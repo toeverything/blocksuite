@@ -77,7 +77,7 @@ export const defaultStore: SerializedStore = {
       'sys:children': ['2'],
       'prop:xywh': '[0,0,720,80]',
       'prop:background': '--affine-background-secondary-color',
-      'prop:zIndex': 0,
+      'prop:index': 'a0',
     },
     '2': {
       'sys:flavour': 'affine:paragraph',

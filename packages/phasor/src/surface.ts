@@ -1,13 +1,4 @@
-import {
-  bringForward,
-  generateRanges,
-  getIndexes,
-  type ReorderingAction,
-  type ReorderingRange,
-  sendBackward,
-} from '@blocksuite/blocks/std';
 import { assertExists } from '@blocksuite/global/utils';
-import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import { randomSeed } from 'roughjs/bin/math.js';
 import * as Y from 'yjs';
 
@@ -25,12 +16,15 @@ import type {
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/surface-element.js';
-import { compare } from './grid.js';
-import { ConnectorElement, intersects } from './index.js';
+import { compare, ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
-import { generateElementId, normalizeWheelDeltaY } from './utils/std.js';
+import {
+  generateElementId,
+  generateKeyBetween,
+  normalizeWheelDeltaY,
+} from './utils/std.js';
 import { serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -38,9 +32,10 @@ export class SurfaceManager {
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, SurfaceElement>();
   private _bindings = new Map<string, Set<string>>();
-  private _zIndexes = { min: 'a0', max: 'a0' };
 
   private _transformPropertyValue: TransformPropertyValue;
+
+  indexes = { min: 'a0', max: 'a0' };
 
   constructor(
     yContainer: Y.Map<unknown>,
@@ -90,10 +85,10 @@ export class SurfaceManager {
 
       this._elements.set(element.id, element);
 
-      if (element.zIndex > this._zIndexes.max) {
-        this._zIndexes.max = element.zIndex;
-      } else if (element.zIndex < this._zIndexes.min) {
-        this._zIndexes.min = element.zIndex;
+      if (element.index > this.indexes.max) {
+        this.indexes.max = element.index;
+      } else if (element.index < this.indexes.min) {
+        this.indexes.min = element.index;
       }
 
       this._updateBindings(element);
@@ -122,8 +117,8 @@ export class SurfaceManager {
 
         this._elements.set(element.id, element);
 
-        if (element.zIndex > this._zIndexes.max) {
-          this._zIndexes.max = element.zIndex;
+        if (element.index > this.indexes.max) {
+          this.indexes.max = element.index;
         }
 
         this._updateBindings(element);
@@ -134,6 +129,10 @@ export class SurfaceManager {
         assertExists(element);
         element.unmount();
         this._elements.delete(id);
+
+        if (element.index === this.indexes.min) {
+          this.indexes.min = generateKeyBetween(element.index, null);
+        }
       }
     });
   };
@@ -143,91 +142,25 @@ export class SurfaceManager {
     doc.transact(callback, doc.clientID);
   }
 
-  private _updateZIndexes(keys: string[], elements: SurfaceElement[]) {
+  updateIndexes(
+    keys: string[],
+    elements: PhasorElement[],
+    callback: (keys: string[]) => void
+  ) {
     this._transact(() => {
-      let e;
-      let newZIndex;
+      let newIndex;
       let i = 0;
       const len = elements.length;
       for (; i < len; i++) {
-        e = elements[i];
-        newZIndex = keys[i];
-        const yElement = this._yContainer.get(e.id) as Y.Map<unknown>;
-        const oldZIndex = yElement.get('zIndex') as string;
-        if (oldZIndex === newZIndex) continue;
-        yElement.set('zIndex', newZIndex);
+        newIndex = keys[i];
+        const yElement = this._yContainer.get(elements[i].id) as Y.Map<unknown>;
+        const oldIndex = yElement.get('index') as string;
+        if (oldIndex === newIndex) continue;
+        yElement.set('index', newIndex);
       }
+
+      callback(keys);
     });
-  }
-
-  /**
-   * Brings to front or sends to back.
-   */
-  private _reorderTo(
-    elementIds: string[],
-    getBoundsIndexes: () => {
-      start: string | null;
-      end: string | null;
-    },
-    setBoundsIndexes: (keys: string[]) => void
-  ) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const { start, end } = getBoundsIndexes();
-
-    const keys = generateNKeysBetween(start, end, sortedElements.length);
-
-    setBoundsIndexes(keys);
-
-    this._updateZIndexes(keys, sortedElements);
-  }
-
-  /**
-   * Brings forward or sends backward layer by layer.
-   */
-  private _reorder(
-    elementIds: string[],
-    getBoundsIndexes: (elements: SurfaceElement[]) => {
-      start: string | null;
-      end: string | null;
-    },
-    order: <T>(ranges: ReorderingRange[], elements: T[]) => void,
-    setBoundsIndexes: (keys: string[]) => void
-  ) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    const elements = this.pickByBound(this.viewport.viewportBounds).sort(
-      compare
-    );
-    const { start, end } = getBoundsIndexes(elements);
-    const indexes = getIndexes(sortedElements, elements);
-
-    const ranges = generateRanges(indexes);
-
-    order(ranges, elements);
-
-    const first = generateKeyBetween(null, start);
-    const keys = generateNKeysBetween(first, end, elements.length);
-
-    setBoundsIndexes(keys);
-
-    this._updateZIndexes(keys, elements);
   }
 
   attach(container: HTMLElement) {
@@ -255,7 +188,7 @@ export class SurfaceManager {
       ...defaultProps,
       ...properties,
       id,
-      zIndex: generateKeyBetween(this._zIndexes.max, null),
+      index: generateKeyBetween(this.indexes.max, null),
       seed: randomSeed(),
     };
     for (const key in props) {
@@ -332,88 +265,8 @@ export class SurfaceManager {
     return picked;
   }
 
-  reorder({ elements, type }: ReorderingAction<SurfaceElement>) {
-    const ids = elements.map(elem => elem.id);
-    switch (type) {
-      case 'front':
-        this.bringToFront(ids);
-        break;
-      case 'forward':
-        this.bringForward(ids);
-        break;
-      case 'backward':
-        this.sendBackward(ids);
-        break;
-      case 'back':
-        this.sendToBack(ids);
-        break;
-    }
-  }
-
-  bringToFront(elementIds: string[]) {
-    this._reorderTo(
-      elementIds,
-      () => ({
-        start: this._zIndexes.max,
-        end: null,
-      }),
-      keys => {
-        const index = keys[keys.length - 1];
-        if (index > this._zIndexes.max) {
-          this._zIndexes.max = index;
-        }
-      }
-    );
-  }
-
-  bringForward(elementIds: string[]) {
-    this._reorder(
-      elementIds,
-      elements => ({
-        start: elements[0].zIndex,
-        end: null,
-      }),
-      bringForward,
-      keys => {
-        const index = keys[keys.length - 1];
-        if (index > this._zIndexes.max) {
-          this._zIndexes.max = index;
-        }
-      }
-    );
-  }
-
-  sendBackward(elementIds: string[]) {
-    this._reorder(
-      elementIds,
-      elements => ({
-        start: null,
-        end: elements[elements.length - 1].zIndex,
-      }),
-      sendBackward,
-      keys => {
-        const index = keys[0];
-        if (index < this._zIndexes.min) {
-          this._zIndexes.min = index;
-        }
-      }
-    );
-  }
-
-  sendToBack(elementIds: string[]) {
-    this._reorderTo(
-      elementIds,
-      () => ({
-        start: null,
-        end: this._zIndexes.min,
-      }),
-      keys => {
-        const index = keys[0];
-        if (index < this._zIndexes.min) {
-          this._zIndexes.min = index;
-        }
-      }
-    );
+  getSortedElementsWithBounds() {
+    return this.pickByBound(this.viewport.viewportBounds).sort(compare);
   }
 
   getBindingElements(id: string) {

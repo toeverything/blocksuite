@@ -825,7 +825,7 @@ test('should indent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"

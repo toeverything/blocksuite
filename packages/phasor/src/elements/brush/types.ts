@@ -4,8 +4,8 @@ export interface IBrush {
   id: string;
   type: string;
   xywh: SerializedXYWH;
+  index: string;
   seed: number;
-  zIndex: string;
 
   // [[x0,y0],[x1,y1]...]
   points: number[][];

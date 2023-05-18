@@ -343,7 +343,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -385,7 +385,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -498,7 +498,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -518,7 +518,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -570,7 +570,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:database
       prop:columns="Array [1]"
@@ -608,7 +608,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:database
       prop:columns="Array [1]"
@@ -728,7 +728,7 @@ test(
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -753,7 +753,7 @@ test(
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"

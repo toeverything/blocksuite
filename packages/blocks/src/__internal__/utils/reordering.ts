@@ -2,7 +2,10 @@
 
 export type ReorderingType = 'front' | 'forward' | 'backward' | 'back';
 
+export type ReorderingTaget = 'frame' | 'shape';
+
 export interface ReorderingAction<T> {
+  target: ReorderingTaget;
   type: ReorderingType;
   elements: T[];
 }
@@ -15,7 +18,7 @@ export interface ReorderingRange {
 /**
  * Gets indexes of a from b.
  */
-export function getIndexes<T>(a: T[], b: T[]): number[] {
+export function getIndexesWith<T>(a: T[], b: T[]): number[] {
   return a.map(e => b.findIndex(element => element === e));
 }
 
@@ -39,57 +42,6 @@ export function generateRanges(indexes: number[]): ReorderingRange[] {
     }
   }
   return ranges;
-}
-
-/**
- * Generates bounds with selected elements.
- */
-export function generateBounds<T>(
-  elements: T[],
-  getXYWH: (e: T) => {
-    x: number;
-    y: number;
-    h: number;
-    w: number;
-  }
-): {
-  x: number;
-  y: number;
-  h: number;
-  w: number;
-} {
-  const bounds = {
-    x: 0,
-    y: 0,
-    w: 0,
-    h: 0,
-  };
-
-  const len = elements.length;
-
-  if (len) {
-    let i = 0;
-    const { x, y, w, h } = getXYWH(elements[i]);
-    let minX = x;
-    let minY = y;
-    let maxX = x + w;
-    let maxY = y + h;
-
-    for (i++; i < len; i++) {
-      const { x, y, w, h } = getXYWH(elements[i]);
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x + w);
-      maxY = Math.max(maxY, y + h);
-    }
-
-    bounds.x = minX;
-    bounds.y = minY;
-    bounds.w = maxX - minX;
-    bounds.h = maxY - minY;
-  }
-
-  return bounds;
 }
 
 /**
@@ -148,4 +100,113 @@ export function sendToBack<T>(ranges: ReorderingRange[], elements: T[]) {
     elements.splice(n, 0, ...temp);
     n += temp.length;
   }
+}
+
+/**
+ * Brings to front or sends to back.
+ */
+export function reorderTo<T>(
+  elements: T[],
+  compare: (a: T, b: T) => number,
+  getIndexes: (elements: T[]) => {
+    start: string | null;
+    end: string | null;
+  },
+  genKeys: (start: string | null, end: string | null, len: number) => string[],
+  setIndexes: (keys: string[], elements: T[]) => void
+) {
+  if (!elements.length) {
+    return;
+  }
+
+  elements.sort(compare);
+
+  const { start, end } = getIndexes(elements);
+  const keys = genKeys(start, end, elements.length);
+
+  setIndexes(keys, elements);
+}
+
+/**
+ * Brings forward or sends backward layer by layer.
+ */
+export function reorder<T>(
+  elements: T[],
+  compare: (a: T, b: T) => number,
+  pick: () => T[],
+  getIndexes: (pickedElements: T[]) => {
+    start: string | null;
+    end: string | null;
+  },
+  order: (ranges: ReorderingRange[], pickedElements: T[]) => void,
+  genKeys: (start: string | null, end: string | null, len: number) => string[],
+  setIndexes: (keys: string[], pickedElements: T[]) => void
+) {
+  if (!elements.length) {
+    return;
+  }
+
+  elements.sort(compare);
+
+  const pickedElements = pick().sort(compare);
+  const { start, end } = getIndexes(pickedElements);
+  const indexes = getIndexesWith(elements, pickedElements);
+  const ranges = generateRanges(indexes);
+
+  order(ranges, pickedElements);
+
+  const keys = genKeys(start, end, pickedElements.length);
+
+  setIndexes(keys, pickedElements);
+}
+
+/**
+ * Generates bounds with selected elements.
+ */
+export function generateBounds<T>(
+  elements: T[],
+  getXYWH: (e: T) => {
+    x: number;
+    y: number;
+    h: number;
+    w: number;
+  }
+): {
+  x: number;
+  y: number;
+  h: number;
+  w: number;
+} {
+  const bounds = {
+    x: 0,
+    y: 0,
+    w: 0,
+    h: 0,
+  };
+
+  const len = elements.length;
+
+  if (len) {
+    let i = 0;
+    const { x, y, w, h } = getXYWH(elements[i]);
+    let minX = x;
+    let minY = y;
+    let maxX = x + w;
+    let maxY = y + h;
+
+    for (i++; i < len; i++) {
+      const { x, y, w, h } = getXYWH(elements[i]);
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + w);
+      maxY = Math.max(maxY, y + h);
+    }
+
+    bounds.x = minX;
+    bounds.y = minY;
+    bounds.w = maxX - minX;
+    bounds.h = maxY - minY;
+  }
+
+  return bounds;
 }

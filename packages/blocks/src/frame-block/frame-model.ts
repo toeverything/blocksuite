@@ -7,7 +7,7 @@ export const FrameBlockSchema = defineBlockSchema({
   props: () => ({
     xywh: '[0,0,720,480]',
     background: FRAME_BACKGROUND_COLORS[0],
-    zIndex: 0,
+    index: 'a0',
   }),
   metadata: {
     version: 1,

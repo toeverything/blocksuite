@@ -166,12 +166,14 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         if (frames.length) {
           this.slots.reorderingUpdated.emit({
             elements: frames,
+            target: 'frame',
             type,
           });
         }
         if (shapes.length) {
-          this.surface.reorder({
+          this.slots.reorderingUpdated.emit({
             elements: shapes,
+            target: 'shape',
             type,
           });
         }

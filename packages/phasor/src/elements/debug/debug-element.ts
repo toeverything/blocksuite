@@ -6,8 +6,8 @@ export interface IDebug {
   id: string;
   type: string;
   xywh: SerializedXYWH;
+  index: string;
   seed: number;
-  zIndex: string;
 
   color: string;
 }

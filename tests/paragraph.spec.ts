@@ -391,7 +391,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
-  prop:zIndex={0}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -423,7 +423,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
-  prop:zIndex={0}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -464,7 +464,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
-  prop:zIndex={0}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -486,7 +486,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
-  prop:zIndex={0}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -531,7 +531,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
-  prop:zIndex={0}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"

@@ -298,7 +298,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:code
       prop:language="Plain Text"
@@ -345,7 +345,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:code
       prop:language="Plain Text"

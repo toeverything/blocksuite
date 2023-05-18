@@ -9,8 +9,8 @@ const data: IBrush = {
   id: '1',
   type: 'brush',
   xywh: '[0,0,104,104]',
+  index: 'a1',
   seed: 0,
-  zIndex: 'a1',
 
   points: Array(100)
     .fill(0)

@@ -187,7 +187,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -219,7 +219,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -281,7 +281,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -302,7 +302,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -325,7 +325,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
-    prop:zIndex={0}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -357,7 +357,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
-  prop:zIndex={0}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="text1"
@@ -378,7 +378,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
-  prop:zIndex={0}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="text1"

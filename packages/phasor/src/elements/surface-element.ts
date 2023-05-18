@@ -9,8 +9,8 @@ export interface ISurfaceElement {
   id: string;
   type: string;
   xywh: SerializedXYWH;
+  index: string;
   seed: number;
-  zIndex: string;
 }
 
 export interface HitTestOptions {
@@ -45,8 +45,8 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return id;
   }
 
-  get zIndex() {
-    const index = this.yMap.get('zIndex') as T['zIndex'];
+  get index() {
+    const index = this.yMap.get('index') as T['index'];
     return index;
   }
 

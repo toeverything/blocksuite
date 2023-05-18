@@ -4,7 +4,6 @@ import {
 } from '@blocksuite/global/config';
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
@@ -31,13 +30,14 @@ function EdgelessMask() {
 }
 
 function EdgelessBlockChild(
+  index: number,
   model: TopLevelBlockModel,
   host: BlockHost,
   viewport: SurfaceViewport,
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
-  const { xywh, background, zIndex } = model;
+  const { xywh, background } = model;
   const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
   const translateX = (modelX - viewportX) * zoom;
@@ -52,7 +52,7 @@ function EdgelessBlockChild(
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
     background: `var(${background || FRAME_BACKGROUND_COLORS[0]})`,
     pointerEvents: 'all',
-    zIndex,
+    zIndex: `${index}`,
     boxSizing: 'border-box',
     borderRadius: '4px',
   };
@@ -67,7 +67,7 @@ function EdgelessBlockChild(
 }
 
 export function EdgelessBlockChildrenContainer(
-  model: BaseBlockModel,
+  frames: TopLevelBlockModel[],
   host: BlockHost,
   viewport: SurfaceViewport,
   active: boolean,
@@ -75,10 +75,11 @@ export function EdgelessBlockChildrenContainer(
 ) {
   return html`
     ${repeat(
-      model.children.filter(child => child.flavour === 'affine:frame'),
+      frames,
       child => child.id,
-      child =>
+      (child, index) =>
         EdgelessBlockChild(
+          index,
           child as FrameBlockModel,
           host,
           viewport,
