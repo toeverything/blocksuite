@@ -195,6 +195,7 @@ export class HtmlParser {
             'codeBlockParser'
           )?.(node);
           break;
+        case 'FIGURE':
         case 'IMG':
           {
             result = await this._contentParser.getParserHtmlText2Block(
@@ -504,8 +505,29 @@ export class HtmlParser {
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     let result: SerializedBlock[] | null = [];
-    if (element instanceof HTMLImageElement) {
-      const imgUrl = element.getAttribute('src') || '';
+    let imgElement = null;
+    const texts = [];
+    if (element.tagName === 'FIGURE') {
+      imgElement = element.querySelector('img');
+      const figcaptionElement = element.querySelector('figcaption');
+      if (figcaptionElement) {
+        const captionResult = await this._contentParser.getParserHtmlText2Block(
+          'commonParser'
+        )?.({
+          element: figcaptionElement,
+          flavour: 'affine:paragraph',
+          type: 'text',
+        });
+        if (captionResult && captionResult.length > 0) {
+          texts.push(...(captionResult[0].text || []));
+        }
+      }
+    } else if (element instanceof HTMLImageElement) {
+      imgElement = element;
+      texts.push({ insert: '' });
+    }
+    if (imgElement) {
+      const imgUrl = imgElement.getAttribute('src') || '';
       const imgBlob = await this._fetchFileFunc(imgUrl);
       if (!imgBlob) {
         return result;
@@ -519,7 +541,7 @@ export class HtmlParser {
           type: 'image',
           sourceId: id,
           children: [],
-          text: [{ insert: '' }],
+          text: texts,
         },
       ];
     }
