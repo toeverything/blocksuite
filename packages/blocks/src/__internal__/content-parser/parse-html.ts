@@ -7,6 +7,10 @@ import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
 
+export type FetchFileFunc = (
+  fileName: string
+) => Promise<Blob | null | undefined>;
+
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
 const INLINE_TAGS = [
@@ -33,11 +37,47 @@ const INLINE_TAGS = [
 export class HtmlParser {
   private _contentParser: ContentParser;
   private _page: Page;
+  private _customFetchFileFunc?: FetchFileFunc;
 
-  constructor(contentParser: ContentParser, page: Page) {
+  constructor(
+    contentParser: ContentParser,
+    page: Page,
+    fetchFileFunc?: FetchFileFunc
+  ) {
     this._contentParser = contentParser;
     this._page = page;
+    this._customFetchFileFunc = fetchFileFunc;
   }
+
+  private _fetchFileFunc = async (
+    fileName: string
+  ): Promise<Blob | null | undefined> => {
+    if (this._customFetchFileFunc) {
+      const customBlob = await this._customFetchFileFunc(fileName);
+      if (customBlob) {
+        return customBlob;
+      }
+    }
+
+    let resp;
+    try {
+      resp = await fetch(fileName, {
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          Origin: window.location.origin,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+    const imgBlob = await resp.blob();
+    if (!imgBlob.type.startsWith('image/')) {
+      return null;
+    }
+    return imgBlob;
+  };
 
   public registerParsers() {
     this._contentParser.registerParserHtmlText2Block(
@@ -463,22 +503,9 @@ export class HtmlParser {
   ): Promise<SerializedBlock[] | null> => {
     let result: SerializedBlock[] | null = [];
     if (element instanceof HTMLImageElement) {
-      const imgUrl = (element as HTMLImageElement).src;
-      let resp;
-      try {
-        resp = await fetch(imgUrl, {
-          cache: 'no-cache',
-          mode: 'cors',
-          headers: {
-            Origin: window.location.origin,
-          },
-        });
-      } catch (error) {
-        console.error(error);
-        return result;
-      }
-      const imgBlob = await resp.blob();
-      if (!imgBlob.type.startsWith('image/')) {
+      const imgUrl = element.getAttribute('src') || '';
+      const imgBlob = await this._fetchFileFunc(imgUrl);
+      if (!imgBlob) {
         return result;
       }
       const storage = await this._page.blobs;

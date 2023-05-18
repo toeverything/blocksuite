@@ -333,7 +333,6 @@ export class DebugMenu extends ShadowlessElement {
       const zipFile = await zip.loadAsync(file);
       const pageIdMap = new Map<string, string>();
       const subPageMap = new Map<string, string[]>();
-      const subFileMap = new Map<string, string[]>();
       const files = Object.keys(zipFile.files);
       for (let i = files.length - 1; i >= 0; i--) {
         const file = files[i];
@@ -359,7 +358,12 @@ export class DebugMenu extends ShadowlessElement {
           }
 
           const rootId = page.root?.id;
-          const contentParser = new window.ContentParser(page);
+          const fetchFileFunc = async (url: string) => {
+            const fileName =
+              folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
+            return (await zipFile.file(fileName)?.async('blob')) || new Blob();
+          };
+          const contentParser = new window.ContentParser(page, fetchFileFunc);
           let text = (await zipFile.file(file)?.async('string')) || '';
           subPageMap
             .get(file.substring(0, file.length - (isHtml ? 5 : 3)))
@@ -383,9 +387,6 @@ export class DebugMenu extends ShadowlessElement {
             }
           }
           pageIdMap.set(file, page.id);
-        } else {
-          subFileMap.get(folder) || subFileMap.set(folder, []);
-          subFileMap.get(folder)?.push(file);
         }
       }
     };
