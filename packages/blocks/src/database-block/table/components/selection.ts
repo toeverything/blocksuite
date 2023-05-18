@@ -1,5 +1,4 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -7,6 +6,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { DatabaseTableState } from '../../../std.js';
 
 type SelectionState = Pick<DatabaseTableState, 'databaseId' | 'rowIds'>;
+type SelectionCache = {
+  left: number;
+  top: number;
+  height: number;
+  rowIds: string[];
+};
 
 @customElement('database-row-level-selection')
 export class RowLevelSelection extends WithDisposable(LitElement) {
@@ -21,6 +26,8 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
       background: var(--affine-primary-color-04);
     }
   `;
+
+  private _selectionCache: SelectionCache | null = null;
 
   @property()
   container!: HTMLElement;
@@ -58,18 +65,34 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
       };
     }
 
-    const startIndex = getRowIndex(startRow);
-    const endIdex = getRowIndex(endRow);
+    if (this._selectionCache) {
+      const { left, top, height, rowIds: cacheRowIds } = this._selectionCache;
+      if (isRowIdsSame(rowIds, cacheRowIds)) {
+        return {
+          left,
+          top,
+          height,
+        };
+      }
+    }
 
     const containerPos = this.container.getBoundingClientRect();
-    const { left, top, height } = startRow.getBoundingClientRect();
+    const { left, top } = startRow.getBoundingClientRect();
+    const height = calcSelectionHeight(this.container, rowIds);
 
-    return {
+    const styles = {
       left: left - containerPos.left,
       top: top - containerPos.top,
-      height:
-        startIndex === endIdex ? height : (endIdex - startIndex + 1) * height,
+      height,
     };
+
+    this._selectionCache = {
+      left: styles.left,
+      top: styles.top,
+      height,
+      rowIds,
+    };
+    return styles;
   };
 
   override render() {
@@ -112,8 +135,20 @@ function getRowsByIds(
   };
 }
 
-function getRowIndex(row: Element) {
-  const rowIndex = row?.getAttribute('data-row-index');
-  assertExists(rowIndex);
-  return Number(rowIndex);
+function calcSelectionHeight(container: Element, rowIds: string[]) {
+  return rowIds.reduce((acc, rowId) => {
+    const row = container.querySelector(
+      `.database-row[data-row-id="${rowId}"]`
+    );
+    if (!row) {
+      return acc;
+    }
+    const { height } = row.getBoundingClientRect();
+    return acc + height;
+  }, 0);
+}
+
+function isRowIdsSame(rowIds: string[], rowIdsCache: string[]) {
+  // ids are in the same order, so a simplified comparison can be done
+  return rowIds.toString() === rowIdsCache.toString();
 }
