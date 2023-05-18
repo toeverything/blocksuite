@@ -526,3 +526,20 @@ test('should insert database', async ({ page }) => {
   const defaultRows = page.locator('.affine-database-block-row');
   expect(await defaultRows.count()).toBe(3);
 });
+
+test.skip('should compatible CJK IME', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '、');
+  const slashMenu = page.locator(`.slash-menu`);
+
+  // Fix playwright can not trigger keyboard event with target: '、'
+  test.fail();
+  await expect(slashMenu).toBeVisible();
+  await type(page, 'h2');
+  const slashItems = slashMenu.locator('format-bar-button');
+  await expect(slashItems).toHaveCount(1);
+  await expect(slashItems).toHaveText(['Heading 2']);
+});
