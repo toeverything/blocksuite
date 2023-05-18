@@ -265,7 +265,7 @@ export class SurfaceManager {
     return picked;
   }
 
-  getSortedElementsWithBounds() {
+  getSortedElementsWithViewportBounds() {
     return this.pickByBound(this.viewport.viewportBounds).sort(compare);
   }
 
