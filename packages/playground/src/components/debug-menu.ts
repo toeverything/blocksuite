@@ -285,112 +285,102 @@ export class DebugMenu extends ShadowlessElement {
     this.requestUpdate();
   }
 
-  private async _importMarkDown() {
+  private async _selectFile(accept: string): Promise<File> {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.md';
+    input.accept = accept;
     input.multiple = false;
-    input.onchange = async () => {
-      const file = input.files?.item(0);
-      if (!file) {
-        return;
-      }
-      const text = await file.text();
-      const rootId = this.page.root?.id;
-      rootId && (await this.contentParser.importMarkdown(text, rootId));
-    };
     input.click();
+    return new Promise((resolve, reject) => {
+      input.onchange = () => {
+        const file = input.files?.item(0);
+        if (!file) {
+          reject();
+        }
+        resolve(file as File);
+      };
+      input.onerror = () => {
+        reject();
+      };
+    });
+  }
+
+  private async _importMarkDown() {
+    const file = await this._selectFile('.md');
+    const text = await file.text();
+    const rootId = this.page.root?.id;
+    rootId && (await this.contentParser.importMarkdown(text, rootId));
   }
 
   private async _importHtml() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.html';
-    input.multiple = false;
-    input.onchange = async () => {
-      const file = input.files?.item(0);
-      if (!file) {
-        return;
-      }
-      const text = await file.text();
-      const rootId = this.page.root?.id;
-      rootId && (await this.contentParser.importHtml(text, rootId));
-    };
-    input.click();
+    const file = await this._selectFile('.html');
+    const text = await file.text();
+    const rootId = this.page.root?.id;
+    rootId && (await this.contentParser.importHtml(text, rootId));
   }
 
   private async _importNotion() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.zip';
-    input.multiple = false;
-    input.onchange = async () => {
-      const file = input.files?.item(0);
-      if (!file) {
-        return;
-      }
-      const zip = new JSZip();
-      const zipFile = await zip.loadAsync(file);
-      const pageIdMap = new Map<string, string>();
-      const subPageMap = new Map<string, string[]>();
-      const files = Object.keys(zipFile.files);
-      for (let i = files.length - 1; i >= 0; i--) {
-        const file = files[i];
-        const lastSplitIndex = file.lastIndexOf('/');
-        const folder = file.substring(0, lastSplitIndex) || '';
-        const fileName = file.substring(lastSplitIndex + 1);
-        if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-          const isHtml = fileName.endsWith('.html');
-          let page = this.page;
-          if (folder) {
-            subPageMap.get(folder) || subPageMap.set(folder, []);
-            subPageMap.get(folder)?.push(file);
-            page = this.page.workspace.createPage({
-              init: {
-                title: file.substring(
-                  lastSplitIndex + 1,
-                  file.length - (isHtml ? 5 : 3)
-                ),
-              },
-            });
-          } else {
-            // todo clear page and set title
-          }
-
-          const rootId = page.root?.id;
-          const fetchFileFunc = async (url: string) => {
-            const fileName =
-              folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
-            return (await zipFile.file(fileName)?.async('blob')) || new Blob();
-          };
-          const contentParser = new window.ContentParser(page, fetchFileFunc);
-          let text = (await zipFile.file(file)?.async('string')) || '';
-          subPageMap
-            .get(file.substring(0, file.length - (isHtml ? 5 : 3)))
-            ?.forEach(async subFile => {
-              const subPageLink = subFile.replaceAll(' ', '%20');
-              text = isHtml
-                ? text.replaceAll(
-                    `href="${subPageLink}"`,
-                    `href="notion-subpage-${pageIdMap.get(subFile)}"`
-                  )
-                : text.replaceAll(
-                    `(${subPageLink})`,
-                    `(notion-subpage-${pageIdMap.get(subFile)})`
-                  );
-            });
-          if (rootId) {
-            if (isHtml) {
-              await contentParser.importHtml(text, rootId);
-            } else {
-              await contentParser.importMarkdown(text, rootId);
-            }
-          }
-          pageIdMap.set(file, page.id);
+    const file = await this._selectFile('.zip');
+    const zip = new JSZip();
+    const zipFile = await zip.loadAsync(file);
+    const pageIdMap = new Map<string, string>();
+    const subPageMap = new Map<string, string[]>();
+    const files = Object.keys(zipFile.files);
+    for (let i = files.length - 1; i >= 0; i--) {
+      const file = files[i];
+      const lastSplitIndex = file.lastIndexOf('/');
+      const folder = file.substring(0, lastSplitIndex) || '';
+      const fileName = file.substring(lastSplitIndex + 1);
+      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+        const isHtml = fileName.endsWith('.html');
+        let page = this.page;
+        if (folder) {
+          subPageMap.get(folder) || subPageMap.set(folder, []);
+          subPageMap.get(folder)?.push(file);
+          page = this.page.workspace.createPage({
+            init: {
+              title: file.substring(
+                lastSplitIndex + 1,
+                file.length - (isHtml ? 5 : 3)
+              ),
+            },
+          });
+        } else {
+          // todo clear page and set title
         }
+
+        const rootId = page.root?.id;
+        const fetchFileFunc = async (url: string) => {
+          const fileName =
+            folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
+          return (await zipFile.file(fileName)?.async('blob')) || new Blob();
+        };
+        const contentParser = new window.ContentParser(page, fetchFileFunc);
+        let text = (await zipFile.file(file)?.async('string')) || '';
+        subPageMap
+          .get(file.substring(0, file.length - (isHtml ? 5 : 3)))
+          ?.forEach(async subFile => {
+            const subPageLink = subFile.replaceAll(' ', '%20');
+            text = isHtml
+              ? text.replaceAll(
+                  `href="${subPageLink}"`,
+                  `href="notion-subpage-${pageIdMap.get(subFile)}"`
+                )
+              : text.replaceAll(
+                  `(${subPageLink})`,
+                  `(notion-subpage-${pageIdMap.get(subFile)})`
+                );
+          });
+        if (rootId) {
+          if (isHtml) {
+            await contentParser.importHtml(text, rootId);
+          } else {
+            await contentParser.importMarkdown(text, rootId);
+          }
+        }
+        pageIdMap.set(file, page.id);
       }
-    };
-    input.click();
+    }
   }
 
   private async _inspect() {
