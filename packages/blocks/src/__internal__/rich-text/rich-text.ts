@@ -15,7 +15,7 @@ const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
 
 const autoIdentifyLink = (
   editor: AffineVEditor,
-  context: VHandlerContext<BaseTextAttributes, InputEvent>
+  context: VHandlerContext<BaseTextAttributes, InputEvent | CompositionEvent>
 ) => {
   const vRange = editor.getVRange();
   if (!vRange) return;
@@ -225,7 +225,7 @@ export class RichText extends ShadowlessElement {
             ctx.attributes = attributes ?? null;
           }
         }
-        // autoIdentifyLink(vEditor, ctx);
+        autoIdentifyLink(vEditor, ctx);
 
         return ctx;
       },
