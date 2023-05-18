@@ -403,9 +403,11 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   private _onUpdateTitleColumn = (titleColumnName: string) => {
+    this.targetModel.page.captureSync();
     this.targetModel.page.updateBlock(this.targetModel, {
       titleColumnName,
     });
+    this.setEditingColumnId('');
   };
 
   private _onUpdateNormalColumn = (name: string, column: Column) => {
@@ -415,6 +417,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       name,
     });
     this.targetModel.applyColumnUpdate();
+    this.setEditingColumnId('');
   };
 
   private _onEditColumnTitle = (event: MouseEvent, columnId: string) => {
