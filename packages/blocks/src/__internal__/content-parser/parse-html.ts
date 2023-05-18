@@ -11,6 +11,8 @@ export type FetchFileFunc = (
   fileName: string
 ) => Promise<Blob | null | undefined>;
 
+export const LINK_PRE = 'Affine-LinkedPage-';
+
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
 const INLINE_TAGS = [
@@ -556,8 +558,16 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['bold'] = true;
   }
   if (getIsLink(htmlElement)) {
-    textStyle['link'] =
+    const linkUrl =
       htmlElement.getAttribute('href') || htmlElement.getAttribute('src');
+    if (linkUrl?.startsWith(LINK_PRE)) {
+      textStyle['reference'] = {
+        pageId: linkUrl.substring(LINK_PRE.length),
+        type: 'LinkedPage',
+      };
+    } else {
+      textStyle['link'] = linkUrl;
+    }
   }
 
   if (tagName === 'EM' || style['fontStyle'] === 'italic') {

@@ -26,6 +26,7 @@ import {
   updateBlockType,
   VARIABLES,
 } from '@blocksuite/blocks';
+import { LINK_PRE } from '@blocksuite/blocks/__internal__/content-parser/parse-html';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
 import { assertExists } from '@blocksuite/global/utils';
@@ -364,11 +365,11 @@ export class DebugMenu extends ShadowlessElement {
             text = isHtml
               ? text.replaceAll(
                   `href="${subPageLink}"`,
-                  `href="notion-subpage-${pageIdMap.get(subFile)}"`
+                  `href="${LINK_PRE + pageIdMap.get(subFile)}"`
                 )
               : text.replaceAll(
                   `(${subPageLink})`,
-                  `(notion-subpage-${pageIdMap.get(subFile)})`
+                  `(${LINK_PRE + pageIdMap.get(subFile)})`
                 );
           });
         if (rootId) {
