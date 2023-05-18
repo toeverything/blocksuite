@@ -1,8 +1,8 @@
-import { clamp } from '@blocksuite/blocks/std';
+import { clamp, type IPoint } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
 import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import { MAX_ZOOM, MIN_ZOOM } from './consts.js';
+import { type IBound, MAX_ZOOM, MIN_ZOOM } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
@@ -17,6 +17,9 @@ export interface SurfaceViewport {
   readonly zoom: number;
   readonly viewportX: number;
   readonly viewportY: number;
+  readonly viewportMinXY: IPoint;
+  readonly viewportMaxXY: IPoint;
+  readonly viewportBounds: IBound;
 
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
@@ -85,6 +88,31 @@ export class Renderer implements SurfaceViewport {
 
   get viewportY() {
     return this.centerY - this.height / 2 / this._zoom;
+  }
+
+  get viewportMinXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX - width / 2 / zoom,
+      y: centerY - height / 2 / zoom,
+    };
+  }
+
+  get viewportMaxXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX + width / 2 / zoom,
+      y: centerY + height / 2 / zoom,
+    };
+  }
+
+  get viewportBounds() {
+    const { viewportMinXY, viewportMaxXY } = this;
+    return {
+      ...viewportMinXY,
+      w: viewportMaxXY.x - viewportMinXY.x,
+      h: viewportMaxXY.y - viewportMinXY.y,
+    };
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {

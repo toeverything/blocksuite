@@ -31,6 +31,11 @@ export class EdgelessToolIconButton extends LitElement {
     }
 
     .icon-container[disabled] {
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .icon-container[coming] {
       cursor: not-allowed;
       color: var(--affine-text-disable-color);
     }
@@ -44,6 +49,9 @@ export class EdgelessToolIconButton extends LitElement {
 
   @property()
   disabled = false;
+
+  @property()
+  coming = false;
 
   @property()
   tooltip!: string | TemplateResult<1>;
@@ -70,7 +78,7 @@ export class EdgelessToolIconButton extends LitElement {
   }
 
   override render() {
-    const tooltip = this.disabled ? '(Coming soon)' : this.tooltip;
+    const tooltip = this.coming ? '(Coming soon)' : this.tooltip;
     const classnames = `icon-container has-tool-tip active-mode-${this.activeMode}`;
 
     return html`

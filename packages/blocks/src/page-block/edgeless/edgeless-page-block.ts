@@ -374,11 +374,15 @@ export class EdgelessPageBlockComponent
       height?: number;
       parentId?: string;
       frameIndex?: number;
+      offsetX?: number;
+      offsetY?: number;
     } = {}
   ) {
     const {
       width = DEFAULT_FRAME_WIDTH,
       height = DEFAULT_FRAME_HEIGHT,
+      offsetX = DEFAULT_FRAME_OFFSET_X,
+      offsetY = DEFAULT_FRAME_OFFSET_Y,
       parentId = this.page.root?.id,
       frameIndex,
     } = options;
@@ -386,12 +390,7 @@ export class EdgelessPageBlockComponent
     return this.page.addBlock(
       'affine:frame',
       {
-        xywh: serializeXYWH(
-          x - DEFAULT_FRAME_OFFSET_X,
-          y - DEFAULT_FRAME_OFFSET_Y,
-          width,
-          height
-        ),
+        xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
       },
       parentId,
       frameIndex
@@ -403,12 +402,23 @@ export class EdgelessPageBlockComponent
    * @param blocks Array<Partial<BaseBlockModel>>
    * @param point Point
    */
-  addNewFrame(blocks: Array<Partial<BaseBlockModel>>, point: Point) {
+  addNewFrame(
+    blocks: Array<Partial<BaseBlockModel>>,
+    point: Point,
+    options?: {
+      width?: number;
+      height?: number;
+      parentId?: string;
+      frameIndex?: number;
+      offsetX?: number;
+      offsetY?: number;
+    }
+  ) {
     this.page.captureSync();
     const { left, top } = this.surface.viewport;
     point.x -= left;
     point.y -= top;
-    const frameId = this.addFrameWithPoint(point);
+    const frameId = this.addFrameWithPoint(point, options);
     const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
         assertExists(flavour);
