@@ -1,5 +1,4 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { ShapeElement } from '@blocksuite/phasor';
 import { Bound, StrokeStyle } from '@blocksuite/phasor';
 
 import type {
@@ -66,8 +65,6 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
       strokeWidth: 4,
       strokeStyle: StrokeStyle.Solid,
     });
-    const tmpShape = this._surface.pickById(id) as ShapeElement;
-    tmpShape.addText('asadasdas\nefdas❎\n95i605687095687095687059');
 
     this._draggingElementId = id;
 

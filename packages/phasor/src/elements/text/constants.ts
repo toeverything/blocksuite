@@ -9,6 +9,6 @@ export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
   text: new Y.Text(),
   color: '#000000',
   fontSize: 16,
-  fontFamily: 'sans-serif',
+  fontFamily: "'Kalam', cursive",
   textAlign: 'center',
 };
