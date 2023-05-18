@@ -2,10 +2,7 @@
 
 export type ReorderingType = 'front' | 'forward' | 'backward' | 'back';
 
-export type ReorderingTaget = 'frame' | 'shape';
-
 export interface ReorderingAction<T> {
-  target: ReorderingTaget;
   type: ReorderingType;
   elements: T[];
 }

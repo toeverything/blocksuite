@@ -84,7 +84,8 @@ export interface EdgelessSelectionSlots {
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
   mouseModeUpdated: Slot<MouseMode>;
-  reorderingUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingFramesUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -179,7 +180,8 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
-    reorderingUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingFramesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -394,7 +396,8 @@ export class EdgelessPageBlockComponent
       })
     );
 
-    _disposables.add(slots.reorderingUpdated.on(this.reorder));
+    _disposables.add(slots.reorderingFramesUpdated.on(this.reorderFrames));
+    _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
   }
 
   /**
@@ -436,12 +439,7 @@ export class EdgelessPageBlockComponent
       pick,
       getIndexes,
       order,
-      (start, end, len) => {
-        if (start && !end) {
-          start = generateKeyBetween(null, start);
-        }
-        return generateNKeysBetween(start, end, len);
-      },
+      (start, end, len) => generateNKeysBetween(start, end, len),
       updateIndexes
     );
   }
@@ -477,177 +475,130 @@ export class EdgelessPageBlockComponent
   }
 
   // Just update `index`, we don't change the order of the frames in the children.
-  reorder = ({ elements, target, type }: ReorderingAction<Selectable>) => {
-    const isFrame = target === 'frame';
+  reorderFrames = ({ elements, type }: ReorderingAction<Selectable>) => {
+    const updateIndexes = (keys: string[], elements: Selectable[]) => {
+      this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
+        const min = keys[0];
+        if (min < this.indexes.min) {
+          this.indexes.min = min;
+        }
+        const max = keys[keys.length - 1];
+        if (max > this.indexes.max) {
+          this.indexes.max = max;
+        }
+      });
+    };
+
     switch (type) {
       case 'front':
-        this.bringToFront(isFrame, elements);
+        this._reorderTo(
+          elements,
+          () => ({
+            start: this.indexes.max,
+            end: null,
+          }),
+          updateIndexes
+        );
         break;
       case 'forward':
-        this.bringForward(isFrame, elements);
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: generateKeyBetween(null, pickedElements[0].index),
+            end: null,
+          }),
+          () => this.getSortedElementsWithViewportBounds(elements),
+          bringForward,
+          updateIndexes
+        );
         break;
       case 'backward':
-        this.sendBackward(isFrame, elements);
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: null,
+            end: pickedElements[pickedElements.length - 1].index,
+          }),
+          () => this.getSortedElementsWithViewportBounds(elements),
+          sendBackward,
+          updateIndexes
+        );
         break;
       case 'back':
-        this.sendToBack(isFrame, elements);
+        this._reorderTo(
+          elements,
+          () => ({
+            start: null,
+            end: this.indexes.min,
+          }),
+          updateIndexes
+        );
         break;
     }
   };
 
-  bringToFront(isFrame: boolean, elements: Selectable[]) {
-    if (isFrame) {
-      this._reorderTo(
-        elements,
-        () => ({
-          start: this.indexes.max,
-          end: null,
-        }),
-        (keys, elements) => {
-          this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
-            const index = keys[keys.length - 1];
-            if (index > this.indexes.max) {
-              this.indexes.max = index;
-            }
-          });
+  // Just update `index`, we don't change the order of the shapes in the children.
+  reorderShapes = ({ elements, type }: ReorderingAction<Selectable>) => {
+    const updateIndexes = (keys: string[], elements: Selectable[]) => {
+      this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
+        const min = keys[0];
+        if (min < this.surface.indexes.min) {
+          this.surface.indexes.min = min;
         }
-      );
-      return;
-    }
-
-    this._reorderTo(
-      elements,
-      () => ({
-        start: this.surface.indexes.max,
-        end: null,
-      }),
-      (keys, elements) => {
-        this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
-          const index = keys[keys.length - 1];
-          if (index > this.surface.indexes.max) {
-            this.surface.indexes.max = index;
-          }
-        });
-      }
-    );
-  }
-
-  bringForward(isFrame: boolean, elements: Selectable[]) {
-    const getIndexes = (pickedElements: Selectable[]) => ({
-      start: pickedElements[0].index,
-      end: null,
-    });
-
-    if (isFrame) {
-      this._reorder(
-        elements,
-        getIndexes,
-        () => this.getSortedElementsWithViewportBounds(elements),
-        bringForward,
-        (keys, elements) => {
-          this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
-            const index = keys[keys.length - 1];
-            if (index > this.indexes.max) {
-              this.indexes.max = index;
-            }
-          });
+        const max = keys[keys.length - 1];
+        if (max > this.surface.indexes.max) {
+          this.surface.indexes.max = max;
         }
-      );
-      return;
+      });
+    };
+
+    switch (type) {
+      case 'front':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: this.surface.indexes.max,
+            end: null,
+          }),
+          updateIndexes
+        );
+        break;
+      case 'forward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: generateKeyBetween(null, pickedElements[0].index),
+            end: null,
+          }),
+          () => this.surface.getSortedElementsWithViewportBounds(),
+          bringForward,
+          updateIndexes
+        );
+        break;
+      case 'backward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: null,
+            end: pickedElements[pickedElements.length - 1].index,
+          }),
+          () => this.surface.getSortedElementsWithViewportBounds(),
+          sendBackward,
+          updateIndexes
+        );
+        break;
+      case 'back':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: null,
+            end: this.surface.indexes.min,
+          }),
+          updateIndexes
+        );
+        break;
     }
-
-    this._reorder(
-      elements,
-      getIndexes,
-      () => this.surface.getSortedElementsWithViewportBounds(),
-      bringForward,
-      (keys, elements) => {
-        this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
-          const index = keys[keys.length - 1];
-          if (index > this.surface.indexes.max) {
-            this.surface.indexes.max = index;
-          }
-        });
-      }
-    );
-  }
-
-  sendBackward(isFrame: boolean, elements: Selectable[]) {
-    const getIndexes = (pickedElements: Selectable[]) => ({
-      start: null,
-      end: pickedElements[pickedElements.length - 1].index,
-    });
-
-    if (isFrame) {
-      this._reorder(
-        elements,
-        getIndexes,
-        () => this.getSortedElementsWithViewportBounds(elements),
-        sendBackward,
-        (keys, elements) => {
-          this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
-            const index = keys[0];
-            if (index < this.indexes.min) {
-              this.indexes.min = index;
-            }
-          });
-        }
-      );
-      return;
-    }
-
-    this._reorder(
-      elements,
-      getIndexes,
-      () => this.surface.getSortedElementsWithViewportBounds(),
-      sendBackward,
-      (keys, elements) => {
-        this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
-          const index = keys[0];
-          if (index < this.surface.indexes.min) {
-            this.surface.indexes.min = index;
-          }
-        });
-      }
-    );
-  }
-
-  sendToBack(isFrame: boolean, elements: Selectable[]) {
-    if (isFrame) {
-      this._reorderTo(
-        elements,
-        () => ({
-          start: null,
-          end: this.indexes.min,
-        }),
-        (keys, elements) => {
-          this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
-            const index = keys[0];
-            if (index < this.indexes.min) {
-              this.indexes.min = index;
-            }
-          });
-        }
-      );
-      return;
-    }
-
-    this._reorderTo(
-      elements,
-      () => ({
-        start: null,
-        end: this.surface.indexes.min,
-      }),
-      (keys, elements) => {
-        this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
-          const index = keys[0];
-          if (index < this.surface.indexes.min) {
-            this.surface.indexes.min = index;
-          }
-        });
-      }
-    );
-  }
+  };
 
   /**
    * Adds a new frame with the given point on the editor-container.
