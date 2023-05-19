@@ -4,7 +4,6 @@ import '@blocksuite/editor';
 import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
-import './components/custom-format-bar';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
