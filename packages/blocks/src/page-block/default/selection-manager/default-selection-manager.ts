@@ -270,6 +270,7 @@ export class DefaultSelectionManager {
 
     // do nothing when clicking on drag-handle
     if (isElement(target) && isDragHandle(target as Element)) {
+      this._clearDatabaseTableViewSelection();
       return;
     }
 
@@ -354,11 +355,7 @@ export class DefaultSelectionManager {
     )
       return;
 
-    // FIXME: refactor this
-    const service = getServiceOrRegister('affine:database');
-    Promise.resolve(service).then(database =>
-      database.clearTableViewSelection()
-    );
+    this._clearDatabaseTableViewSelection();
 
     handleNativeRangeClick(this.page, e, this.container);
   };
@@ -536,6 +533,14 @@ export class DefaultSelectionManager {
 
   private _onSelectionChangeWithoutDebounce = (_: Event) => {
     updateLocalSelectionRange(this.page);
+  };
+
+  private _clearDatabaseTableViewSelection = () => {
+    // FIXME: refactor this
+    const service = getServiceOrRegister('affine:database');
+    Promise.resolve(service).then(database =>
+      database.clearTableViewSelection()
+    );
   };
 
   get viewportElement() {
