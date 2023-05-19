@@ -20,7 +20,7 @@
   },
   "packageManager": "pnpm@8.5.0",
   "scripts": {
-    "deps:check": "dpdm --exit-code circular:1 --no-tree --no-warning --no-tree ./packages/**/src/*.ts",
+    "deps:check": "dpdm --exit-code circular:1 --no-tree --no-warning --no-tree -T ./packages/**/src/*.ts",
     "serve": "pnpm --filter @blocksuite/store serve",
     "preview": "run-p serve preview:playground",
     "preview:playground": "pnpm --filter @blocksuite/playground preview",
