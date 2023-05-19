@@ -42,7 +42,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       position: relative;
-      padding: 32px 0;
+      padding: 32px 0px 12px 0px;
       background: var(--affine-background-code-block);
       border-radius: 10px;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
@@ -101,6 +101,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       /* to make sure the resize observer can be triggered as expected */
       display: block;
       position: relative;
+      width: 90%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 20px;
     }
 
     #line-numbers {
@@ -120,7 +124,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     .affine-code-block-container .virgo-editor {
       width: 90%;
       margin: 0;
-      overflow-x: auto;
     }
 
     .affine-code-block-container affine-code-line span v-text {
