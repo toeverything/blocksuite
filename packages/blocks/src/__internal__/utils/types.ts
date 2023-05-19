@@ -28,11 +28,19 @@ export interface EditingState {
   rect: DOMRect;
 }
 
-export type DatabaseTableStateType = 'select' | 'clear' | 'click';
-export type DatabaseTableState = {
-  type: DatabaseTableStateType;
+export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
+export type DatabaseTableViewRowState = {
+  type: DatabaseTableViewRowStateType;
   databaseId?: string;
   rowIds?: string[];
+};
+
+export type DatabaseTableViewCellStateType = 'select' | 'clear';
+export type DatabaseTableViewCellState = {
+  type: DatabaseTableViewCellStateType;
+  databaseId?: string;
+  key?: string;
+  cell?: Element;
 };
 
 /** Common context interface definition for block models. */

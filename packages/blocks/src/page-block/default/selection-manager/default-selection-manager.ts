@@ -356,9 +356,7 @@ export class DefaultSelectionManager {
 
     // FIXME: refactor this
     const service = getServiceOrRegister('affine:database');
-    Promise.resolve(service).then(database =>
-      database.clearTableViewSelection()
-    );
+    Promise.resolve(service).then(database => database.clearSelection());
 
     handleNativeRangeClick(this.page, e, this.container);
   };

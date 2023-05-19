@@ -4,18 +4,18 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { DatabaseTableState } from '../../../std.js';
+import type { DatabaseTableViewRowState } from '../../../../std.js';
 
-type SelectionState = Pick<DatabaseTableState, 'databaseId' | 'rowIds'>;
+type SelectionState = Pick<DatabaseTableViewRowState, 'databaseId' | 'rowIds'>;
 
 @customElement('database-row-level-selection')
 export class RowLevelSelection extends WithDisposable(LitElement) {
   static override styles = css`
     .database-row-level-selection {
       position: absolute;
-      width: 100%;
       z-index: 1;
       box-sizing: border-box;
+      width: 100%;
       border: 2px solid var(--affine-primary-color);
       border-radius: 2px;
       background: var(--affine-primary-color-04);

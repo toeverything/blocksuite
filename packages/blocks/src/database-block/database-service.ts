@@ -9,15 +9,21 @@ import {
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import {
-  clearAllDatabaseRowsSelection,
   getClosestDatabaseId,
   getClosestRowId,
-  getDatabaseById,
-  setDatabaseRowsSelection,
 } from '../page-block/default/selection-manager/database-selection-manager/utils.js';
-import type { DatabaseTableState } from '../std.js';
+import type {
+  DatabaseTableViewCellState,
+  DatabaseTableViewRowState,
+} from '../std.js';
 import { asyncFocusRichText, type SerializedBlock } from '../std.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import {
+  clearAllDatabaseCellSelection,
+  clearAllDatabaseRowsSelection,
+  setDatabaseCellSelection,
+  setDatabaseRowsSelection,
+} from './table/components/selection/utils.js';
 import type { Cell, Column } from './table/types.js';
 
 type LastTableViewSelection = {
@@ -31,27 +37,39 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   };
 
   slots = {
-    tableViewSelectionUpdated: new Slot<DatabaseTableState | null>(),
+    tableViewRowSelectionUpdated: new Slot<DatabaseTableViewRowState>(),
+    tableViewCellSelectionUpdated: new Slot<DatabaseTableViewCellState>(),
   };
 
   constructor() {
     super();
 
-    this.slots.tableViewSelectionUpdated.on(state => {
-      if (!state) return;
+    this.slots.tableViewRowSelectionUpdated.on(state => {
       const { type, rowIds, databaseId } = state;
 
       if (type === 'select' || type === 'click') {
         if (!databaseId || !rowIds) return;
-        const database = getDatabaseById(databaseId);
         this._lastSelection = {
           databaseId,
           rowIds,
         };
-        setDatabaseRowsSelection(databaseId, database, rowIds);
+        setDatabaseRowsSelection(databaseId, rowIds);
       } else if (type === 'clear') {
         this.clearLastSelection();
         clearAllDatabaseRowsSelection();
+      }
+    });
+
+    this.slots.tableViewCellSelectionUpdated.on(state => {
+      const { type, databaseId, cell, key } = state;
+
+      if (type === 'select') {
+        if (!databaseId || !cell || !key) return;
+        //  select
+        setDatabaseCellSelection(databaseId, cell, key);
+      } else if (type === 'clear') {
+        // clear
+        clearAllDatabaseCellSelection();
       }
     });
   }
@@ -154,19 +172,29 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
+  clearSelection() {
+    this.clearTableViewSelection();
+    this.clearCellLevelSelection();
+  }
+
+  // row level selection
   clearTableViewSelection() {
-    this.slots.tableViewSelectionUpdated.emit({
+    this.slots.tableViewRowSelectionUpdated.emit({
       type: 'clear',
     });
   }
 
-  setTableViewSelection({ type, databaseId, rowIds }: DatabaseTableState) {
+  setTableViewSelection({
+    type,
+    databaseId,
+    rowIds,
+  }: DatabaseTableViewRowState) {
     if (type === 'click' && rowIds?.[0] === this._lastSelection.rowIds?.[0]) {
       this.clearTableViewSelection();
       return;
     }
 
-    this.slots.tableViewSelectionUpdated.emit({
+    this.slots.tableViewRowSelectionUpdated.emit({
       type,
       databaseId,
       rowIds,
@@ -215,5 +243,12 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       return true;
     }
     return false;
+  }
+
+  // cell level selection
+  clearCellLevelSelection() {
+    this.slots.tableViewCellSelectionUpdated.emit({
+      type: 'clear',
+    });
   }
 }

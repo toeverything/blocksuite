@@ -13,6 +13,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { asyncFocusRichText } from '../../__internal__/index.js';
+import { getService } from '../../__internal__/service.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import { onClickOutside } from '../utils.js';
@@ -22,6 +23,16 @@ import { DataBaseRowContainer } from './components/row-container.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { Column } from './types.js';
 import { SearchState } from './types.js';
+
+const KEYS_WHITE_LIST = [
+  'Tab',
+  'Enter',
+  'Escape',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+];
 
 const styles = css`
   affine-database-table {
@@ -171,6 +182,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
+    disposables.addFromEvent(this, 'keydown', this._onCellSelectionChange);
   }
 
   override firstUpdated() {
@@ -243,6 +255,25 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
         },
         'mousedown'
       );
+    });
+  };
+
+  private _onCellSelectionChange = (event: KeyboardEvent) => {
+    if (KEYS_WHITE_LIST.indexOf(event.key) <= -1) return;
+
+    const target = event.target as HTMLElement;
+    const rowsContainer = target.closest('.affine-database-block-rows');
+    const currentCell = target.closest('.database-cell');
+    if (!rowsContainer) return;
+    if (!currentCell) return;
+    event.preventDefault();
+
+    const service = getService('affine:database');
+    service.slots.tableViewCellSelectionUpdated.emit({
+      type: 'select',
+      key: event.key,
+      cell: currentCell,
+      databaseId: this.model.id,
     });
   };
 
