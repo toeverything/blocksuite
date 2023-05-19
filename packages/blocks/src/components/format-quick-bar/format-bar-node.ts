@@ -113,12 +113,16 @@ function ParagraphPanel(
   </div>`;
 }
 
-export type CustomElement = (page: Page) => HTMLDivElement;
+type CustomElementCreator = (
+  page: Page,
+  // todo(himself65): support get current block range
+  getBlockRange: () => ReturnType<typeof getCurrentBlockRange>
+) => HTMLDivElement;
 
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
   static override styles = formatQuickBarStyle;
-  static customElements: CustomElement[] = [];
+  static customElements: CustomElementCreator[] = [];
 
   @property()
   page!: Page;
@@ -171,7 +175,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       FormatQuickBar.customElements.length !== 0
     ) {
       this._customElements = FormatQuickBar.customElements.map(element =>
-        element(this.page)
+        element(this.page, () => getCurrentBlockRange(this.page))
       );
       this.customItemsElement.append(...this._customElements);
       this._disposables.add(() => {

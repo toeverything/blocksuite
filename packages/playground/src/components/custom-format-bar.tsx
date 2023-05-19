@@ -1,7 +1,7 @@
 import { FormatQuickBar } from '@blocksuite/blocks';
 import { createRoot } from 'react-dom/client';
 
-FormatQuickBar.customElements.push(page => {
+FormatQuickBar.customElements.push((page, getBlockRange) => {
   const element = document.createElement('div');
 
   createRoot(element).render(
@@ -15,7 +15,8 @@ FormatQuickBar.customElements.push(page => {
         cursor: 'pointer',
       }}
       onClick={() => {
-        window.alert('Hello World!');
+        const range = getBlockRange();
+        console.log('range', range);
       }}
     >
       <div>X</div>
