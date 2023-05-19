@@ -424,9 +424,27 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   });
 
   hotkey.addListener(UP, e => {
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
+    }
+    const parent = page.getParent(blockRange.models[0]);
+    if (parent && matchFlavours(parent, ['affine:database'])) {
+      const service = getService('affine:database');
+      if (service.getLastCellSelection()) return;
+    }
     handleUp(e, page, { selection });
   });
   hotkey.addListener(DOWN, e => {
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) {
+      return;
+    }
+    const parent = page.getParent(blockRange.models[0]);
+    if (parent && matchFlavours(parent, ['affine:database'])) {
+      const service = getService('affine:database');
+      if (service.getLastCellSelection()) return;
+    }
     handleDown(e, page, { selection });
   });
   hotkey.addListener(LEFT, e => {
