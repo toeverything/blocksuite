@@ -20,6 +20,7 @@
   },
   "packageManager": "pnpm@8.5.0",
   "scripts": {
+    "deps:check": "dpdm --exit-code circular:1 --no-tree --no-warning --no-tree ./packages/**/src/*.ts",
     "serve": "pnpm --filter @blocksuite/store serve",
     "preview": "run-p serve preview:playground",
     "preview:playground": "pnpm --filter @blocksuite/playground preview",
@@ -67,6 +68,7 @@
     "@vitejs/plugin-react": "^3.1.0",
     "@vitest/coverage-istanbul": "^0.28.5",
     "@vitest/ui": "^0.28.5",
+    "dpdm": "^3.13.0",
     "es-module-lexer": "^1.2.0",
     "eslint": "^8.36.0",
     "eslint-plugin-lit": "^1.8.2",
