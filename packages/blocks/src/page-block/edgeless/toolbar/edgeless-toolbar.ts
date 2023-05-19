@@ -14,7 +14,14 @@ import {
   ViewBarIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Bound, deserializeXYWH, getCommonBound } from '@blocksuite/phasor';
+import {
+  Bound,
+  deserializeXYWH,
+  getCommonBound,
+  ZOOM_MAX,
+  ZOOM_MIN,
+  ZOOM_STEP,
+} from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -27,7 +34,7 @@ import {
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { stopPropagation, ZOOM_MAX, ZOOM_MIN } from '../utils.js';
+import { stopPropagation } from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
@@ -259,7 +266,7 @@ export class EdgelessToolbar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom out'}
-          @click=${() => this._setZoomByStep(-0.1)}
+          @click=${() => this._setZoomByStep(-ZOOM_STEP)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -268,7 +275,7 @@ export class EdgelessToolbar extends LitElement {
         </span>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom in'}
-          @click=${() => this._setZoomByStep(+0.1)}
+          @click=${() => this._setZoomByStep(ZOOM_STEP)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

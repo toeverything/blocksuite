@@ -41,9 +41,6 @@ export const DEFAULT_FRAME_HEIGHT = 72;
 export const DEFAULT_FRAME_OFFSET_X = 30;
 export const DEFAULT_FRAME_OFFSET_Y = 40;
 
-export const ZOOM_MAX = 3.0;
-export const ZOOM_MIN = 0.1;
-
 const ATTACHED_DISTANCE = 20;
 
 export function isTopLevelBlock(
@@ -123,7 +120,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
       );
 
       const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
-      viewport.applyDeltaZoom(zoom);
+      viewport.setZoom(zoom);
       const newZoom = viewport.zoom;
 
       const offsetX = centerX - baseX;
@@ -501,4 +498,14 @@ export function addText(
       });
     }
   });
+}
+
+export function xywhArrayToObject(element: TopLevelBlockModel) {
+  const [x, y, w, h] = deserializeXYWH(element.xywh);
+  return {
+    x,
+    y,
+    w,
+    h,
+  };
 }

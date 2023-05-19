@@ -4,9 +4,9 @@ import { SurfaceElement } from '../surface-element.js';
 
 export interface IDebug {
   id: string;
-  index: string;
   type: string;
   xywh: SerializedXYWH;
+  index: string;
   seed: number;
 
   color: string;

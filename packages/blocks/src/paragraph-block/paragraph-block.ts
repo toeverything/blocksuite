@@ -45,7 +45,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
       if (!blockHub) {
         throw new Error('Failed to find blockHub!');
       }
-      blockHub.toggleMenu(true);
+      blockHub.toggleMenu();
     };
     return html`
       <div

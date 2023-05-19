@@ -1,5 +1,4 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
 import { randomSeed } from 'roughjs/bin/math.js';
 import * as Y from 'yjs';
 
@@ -17,12 +16,15 @@ import type {
   HitTestOptions,
   TransformPropertyValue,
 } from './elements/surface-element.js';
-import { compare } from './grid.js';
-import { ConnectorElement, intersects } from './index.js';
+import { compare, ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
-import { generateElementId } from './utils/std.js';
+import {
+  generateElementId,
+  generateKeyBetween,
+  normalizeWheelDeltaY,
+} from './utils/std.js';
 import { serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
@@ -30,9 +32,10 @@ export class SurfaceManager {
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, SurfaceElement>();
   private _bindings = new Map<string, Set<string>>();
-  private _lastIndex = 'a0';
 
   private _transformPropertyValue: TransformPropertyValue;
+
+  indexes = { min: 'a0', max: 'a0' };
 
   constructor(
     yContainer: Y.Map<unknown>,
@@ -48,6 +51,116 @@ export class SurfaceManager {
 
   get viewport(): SurfaceViewport {
     return this._renderer;
+  }
+
+  private _addBinding(id0: string, id1: string) {
+    if (!this._bindings.has(id0)) {
+      this._bindings.set(id0, new Set());
+    }
+    this._bindings.get(id0)?.add(id1);
+  }
+
+  private _updateBindings(element: SurfaceElement) {
+    if (element instanceof ConnectorElement) {
+      if (element.startElement) {
+        this._addBinding(element.startElement.id, element.id);
+        this._addBinding(element.id, element.startElement.id);
+      }
+      if (element.endElement) {
+        this._addBinding(element.endElement.id, element.id);
+        this._addBinding(element.id, element.endElement.id);
+      }
+    }
+  }
+
+  private _syncFromExistingContainer() {
+    this._yContainer.forEach(yElement => {
+      const type = yElement.get('type') as keyof PhasorElementType;
+
+      const ElementCtor = ElementCtors[type];
+      assertExists(ElementCtor);
+      const element = new ElementCtor(yElement);
+      element.transformPropertyValue = this._transformPropertyValue;
+      element.mount(this._renderer);
+
+      this._elements.set(element.id, element);
+
+      if (element.index > this.indexes.max) {
+        this.indexes.max = element.index;
+      } else if (element.index < this.indexes.min) {
+        this.indexes.min = element.index;
+      }
+
+      this._updateBindings(element);
+    });
+  }
+
+  private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
+    // skip empty event
+    if (event.changes.keys.size === 0) return;
+    event.keysChanged.forEach(id => {
+      const type = event.changes.keys.get(id);
+      if (!type) {
+        console.error('invalid event', event);
+        return;
+      }
+
+      if (type.action === 'add') {
+        const yElement = this._yContainer.get(id) as Y.Map<unknown>;
+        const type = yElement.get('type') as keyof PhasorElementType;
+
+        const ElementCtor = ElementCtors[type];
+        assertExists(ElementCtor);
+        const element = new ElementCtor(yElement);
+        element.transformPropertyValue = this._transformPropertyValue;
+        element.mount(this._renderer);
+
+        this._elements.set(element.id, element);
+
+        if (element.index > this.indexes.max) {
+          this.indexes.max = element.index;
+        }
+
+        this._updateBindings(element);
+      } else if (type.action === 'update') {
+        console.error('update event on yElements is not supported', event);
+      } else if (type.action === 'delete') {
+        const element = this._elements.get(id);
+        assertExists(element);
+        element.unmount();
+        this._elements.delete(id);
+
+        if (element.index === this.indexes.min) {
+          this.indexes.min = generateKeyBetween(element.index, null);
+        }
+      }
+    });
+  };
+
+  private _transact(callback: () => void) {
+    const doc = this._yContainer.doc as Y.Doc;
+    doc.transact(callback, doc.clientID);
+  }
+
+  updateIndexes(
+    keys: string[],
+    elements: PhasorElement[],
+    callback: (keys: string[]) => void
+  ) {
+    this._transact(() => {
+      let newIndex;
+      let i = 0;
+      const len = elements.length;
+      for (; i < len; i++) {
+        newIndex = keys[i];
+        const yElement = this._yContainer.get(elements[i].id) as Y.Map<unknown>;
+        const oldIndex = yElement.get('index') as string;
+        if (oldIndex === newIndex) continue;
+        yElement.set('index', newIndex);
+      }
+
+      callback(keys);
+    });
   }
 
   attach(container: HTMLElement) {
@@ -75,7 +188,7 @@ export class SurfaceManager {
       ...defaultProps,
       ...properties,
       id,
-      index: generateKeyBetween(this._lastIndex, null),
+      index: generateKeyBetween(this.indexes.max, null),
       seed: randomSeed(),
     };
     for (const key in props) {
@@ -152,56 +265,8 @@ export class SurfaceManager {
     return picked;
   }
 
-  moveToBack(elementIds: string[]) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    let startIndex = this._lastIndex;
-    this._elements.forEach(element => {
-      if (elementIds.includes(element.id)) {
-        return;
-      }
-      if (element.index < startIndex) {
-        startIndex = element.index;
-      }
-    });
-
-    const keys = generateNKeysBetween(null, startIndex, elementIds.length);
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    this._transact(() => {
-      sortedElements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
-    });
-  }
-
-  moveToFront(elementIds: string[]) {
-    if (!elementIds.length) {
-      return;
-    }
-
-    const keys = generateNKeysBetween(this._lastIndex, null, elementIds.length);
-
-    const sortedElements = (
-      elementIds
-        .map(id => this._elements.get(id))
-        .filter(e => !!e) as SurfaceElement[]
-    ).sort(compare);
-
-    this._transact(() => {
-      sortedElements.forEach((ele, index) => {
-        const yElement = this._yContainer.get(ele.id) as Y.Map<unknown>;
-        yElement.set('index', keys[index]);
-      });
-    });
+  getSortedElementsWithViewportBounds() {
+    return this.pickByBound(this.viewport.viewportBounds).sort(compare);
   }
 
   getBindingElements(id: string) {
@@ -212,89 +277,6 @@ export class SurfaceManager {
     return [...bindingIds.values()]
       .map(bindingId => this.pickById(bindingId))
       .filter(e => !!e) as SurfaceElement[];
-  }
-
-  private _addBinding(id0: string, id1: string) {
-    if (!this._bindings.has(id0)) {
-      this._bindings.set(id0, new Set());
-    }
-    this._bindings.get(id0)?.add(id1);
-  }
-
-  private _updateBindings(element: SurfaceElement) {
-    if (element instanceof ConnectorElement) {
-      if (element.startElement) {
-        this._addBinding(element.startElement.id, element.id);
-        this._addBinding(element.id, element.startElement.id);
-      }
-      if (element.endElement) {
-        this._addBinding(element.endElement.id, element.id);
-        this._addBinding(element.id, element.endElement.id);
-      }
-    }
-  }
-
-  private _syncFromExistingContainer() {
-    this._yContainer.forEach(yElement => {
-      const type = yElement.get('type') as keyof PhasorElementType;
-
-      const ElementCtor = ElementCtors[type];
-      assertExists(ElementCtor);
-      const element = new ElementCtor(yElement);
-      element.transformPropertyValue = this._transformPropertyValue;
-      element.mount(this._renderer);
-
-      this._elements.set(element.id, element);
-
-      if (element.index > this._lastIndex) {
-        this._lastIndex = element.index;
-      }
-
-      this._updateBindings(element);
-    });
-  }
-
-  private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
-    // skip empty event
-    if (event.changes.keys.size === 0) return;
-    event.keysChanged.forEach(id => {
-      const type = event.changes.keys.get(id);
-      if (!type) {
-        console.error('invalid event', event);
-        return;
-      }
-
-      if (type.action === 'add') {
-        const yElement = this._yContainer.get(id) as Y.Map<unknown>;
-        const type = yElement.get('type') as keyof PhasorElementType;
-
-        const ElementCtor = ElementCtors[type];
-        assertExists(ElementCtor);
-        const element = new ElementCtor(yElement);
-        element.transformPropertyValue = this._transformPropertyValue;
-        element.mount(this._renderer);
-
-        this._elements.set(element.id, element);
-
-        if (element.index > this._lastIndex) {
-          this._lastIndex = element.index;
-        }
-
-        this._updateBindings(element);
-      } else if (type.action === 'update') {
-        console.error('update event on yElements is not supported', event);
-      } else if (type.action === 'delete') {
-        const element = this._elements.get(id);
-        assertExists(element);
-        element.unmount();
-        this._elements.delete(id);
-      }
-    });
-  };
-
-  private _transact(callback: () => void) {
-    const doc = this._yContainer.doc as Y.Doc;
-    doc.transact(callback, doc.clientID);
   }
 
   dispose() {
@@ -314,8 +296,8 @@ export class SurfaceManager {
       }
       // zoom
       else {
-        const delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-        _renderer.applyDeltaZoom(delta);
+        const zoom = normalizeWheelDeltaY(e.deltaY);
+        _renderer.setZoom(zoom);
       }
     });
   }

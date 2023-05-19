@@ -3,8 +3,10 @@ import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
   DeleteIcon,
+  DualLinkIcon,
   DuplicateIcon,
   ImageIcon20,
+  NewPageIcon,
   NowIcon,
   paragraphConfig,
   // PasteIcon,
@@ -22,6 +24,8 @@ import {
 import type { TemplateResult } from 'lit';
 
 import { normalizeDelta } from '../../__internal__/clipboard/utils/commons.js';
+import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
+import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
@@ -37,6 +41,7 @@ import {
   onModelTextUpdated,
   updateBlockType,
 } from '../../page-block/utils/index.js';
+import { showLinkedPagePopover } from '../linked-page/index.js';
 import { toast } from '../toast.js';
 
 export type SlashItem = {
@@ -49,7 +54,11 @@ export type SlashItem = {
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
 };
 
-function insertContent(model: BaseBlockModel, text: string) {
+function insertContent(
+  model: BaseBlockModel,
+  text: string,
+  attributes?: AffineTextAttributes
+) {
   if (!model.text) {
     throw new Error("Can't insert text! Text not found");
   }
@@ -59,7 +68,7 @@ function insertContent(model: BaseBlockModel, text: string) {
   }
   const vRange = vEditor.getVRange();
   const index = vRange ? vRange.index : model.text.length;
-  model.text.insert(text, index);
+  model.text.insert(text, index, attributes);
   // Update the caret to the end of the inserted text
   vEditor.setVRange({
     index: index + text.length,
@@ -191,6 +200,36 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             parent.children.indexOf(model);
             const props = await uploadImageFromLocal(page);
             page.addSiblingBlocks(model, props);
+          },
+        },
+      ],
+    },
+    {
+      name: 'Pages',
+      items: [
+        {
+          name: 'New Page',
+          icon: NewPageIcon,
+          showWhen: model =>
+            !!model.page.awarenessStore.getFlag('enable_linked_page'),
+          action: ({ page, model }) => {
+            const newPage = page.workspace.createPage({
+              init: true,
+            });
+            insertContent(model, REFERENCE_NODE, {
+              reference: { type: 'LinkedPage', pageId: newPage.id },
+            });
+          },
+        },
+        {
+          name: 'Link Page',
+          alias: ['dual link'],
+          icon: DualLinkIcon,
+          showWhen: model =>
+            !!model.page.awarenessStore.getFlag('enable_linked_page'),
+          action: ({ model }) => {
+            insertContent(model, '@');
+            showLinkedPagePopover({ model, range: getCurrentNativeRange() });
           },
         },
       ],
