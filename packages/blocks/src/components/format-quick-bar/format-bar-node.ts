@@ -12,6 +12,7 @@ import {
   type Page,
 } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
+import type { PropertyValues } from 'lit';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -112,9 +113,12 @@ function ParagraphPanel(
   </div>`;
 }
 
+export type CustomElement = (page: Page) => HTMLDivElement;
+
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
   static override styles = formatQuickBarStyle;
+  static customElements: CustomElement[] = [];
 
   @property()
   page!: Page;
@@ -154,6 +158,31 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
+
+  @query('.custom-items')
+  customItemsElement!: HTMLElement;
+
+  private _customElements: HTMLDivElement[] = [];
+
+  protected override update(changedProperties: PropertyValues) {
+    super.update(changedProperties);
+    if (
+      this._customElements.length === 0 &&
+      FormatQuickBar.customElements.length !== 0
+    ) {
+      this._customElements = FormatQuickBar.customElements.map(element =>
+        element(this.page)
+      );
+      this.customItemsElement.append(...this._customElements);
+      this._disposables.add(() => {
+        this._customElements.forEach(element => {
+          element.remove();
+        });
+        this._customElements = [];
+        this.customItemsElement.innerHTML = '';
+      });
+    }
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -341,6 +370,10 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       style="${styles}"
       @pointerdown=${stopPropagation}
     >
+      <div class="custom-items"></div>
+      ${this._customElements.length > 0
+        ? html`<div class="divider"></div>`
+        : null}
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}
