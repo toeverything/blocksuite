@@ -128,5 +128,26 @@ export default defineConfig({
         href: 'https://raw.githubusercontent.com/toeverything/blocksuite/master/assets/logo.svg',
       },
     ],
+    [
+      'script',
+      {
+        id: 'mendable',
+        src: 'https://unpkg.com/@mendable/search@0.0.98/dist/umd/mendable-bundle.min.js',
+      },
+    ],
+    [
+      'script',
+      {
+        id: 'mendable-init',
+      },
+      `
+      document.querySelector('#mendable').addEventListener('load', function() {
+        Mendable.initialize({
+          anon_key: ${process.env.MENDABLE_ANON_KEY},
+          type:"floatingButton",
+        });
+      });
+      `,
+    ],
   ],
 });
