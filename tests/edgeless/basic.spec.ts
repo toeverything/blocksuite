@@ -12,7 +12,6 @@ import {
   locatorEdgelessComponentToolButton,
   setMouseMode,
   switchEditorMode,
-  triggerComponentToolbarAction,
   zoomByMouseWheel,
 } from '../utils/actions/edgeless.js';
 import {
@@ -23,12 +22,14 @@ import {
   focusRichText,
   initEmptyEdgelessState,
   pressEnter,
+  redoByKeyboard,
   type,
+  undoByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
-  assertEdgelessSelectedRect,
+  assertEdgelessNonHoverRect,
   assertFrameXYWH,
   assertRichTexts,
   assertSelection,
@@ -178,4 +179,31 @@ test('the tooltip of more button should be hidden when the action menu is shown'
 
   await page.mouse.click(moreButtonBox.x + 10, moreButtonBox.y + 10);
   await expect(tooltip).toBeVisible();
+});
+
+test('undo/redo', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+  await page.mouse.click(0, 0);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+
+  await undoByKeyboard(page);
+  await page.mouse.click(0, 0);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessNonHoverRect(page);
+
+  await redoByKeyboard(page);
+  // TODO: update selected rect
+  await page.mouse.click(0, 0);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });

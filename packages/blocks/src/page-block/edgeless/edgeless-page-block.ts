@@ -444,6 +444,9 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  /**
+   * Updates indexes of the elements with the sorted keys.
+   */
   updateIndexes(
     keys: string[],
     elements: TopLevelBlockModel[],
@@ -776,7 +779,7 @@ export class EdgelessPageBlockComponent
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
 
-      const frame = this.frames.find(child => child.flavour === 'affine:frame');
+      const frame = this.frames[0];
       if (frame) {
         const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
         this.surface.viewport.setCenter(
@@ -830,7 +833,7 @@ export class EdgelessPageBlockComponent
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.sortedFrames,
       this,
-      this.surface.viewport,
+      viewport,
       active,
       this.root.renderModel
     );

@@ -144,6 +144,9 @@ export class SurfaceManager {
     doc.transact(callback, doc.clientID);
   }
 
+  /**
+   * Updates indexes of the elements with the sorted keys.
+   */
   updateIndexes(
     keys: string[],
     elements: PhasorElement[],
@@ -215,8 +218,18 @@ export class SurfaceManager {
     });
   }
 
+  /**
+   * Updates the properties of element with a transaction.
+   */
+  updateElementWith<T extends keyof IPhasorElementType>(
+    id: string,
+    properties: IElementCreateProps<T>
+  ) {
+    this._transact(() => this.updateElement(id, properties));
+  }
+
   setElementBound(id: string, bound: IBound) {
-    this.updateElement(id, {
+    this.updateElementWith(id, {
       xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
     });
   }

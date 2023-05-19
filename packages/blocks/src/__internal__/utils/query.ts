@@ -307,11 +307,9 @@ export function asyncGetBlockElementByModel(
     };
 
     const observer = new MutationObserver(() => {
-      const blockElement = page.querySelector<BlockComponentElement>(
-        `[${ATTR}="${model.id}"]`
-      );
+      const blockElement = getBlockElementById(model.id, page);
       if (blockElement) {
-        onSuccess(blockElement);
+        onSuccess(blockElement as BlockComponentElement);
       }
     });
 
