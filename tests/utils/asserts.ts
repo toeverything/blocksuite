@@ -719,3 +719,15 @@ export async function assertEdgelessColorSameWithHexColor(
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
 }
+
+export async function assertStoreValue(
+  page: Page,
+  key: string,
+  expected: unknown
+) {
+  const actual = (await page.evaluate(() => {
+    const json = window.workspace.doc.toJSON();
+    return json;
+  })) as SerializedStore;
+  expect(actual[key]).toEqual(expected);
+}
