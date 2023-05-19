@@ -31,6 +31,10 @@ export async function getFrameRect(
   return { x, y, w, h };
 }
 
+export async function registerFormatBarCustomElements(page: Page) {
+  await page.click('sl-button[content="Register FormatBar Custom Elements"]');
+}
+
 export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
