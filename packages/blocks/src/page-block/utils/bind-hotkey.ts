@@ -15,6 +15,7 @@ import {
   isPrintableKeyEvent,
 } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
+import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
@@ -456,6 +457,10 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     const blockRange = getCurrentBlockRange(page);
     if (!blockRange) {
       return;
+    }
+    if (matchFlavours(blockRange.models[0], ['affine:database'])) {
+      const service = getService('affine:database');
+      if (service.getLastCellSelection()) return;
     }
     if (blockRange.type === 'Block') {
       // Do nothing

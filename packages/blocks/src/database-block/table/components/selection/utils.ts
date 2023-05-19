@@ -16,6 +16,10 @@ export function setDatabaseCellSelection(
     databaseId,
     key,
   });
+  cellLevelSelection.updateComplete.then(() => {
+    const currentCell = cellLevelSelection.getCurrentSelectedCell();
+    currentCell?.scrollIntoView();
+  });
 }
 
 export function clearAllDatabaseCellSelection() {
