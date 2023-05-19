@@ -219,7 +219,6 @@ export class EdgelessToolbar extends LitElement {
           @click=${() =>
             this._setMouseMode({
               type: 'text',
-              background: FRAME_BACKGROUND_COLORS[0],
             })}
         >
           ${TextIconLarge}
@@ -249,6 +248,18 @@ export class EdgelessToolbar extends LitElement {
           @click=${() => this._setMouseMode({ type: 'pan', panning: false })}
         >
           ${HandIcon}
+        </edgeless-tool-icon-button>
+        <edgeless-tool-icon-button
+          .tooltip=${getTooltipWithShortcut('Text', 'T')}
+          .active=${type === 'text'}
+          @click=${() =>
+            this._setMouseMode({
+              type: 'note',
+              background: FRAME_BACKGROUND_COLORS[0],
+            })}
+        >
+          <!-- FIXME: use note icon -->
+          ${TextIconLarge}
         </edgeless-tool-icon-button>
         <div class="divider"></div>
         <edgeless-tool-icon-button

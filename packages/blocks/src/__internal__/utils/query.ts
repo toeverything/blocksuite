@@ -512,6 +512,16 @@ export function isInsidePageTitle(element: unknown): boolean {
   return titleElement.contains(element as Node);
 }
 
+export function isInsideEdgelessTextEditor(element: unknown): boolean {
+  const editor = activeEditorManager.getActiveEditor();
+  const titleElement = (editor ?? document).querySelector(
+    '[data-block-is-edgeless-text="true"]'
+  );
+  if (!titleElement) return false;
+
+  return titleElement.contains(element as Node);
+}
+
 export function isToggleIcon(element: unknown): element is SVGPathElement {
   return (
     element instanceof SVGPathElement &&

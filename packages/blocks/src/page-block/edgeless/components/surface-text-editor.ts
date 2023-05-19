@@ -29,15 +29,6 @@ export class SurfaceTextEditor extends ShadowlessElement {
     this._element = element;
     this._vEditor = new VEditor(element.text);
 
-    this._vEditor.slots.rangeUpdated.on(range => {
-      const selection = document.getSelection();
-      if (selection) {
-        requestAnimationFrame(() => {
-          selection.removeAllRanges();
-          selection.addRange(range);
-        });
-      }
-    });
     this._vEditor.slots.updated.on(() => {
       const rect = this._virgoContainer.getBoundingClientRect();
       edgeless.surface.updateElement(element.id, {
@@ -47,6 +38,10 @@ export class SurfaceTextEditor extends ShadowlessElement {
           rect.width,
           rect.height
         ).serialize(),
+      });
+      edgeless.slots.selectionUpdated.emit({
+        selected: [element],
+        active: true,
       });
     });
 
@@ -63,6 +58,10 @@ export class SurfaceTextEditor extends ShadowlessElement {
         'blur',
         () => {
           this.remove();
+          edgeless.slots.selectionUpdated.emit({
+            selected: [],
+            active: false,
+          });
         },
         {
           once: true,
@@ -76,7 +75,7 @@ export class SurfaceTextEditor extends ShadowlessElement {
     let backgroundStyle = styleMap({});
     if (this._rect) {
       virgoStyle = styleMap({
-        minWidth: '10px',
+        minWidth: '20px',
         fontSize: this._element?.fontSize + 'px',
         fontFamily: this._element?.fontFamily,
         outline: 'none',
@@ -92,7 +91,10 @@ export class SurfaceTextEditor extends ShadowlessElement {
       });
     }
 
-    return html`<div style=${backgroundStyle}>
+    return html`<div
+      data-block-is-edgeless-text="true"
+      style=${backgroundStyle}
+    >
       <div style=${virgoStyle} class="virgo-container"></div>
     </div>`;
   }
