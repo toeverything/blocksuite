@@ -15,6 +15,7 @@ import {
   pressArrowDown,
   pressArrowRight,
   pressEnter,
+  registerFormatBarCustomElements,
   setSelection,
   switchReadonly,
   type,
@@ -1195,4 +1196,15 @@ test('should update the format quick bar state when there is a change in keyboar
     await page.keyboard.press('ArrowRight');
     await expect(formatBar.boldBtn).not.toHaveAttribute('active', '');
   });
+});
+
+test('should register custom elements in format quick bar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await registerFormatBarCustomElements(page);
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });
