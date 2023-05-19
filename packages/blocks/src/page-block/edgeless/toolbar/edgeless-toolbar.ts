@@ -59,7 +59,7 @@ export class EdgelessToolbar extends LitElement {
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
-      fill: var(--affine-icon-color);
+      fill: currentcolor;
     }
 
     .edgeless-toolbar-container[level='second'] {
@@ -126,28 +126,41 @@ export class EdgelessToolbar extends LitElement {
   }
 
   private _zoomToFit() {
-    const { viewport } = this.edgeless.surface;
-    const { width, height } = viewport;
-    const frame = this.edgeless.model.children[0] as FrameBlockModel;
-    const frameXYWH = deserializeXYWH(frame.xywh);
-    const frameBound = new Bound(...frameXYWH);
+    const bounds = [];
+
+    const frame = this.edgeless.frames[0] as FrameBlockModel;
+    if (frame) {
+      const frameXYWH = deserializeXYWH(frame.xywh);
+      const frameBound = new Bound(...frameXYWH);
+      bounds.push(frameBound);
+    }
 
     const surfaceElementsBound = this.edgeless.surface.getElementsBound();
+    if (surfaceElementsBound) {
+      bounds.push(surfaceElementsBound);
+    }
 
-    const bound = surfaceElementsBound
-      ? getCommonBound([frameBound, surfaceElementsBound])
-      : frameBound;
-    assertExists(bound);
+    const { viewport } = this.edgeless.surface;
+    let { centerX, centerY, zoom } = viewport;
 
-    const zoom = Math.min(
-      (width - FIT_TO_SCREEN_PADDING) / bound.w,
-      (height - FIT_TO_SCREEN_PADDING) / bound.h
-    );
+    if (bounds.length) {
+      const { width, height } = viewport;
+      const bound = getCommonBound(bounds);
+      assertExists(bound);
 
-    const cx = bound.x + bound.w / 2;
-    const cy = bound.y + bound.h / 2;
+      zoom = Math.min(
+        (width - FIT_TO_SCREEN_PADDING) / bound.w,
+        (height - FIT_TO_SCREEN_PADDING) / bound.h
+      );
+
+      centerX = bound.x + bound.w / 2;
+      centerY = bound.y + bound.h / 2;
+    } else {
+      zoom = 1;
+    }
+
     viewport.setZoom(zoom);
-    viewport.setCenter(cx, cy);
+    viewport.setCenter(centerX, centerY);
     this.edgeless.slots.viewportUpdated.emit();
   }
 
