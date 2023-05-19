@@ -14,6 +14,7 @@ type CellRects = {
   top: number;
   height: number;
   width: number;
+  cell: HTMLElement;
 }[][];
 type CellCoord = {
   rowIndex: number;
@@ -35,7 +36,7 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
   `;
 
   @property()
-  cell!: Element;
+  cell!: HTMLElement;
 
   @state()
   state: SelectionState = {
@@ -44,16 +45,22 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
   };
 
   private _lastCellPos: CellCoord | null = null;
+  private _currentSelectedCell: HTMLElement | null = null;
 
   setSelection = (state: SelectionState) => {
     this.state = state;
   };
 
   clearSelection = () => {
+    this._currentSelectedCell = null;
     this.state = {
       databaseId: '',
       key: '',
     };
+  };
+
+  getCurrentSelectedCell = () => {
+    return this._currentSelectedCell;
   };
 
   private _getStyles = () => {
@@ -86,6 +93,7 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
     this._lastCellPos = nextCellCoord;
     const nextCellRect =
       cellRects[nextCellCoord.rowIndex][nextCellCoord.cellIndex];
+    this._currentSelectedCell = nextCellRect.cell;
     const { left, top } = rowsContainer.getBoundingClientRect();
 
     return {
@@ -148,7 +156,7 @@ function getCellRectByCoord(rowsContainer: Element, currentCell: Element) {
       }
       const { left, top, height, width } = cell.getBoundingClientRect();
       cellRects[rowIndex] = cellRects[rowIndex] ?? [];
-      cellRects[rowIndex][cellIndex] = { left, top, height, width };
+      cellRects[rowIndex][cellIndex] = { left, top, height, width, cell };
     });
   });
 
@@ -165,6 +173,8 @@ function getNextCellCoord(
   cellsCount: number
 ) {
   switch (key) {
+    case 'Escape':
+      return getNextCellCoordByEscape(currentCellCoord);
     case 'Tab':
     case 'ArrowRight':
       return getNextCellCoordByTab(currentCellCoord, rowsCount, cellsCount);
@@ -244,6 +254,10 @@ function getNextCellCoordByArrowDown(
     nextCellPos.cellIndex = currentCellCoord.cellIndex;
     return nextCellPos;
   }
+  return currentCellCoord;
+}
+
+function getNextCellCoordByEscape(currentCellCoord: CellCoord) {
   return currentCellCoord;
 }
 

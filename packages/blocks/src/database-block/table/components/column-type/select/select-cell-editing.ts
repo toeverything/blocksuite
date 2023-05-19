@@ -15,6 +15,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
+import { getService } from '../../../../../__internal__/service.js';
 import { getTagColor, onClickOutside } from '../../../../utils.js';
 import {
   SELECT_EDIT_POPUP_WIDTH,
@@ -269,6 +270,17 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       } else {
         this._onAddSelection(selectedValue);
       }
+    } else if (event.key === 'Escape') {
+      this.rowHost.setEditing(false);
+      const service = getService('affine:database');
+      const cell = this.closest<HTMLElement>('.database-cell');
+      assertExists(cell);
+      service.setCellSelection({
+        type: 'select',
+        databaseId: this.databaseModel.id,
+        cell,
+        key: 'Escape',
+      });
     }
   };
 

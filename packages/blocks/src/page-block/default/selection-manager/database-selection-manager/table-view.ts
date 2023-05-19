@@ -85,7 +85,7 @@ export class DatabaseTableViewSelectionManager {
       const rowIds = getSelectedRowIdsByIndexes(this._database, rowIndexes);
       this._rowIds = rowIds;
 
-      this._service?.setTableViewSelection({
+      this._service?.setRowSelection({
         type: 'select',
         rowIds,
         databaseId,
@@ -109,7 +109,7 @@ export class DatabaseTableViewSelectionManager {
     databaseId: string
   ) {
     this._rowIds = [];
-    this._service?.setTableViewSelection({
+    this._service?.setRowSelection({
       type: 'select',
       rowIds: [],
       databaseId,

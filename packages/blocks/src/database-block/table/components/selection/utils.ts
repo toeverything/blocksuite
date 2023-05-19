@@ -1,9 +1,12 @@
+import { assertExists } from '@blocksuite/store';
+
+import type { RichText } from '../../../../__internal__/rich-text/rich-text.js';
 import { CellLevelSelection, getRowsContainer } from './cell-selection.js';
 import { RowLevelSelection } from './row-selection.js';
 
 export function setDatabaseCellSelection(
   databaseId: string,
-  cell: Element,
+  cell: HTMLElement,
   key: string
 ) {
   const container = getRowsContainer(databaseId);
@@ -23,6 +26,26 @@ export function clearAllDatabaseCellSelection() {
     );
     cellLevelSelection?.clearSelection();
   });
+}
+
+export function setDatabaseCellEditing(databaseId: string) {
+  const currentCell = clearDatabaseCellSelectionByDatabaseId(databaseId);
+  const columnTypeCell = currentCell?.firstElementChild
+    ?.firstElementChild as HTMLElement;
+  assertExists(columnTypeCell);
+
+  const richText = currentCell?.querySelector('rich-text');
+
+  // number or rich-text column
+  if ('vEditor' in columnTypeCell) {
+    const richTextCell = columnTypeCell as RichText;
+    richTextCell.vEditor?.focusEnd();
+  } else if (richText) {
+    // title column
+    richText.vEditor?.focusEnd();
+  } else {
+    columnTypeCell.click();
+  }
 }
 
 export function clearAllDatabaseRowsSelection() {
@@ -63,4 +86,14 @@ function getCellLevelSelection(container: Element) {
   }
 
   return cellLevelSelection;
+}
+
+function clearDatabaseCellSelectionByDatabaseId(databaseId: string) {
+  const container = getRowsContainer(databaseId);
+  const cellLevelSelection = container.querySelector(
+    'database-cell-level-selection'
+  );
+  const currentCell = cellLevelSelection?.getCurrentSelectedCell();
+  cellLevelSelection?.clearSelection();
+  return currentCell;
 }

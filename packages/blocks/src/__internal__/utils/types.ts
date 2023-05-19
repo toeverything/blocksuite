@@ -35,12 +35,12 @@ export type DatabaseTableViewRowState = {
   rowIds?: string[];
 };
 
-export type DatabaseTableViewCellStateType = 'select' | 'clear';
+export type DatabaseTableViewCellStateType = 'select' | 'clear' | 'edit';
 export type DatabaseTableViewCellState = {
   type: DatabaseTableViewCellStateType;
   databaseId?: string;
   key?: string;
-  cell?: Element;
+  cell?: HTMLElement;
 };
 
 /** Common context interface definition for block models. */

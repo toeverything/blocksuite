@@ -21,20 +21,26 @@ import type { DatabaseBlockModel } from './database-model.js';
 import {
   clearAllDatabaseCellSelection,
   clearAllDatabaseRowsSelection,
+  setDatabaseCellEditing,
   setDatabaseCellSelection,
   setDatabaseRowsSelection,
 } from './table/components/selection/utils.js';
 import type { Cell, Column } from './table/types.js';
 
-type LastTableViewSelection = {
+type LastTableViewRowSelection = {
   databaseId: string;
   rowIds: string[];
 };
+type LastTableViewCellSelection = {
+  databaseId: string;
+  cell: HTMLElement;
+};
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
-  private _lastSelection: LastTableViewSelection = {
+  private _lastRowSelection: LastTableViewRowSelection = {
     databaseId: '',
     rowIds: [],
   };
+  private _lastCellSelection: LastTableViewCellSelection | null = null;
 
   slots = {
     tableViewRowSelectionUpdated: new Slot<DatabaseTableViewRowState>(),
@@ -49,13 +55,13 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
       if (type === 'select' || type === 'click') {
         if (!databaseId || !rowIds) return;
-        this._lastSelection = {
+        this._lastRowSelection = {
           databaseId,
           rowIds,
         };
         setDatabaseRowsSelection(databaseId, rowIds);
       } else if (type === 'clear') {
-        this.clearLastSelection();
+        this.clearLastRowSelection();
         clearAllDatabaseRowsSelection();
       }
     });
@@ -66,9 +72,18 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       if (type === 'select') {
         if (!databaseId || !cell || !key) return;
         //  select
+        this._lastCellSelection = {
+          databaseId,
+          cell,
+        };
         setDatabaseCellSelection(databaseId, cell, key);
+      } else if (type === 'edit') {
+        if (!databaseId) return;
+        this._lastCellSelection = null;
+        setDatabaseCellEditing(databaseId);
       } else if (type === 'clear') {
         // clear
+        this._lastCellSelection = null;
         clearAllDatabaseCellSelection();
       }
     });
@@ -173,24 +188,23 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   }
 
   clearSelection() {
-    this.clearTableViewSelection();
+    this.clearRowSelection();
     this.clearCellLevelSelection();
   }
 
   // row level selection
-  clearTableViewSelection() {
+  clearRowSelection() {
     this.slots.tableViewRowSelectionUpdated.emit({
       type: 'clear',
     });
   }
 
-  setTableViewSelection({
-    type,
-    databaseId,
-    rowIds,
-  }: DatabaseTableViewRowState) {
-    if (type === 'click' && rowIds?.[0] === this._lastSelection.rowIds?.[0]) {
-      this.clearTableViewSelection();
+  setRowSelection({ type, databaseId, rowIds }: DatabaseTableViewRowState) {
+    if (
+      type === 'click' &&
+      rowIds?.[0] === this._lastRowSelection.rowIds?.[0]
+    ) {
+      this.clearRowSelection();
       return;
     }
 
@@ -201,11 +215,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
-  setTableViewSelectionByElement(element: Element) {
+  setRowSelectionByElement(element: Element) {
     const rowId = getClosestRowId(element);
     if (rowId !== '') {
       const databaseId = getClosestDatabaseId(element);
-      this.setTableViewSelection({
+      this.setRowSelection({
         type: 'select',
         databaseId,
         rowIds: [rowId],
@@ -213,29 +227,29 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
   }
 
-  clearLastSelection() {
-    this._lastSelection = {
+  clearLastRowSelection() {
+    this._lastRowSelection = {
       databaseId: '',
       rowIds: [],
     };
   }
 
-  refreshTableViewSelection() {
-    const { databaseId, rowIds } = this._lastSelection;
+  refreshRowSelection() {
+    const { databaseId, rowIds } = this._lastRowSelection;
     if (rowIds.length === 0) return;
 
-    this.setTableViewSelection({
+    this.setRowSelection({
       type: 'select',
       databaseId,
       rowIds,
     });
   }
 
-  toggleTableViewSelection(element: Element) {
+  toggleRowSelection(element: Element) {
     const rowId = getClosestRowId(element);
     if (rowId !== '') {
       const databaseId = getClosestDatabaseId(element);
-      this.setTableViewSelection({
+      this.setRowSelection({
         type: 'click',
         databaseId,
         rowIds: [rowId],
@@ -250,5 +264,13 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     this.slots.tableViewCellSelectionUpdated.emit({
       type: 'clear',
     });
+  }
+
+  setCellSelection(cellSelectionState: DatabaseTableViewCellState) {
+    this.slots.tableViewCellSelectionUpdated.emit(cellSelectionState);
+  }
+
+  getLastCellSelection() {
+    return this._lastCellSelection;
   }
 }

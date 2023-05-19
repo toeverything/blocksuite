@@ -27,7 +27,6 @@ import { SearchState } from './types.js';
 const KEYS_WHITE_LIST = [
   'Tab',
   'Enter',
-  'Escape',
   'ArrowUp',
   'ArrowDown',
   'ArrowLeft',
@@ -183,6 +182,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
     disposables.addFromEvent(this, 'keydown', this._onCellSelectionChange);
+    disposables.addFromEvent(document, 'keydown', this._onCellSelectionMove);
   }
 
   override firstUpdated() {
@@ -259,22 +259,54 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   private _onCellSelectionChange = (event: KeyboardEvent) => {
-    if (KEYS_WHITE_LIST.indexOf(event.key) <= -1) return;
+    if (['Tab', 'Escape'].indexOf(event.key) <= -1) return;
 
     const target = event.target as HTMLElement;
     const rowsContainer = target.closest('.affine-database-block-rows');
-    const currentCell = target.closest('.database-cell');
+    const currentCell = target.closest<HTMLElement>('.database-cell');
     if (!rowsContainer) return;
     if (!currentCell) return;
     event.preventDefault();
+    event.stopPropagation();
+
+    const editor = currentCell.querySelector<HTMLElement>('.virgo-editor');
+    editor?.blur();
 
     const service = getService('affine:database');
-    service.slots.tableViewCellSelectionUpdated.emit({
+    service.setCellSelection({
       type: 'select',
       key: event.key,
       cell: currentCell,
       databaseId: this.model.id,
     });
+  };
+
+  private _onCellSelectionMove = (event: KeyboardEvent) => {
+    if (KEYS_WHITE_LIST.indexOf(event.key) <= -1) return;
+    event.preventDefault();
+
+    const service = getService('affine:database');
+    const cellSelection = service.getLastCellSelection();
+    if (!cellSelection) return;
+
+    const { cell, databaseId } = cellSelection;
+    if (event.key === 'Enter') {
+      // enter editing state
+      service.setCellSelection({
+        type: 'edit',
+        key: event.key,
+        cell,
+        databaseId,
+      });
+    } else {
+      // set cell selection
+      service.setCellSelection({
+        type: 'select',
+        key: event.key,
+        cell,
+        databaseId,
+      });
+    }
   };
 
   private _addRow = (index?: number) => {
