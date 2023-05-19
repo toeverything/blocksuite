@@ -59,7 +59,7 @@ export class EdgelessToolbar extends LitElement {
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
-      fill: var(--affine-icon-color);
+      fill: currentcolor;
     }
 
     .edgeless-toolbar-container[level='second'] {
