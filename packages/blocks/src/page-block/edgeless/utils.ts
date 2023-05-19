@@ -536,6 +536,7 @@ export function addText(
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new Y.Text(),
       textAlign: 'left',
+      fontSize: 16 / edgeless.surface.viewport.zoom,
     });
     const textElement = edgeless.surface.pickById(id);
     assertExists(textElement);

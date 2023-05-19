@@ -18,6 +18,7 @@ export class SurfaceTextEditor extends ShadowlessElement {
   private _rect: DOMRect | null = null;
 
   private _element: TextElement | null = null;
+  private _edgeless: EdgelessPageBlockComponent | null = null;
 
   get vEditor() {
     return this._vEditor;
@@ -27,6 +28,7 @@ export class SurfaceTextEditor extends ShadowlessElement {
     const rect = getSelectedRect([element], edgeless.surface.viewport);
     this._rect = rect;
     this._element = element;
+    this._edgeless = edgeless;
     this._vEditor = new VEditor(element.text);
 
     this._vEditor.slots.updated.on(() => {
@@ -35,8 +37,8 @@ export class SurfaceTextEditor extends ShadowlessElement {
         xywh: new Bound(
           element.x,
           element.y,
-          rect.width,
-          rect.height
+          rect.width / edgeless.surface.viewport.zoom,
+          rect.height / edgeless.surface.viewport.zoom
         ).serialize(),
       });
       edgeless.slots.selectionUpdated.emit({
@@ -73,11 +75,12 @@ export class SurfaceTextEditor extends ShadowlessElement {
   override render() {
     let virgoStyle = styleMap({});
     let backgroundStyle = styleMap({});
-    if (this._rect) {
+    if (this._rect && this._element && this._edgeless) {
       virgoStyle = styleMap({
         minWidth: '20px',
-        fontSize: this._element?.fontSize + 'px',
-        fontFamily: this._element?.fontFamily,
+        fontSize:
+          this._element.fontSize * this._edgeless.surface.viewport.zoom + 'px',
+        fontFamily: this._element.fontFamily,
         outline: 'none',
       });
       backgroundStyle = styleMap({
