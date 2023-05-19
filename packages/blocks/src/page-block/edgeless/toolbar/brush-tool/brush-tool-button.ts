@@ -2,6 +2,7 @@ import '../../components/tool-icon-button.js';
 import './brush-menu.js';
 
 import { PenIcon } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -19,7 +20,8 @@ interface BrushMenuPopper {
 
 function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
   const brushMenu = document.createElement('edgeless-brush-menu');
-  document.body.appendChild(brushMenu);
+  assertExists(reference.shadowRoot);
+  reference.shadowRoot.appendChild(brushMenu);
   const popper = createPopper(reference, brushMenu, {
     placement: 'top',
     modifiers: [
