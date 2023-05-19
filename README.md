@@ -41,7 +41,7 @@ BlockSuite works very differently than traditional rich text frameworks. Feature
 - 📏 **Compact Rich Text**: BlockSuite builds its own rich text component. With minimal responsibilities that benefits from the block-based architecture, this component is light, simple and reliable.
 - 🎨 **Hybrid Infinite Canvas**: A high performance canvas-based renderer is also provided by BlockSuite, fulfilling needs for whiteboard functionalities.
 
-Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.html) for a detailed overview!
+Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/blocksuite-overview.html) for a detailed overview!
 
 ## Resources
 
