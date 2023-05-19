@@ -143,7 +143,7 @@ export default defineConfig({
       `
       document.querySelector('#mendable').addEventListener('load', function() {
         Mendable.initialize({
-          anon_key: ${process.env.MENDABLE_ANON_KEY},
+          anon_key: "f8cb70be-7b4a-4dc6-9414-a1ea0cbfadea",
           type:"floatingButton",
         });
       });
