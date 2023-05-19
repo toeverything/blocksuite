@@ -325,25 +325,20 @@ export class DebugMenu extends ShadowlessElement {
     const zip = new JSZip();
     const zipFile = await zip.loadAsync(file);
     const pageIdMap = new Map<string, string>();
-    const subPageMap = new Map<string, string[]>();
     const files = Object.keys(zipFile.files);
     for (let i = files.length - 1; i >= 0; i--) {
       const file = files[i];
       const lastSplitIndex = file.lastIndexOf('/');
+      const lastSpaceIndex = file.lastIndexOf(' ');
       const folder = file.substring(0, lastSplitIndex) || '';
       const fileName = file.substring(lastSplitIndex + 1);
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
         const isHtml = fileName.endsWith('.html');
         let page = this.page;
-        if (folder) {
-          subPageMap.get(folder) || subPageMap.set(folder, []);
-          subPageMap.get(folder)?.push(file);
+        if (i !== 0) {
           page = this.page.workspace.createPage({
             init: {
-              title: file.substring(
-                lastSplitIndex + 1,
-                file.length - (isHtml ? 5 : 3)
-              ),
+              title: file.substring(lastSplitIndex + 1, lastSpaceIndex),
             },
           });
         } else {
@@ -358,20 +353,15 @@ export class DebugMenu extends ShadowlessElement {
         };
         const contentParser = new window.ContentParser(page, fetchFileFunc);
         let text = (await zipFile.file(file)?.async('string')) || '';
-        subPageMap
-          .get(file.substring(0, file.length - (isHtml ? 5 : 3)))
-          ?.forEach(async subFile => {
-            const subPageLink = subFile.replaceAll(' ', '%20');
-            text = isHtml
-              ? text.replaceAll(
-                  `href="${subPageLink}"`,
-                  `href="${LINK_PRE + pageIdMap.get(subFile)}"`
-                )
-              : text.replaceAll(
-                  `(${subPageLink})`,
-                  `(${LINK_PRE + pageIdMap.get(subFile)})`
-                );
-          });
+        pageIdMap.forEach((value, key) => {
+          const subPageLink = key.replaceAll(' ', '%20');
+          text = isHtml
+            ? text.replaceAll(
+                `href="${subPageLink}"`,
+                `href="${LINK_PRE + value}"`
+              )
+            : text.replaceAll(`(${subPageLink})`, `(${LINK_PRE + value})`);
+        });
         if (rootId) {
           if (isHtml) {
             await contentParser.importHtml(text, rootId);
