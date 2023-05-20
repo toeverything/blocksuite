@@ -1,6 +1,6 @@
 import '../../../components/drag-handle.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
+import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import {
   type BaseBlockModel,
@@ -446,10 +446,7 @@ export class DefaultSelectionManager {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
         rect: new DOMRect(
-          Math.max(
-            left,
-            innerRect.left + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
-          ),
+          Math.max(left, innerRect.left + PAGE_BLOCK_CHILD_PADDING),
           top,
           width,
           height
