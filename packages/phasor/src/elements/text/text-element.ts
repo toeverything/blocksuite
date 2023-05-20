@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { Renderer } from '../../renderer.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
 import {
@@ -43,6 +42,28 @@ export class TextElement extends SurfaceElement<IText> {
     return this.surface.pickById(this.containerId);
   }
 
+  private _maxTextWidth = 0;
+  private _maxTextHeight = 0;
+
+  override get minWidth() {
+    return this._maxTextWidth;
+  }
+
+  override get minHeight() {
+    return this._maxTextHeight;
+  }
+
+  private _lineHeight = 0;
+  private _lines: ITextDelta[][] = [];
+
+  get lineHeight() {
+    return this._lineHeight;
+  }
+
+  get lines() {
+    return this._lines;
+  }
+
   override render(ctx: CanvasRenderingContext2D) {
     const { w, h, text, color, fontSize, fontFamily, textAlign } = this;
 
@@ -59,8 +80,10 @@ export class TextElement extends SurfaceElement<IText> {
       })
     );
     const lines = deltaInsertsToChunks(deltas);
+    this._lines = lines;
 
-    const lineHeightPx = getLineHeightInPx(fontSize, 1.25);
+    const lineHeightPx = getLineHeightInPx(fontSize, 1.5);
+    this._lineHeight = lineHeightPx;
     const horizontalOffset =
       textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
@@ -98,77 +121,14 @@ export class TextElement extends SurfaceElement<IText> {
 
         ctx.restore();
       }
+
+      if (beforeTextWidth > this._maxTextWidth) {
+        this._maxTextWidth = beforeTextWidth;
+      }
     }
 
-    // const rtl = isRTL(this.text);
-    // const shouldTemporarilyAttach = rtl && !ctx.canvas.isConnected;
-    // if (shouldTemporarilyAttach) {
-    //   // to correctly render RTL text mixed with LTR, we have to append it
-    //   // to the DOM
-    //   document.body.appendChild(ctx.canvas);
-    // }
-    // ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
-    // ctx.save();
-    // ctx.font = getFontString({
-    //   fontSize: this.fontSize,
-    //   fontFamily: this.fontFamily,
-    // });
-    // ctx.fillStyle = this.color;
-    // ctx.textAlign = this.textAlign;
-
-    // ctx.textBaseline = 'top';
-
-    // const wrappedText = wrapText(this.text, this.fontFamily, this.w);
-    // // Canvas does not support multiline text by default
-    // const lines = wrappedText.replace(/\r\n?/g, '\n').split('\n');
-
-    // const horizontalOffset =
-    //   this.textAlign === 'center'
-    //     ? this.w / 2
-    //     : this.textAlign === 'right'
-    //     ? this.w
-    //     : 0;
-    // const lineHeightPx = getLineHeightInPx(this.fontSize, this.lineHeight);
-    // const verticalOffset = this.h / 2 - (lines.length * lineHeightPx) / 2;
-
-    // for (let index = 0; index < lines.length; index++) {
-    //   ctx.fillText(
-    //     lines[index],
-    //     horizontalOffset,
-    //     index * lineHeightPx + verticalOffset
-    //   );
-    // }
-    // ctx.restore();
-    // if (shouldTemporarilyAttach) {
-    //   ctx.canvas.remove();
-    // }
-  }
-
-  private _onYMap = () => {
-    // if (this.container) {
-    //   const wrappedText = wrapText(this.text, this.fontFamily, this.w);
-    //   const lines = wrappedText.replace(/\r\n?/g, '\n').split('\n');
-    //   const lineHeightPx = getLineHeightInPx(this.fontSize, this.lineHeight);
-    //   if (lines.length * lineHeightPx > this.h) {
-    //     this.surface?.updateElement(this.container.id, {
-    //       xywh: serializeXYWH(
-    //         this.container.x,
-    //         this.container.y,
-    //         this.container.w,
-    //         this.container.h + lineHeightPx * 2
-    //       ),
-    //     });
-    //   }
-    // }
-  };
-
-  override mount(renderer: Renderer) {
-    super.mount(renderer);
-    this.yMap.observeDeep(this._onYMap);
-  }
-
-  override unmount() {
-    this.yMap.unobserveDeep(this._onYMap);
-    super.unmount();
+    if (this._maxTextHeight < lines.length * lineHeightPx) {
+      this._maxTextHeight = lines.length * lineHeightPx;
+    }
   }
 }

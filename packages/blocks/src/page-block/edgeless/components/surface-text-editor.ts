@@ -76,21 +76,26 @@ export class SurfaceTextEditor extends ShadowlessElement {
     let virgoStyle = styleMap({});
     let backgroundStyle = styleMap({});
     if (this._rect && this._element && this._edgeless) {
+      const verticalOffset =
+        this._element.h / 2 -
+        (this._element.lines.length * this._element.lineHeight) / 2;
+
       virgoStyle = styleMap({
-        minWidth: '20px',
+        minWidth: this._element.w < 20 ? 20 : this._element.w + 'px',
+        minHeight: this._element.h < 20 ? 20 : this._element.h + 'px',
         fontSize:
           this._element.fontSize * this._edgeless.surface.viewport.zoom + 'px',
         fontFamily: this._element.fontFamily,
+        lineHeight: '1.5',
         outline: 'none',
       });
       backgroundStyle = styleMap({
         position: 'absolute',
-        left: this._rect.x - 16 + 'px',
-        top: this._rect.y - 16 + 'px',
+        left: this._rect.x + 'px',
+        top: this._rect.y - 4 + 'px',
         background: 'var(--affine-background-primary-color)',
         zIndex: '10',
-        padding: '16px',
-        borderRadius: '4px',
+        padding: `${verticalOffset + 4}px 4px ${verticalOffset + 4}px 0`,
       });
     }
 
