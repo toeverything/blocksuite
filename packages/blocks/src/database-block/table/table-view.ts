@@ -20,6 +20,10 @@ import { onClickOutside } from '../utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
+import {
+  getCellCoordByElement,
+  getCellCoordByLastCoord,
+} from './components/selection/utils.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { Column } from './types.js';
 import { SearchState } from './types.js';
@@ -272,11 +276,16 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     const editor = currentCell.querySelector<HTMLElement>('.virgo-editor');
     editor?.blur();
 
+    const nextCoord = getCellCoordByElement(
+      currentCell,
+      this.model.id,
+      event.key
+    );
+
     const service = getService('affine:database');
     service.setCellSelection({
       type: 'select',
-      key: event.key,
-      cell: currentCell,
+      coords: [nextCoord],
       databaseId: this.model.id,
     });
   };
@@ -289,21 +298,24 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     const cellSelection = service.getLastCellSelection();
     if (!cellSelection) return;
 
-    const { cell, databaseId } = cellSelection;
+    const { databaseId, coords } = cellSelection;
     if (event.key === 'Enter') {
       // enter editing state
       service.setCellSelection({
         type: 'edit',
-        key: event.key,
-        cell,
+        coords,
         databaseId,
       });
     } else {
       // set cell selection
+      const nextCoord = getCellCoordByLastCoord(
+        coords[0],
+        databaseId,
+        event.key
+      );
       service.setCellSelection({
         type: 'select',
-        key: event.key,
-        cell,
+        coords: [nextCoord],
         databaseId,
       });
     }

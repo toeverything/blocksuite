@@ -13,6 +13,7 @@ import {
   getClosestRowId,
 } from '../page-block/default/selection-manager/database-selection-manager/utils.js';
 import type {
+  CellCoord,
   DatabaseTableViewCellState,
   DatabaseTableViewRowState,
 } from '../std.js';
@@ -33,7 +34,7 @@ type LastTableViewRowSelection = {
 };
 type LastTableViewCellSelection = {
   databaseId: string;
-  cell: HTMLElement;
+  coords: [CellCoord, CellCoord?];
 };
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   private _lastRowSelection: LastTableViewRowSelection = {
@@ -67,20 +68,20 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
 
     this.slots.tableViewCellSelectionUpdated.on(state => {
-      const { type, databaseId, cell, key } = state;
+      const { type, databaseId, coords } = state;
 
       if (type === 'select') {
-        if (!databaseId || !cell || !key) return;
+        if (!databaseId || !coords) return;
         //  select
         this._lastCellSelection = {
           databaseId,
-          cell,
+          coords,
         };
-        setDatabaseCellSelection(databaseId, cell, key);
+        setDatabaseCellSelection(databaseId, coords);
       } else if (type === 'edit') {
-        if (!databaseId) return;
+        if (!databaseId || !coords) return;
         this._lastCellSelection = null;
-        setDatabaseCellEditing(databaseId);
+        setDatabaseCellEditing(databaseId, coords[0]);
       } else if (type === 'clear') {
         // clear
         this._lastCellSelection = null;
