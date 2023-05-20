@@ -8,6 +8,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import { UIEventDispatcher } from '../event/index.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
 @customElement('block-suite-root')
@@ -23,6 +24,18 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   modelSubscribed = new Set<string>();
 
+  uiEventDispatcher = new UIEventDispatcher(this);
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.uiEventDispatcher.mount();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.uiEventDispatcher.unmount();
+  }
+
   override render() {
     const { root } = this.page;
     if (!root) {
@@ -33,7 +46,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
   }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {
-    const { flavour, id, children } = model;
+    const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
       console.warn(`Cannot find schema for ${flavour}.`);
@@ -46,15 +59,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
-    if (!this.modelSubscribed.has(id)) {
-      model.propsUpdated.on(() => {
-        this.requestUpdate();
-      });
-      model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      });
-      this.modelSubscribed.add(id);
-    }
+    this._onLoadModel(model);
 
     return html`<${tag}
       ${unsafeStatic(this.blockIdAttr)}=${model.id}
@@ -67,6 +72,19 @@ export class BlockSuiteRoot extends ShadowlessElement {
         child => this.renderModel(child)
       )}`}
     ></${tag}>`;
+  };
+
+  _onLoadModel = (model: BaseBlockModel) => {
+    const { id } = model;
+    if (!this.modelSubscribed.has(id)) {
+      model.propsUpdated.on(() => {
+        this.requestUpdate();
+      });
+      model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      });
+      this.modelSubscribed.add(id);
+    }
   };
 }
 
