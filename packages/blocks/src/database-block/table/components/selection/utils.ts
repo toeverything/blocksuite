@@ -86,24 +86,8 @@ export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
   }
 }
 
-export function getCellCoordByLastCoord(
-  lastCoord: CellCoord,
-  databaseId: string,
-  key: string
-) {
-  const rowsContainer = getRowsContainer(databaseId);
-  const cellRects = getAllCellsRect(rowsContainer);
-  const nextCellCoord = getNextCellCoord(
-    key,
-    lastCoord,
-    cellRects.length,
-    cellRects[0].length
-  );
-  return nextCellCoord;
-}
-
-export function getCellCoordByElement(
-  cell: Element,
+export function getCellCoord(
+  target: CellCoord | HTMLElement,
   databaseId: string,
   key: string
 ) {
@@ -113,20 +97,13 @@ export function getCellCoordByElement(
   const rowsCount = cellRects.length;
   const columnsCount = cellRects[0].length;
   let cellCoord: CellCoord | null = null;
-  for (let i = 0; i < rowsCount; i++) {
-    const row = cellRects[i];
-    for (let j = 0; j < row.length; j++) {
-      const { cell: currentCell } = row[j];
-      if (currentCell === cell) {
-        cellCoord = {
-          rowIndex: i,
-          cellIndex: j,
-        };
-        break;
-      }
-    }
+  if (target instanceof Element) {
+    cellCoord = getCellCoordByElement(target, databaseId);
+    assertExists(cellCoord);
+  } else {
+    cellCoord = target;
   }
-  assertExists(cellCoord);
+
   const nextCellCoord = getNextCellCoord(
     key,
     cellCoord,
@@ -136,27 +113,21 @@ export function getCellCoordByElement(
   return nextCellCoord;
 }
 
-export function getCellSelectionRectByCoord(
+export function getCellSelectionRectByCoords(
   coords: [CellCoord, CellCoord?],
   databaseId: string
 ) {
   const rowsContainer = getRowsContainer(databaseId);
   const cellRects = getAllCellsRect(rowsContainer);
 
-  const [start, end] = coords;
-  const startCell = cellRects[start.rowIndex][start.cellIndex];
-  const endCell = end ? cellRects[end.rowIndex][end.cellIndex] : startCell;
-
-  const left = Math.min(startCell.left, endCell.left);
-  const top = Math.min(startCell.top, endCell.top);
-  const width = Math.max(startCell.left, endCell.left) + endCell.width - left;
-  const height = Math.max(startCell.top, endCell.top) + endCell.height - top;
-
+  // Currently only supports single cell selection.
+  const [start] = coords;
+  const cell = cellRects[start.rowIndex][start.cellIndex];
   return {
-    left,
-    top,
-    width,
-    height,
+    left: cell.left,
+    top: cell.top,
+    width: cell.width,
+    height: cell.height,
   };
 }
 
@@ -167,6 +138,23 @@ export function getRowsContainer(databaseId: string) {
   );
   assertExists(container);
   return container;
+}
+
+function getCellCoordByElement(cell: HTMLElement, databaseId: string) {
+  const rowsContainer = getRowsContainer(databaseId);
+  const cellRects = getAllCellsRect(rowsContainer);
+  for (let i = 0; i < cellRects.length; i++) {
+    const row = cellRects[i];
+    for (let j = 0; j < row.length; j++) {
+      if (row[j].cell === cell) {
+        return {
+          rowIndex: i,
+          cellIndex: j,
+        };
+      }
+    }
+  }
+  return null;
 }
 
 function getCellElementByCoord(coord: CellCoord, databaseId: string) {

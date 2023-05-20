@@ -20,10 +20,7 @@ import { onClickOutside } from '../utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
-import {
-  getCellCoordByElement,
-  getCellCoordByLastCoord,
-} from './components/selection/utils.js';
+import { getCellCoord } from './components/selection/utils.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { Column } from './types.js';
 import { SearchState } from './types.js';
@@ -276,11 +273,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     const editor = currentCell.querySelector<HTMLElement>('.virgo-editor');
     editor?.blur();
 
-    const nextCoord = getCellCoordByElement(
-      currentCell,
-      this.model.id,
-      event.key
-    );
+    const nextCoord = getCellCoord(currentCell, this.model.id, event.key);
 
     const service = getService('affine:database');
     service.setCellSelection({
@@ -308,11 +301,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
       });
     } else {
       // set cell selection
-      const nextCoord = getCellCoordByLastCoord(
-        coords[0],
-        databaseId,
-        event.key
-      );
+      const nextCoord = getCellCoord(coords[0], databaseId, event.key);
       service.setCellSelection({
         type: 'select',
         coords: [nextCoord],

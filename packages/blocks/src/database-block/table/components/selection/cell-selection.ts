@@ -4,7 +4,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CellCoord } from '../../../../std.js';
-import { getCellSelectionRectByCoord, getRowsContainer } from './utils.js';
+import { getCellSelectionRectByCoords, getRowsContainer } from './utils.js';
 
 type SelectionState = {
   databaseId: string;
@@ -56,7 +56,7 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
       };
     }
 
-    const { left, top, width, height } = getCellSelectionRectByCoord(
+    const { left, top, width, height } = getCellSelectionRectByCoords(
       coords,
       databaseId
     );

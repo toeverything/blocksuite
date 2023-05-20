@@ -24,7 +24,7 @@ import {
 import { DatabaseCellElement } from '../../../register.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
-import { getCellCoordByElement } from '../../selection/utils.js';
+import { getCellCoord } from '../../selection/utils.js';
 import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
@@ -276,11 +276,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       const service = getService('affine:database');
       const cell = this.closest<HTMLElement>('.database-cell');
       assertExists(cell);
-      const coord = getCellCoordByElement(
-        cell,
-        this.databaseModel.id,
-        'Escape'
-      );
+      const coord = getCellCoord(cell, this.databaseModel.id, 'Escape');
       service.setCellSelection({
         type: 'select',
         databaseId: this.databaseModel.id,
