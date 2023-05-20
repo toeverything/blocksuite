@@ -1,5 +1,6 @@
 import '../../../components/drag-handle.js';
 
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import {
   type BaseBlockModel,
@@ -434,15 +435,25 @@ export class DefaultSelectionManager {
     const point = new Point(raw.clientX, raw.clientY);
     let hoverEditingState = null;
 
+    const { innerRect } = this.container;
     const element = getClosestBlockElementByPoint(point.clone(), {
-      rect: this.container.innerRect,
+      rect: innerRect,
     });
 
     if (element) {
+      const { left, top, width, height } = getRectByBlockElement(element);
       hoverEditingState = {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
-        rect: getRectByBlockElement(element),
+        rect: new DOMRect(
+          Math.max(
+            left,
+            innerRect.left + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+          ),
+          top,
+          width,
+          height
+        ),
       };
     }
 
