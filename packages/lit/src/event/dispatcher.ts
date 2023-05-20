@@ -33,8 +33,8 @@ export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
   private _handlersMap = Object.fromEntries(
-    eventName.map((name): [EventName, Set<UIEventHandler>] => [name, new Set()])
-  ) as Record<EventName, Set<UIEventHandler>>;
+    eventName.map((name): [EventName, Array<UIEventHandler>] => [name, []])
+  ) as Record<EventName, Array<UIEventHandler>>;
 
   private _pointerControl: PointerControl;
 
@@ -66,10 +66,12 @@ export class UIEventDispatcher {
   }
 
   add(name: EventName, handler: UIEventHandler) {
-    this._handlersMap[name].add(handler);
+    this._handlersMap[name].unshift(handler);
     return () => {
-      if (this._handlersMap[name].has(handler)) {
-        this._handlersMap[name].delete(handler);
+      if (this._handlersMap[name].includes(handler)) {
+        this._handlersMap[name] = this._handlersMap[name].filter(
+          f => f !== handler
+        );
       }
     };
   }
