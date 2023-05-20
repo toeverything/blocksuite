@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 import { UIEventStateContext } from './base.js';
 import type { UIEventDispatcher } from './dispatcher.js';

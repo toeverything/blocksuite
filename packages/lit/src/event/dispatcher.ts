@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/utils/disposable.js';
+import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { UIEventHandler } from './base.js';
 import { UIEventStateContext } from './base.js';

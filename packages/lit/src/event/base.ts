@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils.js';
+import { assertExists } from '@blocksuite/global/utils';
 
 declare global {
   interface BlockSuiteUIEventState {
