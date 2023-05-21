@@ -10,9 +10,10 @@ const RS_RTL_CHARS = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
 const RE_RTL_CHECK = new RegExp(`^[^${RS_LTR_CHARS}]*[${RS_RTL_CHARS}]`);
 export const isRTL = (text: string) => RE_RTL_CHECK.test(text);
 
-export const isChrome = navigator.userAgent.indexOf('Chrome') !== -1;
+export const isChrome =
+  globalThis.navigator?.userAgent.indexOf('Chrome') !== -1;
 export const isSafari =
-  !isChrome && navigator.userAgent.indexOf('Safari') !== -1;
+  !isChrome && globalThis.navigator?.userAgent.indexOf('Safari') !== -1;
 
 export const getFontString = ({
   fontSize,
