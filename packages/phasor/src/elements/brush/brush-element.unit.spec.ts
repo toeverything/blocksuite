@@ -8,9 +8,9 @@ import type { IBrush } from './types.js';
 
 const data: IBrush = {
   id: '1',
-  index: 'a1',
   type: 'brush',
   xywh: '[0,0,104,104]',
+  index: 'a1',
   seed: 0,
 
   points: Array(100)

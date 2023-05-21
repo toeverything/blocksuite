@@ -8,9 +8,9 @@ import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 
 export interface ISurfaceElement {
   id: string;
-  index: string;
   type: string;
   xywh: SerializedXYWH;
+  index: string;
   seed: number;
 }
 

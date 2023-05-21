@@ -8,7 +8,12 @@ import {
 } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import {
+  compare,
   deserializeXYWH,
+  generateKeyBetween,
+  generateNKeysBetween,
+  intersects,
+  type PhasorElement,
   serializeXYWH,
   SurfaceManager,
 } from '@blocksuite/phasor';
@@ -23,17 +28,21 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockComponentElement,
-  Point,
-  TopLevelBlockModel,
-} from '../../__internal__/index.js';
 import {
   almostEqual,
   asyncFocusRichText,
+  type BlockComponentElement,
+  bringForward,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
+  type Point,
+  reorder,
+  type ReorderingAction,
+  type ReorderingRange,
+  reorderTo,
   resetNativeSelection,
+  sendBackward,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
@@ -57,6 +66,7 @@ import { bindEdgelessHotkeys } from './hotkey.js';
 import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
+  type Selectable,
 } from './selection-manager.js';
 import {
   DEFAULT_FRAME_HEIGHT,
@@ -65,6 +75,7 @@ import {
   DEFAULT_FRAME_WIDTH,
   getBackgroundGrid,
   getCursorMode,
+  xywhArrayToObject,
 } from './utils.js';
 
 export interface EdgelessSelectionSlots {
@@ -73,6 +84,8 @@ export interface EdgelessSelectionSlots {
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
   mouseModeUpdated: Slot<MouseMode>;
+  reorderingFramesUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -167,6 +180,8 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
+    reorderingFramesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -175,12 +190,26 @@ export class EdgelessPageBlockComponent
 
   surface!: SurfaceManager;
 
+  indexes: { max: string; min: string } = { max: 'a0', min: 'a0' };
+
   getService = getService;
 
   private _selection!: EdgelessSelectionManager;
   // FIXME: Many parts of code assume that the `selection` is used in page mode
   getSelection() {
     return this._selection;
+  }
+
+  // Gets the top level frames.
+  get frames() {
+    return this.model.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[];
+  }
+
+  // Gets the sorted frames.
+  get sortedFrames() {
+    return this.frames.sort(compare);
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -340,7 +369,14 @@ export class EdgelessPageBlockComponent
         const page = this.page;
         resizedFrames.forEach((domRect, id) => {
           const model = page.getBlockById(id) as TopLevelBlockModel;
-          const [x, y, w, h] = deserializeXYWH(model.xywh);
+          const { index, xywh } = model;
+          const [x, y, w, h] = deserializeXYWH(xywh);
+
+          if (index < this.indexes.min) {
+            this.indexes.min = index;
+          } else if (index > this.indexes.max) {
+            this.indexes.max = index;
+          }
 
           // ResizeObserver is not effected by CSS transform, so don't deal with viewport zoom.
           const newModelHeight =
@@ -359,7 +395,210 @@ export class EdgelessPageBlockComponent
         });
       })
     );
+
+    _disposables.add(slots.reorderingFramesUpdated.on(this.reorderFrames));
+    _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
   }
+
+  /**
+   * Brings to front or sends to back.
+   */
+  private _reorderTo(
+    elements: Selectable[],
+    getIndexes: (elements: Selectable[]) => {
+      start: string | null;
+      end: string | null;
+    },
+    updateIndexes: (keys: string[], elements: Selectable[]) => void
+  ) {
+    reorderTo(
+      elements,
+      compare,
+      getIndexes,
+      (start, end, len) => generateNKeysBetween(start, end, len),
+      updateIndexes
+    );
+  }
+
+  /**
+   * Brings forward or sends backward layer by layer.
+   */
+  private _reorder(
+    elements: Selectable[],
+    getIndexes: (pickedElements: Selectable[]) => {
+      start: string | null;
+      end: string | null;
+    },
+    pick: () => Selectable[],
+    order: (ranges: ReorderingRange[], pickedElements: Selectable[]) => void,
+    updateIndexes: (keys: string[], elements: Selectable[]) => void
+  ) {
+    reorder(
+      elements,
+      compare,
+      pick,
+      getIndexes,
+      order,
+      (start, end, len) => generateNKeysBetween(start, end, len),
+      updateIndexes
+    );
+  }
+
+  updateIndexes(
+    keys: string[],
+    elements: TopLevelBlockModel[],
+    callback: (keys: string[]) => void
+  ) {
+    let index;
+    let i = 0;
+    let element;
+    const len = elements.length;
+    for (; i < len; i++) {
+      index = keys[i];
+      element = elements[i];
+      if (element.index === index) continue;
+      this.page.updateBlock(element, {
+        index,
+      });
+    }
+
+    callback(keys);
+  }
+
+  getSortedElementsWithViewportBounds(elements: Selectable[]) {
+    const bounds = this.surface.viewport.viewportBounds;
+    // TODO: opt filter
+    return this.sortedFrames.filter(element => {
+      if (elements.includes(element)) return true;
+      return intersects(bounds, xywhArrayToObject(element));
+    });
+  }
+
+  // Just update `index`, we don't change the order of the frames in the children.
+  reorderFrames = ({ elements, type }: ReorderingAction<Selectable>) => {
+    const updateIndexes = (keys: string[], elements: Selectable[]) => {
+      this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
+        const min = keys[0];
+        if (min < this.indexes.min) {
+          this.indexes.min = min;
+        }
+        const max = keys[keys.length - 1];
+        if (max > this.indexes.max) {
+          this.indexes.max = max;
+        }
+      });
+    };
+
+    switch (type) {
+      case 'front':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: this.indexes.max,
+            end: null,
+          }),
+          updateIndexes
+        );
+        break;
+      case 'forward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: generateKeyBetween(null, pickedElements[0].index),
+            end: null,
+          }),
+          () => this.getSortedElementsWithViewportBounds(elements),
+          bringForward,
+          updateIndexes
+        );
+        break;
+      case 'backward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: null,
+            end: pickedElements[pickedElements.length - 1].index,
+          }),
+          () => this.getSortedElementsWithViewportBounds(elements),
+          sendBackward,
+          updateIndexes
+        );
+        break;
+      case 'back':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: null,
+            end: this.indexes.min,
+          }),
+          updateIndexes
+        );
+        break;
+    }
+  };
+
+  // Just update `index`, we don't change the order of the shapes in the children.
+  reorderShapes = ({ elements, type }: ReorderingAction<Selectable>) => {
+    const updateIndexes = (keys: string[], elements: Selectable[]) => {
+      this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
+        const min = keys[0];
+        if (min < this.surface.indexes.min) {
+          this.surface.indexes.min = min;
+        }
+        const max = keys[keys.length - 1];
+        if (max > this.surface.indexes.max) {
+          this.surface.indexes.max = max;
+        }
+      });
+    };
+
+    switch (type) {
+      case 'front':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: this.surface.indexes.max,
+            end: null,
+          }),
+          updateIndexes
+        );
+        break;
+      case 'forward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: generateKeyBetween(null, pickedElements[0].index),
+            end: null,
+          }),
+          () => this.surface.getSortedElementsWithViewportBounds(),
+          bringForward,
+          updateIndexes
+        );
+        break;
+      case 'backward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: null,
+            end: pickedElements[pickedElements.length - 1].index,
+          }),
+          () => this.surface.getSortedElementsWithViewportBounds(),
+          sendBackward,
+          updateIndexes
+        );
+        break;
+      case 'back':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: null,
+            end: this.surface.indexes.min,
+          }),
+          updateIndexes
+        );
+        break;
+    }
+  };
 
   /**
    * Adds a new frame with the given point on the editor-container.
@@ -391,6 +630,7 @@ export class EdgelessPageBlockComponent
       'affine:frame',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
+        index: this.indexes.max,
       },
       parentId,
       frameIndex
@@ -536,9 +776,7 @@ export class EdgelessPageBlockComponent
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
 
-      const frame = this.model.children.find(
-        child => child.flavour === 'affine:frame'
-      ) as FrameBlockModel;
+      const frame = this.frames.find(child => child.flavour === 'affine:frame');
       if (frame) {
         const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
         this.surface.viewport.setCenter(
@@ -590,7 +828,7 @@ export class EdgelessPageBlockComponent
     const { selected, active } = _selection.blockSelectionState;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
-      this.model,
+      this.sortedFrames,
       this,
       this.surface.viewport,
       active,
@@ -627,6 +865,7 @@ export class EdgelessPageBlockComponent
             background-size: ${gap}px ${gap}px;
             background-position: ${translateX}px ${translateY}px;
             background-color: var(--affine-background-primary-color);
+            z-index: 0;
           }
         </style>
         <div

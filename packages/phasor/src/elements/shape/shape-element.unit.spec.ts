@@ -9,8 +9,8 @@ import type { IShape } from './types.js';
 
 const dataWithoutXywh: Omit<IShape, 'xywh'> = {
   id: '1',
-  index: 'a0',
   type: 'shape',
+  index: 'a0',
   seed: 0,
 
   shapeType: 'rect',

@@ -673,13 +673,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._onClickCardCallback(data);
   };
 
-  public toggleMenu(open: boolean) {
-    if (open) {
-      this._expanded = true;
-    } else {
-      this._expanded = false;
-      this._hideCardList();
-    }
+  public toggleMenu() {
+    this._expanded = !this._expanded;
+    if (!this._expanded) this._hideCardList();
   }
 
   private _onBlockHubButtonClick = (_: MouseEvent) => {
