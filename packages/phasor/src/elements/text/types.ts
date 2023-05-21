@@ -14,8 +14,6 @@ export interface IText {
   fontSize: number;
   fontFamily: string;
   textAlign: 'left' | 'center' | 'right';
-
-  containerId?: string;
 }
 
 export interface ITextDelta {

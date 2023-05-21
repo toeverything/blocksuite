@@ -21,8 +21,6 @@ export interface IShape {
   strokeWidth: number;
   strokeColor: string;
   strokeStyle: StrokeStyle;
-
-  textId?: string;
 }
 
 export interface ShapeMethods {

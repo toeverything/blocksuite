@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
 import {
@@ -30,16 +28,6 @@ export class TextElement extends SurfaceElement<IText> {
 
   get textAlign() {
     return this.yMap.get('textAlign') as IText['textAlign'];
-  }
-
-  get containerId() {
-    return this.yMap.get('containerId') as IText['containerId'];
-  }
-
-  get container() {
-    if (!this.containerId) return;
-    assertExists(this.surface);
-    return this.surface.pickById(this.containerId);
   }
 
   private _maxTextWidth = 0;
