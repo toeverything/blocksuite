@@ -8,6 +8,7 @@ import {
   HandIcon,
   ImageIcon,
   MinusIcon,
+  NoteIcon,
   PlusIcon,
   SelectIcon,
   TextIconLarge,
@@ -270,7 +271,7 @@ export class EdgelessToolbar extends LitElement {
           ${HandIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Text', 'T')}
+          .tooltip=${getTooltipWithShortcut('Note', 'N')}
           .active=${type === 'text'}
           @click=${() =>
             this._setMouseMode({
@@ -278,8 +279,7 @@ export class EdgelessToolbar extends LitElement {
               background: FRAME_BACKGROUND_COLORS[0],
             })}
         >
-          <!-- FIXME: use note icon -->
-          ${TextIconLarge}
+          ${NoteIcon}
         </edgeless-tool-icon-button>
         <div class="divider"></div>
         <edgeless-tool-icon-button
