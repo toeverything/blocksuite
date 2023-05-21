@@ -48,3 +48,9 @@ export class PointerEventState extends UIEventState {
     this.dragging = !!last;
   }
 }
+
+declare global {
+  interface BlockSuiteUIEventState {
+    pointerState: PointerEventState;
+  }
+}

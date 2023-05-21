@@ -1,13 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-declare global {
-  interface BlockSuiteUIEventState {
-    defaultState: UIEventState;
-  }
-
-  type UIEventStateType = keyof BlockSuiteUIEventState;
-}
-
 type MatchEvent<T extends string> = T extends UIEventStateType
   ? BlockSuiteUIEventState[T]
   : UIEventState;
@@ -39,6 +31,10 @@ export class UIEventStateContext {
     this._map[name] = state;
   };
 
+  has = (type: UIEventStateType) => {
+    return !!this._map[type];
+  };
+
   get = <Type extends UIEventStateType = UIEventStateType>(
     type: Type
   ): MatchEvent<Type> => {
@@ -48,4 +44,14 @@ export class UIEventStateContext {
   };
 }
 
-export type UIEventHandler = (context: UIEventStateContext) => boolean;
+export type UIEventHandler = (
+  context: UIEventStateContext
+) => boolean | null | undefined;
+
+declare global {
+  interface BlockSuiteUIEventState {
+    defaultState: UIEventState;
+  }
+
+  type UIEventStateType = keyof BlockSuiteUIEventState;
+}

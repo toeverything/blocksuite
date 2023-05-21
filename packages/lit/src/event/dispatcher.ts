@@ -25,6 +25,8 @@ const eventName = [
   'blur',
   'focus',
   'drop',
+  'selectionchange',
+  'contextmenu',
 ] as const;
 
 export type EventName = (typeof eventName)[number];
@@ -84,7 +86,9 @@ export class UIEventDispatcher {
       'blur',
       'focus',
       'drop',
-    ] as const;
+      'selectionchange',
+      'contextmenu',
+    ] as const satisfies readonly EventName[];
     byPassEvent.forEach(eventName => {
       this.disposables.addFromEvent(this.root, eventName, e => {
         this.run(eventName, UIEventStateContext.from(new UIEventState(e)));
