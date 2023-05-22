@@ -98,6 +98,10 @@ export class AffineLink extends ShadowlessElement {
       this._updateLink();
       return;
     }
+    if (linkState.type === 'toBookmark') {
+      this._onConvertToBookmark();
+      return;
+    }
   }
 
   /**
@@ -166,6 +170,42 @@ export class AffineLink extends ShadowlessElement {
         }
       );
     }
+  }
+  private _onConvertToBookmark() {
+    const model = getModelByElement(this);
+    const { page } = model;
+
+    const textElement = this.querySelector('[data-virgo-text="true"]');
+    assertExists(textElement);
+    const textNode = Array.from(textElement.childNodes).find(
+      (node): node is Text => node instanceof Text
+    );
+    assertExists(textNode);
+    const richText = this.closest('rich-text');
+    assertExists(richText);
+    const domPoint = VEditor.textPointToDomPoint(
+      textNode,
+      0,
+      richText.virgoContainer
+    );
+    assertExists(domPoint);
+    const vEditor = richText.vEditor;
+    assertExists(vEditor);
+
+    const parent = page.getParent(model);
+    assertExists(parent);
+    const index = parent.children.indexOf(model);
+
+    page.addBlock(
+      'affine:bookmark',
+      { link: this.link, title: this.delta.insert },
+      parent,
+      index + 1
+    );
+    vEditor.deleteText({
+      index: domPoint.index,
+      length: textNode.length,
+    });
   }
 
   private _onHoverEnd(e: Event) {

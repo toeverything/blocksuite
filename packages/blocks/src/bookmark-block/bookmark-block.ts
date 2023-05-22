@@ -3,7 +3,7 @@ import '../__internal__/rich-text/rich-text.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
@@ -26,9 +26,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       border-radius: 12px;
     }
   `;
-
-  @state()
-  showChildren = true;
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,

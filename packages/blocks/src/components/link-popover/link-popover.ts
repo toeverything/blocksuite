@@ -1,4 +1,9 @@
-import { ConfirmIcon, EditIcon, UnlinkIcon } from '@blocksuite/global/config';
+import {
+  ConfirmIcon,
+  EditIcon,
+  LinkToCardIcon,
+  UnlinkIcon,
+} from '@blocksuite/global/config';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -197,6 +202,14 @@ export class LinkPopover extends LitElement {
     this.dispatchEvent(createEvent('updateLink', { type: 'remove' }));
   }
 
+  private _onLinkToCard(e: MouseEvent) {
+    this.dispatchEvent(
+      new CustomEvent<LinkDetail>('updateLink', {
+        detail: { type: 'toBookmark' },
+      })
+    );
+  }
+
   private _onEdit(e: MouseEvent) {
     this.dispatchEvent(createEvent('editLink', null));
     this._disableConfirm = false;
@@ -250,6 +263,15 @@ export class LinkPopover extends LitElement {
         <tool-tip inert role="tooltip">Click to copy link</tool-tip>
         <span style="overflow: hidden;">${this.previewLink}</span>
       </div>
+      <span class="affine-link-popover-dividing-line"></span>
+      <icon-button
+        class="has-tool-tip"
+        data-testid="unlink"
+        @click=${this._onLinkToCard}
+      >
+        ${LinkToCardIcon}
+        <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+      </icon-button>
       <span class="affine-link-popover-dividing-line"></span>
       <icon-button
         class="has-tool-tip"
@@ -352,6 +374,7 @@ declare global {
 }
 
 export type LinkDetail =
+  | { type: 'toBookmark' }
   | { type: 'cancel' }
   | { type: 'confirm'; link: string; text?: string }
   | { type: 'remove' };

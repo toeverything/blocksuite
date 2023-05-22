@@ -22,6 +22,7 @@ export const FrameBlockSchema = defineBlockSchema({
       'affine:database',
       'affine:embed',
       'affine:frame-block-*',
+      'affine:bookmark',
     ],
   },
 });

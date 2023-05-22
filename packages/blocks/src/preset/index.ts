@@ -2,6 +2,7 @@ import type { BlockSchemaType } from '@blocksuite/store';
 import type { StaticValue } from 'lit/static-html.js';
 import { literal } from 'lit/static-html.js';
 
+import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
@@ -22,6 +23,7 @@ export const pagePreset = new Map<BlockSchemaType, StaticValue>([
   [CodeBlockSchema, literal`affine-code`],
   [EmbedBlockSchema, literal`affine-embed`],
   [ParagraphBlockSchema, literal`affine-paragraph`],
+  [BookmarkBlockSchema, literal`affine-bookmark`],
 ]);
 
 export const edgelessPreset = new Map<BlockSchemaType, StaticValue>([
@@ -34,4 +36,5 @@ export const edgelessPreset = new Map<BlockSchemaType, StaticValue>([
   [CodeBlockSchema, literal`affine-code`],
   [EmbedBlockSchema, literal`affine-embed`],
   [ParagraphBlockSchema, literal`affine-paragraph`],
+  [BookmarkBlockSchema, literal`affine-bookmark`],
 ]);
