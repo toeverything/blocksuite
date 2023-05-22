@@ -56,6 +56,9 @@ jobs:
       - name: Run prettier
         run: npx prettier --cache --check packages tests
 
+      - name: Run circular imports detect
+        run: pnpm circular
+
       - uses: actions/cache@v3
         id: restore-build
         with:
