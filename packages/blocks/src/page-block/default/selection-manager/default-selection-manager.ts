@@ -546,9 +546,7 @@ export class DefaultSelectionManager {
   private _clearDatabaseTableViewSelection = () => {
     // FIXME: refactor this
     const service = getServiceOrRegister('affine:database');
-    Promise.resolve(service).then(database =>
-      database.clearTableViewSelection()
-    );
+    Promise.resolve(service).then(database => database.clearSelection());
   };
 
   get viewportElement() {
