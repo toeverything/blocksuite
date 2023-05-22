@@ -2,7 +2,12 @@ import '../../../components/drag-handle.js';
 
 import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import type { UIEventDispatcher, UIEventStateContext } from '@blocksuite/lit';
+import type {
+  EventName,
+  UIEventDispatcher,
+  UIEventHandler,
+  UIEventStateContext,
+} from '@blocksuite/lit';
 import {
   type BaseBlockModel,
   DisposableGroup,
@@ -120,7 +125,7 @@ export class DefaultSelectionManager {
     this._databaseTableViewManager = new DatabaseTableViewSelectionManager();
 
     let isDragging = false;
-    this._dispatcher.add('dragStart', ctx => {
+    this._add('dragStart', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -132,7 +137,7 @@ export class DefaultSelectionManager {
       isDragging = true;
       this._onContainerDragStart(ctx);
     });
-    this._dispatcher.add('dragMove', ctx => {
+    this._add('dragMove', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -154,7 +159,7 @@ export class DefaultSelectionManager {
       isDragging = false;
       this._onContainerDragEnd(ctx);
     });
-    this._dispatcher.add('click', ctx => {
+    this._add('click', ctx => {
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
@@ -164,18 +169,18 @@ export class DefaultSelectionManager {
       }
       this._onContainerClick(ctx);
     });
-    this._dispatcher.add('doubleClick', ctx => {
+    this._add('doubleClick', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       this._onContainerDblClick(ctx);
     });
-    this._dispatcher.add('tripleClick', ctx => {
+    this._add('tripleClick', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       this._onContainerTripleClick(ctx);
     });
-    this._dispatcher.add('pointerDown', this._onContainerPointerDown);
-    this._dispatcher.add('pointerMove', ctx => {
+    this._add('pointerDown', this._onContainerPointerDown);
+    this._add('pointerMove', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -186,11 +191,11 @@ export class DefaultSelectionManager {
       }
       this._onContainerPointerMove(ctx);
     });
-    this._dispatcher.add('contextMenu', this._onContainerContextMenu);
-    this._dispatcher.add('selectionChange', () => {
+    this._add('contextMenu', this._onContainerContextMenu);
+    this._add('selectionChange', () => {
       this._onSelectionChangeWithoutDebounce();
     });
-    this._dispatcher.add(
+    this._add(
       'selectionChange',
       debounce((ctx: UIEventStateContext) => {
         const event = ctx.get('defaultState').event;
@@ -204,6 +209,10 @@ export class DefaultSelectionManager {
       }, 300)
     );
   }
+
+  private _add = (name: EventName, fn: UIEventHandler) => {
+    this._disposables.add(this._dispatcher.add(name, fn));
+  };
 
   private _onContainerDragStart = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');

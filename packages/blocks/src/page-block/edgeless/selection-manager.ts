@@ -1,8 +1,10 @@
 import type { PointerEventState } from '@blocksuite/lit';
 import type { UIEventDispatcher } from '@blocksuite/lit';
+import type { EventName, UIEventHandler } from '@blocksuite/lit';
 import type { PhasorElement } from '@blocksuite/phasor';
 import { normalizeWheelDeltaY } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
+import { DisposableGroup } from '@blocksuite/store';
 
 import type {
   BlockComponentElement,
@@ -66,6 +68,7 @@ export interface SelectionArea {
 }
 
 export class EdgelessSelectionManager {
+  private readonly _disposables = new DisposableGroup();
   readonly page: Page;
 
   private _mouseMode: MouseMode = {
@@ -157,7 +160,7 @@ export class EdgelessSelectionManager {
       await new Promise(resolve => requestAnimationFrame(resolve));
     }
 
-    this._dispatcher.add('dragStart', ctx => {
+    this._add('dragStart', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -168,7 +171,7 @@ export class EdgelessSelectionManager {
       }
       this._onContainerDragStart(event);
     });
-    this._dispatcher.add('dragMove', ctx => {
+    this._add('dragMove', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -179,7 +182,7 @@ export class EdgelessSelectionManager {
       }
       this._onContainerDragMove(event);
     });
-    this._dispatcher.add('dragEnd', ctx => {
+    this._add('dragEnd', ctx => {
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
@@ -189,7 +192,7 @@ export class EdgelessSelectionManager {
       }
       this._onContainerDragEnd(event);
     });
-    this._dispatcher.add('click', ctx => {
+    this._add('click', ctx => {
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
@@ -199,17 +202,17 @@ export class EdgelessSelectionManager {
       }
       this._onContainerClick(event);
     });
-    this._dispatcher.add('doubleClick', ctx => {
+    this._add('doubleClick', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       this._onContainerDblClick(event);
     });
-    this._dispatcher.add('tripleClick', ctx => {
+    this._add('tripleClick', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       this._onContainerTripleClick(event);
     });
-    this._dispatcher.add('pointerMove', ctx => {
+    this._add('pointerMove', ctx => {
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -220,22 +223,22 @@ export class EdgelessSelectionManager {
       }
       this._onContainerPointerMove(event);
     });
-    this._dispatcher.add('pointerUp', ctx => {
+    this._add('pointerUp', ctx => {
       const event = ctx.get('pointerState');
       this._onContainerPointerUp(event);
     });
-    this._dispatcher.add('pointerOut', ctx => {
+    this._add('pointerOut', ctx => {
       const event = ctx.get('pointerState');
       this._onContainerPointerOut(event);
     });
-    this._dispatcher.add('contextMenu', ctx => {
+    this._add('contextMenu', ctx => {
       const event = ctx.get('pointerState');
       this._onContainerContextMenu(event);
     });
-    this._dispatcher.add('selectionChange', () => {
+    this._add('selectionChange', () => {
       this._onSelectionChangeWithoutDebounce();
     });
-    this._dispatcher.add('wheel', ctx => {
+    this._add('wheel', ctx => {
       const state = ctx.get('defaultState');
       const e = state.event;
       if (!(e instanceof WheelEvent)) return;
@@ -277,6 +280,10 @@ export class EdgelessSelectionManager {
       }
     });
   }
+
+  private _add = (name: EventName, fn: UIEventHandler) => {
+    this._disposables.add(this._dispatcher.add(name, fn));
+  };
 
   private _onContainerDragStart = (e: PointerEventState) => {
     if (this.page.readonly) return;
@@ -400,5 +407,9 @@ export class EdgelessSelectionManager {
       rect: getSelectionBoxBound(surface.viewport, xywh),
       content: hovered,
     };
+  }
+
+  dispose() {
+    this._disposables.dispose();
   }
 }

@@ -359,6 +359,7 @@ export class EdgelessPageBlockComponent
         this.requestUpdate();
       })
     );
+    _disposables.add(this._selection);
     _disposables.add(this.surface);
     _disposables.add(bindEdgelessHotkeys(this));
 
