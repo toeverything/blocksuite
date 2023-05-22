@@ -11,11 +11,6 @@ type SelectionState = Pick<
   'databaseId' | 'coords'
 >;
 
-const defaultState: SelectionState = {
-  databaseId: '',
-  coords: [{ rowIndex: 0, cellIndex: 0 }],
-};
-
 @customElement('database-cell-level-selection')
 export class CellLevelSelection extends WithDisposable(LitElement) {
   static override styles = css`
@@ -34,53 +29,46 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
   cell!: HTMLElement;
 
   @state()
-  state: SelectionState = { ...defaultState };
+  state: SelectionState | null = null;
 
   setSelection = (state: SelectionState) => {
     this.state = state;
   };
 
   clearSelection = () => {
-    this.state = { ...defaultState };
+    this.state = null;
   };
 
   private _getStyles = () => {
-    const { databaseId, coords } = this.state;
-    if (!databaseId || !coords) {
-      return {
+    if (this.state === null) {
+      // Hide selection.
+      return styleMap({
         left: 0,
         top: 0,
         height: 0,
         width: 0,
         display: 'none',
-      };
+      });
     }
 
+    const { databaseId, coords } = this.state;
     const { left, top, width, height } = getCellSelectionRectByCoords(
       coords,
       databaseId
     );
     const rowsContainer = getRowsContainer(databaseId);
     const containerRect = rowsContainer.getBoundingClientRect();
-    return {
-      left: left - containerRect.left,
-      top: top - containerRect.top,
-      height,
-      width,
-    };
+    return styleMap({
+      left: `${left - containerRect.left}px`,
+      top: `${top - containerRect.top}px`,
+      height: `${height}px`,
+      width: `${width}px`,
+      display: 'block',
+    });
   };
 
   override render() {
-    const { left, top, height, width, display } = this._getStyles();
-
-    const styles = styleMap({
-      display,
-      left: `${left}px`,
-      top: `${top}px`,
-      height: `${height}px`,
-      width: `${width}px`,
-    });
-
+    const styles = this._getStyles();
     return html`<div
       class="database-cell-level-selection"
       style=${styles}
