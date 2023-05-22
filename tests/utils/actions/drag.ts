@@ -35,6 +35,10 @@ export async function dragBetweenIndices(
     click?: boolean;
   }
 ) {
+  const finalOptions = {
+    steps: 20,
+    ...(options || {}),
+  };
   const startCoord = await getIndexCoordinate(
     page,
     [startRichTextIndex, startVIndex],
@@ -46,7 +50,7 @@ export async function dragBetweenIndices(
     endCoordOffSet
   );
 
-  await dragBetweenCoords(page, startCoord, endCoord, options);
+  await dragBetweenCoords(page, startCoord, endCoord, finalOptions);
 }
 
 export async function dragOverTitle(page: Page) {
