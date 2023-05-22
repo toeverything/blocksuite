@@ -1,9 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 
-import type {
-  BrushMouseMode,
-  SelectionEvent,
-} from '../../../__internal__/index.js';
+import type { BrushMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { DEFAULT_SELECTED_COLOR } from '../components/color-panel.js';
 import { MouseModeController } from './index.js';
@@ -18,30 +16,30 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
   private _draggingElementId: string | null = null;
   protected _draggingPathPoints: number[][] | null = null;
 
-  onContainerClick(e: SelectionEvent): void {
+  onContainerClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerContextMenu(e: SelectionEvent): void {
+  onContainerContextMenu(e: PointerEventState): void {
     noop();
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerTripleClick(e: SelectionEvent) {
+  onContainerTripleClick(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragStart(e: SelectionEvent) {
+  onContainerDragStart(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._page.captureSync();
     const { viewport } = this._edgeless.surface;
 
     // create a shape block when drag start
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
+    const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
     const { color, lineWidth } = this.mouseMode;
     const points = [[modelX, modelY]];
 
@@ -57,7 +55,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragMove(e: SelectionEvent) {
+  onContainerDragMove(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     if (!this._draggingElementId) return;
 
@@ -66,7 +64,10 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
     const { lineWidth } = this.mouseMode;
 
-    const [modelX, modelY] = this._edgeless.surface.toModelCoord(e.x, e.y);
+    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
+      e.point.x,
+      e.point.y
+    );
 
     const points = [...this._draggingPathPoints, [modelX, modelY]];
 
@@ -80,18 +81,18 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragEnd(e: SelectionEvent) {
+  onContainerDragEnd(e: PointerEventState) {
     this._draggingElementId = null;
     this._draggingPathPoints = null;
     this._page.captureSync();
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerMouseMove(e: SelectionEvent) {
+  onContainerMouseMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerMouseOut(e: SelectionEvent) {
+  onContainerMouseOut(e: PointerEventState) {
     noop();
   }
 

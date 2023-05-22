@@ -22,6 +22,7 @@ const bypassEventNames = [
   'drop',
   'selectionChange',
   'contextMenu',
+  'wheel',
 ] as const;
 
 const eventNames = [

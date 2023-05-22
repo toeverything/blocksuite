@@ -1,6 +1,7 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
+import type { PointerEventState } from '@blocksuite/lit';
 import type {
   Bound,
   Controller,
@@ -25,7 +26,6 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import type { SelectionEvent } from '../../__internal__/utils/gesture/selection-event.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
 import type {
   EdgelessContainer,
@@ -467,12 +467,15 @@ export function getBackgroundGrid(
 export function addText(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
-  event: SelectionEvent,
+  event: PointerEventState,
   width = DEFAULT_FRAME_WIDTH
 ) {
-  const frameId = edgeless.addFrameWithPoint(new Point(event.x, event.y), {
-    width,
-  });
+  const frameId = edgeless.addFrameWithPoint(
+    new Point(event.point.x, event.point.y),
+    {
+      width,
+    }
+  );
   page.addBlock('affine:paragraph', {}, frameId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
