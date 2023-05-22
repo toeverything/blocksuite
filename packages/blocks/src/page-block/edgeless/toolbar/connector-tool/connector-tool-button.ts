@@ -59,6 +59,9 @@ export class EdgelessConnectorToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  @property()
+  setMouseMode!: (mouseMode: MouseMode) => void;
+
   private _menu: ConnectorMenuPopper | null = null;
 
   private _toggleMenu() {
@@ -70,16 +73,6 @@ export class EdgelessConnectorToolButton extends LitElement {
       this._menu.element.mouseMode = this.mouseMode;
       this._menu.element.edgeless = this.edgeless;
     }
-  }
-
-  private _trySetConnectorMode() {
-    if (this.mouseMode.type === 'connector') return;
-
-    this.edgeless.slots.mouseModeUpdated.emit({
-      type: 'connector',
-      mode: ConnectorMode.Orthogonal,
-      color: DEFAULT_SELECTED_COLOR,
-    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -109,7 +102,11 @@ export class EdgelessConnectorToolButton extends LitElement {
         .tooltip=${'Connector'}
         .active=${type === 'connector'}
         @click=${() => {
-          this._trySetConnectorMode();
+          this.setMouseMode({
+            type: 'connector',
+            mode: ConnectorMode.Orthogonal,
+            color: DEFAULT_SELECTED_COLOR,
+          });
           this._toggleMenu();
         }}
       >

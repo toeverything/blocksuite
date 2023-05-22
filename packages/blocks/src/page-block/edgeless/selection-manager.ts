@@ -97,6 +97,8 @@ export class EdgelessSelectionManager {
   // selected blocks
   selectedBlocks: BlockComponentElement[] = [];
 
+  cachedSelectionState: EdgelessSelectionState | null = null;
+
   /**
    * Holds the state of the current selected block(s) and/or shape(s).
    */

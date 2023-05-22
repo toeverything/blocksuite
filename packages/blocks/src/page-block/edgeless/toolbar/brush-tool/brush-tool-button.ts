@@ -57,6 +57,9 @@ export class EdgelessBrushToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  @property()
+  setMouseMode!: (mouseMode: MouseMode) => void;
+
   @state()
   private _popperShow = false;
 
@@ -73,16 +76,6 @@ export class EdgelessBrushToolButton extends LitElement {
       this._brushMenu.element.edgeless = this.edgeless;
       this._popperShow = true;
     }
-  }
-
-  private _trySetBrushMode() {
-    if (this.mouseMode.type === 'brush') return;
-
-    this.edgeless.slots.mouseModeUpdated.emit({
-      type: 'brush',
-      lineWidth: 4,
-      color: DEFAULT_SELECTED_COLOR,
-    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -112,7 +105,11 @@ export class EdgelessBrushToolButton extends LitElement {
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @click=${() => {
-          this._trySetBrushMode();
+          this.setMouseMode({
+            type: 'brush',
+            lineWidth: 4,
+            color: DEFAULT_SELECTED_COLOR,
+          });
           this._toggleBrushMenu();
         }}
       >

@@ -111,10 +111,6 @@ export class EdgelessToolbar extends LitElement {
 
   private _imageLoading = false;
 
-  private _setMouseMode(mouseMode: MouseMode) {
-    this.edgeless?.slots.mouseModeUpdated.emit(mouseMode);
-  }
-
   private _setCenter(x: number, y: number) {
     this.edgeless.surface.viewport.setCenter(x, y);
     this.edgeless.slots.viewportUpdated.emit();
@@ -284,6 +280,26 @@ export class EdgelessToolbar extends LitElement {
     this._imageLoading = false;
   }
 
+  setMouseMode = (mouseMode: MouseMode) => {
+    if (this.edgeless.mouseMode === mouseMode) return;
+    const state = {
+      selected: [],
+      active: false,
+    };
+    if (mouseMode.type === 'default') {
+      if (this.edgeless.selection.cachedSelectionState) {
+        Object.assign(state, this.edgeless.selection.cachedSelectionState);
+        this.edgeless.selection.cachedSelectionState = null;
+      }
+    } else {
+      this.edgeless.selection.cachedSelectionState =
+        this.edgeless.selection.blockSelectionState;
+    }
+
+    this.edgeless.slots.mouseModeUpdated.emit(mouseMode);
+    this.edgeless.slots.selectionUpdated.emit(state);
+  };
+
   override render() {
     const type = this.mouseMode?.type;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
@@ -299,7 +315,7 @@ export class EdgelessToolbar extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
-          @click=${() => this._setMouseMode({ type: 'default' })}
+          @click=${() => this.setMouseMode({ type: 'default' })}
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
@@ -307,7 +323,7 @@ export class EdgelessToolbar extends LitElement {
           .tooltip=${getTooltipWithShortcut('Text', 'T')}
           .active=${type === 'text'}
           @click=${() =>
-            this._setMouseMode({
+            this.setMouseMode({
               type: 'text',
             })}
         >
@@ -316,6 +332,7 @@ export class EdgelessToolbar extends LitElement {
         <edgeless-shape-tool-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}
+          .setMouseMode=${this.setMouseMode}
         ></edgeless-shape-tool-button>
         <edgeless-tool-icon-button
           .disabled=${this._imageLoading}
@@ -327,23 +344,25 @@ export class EdgelessToolbar extends LitElement {
         <edgeless-connector-tool-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}
+          .setMouseMode=${this.setMouseMode}
         ></edgeless-connector-tool-button>
         <edgeless-brush-tool-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}
+          .setMouseMode=${this.setMouseMode}
         ></edgeless-brush-tool-button>
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
-          @click=${() => this._setMouseMode({ type: 'pan', panning: false })}
+          @click=${() => this.setMouseMode({ type: 'pan', panning: false })}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Note', 'N')}
-          .active=${type === 'text'}
+          .active=${type === 'note'}
           @click=${() =>
-            this._setMouseMode({
+            this.setMouseMode({
               type: 'note',
               background: FRAME_BACKGROUND_COLORS[0],
             })}
