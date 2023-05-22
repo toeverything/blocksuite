@@ -3,6 +3,7 @@ import './connector-menu.js';
 
 import { ConnectorIcon } from '@blocksuite/global/config';
 import { ConnectorMode } from '@blocksuite/phasor';
+import { assertExists } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -21,7 +22,8 @@ function createConnectorMenuPopper(
   reference: HTMLElement
 ): ConnectorMenuPopper {
   const menu = document.createElement('edgeless-connector-menu');
-  document.body.appendChild(menu);
+  assertExists(reference.shadowRoot);
+  reference.shadowRoot.appendChild(menu);
   const popper = createPopper(reference, menu, {
     placement: 'top',
     modifiers: [
