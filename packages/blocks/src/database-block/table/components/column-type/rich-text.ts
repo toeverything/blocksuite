@@ -145,6 +145,10 @@ class TextCell extends DatabaseCellElement<Y.Text> {
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') {
+      event.stopPropagation();
+    }
+
     if (!this.vEditor) return;
     if (event.key === 'Enter') {
       if (event.shiftKey) {

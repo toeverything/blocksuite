@@ -372,7 +372,8 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
 export function getVirgoByModel(model: BaseBlockModel) {
   if (matchFlavours(model, ['affine:database'] as const)) {
     // Not support database model since it's may be have multiple Virgo instances.
-    throw new Error('Cannot get virgo by database model!');
+    // Support to enter the editing state through the Enter key in the database.
+    return null;
   }
   const richText = getRichTextByModel(model);
   if (!richText) return null;
@@ -1012,66 +1013,86 @@ export function getDropRectByPoint(
   };
 
   const isDatabase = matchFlavours(model, ['affine:database'] as const);
-  const tempElement = isDatabase
-    ? element
-    : element.parentElement?.classList.contains(
-        'affine-database-block-row-cell-content'
-      )
-    ? element.parentElement
-    : null;
 
-  // Inside the database
-  if (tempElement) {
-    if (isDatabase) {
-      // If the database is empty
-      if (model.isEmpty()) {
-        result.flag = DropFlags.EmptyDatabase;
-        const table = getDatabaseBlockTableElement(element);
-        assertExists(table);
-        const bounds = table.getBoundingClientRect();
-        if (point.y < bounds.top) return result;
-        const header = getDatabaseBlockColumnHeaderElement(element);
-        assertExists(header);
-        const headerBounds = header.getBoundingClientRect();
-        result.rect = new DOMRect(
-          headerBounds.left,
-          headerBounds.bottom,
-          result.rect.width,
-          1
-        );
-      } else {
-        result.flag = DropFlags.Database;
-        const rows = getDatabaseBlockRowsElement(element);
-        assertExists(rows);
-        const bounds = rows.getBoundingClientRect();
-        if (point.y >= bounds.top && point.y <= bounds.bottom) {
-          let e = findBlockElement(
-            document.elementsFromPoint(point.x, point.y - 1)
-          );
-          if (!e) {
-            e = findBlockElement(
-              document.elementsFromPoint(point.x, point.y + 1)
-            );
-          }
-          if (
-            e?.parentElement?.classList.contains(
-              'affine-database-block-row-cell-content'
-            )
-          ) {
-            e = e.parentElement;
-          } else {
-            e = tempElement;
-          }
-          result.rect = e.getBoundingClientRect();
-        }
-      }
+  if (isDatabase) {
+    const table = getDatabaseBlockTableElement(element);
+    assertExists(table);
+    let bounds = table.getBoundingClientRect();
+    if (model.isEmpty()) {
+      result.flag = DropFlags.EmptyDatabase;
+
+      if (point.y < bounds.top) return result;
+
+      const header = getDatabaseBlockColumnHeaderElement(element);
+      assertExists(header);
+      bounds = header.getBoundingClientRect();
+      result.rect = new DOMRect(
+        result.rect.left,
+        bounds.bottom,
+        result.rect.width,
+        1
+      );
     } else {
       result.flag = DropFlags.Database;
-      result.rect = tempElement.getBoundingClientRect();
+      const rows = getDatabaseBlockRowsElement(element);
+      assertExists(rows);
+      const rowsBounds = rows.getBoundingClientRect();
+
+      if (point.y < rowsBounds.top || point.y > rowsBounds.bottom)
+        return result;
+
+      const elements = document.elementsFromPoint(point.x, point.y);
+      const len = elements.length;
+      let e;
+      let i = 0;
+      for (; i < len; i++) {
+        e = elements[i];
+
+        if (e.classList.contains('affine-database-block-row-cell-content')) {
+          result.rect = getCellRect(e, bounds);
+          return result;
+        }
+
+        if (e.classList.contains('affine-database-block-row')) {
+          e = e.querySelector(ATTR_SELECTOR);
+          assertExists(e);
+          result.rect = getCellRect(e, bounds);
+          return result;
+        }
+      }
+    }
+  } else {
+    const parent = element.parentElement;
+    if (parent?.classList.contains('affine-database-block-row-cell-content')) {
+      result.flag = DropFlags.Database;
+      result.rect = getCellRect(parent);
+      return result;
     }
   }
 
   return result;
+}
+
+function getCellRect(element: Element, bounds?: DOMRect) {
+  if (!bounds) {
+    const table = element.closest('.affine-database-block-table');
+    assertExists(table);
+    bounds = table.getBoundingClientRect();
+  }
+  // affine-database-block-row-cell
+  const col = element.parentElement;
+  assertExists(col);
+  // affine-database-block-row
+  const row = col.parentElement;
+  assertExists(row);
+  const colRect = col.getBoundingClientRect();
+  const rowRect = row.getBoundingClientRect();
+  return new DOMRect(
+    bounds.left,
+    rowRect.top,
+    colRect.right - bounds.left,
+    colRect.height
+  );
 }
 
 /**

@@ -1,5 +1,6 @@
 import '../../../components/drag-handle.js';
 
+import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import {
   type BaseBlockModel,
@@ -434,15 +435,22 @@ export class DefaultSelectionManager {
     const point = new Point(raw.clientX, raw.clientY);
     let hoverEditingState = null;
 
+    const { innerRect } = this.container;
     const element = getClosestBlockElementByPoint(point.clone(), {
-      rect: this.container.innerRect,
+      rect: innerRect,
     });
 
     if (element) {
+      const { left, top, width, height } = getRectByBlockElement(element);
       hoverEditingState = {
         element: element as BlockComponentElement,
         model: getModelByBlockElement(element),
-        rect: getRectByBlockElement(element),
+        rect: new DOMRect(
+          Math.max(left, innerRect.left + PAGE_BLOCK_CHILD_PADDING),
+          top,
+          width,
+          height
+        ),
       };
     }
 
@@ -538,9 +546,7 @@ export class DefaultSelectionManager {
   private _clearDatabaseTableViewSelection = () => {
     // FIXME: refactor this
     const service = getServiceOrRegister('affine:database');
-    Promise.resolve(service).then(database =>
-      database.clearTableViewSelection()
-    );
+    Promise.resolve(service).then(database => database.clearSelection());
   };
 
   get viewportElement() {

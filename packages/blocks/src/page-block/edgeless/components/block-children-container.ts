@@ -9,11 +9,7 @@ import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  BlockHost,
-  FrameBlockModel,
-  TopLevelBlockModel,
-} from '../../../index.js';
+import type { BlockHost, TopLevelBlockModel } from '../../../index.js';
 
 function EdgelessMask() {
   const style = {
@@ -78,14 +74,7 @@ export function EdgelessBlockChildrenContainer(
       frames,
       child => child.id,
       (child, index) =>
-        EdgelessBlockChild(
-          index,
-          child as FrameBlockModel,
-          host,
-          viewport,
-          active,
-          renderer
-        )
+        EdgelessBlockChild(index, child, host, viewport, active, renderer)
     )}
   `;
 }
