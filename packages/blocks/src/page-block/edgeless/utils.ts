@@ -539,6 +539,7 @@ export function addText(
     assertExists(textElement);
     if (textElement instanceof TextElement) {
       mountTextEditor(textElement, edgeless);
+      edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
     }
   }
 }
