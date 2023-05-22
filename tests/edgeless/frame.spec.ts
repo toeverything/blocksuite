@@ -402,21 +402,6 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await expect(toolbar).toBeHidden();
 });
 
-// TODO: update this test
-test.skip('double click blank space to add text', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  await waitNextFrame(page);
-  await page.mouse.dblclick(30, 140);
-  await waitNextFrame(page);
-  await type(page, 'hello');
-  await waitNextFrame(page);
-
-  await assertEdgelessSelectedRect(page, [0, 100, 448, 80]);
-});
-
 test('double click toolbar zoom button, should not add text', async ({
   page,
 }) => {

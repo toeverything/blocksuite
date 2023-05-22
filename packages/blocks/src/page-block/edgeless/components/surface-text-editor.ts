@@ -107,3 +107,9 @@ export class SurfaceTextEditor extends ShadowlessElement {
     </div>`;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'surface-text-editor': SurfaceTextEditor;
+  }
+}
