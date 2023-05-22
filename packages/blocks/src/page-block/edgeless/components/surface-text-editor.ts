@@ -91,11 +91,11 @@ export class SurfaceTextEditor extends ShadowlessElement {
       });
       backgroundStyle = styleMap({
         position: 'absolute',
-        left: this._rect.x + 'px',
-        top: this._rect.y - 4 + 'px',
+        left: this._rect.x - 8 + 'px',
+        top: this._rect.y - 8 + 'px',
         background: 'var(--affine-background-primary-color)',
         zIndex: '10',
-        padding: `${verticalOffset + 4}px 4px ${verticalOffset + 4}px 0`,
+        padding: `${verticalOffset + 8}px 8px`,
       });
     }
 
