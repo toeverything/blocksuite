@@ -1,3 +1,5 @@
+import { Text } from 'yjs';
+
 import { Matcher } from './matcher.js';
 import {
   tArray,
@@ -26,25 +28,30 @@ export const filterMatcher = new Matcher<{
     type
   );
   const firstArg = staticType.args[0];
-  // console.log(typesystem.isSubtype(firstArg, target), firstArg, self)
   return firstArg && typesystem.isSubtype(firstArg, target);
 });
 
 filterMatcher.register(
   tFunction({ args: [tUnknown.create()], rt: tBoolean.create() }),
   {
-    name: 'Is empty',
+    name: 'Is not empty',
     impl: value => {
-      return value == null;
+      if (value instanceof Text) {
+        return !!value.toString();
+      }
+      return value != null;
     },
   }
 );
 filterMatcher.register(
   tFunction({ args: [tUnknown.create()], rt: tBoolean.create() }),
   {
-    name: 'Is not empty',
+    name: 'Is empty',
     impl: value => {
-      return value != null;
+      if (value instanceof Text) {
+        return !value.toString();
+      }
+      return value == null;
     },
   }
 );

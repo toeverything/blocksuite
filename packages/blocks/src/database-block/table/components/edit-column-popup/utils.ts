@@ -2,7 +2,6 @@ import { assertExists } from '@blocksuite/store';
 
 import { columnManager } from '../../../common/column-manager.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
-import type { ColumnRendererHelper } from '../../register.js';
 import type { Column, ColumnActionType, ColumnType } from '../../types.js';
 import { ColumnInsertPosition } from '../../types.js';
 
@@ -10,18 +9,15 @@ export function changeColumnType(
   columnId: string,
   targetType: ColumnType,
   targetColumn: Column | string,
-  targetModel: DatabaseBlockModel,
-  columnRenderer: ColumnRendererHelper
+  targetModel: DatabaseBlockModel
 ) {
   if (isTitleColumn(targetColumn)) return;
-
   const currentType = targetColumn.type;
   targetModel.page.captureSync();
   const [newColumnData, update] =
     columnManager.convertCell(currentType, targetType, targetColumn.data) ?? [];
   if (!update) {
     const newColumn = columnManager.create(targetType, targetColumn.name);
-    console.log(newColumn);
     updateColumn(columnId, newColumn, targetModel);
   } else {
     updateColumn(

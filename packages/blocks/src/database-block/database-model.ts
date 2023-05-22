@@ -1,5 +1,4 @@
-import { Text, uuidv4 } from '@blocksuite/store';
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema, Text } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
 import type {
@@ -40,10 +39,31 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         this.propsUpdated.emit();
       }
     });
+
+    if (!this.views.length) {
+      this.addView('table');
+    }
   }
 
   getViewList() {
     return this.views;
+  }
+
+  addView(type: keyof DatabaseViewDataMap) {
+    this.page.captureSync();
+    const id = this.page.generateId();
+    const view = ViewOperationMap[type].init(this, id, type);
+    this.page.transact(() => {
+      this.views.push(view);
+    });
+    return view;
+  }
+
+  deleteView(id: string) {
+    this.page.captureSync();
+    this.page.transact(() => {
+      this.views = this.views.filter(v => v.id !== id);
+    });
   }
 
   updateView<Type extends keyof DatabaseViewDataMap>(
@@ -58,6 +78,12 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         }
         return update(v as DatabaseViewDataMap[Type]);
       });
+    });
+  }
+
+  applyViewsUpdate() {
+    this.page.updateBlock(this, {
+      views: this.views,
     });
   }
 
@@ -133,7 +159,12 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     const index = this.findColumnIndex(columnId);
     if (index < 0) return;
 
-    this.page.transact(() => this.columns.splice(index, 1));
+    this.page.transact(() => {
+      this.columns.splice(index, 1);
+      this.views.forEach(view => {
+        ViewOperationMap[view.mode].deleteColumn(this, view as any, columnId);
+      });
+    });
   }
 
   getCell(rowId: BaseBlockModel['id'], columnId: Column['id']): Cell | null {
@@ -211,29 +242,13 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  // renameSelectedCellTag(
-  //   columnId: Column['id'],
-  //   oldValue: SelectTag,
-  //   newValue: SelectTag,
-  // ) {
-  //   this.page.transact(() => {
-  //     Object.keys(this.cells).forEach(rowId => {
-  //       const cell = this.cells[rowId][columnId];
-  //       if (!cell) return;
-  //
-  //       const selected = cell.value as SelectTag[];
-  //       const newSelected = [...selected];
-  //       const index = newSelected.findIndex(s => s.value === oldValue.value);
-  //       newSelected[index] = newValue;
-  //
-  //       this.cells[rowId][columnId].value = newSelected;
-  //     });
-  //   });
-  // }
   updateCellByColumn(columnId: string, update: (value: unknown) => unknown) {
     this.page.transact(() => {
       Object.keys(this.cells).forEach(rowId => {
         const cell = this.cells[rowId][columnId];
+        if (!cell) {
+          return;
+        }
         this.cells[rowId][columnId] = {
           columnId,
           value: update(cell.value),
@@ -265,9 +280,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
-    views: [
-      { mode: 'table', name: 'Table', id: uuidv4(), columns: [], filter: [] },
-    ],
+    views: [],
     title: internal.Text(DEFAULT_TITLE),
     cells: {},
     columns: [],

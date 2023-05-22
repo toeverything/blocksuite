@@ -1,4 +1,4 @@
-import { Text } from '@blocksuite/store';
+import { assertExists, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
@@ -7,7 +7,7 @@ import {
   tArray,
   tBoolean,
   tNumber,
-  tString,
+  tRichText,
   tTag,
   tUnion,
 } from '../logical/typesystem.js';
@@ -63,6 +63,12 @@ class ColumnManager {
   create(targetType: string, name: string, data?: unknown) {
     return this.map.get(targetType)!.create(name, data);
   }
+
+  typeOf(type: string, data: unknown): TType {
+    const dataType = this.map.get(type)?.dataType(data);
+    assertExists(dataType);
+    return dataType;
+  }
 }
 
 class ColumnHelper<
@@ -102,7 +108,7 @@ export const columnManager = new ColumnManager();
 export const richTextHelper = columnManager.register<Text['yText']>(
   'rich-text',
   {
-    type: () => tString.create(),
+    type: () => tRichText.create(),
     defaultData: () => ({}),
     configRender: () => html``,
     cellToString: data => data?.toString() ?? '',

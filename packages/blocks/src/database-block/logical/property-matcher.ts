@@ -1,4 +1,5 @@
 import { Matcher } from './matcher.js';
+import type { TFunction } from './typesystem.js';
 import {
   tArray,
   tDate,
@@ -9,10 +10,13 @@ import {
   typesystem,
 } from './typesystem.js';
 
-export const propertyMatcher = new Matcher<{
-  name: string;
-  impl: (...args: unknown[]) => unknown;
-}>((type, target) => {
+export const propertyMatcher = new Matcher<
+  {
+    name: string;
+    impl: (...args: unknown[]) => unknown;
+  },
+  TFunction
+>((type, target) => {
   if (type.type !== 'function') {
     return false;
   }

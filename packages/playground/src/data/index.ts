@@ -184,11 +184,9 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
     databaseId
   );
 
-  const num = new page.YText();
-  num.insert(0, '0.1');
   database.updateCell(p1, {
     columnId: col1,
-    value: num,
+    value: 0.1,
   });
 
   database.updateCell(p2, {
@@ -206,6 +204,7 @@ export const database: InitFn = (workspace: Workspace, pageId: string) => {
 
   // Add a paragraph after database
   page.addBlock('affine:paragraph', {}, frameId);
+  database.addView('table');
   page.resetHistory();
 };
 

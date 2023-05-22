@@ -16,6 +16,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
     }
+
     .select-option-text {
       display: inline-block;
       min-width: 22px;
@@ -27,6 +28,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       overflow: hidden;
       cursor: text;
     }
+
     .select-option-text:focus {
       outline: none;
     }
@@ -49,18 +51,19 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   editing!: boolean;
 
   @property()
-  index!: number;
+  tagId!: string;
 
   @property()
-  saveSelectionName!: (index: number) => void;
+  saveSelectionName!: (id?: string) => void;
 
   @property()
-  setEditingIndex!: (index: number) => void;
+  setEditingId!: (id?: string) => void;
 
   @query('.select-option-text')
   private _container!: HTMLDivElement;
 
   private _vInput!: VirgoInput;
+
   private get _vEditor() {
     return this._vInput.vEditor;
   }
@@ -74,7 +77,6 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       this._vEditor.setReadonly(!this.editing);
       this._vEditor.setText(this.select.value);
     }
-
     if (changedProperties.has('select')) {
       this._vEditor.setText(this.select.value);
     }
@@ -97,12 +99,12 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       if (event.key === 'Enter') {
         event.preventDefault();
         if (this._vInput.value.length > 0) {
-          this.saveSelectionName(this.index);
+          this.saveSelectionName(this.tagId);
         }
       }
       if (event.key === 'Escape') {
         event.preventDefault();
-        this.setEditingIndex(-1);
+        this.setEditingId();
         this._container.blur();
       }
     });
@@ -131,7 +133,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     const style = styleMap({
       backgroundColor: this.select.color,
     });
-    return html`<div
+    return html` <div
       class="select-option-text virgo-editor"
       style=${style}
     ></div>`;

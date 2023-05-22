@@ -19,7 +19,6 @@ export function DataBaseRowContainer(
 ) {
   const databaseModel = databaseBlock.model;
   const filteredChildren = databaseModel.children.filter((_, i) => filter(i));
-
   return html`
     <style>
       .affine-database-block-rows {

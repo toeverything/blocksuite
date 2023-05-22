@@ -180,7 +180,7 @@ export function initMoveColumnHandlers(
       data.columns.splice(fromIndex, 1);
       data.columns.splice(toIndex, 0, column);
     });
-    targetModel.applyColumnUpdate();
+    targetModel.applyViewsUpdate();
   };
 
   const disposables = new DisposableGroup();

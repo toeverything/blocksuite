@@ -55,9 +55,6 @@ export class SelectActionPopup extends LitElement {
   `;
 
   @property()
-  index!: number;
-
-  @property()
   tagId!: string;
 
   @property()
@@ -82,7 +79,7 @@ export class SelectActionPopup extends LitElement {
           return html`
             <div
               class="action ${action.type}"
-              @mousedown="${(e: Event) => this._onAction(e, action.type)}"
+              @click="${(e: Event) => this._onAction(e, action.type)}"
             >
               <div class="action-content">
                 ${action.icon}<span>${action.text}</span>

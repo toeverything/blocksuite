@@ -1,3 +1,7 @@
+import type { Text } from '@blocksuite/store';
+
+import type { SelectTag } from '../types.js';
+
 export interface TUnion {
   type: 'union';
   title: 'union';
@@ -281,6 +285,9 @@ export const tNumber = typesystem.defineData(
 export const tString = typesystem.defineData(
   DataHelper.create<{ value: string }>('String')
 );
+export const tRichText = typesystem.defineData(
+  DataHelper.create<{ value: Text['yText'] }>('RichText')
+);
 export const tBoolean = typesystem.defineData(
   DataHelper.create<{ value: boolean }>('Boolean')
 );
@@ -296,9 +303,7 @@ export const tEmail = typesystem.defineData(
 export const tPhone = typesystem.defineData(
   DataHelper.extends(tString).create('Phone')
 );
-export const tTag = typesystem.defineData(
-  DataHelper.create<{ color: string; id: string }>('Tag')
-);
+export const tTag = typesystem.defineData(DataHelper.create<SelectTag>('Tag'));
 // export const tArray = typesystem.defineData(DataHelper.extends(tString).create<{
 //   color: string;
 //   id: string

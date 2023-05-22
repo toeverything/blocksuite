@@ -24,16 +24,24 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   @state()
   currentView?: string;
 
+  _setViewId = (viewId: string) => {
+    this.currentView = viewId;
+  };
+
   override render() {
     const views = this.model.getViewList();
     const current = views.find(v => v.id === this.currentView) ?? views[0];
-
+    // console.log(current);
     const databaseTag = literal`affine-database-${unsafeStatic(current.mode)}`;
 
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
       <div>
-        <database-view-header .currentView='${this.currentView}' .model='${this.model}'></database-view-header>
+        <database-view-header
+          .currentView='${current.id}'
+          .setViewId='${this._setViewId}'
+          .model='${this.model}'
+        ></database-view-header>
         <${databaseTag}
           .root='${this.root}'
           .model='${this.model}'

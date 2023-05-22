@@ -150,7 +150,7 @@ export function initChangeColumnWidthHandlers(
         titleColumnWidth: columnWidth,
       });
     } else {
-      const columnId = targetModel.columns[index - 1].id;
+      const columnId = view.columns[index - 1].id;
       targetModel.updateView(view.id, 'table', data => {
         data.columns.forEach(v => {
           if (v.id === columnId) {
@@ -158,7 +158,7 @@ export function initChangeColumnWidthHandlers(
           }
         });
       });
-      targetModel.applyColumnUpdate();
+      targetModel.applyViewsUpdate();
     }
   };
 

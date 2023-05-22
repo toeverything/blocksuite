@@ -1,14 +1,14 @@
 import type { TType } from './typesystem.js';
 import { typesystem } from './typesystem.js';
 
-type MatcherData<Data> = { type: TType; data: Data };
+type MatcherData<Data, Type extends TType = TType> = { type: Type; data: Data };
 
-export class Matcher<Data> {
-  private list: MatcherData<Data>[] = [];
+export class Matcher<Data, Type extends TType = TType> {
+  private list: MatcherData<Data, Type>[] = [];
 
   constructor(private _match?: (type: TType, target: TType) => boolean) {}
 
-  register(type: TType, data: Data) {
+  register(type: Type, data: Data) {
     this.list.push({ type, data });
   }
 
@@ -48,11 +48,13 @@ export class Matcher<Data> {
     return this.list.find(data => f(data.data))?.data;
   }
 
-  find(f: (data: MatcherData<Data>) => boolean): MatcherData<Data> | undefined {
+  find(
+    f: (data: MatcherData<Data, Type>) => boolean
+  ): MatcherData<Data, Type> | undefined {
     return this.list.find(f);
   }
 
-  all(): MatcherData<Data>[] {
+  all(): MatcherData<Data, Type>[] {
     return this.list;
   }
 }

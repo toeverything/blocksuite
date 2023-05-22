@@ -1,4 +1,5 @@
 import './toolbar-action-popup.js';
+import '../../../common/filter/filter-group.js';
 
 import {
   DatabaseSearchClose,
@@ -13,6 +14,15 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
+import {
+  columnManager,
+  richTextHelper,
+} from '../../../common/column-manager.js';
+import { FilterGroupView } from '../../../common/filter/filter-group.js';
+import type {
+  DatabaseViewDataMap,
+  TableMixColumn,
+} from '../../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { onClickOutside } from '../../../utils.js';
 import { SearchState } from '../../types.js';
@@ -159,6 +169,12 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   @property()
   searchState!: SearchState;
+
+  @property()
+  columns!: TableMixColumn[];
+
+  @property()
+  view!: DatabaseViewDataMap['table'];
 
   @property()
   addRow!: (index?: number) => void;
@@ -317,6 +333,44 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     this.addRow(0);
   };
 
+  private _showFilter(event: MouseEvent) {
+    this.targetModel.page.captureSync();
+    const filter = new FilterGroupView();
+    filter.vars = [
+      {
+        name: this.targetModel.titleColumnName,
+        id: this.targetModel.id,
+        type: richTextHelper.dataType({}),
+      },
+      ...this.columns.map(v => ({
+        id: v.id,
+        name: v.name,
+        type: columnManager.typeOf(v.type, v.data),
+      })),
+    ];
+    filter.data = this.view.filter;
+    filter.setData = group => {
+      this.targetModel.updateView(this.view.id, 'table', data => {
+        data.filter = group;
+      });
+      this.targetModel.applyViewsUpdate();
+      filter.data = this.view.filter;
+    };
+    filter.style.zIndex = '999';
+    this.append(filter);
+    createPopper(event.target as HTMLElement, filter, {
+      placement: 'top',
+    });
+    onClickOutside(
+      filter,
+      () => {
+        filter.remove();
+        this.targetModel.applyViewsUpdate();
+      },
+      'mousedown'
+    );
+  }
+
   override render() {
     const expandSearch =
       this.searchState === SearchState.SearchInput ||
@@ -364,6 +418,9 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     return html` <div
       class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
     >
+      <div @click="${this._showFilter}" class="affine-database-filter-button">
+        Filter
+      </div>
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>

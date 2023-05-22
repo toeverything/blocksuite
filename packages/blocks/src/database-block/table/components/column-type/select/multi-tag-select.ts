@@ -338,7 +338,6 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
     this._selectColor = undefined;
     const newSelect = { id: nanoid(), value, color: tagColor };
     this.newTag(newSelect);
-    console.log(selectedValue);
     const newValue = this.isSingleMode
       ? [newSelect.id]
       : [...selectedValue, newSelect.id];
@@ -346,52 +345,26 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
     this.editComplete();
   };
 
-  // private _calcRowHostHeight = () => {
-  //   setTimeout(() => {
-  //     const shadowRoot =
-  //       this.rowHost.shadowRoot?.children[0].shadowRoot?.children[0].shadowRoot;
-  //     const selectCell = shadowRoot?.querySelector(
-  //       '.affine-database-select-cell-container',
-  //     );
-  //     if (selectCell) {
-  //       const { height } = selectCell.getBoundingClientRect();
-  //       this.rowHost.setHeight(height);
-  //     }
-  //   });
-  // };
-
   private _onSelectAction = (type: SelectTagActionType, id: string) => {
     if (type === 'rename') {
-      this._setEditingIndex(id);
+      this._setEditingId(id);
       return;
     }
 
     if (type === 'delete') {
       this.deleteTag(id);
-      // this.databaseModel.updateColumn({
-      //   ...this.column,
-      //   data: {
-      //     options: this.selectionList.filter((value) => value.id !== id),
-      //   },
-      // });
-      // this.databaseModel.updateCellByColumn(this.column.id, value => {
-      //   if (this.isSingleMode) {
-      //     return value === id ? undefined : id;
-      //   } else {
-      //     return Array.isArray(value) ? value?.map(v => v !== id) : [];
-      //   }
-      // });
       return;
     }
   };
 
-  private _showSelectAction = (index: number) => {
-    const selectOption = this.querySelectorAll('.select-option').item(index);
+  private _showSelectAction = (id: string) => {
+    const selectOption = this.querySelector(`[data-select-option-id="${id}"]`)
+      ?.parentElement?.parentElement;
     assertExists(selectOption);
 
     const action = new SelectActionPopup();
     action.onAction = this._onSelectAction;
-    action.index = index;
+    action.tagId = id;
     selectOption.appendChild(action);
     const onClose = () => action.remove();
     action.onClose = onClose;
@@ -418,7 +391,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
 
   private _onSaveSelectionName = (id: string) => {
     const selectOption = this._selectOptionContainer.querySelector(
-      `[select-option-id=${id}]`
+      `[data-select-option-id="${id}"]`
     ) as SelectOption;
 
     const value = selectOption.getSelectionValue();
@@ -426,22 +399,10 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
     if (selection) {
       this.changeTag({ ...selection, value });
     }
-    // this.databaseModel.updateColumn({
-    //   ...this.column,
-    //   data: {
-    //     options: selection,
-    //   },
-    // });
-    // this.databaseModel.renameSelectedCellTag(
-    //   this.column.id,
-    //   oldSelect,
-    //   newSelect,
-    // );
-
-    this._setEditingIndex();
+    this._setEditingId();
   };
 
-  private _setEditingIndex = (id?: string) => {
+  private _setEditingId = (id?: string) => {
     this._editingId = id;
   };
 
@@ -514,7 +475,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
               const isEditing = select.id === this._editingId;
               const onOptionIconClick = isEditing
                 ? () => this._onSaveSelectionName(select.id)
-                : () => this._showSelectAction(index);
+                : () => this._showSelectAction(select.id);
               return html`
                 <div class="select-option ${isEditing ? 'editing' : ''}">
                   <div
@@ -527,9 +488,9 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
                       .select="${select}"
                       .editing="${isEditing}"
                       .index="${index}"
-                      .saveSelectionName="${() =>
-                        this._onSaveSelectionName(select.id)}"
-                      .setEditingIndex="${this._setEditingIndex}"
+                      .tagId="${select.id}"
+                      .saveSelectionName="${this._onSaveSelectionName}"
+                      .setEditingId="${this._setEditingId}"
                     ></affine-database-select-option>
                   </div>
                   <div class="select-option-icon" @click="${onOptionIconClick}">

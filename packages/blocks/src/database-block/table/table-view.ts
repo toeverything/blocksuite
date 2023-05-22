@@ -14,7 +14,12 @@ import { html } from 'lit/static-html.js';
 
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import { columnManager, multiSelectHelper } from '../common/column-manager.js';
+import { evalFilter } from '../common/ast.js';
+import {
+  columnManager,
+  multiSelectHelper,
+  richTextHelper,
+} from '../common/column-manager.js';
 import type {
   DatabaseViewDataMap,
   TableMixColumn,
@@ -36,7 +41,7 @@ const styles = css`
     align-items: center;
     justify-content: space-between;
     height: 44px;
-    margin: 18px 0 6px;
+    margin: 2px 0 2px;
   }
 
   .affine-database-block-table {
@@ -212,27 +217,48 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _filter = (index: number): boolean => {
-    const rowTitle = this.model.children[index];
+  private _columnsWithTitle = (): {
+    id: string;
+    data: unknown;
+    type: string;
+  }[] => {
+    return [
+      { id: this.model.id, data: {}, type: richTextHelper.type },
+      ...this._mixColumns(),
+    ];
+  };
 
-    const columns = this._mixColumns();
-    const row = this.model.cells[rowTitle.id];
-    const title = rowTitle.text?.toString() ?? '';
-    if (title.indexOf(this._searchString) >= 0) {
+  private _searchFilter = (rowMap: Record<string, unknown>) => {
+    if (!this._searchString) {
       return true;
     }
+    const columns = this._columnsWithTitle();
     for (const column of columns) {
       const str =
-        columnManager.toString(
-          column.type,
-          row[column.id]?.value,
-          column.data
-        ) ?? '';
+        columnManager.toString(column.type, rowMap[column.id], column.data) ??
+        '';
       if (str.indexOf(this._searchString) >= 0) {
         return true;
       }
     }
     return false;
+  };
+
+  private _filter = (index: number): boolean => {
+    const rowTitle = this.model.children[index];
+    const allRow = Object.values(this.model.cells[rowTitle.id]).map(v => [
+      v.columnId,
+      v.value,
+    ]);
+    allRow.push([this.model.id, rowTitle.text?.yText]);
+    const rowMap = Object.fromEntries(allRow);
+    if (!this._searchFilter(rowMap)) {
+      return false;
+    }
+    if (!evalFilter(this.view.filter, rowMap)) {
+      return false;
+    }
+    return true;
   };
 
   private _resetSearchState() {
@@ -304,14 +330,14 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
+    const mixColumns = this._mixColumns();
     const rows = DataBaseRowContainer(
       this,
-      this._mixColumns(),
+      mixColumns,
       this._filter,
       this._searchState,
       this.root
     );
-
     return html`
       <div class="affine-database-table">
         <div class="affine-database-block-title-container">
@@ -320,6 +346,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
             .targetModel="${this.model}"
           ></affine-database-title>
           <affine-database-toolbar
+            .columns="${mixColumns}"
+            .view="${this.view}"
             .addRow="${this._addRow}"
             .targetModel="${this.model}"
             .hoverState="${this._hoverState}"
@@ -332,7 +360,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
           <div class="affine-database-table-container">
             <affine-database-column-header
               .view="${this.view}"
-              .columns="${this._mixColumns()}"
+              .columns="${mixColumns}"
               .targetModel="${this.model}"
               .addColumn="${this._addColumn}"
               .columnRenderer="${this.columnRenderer}"
