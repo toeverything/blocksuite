@@ -172,7 +172,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
           this._blockSelectionState.selected
         ))
     ) {
-      surface.setElementBound(selected.id, {
+      surface.setElementBounds(selected.id, {
         x: boundX,
         y: boundY,
         w: boundW,

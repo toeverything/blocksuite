@@ -115,24 +115,26 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _setBrushSize(size: BrushSize) {
+  private _setBrushSize(lineWidth: BrushSize) {
     this.page.captureSync();
-    this.elements.forEach(element => {
-      if (element.lineWidth !== size) {
-        this.surface.updateElement<'brush'>(element.id, { lineWidth: size });
+    this.surface.updateElements<'brush'>(
+      this.elements.filter(element => element.lineWidth !== lineWidth),
+      {
+        lineWidth,
       }
-    });
+    );
     // FIXME: force update selection, because brush size changed
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setBrushColor(color: CssVariableName) {
     this.page.captureSync();
-    this.elements.forEach(element => {
-      if (element.color !== color) {
-        this.surface.updateElement<'brush'>(element.id, { color });
+    this.surface.updateElements<'brush'>(
+      this.elements.filter(element => element.color !== color),
+      {
+        color,
       }
-    });
+    );
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {

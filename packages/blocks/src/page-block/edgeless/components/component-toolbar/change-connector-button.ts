@@ -179,76 +179,79 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
   private _setConnectorMode(mode: ConnectorMode) {
     this.page.captureSync();
-    this.elements.forEach(element => {
-      if (element.mode !== mode) {
+    this.surface.updateElementsWith<'connector'>(
+      this.elements.filter(element => element.mode !== mode),
+      {
+        mode,
+      },
+      (element, { mode }) => {
         if (element.mode === ConnectorMode.Orthogonal) {
           const controllers = [
             element.controllers[0],
             element.controllers[element.controllers.length - 1],
-          ].map(c => {
-            return {
-              ...c,
-              x: c.x + element.x,
-              y: c.y + element.y,
-            };
-          });
+          ].map(c => ({
+            ...c,
+            x: c.x + element.x,
+            y: c.y + element.y,
+          }));
 
-          this.surface.updateElement<'connector'>(element.id, {
+          return {
+            mode,
             controllers,
-            mode,
-          });
-        } else {
-          const { start, end } = getConnectorAttachedInfo(
-            element,
-            this.surface,
-            this.page
-          );
-          const route = generateConnectorPath(
-            start.rect,
-            end.rect,
-            start.point,
-            end.point,
-            []
-          );
-
-          this.surface.updateElement<'connector'>(element.id, {
-            controllers: route,
-            mode,
-          });
+          };
         }
+
+        const { start, end } = getConnectorAttachedInfo(
+          element,
+          this.surface,
+          this.page
+        );
+        const controllers = generateConnectorPath(
+          start.rect,
+          end.rect,
+          start.point,
+          end.point,
+          []
+        );
+
+        return {
+          mode,
+          controllers,
+        };
       }
-    });
+    );
     this._forceUpdateSelection();
   }
 
   private _setConnectorColor(color: CssVariableName) {
     this.page.captureSync();
-    this.elements.forEach(element => {
-      if (element.color !== color) {
-        this.surface.updateElement<'connector'>(element.id, { color });
+    this.surface.updateElements<'connector'>(
+      this.elements.filter(element => element.color !== color),
+      {
+        color,
       }
-    });
+    );
   }
 
   private _setShapeStrokeWidth(lineWidth: number) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'connector'>(ele.id, {
-          lineWidth,
-        });
-      });
-    });
+    this.page.captureSync();
+    this.surface.updateElements<'connector'>(
+      this.elements.filter(element => element.lineWidth !== lineWidth),
+      {
+        lineWidth,
+      }
+    );
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'connector'>(ele.id, {
-          strokeStyle,
-        });
-      });
-    });
+    this.page.captureSync();
+    this.surface.updateElements<'connector'>(
+      this.elements.filter(element => element.strokeStyle !== strokeStyle),
+      {
+        strokeStyle,
+      }
+    );
     this._forceUpdateSelection();
   }
 

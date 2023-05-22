@@ -106,36 +106,36 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this.state.selected.map(element => [element.id, element])
     );
 
-    newBounds.forEach((bound, id) => {
+    newBounds.forEach((bounds, id) => {
       const element = selectedMap.get(id);
       if (!element) return;
 
       if (isTopLevelBlock(element)) {
-        let frameX = bound.x;
-        let frameY = bound.y;
-        let frameW = bound.w;
+        let frameX = bounds.x;
+        let frameY = bounds.y;
+        let frameW = bounds.w;
         let frameH = deserializeXYWH(element.xywh)[3];
         // Limit the width of the selected frame
         if (frameW < FRAME_MIN_WIDTH) {
           frameW = FRAME_MIN_WIDTH;
-          frameX = bound.x;
+          frameX = bounds.x;
         }
         // Limit the height of the selected frame
         if (frameH < FRAME_MIN_HEIGHT) {
           frameH = FRAME_MIN_HEIGHT;
-          frameY = bound.y;
+          frameY = bounds.y;
         }
         const xywh = JSON.stringify([frameX, frameY, frameW, frameH]);
         this.page.updateBlock(element, { xywh });
       } else {
         if (element instanceof TextElement) {
-          bound.w = element.w * (bound.h / element.h);
+          bounds.w = element.w * (bounds.h / element.h);
           this.surface.updateElement<'text'>(id, {
-            xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
-            fontSize: element.fontSize * (bound.h / element.h),
+            xywh: serializeXYWH(bounds.x, bounds.y, bounds.w, bounds.h),
+            fontSize: element.fontSize * (bounds.h / element.h),
           });
         } else {
-          this.surface.setElementBound(element.id, bound);
+          this.surface.setElementBounds(element.id, bounds);
         }
       }
       handleElementChangedEffectForConnector(

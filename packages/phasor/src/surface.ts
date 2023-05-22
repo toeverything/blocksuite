@@ -139,9 +139,35 @@ export class SurfaceManager {
     });
   };
 
-  private _transact(callback: () => void) {
+  private _transact<T>(callback: () => T) {
     const doc = this._yContainer.doc as Y.Doc;
-    doc.transact(callback, doc.clientID);
+    return doc.transact(callback, doc.clientID);
+  }
+
+  private _addElement<T extends keyof IPhasorElementType>(
+    type: T,
+    properties: IElementCreateProps<T>
+  ): PhasorElement['id'] {
+    const id = generateElementId();
+
+    const yMap = new Y.Map();
+
+    const defaultProps = ElementDefaultProps[type];
+    const props: IElementCreateProps<T> = {
+      ...defaultProps,
+      ...properties,
+      id,
+      index: generateKeyBetween(this.indexes.max, null),
+      seed: randomSeed(),
+    };
+
+    for (const key in props) {
+      yMap.set(key, props[key as keyof IElementCreateProps<T>]);
+    }
+
+    this._yContainer.set(id, yMap);
+
+    return id;
   }
 
   /**
@@ -184,38 +210,19 @@ export class SurfaceManager {
     type: T,
     properties: IElementCreateProps<T>
   ): PhasorElement['id'] {
-    const id = generateElementId();
-
-    const yMap = new Y.Map();
-
-    const defaultProps = ElementDefaultProps[type];
-    const props: IElementCreateProps<T> = {
-      ...defaultProps,
-      ...properties,
-      id,
-      index: generateKeyBetween(this.indexes.max, null),
-      seed: randomSeed(),
-    };
-
-    this._transact(() => {
-      for (const key in props) {
-        yMap.set(key, props[key as keyof IElementCreateProps<T>]);
-      }
-      this._yContainer.set(id, yMap);
-    });
-
-    return id;
+    return this._transact(() => this._addElement(type, properties));
   }
 
+  /**
+   * Updates the properties of a single element.
+   */
   updateElement<T extends keyof IPhasorElementType>(
     id: string,
     properties: IElementCreateProps<T>
   ) {
-    this._transact(() => {
-      const element = this._elements.get(id);
-      assertExists(element);
-      element.applyUpdate(properties);
-    });
+    const element = this._elements.get(id);
+    assertExists(element);
+    this._transact(() => element.applyUpdate(properties));
   }
 
   /**
@@ -228,12 +235,15 @@ export class SurfaceManager {
     this._transact(() => this.updateElement(id, properties));
   }
 
-  setElementBound(id: string, bound: IBound) {
-    this.updateElementWith(id, {
-      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+  setElementBounds(id: string, { x, y, w, h }: IBound) {
+    this.updateElement(id, {
+      xywh: serializeXYWH(x, y, w, h),
     });
   }
 
+  /**
+   * Removes a single element.
+   */
   removeElement(id: string) {
     this._transact(() => {
       this._yContainer.delete(id);
@@ -242,6 +252,64 @@ export class SurfaceManager {
 
   hasElement(id: string) {
     return this._yContainer.has(id);
+  }
+
+  /**
+   * Adds multiple elements.
+   */
+  addElements<T extends keyof IPhasorElementType>(
+    elements: { type: T; properties: IElementCreateProps<T> }[]
+  ): PhasorElement['id'][] {
+    return this._transact(() =>
+      elements.map(({ type, properties }) => this._addElement(type, properties))
+    );
+  }
+
+  /**
+   * Updates the properties of multiple elements.
+   */
+  updateElements<T extends keyof IPhasorElementType>(
+    elements: SurfaceElement[],
+    properties: IElementCreateProps<T>
+  ) {
+    elements = elements.filter(({ id }) => this._elements.get(id));
+
+    if (!elements.length) return;
+
+    this._transact(() =>
+      elements.forEach(element => element.applyUpdate(properties))
+    );
+  }
+
+  /**
+   * Updates the properties of multiple elements with a handler function.
+   */
+  updateElementsWith<T extends keyof IPhasorElementType>(
+    elements: SurfaceElement[],
+    properties: IElementCreateProps<T>,
+    handler: (
+      element: SurfaceElement,
+      properties: IElementCreateProps<T>
+    ) => IElementCreateProps<T>
+  ) {
+    elements = elements.filter(({ id }) => this._elements.get(id));
+
+    if (!elements.length) return;
+
+    this._transact(() =>
+      elements.forEach(element =>
+        element.applyUpdate(handler(element, properties))
+      )
+    );
+  }
+
+  /**
+   * Removes multiple elements.
+   */
+  removeElements(elements: PhasorElement[]) {
+    this._transact(() =>
+      elements.forEach(({ id }) => this._yContainer.delete(id))
+    );
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {

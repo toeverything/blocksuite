@@ -245,49 +245,51 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setShapeFillColor(color: CssVariableName) {
-    const filled = !isTransparent(color);
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          filled,
-          fillColor: color,
-        });
-      });
-    });
+  private _setShapeFillColor(fillColor: CssVariableName) {
+    const filled = !isTransparent(fillColor);
+    this.page.captureSync();
+    this.surface.updateElements<'shape'>(
+      this.elements.filter(
+        element => element.filled !== filled || element.fillColor !== fillColor
+      ),
+      {
+        filled,
+        fillColor,
+      }
+    );
     this._forceUpdateSelection();
   }
 
-  private _setShapeStrokeColor(color: CssVariableName) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeColor: color,
-        });
-      });
-    });
+  private _setShapeStrokeColor(strokeColor: CssVariableName) {
+    this.page.captureSync();
+    this.surface.updateElements<'shape'>(
+      this.elements.filter(element => element.strokeColor !== strokeColor),
+      {
+        strokeColor,
+      }
+    );
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeWidth(strokeWidth: number) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeWidth,
-        });
-      });
-    });
+    this.page.captureSync();
+    this.surface.updateElements<'shape'>(
+      this.elements.filter(element => element.strokeWidth !== strokeWidth),
+      {
+        strokeWidth,
+      }
+    );
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeStyle,
-        });
-      });
-    });
+    this.page.captureSync();
+    this.surface.updateElements<'shape'>(
+      this.elements.filter(element => element.strokeStyle !== strokeStyle),
+      {
+        strokeStyle,
+      }
+    );
     this._forceUpdateSelection();
   }
 
