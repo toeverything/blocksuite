@@ -12,7 +12,7 @@ export async function dragBetweenCoords(
     click?: boolean;
   }
 ) {
-  const steps = options?.steps ?? 1;
+  const steps = options?.steps ?? 20;
   const { x: x1, y: y1 } = from;
   const { x: x2, y: y2 } = to;
   options?.click && (await page.mouse.click(x1, y1));
@@ -36,7 +36,7 @@ export async function dragBetweenIndices(
   }
 ) {
   const finalOptions = {
-    steps: 20,
+    steps: 50,
     ...(options || {}),
   };
   const startCoord = await getIndexCoordinate(
