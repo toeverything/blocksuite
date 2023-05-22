@@ -2,9 +2,8 @@ import { debug } from '@blocksuite/global/debug';
 import type { Transaction } from 'yjs';
 import * as Y from 'yjs';
 
-import { createYArrayProxy } from './array.js';
 import type { ProxyConfig } from './config.js';
-import { createYMapProxy } from './map.js';
+import { createYArrayProxy, createYMapProxy } from './proxy.js';
 
 export type BlockSuiteDocAllowedValue =
   | Record<string, unknown>
