@@ -198,7 +198,7 @@ export class DefaultSelectionManager {
     this._add(
       'selectionChange',
       debounce((ctx: UIEventStateContext) => {
-        const event = ctx.get('defaultState').event;
+        const { event } = ctx.get('defaultState');
 
         if (shouldFilterMouseEvent(event)) return;
         if (isDragging) {

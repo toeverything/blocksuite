@@ -179,7 +179,7 @@ export async function addBasicRectShapeElement(
   end: { x: number; y: number }
 ) {
   await setMouseMode(page, 'shape');
-  await dragBetweenCoords(page, start, end, { steps: 10 });
+  await dragBetweenCoords(page, start, end, { steps: 20 });
   await setMouseMode(page, 'default');
 }
 
