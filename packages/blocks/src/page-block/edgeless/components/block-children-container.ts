@@ -28,20 +28,15 @@ function EdgelessMask() {
 function EdgelessBlockChild(
   index: number,
   model: TopLevelBlockModel,
-  host: BlockHost,
-  viewport: SurfaceViewport,
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
   const { xywh, background } = model;
-  const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
-  const translateX = (modelX - viewportX) * zoom;
-  const translateY = (modelY - viewportY) * zoom;
 
   const style = {
     position: 'absolute',
-    transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
+    transform: `translate(${modelX}px, ${modelY}px)`,
     transformOrigin: '0 0',
     width: modelW + 'px',
     height: modelH + 'px',
@@ -69,12 +64,22 @@ export function EdgelessBlockChildrenContainer(
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
+  const { zoom, viewportX, viewportY } = viewport;
+  const x = -viewportX * zoom;
+  const y = -viewportY * zoom;
+  const style = {
+    position: 'absolute',
+    transform: `translate(${x}px, ${y}px) scale(${zoom})`,
+    transformOrigin: '0 0',
+  };
+
   return html`
-    ${repeat(
-      frames,
-      child => child.id,
-      (child, index) =>
-        EdgelessBlockChild(index, child, host, viewport, active, renderer)
-    )}
+    <div style=${styleMap(style)}>
+      ${repeat(
+        frames,
+        child => child.id,
+        (child, index) => EdgelessBlockChild(index, child, active, renderer)
+      )}
+    </div>
   `;
 }
