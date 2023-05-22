@@ -406,10 +406,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   ) {
     if (
       !previousSibling ||
-      !matchFlavours(previousSibling, [
-        'affine:paragraph',
-        'affine:list',
-      ] as const)
+      !matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
     )
       return false;
 
@@ -502,7 +499,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:paragraph'] as const)) return false;
+  if (!matchFlavours(model, ['affine:paragraph'])) return false;
 
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.
