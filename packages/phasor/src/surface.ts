@@ -282,12 +282,12 @@ export class SurfaceManager {
   }
 
   /**
-   * Updates the properties of multiple elements with a handler function.
+   * Updates the properties of multiple elements with a process function.
    */
   updateElementsWith<T extends keyof IPhasorElementType>(
     elements: SurfaceElement[],
     properties: IElementCreateProps<T>,
-    handler: (
+    process: (
       element: SurfaceElement,
       properties: IElementCreateProps<T>
     ) => IElementCreateProps<T>
@@ -298,7 +298,7 @@ export class SurfaceManager {
 
     this._transact(() =>
       elements.forEach(element =>
-        element.applyUpdate(handler(element, properties))
+        element.applyUpdate(process(element, properties))
       )
     );
   }
