@@ -6,6 +6,24 @@ import { UIEventState } from './base.js';
 import { PointerControl } from './pointer.js';
 import { toLowerCase } from './utils.js';
 
+const byPassEventName = [
+  'beforeInput',
+  'compositionStart',
+  'compositionUpdate',
+  'compositionEnd',
+
+  'keyDown',
+  'keyUp',
+
+  'paste',
+  'copy',
+  'blur',
+  'focus',
+  'drop',
+  'selectionChange',
+  'contextMenu',
+] as const;
+
 const eventName = [
   'click',
   'doubleClick',
@@ -20,14 +38,7 @@ const eventName = [
   'dragMove',
   'dragEnd',
 
-  'keyDown',
-  'paste',
-  'copy',
-  'blur',
-  'focus',
-  'drop',
-  'selectionChange',
-  'contextMenu',
+  ...byPassEventName,
 ] as const;
 
 export type EventName = (typeof eventName)[number];
@@ -80,17 +91,7 @@ export class UIEventDispatcher {
   }
 
   private _bindEvents() {
-    const byPassEvent = [
-      'keyDown',
-      'paste',
-      'copy',
-      'blur',
-      'focus',
-      'drop',
-      'selectionChange',
-      'contextMenu',
-    ] as const satisfies readonly EventName[];
-    byPassEvent.forEach(eventName => {
+    byPassEventName.forEach(eventName => {
       this.disposables.addFromEvent(this.root, toLowerCase(eventName), e => {
         this.run(eventName, UIEventStateContext.from(new UIEventState(e)));
       });
