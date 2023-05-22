@@ -34,7 +34,7 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
       xywh: `[${x},${y},100,100]`,
       seed: Math.floor(Math.random() * 2 ** 31),
 
-      shapeType: SHAPE_TYPES[Math.floor(Math.random() * 10) % 4],
+      shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4],
 
       radius: 0,
       filled: false,
