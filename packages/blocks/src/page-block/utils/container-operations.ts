@@ -5,6 +5,7 @@ import {
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -26,7 +27,6 @@ import {
   isCollapsedNativeSelection,
   isMultiBlockRange,
   resetNativeSelection,
-  type SelectionEvent,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -593,14 +593,14 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
 // Show format quick bar when double/triple clicking on text
 export function showFormatQuickBarByClicks(
   type: 'double' | 'triple',
-  e: SelectionEvent,
+  e: PointerEventState,
   page: Page,
   container?: HTMLElement,
   state?: PageSelectionState
 ) {
   const range =
     type === 'double'
-      ? handleNativeRangeDblClick(page, e)
+      ? handleNativeRangeDblClick()
       : handleNativeRangeTripleClick(e);
   if (e.raw.target instanceof HTMLTextAreaElement) return;
   if (!range || range.collapsed) return;

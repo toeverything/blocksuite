@@ -1,7 +1,8 @@
+import type { PointerEventState } from '@blocksuite/lit';
+
 import {
   handleNativeRangeDragMove,
   isBlankArea,
-  type SelectionEvent,
 } from '../../../../__internal__/index.js';
 import { getService } from '../../../../__internal__/service.js';
 import type { DatabaseBlockService } from '../../../../database-block/database-service.js';
@@ -21,7 +22,7 @@ export class DatabaseTableViewSelectionManager {
   private _startRange: Range | null = null;
   private _rowIds: string[] = [];
 
-  onDragStart(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onDragStart(selection: DefaultSelectionManager, e: PointerEventState) {
     if (!isBlankArea(e)) {
       selection.state.resetStartRange(e);
       selection.state.type = 'database';
@@ -43,7 +44,7 @@ export class DatabaseTableViewSelectionManager {
     }
   }
 
-  onDragMove(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onDragMove(selection: DefaultSelectionManager, e: PointerEventState) {
     const { clientX: x, clientY: y } = e.raw;
 
     // In order to avoid missing the underlying database-related elements, use `elementsFromPoint` instead
@@ -94,7 +95,7 @@ export class DatabaseTableViewSelectionManager {
     selection.state.type = 'database';
   }
 
-  onDragEnd(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onDragEnd(selection: DefaultSelectionManager, e: PointerEventState) {
     this._setColumnWidthHandleDisplay('block');
   }
 

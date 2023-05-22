@@ -41,7 +41,7 @@ export class PointerControl {
   private _reset = () => {
     this._startX = -Infinity;
     this._startY = -Infinity;
-    this._lastPointerDownEvent = null;
+    this._lastDragState = null;
     this._dragging = false;
   };
 

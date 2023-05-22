@@ -1,9 +1,9 @@
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 
 import type {
   BlockComponentElement,
   IPoint,
-  SelectionEvent,
 } from '../../../__internal__/index.js';
 import {
   getBlockElementsByElement,
@@ -96,7 +96,7 @@ export class PageSelectionState {
     };
   }
 
-  resetStartRange(e: SelectionEvent) {
+  resetStartRange(e: PointerEventState) {
     const { clientX, clientY } = e.raw;
     this._startRange = caretRangeFromPoint(clientX, clientY);
     // Save the last coordinates so that we can send them when scrolling through the wheel
@@ -104,14 +104,14 @@ export class PageSelectionState {
   }
 
   resetDraggingArea(
-    e: SelectionEvent,
+    e: PointerEventState,
     offset: { scrollLeft: number; scrollTop: number } = {
       scrollLeft: 0,
       scrollTop: 0,
     }
   ) {
     const { scrollLeft, scrollTop } = offset;
-    let { x, y } = e;
+    let { x, y } = e.point;
     x += scrollLeft;
     y += scrollTop;
     const end = new Point(x, y);

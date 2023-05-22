@@ -5,13 +5,14 @@ import {
   matchFlavours,
   nonTextBlock,
 } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
-import type { IPoint, SelectionEvent } from './gesture/index.js';
+import type { IPoint } from './gesture/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
@@ -382,7 +383,7 @@ function handleInFrameDragMove(
 
 export function handleNativeRangeDragMove(
   startRange: Range | null,
-  e: SelectionEvent
+  e: PointerEventState
 ) {
   const isEdgelessMode = !!document.querySelector('affine-edgeless-page');
   const { clientX: x, clientY: y } = e.raw;
@@ -473,7 +474,7 @@ function normalizePointIntoContainer(point: IPoint, container: Element) {
   return newPoint;
 }
 
-export function isBlankArea(e: SelectionEvent) {
+export function isBlankArea(e: PointerEventState) {
   const { cursor } = window.getComputedStyle(e.raw.target as Element);
   return cursor !== 'text';
 }
@@ -481,7 +482,11 @@ export function isBlankArea(e: SelectionEvent) {
 // Retarget selection back to the nearest block
 // when user clicks on the edge of page (page mode) or frame (edgeless mode).
 // See https://github.com/toeverything/blocksuite/pull/878
-function retargetClick(page: Page, e: SelectionEvent, container?: HTMLElement) {
+function retargetClick(
+  page: Page,
+  e: PointerEventState,
+  container?: HTMLElement
+) {
   const targetElement = getElementFromEventTarget(e.raw.target);
   const block = targetElement?.closest(`[${BLOCK_ID_ATTR}]`) as {
     model?: BaseBlockModel;
@@ -523,7 +528,7 @@ function retargetClick(page: Page, e: SelectionEvent, container?: HTMLElement) {
 
 export function handleNativeRangeClick(
   page: Page,
-  e: SelectionEvent,
+  e: PointerEventState,
   container?: HTMLElement
 ) {
   // if not left click
@@ -543,7 +548,7 @@ export function handleNativeRangeAtPoint(x: number, y: number) {
   }
 }
 
-export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
+export function handleNativeRangeDblClick() {
   const selection = window.getSelection();
   if (selection && selection.isCollapsed && selection.anchorNode) {
     const editableContainer =
@@ -826,14 +831,14 @@ export function getSplicedTitle(title: HTMLTextAreaElement) {
   return text.join('');
 }
 
-export function isEmbed(e: SelectionEvent) {
+export function isEmbed(e: PointerEventState) {
   if ((e.raw.target as HTMLElement).classList.contains('resize')) {
     return true;
   }
   return false;
 }
 
-export function isDatabase(e: SelectionEvent) {
+export function isDatabase(e: PointerEventState) {
   const target = e.raw.target;
   if (!(target instanceof HTMLElement)) {
     // When user click on the list indicator,
@@ -932,7 +937,7 @@ export function getClosestFrame(clientY: number) {
 /**
  * Handle native range with triple click.
  */
-export function handleNativeRangeTripleClick(e: SelectionEvent) {
+export function handleNativeRangeTripleClick(e: PointerEventState) {
   const {
     raw: { clientX, clientY },
   } = e;
