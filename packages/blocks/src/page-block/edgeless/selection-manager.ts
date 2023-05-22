@@ -81,9 +81,6 @@ export class EdgelessSelectionManager {
     type: 'default',
   };
 
-  // selected blocks
-  selectedBlocks: BlockComponentElement[] = [];
-
   private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
   private readonly _dispatcher: UIEventDispatcher;
@@ -97,12 +94,23 @@ export class EdgelessSelectionManager {
     timeStamp: number;
   } | null = null;
 
-  get lastMousePos() {
-    return this._lastMousePos;
-  }
+  // selected blocks
+  selectedBlocks: BlockComponentElement[] = [];
+
+  /**
+   * Holds the state of the current selected block(s) and/or shape(s).
+   */
+  blockSelectionState: EdgelessSelectionState = {
+    selected: [],
+    active: false,
+  };
 
   get isActive() {
-    return this.currentController.isActive;
+    return this.blockSelectionState.active;
+  }
+
+  get lastMousePos() {
+    return this._lastMousePos;
   }
 
   get mouseMode() {
@@ -113,10 +121,6 @@ export class EdgelessSelectionManager {
     this._mouseMode = mode;
     // sync mouse mode
     this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
-  }
-
-  get blockSelectionState() {
-    return this.currentController.blockSelectionState;
   }
 
   get currentController() {

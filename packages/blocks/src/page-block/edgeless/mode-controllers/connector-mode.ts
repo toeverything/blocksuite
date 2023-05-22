@@ -170,8 +170,4 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
   onContainerMouseOut(e: PointerEventState) {
     noop();
   }
-
-  clearSelection() {
-    noop();
-  }
 }

@@ -49,8 +49,4 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
   syncDraggingArea() {
     noop();
   }
-
-  clearSelection() {
-    noop();
-  }
 }
