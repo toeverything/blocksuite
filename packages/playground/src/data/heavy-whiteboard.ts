@@ -9,6 +9,8 @@ import { addShapeElement, type InitFn } from './utils';
 
 const COUNT = 500;
 
+const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
+
 export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
 
@@ -32,7 +34,7 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
       xywh: `[${x},${y},100,100]`,
       seed: Math.floor(Math.random() * 2 ** 31),
 
-      shapeType: 'rect',
+      shapeType: SHAPE_TYPES[Math.floor(Math.random() * 10) % 4],
 
       radius: 0,
       filled: false,
@@ -58,7 +60,7 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
     page.addBlock(
       'affine:paragraph',
       {
-        text: new Text('Hello, world! ' + i),
+        text: new Text('Frame #' + i),
       },
       frameId
     );
