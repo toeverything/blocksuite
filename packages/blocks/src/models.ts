@@ -3,6 +3,7 @@
 import type { BlockSchema } from '@blocksuite/store';
 import type { z } from 'zod';
 
+import type { BookmarkBlockModel } from './bookmark-block/bookmark-model.js';
 import {
   type CodeBlockModel,
   CodeBlockSchema,
@@ -64,6 +65,7 @@ export type BlockSchemas = {
   'affine:embed': EmbedBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
+  'affine:bookmark': BookmarkBlockModel;
 };
 
 export type Flavour = keyof BlockSchemas;
