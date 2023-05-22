@@ -12,10 +12,20 @@ import {
 } from '../__internal__/rich-text/virgo/types.js';
 import { registerService } from '../__internal__/service.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
+import type { BookmarkProps } from './bookmark-model.js';
 import { BookmarkBlockService } from './bookmark-service.js';
 import { DefaultBanner } from './images/banners.js';
 import { DefaultIcon } from './images/icons.js';
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace globalThis {
+    // eslint-disable-next-line no-var
+    const getBookmarkDataByLink: (
+      link: string
+    ) => Promise<Omit<BookmarkProps, 'link'>>;
+  }
+}
 @customElement('affine-bookmark')
 export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   static override styles = css`
@@ -88,6 +98,16 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:bookmark', BookmarkBlockService);
+    if (getBookmarkDataByLink) {
+      // This method is get website's metaData by link
+      // And only exists in the AFFiNE client
+      getBookmarkDataByLink(this.model.link).then(data => {
+        this.model.page.updateBlock(this.model, {
+          link: this.model.link,
+          ...data,
+        });
+      });
+    }
   }
 
   override render() {
