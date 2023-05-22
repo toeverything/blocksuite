@@ -1,9 +1,12 @@
 import type * as Y from 'yjs';
 
 import type { VRange } from '../types.js';
-import { VEditor } from '../virgo.js';
+import {
+  nativePointToTextPoint,
+  textPointToDomPoint,
+} from './point-conversion.js';
 import { isSelectionBackwards } from './selection.js';
-import { calculateTextLength } from './text.js';
+import { calculateTextLength, getTextNodesFromElement } from './text.js';
 
 type VRangeRunnerContext = {
   rootElement: HTMLElement;
@@ -37,12 +40,12 @@ const rangeHasAnchorAndFocusHandler: Handler = ({
   anchorTextOffset,
   focusTextOffset,
 }) => {
-  const anchorDomPoint = VEditor.textPointToDomPoint(
+  const anchorDomPoint = textPointToDomPoint(
     anchorText,
     anchorTextOffset,
     rootElement
   );
-  const focusDomPoint = VEditor.textPointToDomPoint(
+  const focusDomPoint = textPointToDomPoint(
     focusText,
     focusTextOffset,
     rootElement
@@ -72,7 +75,7 @@ const rangeOnlyHasFocusHandler: Handler = ({
   focusTextOffset,
 }) => {
   if (isSelectionBackwards(selection)) {
-    const anchorDomPoint = VEditor.textPointToDomPoint(
+    const anchorDomPoint = textPointToDomPoint(
       anchorText,
       anchorTextOffset,
       rootElement
@@ -87,7 +90,7 @@ const rangeOnlyHasFocusHandler: Handler = ({
       length: yText.length - anchorDomPoint.index,
     };
   } else {
-    const focusDomPoint = VEditor.textPointToDomPoint(
+    const focusDomPoint = textPointToDomPoint(
       focusText,
       focusTextOffset,
       rootElement
@@ -122,7 +125,7 @@ const rangeOnlyHasAnchorHandler: Handler = ({
   focusTextOffset,
 }) => {
   if (isSelectionBackwards(selection)) {
-    const focusDomPoint = VEditor.textPointToDomPoint(
+    const focusDomPoint = textPointToDomPoint(
       focusText,
       focusTextOffset,
       rootElement
@@ -137,7 +140,7 @@ const rangeOnlyHasAnchorHandler: Handler = ({
       length: focusDomPoint.index,
     };
   } else {
-    const anchorDomPoint = VEditor.textPointToDomPoint(
+    const anchorDomPoint = textPointToDomPoint(
       anchorText,
       anchorTextOffset,
       rootElement
@@ -176,11 +179,8 @@ const buildContext = (
 ): VRangeRunnerContext | null => {
   const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
 
-  const anchorTextPoint = VEditor.nativePointToTextPoint(
-    anchorNode,
-    anchorOffset
-  );
-  const focusTextPoint = VEditor.nativePointToTextPoint(focusNode, focusOffset);
+  const anchorTextPoint = nativePointToTextPoint(anchorNode, anchorOffset);
+  const focusTextPoint = nativePointToTextPoint(focusNode, focusOffset);
 
   if (!anchorTextPoint || !focusTextPoint) {
     return null;
@@ -283,7 +283,7 @@ export function virgoRangeToDomRange(
       break;
     }
 
-    const texts = VEditor.getTextNodesFromElement(lineElements[i]);
+    const texts = getTextNodesFromElement(lineElements[i]);
     for (const text of texts) {
       const textLength = calculateTextLength(text);
 
