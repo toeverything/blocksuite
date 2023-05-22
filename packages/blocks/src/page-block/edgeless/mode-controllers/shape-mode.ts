@@ -116,18 +116,16 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     this._draggingElementId = null;
     this._draggingArea = null;
-    this._page.captureSync();
 
-    // this._edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
+    this._page.captureSync();
 
     const element = this._surface.pickById(id);
     assertExists(element);
-    const selectionState = {
+    this._edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
+    this._edgeless.slots.selectionUpdated.emit({
       selected: [element],
       active: false,
-    };
-    this._edgeless.slots.selectionUpdated.emit(selectionState);
-    this._edgeless.slots.surfaceUpdated.emit();
+    });
   }
 
   onContainerMouseMove(e: PointerEventState) {

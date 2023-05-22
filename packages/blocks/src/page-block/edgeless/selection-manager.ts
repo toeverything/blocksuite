@@ -417,4 +417,12 @@ export class EdgelessSelectionManager {
   dispose() {
     this._disposables.dispose();
   }
+
+  clear() {
+    this.selectedBlocks = [];
+    this.blockSelectionState = {
+      selected: [],
+      active: false,
+    };
+  }
 }

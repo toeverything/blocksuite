@@ -81,6 +81,18 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     return null;
   }
 
+  get selectedBlocks() {
+    return this._edgeless.selection.selectedBlocks;
+  }
+
+  get blockSelectionState() {
+    return this._edgeless.selection.blockSelectionState;
+  }
+
+  get isActive() {
+    return this._edgeless.selection.blockSelectionState.active;
+  }
+
   private _pick(x: number, y: number) {
     const { surface } = this._edgeless;
     const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
@@ -105,8 +117,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _handleClickOnSelected(selected: Selectable, e: PointerEventState) {
     this._edgeless.clearSelectedBlocks();
 
-    const currentSelected =
-      this._edgeless.selection.blockSelectionState.selected;
+    const currentSelected = this.blockSelectionState.selected;
     if (currentSelected.length !== 1) {
       this._setSelectionState([selected], false);
       return;
@@ -115,8 +126,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     // phasor element
     if (isPhasorElement(selected)) {
       if (
-        this._blockSelectionState.selected[0] instanceof TextElement &&
-        this._blockSelectionState.active
+        this.blockSelectionState.selected[0] instanceof TextElement &&
+        this.blockSelectionState.active
       ) {
         return;
       }
@@ -143,7 +154,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _handleDragMoveEffect(element: Selectable) {
     handleElementChangedEffectForConnector(
       element,
-      this._edgeless.selection.blockSelectionState.selected,
+      this.blockSelectionState.selected,
       this._edgeless.surface,
       this._page
     );
@@ -171,7 +182,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       (selected instanceof ConnectorElement &&
         isConnectorAndBindingsAllSelected(
           selected,
-          this._edgeless.selection.blockSelectionState.selected
+          this.blockSelectionState.selected
         ))
     ) {
       surface.setElementBound(selected.id, {
@@ -201,15 +212,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._handleDragMoveEffect(block);
 
     // TODO: refactor
-    if (this._edgeless.selection.selectedBlocks.length) {
-      this._edgeless.slots.selectedBlocksUpdated.emit(
-        this._edgeless.selection.selectedBlocks
-      );
+    if (this.selectedBlocks.length) {
+      this._edgeless.slots.selectedBlocksUpdated.emit(this.selectedBlocks);
     }
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
-    const { selected } = this._edgeless.selection.blockSelectionState;
+    const { selected } = this.blockSelectionState;
     if (!selected.length) return false;
 
     const commonBound = getCommonBound(
@@ -236,7 +245,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _forceUpdateSelection() {
     // FIXME: force triggering selection change to re-render selection rect
     this._edgeless.slots.selectionUpdated.emit({
-      ...this._edgeless.selection.blockSelectionState,
+      ...this.blockSelectionState,
     });
   }
 
@@ -338,7 +347,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDragStart(e: PointerEventState) {
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
-      this.dragType = this._edgeless.selection.blockSelectionState.active
+      this.dragType = this.blockSelectionState.active
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
@@ -376,15 +385,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
       }
       case DefaultModeDragType.ContentMoving: {
-        this._edgeless.selection.blockSelectionState.selected.forEach(
-          element => {
-            if (isPhasorElement(element)) {
-              this._handleSurfaceDragMove(element, e);
-            } else {
-              this._handleBlockDragMove(element, e);
-            }
+        this.blockSelectionState.selected.forEach(element => {
+          if (isPhasorElement(element)) {
+            this._handleSurfaceDragMove(element, e);
+          } else {
+            this._handleBlockDragMove(element, e);
           }
-        );
+        });
         this._forceUpdateSelection();
         break;
       }
@@ -406,7 +413,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       this._lock = false;
     }
 
-    if (this._edgeless.selection.isActive) {
+    if (this.isActive) {
       const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar

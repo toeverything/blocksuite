@@ -348,9 +348,6 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.selectionUpdated.on(state => {
-        if (this.mouseMode.type !== 'default') {
-          this.mouseMode = { type: 'default' };
-        }
         this.selection.blockSelectionState = state;
         this._clearSelection();
         this.requestUpdate();
@@ -838,21 +835,22 @@ export class EdgelessPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const { viewport } = this.surface;
-    const { selection, _rectsOfSelectedBlocks, page } = this;
-    const { selected, active } = selection.blockSelectionState;
+    const { mouseMode, page, selection, surface, _rectsOfSelectedBlocks } =
+      this;
+    const { blockSelectionState, draggingArea } = selection;
+    const { viewport } = surface;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.sortedFrames,
-      active,
+      blockSelectionState.active,
       this.root.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
-    const draggingArea = EdgelessDraggingArea(selection.draggingArea);
+    const draggingAreaTpl = EdgelessDraggingArea(draggingArea);
 
     const hoverState = selection.getHoverState();
-    const hoverRect = EdgelessHoverRect(hoverState, zoom);
+    const hoverRectTpl = EdgelessHoverRect(hoverState, zoom);
 
     const { grid, gap, translateX, translateY } = getBackgroundGrid(
       viewportX,
@@ -891,14 +889,14 @@ export class EdgelessPageBlockComponent
             y: -top,
           }}
         ></affine-selected-blocks>
-        ${hoverRect} ${draggingArea}
-        ${selected.length
+        ${hoverRectTpl} ${draggingAreaTpl}
+        ${blockSelectionState.selected.length
           ? html`
               <edgeless-selected-rect
                 .page=${page}
                 .state=${selection.blockSelectionState}
                 .slots=${this.slots}
-                .surface=${this.surface}
+                .surface=${surface}
               ></edgeless-selected-rect>
             `
           : null}
@@ -906,7 +904,7 @@ export class EdgelessPageBlockComponent
       ${this._toolbarEnabled
         ? html`
             <edgeless-toolbar
-              .mouseMode=${this.mouseMode}
+              .mouseMode=${mouseMode}
               .zoom=${zoom}
               .edgeless=${this}
             ></edgeless-toolbar>
