@@ -32,7 +32,6 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -129,7 +128,7 @@ export class EdgelessToolbar extends LitElement {
   private _zoomToFit() {
     const bounds = [];
 
-    const frame = this.edgeless.frames[0] as FrameBlockModel;
+    const frame = this.edgeless.frames[0];
     if (frame) {
       const frameXYWH = deserializeXYWH(frame.xywh);
       const frameBound = new Bound(...frameXYWH);
