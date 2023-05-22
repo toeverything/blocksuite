@@ -103,7 +103,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       }
     },
     setDragType(dragging: boolean) {
-      const selection = pageBlock.getSelection();
+      const { selection } = pageBlock;
       if (selection.mouseMode.type === 'default') {
         const currentController =
           selection.currentController as DefaultModeController;
@@ -120,8 +120,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       pageBlock.slots.selectedBlocksUpdated.emit(selectedBlocks);
     },
     getSelectedBlocks() {
-      const selection = pageBlock.getSelection();
-      return selection.selectedBlocks;
+      return pageBlock.selection.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {
       if (pageBlock.mouseMode.type !== 'default') return null;

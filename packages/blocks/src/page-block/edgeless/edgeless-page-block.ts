@@ -722,7 +722,7 @@ export class EdgelessPageBlockComponent
    * Not supports surface elements.
    */
   setSelection(frameId: string, active = true, blockId: string, point?: Point) {
-    const frameBlock = this.model.children.find(b => b.id === frameId);
+    const frameBlock = this.frames.find(b => b.id === frameId);
     assertExists(frameBlock);
 
     requestAnimationFrame(() => {

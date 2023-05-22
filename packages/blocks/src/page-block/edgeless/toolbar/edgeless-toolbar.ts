@@ -268,7 +268,19 @@ export class EdgelessToolbar extends LitElement {
       y = centerY - (options.height * zoom) / 2;
     }
 
-    this.edgeless.addNewFrame(models, new Point(x, y), options);
+    const { frameId } = this.edgeless.addNewFrame(
+      models,
+      new Point(x, y),
+      options
+    );
+    const frame = this.edgeless.frames.find(frame => frame.id === frameId);
+    assertExists(frame);
+    this.edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
+    this.edgeless.slots.selectionUpdated.emit({
+      selected: [frame],
+      active: false,
+    });
+
     this._imageLoading = false;
   }
 
