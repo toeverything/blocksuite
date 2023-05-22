@@ -43,7 +43,7 @@ export function setDatabaseRowsSelection(databaseId: string, rowIds: string[]) {
 
 export function setDatabaseCellSelection(
   databaseId: string,
-  coords: [CellCoord, CellCoord?]
+  coords: [CellCoord]
 ) {
   const container = getRowsContainer(databaseId);
   const cellLevelSelection = getCellLevelSelection(container);
@@ -95,7 +95,7 @@ export function getCellCoord(
   const cellRects = getAllCellsRect(rowsContainer);
 
   const rowsCount = cellRects.length;
-  const columnsCount = cellRects[0].length;
+  const cellsCount = cellRects[0].length;
   let cellCoord: CellCoord | null = null;
   if (target instanceof Element) {
     cellCoord = getCellCoordByElement(target, databaseId);
@@ -104,17 +104,12 @@ export function getCellCoord(
     cellCoord = target;
   }
 
-  const nextCellCoord = getNextCellCoord(
-    key,
-    cellCoord,
-    rowsCount,
-    columnsCount
-  );
+  const nextCellCoord = getNextCellCoord(key, cellCoord, rowsCount, cellsCount);
   return nextCellCoord;
 }
 
 export function getCellSelectionRectByCoords(
-  coords: [CellCoord, CellCoord?],
+  coords: [CellCoord],
   databaseId: string
 ) {
   const rowsContainer = getRowsContainer(databaseId);

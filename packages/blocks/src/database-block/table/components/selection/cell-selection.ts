@@ -3,13 +3,13 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CellCoord } from '../../../../std.js';
+import type { DatabaseTableViewCellSelect } from '../../../../std.js';
 import { getCellSelectionRectByCoords, getRowsContainer } from './utils.js';
 
-type SelectionState = {
-  databaseId: string;
-  coords: [CellCoord, CellCoord?];
-};
+type SelectionState = Pick<
+  DatabaseTableViewCellSelect,
+  'databaseId' | 'coords'
+>;
 
 const defaultState: SelectionState = {
   databaseId: '',

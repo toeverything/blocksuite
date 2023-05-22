@@ -35,16 +35,28 @@ export type DatabaseTableViewRowState = {
   rowIds?: string[];
 };
 
-export type DatabaseTableViewCellStateType = 'select' | 'clear' | 'edit';
 export type CellCoord = {
   rowIndex: number;
   cellIndex: number;
 };
-export type DatabaseTableViewCellState = {
-  type: DatabaseTableViewCellStateType;
-  databaseId?: string;
-  coords?: [CellCoord, CellCoord?];
+export type DatabaseTableViewCellSelect = {
+  type: 'select';
+  databaseId: string;
+  // Currently only supports single cell selection.
+  coords: [CellCoord];
 };
+type DatabaseTableViewCellEdit = {
+  type: 'edit';
+  databaseId: string;
+  coords: [CellCoord];
+};
+type DatabaseTableViewCellClear = {
+  type: 'clear';
+};
+export type DatabaseTableViewCellState =
+  | DatabaseTableViewCellSelect
+  | DatabaseTableViewCellEdit
+  | DatabaseTableViewCellClear;
 
 /** Common context interface definition for block models. */
 

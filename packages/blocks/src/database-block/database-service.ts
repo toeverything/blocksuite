@@ -13,7 +13,7 @@ import {
   getClosestRowId,
 } from '../page-block/default/selection-manager/database-selection-manager/utils.js';
 import type {
-  CellCoord,
+  DatabaseTableViewCellSelect,
   DatabaseTableViewCellState,
   DatabaseTableViewRowState,
 } from '../std.js';
@@ -32,10 +32,10 @@ type LastTableViewRowSelection = {
   databaseId: string;
   rowIds: string[];
 };
-type LastTableViewCellSelection = {
-  databaseId: string;
-  coords: [CellCoord, CellCoord?];
-};
+type LastTableViewCellSelection = Pick<
+  DatabaseTableViewCellSelect,
+  'databaseId' | 'coords'
+>;
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   private _lastRowSelection: LastTableViewRowSelection = {
     databaseId: '',
@@ -68,10 +68,10 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
 
     this.slots.tableViewCellSelectionUpdated.on(state => {
-      const { type, databaseId, coords } = state;
+      const { type } = state;
 
       if (type === 'select') {
-        if (!databaseId || !coords) return;
+        const { databaseId, coords } = state;
         //  select
         this._lastCellSelection = {
           databaseId,
@@ -79,7 +79,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         };
         setDatabaseCellSelection(databaseId, coords);
       } else if (type === 'edit') {
-        if (!databaseId || !coords) return;
+        const { databaseId, coords } = state;
         this._lastCellSelection = null;
         setDatabaseCellEditing(databaseId, coords[0]);
       } else if (type === 'clear') {
