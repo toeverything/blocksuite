@@ -181,7 +181,7 @@ test('the tooltip of more button should be hidden when the action menu is shown'
   await expect(tooltip).toBeVisible();
 });
 
-test('undo/redo', async ({ page }) => {
+test('should undo/redo works in edgeless', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
