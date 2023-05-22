@@ -5,13 +5,21 @@ import {
 import { serializeXYWH } from '@blocksuite/phasor';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
+import { getOptions } from '../utils';
 import { addShapeElement, type InitFn } from './utils';
-
-const COUNT = 500;
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 
 export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
+  const { count } = getOptions((params: URLSearchParams) => {
+    const count = Number(params.get('count')) || 100;
+    return {
+      count,
+    };
+  }) as {
+    count: number;
+  };
+
   const page = workspace.createPage({ id });
 
   // Add page block and surface block at root level
@@ -24,9 +32,9 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
   let i = 0;
 
   // Add frame block inside page block
-  for (; i < COUNT; i++) {
-    const x = Math.random() * 1000;
-    const y = Math.random() * 1000;
+  for (; i < count; i++) {
+    const x = Math.random() * count * 2;
+    const y = Math.random() * count * 2;
     addShapeElement(page, surfaceBlockId, {
       id: nanoid(),
       index: 'a0',
@@ -46,9 +54,9 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
   }
 
   // Add frame block inside page block
-  for (i = 0; i < COUNT; i++) {
-    const x = Math.random() * -1000 - 100;
-    const y = Math.random() * 1000;
+  for (i = 0; i < count; i++) {
+    const x = Math.random() * -count * 2 - 100;
+    const y = Math.random() * count * 2;
     const frameId = page.addBlock(
       'affine:frame',
       {
@@ -69,4 +77,4 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
 
 heavyWhiteboard.id = 'heavy-whiteboard';
 heavyWhiteboard.displayName = 'Heavy Whiteboard';
-heavyWhiteboard.description = 'Heavy Whiteboard on 500 frames and 500 shapes';
+heavyWhiteboard.description = 'Heavy Whiteboard on 200 elements by default';
