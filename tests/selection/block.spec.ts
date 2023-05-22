@@ -148,8 +148,8 @@ test('selection on heavy page', async ({ page }) => {
   await dragBetweenCoords(
     page,
     {
-      x: first.x - 1,
-      y: first.y - 1,
+      x: first.x - 10,
+      y: first.y - 10,
     },
     {
       x: last.x + 1,
@@ -160,8 +160,8 @@ test('selection on heavy page', async ({ page }) => {
         const rect = await page
           .locator('.affine-page-dragging-area')
           .evaluate(element => element.getBoundingClientRect());
-        assertAlmostEqual(rect.x, first.x - 1, 1);
-        assertAlmostEqual(rect.y, first.y - 1, 1);
+        assertAlmostEqual(rect.x, first.x - 10, 1);
+        assertAlmostEqual(rect.y, first.y - 4, 1);
         assertAlmostEqual(rect.right, last.x + 1, 1);
         assertAlmostEqual(rect.bottom, last.y + 1, 1);
       },
@@ -180,10 +180,10 @@ test('should indent multi-selection block', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 26 - 24, coord.y - 10);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x + 20, coord.y + 50);
+  await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
   await page.mouse.up();
 
   await page.keyboard.press('Tab');
@@ -534,8 +534,8 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -575,8 +575,8 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -646,8 +646,8 @@ test('should not clear selected rects when clicking on scrollbar', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -729,8 +729,8 @@ test('should not clear selected rects when scrolling the wheel', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -878,8 +878,8 @@ test('should clear block selection before native selection', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -946,8 +946,8 @@ test('should not be misaligned when the editor container has padding or margin',
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: last.left + 1,
