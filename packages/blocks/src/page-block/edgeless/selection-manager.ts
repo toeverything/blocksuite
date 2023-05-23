@@ -49,6 +49,9 @@ function shouldFilterMouseEvent(event: Event): boolean {
   if (target.tagName === 'FORMAT-QUICK-BAR') {
     return true;
   }
+  if (target.tagName === 'AFFINE-DRAG-HANDLE') {
+    return true;
+  }
   return false;
 }
 
