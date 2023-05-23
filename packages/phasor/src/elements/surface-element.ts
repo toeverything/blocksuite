@@ -19,7 +19,7 @@ export interface HitTestOptions {
   fillHollow: boolean;
 }
 
-export type TransformPropertyValue = (value: string) => string;
+export type ComputedValue = (value: string) => string;
 
 export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
   yMap: Y.Map<unknown>;
@@ -27,7 +27,7 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
   protected renderer: Renderer | null = null;
   protected surface: SurfaceManager | null = null;
 
-  transformPropertyValue: TransformPropertyValue = v => v;
+  computedValue: ComputedValue = v => v;
 
   constructor(yMap: Y.Map<unknown>, surface: SurfaceManager, data?: T) {
     if (!yMap.doc) {

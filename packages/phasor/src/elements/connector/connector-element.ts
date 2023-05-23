@@ -42,7 +42,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     const { seed, strokeStyle, color, lineWidth, controllers } = this;
-    const realStrokeColor = this.transformPropertyValue(color);
+    const realStrokeColor = this.computedValue(color);
 
     if (this.mode === ConnectorMode.Orthogonal) {
       rc.linearPath(

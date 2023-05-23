@@ -41,11 +41,11 @@ export class ShapeElement extends SurfaceElement<IShape> {
   }
 
   get realStrokeColor() {
-    return this.transformPropertyValue(this.strokeColor);
+    return this.computedValue(this.strokeColor);
   }
 
   get realFillColor() {
-    return this.transformPropertyValue(this.fillColor);
+    return this.computedValue(this.fillColor);
   }
 
   override hitTest(x: number, y: number, options?: HitTestOptions) {
