@@ -449,21 +449,16 @@ export function getBackgroundGrid(
 ) {
   const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
   const gap = 20 * step * zoom;
-  const translateX = -viewportX * zoom + gap / 2;
-  const translateY = -viewportY * zoom + gap / 2;
-
-  const gridStyle = {
-    backgroundImage:
-      'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)',
-  };
-  const defaultStyle = {};
-  const style = showGrid ? gridStyle : defaultStyle;
+  const translateX = -viewportX * zoom;
+  const translateY = -viewportY * zoom;
 
   return {
-    style,
     gap,
     translateX,
     translateY,
+    grid: showGrid
+      ? 'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)'
+      : 'unset',
   };
 }
 
