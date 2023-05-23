@@ -80,7 +80,7 @@ test('native range delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const box123 = await getRichTextBoundingBox(page, '2');
-  const inside123 = { x: box123.left - 10, y: box123.top + 1 };
+  const inside123 = { x: box123.left - 1, y: box123.top + 1 };
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
@@ -107,7 +107,7 @@ test('native range input', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const box123 = await getRichTextBoundingBox(page, '2');
-  const inside123 = { x: box123.left - 10, y: box123.top + 1 };
+  const inside123 = { x: box123.left - 1, y: box123.top + 1 };
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };

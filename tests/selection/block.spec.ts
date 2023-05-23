@@ -148,8 +148,8 @@ test('selection on heavy page', async ({ page }) => {
   await dragBetweenCoords(
     page,
     {
-      x: first.x - 10,
-      y: first.y - 10,
+      x: first.x - 1,
+      y: first.y - 1,
     },
     {
       x: last.x + 1,
@@ -160,8 +160,8 @@ test('selection on heavy page', async ({ page }) => {
         const rect = await page
           .locator('.affine-page-dragging-area')
           .evaluate(element => element.getBoundingClientRect());
-        assertAlmostEqual(rect.x, first.x - 10, 1);
-        assertAlmostEqual(rect.y, first.y - 4, 1);
+        assertAlmostEqual(rect.x, first.x - 1, 1);
+        assertAlmostEqual(rect.y, first.y - 1, 1);
         assertAlmostEqual(rect.right, last.x + 1, 1);
         assertAlmostEqual(rect.bottom, last.y + 1, 1);
       },
