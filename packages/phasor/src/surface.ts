@@ -13,8 +13,8 @@ import {
   type SurfaceElement,
 } from './elements/index.js';
 import type {
+  ComputedValue,
   HitTestOptions,
-  TransformPropertyValue,
 } from './elements/surface-element.js';
 import { compare, ConnectorElement, intersects } from './index.js';
 import type { SurfaceViewport } from './renderer.js';
@@ -33,17 +33,17 @@ export class SurfaceManager {
   private _elements = new Map<string, SurfaceElement>();
   private _bindings = new Map<string, Set<string>>();
 
-  private _transformPropertyValue: TransformPropertyValue;
+  private _computedValue: ComputedValue;
 
   indexes = { min: 'a0', max: 'a0' };
 
   constructor(
     yContainer: Y.Map<unknown>,
-    transformPropertyValue: TransformPropertyValue = v => v
+    computedValue: ComputedValue = v => v
   ) {
     this._renderer = new Renderer();
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
-    this._transformPropertyValue = transformPropertyValue;
+    this._computedValue = computedValue;
 
     this._syncFromExistingContainer();
     this._yContainer.observe(this._onYContainer);
@@ -81,7 +81,7 @@ export class SurfaceManager {
         const ElementCtor = ElementCtors[type];
         assertExists(ElementCtor);
         const element = new ElementCtor(yElement, this);
-        element.transformPropertyValue = this._transformPropertyValue;
+        element.computedValue = this._computedValue;
         element.mount(this._renderer);
 
         this._elements.set(element.id, element);
@@ -114,7 +114,7 @@ export class SurfaceManager {
         const ElementCtor = ElementCtors[type];
         assertExists(ElementCtor);
         const element = new ElementCtor(yElement, this);
-        element.transformPropertyValue = this._transformPropertyValue;
+        element.computedValue = this._computedValue;
         element.mount(this._renderer);
 
         this._elements.set(element.id, element);
