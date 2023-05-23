@@ -2,7 +2,6 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
   FRAME_BACKGROUND_COLORS,
 } from '@blocksuite/global/config';
-import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { TemplateResult } from 'lit';
 import { html, nothing } from 'lit';
