@@ -370,7 +370,7 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
 }
 
 export function getVirgoByModel(model: BaseBlockModel) {
-  if (matchFlavours(model, ['affine:database'] as const)) {
+  if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple Virgo instances.
     // Support to enter the editing state through the Enter key in the database.
     return null;
@@ -381,7 +381,7 @@ export function getVirgoByModel(model: BaseBlockModel) {
 }
 
 export async function asyncGetVirgoByModel(model: BaseBlockModel) {
-  if (matchFlavours(model, ['affine:database'] as const)) {
+  if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple Virgo instances.
     throw new Error('Cannot get virgo by database model!');
   }
@@ -963,7 +963,7 @@ export function getHoveringFrame(point: Point) {
  * Returns `true` if the database is empty.
  */
 export function isEmptyDatabase(model: BaseBlockModel) {
-  return matchFlavours(model, ['affine:database'] as const) && model.isEmpty();
+  return matchFlavours(model, ['affine:database']) && model.isEmpty();
 }
 
 /**
