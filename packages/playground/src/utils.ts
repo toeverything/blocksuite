@@ -53,6 +53,10 @@ export const initParam = providerArgs.includes('indexeddb')
   : params.get('init');
 export const isE2E = room.startsWith('playwright');
 
+export const getOptions = (
+  fn: (params: URLSearchParams) => Record<string, string | number>
+) => fn(params);
+
 declare global {
   // eslint-disable-next-line no-var
   var targetPageId: string | undefined;
