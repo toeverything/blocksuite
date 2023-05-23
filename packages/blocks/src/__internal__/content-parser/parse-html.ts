@@ -4,6 +4,7 @@ import type { DeltaOperation, Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
 
@@ -106,6 +107,11 @@ export class HtmlParser {
       'embedItemParser',
       this._embedItemParser
     );
+
+    this._contentParser.registerParserHtmlText2Block(
+      'tableParser',
+      this._tableParser
+    );
   }
 
   // TODO parse children block
@@ -202,6 +208,20 @@ export class HtmlParser {
               'embedItemParser'
             )?.(node);
           }
+          break;
+        case 'HEADER':
+          result = await this._contentParser.getParserHtmlText2Block(
+            'commonParser'
+          )?.({
+            element: node,
+            flavour: 'affine:page',
+            type: tagName.toLowerCase(),
+          });
+          break;
+        case 'TABLE':
+          result = await this._contentParser.getParserHtmlText2Block(
+            'tableParser'
+          )?.(node);
           break;
         default:
           break;
@@ -546,6 +566,87 @@ export class HtmlParser {
       ];
     }
 
+    return result;
+  };
+
+  // TODO parse children block, this is temporary solution
+  private _tableParser = async (
+    element: Element
+  ): Promise<SerializedBlock[] | null> => {
+    let result: SerializedBlock[] | null = [];
+    if (element.tagName === 'TABLE') {
+      const theadElement = element.querySelector('thead');
+      const tbodyElement = element.querySelector('tbody');
+      const titleTrEle = theadElement?.querySelector('tr');
+      let id = 1;
+      const titles: string[] = [];
+      titleTrEle?.querySelectorAll('th').forEach(ele => {
+        titles.push(ele.textContent || '');
+      });
+      const rows: string[][] = [];
+      tbodyElement?.querySelectorAll('tr').forEach(ele => {
+        const row: string[] = [];
+        ele.querySelectorAll('td').forEach(ele => {
+          row.push(ele.textContent || '');
+        });
+        rows.push(row);
+      });
+      const columns: Column[] = titles.slice(1).map((value, index) => {
+        return {
+          name: value,
+          type: 'rich-text',
+          width: 200,
+          hide: false,
+          id: '' + id++,
+        };
+      });
+      if (rows.length > 0) {
+        for (let i = 0; i < rows[0].length - columns.length; i++) {
+          columns.push({
+            name: '',
+            type: 'rich-text',
+            width: 200,
+            hide: false,
+            id: '' + id++,
+          });
+        }
+      }
+      const databasePropsId = id++;
+      const cells: Record<string, Record<string, Cell>> = {};
+      const children: SerializedBlock[] = [];
+      rows.forEach(row => {
+        children.push({
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: row[0] }],
+          children: [],
+        });
+        const rowId = '' + id++;
+        cells[rowId] = {};
+        row.slice(1).forEach((value, index) => {
+          cells[rowId][columns[index].id] = {
+            columnId: columns[index].id,
+            value,
+          };
+        });
+      });
+
+      result = [
+        {
+          flavour: 'affine:database',
+          databaseProps: {
+            id: '' + databasePropsId,
+            title: 'Database',
+            titleColumnName: titles[0],
+            titleColumnWidth: 432,
+            rowIds: Object.keys(cells),
+            cells: cells,
+            columns: columns,
+          },
+          children: children,
+        },
+      ];
+    }
     return result;
   };
 }

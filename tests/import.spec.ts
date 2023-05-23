@@ -1,23 +1,16 @@
 import './utils/declare-test-window.js';
 
+import { expect } from '@playwright/test';
+
 import {
   enterPlaygroundRoom,
-  focusRichText,
-  importMarkdown,
-  initEmptyParagraphState,
-  resetHistory,
-  setVirgoSelection,
+  transformMarkdown,
 } from './utils/actions/index.js';
-import { assertStoreValue } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 test(scoped`import notion markdown-format text todo head`, async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await resetHistory(page);
-  await setVirgoSelection(page, 1, 1);
 
-  const temp = `
+  const tempText = `
   # demo
 
   text
@@ -31,171 +24,63 @@ test(scoped`import notion markdown-format text todo head`, async ({ page }) => {
 
   ### heading3
 `;
-  const value = {
-    '0': {
-      'sys:id': '0',
-      'sys:flavour': 'affine:page',
-      'sys:children': ['1'],
-      'prop:title': '',
-    },
-    '1': {
-      'sys:id': '1',
-      'sys:flavour': 'affine:frame',
-      'sys:children': ['3', '4', '5', '7', '8', '9', '2'],
-      'prop:xywh': '[0,0,720,80]',
-      'prop:background': '--affine-background-secondary-color',
-    },
-    '2': {
-      'sys:id': '2',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': '',
-    },
-    '3': {
-      'sys:id': '3',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h1',
-      'prop:text': 'demo',
-    },
-    '4': {
-      'sys:id': '4',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': '  text',
-    },
-    '5': {
-      'sys:id': '5',
-      'sys:flavour': 'affine:list',
-      'sys:children': ['6'],
-      'prop:type': 'todo',
-      'prop:checked': false,
-      'prop:text': ' todo1',
-    },
-    '6': {
-      'sys:id': '6',
-      'sys:flavour': 'affine:list',
-      'sys:children': [],
-      'prop:type': 'todo',
-      'prop:checked': false,
-      'prop:text': ' todo2',
-    },
-    '7': {
-      'sys:id': '7',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h1',
-      'prop:text': 'heading1',
-    },
-    '8': {
-      'sys:id': '8',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h2',
-      'prop:text': 'heading2',
-    },
-    '9': {
-      'sys:id': '9',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h3',
-      'prop:text': 'heading3',
-    },
-  };
-  await importMarkdown(page, frameId, temp);
-  await assertStoreValue(page, 'space:page0', value);
-});
 
-test(scoped`import notion markdown-format list`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await resetHistory(page);
-  await setVirgoSelection(page, 1, 1);
+  const expectedValue = [
+    {
+      flavour: 'affine:paragraph',
+      type: 'h1',
+      text: [{ insert: 'demo', attributes: {} }],
+      children: [],
+    },
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: '  text', attributes: {} }],
+      children: [],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [{ insert: ' todo1', attributes: {} }],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'todo',
+          checked: false,
+          text: [{ insert: ' todo2', attributes: {} }],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:paragraph',
+      type: 'h1',
+      text: [{ insert: 'heading1', attributes: {} }],
+      children: [],
+    },
+    {
+      flavour: 'affine:paragraph',
+      type: 'h2',
+      text: [{ insert: 'heading2', attributes: {} }],
+      children: [],
+    },
+    {
+      flavour: 'affine:paragraph',
+      type: 'h3',
+      text: [{ insert: 'heading3', attributes: {} }],
+      children: [],
+    },
+  ];
 
-  const temp = `
-  # demo
-
-  - bulleted list1
-      - bulleted list2
-  1. number list1
-  2. number list2
-`;
-  const value = {
-    '0': {
-      'sys:id': '0',
-      'sys:flavour': 'affine:page',
-      'sys:children': ['1'],
-      'prop:title': '',
-    },
-    '1': {
-      'sys:id': '1',
-      'sys:flavour': 'affine:frame',
-      'sys:children': ['3', '4', '6', '7', '2'],
-      'prop:xywh': '[0,0,720,80]',
-      'prop:background': '--affine-background-secondary-color',
-    },
-    '2': {
-      'sys:id': '2',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': '',
-    },
-    '3': {
-      'sys:id': '3',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h1',
-      'prop:text': 'demo',
-    },
-    '4': {
-      'sys:id': '4',
-      'sys:flavour': 'affine:list',
-      'sys:children': ['5'],
-      'prop:type': 'bulleted',
-      'prop:text': 'bulleted list1',
-      'prop:checked': false,
-    },
-    '5': {
-      'sys:id': '5',
-      'sys:flavour': 'affine:list',
-      'sys:children': [],
-      'prop:type': 'bulleted',
-      'prop:text': 'bulleted list2',
-      'prop:checked': false,
-    },
-    '6': {
-      'sys:id': '6',
-      'sys:flavour': 'affine:list',
-      'sys:children': [],
-      'prop:type': 'numbered',
-      'prop:text': 'number list1',
-      'prop:checked': false,
-    },
-    '7': {
-      'sys:id': '7',
-      'sys:flavour': 'affine:list',
-      'sys:children': [],
-      'prop:type': 'numbered',
-      'prop:text': 'number list2',
-      'prop:checked': false,
-    },
-  };
-  await importMarkdown(page, frameId, temp);
-  await assertStoreValue(page, 'space:page0', value);
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
 });
 
 test(scoped`import notion html-format text todo head`, async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await resetHistory(page);
-  await setVirgoSelection(page, 1, 1);
 
-  const temp = `
+  const tempText = `
   <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -229,105 +114,129 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
   </body>
   </html>
 `;
-  const value = {
-    '0': {
-      'sys:id': '0',
-      'sys:flavour': 'affine:page',
-      'sys:children': ['1'],
-      'prop:title': '',
+  const expectedValue = [
+    {
+      flavour: 'affine:page',
+      type: 'header',
+      text: [{ insert: 'demo', attributes: {} }],
+      children: [],
     },
-    '1': {
-      'sys:id': '1',
-      'sys:flavour': 'affine:frame',
-      'sys:children': ['3', '4', '5', '9', '10', '11', '2'],
-      'prop:xywh': '[0,0,720,80]',
-      'prop:background': '--affine-background-secondary-color',
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'text', attributes: {} }],
+      children: [],
     },
-    '2': {
-      'sys:id': '2',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': '',
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [
+        { insert: '', attributes: {} },
+        { insert: '            ', attributes: {} },
+      ],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: 'todo1', attributes: {} }],
+          children: [],
+        },
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [
+            { insert: '', attributes: {} },
+            { insert: '                  ', attributes: {} },
+          ],
+          children: [
+            {
+              flavour: 'affine:paragraph',
+              type: 'text',
+              text: [{ insert: 'todo2', attributes: {} }],
+              children: [],
+            },
+          ],
+        },
+      ],
     },
-    '3': {
-      'sys:id': '3',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h1',
-      'prop:text': 'demo',
+    {
+      flavour: 'affine:paragraph',
+      type: 'h1',
+      text: [{ insert: 'heading1', attributes: {} }],
+      children: [],
     },
-    '4': {
-      'sys:id': '4',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': 'text',
+    {
+      flavour: 'affine:paragraph',
+      type: 'h2',
+      text: [{ insert: 'heading2', attributes: {} }],
+      children: [],
     },
-    '5': {
-      'sys:id': '5',
-      'sys:flavour': 'affine:list',
-      'sys:children': ['6', '7'],
-      'prop:type': 'bulleted',
-      'prop:text': '            ',
-      'prop:checked': false,
+    {
+      flavour: 'affine:paragraph',
+      type: 'h3',
+      text: [{ insert: 'heading3', attributes: {} }],
+      children: [],
     },
-    '6': {
-      'sys:id': '6',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': 'todo1',
+  ];
+
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
+});
+
+test(scoped`import notion markdown-format list`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  const tempText = `
+  # demo
+
+  - bulleted list1
+      - bulleted list2
+  1. number list1
+  2. number list2
+`;
+
+  const expectedValue = [
+    {
+      flavour: 'affine:paragraph',
+      type: 'h1',
+      text: [{ insert: 'demo', attributes: {} }],
+      children: [],
     },
-    '7': {
-      'sys:id': '7',
-      'sys:flavour': 'affine:list',
-      'sys:children': ['8'],
-      'prop:type': 'bulleted',
-      'prop:text': '                  ',
-      'prop:checked': false,
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: 'bulleted list1', attributes: {} }],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: 'bulleted list2', attributes: {} }],
+          children: [],
+        },
+      ],
     },
-    '8': {
-      'sys:id': '8',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': 'todo2',
+    {
+      flavour: 'affine:list',
+      type: 'numbered',
+      text: [{ insert: 'number list1', attributes: {} }],
+      children: [],
     },
-    '9': {
-      'sys:id': '9',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h1',
-      'prop:text': 'heading1',
+    {
+      flavour: 'affine:list',
+      type: 'numbered',
+      text: [{ insert: 'number list2', attributes: {} }],
+      children: [],
     },
-    '10': {
-      'sys:id': '10',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h2',
-      'prop:text': 'heading2',
-    },
-    '11': {
-      'sys:id': '11',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h3',
-      'prop:text': 'heading3',
-    },
-  };
-  await importMarkdown(page, frameId, temp);
-  await assertStoreValue(page, 'space:page0', value);
+  ];
+
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
 });
 
 test(scoped`import notion html-format list`, async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await resetHistory(page);
-  await setVirgoSelection(page, 1, 1);
 
-  const temp = `
+  const tempText = `
   <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -366,67 +275,192 @@ test(scoped`import notion html-format list`, async ({ page }) => {
   </body>
   </html>
 `;
-  const value = {
-    '0': {
-      'sys:id': '0',
-      'sys:flavour': 'affine:page',
-      'sys:children': ['1'],
-      'prop:title': '',
+  const expectedValue = [
+    {
+      flavour: 'affine:page',
+      type: 'header',
+      text: [{ insert: 'demo', attributes: {} }],
+      children: [],
     },
-    '1': {
-      'sys:id': '1',
-      'sys:flavour': 'affine:frame',
-      'sys:children': ['3', '4', '6', '7', '2'],
-      'prop:xywh': '[0,0,720,80]',
-      'prop:background': '--affine-background-secondary-color',
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [
+        { insert: '', attributes: {} },
+        { insert: '            bulleted list1', attributes: {} },
+        { insert: '            ', attributes: {} },
+      ],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: 'bulleted list2', attributes: {} }],
+          children: [],
+        },
+      ],
     },
-    '2': {
-      'sys:id': '2',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'text',
-      'prop:text': '',
+    {
+      flavour: 'affine:list',
+      type: 'numbered',
+      text: [{ insert: 'number list1', attributes: {} }],
+      children: [],
     },
-    '3': {
-      'sys:id': '3',
-      'sys:flavour': 'affine:paragraph',
-      'sys:children': [],
-      'prop:type': 'h1',
-      'prop:text': 'demo',
+    {
+      flavour: 'affine:list',
+      type: 'numbered',
+      text: [{ insert: 'number list2', attributes: {} }],
+      children: [],
     },
-    '4': {
-      'sys:id': '4',
-      'sys:flavour': 'affine:list',
-      'sys:children': ['5'],
-      'prop:type': 'bulleted',
-      'prop:text': '            bulleted list1            ',
-      'prop:checked': false,
+  ];
+
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
+});
+
+test(scoped`import notion markdown-format table`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  const tempText = `
+  # demo
+  
+  | table-title1 | table-title2 |
+  | --- | --- |
+  | table-content1 | table-content2 |
+  |  |  |
+`;
+
+  const expectedValue = [
+    {
+      flavour: 'affine:paragraph',
+      type: 'h1',
+      text: [{ insert: 'demo', attributes: {} }],
+      children: [],
     },
-    '5': {
-      'sys:id': '5',
-      'sys:flavour': 'affine:list',
-      'sys:children': [],
-      'prop:type': 'bulleted',
-      'prop:text': 'bulleted list2',
-      'prop:checked': false,
+    {
+      flavour: 'affine:database',
+      databaseProps: {
+        id: '3',
+        title: 'Database',
+        titleColumnName: 'table-title1',
+        titleColumnWidth: 432,
+        rowIds: ['4', '5'],
+        cells: {
+          '4': { '1': { columnId: '1', value: 'table-content2' } },
+          '5': { '1': { columnId: '1', value: '' } },
+        },
+        columns: [
+          {
+            name: 'table-title2',
+            type: 'rich-text',
+            width: 200,
+            hide: false,
+            id: '1',
+          },
+          { name: '', type: 'rich-text', width: 200, hide: false, id: '2' },
+        ],
+      },
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: 'table-content1' }],
+          children: [],
+        },
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: '' }],
+          children: [],
+        },
+      ],
     },
-    '6': {
-      'sys:id': '6',
-      'sys:flavour': 'affine:list',
-      'sys:children': [],
-      'prop:type': 'numbered',
-      'prop:text': 'number list1',
-      'prop:checked': false,
+  ];
+
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
+});
+
+test(scoped`import notion html-format table`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  const tempText = `
+  <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>demo</title>
+  </head>
+  <body>
+    <article id="8da888cd-8160-4fd6-929c-628fca9189d8" class="page sans">
+      <header><h1 class="page-title">demo</h1></header>
+      <div class="page-body">
+        <table id="b94f7bb7-9331-4121-8fe5-866465277b93" class="simple-table">
+          <tbody>
+            <tr id="c35d91c6-e443-4eb4-b70b-b1fc16f193d4">
+              <td id="FkBK" class="">table-title1</td>
+              <td id="&gt;VYO" class="">table-title2</td>
+            </tr>
+            <tr id="a04ad6bc-476a-4420-9103-9d43f9ac4d1e">
+              <td id="FkBK" class="">table-content1</td>
+              <td id="&gt;VYO" class="">table-content2</td>
+            </tr>
+            <tr id="1d0064a3-300e-44ca-870b-e969f691b839">
+              <td id="FkBK" class=""></td>
+              <td id="&gt;VYO" class=""></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </body>
+  </html>
+`;
+
+  const expectedValue = [
+    {
+      flavour: 'affine:page',
+      type: 'header',
+      text: [{ insert: 'demo', attributes: {} }],
+      children: [],
     },
-    '7': {
-      'sys:id': '7',
-      'sys:flavour': 'affine:list',
-      'sys:children': [],
-      'prop:type': 'numbered',
-      'prop:text': 'number list2',
-      'prop:checked': false,
+    {
+      flavour: 'affine:database',
+      databaseProps: {
+        id: '2',
+        title: 'Database',
+        titleColumnWidth: 432,
+        rowIds: ['3', '4', '5'],
+        cells: {
+          '3': { '1': { columnId: '1', value: 'table-title2' } },
+          '4': { '1': { columnId: '1', value: 'table-content2' } },
+          '5': { '1': { columnId: '1', value: '' } },
+        },
+        columns: [
+          { name: '', type: 'rich-text', width: 200, hide: false, id: '1' },
+        ],
+      },
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: 'table-title1' }],
+          children: [],
+        },
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: 'table-content1' }],
+          children: [],
+        },
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: '' }],
+          children: [],
+        },
+      ],
     },
-  };
-  await importMarkdown(page, frameId, temp);
-  await assertStoreValue(page, 'space:page0', value);
+  ];
+
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
 });

@@ -29,6 +29,15 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[]
   ) {
+    if (
+      pastedBlocks.length > 0 &&
+      pastedBlocks[0].children.length === 0 &&
+      (pastedBlocks[0].text?.length || 0) > 0
+    ) {
+      focusedBlockModel.title =
+        pastedBlocks[0].text?.map(text => text.insert || '').join('') || '';
+      pastedBlocks = pastedBlocks.slice(1);
+    }
     // this is page block empty case
     const frameId = focusedBlockModel.page.addBlock(
       'affine:frame',
