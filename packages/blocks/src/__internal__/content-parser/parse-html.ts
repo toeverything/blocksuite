@@ -35,6 +35,7 @@ const INLINE_TAGS = [
   'ABBR',
   'CITE',
   'BDI',
+  'TIME',
 ];
 
 export class HtmlParser {
@@ -318,6 +319,7 @@ export class HtmlParser {
       const node = childNodes.item(i);
       if (!node) continue;
       if (node.nodeName === '#comment') continue;
+      if (node.nodeName === 'STYLE') continue;
       if (!isChildNode) {
         if (node instanceof Text) {
           textValues.push(
@@ -354,6 +356,20 @@ export class HtmlParser {
       };
     }
 
+    if (
+      textValues.length === 0 &&
+      children.length > 0 &&
+      flavour === 'affine:list'
+    ) {
+      return {
+        flavour: flavour as keyof BlockSchemas,
+        type: type,
+        checked: checked,
+        text: children[0].text,
+        children: children.slice(1),
+      };
+    }
+
     return {
       flavour: flavour as keyof BlockSchemas,
       type: type,
@@ -377,6 +393,9 @@ export class HtmlParser {
       });
     }
     const htmlElement = element as HTMLElement;
+    if (htmlElement.classList.contains('katex-mathml')) {
+      return [];
+    }
     const childNodes = Array.from(htmlElement.childNodes);
     const currentTextStyle = getTextStyle(htmlElement);
 
@@ -412,6 +431,32 @@ export class HtmlParser {
   ): Promise<SerializedBlock[] | null> => {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
+    if (
+      element.firstElementChild?.tagName === 'DETAIL' ||
+      element.firstElementChild?.firstElementChild?.tagName === 'SUMMARY'
+    ) {
+      const summary = await this._contentParser.getParserHtmlText2Block(
+        'commonParser'
+      )?.({
+        element: element.firstElementChild.firstElementChild,
+        flavour: 'affine:list',
+        type: type,
+      });
+      const childNodes = element.firstElementChild.childNodes;
+      const children = [];
+      for (let i = 1; i < childNodes.length; i++) {
+        const node = childNodes.item(i);
+        if (!node) continue;
+        if (node instanceof Element) {
+          const childNode = await this._nodeParser(node);
+          childNode && children.push(...childNode);
+        }
+      }
+      if (summary && summary.length > 0) {
+        summary[0].children = [...(summary[0].children || []), ...children];
+      }
+      return summary;
+    }
     let checked;
     let inputEl;
     if (
@@ -549,21 +594,37 @@ export class HtmlParser {
     if (imgElement) {
       const imgUrl = imgElement.getAttribute('src') || '';
       const imgBlob = await this._fetchFileFunc(imgUrl);
-      if (!imgBlob) {
-        return result;
+      if (!imgBlob || imgBlob.size === 0) {
+        const texts = [
+          {
+            insert: imgUrl,
+            attributes: {
+              link: imgUrl,
+            },
+          },
+        ];
+        result = [
+          {
+            flavour: 'affine:paragraph',
+            type: 'text',
+            children: [],
+            text: texts,
+          },
+        ];
+      } else {
+        const storage = await this._page.blobs;
+        assertExists(storage);
+        const id = await storage.set(imgBlob);
+        result = [
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            sourceId: id,
+            children: [],
+            text: texts,
+          },
+        ];
       }
-      const storage = await this._page.blobs;
-      assertExists(storage);
-      const id = await storage.set(imgBlob);
-      result = [
-        {
-          flavour: 'affine:embed',
-          type: 'image',
-          sourceId: id,
-          children: [],
-          text: texts,
-        },
-      ];
     }
 
     return result;
