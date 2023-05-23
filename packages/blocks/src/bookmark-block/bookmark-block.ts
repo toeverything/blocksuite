@@ -17,15 +17,6 @@ import { BookmarkBlockService } from './bookmark-service.js';
 import { DefaultBanner } from './images/banners.js';
 import { DefaultIcon } from './images/icons.js';
 
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace globalThis {
-    // eslint-disable-next-line no-var
-    const getBookmarkDataByLink: (
-      link: string
-    ) => Promise<Omit<BookmarkProps, 'link'>>;
-  }
-}
 @customElement('affine-bookmark')
 export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   static override styles = css`
@@ -43,28 +34,40 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       color: var(--affine-text-primary-color);
       overflow: hidden;
       line-height: calc(1em + 4px);
+      margin-top: calc(var(--affine-paragraph-space) + 8px);
     }
     .affine-bookmark-banner {
       width: 140px;
       height: 96px;
+    }
+    .affine-bookmark-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .affine-bookmark-content-wrapper {
       flex-grow: 1;
       overflow: hidden;
     }
     .affine-bookmark-title {
+      height: 18px;
       display: flex;
       align-items: center;
       font-size: var(--affine-font-sm);
       font-weight: 600;
     }
     .affine-bookmark-icon {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      margin-right: 4px;
       color: var(--affine-text-secondary-color);
     }
-    .affine-bookmark-summary {
+    .affine-bookmark-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .affine-bookmark-description {
       height: 32px;
       line-height: 16px;
       margin-top: 4px;
@@ -83,6 +86,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      margin-top: 2px;
     }
   `;
 
@@ -98,35 +102,43 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:bookmark', BookmarkBlockService);
-    if (getBookmarkDataByLink) {
+    // @ts-ignore
+    if (window?.apis?.ui?.getBookmarkDataByLink) {
       // This method is get website's metaData by link
       // And only exists in the AFFiNE client
-      getBookmarkDataByLink(this.model.link).then(data => {
-        this.model.page.updateBlock(this.model, {
-          link: this.model.link,
-          ...data,
+      // @ts-ignore
+      window.apis.ui
+        .getBookmarkDataByLink(this.model.url)
+        .then((data: BookmarkProps) => {
+          this.model.page.updateBlock(this.model, {
+            ...data,
+            url: this.model.url,
+          });
         });
-      });
     }
   }
 
   override render() {
-    const { link, title, summary, icon, banner } = this.model;
+    const { url, title, description, icon, image } = this.model;
     return html`<a
-      href="${link}"
+      href="${url}"
       target="_blank"
       class=${`affine-bookmark-block-container`}
     >
       <div class="affine-bookmark-content-wrapper">
         <div class="affine-bookmark-title">
-          <div class="affine-bookmark-icon">${icon || DefaultIcon}</div>
+          <div class="affine-bookmark-icon">
+            ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
+          </div>
           ${title || 'Bookmark'}
         </div>
 
-        <div class="affine-bookmark-summary">${summary || link}</div>
-        <div class="affine-bookmark-link">${link}</div>
+        <div class="affine-bookmark-description">${description || url}</div>
+        <div class="affine-bookmark-link">${url}</div>
       </div>
-      <div class="affine-bookmark-banner">${banner || DefaultBanner}</div>
+      <div class="affine-bookmark-banner">
+        ${image ? html`<img src="${image}" alt="image" />` : DefaultBanner}
+      </div>
     </a> `;
   }
 }

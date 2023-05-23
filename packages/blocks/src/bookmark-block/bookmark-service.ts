@@ -6,6 +6,6 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     block: BookmarkBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    return block.link;
+    return block.url;
   }
 }

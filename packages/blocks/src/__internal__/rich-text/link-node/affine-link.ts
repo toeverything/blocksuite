@@ -198,7 +198,7 @@ export class AffineLink extends ShadowlessElement {
 
     page.addBlock(
       'affine:bookmark',
-      { link: this.link, title: this.delta.insert },
+      { url: this.link, title: this.delta.insert },
       parent,
       index + 1
     );

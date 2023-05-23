@@ -1,23 +1,31 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-export type BookmarkProps = {
-  link: string;
-  // When convert edited link to a bookmark, we need to keep the text to title.
-  title: string;
-  summary?: string;
+// This type is declared in Affine, this block will move to Affine
+type MetaData = {
+  title?: string;
+  description?: string;
   icon?: string;
-  banner?: string;
+  image?: string;
+  // keywords?: string[];
+  // language?: string;
+  // type?: string;
+  // url?: string;
+  // provider?: string;
+  [x: string]: string | string[] | undefined;
 };
+export type BookmarkProps = {
+  url: string;
+} & MetaData;
 
 export const BookmarkBlockSchema = defineBlockSchema({
   flavour: 'affine:bookmark',
   props: (internal): BookmarkProps => ({
-    link: '',
+    url: '',
     title: '',
-    summary: '',
+    description: '',
     icon: '',
-    banner: '',
+    image: '',
   }),
   metadata: {
     version: 1,
