@@ -9,7 +9,7 @@ import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockHost, TopLevelBlockModel } from '../../../index.js';
+import type { TopLevelBlockModel } from '../../../index.js';
 
 function EdgelessMask() {
   const style = {
@@ -59,27 +59,14 @@ function EdgelessBlockChild(
 
 export function EdgelessBlockChildrenContainer(
   frames: TopLevelBlockModel[],
-  host: BlockHost,
-  viewport: SurfaceViewport,
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
-  const { zoom, viewportX, viewportY } = viewport;
-  const x = -viewportX * zoom;
-  const y = -viewportY * zoom;
-  const style = {
-    position: 'absolute',
-    transform: `translate(${x}px, ${y}px) scale(${zoom})`,
-    transformOrigin: '0 0',
-  };
-
   return html`
-    <div style=${styleMap(style)}>
-      ${repeat(
-        frames,
-        child => child.id,
-        (child, index) => EdgelessBlockChild(index, child, active, renderer)
-      )}
-    </div>
+    ${repeat(
+      frames,
+      child => child.id,
+      (child, index) => EdgelessBlockChild(index, child, active, renderer)
+    )}
   `;
 }
