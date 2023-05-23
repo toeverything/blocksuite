@@ -29,7 +29,7 @@ export interface EditingState {
 }
 
 export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
-type DatabaseTableViewRowSelect = {
+export type DatabaseTableViewRowSelect = {
   type: 'select';
   databaseId: string;
   rowIds: string[];

@@ -3,9 +3,9 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { DatabaseTableViewRowState } from '../../../../std.js';
+import type { DatabaseTableViewRowSelect } from '../../../../std.js';
 
-type SelectionState = Pick<DatabaseTableViewRowState, 'databaseId' | 'rowIds'>;
+type SelectionState = Pick<DatabaseTableViewRowSelect, 'databaseId' | 'rowIds'>;
 type SelectionCache = {
   left: number;
   top: number;
@@ -33,10 +33,7 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
   container!: HTMLElement;
 
   @state()
-  state: SelectionState = {
-    databaseId: '',
-    rowIds: [],
-  };
+  state: SelectionState | null = null;
 
   setSelection = ({ databaseId, rowIds }: SelectionState) => {
     this.state = {
@@ -46,33 +43,34 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
   };
 
   clearSelection = () => {
-    this.state = {};
+    this.state = null;
   };
 
   private _getStyles = () => {
-    const { rowIds = [] } = this.state;
+    const hideStyles = styleMap({
+      left: 0,
+      top: 0,
+      height: 0,
+      display: 'none',
+    });
+    if (!this.state) return hideStyles;
+
+    const { rowIds } = this.state;
     const { startRow, endRow } = getRowsByIds(this.container, {
       startRowId: rowIds[0],
       endRowId: rowIds[rowIds.length - 1],
     });
 
-    if (rowIds.length === 0 || !startRow || !endRow) {
-      return {
-        left: 0,
-        top: 0,
-        height: 0,
-        display: 'none',
-      };
-    }
+    if (!startRow || !endRow) return hideStyles;
 
     if (this._selectionCache) {
       const { left, top, height, rowIds: cacheRowIds } = this._selectionCache;
       if (isRowIdsSame(rowIds, cacheRowIds)) {
-        return {
-          left,
-          top,
-          height,
-        };
+        return styleMap({
+          left: `${left}px`,
+          top: `${top}px`,
+          height: `${height}px`,
+        });
       }
     }
 
@@ -80,15 +78,17 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
     const { left, top } = startRow.getBoundingClientRect();
     const height = calcSelectionHeight(this.container, rowIds);
 
-    const styles = {
-      left: left - containerPos.left,
-      top: top - containerPos.top,
-      height,
-    };
+    const styleLeft = left - containerPos.left;
+    const styleTop = top - containerPos.top;
+    const styles = styleMap({
+      left: `${styleLeft}px`,
+      top: `${styleTop}px`,
+      height: `${height}px`,
+    });
 
     this._selectionCache = {
-      left: styles.left,
-      top: styles.top,
+      left: styleLeft,
+      top: styleTop,
       height,
       rowIds,
     };
@@ -96,15 +96,7 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
   };
 
   override render() {
-    const { left, top, height, display } = this._getStyles();
-
-    const styles = styleMap({
-      display,
-      left: `${left}px`,
-      top: `${top}px`,
-      height: `${height}px`,
-    });
-
+    const styles = this._getStyles();
     return html`<div
       class="database-row-level-selection"
       style=${styles}
