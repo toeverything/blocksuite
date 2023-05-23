@@ -1,7 +1,6 @@
 import type { PointerEventState } from '@blocksuite/lit';
 
 import type { TextMouseMode } from '../../../__internal__/index.js';
-
 import { noop } from '../../../__internal__/index.js';
 import { addText } from '../utils.js';
 import { MouseModeController } from './index.js';
@@ -27,15 +26,15 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     noop();
   }
 
-  onContainerDragStart(e: SelectionEvent) {
+  onContainerDragStart(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragMove(e: SelectionEvent) {
+  onContainerDragMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragEnd(e: SelectionEvent) {
+  onContainerDragEnd(e: PointerEventState) {
     noop();
   }
 

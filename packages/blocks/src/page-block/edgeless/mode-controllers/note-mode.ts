@@ -1,7 +1,6 @@
-import {
-  type NoteMouseMode,
-  type SelectionEvent,
-} from '../../../__internal__/index.js';
+import type { PointerEventState } from '@blocksuite/lit';
+
+import { type NoteMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { addNote, DEFAULT_FRAME_WIDTH } from '../utils.js';
 import { MouseModeController } from './index.js';
@@ -11,29 +10,29 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
     type: 'note',
   };
 
-  private _dragStartEvent: SelectionEvent | null = null;
+  private _dragStartEvent: PointerEventState | null = null;
 
-  private _addNote(e: SelectionEvent, width = DEFAULT_FRAME_WIDTH) {
+  private _addNote(e: PointerEventState, width = DEFAULT_FRAME_WIDTH) {
     addNote(this._edgeless, this._page, e, width);
   }
 
-  onContainerClick(e: SelectionEvent): void {
+  onContainerClick(e: PointerEventState): void {
     this._addNote(e);
   }
 
-  onContainerContextMenu(e: SelectionEvent): void {
+  onContainerContextMenu(e: PointerEventState): void {
     noop();
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerTripleClick(e: SelectionEvent) {
+  onContainerTripleClick(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragStart(e: SelectionEvent) {
+  onContainerDragStart(e: PointerEventState) {
     this._dragStartEvent = e;
     this._draggingArea = {
       start: new DOMPoint(e.x, e.y),
@@ -41,14 +40,14 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
     };
   }
 
-  onContainerDragMove(e: SelectionEvent) {
+  onContainerDragMove(e: PointerEventState) {
     if (this._draggingArea) {
       this._draggingArea.end = new DOMPoint(e.x, e.y);
       this._edgeless.slots.hoverUpdated.emit();
     }
   }
 
-  onContainerDragEnd(e: SelectionEvent) {
+  onContainerDragEnd(e: PointerEventState) {
     if (this._dragStartEvent) {
       const startEvent =
         e.x > this._dragStartEvent.x ? this._dragStartEvent : e;
@@ -62,11 +61,11 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
     this._draggingArea = null;
   }
 
-  onContainerMouseMove(e: SelectionEvent) {
+  onContainerMouseMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerMouseOut(e: SelectionEvent) {
+  onContainerMouseOut(e: PointerEventState) {
     noop();
   }
 
