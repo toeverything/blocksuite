@@ -29,11 +29,29 @@ export interface EditingState {
 }
 
 export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
-export type DatabaseTableViewRowState = {
-  type: DatabaseTableViewRowStateType;
-  databaseId?: string;
-  rowIds?: string[];
+type DatabaseTableViewRowSelect = {
+  type: 'select';
+  databaseId: string;
+  rowIds: string[];
 };
+type DatabaseTableViewRowClick = {
+  type: 'click';
+  databaseId: string;
+  rowIds: string[];
+};
+type DatabaseTableViewRowDelete = {
+  type: 'delete';
+  databaseId: string;
+  rowIds: string[];
+};
+type DatabaseTableViewRowClear = {
+  type: 'clear';
+};
+export type DatabaseTableViewRowState =
+  | DatabaseTableViewRowSelect
+  | DatabaseTableViewRowClick
+  | DatabaseTableViewRowDelete
+  | DatabaseTableViewRowClear;
 
 export type CellCoord = {
   rowIndex: number;
