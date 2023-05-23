@@ -1,4 +1,4 @@
-import { type Workspace } from '@blocksuite/store';
+import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
