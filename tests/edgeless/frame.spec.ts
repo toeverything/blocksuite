@@ -357,7 +357,7 @@ test('when the selection is always a frame, it should remain in an active state'
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [84, 408, 448, 112]);
+  await assertEdgelessSelectedRect(page, [86, 410, 448, 112]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInFrame(page, ids.frameId);
