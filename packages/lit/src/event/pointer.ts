@@ -134,7 +134,6 @@ export class PointerControl {
         'dragStart',
         UIEventStateContext.from(this._startDragState)
       );
-      return;
     }
 
     if (this._dragging) {
