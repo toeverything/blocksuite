@@ -19,6 +19,7 @@ import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { ConnectorModeController } from './mode-controllers/connector-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
+import { NoteModeController } from './mode-controllers/note-mode.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
 import { ShapeModeController } from './mode-controllers/shape-mode.js';
 import { TextModeController } from './mode-controllers/text-mode.js';
@@ -116,10 +117,11 @@ export class EdgelessSelectionManager {
     this._container = container;
     this._controllers = {
       default: new DefaultModeController(this._container),
+      text: new TextModeController(this._container),
       shape: new ShapeModeController(this._container),
       brush: new BrushModeController(this._container),
       pan: new PanModeController(this._container),
-      text: new TextModeController(this._container),
+      note: new NoteModeController(this._container),
       connector: new ConnectorModeController(this._container),
     };
 

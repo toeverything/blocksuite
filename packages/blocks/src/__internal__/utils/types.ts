@@ -118,6 +118,10 @@ export enum BrushSize {
   Thick = 10,
 }
 
+export type TextMouseMode = {
+  type: 'text';
+};
+
 export type BrushMouseMode = {
   type: 'brush';
   color: CssVariableName;
@@ -129,8 +133,8 @@ export type PanMouseMode = {
   panning: boolean;
 };
 
-export type TextMouseMode = {
-  type: 'text';
+export type NoteMouseMode = {
+  type: 'note';
   background: CssVariableName;
 };
 
@@ -142,10 +146,11 @@ export type ConnectorMouseMode = {
 
 export type MouseMode =
   | DefaultMouseMode
+  | TextMouseMode
   | ShapeMouseMode
   | BrushMouseMode
   | PanMouseMode
-  | TextMouseMode
+  | NoteMouseMode
   | ConnectorMouseMode;
 
 export type SerializedBlock = {

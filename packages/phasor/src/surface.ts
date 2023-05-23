@@ -4,9 +4,9 @@ import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import {
-  type ElementCreateProps,
   ElementCtors,
   ElementDefaultProps,
+  type IElementCreateProps,
   type IPhasorElementType,
   type PhasorElement,
   type PhasorElementType,
@@ -74,24 +74,26 @@ export class SurfaceManager {
   }
 
   private _syncFromExistingContainer() {
-    this._yContainer.forEach(yElement => {
-      const type = yElement.get('type') as keyof PhasorElementType;
+    this._transact(() => {
+      this._yContainer.forEach(yElement => {
+        const type = yElement.get('type') as keyof PhasorElementType;
 
-      const ElementCtor = ElementCtors[type];
-      assertExists(ElementCtor);
-      const element = new ElementCtor(yElement);
-      element.transformPropertyValue = this._transformPropertyValue;
-      element.mount(this._renderer);
+        const ElementCtor = ElementCtors[type];
+        assertExists(ElementCtor);
+        const element = new ElementCtor(yElement, this);
+        element.transformPropertyValue = this._transformPropertyValue;
+        element.mount(this._renderer);
 
-      this._elements.set(element.id, element);
+        this._elements.set(element.id, element);
 
-      if (element.index > this.indexes.max) {
-        this.indexes.max = element.index;
-      } else if (element.index < this.indexes.min) {
-        this.indexes.min = element.index;
-      }
+        if (element.index > this.indexes.max) {
+          this.indexes.max = element.index;
+        } else if (element.index < this.indexes.min) {
+          this.indexes.min = element.index;
+        }
 
-      this._updateBindings(element);
+        this._updateBindings(element);
+      });
     });
   }
 
@@ -111,7 +113,7 @@ export class SurfaceManager {
 
         const ElementCtor = ElementCtors[type];
         assertExists(ElementCtor);
-        const element = new ElementCtor(yElement);
+        const element = new ElementCtor(yElement, this);
         element.transformPropertyValue = this._transformPropertyValue;
         element.mount(this._renderer);
 
@@ -177,36 +179,40 @@ export class SurfaceManager {
 
   addElement<T extends keyof IPhasorElementType>(
     type: T,
-    properties: ElementCreateProps<T>
+    properties: IElementCreateProps<T>
   ): PhasorElement['id'] {
     const id = generateElementId();
 
     const yMap = new Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
-    const props: ElementCreateProps<T> = {
+    const props: IElementCreateProps<T> = {
       ...defaultProps,
       ...properties,
       id,
       index: generateKeyBetween(this.indexes.max, null),
       seed: randomSeed(),
     };
-    for (const key in props) {
-      yMap.set(key, props[key as keyof ElementCreateProps<T>]);
-    }
 
-    this._yContainer.set(id, yMap);
+    this._transact(() => {
+      for (const key in props) {
+        yMap.set(key, props[key as keyof IElementCreateProps<T>]);
+      }
+      this._yContainer.set(id, yMap);
+    });
 
     return id;
   }
 
   updateElement<T extends keyof IPhasorElementType>(
     id: string,
-    properties: ElementCreateProps<T>
+    properties: IElementCreateProps<T>
   ) {
-    const element = this._elements.get(id);
-    assertExists(element);
-    element.applyUpdate(properties);
+    this._transact(() => {
+      const element = this._elements.get(id);
+      assertExists(element);
+      element.applyUpdate(properties);
+    });
   }
 
   setElementBound(id: string, bound: IBound) {

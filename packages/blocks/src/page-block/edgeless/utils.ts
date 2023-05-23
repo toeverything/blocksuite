@@ -1,12 +1,13 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
-import type {
+import {
   Bound,
-  Controller,
-  PhasorElement,
-  SurfaceManager,
-  SurfaceViewport,
+  type Controller,
+  type PhasorElement,
+  type SurfaceManager,
+  type SurfaceViewport,
+  TextElement,
 } from '@blocksuite/phasor';
 import { ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
 import {
@@ -17,7 +18,8 @@ import {
   normalizeWheelDeltaY,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
+import { assertExists, type Page } from '@blocksuite/store';
+import * as Y from 'yjs';
 
 import {
   handleNativeRangeAtPoint,
@@ -27,6 +29,7 @@ import {
 } from '../../__internal__/index.js';
 import type { SelectionEvent } from '../../__internal__/utils/gesture/selection-event.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
+import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
   EdgelessContainer,
   EdgelessPageBlockComponent,
@@ -464,7 +467,7 @@ export function getBackgroundGrid(
   };
 }
 
-export function addText(
+export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
   event: SelectionEvent,
@@ -498,6 +501,47 @@ export function addText(
       });
     }
   });
+}
+
+export function mountTextEditor(
+  textElement: TextElement,
+  edgeless: EdgelessPageBlockComponent
+) {
+  const textEditor = new SurfaceTextEditor();
+  const pageBlockContainer = edgeless.pageBlockContainer;
+
+  pageBlockContainer.appendChild(textEditor);
+  textEditor.mount(textElement, edgeless);
+  textEditor.vEditor?.focusEnd();
+  edgeless.slots.selectionUpdated.emit({
+    selected: [textElement],
+    active: true,
+  });
+}
+
+export function addText(
+  edgeless: EdgelessPageBlockComponent,
+  event: SelectionEvent
+) {
+  const selected = edgeless.surface.pickTop(event.x, event.y);
+  if (!selected) {
+    const [modelX, modelY] = edgeless.surface.viewport.toModelCoord(
+      event.x,
+      event.y
+    );
+    const id = edgeless.surface.addElement('text', {
+      xywh: new Bound(modelX, modelY, 32, 32).serialize(),
+      text: new Y.Text(),
+      textAlign: 'left',
+      fontSize: 16 / edgeless.surface.viewport.zoom,
+    });
+    const textElement = edgeless.surface.pickById(id);
+    assertExists(textElement);
+    if (textElement instanceof TextElement) {
+      mountTextEditor(textElement, edgeless);
+      edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
+    }
+  }
 }
 
 export function xywhArrayToObject(element: TopLevelBlockModel) {

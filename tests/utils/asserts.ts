@@ -124,6 +124,18 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   expect(actualTexts).toEqual(texts);
 }
 
+export async function assertEdgelessText(page: Page, text: string) {
+  const actualTexts = await page.evaluate(() => {
+    const editor = document.querySelector('surface-text-editor');
+    if (!editor) {
+      throw new Error('editor not found');
+    }
+    const vEditor = editor.vEditor;
+    return vEditor?.yText.toString();
+  });
+  expect(actualTexts).toEqual(text);
+}
+
 export async function assertRichImage(page: Page, count: number) {
   const actual = await page.locator('.resizable-img').count();
   expect(actual).toEqual(count);
