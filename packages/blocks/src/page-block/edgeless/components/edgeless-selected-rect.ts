@@ -206,9 +206,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = {
-      border: `${
-        this.state.active ? 2 : 1
-      }px solid var(--affine-primary-color)`,
+      border: `${this.state.active ? 2 : 1}px solid var(--affine-blue)`,
       ...getCommonRectStyle(selectedRect, active, true),
     };
 

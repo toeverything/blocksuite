@@ -200,8 +200,8 @@ importers:
         specifier: workspace:*
         version: link:../global
       '@toeverything/theme':
-        specifier: 0.5.8
-        version: 0.5.8
+        specifier: 0.5.9
+        version: 0.5.9
       lit:
         specifier: ^2.7.3
         version: 2.7.3
@@ -1485,8 +1485,8 @@ packages:
     resolution: {integrity: sha512-PiYD2zUOewNAtfJKU9tBZfyv3NeFlTlUe5LSGTTplvBcM0iuHrNVnd30+HIcUGJQhi3Uf0Ng9FRi/kPqm/q6ZA==}
     dev: false
 
-  /@toeverything/theme@0.5.8:
-    resolution: {integrity: sha512-AM4gDQm65DYiVEpuXF9OcdRppIfs+fxzuT/4skhPFHKDXVGOUNHptdztv1S2h5f/+1yiG1VXQX0CHWNwIZo8Ow==}
+  /@toeverything/theme@0.5.9:
+    resolution: {integrity: sha512-fPLzQDQrmtjayuW2Krl+pGzsTc00ulJsPOAmWL2bcg6abuR1eKtjTltHPjk/oC2IZGRQrCNSwckzRBH/phwsMw==}
     dev: false
 
   /@toeverything/y-indexeddb@0.5.4-canary.21(yjs@13.6.0):
