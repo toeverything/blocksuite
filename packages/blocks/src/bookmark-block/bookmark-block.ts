@@ -1,15 +1,7 @@
-/// <reference types="vite/client" />
-import '../__internal__/rich-text/rich-text.js';
-
 import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
-import {
-  affineTextAttributes,
-  type AffineTextSchema,
-} from '../__internal__/rich-text/virgo/types.js';
 import { registerService } from '../__internal__/service.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import type { BookmarkProps } from './bookmark-model.js';
@@ -89,11 +81,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       margin-top: 2px;
     }
   `;
-
-  readonly textSchema: AffineTextSchema = {
-    attributesSchema: affineTextAttributes,
-    textRenderer: attributeRenderer,
-  };
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
