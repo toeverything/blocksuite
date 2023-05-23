@@ -12,7 +12,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type {
-  TextMouseMode,
+  NoteMouseMode,
   TopLevelBlockModel,
 } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -22,12 +22,12 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonBackground(
   frames: TopLevelBlockModel[]
-): TextMouseMode['background'] | null {
+): NoteMouseMode['background'] | null {
   const shapeTypes = countBy(frames, (frame: TopLevelBlockModel) => {
     return frame.background;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as TextMouseMode['background']) : null;
+  return max ? (max[0] as NoteMouseMode['background']) : null;
 }
 
 @customElement('edgeless-change-frame-button')

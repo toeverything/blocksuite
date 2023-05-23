@@ -9,7 +9,7 @@ export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
 export interface IShape {
   id: string;
-  type: string;
+  type: 'shape';
   xywh: SerializedXYWH;
   index: string;
   seed: number;

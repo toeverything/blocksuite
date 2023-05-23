@@ -48,10 +48,7 @@ export function calcDropTarget(
     }
   }
 
-  if (
-    !shouldAppendToDatabase &&
-    !matchFlavours(model, ['affine:database'] as const)
-  ) {
+  if (!shouldAppendToDatabase && !matchFlavours(model, ['affine:database'])) {
     const databaseBlockElement = element.closest('affine-database');
     if (databaseBlockElement) {
       element = databaseBlockElement;

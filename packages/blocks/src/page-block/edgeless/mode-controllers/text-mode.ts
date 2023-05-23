@@ -1,8 +1,9 @@
 import type { PointerEventState } from '@blocksuite/lit';
 
 import type { TextMouseMode } from '../../../__internal__/index.js';
+
 import { noop } from '../../../__internal__/index.js';
-import { addText, DEFAULT_FRAME_WIDTH } from '../utils.js';
+import { addText } from '../utils.js';
 import { MouseModeController } from './index.js';
 
 export class TextModeController extends MouseModeController<TextMouseMode> {
@@ -10,14 +11,8 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     type: 'text',
   };
 
-  private _dragStartEvent: PointerEventState | null = null;
-
-  private _addText(e: PointerEventState, width = DEFAULT_FRAME_WIDTH) {
-    addText(this._edgeless, this._page, e, width);
-  }
-
   onContainerClick(e: PointerEventState): void {
-    this._addText(e);
+    addText(this._edgeless, e);
   }
 
   onContainerContextMenu(e: PointerEventState): void {
@@ -32,34 +27,16 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     noop();
   }
 
-  onContainerDragStart(e: PointerEventState) {
-    this._dragStartEvent = e;
-    this._draggingArea = {
-      start: new DOMPoint(e.x, e.y),
-      end: new DOMPoint(e.x, e.y),
-    };
+  onContainerDragStart(e: SelectionEvent) {
+    noop();
   }
 
-  onContainerDragMove(e: PointerEventState) {
-    if (this._draggingArea) {
-      this._draggingArea.end = new DOMPoint(e.x, e.y);
-      this._edgeless.slots.hoverUpdated.emit();
-    }
+  onContainerDragMove(e: SelectionEvent) {
+    noop();
   }
 
-  onContainerDragEnd(e: PointerEventState) {
-    if (this._dragStartEvent) {
-      const startEvent =
-        e.x > this._dragStartEvent.x ? this._dragStartEvent : e;
-      const width = Math.max(
-        Math.abs(e.x - this._dragStartEvent.x),
-        DEFAULT_FRAME_WIDTH
-      );
-      this._addText(startEvent, width);
-    }
-
-    this._dragStartEvent = null;
-    this._draggingArea = null;
+  onContainerDragEnd(e: SelectionEvent) {
+    noop();
   }
 
   onContainerMouseMove(e: PointerEventState) {

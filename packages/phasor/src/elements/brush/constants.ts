@@ -1,6 +1,6 @@
-import type { ElementDefaultProps } from '../index.js';
+import type { IElementDefaultProps } from '../index.js';
 
-export const BrushElementDefaultProps: ElementDefaultProps<'brush'> = {
+export const BrushElementDefaultProps: IElementDefaultProps<'brush'> = {
   type: 'brush',
   xywh: '[0,0,0,0]',
 

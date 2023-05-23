@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 
+import { SurfaceManager } from '../../surface.js';
 import { Bound } from '../../utils/bound.js';
 import { BrushElement } from './brush-element.js';
 import type { IBrush } from './types.js';
@@ -22,9 +23,11 @@ const data: IBrush = {
 describe('brush element', () => {
   const doc = new Y.Doc();
   const yMap = doc.getMap('brush');
+  const yContainer = doc.getMap('surface');
+  const surface = new SurfaceManager(yContainer, value => value);
 
   it('deserialize', () => {
-    const element = new BrushElement(yMap, data);
+    const element = new BrushElement(yMap, surface, data);
     expect(element.id).equal(data.id);
     expect(element.color).equal(data.color);
     expect(element.lineWidth).equal(data.lineWidth);
@@ -35,20 +38,20 @@ describe('brush element', () => {
   });
 
   it('serialize', () => {
-    const element = new BrushElement(yMap, data);
+    const element = new BrushElement(yMap, surface, data);
     const serialized = element.serialize();
     expect(serialized).toMatchObject(data);
   });
 
   it('hit test', () => {
-    const element = new BrushElement(yMap, data);
+    const element = new BrushElement(yMap, surface, data);
     expect(element.hitTest(8.5, 8.5)).toBeTruthy();
     // point is in rect, but not in path
     expect(element.hitTest(20, 60)).toBeTruthy();
   });
 
   it('transform', () => {
-    const element = new BrushElement(yMap, data);
+    const element = new BrushElement(yMap, surface, data);
     element.applyUpdate({
       xywh: new Bound(0, 0, 204, 204).serialize(),
     });

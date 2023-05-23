@@ -3,6 +3,7 @@ import type { PointerEventState } from '@blocksuite/lit';
 import {
   ConnectorElement,
   type PhasorElement,
+  TextElement,
   type XYWH,
 } from '@blocksuite/phasor';
 import { deserializeXYWH, getCommonBound, isPointIn } from '@blocksuite/phasor';
@@ -37,6 +38,7 @@ import {
   isConnectorAndBindingsAllSelected,
   isPhasorElement,
   isTopLevelBlock,
+  mountTextEditor,
   pickBlocksByBound,
   pickTopBlock,
 } from '../utils.js';
@@ -113,6 +115,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
     // phasor element
     if (isPhasorElement(selected)) {
+      if (
+        this._blockSelectionState.selected[0] instanceof TextElement &&
+        this._blockSelectionState.active
+      ) {
+        return;
+      }
       this._setSelectionState([selected], false);
     }
     // frame block
@@ -302,8 +310,13 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDblClick(e: PointerEventState) {
     const selected = this._pick(e.point.x, e.point.y);
     if (!selected) {
-      addText(this._edgeless, this._page, e);
+      addText(this._edgeless, e);
       return;
+    } else {
+      if (selected instanceof TextElement) {
+        mountTextEditor(selected, this._edgeless);
+        return;
+      }
     }
 
     if (

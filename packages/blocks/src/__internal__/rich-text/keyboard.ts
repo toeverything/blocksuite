@@ -80,7 +80,7 @@ export function createKeyboardBindings(
         }
         const flag = page.awarenessStore.getFlag('enable_linked_page');
         if (!flag) return ALLOW_DEFAULT;
-        if (matchFlavours(model, ['affine:code'] as const)) {
+        if (matchFlavours(model, ['affine:code'])) {
           return ALLOW_DEFAULT;
         }
 
