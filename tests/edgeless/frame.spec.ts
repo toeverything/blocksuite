@@ -219,7 +219,8 @@ test('dragging un-selected frame', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: frameBox.x + 5, y: frameBox.y + 5 },
-    { x: frameBox.x + 25, y: frameBox.y + 25 }
+    { x: frameBox.x + 25, y: frameBox.y + 25 },
+    { steps: 10 }
   );
 
   await page.mouse.move(frameBox.x + 25, frameBox.y + 25);

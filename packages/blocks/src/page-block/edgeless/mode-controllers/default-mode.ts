@@ -160,8 +160,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
     const { surface } = this._edgeless;
     const { zoom } = surface.viewport;
-    const deltaX = this._dragLastPos.x - e.point.x;
-    const deltaY = this._dragLastPos.y - e.point.y;
+    const deltaX = this._dragLastPos.x - e.x;
+    const deltaY = this._dragLastPos.y - e.y;
     const boundX = selected.x - deltaX / zoom;
     const boundY = selected.y - deltaY / zoom;
     const boundW = selected.w;
@@ -291,7 +291,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerClick(e: PointerEventState) {
     this._tryDeleteEmptyBlocks();
 
-    const selected = this._pick(e.point.x, e.point.y);
+    const selected = this._pick(e.x, e.y);
 
     if (selected) {
       this._handleClickOnSelected(selected, e);
@@ -308,7 +308,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerDblClick(e: PointerEventState) {
-    const selected = this._pick(e.point.x, e.point.y);
+    const selected = this._pick(e.x, e.y);
     if (!selected) {
       addText(this._edgeless, e);
       return;
@@ -339,12 +339,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   onContainerDragStart(e: PointerEventState) {
     // Is dragging started from current selected rect
-    if (this._isInSelectedRect(e.point.x, e.point.y)) {
+    if (this._isInSelectedRect(e.x, e.y)) {
       this.dragType = this._blockSelectionState.active
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
-      const selected = this._pick(e.point.x, e.point.y);
+      const selected = this._pick(e.x, e.y);
       if (selected) {
         this._setSelectionState([selected], false);
         this.dragType = DefaultModeDragType.ContentMoving;
@@ -353,10 +353,9 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
     }
 
-    const [x, y] = [e.raw.clientX, e.raw.clientY];
-    this._startRange = caretRangeFromPoint(x, y);
-    this._dragStartPos = { x: e.point.x, y: e.point.y };
-    this._dragLastPos = { x: e.point.x, y: e.point.y };
+    this._startRange = caretRangeFromPoint(e.x, e.y);
+    this._dragStartPos = { x: e.x, y: e.y };
+    this._dragLastPos = { x: e.x, y: e.y };
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -364,12 +363,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       case DefaultModeDragType.Selecting: {
         const startX = this._dragStartPos.x;
         const startY = this._dragStartPos.y;
-        const viewX = Math.min(startX, e.point.x);
-        const viewY = Math.min(startY, e.point.y);
+        const viewX = Math.min(startX, e.x);
+        const viewY = Math.min(startY, e.y);
 
         const [x, y] = this._surface.toModelCoord(viewX, viewY);
-        const w = Math.abs(startX - e.point.x);
-        const h = Math.abs(startY - e.point.y);
+        const w = Math.abs(startX - e.x);
+        const h = Math.abs(startY - e.y);
         const { zoom } = this._surface.viewport;
         const bound = { x, y, w: w / zoom, h: h / zoom };
 
@@ -396,8 +395,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
     }
     this._dragLastPos = {
-      x: e.point.x,
-      y: e.point.y,
+      x: e.x,
+      y: e.y,
     };
   }
 

@@ -14,6 +14,7 @@ import type {
 import {
   getEditorContainerByElement,
   isDatabaseInput,
+  isInsideEdgelessTextEditor,
   isInsidePageTitle,
   isPinchEvent,
 } from '../../__internal__/index.js';
@@ -167,7 +168,8 @@ export class EdgelessSelectionManager {
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -178,7 +180,8 @@ export class EdgelessSelectionManager {
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -188,7 +191,8 @@ export class EdgelessSelectionManager {
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -219,7 +223,8 @@ export class EdgelessSelectionManager {
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
