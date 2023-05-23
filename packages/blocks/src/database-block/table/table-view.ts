@@ -184,6 +184,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'click', this._onClick);
     disposables.addFromEvent(this, 'keydown', this._onCellSelectionChange);
     disposables.addFromEvent(document, 'keydown', this._onCellSelectionMove);
+    disposables.addFromEvent(document, 'keydown', this._onRowSelectionDelete);
   }
 
   override firstUpdated() {
@@ -308,6 +309,30 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
         databaseId,
       });
     }
+  };
+
+  private _onRowSelectionDelete = (event: KeyboardEvent) => {
+    if (event.key !== 'Delete') return;
+    event.preventDefault();
+
+    const service = getService('affine:database');
+    const rowSelection = service.getLastRowSelection();
+    if (!rowSelection) return;
+
+    const { rowIds } = rowSelection;
+    const page = this.model.page;
+    const children = this.model.children;
+    page.captureSync();
+    if (children.length === rowIds.length) {
+      // delete the database
+      page.deleteBlock(this.model);
+    } else {
+      // delete rows
+      page.updateBlock(this.model, {
+        children: children.filter(child => rowIds.indexOf(child.id) === -1),
+      });
+    }
+    service.clearRowSelection();
   };
 
   private _addRow = (index?: number) => {
