@@ -2,7 +2,7 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '@blocksuite/blocks';
-import { type Workspace } from '@blocksuite/store';
+import { Text, type Workspace } from '@blocksuite/store';
 
 import { addShapeElement, type InitFn } from './utils';
 
