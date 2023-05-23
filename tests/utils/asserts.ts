@@ -722,12 +722,32 @@ export async function assertEdgelessColorSameWithHexColor(
 
 export async function assertStoreValue(
   page: Page,
-  key: string,
-  expected: unknown
+  pageId: string,
+  expected: SerializedStore
 ) {
-  const actual = (await page.evaluate(() => {
+  const jsonDoc = (await page.evaluate(() => {
     const json = window.workspace.doc.toJSON();
     return json;
   })) as SerializedStore;
-  expect(actual[key]).toEqual(expected);
+  const actualPageValue = jsonDoc[pageId];
+  const expectedKeys = Object.keys(expected);
+  const actualKeys = Object.keys(actualPageValue);
+  expect(actualKeys.length).toEqual(expectedKeys.length);
+  const keyMap = new Map();
+  expectedKeys.forEach((key, index) => {
+    keyMap.set(key, actualKeys[index]);
+  });
+
+  const expectedValue = {} as SerializedStore;
+  actualKeys.forEach((key, index) => {
+    expectedValue[key] = (expected[expectedKeys[index]] || {}) as Record<
+      string,
+      unknown
+    >;
+    expectedValue[key]['sys:id'] = key;
+    expectedValue[key]['sys:children'] = (
+      expectedValue[key]['sys:children'] as string[]
+    ).map(childKey => keyMap.get(childKey));
+  });
+  expect(actualPageValue).toEqual(expectedValue);
 }

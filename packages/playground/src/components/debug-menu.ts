@@ -334,16 +334,11 @@ export class DebugMenu extends ShadowlessElement {
       const fileName = file.substring(lastSplitIndex + 1);
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
         const isHtml = fileName.endsWith('.html');
-        let page = this.page;
-        if (i !== 0) {
-          page = this.page.workspace.createPage({
-            init: {
-              title: file.substring(lastSplitIndex + 1, lastSpaceIndex),
-            },
-          });
-        } else {
-          // todo clear page and set title
-        }
+        const page = this.page.workspace.createPage({
+          init: {
+            title: file.substring(lastSplitIndex + 1, lastSpaceIndex),
+          },
+        });
 
         const rootId = page.root?.id;
         const fetchFileFunc = async (url: string) => {
