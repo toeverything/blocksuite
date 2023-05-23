@@ -77,7 +77,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     }
 
     .brush-size-button[active] div {
-      background-color: var(--affine-primary-color);
+      background-color: var(--affine-blue);
     }
 
     .brush-size-button .thin {

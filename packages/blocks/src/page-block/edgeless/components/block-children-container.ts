@@ -44,7 +44,9 @@ function EdgelessBlockChild(
     pointerEvents: 'all',
     zIndex: `${index}`,
     boxSizing: 'border-box',
-    borderRadius: '4px',
+    borderRadius: '8px',
+    border: '2px solid var(--affine-white-10)',
+    boxShadow: 'var(--affine-shadow-3)',
   };
 
   const mask = active ? nothing : EdgelessMask();
