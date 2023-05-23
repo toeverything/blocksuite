@@ -1,6 +1,6 @@
 import { type SelectTag } from '@blocksuite/blocks';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
-import { nanoid, type Workspace } from '@blocksuite/store';
+import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
