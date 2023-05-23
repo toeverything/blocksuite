@@ -1,10 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import { Bound, StrokeStyle } from '@blocksuite/phasor';
 
-import type {
-  SelectionEvent,
-  ShapeMouseMode,
-} from '../../../__internal__/index.js';
+import type { ShapeMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { isTransparent } from '../components/color-panel.js';
 import {
@@ -26,30 +24,30 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
   protected override _draggingArea: SelectionArea | null = null;
 
-  onContainerClick(e: SelectionEvent): void {
+  onContainerClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerContextMenu(e: SelectionEvent): void {
+  onContainerContextMenu(e: PointerEventState): void {
     noop();
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerTripleClick(e: SelectionEvent) {
+  onContainerTripleClick(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragStart(e: SelectionEvent) {
+  onContainerDragStart(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._page.captureSync();
     const { viewport } = this._edgeless.surface;
 
     // create a shape block when drag start
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
+    const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
     const bound = new Bound(modelX, modelY, 0, 0);
     const { shape, fillColor, strokeColor } = this.mouseMode;
 
@@ -75,7 +73,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragMove(e: SelectionEvent) {
+  onContainerDragMove(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     assertExists(this._draggingElementId);
@@ -112,18 +110,18 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragEnd(e: SelectionEvent) {
+  onContainerDragEnd(e: PointerEventState) {
     this._draggingElementId = null;
     this._draggingArea = null;
     this._page.captureSync();
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerMouseMove(e: SelectionEvent) {
+  onContainerMouseMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerMouseOut(e: SelectionEvent) {
+  onContainerMouseOut(e: PointerEventState) {
     noop();
   }
 

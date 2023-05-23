@@ -46,7 +46,7 @@ export class UIEventStateContext {
 
 export type UIEventHandler = (
   context: UIEventStateContext
-) => boolean | null | undefined;
+) => boolean | null | undefined | void;
 
 declare global {
   interface BlockSuiteUIEventState {

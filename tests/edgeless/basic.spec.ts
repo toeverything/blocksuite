@@ -117,7 +117,12 @@ test('should cancel select when the selected point is outside the current select
   // select the first rect
   await page.mouse.click(150, 150);
 
-  await dragBetweenCoords(page, { x: 350, y: 350 }, { x: 350, y: 450 });
+  await dragBetweenCoords(
+    page,
+    { x: 350, y: 350 },
+    { x: 350, y: 450 },
+    { steps: 0 }
+  );
 
   await page.mouse.move(150, 150);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);

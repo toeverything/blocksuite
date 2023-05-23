@@ -778,28 +778,17 @@ test('should get to selected block when dragging unselected block', async ({
     throw new Error();
   }
 
-  await page.mouse.move(
-    editorRect1.x + 5,
-    editorRect1.y + editorRect1.height / 2
-  );
-
-  await page.mouse.move(
-    editorRect1.x - 20,
-    editorRect1.y + editorRect1.height / 2
-  );
+  await page.mouse.move(editorRect1.x - 5, editorRect0.y);
   await page.mouse.down();
   await page.mouse.up();
 
   const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(1);
 
-  await page.mouse.move(
-    editorRect0.x - 20,
-    editorRect0.y + editorRect0.height / 2
-  );
+  await page.mouse.move(editorRect1.x - 5, editorRect0.y);
   await page.mouse.down();
   await page.mouse.move(
-    editorRect1.x - 20,
+    editorRect1.x - 5,
     editorRect1.y + editorRect1.height / 2 + 1,
     {
       steps: 10,

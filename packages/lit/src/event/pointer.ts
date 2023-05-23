@@ -41,7 +41,7 @@ export class PointerControl {
   private _reset = () => {
     this._startX = -Infinity;
     this._startY = -Infinity;
-    this._lastPointerDownEvent = null;
+    this._lastDragState = null;
     this._dragging = false;
   };
 
@@ -124,19 +124,20 @@ export class PointerControl {
       startY: this._startY,
       last,
     });
-    const ctx = UIEventStateContext.from(state);
     this._lastDragState = state;
 
     assertExists(this._startDragState);
 
     if (!this._dragging && isFarEnough(this._startDragState.raw, state.raw)) {
       this._dragging = true;
-      this._dispatcher.run('dragStart', ctx);
-      return;
+      this._dispatcher.run(
+        'dragStart',
+        UIEventStateContext.from(this._startDragState)
+      );
     }
 
     if (this._dragging) {
-      this._dispatcher.run('dragMove', ctx);
+      this._dispatcher.run('dragMove', UIEventStateContext.from(state));
     }
   };
 

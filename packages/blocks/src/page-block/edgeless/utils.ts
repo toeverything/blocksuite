@@ -1,6 +1,7 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
+import type { PointerEventState } from '@blocksuite/lit';
 import {
   Bound,
   type Controller,
@@ -27,7 +28,6 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import type { SelectionEvent } from '../../__internal__/utils/gesture/selection-event.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
 import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
@@ -465,12 +465,15 @@ export function getBackgroundGrid(
 export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
-  event: SelectionEvent,
+  event: PointerEventState,
   width = DEFAULT_FRAME_WIDTH
 ) {
-  const frameId = edgeless.addFrameWithPoint(new Point(event.x, event.y), {
-    width,
-  });
+  const frameId = edgeless.addFrameWithPoint(
+    new Point(event.point.x, event.point.y),
+    {
+      width,
+    }
+  );
   page.addBlock('affine:paragraph', {}, frameId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
@@ -516,7 +519,7 @@ export function mountTextEditor(
 
 export function addText(
   edgeless: EdgelessPageBlockComponent,
-  event: SelectionEvent
+  event: PointerEventState
 ) {
   const selected = edgeless.surface.pickTop(event.x, event.y);
   if (!selected) {

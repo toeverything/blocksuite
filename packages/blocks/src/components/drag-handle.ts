@@ -4,6 +4,7 @@ import {
   type Disposable,
   isFirefox,
 } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render } from 'lit';
@@ -21,7 +22,6 @@ import {
   isContainedIn,
   Point,
   type Rect,
-  type SelectionEvent,
 } from '../__internal__/index.js';
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
@@ -286,7 +286,10 @@ export class DragHandle extends WithDisposable(LitElement) {
     return this._getSelectedBlocks() ?? [];
   }
 
-  onContainerMouseMove(event: SelectionEvent, modelState: EditingState | null) {
+  onContainerMouseMove(
+    event: PointerEventState,
+    modelState: EditingState | null
+  ) {
     const frameBlock = this._container.querySelector(
       '.affine-frame-block-container'
     );

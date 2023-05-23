@@ -508,6 +508,7 @@ export class DefaultPageBlockComponent
       mouseRoot: this.mouseRoot,
       slots: this.slots,
       container: this,
+      dispatcher: this.root.uiEventDispatcher,
     });
   }
 

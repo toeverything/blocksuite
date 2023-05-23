@@ -760,7 +760,10 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
-      this._selection = new EdgelessSelectionManager(this);
+      this._selection = new EdgelessSelectionManager(
+        this,
+        this.root.uiEventDispatcher
+      );
     }
     if (changedProperties.has('mouseMode')) {
       this._selection.mouseMode = this.mouseMode;

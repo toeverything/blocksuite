@@ -650,7 +650,12 @@ test(
       }
     );
 
-    await dragBetweenCoords(page, { x: 50, y: 90 }, { x: 400, y: 400 });
+    await dragBetweenCoords(
+      page,
+      { x: 50, y: 90 },
+      { x: 400, y: 400 },
+      { steps: 10 }
+    );
     await assertEdgelessSelectedRect(page, [90, 100, 720, 272]);
 
     await copyByKeyboard(page);

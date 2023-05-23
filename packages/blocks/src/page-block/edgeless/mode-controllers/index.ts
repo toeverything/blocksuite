@@ -1,6 +1,7 @@
+import type { PointerEventState } from '@blocksuite/lit';
+
 import type {
   MouseMode,
-  SelectionEvent,
   TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -56,15 +57,15 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   }
 
   public abstract mouseMode: Mode;
-  abstract onContainerDragStart(e: SelectionEvent): void;
-  abstract onContainerDragMove(e: SelectionEvent): void;
-  abstract onContainerDragEnd(e: SelectionEvent): void;
-  abstract onContainerClick(e: SelectionEvent): void;
-  abstract onContainerDblClick(e: SelectionEvent): void;
-  abstract onContainerTripleClick(e: SelectionEvent): void;
-  abstract onContainerMouseMove(e: SelectionEvent): void;
-  abstract onContainerMouseOut(e: SelectionEvent): void;
-  abstract onContainerContextMenu(e: SelectionEvent): void;
+  abstract onContainerDragStart(e: PointerEventState): void;
+  abstract onContainerDragMove(e: PointerEventState): void;
+  abstract onContainerDragEnd(e: PointerEventState): void;
+  abstract onContainerClick(e: PointerEventState): void;
+  abstract onContainerDblClick(e: PointerEventState): void;
+  abstract onContainerTripleClick(e: PointerEventState): void;
+  abstract onContainerMouseMove(e: PointerEventState): void;
+  abstract onContainerMouseOut(e: PointerEventState): void;
+  abstract onContainerContextMenu(e: PointerEventState): void;
 
   abstract clearSelection(): void;
 }

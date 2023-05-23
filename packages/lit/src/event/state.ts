@@ -26,6 +26,14 @@ export class PointerEventState extends UIEventState {
   button: number;
   dragging: boolean;
 
+  get x() {
+    return this.point.x;
+  }
+
+  get y() {
+    return this.point.y;
+  }
+
   constructor({ event, rect, startX, startY, last }: PointerEventStateOptions) {
     super(event as Event);
 

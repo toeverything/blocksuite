@@ -445,7 +445,7 @@ test('drag select code block can delete it', async ({ page }) => {
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY },
-    { steps: 10 }
+    { steps: 20 }
   );
   await page.waitForTimeout(10);
   await page.keyboard.press('Backspace');

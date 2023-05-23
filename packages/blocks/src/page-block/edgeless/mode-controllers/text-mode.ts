@@ -1,7 +1,6 @@
-import {
-  type SelectionEvent,
-  type TextMouseMode,
-} from '../../../__internal__/index.js';
+import type { PointerEventState } from '@blocksuite/lit';
+
+import type { TextMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { addText } from '../utils.js';
 import { MouseModeController } from './index.js';
@@ -11,39 +10,39 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     type: 'text',
   };
 
-  onContainerClick(e: SelectionEvent): void {
+  onContainerClick(e: PointerEventState): void {
     addText(this._edgeless, e);
   }
 
-  onContainerContextMenu(e: SelectionEvent): void {
+  onContainerContextMenu(e: PointerEventState): void {
     noop();
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerTripleClick(e: SelectionEvent) {
+  onContainerTripleClick(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragStart(e: SelectionEvent) {
+  onContainerDragStart(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragMove(e: SelectionEvent) {
+  onContainerDragMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragEnd(e: SelectionEvent) {
+  onContainerDragEnd(e: PointerEventState) {
     noop();
   }
 
-  onContainerMouseMove(e: SelectionEvent) {
+  onContainerMouseMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerMouseOut(e: SelectionEvent) {
+  onContainerMouseOut(e: PointerEventState) {
     noop();
   }
 
