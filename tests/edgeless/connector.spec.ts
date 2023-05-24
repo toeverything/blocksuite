@@ -201,8 +201,8 @@ test('change connector line width', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [
-    [start.x + 20, start.y - 5],
-    [start.x + 20, start.y + 4],
+    [start.x + 10, start.y - 3],
+    [start.x + 10, start.y + 3],
   ]);
   expect(pickedColor[0]).toBe(pickedColor[1]);
 });
