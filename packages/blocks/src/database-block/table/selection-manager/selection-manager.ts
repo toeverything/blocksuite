@@ -162,4 +162,8 @@ export class RowSelectionManager {
   private _add = (name: EventName, fn: UIEventHandler) => {
     this._disposables.add(this._dispatcher.add(name, fn));
   };
+
+  dispose() {
+    this._disposables.dispose();
+  }
 }

@@ -163,6 +163,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @state()
   private _hoverState = false;
 
+  private _rowSelection!: RowSelectionManager;
+
   private _columnRenderer = registerInternalRenderer();
   get columnRenderer() {
     return this._columnRenderer;
@@ -218,8 +220,14 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     );
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    this._rowSelection.dispose();
+  }
+
   private _initRowSelectionEvents = () => {
-    new RowSelectionManager(this.root.uiEventDispatcher);
+    this._rowSelection = new RowSelectionManager(this.root.uiEventDispatcher);
   };
 
   private _setFilteredRowIds = (rowIds: string[]) => {
