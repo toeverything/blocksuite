@@ -12,7 +12,6 @@ import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
-import type { IPoint } from './gesture/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
@@ -25,7 +24,7 @@ import {
   getPreviousBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import type { SelectionPosition } from './types.js';
+import type { IPoint, SelectionPosition } from './types.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
