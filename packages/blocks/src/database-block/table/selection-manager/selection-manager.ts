@@ -32,6 +32,7 @@ export class RowSelectionManager {
   private _columnWidthHandles: HTMLElement[] = [];
   private _startRange: Range | null = null;
   private _rowIds: string[] = [];
+  private _isInDatabase = false;
 
   constructor(dispatcher: UIEventDispatcher) {
     this._dispatcher = dispatcher;
@@ -46,16 +47,17 @@ export class RowSelectionManager {
   _onDragStart = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
 
-    const { clientX, clientY, target } = e.raw;
-    if (!isInDatabase(target as HTMLElement)) {
+    const { clientX: x, clientY: y, target } = e.raw;
+    const targetElement = target as HTMLElement;
+    this._isInDatabase = isInDatabase(targetElement);
+    if (!this._isInDatabase) {
       return false;
     }
 
-    const startRange = caretRangeFromPoint(clientX, clientY);
+    const startRange = caretRangeFromPoint(x, y);
     this._startRange = startRange;
 
     if (!isBlankArea(e)) {
-      const { clientX: x, clientY: y } = e.raw;
       const el = document.elementFromPoint(x, y);
       this._startCell = el?.closest<HTMLElement>('.database-cell') ?? null;
 
@@ -72,6 +74,10 @@ export class RowSelectionManager {
   };
 
   _onDragMove = (ctx: UIEventStateContext) => {
+    if (!this._isInDatabase) {
+      return false;
+    }
+
     const e = ctx.get('pointerState');
     e.raw.preventDefault();
 
@@ -132,7 +138,7 @@ export class RowSelectionManager {
 
     this._startRange = null;
     this._setColumnWidthHandleDisplay('block');
-    return false;
+    return true;
   };
 
   _onClick = (ctx: UIEventStateContext) => {

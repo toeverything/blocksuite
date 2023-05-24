@@ -385,7 +385,7 @@ export function handleNativeRangeDragMove(
   e: PointerEventState
 ) {
   const isEdgelessMode = !!document.querySelector('affine-edgeless-page');
-  const { clientX: x, clientY: y } = e.raw;
+  const { clientX: x, clientY: y, target } = e.raw;
 
   // Range from current mouse position
   let currentRange = caretRangeFromPoint(x, y);
@@ -422,7 +422,10 @@ export function handleNativeRangeDragMove(
   if (!currentFrame) return;
 
   if (shouldUpdateCurrentRange) {
-    const closestEditor = getClosestEditor(y, currentFrame);
+    let closestEditor = (target as HTMLElement).closest('.virgo-editor');
+    if (!closestEditor) {
+      closestEditor = getClosestEditor(y, currentFrame);
+    }
     if (!closestEditor) return;
 
     const newPoint = normalizePointIntoContainer({ x, y }, closestEditor);
