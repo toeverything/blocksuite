@@ -16,6 +16,10 @@ import type { Point } from './rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
+export interface IPoint {
+  x: number;
+  y: number;
+}
 export interface BlockTransformContext {
   childText?: string;
   begin?: number;
