@@ -39,6 +39,7 @@ import { GUI } from 'dat.gui';
 import JSZip from 'jszip';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+
 import { registerFormatBarCustomElement } from './custom-format-bar';
 import { createViewer } from './doc-inspector';
 
