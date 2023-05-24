@@ -240,6 +240,9 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
   toggleRowSelection(element: Element) {
     const rowId = getClosestRowId(element);
+    // click on database's drag handle
+    if (rowId === '') return false;
+
     const rowIds = this._lastRowSelection?.rowIds ?? [];
 
     if (rowIds.indexOf(rowId) > -1) {
@@ -251,6 +254,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         rowIds: [rowId],
       });
     }
+    return true;
   }
 
   getLastRowSelection() {

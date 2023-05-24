@@ -554,22 +554,29 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
     setSelectedBlock(modelState: EditingState | null, element) {
+      const service = getService('affine:database');
       if (element && element.closest('affine-database')) {
-        const service = getService('affine:database');
-        service.toggleRowSelection(element);
-        return;
+        const toggled = service.toggleRowSelection(element);
+        if (toggled) {
+          pageBlock.selection.clear();
+          return;
+        }
       }
 
       const model = modelState?.model;
       if (model) {
         const parent = model.page.getParent(model);
         if (parent && matchFlavours(parent, ['affine:database'])) {
-          const service = getService('affine:database');
           service.setRowSelectionByElement(modelState.element);
           return;
         }
       }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
+
+      const rowSelection = service.getLastRowSelection();
+      if (rowSelection) {
+        service.clearRowSelection();
+      }
     },
     getSelectedBlocks() {
       return pageBlock.selection.state.selectedBlocks;
