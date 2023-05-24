@@ -252,9 +252,9 @@ export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
 export abstract class AbstractSelectionManager<
   T extends BlockElement<PageBlockModel>
 > {
+  public readonly container: T;
   protected readonly _dispatcher: UIEventDispatcher;
   protected readonly _disposables = new DisposableGroup();
-  protected readonly container: T;
 
   constructor(container: T, dispatcher: UIEventDispatcher) {
     this.container = container;
@@ -266,4 +266,6 @@ export abstract class AbstractSelectionManager<
   }
 
   abstract clear(): void;
+
+  abstract dispose(): void;
 }

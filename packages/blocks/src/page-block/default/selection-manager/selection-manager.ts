@@ -104,6 +104,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     slots: DefaultSelectionSlots;
   }) {
     super(container, dispatcher);
+
     this.slots = slots;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
@@ -615,34 +616,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     return this.container.viewportElement;
   }
 
-  // clear selection: `block`, `block:drag`, `embed`, `native`
-  clear() {
-    const { state, slots } = this;
-    let { type } = state;
-
-    if (type === 'block:drag') {
-      // clear `drag preview`
-      PreviewDragHandlers.clear(this);
-      type = 'block';
-    }
-
-    if (type === 'block') {
-      state.clearBlockSelection();
-      slots.selectedRectsUpdated.emit([]);
-      slots.draggingAreaUpdated.emit(null);
-
-      // clear `format quick bar`
-      // document.dispatchEvent(new MouseEvent('mousedown'));
-      this.container.querySelector('format-quick-bar')?.remove();
-    } else if (type === 'embed') {
-      state.clearEmbedSelection();
-      slots.embedRectsUpdated.emit([]);
-      slots.embedEditingStateUpdated.emit(null);
-    } else if (type === 'native') {
-      state.clearNativeSelection();
-    }
-  }
-
   updateDraggingArea(draggingArea: { start: Point; end: Point }): DOMRect {
     if (this.state.focusedBlock !== null) {
       this.state.focusedBlock = null;
@@ -929,6 +902,34 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
   setFocusedBlock(blockElement: Element) {
     this.state.focusedBlock = blockElement as BlockComponentElement;
+  }
+
+  // clear selection: `block`, `block:drag`, `embed`, `native`
+  clear() {
+    const { state, slots } = this;
+    let { type } = state;
+
+    if (type === 'block:drag') {
+      // clear `drag preview`
+      PreviewDragHandlers.clear(this);
+      type = 'block';
+    }
+
+    if (type === 'block') {
+      state.clearBlockSelection();
+      slots.selectedRectsUpdated.emit([]);
+      slots.draggingAreaUpdated.emit(null);
+
+      // `ESC`
+      // clear `format quick bar`
+      this.container.querySelector('format-quick-bar')?.remove();
+    } else if (type === 'embed') {
+      state.clearEmbedSelection();
+      slots.embedRectsUpdated.emit([]);
+      slots.embedEditingStateUpdated.emit(null);
+    } else if (type === 'native') {
+      state.clearNativeSelection();
+    }
   }
 
   dispose() {

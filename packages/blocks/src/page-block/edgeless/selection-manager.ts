@@ -136,6 +136,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     dispacher: UIEventDispatcher
   ) {
     super(container, dispacher);
+
     this._controllers = {
       default: new DefaultModeController(this.container),
       text: new TextModeController(this.container),
@@ -405,10 +406,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     };
   }
 
-  dispose() {
-    this._disposables.dispose();
-  }
-
   clear() {
     this.selectedBlocks = [];
     this.lastState = null;
@@ -416,5 +413,9 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       selected: [],
       active: false,
     };
+  }
+
+  dispose() {
+    this._disposables.dispose();
   }
 }
