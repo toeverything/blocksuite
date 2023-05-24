@@ -85,7 +85,7 @@ export class RowSelectionManager {
 
     const endCell = elements.find(el => el.classList.contains('database-cell'));
     const startCell = this._startCell;
-    if (!endCell || !startCell || !this._database) return true;
+    if (!endCell || !startCell || !this._database) return false;
 
     if (endCell === startCell) {
       // current cell, native selection
@@ -132,7 +132,7 @@ export class RowSelectionManager {
 
     this._startRange = null;
     this._setColumnWidthHandleDisplay('block');
-    return true;
+    return false;
   };
 
   _onClick = (ctx: UIEventStateContext) => {
