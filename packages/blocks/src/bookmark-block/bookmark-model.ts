@@ -16,17 +16,20 @@ type MetaData = {
 };
 export type BookmarkProps = {
   url: string;
+  caption?: string;
 } & MetaData;
 
+export const defaultBookmarkProps: BookmarkProps = {
+  url: '',
+  title: '',
+  description: '',
+  icon: '',
+  image: '',
+  caption: '',
+};
 export const BookmarkBlockSchema = defineBlockSchema({
   flavour: 'affine:bookmark',
-  props: (internal): BookmarkProps => ({
-    url: '',
-    title: '',
-    description: '',
-    icon: '',
-    image: '',
-  }),
+  props: (internal): BookmarkProps => defaultBookmarkProps,
   metadata: {
     version: 1,
     role: 'content',

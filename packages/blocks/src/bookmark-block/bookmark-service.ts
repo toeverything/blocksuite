@@ -8,4 +8,10 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   ) {
     return block.url;
   }
+  override block2Text(
+    block: BookmarkBlockModel,
+    { childText = '', begin = 0, end }: BlockTransformContext = {}
+  ): string {
+    return block.url;
+  }
 }

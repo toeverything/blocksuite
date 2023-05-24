@@ -120,6 +120,8 @@ export const preset: InitFn = (workspace: Workspace, pageId: string) => {
     strokeStyle: 'solid',
   });
   contentParser.importMarkdown(presetMarkdown, frameId);
+
+  page.addBlock('affine:bookmark', { url: 'https://www.google.com' }, frameId);
 };
 
 preset.id = 'preset';
