@@ -477,10 +477,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   const previousSibling = getPreviousBlock(model);
 
   if (matchFlavours(parent, ['affine:database'])) {
-    const databaseRowsCount = parent.children.length;
-    if (databaseRowsCount === 1) {
-      return true;
-    } else if (previousSibling) {
+    if (previousSibling) {
       page.deleteBlock(model);
       focusBlockByModel(previousSibling);
       return true;
