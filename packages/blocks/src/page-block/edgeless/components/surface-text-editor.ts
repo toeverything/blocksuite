@@ -59,6 +59,7 @@ export class SurfaceTextEditor extends ShadowlessElement {
       this._virgoContainer.addEventListener(
         'blur',
         () => {
+          this.vEditor?.unmount();
           this.remove();
           edgeless.slots.selectionUpdated.emit({
             selected: [],

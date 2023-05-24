@@ -6,7 +6,6 @@ import {
   getLineHeightInPx,
   getTextWidth,
   isRTL,
-  wrapText,
 } from './utils.js';
 
 export class TextElement extends SurfaceElement<IText> {
@@ -61,12 +60,7 @@ export class TextElement extends SurfaceElement<IText> {
     });
 
     const yText = text;
-    const deltas: ITextDelta[] = (yText.toDelta() as ITextDelta[]).map(
-      delta => ({
-        insert: wrapText(delta.insert, font, w),
-        attributes: delta.attributes,
-      })
-    );
+    const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
     const lines = deltaInsertsToChunks(deltas);
     this._lines = lines;
 
