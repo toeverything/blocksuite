@@ -71,6 +71,12 @@ export function createKeyboardBindings(
       altKey: null,
       shiftKey: null,
       handler(range, { event, prefix }) {
+        if (range.length > 0) {
+          // When select text and press `[[` should not trigger transform,
+          // since it will break the bracket complete.
+          // Expected `[[selected text]]` instead of `@selected text]]`
+          return ALLOW_DEFAULT;
+        }
         if (
           (event.key === '[' || event.key === '【') &&
           !prefix.endsWith(event.key)
