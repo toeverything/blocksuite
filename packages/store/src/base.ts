@@ -157,7 +157,6 @@ export class BaseBlockModel<
   type?: string;
   text?: Text;
   sourceId?: string;
-  title?: string;
 
   isEmpty() {
     return this.children.length === 0;

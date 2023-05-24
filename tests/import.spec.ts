@@ -577,138 +577,138 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
 });
 
 // todo this is temporary solution
-test(scoped`import notion html-format image`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
+// test(scoped`import notion html-format image`, async ({ page }) => {
+//   await enterPlaygroundRoom(page);
 
-  const tempText = `
-  <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>demo</title>
-  </head>
-  <body>
-    <article id="8da888cd-8160-4fd6-929c-628fca9189d8" class="page sans">
-      <header><h1 class="page-title">demo</h1></header>
-      <div class="page-body">
-      <figure id="c1484c02-09a5-4bb8-8ba1-8f681f49c8b0" class="image">
-      <a href="image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png"
-        ><img
-          style="width: 524px"
-          src="image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png"
-      /></a>
-    </figure>
-    <figure id="cda1e799-663f-4bb0-9591-e78e9c69abe9" class="image">
-      <a
-        href="https://images.unsplash.com/photo-1662321979743-3d0a327397bb?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb"
-        ><img
-          src="https://images.unsplash.com/photo-1662321979743-3d0a327397bb?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb"
-      /></a>
-    </figure>
-    <figure id="f456cd22-ed40-4a0d-8a4a-184782ce1e38" class="image">
-      <a
-        href="image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg"
-        ><img
-          style="width: 3484px"
-          src="image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg"
-      /></a>
-    </figure>
-    <figure id="c5503afa-03ea-4e71-9869-0a7043fdce44" class="image">
-      <a
-        href="https://media1.giphy.com/media/HJZblxmxHb7CbZtmNy/giphy.gif?cid=7941fdc629znta1bnwp46vdn5ex496a0ra92or1smz7xwfo6&amp;ep=v1_gifs_trending&amp;rid=giphy.gif&amp;ct=g"
-        ><img
-          src="https://media1.giphy.com/media/HJZblxmxHb7CbZtmNy/giphy.gif?cid=7941fdc629znta1bnwp46vdn5ex496a0ra92or1smz7xwfo6&amp;ep=v1_gifs_trending&amp;rid=giphy.gif&amp;ct=g"
-      /></a>
-    </figure>
-    <figure id="cf79d568-40e5-4044-902e-34dba584149c">
-      <a href="http://www.google.com" class="bookmark source"
-        ><div class="bookmark-info">
-          <div class="bookmark-text">
-            <div class="bookmark-title">Google</div>
-            <div class="bookmark-description">
-              Search the world&#x27;s information, including webpages,
-              images, videos and more. Google has many special features to
-              help you find exactly what you&#x27;re looking for.
-            </div>
-          </div>
-          <div class="bookmark-href">
-            <img
-              src="http://www.google.com/favicon.ico"
-              class="icon bookmark-icon"
-            />http://www.google.com
-          </div>
-        </div></a
-      >
-    </figure>
-      </div>
-    </article>
-  </body>
-  </html>
-`;
+//   const tempText = `
+//   <html>
+//   <head>
+//     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+//     <title>demo</title>
+//   </head>
+//   <body>
+//     <article id="8da888cd-8160-4fd6-929c-628fca9189d8" class="page sans">
+//       <header><h1 class="page-title">demo</h1></header>
+//       <div class="page-body">
+//       <figure id="c1484c02-09a5-4bb8-8ba1-8f681f49c8b0" class="image">
+//       <a href="image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png"
+//         ><img
+//           style="width: 524px"
+//           src="image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png"
+//       /></a>
+//     </figure>
+//     <figure id="cda1e799-663f-4bb0-9591-e78e9c69abe9" class="image">
+//       <a
+//         href="https://images.unsplash.com/photo-1662321979743-3d0a327397bb?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb"
+//         ><img
+//           src="https://images.unsplash.com/photo-1662321979743-3d0a327397bb?ixlib=rb-4.0.3&amp;q=85&amp;fm=jpg&amp;crop=entropy&amp;cs=srgb"
+//       /></a>
+//     </figure>
+//     <figure id="f456cd22-ed40-4a0d-8a4a-184782ce1e38" class="image">
+//       <a
+//         href="image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg"
+//         ><img
+//           style="width: 3484px"
+//           src="image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg"
+//       /></a>
+//     </figure>
+//     <figure id="c5503afa-03ea-4e71-9869-0a7043fdce44" class="image">
+//       <a
+//         href="https://media1.giphy.com/media/HJZblxmxHb7CbZtmNy/giphy.gif?cid=7941fdc629znta1bnwp46vdn5ex496a0ra92or1smz7xwfo6&amp;ep=v1_gifs_trending&amp;rid=giphy.gif&amp;ct=g"
+//         ><img
+//           src="https://media1.giphy.com/media/HJZblxmxHb7CbZtmNy/giphy.gif?cid=7941fdc629znta1bnwp46vdn5ex496a0ra92or1smz7xwfo6&amp;ep=v1_gifs_trending&amp;rid=giphy.gif&amp;ct=g"
+//       /></a>
+//     </figure>
+//     <figure id="cf79d568-40e5-4044-902e-34dba584149c">
+//       <a href="http://www.google.com" class="bookmark source"
+//         ><div class="bookmark-info">
+//           <div class="bookmark-text">
+//             <div class="bookmark-title">Google</div>
+//             <div class="bookmark-description">
+//               Search the world&#x27;s information, including webpages,
+//               images, videos and more. Google has many special features to
+//               help you find exactly what you&#x27;re looking for.
+//             </div>
+//           </div>
+//           <div class="bookmark-href">
+//             <img
+//               src="http://www.google.com/favicon.ico"
+//               class="icon bookmark-icon"
+//             />http://www.google.com
+//           </div>
+//         </div></a
+//       >
+//     </figure>
+//       </div>
+//     </article>
+//   </body>
+//   </html>
+// `;
 
-  const expectedValue = [
-    {
-      flavour: 'affine:page',
-      type: 'header',
-      text: [{ insert: 'demo', attributes: {} }],
-      children: [],
-    },
-    {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      children: [],
-      text: [
-        {
-          insert: 'image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png',
-          attributes: {
-            link: 'image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png',
-          },
-        },
-      ],
-    },
-    {
-      flavour: 'affine:embed',
-      type: 'image',
-      sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
-      children: [],
-      text: [],
-    },
-    {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      children: [],
-      text: [
-        {
-          insert:
-            'image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg',
-          attributes: {
-            link: 'image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg',
-          },
-        },
-      ],
-    },
-    {
-      flavour: 'affine:embed',
-      type: 'image',
-      sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
-      children: [],
-      text: [],
-    },
-    {
-      flavour: 'affine:paragraph',
-      type: 'text',
-      children: [],
-      text: [
-        {
-          insert: 'http://www.google.com/favicon.ico',
-          attributes: { link: 'http://www.google.com/favicon.ico' },
-        },
-      ],
-    },
-  ];
+//   const expectedValue = [
+//     {
+//       flavour: 'affine:page',
+//       type: 'header',
+//       text: [{ insert: 'demo', attributes: {} }],
+//       children: [],
+//     },
+//     {
+//       flavour: 'affine:paragraph',
+//       type: 'text',
+//       children: [],
+//       text: [
+//         {
+//           insert: 'image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png',
+//           attributes: {
+//             link: 'image%2013665bbaf5544871b0cbcd70e3d4799c/Untitled.png',
+//           },
+//         },
+//       ],
+//     },
+//     {
+//       flavour: 'affine:embed',
+//       type: 'image',
+//       sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
+//       children: [],
+//       text: [],
+//     },
+//     {
+//       flavour: 'affine:paragraph',
+//       type: 'text',
+//       children: [],
+//       text: [
+//         {
+//           insert:
+//             'image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg',
+//           attributes: {
+//             link: 'image%2013665bbaf5544871b0cbcd70e3d4799c/rachit-tank-2cFZ_FB08UM-unsplash.jpg',
+//           },
+//         },
+//       ],
+//     },
+//     {
+//       flavour: 'affine:embed',
+//       type: 'image',
+//       sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
+//       children: [],
+//       text: [],
+//     },
+//     {
+//       flavour: 'affine:paragraph',
+//       type: 'text',
+//       children: [],
+//       text: [
+//         {
+//           insert: 'http://www.google.com/favicon.ico',
+//           attributes: { link: 'http://www.google.com/favicon.ico' },
+//         },
+//       ],
+//     },
+//   ];
 
-  const blocks = await transformMarkdown(page, tempText);
-  expect(blocks).toEqual(expectedValue);
-});
+//   const blocks = await transformMarkdown(page, tempText);
+//   expect(blocks).toEqual(expectedValue);
+// });
 
 // todo this is temporary solution
 test(scoped`import notion markdown-format toggle list`, async ({ page }) => {

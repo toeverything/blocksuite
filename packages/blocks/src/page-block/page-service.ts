@@ -30,8 +30,9 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     pastedBlocks: SerializedBlock[]
   ) {
     if (pastedBlocks.length > 0 && pastedBlocks[0].children.length === 0) {
-      focusedBlockModel.title =
-        pastedBlocks[0].text?.map(text => text.insert || '').join('') || '';
+      (focusedBlockModel as PageBlockModel).title.applyDelta(
+        pastedBlocks[0].text || []
+      );
       pastedBlocks = pastedBlocks.slice(1);
     }
     // this is page block empty case
