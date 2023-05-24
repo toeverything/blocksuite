@@ -9,6 +9,7 @@ import type {
   FrameBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -75,7 +76,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,80]',
+      'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
       'prop:background': '--affine-background-secondary-color',
       'prop:index': 'a0',
     },

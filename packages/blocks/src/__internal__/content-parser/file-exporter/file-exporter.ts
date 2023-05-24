@@ -1,4 +1,5 @@
 /* eslint-disable no-control-regex */
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import TurndownService from 'turndown';
 
 import { globalCSS } from './exporter-style.js';
@@ -255,7 +256,7 @@ function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
   ${htmlCss}
 </head>
 <body>
-<div style="margin:0 auto;padding:1rem;max-width:720px">
+<div style="margin:0 auto;padding:1rem;max-width:${EDITOR_WIDTH}px">
 ${htmlContent}
 </div>
 </body>

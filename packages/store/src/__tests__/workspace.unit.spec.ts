@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
 
@@ -191,7 +192,7 @@ describe('addBlock', () => {
         'sys:flavour': 'affine:frame',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': '[0,0,720,480]',
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
         'prop:index': 'a0',
       },
       '2': {
@@ -373,7 +374,7 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:frame',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': '[0,0,720,480]',
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
         'prop:index': 'a0',
       },
       '2': {
@@ -400,7 +401,7 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:frame',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': '[0,0,720,480]',
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
         'prop:index': 'a0',
       },
     });
