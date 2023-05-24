@@ -7,8 +7,8 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
-import { SHORT_KEY } from './keyboard.js';
-import { getEditorLocator } from './misc.js';
+import { SHORT_KEY, type } from './keyboard.js';
+import { getEditorLocator, waitForVirgoStateUpdated } from './misc.js';
 
 export async function getFrameRect(
   page: Page,
@@ -31,6 +31,10 @@ export async function getFrameRect(
   return { x, y, w, h };
 }
 
+export async function registerFormatBarCustomElements(page: Page) {
+  await page.click('sl-button[content="Register FormatBar Custom Elements"]');
+}
+
 export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
@@ -43,7 +47,14 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text' | 'connector';
+type MouseMode =
+  | 'default'
+  | 'shape'
+  | 'brush'
+  | 'pan'
+  | 'text'
+  | 'connector'
+  | 'note';
 type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -59,6 +70,7 @@ export function locatorEdgelessToolButton(
     pan: 'Hand',
     text: 'Text',
     connector: 'Connector',
+    note: 'Note',
 
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
@@ -100,6 +112,7 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
     case 'brush':
     case 'pan':
     case 'text':
+    case 'note':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
@@ -175,7 +188,7 @@ export async function addBasicRectShapeElement(
   end: { x: number; y: number }
 ) {
   await setMouseMode(page, 'shape');
-  await dragBetweenCoords(page, start, end, { steps: 10 });
+  await dragBetweenCoords(page, start, end, { steps: 20 });
   await setMouseMode(page, 'default');
 }
 
@@ -186,6 +199,19 @@ export async function addBasicConnectorElement(
 ) {
   await setMouseMode(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
+  await setMouseMode(page, 'default');
+}
+
+export async function addTextFrame(
+  page: Page,
+  text: string,
+  x: number,
+  y: number
+) {
+  await setMouseMode(page, 'note');
+  await page.mouse.click(x, y);
+  await waitForVirgoStateUpdated(page);
+  await type(page, text);
   await setMouseMode(page, 'default');
 }
 
@@ -339,6 +365,8 @@ function locatorComponentToolbarMoreButton(page: Page) {
 }
 type Action =
   | 'bringToFront'
+  | 'bringForward'
+  | 'sendBackward'
   | 'sendToBack'
   | 'changeFrameColor'
   | 'changeShapeFillColor'
@@ -360,6 +388,30 @@ export async function triggerComponentToolbarAction(
         .locator('.more-actions-container .action-item')
         .filter({
           hasText: 'Bring to front',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'bringForward': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Bring forward',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'sendBackward': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Send backward',
         });
       await actionButton.click();
       break;
@@ -536,4 +588,30 @@ export async function changeConnectorStrokeStyle(
 ) {
   const button = locatorConnectorStrokeStyleButton(page, mode);
   await button.click();
+}
+
+export async function initThreeShapes(page: Page) {
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 130, y: 130 },
+    end: { x: 230, y: 230 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  const rect2 = {
+    start: { x: 160, y: 160 },
+    end: { x: 260, y: 260 },
+  };
+  await addBasicRectShapeElement(page, rect2.start, rect2.end);
+}
+
+export async function initThreeTextFrames(page: Page) {
+  await addTextFrame(page, 'abc', 30 + 100, 40 + 100);
+  await addTextFrame(page, 'efg', 30 + 130, 40 + 100);
+  await addTextFrame(page, 'hij', 30 + 160, 40 + 100);
 }

@@ -34,7 +34,7 @@ function ResizeHandle(
     boxSizing: 'border-box',
     borderRadius: '6px',
     zIndex: '10',
-    border: '2px var(--affine-primary-color) solid',
+    border: '2px var(--affine-blue) solid',
     background: 'white',
     cursor: directionCursors[handleDirection],
     /**

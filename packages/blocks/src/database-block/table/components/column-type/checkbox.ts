@@ -17,12 +17,18 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
       display: block;
       width: 100%;
       height: 100%;
+      cursor: pointer;
     }
 
     .affine-database-checkbox-container {
+      height: 100%;
+    }
+
+    .affine-database-checkbox {
       display: flex;
       align-items: center;
       height: 100%;
+      width: 100%;
     }
   `;
 

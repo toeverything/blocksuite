@@ -38,8 +38,8 @@ import { GUI } from 'dat.gui';
 import JSZip from 'jszip';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-
-import { createViewer } from './doc-inspector.js';
+import { registerFormatBarCustomElement } from './custom-format-bar';
+import { createViewer } from './doc-inspector';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -412,6 +412,10 @@ export class DebugMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
+  private _registerFormatBarCustomElements() {
+    registerFormatBarCustomElement();
+  }
+
   override firstUpdated() {
     this.workspace.slots.pageAdded.on(e => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
@@ -655,6 +659,20 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
+
+          <sl-tooltip
+            content="Register FormatBar Custom Elements"
+            placement="bottom"
+            hoist
+          >
+            <sl-button
+              size="small"
+              content="Register FormatBar Custom Elements"
+              @click=${this._registerFormatBarCustomElements}
+            >
+              <sl-icon name="plug"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
             <sl-button

@@ -1,7 +1,6 @@
-import type {
-  PanMouseMode,
-  SelectionEvent,
-} from '../../../__internal__/index.js';
+import type { PointerEventState } from '@blocksuite/lit';
+
+import type { PanMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { MouseModeController } from './index.js';
 
@@ -12,30 +11,30 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
 
   private _lastPoint: [number, number] | null = null;
 
-  onContainerClick(e: SelectionEvent): void {
+  onContainerClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerContextMenu(e: SelectionEvent): void {
+  onContainerContextMenu(e: PointerEventState): void {
     noop();
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerTripleClick(e: SelectionEvent) {
+  onContainerTripleClick(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragStart(e: SelectionEvent) {
+  onContainerDragStart(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._lastPoint = [e.x, e.y];
     this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: true });
   }
 
-  onContainerDragMove(e: SelectionEvent) {
+  onContainerDragMove(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     if (!this._lastPoint) return;
 
@@ -58,11 +57,11 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: false });
   }
 
-  onContainerMouseMove(e: SelectionEvent) {
+  onContainerMouseMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerMouseOut(e: SelectionEvent) {
+  onContainerMouseOut(e: PointerEventState) {
     noop();
   }
 

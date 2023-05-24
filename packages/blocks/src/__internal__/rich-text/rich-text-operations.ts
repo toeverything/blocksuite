@@ -125,6 +125,13 @@ export function handleBlockSplit(
 ) {
   if (!(model.text instanceof Text)) return;
 
+  // On press enter, it may convert symbols from yjs ContentString
+  // to yjs ContentFormat. Once it happens, the converted symbol will
+  // be deleted and not counted as model.text.yText.length.
+  // Example: "`a`[enter]" -> yText[<ContentFormat: Code>, "a", <ContentFormat: Code>]
+  // In this case, we should not split the block.
+  if (model.text.yText.length < splitIndex + splitLength) return;
+
   const parent = page.getParent(model);
   if (!parent) return;
 
@@ -399,10 +406,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   ) {
     if (
       !previousSibling ||
-      !matchFlavours(previousSibling, [
-        'affine:paragraph',
-        'affine:list',
-      ] as const)
+      !matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
     )
       return false;
 
@@ -495,7 +499,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:paragraph'] as const)) return false;
+  if (!matchFlavours(model, ['affine:paragraph'])) return false;
 
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.

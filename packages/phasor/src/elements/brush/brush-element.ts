@@ -42,7 +42,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
     const commands = Utils.getSvgPathFromStroke(stroke);
     const path = new Path2D(commands);
 
-    ctx.fillStyle = this.transformPropertyValue(this.color);
+    ctx.fillStyle = this.computedValue(this.color);
     ctx.fill(path);
   }
 

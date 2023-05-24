@@ -1,4 +1,8 @@
-import { isDatabaseInput, isInsidePageTitle } from '../query.js';
+import {
+  isDatabaseInput,
+  isInsideEdgelessTextEditor,
+  isInsidePageTitle,
+} from '../query.js';
 import { debounce, noop } from '../std.js';
 import { Recognizer } from './recognizer.js';
 import type { SelectionEvent } from './selection-event.js';
@@ -48,7 +52,8 @@ export function initMouseEventHandlers(
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -59,7 +64,8 @@ export function initMouseEventHandlers(
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -68,7 +74,8 @@ export function initMouseEventHandlers(
     onDragEnd: event => {
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -83,7 +90,8 @@ export function initMouseEventHandlers(
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }
@@ -99,7 +107,8 @@ export function initMouseEventHandlers(
     onClick: event => {
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }

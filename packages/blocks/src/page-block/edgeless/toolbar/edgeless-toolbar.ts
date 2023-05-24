@@ -8,13 +8,21 @@ import {
   HandIcon,
   ImageIcon,
   MinusIcon,
+  NoteIcon,
   PlusIcon,
   SelectIcon,
   TextIconLarge,
   ViewBarIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Bound, deserializeXYWH, getCommonBound } from '@blocksuite/phasor';
+import {
+  Bound,
+  deserializeXYWH,
+  getCommonBound,
+  ZOOM_MAX,
+  ZOOM_MIN,
+  ZOOM_STEP,
+} from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -24,10 +32,9 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { stopPropagation, ZOOM_MAX, ZOOM_MIN } from '../utils.js';
+import { stopPropagation } from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
@@ -52,7 +59,7 @@ export class EdgelessToolbar extends LitElement {
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
-      fill: var(--affine-icon-color);
+      fill: currentcolor;
     }
 
     .edgeless-toolbar-container[level='second'] {
@@ -119,28 +126,41 @@ export class EdgelessToolbar extends LitElement {
   }
 
   private _zoomToFit() {
-    const { viewport } = this.edgeless.surface;
-    const { width, height } = viewport;
-    const frame = this.edgeless.model.children[0] as FrameBlockModel;
-    const frameXYWH = deserializeXYWH(frame.xywh);
-    const frameBound = new Bound(...frameXYWH);
+    const bounds = [];
+
+    const frame = this.edgeless.frames[0];
+    if (frame) {
+      const frameXYWH = deserializeXYWH(frame.xywh);
+      const frameBound = new Bound(...frameXYWH);
+      bounds.push(frameBound);
+    }
 
     const surfaceElementsBound = this.edgeless.surface.getElementsBound();
+    if (surfaceElementsBound) {
+      bounds.push(surfaceElementsBound);
+    }
 
-    const bound = surfaceElementsBound
-      ? getCommonBound([frameBound, surfaceElementsBound])
-      : frameBound;
-    assertExists(bound);
+    const { viewport } = this.edgeless.surface;
+    let { centerX, centerY, zoom } = viewport;
 
-    const zoom = Math.min(
-      (width - FIT_TO_SCREEN_PADDING) / bound.w,
-      (height - FIT_TO_SCREEN_PADDING) / bound.h
-    );
+    if (bounds.length) {
+      const { width, height } = viewport;
+      const bound = getCommonBound(bounds);
+      assertExists(bound);
 
-    const cx = bound.x + bound.w / 2;
-    const cy = bound.y + bound.h / 2;
+      zoom = Math.min(
+        (width - FIT_TO_SCREEN_PADDING) / bound.w,
+        (height - FIT_TO_SCREEN_PADDING) / bound.h
+      );
+
+      centerX = bound.x + bound.w / 2;
+      centerY = bound.y + bound.h / 2;
+    } else {
+      zoom = 1;
+    }
+
     viewport.setZoom(zoom);
-    viewport.setCenter(cx, cy);
+    viewport.setCenter(centerX, centerY);
     this.edgeless.slots.viewportUpdated.emit();
   }
 
@@ -219,7 +239,6 @@ export class EdgelessToolbar extends LitElement {
           @click=${() =>
             this._setMouseMode({
               type: 'text',
-              background: FRAME_BACKGROUND_COLORS[0],
             })}
         >
           ${TextIconLarge}
@@ -250,6 +269,17 @@ export class EdgelessToolbar extends LitElement {
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
+        <edgeless-tool-icon-button
+          .tooltip=${getTooltipWithShortcut('Note', 'N')}
+          .active=${type === 'text'}
+          @click=${() =>
+            this._setMouseMode({
+              type: 'note',
+              background: FRAME_BACKGROUND_COLORS[0],
+            })}
+        >
+          ${NoteIcon}
+        </edgeless-tool-icon-button>
         <div class="divider"></div>
         <edgeless-tool-icon-button
           .tooltip=${'Fit to screen'}
@@ -259,7 +289,7 @@ export class EdgelessToolbar extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom out'}
-          @click=${() => this._setZoomByStep(-0.1)}
+          @click=${() => this._setZoomByStep(-ZOOM_STEP)}
         >
           ${MinusIcon}
         </edgeless-tool-icon-button>
@@ -268,7 +298,7 @@ export class EdgelessToolbar extends LitElement {
         </span>
         <edgeless-tool-icon-button
           .tooltip=${'Zoom in'}
-          @click=${() => this._setZoomByStep(+0.1)}
+          @click=${() => this._setZoomByStep(ZOOM_STEP)}
         >
           ${PlusIcon}
         </edgeless-tool-icon-button>

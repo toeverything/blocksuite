@@ -142,6 +142,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -193,6 +194,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -250,6 +252,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -308,6 +311,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -430,6 +434,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -494,6 +499,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -772,28 +778,17 @@ test('should get to selected block when dragging unselected block', async ({
     throw new Error();
   }
 
-  await page.mouse.move(
-    editorRect1.x + 5,
-    editorRect1.y + editorRect1.height / 2
-  );
-
-  await page.mouse.move(
-    editorRect1.x - 20,
-    editorRect1.y + editorRect1.height / 2
-  );
+  await page.mouse.move(editorRect1.x - 5, editorRect0.y);
   await page.mouse.down();
   await page.mouse.up();
 
   const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(1);
 
-  await page.mouse.move(
-    editorRect0.x - 20,
-    editorRect0.y + editorRect0.height / 2
-  );
+  await page.mouse.move(editorRect1.x - 5, editorRect0.y);
   await page.mouse.down();
   await page.mouse.move(
-    editorRect1.x - 20,
+    editorRect1.x - 5,
     editorRect1.y + editorRect1.height / 2 + 1,
     {
       steps: 10,
