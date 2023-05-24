@@ -8,10 +8,6 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
-import {
-  getClosestDatabaseId,
-  getClosestRowId,
-} from '../page-block/default/selection-manager/database-selection-manager/utils.js';
 import type {
   DatabaseTableViewCellSelect,
   DatabaseTableViewCellState,
@@ -26,6 +22,10 @@ import {
   setDatabaseCellSelection,
   setDatabaseRowsSelection,
 } from './table/components/selection/utils.js';
+import {
+  getClosestDatabaseId,
+  getClosestRowId,
+} from './table/selection-manager/utils.js';
 import type { Cell, Column } from './table/types.js';
 
 type LastTableViewRowSelection = {
@@ -240,16 +240,21 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
   toggleRowSelection(element: Element) {
     const rowId = getClosestRowId(element);
-    if (rowId !== '') {
-      const databaseId = getClosestDatabaseId(element);
+    // click on database's drag handle
+    if (rowId === '') return false;
+
+    const rowIds = this._lastRowSelection?.rowIds ?? [];
+
+    if (rowIds.indexOf(rowId) > -1) {
+      this.clearRowSelection();
+    } else {
       this.setRowSelection({
         type: 'click',
-        databaseId,
+        databaseId: getClosestDatabaseId(element),
         rowIds: [rowId],
       });
-      return true;
     }
-    return false;
+    return true;
   }
 
   getLastRowSelection() {

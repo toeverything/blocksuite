@@ -21,7 +21,10 @@ import {
   getModelByBlockElement,
   isInSamePath,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
+import {
+  getService,
+  getServiceOrRegister,
+} from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -573,6 +576,14 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
         }
       }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
+
+      const service = getServiceOrRegister('affine:database');
+      Promise.resolve(service).then(service => {
+        const rowSelection = service.getLastRowSelection();
+        if (rowSelection) {
+          service.clearRowSelection();
+        }
+      });
     },
     getSelectedBlocks() {
       return pageBlock.selection.state.selectedBlocks;

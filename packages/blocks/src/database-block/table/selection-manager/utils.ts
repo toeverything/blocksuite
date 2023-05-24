@@ -57,6 +57,11 @@ export function getClosestDatabaseId(element: Element) {
   return databaseId;
 }
 
+export function isInDatabase(element: Element) {
+  const database = element.closest('affine-database');
+  return database !== null;
+}
+
 function getRowIdByIndex(database: Element, index: number) {
   const rowId = database
     .querySelector(`.database-row[data-row-index="${index}"]`)

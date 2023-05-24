@@ -22,6 +22,7 @@ import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import { getCellCoord } from './components/selection/utils.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
+import { RowSelectionManager } from './selection-manager/selection-manager.js';
 import type { Column } from './types.js';
 import { SearchState } from './types.js';
 
@@ -162,6 +163,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @state()
   private _hoverState = false;
 
+  private _rowSelection!: RowSelectionManager;
+
   private _columnRenderer = registerInternalRenderer();
   get columnRenderer() {
     return this._columnRenderer;
@@ -185,6 +188,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'keydown', this._onCellSelectionChange);
     disposables.addFromEvent(document, 'keydown', this._onCellSelectionMove);
     disposables.addFromEvent(document, 'keydown', this._onRowSelectionDelete);
+
+    this._initRowSelectionEvents();
   }
 
   override firstUpdated() {
@@ -214,6 +219,16 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
       this._onDatabaseScroll
     );
   }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    this._rowSelection.dispose();
+  }
+
+  private _initRowSelectionEvents = () => {
+    this._rowSelection = new RowSelectionManager(this.root.uiEventDispatcher);
+  };
 
   private _setFilteredRowIds = (rowIds: string[]) => {
     this._filteredRowIds = rowIds;
