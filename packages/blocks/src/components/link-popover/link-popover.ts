@@ -120,6 +120,9 @@ export class LinkPopover extends LitElement {
   @property()
   previewLink = '';
 
+  @property()
+  showBookmarkOperation = false;
+
   @state()
   private _bodyOverflowStyle = '';
 
@@ -264,15 +267,17 @@ export class LinkPopover extends LitElement {
         <span style="overflow: hidden;">${this.previewLink}</span>
       </div>
       <span class="affine-link-popover-dividing-line"></span>
-      <icon-button
-        class="has-tool-tip"
-        data-testid="unlink"
-        @click=${this._onLinkToCard}
-      >
-        ${LinkToCardIcon}
-        <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
-      </icon-button>
-      <span class="affine-link-popover-dividing-line"></span>
+      ${this.showBookmarkOperation
+        ? html`<icon-button
+              class="has-tool-tip"
+              data-testid="unlink"
+              @click=${this._onLinkToCard}
+            >
+              ${LinkToCardIcon}
+              <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+            </icon-button>
+            <span class="affine-link-popover-dividing-line"></span>`
+        : ''}
       <icon-button
         class="has-tool-tip"
         data-testid="unlink"
@@ -281,6 +286,7 @@ export class LinkPopover extends LitElement {
         ${UnlinkIcon}
         <tool-tip inert role="tooltip">Remove</tool-tip>
       </icon-button>
+
       <icon-button
         class="has-tool-tip"
         data-testid="edit"

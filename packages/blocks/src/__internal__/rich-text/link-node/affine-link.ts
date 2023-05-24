@@ -78,10 +78,12 @@ export class AffineLink extends ShadowlessElement {
     if (!(e.target instanceof HTMLElement) || !document.contains(e.target)) {
       return;
     }
+    const model = getModelByElement(this);
 
     const text = this.delta.insert;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
+      page: model.page,
       text,
       link: this.link,
       showMask: false,

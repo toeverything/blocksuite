@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 
 import {
   getDefaultPageBlock,
@@ -23,11 +24,18 @@ function updatePosition(element: LinkPopover, anchorEl: HTMLElement) {
 function createEditLinkElement(
   anchorEl: HTMLElement,
   container: HTMLElement,
-  { showMask, previewLink }: { showMask: boolean; previewLink: string }
+  {
+    showMask,
+    previewLink,
+    page,
+  }: { showMask: boolean; previewLink: string; page: Page }
 ) {
   const linkPanel = document.createElement('edit-link-panel');
   linkPanel.showMask = showMask;
   linkPanel.previewLink = previewLink;
+  linkPanel.showBookmarkOperation = !!page.awarenessStore.getFlag(
+    'enable_bookmark_operation'
+  );
   container.appendChild(linkPanel);
 
   requestAnimationFrame(() => {
@@ -84,6 +92,7 @@ function bindHoverState(
 
 interface LinkPopoverOptions {
   anchorEl: HTMLElement;
+  page: Page;
   container?: HTMLElement;
   text?: string;
   link?: string;
@@ -94,6 +103,7 @@ interface LinkPopoverOptions {
 
 export async function showLinkPopover({
   anchorEl,
+  page,
   container = document.body,
   text = '',
   link = '',
@@ -110,6 +120,7 @@ export async function showLinkPopover({
   const editLinkEle = createEditLinkElement(anchorEl, container, {
     showMask,
     previewLink: link,
+    page,
   });
 
   const unsubscribeHoverAbort =
