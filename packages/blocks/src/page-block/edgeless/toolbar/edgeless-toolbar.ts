@@ -287,13 +287,12 @@ export class EdgelessToolbar extends LitElement {
       active: false,
     };
     if (mouseMode.type === 'default') {
-      if (this.edgeless.selection.cachedSelectionState) {
-        Object.assign(state, this.edgeless.selection.cachedSelectionState);
-        this.edgeless.selection.cachedSelectionState = null;
+      if (this.edgeless.selection.lastState) {
+        Object.assign(state, this.edgeless.selection.lastState);
+        this.edgeless.selection.lastState = null;
       }
-    } else {
-      this.edgeless.selection.cachedSelectionState =
-        this.edgeless.selection.blockSelectionState;
+    } else if (this.edgeless.selection.state.selected.length) {
+      this.edgeless.selection.lastState = this.edgeless.selection.state;
     }
 
     this.edgeless.slots.mouseModeUpdated.emit(mouseMode);

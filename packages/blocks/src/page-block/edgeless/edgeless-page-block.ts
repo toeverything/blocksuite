@@ -348,7 +348,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.selectionUpdated.on(state => {
-        this.selection.blockSelectionState = state;
+        this.selection.state = state;
         this._clearSelection();
         this.requestUpdate();
       })
@@ -400,7 +400,7 @@ export class EdgelessPageBlockComponent
 
         // FIXME: force updating selection for triggering re-render `selected-rect`
         slots.selectionUpdated.emit({
-          ...this.selection.blockSelectionState,
+          ...this.selection.state,
         });
       })
     );
@@ -837,12 +837,12 @@ export class EdgelessPageBlockComponent
 
     const { mouseMode, page, selection, surface, _rectsOfSelectedBlocks } =
       this;
-    const { blockSelectionState, draggingArea } = selection;
+    const { state, draggingArea } = selection;
     const { viewport } = surface;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.sortedFrames,
-      blockSelectionState.active,
+      state.active,
       this.root.renderModel
     );
 
@@ -890,16 +890,16 @@ export class EdgelessPageBlockComponent
           }}
         ></affine-selected-blocks>
         ${hoverRectTpl} ${draggingAreaTpl}
-        ${blockSelectionState.selected.length
+        ${state.selected.length
           ? html`
               <edgeless-selected-rect
                 .page=${page}
-                .state=${selection.blockSelectionState}
+                .state=${state}
                 .slots=${this.slots}
                 .surface=${surface}
               ></edgeless-selected-rect>
             `
-          : null}
+          : nothing}
       </div>
       ${this._toolbarEnabled
         ? html`

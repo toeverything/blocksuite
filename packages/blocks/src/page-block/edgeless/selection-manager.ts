@@ -94,21 +94,20 @@ export class EdgelessSelectionManager {
     timeStamp: number;
   } | null = null;
 
-  // selected blocks
+  // The selected blocks on then frame.
   selectedBlocks: BlockComponentElement[] = [];
 
-  cachedSelectionState: EdgelessSelectionState | null = null;
+  // Cache the last edited elements.
+  lastState: EdgelessSelectionState | null = null;
 
-  /**
-   * Holds the state of the current selected block(s) and/or shape(s).
-   */
-  blockSelectionState: EdgelessSelectionState = {
+  // Holds the state of the current selected elements.
+  state: EdgelessSelectionState = {
     selected: [],
     active: false,
   };
 
   get isActive() {
-    return this.blockSelectionState.active;
+    return this.state.active;
   }
 
   get lastMousePos() {
@@ -398,14 +397,14 @@ export class EdgelessSelectionManager {
       // if in other mouse mode
       this.mouseMode.type !== 'default' ||
       // if current selection is not active
-      !this.blockSelectionState.active ||
+      !this.state.active ||
       // if current selected block is not the hovered block
-      this.blockSelectionState.selected[0].id !== hovered.id
+      this.state.selected[0].id !== hovered.id
     ) {
       this._container.components.dragHandle?.hide();
     }
 
-    if (!hovered || this.blockSelectionState.active) {
+    if (!hovered || this.state.active) {
       return null;
     }
 
@@ -422,7 +421,8 @@ export class EdgelessSelectionManager {
 
   clear() {
     this.selectedBlocks = [];
-    this.blockSelectionState = {
+    this.lastState = null;
+    this.state = {
       selected: [],
       active: false,
     };

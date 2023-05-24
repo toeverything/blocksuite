@@ -85,12 +85,12 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     return this._edgeless.selection.selectedBlocks;
   }
 
-  get blockSelectionState() {
-    return this._edgeless.selection.blockSelectionState;
+  get state() {
+    return this._edgeless.selection.state;
   }
 
   get isActive() {
-    return this._edgeless.selection.blockSelectionState.active;
+    return this._edgeless.selection.state.active;
   }
 
   private _pick(x: number, y: number) {
@@ -114,37 +114,34 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     });
   }
 
-  private _handleClickOnSelected(selected: Selectable, e: PointerEventState) {
+  private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
     this._edgeless.clearSelectedBlocks();
 
-    const currentSelected = this.blockSelectionState.selected;
-    if (currentSelected.length !== 1) {
-      this._setSelectionState([selected], false);
+    const { selected, active } = this.state;
+    if (selected.length !== 1) {
+      this._setSelectionState([element], false);
       return;
     }
 
     // phasor element
-    if (isPhasorElement(selected)) {
-      if (
-        this.blockSelectionState.selected[0] instanceof TextElement &&
-        this.blockSelectionState.active
-      ) {
+    if (isPhasorElement(element)) {
+      if (selected[0] instanceof TextElement && active) {
         return;
       }
-      this._setSelectionState([selected], false);
+      this._setSelectionState([element], false);
     }
     // frame block
     else {
-      if (currentSelected[0] === selected) {
-        this._setSelectionState([selected], true);
+      if (selected[0] === element) {
+        this._setSelectionState([element], true);
       } else {
         // issue #1809
         // If the previously selected element is a frameBlock and is in an active state,
         // then the currently clicked frameBlock should also be in an active state when selected.
-        const active =
-          isTopLevelBlock(currentSelected[0]) &&
-          this._edgeless.selection.isActive;
-        this._setSelectionState([selected], active);
+        this._setSelectionState(
+          [element],
+          active && isTopLevelBlock(selected[0])
+        );
       }
       this._edgeless.slots.selectedBlocksUpdated.emit([]);
       handleNativeRangeClick(this._page, e);
@@ -154,7 +151,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _handleDragMoveEffect(element: Selectable) {
     handleElementChangedEffectForConnector(
       element,
-      this.blockSelectionState.selected,
+      this.state.selected,
       this._edgeless.surface,
       this._page
     );
@@ -180,10 +177,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     if (
       selected.type !== 'connector' ||
       (selected instanceof ConnectorElement &&
-        isConnectorAndBindingsAllSelected(
-          selected,
-          this.blockSelectionState.selected
-        ))
+        isConnectorAndBindingsAllSelected(selected, this.state.selected))
     ) {
       surface.setElementBound(selected.id, {
         x: boundX,
@@ -218,7 +212,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
-    const { selected } = this.blockSelectionState;
+    const { selected } = this.state;
     if (!selected.length) return false;
 
     const commonBound = getCommonBound(
@@ -245,7 +239,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _forceUpdateSelection() {
     // FIXME: force triggering selection change to re-render selection rect
     this._edgeless.slots.selectionUpdated.emit({
-      ...this.blockSelectionState,
+      ...this.state,
     });
   }
 
@@ -264,7 +258,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   /** Update drag handle by closest block elements */
   private _updateDragHandle(e: PointerEventState) {
-    const block = this._edgeless.selection.blockSelectionState.selected[0];
+    const block = this.state.selected[0];
     if (!block || !isTopLevelBlock(block)) return;
     const frameBlockElement = getBlockElementByModel(block);
     assertExists(frameBlockElement);
@@ -347,7 +341,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDragStart(e: PointerEventState) {
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
-      this.dragType = this.blockSelectionState.active
+      this.dragType = this.state.active
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
@@ -385,7 +379,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
       }
       case DefaultModeDragType.ContentMoving: {
-        this.blockSelectionState.selected.forEach(element => {
+        this.state.selected.forEach(element => {
           if (isPhasorElement(element)) {
             this._handleSurfaceDragMove(element, e);
           } else {

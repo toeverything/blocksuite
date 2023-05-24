@@ -38,14 +38,14 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(
     HOTKEYS.SPACE,
     (event: KeyboardEvent) => {
-      const { mouseMode, blockSelectionState } = edgeless.selection;
+      const { mouseMode, state } = edgeless.selection;
       if (event.type === 'keydown') {
         if (mouseMode.type === 'pan') {
           return;
         }
 
         // when user is editing, shouldn't enter pan mode
-        if (mouseMode.type === 'default' && blockSelectionState.active) {
+        if (mouseMode.type === 'default' && state.active) {
           return;
         }
 
@@ -71,7 +71,7 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
     // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
-    const { selected } = edgeless.selection.blockSelectionState;
+    const { selected } = edgeless.selection.state;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = edgeless.page.root?.children ?? [];
@@ -84,9 +84,7 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
       }
     });
     edgeless.selection.clear();
-    edgeless.slots.selectionUpdated.emit(
-      edgeless.selection.blockSelectionState
-    );
+    edgeless.slots.selectionUpdated.emit(edgeless.selection.state);
   }
   hotkey.addListener(HOTKEYS.BACKSPACE, backspace);
   hotkey.addListener(HOTKEYS.DELETE, backspace);
