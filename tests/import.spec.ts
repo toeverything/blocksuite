@@ -992,7 +992,6 @@ test(scoped`import notion html-format inline`, async ({ page }) => {
         { insert: '∗', attributes: {} },
         { insert: '2', attributes: {} },
         { insert: '', attributes: {} },
-        { insert: '', attributes: {} },
         { insert: '    ', attributes: {} },
       ],
       children: [],
