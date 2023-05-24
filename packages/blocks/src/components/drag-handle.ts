@@ -169,6 +169,16 @@ export class DragHandle extends WithDisposable(LitElement) {
       color: var(--affine-icon-color);
     }
 
+    @media print {
+      .affine-drag-handle-line {
+        display: none;
+      }
+
+      .affine-drag-handle {
+        display: none;
+      }
+    }
+
     .affine-drag-handle-normal {
       display: flex;
       stroke: currentcolor;
@@ -227,6 +237,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     this._getClosestBlockElement = options.getClosestBlockElement;
     options.container.appendChild(this);
     this._container = options.container;
+    this.addEventListener('beforeprint', () => this.hide(true));
   }
 
   /**

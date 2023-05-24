@@ -269,6 +269,10 @@ export class DebugMenu extends ShadowlessElement {
     this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
+  private _exportPdf() {
+    this.contentParser.exportPdf();
+  }
+
   private _exportHtml() {
     this.contentParser.exportHtml();
   }
@@ -387,6 +391,12 @@ export class DebugMenu extends ShadowlessElement {
           overflow: auto;
           z-index: 1000; /* for debug visibility */
           pointer-events: none;
+        }
+
+        @media print {
+          .debug-menu {
+            display: none;
+          }
         }
 
         .default-toolbar {
@@ -549,6 +559,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._exportHtml}>
                 Export HTML
+              </sl-menu-item>
+              <sl-menu-item @click=${this._exportPdf}>
+                Export PDF
               </sl-menu-item>
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
