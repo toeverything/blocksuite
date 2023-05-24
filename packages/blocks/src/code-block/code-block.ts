@@ -9,6 +9,7 @@ import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, render } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
   BUNDLED_LANGUAGES,
@@ -107,18 +108,18 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       padding-bottom: 20px;
     }
 
+    .affine-code-block-container .rich-text-container {
+      position: relative;
+      border-radius: 5px;
+      padding: 4px 12px 4px 60px;
+    }
+
     #line-numbers {
       position: absolute;
       text-align: right;
       left: 20px;
       line-height: var(--affine-line-height);
       color: var(--affine-text-secondary-color);
-    }
-
-    .affine-code-block-container .rich-text-container {
-      position: relative;
-      border-radius: 5px;
-      padding: 4px 12px 4px 60px;
     }
 
     .affine-code-block-container .virgo-editor {
@@ -132,6 +133,16 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     .affine-code-block-container affine-code-line span {
       white-space: pre;
+    }
+
+    .affine-code-block-container.wrap #line-numbers {
+      top: calc(var(--affine-line-height) + 4px);
+    }
+
+    .affine-code-block-container.wrap #line-numbers > div {
+      margin-top: calc(
+        var(--top, 0) / var(--affine-zoom, 1) - var(--affine-line-height)
+      );
     }
 
     .affine-code-block-container.wrap v-line > div {
@@ -403,46 +414,16 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   private _updateLineNumbers() {
-    const lineNumbersContainer = this.querySelector(
-      '#line-numbers'
-    ) as HTMLElement;
-    const richTextContainer = this.querySelector('.rich-text-container');
+    const lineNumbersContainer =
+      this.querySelector<HTMLElement>('#line-numbers');
     assertExists(lineNumbersContainer);
-    assertExists(richTextContainer);
 
-    const richTextRect = richTextContainer.getBoundingClientRect();
+    const next = this._wrap ? generateLineNumberRender() : lineNumberRender;
 
-    const lines = Array.from(this.querySelectorAll('v-line')).map(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      line => line.querySelector('v-text span')!
+    render(
+      repeat(Array.from(this.querySelectorAll('v-line')), next),
+      lineNumbersContainer
     );
-    const lineNumbers = [];
-    for (const [index, line] of lines.entries()) {
-      const rect = line.getBoundingClientRect();
-      const top = rect.top - richTextRect.top;
-      const height = rect.height;
-
-      lineNumbers.push(html`<div
-        style="${styleMap({
-          top: `${top}px`,
-          height: `${height}px`,
-          position: 'absolute',
-          display: 'flex',
-        })}"
-      >
-        <span
-          style="${styleMap({
-            position: 'absolute',
-            top: '-2px',
-            height: '1em',
-            lineHeight: '1em',
-          })}"
-          >${index + 1}</span
-        >
-      </div>`);
-    }
-
-    render(lineNumbers, lineNumbersContainer);
   }
 
   override render() {
@@ -457,6 +438,20 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       </div>
       ${this._codeOptionTemplate()}`;
   }
+}
+
+function generateLineNumberRender(top = 0) {
+  return function lineNumberRender(e: HTMLElement, index: number) {
+    const style = {
+      '--top': `${top}px`,
+    };
+    top = e.getBoundingClientRect().height;
+    return html`<div style=${styleMap(style)}>${index + 1}</div>`;
+  };
+}
+
+function lineNumberRender(_: HTMLElement, index: number) {
+  return html`<div>${index + 1}</div>`;
 }
 
 declare global {
