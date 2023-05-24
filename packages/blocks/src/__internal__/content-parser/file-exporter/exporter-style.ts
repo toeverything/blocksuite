@@ -1,8 +1,9 @@
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { css } from 'lit';
 
 export const globalCSS = css`
   :root {
-    --affine-editor-width: 720px;
+    --affine-editor-width: ${EDITOR_WIDTH}px;
 
     --affine-theme-mode: light;
     --affine-editor-mode: page;
