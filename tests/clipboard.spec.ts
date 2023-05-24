@@ -658,7 +658,7 @@ test(
       { x: 400, y: 400 },
       { steps: 10 }
     );
-    await assertEdgelessSelectedRect(page, [90, 100, EDITOR_WIDTH, 272]);
+    await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
 
     await copyByKeyboard(page);
 
@@ -666,7 +666,7 @@ test(
 
     await pasteByKeyboard(page, false);
 
-    await assertEdgelessSelectedRect(page, [40, 264, EDITOR_WIDTH, 272]);
+    await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
   }
 );
 
