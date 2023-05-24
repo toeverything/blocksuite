@@ -167,6 +167,9 @@ test('should show or hide database toolbar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
+  await initDatabaseColumn(page);
+  await initDatabaseRow(page);
+
   const db = await getDatabaseMouse(page);
   await db.mouseOver();
   const toolbar = page.locator('.affine-database-toolbar');
