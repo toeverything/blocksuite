@@ -556,11 +556,8 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     setSelectedBlock(modelState: EditingState | null, element) {
       if (element && element.closest('affine-database')) {
         const service = getService('affine:database');
-        const toggled = service.toggleRowSelection(element);
-        if (toggled) {
-          pageBlock.selection.clear();
-          return;
-        }
+        service.toggleRowSelection(element);
+        return;
       }
 
       const model = modelState?.model;
