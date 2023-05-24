@@ -5,6 +5,7 @@ import type {
   CssVariableName,
   DatabaseBlockModel,
   ListType,
+  SerializedBlock,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
@@ -904,4 +905,26 @@ export async function getCurrentThemeCSSPropertyValue(
         .themeObserver.cssVariables?.[property];
     }, property);
   return value;
+}
+
+export async function transformMarkdown(page: Page, data: string) {
+  const promiseResult = await page.evaluate(
+    ({ data }) => {
+      const contentParser = new window.ContentParser(window.page);
+      return contentParser.markdown2Block(data);
+    },
+    { data }
+  );
+  return await promiseResult;
+}
+
+export async function transformHtml(page: Page, data: string) {
+  const promiseResult = await page.evaluate(
+    ({ data }) => {
+      const contentParser = new window.ContentParser(window.page);
+      return contentParser.htmlText2Block(data);
+    },
+    { data }
+  );
+  return await promiseResult;
 }

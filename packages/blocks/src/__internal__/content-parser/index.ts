@@ -7,6 +7,7 @@ import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
+import type { FetchFileFunc } from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
@@ -23,9 +24,9 @@ export class ContentParser {
   private _parsers: Record<string, ParseHtml2BlockFunc> = {};
   private _htmlParser: HtmlParser;
 
-  constructor(page: Page) {
+  constructor(page: Page, fetchFileFunc?: FetchFileFunc) {
     this._page = page;
-    this._htmlParser = new HtmlParser(this, page);
+    this._htmlParser = new HtmlParser(this, page, fetchFileFunc);
     this._htmlParser.registerParsers();
   }
 
@@ -155,6 +156,17 @@ export class ContentParser {
 
   public async importMarkdown(text: string, insertPositionId: string) {
     const blocks = await this.markdown2Block(text);
+    const insertBlockModel = this._page.getBlockById(insertPositionId);
+
+    assertExists(insertBlockModel);
+    const { getServiceOrRegister } = await import('../service.js');
+    const service = await getServiceOrRegister(insertBlockModel.flavour);
+
+    service.json2Block(insertBlockModel, blocks);
+  }
+
+  public async importHtml(text: string, insertPositionId: string) {
+    const blocks = await this.htmlText2Block(text);
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
