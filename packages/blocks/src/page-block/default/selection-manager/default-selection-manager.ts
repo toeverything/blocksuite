@@ -36,7 +36,6 @@ import {
   handleNativeRangeClick,
   handleNativeRangeDragMove,
   isBlankArea,
-  isDatabase,
   isDatabaseInput,
   isDragHandle,
   isElement,
@@ -47,7 +46,6 @@ import {
   Point,
   Rect,
 } from '../../../__internal__/index.js';
-import { getServiceOrRegister } from '../../../__internal__/service.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
@@ -65,7 +63,6 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
-import { DatabaseTableViewSelectionManager } from './database-selection-manager/table-view.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
@@ -100,7 +97,6 @@ export class DefaultSelectionManager {
   readonly container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _databaseTableViewManager: DatabaseTableViewSelectionManager;
   private readonly _dispatcher: UIEventDispatcher;
 
   constructor({
@@ -122,7 +118,6 @@ export class DefaultSelectionManager {
     this._dispatcher = dispatcher;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
-    this._databaseTableViewManager = new DatabaseTableViewSelectionManager();
 
     let isDragging = false;
     this._add('dragStart', ctx => {
@@ -235,11 +230,6 @@ export class DefaultSelectionManager {
       this._embedResizeManager.onStart(e);
       return;
     }
-    if (isDatabase(e)) {
-      this.state.type = 'database';
-      this._databaseTableViewManager.onDragStart(this, e);
-      return;
-    }
 
     // disable dragHandle button
     this.container.components.dragHandle?.setPointerEvents('none');
@@ -276,10 +266,6 @@ export class DefaultSelectionManager {
     if (this.state.type === 'embed') {
       return this._embedResizeManager.onMove(e);
     }
-
-    if (this.state.type === 'database') {
-      return this._databaseTableViewManager.onDragMove(this, e);
-    }
   };
 
   private _onContainerDragEnd = (ctx: UIEventStateContext) => {
@@ -296,9 +282,8 @@ export class DefaultSelectionManager {
       BlockDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
-    } else if (this.state.type === 'database') {
-      this._databaseTableViewManager.onDragEnd(this, e);
     }
+
     if (this.page.readonly) return;
 
     if (this.state.type === 'native') {
@@ -369,7 +354,6 @@ export class DefaultSelectionManager {
 
     // do nothing when clicking on drag-handle
     if (isElement(target) && isDragHandle(target as Element)) {
-      this._clearDatabaseTableViewSelection();
       return;
     }
 
@@ -453,8 +437,6 @@ export class DefaultSelectionManager {
       target instanceof HTMLInputElement
     )
       return;
-
-    this._clearDatabaseTableViewSelection();
 
     handleNativeRangeClick(this.page, e, this.container);
   };
@@ -638,12 +620,6 @@ export class DefaultSelectionManager {
 
   private _onSelectionChangeWithoutDebounce = () => {
     updateLocalSelectionRange(this.page);
-  };
-
-  private _clearDatabaseTableViewSelection = () => {
-    // FIXME: refactor this
-    const service = getServiceOrRegister('affine:database');
-    Promise.resolve(service).then(database => database.clearSelection());
   };
 
   get viewportElement() {
