@@ -389,27 +389,30 @@ export class Page extends Space<FlatBlockMap> {
       return;
     }
 
-    const firstBlock = blocks[0];
-    const currentParent = this.getParent(firstBlock);
-
-    // the blocks must have the same parent (siblings)
-    if (blocks.some(block => this.getParent(block) !== currentParent)) {
-      console.error('the blocks must have the same parent');
-    }
-
-    if (currentParent === null || newParent === null) {
+    if (newParent === null) {
       throw new Error("Can't find parent model");
     }
 
+    const tempMap = new Map<BaseBlockModel, BaseBlockModel[]>();
+
     blocks.forEach(block => {
+      const parent = this.getParent(block);
+
+      if (parent === null) {
+        throw new Error("Can't find parent model");
+      }
+
       this.schema.validate(block.flavour, newParent.flavour);
+
+      const subArray = tempMap.get(parent);
+      if (subArray) {
+        subArray.push(block);
+      } else {
+        tempMap.set(parent, [block]);
+      }
     });
 
     this.transact(() => {
-      const yParentA = this._yBlocks.get(currentParent.id) as YBlock;
-      const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
-      const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
-      yChildrenA.delete(idx, blocks.length);
       const yParentB = this._yBlocks.get(newParent.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
 
@@ -418,15 +421,25 @@ export class Page extends Space<FlatBlockMap> {
         nextIdx = yChildrenB.toArray().findIndex(id => id === newSibling.id);
       }
 
-      const ids = blocks.map(block => block.id);
-      if (insertBeforeSibling) {
-        yChildrenB.insert(nextIdx, ids);
-      } else {
-        yChildrenB.insert(nextIdx + 1, ids);
+      for (const [parent, blocks] of tempMap) {
+        const yParentA = this._yBlocks.get(parent.id) as YBlock;
+        const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
+        const ids = blocks.map(block => block.id);
+        const idx = yChildrenA.toArray().findIndex(id => id === ids[0]);
+        yChildrenA.delete(idx, ids.length);
+
+        if (insertBeforeSibling) {
+          yChildrenB.insert(nextIdx, ids);
+          nextIdx++;
+        } else {
+          nextIdx++;
+          yChildrenB.insert(nextIdx, ids);
+        }
       }
     });
 
-    currentParent.childrenUpdated.emit();
+    Array.from(tempMap.keys()).forEach(parent => parent.childrenUpdated.emit());
+
     newParent.childrenUpdated.emit();
   }
 
