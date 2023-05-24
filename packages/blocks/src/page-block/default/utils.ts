@@ -21,7 +21,10 @@ import {
   getModelByBlockElement,
   isInSamePath,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
+import {
+  getService,
+  getServiceOrRegister,
+} from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -554,8 +557,8 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
     setSelectedBlock(modelState: EditingState | null, element) {
-      const service = getService('affine:database');
       if (element && element.closest('affine-database')) {
+        const service = getService('affine:database');
         const toggled = service.toggleRowSelection(element);
         if (toggled) {
           pageBlock.selection.clear();
@@ -567,16 +570,20 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       if (model) {
         const parent = model.page.getParent(model);
         if (parent && matchFlavours(parent, ['affine:database'])) {
+          const service = getService('affine:database');
           service.setRowSelectionByElement(modelState.element);
           return;
         }
       }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
 
-      const rowSelection = service.getLastRowSelection();
-      if (rowSelection) {
-        service.clearRowSelection();
-      }
+      const service = getServiceOrRegister('affine:database');
+      Promise.resolve(service).then(service => {
+        const rowSelection = service.getLastRowSelection();
+        if (rowSelection) {
+          service.clearRowSelection();
+        }
+      });
     },
     getSelectedBlocks() {
       return pageBlock.selection.state.selectedBlocks;
