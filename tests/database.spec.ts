@@ -752,7 +752,7 @@ test('should display the add column button on the right side of database correct
   await dragBetweenCoords(
     page,
     { x: box.x, y: box.y },
-    { x: box.x + 100, y: box.y },
+    { x: box.x + 120, y: box.y },
     {
       steps: 50,
       beforeMouseUp: async () => {

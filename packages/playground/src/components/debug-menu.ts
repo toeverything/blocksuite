@@ -28,6 +28,7 @@ import {
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
@@ -262,7 +263,7 @@ export class DebugMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},720,480]`;
+    const xywh = `[0,${count * 60},${EDITOR_WIDTH},480]`;
 
     const frameId = this.page.addBlock('affine:frame', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, frameId);

@@ -1,3 +1,4 @@
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { expect } from '@playwright/test';
 
 import {
@@ -55,7 +56,7 @@ test('can drag selected non-active frame', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 80]);
+  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -64,7 +65,7 @@ test('can drag selected non-active frame', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertFrameXYWH(page, [0, 100, 720, 80]);
+  await assertFrameXYWH(page, [0, 100, EDITOR_WIDTH, 80]);
 });
 
 test('resize frame in edgeless mode', async ({ page }) => {
@@ -357,7 +358,7 @@ test('when the selection is always a frame, it should remain in an active state'
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [86, 410, 448, 112]);
+  await assertEdgelessSelectedRect(page, [46, 410, 448, 112]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInFrame(page, ids.frameId);
