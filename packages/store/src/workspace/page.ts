@@ -416,29 +416,33 @@ export class Page extends Space<FlatBlockMap> {
       const yParentB = this._yBlocks.get(newParent.id) as YBlock;
       const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
 
+      // after the target
+      let offset = 1;
+
       for (const [parent, blocks] of tempMap) {
         const yParentA = this._yBlocks.get(parent.id) as YBlock;
         const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
 
         // blocks may not be continuous
-        blocks.forEach(block => {
-          const ids = [block.id];
-          const idx = yChildrenA.toArray().findIndex(id => id === ids[0]);
-          yChildrenA.delete(idx, ids.length);
-
-          let nextIdx = 0;
-          if (newSibling) {
-            nextIdx = yChildrenB
-              .toArray()
-              .findIndex(id => id === newSibling.id);
-          }
-
-          if (insertBeforeSibling) {
-            yChildrenB.insert(nextIdx, ids);
-          } else {
-            yChildrenB.insert(nextIdx + 1, ids);
-          }
+        const ids = blocks.map(({ id }) => {
+          const idx = yChildrenA.toArray().findIndex(val => val === id);
+          yChildrenA.delete(idx, 1);
+          return id;
         });
+
+        let nextIdx = 0;
+        if (newSibling) {
+          nextIdx = yChildrenB
+            .toArray()
+            .findIndex(val => val === newSibling.id);
+        }
+
+        if (insertBeforeSibling) {
+          yChildrenB.insert(nextIdx, ids);
+        } else {
+          yChildrenB.insert(nextIdx + offset, ids);
+          offset += ids.length;
+        }
       }
     });
 
