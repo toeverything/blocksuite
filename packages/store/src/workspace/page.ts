@@ -377,6 +377,82 @@ export class Page extends Space<FlatBlockMap> {
     return id;
   }
 
+  /**
+   * Moves contiguous blocks to the new parent.
+   *
+   * @example
+   * Moves blocks in a frame only.
+   * Moves `2` to after `0`.
+   * ```
+   * frame A
+   * +--------------+
+   * |  block       |
+   * |  +--------+  |
+   * |  | 0      |  |
+   * |  +--------+  |
+   * |  block      <---+
+   * |  +--------+  |  |
+   * |  | 1      |  |  |
+   * |  +--------+  |  |
+   * |  block       |  |
+   * |  +--------+  |  |
+   * |  | 2      | +---+
+   * |  +--------+  |
+   * |              |
+   * +--------------+
+   * ```
+   *
+   * @example
+   * Moves blocks in multiple frames.
+   * * Moves `1` and `2` in C to before `0` in B.
+   * * Moves `0` in D and `0` in E to after `0` in A.
+   * ```
+   * frame A
+   * +--------------+
+   * |  block       |
+   * |  +--------+  |
+   * |  | 0      |  |
+   * |  +--------+  |
+   * |             <------+
+   * +--------------+     |
+   * frame B              |
+   * +--------------+     |
+   * |  block      <---+  |
+   * |  +--------+  |  |  |
+   * |  | 0      |  |  |  |
+   * |  +--------+  |  |  |
+   * |              |  |  |
+   * +--------------+  |  |
+   * frame C           |  |
+   * +--------------+  |  |
+   * |  block       |  |  |
+   * |  +--------+  |  |  |
+   * |  | 0      | +---+  |
+   * |  +--------+  |  |  |
+   * |  block       |  |  |
+   * |  +--------+  |  |  |
+   * |  | 1      | +---+  |
+   * |  +--------+  |     |
+   * |              |     |
+   * +--------------+     |
+   * frame D              |
+   * +--------------+     |
+   * |  block       |     |
+   * |  +--------+  |     |
+   * |  | 0      | +------+
+   * |  +--------+  |     |
+   * |              |     |
+   * +--------------+     |
+   * frame E              |
+   * +--------------+     |
+   * |  block       |     |
+   * |  +--------+  |     |
+   * |  | 0      | +------+
+   * |  +--------+  |
+   * |              |
+   * +--------------+
+   * ```
+   */
   @debug('CRUD')
   moveBlocks(
     blocks: BaseBlockModel[],
@@ -423,18 +499,14 @@ export class Page extends Space<FlatBlockMap> {
         const yParentA = this._yBlocks.get(parent.id) as YBlock;
         const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
 
-        // blocks may not be continuous
-        const ids = blocks.map(({ id }) => {
-          const idx = yChildrenA.toArray().findIndex(val => val === id);
-          yChildrenA.delete(idx, 1);
-          return id;
-        });
+        // blocks must be continuous
+        const ids = blocks.map(({ id }) => id);
+        const idx = yChildrenA.toArray().findIndex(id => id === ids[0]);
+        yChildrenA.delete(idx, ids.length);
 
         let nextIdx = 0;
         if (newSibling) {
-          nextIdx = yChildrenB
-            .toArray()
-            .findIndex(val => val === newSibling.id);
+          nextIdx = yChildrenB.toArray().findIndex(id => id === newSibling.id);
         }
 
         if (insertBeforeSibling) {
