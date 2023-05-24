@@ -3,21 +3,18 @@ import type { UIEventDispatcher } from '@blocksuite/lit';
 import type { EventName, UIEventHandler } from '@blocksuite/lit';
 import type { PhasorElement } from '@blocksuite/phasor';
 import { normalizeWheelDeltaY } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 
 import {
+  AbstractSelectionManager,
   type BlockComponentElement,
-  type MouseMode,
-  Point,
-  type TopLevelBlockModel,
-} from '../../__internal__/index.js';
-import {
   getEditorContainerByElement,
   isDatabaseInput,
   isInsideEdgelessTextEditor,
   isInsidePageTitle,
   isPinchEvent,
+  type MouseMode,
+  Point,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
@@ -73,17 +70,12 @@ export interface SelectionArea {
   end: DOMPoint;
 }
 
-export class EdgelessSelectionManager {
-  private readonly _disposables = new DisposableGroup();
-  readonly page: Page;
-
+export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
   private _mouseMode: MouseMode = {
     type: 'default',
   };
 
-  private _container: EdgelessPageBlockComponent;
   private _controllers: Record<MouseMode['type'], MouseModeController>;
-  private readonly _dispatcher: UIEventDispatcher;
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
@@ -143,17 +135,15 @@ export class EdgelessSelectionManager {
     container: EdgelessPageBlockComponent,
     dispacher: UIEventDispatcher
   ) {
-    this.page = container.page;
-    this._container = container;
-    this._dispatcher = dispacher;
+    super(container, dispacher);
     this._controllers = {
-      default: new DefaultModeController(this._container),
-      text: new TextModeController(this._container),
-      shape: new ShapeModeController(this._container),
-      brush: new BrushModeController(this._container),
-      pan: new PanModeController(this._container),
-      note: new NoteModeController(this._container),
-      connector: new ConnectorModeController(this._container),
+      default: new DefaultModeController(this.container),
+      text: new TextModeController(this.container),
+      shape: new ShapeModeController(this.container),
+      brush: new BrushModeController(this.container),
+      pan: new PanModeController(this.container),
+      note: new NoteModeController(this.container),
+      connector: new ConnectorModeController(this.container),
     };
 
     this._initMouseAndWheelEvents();
@@ -168,7 +158,7 @@ export class EdgelessSelectionManager {
 
   private async _initMouseAndWheelEvents() {
     // due to surface initializing after one frame, the events handler should register after that.
-    if (!this._container.surface) {
+    if (!this.container.surface) {
       await new Promise(resolve => requestAnimationFrame(resolve));
     }
 
@@ -259,10 +249,10 @@ export class EdgelessSelectionManager {
       const state = ctx.get('defaultState');
       const e = state.event;
       if (!(e instanceof WheelEvent)) return;
-      const container = this._container;
 
       e.preventDefault();
 
+      const container = this.container;
       const { viewport } = container.surface;
       // pan
       if (!isPinchEvent(e)) {
@@ -316,7 +306,7 @@ export class EdgelessSelectionManager {
   };
 
   private _onContainerClick = (e: PointerEventState) => {
-    const container = getEditorContainerByElement(this._container);
+    const container = getEditorContainerByElement(this.container);
     activeEditorManager.setActive(container);
     return this.currentController.onContainerClick(e);
   };
@@ -331,7 +321,7 @@ export class EdgelessSelectionManager {
 
   private _onContainerPointerMove = (e: PointerEventState) => {
     this._updateLastMousePos(e);
-    this._container.slots.hoverUpdated.emit();
+    this.container.slots.hoverUpdated.emit();
     return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
   };
 
@@ -357,7 +347,7 @@ export class EdgelessSelectionManager {
     if (e.button === 2 && this._rightClickTimer) {
       const { timer, timeStamp, mouseMode } = this._rightClickTimer;
       if (e.raw.timeStamp - timeStamp > 233) {
-        this._container.slots.mouseModeUpdated.emit(mouseMode);
+        this.container.slots.mouseModeUpdated.emit(mouseMode);
       } else {
         clearTimeout(timer);
       }
@@ -380,7 +370,7 @@ export class EdgelessSelectionManager {
     if (!this.currentController.enableHover) {
       return null;
     }
-    const { surface } = this._container;
+    const { surface } = this.container;
     const frames = (this.page.root?.children ?? []).filter(
       child => child.flavour === 'affine:frame'
     ) as TopLevelBlockModel[];
@@ -401,7 +391,7 @@ export class EdgelessSelectionManager {
       // if current selected block is not the hovered block
       this.state.selected[0].id !== hovered.id
     ) {
-      this._container.components.dragHandle?.hide();
+      this.container.components.dragHandle?.hide();
     }
 
     if (!hovered || this.state.active) {

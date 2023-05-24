@@ -8,20 +8,14 @@ import type {
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/lit';
-import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type {
-  EmbedBlockDoubleClickData,
-  IPoint,
-} from '../../../__internal__/index.js';
 import {
+  AbstractSelectionManager,
   type BlockComponentElement,
   debounce,
   type EditingState,
+  type EmbedBlockDoubleClickData,
   getBlockElementByModel,
   getBlockElementsByElement,
   getBlockElementsExcludeSubtrees,
@@ -35,6 +29,7 @@ import {
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  type IPoint,
   isBlankArea,
   isDatabaseInput,
   isDragHandle,
@@ -90,32 +85,26 @@ function shouldFilterMouseEvent(event: Event): boolean {
 /**
  * The selection manager used in default mode.
  */
-export class DefaultSelectionManager {
-  readonly page: Page;
+export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPageBlockComponent> {
   readonly state = new PageSelectionState('none');
   readonly slots: DefaultSelectionSlots;
-  readonly container: DefaultPageBlockComponent;
-  private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _dispatcher: UIEventDispatcher;
 
   constructor({
+    container,
+    dispatcher,
     page,
     mouseRoot,
     slots,
-    container,
-    dispatcher,
   }: {
+    container: DefaultPageBlockComponent;
+    dispatcher: UIEventDispatcher;
     page: Page;
     mouseRoot: HTMLElement;
     slots: DefaultSelectionSlots;
-    container: DefaultPageBlockComponent;
-    dispatcher: UIEventDispatcher;
   }) {
-    this.page = page;
+    super(container, dispatcher);
     this.slots = slots;
-    this.container = container;
-    this._dispatcher = dispatcher;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
 
