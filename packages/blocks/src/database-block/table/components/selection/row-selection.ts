@@ -46,6 +46,12 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
     this.state = null;
   };
 
+  private get _zoom() {
+    const edgelessPageBlock = document.querySelector('affine-edgeless-page');
+    if (!edgelessPageBlock) return 1;
+    return edgelessPageBlock.surface.viewport.zoom;
+  }
+
   private _getStyles = () => {
     const hideStyles = styleMap({
       left: 0,
@@ -76,20 +82,21 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
 
     const containerPos = this.container.getBoundingClientRect();
     const { left, top } = startRow.getBoundingClientRect();
-    const height = calcSelectionHeight(this.container, rowIds);
 
-    const styleLeft = left - containerPos.left;
-    const styleTop = top - containerPos.top;
+    const scale = 1 / this._zoom;
+    const scaledHeight = calcSelectionHeight(this.container, rowIds) * scale;
+    const scaledLeft = (left - containerPos.left) * scale;
+    const scaledTop = (top - containerPos.top) * scale;
     const styles = styleMap({
-      left: `${styleLeft}px`,
-      top: `${styleTop}px`,
-      height: `${height}px`,
+      left: `${scaledLeft}px`,
+      top: `${scaledTop}px`,
+      height: `${scaledHeight}px`,
     });
 
     this._selectionCache = {
-      left: styleLeft,
-      top: styleTop,
-      height,
+      left: scaledLeft,
+      top: scaledTop,
+      height: scaledHeight,
       rowIds,
     };
     return styles;
