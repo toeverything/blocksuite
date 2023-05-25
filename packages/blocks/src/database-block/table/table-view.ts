@@ -13,15 +13,27 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { asyncFocusRichText } from '../../__internal__/index.js';
+import { getService } from '../../__internal__/service.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import { onClickOutside } from '../utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
+import { getCellCoord } from './components/selection/utils.js';
 import { DEFAULT_COLUMN_WIDTH } from './consts.js';
+import { RowSelectionManager } from './selection-manager/selection-manager.js';
 import type { Column } from './types.js';
 import { SearchState } from './types.js';
+
+const KEYS_WHITE_LIST = [
+  'Tab',
+  'Enter',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+];
 
 const styles = css`
   affine-database-table {
@@ -151,6 +163,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @state()
   private _hoverState = false;
 
+  private _rowSelection!: RowSelectionManager;
+
   private _columnRenderer = registerInternalRenderer();
   get columnRenderer() {
     return this._columnRenderer;
@@ -171,6 +185,11 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
+    disposables.addFromEvent(this, 'keydown', this._onCellSelectionChange);
+    disposables.addFromEvent(document, 'keydown', this._onCellSelectionMove);
+    disposables.addFromEvent(document, 'keydown', this._onRowSelectionDelete);
+
+    this._initRowSelectionEvents();
   }
 
   override firstUpdated() {
@@ -200,6 +219,16 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
       this._onDatabaseScroll
     );
   }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    this._rowSelection.dispose();
+  }
+
+  private _initRowSelectionEvents = () => {
+    this._rowSelection = new RowSelectionManager(this.root.uiEventDispatcher);
+  };
 
   private _setFilteredRowIds = (rowIds: string[]) => {
     this._filteredRowIds = rowIds;
@@ -244,6 +273,81 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
         'mousedown'
       );
     });
+  };
+
+  private _onCellSelectionChange = (event: KeyboardEvent) => {
+    if (['Tab', 'Escape'].indexOf(event.key) <= -1) return;
+
+    const target = event.target as HTMLElement;
+    const rowsContainer = target.closest('.affine-database-block-rows');
+    const currentCell = target.closest<HTMLElement>('.database-cell');
+    if (!rowsContainer) return;
+    if (!currentCell) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const editor = currentCell.querySelector<HTMLElement>('.virgo-editor');
+    editor?.blur();
+
+    const nextCoord = getCellCoord(currentCell, this.model.id, event.key);
+
+    const service = getService('affine:database');
+    service.setCellSelection({
+      type: 'select',
+      coords: [nextCoord],
+      databaseId: this.model.id,
+    });
+  };
+
+  private _onCellSelectionMove = (event: KeyboardEvent) => {
+    if (KEYS_WHITE_LIST.indexOf(event.key) <= -1) return;
+    event.preventDefault();
+
+    const service = getService('affine:database');
+    const cellSelection = service.getLastCellSelection();
+    if (!cellSelection) return;
+
+    const { databaseId, coords } = cellSelection;
+    if (event.key === 'Enter') {
+      // enter editing state
+      service.setCellSelection({
+        type: 'edit',
+        coords,
+        databaseId,
+      });
+    } else {
+      // set cell selection
+      const nextCoord = getCellCoord(coords[0], databaseId, event.key);
+      service.setCellSelection({
+        type: 'select',
+        coords: [nextCoord],
+        databaseId,
+      });
+    }
+  };
+
+  private _onRowSelectionDelete = (event: KeyboardEvent) => {
+    if (event.key !== 'Delete') return;
+    event.preventDefault();
+
+    const service = getService('affine:database');
+    const rowSelection = service.getLastRowSelection();
+    if (!rowSelection) return;
+
+    const { rowIds } = rowSelection;
+    const page = this.model.page;
+    const children = this.model.children;
+    page.captureSync();
+    if (children.length === rowIds.length) {
+      // delete the database
+      page.deleteBlock(this.model);
+    } else {
+      // delete rows
+      page.updateBlock(this.model, {
+        children: children.filter(child => rowIds.indexOf(child.id) === -1),
+      });
+    }
+    service.clearRowSelection();
   };
 
   private _addRow = (index?: number) => {

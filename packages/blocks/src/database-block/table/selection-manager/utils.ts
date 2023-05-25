@@ -1,7 +1,5 @@
 import { assertExists } from '@blocksuite/store';
 
-import { RowLevelSelection } from '../../../../database-block/table/components/selection.js';
-
 export function getClosestRowIndex(element: Element): number {
   const rowIndex = element
     .closest('.database-row')
@@ -59,51 +57,9 @@ export function getClosestDatabaseId(element: Element) {
   return databaseId;
 }
 
-export function getDatabaseById(id: string) {
-  const database = document.querySelector<HTMLElement>(
-    `affine-database[data-block-id="${id}"]`
-  );
-  assertExists(database);
-  return database;
-}
-
-export function clearAllDatabaseRowsSelection() {
-  const databases = document.querySelectorAll('affine-database');
-  databases.forEach(database => {
-    const rowLevelSelection = database.querySelector(
-      'database-row-level-selection'
-    );
-    if (rowLevelSelection) {
-      const databaseId = database.getAttribute('data-block-id');
-      assertExists(databaseId);
-      rowLevelSelection.clearSelection();
-    }
-  });
-}
-
-export function setDatabaseRowsSelection(
-  databaseId: string,
-  database: HTMLElement,
-  rowIds: string[]
-) {
-  const container = database.querySelector<HTMLElement>(
-    '.affine-database-table-container'
-  );
-  assertExists(container);
-
-  let rowLevelSelection = container.querySelector(
-    'database-row-level-selection'
-  );
-  if (!rowLevelSelection) {
-    rowLevelSelection = new RowLevelSelection();
-    container.appendChild(rowLevelSelection);
-  }
-
-  rowLevelSelection.container = container;
-  rowLevelSelection.setSelection({
-    databaseId,
-    rowIds,
-  });
+export function isInDatabase(element: Element) {
+  const database = element.closest('affine-database');
+  return database !== null;
 }
 
 function getRowIdByIndex(database: Element, index: number) {

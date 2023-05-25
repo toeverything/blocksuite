@@ -101,7 +101,9 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
         }
       }
       if (event.key === 'Escape') {
+        event.stopPropagation();
         event.preventDefault();
+
         this.setEditingIndex(-1);
         this._container.blur();
       }

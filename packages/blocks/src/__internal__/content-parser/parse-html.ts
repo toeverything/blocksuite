@@ -4,8 +4,15 @@ import type { DeltaOperation, Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
+
+export type FetchFileFunc = (
+  fileName: string
+) => Promise<Blob | null | undefined>;
+
+export const LINK_PRE = 'Affine-LinkedPage-';
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -28,16 +35,53 @@ const INLINE_TAGS = [
   'ABBR',
   'CITE',
   'BDI',
+  'TIME',
 ];
 
 export class HtmlParser {
   private _contentParser: ContentParser;
   private _page: Page;
+  private _customFetchFileFunc?: FetchFileFunc;
 
-  constructor(contentParser: ContentParser, page: Page) {
+  constructor(
+    contentParser: ContentParser,
+    page: Page,
+    fetchFileFunc?: FetchFileFunc
+  ) {
     this._contentParser = contentParser;
     this._page = page;
+    this._customFetchFileFunc = fetchFileFunc;
   }
+
+  private _fetchFileFunc = async (
+    fileName: string
+  ): Promise<Blob | null | undefined> => {
+    if (this._customFetchFileFunc) {
+      const customBlob = await this._customFetchFileFunc(fileName);
+      if (customBlob) {
+        return customBlob;
+      }
+    }
+
+    let resp;
+    try {
+      resp = await fetch(fileName, {
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          Origin: window.location.origin,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+    const imgBlob = await resp.blob();
+    if (!imgBlob.type.startsWith('image/')) {
+      return null;
+    }
+    return imgBlob;
+  };
 
   public registerParsers() {
     this._contentParser.registerParserHtmlText2Block(
@@ -63,6 +107,11 @@ export class HtmlParser {
     this._contentParser.registerParserHtmlText2Block(
       'embedItemParser',
       this._embedItemParser
+    );
+
+    this._contentParser.registerParserHtmlText2Block(
+      'tableParser',
+      this._tableParser
     );
   }
 
@@ -153,12 +202,27 @@ export class HtmlParser {
             'codeBlockParser'
           )?.(node);
           break;
+        case 'FIGURE':
         case 'IMG':
           {
             result = await this._contentParser.getParserHtmlText2Block(
               'embedItemParser'
             )?.(node);
           }
+          break;
+        case 'HEADER':
+          result = await this._contentParser.getParserHtmlText2Block(
+            'commonParser'
+          )?.({
+            element: node,
+            flavour: 'affine:page',
+            type: tagName.toLowerCase(),
+          });
+          break;
+        case 'TABLE':
+          result = await this._contentParser.getParserHtmlText2Block(
+            'tableParser'
+          )?.(node);
           break;
         default:
           break;
@@ -255,6 +319,7 @@ export class HtmlParser {
       const node = childNodes.item(i);
       if (!node) continue;
       if (node.nodeName === '#comment') continue;
+      if (node.nodeName === 'STYLE') continue;
       if (!isChildNode) {
         if (node instanceof Text) {
           textValues.push(
@@ -291,6 +356,20 @@ export class HtmlParser {
       };
     }
 
+    if (
+      textValues.length === 0 &&
+      children.length > 0 &&
+      flavour === 'affine:list'
+    ) {
+      return {
+        flavour: flavour as keyof BlockSchemas,
+        type: type,
+        checked: checked,
+        text: children[0].text,
+        children: children.slice(1),
+      };
+    }
+
     return {
       flavour: flavour as keyof BlockSchemas,
       type: type,
@@ -314,6 +393,9 @@ export class HtmlParser {
       });
     }
     const htmlElement = element as HTMLElement;
+    if (htmlElement.classList.contains('katex-mathml')) {
+      return [];
+    }
     const childNodes = Array.from(htmlElement.childNodes);
     const currentTextStyle = getTextStyle(htmlElement);
 
@@ -349,6 +431,32 @@ export class HtmlParser {
   ): Promise<SerializedBlock[] | null> => {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
+    if (
+      element.firstElementChild?.tagName === 'DETAIL' ||
+      element.firstElementChild?.firstElementChild?.tagName === 'SUMMARY'
+    ) {
+      const summary = await this._contentParser.getParserHtmlText2Block(
+        'commonParser'
+      )?.({
+        element: element.firstElementChild.firstElementChild,
+        flavour: 'affine:list',
+        type: type,
+      });
+      const childNodes = element.firstElementChild.childNodes;
+      const children = [];
+      for (let i = 1; i < childNodes.length; i++) {
+        const node = childNodes.item(i);
+        if (!node) continue;
+        if (node instanceof Element) {
+          const childNode = await this._nodeParser(node);
+          childNode && children.push(...childNode);
+        }
+      }
+      if (summary && summary.length > 0) {
+        summary[0].children = [...(summary[0].children || []), ...children];
+      }
+      return summary;
+    }
     let checked;
     let inputEl;
     if (
@@ -462,39 +570,144 @@ export class HtmlParser {
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     let result: SerializedBlock[] | null = [];
-    if (element instanceof HTMLImageElement) {
-      const imgUrl = (element as HTMLImageElement).src;
-      let resp;
-      try {
-        resp = await fetch(imgUrl, {
-          cache: 'no-cache',
-          mode: 'cors',
-          headers: {
-            Origin: window.location.origin,
-          },
+    let imgElement = null;
+    const texts = [];
+    if (element.tagName === 'FIGURE') {
+      imgElement = element.querySelector('img');
+      const figcaptionElement = element.querySelector('figcaption');
+      if (figcaptionElement) {
+        const captionResult = await this._contentParser.getParserHtmlText2Block(
+          'commonParser'
+        )?.({
+          element: figcaptionElement,
+          flavour: 'affine:paragraph',
+          type: 'text',
         });
-      } catch (error) {
-        console.error(error);
-        return result;
+        if (captionResult && captionResult.length > 0) {
+          texts.push(...(captionResult[0].text || []));
+        }
       }
-      const imgBlob = await resp.blob();
-      if (!imgBlob.type.startsWith('image/')) {
-        return result;
+    } else if (element instanceof HTMLImageElement) {
+      imgElement = element;
+      texts.push({ insert: '' });
+    }
+    if (imgElement) {
+      const imgUrl = imgElement.getAttribute('src') || '';
+      const imgBlob = await this._fetchFileFunc(imgUrl);
+      if (!imgBlob || imgBlob.size === 0) {
+        const texts = [
+          {
+            insert: imgUrl,
+            attributes: {
+              link: imgUrl,
+            },
+          },
+        ];
+        result = [
+          {
+            flavour: 'affine:paragraph',
+            type: 'text',
+            children: [],
+            text: texts,
+          },
+        ];
+      } else {
+        const storage = await this._page.blobs;
+        assertExists(storage);
+        const id = await storage.set(imgBlob);
+        result = [
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            sourceId: id,
+            children: [],
+            text: texts,
+          },
+        ];
       }
-      const storage = await this._page.blobs;
-      assertExists(storage);
-      const id = await storage.set(imgBlob);
+    }
+
+    return result;
+  };
+
+  // TODO parse children block, this is temporary solution
+  private _tableParser = async (
+    element: Element
+  ): Promise<SerializedBlock[] | null> => {
+    let result: SerializedBlock[] | null = [];
+    if (element.tagName === 'TABLE') {
+      const theadElement = element.querySelector('thead');
+      const tbodyElement = element.querySelector('tbody');
+      const titleTrEle = theadElement?.querySelector('tr');
+      let id = 1;
+      const titles: string[] = [];
+      titleTrEle?.querySelectorAll('th').forEach(ele => {
+        titles.push(ele.textContent || '');
+      });
+      const rows: string[][] = [];
+      tbodyElement?.querySelectorAll('tr').forEach(ele => {
+        const row: string[] = [];
+        ele.querySelectorAll('td').forEach(ele => {
+          row.push(ele.textContent || '');
+        });
+        rows.push(row);
+      });
+      const columns: Column[] = titles.slice(1).map((value, index) => {
+        return {
+          name: value,
+          type: 'rich-text',
+          width: 200,
+          hide: false,
+          id: '' + id++,
+        };
+      });
+      if (rows.length > 0) {
+        for (let i = 0; i < rows[0].length - columns.length; i++) {
+          columns.push({
+            name: '',
+            type: 'rich-text',
+            width: 200,
+            hide: false,
+            id: '' + id++,
+          });
+        }
+      }
+      const databasePropsId = id++;
+      const cells: Record<string, Record<string, Cell>> = {};
+      const children: SerializedBlock[] = [];
+      rows.forEach(row => {
+        children.push({
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: row[0] }],
+          children: [],
+        });
+        const rowId = '' + id++;
+        cells[rowId] = {};
+        row.slice(1).forEach((value, index) => {
+          cells[rowId][columns[index].id] = {
+            columnId: columns[index].id,
+            value,
+          };
+        });
+      });
+
       result = [
         {
-          flavour: 'affine:embed',
-          type: 'image',
-          sourceId: id,
-          children: [],
-          text: [{ insert: '' }],
+          flavour: 'affine:database',
+          databaseProps: {
+            id: '' + databasePropsId,
+            title: 'Database',
+            titleColumnName: titles[0],
+            titleColumnWidth: 432,
+            rowIds: Object.keys(cells),
+            cells: cells,
+            columns: columns,
+          },
+          children: children,
         },
       ];
     }
-
     return result;
   };
 }
@@ -529,8 +742,16 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['bold'] = true;
   }
   if (getIsLink(htmlElement)) {
-    textStyle['link'] =
+    const linkUrl =
       htmlElement.getAttribute('href') || htmlElement.getAttribute('src');
+    if (linkUrl?.startsWith(LINK_PRE)) {
+      textStyle['reference'] = {
+        pageId: linkUrl.substring(LINK_PRE.length),
+        type: 'LinkedPage',
+      };
+    } else {
+      textStyle['link'] = linkUrl;
+    }
   }
 
   if (tagName === 'EM' || style['fontStyle'] === 'italic') {

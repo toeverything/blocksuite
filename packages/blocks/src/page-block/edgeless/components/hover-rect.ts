@@ -13,7 +13,7 @@ export function EdgelessHoverRect(
 
   const style = {
     ...getCommonRectStyle(rect),
-    border: '1px solid var(--affine-primary-color)',
+    border: '1px solid var(--affine-blue)',
   };
 
   return html`

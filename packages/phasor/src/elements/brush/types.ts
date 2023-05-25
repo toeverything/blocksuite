@@ -2,7 +2,7 @@ import type { SerializedXYWH } from '../../utils/xywh.js';
 
 export interface IBrush {
   id: string;
-  type: string;
+  type: 'brush';
   xywh: SerializedXYWH;
   index: string;
   seed: number;

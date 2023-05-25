@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import {
   BLOCK_ID_ATTR,
+  PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
@@ -73,8 +74,8 @@ export class DefaultPageBlockComponent
       padding-bottom: ${PAGE_BLOCK_PADDING_BOTTOM}px;
 
       /* Leave a place for drag-handle */
-      padding-left: 24px;
-      padding-right: 24px;
+      padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
+      padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
     }
 
     .affine-default-page-block-title {
@@ -507,6 +508,7 @@ export class DefaultPageBlockComponent
       mouseRoot: this.mouseRoot,
       slots: this.slots,
       container: this,
+      dispatcher: this.root.uiEventDispatcher,
     });
   }
 

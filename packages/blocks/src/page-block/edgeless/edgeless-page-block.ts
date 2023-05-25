@@ -138,6 +138,19 @@ export class EdgelessPageBlockComponent
        * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
        */
       touch-action: none;
+
+      background-size: var(--affine-edgeless-gap) var(--affine-edgeless-gap);
+      background-position: var(--affine-edgeless-x) var(--affine-edgeless-y);
+      background-color: var(--affine-background-primary-color);
+      background-image: var(--affine-edgeless-grid);
+      z-index: 0;
+    }
+
+    .affine-edgeless-layer {
+      position: absolute;
+      contain: layout style size;
+      transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
+        scale(var(--affine-zoom));
     }
   `;
 
@@ -747,7 +760,10 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
-      this._selection = new EdgelessSelectionManager(this);
+      this._selection = new EdgelessSelectionManager(
+        this,
+        this.root.uiEventDispatcher
+      );
     }
     if (changedProperties.has('mouseMode')) {
       this._selection.mouseMode = this.mouseMode;
@@ -829,8 +845,6 @@ export class EdgelessPageBlockComponent
 
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.sortedFrames,
-      this,
-      this.surface.viewport,
       active,
       this.root.renderModel
     );
@@ -841,16 +855,20 @@ export class EdgelessPageBlockComponent
     const hoverState = _selection.getHoverState();
     const hoverRect = EdgelessHoverRect(hoverState, zoom);
 
-    const cursor = {
-      cursor: getCursorMode(this.mouseMode),
-    };
-
-    const { style, gap, translateX, translateY } = getBackgroundGrid(
+    const { grid, gap, translateX, translateY } = getBackgroundGrid(
       viewportX,
       viewportY,
       zoom,
       this.showGrid
     );
+
+    const blockContainerStyle = {
+      cursor: getCursorMode(this.mouseMode),
+      '--affine-edgeless-gap': `${gap}px`,
+      '--affine-edgeless-grid': grid,
+      '--affine-edgeless-x': `${translateX}px`,
+      '--affine-edgeless-y': `${translateY}px`,
+    };
 
     return html`
       <div class="affine-edgeless-surface-block-container">
@@ -858,21 +876,10 @@ export class EdgelessPageBlockComponent
       </div>
       <div
         class="affine-edgeless-page-block-container"
-        style=${styleMap(cursor)}
+        style=${styleMap(blockContainerStyle)}
       >
-        <style>
-          .affine-block-children-container.edgeless {
-            background-size: ${gap}px ${gap}px;
-            background-position: ${translateX}px ${translateY}px;
-            background-color: var(--affine-background-primary-color);
-            z-index: 0;
-          }
-        </style>
-        <div
-          class="affine-block-children-container edgeless"
-          style=${styleMap(style)}
-        >
-          ${childrenContainer}
+        <div class="affine-block-children-container edgeless">
+          <div class="affine-edgeless-layer">${childrenContainer}</div>
         </div>
         <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}

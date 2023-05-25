@@ -8,6 +8,7 @@ import {
   HandIcon,
   ImageIcon,
   MinusIcon,
+  NoteIcon,
   PlusIcon,
   SelectIcon,
   TextIconLarge,
@@ -31,7 +32,6 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -128,7 +128,7 @@ export class EdgelessToolbar extends LitElement {
   private _zoomToFit() {
     const bounds = [];
 
-    const frame = this.edgeless.frames[0] as FrameBlockModel;
+    const frame = this.edgeless.frames[0];
     if (frame) {
       const frameXYWH = deserializeXYWH(frame.xywh);
       const frameBound = new Bound(...frameXYWH);
@@ -239,7 +239,6 @@ export class EdgelessToolbar extends LitElement {
           @click=${() =>
             this._setMouseMode({
               type: 'text',
-              background: FRAME_BACKGROUND_COLORS[0],
             })}
         >
           ${TextIconLarge}
@@ -269,6 +268,17 @@ export class EdgelessToolbar extends LitElement {
           @click=${() => this._setMouseMode({ type: 'pan', panning: false })}
         >
           ${HandIcon}
+        </edgeless-tool-icon-button>
+        <edgeless-tool-icon-button
+          .tooltip=${getTooltipWithShortcut('Note', 'N')}
+          .active=${type === 'text'}
+          @click=${() =>
+            this._setMouseMode({
+              type: 'note',
+              background: FRAME_BACKGROUND_COLORS[0],
+            })}
+        >
+          ${NoteIcon}
         </edgeless-tool-icon-button>
         <div class="divider"></div>
         <edgeless-tool-icon-button

@@ -13,6 +13,9 @@ import {
 import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape } from './shape/types.js';
+import { TextElementDefaultProps } from './text/constants.js';
+import { TextElement } from './text/text-element.js';
+import type { IText } from './text/types.js';
 
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
@@ -20,6 +23,7 @@ export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
 export type { SurfaceElement } from './surface-element.js';
+export { TextElement } from './text/text-element.js';
 
 export type PhasorElement =
   | ShapeElement
@@ -33,6 +37,7 @@ export type PhasorElementType = {
   debug: DebugElement;
   brush: BrushElement;
   connector: ConnectorElement;
+  text: TextElement;
 };
 
 export type IPhasorElementType = {
@@ -40,6 +45,7 @@ export type IPhasorElementType = {
   debug: IDebug;
   brush: IBrush;
   connector: IConnector;
+  text: IText;
 };
 
 export const ElementCtors = {
@@ -47,23 +53,25 @@ export const ElementCtors = {
   brush: BrushElement,
   shape: ShapeElement,
   connector: ConnectorElement,
+  text: TextElement,
 } as const;
 
 export const ElementDefaultProps: Record<
   keyof IPhasorElementType,
-  ElementDefaultProps<keyof IPhasorElementType>
+  IElementDefaultProps<keyof IPhasorElementType>
 > = {
   debug: DebugElementDefaultProps,
   brush: BrushElementDefaultProps,
   shape: ShapeElementDefaultProps,
   connector: ConnectorElementDefaultProps,
+  text: TextElementDefaultProps,
 } as const;
 
-export type ElementCreateProps<T extends keyof IPhasorElementType> = Partial<
+export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
   Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
 >;
 
-export type ElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
+export type IElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
   IPhasorElementType[T],
   'id' | 'index' | 'seed'
 >;

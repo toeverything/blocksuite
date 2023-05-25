@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
@@ -61,10 +62,10 @@ test('can zoom viewport', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 80]);
+  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [90, 260, 720, 80];
+  const original = [50, 260, EDITOR_WIDTH, 80];
   await assertEdgelessHoverRect(page, original);
 
   await decreaseZoomLevel(page);
@@ -86,16 +87,16 @@ test('zoom by mouse', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 80]);
+  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [90, 260, 720, 80];
+  const original = [50, 260, EDITOR_WIDTH, 80];
   await assertEdgelessHoverRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const zoomed = [126, 264, original[2] * 0.9, original[3] * 0.9];
+  const zoomed = [90, 264, original[2] * 0.9, original[3] * 0.9];
   await assertEdgelessHoverRect(page, zoomed);
 });
 
@@ -117,7 +118,12 @@ test('should cancel select when the selected point is outside the current select
   // select the first rect
   await page.mouse.click(150, 150);
 
-  await dragBetweenCoords(page, { x: 350, y: 350 }, { x: 350, y: 450 });
+  await dragBetweenCoords(
+    page,
+    { x: 350, y: 350 },
+    { x: 350, y: 450 },
+    { steps: 0 }
+  );
 
   await page.mouse.move(150, 150);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);

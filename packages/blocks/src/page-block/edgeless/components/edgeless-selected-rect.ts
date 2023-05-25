@@ -1,7 +1,12 @@
 import './component-toolbar/component-toolbar.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import type { Bound, ConnectorElement } from '@blocksuite/phasor';
+import type { Bound } from '@blocksuite/phasor';
+import {
+  type ConnectorElement,
+  serializeXYWH,
+  TextElement,
+} from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import type { Instance as PopperInstance } from '@popperjs/core';
@@ -123,7 +128,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         const xywh = JSON.stringify([frameX, frameY, frameW, frameH]);
         this.page.updateBlock(element, { xywh });
       } else {
-        this.surface.setElementBound(element.id, bound);
+        if (element instanceof TextElement) {
+          bound.w = element.w * (bound.h / element.h);
+          this.surface.updateElement<'text'>(id, {
+            xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+            fontSize: element.fontSize * (bound.h / element.h),
+          });
+        } else {
+          this.surface.setElementBound(element.id, bound);
+        }
       }
       handleElementChangedEffectForConnector(
         element,
@@ -193,9 +206,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = {
-      border: `${
-        this.state.active ? 2 : 1
-      }px solid var(--affine-primary-color)`,
+      border: `${this.state.active ? 2 : 1}px solid var(--affine-blue)`,
       ...getCommonRectStyle(selectedRect, active, true),
     };
 

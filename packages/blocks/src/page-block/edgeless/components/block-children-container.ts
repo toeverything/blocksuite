@@ -2,18 +2,13 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
   FRAME_BACKGROUND_COLORS,
 } from '@blocksuite/global/config';
-import type { SurfaceViewport } from '@blocksuite/phasor';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { TemplateResult } from 'lit';
 import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  BlockHost,
-  FrameBlockModel,
-  TopLevelBlockModel,
-} from '../../../index.js';
+import type { TopLevelBlockModel } from '../../../index.js';
 
 function EdgelessMask() {
   const style = {
@@ -32,20 +27,15 @@ function EdgelessMask() {
 function EdgelessBlockChild(
   index: number,
   model: TopLevelBlockModel,
-  host: BlockHost,
-  viewport: SurfaceViewport,
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
   const { xywh, background } = model;
-  const { zoom, viewportX, viewportY } = viewport;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
-  const translateX = (modelX - viewportX) * zoom;
-  const translateY = (modelY - viewportY) * zoom;
 
   const style = {
     position: 'absolute',
-    transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
+    transform: `translate(${modelX}px, ${modelY}px)`,
     transformOrigin: '0 0',
     width: modelW + 'px',
     height: modelH + 'px',
@@ -54,7 +44,9 @@ function EdgelessBlockChild(
     pointerEvents: 'all',
     zIndex: `${index}`,
     boxSizing: 'border-box',
-    borderRadius: '4px',
+    borderRadius: '8px',
+    border: '2px solid var(--affine-white-10)',
+    boxShadow: 'var(--affine-shadow-3)',
   };
 
   const mask = active ? nothing : EdgelessMask();
@@ -68,8 +60,6 @@ function EdgelessBlockChild(
 
 export function EdgelessBlockChildrenContainer(
   frames: TopLevelBlockModel[],
-  host: BlockHost,
-  viewport: SurfaceViewport,
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
@@ -77,15 +67,7 @@ export function EdgelessBlockChildrenContainer(
     ${repeat(
       frames,
       child => child.id,
-      (child, index) =>
-        EdgelessBlockChild(
-          index,
-          child as FrameBlockModel,
-          host,
-          viewport,
-          active,
-          renderer
-        )
+      (child, index) => EdgelessBlockChild(index, child, active, renderer)
     )}
   `;
 }
