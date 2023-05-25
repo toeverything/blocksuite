@@ -167,6 +167,7 @@ export function getPageBlock(
  */
 export function getDefaultPage(page: Page) {
   const editor = getEditorContainer(page);
+  if (editor.mode !== 'page') return null;
   const pageComponent = editor.querySelector('affine-default-page');
   return pageComponent;
 }
@@ -176,6 +177,7 @@ export function getDefaultPage(page: Page) {
  */
 export function getEdgelessPage(page: Page) {
   const editor = getEditorContainer(page);
+  if (editor.mode !== 'edgeless') return null;
   const pageComponent = editor.querySelector('affine-edgeless-page');
   return pageComponent;
 }
