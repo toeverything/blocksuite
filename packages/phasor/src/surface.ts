@@ -4,6 +4,7 @@ import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import {
+  ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
   type IElementCreateProps,
@@ -16,10 +17,11 @@ import type {
   ComputedValue,
   HitTestOptions,
 } from './elements/surface-element.js';
-import { compare, ConnectorElement, intersects } from './index.js';
+import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
+import { intersects } from './utils/hit-utils.js';
 import {
   generateElementId,
   generateKeyBetween,
