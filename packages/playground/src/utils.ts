@@ -220,6 +220,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_database: true,
       enable_edgeless_toolbar: true,
       enable_linked_page: true,
+      enable_bookmark_operation: false,
       readonly: {
         'space:page0': false,
       },

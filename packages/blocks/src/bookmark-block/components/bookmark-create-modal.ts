@@ -25,6 +25,13 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    requestAnimationFrame(() => {
+      const linkInput = document.querySelector(
+        `#${this.id} input.link`
+      ) as HTMLInputElement;
+      linkInput.focus();
+    });
   }
 
   private _onEnsure() {

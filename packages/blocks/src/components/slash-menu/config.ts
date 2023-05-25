@@ -1,4 +1,5 @@
 import {
+  BookmarkIcon,
   CopyIcon,
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
@@ -29,6 +30,7 @@ import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/ty
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
+  createBookmarkBlock,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
@@ -177,33 +179,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           action: ({ model }) => updateBlockType([model], flavour, type),
         })),
     },
-    {
-      name: 'Image & File',
-      items: [
-        {
-          name: 'Image',
-          icon: ImageIcon20,
-          showWhen: model => {
-            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
-              return false;
-            }
-            if (insideDatabase(model)) {
-              return false;
-            }
-            return true;
-          },
-          async action({ page, model }) {
-            const parent = page.getParent(model);
-            if (!parent) {
-              return;
-            }
-            parent.children.indexOf(model);
-            const props = await uploadImageFromLocal(page);
-            page.addSiblingBlocks(model, props);
-          },
-        },
-      ],
-    },
+
     {
       name: 'Pages',
       items: [
@@ -230,6 +206,56 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           action: ({ model }) => {
             insertContent(model, '@');
             showLinkedPagePopover({ model, range: getCurrentNativeRange() });
+          },
+        },
+      ],
+    },
+    {
+      name: 'Content & Media',
+      items: [
+        {
+          name: 'Image',
+          icon: ImageIcon20,
+          showWhen: model => {
+            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+              return false;
+            }
+            if (insideDatabase(model)) {
+              return false;
+            }
+            return true;
+          },
+          async action({ page, model }) {
+            const parent = page.getParent(model);
+            if (!parent) {
+              return;
+            }
+            parent.children.indexOf(model);
+            const props = await uploadImageFromLocal(page);
+            page.addSiblingBlocks(model, props);
+          },
+        },
+        {
+          name: 'Bookmark',
+          icon: BookmarkIcon,
+          showWhen: model => {
+            if (
+              !model.page.awarenessStore.getFlag('enable_bookmark_operation')
+            ) {
+              return false;
+            }
+            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+              return false;
+            }
+            return !insideDatabase(model);
+          },
+          async action({ page, model }) {
+            const parent = page.getParent(model);
+            if (!parent) {
+              return;
+            }
+            const index = parent.children.indexOf(model);
+            createBookmarkBlock(parent, index + 1);
           },
         },
       ],
