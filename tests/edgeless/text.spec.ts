@@ -1,4 +1,5 @@
 import {
+  assertMouseMode,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
   setMouseMode,
@@ -21,6 +22,7 @@ test('add Text in default mode', async ({ page }) => {
 
   await type(page, 'hello');
   await assertEdgelessText(page, 'hello');
+  await assertMouseMode(page, 'default');
 });
 
 test('add Text in text mode', async ({ page }) => {
@@ -35,4 +37,5 @@ test('add Text in text mode', async ({ page }) => {
 
   await type(page, 'hello');
   await assertEdgelessText(page, 'hello');
+  await assertMouseMode(page, 'default');
 });

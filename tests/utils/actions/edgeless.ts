@@ -132,6 +132,12 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
   }
 }
 
+export async function assertMouseMode(page: Page, mode: MouseMode) {
+  const button = locatorEdgelessToolButton(page, mode, true);
+  const active = await button.getAttribute('active');
+  expect(active).not.toBeNull();
+}
+
 export async function switchShapeType(page: Page, shapeType: string) {
   // TODO
 }
@@ -180,11 +186,12 @@ export async function increaseZoomLevel(page: Page) {
 export async function addBasicBrushElement(
   page: Page,
   start: { x: number; y: number },
-  end: { x: number; y: number }
+  end: { x: number; y: number },
+  auto = true
 ) {
   await setMouseMode(page, 'brush');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  await setMouseMode(page, 'default');
+  auto && (await setMouseMode(page, 'default'));
 }
 
 export async function addBasicRectShapeElement(
@@ -194,7 +201,6 @@ export async function addBasicRectShapeElement(
 ) {
   await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, start, end, { steps: 20 });
-  await setMouseMode(page, 'default');
 }
 
 export async function addBasicConnectorElement(
@@ -204,7 +210,6 @@ export async function addBasicConnectorElement(
 ) {
   await setMouseMode(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  await setMouseMode(page, 'default');
 }
 
 export async function addTextFrame(

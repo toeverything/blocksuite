@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
+  assertMouseMode,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
@@ -37,8 +38,8 @@ test('add connector element', async ({ page }) => {
 
   await addBasicConnectorElement(page, start, end);
 
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 107]);
+  await assertMouseMode(page, 'default');
+  await assertEdgelessSelectedRect(page, [98, 98, 104, 107]);
 });
 
 test('connector attached element', async ({ page }) => {
