@@ -23,7 +23,6 @@ import {
   getNextBlock,
   getPageBlock,
   getPreviousBlock,
-  isPageMode,
 } from './query.js';
 import { Rect } from './rect.js';
 import type { IPoint, SelectionPosition } from './types.js';
@@ -159,16 +158,13 @@ export function focusBlockByModel(
     throw new Error("Can't focus frame or page!");
   }
 
-  // In the edgeless mode
-  if (!isPageMode(model.page)) {
-    return;
-  }
-
-  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
+  const pageBlock = getPageBlock(model);
   assertExists(pageBlock);
+  const isPageBlock = pageBlock instanceof DefaultPageBlockComponent;
 
   // If focus on a follow block, we should select the block
   if (
+    isPageBlock &&
     matchFlavours(model, [
       'affine:embed',
       'affine:divider',
@@ -198,9 +194,11 @@ export function focusBlockByModel(
   }
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  pageBlock.selection && pageBlock.selection.state.clearSelection();
   if (editableContainer) {
-    pageBlock.selection?.setFocusedBlock(element as Element);
+    if (isPageBlock) {
+      pageBlock.selection.state.clearSelection();
+      pageBlock.selection.setFocusedBlock(element as Element);
+    }
     focusRichText(editableContainer, position, zoom);
   }
 }
