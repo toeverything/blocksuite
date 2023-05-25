@@ -1,4 +1,4 @@
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { Bound, type TextElement } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
@@ -10,7 +10,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { getSelectedRect } from './utils.js';
 
 @customElement('surface-text-editor')
-export class SurfaceTextEditor extends ShadowlessElement {
+export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
@@ -52,12 +52,14 @@ export class SurfaceTextEditor extends ShadowlessElement {
       this._syncRect();
     });
 
-    edgeless.slots.viewportUpdated.on(() => {
-      this.requestUpdate();
-      requestAnimationFrame(() => {
-        this._syncRect();
-      });
-    });
+    this._disposables.add(
+      edgeless.slots.viewportUpdated.on(() => {
+        this.requestUpdate();
+        requestAnimationFrame(() => {
+          this._syncRect();
+        });
+      })
+    );
 
     this.requestUpdate();
     requestAnimationFrame(() => {
