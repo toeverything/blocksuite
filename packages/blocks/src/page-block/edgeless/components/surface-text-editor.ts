@@ -15,7 +15,6 @@ export class SurfaceTextEditor extends ShadowlessElement {
   private _virgoContainer!: HTMLDivElement;
 
   private _vEditor: VEditor | null = null;
-  private _rect: DOMRect | null = null;
 
   private _element: TextElement | null = null;
   private _edgeless: EdgelessPageBlockComponent | null = null;
@@ -24,14 +23,10 @@ export class SurfaceTextEditor extends ShadowlessElement {
     return this._vEditor;
   }
 
-  mount(element: TextElement, edgeless: EdgelessPageBlockComponent) {
-    const rect = getSelectedRect([element], edgeless.surface.viewport);
-    this._rect = rect;
-    this._element = element;
-    this._edgeless = edgeless;
-    this._vEditor = new VEditor(element.text);
-
-    this._vEditor.slots.updated.on(() => {
+  private _syncRect() {
+    const edgeless = this._edgeless;
+    const element = this._element;
+    if (edgeless && element) {
       const rect = this._virgoContainer.getBoundingClientRect();
       edgeless.surface.updateElement(element.id, {
         xywh: new Bound(
@@ -45,10 +40,23 @@ export class SurfaceTextEditor extends ShadowlessElement {
         selected: [element],
         active: true,
       });
+    }
+  }
+
+  mount(element: TextElement, edgeless: EdgelessPageBlockComponent) {
+    this._element = element;
+    this._edgeless = edgeless;
+    this._vEditor = new VEditor(element.text);
+
+    this._vEditor.slots.updated.on(() => {
+      this._syncRect();
     });
 
     edgeless.slots.viewportUpdated.on(() => {
-      this._virgoContainer.blur();
+      this.requestUpdate();
+      requestAnimationFrame(() => {
+        this._syncRect();
+      });
     });
 
     this.requestUpdate();
@@ -76,7 +84,11 @@ export class SurfaceTextEditor extends ShadowlessElement {
   override render() {
     let virgoStyle = styleMap({});
     let backgroundStyle = styleMap({});
-    if (this._rect && this._element && this._edgeless) {
+    if (this._element && this._edgeless) {
+      const rect = getSelectedRect(
+        [this._element],
+        this._edgeless.surface.viewport
+      );
       const verticalOffset =
         this._element.h / 2 -
         (this._element.lines.length * this._element.lineHeight) / 2;
@@ -92,8 +104,8 @@ export class SurfaceTextEditor extends ShadowlessElement {
       });
       backgroundStyle = styleMap({
         position: 'absolute',
-        left: this._rect.x - 8 + 'px',
-        top: this._rect.y - 8 + 'px',
+        left: rect.x - 8 + 'px',
+        top: rect.y - 8 + 'px',
         background: 'var(--affine-background-primary-color)',
         zIndex: '10',
         padding: `${verticalOffset + 8}px 8px`,
