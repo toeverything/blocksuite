@@ -189,6 +189,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(document, 'keydown', this._onCellSelectionMove);
     disposables.addFromEvent(document, 'keydown', this._onRowSelectionDelete);
 
+    this._updateHoverState();
     this._initRowSelectionEvents();
   }
 
@@ -208,6 +209,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
         cell.requestUpdate();
       });
       this.querySelector('affine-database-column-header')?.requestUpdate();
+      this._updateHoverState();
     });
 
     if (this.readonly) return;
@@ -218,6 +220,15 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
       'scroll',
       this._onDatabaseScroll
     );
+  }
+
+  private _updateHoverState() {
+    if (this.model.children.length === 0) {
+      this._hoverState = true;
+      return;
+    }
+
+    this._resetHoverState();
   }
 
   override disconnectedCallback() {
@@ -256,7 +267,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
   private _onMouseLeave = () => {
     if (this._searchState === SearchState.SearchIcon) {
-      this._resetHoverState();
+      this._updateHoverState();
     }
   };
 
