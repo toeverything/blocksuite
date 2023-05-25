@@ -1,4 +1,4 @@
-import type { BaseBlockModel, Workspace } from '@blocksuite/store';
+import type { Workspace } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
 import { ImportPage, type OnSuccessFunc } from './import-page.js';

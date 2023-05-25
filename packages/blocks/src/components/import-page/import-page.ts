@@ -1,5 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { ContentParser } from '@blocksuite/blocks/content-parser.js';
+import '../loader.js';
+
 import {
   CloseIcon,
   ExportToHTMLIcon,
@@ -9,18 +9,23 @@ import {
   OpenInNewIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { Page, Workspace } from '@blocksuite/store/index.js';
+import type { Page, Workspace } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
+import { ContentParser } from '../../__internal__/content-parser/index.js';
 import { styles } from './styles.js';
-export const LINK_PRE = 'Affine-LinkedPage-';
+const LINK_PRE = 'Affine-LinkedPage-';
 export type OnSuccessFunc = (pageIds: string[]) => void;
+const SHOW_LOADING_SIZE = 1024 * 200;
 
 @customElement('import-page')
 export class ImportPage extends WithDisposable(LitElement) {
   static override styles = styles;
+
+  @state()
+  _loading = false;
 
   @state()
   x = 0;
@@ -40,11 +45,14 @@ export class ImportPage extends WithDisposable(LitElement) {
     private abortController = new AbortController()
   ) {
     super();
+
+    this._loading = false;
+
     this.x = 0;
     this.y = 0;
-
     this._startX = 0;
     this._startY = 0;
+
     this._onMouseMove = this._onMouseMove.bind(this);
   }
 
@@ -94,97 +102,163 @@ export class ImportPage extends WithDisposable(LitElement) {
     });
   }
 
+  private async _importFile(
+    fileExtension: string,
+    needLoadingFunc: (file: File) => Promise<boolean>,
+    parseContentFunc: (file: File) => Promise<void>
+  ) {
+    this.hidden = true;
+    const file = await this._selectFile(fileExtension);
+    const needLoading = await needLoadingFunc(file);
+    if (needLoading) {
+      this.hidden = false;
+      this._loading = true;
+    } else {
+      this.abortController.abort();
+    }
+    await parseContentFunc(file);
+    needLoading && this.abortController.abort();
+  }
+
   private async _importMarkDown() {
-    this.abortController.abort();
-    const file = await this._selectFile('.md');
-    const text = await file.text();
-    const page = this.workspace.createPage({
-      init: {
-        title: '',
+    await this._importFile(
+      '.md',
+      async file => {
+        return file.size > SHOW_LOADING_SIZE;
       },
-    });
-    const rootId = page.root?.id;
-    const contentParser = new ContentParser(page);
-    rootId && (await contentParser.importMarkdown(text, rootId));
-    this.onSuccess?.([page.id]);
-  }
-
-  private async _importHtml() {
-    this.abortController.abort();
-    const file = await this._selectFile('.html');
-    const text = await file.text();
-    const page = this.workspace.createPage({
-      init: {
-        title: '',
-      },
-    });
-    const rootId = page.root?.id;
-    const contentParser = new ContentParser(page);
-    rootId && (await contentParser.importHtml(text, rootId));
-    this.onSuccess?.([page.id]);
-  }
-
-  private async _importNotion() {
-    this.abortController.abort();
-    const file = await this._selectFile('.zip');
-    const zip = new JSZip();
-    const zipFile = await zip.loadAsync(file);
-    const pageMap = new Map<string, Page>();
-    const files = Object.keys(zipFile.files);
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const lastSplitIndex = file.lastIndexOf('/');
-      const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+      async file => {
+        const text = await file.text();
         const page = this.workspace.createPage({
           init: {
             title: '',
           },
         });
-        pageMap.set(file, page);
-      }
-    }
-    pageMap.forEach(async (page, file) => {
-      const lastSplitIndex = file.lastIndexOf('/');
-      const folder = file.substring(0, lastSplitIndex) || '';
-      const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-        const isHtml = fileName.endsWith('.html');
         const rootId = page.root?.id;
-        const fetchFileFunc = async (url: string) => {
-          const fileName =
-            folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
-          return (await zipFile.file(fileName)?.async('blob')) || new Blob();
-        };
-        const contentParser = new ContentParser(page, fetchFileFunc);
-        let text = (await zipFile.file(file)?.async('string')) || '';
-        pageMap.forEach((value, key) => {
-          const subPageLink = key.replaceAll(' ', '%20');
-          text = isHtml
-            ? text.replaceAll(
-                `href="${subPageLink}"`,
-                `href="${LINK_PRE + value.id}"`
-              )
-            : text.replaceAll(`(${subPageLink})`, `(${LINK_PRE + value.id})`);
+        const contentParser = new ContentParser(page);
+        rootId && (await contentParser.importMarkdown(text, rootId));
+        this.onSuccess?.([page.id]);
+      }
+    );
+  }
+
+  private async _importHtml() {
+    await this._importFile(
+      '.html',
+      async file => {
+        return file.size > SHOW_LOADING_SIZE;
+      },
+      async file => {
+        const text = await file.text();
+        const page = this.workspace.createPage({
+          init: {
+            title: '',
+          },
         });
-        if (rootId) {
-          if (isHtml) {
-            await contentParser.importHtml(text, rootId);
-          } else {
-            await contentParser.importMarkdown(text, rootId);
+        const rootId = page.root?.id;
+        const contentParser = new ContentParser(page);
+        rootId && (await contentParser.importHtml(text, rootId));
+        this.onSuccess?.([page.id]);
+      }
+    );
+  }
+
+  private async _importNotion() {
+    await this._importFile(
+      '.zip',
+      async file => {
+        const zip = new JSZip();
+        const zipFile = await zip.loadAsync(file);
+        const fileArray = Object.values(zipFile.files);
+
+        let totalUncompressedSize = 0;
+        for (const file of fileArray) {
+          if (file.dir) continue;
+          if (totalUncompressedSize > SHOW_LOADING_SIZE) return true;
+          const fileContent = await file.async('uint8array');
+          totalUncompressedSize += fileContent.length;
+        }
+        return totalUncompressedSize > SHOW_LOADING_SIZE;
+      },
+      async file => {
+        const zip = new JSZip();
+        const zipFile = await zip.loadAsync(file);
+        const pageMap = new Map<string, Page>();
+        const files = Object.keys(zipFile.files);
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const lastSplitIndex = file.lastIndexOf('/');
+          const fileName = file.substring(lastSplitIndex + 1);
+          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+            const page = this.workspace.createPage({
+              init: {
+                title: '',
+              },
+            });
+            pageMap.set(file, page);
           }
         }
+        pageMap.forEach(async (page, file) => {
+          const lastSplitIndex = file.lastIndexOf('/');
+          const folder = file.substring(0, lastSplitIndex) || '';
+          const fileName = file.substring(lastSplitIndex + 1);
+          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+            const isHtml = fileName.endsWith('.html');
+            const rootId = page.root?.id;
+            const fetchFileFunc = async (url: string) => {
+              const fileName =
+                folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
+              return (
+                (await zipFile.file(fileName)?.async('blob')) || new Blob()
+              );
+            };
+            const contentParser = new ContentParser(page, fetchFileFunc);
+            let text = (await zipFile.file(file)?.async('string')) || '';
+            pageMap.forEach((value, key) => {
+              const subPageLink = key.replaceAll(' ', '%20');
+              text = isHtml
+                ? text.replaceAll(
+                    `href="${subPageLink}"`,
+                    `href="${LINK_PRE + value.id}"`
+                  )
+                : text.replaceAll(
+                    `(${subPageLink})`,
+                    `(${LINK_PRE + value.id})`
+                  );
+            });
+            if (rootId) {
+              if (isHtml) {
+                await contentParser.importHtml(text, rootId);
+              } else {
+                await contentParser.importMarkdown(text, rootId);
+              }
+            }
+          }
+        });
+        this.onSuccess?.([...pageMap.values()].map(page => page.id));
       }
-    });
-    this.onSuccess?.([...pageMap.values()].map(page => page.id));
+    );
   }
-  //   <icon-button class="button-item" @click=${this._importMarkDown}>
-  //   Markdown
-  // </icon-button>
+
   override render() {
+    if (this._loading) {
+      return html`
+        <header
+          class="loading-header"
+          @mousedown=${this._onMouseDown}
+          @mouseup=${this._onMouseUp}
+        >
+          <div>Import</div>
+          <loader-element width="50px"></loader-element>
+        </header>
+        <div>
+          Importing the file may take some time. It depends on document size and
+          complexity.
+        </div>
+      `;
+    }
     return html`
       <header @mousedown=${this._onMouseDown} @mouseup=${this._onMouseUp}>
-        <icon-button height="12px" @click=${this._onCloseClick}>
+        <icon-button height="16px" @click=${this._onCloseClick}>
           ${CloseIcon}
         </icon-button>
         <div>Import</div>
@@ -197,7 +271,7 @@ export class ImportPage extends WithDisposable(LitElement) {
         <icon-button
           class="button-item"
           text="Markdown"
-          @click=${this.importMarkdown}
+          @click=${this._importMarkDown}
         >
           ${ExportToMarkdownIcon}
         </icon-button>
