@@ -91,9 +91,8 @@ export class EdgelessChangeConnectorButton extends LitElement {
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        fill: none;
-        stroke: none;
         color: var(--affine-text-primary-color);
+        fill: currentColor;
       }
 
       menu-divider {

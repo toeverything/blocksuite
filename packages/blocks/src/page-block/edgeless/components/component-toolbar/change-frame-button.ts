@@ -35,9 +35,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
-      fill: none;
-      stroke: currentColor;
       color: var(--affine-text-primary-color);
+      fill: currentColor;
     }
 
     edgeless-color-panel {
