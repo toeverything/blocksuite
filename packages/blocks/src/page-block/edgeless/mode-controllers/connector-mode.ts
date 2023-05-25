@@ -167,8 +167,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     const element = this._surface.pickById(id);
     assertExists(element);
-    this._edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
-    this._edgeless.slots.selectionUpdated.emit({
+    this._edgeless.selection.switchToDefaultMode({
       selected: [element],
       active: false,
     });

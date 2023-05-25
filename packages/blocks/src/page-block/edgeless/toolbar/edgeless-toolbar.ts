@@ -271,8 +271,8 @@ export class EdgelessToolbar extends LitElement {
     );
     const frame = this.edgeless.frames.find(frame => frame.id === frameId);
     assertExists(frame);
-    this.edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
-    this.edgeless.slots.selectionUpdated.emit({
+
+    this.edgeless.selection.switchToDefaultMode({
       selected: [frame],
       active: false,
     });
@@ -281,22 +281,7 @@ export class EdgelessToolbar extends LitElement {
   }
 
   setMouseMode = (mouseMode: MouseMode) => {
-    if (this.edgeless.mouseMode === mouseMode) return;
-    const state = {
-      selected: [],
-      active: false,
-    };
-    if (mouseMode.type === 'default') {
-      if (this.edgeless.selection.lastState) {
-        Object.assign(state, this.edgeless.selection.lastState);
-        this.edgeless.selection.lastState = null;
-      }
-    } else if (this.edgeless.selection.state.selected.length) {
-      this.edgeless.selection.lastState = this.edgeless.selection.state;
-    }
-
-    this.edgeless.slots.mouseModeUpdated.emit(mouseMode);
-    this.edgeless.slots.selectionUpdated.emit(state);
+    this.edgeless.selection.setMouseMode(mouseMode);
   };
 
   override render() {
@@ -321,10 +306,7 @@ export class EdgelessToolbar extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Text', 'T')}
           .active=${type === 'text'}
-          @click=${() =>
-            this.setMouseMode({
-              type: 'text',
-            })}
+          @click=${() => this.setMouseMode({ type: 'text' })}
         >
           ${TextIconLarge}
         </edgeless-tool-icon-button>

@@ -406,6 +406,33 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     };
   }
 
+  setMouseMode = (
+    mouseMode: MouseMode,
+    state: EdgelessSelectionState = {
+      selected: [],
+      active: false,
+    }
+  ) => {
+    if (this.mouseMode === mouseMode) return;
+    if (mouseMode.type === 'default') {
+      if (!state.selected.length && this.lastState) {
+        Object.assign(state, this.lastState);
+        this.lastState = null;
+      } else {
+        this.lastState = state;
+      }
+    } else if (this.state.selected.length) {
+      this.lastState = this.state;
+    }
+
+    this.container.slots.mouseModeUpdated.emit(mouseMode);
+    this.container.slots.selectionUpdated.emit(state);
+  };
+
+  switchToDefaultMode(state: EdgelessSelectionState) {
+    this.setMouseMode({ type: 'default' }, state);
+  }
+
   clear() {
     this.selectedBlocks = [];
     this.lastState = null;
