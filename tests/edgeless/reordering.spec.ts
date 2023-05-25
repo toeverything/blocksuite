@@ -1,7 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import {
-  initThreeNoteFrames,
+  initThreeNotes,
   initThreeShapes,
   switchEditorMode,
   triggerComponentToolbarAction,
@@ -122,7 +122,7 @@ test.describe('reordering frames', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
-    await initThreeNoteFrames(page);
+    await initThreeNotes(page);
     await waitNextFrame(page);
     await page.mouse.click(0, 0);
   }
