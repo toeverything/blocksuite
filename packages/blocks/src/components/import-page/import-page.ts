@@ -1,6 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ContentParser } from '@blocksuite/blocks/content-parser.js';
-import { ConfirmIcon, EditIcon, UnlinkIcon } from '@blocksuite/global/config';
+import {
+  CloseIcon,
+  ExportToHTMLIcon,
+  ExportToMarkdownIcon,
+  NewIcon,
+  NotionIcon,
+  OpenInNewIcon,
+} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store/index.js';
 import JSZip from 'jszip';
@@ -177,36 +184,43 @@ export class ImportPage extends WithDisposable(LitElement) {
   override render() {
     return html`
       <header @mousedown=${this._onMouseDown} @mouseup=${this._onMouseUp}>
-        Import
-        <button @click=${this._onCloseClick} class="close-btn">X</button>
+        <icon-button height="12px" @click=${this._onCloseClick}>
+          ${CloseIcon}
+        </icon-button>
+        <div>Import</div>
       </header>
       <div>
         AFFiNE will gradually support more and more file types for import.
-        <a>Provide feedback.</a>
+        <a href="www.google.com">Provide feedback.</a>
       </div>
       <div class="button-container">
         <icon-button
           class="button-item"
           text="Markdown"
           @click=${this.importMarkdown}
-          >${ConfirmIcon}</icon-button
         >
-        <icon-button class="button-item" text="Html" @click=${this._importHtml}
-          >${ConfirmIcon}</icon-button
-        >
+          ${ExportToMarkdownIcon}
+        </icon-button>
+        <icon-button class="button-item" text="Html" @click=${this._importHtml}>
+          ${ExportToHTMLIcon}
+        </icon-button>
       </div>
       <div class="button-container">
         <icon-button
           class="button-item"
           text="Notion"
           @click=${this._importNotion}
-          >${ConfirmIcon}</icon-button
         >
-        <icon-button class="button-item" text="Coming soon" disabled="true"
-          >${ConfirmIcon}</icon-button
-        >
+          ${NotionIcon}
+        </icon-button>
+        <icon-button class="button-item" text="Coming soon..." disabled="true">
+          ${NewIcon}
+        </icon-button>
       </div>
-      <div class="footer">Migrate from other versions of AFFiNE? ></div>
+      <div class="footer">
+        <div>Migrate from other versions of AFFiNE?</div>
+        <icon-button class="button-item"> ${OpenInNewIcon} </icon-button>
+      </div>
     `;
   }
 }

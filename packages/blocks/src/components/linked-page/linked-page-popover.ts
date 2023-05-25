@@ -1,4 +1,4 @@
-import { DualLinkIcon, PageIcon } from '@blocksuite/global/config';
+import { DualLinkIcon, ImportIcon, PageIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   assertExists,
@@ -100,7 +100,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         key: 'import-linked-page',
         name: `Import`,
         active: filteredPageList.length + 1 === this._activatedItemIndex,
-        icon: DualLinkIcon,
+        icon: ImportIcon,
         action: () => this._importPage(),
       },
     ];

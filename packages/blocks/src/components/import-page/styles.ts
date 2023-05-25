@@ -23,12 +23,23 @@ export const styles = css`
   }
 
   header {
-    display: flex;
-    justify-content: space-between;
     cursor: move;
     user-select: none;
     font-size: var(--affine-font-h-6);
     font-weight: 600;
+  }
+
+  a {
+    white-space: nowrap;
+    word-break: break-word;
+    color: var(--affine-link-color);
+    fill: var(--affine-link-color);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  header icon-button {
+    margin-left: auto;
   }
 
   .button-container {
@@ -47,6 +58,8 @@ export const styles = css`
   }
 
   .footer {
+    display: flex;
+    align-items: center;
     color: var(--affine-text-secondary-color);
   }
 `;
