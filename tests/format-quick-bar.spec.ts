@@ -699,6 +699,7 @@ test('should format quick bar position correct at the start of second line', asy
 
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
+  await waitNextFrame(page);
 
   const formatBox = await formatQuickBar.boundingBox();
   if (!formatBox) {
@@ -1095,7 +1096,7 @@ test('should the database action icon show correctly', async ({ page }) => {
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY },
-    { steps: 10 }
+    { steps: 20 }
   );
   await expect(databaseAction).toBeVisible();
   await expect(databaseAction).toHaveAttribute('disabled', '');

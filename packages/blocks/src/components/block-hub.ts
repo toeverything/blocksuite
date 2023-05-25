@@ -46,6 +46,12 @@ const styles = css`
     user-select: none;
   }
 
+  @media print {
+    affine-block-hub {
+      display: none;
+    }
+  }
+
   .affine-block-hub-container {
     width: 274px;
     position: absolute;

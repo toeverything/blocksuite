@@ -167,6 +167,9 @@ test('should show or hide database toolbar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
+  await initDatabaseColumn(page);
+  await initDatabaseRow(page);
+
   const db = await getDatabaseMouse(page);
   await db.mouseOver();
   const toolbar = page.locator('.affine-database-toolbar');
@@ -752,7 +755,7 @@ test('should display the add column button on the right side of database correct
   await dragBetweenCoords(
     page,
     { x: box.x, y: box.y },
-    { x: box.x + 100, y: box.y },
+    { x: box.x + 120, y: box.y },
     {
       steps: 50,
       beforeMouseUp: async () => {

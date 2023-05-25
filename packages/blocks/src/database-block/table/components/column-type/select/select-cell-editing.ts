@@ -11,6 +11,7 @@ import { nanoid } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
@@ -27,6 +28,8 @@ import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import { getCellCoord } from '../../selection/utils.js';
 import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
+
+const KEYS_WHITE_LIST = ['Enter', 'ArrowUp', 'ArrowDown'];
 
 const styles = css`
   affine-database-select-cell-editing {
@@ -138,6 +141,7 @@ const styles = css`
     margin-bottom: 4px;
     cursor: pointer;
   }
+  .select-option.selected,
   .select-option:hover {
     background: var(--affine-hover-color);
   }
@@ -199,6 +203,9 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   @state()
   private _editingIndex = -1;
 
+  @state()
+  private _selectedOptionIndex = -1;
+
   @query('.select-option-container')
   private _selectOptionContainer!: HTMLDivElement;
   private _selectColor: string | undefined = undefined;
@@ -218,6 +225,13 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this._disposables.addFromEvent(
+      document.body,
+      'keydown',
+      this._onSelectOption
+    );
+
     createPopper(
       {
         getBoundingClientRect: () => {
@@ -234,6 +248,67 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
       }
     );
   }
+
+  protected override updated(_changedProperties: Map<PropertyKey, unknown>) {
+    super.updated(_changedProperties);
+
+    if (_changedProperties.has('cell')) {
+      this._selectInput.focus();
+    }
+  }
+
+  private _onSelectOption = (event: KeyboardEvent) => {
+    const key = event.key;
+
+    if (KEYS_WHITE_LIST.indexOf(key) <= -1) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const maxIndex = this.selectionList.length - 1;
+    if (this._selectedOptionIndex === maxIndex && key === 'ArrowDown') {
+      this._selectedOptionIndex = 0;
+      return;
+    }
+    if (this._selectedOptionIndex <= 0 && key === 'ArrowUp') {
+      this._selectedOptionIndex = maxIndex;
+      return;
+    }
+
+    if (key === 'ArrowDown') {
+      this._selectedOptionIndex++;
+    } else if (key === 'ArrowUp') {
+      this._selectedOptionIndex--;
+    } else if (key === 'Enter') {
+      const index = this._selectedOptionIndex;
+      if (index === -1) return;
+      if (this.isSingleMode) {
+        this._selectedOptionIndex = -1;
+      }
+
+      const selected = this.cell?.value ?? [];
+      const currentSelection = this.selectionList[index];
+      this._onSelect(selected, currentSelection);
+      this._selectCell();
+    }
+  };
+
+  private _selectCell = (exitEditing = false) => {
+    if (this.isSingleMode || exitEditing) this.rowHost.setEditing(false);
+
+    const service = getService('affine:database');
+    const lastSelection = service.getLastCellSelection();
+    if (lastSelection === null) return;
+
+    const cell =
+      this._selectOptionContainer.closest<HTMLElement>('.database-cell');
+    assertExists(cell);
+    const coord = getCellCoord(cell, this.databaseModel.id, 'Escape');
+    service.setCellSelection({
+      type: 'select',
+      databaseId: this.databaseModel.id,
+      coords: [coord],
+    });
+  };
 
   private _onDeleteSelected = (
     selectedValue: SelectTag[],
@@ -263,6 +338,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
         selectedValue[selectedValue.length - 1]
       );
     } else if (event.key === 'Enter' && inputValue !== '') {
+      if (this._selectedOptionIndex !== -1) return;
       const selectTag = this.selectionList.find(
         item => item.value === inputValue
       );
@@ -272,16 +348,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
         this._onAddSelection(selectedValue);
       }
     } else if (event.key === 'Escape') {
-      this.rowHost.setEditing(false);
-      const service = getService('affine:database');
-      const cell = this.closest<HTMLElement>('.database-cell');
-      assertExists(cell);
-      const coord = getCellCoord(cell, this.databaseModel.id, 'Escape');
-      service.setCellSelection({
-        type: 'select',
-        databaseId: this.databaseModel.id,
-        coords: [coord],
-      });
+      this._selectCell(true);
     }
   };
 
@@ -291,10 +358,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
     const isExist =
       selectedValue.findIndex(item => item.value === select.value) > -1;
-    if (isExist) {
-      this.rowHost.setEditing(false);
-      return;
-    }
+    if (isExist) return;
 
     this.value = select;
     const isSelected = selectedValue.indexOf(this.value) > -1;
@@ -303,7 +367,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
         ? [this.value]
         : [...selectedValue, this.value];
       this.rowHost.setValue(newValue);
-      this.rowHost.setEditing(false);
+      if (this.isSingleMode) this.rowHost.setEditing(false);
 
       if (!this.isSingleMode && newValue.length > 1) {
         this._calcRowHostHeight();
@@ -502,11 +566,18 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
             select => select.id,
             (select, index) => {
               const isEditing = index === this._editingIndex;
+              const isSelected = index === this._selectedOptionIndex;
               const onOptionIconClick = isEditing
                 ? () => this._onSaveSelectionName(index)
                 : () => this._showSelectAction(index);
+
+              const classes = classMap({
+                'select-option': true,
+                selected: isSelected,
+                editing: isEditing,
+              });
               return html`
-                <div class="select-option ${isEditing ? 'editing' : ''}">
+                <div class="${classes}">
                   <div
                     class="select-option-text-container"
                     @click=${() => this._onSelect(selectedTag, select)}

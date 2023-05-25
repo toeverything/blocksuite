@@ -1,5 +1,7 @@
 import './utils/declare-test-window.js';
 
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
+
 import {
   activeFrameInEdgeless,
   addBasicRectShapeElement,
@@ -650,8 +652,13 @@ test(
       }
     );
 
-    await dragBetweenCoords(page, { x: 50, y: 90 }, { x: 400, y: 400 });
-    await assertEdgelessSelectedRect(page, [90, 100, 720, 272]);
+    await dragBetweenCoords(
+      page,
+      { x: 50, y: 90 },
+      { x: 400, y: 400 },
+      { steps: 10 }
+    );
+    await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
 
     await copyByKeyboard(page);
 
@@ -659,7 +666,7 @@ test(
 
     await pasteByKeyboard(page, false);
 
-    await assertEdgelessSelectedRect(page, [40, 264, 720, 272]);
+    await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
   }
 );
 

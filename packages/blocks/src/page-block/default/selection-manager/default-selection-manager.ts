@@ -2,6 +2,12 @@ import '../../../components/drag-handle.js';
 
 import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import type {
+  EventName,
+  UIEventDispatcher,
+  UIEventHandler,
+  UIEventStateContext,
+} from '@blocksuite/lit';
 import {
   type BaseBlockModel,
   DisposableGroup,
@@ -14,6 +20,7 @@ import type {
 } from '../../../__internal__/index.js';
 import {
   type BlockComponentElement,
+  debounce,
   type EditingState,
   getBlockElementByModel,
   getBlockElementsByElement,
@@ -28,9 +35,7 @@ import {
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
-  initMouseEventHandlers,
   isBlankArea,
-  isDatabase,
   isDatabaseInput,
   isDragHandle,
   isElement,
@@ -40,9 +45,7 @@ import {
   isSelectedBlocks,
   Point,
   Rect,
-  type SelectionEvent,
 } from '../../../__internal__/index.js';
-import { getServiceOrRegister } from '../../../__internal__/service.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
 import type {
@@ -60,7 +63,6 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
-import { DatabaseTableViewSelectionManager } from './database-selection-manager/table-view.js';
 import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
@@ -70,6 +72,20 @@ import {
   setSelectedBlocks,
   updateLocalSelectionRange,
 } from './utils.js';
+
+function shouldFilterMouseEvent(event: Event): boolean {
+  const target = event.target;
+  if (!target || !(target instanceof HTMLElement)) {
+    return false;
+  }
+  if (target.tagName === 'INPUT') {
+    return true;
+  }
+  if (target.tagName === 'FORMAT-QUICK-BAR') {
+    return true;
+  }
+  return false;
+}
 
 /**
  * The selection manager used in default mode.
@@ -81,46 +97,120 @@ export class DefaultSelectionManager {
   readonly container: DefaultPageBlockComponent;
   private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _databaseTableViewManager: DatabaseTableViewSelectionManager;
+  private readonly _dispatcher: UIEventDispatcher;
 
   constructor({
     page,
     mouseRoot,
     slots,
     container,
+    dispatcher,
   }: {
     page: Page;
     mouseRoot: HTMLElement;
     slots: DefaultSelectionSlots;
     container: DefaultPageBlockComponent;
+    dispatcher: UIEventDispatcher;
   }) {
     this.page = page;
     this.slots = slots;
     this.container = container;
+    this._dispatcher = dispatcher;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
-    this._databaseTableViewManager = new DatabaseTableViewSelectionManager();
-    this._disposables.add(
-      initMouseEventHandlers(
-        mouseRoot,
-        this._onContainerDragStart,
-        this._onContainerDragMove,
-        this._onContainerDragEnd,
-        this._onContainerClick,
-        this._onContainerDblClick,
-        this._onContainerTripleClick,
-        this._onContainerMouseMove,
-        this._onContainerMouseOut,
-        this._onContainerContextMenu,
-        // TODO merge these two functions
-        this._onSelectionChangeWithDebounce,
-        this._onSelectionChangeWithoutDebounce,
-        this._onContainerPointerDown
-      )
+
+    let isDragging = false;
+    this._add('dragStart', ctx => {
+      const event = ctx.get('pointerState');
+      if (shouldFilterMouseEvent(event.raw)) return;
+      if (
+        !isInsidePageTitle(event.raw.target) &&
+        !isDatabaseInput(event.raw.target)
+      ) {
+        event.raw.preventDefault();
+      }
+      isDragging = true;
+      this._onContainerDragStart(ctx);
+    });
+    this._add('dragMove', ctx => {
+      const event = ctx.get('pointerState');
+      if (shouldFilterMouseEvent(event.raw)) return;
+      if (
+        !isInsidePageTitle(event.raw.target) &&
+        !isDatabaseInput(event.raw.target)
+      ) {
+        event.raw.preventDefault();
+      }
+      this._onContainerDragMove(ctx);
+    });
+    this._dispatcher.add('dragEnd', ctx => {
+      const event = ctx.get('pointerState');
+      if (
+        !isInsidePageTitle(event.raw.target) &&
+        !isDatabaseInput(event.raw.target)
+      ) {
+        event.raw.preventDefault();
+      }
+      isDragging = false;
+      this._onContainerDragEnd(ctx);
+    });
+    this._add('click', ctx => {
+      const event = ctx.get('pointerState');
+      if (
+        !isInsidePageTitle(event.raw.target) &&
+        !isDatabaseInput(event.raw.target)
+      ) {
+        event.raw.preventDefault();
+      }
+      this._onContainerClick(ctx);
+    });
+    this._add('doubleClick', ctx => {
+      const event = ctx.get('pointerState');
+      if (shouldFilterMouseEvent(event.raw)) return;
+      this._onContainerDblClick(ctx);
+    });
+    this._add('tripleClick', ctx => {
+      const event = ctx.get('pointerState');
+      if (shouldFilterMouseEvent(event.raw)) return;
+      this._onContainerTripleClick(ctx);
+    });
+    this._add('pointerDown', this._onContainerPointerDown);
+    this._add('pointerMove', ctx => {
+      const event = ctx.get('pointerState');
+      if (shouldFilterMouseEvent(event.raw)) return;
+      if (
+        !isInsidePageTitle(event.raw.target) &&
+        !isDatabaseInput(event.raw.target)
+      ) {
+        event.raw.preventDefault();
+      }
+      this._onContainerPointerMove(ctx);
+    });
+    this._add('contextMenu', this._onContainerContextMenu);
+    this._add('selectionChange', () => {
+      this._onSelectionChangeWithoutDebounce();
+    });
+    this._add(
+      'selectionChange',
+      debounce((ctx: UIEventStateContext) => {
+        const { event } = ctx.get('defaultState');
+
+        if (shouldFilterMouseEvent(event)) return;
+        if (isDragging) {
+          return;
+        }
+
+        this._onSelectionChangeWithDebounce();
+      }, 300)
     );
   }
 
-  private _onContainerDragStart = (e: SelectionEvent) => {
+  private _add = (name: EventName, fn: UIEventHandler) => {
+    this._disposables.add(this._dispatcher.add(name, fn));
+  };
+
+  private _onContainerDragStart = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     const target = e.raw.target;
     if (isInsidePageTitle(target) || isDatabaseInput(target)) {
       this.state.type = 'none';
@@ -140,11 +230,6 @@ export class DefaultSelectionManager {
       this._embedResizeManager.onStart(e);
       return;
     }
-    if (isDatabase(e)) {
-      this.state.type = 'database';
-      this._databaseTableViewManager.onDragStart(this, e);
-      return;
-    }
 
     // disable dragHandle button
     this.container.components.dragHandle?.setPointerEvents('none');
@@ -159,7 +244,8 @@ export class DefaultSelectionManager {
     }
   };
 
-  private _onContainerDragMove = (e: SelectionEvent) => {
+  private _onContainerDragMove = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     if (this.state.type === 'native') {
       NativeDragHandlers.onMove(this, e);
       return;
@@ -180,13 +266,10 @@ export class DefaultSelectionManager {
     if (this.state.type === 'embed') {
       return this._embedResizeManager.onMove(e);
     }
-
-    if (this.state.type === 'database') {
-      return this._databaseTableViewManager.onDragMove(this, e);
-    }
   };
 
-  private _onContainerDragEnd = (e: SelectionEvent) => {
+  private _onContainerDragEnd = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     this.container.components.dragHandle?.setPointerEvents('auto');
 
     if (this.state.type === 'block:drag') {
@@ -199,9 +282,8 @@ export class DefaultSelectionManager {
       BlockDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'embed') {
       this._embedResizeManager.onEnd();
-    } else if (this.state.type === 'database') {
-      this._databaseTableViewManager.onDragEnd(this, e);
     }
+
     if (this.page.readonly) return;
 
     if (this.state.type === 'native') {
@@ -230,7 +312,7 @@ export class DefaultSelectionManager {
       // TODO Check if there are valid blocks in the selection before showing the format bar
       // If all the selected blocks are images, the format bar should not be displayed.
 
-      const direction = e.start.y < e.y ? 'center-bottom' : 'center-top';
+      const direction = e.start.y < e.point.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
         page: this.page,
         container: this.container,
@@ -246,19 +328,20 @@ export class DefaultSelectionManager {
     }
   };
 
-  private _onContainerPointerDown = (e: SelectionEvent) => {
+  private _onContainerPointerDown = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     if (e.keys.shift) {
       // dont trigger native selection behavior
       e.raw.preventDefault();
     }
   };
 
-  private _onContainerClick = (e: SelectionEvent) => {
+  private _onContainerClick = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     const container = getEditorContainerByElement(this.container);
     activeEditorManager.setActive(container);
     const {
-      x,
-      y,
+      point: { x, y },
       raw: { target, clientX, clientY, pageX },
       keys: { shift },
     } = e;
@@ -271,7 +354,6 @@ export class DefaultSelectionManager {
 
     // do nothing when clicking on drag-handle
     if (isElement(target) && isDragHandle(target as Element)) {
-      this._clearDatabaseTableViewSelection();
       return;
     }
 
@@ -356,12 +438,11 @@ export class DefaultSelectionManager {
     )
       return;
 
-    this._clearDatabaseTableViewSelection();
-
     handleNativeRangeClick(this.page, e, this.container);
   };
 
-  private _onContainerDblClick = (e: SelectionEvent) => {
+  private _onContainerDblClick = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     // clear selection first
     this.clear();
 
@@ -411,7 +492,8 @@ export class DefaultSelectionManager {
     );
   };
 
-  private _onContainerTripleClick = (e: SelectionEvent) => {
+  private _onContainerTripleClick = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     showFormatQuickBarByClicks(
       'triple',
       e,
@@ -421,11 +503,13 @@ export class DefaultSelectionManager {
     );
   };
 
-  private _onContainerContextMenu = (e: SelectionEvent) => {
-    repairContextMenuRange(e);
+  private _onContainerContextMenu = (ctx: UIEventStateContext) => {
+    const e = ctx.get('defaultState');
+    repairContextMenuRange(e.event as MouseEvent);
   };
 
-  private _onContainerMouseMove = (e: SelectionEvent) => {
+  private _onContainerPointerMove = (ctx: UIEventStateContext) => {
+    const e = ctx.get('pointerState');
     const { dragging, raw } = e;
 
     // dont show option menu of image on block/native selection
@@ -490,12 +574,7 @@ export class DefaultSelectionManager {
     this.slots.embedEditingStateUpdated.emit(hoverEditingState);
   };
 
-  // TODO: Keep selecting blocks?
-  private _onContainerMouseOut = (_: SelectionEvent) => {
-    // console.log('mouseout', e);
-  };
-
-  private _onSelectionChangeWithDebounce = (_: Event) => {
+  private _onSelectionChangeWithDebounce = () => {
     const selection = window.getSelection();
     if (!selection) return;
 
@@ -539,14 +618,8 @@ export class DefaultSelectionManager {
     });
   };
 
-  private _onSelectionChangeWithoutDebounce = (_: Event) => {
+  private _onSelectionChangeWithoutDebounce = () => {
     updateLocalSelectionRange(this.page);
-  };
-
-  private _clearDatabaseTableViewSelection = () => {
-    // FIXME: refactor this
-    const service = getServiceOrRegister('affine:database');
-    Promise.resolve(service).then(database => database.clearSelection());
   };
 
   get viewportElement() {

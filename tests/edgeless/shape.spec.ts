@@ -366,8 +366,8 @@ test('change shape stroke width', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [
-    [start.x + 20, start.y],
-    [start.x + 20, start.y + 9],
+    [start.x + 20, start.y + 2],
+    [start.x + 20, start.y + 7],
   ]);
   expect(pickedColor[0]).toBe(pickedColor[1]);
 });

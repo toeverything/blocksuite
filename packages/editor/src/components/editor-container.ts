@@ -220,6 +220,12 @@ export class EditorContainer
           font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
         }
+        @media print {
+          editor-container,
+          .affine-editor-container {
+            height: auto;
+          }
+        }
       </style>
       ${rootContainer} ${remoteSelectionContainer}
     `;

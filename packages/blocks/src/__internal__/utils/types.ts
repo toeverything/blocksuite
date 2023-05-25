@@ -16,6 +16,10 @@ import type { Point } from './rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
+export interface IPoint {
+  x: number;
+  y: number;
+}
 export interface BlockTransformContext {
   childText?: string;
   begin?: number;
@@ -29,11 +33,29 @@ export interface EditingState {
 }
 
 export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
-export type DatabaseTableViewRowState = {
-  type: DatabaseTableViewRowStateType;
-  databaseId?: string;
-  rowIds?: string[];
+export type DatabaseTableViewRowSelect = {
+  type: 'select';
+  databaseId: string;
+  rowIds: string[];
 };
+type DatabaseTableViewRowClick = {
+  type: 'click';
+  databaseId: string;
+  rowIds: string[];
+};
+type DatabaseTableViewRowDelete = {
+  type: 'delete';
+  databaseId: string;
+  rowIds: string[];
+};
+type DatabaseTableViewRowClear = {
+  type: 'clear';
+};
+export type DatabaseTableViewRowState =
+  | DatabaseTableViewRowSelect
+  | DatabaseTableViewRowClick
+  | DatabaseTableViewRowDelete
+  | DatabaseTableViewRowClear;
 
 export type CellCoord = {
   rowIndex: number;
@@ -118,6 +140,10 @@ export enum BrushSize {
   Thick = 10,
 }
 
+export type TextMouseMode = {
+  type: 'text';
+};
+
 export type BrushMouseMode = {
   type: 'brush';
   color: CssVariableName;
@@ -129,8 +155,8 @@ export type PanMouseMode = {
   panning: boolean;
 };
 
-export type TextMouseMode = {
-  type: 'text';
+export type NoteMouseMode = {
+  type: 'note';
   background: CssVariableName;
 };
 
@@ -142,10 +168,11 @@ export type ConnectorMouseMode = {
 
 export type MouseMode =
   | DefaultMouseMode
+  | TextMouseMode
   | ShapeMouseMode
   | BrushMouseMode
   | PanMouseMode
-  | TextMouseMode
+  | NoteMouseMode
   | ConnectorMouseMode;
 
 export type SerializedBlock = {

@@ -28,7 +28,7 @@ export interface Controller {
 
 export interface IConnector {
   id: string;
-  type: string;
+  type: 'connector';
   xywh: SerializedXYWH;
   index: string;
   seed: number;

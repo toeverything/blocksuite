@@ -370,7 +370,7 @@ export async function asyncGetRichTextByModel(model: BaseBlockModel) {
 }
 
 export function getVirgoByModel(model: BaseBlockModel) {
-  if (matchFlavours(model, ['affine:database'] as const)) {
+  if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple Virgo instances.
     // Support to enter the editing state through the Enter key in the database.
     return null;
@@ -381,7 +381,7 @@ export function getVirgoByModel(model: BaseBlockModel) {
 }
 
 export async function asyncGetVirgoByModel(model: BaseBlockModel) {
-  if (matchFlavours(model, ['affine:database'] as const)) {
+  if (matchFlavours(model, ['affine:database'])) {
     // Not support database model since it's may be have multiple Virgo instances.
     throw new Error('Cannot get virgo by database model!');
   }
@@ -513,6 +513,16 @@ export function isInsidePageTitle(element: unknown): boolean {
   return titleElement.contains(element as Node);
 }
 
+export function isInsideEdgelessTextEditor(element: unknown): boolean {
+  const editor = activeEditorManager.getActiveEditor();
+  const titleElement = (editor ?? document).querySelector(
+    '[data-block-is-edgeless-text="true"]'
+  );
+  if (!titleElement) return false;
+
+  return titleElement.contains(element as Node);
+}
+
 export function isToggleIcon(element: unknown): element is SVGPathElement {
   return (
     element instanceof SVGPathElement &&
@@ -599,15 +609,20 @@ export function isEdgelessPage({ tagName }: Element) {
 /**
  * Returns `true` if element is default/edgeless page or frame.
  */
-export function isPageOrFrame(element: Element) {
-  return isDefaultPage(element) || isEdgelessPage(element) || isFrame(element);
+export function isPageOrFrameOrSurface(element: Element) {
+  return (
+    isDefaultPage(element) ||
+    isEdgelessPage(element) ||
+    isFrame(element) ||
+    isSurface(element)
+  );
 }
 
 /**
  * Returns `true` if element is not page or frame.
  */
 export function isBlock(element: Element) {
-  return !isPageOrFrame(element);
+  return !isPageOrFrameOrSurface(element);
 }
 
 /**
@@ -624,6 +639,13 @@ export function isImage({ tagName, firstElementChild }: Element) {
  */
 function isFrame({ tagName }: Element) {
   return tagName === 'AFFINE-FRAME';
+}
+
+/**
+ * Returns `true` if element is surface.
+ */
+function isSurface({ tagName }: Element) {
+  return tagName === 'AFFINE-SURFACE';
 }
 
 /**
@@ -963,7 +985,7 @@ export function getHoveringFrame(point: Point) {
  * Returns `true` if the database is empty.
  */
 export function isEmptyDatabase(model: BaseBlockModel) {
-  return matchFlavours(model, ['affine:database'] as const) && model.isEmpty();
+  return matchFlavours(model, ['affine:database']) && model.isEmpty();
 }
 
 /**

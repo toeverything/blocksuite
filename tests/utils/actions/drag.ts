@@ -12,7 +12,7 @@ export async function dragBetweenCoords(
     click?: boolean;
   }
 ) {
-  const steps = options?.steps ?? 1;
+  const steps = options?.steps ?? 20;
   const { x: x1, y: y1 } = from;
   const { x: x2, y: y2 } = to;
   options?.click && (await page.mouse.click(x1, y1));
@@ -35,6 +35,10 @@ export async function dragBetweenIndices(
     click?: boolean;
   }
 ) {
+  const finalOptions = {
+    steps: 50,
+    ...(options || {}),
+  };
   const startCoord = await getIndexCoordinate(
     page,
     [startRichTextIndex, startVIndex],
@@ -46,7 +50,7 @@ export async function dragBetweenIndices(
     endCoordOffSet
   );
 
-  await dragBetweenCoords(page, startCoord, endCoord, options);
+  await dragBetweenCoords(page, startCoord, endCoord, finalOptions);
 }
 
 export async function dragOverTitle(page: Page) {
@@ -127,7 +131,8 @@ export async function dragHandleFromBlockToBlockBottomById(
   }
   await page.mouse.move(
     handle.x + handle.width / 2,
-    handle.y + handle.height / 2
+    handle.y + handle.height / 2,
+    { steps: 10 }
   );
   await page.mouse.down();
   await page.mouse.move(

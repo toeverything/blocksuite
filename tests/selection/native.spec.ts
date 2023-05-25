@@ -80,13 +80,13 @@ test('native range delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const box123 = await getRichTextBoundingBox(page, '2');
-  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
+  const inside123 = { x: box123.left - 1, y: box123.top + 1 };
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, inside123, inside789);
+  await dragBetweenCoords(page, inside123, inside789, { steps: 50 });
   await page.keyboard.press('Backspace');
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
@@ -107,13 +107,13 @@ test('native range input', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const box123 = await getRichTextBoundingBox(page, '2');
-  const inside123 = { x: box123.left + 1, y: box123.top + 1 };
+  const inside123 = { x: box123.left - 1, y: box123.top + 1 };
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, inside123, inside789);
+  await dragBetweenCoords(page, inside123, inside789, { steps: 50 });
   await page.keyboard.press('a');
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['a']);
@@ -132,7 +132,7 @@ test('native range selection backwards', async ({ page }) => {
   const bottomRight789 = { x: box789.right, y: box789.bottom };
 
   // from bottom to top
-  await dragBetweenCoords(page, bottomRight789, above123);
+  await dragBetweenCoords(page, bottomRight789, above123, { steps: 10 });
   await pressBackspace(page);
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
@@ -295,7 +295,9 @@ test('select all text with dragging and delete', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  await dragBetweenIndices(page, [0, 0], [2, 3], undefined, undefined, {
+    steps: 20,
+  });
   await pressBackspace(page);
   await type(page, 'abc');
   const textOne = await getVirgoSelectionText(page);
@@ -310,7 +312,9 @@ test('select text leaving a few words in the last line and delete', async ({
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await dragBetweenIndices(page, [0, 0], [2, 1]);
+  await dragBetweenIndices(page, [0, 0], [2, 1], undefined, undefined, {
+    steps: 20,
+  });
   await page.keyboard.press('Backspace');
   await waitNextFrame(page);
   await type(page, 'abc');
@@ -350,6 +354,7 @@ test('select text in the same line with dragging leftward and move outside the a
     { x: 0, y: 0 },
     { x: 0, y: 0 },
     {
+      steps: 20,
       async beforeMouseUp() {
         await page.mouse.move(
           frameLeft - 1,
@@ -395,6 +400,7 @@ test('select text in the same line with dragging rightward and move outside the 
     { x: 0, y: 0 },
     { x: 0, y: 0 },
     {
+      steps: 20,
       async beforeMouseUp() {
         await page.mouse.move(
           frameRight + 1,
@@ -439,9 +445,13 @@ test('drag to select tagged text, and copy', async ({ page }) => {
   await page.keyboard.insertText('123456789');
   await assertRichTexts(page, ['123456789']);
 
-  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await dragBetweenIndices(page, [0, 1], [0, 3], undefined, undefined, {
+    steps: 20,
+  });
   page.keyboard.press(`${SHORT_KEY}+B`);
-  await dragBetweenIndices(page, [0, 0], [0, 5]);
+  await dragBetweenIndices(page, [0, 0], [0, 5], undefined, undefined, {
+    steps: 20,
+  });
   page.keyboard.press(`${SHORT_KEY}+C`);
   const textOne = await getSelectedTextByVirgo(page);
   expect(textOne).toBe('12345');
@@ -455,9 +465,13 @@ test('drag to select tagged text, and input character', async ({ page }) => {
   await page.keyboard.insertText('123456789');
   await assertRichTexts(page, ['123456789']);
 
-  await dragBetweenIndices(page, [0, 1], [0, 3]);
+  await dragBetweenIndices(page, [0, 1], [0, 3], undefined, undefined, {
+    steps: 20,
+  });
   page.keyboard.press(`${SHORT_KEY}+B`);
-  await dragBetweenIndices(page, [0, 0], [0, 5]);
+  await dragBetweenIndices(page, [0, 0], [0, 5], undefined, undefined, {
+    steps: 20,
+  });
   await type(page, '1');
   const textOne = await getVirgoSelectionText(page);
   expect(textOne).toBe('16789');
@@ -770,7 +784,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 26 - 24, coord.y);
+  await page.mouse.move(coord.x - 15, coord.y, { steps: 20 });
   await page.mouse.up();
   expect(await getSelectedTextByVirgo(page)).toBe('45');
 
@@ -779,9 +793,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x - 26 - 24, coord.y);
-  // ↓
-  await page.mouse.move(coord.x - 26 - 24, coord.y + 90);
+  await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
   await page.mouse.up();
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
@@ -793,10 +805,7 @@ test('should select texts on dragging around the page', async ({ page }) => {
   await page.mouse.click(0, 0);
   await page.mouse.move(coord.x, coord.y);
   await page.mouse.down();
-  // →
-  await page.mouse.move(coord.x + 20, coord.y);
-  // ↓
-  await page.mouse.move(coord.x + 20, coord.y + 90);
+  await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
   await page.mouse.up();
   await page.keyboard.press('Backspace');
   await assertRichTexts(page, ['123', '45']);
@@ -815,7 +824,7 @@ test('should indent native multi-selection block', async ({ page }) => {
   const inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
 
   // from top to bottom
-  await dragBetweenCoords(page, inside456, inside789);
+  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
 
   await page.keyboard.press('Tab');
 
@@ -858,7 +867,8 @@ test('should clear native selection before block selection', async ({
     [1, 3],
     [1, 0],
     { x: 0, y: 0 },
-    { x: 0, y: 0 }
+    { x: 0, y: 0 },
+    { steps: 20 }
   );
 
   const text0 = await getVirgoSelectionText(page);
@@ -875,12 +885,15 @@ test('should clear native selection before block selection', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.right + 1,
+      x: first.right + 10,
       y: first.top - 1,
     },
     {
-      x: first.right - 1,
+      x: first.right - 10,
       y: first.top + 1,
+    },
+    {
+      steps: 20,
     }
   );
 

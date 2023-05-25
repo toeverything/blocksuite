@@ -111,12 +111,17 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     );
 
     hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
-    hotkey.addListener('h', () =>
-      setMouseMode(edgeless, { type: 'pan', panning: false })
-    );
     hotkey.addListener('t', () =>
       setMouseMode(edgeless, {
         type: 'text',
+      })
+    );
+    hotkey.addListener('h', () =>
+      setMouseMode(edgeless, { type: 'pan', panning: false })
+    );
+    hotkey.addListener('n', () =>
+      setMouseMode(edgeless, {
+        type: 'note',
         background: FRAME_BACKGROUND_COLORS[0],
       })
     );

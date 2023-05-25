@@ -57,6 +57,9 @@ export class EdgelessToolIconButton extends LitElement {
   tooltip!: string | TemplateResult<1>;
 
   @property()
+  tipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
+
+  @property()
   active = false;
 
   @property()
@@ -90,7 +93,11 @@ export class EdgelessToolIconButton extends LitElement {
       >
         <slot></slot>
         ${tooltip
-          ? html`<tool-tip inert role="tooltip" tip-position="top" arrow
+          ? html`<tool-tip
+              inert
+              role="tooltip"
+              tip-position=${this.tipPosition}
+              arrow
               >${tooltip}</tool-tip
             >`
           : nothing}

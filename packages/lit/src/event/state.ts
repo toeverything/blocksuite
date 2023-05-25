@@ -26,6 +26,14 @@ export class PointerEventState extends UIEventState {
   button: number;
   dragging: boolean;
 
+  get x() {
+    return this.point.x;
+  }
+
+  get y() {
+    return this.point.y;
+  }
+
   constructor({ event, rect, startX, startY, last }: PointerEventStateOptions) {
     super(event as Event);
 
@@ -49,8 +57,30 @@ export class PointerEventState extends UIEventState {
   }
 }
 
+type KeyboardEventStateOptions = {
+  event: KeyboardEvent;
+};
+
+export class KeyboardEventState extends UIEventState {
+  override readonly type = 'keyboardState';
+
+  raw: KeyboardEvent;
+
+  constructor({ event }: KeyboardEventStateOptions) {
+    super(event as Event);
+
+    this.raw = event;
+  }
+}
+
 declare global {
   interface BlockSuiteUIEventState {
     pointerState: PointerEventState;
+  }
+}
+
+declare global {
+  interface BlockSuiteUIEventState {
+    keyboardState: KeyboardEventState;
   }
 }

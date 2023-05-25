@@ -9,6 +9,7 @@ import type {
   FrameBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -76,7 +77,7 @@ export const defaultStore: SerializedStore = {
       'sys:flavour': 'affine:frame',
       'sys:id': '1',
       'sys:children': ['2'],
-      'prop:xywh': '[0,0,720,80]',
+      'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
       'prop:background': '--affine-background-secondary-color',
       'prop:index': 'a0',
     },
@@ -123,6 +124,18 @@ export async function assertRichTexts(page: Page, texts: string[]) {
     });
   }, currentEditorIndex);
   expect(actualTexts).toEqual(texts);
+}
+
+export async function assertEdgelessText(page: Page, text: string) {
+  const actualTexts = await page.evaluate(() => {
+    const editor = document.querySelector('surface-text-editor');
+    if (!editor) {
+      throw new Error('editor not found');
+    }
+    const vEditor = editor.vEditor;
+    return vEditor?.yText.toString();
+  });
+  expect(actualTexts).toEqual(text);
 }
 
 export async function assertRichImage(page: Page, count: number) {

@@ -1,3 +1,4 @@
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { expect } from '@playwright/test';
 
 import {
@@ -55,7 +56,7 @@ test('can drag selected non-active frame', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 80]);
+  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -64,7 +65,7 @@ test('can drag selected non-active frame', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertFrameXYWH(page, [0, 100, 720, 80]);
+  await assertFrameXYWH(page, [0, 100, EDITOR_WIDTH, 80]);
 });
 
 test('resize frame in edgeless mode', async ({ page }) => {
@@ -105,12 +106,12 @@ test('resize frame in edgeless mode', async ({ page }) => {
   assertRectEqual(newRect, draggedRect);
 });
 
-test('add Text', async ({ page }) => {
+test('add Note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'text');
+  await setMouseMode(page, 'note');
 
   await page.mouse.click(30, 40);
   await waitForVirgoStateUpdated(page);
@@ -122,28 +123,28 @@ test('add Text', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [0, 0, 448, 80]);
 });
 
-test('add empty Text', async ({ page }) => {
+test('add empty Note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'text');
+  await setMouseMode(page, 'note');
 
-  // add text at 30,40
+  // add note at 30,40
   await page.mouse.click(30, 40);
   await waitForVirgoStateUpdated(page);
   await pressEnter(page);
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
 
-  // assert add text success
+  // assert add note success
   await page.mouse.move(30, 40);
   await assertEdgelessSelectedRect(page, [0, 0, 448, 112]);
 
-  // click out of text
+  // click out of note
   await page.mouse.click(0, 200);
 
-  // assert empty text is removed
+  // assert empty note is removed
   await page.mouse.move(30, 40);
   await assertEdgelessNonSelectedRect(page);
 });
@@ -219,7 +220,8 @@ test('dragging un-selected frame', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: frameBox.x + 5, y: frameBox.y + 5 },
-    { x: frameBox.x + 25, y: frameBox.y + 25 }
+    { x: frameBox.x + 25, y: frameBox.y + 25 },
+    { steps: 10 }
   );
 
   await page.mouse.move(frameBox.x + 25, frameBox.y + 25);
@@ -289,7 +291,7 @@ test('drag handle should work across multiple frames', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'text');
+  await setMouseMode(page, 'note');
 
   await page.mouse.click(30, 40);
   await waitForVirgoStateUpdated(page);
@@ -344,7 +346,7 @@ test('when the selection is always a frame, it should remain in an active state'
   await switchEditorMode(page);
   const bound = await getFrameBoundBoxInEdgeless(page, ids.frameId);
 
-  await setMouseMode(page, 'text');
+  await setMouseMode(page, 'note');
 
   const newFrameX = bound.x;
   const newFrameY = bound.y + bound.height + 100;
@@ -356,7 +358,7 @@ test('when the selection is always a frame, it should remain in an active state'
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [84, 408, 448, 112]);
+  await assertEdgelessSelectedRect(page, [46, 410, 448, 112]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInFrame(page, ids.frameId);
@@ -400,20 +402,6 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await page.mouse.click(0, 0);
   await activeFrameInEdgeless(page, ids.frameId);
   await expect(toolbar).toBeHidden();
-});
-
-test('double click blank space to add text', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  await waitNextFrame(page);
-  await page.mouse.dblclick(30, 140);
-  await waitNextFrame(page);
-  await type(page, 'hello');
-  await waitNextFrame(page);
-
-  await assertEdgelessSelectedRect(page, [0, 100, 448, 80]);
 });
 
 test('double click toolbar zoom button, should not add text', async ({

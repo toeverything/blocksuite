@@ -2,6 +2,7 @@ import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 import type * as Y from 'yjs';
 
 import type { Renderer } from '../renderer.js';
+import type { SurfaceManager } from '../surface.js';
 import { isPointIn } from '../utils/hit-utils.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 
@@ -18,16 +19,17 @@ export interface HitTestOptions {
   fillHollow: boolean;
 }
 
-export type TransformPropertyValue = (value: string) => string;
+export type ComputedValue = (value: string) => string;
 
 export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
   yMap: Y.Map<unknown>;
 
-  private _renderer: Renderer | null = null;
+  protected renderer: Renderer | null = null;
+  protected surface: SurfaceManager | null = null;
 
-  transformPropertyValue: TransformPropertyValue = v => v;
+  computedValue: ComputedValue = v => v;
 
-  constructor(yMap: Y.Map<unknown>, data?: T) {
+  constructor(yMap: Y.Map<unknown>, surface: SurfaceManager, data?: T) {
     if (!yMap.doc) {
       throw new Error('yMap must be bound to a Y.Doc');
     }
@@ -38,6 +40,8 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
         this.yMap.set(key, data[key] as T[keyof T]);
       }
     }
+
+    this.surface = surface;
   }
 
   get id() {
@@ -85,6 +89,14 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return seed;
   }
 
+  get minWidth() {
+    return this.w;
+  }
+
+  get minHeight() {
+    return this.h;
+  }
+
   applyUpdate(updates: Partial<T>) {
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
@@ -99,18 +111,21 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return isPointIn(this, x, y);
   }
 
+  private _onMap = () => {
+    this.renderer?.removeElement(this);
+    this.renderer?.addElement(this);
+  };
+
   mount(renderer: Renderer) {
-    this._renderer = renderer;
-    this._renderer.addElement(this);
-    this.yMap.observeDeep(() => {
-      this._renderer?.removeElement(this);
-      this._renderer?.addElement(this);
-    });
+    this.renderer = renderer;
+    this.renderer.addElement(this);
+    this.yMap.observeDeep(this._onMap);
   }
 
   unmount() {
-    this._renderer?.removeElement(this);
-    this._renderer = null;
+    this.yMap.unobserveDeep(this._onMap);
+    this.renderer?.removeElement(this);
+    this.renderer = null;
   }
 
   render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {

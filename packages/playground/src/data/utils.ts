@@ -1,6 +1,12 @@
-import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, type Page, type Workspace } from '@blocksuite/store';
 import * as Y from 'yjs';
+
+export interface InitFn {
+  (workspace: Workspace, pageId: string): void;
+  id: string;
+  displayName: string;
+  description: string;
+}
 
 export function addShapeElement(
   page: Page,
