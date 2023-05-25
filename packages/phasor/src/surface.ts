@@ -197,8 +197,12 @@ export class SurfaceManager {
     };
 
     this._transact(() => {
-      for (const key in props) {
-        yMap.set(key, props[key as keyof IElementCreateProps<T>]);
+      for (const [key, value] of Object.entries(props)) {
+        if (key === 'text' && !(value instanceof Y.Text)) {
+          yMap.set(key, new Y.Text(value));
+        } else {
+          yMap.set(key, value);
+        }
       }
       this._yContainer.set(id, yMap);
     });
