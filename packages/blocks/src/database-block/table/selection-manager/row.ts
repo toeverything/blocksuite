@@ -13,6 +13,7 @@ import {
   isBlankArea,
   resetNativeSelection,
 } from '../../../std.js';
+import type { DatabaseBlockModel } from '../../database-model.js';
 import type { DatabaseBlockService } from '../../database-service.js';
 import {
   getClosestDatabase,
@@ -25,6 +26,7 @@ import {
 export class RowSelectionManager {
   private readonly _dispatcher: UIEventDispatcher;
   private readonly _disposables = new DisposableGroup();
+  private readonly _model: DatabaseBlockModel;
 
   private _service: DatabaseBlockService | null = null;
   private _startCell: HTMLElement | null = null;
@@ -34,17 +36,19 @@ export class RowSelectionManager {
   private _rowIds: string[] = [];
   private _isInDatabase = false;
 
-  constructor(dispatcher: UIEventDispatcher) {
+  constructor(dispatcher: UIEventDispatcher, model: DatabaseBlockModel) {
     this._dispatcher = dispatcher;
+    this._model = model;
     this._service = getService('affine:database');
 
     this._add('dragStart', this._onDragStart);
     this._add('dragMove', this._onDragMove);
     this._add('dragEnd', this._onDragEnd);
     this._add('click', this._onClick);
+    this._add('keyDown', this._onRowSelectionDelete);
   }
 
-  _onDragStart = (ctx: UIEventStateContext) => {
+  private _onDragStart = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
 
     const { clientX: x, clientY: y, target } = e.raw;
@@ -73,7 +77,7 @@ export class RowSelectionManager {
     return true;
   };
 
-  _onDragMove = (ctx: UIEventStateContext) => {
+  private _onDragMove = (ctx: UIEventStateContext) => {
     if (!this._isInDatabase) {
       return false;
     }
@@ -129,7 +133,7 @@ export class RowSelectionManager {
     return true;
   };
 
-  _onDragEnd = (ctx: UIEventStateContext) => {
+  private _onDragEnd = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
     const target = e.raw.target as HTMLElement;
     if (!isInDatabase(target)) {
@@ -141,7 +145,7 @@ export class RowSelectionManager {
     return true;
   };
 
-  _onClick = (ctx: UIEventStateContext) => {
+  private _onClick = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
     const target = e.raw.target as HTMLElement;
 
@@ -151,6 +155,35 @@ export class RowSelectionManager {
     if (rowSelection) {
       this._clearRowSelection();
     }
+  };
+
+  private _onRowSelectionDelete = (ctx: UIEventStateContext) => {
+    const e = ctx.get('keyboardState');
+    const event = e.raw;
+
+    if (event.key !== 'Delete') return;
+    event.preventDefault();
+
+    const service = getService('affine:database');
+    const rowSelection = service.getLastRowSelection();
+    if (!rowSelection) return;
+
+    const { rowIds } = rowSelection;
+    const page = this._model.page;
+    const children = this._model.children;
+    page.captureSync();
+    if (children.length === rowIds.length) {
+      // delete the database
+      page.deleteBlock(this._model);
+    } else {
+      // delete rows
+      page.updateBlock(this._model, {
+        children: children.filter(child => rowIds.indexOf(child.id) === -1),
+      });
+    }
+    service.clearRowSelection();
+
+    return true;
   };
 
   private _setColumnWidthHandleDisplay(display: string) {
