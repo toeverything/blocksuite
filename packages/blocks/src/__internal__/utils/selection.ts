@@ -422,8 +422,11 @@ export function handleNativeRangeDragMove(
   if (!currentFrame) return;
 
   if (shouldUpdateCurrentRange) {
-    const targetElement = target as HTMLElement | null;
-    let closestEditor = targetElement?.closest('.virgo-editor');
+    let closestEditor: Element | null = null;
+    // In some cases, the target element may be HTMLDocument.
+    if (target && 'closest' in target) {
+      closestEditor = (target as HTMLElement).closest('.virgo-editor');
+    }
     if (!closestEditor) {
       closestEditor = getClosestEditor(y, currentFrame);
     }
