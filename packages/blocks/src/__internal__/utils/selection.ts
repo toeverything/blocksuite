@@ -10,7 +10,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
-import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
@@ -211,14 +211,16 @@ export function focusPreviousBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const pageBlock = getDefaultPage(model.page);
+  const pageBlock = getPageBlock(model);
   assertExists(pageBlock);
 
   let nextPosition = position;
-  if (nextPosition) {
-    pageBlock.lastSelectionPosition = nextPosition;
-  } else if (pageBlock.lastSelectionPosition) {
-    nextPosition = pageBlock.lastSelectionPosition;
+  if (pageBlock instanceof DefaultPageBlockComponent) {
+    if (nextPosition) {
+      pageBlock.lastSelectionPosition = nextPosition;
+    } else if (pageBlock.lastSelectionPosition) {
+      nextPosition = pageBlock.lastSelectionPosition;
+    }
   }
 
   const preNodeModel = getPreviousBlock(model);
@@ -233,17 +235,19 @@ export function focusNextBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const pageBlock = getDefaultPage(model.page);
+  const pageBlock = getPageBlock(model);
   assertExists(pageBlock);
 
   let nextPosition = position;
-  if (nextPosition) {
-    pageBlock.lastSelectionPosition = nextPosition;
-  } else if (pageBlock.lastSelectionPosition) {
-    nextPosition = pageBlock.lastSelectionPosition;
+  if (pageBlock instanceof DefaultPageBlockComponent) {
+    if (nextPosition) {
+      pageBlock.lastSelectionPosition = nextPosition;
+    } else if (pageBlock.lastSelectionPosition) {
+      nextPosition = pageBlock.lastSelectionPosition;
+    }
   }
-  const nextNodeModel = getNextBlock(model);
 
+  const nextNodeModel = getNextBlock(model);
   if (nextNodeModel) {
     focusBlockByModel(nextNodeModel, nextPosition, zoom);
   }

@@ -238,7 +238,7 @@ export function handleDown(
   if (!blockRange) {
     return;
   }
-  if (blockRange.type === 'Block' && selection) {
+  if (blockRange.type === 'Block') {
     if (!selection) {
       console.error(
         'Failed to handle down: selection is not provided',
