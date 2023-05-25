@@ -153,7 +153,7 @@ export function getPreviousBlock(
 
 /**
  * Returns `DefaultPageBlockComponent` | `EdgelessPageBlockComponent` if it exists
- * Otherwise return `null`.
+ * otherwise return `null`.
  */
 export function getPageBlock(
   model: BaseBlockModel
