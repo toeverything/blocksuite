@@ -10,7 +10,7 @@ import {
 import { assertEdgelessText } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('add Text in default mode', async ({ page }) => {
+test('add text element in default mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -25,7 +25,7 @@ test('add Text in default mode', async ({ page }) => {
   await assertMouseMode(page, 'default');
 });
 
-test('add Text in text mode', async ({ page }) => {
+test('add text element in text mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 

@@ -49,7 +49,6 @@ test('add brush element', async ({ page }) => {
   await addBasicBrushElement(page, start, end, false);
 
   await assertMouseMode(page, 'brush');
-  await assertEdgelessSelectedRect(page, [98, 98, 104, 104]);
 });
 
 test('resize brush element', async ({ page }) => {

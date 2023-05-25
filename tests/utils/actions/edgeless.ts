@@ -133,9 +133,14 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
 }
 
 export async function assertMouseMode(page: Page, mode: MouseMode) {
-  const button = locatorEdgelessToolButton(page, mode, true);
-  const active = await button.getAttribute('active');
-  expect(active).not.toBeNull();
+  const type = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) {
+      throw new Error('Missing edgeless page');
+    }
+    return container.mouseMode.type;
+  });
+  expect(type).toEqual(mode);
 }
 
 export async function switchShapeType(page: Page, shapeType: string) {
@@ -212,7 +217,7 @@ export async function addBasicConnectorElement(
   await dragBetweenCoords(page, start, end, { steps: 100 });
 }
 
-export async function addTextFrame(
+export async function addNoteFrame(
   page: Page,
   text: string,
   x: number,
@@ -222,7 +227,6 @@ export async function addTextFrame(
   await page.mouse.click(x, y);
   await waitForVirgoStateUpdated(page);
   await type(page, text);
-  await setMouseMode(page, 'default');
 }
 
 export async function resizeElementByTopLeftHandle(
@@ -621,7 +625,7 @@ export async function initThreeShapes(page: Page) {
 }
 
 export async function initThreeTextFrames(page: Page) {
-  await addTextFrame(page, 'abc', 30 + 100, 40 + 100);
-  await addTextFrame(page, 'efg', 30 + 130, 40 + 100);
-  await addTextFrame(page, 'hij', 30 + 160, 40 + 100);
+  await addNoteFrame(page, 'abc', 30 + 100, 40 + 100);
+  await addNoteFrame(page, 'efg', 30 + 130, 40 + 100);
+  await addNoteFrame(page, 'hij', 30 + 160, 40 + 100);
 }
