@@ -57,8 +57,30 @@ export class PointerEventState extends UIEventState {
   }
 }
 
+type KeyboardEventStateOptions = {
+  event: KeyboardEvent;
+};
+
+export class KeyboardEventState extends UIEventState {
+  override readonly type = 'keyboardState';
+
+  raw: KeyboardEvent;
+
+  constructor({ event }: KeyboardEventStateOptions) {
+    super(event as Event);
+
+    this.raw = event;
+  }
+}
+
 declare global {
   interface BlockSuiteUIEventState {
     pointerState: PointerEventState;
+  }
+}
+
+declare global {
+  interface BlockSuiteUIEventState {
+    keyboardState: KeyboardEventState;
   }
 }

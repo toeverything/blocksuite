@@ -3,6 +3,7 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import type { UIEventHandler } from './base.js';
 import { UIEventStateContext } from './base.js';
 import { UIEventState } from './base.js';
+import { KeyboardControl } from './keyboard.js';
 import { PointerControl } from './pointer.js';
 import { toLowerCase } from './utils.js';
 
@@ -11,9 +12,6 @@ const bypassEventNames = [
   'compositionStart',
   'compositionUpdate',
   'compositionEnd',
-
-  'keyDown',
-  'keyUp',
 
   'paste',
   'copy',
@@ -40,6 +38,9 @@ const eventNames = [
   'dragMove',
   'dragEnd',
 
+  'keyDown',
+  'keyUp',
+
   ...bypassEventNames,
   ...globalEventNames,
 ] as const;
@@ -54,9 +55,11 @@ export class UIEventDispatcher {
   ) as Record<EventName, Array<UIEventHandler>>;
 
   private _pointerControl: PointerControl;
+  private _keyboardControl: KeyboardControl;
 
   constructor(public root: HTMLElement) {
     this._pointerControl = new PointerControl(this);
+    this._keyboardControl = new KeyboardControl(this);
   }
 
   mount() {
@@ -106,5 +109,6 @@ export class UIEventDispatcher {
     });
 
     this._pointerControl.listen();
+    this._keyboardControl.listen();
   }
 }
