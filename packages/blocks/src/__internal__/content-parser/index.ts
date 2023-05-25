@@ -54,6 +54,12 @@ export class ContentParser {
     );
   }
 
+  public async exportPdf() {
+    const root = this._page.root;
+    if (!root) return;
+    window.print();
+  }
+
   public async block2Html(blocks: SelectedBlock[]): Promise<string> {
     let htmlText = '';
     for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
