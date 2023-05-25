@@ -147,6 +147,9 @@ importers:
       hotkeys-js:
         specifier: ^3.10.1
         version: 3.10.1(patch_hash=otx73r74oyscqvo3amwccrzngy)
+      jszip:
+        specifier: ^3.10.1
+        version: 3.10.1
       lit:
         specifier: ^2.7.3
         version: 2.7.3

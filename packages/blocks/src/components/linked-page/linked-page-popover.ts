@@ -16,6 +16,7 @@ import {
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
 import { isFuzzyMatch } from '../../__internal__/utils/std.js';
+import { showImportModal } from '../import-page/index.js';
 import { createKeydownObserver } from '../utils.js';
 import { styles } from './styles.js';
 
@@ -95,6 +96,13 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       //   icon: NewPageIcon,
       //   action: () => this._createSubpage(),
       // },
+      {
+        key: 'import-linked-page',
+        name: `Import`,
+        active: filteredPageList.length + 1 === this._activatedItemIndex,
+        icon: DualLinkIcon,
+        action: () => this._importPage(),
+      },
     ];
   }
 
@@ -202,6 +210,18 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     this._insertLinkedNode('LinkedPage', page.id);
   }
 
+  private _importPage() {
+    this.abortController.abort();
+    const onSuccess = (pageIds: string[]) => {
+      if (pageIds.length === 0) {
+        return;
+      }
+      const pageId = pageIds[0];
+      this._insertLinkedNode('LinkedPage', pageId);
+    };
+    showImportModal({ workspace: this._page.workspace, onSuccess });
+  }
+
   // private _createSubpage() {
   //   const pageName = this._query;
   //   const page = this._page.workspace.createPage({
@@ -224,7 +244,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
-    const pageList = this._actionList.slice(0, -1).map(
+    const pageList = this._actionList.slice(0, -2).map(
       ({ key, name, action, active, icon }, index) => html`<icon-button
         width="280px"
         height="32px"
@@ -240,7 +260,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       >`
     );
 
-    const createList = this._actionList.slice(-1).map(
+    const createList = this._actionList.slice(-2).map(
       ({ key, name, action, active, icon }, index) => html`<icon-button
         width="280px"
         height="32px"
