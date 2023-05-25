@@ -164,6 +164,7 @@ export function focusBlockByModel(
       'affine:divider',
       'affine:code',
       'affine:database',
+      'affine:bookmark',
     ])
   ) {
     if (!defaultPageBlock.selection) {

@@ -1,6 +1,7 @@
 import {
   asyncFocusRichText,
   BlockHub,
+  createBookmarkBlock,
   getAllowSelectedBlocks,
   getEdgelessPage,
   getServiceOrRegister,
@@ -17,7 +18,7 @@ import {
 } from '@blocksuite/blocks/std';
 import { PAGE_BLOCK_PADDING_BOTTOM } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -47,10 +48,22 @@ export const createBlockHub: (
       const last = page.root?.lastItem();
       const range = getCurrentBlockRange(page);
       if (range) {
-        const arr = page.addSiblingBlocks(range.models[0], models, 'after');
+        const lastModel = range.models[range.models.length - 1];
+        if (data.flavour === 'affine:bookmark') {
+          const parent = page.getParent(lastModel);
+          assertExists(parent);
+          const index = parent.children.indexOf(lastModel);
+          createBookmarkBlock(parent, index + 1);
+          return;
+        }
+        const arr = page.addSiblingBlocks(lastModel, models, 'after');
         const lastId = arr[arr.length - 1];
         asyncFocusRichText(page, lastId);
       } else if (last) {
+        if (data.flavour === 'affine:bookmark') {
+          createBookmarkBlock(page.root?.lastItem() as BaseBlockModel);
+          return;
+        }
         // add to end
         let lastId = page.root?.lastItem()?.id;
         models.forEach(model => {
@@ -91,6 +104,12 @@ export const createBlockHub: (
           const ids = page.addBlocks(models, model);
           focusId = ids[0];
           parentId = model.id;
+        } else if (props.flavour === 'affine:bookmark') {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+          focusId = createBookmarkBlock(parent, index + 1);
+          parentId = parent.id;
         } else {
           const parent = page.getParent(model);
           assertExists(parent);
@@ -179,6 +198,7 @@ export const createBlockHub: (
       }
       return state;
     },
+    page,
   });
 
   return blockHub;
