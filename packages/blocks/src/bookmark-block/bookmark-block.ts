@@ -1,6 +1,9 @@
 import './components/bookmark-toolbar.js';
+import './components/bookmark-edit-modal.js';
+import './components/bookmark-create-modal.js';
 
 import { BlockElement } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
@@ -11,6 +14,8 @@ import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
 import { DefaultIcon } from './images/icons.js';
 import { refreshBookmarkBlock } from './utils.js';
+
+// import { Slot } from '@blocksuite/global/dist/utils/slot.js';
 @customElement('affine-bookmark')
 export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   static override styles = css`
@@ -104,11 +109,21 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }
   `;
 
+  slots = {
+    openInitialModal: new Slot(),
+  };
+
   @query('input.affine-bookmark-caption')
   _input!: HTMLInputElement;
 
   @state()
+  private _showCreateModal = false;
+
+  @state()
   private _showToolbar = false;
+
+  @state()
+  private _showEditModal = false;
 
   @state()
   private _caption!: string;
@@ -133,6 +148,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     super.connectedCallback();
     registerService('affine:bookmark', BookmarkBlockService);
     refreshBookmarkBlock(this.model);
+    this.slots.openInitialModal.on(() => {
+      this._showCreateModal = true;
+    });
   }
 
   private _onInputChange() {
@@ -153,29 +171,52 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   private _onHoverOut() {
     this._timer = setTimeout(() => {
       this._showToolbar = false;
-    }, 200);
+    }, 100);
   }
 
   private _onToolbarSelected: ToolbarActionCallback = type => {
     if (type === 'caption') {
       this._input.classList.add('caption-show');
     }
+
+    if (type === 'edit') {
+      this._showEditModal = true;
+    }
   };
   override render() {
     const { url, title, description, icon, image } = this.model;
 
+    const createModal = this._showCreateModal
+      ? html`<bookmark-create-modal
+          .model=${this.model}
+          .onCancel=${() => {
+            this._showCreateModal = false;
+          }}
+        ></bookmark-create-modal>`
+      : nothing;
+    const editModal = this._showEditModal
+      ? html`<bookmark-edit-modal
+          .model=${this.model}
+          .onCancel=${() => {
+            this._showEditModal = false;
+          }}
+        ></bookmark-edit-modal>`
+      : nothing;
+    const toolbar = this._showToolbar
+      ? html`<bookmark-toolbar
+          .model=${this.model}
+          .onSelected=${this._onToolbarSelected}
+        ></bookmark-toolbar>`
+      : nothing;
+
     return html`
+      ${createModal} ${editModal}
       <div
         class="affine-bookmark-block-container"
         @mouseover="${this._onHover}"
         @mouseout="${this._onHoverOut}"
       >
-        ${this._showToolbar
-          ? html`<bookmark-toolbar
-              .model=${this.model}
-              .onSelected=${this._onToolbarSelected}
-            ></bookmark-toolbar>`
-          : nothing}
+        ${toolbar}
         <a href="${url}" target="_blank" class="affine-bookmark-link">
           <div class="affine-bookmark-content-wrapper">
             <div class="affine-bookmark-title">

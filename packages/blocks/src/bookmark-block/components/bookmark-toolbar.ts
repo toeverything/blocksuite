@@ -83,8 +83,8 @@ const config: ConfigItem[] = [
     type: 'edit',
     icon: EditIcon,
     tooltip: 'Edit',
-    action: model => {
-      console.log('hi');
+    action: (model, callback) => {
+      callback?.('edit');
     },
     divider: true,
   },
@@ -131,8 +131,9 @@ const config: ConfigItem[] = [
     icon: RefreshIcon,
     tooltip: 'Refresh',
     action: (model, callback) => {
-      refreshBookmarkBlock(model);
-      callback?.('refresh');
+      refreshBookmarkBlock(model, true).then(() => {
+        callback?.('refresh');
+      });
     },
   },
   {

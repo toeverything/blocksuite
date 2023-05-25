@@ -12,11 +12,12 @@ type MetaData = {
   // type?: string;
   // url?: string;
   // provider?: string;
-  [x: string]: string | string[] | undefined;
+  [x: string]: string | string[] | undefined | boolean;
 };
 export type BookmarkProps = {
   url: string;
   caption?: string;
+  hasCrawled?: boolean;
 } & MetaData;
 
 export const defaultBookmarkProps: BookmarkProps = {
@@ -26,6 +27,7 @@ export const defaultBookmarkProps: BookmarkProps = {
   icon: '',
   image: '',
   caption: '',
+  hasCrawled: false,
 };
 export const BookmarkBlockSchema = defineBlockSchema({
   flavour: 'affine:bookmark',
