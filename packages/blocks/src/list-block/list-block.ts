@@ -3,16 +3,18 @@ import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { getDefaultPageBlock } from '../__internal__/index.js';
+import { getPageBlock, isPageMode } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
 import { registerService } from '../__internal__/service.js';
+import type { DefaultPageBlockComponent } from '../index.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListBlockService } from './list-service.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -84,8 +86,11 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   };
 
   private _select() {
-    const { selection } = getDefaultPageBlock(this.model);
-    selection?.selectOneBlock(this);
+    const pageBlock = getPageBlock(this.model);
+    assertExists(pageBlock);
+    if (isPageMode(this.model.page)) {
+      (pageBlock as DefaultPageBlockComponent).selection.selectOneBlock(this);
+    }
   }
 
   private _onClickIcon = (e: MouseEvent) => {

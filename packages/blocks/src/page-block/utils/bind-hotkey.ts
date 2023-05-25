@@ -9,6 +9,7 @@ import type { Page } from '@blocksuite/store';
 import {
   blockRangeToNativeRange,
   focusBlockByModel,
+  getDefaultPage,
   hotkey,
   isMultiBlockRange,
   isPageMode,
@@ -25,7 +26,6 @@ import {
   focusPreviousBlock,
   focusTitle,
   getCurrentNativeRange,
-  getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
@@ -161,10 +161,10 @@ export function handleUp(
       );
       return;
     }
-    const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const pageBlock = getDefaultPageBlock(selectedModel);
+    const selectedModel = getModelByElement(selection.state.selectedBlocks[0]);
     selection.clear();
+    const pageBlock = getDefaultPage(page);
+    assertExists(pageBlock);
     focusPreviousBlock(
       selectedModel,
       pageBlock.lastSelectionPosition instanceof Point
@@ -246,8 +246,7 @@ export function handleDown(
       );
       return;
     }
-    const { state } = selection;
-    const lastEle = state.selectedBlocks.at(-1);
+    const lastEle = selection.state.selectedBlocks.at(-1);
     if (!lastEle) {
       throw new Error(
         "Failed to handleDown! Can't find last selected element!"
@@ -255,11 +254,12 @@ export function handleDown(
     }
     const selectedModel = getModelByElement(lastEle);
     selection.clear();
-    const page = getDefaultPageBlock(selectedModel);
+    const pageBlock = getDefaultPage(page);
+    assertExists(pageBlock);
     focusNextBlock(
       selectedModel,
-      page.lastSelectionPosition instanceof Point
-        ? page.lastSelectionPosition
+      pageBlock.lastSelectionPosition instanceof Point
+        ? pageBlock.lastSelectionPosition
         : 'start'
     );
     e.preventDefault();

@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
 import {
-  getDefaultPageBlock,
+  getDefaultPage,
   getModelByElement,
   noop,
 } from '../../__internal__/utils/index.js';
@@ -77,8 +77,8 @@ function bindHoverState(
   popover.addEventListener('mouseout', handleMouseLeave);
 
   const model = getModelByElement(target);
-  const pageBlock = getDefaultPageBlock(model);
-  const viewport = pageBlock.viewportElement;
+  const pageBlock = getDefaultPage(model.page);
+  const viewport = pageBlock?.viewportElement;
   viewport?.addEventListener('scroll', abortHandler);
   return () => {
     target.removeEventListener('mouseover', handleMouseEnter);

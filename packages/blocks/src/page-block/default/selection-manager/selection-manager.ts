@@ -22,7 +22,6 @@ import {
   getBlockElementsIncludeSubtrees,
   getClosestBlockElementByPoint,
   getCurrentNativeRange,
-  getDefaultPageBlock,
   getEditorContainerByElement,
   getModelByBlockElement,
   getRectByBlockElement,
@@ -393,9 +392,8 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     }
 
     if (clickBlockInfo && clickBlockInfo.model) {
-      const { model, element } = clickBlockInfo;
-      const page = getDefaultPageBlock(model);
-      page.lastSelectionPosition = 'start';
+      const { element } = clickBlockInfo;
+      this.container.lastSelectionPosition = 'start';
       state.focusedBlock = element;
     }
 
