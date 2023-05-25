@@ -159,11 +159,11 @@ export function focusBlockByModel(
 
   const pageBlock = getPageBlock(model);
   assertExists(pageBlock);
-  const isPageBlock = pageBlock instanceof DefaultPageBlockComponent;
+  const isPageMode = pageBlock instanceof DefaultPageBlockComponent;
 
   // If focus on a follow block, we should select the block
   if (
-    isPageBlock &&
+    isPageMode &&
     matchFlavours(model, [
       'affine:embed',
       'affine:divider',
@@ -194,7 +194,7 @@ export function focusBlockByModel(
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
-    if (isPageBlock) {
+    if (isPageMode) {
       pageBlock.selection.state.clearSelection();
       pageBlock.selection.setFocusedBlock(element as Element);
     }
