@@ -11,7 +11,6 @@ import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
-import type { RichText } from '../rich-text/rich-text.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
   type BlockComponentElement,
@@ -203,7 +202,6 @@ export function focusBlockByModel(
   }
 }
 
-// Focus previous block in page mode.
 export function focusPreviousBlock(
   model: BaseBlockModel,
   position: SelectionPosition = 'start',
@@ -227,7 +225,6 @@ export function focusPreviousBlock(
   }
 }
 
-// Focus next block in page mode.
 export function focusNextBlock(
   model: BaseBlockModel,
   position: SelectionPosition = 'start',
@@ -261,30 +258,6 @@ export function resetNativeSelection(range: Range | null) {
 export function clearSelection(page: Page) {
   if (!page.root) return;
   getPageBlock(page.root)?.selection.clear();
-}
-
-/**
- * @deprecated Use {@link focusBlockByModel} instead.
- */
-export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
-  const richText = richTextParent.querySelector('rich-text');
-  assertExists(richText);
-  const bbox = richText.getBoundingClientRect();
-  const y = bbox.y + bbox.height / 2;
-  const range = caretRangeFromPoint(x, y);
-  if (range?.startContainer instanceof Node) {
-    resetNativeSelection(range);
-  }
-}
-
-/**
- * @deprecated Use {@link focusBlockByModel} instead.
- */
-export function focusRichTextStart(richText: RichText) {
-  const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
-  const range = document.createRange();
-  range.setStart(start, 0);
-  resetNativeSelection(range);
 }
 
 /**

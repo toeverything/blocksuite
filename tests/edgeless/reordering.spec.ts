@@ -20,6 +20,7 @@ test.describe('reordering shapes', () => {
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
     await initThreeShapes(page);
+    await page.mouse.click(0, 0);
   }
 
   test('bring to front', async ({ page }) => {
@@ -123,6 +124,7 @@ test.describe('reordering frames', () => {
     await switchEditorMode(page);
     await initThreeTextFrames(page);
     await waitNextFrame(page);
+    await page.mouse.click(0, 0);
   }
 
   test('bring to front', async ({ page }) => {
