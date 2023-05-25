@@ -404,7 +404,7 @@ export class Page extends Space<FlatBlockMap> {
    *
    * @example
    * Moves blocks in multiple frames.
-   * * Moves `1` and `2` in C to before `0` in B.
+   * * Moves `0` and `1` in C to before `0` in B.
    * * Moves `0` in D and `0` in E to after `0` in A.
    * ```
    * frame A
