@@ -1,3 +1,10 @@
 {
-    "excludeRegExp": [".ts$"]
+  "excludeRegExp": [
+    "^(blocks*)"
+  ],
+  "detectiveOptions": {
+    "ts": {
+      "skipTypeImports": true
+    }
+  }
 }
