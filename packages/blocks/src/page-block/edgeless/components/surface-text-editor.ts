@@ -68,6 +68,11 @@ export class SurfaceTextEditor extends ShadowlessElement {
         'blur',
         () => {
           this.vEditor?.unmount();
+
+          if (this._element?.text.length === 0) {
+            this._edgeless?.surface.removeElement(this._element?.id);
+          }
+
           this.remove();
           edgeless.slots.selectionUpdated.emit({
             selected: [],
