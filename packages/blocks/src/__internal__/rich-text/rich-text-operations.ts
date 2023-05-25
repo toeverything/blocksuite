@@ -32,6 +32,18 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   if (!parent) {
     return;
   }
+
+  const getProps = ():
+    | ['affine:list', Partial<BlockModelProps['affine:list']>]
+    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
+    const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
+    if (shouldInheritFlavour) {
+      return [model.flavour, { type: model.type }];
+    }
+    return ['affine:paragraph', { type: 'text' }];
+  };
+  const [flavour, blockProps] = getProps();
+
   if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
     page.captureSync();
     const index = parent.children.findIndex(child => child.id === model.id);
@@ -60,7 +72,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
       newBlockIndex = prevIndex + 1;
     }
 
-    const id = page.addBlock('affine:paragraph', {}, newParent, newBlockIndex);
+    const id = page.addBlock(flavour, blockProps, newParent, newBlockIndex);
     asyncFocusRichText(page, id);
     return;
   }
@@ -70,17 +82,6 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   }
   // make adding text block by enter a standalone operation
   page.captureSync();
-
-  const getProps = ():
-    | ['affine:list', Partial<BlockModelProps['affine:list']>]
-    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
-    const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
-    if (shouldInheritFlavour) {
-      return [model.flavour, { type: model.type }];
-    }
-    return ['affine:paragraph', { type: 'text' }];
-  };
-  const [flavour, blockProps] = getProps();
 
   const id = !model.children.length
     ? page.addBlock(flavour, blockProps, parent, index + 1)
