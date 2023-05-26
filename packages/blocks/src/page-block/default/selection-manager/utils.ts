@@ -1,6 +1,6 @@
 import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import type { PointerEventState } from '@blocksuite/lit';
-import type { Page, UserRange } from '@blocksuite/store';
+import { matchFlavours, type Page, type UserRange } from '@blocksuite/store';
 
 import type {
   BlockComponentElement,
@@ -55,12 +55,16 @@ export function filterBlocksExcludeSubtrees(
         let prevBlock = entries[prevIndex][0];
         // prev block before and contains block
         if (contains(prevBlock, block)) {
-          // not continuous block
-          if (results.length > 1) {
+          if (matchFlavours(prevBlock.model, ['affine:database'])) {
             continue;
+          } else {
+            // not continuous block
+            if (results.length > 1) {
+              continue;
+            }
+            prevIndex = i;
+            results.shift();
           }
-          prevIndex = i;
-          results.shift();
         } else {
           // backward search parent block and remove its subtree
           // only keep blocks of same level
