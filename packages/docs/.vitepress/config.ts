@@ -25,10 +25,10 @@ export default defineConfig({
         text: 'Introduction',
         items: [
           { text: 'BlockSuite Overview', link: '/blocksuite-overview' },
-          // {
-          //   text: 'The Local-First Paradigm',
-          //   link: '/the-local-first-paradigm',
-          // },
+          {
+            text: 'The Local-First Paradigm',
+            link: '/the-local-first-paradigm',
+          },
         ],
       },
       {
