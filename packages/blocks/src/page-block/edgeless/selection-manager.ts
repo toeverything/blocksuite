@@ -86,7 +86,10 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     timeStamp: number;
   } | null = null;
 
-  // The selected blocks on then frame.
+  // pressed shift key
+  private _shift = false;
+
+  // selected blocks
   selectedBlocks: BlockComponentElement[] = [];
 
   // Cache the last edited elements.
@@ -129,6 +132,15 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     const maxX = Math.max(start.x, end.x);
     const maxY = Math.max(start.y, end.y);
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  get shift() {
+    return this._shift;
+  }
+
+  set shift(pressed: boolean) {
+    this._shift = pressed;
+    this.currentController.onShift(pressed);
   }
 
   constructor(

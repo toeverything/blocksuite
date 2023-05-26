@@ -79,35 +79,9 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     assertExists(this._draggingElementId);
     assertExists(this._draggingArea);
 
-    const { viewport } = this._edgeless.surface;
+    this._draggingArea.end = new DOMPoint(e.x, e.y);
 
-    let endX = e.x;
-    let endY = e.y;
-    if (e.keys.shift) {
-      const { x: startX, y: startY } = this._draggingArea.start;
-      const w = Math.abs(endX - startX) / viewport.zoom;
-      const h = Math.abs(endY - startY) / viewport.zoom;
-      const maxLength = Math.max(w, h);
-      endX = endX > startX ? startX + maxLength : startX - maxLength;
-      endY = endY > startY ? startY + maxLength : startY - maxLength;
-    }
-    this._draggingArea.end = new DOMPoint(endX, endY);
-
-    const [x, y] = viewport.toModelCoord(
-      Math.min(this._draggingArea.start.x, this._draggingArea.end.x),
-      Math.min(this._draggingArea.start.y, this._draggingArea.end.y)
-    );
-    const w =
-      Math.abs(this._draggingArea.start.x - this._draggingArea.end.x) /
-      viewport.zoom;
-    const h =
-      Math.abs(this._draggingArea.start.y - this._draggingArea.end.y) /
-      viewport.zoom;
-
-    const bound = new Bound(x, y, w, h);
-    const id = this._draggingElementId;
-    this._surface.setElementBound(id, bound);
-    this._edgeless.slots.surfaceUpdated.emit();
+    this._draw(e.keys.shift);
   }
 
   onContainerDragEnd(e: PointerEventState) {
@@ -125,6 +99,46 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
       selected: [element],
       active: false,
     });
+  }
+
+  onShift(pressed: boolean) {
+    const id = this._draggingElementId;
+    if (!id) return;
+
+    this._draw(pressed);
+  }
+
+  private _draw(shift = false) {
+    assertExists(this._draggingElementId);
+    assertExists(this._draggingArea);
+
+    const { slots, surface } = this._edgeless;
+    const { viewport } = surface;
+
+    shift = shift || this._edgeless.selection.shift;
+
+    const { x: startX, y: startY } = this._draggingArea.start;
+    let { x: endX, y: endY } = this._draggingArea.end;
+
+    if (shift) {
+      const w = Math.abs(endX - startX) / viewport.zoom;
+      const h = Math.abs(endY - startY) / viewport.zoom;
+      const maxLength = Math.max(w, h);
+      endX = endX > startX ? startX + maxLength : startX - maxLength;
+      endY = endY > startY ? startY + maxLength : startY - maxLength;
+    }
+
+    const [x, y] = viewport.toModelCoord(
+      Math.min(startX, endX),
+      Math.min(startY, endY)
+    );
+    const w = Math.abs(startX - endX) / viewport.zoom;
+    const h = Math.abs(startY - endY) / viewport.zoom;
+
+    const bound = new Bound(x, y, w, h);
+    const id = this._draggingElementId;
+    surface.setElementBound(id, bound);
+    slots.surfaceUpdated.emit();
   }
 
   onContainerMouseMove(e: PointerEventState) {

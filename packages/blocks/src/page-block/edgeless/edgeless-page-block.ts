@@ -192,9 +192,6 @@ export class EdgelessPageBlockComponent
   @state()
   private _rectsOfSelectedBlocks: DOMRect[] = [];
 
-  @state()
-  private _shift = false;
-
   @query('.affine-edgeless-surface-block-container')
   private _surfaceContainer!: HTMLDivElement;
 
@@ -412,7 +409,6 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(this.selection);
     _disposables.add(this.surface);
-    _disposables.add(slots.shiftUpdated.on(shift => (this._shift = shift)));
     _disposables.add(bindEdgelessHotkeys(this));
 
     _disposables.add(this._frameResizeObserver);
@@ -452,6 +448,12 @@ export class EdgelessPageBlockComponent
       slots.zoomUpdated.on((action: ZoomAction) =>
         this.components.toolbar?.setZoomByAction(action)
       )
+    );
+    _disposables.add(
+      slots.shiftUpdated.on(shift => {
+        this.selection.shift = shift;
+        this.requestUpdate();
+      })
     );
   }
 
