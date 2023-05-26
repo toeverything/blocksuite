@@ -515,12 +515,10 @@ export function isInsidePageTitle(element: unknown): boolean {
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
   const editor = activeEditorManager.getActiveEditor();
-  const titleElement = (editor ?? document).querySelector(
-    '[data-block-is-edgeless-text="true"]'
-  );
-  if (!titleElement) return false;
+  const textElement = (editor ?? document).querySelector('surface-text-editor');
+  if (!textElement) return false;
 
-  return titleElement.contains(element as Node);
+  return textElement.contains(element as Node);
 }
 
 export function isToggleIcon(element: unknown): element is SVGPathElement {
@@ -533,7 +531,8 @@ export function isToggleIcon(element: unknown): element is SVGPathElement {
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
-    element.getAttribute('data-virgo-root') === 'true'
+    element.getAttribute('data-virgo-root') === 'true' &&
+    !!element.closest('affine-database')
   );
 }
 
