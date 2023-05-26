@@ -96,8 +96,10 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
+    const viewport = this._edgeless?.surface.viewport;
     let virgoStyle = styleMap({});
-    if (this._element && this._edgeless) {
+    if (viewport && this._element && this._edgeless) {
+      const zoom = viewport.zoom;
       const rect = getSelectedRect(
         [this._element],
         this._edgeless.surface.viewport
@@ -109,11 +111,12 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         top: rect.y + 'px',
         minWidth: this._element.w < 20 ? 20 : this._element.w + 'px',
         minHeight: this._element.h < 20 ? 20 : this._element.h + 'px',
-        fontSize:
-          this._element.fontSize * this._edgeless.surface.viewport.zoom + 'px',
+        fontSize: this._element.fontSize + 'px',
         fontFamily: this._element.fontFamily,
         lineHeight: '1.5',
         outline: 'none',
+        transform: `scale(${zoom}, ${zoom})`,
+        transformOrigin: 'top left',
       });
     }
 
