@@ -8,7 +8,7 @@ import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
 
-export type FetchFileFunc = (
+export type FetchFileHandler = (
   fileName: string
 ) => Promise<Blob | null | undefined>;
 
@@ -41,23 +41,23 @@ const INLINE_TAGS = [
 export class HtmlParser {
   private _contentParser: ContentParser;
   private _page: Page;
-  private _customFetchFileFunc?: FetchFileFunc;
+  private _customFetchFileHandler?: FetchFileHandler;
 
   constructor(
     contentParser: ContentParser,
     page: Page,
-    fetchFileFunc?: FetchFileFunc
+    fetchFileFunc?: FetchFileHandler
   ) {
     this._contentParser = contentParser;
     this._page = page;
-    this._customFetchFileFunc = fetchFileFunc;
+    this._customFetchFileHandler = fetchFileFunc;
   }
 
-  private _fetchFileFunc = async (
+  private _fetchFileHandler = async (
     fileName: string
   ): Promise<Blob | null | undefined> => {
-    if (this._customFetchFileFunc) {
-      const customBlob = await this._customFetchFileFunc(fileName);
+    if (this._customFetchFileHandler) {
+      const customBlob = await this._customFetchFileHandler(fileName);
       if (customBlob) {
         return customBlob;
       }
@@ -593,7 +593,7 @@ export class HtmlParser {
     }
     if (imgElement) {
       const imgUrl = imgElement.getAttribute('src') || '';
-      const imgBlob = await this._fetchFileFunc(imgUrl);
+      const imgBlob = await this._fetchFileHandler(imgUrl);
       if (!imgBlob || imgBlob.size === 0) {
         const texts = [
           {

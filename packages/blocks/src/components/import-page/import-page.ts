@@ -17,8 +17,10 @@ import { customElement, state } from 'lit/decorators.js';
 import { ContentParser } from '../../__internal__/content-parser/index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
+
+export type OnSuccessHandler = (pageIds: string[]) => void;
+
 const LINK_PRE = 'Affine-LinkedPage-';
-export type OnSuccessFunc = (pageIds: string[]) => void;
 const SHOW_LOADING_SIZE = 1024 * 200;
 
 @customElement('import-page')
@@ -43,7 +45,7 @@ export class ImportPage extends WithDisposable(LitElement) {
   constructor(
     private workspace: Workspace,
     private multiple: boolean,
-    private onSuccess?: OnSuccessFunc,
+    private onSuccess?: OnSuccessHandler,
     private abortController = new AbortController()
   ) {
     super();
@@ -116,19 +118,19 @@ export class ImportPage extends WithDisposable(LitElement) {
 
   private async _importFile(
     fileExtension: string,
-    needLoadingFunc: (file: File[]) => Promise<boolean>,
-    parseContentFunc: (file: File[]) => Promise<void>
+    needLoadingHandler: (files: File[]) => Promise<boolean>,
+    parseContentHandler: (files: File[]) => Promise<void>
   ) {
     this.hidden = true;
     const files = await this._selectFile(fileExtension);
-    const needLoading = await needLoadingFunc(files);
+    const needLoading = await needLoadingHandler(files);
     if (needLoading) {
       this.hidden = false;
       this._loading = true;
     } else {
       this.abortController.abort();
     }
-    await parseContentFunc(files);
+    await parseContentHandler(files);
     needLoading && this.abortController.abort();
   }
 
@@ -238,14 +240,14 @@ export class ImportPage extends WithDisposable(LitElement) {
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
               const isHtml = fileName.endsWith('.html');
               const rootId = page.root?.id;
-              const fetchFileFunc = async (url: string) => {
+              const fetchFileHandler = async (url: string) => {
                 const fileName =
                   folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
                 return (
                   (await zipFile.file(fileName)?.async('blob')) || new Blob()
                 );
               };
-              const contentParser = new ContentParser(page, fetchFileFunc);
+              const contentParser = new ContentParser(page, fetchFileHandler);
               let text = (await zipFile.file(file)?.async('string')) || '';
               pageMap.forEach((value, key) => {
                 const subPageLink = key.replaceAll(' ', '%20');

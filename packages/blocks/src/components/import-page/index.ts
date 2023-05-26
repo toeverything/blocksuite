@@ -1,7 +1,7 @@
 import type { Workspace } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
-import { ImportPage, type OnSuccessFunc } from './import-page.js';
+import { ImportPage, type OnSuccessHandler } from './import-page.js';
 
 export function showImportModal({
   workspace,
@@ -11,7 +11,7 @@ export function showImportModal({
   abortController = new AbortController(),
 }: {
   workspace: Workspace;
-  onSuccess?: OnSuccessFunc;
+  onSuccess?: OnSuccessHandler;
   multiple?: boolean;
   container?: HTMLElement;
   abortController?: AbortController;

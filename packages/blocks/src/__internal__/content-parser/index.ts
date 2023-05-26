@@ -7,11 +7,11 @@ import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
-import type { FetchFileFunc } from './parse-html.js';
+import type { FetchFileHandler } from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
-type ParseHtml2BlockFunc = (
+type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
@@ -21,10 +21,10 @@ export class ContentParser {
   readonly slots = {
     beforeHtml2Block: new Slot<Element>(),
   };
-  private _parsers: Record<string, ParseHtml2BlockFunc> = {};
+  private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _htmlParser: HtmlParser;
 
-  constructor(page: Page, fetchFileFunc?: FetchFileFunc) {
+  constructor(page: Page, fetchFileFunc?: FetchFileHandler) {
     this._page = page;
     this._htmlParser = new HtmlParser(this, page, fetchFileFunc);
     this._htmlParser.registerParsers();
@@ -182,11 +182,14 @@ export class ContentParser {
     service.json2Block(insertBlockModel, blocks);
   }
 
-  public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
-    this._parsers[name] = func;
+  public registerParserHtmlText2Block(
+    name: string,
+    handler: ParseHtml2BlockHandler
+  ) {
+    this._parsers[name] = handler;
   }
 
-  public getParserHtmlText2Block(name: string): ParseHtml2BlockFunc {
+  public getParserHtmlText2Block(name: string): ParseHtml2BlockHandler {
     return this._parsers[name] || null;
   }
 
