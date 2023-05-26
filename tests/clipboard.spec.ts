@@ -838,3 +838,53 @@ test(scoped`paste in list format`, async ({ page }) => {
   );
   await assertRichTexts(page, ['test111', '222']);
 });
+
+test(scoped`auto identify url`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  // set up clipboard data using html
+  const clipData = {
+    'text/plain': `test https://www.google.com`,
+  };
+  await waitNextFrame(page);
+  await page.evaluate(
+    ({ clipData }) => {
+      const dT = new DataTransfer();
+      const e = new ClipboardEvent('paste', { clipboardData: dT });
+      Object.defineProperty(e, 'target', {
+        writable: false,
+        value: document.body,
+      });
+      e.clipboardData?.setData('text/plain', clipData['text/plain']);
+      document.body.dispatchEvent(e);
+    },
+    { clipData }
+  );
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text={
+        <>
+          <text
+            insert="test "
+          />
+          <text
+            insert="https://www.google.com"
+            link="https://www.google.com"
+          />
+        </>
+      }
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
