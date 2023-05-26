@@ -416,7 +416,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     if (this.mouseMode === mouseMode) return;
     if (mouseMode.type === 'default') {
       if (!state.selected.length && this.lastState) {
-        Object.assign(state, this.lastState);
+        state = this.lastState;
         this.lastState = null;
       } else {
         this.lastState = state;

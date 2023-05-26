@@ -27,7 +27,7 @@ function setMouseMode(
   if (!ignoreActiveState && edgeless.selection.isActive) {
     return;
   }
-  edgeless.slots.mouseModeUpdated.emit(mouseMode);
+  edgeless.selection.setMouseMode(mouseMode);
 }
 
 function bindSpace(edgeless: EdgelessPageBlockComponent) {
