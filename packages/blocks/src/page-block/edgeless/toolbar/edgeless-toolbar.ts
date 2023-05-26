@@ -121,7 +121,7 @@ export class EdgelessToolbar extends LitElement {
     this.edgeless.slots.viewportUpdated.emit();
   }
 
-  private _setZoom(zoom: number, focusPoint?: IPoint) {
+  private _setZoom(zoom: number, focusPoint?: Point) {
     this.edgeless.surface.viewport.setZoom(zoom, focusPoint);
     this.edgeless.slots.viewportUpdated.emit();
   }

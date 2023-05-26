@@ -60,4 +60,9 @@ describe('Point', () => {
     const a = new Point(1, 2);
     expect(a.toString()).toEqual('1,2');
   });
+
+  it('#toArray', () => {
+    const a = new Point(1, 2);
+    expect(a.toArray()).toEqual([1, 2]);
+  });
 });

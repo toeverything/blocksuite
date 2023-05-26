@@ -25,9 +25,8 @@ export interface SurfaceViewport {
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
 
-  setCenter(center: IPoint): void;
   setCenter(centerX: number, centerY: number): void;
-  setZoom(zoom: number, focusPoint?: IPoint): void;
+  setZoom(zoom: number, focusPoint?: Point): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
 }
 
@@ -46,7 +45,6 @@ export class Renderer implements SurfaceViewport {
   private _zoom = 1.0;
   private _center = new Point();
   private _shouldUpdate = false;
-  private _focusPoint = new Point();
 
   constructor() {
     const canvas = document.createElement('canvas');
@@ -132,15 +130,8 @@ export class Renderer implements SurfaceViewport {
     return [(logicalX - viewportX) * zoom, (logicalY - viewportY) * zoom];
   }
 
-  setCenter(center: IPoint): void;
-  setCenter(centerX: number, centerY: number): void;
-  setCenter(centerX: number | IPoint, centerY?: number) {
-    if (typeof centerX === 'number' && typeof centerY === 'number') {
-      this._center.set(centerX, centerY);
-    } else if (typeof centerX === 'object') {
-      this._center.set(centerX.x, centerX.y);
-    }
-    this._focusPoint.set(this._center.x, this._center.y);
+  setCenter(centerX: number, centerY: number) {
+    this._center.set(centerX, centerY);
     this._shouldUpdate = true;
   }
 
@@ -149,16 +140,15 @@ export class Renderer implements SurfaceViewport {
    * @param zoom zoom
    * @param focusPoint canvas coordinate
    */
-  setZoom(zoom: number, focusPoint?: IPoint) {
+  setZoom(zoom: number, focusPoint?: Point) {
     const prevZoom = this.zoom;
-    this._focusPoint = focusPoint
-      ? new Point(focusPoint.x, focusPoint.y)
-      : this._focusPoint;
+    focusPoint = focusPoint ?? this._center;
     this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
     const newZoom = this.zoom;
 
-    const offset = this.center.subtract(this._focusPoint);
-    this.setCenter(this._focusPoint.add(offset.scale(prevZoom / newZoom)));
+    const offset = this.center.subtract(focusPoint);
+    const newCenter = focusPoint.add(offset.scale(prevZoom / newZoom));
+    this.setCenter(newCenter.x, newCenter.y);
     this._shouldUpdate = true;
   }
 

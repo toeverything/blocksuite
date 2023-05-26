@@ -57,6 +57,10 @@ export class Point {
     return this.x + ',' + this.y;
   }
 
+  toArray() {
+    return [this.x, this.y];
+  }
+
   /**
    * Returns a copy of the point.
    */
