@@ -2,6 +2,7 @@
 import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocksuite/blocks';
+import { sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -162,14 +163,18 @@ export async function getEdgelessSelectedRect(page: Page) {
   return selectedBox;
 }
 
+const AWAIT_TIMEOUT = 160;
+
 export async function decreaseZoomLevel(page: Page) {
   const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
   await btn.click();
+  await sleep(AWAIT_TIMEOUT);
 }
 
 export async function increaseZoomLevel(page: Page) {
   const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
   await btn.click();
+  await sleep(AWAIT_TIMEOUT);
 }
 
 export async function addBasicBrushElement(

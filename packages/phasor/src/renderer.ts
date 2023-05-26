@@ -1,4 +1,4 @@
-import { clamp, type IPoint } from '@blocksuite/blocks/std';
+import { clamp, type IPoint, Point } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
 import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
@@ -12,6 +12,7 @@ export interface SurfaceViewport {
   readonly top: number;
   readonly width: number;
   readonly height: number;
+  readonly center: Point;
   readonly centerX: number;
   readonly centerY: number;
   readonly zoom: number;
@@ -25,7 +26,7 @@ export interface SurfaceViewport {
   toViewCoord(logicalX: number, logicalY: number): [number, number];
 
   setCenter(centerX: number, centerY: number): void;
-  setZoom(zoom: number): void;
+  setZoom(zoom: number, focusPoint?: Point): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
 }
 
@@ -42,8 +43,7 @@ export class Renderer implements SurfaceViewport {
   private _height = 0;
 
   private _zoom = 1.0;
-  private _centerX = 0.0;
-  private _centerY = 0.0;
+  private _center = new Point();
   private _shouldUpdate = false;
 
   constructor() {
@@ -74,11 +74,15 @@ export class Renderer implements SurfaceViewport {
   }
 
   get centerX() {
-    return this._centerX;
+    return this._center.x;
   }
 
   get centerY() {
-    return this._centerY;
+    return this._center.y;
+  }
+
+  get center() {
+    return this._center;
   }
 
   get viewportX() {
@@ -127,18 +131,29 @@ export class Renderer implements SurfaceViewport {
   }
 
   setCenter(centerX: number, centerY: number) {
-    this._centerX = centerX;
-    this._centerY = centerY;
+    this._center.set(centerX, centerY);
     this._shouldUpdate = true;
   }
 
-  setZoom(zoom: number) {
+  /**
+   *
+   * @param zoom zoom
+   * @param focusPoint canvas coordinate
+   */
+  setZoom(zoom: number, focusPoint?: Point) {
+    const prevZoom = this.zoom;
+    focusPoint = focusPoint ?? this._center;
     this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+    const newZoom = this.zoom;
+
+    const offset = this.center.subtract(focusPoint);
+    const newCenter = focusPoint.add(offset.scale(prevZoom / newZoom));
+    this.setCenter(newCenter.x, newCenter.y);
     this._shouldUpdate = true;
   }
 
   applyDeltaCenter = (deltaX: number, deltaY: number) => {
-    this.setCenter(this._centerX + deltaX, this._centerY + deltaY);
+    this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
   };
 
   addElement(element: SurfaceElement) {
@@ -179,8 +194,8 @@ export class Renderer implements SurfaceViewport {
     this._resetSize();
 
     this.setCenter(
-      this._centerX - (oldWidth - this.width) / 2,
-      this._centerY - (oldHeight - this.height) / 2
+      this.centerX - (oldWidth - this.width) / 2,
+      this.centerY - (oldHeight - this.height) / 2
     );
 
     // Re-render once the canvas size changed. Otherwise it will flicker.
@@ -219,7 +234,7 @@ export class Renderer implements SurfaceViewport {
   }
 
   private _render() {
-    const { ctx, gridManager, width, height, rc, viewportBounds, zoom } = this;
+    const { ctx, gridManager, viewportBounds, width, height, rc, zoom } = this;
     const dpr = window.devicePixelRatio;
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
