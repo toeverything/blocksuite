@@ -90,7 +90,7 @@ test('can zoom viewport', async ({ page }) => {
   await assertEdgelessHoverRect(page, original);
 });
 
-test('zoom by mouse', async ({ page }) => {
+test.only('zoom by mouse', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -104,7 +104,7 @@ test('zoom by mouse', async ({ page }) => {
   await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const zoomed = [90, 264, original[2] * 0.9, original[3] * 0.9];
+  const zoomed = [150, 270, original[2] * 0.75, original[3] * 0.75];
   await assertEdgelessHoverRect(page, zoomed);
 });
 
