@@ -296,9 +296,6 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
     if (this.isSingleMode || exitEditing) this.rowHost.setEditing(false);
 
     const service = getService('affine:database');
-    const lastSelection = service.getLastCellSelection();
-    if (lastSelection === null) return;
-
     const cell =
       this._selectOptionContainer.closest<HTMLElement>('.database-cell');
     assertExists(cell);
