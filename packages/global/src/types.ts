@@ -1,4 +1,5 @@
 import type {
+  BookmarkBlockModel,
   CodeBlockSchema,
   DatabaseBlockSchema,
   DividerBlockSchema,
@@ -9,6 +10,7 @@ import type {
   ParagraphBlockSchema,
   SurfaceBlockSchema,
 } from '@blocksuite/blocks';
+import type { BookmarkBlockSchema } from '@blocksuite/blocks';
 import type {
   // Model
   CodeBlockModel,
@@ -32,6 +34,7 @@ export type BlockSchemas = {
   'affine:embed': typeof EmbedBlockSchema;
   'affine:surface': typeof SurfaceBlockSchema;
   'affine:database': typeof DatabaseBlockSchema;
+  'affine:bookmark': typeof BookmarkBlockSchema;
 };
 
 export type BlockModels = {
@@ -44,6 +47,7 @@ export type BlockModels = {
   'affine:embed': EmbedBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
+  'affine:bookmark': BookmarkBlockModel;
 };
 
 export type BlockModelProps = {

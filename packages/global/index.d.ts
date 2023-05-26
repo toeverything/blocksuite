@@ -14,5 +14,6 @@ declare type BlockSuiteFlags = {
   enable_toggle_block: boolean;
   enable_edgeless_toolbar: boolean;
   enable_linked_page: boolean;
+  enable_bookmark_operation: boolean;
   readonly: Record<string, boolean>;
 };

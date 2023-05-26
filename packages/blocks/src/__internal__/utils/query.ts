@@ -609,15 +609,20 @@ export function isEdgelessPage({ tagName }: Element) {
 /**
  * Returns `true` if element is default/edgeless page or frame.
  */
-export function isPageOrFrame(element: Element) {
-  return isDefaultPage(element) || isEdgelessPage(element) || isFrame(element);
+export function isPageOrFrameOrSurface(element: Element) {
+  return (
+    isDefaultPage(element) ||
+    isEdgelessPage(element) ||
+    isFrame(element) ||
+    isSurface(element)
+  );
 }
 
 /**
  * Returns `true` if element is not page or frame.
  */
 export function isBlock(element: Element) {
-  return !isPageOrFrame(element);
+  return !isPageOrFrameOrSurface(element);
 }
 
 /**
@@ -634,6 +639,13 @@ export function isImage({ tagName, firstElementChild }: Element) {
  */
 function isFrame({ tagName }: Element) {
   return tagName === 'AFFINE-FRAME';
+}
+
+/**
+ * Returns `true` if element is surface.
+ */
+function isSurface({ tagName }: Element) {
+  return tagName === 'AFFINE-SURFACE';
 }
 
 /**

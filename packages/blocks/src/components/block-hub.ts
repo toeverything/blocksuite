@@ -5,14 +5,14 @@ import {
   BlockHubIcon,
   CrossIcon,
   DatabaseTableViewIcon,
-  ImageIcon,
+  EmbedIcon,
   NumberedListIconLarge,
   RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import {
   customElement,
@@ -60,6 +60,7 @@ const styles = css`
     display: none;
     justify-content: center;
     fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
     font-size: var(--affine-font-sm);
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-menu-shadow);
@@ -119,6 +120,7 @@ const styles = css`
   .card-container-inner:hover .card-container {
     background: var(--affine-hover-color);
     fill: var(--affine-primary-color);
+    color: var(--affine-primary-color);
     top: -2px;
     left: -2px;
   }
@@ -190,11 +192,17 @@ const styles = css`
     position: relative;
     border-radius: 4px;
     fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
     height: 36px;
+  }
+  .block-hub-icon-container svg {
+    width: 24px;
+    height: 24px;
   }
 
   .block-hub-icon-container[selected='true'] {
     fill: var(--affine-primary-color);
+    color: var(--affine-primary-color);
   }
 
   .block-hub-icon-container:hover {
@@ -347,7 +355,8 @@ function BlockHubMenu(
   visibleCardType: CardListType | null,
   isCardListVisible: boolean,
   showTooltip: boolean,
-  maxHeight: number
+  maxHeight: number,
+  page: Page
 ) {
   const menuNum = enableDatabase ? 5 : 4;
   const height = menuNum * 44 + 10;
@@ -363,9 +372,14 @@ function BlockHubMenu(
   );
 
   const blockHubFileCards = BlockHubCards(
-    BLOCKHUB_FILE_ITEMS,
+    BLOCKHUB_FILE_ITEMS.filter(({ flavour }) => {
+      if (flavour === 'affine:bookmark') {
+        return page.awarenessStore.getFlag('enable_bookmark_operation');
+      }
+      return true;
+    }),
     'file',
-    'Image or file',
+    'Content & Media',
     maxHeight,
     shouldDisplayCard('file', expanded, isCardListVisible, visibleCardType),
     isGrabbing,
@@ -416,7 +430,7 @@ function BlockHubMenu(
         type="file"
         selected=${visibleCardType === 'file' ? 'true' : 'false'}
       >
-        ${blockHubFileCards} ${ImageIcon}
+        ${blockHubFileCards} ${EmbedIcon}
       </div>
       ${enableDatabase
         ? html`
@@ -494,6 +508,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   @query('[role="menuitem"]')
   private _blockHubMenuEntry!: HTMLElement;
 
+  private _page: Page;
+
   private readonly _onDragStartCallback: () => void;
 
   private readonly _onDropCallback: (
@@ -538,8 +554,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       lastType: DroppingType
     ) => Promise<void>;
     onClickCard: (data: { flavour: string; type?: string }) => Promise<void>;
+    page: Page;
   }) {
     super();
+    this._page = options.page;
     this._mouseRoot = options.mouseRoot;
     this._enableDatabase = options.enableDatabase;
     this.getAllowedBlocks = options.getAllowedBlocks;
@@ -872,7 +890,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._visibleCardType,
       this._isCardListVisible,
       this._showTooltip,
-      this._maxHeight
+      this._maxHeight,
+      this._page
     );
 
     const blockHubCards = BlockHubCards(

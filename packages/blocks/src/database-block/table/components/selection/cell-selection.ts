@@ -39,6 +39,12 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
     this.state = null;
   };
 
+  private get _zoom() {
+    const edgelessPageBlock = document.querySelector('affine-edgeless-page');
+    if (!edgelessPageBlock) return 1;
+    return edgelessPageBlock.surface.viewport.zoom;
+  }
+
   private _getStyles = () => {
     if (this.state === null) {
       // Hide selection.
@@ -58,11 +64,18 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
     );
     const rowsContainer = getRowsContainer(databaseId);
     const containerRect = rowsContainer.getBoundingClientRect();
+
+    const scale = 1 / this._zoom;
+    const scaledLeft = (left - containerRect.left) * scale;
+    const scaledTop = (top - containerRect.top) * scale;
+    const scaledWidth = width * scale;
+    const scaledHeight = height * scale;
+
     return styleMap({
-      left: `${left - containerRect.left}px`,
-      top: `${top - containerRect.top}px`,
-      height: `${height}px`,
-      width: `${width}px`,
+      left: `${scaledLeft}px`,
+      top: `${scaledTop}px`,
+      height: `${scaledHeight}px`,
+      width: `${scaledWidth}px`,
       display: 'block',
     });
   };
