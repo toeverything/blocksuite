@@ -199,7 +199,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.state.selected.length === 0) return null;
+    if (
+      this.state.selected.length === 0 ||
+      (this.state.selected[0] instanceof TextElement && this.state.active)
+    )
+      return null;
 
     const { page, state, surface, resizeMode, _resizeManager } = this;
     const { active, selected } = state;

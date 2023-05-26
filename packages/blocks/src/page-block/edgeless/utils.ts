@@ -533,6 +533,7 @@ export function addText(
       textAlign: 'left',
       fontSize: 16 / edgeless.surface.viewport.zoom,
     });
+    edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);
     assertExists(textElement);
     if (textElement instanceof TextElement) {

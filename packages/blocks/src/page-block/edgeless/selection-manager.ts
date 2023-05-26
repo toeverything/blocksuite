@@ -206,7 +206,8 @@ export class EdgelessSelectionManager {
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
+        !isDatabaseInput(event.raw.target) &&
+        !isInsideEdgelessTextEditor(event.raw.target)
       ) {
         event.raw.preventDefault();
       }

@@ -64,22 +64,13 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
     this.requestUpdate();
     requestAnimationFrame(() => {
       assertExists(this._vEditor);
+      this._element?.setDisplay(false);
       this._vEditor.mount(this._virgoContainer);
 
       this._virgoContainer.addEventListener(
         'blur',
         () => {
-          this.vEditor?.unmount();
-
-          if (this._element?.text.length === 0) {
-            this._edgeless?.surface.removeElement(this._element?.id);
-          }
-
-          this.remove();
-          edgeless.slots.selectionUpdated.emit({
-            selected: [],
-            active: false,
-          });
+          this._unmount();
         },
         {
           once: true,
@@ -88,19 +79,34 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
     });
   }
 
+  private _unmount() {
+    this.vEditor?.unmount();
+    this._element?.setDisplay(true);
+
+    if (this._element?.text.length === 0) {
+      this._edgeless?.surface.removeElement(this._element?.id);
+    }
+
+    this.remove();
+    assertExists(this._edgeless);
+    this._edgeless.slots.selectionUpdated.emit({
+      selected: [],
+      active: false,
+    });
+  }
+
   override render() {
     let virgoStyle = styleMap({});
-    let backgroundStyle = styleMap({});
     if (this._element && this._edgeless) {
       const rect = getSelectedRect(
         [this._element],
         this._edgeless.surface.viewport
       );
-      const verticalOffset =
-        this._element.h / 2 -
-        (this._element.lines.length * this._element.lineHeight) / 2;
 
       virgoStyle = styleMap({
+        position: 'absolute',
+        left: rect.x + 'px',
+        top: rect.y + 'px',
         minWidth: this._element.w < 20 ? 20 : this._element.w + 'px',
         minHeight: this._element.h < 20 ? 20 : this._element.h + 'px',
         fontSize:
@@ -109,22 +115,9 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         lineHeight: '1.5',
         outline: 'none',
       });
-      backgroundStyle = styleMap({
-        position: 'absolute',
-        left: rect.x - 8 + 'px',
-        top: rect.y - 8 + 'px',
-        background: 'var(--affine-background-primary-color)',
-        zIndex: '10',
-        padding: `${verticalOffset + 8}px 8px`,
-      });
     }
 
-    return html`<div
-      data-block-is-edgeless-text="true"
-      style=${backgroundStyle}
-    >
-      <div style=${virgoStyle} class="virgo-container"></div>
-    </div>`;
+    return html`<div style=${virgoStyle} class="virgo-container"></div>`;
   }
 }
 

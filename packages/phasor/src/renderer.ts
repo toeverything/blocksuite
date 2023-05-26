@@ -249,7 +249,7 @@ export class Renderer implements SurfaceViewport {
       ctx.save();
       ctx.translate(dx, dy);
 
-      if (intersects(element, viewportBounds)) {
+      if (intersects(element, viewportBounds) && element.display) {
         element.render(ctx, rc);
       }
 

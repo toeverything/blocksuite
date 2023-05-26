@@ -29,6 +29,18 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
 
   computedValue: ComputedValue = v => v;
 
+  private _display = true;
+
+  get display() {
+    return this._display;
+  }
+
+  setDisplay(display: boolean) {
+    this._display = display;
+    this.renderer?.removeElement(this);
+    this.renderer?.addElement(this);
+  }
+
   constructor(yMap: Y.Map<unknown>, surface: SurfaceManager, data?: T) {
     if (!yMap.doc) {
       throw new Error('yMap must be bound to a Y.Doc');
