@@ -6,10 +6,11 @@ import { normalizeWheelDeltaY } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
-import type {
-  BlockComponentElement,
-  MouseMode,
-  TopLevelBlockModel,
+import {
+  type BlockComponentElement,
+  type MouseMode,
+  Point,
+  type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {
   getEditorContainerByElement,
@@ -266,9 +267,6 @@ export class EdgelessSelectionManager {
       }
       // zoom
       else {
-        const { centerX, centerY } = viewport;
-        const prevZoom = viewport.zoom;
-
         const rect = container.getBoundingClientRect();
         // Perform zooming relative to the mouse position
         const [baseX, baseY] = container.surface.toModelCoord(
@@ -277,15 +275,7 @@ export class EdgelessSelectionManager {
         );
 
         const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
-        viewport.setZoom(zoom);
-        const newZoom = viewport.zoom;
-
-        const offsetX = centerX - baseX;
-        const offsetY = centerY - baseY;
-        const newCenterX = baseX + offsetX * (prevZoom / newZoom);
-        const newCenterY = baseY + offsetY * (prevZoom / newZoom);
-        viewport.setCenter(newCenterX, newCenterY);
-
+        viewport.setZoom(zoom, new Point(baseX, baseY));
         container.slots.viewportUpdated.emit();
       }
     });

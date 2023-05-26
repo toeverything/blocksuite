@@ -13,7 +13,6 @@ import {
   locatorEdgelessComponentToolButton,
   setMouseMode,
   switchEditorMode,
-  triggerComponentToolbarAction,
   zoomByMouseWheel,
 } from '../utils/actions/edgeless.js';
 import {
@@ -29,7 +28,6 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
-  assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertRichTexts,
   assertSelection,
@@ -67,13 +65,14 @@ test('can zoom viewport', async ({ page }) => {
 
   const original = [50, 260, EDITOR_WIDTH, 80];
   await assertEdgelessHoverRect(page, original);
+  let box = await getEdgelessHoverRect(page);
 
   await decreaseZoomLevel(page);
   await decreaseZoomLevel(page);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const box = await getEdgelessHoverRect(page);
-  const zoomed = [box.x, box.y, original[2] * 0.8, original[3] * 0.8];
+  box = await getEdgelessHoverRect(page);
+  const zoomed = [box.x, box.y, original[2] * 0.5, original[3] * 0.5];
   await assertEdgelessHoverRect(page, zoomed);
 
   await increaseZoomLevel(page);
@@ -96,7 +95,7 @@ test('zoom by mouse', async ({ page }) => {
   await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const zoomed = [90, 264, original[2] * 0.9, original[3] * 0.9];
+  const zoomed = [150, 270, original[2] * 0.75, original[3] * 0.75];
   await assertEdgelessHoverRect(page, zoomed);
 });
 
