@@ -219,7 +219,11 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       const pageId = pageIds[0];
       this._insertLinkedNode('LinkedPage', pageId);
     };
-    showImportModal({ workspace: this._page.workspace, onSuccess });
+    showImportModal({
+      workspace: this._page.workspace,
+      multiple: false,
+      onSuccess,
+    });
   }
 
   // private _createSubpage() {

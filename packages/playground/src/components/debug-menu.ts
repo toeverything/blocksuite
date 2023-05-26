@@ -352,12 +352,12 @@ export class DebugMenu extends ShadowlessElement {
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
         const isHtml = fileName.endsWith('.html');
         const rootId = page.root?.id;
-        const fetchFileFunc = async (url: string) => {
+        const fetchFileHandler = async (url: string) => {
           const fileName =
             folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
           return (await zipFile.file(fileName)?.async('blob')) || new Blob();
         };
-        const contentParser = new window.ContentParser(page, fetchFileFunc);
+        const contentParser = new window.ContentParser(page, fetchFileHandler);
         let text = (await zipFile.file(file)?.async('string')) || '';
         pageMap.forEach((value, key) => {
           const subPageLink = key.replaceAll(' ', '%20');

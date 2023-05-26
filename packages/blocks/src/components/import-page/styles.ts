@@ -1,5 +1,7 @@
 import { css } from 'lit';
 
+import { tooltipStyle } from '../tooltip/tooltip.js';
+
 export const styles = css`
   :host {
     position: absolute;
@@ -54,7 +56,7 @@ export const styles = css`
     gap: 8px;
     width: 190px;
     height: 40px;
-    box-shadow: 0px 0px 4px rgba(66, 65, 73, 0.14);
+    box-shadow: var(--affine-shadow-1);
   }
 
   .footer {
@@ -67,4 +69,11 @@ export const styles = css`
     display: flex;
     align-items: center;
   }
+
+  .has-tool-tip {
+    display: flex;
+    margin-left: auto;
+  }
+
+  ${tooltipStyle}
 `;

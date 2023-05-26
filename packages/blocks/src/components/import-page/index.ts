@@ -1,20 +1,27 @@
 import type { Workspace } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
-import { ImportPage, type OnSuccessFunc } from './import-page.js';
+import { ImportPage, type OnSuccessHandler } from './import-page.js';
 
 export function showImportModal({
   workspace,
   onSuccess,
+  multiple = true,
   container = document.body,
   abortController = new AbortController(),
 }: {
   workspace: Workspace;
-  onSuccess?: OnSuccessFunc;
+  onSuccess?: OnSuccessHandler;
+  multiple?: boolean;
   container?: HTMLElement;
   abortController?: AbortController;
 }) {
-  const importPage = new ImportPage(workspace, onSuccess, abortController);
+  const importPage = new ImportPage(
+    workspace,
+    multiple,
+    onSuccess,
+    abortController
+  );
   container.appendChild(importPage);
 
   const disposables = new DisposableGroup();
