@@ -28,7 +28,6 @@ import { customElement, property } from 'lit/decorators.js';
 
 import {
   clamp,
-  type IPoint,
   type MouseMode,
   Point,
   uploadImageFromLocal,
