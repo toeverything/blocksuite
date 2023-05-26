@@ -452,6 +452,11 @@ export class Page extends Space<FlatBlockMap> {
    * |              |
    * +--------------+
    * ```
+   *
+   * @example
+   * TODO:
+   * Sometimes we may use the shift shortcut to remove a block from the selected blocks,
+   * this will cause blocks to be discontinuous
    */
   @debug('CRUD')
   moveBlocks(
@@ -469,6 +474,7 @@ export class Page extends Space<FlatBlockMap> {
       throw new Error("Can't find parent model");
     }
 
+    // Map<parent, children>
     const tempMap = new Map<BaseBlockModel, BaseBlockModel[]>();
 
     blocks.forEach(block => {
@@ -480,9 +486,14 @@ export class Page extends Space<FlatBlockMap> {
 
       this.schema.validate(block.flavour, newParent.flavour);
 
-      const subArray = tempMap.get(parent);
-      if (subArray) {
-        subArray.push(block);
+      const children = tempMap.get(parent);
+      if (children) {
+        if (this.getNextSibling(children[children.length - 1]) !== block) {
+          throw new Error(
+            'The children in the selection are not continuous in parent'
+          );
+        }
+        children.push(block);
       } else {
         tempMap.set(parent, [block]);
       }
