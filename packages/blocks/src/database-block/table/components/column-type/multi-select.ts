@@ -2,19 +2,26 @@ import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 import type { SelectTag } from '../../types.js';
 import { SelectMode } from '../../types.js';
 
 @customElement('affine-database-multi-select-cell')
-class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
+class MultiSelectCell
+  extends DatabaseCellElement<SelectTag[]>
+  implements TableViewCell
+{
   static override styles = css`
     :host {
       width: 100%;
     }
   `;
   static override tag = literal`affine-database-multi-select-cell`;
-  override cellType = 'multi-select' as const;
+  cellType = 'multi-select' as const;
 
   override render() {
     return html`
@@ -30,9 +37,12 @@ class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
 }
 
 @customElement('affine-database-multi-select-cell-editing')
-class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
+class MultiSelectCellEditing
+  extends DatabaseCellElement<SelectTag[]>
+  implements TableViewCell
+{
   static override tag = literal`affine-database-multi-select-cell-editing`;
-  override cellType = 'multi-select' as const;
+  cellType = 'multi-select' as const;
 
   override render() {
     return html`

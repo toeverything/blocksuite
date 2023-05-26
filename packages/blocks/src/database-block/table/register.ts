@@ -7,11 +7,14 @@ import type { literal } from 'lit/static-html.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { Cell, Column, ColumnType, RowHost } from './types.js';
 
+export interface TableViewCell {
+  cellType: ColumnType;
+}
+
 export abstract class DatabaseCellElement<Value> extends WithDisposable(
   ShadowlessElement
 ) {
   static tag: ReturnType<typeof literal>;
-  abstract readonly cellType: ColumnType;
 
   @property()
   rowHost!: RowHost<Value>;

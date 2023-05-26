@@ -6,12 +6,16 @@ import { html, literal } from 'lit/static-html.js';
 import {
   DatabaseCellElement,
   defineColumnRenderer,
+  type TableViewCell,
 } from '../../../register.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectCellEditing } from './select-cell-editing.js';
 
 @customElement('affine-database-select-cell')
-class SelectCell extends DatabaseCellElement<SelectTag[]> {
+class SelectCell
+  extends DatabaseCellElement<SelectTag[]>
+  implements TableViewCell
+{
   static override styles = css`
     affine-database-select-cell {
       display: flex;
@@ -43,7 +47,7 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
 
   static override tag = literal`affine-database-select-cell`;
 
-  override cellType = 'select' as const;
+  cellType = 'select' as const;
 
   override render() {
     const values = this.cell?.value ?? [];
