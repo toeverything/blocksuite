@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, sleep } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
@@ -67,18 +67,26 @@ test('can zoom viewport', async ({ page }) => {
 
   const original = [50, 260, EDITOR_WIDTH, 80];
   await assertEdgelessHoverRect(page, original);
-
+  let box = await getEdgelessHoverRect(page);
+  const awaitTime = 160;
   await decreaseZoomLevel(page);
+  await sleep(awaitTime);
   await decreaseZoomLevel(page);
+  await sleep(awaitTime);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const box = await getEdgelessHoverRect(page);
-  const zoomed = [box.x, box.y, original[2] * 0.8, original[3] * 0.8];
+  box = await getEdgelessHoverRect(page);
+
+  const zoomed = [box.x, box.y, original[2] * 0.5, original[3] * 0.5];
+
   await assertEdgelessHoverRect(page, zoomed);
 
   await increaseZoomLevel(page);
+  await sleep(awaitTime);
   await increaseZoomLevel(page);
+  await sleep(awaitTime);
   await page.mouse.move(CENTER_X, CENTER_Y);
+
   await assertEdgelessHoverRect(page, original);
 });
 
