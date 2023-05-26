@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/store';
 
 import type { CellCoord } from '../../../../std.js';
-import type { DatabaseCellElement } from '../../register.js';
+import type { TableViewCell } from '../../register.js';
 import type { NumberCellEditing } from '../column-type/number.js';
 import type { TextCell } from '../column-type/rich-text.js';
 import { CellLevelSelection } from './cell-selection.js';
@@ -71,7 +71,7 @@ export function clearAllDatabaseCellSelection() {
 export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
   const currentCell = getCellElementByCoord(coord, databaseId);
   const cell = currentCell.firstElementChild
-    ?.firstElementChild as DatabaseCellElement<unknown>;
+    ?.firstElementChild as TableViewCell;
   assertExists(cell);
 
   let shouldClearCellSelection = true;
