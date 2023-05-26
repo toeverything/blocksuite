@@ -19,28 +19,6 @@ export class Point {
     return this.x === x && this.y === y;
   }
 
-  xDistance({ x }: Point) {
-    return this.x - x;
-  }
-
-  yDistance({ y }: Point) {
-    return this.y - y;
-  }
-
-  xDistanceAbsolute(point: Point) {
-    return Math.abs(this.xDistance(point));
-  }
-
-  yDistanceAbsolute(point: Point) {
-    return Math.abs(this.yDistance(point));
-  }
-
-  distance(point: Point) {
-    return Math.sqrt(
-      Math.pow(this.xDistance(point), 2) + Math.pow(this.yDistance(point), 2)
-    );
-  }
-
   add(point: IPoint): Point {
     return new Point(this.x + point.x, this.y + point.y);
   }
@@ -51,14 +29,6 @@ export class Point {
 
   subtract(point: IPoint): Point {
     return new Point(this.x - point.x, this.y - point.y);
-  }
-
-  toString() {
-    return this.x + ',' + this.y;
-  }
-
-  toArray() {
-    return [this.x, this.y];
   }
 
   /**
