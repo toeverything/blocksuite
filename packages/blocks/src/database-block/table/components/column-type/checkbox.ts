@@ -11,6 +11,7 @@ import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 @customElement('affine-database-checkbox-cell')
 class CheckboxCell extends DatabaseCellElement<boolean> {
   static override tag = literal`affine-database-checkbox-cell`;
+  override cellType = 'checkbox' as const;
 
   static override styles = css`
     affine-database-checkbox-cell {

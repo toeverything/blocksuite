@@ -83,6 +83,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
   static override styles = styles;
 
   static override tag = literal`affine-database-progress-cell-editing`;
+  override cellType = 'progress' as const;
 
   @query('.affine-database-progress-drag-handle')
   private _dragHandle!: HTMLElement;

@@ -43,6 +43,8 @@ class SelectCell extends DatabaseCellElement<SelectTag[]> {
 
   static override tag = literal`affine-database-select-cell`;
 
+  override cellType = 'select' as const;
+
   override render() {
     const values = this.cell?.value ?? [];
     return html`

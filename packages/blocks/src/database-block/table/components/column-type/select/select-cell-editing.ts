@@ -190,6 +190,7 @@ export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
 
   static override styles = styles;
   static override tag = literal`affine-database-select-cell-editing`;
+  override cellType = 'select' as const;
 
   @property()
   mode: SelectMode = SelectMode.Single;

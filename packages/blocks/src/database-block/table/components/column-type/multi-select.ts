@@ -14,6 +14,7 @@ class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
     }
   `;
   static override tag = literal`affine-database-multi-select-cell`;
+  override cellType = 'multi-select' as const;
 
   override render() {
     return html`
@@ -31,6 +32,7 @@ class MultiSelectCell extends DatabaseCellElement<SelectTag[]> {
 @customElement('affine-database-multi-select-cell-editing')
 class MultiSelectCellEditing extends DatabaseCellElement<SelectTag[]> {
   static override tag = literal`affine-database-multi-select-cell-editing`;
+  override cellType = 'multi-select' as const;
 
   override render() {
     return html`

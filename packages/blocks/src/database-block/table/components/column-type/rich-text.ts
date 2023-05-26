@@ -63,7 +63,7 @@ function toggleStyle(
 }
 
 @customElement('affine-database-rich-text-cell')
-class TextCell extends DatabaseCellElement<Y.Text> {
+export class TextCell extends DatabaseCellElement<Y.Text> {
   static override styles = css`
     affine-database-rich-text-cell {
       display: flex;
@@ -94,6 +94,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
   vEditor: AffineVEditor | null = null;
   static override tag = literal`affine-database-rich-text-cell`;
+  override cellType = 'rich-text';
 
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;

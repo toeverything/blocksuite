@@ -11,6 +11,8 @@ export abstract class DatabaseCellElement<Value> extends WithDisposable(
   ShadowlessElement
 ) {
   static tag: ReturnType<typeof literal>;
+  abstract readonly cellType: ColumnType;
+
   @property()
   rowHost!: RowHost<Value>;
   @property()
