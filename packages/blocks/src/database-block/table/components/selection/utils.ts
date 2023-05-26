@@ -53,7 +53,7 @@ export function setDatabaseCellSelection(
   });
 
   const currentCell = getCellElementByCoord(coords[0], databaseId);
-  currentCell.scrollIntoView();
+  currentCell.scrollIntoView({ block: 'nearest' });
 }
 
 export function clearAllDatabaseCellSelection() {
