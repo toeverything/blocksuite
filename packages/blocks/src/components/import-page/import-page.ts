@@ -4,9 +4,9 @@ import {
   CloseIcon,
   ExportToHTMLIcon,
   ExportToMarkdownIcon,
+  HelpIcon,
   NewIcon,
   NotionIcon,
-  OpenInNewIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store';
@@ -15,6 +15,7 @@ import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
+import { toast } from '../toast.js';
 import { styles } from './styles.js';
 const LINK_PRE = 'Affine-LinkedPage-';
 export type OnSuccessFunc = (pageIds: string[]) => void;
@@ -41,6 +42,7 @@ export class ImportPage extends WithDisposable(LitElement) {
 
   constructor(
     private workspace: Workspace,
+    private multiple: boolean,
     private onSuccess?: OnSuccessFunc,
     private abortController = new AbortController()
   ) {
@@ -82,19 +84,20 @@ export class ImportPage extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private async _selectFile(accept: string): Promise<File> {
+  private async _selectFile(accept: string): Promise<File[]> {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;
-    input.multiple = false;
+    input.multiple = this.multiple;
     input.click();
     return new Promise((resolve, reject) => {
       input.onchange = () => {
-        const file = input.files?.item(0);
-        if (!file) {
+        const files = input.files;
+        if (!files) {
           reject();
+          return;
         }
-        resolve(file as File);
+        resolve(Array.from(files));
       };
       input.onerror = () => {
         reject();
@@ -102,41 +105,59 @@ export class ImportPage extends WithDisposable(LitElement) {
     });
   }
 
+  private _onImportSuccess(pageIds: string[]) {
+    toast(
+      `Successfully imported ${pageIds.length} Page${
+        pageIds.length > 1 ? 's' : ''
+      }.`
+    );
+    this.onSuccess?.(pageIds);
+  }
+
   private async _importFile(
     fileExtension: string,
-    needLoadingFunc: (file: File) => Promise<boolean>,
-    parseContentFunc: (file: File) => Promise<void>
+    needLoadingFunc: (file: File[]) => Promise<boolean>,
+    parseContentFunc: (file: File[]) => Promise<void>
   ) {
     this.hidden = true;
-    const file = await this._selectFile(fileExtension);
-    const needLoading = await needLoadingFunc(file);
+    const files = await this._selectFile(fileExtension);
+    const needLoading = await needLoadingFunc(files);
     if (needLoading) {
       this.hidden = false;
       this._loading = true;
     } else {
       this.abortController.abort();
     }
-    await parseContentFunc(file);
+    await parseContentFunc(files);
     needLoading && this.abortController.abort();
   }
 
   private async _importMarkDown() {
     await this._importFile(
       '.md',
-      async file => {
-        return file.size > SHOW_LOADING_SIZE;
+      async files => {
+        let totalSize = 0;
+        for (const file of files) {
+          totalSize += file.size;
+          if (totalSize > SHOW_LOADING_SIZE) return true;
+        }
+        return false;
       },
-      async file => {
-        const text = await file.text();
-        const page = this.workspace.createPage({
-          init: {
-            title: '',
-          },
-        });
-        const rootId = page.root?.id;
-        const contentParser = new ContentParser(page);
-        rootId && (await contentParser.importMarkdown(text, rootId));
-        this.onSuccess?.([page.id]);
+      async files => {
+        const pageIds: string[] = [];
+        for (const file of files) {
+          const text = await file.text();
+          const page = this.workspace.createPage({
+            init: {
+              title: '',
+            },
+          });
+          const rootId = page.root?.id;
+          const contentParser = new ContentParser(page);
+          rootId && (await contentParser.importMarkdown(text, rootId));
+          pageIds.push(page.id);
+        }
+        this._onImportSuccess(pageIds);
       }
     );
   }
@@ -144,20 +165,30 @@ export class ImportPage extends WithDisposable(LitElement) {
   private async _importHtml() {
     await this._importFile(
       '.html',
-      async file => {
-        return file.size > SHOW_LOADING_SIZE;
+      async files => {
+        let totalSize = 0;
+        for (const file of files) {
+          totalSize += file.size;
+          if (totalSize > SHOW_LOADING_SIZE) return true;
+        }
+        return false;
       },
-      async file => {
-        const text = await file.text();
-        const page = this.workspace.createPage({
-          init: {
-            title: '',
-          },
-        });
-        const rootId = page.root?.id;
-        const contentParser = new ContentParser(page);
-        rootId && (await contentParser.importHtml(text, rootId));
-        this.onSuccess?.([page.id]);
+      async files => {
+        const pageIds: string[] = [];
+        for (const file of files) {
+          const pageIds: string[] = [];
+          const text = await file.text();
+          const page = this.workspace.createPage({
+            init: {
+              title: '',
+            },
+          });
+          const rootId = page.root?.id;
+          const contentParser = new ContentParser(page);
+          rootId && (await contentParser.importHtml(text, rootId));
+          pageIds.push(page.id);
+        }
+        this._onImportSuccess(pageIds);
       }
     );
   }
@@ -165,78 +196,88 @@ export class ImportPage extends WithDisposable(LitElement) {
   private async _importNotion() {
     await this._importFile(
       '.zip',
-      async file => {
-        const zip = new JSZip();
-        const zipFile = await zip.loadAsync(file);
-        const fileArray = Object.values(zipFile.files);
-
-        let totalUncompressedSize = 0;
-        for (const file of fileArray) {
-          if (file.dir) continue;
-          if (totalUncompressedSize > SHOW_LOADING_SIZE) return true;
-          const fileContent = await file.async('uint8array');
-          totalUncompressedSize += fileContent.length;
-        }
-        return totalUncompressedSize > SHOW_LOADING_SIZE;
-      },
-      async file => {
-        const zip = new JSZip();
-        const zipFile = await zip.loadAsync(file);
-        const pageMap = new Map<string, Page>();
-        const files = Object.keys(zipFile.files);
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const lastSplitIndex = file.lastIndexOf('/');
-          const fileName = file.substring(lastSplitIndex + 1);
-          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-            const page = this.workspace.createPage({
-              init: {
-                title: '',
-              },
-            });
-            pageMap.set(file, page);
+      async files => {
+        let totalSize = 0;
+        for (const file of files) {
+          const zip = new JSZip();
+          const zipFile = await zip.loadAsync(file);
+          const fileArray = Object.values(zipFile.files);
+          for (const file of fileArray) {
+            if (file.dir) continue;
+            const fileContent = await file.async('uint8array');
+            totalSize += fileContent.length;
+            if (totalSize > SHOW_LOADING_SIZE) return true;
           }
         }
-        pageMap.forEach(async (page, file) => {
-          const lastSplitIndex = file.lastIndexOf('/');
-          const folder = file.substring(0, lastSplitIndex) || '';
-          const fileName = file.substring(lastSplitIndex + 1);
-          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-            const isHtml = fileName.endsWith('.html');
-            const rootId = page.root?.id;
-            const fetchFileFunc = async (url: string) => {
-              const fileName =
-                folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
-              return (
-                (await zipFile.file(fileName)?.async('blob')) || new Blob()
-              );
-            };
-            const contentParser = new ContentParser(page, fetchFileFunc);
-            let text = (await zipFile.file(file)?.async('string')) || '';
-            pageMap.forEach((value, key) => {
-              const subPageLink = key.replaceAll(' ', '%20');
-              text = isHtml
-                ? text.replaceAll(
-                    `href="${subPageLink}"`,
-                    `href="${LINK_PRE + value.id}"`
-                  )
-                : text.replaceAll(
-                    `(${subPageLink})`,
-                    `(${LINK_PRE + value.id})`
-                  );
-            });
-            if (rootId) {
-              if (isHtml) {
-                await contentParser.importHtml(text, rootId);
-              } else {
-                await contentParser.importMarkdown(text, rootId);
-              }
+        return false;
+      },
+      async files => {
+        const pageIds: string[] = [];
+        for (const file of files) {
+          const zip = new JSZip();
+          const zipFile = await zip.loadAsync(file);
+          const pageMap = new Map<string, Page>();
+          const files = Object.keys(zipFile.files);
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const lastSplitIndex = file.lastIndexOf('/');
+            const fileName = file.substring(lastSplitIndex + 1);
+            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              const page = this.workspace.createPage({
+                init: {
+                  title: '',
+                },
+              });
+              pageMap.set(file, page);
             }
           }
-        });
-        this.onSuccess?.([...pageMap.values()].map(page => page.id));
+          pageMap.forEach(async (page, file) => {
+            const lastSplitIndex = file.lastIndexOf('/');
+            const folder = file.substring(0, lastSplitIndex) || '';
+            const fileName = file.substring(lastSplitIndex + 1);
+            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              const isHtml = fileName.endsWith('.html');
+              const rootId = page.root?.id;
+              const fetchFileFunc = async (url: string) => {
+                const fileName =
+                  folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
+                return (
+                  (await zipFile.file(fileName)?.async('blob')) || new Blob()
+                );
+              };
+              const contentParser = new ContentParser(page, fetchFileFunc);
+              let text = (await zipFile.file(file)?.async('string')) || '';
+              pageMap.forEach((value, key) => {
+                const subPageLink = key.replaceAll(' ', '%20');
+                text = isHtml
+                  ? text.replaceAll(
+                      `href="${subPageLink}"`,
+                      `href="${LINK_PRE + value.id}"`
+                    )
+                  : text.replaceAll(
+                      `(${subPageLink})`,
+                      `(${LINK_PRE + value.id})`
+                    );
+              });
+              if (rootId) {
+                if (isHtml) {
+                  await contentParser.importHtml(text, rootId);
+                } else {
+                  await contentParser.importMarkdown(text, rootId);
+                }
+              }
+            }
+          });
+          pageIds.push(...[...pageMap.values()].map(page => page.id));
+        }
+        this._onImportSuccess(pageIds);
       }
     );
+  }
+
+  private _openLearnImportLink(event: MouseEvent) {
+    event.stopPropagation();
+    window.open('https://community.affine.pro', '_blank');
   }
 
   override render() {
@@ -265,7 +306,9 @@ export class ImportPage extends WithDisposable(LitElement) {
       </header>
       <div>
         AFFiNE will gradually support more and more file types for import.
-        <a href="www.google.com">Provide feedback.</a>
+        <a href="https://community.affine.pro" target="_blank"
+          >Provide feedback.</a
+        >
       </div>
       <div class="button-container">
         <icon-button
@@ -286,6 +329,16 @@ export class ImportPage extends WithDisposable(LitElement) {
           @click=${this._importNotion}
         >
           ${NotionIcon}
+          <div
+            slot="optional"
+            class="has-tool-tip"
+            @click=${this._openLearnImportLink}
+          >
+            ${HelpIcon}
+            <tool-tip inert arrow tip-position="top" role="tooltip">
+              Learn how to Import your Notion pages into AFFiNE.
+            </tool-tip>
+          </div>
         </icon-button>
         <icon-button class="button-item" text="Coming soon..." disabled="true">
           ${NewIcon}
@@ -293,7 +346,6 @@ export class ImportPage extends WithDisposable(LitElement) {
       </div>
       <div class="footer">
         <div>Migrate from other versions of AFFiNE?</div>
-        <icon-button class="button-item"> ${OpenInNewIcon} </icon-button>
       </div>
     `;
   }
