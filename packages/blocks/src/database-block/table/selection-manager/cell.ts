@@ -7,6 +7,7 @@ import type {
 import { DisposableGroup } from '@blocksuite/store';
 
 import { getService } from '../../../__internal__/service.js';
+import { resetNativeSelection } from '../../../std.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { DatabaseBlockService } from '../../database-service.js';
 import { getCellCoord } from '../components/selection/utils.js';
@@ -89,6 +90,7 @@ export class CellSelectionManager {
     const databaseId = this._model.id;
     const editor = currentCell.querySelector<HTMLElement>('.virgo-editor');
     editor?.blur();
+    resetNativeSelection(null);
 
     const nextCoord = getCellCoord(currentCell, databaseId, event.key);
 
