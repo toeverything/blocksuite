@@ -1,7 +1,9 @@
 import { assertExists } from '@blocksuite/store';
 
-import type { RichText } from '../../../../__internal__/rich-text/rich-text.js';
 import type { CellCoord } from '../../../../std.js';
+import type { TableViewCell } from '../../register.js';
+import type { NumberCellEditing } from '../column-type/number.js';
+import type { TextCell } from '../column-type/rich-text.js';
 import { CellLevelSelection } from './cell-selection.js';
 import { RowLevelSelection } from './row-selection.js';
 
@@ -67,22 +69,32 @@ export function clearAllDatabaseCellSelection() {
 }
 
 export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
-  clearDatabaseCellSelectionByDatabaseId(databaseId);
   const currentCell = getCellElementByCoord(coord, databaseId);
-  const columnTypeCell = currentCell.firstElementChild
-    ?.firstElementChild as HTMLElement;
-  assertExists(columnTypeCell);
-  const richText = columnTypeCell?.querySelector('rich-text');
+  const cell = currentCell.firstElementChild
+    ?.firstElementChild as TableViewCell;
+  assertExists(cell);
 
-  // number or rich-text column
-  if ('vEditor' in columnTypeCell) {
-    const richTextCell = columnTypeCell as RichText;
-    richTextCell.vEditor?.focusEnd();
-  } else if (richText) {
+  let shouldClearCellSelection = true;
+  const richText = cell?.querySelector('rich-text');
+  if (richText) {
     // title column
     richText.vEditor?.focusEnd();
+  } else if (cell.cellType === 'number') {
+    const richTextCell = cell as NumberCellEditing;
+    richTextCell.vEditor?.focusEnd();
+  } else if (cell.cellType === 'rich-text') {
+    const richTextCell = cell as TextCell;
+    richTextCell.vEditor?.focusEnd();
   } else {
-    columnTypeCell.click();
+    // checkbox column
+    if (cell.cellType === 'checkbox') {
+      shouldClearCellSelection = false;
+    }
+    cell.click();
+  }
+
+  if (shouldClearCellSelection) {
+    clearDatabaseCellSelectionByDatabaseId(databaseId);
   }
 }
 

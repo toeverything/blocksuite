@@ -22,7 +22,7 @@ import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
 } from '../../../consts.js';
-import { DatabaseCellElement } from '../../../register.js';
+import { DatabaseCellElement, type TableViewCell } from '../../../register.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import { getCellCoord } from '../../selection/utils.js';
@@ -185,11 +185,15 @@ const styles = css`
 `;
 
 @customElement('affine-database-select-cell-editing')
-export class SelectCellEditing extends DatabaseCellElement<SelectTag[]> {
+export class SelectCellEditing
+  extends DatabaseCellElement<SelectTag[]>
+  implements TableViewCell
+{
   value: SelectTag | undefined = undefined;
 
   static override styles = styles;
   static override tag = literal`affine-database-select-cell-editing`;
+  cellType = 'select' as const;
 
   @property()
   mode: SelectMode = SelectMode.Single;

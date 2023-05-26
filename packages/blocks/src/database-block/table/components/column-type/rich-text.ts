@@ -12,7 +12,11 @@ import type {
 } from '../../../../__internal__/rich-text/virgo/types.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 
 function toggleStyle(
   vEditor: AffineVEditor,
@@ -63,7 +67,10 @@ function toggleStyle(
 }
 
 @customElement('affine-database-rich-text-cell')
-class TextCell extends DatabaseCellElement<Y.Text> {
+export class TextCell
+  extends DatabaseCellElement<Y.Text>
+  implements TableViewCell
+{
   static override styles = css`
     affine-database-rich-text-cell {
       display: flex;
@@ -94,6 +101,7 @@ class TextCell extends DatabaseCellElement<Y.Text> {
 
   vEditor: AffineVEditor | null = null;
   static override tag = literal`affine-database-rich-text-cell`;
+  cellType = 'rich-text' as const;
 
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;

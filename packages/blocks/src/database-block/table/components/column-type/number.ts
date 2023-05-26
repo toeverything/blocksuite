@@ -5,10 +5,17 @@ import { literal } from 'lit/static-html.js';
 
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 
 @customElement('affine-database-number-cell-editing')
-class NumberCellEditing extends DatabaseCellElement<Y.Text> {
+export class NumberCellEditing
+  extends DatabaseCellElement<Y.Text>
+  implements TableViewCell
+{
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
@@ -37,6 +44,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   `;
 
   static override tag = literal`affine-database-number-cell-editing`;
+  cellType = 'number' as const;
 
   @query('.affine-database-number')
   private _container!: HTMLDivElement;
