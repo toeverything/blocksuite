@@ -39,7 +39,8 @@
     ".": "./src/index.ts",
     "./std": "./src/std.ts",
     "./models": "./src/models.ts",
-    "./content-parser": "./src/content-parser.ts"
+    "./content-parser": "./src/content-parser.ts",
+    "./__internal__": "./src/__internal__.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -63,6 +64,10 @@
       "./content-parser": {
         "types": "./dist/content-parser.d.ts",
         "default": "./dist/content-parser.js"
+      },
+      "./__internal__": {
+        "types": "./dist/__internal__.d.ts",
+        "default": "./dist/__internal__.js"
       }
     }
   },
