@@ -32,4 +32,32 @@ describe('Point', () => {
     const a = new Point(0, 0);
     expect(a.clone()).toEqual(new Point(0, 0));
   });
+
+  it('#set method should set x and y', () => {
+    const p = new Point(0, 0);
+    p.set(1, 2);
+    expect(p).toEqual(new Point(1, 2));
+  });
+
+  it('#add', () => {
+    const a = new Point(1, 2);
+    const b = new Point(3, 4);
+    expect(a.add(b)).toEqual(new Point(4, 6));
+  });
+
+  it('#subtract', () => {
+    const a = new Point(1, 2);
+    const b = new Point(3, 4);
+    expect(a.subtract(b)).toEqual(new Point(-2, -2));
+  });
+
+  it('#scale', () => {
+    const a = new Point(1, 2);
+    expect(a.scale(2)).toEqual(new Point(2, 4));
+  });
+
+  it('#toString', () => {
+    const a = new Point(1, 2);
+    expect(a.toString()).toEqual('1,2');
+  });
 });
