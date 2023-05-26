@@ -67,13 +67,13 @@ export function clearAllDatabaseCellSelection() {
 }
 
 export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
-  clearDatabaseCellSelectionByDatabaseId(databaseId);
   const currentCell = getCellElementByCoord(coord, databaseId);
   const columnTypeCell = currentCell.firstElementChild
     ?.firstElementChild as HTMLElement;
   assertExists(columnTypeCell);
-  const richText = columnTypeCell?.querySelector('rich-text');
 
+  let shouldClearCellSelection = true;
+  const richText = columnTypeCell?.querySelector('rich-text');
   // number or rich-text column
   if ('vEditor' in columnTypeCell) {
     const richTextCell = columnTypeCell as RichText;
@@ -83,6 +83,14 @@ export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
     richText.vEditor?.focusEnd();
   } else {
     columnTypeCell.click();
+    // checkbox column
+    if (columnTypeCell.tagName === 'AFFINE-DATABASE-CHECKBOX-CELL') {
+      shouldClearCellSelection = false;
+    }
+  }
+
+  if (shouldClearCellSelection) {
+    clearDatabaseCellSelectionByDatabaseId(databaseId);
   }
 }
 
