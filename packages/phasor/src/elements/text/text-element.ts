@@ -3,7 +3,6 @@ import type { IText, ITextDelta } from './types.js';
 import {
   deltaInsertsToChunks,
   getFontString,
-  getLineHeightInPx,
   getTextWidth,
   isRTL,
 } from './utils.js';
@@ -52,7 +51,7 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override render(ctx: CanvasRenderingContext2D) {
-    const { w, h, text, color, fontSize, fontFamily, textAlign } = this;
+    const { w, text, color, fontSize, fontFamily, textAlign } = this;
 
     const font = getFontString({
       fontSize: fontSize,
@@ -64,7 +63,7 @@ export class TextElement extends SurfaceElement<IText> {
     const lines = deltaInsertsToChunks(deltas);
     this._lines = lines;
 
-    const lineHeightPx = getLineHeightInPx(fontSize, 1.5);
+    const lineHeightPx = this.h / lines.length;
     this._lineHeight = lineHeightPx;
     const horizontalOffset =
       textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
@@ -88,12 +87,14 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.fillStyle = color;
         ctx.textAlign = textAlign;
 
-        ctx.textBaseline = 'top';
+        ctx.textBaseline = 'bottom';
 
-        const verticalOffset =
-          h / 2 - (lines.length * lineHeightPx) / 2 + lineIndex * lineHeightPx;
-
-        ctx.fillText(str, horizontalOffset + beforeTextWidth, verticalOffset);
+        ctx.fillText(
+          str,
+          horizontalOffset + beforeTextWidth,
+          // --affine-line-height: calc(1em + 8px);
+          (lineIndex + 1) * lineHeightPx - 4
+        );
 
         beforeTextWidth += getTextWidth(str, fontFamily);
 
