@@ -39,22 +39,6 @@ export const splitIntoLines = (text: string) => {
   return normalizeText(text).split('\n');
 };
 
-export function getLineHeightInPx(
-  fontSize: number,
-  lineHeight: number
-): number {
-  return fontSize * lineHeight;
-}
-
-export function getTextHeight(
-  text: string,
-  fontSize: number,
-  lineHeight: number
-): number {
-  const lineCount = splitIntoLines(text).length;
-  return getLineHeightInPx(fontSize, lineHeight) * lineCount;
-}
-
 export function getLineWidth(text: string, font: string): number {
   const canvas = document.createElement('canvas');
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
