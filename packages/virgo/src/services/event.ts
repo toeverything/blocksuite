@@ -254,6 +254,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           }
 
           const newRange = this._editor.toDomRange(newVRange);
+          if (!newRange) return;
           assertExists(newRange);
           selection.removeAllRanges();
           selection.addRange(newRange);
