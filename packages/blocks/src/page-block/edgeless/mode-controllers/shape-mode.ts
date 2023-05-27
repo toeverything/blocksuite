@@ -109,34 +109,37 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   }
 
   private _draw(shift = false) {
-    assertExists(this._draggingElementId);
-    assertExists(this._draggingArea);
+    const { _draggingElementId: id, _draggingArea, _edgeless } = this;
+    assertExists(id);
+    assertExists(_draggingArea);
 
-    const { slots, surface } = this._edgeless;
+    shift ||= _edgeless.selection.shift;
+
+    const { slots, surface } = _edgeless;
     const { viewport } = surface;
-
-    shift = shift || this._edgeless.selection.shift;
-
-    const { x: startX, y: startY } = this._draggingArea.start;
-    let { x: endX, y: endY } = this._draggingArea.end;
+    const { zoom } = viewport;
+    const {
+      start: { x: startX, y: startY },
+      end,
+    } = _draggingArea;
+    let { x: endX, y: endY } = end;
 
     if (shift) {
-      const w = Math.abs(endX - startX) / viewport.zoom;
-      const h = Math.abs(endY - startY) / viewport.zoom;
-      const maxLength = Math.max(w, h);
-      endX = endX > startX ? startX + maxLength : startX - maxLength;
-      endY = endY > startY ? startY + maxLength : startY - maxLength;
+      const w = Math.abs(endX - startX) / zoom;
+      const h = Math.abs(endY - startY) / zoom;
+      const max = Math.max(w, h);
+      endX = endX > startX ? startX + max : startX - max;
+      endY = endY > startY ? startY + max : startY - max;
     }
 
     const [x, y] = viewport.toModelCoord(
       Math.min(startX, endX),
       Math.min(startY, endY)
     );
-    const w = Math.abs(startX - endX) / viewport.zoom;
-    const h = Math.abs(startY - endY) / viewport.zoom;
+    const w = Math.abs(startX - endX) / zoom;
+    const h = Math.abs(startY - endY) / zoom;
 
     const bound = new Bound(x, y, w, h);
-    const id = this._draggingElementId;
     surface.setElementBound(id, bound);
     slots.surfaceUpdated.emit();
   }

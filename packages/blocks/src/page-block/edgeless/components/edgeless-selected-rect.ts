@@ -160,6 +160,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @property({ type: SurfaceManager })
   surface!: SurfaceManager;
 
+  @property()
+  shift!: boolean;
+
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
@@ -183,7 +186,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragMove,
       this._onDragEnd
     );
-    this.addEventListener('mousedown', stopPropagation);
+    this.addEventListener('pointerdown', stopPropagation);
   }
 
   get zoom() {
@@ -204,8 +207,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragMove = (newBounds: Map<string, Bound>) => {
+    const { page, state, surface } = this;
     const selectedMap = new Map<string, Selectable>(
-      this.state.selected.map(element => [element.id, element])
+      state.selected.map(element => [element.id, element])
     );
 
     newBounds.forEach((bound, id) => {
@@ -227,25 +231,22 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           frameH = FRAME_MIN_HEIGHT;
           frameY = bound.y;
         }
-        const xywh = JSON.stringify([frameX, frameY, frameW, frameH]);
-        this.page.updateBlock(element, { xywh });
+        page.updateBlock(element, {
+          xywh: JSON.stringify([frameX, frameY, frameW, frameH]),
+        });
       } else {
         if (element instanceof TextElement) {
-          bound.w = element.w * (bound.h / element.h);
-          this.surface.updateElement<'text'>(id, {
+          const p = bound.h / element.h;
+          bound.w = element.w * p;
+          surface.updateElement<'text'>(id, {
             xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
-            fontSize: element.fontSize * (bound.h / element.h),
+            fontSize: element.fontSize * p,
           });
         } else {
-          this.surface.setElementBound(element.id, bound);
+          surface.setElementBound(element.id, bound);
         }
       }
-      handleElementChangedEffectForConnector(
-        element,
-        [element],
-        this.surface,
-        this.page
-      );
+      handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
     this.requestUpdate();

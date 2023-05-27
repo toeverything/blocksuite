@@ -27,7 +27,8 @@ export class HandleResizeManager {
     e: PointerEvent,
     direction: HandleDirection,
     bounds: Map<string, Bound>,
-    zoom: number
+    zoom: number,
+    shift: boolean
   ) => {
     // Prevent selection action from being triggered
     e.stopPropagation();
@@ -44,8 +45,11 @@ export class HandleResizeManager {
     };
 
     const _onPointerMove = (e: PointerEvent) => {
-      const direction = this._dragDirection;
-      const { x: startX, y: startY } = this._startDragPos;
+      shift ||= e.shiftKey;
+      const {
+        _dragDirection: direction,
+        _startDragPos: { x: startX, y: startY },
+      } = this;
 
       const [oldCommonMinX, oldCommonMinY, oldCommonMaxX, oldCommonMaxY] =
         this._commonBound;
@@ -56,7 +60,7 @@ export class HandleResizeManager {
 
       let deltaX = (e.clientX - startX) / zoom;
       let deltaY = (e.clientY - startY) / zoom;
-      if (e.shiftKey) {
+      if (shift) {
         const { w, h } = getCommonBound([...this._bounds.values()]) as Bound;
         const aspectRatio = w / h;
         deltaX = deltaX > deltaY ? deltaX : deltaY * aspectRatio;
@@ -140,8 +144,8 @@ export class HandleResizeManager {
     const _onPointerUp = (_: PointerEvent) => {
       this._onResizeEnd();
 
-      this._startDragPos = { x: 0, y: 0 };
       this._bounds.clear();
+      this._startDragPos = { x: 0, y: 0 };
       this._commonBound = [0, 0, 0, 0];
 
       window.removeEventListener('pointermove', _onPointerMove);
