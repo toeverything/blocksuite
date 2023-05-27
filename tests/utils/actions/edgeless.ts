@@ -132,6 +132,17 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
   }
 }
 
+export async function assertMouseMode(page: Page, mode: MouseMode) {
+  const type = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) {
+      throw new Error('Missing edgeless page');
+    }
+    return container.mouseMode.type;
+  });
+  expect(type).toEqual(mode);
+}
+
 export async function switchShapeType(page: Page, shapeType: string) {
   // TODO
 }
@@ -180,11 +191,12 @@ export async function increaseZoomLevel(page: Page) {
 export async function addBasicBrushElement(
   page: Page,
   start: { x: number; y: number },
-  end: { x: number; y: number }
+  end: { x: number; y: number },
+  auto = true
 ) {
   await setMouseMode(page, 'brush');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  await setMouseMode(page, 'default');
+  auto && (await setMouseMode(page, 'default'));
 }
 
 export async function addBasicRectShapeElement(
@@ -194,7 +206,6 @@ export async function addBasicRectShapeElement(
 ) {
   await setMouseMode(page, 'shape');
   await dragBetweenCoords(page, start, end, { steps: 20 });
-  await setMouseMode(page, 'default');
 }
 
 export async function addBasicConnectorElement(
@@ -204,20 +215,13 @@ export async function addBasicConnectorElement(
 ) {
   await setMouseMode(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  await setMouseMode(page, 'default');
 }
 
-export async function addTextFrame(
-  page: Page,
-  text: string,
-  x: number,
-  y: number
-) {
+export async function addNote(page: Page, text: string, x: number, y: number) {
   await setMouseMode(page, 'note');
   await page.mouse.click(x, y);
   await waitForVirgoStateUpdated(page);
   await type(page, text);
-  await setMouseMode(page, 'default');
 }
 
 export async function resizeElementByTopLeftHandle(
@@ -615,8 +619,8 @@ export async function initThreeShapes(page: Page) {
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
 }
 
-export async function initThreeTextFrames(page: Page) {
-  await addTextFrame(page, 'abc', 30 + 100, 40 + 100);
-  await addTextFrame(page, 'efg', 30 + 130, 40 + 100);
-  await addTextFrame(page, 'hij', 30 + 160, 40 + 100);
+export async function initThreeNotes(page: Page) {
+  await addNote(page, 'abc', 30 + 100, 40 + 100);
+  await addNote(page, 'efg', 30 + 130, 40 + 100);
+  await addNote(page, 'hij', 30 + 160, 40 + 100);
 }

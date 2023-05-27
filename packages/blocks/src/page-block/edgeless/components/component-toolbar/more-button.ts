@@ -56,9 +56,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
-      fill: none;
-      stroke: currentColor;
       color: var(--affine-text-primary-color);
+      fill: currentColor;
     }
 
     .more-actions-container {

@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
+  assertMouseMode,
   changeShapeFillColor,
   changeShapeStrokeColor,
   changeShapeStrokeStyle,
@@ -46,8 +47,8 @@ test('add shape element', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicRectShapeElement(page, start, end);
 
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+  await assertMouseMode(page, 'default');
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
 test('select multiple shapes and resize', async ({ page }) => {

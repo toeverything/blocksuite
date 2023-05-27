@@ -5,17 +5,10 @@ import type {
   TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type {
-  EdgelessSelectionState,
-  SelectionArea,
-} from '../selection-manager.js';
+import type { SelectionArea } from '../selection-manager.js';
 
 export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   protected readonly _edgeless: EdgelessPageBlockComponent;
-  protected _blockSelectionState: EdgelessSelectionState = {
-    selected: [],
-    active: false,
-  };
 
   protected _draggingArea: SelectionArea | null = null;
 
@@ -23,17 +16,6 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     this._edgeless = edgeless;
-  }
-
-  get isActive() {
-    return this._blockSelectionState.active;
-  }
-
-  /**
-   * Holds the state of the current selected block(s) and/or shape(s).
-   */
-  get blockSelectionState() {
-    return this._blockSelectionState;
   }
 
   get draggingArea() {
@@ -52,10 +34,6 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
     return this._edgeless.sortedFrames;
   }
 
-  setBlockSelectionState(state: EdgelessSelectionState) {
-    this._blockSelectionState = state;
-  }
-
   public abstract mouseMode: Mode;
   abstract onContainerDragStart(e: PointerEventState): void;
   abstract onContainerDragMove(e: PointerEventState): void;
@@ -66,6 +44,4 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerMouseMove(e: PointerEventState): void;
   abstract onContainerMouseOut(e: PointerEventState): void;
   abstract onContainerContextMenu(e: PointerEventState): void;
-
-  abstract clearSelection(): void;
 }

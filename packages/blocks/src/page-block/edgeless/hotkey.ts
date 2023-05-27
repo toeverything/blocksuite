@@ -24,10 +24,10 @@ function setMouseMode(
   ignoreActiveState = false
 ) {
   // when editing, should not update mouse mode by shortcut
-  if (!ignoreActiveState && edgeless.getSelection().isActive) {
+  if (!ignoreActiveState && edgeless.selection.isActive) {
     return;
   }
-  edgeless.slots.mouseModeUpdated.emit(mouseMode);
+  edgeless.selection.setMouseMode(mouseMode);
 }
 
 function bindSpace(edgeless: EdgelessPageBlockComponent) {
@@ -38,14 +38,14 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(
     HOTKEYS.SPACE,
     (event: KeyboardEvent) => {
-      const { mouseMode, blockSelectionState } = edgeless.getSelection();
+      const { mouseMode, state } = edgeless.selection;
       if (event.type === 'keydown') {
         if (mouseMode.type === 'pan') {
           return;
         }
 
         // when user is editing, shouldn't enter pan mode
-        if (mouseMode.type === 'default' && blockSelectionState.active) {
+        if (mouseMode.type === 'default' && state.active) {
           return;
         }
 
@@ -71,7 +71,7 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
     // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
-    const { selected } = edgeless.getSelection().blockSelectionState;
+    const { selected } = edgeless.selection.state;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = edgeless.page.root?.children ?? [];
@@ -83,10 +83,8 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
         edgeless.surface.removeElement(element.id);
       }
     });
-    edgeless.getSelection().currentController.clearSelection();
-    edgeless.slots.selectionUpdated.emit(
-      edgeless.getSelection().blockSelectionState
-    );
+    edgeless.selection.clear();
+    edgeless.slots.selectionUpdated.emit(edgeless.selection.state);
   }
   hotkey.addListener(HOTKEYS.BACKSPACE, backspace);
   hotkey.addListener(HOTKEYS.DELETE, backspace);

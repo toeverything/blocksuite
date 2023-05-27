@@ -1,3 +1,4 @@
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { expect } from '@playwright/test';
 
 import {
@@ -17,9 +18,6 @@ import {
 import { getBoundingClientRect } from './utils/actions/misc.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
-
-// '../packages/blocks/src/__internal__/utils/consts.ts'
-const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
 
 test('only have one drag handle in screen', async ({ page }) => {
   await enterPlaygroundRoom(page);

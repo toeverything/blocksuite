@@ -17,7 +17,6 @@ import {
   assertBlockType,
   assertRichTexts,
   assertText,
-  assertTextContain,
   assertTextFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';

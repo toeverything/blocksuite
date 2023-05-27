@@ -207,11 +207,7 @@ export class EdgelessPageBlockComponent
 
   getService = getService;
 
-  private _selection!: EdgelessSelectionManager;
-  // FIXME: Many parts of code assume that the `selection` is used in page mode
-  getSelection() {
-    return this._selection;
-  }
+  selection!: EdgelessSelectionManager;
 
   // Gets the top level frames.
   get frames() {
@@ -231,7 +227,7 @@ export class EdgelessPageBlockComponent
 
   private _clearSelection() {
     requestAnimationFrame(() => {
-      if (!this._selection.isActive) {
+      if (!this.selection.isActive) {
         resetNativeSelection(null);
       }
     });
@@ -319,7 +315,7 @@ export class EdgelessPageBlockComponent
   private _initSlotEffects() {
     // TODO: listen to new children
     // this.model.children.forEach(frame => {
-    //   frame.propsUpdated.on(() => this._selection.syncDraggingArea());
+    //   frame.propsUpdated.on(() => this.selection.syncDraggingArea());
     // });
     const { _disposables, slots } = this;
     _disposables.add(
@@ -331,15 +327,15 @@ export class EdgelessPageBlockComponent
           this.components.dragHandle?.setScale(newZoom);
         }
         this.components.dragHandle?.hide();
-        if (this._selection.selectedBlocks.length) {
-          slots.selectedBlocksUpdated.emit(this._selection.selectedBlocks);
+        if (this.selection.selectedBlocks.length) {
+          slots.selectedBlocksUpdated.emit(this.selection.selectedBlocks);
         }
         this.requestUpdate();
       })
     );
     _disposables.add(
       slots.selectedBlocksUpdated.on(selectedBlocks => {
-        this._selection.selectedBlocks = selectedBlocks;
+        this.selection.selectedBlocks = selectedBlocks;
         // TODO: remove `requestAnimationFrame`
         requestAnimationFrame(() => {
           this._rectsOfSelectedBlocks = selectedBlocks.map(
@@ -352,7 +348,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.selectionUpdated.on(state => {
-        this._selection.currentController.setBlockSelectionState(state);
+        this.selection.state = state;
         this._clearSelection();
         this.requestUpdate();
       })
@@ -372,7 +368,7 @@ export class EdgelessPageBlockComponent
         this.requestUpdate();
       })
     );
-    _disposables.add(this._selection);
+    _disposables.add(this.selection);
     _disposables.add(this.surface);
     _disposables.add(bindEdgelessHotkeys(this));
 
@@ -404,7 +400,7 @@ export class EdgelessPageBlockComponent
 
         // FIXME: force updating selection for triggering re-render `selected-rect`
         slots.selectionUpdated.emit({
-          ...this._selection.blockSelectionState,
+          ...this.selection.state,
         });
       })
     );
@@ -726,7 +722,7 @@ export class EdgelessPageBlockComponent
    * Not supports surface elements.
    */
   setSelection(frameId: string, active = true, blockId: string, point?: Point) {
-    const frameBlock = this.model.children.find(b => b.id === frameId);
+    const frameBlock = this.frames.find(b => b.id === frameId);
     assertExists(frameBlock);
 
     requestAnimationFrame(() => {
@@ -752,7 +748,7 @@ export class EdgelessPageBlockComponent
    * Clear selected blocks.
    */
   clearSelectedBlocks() {
-    if (this.getSelection().selectedBlocks.length) {
+    if (this.selection.selectedBlocks.length) {
       this.slots.selectedBlocksUpdated.emit([]);
     }
   }
@@ -760,13 +756,13 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
-      this._selection = new EdgelessSelectionManager(
+      this.selection = new EdgelessSelectionManager(
         this,
         this.root.uiEventDispatcher
       );
     }
     if (changedProperties.has('mouseMode')) {
-      this._selection.mouseMode = this.mouseMode;
+      this.selection.mouseMode = this.mouseMode;
     }
     super.update(changedProperties);
   }
@@ -774,7 +770,7 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.slots.selectedBlocksUpdated.emit(this.getSelection().selectedBlocks);
+      this.slots.selectedBlocksUpdated.emit(this.selection.selectedBlocks);
     });
     resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
@@ -834,26 +830,27 @@ export class EdgelessPageBlockComponent
 
   override render() {
     requestAnimationFrame(() => {
-      this._selection.refreshRemoteSelection();
+      this.selection.refreshRemoteSelection();
     });
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const { viewport } = this.surface;
-    const { _selection, _rectsOfSelectedBlocks, page } = this;
-    const { selected, active } = _selection.blockSelectionState;
+    const { mouseMode, page, selection, surface, _rectsOfSelectedBlocks } =
+      this;
+    const { state, draggingArea } = selection;
+    const { viewport } = surface;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
       this.sortedFrames,
-      active,
+      state.active,
       this.root.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
-    const draggingArea = EdgelessDraggingArea(_selection.draggingArea);
+    const draggingAreaTpl = EdgelessDraggingArea(draggingArea);
 
-    const hoverState = _selection.getHoverState();
-    const hoverRect = EdgelessHoverRect(hoverState, zoom);
+    const hoverState = selection.getHoverState();
+    const hoverRectTpl = EdgelessHoverRect(hoverState, zoom);
 
     const { grid, gap, translateX, translateY } = getBackgroundGrid(
       viewportX,
@@ -892,22 +889,22 @@ export class EdgelessPageBlockComponent
             y: -top,
           }}
         ></affine-selected-blocks>
-        ${hoverRect} ${draggingArea}
-        ${selected.length
+        ${hoverRectTpl} ${draggingAreaTpl}
+        ${state.selected.length
           ? html`
               <edgeless-selected-rect
                 .page=${page}
-                .state=${_selection.blockSelectionState}
+                .state=${state}
                 .slots=${this.slots}
-                .surface=${this.surface}
+                .surface=${surface}
               ></edgeless-selected-rect>
             `
-          : null}
+          : nothing}
       </div>
       ${this._toolbarEnabled
         ? html`
             <edgeless-toolbar
-              .mouseMode=${this.mouseMode}
+              .mouseMode=${mouseMode}
               .zoom=${zoom}
               .edgeless=${this}
             ></edgeless-toolbar>

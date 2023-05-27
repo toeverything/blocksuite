@@ -3,6 +3,8 @@ import { expect } from '@playwright/test';
 
 import {
   activeFrameInEdgeless,
+  addNote,
+  assertMouseMode,
   changeEdgelessFrameBackground,
   getFrameBoundBoxInEdgeless,
   getFrameRect,
@@ -113,13 +115,10 @@ test('add Note', async ({ page }) => {
   await switchEditorMode(page);
   await setMouseMode(page, 'note');
 
-  await page.mouse.click(30, 40);
-  await waitForVirgoStateUpdated(page);
+  await addNote(page, 'hello', 30, 40);
 
-  await type(page, 'hello');
+  await assertMouseMode(page, 'default');
   await assertRichTexts(page, ['', 'hello']);
-
-  await page.mouse.move(30, 40);
   await assertEdgelessSelectedRect(page, [0, 0, 448, 80]);
 });
 

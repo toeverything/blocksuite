@@ -1,8 +1,8 @@
 import { type Page } from '@playwright/test';
 
 import {
+  initThreeNotes,
   initThreeShapes,
-  initThreeTextFrames,
   switchEditorMode,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -20,6 +20,7 @@ test.describe('reordering shapes', () => {
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
     await initThreeShapes(page);
+    await page.mouse.click(0, 0);
   }
 
   test('bring to front', async ({ page }) => {
@@ -121,8 +122,9 @@ test.describe('reordering frames', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
-    await initThreeTextFrames(page);
+    await initThreeNotes(page);
     await waitNextFrame(page);
+    await page.mouse.click(0, 0);
   }
 
   test('bring to front', async ({ page }) => {

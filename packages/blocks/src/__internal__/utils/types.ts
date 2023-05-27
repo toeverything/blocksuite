@@ -1,8 +1,15 @@
+import type { BlockElement, UIEventDispatcher } from '@blocksuite/lit';
 import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
-import type { BaseBlockModel, Page, Slot } from '@blocksuite/store';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+  type Slot,
+} from '@blocksuite/store';
 
 import type { Cell, Column } from '../../database-block/table/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
+import type { PageBlockModel } from '../../models.js';
 import type {
   BlockServiceInstanceByKey,
   ServiceFlavour,
@@ -241,3 +248,24 @@ export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
     : T extends keyof HTMLElementEventMap
     ? HTMLElementEventDetail<T>
     : never;
+
+export abstract class AbstractSelectionManager<
+  T extends BlockElement<PageBlockModel>
+> {
+  public readonly container: T;
+  protected readonly _dispatcher: UIEventDispatcher;
+  protected readonly _disposables = new DisposableGroup();
+
+  constructor(container: T, dispatcher: UIEventDispatcher) {
+    this.container = container;
+    this._dispatcher = dispatcher;
+  }
+
+  protected get page() {
+    return this.container.page;
+  }
+
+  abstract clear(): void;
+
+  abstract dispose(): void;
+}

@@ -157,10 +157,20 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
   }
 
   onContainerDragEnd(e: PointerEventState) {
+    const id = this._draggingElementId;
+    assertExists(id);
+
     this._draggingElementId = null;
     this._draggingArea = null;
+
     this._page.captureSync();
-    this._edgeless.slots.surfaceUpdated.emit();
+
+    const element = this._surface.pickById(id);
+    assertExists(element);
+    this._edgeless.selection.switchToDefaultMode({
+      selected: [element],
+      active: false,
+    });
   }
 
   onContainerMouseMove(e: PointerEventState) {
@@ -168,10 +178,6 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
   }
 
   onContainerMouseOut(e: PointerEventState) {
-    noop();
-  }
-
-  clearSelection() {
     noop();
   }
 }

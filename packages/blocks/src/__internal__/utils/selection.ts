@@ -10,17 +10,17 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
-import type { RichText } from '../rich-text/rich-text.js';
+import { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
   getDefaultPage,
-  getDefaultPageBlock,
   getElementFromEventTarget,
   getModelByElement,
   getModelsByRange,
   getNextBlock,
+  getPageBlock,
   getPreviousBlock,
 } from './query.js';
 import { Rect } from './rect.js';
@@ -156,9 +156,14 @@ export function focusBlockByModel(
   if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
     throw new Error("Can't focus frame or page!");
   }
-  const defaultPageBlock = getDefaultPageBlock(model);
+
+  const pageBlock = getPageBlock(model);
+  assertExists(pageBlock);
+  const isPageMode = pageBlock instanceof DefaultPageBlockComponent;
+
   // If focus on a follow block, we should select the block
   if (
+    isPageMode &&
     matchFlavours(model, [
       'affine:embed',
       'affine:divider',
@@ -167,36 +172,32 @@ export function focusBlockByModel(
       'affine:bookmark',
     ])
   ) {
-    if (!defaultPageBlock.selection) {
-      // TODO fix this
-      // In the edgeless mode
-      return;
-    }
-    defaultPageBlock.selection.state.clearSelection();
+    pageBlock.selection.state.clearSelection();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
-    rect && defaultPageBlock.slots.selectedRectsUpdated.emit([rect]);
+    rect && pageBlock.slots.selectedRectsUpdated.emit([rect]);
     const element = getBlockElementByModel(model);
     assertExists(element);
-    defaultPageBlock.selection.state.selectedBlocks.push(element);
+    pageBlock.selection.state.selectedBlocks.push(element);
     if (matchFlavours(model, ['affine:database'])) {
       const elements = model.children
         .map(child => getBlockElementByModel(child))
         .filter(
           (element): element is BlockComponentElement => element !== null
         );
-      defaultPageBlock.selection.state.selectedBlocks.push(...elements);
+      pageBlock.selection.state.selectedBlocks.push(...elements);
     }
-    defaultPageBlock.selection.state.type = 'block';
+    pageBlock.selection.state.type = 'block';
     resetNativeSelection(null);
     (document.activeElement as HTMLTextAreaElement).blur();
     return;
   }
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  defaultPageBlock.selection &&
-    defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
-    defaultPageBlock.selection?.setFocusedBlock(element as Element);
+    if (isPageMode) {
+      pageBlock.selection.state.clearSelection();
+      pageBlock.selection.setFocusedBlock(element as Element);
+    }
     focusRichText(editableContainer, position, zoom);
   }
 }
@@ -206,13 +207,16 @@ export function focusPreviousBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const page = getDefaultPageBlock(model);
+  const pageBlock = getPageBlock(model);
+  assertExists(pageBlock);
 
   let nextPosition = position;
-  if (nextPosition) {
-    page.lastSelectionPosition = nextPosition;
-  } else if (page.lastSelectionPosition) {
-    nextPosition = page.lastSelectionPosition;
+  if (pageBlock instanceof DefaultPageBlockComponent) {
+    if (nextPosition) {
+      pageBlock.lastSelectionPosition = nextPosition;
+    } else if (pageBlock.lastSelectionPosition) {
+      nextPosition = pageBlock.lastSelectionPosition;
+    }
   }
 
   const preNodeModel = getPreviousBlock(model);
@@ -226,15 +230,19 @@ export function focusNextBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const page = getDefaultPageBlock(model);
-  let nextPosition = position;
-  if (nextPosition) {
-    page.lastSelectionPosition = nextPosition;
-  } else if (page.lastSelectionPosition) {
-    nextPosition = page.lastSelectionPosition;
-  }
-  const nextNodeModel = getNextBlock(model);
+  const pageBlock = getPageBlock(model);
+  assertExists(pageBlock);
 
+  let nextPosition = position;
+  if (pageBlock instanceof DefaultPageBlockComponent) {
+    if (nextPosition) {
+      pageBlock.lastSelectionPosition = nextPosition;
+    } else if (pageBlock.lastSelectionPosition) {
+      nextPosition = pageBlock.lastSelectionPosition;
+    }
+  }
+
+  const nextNodeModel = getNextBlock(model);
   if (nextNodeModel) {
     focusBlockByModel(nextNodeModel, nextPosition, zoom);
   }
@@ -249,36 +257,7 @@ export function resetNativeSelection(range: Range | null) {
 
 export function clearSelection(page: Page) {
   if (!page.root) return;
-  const defaultPageBlock = getDefaultPageBlock(page.root);
-
-  if ('selection' in defaultPageBlock) {
-    // this is not EdgelessPageBlockComponent
-    defaultPageBlock.selection.clear();
-  }
-}
-
-/**
- * @deprecated Use {@link focusBlockByModel} instead.
- */
-export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
-  const richText = richTextParent.querySelector('rich-text');
-  assertExists(richText);
-  const bbox = richText.getBoundingClientRect();
-  const y = bbox.y + bbox.height / 2;
-  const range = caretRangeFromPoint(x, y);
-  if (range?.startContainer instanceof Node) {
-    resetNativeSelection(range);
-  }
-}
-
-/**
- * @deprecated Use {@link focusBlockByModel} instead.
- */
-export function focusRichTextStart(richText: RichText) {
-  const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
-  const range = document.createRange();
-  range.setStart(start, 0);
-  resetNativeSelection(range);
+  getPageBlock(page.root)?.selection.clear();
 }
 
 /**

@@ -485,11 +485,10 @@ export function addNote(
       ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === frameId);
     if (element) {
-      const selectionState = {
+      edgeless.slots.selectionUpdated.emit({
         selected: [element],
         active: true,
-      };
-      edgeless.slots.selectionUpdated.emit(selectionState);
+      });
 
       // Waiting dom updated, `frame mask` is removed
       edgeless.updateComplete.then(() => {
@@ -511,7 +510,7 @@ export function mountTextEditor(
   pageBlockContainer.appendChild(textEditor);
   textEditor.mount(textElement, edgeless);
   textEditor.vEditor?.focusEnd();
-  edgeless.slots.selectionUpdated.emit({
+  edgeless.selection.switchToDefaultMode({
     selected: [textElement],
     active: true,
   });
@@ -538,7 +537,6 @@ export function addText(
     assertExists(textElement);
     if (textElement instanceof TextElement) {
       mountTextEditor(textElement, edgeless);
-      edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
     }
   }
 }

@@ -5,7 +5,7 @@ import {
   noop,
   Point,
 } from '../../../__internal__/index.js';
-import type { DefaultSelectionManager } from './default-selection-manager.js';
+import type { DefaultSelectionManager } from './selection-manager.js';
 import { autoScroll } from './utils.js';
 
 export const NativeDragHandlers = {

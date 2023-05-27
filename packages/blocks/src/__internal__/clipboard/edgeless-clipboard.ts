@@ -53,6 +53,10 @@ export class EdgelessClipboard implements Clipboard {
     document.body.addEventListener('paste', this._onPaste);
   }
 
+  get selection() {
+    return this._edgeless.selection;
+  }
+
   public dispose() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
@@ -66,14 +70,14 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     this._onCopy(e);
 
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
+    const { state } = this.selection;
+    if (state.active) {
       deleteModelsByRange(this._page);
       return;
     }
 
     this._page.transact(() => {
-      selection.selected.forEach(selected => {
+      state.selected.forEach(selected => {
         if (isTopLevelBlock(selected)) {
           this._page.deleteBlock(selected);
         } else {
@@ -89,15 +93,15 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
+    const { state } = this.selection;
     // when frame active, handle copy like page mode
-    if (selection.active) {
+    if (state.active) {
       const range = getCurrentBlockRange(this._page);
       assertExists(range);
       copyBlocks(range);
       return;
     }
-    const data = selection.selected
+    const data = state.selected
       .map(selected => {
         if (isTopLevelBlock(selected)) {
           return getBlockClipboardInfo(selected).json;
@@ -116,8 +120,8 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
+    const { state } = this.selection;
+    if (state.active) {
       this._pasteInTextFrame(e);
       return;
     }
@@ -265,7 +269,7 @@ export class EdgelessClipboard implements Clipboard {
       groupedByType.frames || []
     );
 
-    const lastMousePos = this._edgeless.getSelection().lastMousePos;
+    const { lastMousePos } = this.selection;
     const [modelX, modelY] = this._edgeless.surface.toModelCoord(
       lastMousePos.x,
       lastMousePos.y

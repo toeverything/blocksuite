@@ -152,37 +152,22 @@ export function getPreviousBlock(
 }
 
 /**
- * Note: this method will return `DefaultPageBlockComponent` | `EdgelessPageBlockComponent`!
- *
- * @deprecated Use {@link getDefaultPage} instead. This method only works in the paper mode!
+ * Returns `DefaultPageBlockComponent` | `EdgelessPageBlockComponent` if it exists
+ * otherwise return `null`.
  */
-export function getDefaultPageBlock(model: BaseBlockModel) {
+export function getPageBlock(
+  model: BaseBlockModel
+): DefaultPageBlockComponent | EdgelessPageBlockComponent | null {
   assertExists(model.page.root);
-  const page = document.querySelector(
-    `[${ATTR}="${model.page.root.id}"]`
-  ) as DefaultPageBlockComponent;
-  // | EdgelessPageBlockComponent | null;
-  return page;
-}
-
-/**
- * @deprecated Use {@link getEditorContainer} instead
- */
-export function getContainerByModel(model: BaseBlockModel) {
-  const page = getDefaultPageBlock(model);
-  const container = page.closest('editor-container');
-  assertExists(container);
-  return container;
+  return document.querySelector(`[${ATTR}="${model.page.root.id}"]`);
 }
 
 /**
  * If it's not in the page mode, it will return `null` directly.
  */
 export function getDefaultPage(page: Page) {
-  if (!isPageMode(page)) {
-    return null;
-  }
   const editor = getEditorContainer(page);
+  if (editor.mode !== 'page') return null;
   const pageComponent = editor.querySelector('affine-default-page');
   return pageComponent;
 }
@@ -192,6 +177,7 @@ export function getDefaultPage(page: Page) {
  */
 export function getEdgelessPage(page: Page) {
   const editor = getEditorContainer(page);
+  if (editor.mode !== 'edgeless') return null;
   const pageComponent = editor.querySelector('affine-edgeless-page');
   return pageComponent;
 }
@@ -225,8 +211,7 @@ export function isPageMode(page: Page) {
   if (!('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
-  const mode = editor.mode;
-  return mode === 'page';
+  return editor.mode === 'page';
 }
 
 /**

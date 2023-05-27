@@ -72,8 +72,4 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
   syncDraggingArea() {
     noop();
   }
-
-  clearSelection() {
-    noop();
-  }
 }

@@ -8,33 +8,27 @@ import type {
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/lit';
-import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type {
-  EmbedBlockDoubleClickData,
-  IPoint,
-} from '../../../__internal__/index.js';
 import {
+  AbstractSelectionManager,
   type BlockComponentElement,
   debounce,
   type EditingState,
+  type EmbedBlockDoubleClickData,
   getBlockElementByModel,
   getBlockElementsByElement,
   getBlockElementsExcludeSubtrees,
   getBlockElementsIncludeSubtrees,
   getClosestBlockElementByPoint,
   getCurrentNativeRange,
-  getDefaultPageBlock,
   getEditorContainerByElement,
   getModelByBlockElement,
   getRectByBlockElement,
   getSelectedStateRectByBlockElement,
   handleNativeRangeClick,
   handleNativeRangeDragMove,
+  type IPoint,
   isBlankArea,
   isDatabaseInput,
   isDragHandle,
@@ -90,32 +84,27 @@ function shouldFilterMouseEvent(event: Event): boolean {
 /**
  * The selection manager used in default mode.
  */
-export class DefaultSelectionManager {
-  readonly page: Page;
+export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPageBlockComponent> {
   readonly state = new PageSelectionState('none');
   readonly slots: DefaultSelectionSlots;
-  readonly container: DefaultPageBlockComponent;
-  private readonly _disposables = new DisposableGroup();
   private readonly _embedResizeManager: EmbedResizeManager;
-  private readonly _dispatcher: UIEventDispatcher;
 
   constructor({
+    container,
+    dispatcher,
     page,
     mouseRoot,
     slots,
-    container,
-    dispatcher,
   }: {
+    container: DefaultPageBlockComponent;
+    dispatcher: UIEventDispatcher;
     page: Page;
     mouseRoot: HTMLElement;
     slots: DefaultSelectionSlots;
-    container: DefaultPageBlockComponent;
-    dispatcher: UIEventDispatcher;
   }) {
-    this.page = page;
+    super(container, dispatcher);
+
     this.slots = slots;
-    this.container = container;
-    this._dispatcher = dispatcher;
 
     this._embedResizeManager = new EmbedResizeManager(this.state, slots);
 
@@ -403,9 +392,8 @@ export class DefaultSelectionManager {
     }
 
     if (clickBlockInfo && clickBlockInfo.model) {
-      const { model, element } = clickBlockInfo;
-      const page = getDefaultPageBlock(model);
-      page.lastSelectionPosition = 'start';
+      const { element } = clickBlockInfo;
+      this.container.lastSelectionPosition = 'start';
       state.focusedBlock = element;
     }
 
@@ -624,34 +612,6 @@ export class DefaultSelectionManager {
 
   get viewportElement() {
     return this.container.viewportElement;
-  }
-
-  // clear selection: `block`, `block:drag`, `embed`, `native`
-  clear() {
-    const { state, slots } = this;
-    let { type } = state;
-
-    if (type === 'block:drag') {
-      // clear `drag preview`
-      PreviewDragHandlers.clear(this);
-      type = 'block';
-    }
-
-    if (type === 'block') {
-      state.clearBlockSelection();
-      slots.selectedRectsUpdated.emit([]);
-      slots.draggingAreaUpdated.emit(null);
-
-      // clear `format quick bar`
-      // document.dispatchEvent(new MouseEvent('mousedown'));
-      this.container.querySelector('format-quick-bar')?.remove();
-    } else if (type === 'embed') {
-      state.clearEmbedSelection();
-      slots.embedRectsUpdated.emit([]);
-      slots.embedEditingStateUpdated.emit(null);
-    } else if (type === 'native') {
-      state.clearNativeSelection();
-    }
   }
 
   updateDraggingArea(draggingArea: { start: Point; end: Point }): DOMRect {
@@ -940,6 +900,34 @@ export class DefaultSelectionManager {
 
   setFocusedBlock(blockElement: Element) {
     this.state.focusedBlock = blockElement as BlockComponentElement;
+  }
+
+  // clear selection: `block`, `block:drag`, `embed`, `native`
+  clear() {
+    const { state, slots } = this;
+    let { type } = state;
+
+    if (type === 'block:drag') {
+      // clear `drag preview`
+      PreviewDragHandlers.clear(this);
+      type = 'block';
+    }
+
+    if (type === 'block') {
+      state.clearBlockSelection();
+      slots.selectedRectsUpdated.emit([]);
+      slots.draggingAreaUpdated.emit(null);
+
+      // `ESC`
+      // clear `format quick bar`
+      this.container.querySelector('format-quick-bar')?.remove();
+    } else if (type === 'embed') {
+      state.clearEmbedSelection();
+      slots.embedRectsUpdated.emit([]);
+      slots.embedEditingStateUpdated.emit(null);
+    } else if (type === 'native') {
+      state.clearNativeSelection();
+    }
   }
 
   dispose() {
