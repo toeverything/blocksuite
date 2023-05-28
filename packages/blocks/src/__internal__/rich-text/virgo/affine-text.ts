@@ -19,17 +19,24 @@ export function affineTextStyles(
   }
 
   let inlineCodeStyle = {};
-  if (props.code) {
+  if (props.code || props.kbd) {
+    const isCode = props.code && !props.kbd;
     inlineCodeStyle = {
       'font-family': 'var(--affine-font-code-family)',
-      background: 'var(--affine-background-code-block)',
+      background: `var(${
+        isCode
+          ? '--affine-background-code-block'
+          : '--affine-background-kbd-block'
+      })`,
       color: 'var(--affine-text-primary-color)',
       'border-radius': '4px',
       padding: '3px 6px',
-      'font-size': 'calc(var(--affine-font-base) - 4px)',
+      'font-size': `calc(var(--affine-font-base) - ${isCode ? '4px' : '2px'})`,
       'font-variant-ligatures': 'none',
       'line-height': 'var(--affine-font-base)',
-      border: '1px solid var(--affine-border-color)',
+      border: `1px solid var(${
+        isCode ? '--affine-border-color' : '--affine-placeholder-color'
+      })`,
     };
   }
 

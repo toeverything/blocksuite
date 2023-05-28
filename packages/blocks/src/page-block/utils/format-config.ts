@@ -1,6 +1,7 @@
 import {
   BoldIcon,
   InlineCodeIcon,
+  InlineKeyboardIcon,
   ItalicIcon,
   LinkIcon,
   SHORT_KEY,
@@ -71,6 +72,17 @@ export const formatConfig = [
     showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
     action: ({ page }: ActionProps) => {
       handleFormat(page, 'code');
+    },
+  },
+  {
+    id: 'kbd',
+    name: 'Keyboard',
+    icon: InlineKeyboardIcon,
+    hotkey: `${SHORT_KEY}+k`,
+    activeWhen: (format: AffineTextAttributes) => 'kbd' in format,
+    showWhen: (models: BaseBlockModel[]) => noneCodeBlockSelected(models),
+    action: ({ page }: ActionProps) => {
+      handleFormat(page, 'kbd');
     },
   },
   {

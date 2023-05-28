@@ -54,6 +54,7 @@ export const globalCSS = css`
     --affine-background-secondary-color: #fbfafc;
     --affine-background-tertiary-color: #e9e9ec;
     --affine-background-code-block: #fafbfd;
+    --affine-background-kbd-block: #fdfbfa;
     --affine-background-modal-color: rgba(0, 0, 0, 0.6);
     --affine-text-primary-color: #424149;
     --affine-text-secondary-color: #8e8d91;

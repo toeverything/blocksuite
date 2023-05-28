@@ -381,6 +381,26 @@ export const InlineCodeIcon = html`<svg
   />
 </svg>`;
 
+export const InlineKeyboardIcon = html`<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xml:space="preserve"
+  viewBox="0 0 147 97.8"
+>
+  <defs><path id="a" d="M16 24h114v54H16z" /></defs>
+  <clipPath id="b"><use xlink:href="#a" overflow="visible" /></clipPath>
+  <path
+    fill="none"
+    stroke-width="1.8"
+    d="M20 25s-4 0-4 3v46s0 3 4 3h105s4 0 4-3V28s0-3-4-3H20z"
+    clip-path="url(#b)"
+  />
+  <path
+    d="m44 63-1 1v5l1 1h57l1-1v-5l-1-1H44zm62 0-1 1v5l1 1h15l1-1v-5l-1-1h-15zm-82 0-1 1v5l1 1h15l1-1v-5l-1-1H24zm30-10h-1v6l1 1h6v-7h-6zm-10 0h-1v6l1 1h5l1-1v-6h-6zm-20 0h-1v6l1 1h15l1-1v-6H24zm41 0h-1v6l1 1h5l1-1v-6h-6zm10 0h-1v6l1 1h6v-7h-6zm10 0v7h6l1-1v-6h-7zm11 0h-1v6l1 1h5l1-1v-6h-6zm10 0h-1v6l1 1h15l1-1v-6h-16zM50 42l-1 1v6h7v-6l-1-1h-5zm-11 0-1 1v6h7v-7h-6zm-15 0-1 1v6h12v-6l-1-1H24zm36 0-1 1v6h7v-7h-6zm10 0v7h7v-6l-1-1h-6zm11 0-1 1v6h7v-6l-1-1h-5zm10 0-1 1v6h7v-7h-6zm10 0v7h7v-6l-1-1h-6zm11 0-1 1v6h11v-6l-1-1h-9zM75 32l-1 1v5l1 1h5l1-1v-5l-1-1h-5zm-10 0-1 1v5l1 1h5l1-1v-5l-1-1h-5zm-11 0v7h6l1-1v-5l-1-1h-6zm-10 0v7h6l1-1v-5l-1-1h-6zm-10 0v7h6l1-1v-5l-1-1h-6zm-10 0-1 1v5l1 1h6v-7h-6zm61 0-1 1v5l1 1h5l1-1v-5l-1-1h-5zm10 0-1 1v5l1 1h5l1-1v-5l-1-1h-5zm10 0-1 1v5l1 1h6v-7h-6zm10 0-1 1v5l1 1h6v-7h-6z"
+    clip-path="url(#b)"
+  />
+</svg>`;
+
 const LinkSVG = svg`<path
   fill-rule="evenodd"
   clip-rule="evenodd"

@@ -103,6 +103,9 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     if (attributes.code) {
       text = `<code>${text}</code>`;
     }
+    if (attributes.kbd) {
+      text = `<kbd>${text}</kbd>`;
+    }
     if (attributes.bold) {
       text = `<strong>${text}</strong>`;
     }
