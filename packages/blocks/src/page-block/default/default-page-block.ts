@@ -248,7 +248,7 @@ export class DefaultPageBlockComponent
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      const firstParagraph = model.children[0].children[0];
+      const firstParagraph = model.children[1].children[0];
       if (firstParagraph) {
         asyncFocusRichText(page, firstParagraph.id);
       } else {
