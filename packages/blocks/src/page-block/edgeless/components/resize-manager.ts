@@ -35,7 +35,7 @@ export class HandleResizeManager {
     this._onResizeEnd = onResizeEnd;
   }
 
-  // TODO: add them to vec2
+  // TODO: move to vec2
   private _resize(shift = false) {
     const {
       _aspectRatio: aspectRatio,
