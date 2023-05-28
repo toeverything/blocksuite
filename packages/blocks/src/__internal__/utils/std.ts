@@ -18,7 +18,7 @@ export function supportsChildren(model: BaseBlockModel): boolean {
     return false;
   }
   if (
-    matchFlavours(model, ['affine:paragraph'] as const) &&
+    matchFlavours(model, ['affine:paragraph']) &&
     ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'quote'].includes(model.type ?? '')
   ) {
     return false;
@@ -318,12 +318,13 @@ export function isFuzzyMatch(name: string, query: string) {
     .trim()
     .toLowerCase()
     .split('')
-    .filter(char => /[A-Za-z0-9]/.test(char))
+    .filter(char => char !== ' ')
     .join('');
 
   const regex = new RegExp(
     query
       .split('')
+      .filter(char => char !== ' ')
       .map(item => `${escapeRegExp(item)}.*`)
       .join(''),
     'i'

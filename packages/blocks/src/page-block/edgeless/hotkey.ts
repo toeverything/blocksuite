@@ -1,6 +1,7 @@
 import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
 
-import { hotkey, HOTKEY_SCOPE } from '../../__internal__/utils/hotkey.js';
+import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
 import {
@@ -23,10 +24,10 @@ function setMouseMode(
   ignoreActiveState = false
 ) {
   // when editing, should not update mouse mode by shortcut
-  if (!ignoreActiveState && edgeless.getSelection().isActive) {
+  if (!ignoreActiveState && edgeless.selection.isActive) {
     return;
   }
-  edgeless.slots.mouseModeUpdated.emit(mouseMode);
+  edgeless.selection.setMouseMode(mouseMode);
 }
 
 function bindSpace(edgeless: EdgelessPageBlockComponent) {
@@ -37,20 +38,22 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(
     HOTKEYS.SPACE,
     (event: KeyboardEvent) => {
-      const { mouseMode, blockSelectionState } = edgeless.getSelection();
+      const { mouseMode, state } = edgeless.selection;
       if (event.type === 'keydown') {
         if (mouseMode.type === 'pan') {
           return;
         }
 
         // when user is editing, shouldn't enter pan mode
-        if (mouseMode.type === 'default' && blockSelectionState.active) {
+        if (mouseMode.type === 'default' && state.active) {
           return;
         }
 
         edgeless.mouseMode = { type: 'pan', panning: false };
         shouldRevertMode = true;
         lastMode = mouseMode;
+
+        return;
       }
       if (event.type === 'keyup') {
         if (mouseMode.type === 'pan' && shouldRevertMode && lastMode) {
@@ -63,14 +66,12 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   );
 }
 
-export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
-  hotkey.setScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
-
-  hotkey.addListener(HOTKEYS.BACKSPACE, (e: KeyboardEvent) => {
+function bindDelete(edgeless: EdgelessPageBlockComponent) {
+  function backspace(e: KeyboardEvent) {
     // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
-    const { selected } = edgeless.getSelection().blockSelectionState;
+    const { selected } = edgeless.selection.state;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = edgeless.page.root?.children ?? [];
@@ -82,50 +83,74 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
         edgeless.surface.removeElement(element.id);
       }
     });
-    edgeless.getSelection().currentController.clearSelection();
-    edgeless.slots.selectionUpdated.emit(
-      edgeless.getSelection().blockSelectionState
+    edgeless.selection.clear();
+    edgeless.slots.selectionUpdated.emit(edgeless.selection.state);
+  }
+  hotkey.addListener(HOTKEYS.BACKSPACE, backspace);
+  hotkey.addListener(HOTKEYS.DELETE, backspace);
+}
+
+export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
+  const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_EDGELESS);
+  if (activeEditorManager.isActive(edgeless)) {
+    hotkey.setScope(scope);
+  }
+  const activeDispose = activeEditorManager.activeSlot.on(() => {
+    if (activeEditorManager.isActive(edgeless)) {
+      hotkey.setScope(scope);
+    }
+  });
+  hotkey.withScope(scope, () => {
+    hotkey.addListener(HOTKEYS.UP, e =>
+      handleUp(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom })
     );
+    hotkey.addListener(HOTKEYS.DOWN, e =>
+      handleDown(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom })
+    );
+
+    hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
+    hotkey.addListener('t', () =>
+      setMouseMode(edgeless, {
+        type: 'text',
+      })
+    );
+    hotkey.addListener('h', () =>
+      setMouseMode(edgeless, { type: 'pan', panning: false })
+    );
+    hotkey.addListener('n', () =>
+      setMouseMode(edgeless, {
+        type: 'note',
+        background: FRAME_BACKGROUND_COLORS[0],
+      })
+    );
+    hotkey.addListener('p', () =>
+      setMouseMode(edgeless, {
+        type: 'brush',
+        color: DEFAULT_SELECTED_COLOR,
+        lineWidth: BrushSize.Thin,
+      })
+    );
+    hotkey.addListener('s', () =>
+      setMouseMode(edgeless, {
+        type: 'shape',
+        shape: 'rect',
+        fillColor: DEFAULT_SHAPE_FILL_COLOR,
+        strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+      })
+    );
+
+    // issue #1814
+    hotkey.addListener(HOTKEYS.ESC, () => {
+      edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
+      setMouseMode(edgeless, { type: 'default' }, true);
+    });
+
+    bindSpace(edgeless);
+    bindDelete(edgeless);
+    bindCommonHotkey(edgeless.page);
   });
-  hotkey.addListener(HOTKEYS.UP, e => handleUp(e, edgeless.page));
-  hotkey.addListener(HOTKEYS.DOWN, e => handleDown(e, edgeless.page));
-
-  hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
-  hotkey.addListener('h', () =>
-    setMouseMode(edgeless, { type: 'pan', panning: false })
-  );
-  hotkey.addListener('t', () =>
-    setMouseMode(edgeless, {
-      type: 'text',
-      background: FRAME_BACKGROUND_COLORS[0],
-    })
-  );
-  hotkey.addListener('p', () =>
-    setMouseMode(edgeless, {
-      type: 'brush',
-      color: DEFAULT_SELECTED_COLOR,
-      lineWidth: BrushSize.Thin,
-    })
-  );
-  hotkey.addListener('s', () =>
-    setMouseMode(edgeless, {
-      type: 'shape',
-      shape: 'rect',
-      fillColor: DEFAULT_SHAPE_FILL_COLOR,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    })
-  );
-
-  // issue #1814
-  hotkey.addListener('esc', () => {
-    edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
-    setMouseMode(edgeless, { type: 'default' }, true);
-  });
-
-  bindSpace(edgeless);
-  bindCommonHotkey(edgeless.page);
-
   return () => {
-    hotkey.deleteScope(HOTKEY_SCOPE.AFFINE_EDGELESS);
+    hotkey.deleteScope(scope);
+    activeDispose.dispose();
   };
 }

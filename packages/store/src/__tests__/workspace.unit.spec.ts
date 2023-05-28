@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
 
@@ -83,7 +84,8 @@ describe('basic', () => {
 });
 
 describe('pageMeta', () => {
-  it('can create subpage', async () => {
+  // TODO deprecated subpage tests
+  it.fails('can create subpage', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
@@ -190,7 +192,8 @@ describe('addBlock', () => {
         'sys:flavour': 'affine:frame',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': '[0,0,720,480]',
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+        'prop:index': 'a0',
       },
       '2': {
         'sys:children': [],
@@ -225,10 +228,7 @@ describe('addBlock', () => {
       })
     );
     const block = await waitOnce(page.slots.rootAdded);
-    if (!Array.isArray(block) || !block[0]) {
-      throw new Error('');
-    }
-    assert.equal(block[0].flavour, 'affine:page');
+    assert.equal(block.flavour, 'affine:page');
   });
 
   it('can add block to root', async () => {
@@ -374,7 +374,8 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:frame',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': '[0,0,720,480]',
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+        'prop:index': 'a0',
       },
       '2': {
         'sys:children': [],
@@ -400,7 +401,8 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:frame',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': '[0,0,720,480]',
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+        'prop:index': 'a0',
       },
     });
     assert.equal(root.children.length, 1);
@@ -437,7 +439,7 @@ describe('getBlock', () => {
     ) as BaseBlockModel;
     assert.equal(result, root.children[0]);
 
-    const invalid = page.getParentById(root.id, root);
+    const invalid = page.getParent(root);
     assert.equal(invalid, null);
   });
 
@@ -499,6 +501,7 @@ describe('workspace.exportJSX works', () => {
       <affine:page>
         <affine:frame
           prop:background="--affine-background-secondary-color"
+          prop:index="a0"
         >
           <affine:paragraph
             prop:type="text"

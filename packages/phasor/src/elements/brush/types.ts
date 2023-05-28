@@ -1,19 +1,14 @@
-export type SerializedBrushProps = {
+import type { SerializedXYWH } from '../../utils/xywh.js';
+
+export interface IBrush {
   id: string;
+  type: 'brush';
+  xywh: SerializedXYWH;
   index: string;
-  type: string;
-  xywh: string;
+  seed: number;
 
   // [[x0,y0],[x1,y1]...]
-  points: string;
-
+  points: number[][];
   color: string;
   lineWidth: number;
-};
-
-type BrushPropsKeys = keyof Omit<
-  SerializedBrushProps,
-  'id' | 'type' | 'xywh' | 'points'
->;
-
-export type BrushProps = Partial<Pick<SerializedBrushProps, BrushPropsKeys>>;
+}

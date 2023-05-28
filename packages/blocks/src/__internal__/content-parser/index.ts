@@ -7,10 +7,11 @@ import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import type { SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
+import type { FetchFileHandler } from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
-type ParseHtml2BlockFunc = (
+type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
@@ -20,20 +21,20 @@ export class ContentParser {
   readonly slots = {
     beforeHtml2Block: new Slot<Element>(),
   };
-  private _parsers: Record<string, ParseHtml2BlockFunc> = {};
+  private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _htmlParser: HtmlParser;
 
-  constructor(page: Page) {
+  constructor(page: Page, fetchFileFunc?: FetchFileHandler) {
     this._page = page;
-    this._htmlParser = new HtmlParser(this, page);
+    this._htmlParser = new HtmlParser(this, page, fetchFileFunc);
     this._htmlParser.registerParsers();
   }
 
-  public async onExportHtml() {
+  public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[0].children
+      this._getSelectedBlock(root).children[1].children
     );
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
@@ -41,16 +42,22 @@ export class ContentParser {
     );
   }
 
-  public async onExportMarkdown() {
+  public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[0].children
+      this._getSelectedBlock(root).children[1].children
     );
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       htmlContent
     );
+  }
+
+  public async exportPdf() {
+    const root = this._page.root;
+    if (!root) return;
+    window.print();
   }
 
   public async block2Html(blocks: SelectedBlock[]): Promise<string> {
@@ -164,11 +171,25 @@ export class ContentParser {
     service.json2Block(insertBlockModel, blocks);
   }
 
-  public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
-    this._parsers[name] = func;
+  public async importHtml(text: string, insertPositionId: string) {
+    const blocks = await this.htmlText2Block(text);
+    const insertBlockModel = this._page.getBlockById(insertPositionId);
+
+    assertExists(insertBlockModel);
+    const { getServiceOrRegister } = await import('../service.js');
+    const service = await getServiceOrRegister(insertBlockModel.flavour);
+
+    service.json2Block(insertBlockModel, blocks);
   }
 
-  public getParserHtmlText2Block(name: string): ParseHtml2BlockFunc {
+  public registerParserHtmlText2Block(
+    name: string,
+    handler: ParseHtml2BlockHandler
+  ) {
+    this._parsers[name] = handler;
+  }
+
+  public getParserHtmlText2Block(name: string): ParseHtml2BlockHandler {
     return this._parsers[name] || null;
   }
 

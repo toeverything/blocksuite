@@ -3,9 +3,9 @@ import { assertExists } from '@blocksuite/store';
 import type {
   BlockComponentElement,
   EditingState,
-  Point,
 } from '../../__internal__/index.js';
 import {
+  getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getClosestFrameBlockElementById,
@@ -13,6 +13,7 @@ import {
   getModelByBlockElement,
   getRectByBlockElement,
   isInSamePath,
+  Point,
   Rect,
 } from '../../__internal__/index.js';
 import { DragHandle } from '../../components/index.js';
@@ -65,17 +66,44 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         pageBlock.setSelection(targetFrameBlock.model.id, true, focusId, point);
         return;
       }
-
       // blank area
       page.captureSync();
-      pageBlock.moveBlocksToNewFrame(
-        models,
-        point,
-        getRectByBlockElement(blockElementsExcludeSubtrees[0])
+
+      const parent = page.getParent(models[0]);
+      assertExists(parent);
+
+      const firstModelIndex = parent.children.findIndex(
+        m => m.id === models[0].id
       );
+      const lastModelIndex = parent.children.findIndex(
+        m => m.id === models[models.length - 1].id
+      );
+
+      pageBlock.moveBlocksWithNewFrame(models, point, {
+        rect: getRectByBlockElement(blockElementsExcludeSubtrees[0]),
+        focus: true,
+        frameIndex: firstModelIndex === 0 ? 0 : undefined,
+      });
+
+      if (
+        firstModelIndex !== 0 &&
+        lastModelIndex !== parent.children.length - 1
+      ) {
+        const nextFirstBlockElement = getBlockElementByModel(
+          parent?.children[lastModelIndex]
+        );
+
+        assertExists(nextFirstBlockElement);
+        const nextFirstBlockRect = getRectByBlockElement(nextFirstBlockElement);
+        pageBlock.moveBlocksWithNewFrame(
+          parent?.children.slice(lastModelIndex),
+          new Point(nextFirstBlockRect.x, nextFirstBlockRect.y),
+          { rect: nextFirstBlockRect }
+        );
+      }
     },
     setDragType(dragging: boolean) {
-      const selection = pageBlock.getSelection();
+      const { selection } = pageBlock;
       if (selection.mouseMode.type === 'default') {
         const currentController =
           selection.currentController as DefaultModeController;
@@ -92,8 +120,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       pageBlock.slots.selectedBlocksUpdated.emit(selectedBlocks);
     },
     getSelectedBlocks() {
-      const selection = pageBlock.getSelection();
-      return selection.selectedBlocks;
+      return pageBlock.selection.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {
       if (pageBlock.mouseMode.type !== 'default') return null;

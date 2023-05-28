@@ -2,12 +2,14 @@
 import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocksuite/blocks';
+import { sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
-import { SHORT_KEY } from './keyboard.js';
+import { SHORT_KEY, type } from './keyboard.js';
+import { getEditorLocator, waitForVirgoStateUpdated } from './misc.js';
 
 export async function getFrameRect(
   page: Page,
@@ -30,6 +32,10 @@ export async function getFrameRect(
   return { x, y, w, h };
 }
 
+export async function registerFormatBarCustomElements(page: Page) {
+  await page.click('sl-button[content="Register FormatBar Custom Elements"]');
+}
+
 export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
 }
@@ -42,7 +48,14 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type MouseMode = 'default' | 'shape' | 'brush' | 'pan' | 'text' | 'connector';
+type MouseMode =
+  | 'default'
+  | 'shape'
+  | 'brush'
+  | 'pan'
+  | 'text'
+  | 'connector'
+  | 'note';
 type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -58,6 +71,7 @@ export function locatorEdgelessToolButton(
     pan: 'Hand',
     text: 'Text',
     connector: 'Connector',
+    note: 'Note',
 
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
@@ -99,6 +113,7 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
     case 'brush':
     case 'pan':
     case 'text':
+    case 'note':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
@@ -115,6 +130,17 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
       break;
     }
   }
+}
+
+export async function assertMouseMode(page: Page, mode: MouseMode) {
+  const type = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) {
+      throw new Error('Missing edgeless page');
+    }
+    return container.mouseMode.type;
+  });
+  expect(type).toEqual(mode);
 }
 
 export async function switchShapeType(page: Page, shapeType: string) {
@@ -148,24 +174,29 @@ export async function getEdgelessSelectedRect(page: Page) {
   return selectedBox;
 }
 
+const AWAIT_TIMEOUT = 160;
+
 export async function decreaseZoomLevel(page: Page) {
   const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
   await btn.click();
+  await sleep(AWAIT_TIMEOUT);
 }
 
 export async function increaseZoomLevel(page: Page) {
   const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
   await btn.click();
+  await sleep(AWAIT_TIMEOUT);
 }
 
 export async function addBasicBrushElement(
   page: Page,
   start: { x: number; y: number },
-  end: { x: number; y: number }
+  end: { x: number; y: number },
+  auto = true
 ) {
   await setMouseMode(page, 'brush');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  await setMouseMode(page, 'default');
+  auto && (await setMouseMode(page, 'default'));
 }
 
 export async function addBasicRectShapeElement(
@@ -174,8 +205,7 @@ export async function addBasicRectShapeElement(
   end: { x: number; y: number }
 ) {
   await setMouseMode(page, 'shape');
-  await dragBetweenCoords(page, start, end, { steps: 10 });
-  await setMouseMode(page, 'default');
+  await dragBetweenCoords(page, start, end, { steps: 20 });
 }
 
 export async function addBasicConnectorElement(
@@ -185,7 +215,13 @@ export async function addBasicConnectorElement(
 ) {
   await setMouseMode(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  await setMouseMode(page, 'default');
+}
+
+export async function addNote(page: Page, text: string, x: number, y: number) {
+  await setMouseMode(page, 'note');
+  await page.mouse.click(x, y);
+  await waitForVirgoStateUpdated(page);
+  await type(page, text);
 }
 
 export async function resizeElementByTopLeftHandle(
@@ -251,7 +287,8 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
 }
 
 export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
-  const frame = page.locator(`affine-frame[data-block-id="${frameId}"]`);
+  const editor = getEditorLocator(page);
+  const frame = editor.locator(`affine-frame[data-block-id="${frameId}"]`);
   const bound = await frame.boundingBox();
   if (!bound) {
     throw new Error(`Missing frame: ${frameId}`);
@@ -337,6 +374,8 @@ function locatorComponentToolbarMoreButton(page: Page) {
 }
 type Action =
   | 'bringToFront'
+  | 'bringForward'
+  | 'sendBackward'
   | 'sendToBack'
   | 'changeFrameColor'
   | 'changeShapeFillColor'
@@ -358,6 +397,30 @@ export async function triggerComponentToolbarAction(
         .locator('.more-actions-container .action-item')
         .filter({
           hasText: 'Bring to front',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'bringForward': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Bring forward',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'sendBackward': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Send backward',
         });
       await actionButton.click();
       break;
@@ -534,4 +597,30 @@ export async function changeConnectorStrokeStyle(
 ) {
   const button = locatorConnectorStrokeStyleButton(page, mode);
   await button.click();
+}
+
+export async function initThreeShapes(page: Page) {
+  const rect0 = {
+    start: { x: 100, y: 100 },
+    end: { x: 200, y: 200 },
+  };
+  await addBasicRectShapeElement(page, rect0.start, rect0.end);
+
+  const rect1 = {
+    start: { x: 130, y: 130 },
+    end: { x: 230, y: 230 },
+  };
+  await addBasicRectShapeElement(page, rect1.start, rect1.end);
+
+  const rect2 = {
+    start: { x: 160, y: 160 },
+    end: { x: 260, y: 260 },
+  };
+  await addBasicRectShapeElement(page, rect2.start, rect2.end);
+}
+
+export async function initThreeNotes(page: Page) {
+  await addNote(page, 'abc', 30 + 100, 40 + 100);
+  await addNote(page, 'efg', 30 + 130, 40 + 100);
+  await addNote(page, 'hij', 30 + 160, 40 + 100);
 }

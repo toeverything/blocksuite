@@ -60,7 +60,7 @@ export class Page extends Space<FlatBlockMap> {
   private readonly _workspace: Workspace;
   private readonly _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
-  private _root: (BaseBlockModel | null)[] | null = null;
+  private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
 
@@ -69,7 +69,7 @@ export class Page extends Space<FlatBlockMap> {
 
   readonly slots = {
     historyUpdated: new Slot(),
-    rootAdded: new Slot<(BaseBlockModel | null)[]>(),
+    rootAdded: new Slot<BaseBlockModel>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
     yUpdated: new Slot(),
@@ -79,14 +79,6 @@ export class Page extends Space<FlatBlockMap> {
     blockUpdated: new Slot<{
       type: 'add' | 'delete' | 'update';
       id: string;
-    }>(),
-    /**
-     * @deprecated
-     */
-    subpageUpdated: new Slot<{
-      type: 'add' | 'delete';
-      id: string;
-      subpageIds: string[];
     }>(),
   };
 
@@ -132,30 +124,11 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   get root() {
-    const root = Array.isArray(this._root) ? this._root[0] : this._root;
-    if (!root) return root;
-
-    const rootSchema = this.schema.flavourSchemaMap.get(root.flavour);
-    if (rootSchema?.model.role !== 'root') {
-      console.error('data broken');
-    }
-    return root;
+    return this._root;
   }
 
-  get surface() {
-    return Array.isArray(this._root) ? this._root[1] : null;
-  }
-
-  /** @internal Used for getting surface elements for phasor. */
-  get ySurfaceContainer() {
-    assertExists(this.surface);
-    const ySurface = this._yBlocks.get(this.surface.id);
-    if (ySurface?.has('elements')) {
-      return ySurface.get('elements') as Y.Map<unknown>;
-    } else {
-      ySurface?.set('elements', new Y.Map());
-      return ySurface?.get('elements') as Y.Map<unknown>;
-    }
+  getYBlockById(id: string) {
+    return this._yBlocks.get(id);
   }
 
   get isEmpty() {
@@ -178,6 +151,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get YText() {
     return Y.Text;
+  }
+
+  get YMap() {
+    return Y.Map;
   }
 
   get Text() {
@@ -223,29 +200,29 @@ export class Page extends Space<FlatBlockMap> {
     );
   }
 
-  getParentById(
-    rootId: string,
-    target: BaseBlockModel | string
-  ): BaseBlockModel | null {
+  getParent(target: BaseBlockModel | string): BaseBlockModel | null {
+    const root = this._root;
     const targetId = typeof target === 'string' ? target : target.id;
-    if (rootId === targetId) return null;
+    if (!root || root.id === targetId) return null;
 
-    const root = this._blockMap.get(rootId);
-    if (!root) return null;
+    const findParent = (parentId: string): BaseBlockModel | null => {
+      const parentModel = this._blockMap.get(parentId);
+      if (!parentModel) return null;
 
-    for (const [childId] of root.childMap) {
-      if (childId === targetId) return root;
+      for (const [childId] of parentModel.childMap) {
+        if (childId === targetId) return parentModel;
 
-      const parent = this.getParentById(childId, target);
-      if (parent !== null) return parent;
-    }
+        const parent = findParent(childId);
+        if (parent !== null) return parent;
+      }
+
+      return null;
+    };
+
+    const parent = findParent(root.id);
+    if (parent !== null) return parent;
+
     return null;
-  }
-
-  getParent(block: BaseBlockModel | string) {
-    if (!this.root) return null;
-
-    return this.getParentById(this.root.id, block);
   }
 
   getPreviousSibling(block: BaseBlockModel) {
@@ -382,14 +359,10 @@ export class Page extends Space<FlatBlockMap> {
 
       syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
-      if (typeof parent === 'string') {
-        parent = this._blockMap.get(parent) ?? null;
-      }
+      const parentModel =
+        typeof parent === 'string' ? this._blockMap.get(parent) : parent;
 
-      let parentId = null;
-      if (parent !== null) {
-        parentId = parent?.id ?? this.root?.id;
-      }
+      const parentId = parentModel?.id ?? this._root?.id;
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -419,10 +392,6 @@ export class Page extends Space<FlatBlockMap> {
     const firstBlock = blocks[0];
     const currentParent = this.getParent(firstBlock);
 
-    blocks.forEach(block => {
-      this.schema.validate(block.flavour, currentParent?.flavour);
-    });
-
     // the blocks must have the same parent (siblings)
     if (blocks.some(block => this.getParent(block) !== currentParent)) {
       console.error('the blocks must have the same parent');
@@ -431,6 +400,10 @@ export class Page extends Space<FlatBlockMap> {
     if (currentParent === null || newParent === null) {
       throw new Error("Can't find parent model");
     }
+
+    blocks.forEach(block => {
+      this.schema.validate(block.flavour, newParent.flavour);
+    });
 
     this.transact(() => {
       const yParentA = this._yBlocks.get(currentParent.id) as YBlock;
@@ -717,17 +690,9 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
-    let isRoot = false;
-    let isSurface = false;
 
     const props = toBlockProps(yBlock);
     const model = this._createBlockModel({ ...props, id }, yBlock);
-    if (model.flavour === 'affine:surface') {
-      isSurface = true;
-    }
-    if (model.flavour === 'affine:page') {
-      isRoot = true;
-    }
     this._blockMap.set(id, model);
 
     const yChildren = yBlock.get('sys:children');
@@ -751,30 +716,24 @@ export class Page extends Space<FlatBlockMap> {
       });
     }
 
-    if (isRoot) {
-      this._root = Array.isArray(this._root)
-        ? [model, this._root[1]]
-        : [model, null];
+    if (model.role === 'root') {
+      this._root = model;
       this.slots.rootAdded.emit(this._root);
       this.workspace.slots.pageAdded.emit(this.id);
-    } else if (isSurface) {
-      this._root = Array.isArray(this._root)
-        ? [this._root[0], model]
-        : [null, model];
-      this.slots.rootAdded.emit(this._root);
-    } else {
-      const parent = this.getParent(model);
-      const index = parent?.childMap.get(model.id);
-      if (parent && index !== undefined) {
-        parent.children[index] = model;
-        parent.childrenUpdated.emit();
-      }
+      return;
+    }
+
+    const parent = this.getParent(model);
+    const index = parent?.childMap.get(model.id);
+    if (parent && index !== undefined) {
+      parent.children[index] = model;
+      parent.childrenUpdated.emit();
     }
   }
 
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
-    if (model === this._root?.[0]) {
+    if (model === this._root) {
       this.slots.rootDeleted.emit(id);
     } else {
       // TODO dispatch model delete event

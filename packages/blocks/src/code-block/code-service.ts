@@ -12,28 +12,64 @@ import type {
 } from '../__internal__/utils/index.js';
 import { getVirgoByModel } from '../__internal__/utils/index.js';
 import type { CodeBlockModel } from './code-model.js';
+import { getStandardLanguage } from './utils/code-languages.js';
+import { FALLBACK_LANG } from './utils/consts.js';
+
+const INDENT_SYMBOL = '  ';
+const LINE_BREAK_SYMBOL = '\n';
+const allIndexOf = (
+  text: string,
+  symbol: string,
+  start = 0,
+  end = text.length
+) => {
+  const indexArr: number[] = [];
+  let i = start;
+
+  while (i < end) {
+    const index = text.indexOf(symbol, i);
+    if (index === -1 || index > end) {
+      break;
+    }
+    indexArr.push(index);
+    i = index + 1;
+  }
+  return indexArr;
+};
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {
-  setLang(model: CodeBlockModel, lang: string) {
-    model.page.updateBlock(model, { language: lang });
+  setLang(model: CodeBlockModel, lang: string | null) {
+    const standardLang = getStandardLanguage(lang);
+    const langName = standardLang?.id ?? FALLBACK_LANG;
+    model.page.updateBlock(model, {
+      language: langName,
+    });
   }
 
   override block2html(
     block: CodeBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ): string {
-    const codeElement = document.querySelector(
-      `[${BLOCK_ID_ATTR}="${block.id}"] pre`
+    const richTextElement = document.querySelector(
+      `[${BLOCK_ID_ATTR}="${block.id}"] rich-text`
     );
-    if (!codeElement) {
+    if (!richTextElement) {
       return super.block2html(block, {
         childText,
         begin,
         end,
       });
     }
-    codeElement.setAttribute('code-lang', block.language);
-    return codeElement.outerHTML;
+    const preElement = document.createElement('pre');
+    const codeElement = document.createElement('code');
+    preElement.setAttribute('code-lang', block.language);
+    codeElement.innerHTML = Array.from(
+      richTextElement.querySelectorAll('v-line')
+    )
+      .map(line => line.textContent + '\n')
+      .join('');
+    preElement.append(codeElement);
+    return preElement.outerHTML;
   }
 
   override async json2Block(
@@ -67,25 +103,33 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
         key: 'Tab',
         handler(range, context) {
           context.event.stopPropagation();
-
-          const lastLineBreakBeforeCursor = this.vEditor.yText
-            .toString()
-            .lastIndexOf('\n', range.index - 1);
-
-          const lineStart =
-            lastLineBreakBeforeCursor !== -1
-              ? lastLineBreakBeforeCursor + 1
-              : 0;
-          this.vEditor.insertText(
-            {
-              index: lineStart,
-              length: 0,
-            },
-            '  '
-          );
+          const text = this.vEditor.yText.toString();
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, range.index - 1);
+          const indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            range.index,
+            range.index + range.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr.forEach(i => {
+            this.vEditor.insertText(
+              {
+                index: i,
+                length: 0,
+              },
+              INDENT_SYMBOL
+            );
+          });
           this.vEditor.setVRange({
             index: range.index + 2,
-            length: 0,
+            length: range.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
           });
 
           return PREVENT_DEFAULT;
@@ -94,29 +138,39 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
       shiftTab: {
         key: 'Tab',
         shiftKey: true,
-        handler(range, context) {
+        handler: function (range, context) {
           context.event.stopPropagation();
-
-          const lastLineBreakBeforeCursor = this.vEditor.yText
-            .toString()
-            .lastIndexOf('\n', range.index - 1);
-
-          const lineStart =
-            lastLineBreakBeforeCursor !== -1
-              ? lastLineBreakBeforeCursor + 1
-              : 0;
-          if (
-            this.vEditor.yText.length >= 2 &&
-            this.vEditor.yText.toString().slice(lineStart, lineStart + 2) ===
-              '  '
-          ) {
+          const text = this.vEditor.yText.toString();
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, range.index - 1);
+          let indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            range.index,
+            range.index + range.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr = indexArr.filter(
+            i => text.slice(i, i + 2) === INDENT_SYMBOL
+          );
+          indexArr.forEach(i => {
             this.vEditor.deleteText({
-              index: lineStart,
+              index: i,
               length: 2,
             });
+          });
+          if (indexArr.length > 0) {
             this.vEditor.setVRange({
-              index: range.index - 2,
-              length: 0,
+              index:
+                range.index -
+                (indexArr[indexArr.length - 1] < range.index ? 2 : 0),
+              length:
+                range.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
             });
           }
 

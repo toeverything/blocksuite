@@ -1,8 +1,10 @@
-import type { Bound, PhasorElement } from '@blocksuite/phasor';
+import type {
+  Bound,
+  PhasorElement,
+  PhasorElementType,
+} from '@blocksuite/phasor';
 import {
   deserializeXYWH,
-  ElementCtors,
-  generateElementId,
   getCommonBound,
   serializeXYWH,
 } from '@blocksuite/phasor';
@@ -20,6 +22,7 @@ import { deleteModelsByRange } from '../../page-block/utils/container-operations
 import type { SerializedBlock, TopLevelBlockModel } from '../index.js';
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
+import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/block-range.js';
 import { groupBy } from '../utils/std.js';
 import type { Clipboard } from './type.js';
@@ -50,6 +53,10 @@ export class EdgelessClipboard implements Clipboard {
     document.body.addEventListener('paste', this._onPaste);
   }
 
+  get selection() {
+    return this._edgeless.selection;
+  }
+
   public dispose() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
@@ -57,17 +64,20 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   private _onCut = (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._edgeless)) {
+      return;
+    }
     e.preventDefault();
     this._onCopy(e);
 
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
+    const { state } = this.selection;
+    if (state.active) {
       deleteModelsByRange(this._page);
       return;
     }
 
     this._page.transact(() => {
-      selection.selected.forEach(selected => {
+      state.selected.forEach(selected => {
         if (isTopLevelBlock(selected)) {
           this._page.deleteBlock(selected);
         } else {
@@ -79,16 +89,19 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private _onCopy = (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._edgeless)) {
+      return;
+    }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
+    const { state } = this.selection;
     // when frame active, handle copy like page mode
-    if (selection.active) {
+    if (state.active) {
       const range = getCurrentBlockRange(this._page);
       assertExists(range);
       copyBlocks(range);
       return;
     }
-    const data = selection.selected
+    const data = state.selected
       .map(selected => {
         if (isTopLevelBlock(selected)) {
           return getBlockClipboardInfo(selected).json;
@@ -103,9 +116,12 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private _onPaste = async (e: ClipboardEvent) => {
+    if (!activeEditorManager.isActive(this._edgeless)) {
+      return;
+    }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
+    const { state } = this.selection;
+    if (state.active) {
       this._pasteInTextFrame(e);
       return;
     }
@@ -140,9 +156,11 @@ export class EdgelessClipboard implements Clipboard {
     const phasorElements =
       (elements
         ?.map(d => {
-          const type = (d as unknown as PhasorElement).type;
-          const element = ElementCtors[type]?.deserialize(d);
-          element.id = generateElementId();
+          const id = this._edgeless.surface.addElement(
+            d.type as keyof PhasorElementType,
+            d
+          );
+          const element = this._edgeless.surface.pickById(id);
           return element;
         })
         .filter(e => !!e) as PhasorElement[]) || [];
@@ -223,7 +241,9 @@ export class EdgelessClipboard implements Clipboard {
         .filter(e => !!e) as PhasorElement[]),
       ...(frameIds
         .map(id => this._page.getBlockById(id))
-        .filter(f => !!f) as TopLevelBlockModel[]),
+        .filter(
+          f => !!f && f.flavour === 'affine:frame'
+        ) as TopLevelBlockModel[]),
     ];
 
     this._edgeless.slots.selectionUpdated.emit({
@@ -249,7 +269,7 @@ export class EdgelessClipboard implements Clipboard {
       groupedByType.frames || []
     );
 
-    const lastMousePos = this._edgeless.getSelection().lastMousePos;
+    const { lastMousePos } = this.selection;
     const [modelX, modelY] = this._edgeless.surface.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
@@ -259,12 +279,17 @@ export class EdgelessClipboard implements Clipboard {
 
     // update phasor elements' position to mouse position
     elements.forEach(ele => {
-      ele.x = pasteX + ele.x - oldCommonBound.x;
-      ele.y = pasteY + ele.y - oldCommonBound.y;
-    });
+      const newXYWH = serializeXYWH(
+        pasteX + ele.x - oldCommonBound.x,
+        pasteY + ele.y - oldCommonBound.y,
+        ele.w,
+        ele.h
+      );
 
-    // add phasor element to surface
-    this._edgeless.surface.addElements(elements);
+      this._edgeless.surface.updateElement(ele.id, {
+        xywh: newXYWH,
+      });
+    });
     // create and add blocks to page
     const frameIds = await this._createFrameBlocks(
       groupedByType.frames || [],

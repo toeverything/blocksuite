@@ -12,7 +12,7 @@ export class EdgelessToolIconButton extends LitElement {
       display: flex;
       align-items: center;
       padding: 4px;
-      color: var(--affine-text-secondary-color);
+      color: var(--affine-icon-color);
       margin: 8px;
       border-radius: 5px;
       cursor: pointer;
@@ -31,18 +31,33 @@ export class EdgelessToolIconButton extends LitElement {
     }
 
     .icon-container[disabled] {
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .icon-container[coming] {
       cursor: not-allowed;
       color: var(--affine-text-disable-color);
     }
 
     ${tooltipStyle}
+
+    tool-tip {
+      z-index: 12;
+    }
   `;
 
   @property()
   disabled = false;
 
   @property()
+  coming = false;
+
+  @property()
   tooltip!: string | TemplateResult<1>;
+
+  @property()
+  tipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
   @property()
   active = false;
@@ -66,7 +81,7 @@ export class EdgelessToolIconButton extends LitElement {
   }
 
   override render() {
-    const tooltip = this.disabled ? '(Coming soon)' : this.tooltip;
+    const tooltip = this.coming ? '(Coming soon)' : this.tooltip;
     const classnames = `icon-container has-tool-tip active-mode-${this.activeMode}`;
 
     return html`
@@ -78,7 +93,11 @@ export class EdgelessToolIconButton extends LitElement {
       >
         <slot></slot>
         ${tooltip
-          ? html`<tool-tip inert role="tooltip" tip-position="top" arrow
+          ? html`<tool-tip
+              inert
+              role="tooltip"
+              tip-position=${this.tipPosition}
+              arrow
               >${tooltip}</tool-tip
             >`
           : nothing}

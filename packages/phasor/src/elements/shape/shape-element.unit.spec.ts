@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest';
+import * as Y from 'yjs';
 
+import { StrokeStyle } from '../../consts.js';
+import { SurfaceManager } from '../../surface.js';
+import { Bound } from '../../utils/bound.js';
 import { ShapeElement } from './shape-element.js';
+import type { IShape } from './types.js';
 
-const dataWithoutXywh = {
+const dataWithoutXywh: Omit<IShape, 'xywh'> = {
   id: '1',
-  index: 'a0',
   type: 'shape',
+  index: 'a0',
+  seed: 0,
 
   shapeType: 'rect',
 
@@ -14,14 +20,19 @@ const dataWithoutXywh = {
   fillColor: '#000000',
   strokeWidth: 4,
   strokeColor: '#000000',
-  strokeStyle: 'solid',
+  strokeStyle: StrokeStyle.Solid,
 };
 
-const data = { ...dataWithoutXywh, xywh: '[0,0,20,20]' };
+const data: IShape = { ...dataWithoutXywh, xywh: '[0,0,20,20]' };
 
-describe('brush element', () => {
+describe('shape element', () => {
+  const doc = new Y.Doc();
+  const yMap = doc.getMap('shape');
+  const yContainer = doc.getMap('surface');
+  const surface = new SurfaceManager(yContainer, value => value);
+
   it('deserialize', () => {
-    const element = ShapeElement.deserialize(data);
+    const element = new ShapeElement(yMap, surface, data);
     expect(element).toMatchObject({
       ...dataWithoutXywh,
       x: 0,
@@ -32,13 +43,13 @@ describe('brush element', () => {
   });
 
   it('serialize', () => {
-    const element = ShapeElement.deserialize(data);
+    const element = new ShapeElement(yMap, surface, data);
     const serialized = element.serialize();
     expect(serialized).toMatchObject(data);
   });
 
   it('hit test rect', () => {
-    const element = ShapeElement.deserialize(data);
+    const element = new ShapeElement(yMap, surface, data);
     expect(element.hitTest(0, 0)).toBeTruthy();
     // point is in rect, but not in path
     expect(element.hitTest(10, 10)).toBeTruthy();
@@ -46,7 +57,7 @@ describe('brush element', () => {
   });
 
   it('hit test diamond', () => {
-    const element = ShapeElement.deserialize({
+    const element = new ShapeElement(yMap, surface, {
       ...data,
       shapeType: 'diamond',
     });
@@ -59,7 +70,7 @@ describe('brush element', () => {
   });
 
   it('hit test triangle', () => {
-    const element = ShapeElement.deserialize({
+    const element = new ShapeElement(yMap, surface, {
       ...data,
       shapeType: 'triangle',
     });
@@ -72,7 +83,7 @@ describe('brush element', () => {
   });
 
   it('hit test ellipse', () => {
-    const element = ShapeElement.deserialize({
+    const element = new ShapeElement(yMap, surface, {
       ...data,
       shapeType: 'ellipse',
     });
@@ -87,13 +98,10 @@ describe('brush element', () => {
   });
 
   it('transform', () => {
-    const element = ShapeElement.deserialize(data);
-    const props = ShapeElement.getBoundProps(element, {
-      x: 1,
-      y: 1,
-      w: 10,
-      h: 10,
+    const element = new ShapeElement(yMap, surface, data);
+    element.applyUpdate({
+      xywh: new Bound(1, 1, 10, 10).serialize(),
     });
-    expect(props.xywh).toBe('[1,1,10,10]');
+    expect(element.xywh).toBe('[1,1,10,10]');
   });
 });

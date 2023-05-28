@@ -125,7 +125,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await switchColumnType(page, 'rich-text');
   await initDatabaseDynamicRowWithData(page, '123', true);
 
-  const cell = getFirstColumnCell(page, 'rich-text-container');
+  const cell = getFirstColumnCell(page, 'affine-database-rich-text');
   await cell.click();
   await pressArrowLeft(page);
   await pressEnter(page);
@@ -166,6 +166,9 @@ test('should hide placeholder of paragraph in database', async ({ page }) => {
 test('should show or hide database toolbar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseRow(page);
 
   const db = await getDatabaseMouse(page);
   await db.mouseOver();
@@ -443,8 +446,8 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'rich-text');
 
     // For now, rich-text will only be initialized on click
-    // Therefore, for the time being, here is to detect whether there is '.rich-text-container'
-    const cell = getFirstColumnCell(page, 'rich-text-container');
+    // Therefore, for the time being, here is to detect whether there is '.affine-database-rich-text'
+    const cell = getFirstColumnCell(page, 'affine-database-rich-text');
     expect(await cell.count()).toBe(1);
 
     await initDatabaseDynamicRowWithData(page, '123');
@@ -527,6 +530,66 @@ test.describe('switch column type', () => {
     await assertDatabaseCellNumberText(page, {
       text: '',
     });
+  });
+
+  test('switch to checkbox', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await switchColumnType(page, 'checkbox');
+
+    const checkbox = getFirstColumnCell(page, 'checkbox');
+    await expect(checkbox).not.toHaveClass('checked');
+
+    await checkbox.click();
+    await expect(checkbox).toHaveClass(/checked/);
+
+    await undoByClick(page);
+    await expect(checkbox).not.toHaveClass('checked');
+  });
+
+  test('switch to progress', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '', true);
+    await switchColumnType(page, 'progress');
+
+    const progress = getFirstColumnCell(page, 'progress');
+    expect(await progress.textContent()).toBe('0');
+
+    const progressBg = page.locator('.affine-database-progress-bg');
+    const {
+      x: progressBgX,
+      y: progressBgY,
+      width: progressBgWidth,
+    } = await getBoundingBox(progressBg);
+    await page.mouse.move(progressBgX, progressBgY);
+
+    const dragHandle = page.locator('.affine-database-progress-drag-handle');
+    const {
+      x: dragX,
+      y: dragY,
+      width,
+      height,
+    } = await getBoundingBox(dragHandle);
+    const dragCenterX = dragX + width / 2;
+    const dragCenterY = dragY + height / 2;
+    await page.mouse.move(dragCenterX, dragCenterY);
+
+    const endX = dragCenterX + progressBgWidth;
+    await dragBetweenCoords(
+      page,
+      { x: dragCenterX, y: dragCenterY },
+      { x: endX, y: dragCenterY }
+    );
+    expect(await progress.textContent()).toBe('100');
+
+    await undoByClick(page);
+    expect(await progress.textContent()).toBe('0');
   });
 });
 
@@ -692,7 +755,7 @@ test('should display the add column button on the right side of database correct
   await dragBetweenCoords(
     page,
     { x: box.x, y: box.y },
-    { x: box.x + 100, y: box.y },
+    { x: box.x + 120, y: box.y },
     {
       steps: 50,
       beforeMouseUp: async () => {

@@ -8,13 +8,13 @@ import '@blocksuite/editor/themes/affine.css';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
-import { EditorContainer } from '@blocksuite/editor';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
 import { DebugMenu } from './components/debug-menu.js';
 import type { InitFn } from './data';
 import {
+  createEditor,
   createWorkspaceOptions,
   defaultMode,
   initDebugConfig,
@@ -35,21 +35,12 @@ function subscribePage(workspace: Workspace) {
         return;
       }
     }
+    const app = document.getElementById('app');
+    if (!app) {
+      return;
+    }
     const page = workspace.getPage(pageId) as Page;
-
-    const editor = new EditorContainer();
-    editor.page = page;
-    editor.autofocus = true;
-    editor.slots.pageLinkClicked.on(({ pageId }) => {
-      const page = workspace.getPage(pageId);
-      if (!page) {
-        throw new Error(`Failed to jump to page ${pageId}`);
-      }
-      editor.page = page;
-    });
-
-    document.getElementById('app')?.append(editor);
-
+    const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
     debugMenu.workspace = workspace;
@@ -57,17 +48,21 @@ function subscribePage(workspace: Workspace) {
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
     document.body.appendChild(debugMenu);
-    editor.createBlockHub().then(blockHub => {
-      document.body.appendChild(blockHub);
-    });
 
     window.editor = editor;
     window.page = page;
   });
 }
 
-async function initPageContentByParam(workspace: Workspace, param: string) {
-  const functionMap = new Map<string, (workspace: Workspace) => void>();
+export async function initPageContentByParam(
+  workspace: Workspace,
+  param: string,
+  pageId: string
+) {
+  const functionMap = new Map<
+    string,
+    (workspace: Workspace, id: string) => void
+  >();
   Object.values(
     (await import('./data/index.js')) as Record<string, InitFn>
   ).forEach(fn => functionMap.set(fn.id, fn));
@@ -78,19 +73,21 @@ async function initPageContentByParam(workspace: Workspace, param: string) {
 
   // Load built-in init function when `?init=heavy` param provided
   if (functionMap.has(param)) {
-    functionMap.get(param)?.(workspace);
+    functionMap.get(param)?.(workspace, pageId);
     return;
   }
 
   // Try to load base64 content or markdown content from url
-  await tryInitExternalContent(workspace, param);
+  await tryInitExternalContent(workspace, param, pageId);
 }
 
 async function main() {
+  if (window.workspace) {
+    return;
+  }
   const workspace = new Workspace(options)
     .register(AffineSchemas)
     .register(__unstableSchemas);
-
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
@@ -107,7 +104,7 @@ async function main() {
 
   subscribePage(workspace);
   if (initParam !== null) {
-    await initPageContentByParam(workspace, initParam);
+    await initPageContentByParam(workspace, initParam, 'page0');
     return;
   }
 

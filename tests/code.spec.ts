@@ -15,7 +15,10 @@ import {
   initEmptyParagraphState,
   pasteByKeyboard,
   pressArrowLeft,
+  pressArrowUp,
   pressEnter,
+  pressShiftTab,
+  pressTab,
   redoByKeyboard,
   selectAllByKeyboard,
   SHORT_KEY,
@@ -125,7 +128,7 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   const languageButton = codeBlockController.languageButton;
   await expect(languageButton).toBeVisible();
   const languageText = await languageButton.innerText();
-  expect(languageText).toEqual('TypeScript');
+  expect(languageText).toEqual('Typescript');
 });
 
 test('use more than three backticks can not create code block', async ({
@@ -177,7 +180,7 @@ test('change code language can work', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:code
-  prop:language="Rust"
+  prop:language="rust"
 />`,
     codeBlockId
   );
@@ -295,6 +298,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:code
       prop:language="Plain Text"
@@ -341,6 +345,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:code
       prop:language="Plain Text"
@@ -440,7 +445,7 @@ test('drag select code block can delete it', async ({ page }) => {
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY },
-    { steps: 10 }
+    { steps: 20 }
   );
   await page.waitForTimeout(10);
   await page.keyboard.press('Backspace');
@@ -645,4 +650,49 @@ test('should code block works in read only mode', async ({ page }) => {
   await expect(
     codeBlockController.codeOption.locator('format-bar-button')
   ).toHaveCount(2);
+});
+
+test('should code block lang input supports alias', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  const codeBlockController = getCodeBlock(page);
+  const codeBlock = codeBlockController.codeBlock;
+  await codeBlock.hover();
+  await codeBlockController.clickLanguageButton();
+  await expect(codeBlockController.langList).toBeVisible();
+  await type(page, '文言');
+  await pressEnter(page);
+  await expect(codeBlockController.languageButton).toHaveText('Wenyan');
+});
+
+test('multi-line indent', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'aaa');
+  await pressEnter(page);
+
+  await type(page, 'bbb');
+  await pressEnter(page);
+
+  await type(page, 'ccc');
+
+  await page.keyboard.down('Shift');
+  await pressArrowUp(page, 2);
+  await page.keyboard.up('Shift');
+
+  await pressTab(page);
+
+  await assertRichTexts(page, ['  aaa\n  bbb\n  ccc']);
+
+  await pressShiftTab(page);
+
+  await assertRichTexts(page, ['aaa\nbbb\nccc']);
+
+  await pressShiftTab(page);
+
+  await assertRichTexts(page, ['aaa\nbbb\nccc']);
 });

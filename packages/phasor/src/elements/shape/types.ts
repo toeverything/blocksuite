@@ -1,14 +1,18 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+
 import type { IBound, StrokeStyle } from '../../consts.js';
-import type { HitTestOptions } from '../base-element.js';
+import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { HitTestOptions } from '../surface-element.js';
 import type { ShapeElement } from './shape-element.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
-export type SerializedShapeProps = {
+export interface IShape {
   id: string;
+  type: 'shape';
+  xywh: SerializedXYWH;
   index: string;
-  type: string;
-  xywh: string;
+  seed: number;
 
   shapeType: ShapeType;
   radius: number;
@@ -17,14 +21,14 @@ export type SerializedShapeProps = {
   strokeWidth: number;
   strokeColor: string;
   strokeStyle: StrokeStyle;
-};
-
-type ShapeKeys = keyof Omit<SerializedShapeProps, 'id' | 'type' | 'xywh'>;
-
-export type ShapeProps = Partial<Pick<SerializedShapeProps, ShapeKeys>>;
+}
 
 export interface ShapeMethods {
-  render: (ctx: CanvasRenderingContext2D, element: ShapeElement) => void;
+  render: (
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    element: ShapeElement
+  ) => void;
   hitTest: (
     x: number,
     y: number,

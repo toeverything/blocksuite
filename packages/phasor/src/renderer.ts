@@ -1,7 +1,9 @@
+import { clamp, type IPoint, Point } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
+import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import { MIN_ZOOM } from './consts.js';
-import type { PhasorElement } from './elements/index.js';
+import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
+import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
 
@@ -10,24 +12,28 @@ export interface SurfaceViewport {
   readonly top: number;
   readonly width: number;
   readonly height: number;
+  readonly center: Point;
   readonly centerX: number;
   readonly centerY: number;
   readonly zoom: number;
   readonly viewportX: number;
   readonly viewportY: number;
+  readonly viewportMinXY: IPoint;
+  readonly viewportMaxXY: IPoint;
+  readonly viewportBounds: IBound;
 
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
 
   setCenter(centerX: number, centerY: number): void;
-  setZoom(zoom: number): void;
-  applyDeltaZoom(delta: number): void;
+  setZoom(zoom: number, focusPoint?: Point): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
 }
 
 export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
+  rc: RoughCanvas;
   gridManager = new GridManager();
 
   private _container!: HTMLElement;
@@ -37,13 +43,14 @@ export class Renderer implements SurfaceViewport {
   private _height = 0;
 
   private _zoom = 1.0;
-  private _centerX = 0.0;
-  private _centerY = 0.0;
+  private _center = new Point();
   private _shouldUpdate = false;
 
   constructor() {
-    this.canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
+    this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    this.rc = new RoughCanvas(canvas);
   }
 
   get left() {
@@ -67,67 +74,99 @@ export class Renderer implements SurfaceViewport {
   }
 
   get centerX() {
-    return this._centerX;
+    return this._center.x;
   }
 
   get centerY() {
-    return this._centerY;
+    return this._center.y;
+  }
+
+  get center() {
+    return this._center;
   }
 
   get viewportX() {
-    return this.centerX - this.width / 2 / this._zoom;
+    const { centerX, width, zoom } = this;
+    return centerX - width / 2 / zoom;
   }
 
   get viewportY() {
-    return this.centerY - this.height / 2 / this._zoom;
+    const { centerY, height, zoom } = this;
+    return centerY - height / 2 / zoom;
+  }
+
+  get viewportMinXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX - width / 2 / zoom,
+      y: centerY - height / 2 / zoom,
+    };
+  }
+
+  get viewportMaxXY() {
+    const { centerX, centerY, width, height, zoom } = this;
+    return {
+      x: centerX + width / 2 / zoom,
+      y: centerY + height / 2 / zoom,
+    };
+  }
+
+  get viewportBounds() {
+    const { viewportMinXY, viewportMaxXY } = this;
+    return {
+      ...viewportMinXY,
+      w: viewportMaxXY.x - viewportMinXY.x,
+      h: viewportMaxXY.y - viewportMinXY.y,
+    };
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {
-    return [
-      this.viewportX + viewX / this._zoom,
-      this.viewportY + viewY / this._zoom,
-    ];
+    const { viewportX, viewportY, zoom } = this;
+    return [viewportX + viewX / zoom, viewportY + viewY / zoom];
   }
 
   toViewCoord(logicalX: number, logicalY: number): [number, number] {
-    return [
-      (logicalX - this.viewportX) * this._zoom,
-      (logicalY - this.viewportY) * this._zoom,
-    ];
+    const { viewportX, viewportY, zoom } = this;
+    return [(logicalX - viewportX) * zoom, (logicalY - viewportY) * zoom];
   }
 
   setCenter(centerX: number, centerY: number) {
-    this._centerX = centerX;
-    this._centerY = centerY;
+    this._center.set(centerX, centerY);
     this._shouldUpdate = true;
   }
 
-  setZoom(zoom: number) {
-    this._zoom = zoom;
-    this._shouldUpdate = true;
-  }
+  /**
+   *
+   * @param zoom zoom
+   * @param focusPoint canvas coordinate
+   */
+  setZoom(zoom: number, focusPoint?: Point) {
+    const prevZoom = this.zoom;
+    focusPoint = focusPoint ?? this._center;
+    this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+    const newZoom = this.zoom;
 
-  applyDeltaZoom(delta: number) {
-    const val = (this.zoom * (100 + delta)) / 100;
-    const newZoom = Math.max(val, MIN_ZOOM);
-    this.setZoom(newZoom);
+    const offset = this.center.subtract(focusPoint);
+    const newCenter = focusPoint.add(offset.scale(prevZoom / newZoom));
+    this.setCenter(newCenter.x, newCenter.y);
+    this._shouldUpdate = true;
   }
 
   applyDeltaCenter = (deltaX: number, deltaY: number) => {
-    this.setCenter(this._centerX + deltaX, this._centerY + deltaY);
+    this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
   };
 
-  addElement(element: PhasorElement) {
+  addElement(element: SurfaceElement) {
     this.gridManager.add(element);
     this._shouldUpdate = true;
   }
 
-  removeElement(element: PhasorElement) {
+  removeElement(element: SurfaceElement) {
     this.gridManager.remove(element);
     this._shouldUpdate = true;
   }
 
-  load(elements: PhasorElement[]) {
+  load(elements: SurfaceElement[]) {
     for (let i = 0; i < elements.length; i++) {
       this.gridManager.add(elements[i]);
     }
@@ -155,8 +194,8 @@ export class Renderer implements SurfaceViewport {
     this._resetSize();
 
     this.setCenter(
-      this._centerX - (oldWidth - this.width) / 2,
-      this._centerY - (oldHeight - this.height) / 2
+      this.centerX - (oldWidth - this.width) / 2,
+      this.centerY - (oldHeight - this.height) / 2
     );
 
     // Re-render once the canvas size changed. Otherwise it will flicker.
@@ -195,36 +234,26 @@ export class Renderer implements SurfaceViewport {
   }
 
   private _render() {
-    const { ctx, centerX, centerY, width, height, zoom } = this;
+    const { ctx, gridManager, viewportBounds, width, height, rc, zoom } = this;
     const dpr = window.devicePixelRatio;
-    const viewportLeft = centerX - width / 2 / zoom;
-    const viewportTop = centerY - height / 2 / zoom;
-    const viewportRight = centerX + width / 2 / zoom;
-    const viewportBottom = centerY + height / 2 / zoom;
-    const viewBound = {
-      x: viewportLeft,
-      y: viewportTop,
-      w: viewportRight - viewportLeft,
-      h: viewportBottom - viewportTop,
-    };
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
     ctx.save();
 
     ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, 0, 0);
 
-    const elements = this.gridManager.search(viewBound);
+    const elements = gridManager.search(viewportBounds);
     for (const element of elements) {
-      const dx = element.x - viewBound.x;
-      const dy = element.y - viewBound.y;
-      this.ctx.save();
-      this.ctx.translate(dx, dy);
+      const dx = element.x - viewportBounds.x;
+      const dy = element.y - viewportBounds.y;
+      ctx.save();
+      ctx.translate(dx, dy);
 
-      if (intersects(element, viewBound)) {
-        element.render(this.ctx);
+      if (intersects(element, viewportBounds) && element.display) {
+        element.render(ctx, rc);
       }
 
-      this.ctx.restore();
+      ctx.restore();
     }
 
     ctx.restore();

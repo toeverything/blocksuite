@@ -5,13 +5,14 @@ import {
   BlockHubIcon,
   CrossIcon,
   DatabaseTableViewIcon,
-  ImageIcon,
+  EmbedIcon,
   NumberedListIconLarge,
   RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import {
   customElement,
@@ -20,21 +21,22 @@ import {
   queryAll,
   state,
 } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EditingState, Rect } from '../__internal__/index.js';
+import type {
+  AbstractEditor,
+  EditingState,
+  Rect,
+} from '../__internal__/index.js';
 import {
+  calcDropTarget,
+  type DroppingType,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
-  ShadowlessElement,
-  WithDisposable,
 } from '../__internal__/index.js';
-import {
-  DragHandle,
-  type DragIndicator,
-  type DroppingType,
-} from './drag-handle.js';
+import { type DragIndicator } from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
@@ -42,6 +44,12 @@ const styles = css`
     position: absolute;
     z-index: 1;
     user-select: none;
+  }
+
+  @media print {
+    affine-block-hub {
+      display: none;
+    }
   }
 
   .affine-block-hub-container {
@@ -52,10 +60,11 @@ const styles = css`
     display: none;
     justify-content: center;
     fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
     font-size: var(--affine-font-sm);
     background: var(--affine-background-overlay-panel-color);
-    box-shadow: 0 0 8px rgba(66, 65, 73, 0.12);
-    border-radius: 10px;
+    box-shadow: var(--affine-menu-shadow);
+    border-radius: 8px;
   }
 
   .affine-block-hub-container[type='text'] {
@@ -86,9 +95,9 @@ const styles = css`
     align-items: center;
     width: 250px;
     height: 54px;
-    background: var(--affine-white-90);
-    box-shadow: 0 0 6px rgba(66, 65, 73, 0.08);
-    border-radius: 10px;
+    background: var(--affine-white-80);
+    box-shadow: var(--affine-shadow-1);
+    border-radius: 8px;
     margin-bottom: 12px;
     cursor: grab;
     top: 0;
@@ -111,6 +120,7 @@ const styles = css`
   .card-container-inner:hover .card-container {
     background: var(--affine-hover-color);
     fill: var(--affine-primary-color);
+    color: var(--affine-primary-color);
     top: -2px;
     left: -2px;
   }
@@ -118,8 +128,7 @@ const styles = css`
   .card-container-inner:hover .card-container.grabbing {
     top: unset;
     left: unset;
-    box-shadow: 1px 1px 8px rgba(66, 65, 73, 0.12),
-      0 0 12px rgba(66, 65, 73, 0.08);
+    box-shadow: var(--affine-shadow-2);
   }
 
   .card-description-container {
@@ -167,11 +176,11 @@ const styles = css`
     position: fixed;
     width: 44px;
     background: var(--affine-background-primary-color);
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
   .block-hub-menu-container[expanded] {
-    box-shadow: 0px 0px 8px rgba(66, 65, 73, 0.12);
+    box-shadow: var(--affine-menu-shadow);
     background: var(--affine-background-overlay-panel-color);
   }
 
@@ -181,18 +190,24 @@ const styles = css`
     align-items: center;
     margin-bottom: 8px;
     position: relative;
-    border-radius: 5px;
-    fill: var(--affine-text-secondary-color);
+    border-radius: 4px;
+    fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
     height: 36px;
+  }
+  .block-hub-icon-container svg {
+    width: 24px;
+    height: 24px;
   }
 
   .block-hub-icon-container[selected='true'] {
     fill: var(--affine-primary-color);
+    color: var(--affine-primary-color);
   }
 
   .block-hub-icon-container:hover {
     background: var(--affine-hover-color);
-    border-radius: 5px;
+    border-radius: 4px;
   }
 
   .new-icon {
@@ -202,17 +217,20 @@ const styles = css`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border-radius: 10px;
-    fill: var(--affine-text-secondary-color);
+    border-radius: 8px;
+    fill: var(--affine-icon-color);
   }
 
+  .new-icon-in-edgeless {
+    box-shadow: var(--affine-menu-shadow);
+  }
   .block-hub-menu-container[expanded] .new-icon {
-    border-radius: 5px;
+    border-radius: 4px;
+    box-shadow: unset;
   }
 
   .new-icon:hover {
-    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
+    box-shadow: var(--affine-menu-shadow);
     background: var(--affine-white);
     fill: var(--affine-primary-color);
   }
@@ -224,8 +242,6 @@ const styles = css`
 
   .icon-expanded:hover {
     background: var(--affine-hover-color);
-    box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-      -4px -4px 13px rgba(58, 76, 92, 0.02), 6px 6px 36px rgba(58, 76, 92, 0.06);
   }
 
   .divider {
@@ -339,7 +355,8 @@ function BlockHubMenu(
   visibleCardType: CardListType | null,
   isCardListVisible: boolean,
   showTooltip: boolean,
-  maxHeight: number
+  maxHeight: number,
+  page: Page
 ) {
   const menuNum = enableDatabase ? 5 : 4;
   const height = menuNum * 44 + 10;
@@ -355,9 +372,14 @@ function BlockHubMenu(
   );
 
   const blockHubFileCards = BlockHubCards(
-    BLOCKHUB_FILE_ITEMS,
+    BLOCKHUB_FILE_ITEMS.filter(({ flavour }) => {
+      if (flavour === 'affine:bookmark') {
+        return page.awarenessStore.getFlag('enable_bookmark_operation');
+      }
+      return true;
+    }),
     'file',
-    'Image or file',
+    'Content & Media',
     maxHeight,
     shouldDisplayCard('file', expanded, isCardListVisible, visibleCardType),
     isGrabbing,
@@ -408,7 +430,7 @@ function BlockHubMenu(
         type="file"
         selected=${visibleCardType === 'file' ? 'true' : 'false'}
       >
-        ${blockHubFileCards} ${ImageIcon}
+        ${blockHubFileCards} ${EmbedIcon}
       </div>
       ${enableDatabase
         ? html`
@@ -445,9 +467,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   public getAllowedBlocks: () => BaseBlockModel[];
 
   @property()
-  public onDragStarted: () => void;
-
-  @property()
   public getHoveringFrameState: (point: Point) => {
     container?: Element;
     rect?: Rect;
@@ -465,6 +484,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   @state()
   private _showTooltip = true;
+  @state()
+  private _inEdgelessMode = false;
 
   @state()
   private _maxHeight = 2000;
@@ -487,6 +508,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   @query('[role="menuitem"]')
   private _blockHubMenuEntry!: HTMLElement;
 
+  private _page: Page;
+
+  private readonly _onDragStartCallback: () => void;
+
   private readonly _onDropCallback: (
     e: DragEvent,
     point: Point,
@@ -494,21 +519,26 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     lastType: DroppingType
   ) => Promise<void>;
 
+  private readonly _onClickCardCallback: (data: {
+    flavour: string;
+    type?: string;
+  }) => Promise<void>;
+
   private _currentClientX = 0;
   private _currentClientY = 0;
   private _isCardListVisible = false;
   private _indicator!: DragIndicator;
   private _lastDroppingTarget: EditingState | null = null;
   private _lastDroppingType: DroppingType = 'none';
-  private _lastDraggingType: DroppingType = 'none';
+  private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private readonly _enableDatabase: boolean;
-  private _mouseRoot: HTMLElement;
+  private _mouseRoot: AbstractEditor;
 
   static override styles = styles;
 
   constructor(options: {
-    mouseRoot: HTMLElement;
+    mouseRoot: AbstractEditor;
     enableDatabase: boolean;
     getAllowedBlocks: () => BaseBlockModel[];
     getHoveringFrameState: (point: Point) => {
@@ -516,21 +546,26 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect?: Rect;
       scale: number;
     };
-    onDragStarted: () => void;
-    onDropCallback: (
+    onDragStart: () => void;
+    onDrop: (
       e: DragEvent,
       point: Point,
       lastModelState: EditingState | null,
       lastType: DroppingType
     ) => Promise<void>;
+    onClickCard: (data: { flavour: string; type?: string }) => Promise<void>;
+    page: Page;
   }) {
     super();
+    this._page = options.page;
     this._mouseRoot = options.mouseRoot;
     this._enableDatabase = options.enableDatabase;
-    this.onDragStarted = options.onDragStarted;
     this.getAllowedBlocks = options.getAllowedBlocks;
     this.getHoveringFrameState = options.getHoveringFrameState;
-    this._onDropCallback = options.onDropCallback;
+
+    this._onDragStartCallback = options.onDragStart;
+    this._onDropCallback = options.onDrop;
+    this._onClickCardCallback = options.onClickCard;
   }
 
   override connectedCallback() {
@@ -543,7 +578,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this._mouseRoot, 'dragover', this._onDragOver);
     disposables.addFromEvent(this._mouseRoot, 'drop', this._onDrop);
     disposables.addFromEvent(this, 'mousedown', this._onMouseDown);
-
+    disposables.add(
+      this._mouseRoot.slots.pageModeSwitched.on(mode => {
+        this._inEdgelessMode = mode === 'edgeless';
+      })
+    );
     if (isFirefox) {
       disposables.addFromEvent(
         this._mouseRoot,
@@ -560,6 +599,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
       disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
+      disposables.addFromEvent(card, 'click', e => this._onClickCard(e, card));
     });
     for (const blockHubMenu of this._blockHubMenus) {
       disposables.addFromEvent(
@@ -585,12 +625,16 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       'mouseover',
       this._onBlockHubEntryMouseOver
     );
-    disposables.addFromEvent(document, 'click', this._onClick);
+    disposables.addFromEvent(document, 'click', this._onClickOutside);
     disposables.addFromEvent(
       this._blockHubButton,
       'click',
       this._onBlockHubButtonClick
     );
+    disposables.addFromEvent(this._blockHubButton, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
     disposables.addFromEvent(
       this._blockHubIconsContainer,
       'transitionstart',
@@ -598,8 +642,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     );
     disposables.addFromEvent(window, 'resize', this._onResize);
     this._indicator = <DragIndicator>(
-      document.querySelector('affine-drag-indicator')
+      document.createElement('affine-drag-indicator')
     );
+    document.body.appendChild(this._indicator);
   }
 
   override disconnectedCallback() {
@@ -630,20 +675,31 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onClick = (e: MouseEvent) => {
+  private _onClickOutside = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
       this._hideCardList();
     }
   };
 
-  public toggleMenu(open: boolean) {
-    if (open) {
-      this._expanded = true;
-    } else {
-      this._expanded = false;
-      this._hideCardList();
+  private _onClickCard = (e: MouseEvent, blockHubElement: HTMLElement) => {
+    const affineType = blockHubElement.getAttribute('affine-type');
+    assertExists(affineType);
+    const data: {
+      flavour: string;
+      type?: string;
+    } = {
+      flavour: blockHubElement.getAttribute('affine-flavour') ?? '',
+    };
+    if (affineType) {
+      data.type = affineType;
     }
+    this._onClickCardCallback(data);
+  };
+
+  public toggleMenu() {
+    this._expanded = !this._expanded;
+    if (!this._expanded) this._hideCardList();
   }
 
   private _onBlockHubButtonClick = (_: MouseEvent) => {
@@ -677,9 +733,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       data.type = affineType;
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
-    this._lastDraggingType =
-      data.flavour === 'affine:database' ? 'database' : 'none';
-    this.onDragStarted();
+    this._lastDraggingFlavour = data.flavour;
+    this._onDragStartCallback();
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -715,38 +770,44 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect: frameRect,
       scale,
     } = this.getHoveringFrameState(point.clone());
-    let element = null;
-    if (frameRect) {
-      element = getClosestBlockElementByPoint(
-        point,
-        { container, rect: frameRect },
-        scale
-      );
+    if (!frameRect) {
+      this._resetDropState();
+      return;
+    }
+    const element = getClosestBlockElementByPoint(
+      point,
+      { container, rect: frameRect, snapToEdge: { x: false, y: true } },
+      scale
+    );
+    if (!element) {
+      // if (this._mouseRoot.mode === 'page') {
+      //   return;
+      // }
+      this._resetDropState();
+      return;
     }
 
     let type: DroppingType = 'none';
     let rect = null;
     let lastModelState = null;
-    if (element) {
-      const model = getModelByBlockElement(element);
-      const result = DragHandle.calcTarget(
-        point,
-        model,
-        element,
-        [],
-        scale,
-        this._lastDraggingType === 'database'
-      );
+    const model = getModelByBlockElement(element);
+    const result = calcDropTarget(
+      point,
+      model,
+      element,
+      [],
+      scale,
+      this._lastDraggingFlavour
+    );
 
-      if (result) {
-        type = result.type;
-        rect = result.rect;
-        lastModelState = result.modelState;
-      }
+    if (result) {
+      type = result.type;
+      rect = result.rect;
+      lastModelState = result.modelState;
     }
 
-    this._indicator.rect = rect;
     this._lastDroppingType = type;
+    this._indicator.rect = rect;
     this._lastDroppingTarget = lastModelState;
   };
 
@@ -765,13 +826,14 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _onDragEnd = (_: DragEvent) => {
     this._showTooltip = true;
     this._isGrabbing = false;
-    this._lastDraggingType = 'none';
-    this._lastDroppingType = 'none';
-    this._lastDroppingTarget = null;
+    this._lastDraggingFlavour = null;
+    this._resetDropState();
+  };
 
-    if (this._indicator) {
-      this._indicator.rect = null;
-    }
+  private _resetDropState = () => {
+    this._lastDroppingType = 'none';
+    this._indicator.rect = null;
+    this._lastDroppingTarget = null;
   };
 
   private _onDrop = (e: DragEvent) => {
@@ -828,7 +890,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._visibleCardType,
       this._isCardListVisible,
       this._showTooltip,
-      this._maxHeight
+      this._maxHeight,
+      this._page
     );
 
     const blockHubCards = BlockHubCards(
@@ -845,7 +908,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._isGrabbing,
       this._showTooltip
     );
-
+    const classes = classMap({
+      'icon-expanded': this._expanded,
+      'new-icon-in-edgeless': this._inEdgelessMode && !this._expanded,
+      'has-tool-tip': true,
+      'new-icon': true,
+    });
     return html`
       <div
         class="block-hub-menu-container"
@@ -853,11 +921,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         style="bottom: ${BOTTOM_OFFSET}px; right: ${RIGHT_OFFSET}px;"
       >
         ${blockHubMenu}
-        <div
-          class="has-tool-tip new-icon ${this._expanded ? 'icon-expanded' : ''}"
-          role="menuitem"
-          style="cursor:pointer;"
-        >
+        <div class=${classes} role="menuitem" style="cursor:pointer;">
           ${this._expanded ? CrossIcon : BlockHubIcon}
           <tool-tip
             class=${this._expanded ? 'invisible' : ''}

@@ -17,7 +17,6 @@ import {
   assertBlockType,
   assertRichTexts,
   assertText,
-  assertTextContain,
   assertTextFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -254,25 +253,6 @@ test('markdown inline-text', async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 
-  await waitNextFrame(page);
-  await type(page, '[test](www.test.com) ');
-  await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 6, {});
-  await undoByClick(page);
-  await waitNextFrame(page);
-  await assertRichTexts(page, ['[test](www.test.com) ']);
-  await undoByClick(page);
-  await assertRichTexts(page, ['']);
-
-  await waitNextFrame(page);
-  await type(page, 'www.test.com ');
-  await assertTextFormat(page, 0, 0, { link: 'www.test.com' });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 13, {});
-  await undoByClick(page);
-  await assertTextContain(page, 'www.test.com ');
-  await undoByClick(page);
   // TODO
   // await assertRichTexts(page, ['\n']);
 });

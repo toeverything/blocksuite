@@ -41,7 +41,7 @@ BlockSuite works very differently than traditional rich text frameworks. Feature
 - 📏 **Compact Rich Text**: BlockSuite builds its own rich text component. With minimal responsibilities that benefits from the block-based architecture, this component is light, simple and reliable.
 - 🎨 **Hybrid Infinite Canvas**: A high performance canvas-based renderer is also provided by BlockSuite, fulfilling needs for whiteboard functionalities.
 
-Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.html) for a detailed overview!
+Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/blocksuite-overview.html) for a detailed overview!
 
 ## Resources
 
@@ -51,8 +51,9 @@ Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/introduction.htm
   - [AFFiNE Alpha Editor](https://app.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/apps/web))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
   - [BlockSuite Monorepo in CodeSandbox](https://codesandbox.io/p/github/toeverything/blocksuite/master)
-- 📄 [Documentation](https://blocksuite.affine.pro/introduction.html)
-- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/10)
+  - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
+- 📄 [Documentation](https://blocksuite.affine.pro/blocksuite-overview.html)
+- 🗓️ [GitHub Project](https://github.com/orgs/toeverything/projects/22)
 - 📍 [GitHub Issues](https://github.com/toeverything/blocksuite/issues)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
@@ -65,7 +66,7 @@ To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://bl
 
 ## Current Status (`@blocksuite/editor`)
 
-> For more detailed planning and progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/10).
+> For more detailed planning and recent progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/22).
 
 - Basic text editing
   - ✅ Paragraph with inline style

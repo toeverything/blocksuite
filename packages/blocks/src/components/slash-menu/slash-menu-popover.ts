@@ -1,4 +1,5 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import { WithDisposable } from '@blocksuite/lit';
+import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -7,11 +8,19 @@ import {
   getRichTextByModel,
   isControlledKeyboardEvent,
   isFuzzyMatch,
-  WithDisposable,
 } from '../../__internal__/utils/index.js';
 import { createKeydownObserver } from '../utils.js';
 import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
+
+function collectGroupNames(menuItem: SlashItem[]) {
+  return menuItem.reduce((acc, item) => {
+    if (!acc.length || acc[acc.length - 1] !== item.groupName) {
+      acc.push(item.groupName);
+    }
+    return acc;
+  }, [] as string[]);
+}
 
 @customElement('slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
@@ -49,23 +58,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
    */
   private _searchString = '';
 
-  get enabledDatabase() {
-    return !!this.model.page.awarenessStore.getFlag('enable_database');
-  }
-
-  get filteredMenuGroups() {
-    return this.enabledDatabase
-      ? menuGroups
-      : menuGroups.filter(group => group.name !== 'Database');
-  }
-
-  get filterItems() {
-    return this.enabledDatabase
-      ? this._filterItems
-      : this._filterItems.filter(item => {
-          if (!item.alias) return true;
-          return item.alias.indexOf('database') === -1;
-        });
+  get menuGroups() {
+    return menuGroups;
   }
 
   override connectedCallback() {
@@ -75,7 +69,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       // Prevent input from losing focus
       e.preventDefault();
     });
-    this._filterItems = this.filteredMenuGroups.flatMap(group => group.items);
+    this._filterItems = this._updateItem('');
 
     const richText = getRichTextByModel(this.model);
     if (!richText) {
@@ -111,6 +105,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
           this.abortController.abort();
           return;
         }
+        if (e.key === ' ') {
+          this._hide = true;
+          next();
+          return;
+        }
         if (this._hide) {
           this._hide = false;
         }
@@ -141,22 +140,33 @@ export class SlashMenu extends WithDisposable(LitElement) {
         }
       },
       onMove: step => {
-        const configLen = this.filterItems.length;
+        const configLen = this._filterItems.length;
         if (this._leftPanelActivated) {
-          const nowGroupIdx = this._getGroupIndexByItem(
-            this.filterItems[this._activatedItemIndex]
+          const groupNames = collectGroupNames(this._filterItems);
+          const nowGroupIdx = groupNames.findIndex(
+            groupName =>
+              groupName ===
+              this._filterItems[this._activatedItemIndex].groupName
           );
-          this._handleClickCategory(
-            this.filteredMenuGroups[
-              (nowGroupIdx + step + this.filteredMenuGroups.length) %
-                this.filteredMenuGroups.length
-            ]
-          );
+          const targetGroup =
+            groupNames[
+              (nowGroupIdx + step + groupNames.length) % groupNames.length
+            ];
+          this._handleClickCategory(targetGroup);
           return;
         }
-        this._activatedItemIndex =
-          (this._activatedItemIndex + step + configLen) % configLen;
-        this._scrollToItem(this.filterItems[this._activatedItemIndex], false);
+        let ejectedCnt = configLen;
+        do {
+          this._activatedItemIndex =
+            (this._activatedItemIndex + step + configLen) % configLen;
+          // Skip disabled items
+        } while (
+          this._filterItems[this._activatedItemIndex].disabled &&
+          // If all items are disabled, the loop will never end
+          ejectedCnt--
+        );
+
+        this._scrollToItem(this._filterItems[this._activatedItemIndex], false);
       },
       onConfirm: () => {
         this._handleClickItem(this._activatedItemIndex);
@@ -179,12 +189,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   };
 
-  private _getGroupIndexByItem(item: SlashItem) {
-    return this.filteredMenuGroups.findIndex(group =>
-      group.items.includes(item)
-    );
-  }
-
   private _updateItem(query: string): SlashItem[] {
     this._searchString = query;
     this._activatedItemIndex = 0;
@@ -193,14 +197,18 @@ export class SlashMenu extends WithDisposable(LitElement) {
       this._leftPanelActivated = false;
     }
     const searchStr = this._searchString.toLowerCase();
+    let allMenus = this.menuGroups.flatMap(group => group.items);
+
+    allMenus = allMenus.filter(({ showWhen = () => true }) =>
+      showWhen(this.model)
+    );
     if (!searchStr) {
-      return this.filteredMenuGroups.flatMap(group => group.items);
+      return allMenus;
     }
-    return this.filteredMenuGroups
-      .flatMap(group => group.items)
-      .filter(({ name, alias = [] }) =>
-        [name, ...alias].some(str => isFuzzyMatch(str, searchStr))
-      );
+
+    return allMenus.filter(({ name, alias = [] }) =>
+      [name, ...alias].some(str => isFuzzyMatch(str, searchStr))
+    );
   }
 
   private _scrollToItem(item: SlashItem, force = true) {
@@ -228,7 +236,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     if (
       this._leftPanelActivated ||
       index < 0 ||
-      index >= this.filterItems.length
+      index >= this._filterItems.length
     ) {
       return;
     }
@@ -237,40 +245,37 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Otherwise, the action may change the model and cause the slash string to be changed
     this.abortController.abort(this._searchString);
 
-    const { action } = this.filterItems[index];
+    const { action } = this._filterItems[index];
     action({ page: this.model.page, model: this.model });
   }
 
-  private _handleClickCategory(group: { name: string; items: SlashItem[] }) {
-    const menuGroup = this.filteredMenuGroups.find(g => g.name === group.name);
-    if (!menuGroup) return;
-    const item = menuGroup.items[0];
+  private _handleClickCategory(groupName: string) {
+    const item = this._filterItems.find(item => item.groupName === groupName);
+    if (!item) return;
     this._scrollToItem(item);
-    this._activatedItemIndex = this.filterItems.findIndex(
+    this._activatedItemIndex = this._filterItems.findIndex(
       i => i.name === item.name
     );
   }
 
   private _categoryTemplate() {
     const showCategory = !this._searchString.length;
-    const activatedCategory = this.filteredMenuGroups.find(group =>
-      group.items.some(
-        item => item.name === this.filterItems[this._activatedItemIndex].name
-      )
-    );
+    const activatedGroupName =
+      this._filterItems[this._activatedItemIndex]?.groupName;
+    const groups = collectGroupNames(this._filterItems);
 
     return html`<div
       class="slash-category ${!showCategory ? 'slash-category-hide' : ''}"
     >
-      ${this.filteredMenuGroups.map(
-        group =>
+      ${groups.map(
+        groupName =>
           html`<div
-            class="slash-category-name ${activatedCategory?.name === group.name
+            class="slash-category-name ${activatedGroupName === groupName
               ? 'slash-active-category'
               : ''}"
-            @click=${() => this._handleClickCategory(group)}
+            @click=${() => this._handleClickCategory(groupName)}
           >
-            ${group.name}
+            ${groupName}
           </div>`
       )}
     </div>`;
@@ -297,31 +302,35 @@ export class SlashMenu extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
-    const btnItems = this.filterItems.map(
-      ({ name, icon, divider, disabled = false }, index) => html`<div
-          class="slash-item-divider"
-          ?hidden=${!divider || !!this._searchString.length}
-        ></div>
-        <format-bar-button
-          ?disabled=${disabled}
-          width="100%"
-          style="padding-left: 12px; justify-content: flex-start;"
-          ?hover=${!disabled &&
-          !this._leftPanelActivated &&
-          this._activatedItemIndex === index}
-          text="${name}"
-          data-testid="${name}"
-          @mousemove=${() => {
-            // Use `mousemove` instead of `mouseover` to avoid navigate conflict in left panel
-            this._leftPanelActivated = false;
-            this._activatedItemIndex = index;
-          }}
-          @click=${() => {
-            this._handleClickItem(index);
-          }}
-        >
-          ${icon}
-        </format-bar-button>`
+    const btnItems = this._filterItems.map(
+      ({ name, icon, disabled = false, groupName }, index) => {
+        const showDivider =
+          index !== 0 && this._filterItems[index - 1].groupName !== groupName;
+        return html`<div
+            class="slash-item-divider"
+            ?hidden=${!showDivider || !!this._searchString.length}
+          ></div>
+          <format-bar-button
+            ?disabled=${disabled}
+            width="100%"
+            style="padding-left: 12px; justify-content: flex-start;"
+            ?hover=${!disabled &&
+            !this._leftPanelActivated &&
+            this._activatedItemIndex === index}
+            text="${name}"
+            data-testid="${name}"
+            @mousemove=${() => {
+              // Use `mousemove` instead of `mouseover` to avoid navigate conflict in left panel
+              this._leftPanelActivated = false;
+              this._activatedItemIndex = index;
+            }}
+            @click=${() => {
+              this._handleClickItem(index);
+            }}
+          >
+            ${icon}
+          </format-bar-button>`;
+      }
     );
 
     return html`<div class="slash-menu-container">

@@ -3,16 +3,16 @@ import '../../toolbar/shape-tool/shape-menu.js';
 import '../color-panel.js';
 
 import { FRAME_BACKGROUND_COLORS } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { WithDisposable } from '../../../../__internal__/utils/lit.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type {
-  TextMouseMode,
+  NoteMouseMode,
   TopLevelBlockModel,
 } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -22,12 +22,12 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonBackground(
   frames: TopLevelBlockModel[]
-): TextMouseMode['background'] | null {
+): NoteMouseMode['background'] | null {
   const shapeTypes = countBy(frames, (frame: TopLevelBlockModel) => {
     return frame.background;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as TextMouseMode['background']) : null;
+  return max ? (max[0] as NoteMouseMode['background']) : null;
 }
 
 @customElement('edgeless-change-frame-button')
@@ -35,9 +35,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
-      fill: none;
-      stroke: currentColor;
       color: var(--affine-text-primary-color);
+      fill: currentColor;
     }
 
     edgeless-color-panel {
@@ -46,8 +45,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       height: 68px;
       padding: 8px 12px;
       flex-wrap: wrap;
-      background: var(--affine-white);
-      box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
     }
 

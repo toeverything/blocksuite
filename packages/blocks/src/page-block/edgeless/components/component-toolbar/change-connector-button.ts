@@ -1,9 +1,13 @@
 import '../tool-icon-button.js';
 import '../color-panel.js';
 
-import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
+import {
+  ConnectorLIcon,
+  ConnectorXIcon,
+  LineStyleIcon,
+} from '@blocksuite/global/config';
 import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
-import { getBrushBoundFromPoints, StrokeStyle } from '@blocksuite/phasor';
+import { StrokeStyle } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
@@ -22,7 +26,7 @@ import {
 import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
 import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
 import type { LineSizeButtonProps } from '../line-size-button.js';
-import { LineSizeButton, lineSizeButtonStyles } from '../line-size-button.js';
+import { lineSizeButtonStyles } from '../line-size-button.js';
 import type { LineStyleButtonProps } from '../line-style-button.js';
 import {
   LineStylesPanel,
@@ -87,9 +91,8 @@ export class EdgelessChangeConnectorButton extends LitElement {
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        fill: none;
-        stroke: none;
         color: var(--affine-text-primary-color);
+        fill: currentColor;
       }
 
       menu-divider {
@@ -101,8 +104,8 @@ export class EdgelessChangeConnectorButton extends LitElement {
         padding: 4px;
         justify-content: center;
         align-items: center;
-        background: var(--affine-white);
-        box-shadow: 0 0 12px rgba(66, 65, 73, 0.14);
+        background: var(--affine-background-overlay-panel-color);
+        box-shadow: var(--affine-shadow-2);
         border-radius: 8px;
       }
 
@@ -155,9 +158,10 @@ export class EdgelessChangeConnectorButton extends LitElement {
   @property()
   slots!: EdgelessSelectionSlots;
 
+  @query('.connector-color-button')
+  private _colorButton!: EdgelessToolIconButton;
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
-
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
@@ -185,12 +189,16 @@ export class EdgelessChangeConnectorButton extends LitElement {
           const controllers = [
             element.controllers[0],
             element.controllers[element.controllers.length - 1],
-          ];
-          const bound = getBrushBoundFromPoints(
-            controllers.map(c => [c.x + element.x, c.y + element.y]),
-            0
-          );
-          this.surface.updateConnectorElement(element.id, bound, controllers, {
+          ].map(c => {
+            return {
+              ...c,
+              x: c.x + element.x,
+              y: c.y + element.y,
+            };
+          });
+
+          this.surface.updateElement<'connector'>(element.id, {
+            controllers,
             mode,
           });
         } else {
@@ -206,18 +214,9 @@ export class EdgelessChangeConnectorButton extends LitElement {
             end.point,
             []
           );
-          const bound = getBrushBoundFromPoints(
-            route.map(r => [r.x, r.y]),
-            0
-          );
-          const controllers = route.map(r => {
-            return {
-              ...r,
-              x: r.x - bound.x,
-              y: r.y - bound.y,
-            };
-          });
-          this.surface.updateConnectorElement(element.id, bound, controllers, {
+
+          this.surface.updateElement<'connector'>(element.id, {
+            controllers: route,
             mode,
           });
         }
@@ -230,7 +229,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElementProps(element.id, { color });
+        this.surface.updateElement<'connector'>(element.id, { color });
       }
     });
   }
@@ -238,7 +237,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
   private _setShapeStrokeWidth(lineWidth: number) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
-        this.surface.updateElementProps(ele.id, {
+        this.surface.updateElement<'connector'>(ele.id, {
           lineWidth,
         });
       });
@@ -249,7 +248,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.page.transact(() => {
       this.elements.forEach(ele => {
-        this.surface.updateElementProps(ele.id, {
+        this.surface.updateElement<'connector'>(ele.id, {
           strokeStyle,
         });
       });
@@ -282,7 +281,10 @@ export class EdgelessChangeConnectorButton extends LitElement {
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._colorPanelPopper = createButtonPopper(this, this._colorPanel);
+    this._colorPanelPopper = createButtonPopper(
+      this._colorButton,
+      this._colorPanel
+    );
     _disposables.add(this._colorPanelPopper);
 
     this._lineStylesPanelPopper = createButtonPopper(
@@ -311,6 +313,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Straight line'}
+        .tipPosition=${'bottom'}
         @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
       >
         <div
@@ -322,6 +325,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Connector'}
+        .tipPosition=${'bottom'}
         @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
       >
         <div
@@ -333,11 +337,13 @@ export class EdgelessChangeConnectorButton extends LitElement {
       </edgeless-tool-icon-button>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
+        class="connector-color-button"
         .tooltip=${'Color'}
+        .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._colorPanelPopper?.toggle()}
       >
-        <div class="connector-color-button">
+        <div>
           <div class="color" style=${styleMap(style)}></div>
         </div>
       </edgeless-tool-icon-button>
@@ -349,14 +355,15 @@ export class EdgelessChangeConnectorButton extends LitElement {
         </edgeless-color-panel>
       </div>
 
-      ${LineSizeButton({
-        className: 'line-styles-button',
-        size: selectedLineSize,
-        tooltip: this._popperShow ? '' : 'Line style',
-        onClick: () => {
-          this._lineStylesPanelPopper?.toggle();
-        },
-      })}
+      <edgeless-tool-icon-button
+        class="line-styles-button"
+        .tooltip=${this._popperShow ? '' : 'Border style'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+        @click=${() => this._lineStylesPanelPopper?.toggle()}
+      >
+        ${LineStyleIcon}
+      </edgeless-tool-icon-button>
       ${LineStylesPanel({
         selectedLineSize,
         selectedLineStyle,

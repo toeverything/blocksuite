@@ -1,12 +1,13 @@
 import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { type DeltaInsert, VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
-import { getModelByElement, ShadowlessElement } from '../../utils/index.js';
+import { getModelByElement } from '../../utils/index.js';
 import { affineTextStyles } from '../virgo/affine-text.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
@@ -77,10 +78,12 @@ export class AffineLink extends ShadowlessElement {
     if (!(e.target instanceof HTMLElement) || !document.contains(e.target)) {
       return;
     }
+    const model = getModelByElement(this);
 
     const text = this.delta.insert;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
+      page: model.page,
       text,
       link: this.link,
       showMask: false,
@@ -95,6 +98,10 @@ export class AffineLink extends ShadowlessElement {
     }
     if (linkState.type === 'remove') {
       this._updateLink();
+      return;
+    }
+    if (linkState.type === 'toBookmark') {
+      this._onConvertToBookmark();
       return;
     }
   }
@@ -165,6 +172,42 @@ export class AffineLink extends ShadowlessElement {
         }
       );
     }
+  }
+  private _onConvertToBookmark() {
+    const model = getModelByElement(this);
+    const { page } = model;
+
+    const textElement = this.querySelector('[data-virgo-text="true"]');
+    assertExists(textElement);
+    const textNode = Array.from(textElement.childNodes).find(
+      (node): node is Text => node instanceof Text
+    );
+    assertExists(textNode);
+    const richText = this.closest('rich-text');
+    assertExists(richText);
+    const domPoint = VEditor.textPointToDomPoint(
+      textNode,
+      0,
+      richText.virgoContainer
+    );
+    assertExists(domPoint);
+    const vEditor = richText.vEditor;
+    assertExists(vEditor);
+
+    const parent = page.getParent(model);
+    assertExists(parent);
+    const index = parent.children.indexOf(model);
+
+    page.addBlock(
+      'affine:bookmark',
+      { url: this.link, title: this.delta.insert },
+      parent,
+      index + 1
+    );
+    vEditor.deleteText({
+      index: domPoint.index,
+      length: textNode.length,
+    });
   }
 
   private _onHoverEnd(e: Event) {

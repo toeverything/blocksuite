@@ -1,9 +1,10 @@
+import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type IPoint, WithDisposable } from '../__internal__/index.js';
+import { type IPoint } from '../__internal__/index.js';
 
 @customElement('affine-selected-blocks')
 export class AffineSelectedBlocks extends WithDisposable(LitElement) {
@@ -32,10 +33,10 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
     }
   `;
 
-  private _onMouseUp({ clientX, clientY, shiftKey }: MouseEvent) {
+  private _onPointerUp({ clientX, clientY, shiftKey }: PointerEvent) {
     this.removeAttribute('data-grab');
-    this.mouseRoot.dispatchEvent(
-      new MouseEvent('mouseup', {
+    document.dispatchEvent(
+      new PointerEvent('pointerup', {
         bubbles: true,
         clientX,
         clientY,
@@ -56,7 +57,7 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     // trigger click event on editor container
-    this._disposables.addFromEvent(this, 'mouseup', this._onMouseUp);
+    this._disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
   }
 
   override willUpdate() {

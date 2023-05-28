@@ -20,16 +20,19 @@ export * from './__internal__/rich-text/rich-text-operations.js';
 export { getServiceOrRegister } from './__internal__/service.js';
 export type { BaseService } from './__internal__/service/index.js';
 export type { CssVariableName } from './__internal__/theme/css-variables.js';
+export * from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/theme-observer.js';
+export * from './__internal__/utils/active-editor-manager.js';
 export * from './__internal__/utils/block-range.js';
 export * from './__internal__/utils/common-operations.js';
 export * from './__internal__/utils/filesys.js';
-export * from './__internal__/utils/lit.js';
 export * from './__internal__/utils/query.js';
 export * as SelectionUtils from './__internal__/utils/selection.js';
 export * from './__internal__/utils/std.js';
 export * from './__internal__/utils/types.js';
+export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
+export { FormatQuickBar } from './components/format-quick-bar/format-bar-node.js';
 export * from './components/index.js';
 export * from './counter-block/index.js';
 export * from './database-block/index.js';
@@ -40,8 +43,8 @@ export * from './frame-block/index.js';
 export * from './list-block/index.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
+export * from './preset/index.js';
 export * from './surface-block/index.js';
-
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis

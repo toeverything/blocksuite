@@ -137,7 +137,7 @@ export class InlineSuggestionController implements ReactiveController {
 
       const pageBlock = this.model.page.root;
       assertExists(pageBlock);
-      if (!matchFlavours(pageBlock, ['affine:page'] as const)) {
+      if (!matchFlavours(pageBlock, ['affine:page'])) {
         throw new Error('Invalid page root');
       }
 

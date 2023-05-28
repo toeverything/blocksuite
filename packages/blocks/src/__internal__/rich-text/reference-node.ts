@@ -1,6 +1,7 @@
 import { FontLinkedPageIcon, FontPageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page, PageMeta } from '@blocksuite/store';
 import {
   type DeltaInsert,
@@ -10,12 +11,8 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  type BlockHost,
-  getModelByElement,
-  ShadowlessElement,
-  WithDisposable,
-} from '../utils/index.js';
+import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import { getBlockElementById, getModelByElement } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
@@ -23,22 +20,6 @@ export const REFERENCE_NODE = ' ';
 const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
-  /**
-   * Emit when the subpage is linked to the current page.
-   *
-   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
-   *
-   * @deprecated
-   */
-  subpageLinked: Slot<{ pageId: string }>;
-  /**
-   * Emit when the subpage is unlinked from the current page.
-   *
-   * Note: This event may be called multiple times, so you must ensure that the callback operation is idempotent.
-   *
-   * @deprecated
-   */
-  subpageUnlinked: Slot<{ pageId: string }>;
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
 };
 
@@ -84,9 +65,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     attributes: {},
   };
 
-  @property()
-  host!: BlockHost;
-
   // Since the linked page may be deleted, the `_refMeta` could be undefined.
   @state()
   private _refMeta?: PageMeta;
@@ -100,7 +78,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     if (this.delta.insert !== REFERENCE_NODE) {
       console.error(
-        `Reference node must be initialized with ${REFERENCE_NODE}, but got '${this.delta.insert}'`
+        `Reference node must be initialized with '${REFERENCE_NODE}', but got '${this.delta.insert}'`
       );
     }
     const model = getModelByElement(this);
@@ -138,7 +116,11 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       return;
     }
     const targetPageId = refMeta.id;
-    this.host.slots.pageLinkClicked.emit({ pageId: targetPageId });
+    const root = model.page.root;
+    assertExists(root);
+    const element = getBlockElementById(root?.id) as DefaultPageBlockComponent;
+    assertExists(element);
+    element.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
 
   override render() {

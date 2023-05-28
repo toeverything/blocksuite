@@ -5,8 +5,14 @@ import {
   type BlockConfig,
   paragraphConfig,
 } from '@blocksuite/global/config';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import { WithDisposable } from '@blocksuite/lit';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
+import type { PropertyValues } from 'lit';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -16,10 +22,7 @@ import {
   getCurrentBlockRange,
   restoreSelection,
 } from '../../__internal__/utils/block-range.js';
-import {
-  getRichTextByModel,
-  WithDisposable,
-} from '../../__internal__/utils/index.js';
+import { getRichTextByModel } from '../../__internal__/utils/index.js';
 import { stopPropagation } from '../../page-block/edgeless/utils.js';
 import { actionConfig } from '../../page-block/utils/const.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
@@ -48,6 +51,8 @@ function ParagraphPanel(
   if (showParagraphPanel === 'hidden') {
     return html``;
   }
+  const page = models[0].page;
+  assertExists(page);
   const styles = styleMap({
     left: '0',
     top: showParagraphPanel === 'bottom' ? 'calc(100% + 4px)' : null,
@@ -91,23 +96,33 @@ function ParagraphPanel(
     @mouseover="${onHover}"
     @mouseout="${onHoverEnd}"
   >
-    ${paragraphConfig.map(
-      ({ flavour, type, name, icon }) => html`<format-bar-button
-        width="100%"
-        style="padding-left: 12px; justify-content: flex-start;"
-        text="${name}"
-        data-testid="${flavour}/${type}"
-        @click="${() => updateParagraphType(flavour, type)}"
-      >
-        ${icon}
-      </format-bar-button>`
-    )}
+    ${paragraphConfig
+      .filter(({ flavour }) => flavour !== 'affine:divider')
+      .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
+      .map(
+        ({ flavour, type, name, icon }) => html`<format-bar-button
+          width="100%"
+          style="padding-left: 12px; justify-content: flex-start;"
+          text="${name}"
+          data-testid="${flavour}/${type}"
+          @click="${() => updateParagraphType(flavour, type)}"
+        >
+          ${icon}
+        </format-bar-button>`
+      )}
   </div>`;
 }
+
+type CustomElementCreator = (
+  page: Page,
+  // todo(himself65): support get current block range
+  getBlockRange: () => ReturnType<typeof getCurrentBlockRange>
+) => HTMLDivElement;
 
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
   static override styles = formatQuickBarStyle;
+  static customElements: CustomElementCreator[] = [];
 
   @property()
   page!: Page;
@@ -147,6 +162,31 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
 
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
+
+  @query('.custom-items')
+  customItemsElement!: HTMLElement;
+
+  private _customElements: HTMLDivElement[] = [];
+
+  protected override update(changedProperties: PropertyValues) {
+    super.update(changedProperties);
+    if (
+      this._customElements.length === 0 &&
+      FormatQuickBar.customElements.length !== 0
+    ) {
+      this._customElements = FormatQuickBar.customElements.map(element =>
+        element(this.page, () => getCurrentBlockRange(this.page))
+      );
+      this.customItemsElement.append(...this._customElements);
+      this._disposables.add(() => {
+        this._customElements.forEach(element => {
+          element.remove();
+        });
+        this._customElements = [];
+        this.customItemsElement.innerHTML = '';
+      });
+    }
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -334,6 +374,10 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       style="${styles}"
       @pointerdown=${stopPropagation}
     >
+      <div class="custom-items"></div>
+      ${this._customElements.length > 0
+        ? html`<div class="divider"></div>`
+        : null}
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}

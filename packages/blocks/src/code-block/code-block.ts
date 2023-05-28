@@ -4,33 +4,35 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
+import { BlockElement } from '@blocksuite/lit';
 import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, render } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { getHighlighter, type Highlighter, type Lang } from 'shiki';
+import {
+  BUNDLED_LANGUAGES,
+  getHighlighter,
+  type Highlighter,
+  type ILanguageRegistration,
+  type Lang,
+} from 'shiki';
 import { z } from 'zod';
 
-import {
-  type BlockHost,
-  getViewportElement,
-  queryCurrentMode,
-  ShadowlessElement,
-  WithDisposable,
-} from '../__internal__/index.js';
+import { getViewportElement, queryCurrentMode } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
+import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
-import { codeLanguages } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
-import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
+import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
+export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   static override styles = css`
     code-block {
       position: relative;
@@ -41,7 +43,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       position: relative;
-      padding: 32px 0;
+      padding: 32px 0px 12px 0px;
       background: var(--affine-background-code-block);
       border-radius: 10px;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
@@ -91,13 +93,25 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-code-block-container > .lang-list-wrapper > .lang-button {
-      min-width: 101px;
+      display: flex;
+      justify-content: flex-start;
+      padding: 0 8px;
     }
 
     .affine-code-block-container rich-text {
       /* to make sure the resize observer can be triggered as expected */
       display: block;
       position: relative;
+      width: 90%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 20px;
+    }
+
+    .affine-code-block-container .rich-text-container {
+      position: relative;
+      border-radius: 5px;
+      padding: 4px 12px 4px 60px;
     }
 
     #line-numbers {
@@ -108,16 +122,9 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       color: var(--affine-text-secondary-color);
     }
 
-    .affine-code-block-container .rich-text-container {
-      position: relative;
-      border-radius: 5px;
-      padding: 4px 12px 4px 60px;
-    }
-
     .affine-code-block-container .virgo-editor {
       width: 90%;
       margin: 0;
-      overflow-x: auto;
     }
 
     .affine-code-block-container affine-code-line span v-text {
@@ -126,6 +133,16 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
     .affine-code-block-container affine-code-line span {
       white-space: pre;
+    }
+
+    .affine-code-block-container.wrap #line-numbers {
+      top: calc(var(--affine-line-height) + 4px);
+    }
+
+    .affine-code-block-container.wrap #line-numbers > div {
+      margin-top: calc(
+        var(--top, 0) / var(--affine-zoom, 1) - var(--affine-line-height)
+      );
     }
 
     .affine-code-block-container.wrap v-line > div {
@@ -141,24 +158,17 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .code-block-option {
-      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.08),
-        0 3px 16px -6px rgba(24, 39, 75, 0.04);
-      border-radius: 10px;
+      box-shadow: var(--affine-shadow-2);
+      border-radius: 8px;
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-white-90);
+      background-color: var(--affine-background-overlay-panel-color);
       margin: 0;
     }
 
     ${tooltipStyle}
   `;
-
-  @property()
-  model!: CodeBlockModel;
-
-  @property()
-  host!: BlockHost;
 
   @state()
   private _showLangList = false;
@@ -185,7 +195,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
   private _preLang: string | null = null;
   private _highlighter: Highlighter | null = null;
-  private async _startHighlight(lang: Lang) {
+  private async _startHighlight(lang: ILanguageRegistration) {
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
@@ -218,6 +228,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    registerService('affine:code', CodeBlockService);
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
@@ -297,32 +308,32 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       });
     });
 
-    if (this.model.language === 'Plain Text') {
+    if (!this.model.language || this.model.language === FALLBACK_LANG) {
       this._highlighter = null;
       return;
     }
 
-    const lang = codeLanguages.find(
-      lang => lang === this.model.language.toLowerCase()
+    const lang = BUNDLED_LANGUAGES.find(
+      lang => lang.id === this.model.language.toLowerCase()
     );
-    if (lang) {
-      this._startHighlight(lang);
-    } else {
-      this._highlighter = null;
+    if (!lang) {
+      console.warn('Unexpected language: ', this.model.language);
+      return;
     }
+    this._startHighlight(lang);
   }
 
   override updated() {
     if (this.model.language !== this._preLang) {
       this._preLang = this.model.language;
 
-      const lang = codeLanguages.find(
-        lang => lang === this.model.language.toLowerCase()
+      const lang = BUNDLED_LANGUAGES.find(
+        lang => lang.id === this.model.language.toLowerCase()
       );
       if (lang) {
         if (this._highlighter) {
           const currentLangs = this._highlighter.getLoadedLanguages();
-          if (!currentLangs.includes(lang)) {
+          if (!currentLangs.includes(lang.id as Lang)) {
             this._highlighter.loadLanguage(lang).then(() => {
               const richText = this.querySelector('rich-text');
               const vEditor = richText?.vEditor;
@@ -357,6 +368,9 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   private _langListTemplate() {
+    // TODO this is a workaround
+    const normalizedLang =
+      this.model.language[0].toUpperCase() + this.model.language.slice(1);
     return html`<div
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
@@ -370,14 +384,12 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
         ?disabled=${this.readonly}
         @click=${this._onClickLangBtn}
       >
-        ${this.model.language} ${!this.readonly ? ArrowDownIcon : html``}
+        ${normalizedLang} ${!this.readonly ? ArrowDownIcon : html``}
       </icon-button>
       ${this._showLangList
         ? html`<lang-list
             @selected-language-changed=${(e: CustomEvent) => {
-              this.host
-                .getService('affine:code')
-                .setLang(this.model, e.detail.language);
+              getService('affine:code').setLang(this.model, e.detail.language);
               this._showLangList = false;
             }}
             @dispose=${() => {
@@ -402,70 +414,44 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   private _updateLineNumbers() {
-    const lineNumbersContainer = this.querySelector(
-      '#line-numbers'
-    ) as HTMLElement;
-    const richTextContainer = this.querySelector('.rich-text-container');
+    const lineNumbersContainer =
+      this.querySelector<HTMLElement>('#line-numbers');
     assertExists(lineNumbersContainer);
-    assertExists(richTextContainer);
 
-    const richTextRect = richTextContainer.getBoundingClientRect();
+    const next = this._wrap ? generateLineNumberRender() : lineNumberRender;
 
-    const lines = Array.from(this.querySelectorAll('v-line')).map(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      line => line.querySelector('v-text span')!
+    render(
+      repeat(Array.from(this.querySelectorAll('v-line')), next),
+      lineNumbersContainer
     );
-    const lineNumbers = [];
-    for (const [index, line] of lines.entries()) {
-      const rect = line.getBoundingClientRect();
-      const top = rect.top - richTextRect.top;
-      const height = rect.height;
-
-      lineNumbers.push(html`<div
-        style="${styleMap({
-          top: `${top}px`,
-          height: `${height}px`,
-          position: 'absolute',
-          display: 'flex',
-        })}"
-      >
-        <span
-          style="${styleMap({
-            position: 'absolute',
-            top: '-2px',
-            height: '1em',
-            lineHeight: '1em',
-          })}"
-          >${index + 1}</span
-        >
-      </div>`);
-    }
-
-    render(lineNumbers, lineNumbersContainer);
   }
 
   override render() {
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
-
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
         <div class="rich-text-container">
           <div id="line-numbers"></div>
-          <rich-text
-            .host=${this.host}
-            .model=${this.model}
-            .textSchema=${this.textSchema}
-          >
+          <rich-text .model=${this.model} .textSchema=${this.textSchema}>
           </rich-text>
         </div>
-        ${childrenContainer}
+        ${this.content}
       </div>
       ${this._codeOptionTemplate()}`;
   }
+}
+
+function generateLineNumberRender(top = 0) {
+  return function lineNumberRender(e: HTMLElement, index: number) {
+    const style = {
+      '--top': `${top}px`,
+    };
+    top = e.getBoundingClientRect().height;
+    return html`<div style=${styleMap(style)}>${index + 1}</div>`;
+  };
+}
+
+function lineNumberRender(_: HTMLElement, index: number) {
+  return html`<div>${index + 1}</div>`;
 }
 
 declare global {

@@ -1,4 +1,5 @@
-import { DualLinkIcon, PageIcon } from '@blocksuite/global/config';
+import { DualLinkIcon, ImportIcon, PageIcon } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import {
   assertExists,
   type BaseBlockModel,
@@ -8,7 +9,6 @@ import { html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { WithDisposable } from '../../__internal__/index.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineVEditor } from '../../__internal__/rich-text/virgo/types.js';
 import {
@@ -16,6 +16,7 @@ import {
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
 import { isFuzzyMatch } from '../../__internal__/utils/std.js';
+import { showImportModal } from '../import-page/index.js';
 import { createKeydownObserver } from '../utils.js';
 import { styles } from './styles.js';
 
@@ -95,6 +96,13 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       //   icon: NewPageIcon,
       //   action: () => this._createSubpage(),
       // },
+      {
+        key: 'import-linked-page',
+        name: `Import`,
+        active: filteredPageList.length + 1 === this._activatedItemIndex,
+        icon: ImportIcon,
+        action: () => this._importPage(),
+      },
     ];
   }
 
@@ -119,7 +127,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
     createKeydownObserver({
       target: richText,
-      onUpdateQuery: str => this._updateQuery(str),
+      onUpdateQuery: str => {
+        this._query = str;
+        this._activatedItemIndex = 0;
+      },
       abortController: this.abortController,
       onMove: step => {
         this._activatedItemIndex =
@@ -174,11 +185,6 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     this._position = position;
   }
 
-  private _updateQuery(str: string) {
-    this._query = str;
-    this._activatedItemIndex = 0;
-  }
-
   private _insertLinkedNode(type: 'Subpage' | 'LinkedPage', pageId: string) {
     this.abortController.abort();
     const vEditor = getVirgoByModel(this.model);
@@ -204,6 +210,22 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     this._insertLinkedNode('LinkedPage', page.id);
   }
 
+  private _importPage() {
+    this.abortController.abort();
+    const onSuccess = (pageIds: string[]) => {
+      if (pageIds.length === 0) {
+        return;
+      }
+      const pageId = pageIds[0];
+      this._insertLinkedNode('LinkedPage', pageId);
+    };
+    showImportModal({
+      workspace: this._page.workspace,
+      multiple: false,
+      onSuccess,
+    });
+  }
+
   // private _createSubpage() {
   //   const pageName = this._query;
   //   const page = this._page.workspace.createPage({
@@ -226,7 +248,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
-    const pageList = this._actionList.slice(0, -1).map(
+    const pageList = this._actionList.slice(0, -2).map(
       ({ key, name, action, active, icon }, index) => html`<icon-button
         width="280px"
         height="32px"
@@ -242,7 +264,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       >`
     );
 
-    const createList = this._actionList.slice(-1).map(
+    const createList = this._actionList.slice(-2).map(
       ({ key, name, action, active, icon }, index) => html`<icon-button
         width="280px"
         height="32px"

@@ -1,6 +1,12 @@
 import './component-toolbar/component-toolbar.js';
 
-import type { Bound, ConnectorElement } from '@blocksuite/phasor';
+import { WithDisposable } from '@blocksuite/lit';
+import type { Bound } from '@blocksuite/phasor';
+import {
+  type ConnectorElement,
+  serializeXYWH,
+  TextElement,
+} from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import type { Instance as PopperInstance } from '@popperjs/core';
@@ -9,7 +15,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { WithDisposable } from '../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../edgeless-page-block.js';
 import type {
   EdgelessSelectionState,
@@ -123,7 +128,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         const xywh = JSON.stringify([frameX, frameY, frameW, frameH]);
         this.page.updateBlock(element, { xywh });
       } else {
-        this.surface.setElementBound(element.id, bound);
+        if (element instanceof TextElement) {
+          bound.w = element.w * (bound.h / element.h);
+          this.surface.updateElement<'text'>(id, {
+            xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+            fontSize: element.fontSize * (bound.h / element.h),
+          });
+        } else {
+          this.surface.setElementBound(element.id, bound);
+        }
       }
       handleElementChangedEffectForConnector(
         element,
@@ -186,16 +199,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.state.selected.length === 0) return null;
+    if (
+      this.state.selected.length === 0 ||
+      (this.state.selected[0] instanceof TextElement && this.state.active)
+    )
+      return null;
 
     const { page, state, surface, resizeMode, _resizeManager } = this;
     const { active, selected } = state;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = {
-      border: `${
-        this.state.active ? 2 : 1
-      }px solid var(--affine-primary-color)`,
+      border: `${this.state.active ? 2 : 1}px solid var(--affine-blue)`,
       ...getCommonRectStyle(selectedRect, active, true),
     };
 

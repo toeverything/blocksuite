@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
@@ -12,7 +13,6 @@ import {
   locatorEdgelessComponentToolButton,
   setMouseMode,
   switchEditorMode,
-  triggerComponentToolbarAction,
   zoomByMouseWheel,
 } from '../utils/actions/edgeless.js';
 import {
@@ -28,7 +28,6 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
-  assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertRichTexts,
   assertSelection,
@@ -61,18 +60,19 @@ test('can zoom viewport', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 80]);
+  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [90, 260, 720, 80];
+  const original = [50, 260, EDITOR_WIDTH, 80];
   await assertEdgelessHoverRect(page, original);
+  let box = await getEdgelessHoverRect(page);
 
   await decreaseZoomLevel(page);
   await decreaseZoomLevel(page);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const box = await getEdgelessHoverRect(page);
-  const zoomed = [box.x, box.y, original[2] * 0.8, original[3] * 0.8];
+  box = await getEdgelessHoverRect(page);
+  const zoomed = [box.x, box.y, original[2] * 0.5, original[3] * 0.5];
   await assertEdgelessHoverRect(page, zoomed);
 
   await increaseZoomLevel(page);
@@ -86,16 +86,16 @@ test('zoom by mouse', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, 720, 80]);
+  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [90, 260, 720, 80];
+  const original = [50, 260, EDITOR_WIDTH, 80];
   await assertEdgelessHoverRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const zoomed = [126, 264, original[2] * 0.9, original[3] * 0.9];
+  const zoomed = [150, 270, original[2] * 0.75, original[3] * 0.75];
   await assertEdgelessHoverRect(page, zoomed);
 });
 
@@ -117,7 +117,12 @@ test('should cancel select when the selected point is outside the current select
   // select the first rect
   await page.mouse.click(150, 150);
 
-  await dragBetweenCoords(page, { x: 350, y: 350 }, { x: 350, y: 450 });
+  await dragBetweenCoords(
+    page,
+    { x: 350, y: 350 },
+    { x: 350, y: 450 },
+    { steps: 0 }
+  );
 
   await page.mouse.move(150, 150);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
@@ -146,70 +151,6 @@ test.skip('shape element should have the correct selected shape when clicking on
   expect(blockBox.y).toBeCloseTo(selectedBox.y, 0);
   expect(blockBox.width).toBeCloseTo(selectedBox.width, 0);
   expect(blockBox.height).toBeCloseTo(selectedBox.height, 0);
-});
-
-test('bring to front', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  const rect0 = {
-    start: { x: 100, y: 100 },
-    end: { x: 200, y: 200 },
-  };
-  await addBasicRectShapeElement(page, rect0.start, rect0.end);
-
-  const rect1 = {
-    start: { x: 150, y: 150 },
-    end: { x: 250, y: 250 },
-  };
-  await addBasicRectShapeElement(page, rect1.start, rect1.end);
-
-  // should be rect1
-  await page.mouse.click(175, 175);
-  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
-
-  // click outside to clear selection
-  await page.mouse.click(300, 300);
-
-  // should be rect0
-  await page.mouse.click(110, 110);
-  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-
-  // bring rect0 to front
-  await triggerComponentToolbarAction(page, 'bringToFront');
-
-  // should be rect0
-  await page.mouse.click(175, 175);
-  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-});
-
-test('send to back', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  const rect0 = {
-    start: { x: 100, y: 100 },
-    end: { x: 200, y: 200 },
-  };
-  await addBasicRectShapeElement(page, rect0.start, rect0.end);
-
-  const rect1 = {
-    start: { x: 150, y: 150 },
-    end: { x: 250, y: 250 },
-  };
-  await addBasicRectShapeElement(page, rect1.start, rect1.end);
-
-  // should be rect1
-  await page.mouse.click(175, 175);
-  await assertEdgelessSelectedRect(page, [150, 150, 100, 100]);
-
-  // bring rect1 to back
-  await triggerComponentToolbarAction(page, 'sendToBack');
-
-  // should be rect0
-  await page.mouse.click(175, 175);
-  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
 test('the tooltip of more button should be hidden when the action menu is shown', async ({

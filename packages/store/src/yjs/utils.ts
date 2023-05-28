@@ -1,10 +1,5 @@
 import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
 
-import { subscribeYArray } from './array.js';
-import type { ProxyConfig } from './config.js';
-import { subscribeYMap } from './map.js';
-import { createYProxy } from './proxy.js';
-
 export type Native2Y<T> = T extends Record<string, infer U>
   ? YMap<U>
   : T extends Array<infer U>
@@ -60,70 +55,3 @@ export function toPlainValue(v: unknown): unknown {
 }
 
 export type UnRecord = Record<string, unknown>;
-
-export function initialize(
-  array: unknown[],
-  yArray: YArray<unknown>,
-  config: ProxyConfig
-): void;
-export function initialize(
-  object: UnRecord,
-  yMap: YMap<unknown>,
-  config: ProxyConfig
-): void;
-export function initialize(
-  target: unknown[] | UnRecord,
-  yAbstract: YArray<unknown> | YMap<unknown>,
-  config: ProxyConfig
-): void;
-export function initialize(
-  target: unknown[] | UnRecord,
-  yAbstract: YArray<unknown> | YMap<unknown>,
-  config: ProxyConfig
-): void {
-  const { deep } = config;
-  if (!(yAbstract instanceof YArray || yAbstract instanceof YMap)) {
-    return;
-  }
-  yAbstract.forEach((value, key) => {
-    const result =
-      deep && (value instanceof YMap || value instanceof YArray)
-        ? createYProxy(value, config)
-        : value;
-
-    (target as Record<string, unknown>)[key] = result;
-  });
-}
-
-export function subscribeYEvent(
-  arr: unknown[],
-  yArray: YArray<unknown>,
-  config: ProxyConfig
-): void;
-export function subscribeYEvent(
-  object: UnRecord,
-  yMap: YMap<unknown>,
-  config: ProxyConfig
-): void;
-export function subscribeYEvent(
-  target: unknown[] | UnRecord,
-  yAbstract: YArray<unknown> | YMap<unknown>,
-  config: ProxyConfig
-): void;
-export function subscribeYEvent(
-  target: unknown[] | UnRecord,
-  yAbstract: YArray<unknown> | YMap<unknown>,
-  config: ProxyConfig
-): void {
-  if (yAbstract instanceof YArray) {
-    subscribeYArray(target as unknown[], yAbstract, config);
-    return;
-  }
-
-  if (yAbstract instanceof YMap) {
-    subscribeYMap(target as UnRecord, yAbstract, config);
-    return;
-  }
-
-  throw new Error();
-}

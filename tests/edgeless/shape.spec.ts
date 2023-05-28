@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
+  assertMouseMode,
   changeShapeFillColor,
   changeShapeStrokeColor,
   changeShapeStrokeStyle,
@@ -46,8 +47,8 @@ test('add shape element', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicRectShapeElement(page, start, end);
 
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
+  await assertMouseMode(page, 'default');
+  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
 test('select multiple shapes and resize', async ({ page }) => {
@@ -149,7 +150,8 @@ test('delete shape by component-toolbar', async ({ page }) => {
   await assertEdgelessNonHoverRect(page);
 });
 
-test('change shape fill color', async ({ page }) => {
+//FIXME: need a way to test hand-drawn-like style
+test.skip('change shape fill color', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -365,8 +367,8 @@ test('change shape stroke width', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [
-    [start.x + 20, start.y],
-    [start.x + 20, start.y + 9],
+    [start.x + 20, start.y + 2],
+    [start.x + 20, start.y + 7],
   ]);
   expect(pickedColor[0]).toBe(pickedColor[1]);
 });
@@ -394,5 +396,5 @@ test('change shape stroke style', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
-  expect(pickedColor[0]).toBe('#000000');
+  expect(pickedColor[0]).toBe('#3b25cc');
 });

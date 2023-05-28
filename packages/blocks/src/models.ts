@@ -3,6 +3,8 @@
 import type { BlockSchema } from '@blocksuite/store';
 import type { z } from 'zod';
 
+import type { BookmarkBlockModel } from './bookmark-block/bookmark-model.js';
+import { BookmarkBlockSchema } from './bookmark-block/bookmark-model.js';
 import {
   type CodeBlockModel,
   CodeBlockSchema,
@@ -25,6 +27,7 @@ import type { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 
 export type {
+  BookmarkBlockModel,
   CodeBlockModel,
   DatabaseBlockModel,
   DividerBlockModel,
@@ -46,6 +49,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   DividerBlockSchema,
   EmbedBlockSchema,
   SurfaceBlockSchema,
+  BookmarkBlockSchema,
   // DatabaseBlockSchema,
 ];
 
@@ -64,6 +68,7 @@ export type BlockSchemas = {
   'affine:embed': EmbedBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
+  'affine:bookmark': BookmarkBlockModel;
 };
 
 export type Flavour = keyof BlockSchemas;

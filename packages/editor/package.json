@@ -14,16 +14,19 @@
   "license": "MPL-2.0",
   "peerDependencies": {
     "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "lit": "^2.7.2",
+    "@toeverything/theme": "0.5.9",
+    "lit": "^2.7.3",
     "marked": "^4.2.12",
     "turndown": "^7.1.1"
   },
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@types/marked": "^4.0.8",
     "@types/turndown": "^5.0.1"

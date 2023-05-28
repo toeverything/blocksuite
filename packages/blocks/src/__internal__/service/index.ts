@@ -30,8 +30,6 @@ import {
 } from './keymap.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
-  onLoad?: () => Promise<void>;
-
   block2html(
     block: BlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
@@ -90,6 +88,14 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     deltaLeaf: DeltaOperation
   ) {
     let text = deltaLeaf.insert ?? '';
+    // replace unsafe characters
+    text = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
     const attributes = deltaLeaf.attributes;
     if (!attributes) {
       return text;
@@ -223,7 +229,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
         key: 'ArrowDown',
         shiftKey: false,
         handler(range, context) {
-          return handleKeyDown(context.event, this.vEditor.rootElement);
+          return handleKeyDown(block, context.event, this.vEditor.rootElement);
         },
       },
       left: {

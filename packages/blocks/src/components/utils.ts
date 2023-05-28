@@ -1,4 +1,8 @@
+import { assertExists, sleep } from '@blocksuite/global/utils';
+
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { isControlledKeyboardEvent } from '../__internal__/utils/std.js';
+import { getCurrentNativeRange } from '../std.js';
 
 export const createKeydownObserver = ({
   target,
@@ -9,7 +13,7 @@ export const createKeydownObserver = ({
   interceptor = (e, next) => next(),
   abortController,
 }: {
-  target: HTMLElement;
+  target: RichText;
   onUpdateQuery: (val: string) => void;
   onMove: (step: 1 | -1) => void;
   onConfirm: () => void;
@@ -18,6 +22,44 @@ export const createKeydownObserver = ({
   abortController: AbortController;
 }) => {
   let query = '';
+  const vEditor = target.vEditor;
+  assertExists(
+    vEditor,
+    'Failed to observer keyboard! virgo editor is not exist.'
+  );
+  const startIndex = vEditor?.getVRange()?.index ?? 0;
+
+  const updateQuery = async () => {
+    // Wait for text update
+    await sleep(0);
+    const range = getCurrentNativeRange();
+    if (range.startContainer !== range.endContainer) {
+      console.warn(
+        'Failed to parse query! Current range is not collapsed.',
+        range
+      );
+      abortController.abort();
+      return;
+    }
+    const textNode = range.startContainer;
+    if (textNode.nodeType !== Node.TEXT_NODE) {
+      console.warn(
+        'Failed to parse query! Current range is not a text node.',
+        range
+      );
+      abortController.abort();
+      return;
+    }
+    const curIndex = vEditor.getVRange()?.index ?? 0;
+    const text = vEditor.yText.toString();
+    const previousQuery = query;
+    query = text.slice(startIndex, curIndex);
+
+    if (query !== previousQuery) {
+      onUpdateQuery(query);
+    }
+  };
+
   const keyDownListener = (e: KeyboardEvent) => {
     e.stopPropagation();
 
@@ -68,8 +110,7 @@ export const createKeydownObserver = ({
           if (!query.length) {
             abortController.abort();
           }
-          query = query.slice(0, -1);
-          onUpdateQuery(query);
+          updateQuery();
           return;
         }
         case 'Enter': {
@@ -121,21 +162,22 @@ export const createKeydownObserver = ({
           return;
       }
     }
-    query += e.key;
-    onUpdateQuery(query);
+    updateQuery();
   };
 
-  const listenerWithMiddleware = (e: KeyboardEvent) =>
-    interceptor(e, () => keyDownListener(e));
-
-  target.addEventListener('keydown', listenerWithMiddleware, {
-    // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
-    capture: true,
-  });
-  abortController.signal.addEventListener('abort', () => {
-    target.removeEventListener('keydown', listenerWithMiddleware, {
+  target.addEventListener(
+    'keydown',
+    (e: KeyboardEvent) => interceptor(e, () => keyDownListener(e)),
+    {
+      // Workaround: Use capture to prevent the event from triggering the keyboard bindings action
       capture: true,
-    });
+      signal: abortController.signal,
+    }
+  );
+
+  // Fix composition input
+  target.addEventListener('input', updateQuery, {
+    signal: abortController.signal,
   });
 
   if (onEsc) {
@@ -144,9 +186,8 @@ export const createKeydownObserver = ({
         onEsc();
       }
     };
-    window.addEventListener('keydown', escListener);
-    abortController.signal.addEventListener('abort', () =>
-      window.removeEventListener('keydown', escListener)
-    );
+    window.addEventListener('keydown', escListener, {
+      signal: abortController.signal,
+    });
   }
 };

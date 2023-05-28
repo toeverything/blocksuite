@@ -24,9 +24,9 @@ export const styles = css`
     padding: 12px 0;
     display: flex;
 
-    background: var(--affine-background-primary-color);
-    box-shadow: var(--affine-popover-shadow);
-    border-radius: 0 10px 10px 10px;
+    background: var(--affine-background-overlay-panel-color);
+    box-shadow: var(--affine-shadow-2);
+    border-radius: 12px;
     z-index: var(--affine-z-index-popover);
     /* transition: max-height 0.2s ease-in-out; */
   }
@@ -67,9 +67,6 @@ export const styles = css`
     white-space: nowrap;
     cursor: pointer;
     padding: 4px 20px;
-  }
-  .slash-category-name:hover {
-    color: var(--affine-popover-color);
   }
 
   .slash-active-category {
@@ -113,5 +110,10 @@ export const styles = css`
   .slash-item-divider {
     border-top: 1px dashed var(--affine-border-color);
     margin: 8px 0;
+  }
+
+  format-bar-button svg {
+    width: 20px;
+    height: 20px;
   }
 `;

@@ -5,6 +5,7 @@ import {
   isCaptionElement,
   isDatabaseInput,
   isInsideDatabaseTitle,
+  isInsideEdgelessTextEditor,
   isInsidePageTitle,
   isInsideRichText,
 } from './query.js';
@@ -22,6 +23,9 @@ function isUndoRedo(event: KeyboardEvent) {
   return false;
 }
 
+/**
+ * Return `true` if the event should be ignore.
+ */
 function shouldFilterHotkey(event: KeyboardEvent) {
   const target = event.target;
   // Not sure if this is the right thing to do
@@ -52,6 +56,10 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     ) {
       return false;
     }
+    // undo/redo should work in edgeless text editor
+    if (isInsideEdgelessTextEditor(event.target) && isUndoRedo(event)) {
+      return false;
+    }
     // Some event dispatch from body
     // for example, press backspace to remove block-level selection
     if (event.target === document.body) {
@@ -69,10 +77,15 @@ function shouldFilterHotkey(event: KeyboardEvent) {
   return false;
 }
 
-export enum HOTKEY_SCOPE {
-  AFFINE_PAGE = 'affine:page',
-  AFFINE_EDGELESS = 'affine:edgeless',
-}
+export const HOTKEY_SCOPE_TYPE = {
+  AFFINE_PAGE: 'affine:page',
+  AFFINE_EDGELESS: 'affine:edgeless',
+} as const;
+export type HOTKEY_SCOPE_TYPE =
+  (typeof HOTKEY_SCOPE_TYPE)[keyof typeof HOTKEY_SCOPE_TYPE];
+export type HOTKEY_SCOPE =
+  | `affine:page-${number}`
+  | `affine:edgeless-${number}`;
 
 const HOTKEY_DISABLED_SCOPE = 'hotkey_disabled';
 
@@ -87,8 +100,9 @@ const HOTKEY_DISABLED_SCOPE = 'hotkey_disabled';
  */
 class HotkeyManager {
   private readonly _hotkeys: typeof hotkeys;
-  private _scope: HOTKEY_SCOPE = HOTKEY_SCOPE.AFFINE_PAGE;
+  private _scope: string = HOTKEY_DISABLED_SCOPE;
   private _disabled = false;
+  private counter = 0;
 
   constructor() {
     this._hotkeys = hotkeys;
@@ -96,6 +110,10 @@ class HotkeyManager {
 
   get disabled() {
     return this._disabled;
+  }
+
+  newScope(type: HOTKEY_SCOPE_TYPE): HOTKEY_SCOPE {
+    return `${type}-${this.counter++}`;
   }
 
   setScope(scope: HOTKEY_SCOPE) {
@@ -174,6 +192,16 @@ class HotkeyManager {
       this.withDisabledHotkey<ReturnType<T>>(() =>
         fn(...args)
       ) as ReturnType<T>) as unknown as T;
+  }
+
+  withScope(scope: HOTKEY_SCOPE, fn: () => void) {
+    const pre = this._scope;
+    try {
+      this._scope = scope;
+      fn();
+    } finally {
+      this._scope = pre;
+    }
   }
 }
 

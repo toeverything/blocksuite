@@ -1,4 +1,5 @@
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 
 import {
   clamp,
@@ -6,16 +7,15 @@ import {
   hasNativeSelection,
   isMultiLineRange,
   resetNativeSelection,
-  type SelectionEvent,
 } from '../../__internal__/index.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import type { PageSelectionState } from '../default/selection-manager/index.js';
 
-export function repairContextMenuRange(e: SelectionEvent) {
+export function repairContextMenuRange(e: MouseEvent) {
   const selection = window.getSelection() as Selection;
   const currentRange =
     selection && selection.rangeCount && selection.getRangeAt(0);
-  const pointRange = caretRangeFromPoint(e.raw.x, e.raw.y);
+  const pointRange = caretRangeFromPoint(e.x, e.y);
   // repair browser context menu change selection can not go through blocks
   if (
     currentRange &&
@@ -30,7 +30,7 @@ export function repairContextMenuRange(e: SelectionEvent) {
       resetNativeSelection(currentRange);
     });
   } else {
-    e.raw.preventDefault();
+    e.preventDefault();
   }
 }
 
@@ -48,11 +48,11 @@ export type DragDirection =
 // text can be applied both text and paragraph formatting actions, while others can only be applied paragraph actions
 export type SelectedBlockType = 'Text' | 'Caret' | 'Other';
 
-export function getDragDirection(e: SelectionEvent): DragDirection {
+export function getDragDirection(e: PointerEventState): DragDirection {
   const startX = e.start.x;
   const startY = e.start.y;
-  const endX = e.x;
-  const endY = e.y;
+  const endX = e.point.x;
+  const endY = e.point.y;
   // selection direction
   const isForwards = endX > startX;
   const range = getCurrentNativeRange();
@@ -85,7 +85,7 @@ export function getDragDirection(e: SelectionEvent): DragDirection {
  * }
  * ```
  */
-export function getNativeSelectionMouseDragInfo(e: SelectionEvent) {
+export function getNativeSelectionMouseDragInfo(e: PointerEventState) {
   const curRange = getCurrentNativeRange();
   const direction = getDragDirection(e);
 

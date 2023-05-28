@@ -16,27 +16,109 @@ import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
 import {
+  activeEditorManager,
+  COLOR_VARIABLES,
+  extractCssVariables,
+  FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
   SelectionUtils,
-  ShadowlessElement,
+  SIZE_VARIABLES,
   updateBlockType,
+  VARIABLES,
 } from '@blocksuite/blocks';
+import { LINK_PRE } from '@blocksuite/blocks/__internal__/content-parser/parse-html';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
-import type { EditorContainer } from '@blocksuite/editor';
+import { EditorContainer } from '@blocksuite/editor';
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import { Utils, type Workspace } from '@blocksuite/store';
+import { ShadowlessElement } from '@blocksuite/lit';
+import { type Page, Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
+import JSZip from 'jszip';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { registerFormatBarCustomElement } from './custom-format-bar';
 import { createViewer } from './doc-inspector';
+
+const cssVariablesMap = extractCssVariables(document.documentElement);
+const plate: Record<string, string> = {};
+COLOR_VARIABLES.forEach((key: string) => {
+  plate[key] = cssVariablesMap[key];
+});
+const OTHER_CSS_VARIABLES = VARIABLES.filter(
+  variable =>
+    !SIZE_VARIABLES.includes(variable) &&
+    !COLOR_VARIABLES.includes(variable) &&
+    !FONT_FAMILY_VARIABLES.includes(variable)
+);
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
+
+function init_css_debug_menu(styleMenu: GUI, style: CSSStyleDeclaration) {
+  const sizeFolder = styleMenu.addFolder('Size');
+  const fontFamilyFolder = styleMenu.addFolder('FontFamily');
+  const colorFolder = styleMenu.addFolder('Color');
+  const othersFolder = styleMenu.addFolder('Others');
+  sizeFolder.open();
+  fontFamilyFolder.open();
+  colorFolder.open();
+  othersFolder.open();
+  SIZE_VARIABLES.forEach(name => {
+    sizeFolder
+      .add(
+        {
+          [name]: isNaN(parseFloat(cssVariablesMap[name]))
+            ? 0
+            : parseFloat(cssVariablesMap[name]),
+        },
+        name,
+        0,
+        100
+      )
+      .onChange(e => {
+        style.setProperty(name, `${Math.round(e)}px`);
+      });
+  });
+  FONT_FAMILY_VARIABLES.forEach(name => {
+    fontFamilyFolder
+      .add(
+        {
+          [name]: cssVariablesMap[name],
+        },
+        name
+      )
+      .onChange(e => {
+        style.setProperty(name, e);
+      });
+  });
+  OTHER_CSS_VARIABLES.forEach(name => {
+    othersFolder.add({ [name]: cssVariablesMap[name] }, name).onChange(e => {
+      style.setProperty(name, e);
+    });
+  });
+  fontFamilyFolder
+    .add(
+      {
+        '--affine-font-family':
+          'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
+      },
+      '--affine-font-family'
+    )
+    .onChange(e => {
+      style.setProperty('--affine-font-family', e);
+    });
+  for (const plateKey in plate) {
+    colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
+      style.setProperty(plateKey, color);
+    });
+  }
+}
 
 @customElement('debug-menu')
 export class DebugMenu extends ShadowlessElement {
@@ -161,8 +243,14 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
-    this.mode = mode;
+    const editor = activeEditorManager.getActiveEditor();
+    if (editor instanceof EditorContainer) {
+      const mode = editor.mode === 'page' ? 'edgeless' : 'page';
+      editor.mode = mode;
+    } else {
+      const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
+      this.mode = mode;
+    }
   }
 
   private _switchOffsetMode() {
@@ -177,26 +265,118 @@ export class DebugMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},720,480]`;
+    const xywh = `[0,${count * 60},${EDITOR_WIDTH},480]`;
 
     const frameId = this.page.addBlock('affine:frame', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, frameId);
   }
 
-  private _switchShowGrid() {
-    this.editor.showGrid = !this.editor.showGrid;
+  private _exportPdf() {
+    this.contentParser.exportPdf();
   }
 
   private _exportHtml() {
-    this.contentParser.onExportHtml();
+    this.contentParser.exportHtml();
   }
 
   private _exportMarkDown() {
-    this.contentParser.onExportMarkdown();
+    this.contentParser.exportMarkdown();
   }
 
   private _exportYDoc() {
     this.workspace.exportYDoc();
+  }
+
+  private async _importYDoc() {
+    await this.workspace.importYDoc();
+    this.requestUpdate();
+  }
+
+  private async _selectFile(accept: string): Promise<File> {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept;
+    input.multiple = false;
+    input.click();
+    return new Promise((resolve, reject) => {
+      input.onchange = () => {
+        const file = input.files?.item(0);
+        if (!file) {
+          reject();
+        }
+        resolve(file as File);
+      };
+      input.onerror = () => {
+        reject();
+      };
+    });
+  }
+
+  private async _importMarkDown() {
+    const file = await this._selectFile('.md');
+    const text = await file.text();
+    const rootId = this.page.root?.id;
+    rootId && (await this.contentParser.importMarkdown(text, rootId));
+  }
+
+  private async _importHtml() {
+    const file = await this._selectFile('.html');
+    const text = await file.text();
+    const rootId = this.page.root?.id;
+    rootId && (await this.contentParser.importHtml(text, rootId));
+  }
+
+  private async _importNotion() {
+    const file = await this._selectFile('.zip');
+    const zip = new JSZip();
+    const zipFile = await zip.loadAsync(file);
+    const pageMap = new Map<string, Page>();
+    const files = Object.keys(zipFile.files);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const lastSplitIndex = file.lastIndexOf('/');
+      const fileName = file.substring(lastSplitIndex + 1);
+      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+        const page = this.page.workspace.createPage({
+          init: {
+            title: '',
+          },
+        });
+        pageMap.set(file, page);
+      }
+    }
+    pageMap.forEach(async (page, file) => {
+      const lastSplitIndex = file.lastIndexOf('/');
+      const folder = file.substring(0, lastSplitIndex) || '';
+      const fileName = file.substring(lastSplitIndex + 1);
+      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+        const isHtml = fileName.endsWith('.html');
+        const rootId = page.root?.id;
+        const fetchFileHandler = async (url: string) => {
+          const fileName =
+            folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
+          return (await zipFile.file(fileName)?.async('blob')) || new Blob();
+        };
+        const contentParser = new window.ContentParser(page, fetchFileHandler);
+        let text = (await zipFile.file(file)?.async('string')) || '';
+        pageMap.forEach((value, key) => {
+          const subPageLink = key.replaceAll(' ', '%20');
+          text = isHtml
+            ? text.replaceAll(
+                `href="${subPageLink}"`,
+                `href="${LINK_PRE + value.id}"`
+              )
+            : text.replaceAll(`(${subPageLink})`, `(${LINK_PRE + value.id})`);
+        });
+        if (rootId) {
+          if (isHtml) {
+            await contentParser.importHtml(text, rootId);
+          } else {
+            await contentParser.importMarkdown(text, rootId);
+          }
+        }
+      }
+    });
   }
 
   private async _inspect() {
@@ -238,15 +418,25 @@ export class DebugMenu extends ShadowlessElement {
     this._setThemeMode(!!e.matches);
   };
 
+  private _registerFormatBarCustomElements() {
+    registerFormatBarCustomElement();
+  }
+
   override firstUpdated() {
+    this.workspace.slots.pageAdded.on(e => {
+      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
+    });
+    this.workspace.slots.pageRemoved.on(() => {
+      this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
+    });
     this.page.slots.historyUpdated.on(() => {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
     this._styleMenu = new GUI({ hideable: false });
-    this._styleMenu.width = 350;
-    const sizeFolder = this._styleMenu.addFolder('Size');
-    sizeFolder.open();
+    this._styleMenu.width = 650;
+    const style = document.documentElement.style;
+    init_css_debug_menu(this._styleMenu, style);
     this._styleMenu.hide();
   }
 
@@ -290,6 +480,12 @@ export class DebugMenu extends ShadowlessElement {
           overflow: auto;
           z-index: 1000; /* for debug visibility */
           pointer-events: none;
+        }
+
+        @media print {
+          .debug-menu {
+            display: none;
+          }
         }
 
         .default-toolbar {
@@ -349,7 +545,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-button>
             </sl-tooltip>
           </sl-button-group>
-
           <!-- block type -->
           <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
             <sl-button size="small" slot="trigger" caret>
@@ -454,21 +649,45 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._exportHtml}>
                 Export HTML
               </sl-menu-item>
+              <sl-menu-item @click=${this._exportPdf}>
+                Export PDF
+              </sl-menu-item>
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importYDoc}>
+                Import YDoc
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importMarkDown}>
+                Import Markdown
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importHtml}>
+                Import Html
+              </sl-menu-item>
+              <sl-menu-item @click=${this._importNotion}>
+                Import Notion
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc </sl-menu-item>
-              <sl-menu-item
-                @click=${() => (this._showTabMenu = !this._showTabMenu)}
-              >
-                Toggle Tab Menu
-              </sl-menu-item>
+              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
+
+          <sl-tooltip
+            content="Register FormatBar Custom Elements"
+            placement="bottom"
+            hoist
+          >
+            <sl-button
+              size="small"
+              content="Register FormatBar Custom Elements"
+              @click=${this._registerFormatBarCustomElements}
+            >
+              <sl-icon name="plug"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
 
           <sl-tooltip content="Switch Editor Mode" placement="bottom" hoist>
             <sl-button
@@ -498,6 +717,16 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
+          <sl-tooltip content="Add new page" placement="bottom" hoist>
+            <sl-button
+              size="small"
+              content="Add New Page"
+              @click=${() => createPage(this.workspace)}
+            >
+              <sl-icon name="file-earmark-plus"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
           ${this._showTabMenu
             ? getTabGroupTemplate({
                 workspace: this.workspace,
@@ -505,22 +734,6 @@ export class DebugMenu extends ShadowlessElement {
                 requestUpdate: () => this.requestUpdate(),
               })
             : null}
-        </div>
-
-        <div
-          class="edgeless-toolbar"
-          style=${'display:' + (this.mode === 'edgeless' ? 'flex' : 'none')}
-        >
-          <sl-tooltip content="Show Grid" placement="bottom" hoist>
-            <sl-button
-              size="small"
-              content="Show Grid"
-              @click=${this._switchShowGrid}
-            >
-              <sl-icon name=${!this.editor.showGrid ? 'square' : 'grid-3x3'}>
-              </sl-icon>
-            </sl-button>
-          </sl-tooltip>
         </div>
       </div>
     `;
@@ -549,65 +762,57 @@ function getTabGroupTemplate({
     tabGroup.show(pageId);
   });
 
-  return html`<sl-tooltip content="Add new page" placement="bottom" hoist>
-      <sl-button
-        size="small"
-        content="Add New Page"
-        @click=${() => createPage(workspace)}
-      >
-        <sl-icon name="file-earmark-plus"></sl-icon>
-      </sl-button>
-    </sl-tooltip>
-    <sl-tab-group
-      class="tabs-closable"
-      style="display: flex; overflow: hidden;"
-      @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
-        const otherPage = workspace.getPage(e.detail.name);
-        if (!otherPage) throw new Error('page not found');
-        editor.page = otherPage;
-      }}
-    >
-      ${pageList.map(
-        page =>
-          html`<sl-tab
-            slot="nav"
-            panel="${page.id}"
-            ?active=${page.id === editor.page.id}
-            ?closable=${pageList.length > 1}
-            @sl-close=${(e: CustomEvent) => {
-              const tab = e.target;
-              // Show other tab if the tab is currently active
-              if (tab && (tab as SlTab).active) {
-                const tabGroup =
-                  document.querySelector<SlTabGroup>('.tabs-closable');
-                if (!tabGroup) throw new Error('tab group not found');
-                const otherPage = pageList.find(
-                  metaPage => page.id !== metaPage.id
-                );
-                if (!otherPage) throw new Error('no other page found');
-                tabGroup.show(otherPage.id);
-              }
-              workspace.removePage(page.id);
-            }}
-          >
+  return html`<sl-tab-group
+    class="tabs-closable"
+    style="display: flex; overflow: hidden;"
+    @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
+      const otherPage = workspace.getPage(e.detail.name);
+      if (!otherPage) throw new Error('page not found');
+      editor.page = otherPage;
+    }}
+  >
+    ${pageList.map(
+      page =>
+        html`<sl-tab
+          slot="nav"
+          panel="${page.id}"
+          ?active=${page.id === editor.page.id}
+          ?closable=${pageList.length > 1}
+          @sl-close=${(e: CustomEvent) => {
+            const tab = e.target;
+            // Show other tab if the tab is currently active
+            if (tab && (tab as SlTab).active) {
+              const tabGroup =
+                document.querySelector<SlTabGroup>('.tabs-closable');
+              if (!tabGroup) throw new Error('tab group not found');
+              const otherPage = pageList.find(
+                metaPage => page.id !== metaPage.id
+              );
+              if (!otherPage) throw new Error('no other page found');
+              tabGroup.show(otherPage.id);
+            }
+            workspace.removePage(page.id);
+          }}
+        >
+          <div>
+            <div>${page.title || 'Untitled'}</div>
+            <!-- TODO deprecated subpage -->
             <div>
-              <div>${page.title || 'Untitled'}</div>
-              <div>
-                ${page.subpageIds
-                  .map(
-                    pageId =>
-                      (
-                        pageList.find(meta => meta.id === pageId) ?? {
-                          title: 'Page Not Found',
-                        }
-                      ).title || 'Untitled'
-                  )
-                  .join(',')}
-              </div>
+              ${page.subpageIds
+                .map(
+                  pageId =>
+                    (
+                      pageList.find(meta => meta.id === pageId) ?? {
+                        title: 'Page Not Found',
+                      }
+                    ).title || 'Untitled'
+                )
+                .join(',')}
             </div>
-          </sl-tab>`
-      )}
-    </sl-tab-group>`;
+          </div>
+        </sl-tab>`
+    )}
+  </sl-tab-group>`;
 }
 
 declare global {

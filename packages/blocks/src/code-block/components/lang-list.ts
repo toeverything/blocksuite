@@ -1,9 +1,16 @@
 import { SearchIcon } from '@blocksuite/global/config';
+import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import {
+  BUNDLED_LANGUAGES,
+  type ILanguageRegistration,
+  type Lang,
+} from 'shiki';
 
-import { createEvent, ShadowlessElement } from '../../__internal__/index.js';
-import { codeLanguages } from '../utils/code-languages.js';
+import { createEvent } from '../../__internal__/index.js';
+import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
+import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
@@ -14,17 +21,16 @@ export class LangList extends ShadowlessElement {
         display: flex;
         flex-direction: column;
         position: absolute;
-        background: var(--affine-background-primary-color);
-        border-radius: 10px;
+        background: var(--affine-background-overlay-panel-color);
+        border-radius: 12px;
         top: 24px;
         z-index: 1;
       }
 
       .lang-list-container {
-        box-shadow: 4px 4px 7px rgba(58, 76, 92, 0.04),
-          -4px -4px 13px rgba(58, 76, 92, 0.02),
-          6px 6px 36px rgba(58, 76, 92, 0.06);
-        border-radius: 0 10px 10px 10px;
+        box-shadow: var(--affine-menu-shadow);
+        border-radius: 8px;
+        padding: 12px 8px;
       }
 
       .lang-list-button-container {
@@ -64,7 +70,7 @@ export class LangList extends ShadowlessElement {
         height: 32px;
         width: 192px;
         border: 1px solid var(--affine-border-color);
-        border-radius: 10px;
+        border-radius: 8px;
         padding-left: 44px;
         padding-top: 4px;
 
@@ -72,7 +78,7 @@ export class LangList extends ShadowlessElement {
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;
-        background: transparent;
+        background: var(--affine-background-overlay-panel-color);
       }
 
       #filter-input:focus {
@@ -99,10 +105,7 @@ export class LangList extends ShadowlessElement {
   private _filterText = '';
 
   @state()
-  private _currentSelectedIndex = -1;
-
-  @property()
-  selectedLanguage = '';
+  private _currentSelectedIndex = 0;
 
   @query('#filter-input')
   filterInput!: HTMLInputElement;
@@ -110,15 +113,14 @@ export class LangList extends ShadowlessElement {
   @property()
   delay = 150;
 
-  static languages = codeLanguages
-    .map(lang => lang.toUpperCase()[0] + lang.slice(1))
-    .concat(['Plain Text']);
-
   override async connectedCallback() {
-    await super.connectedCallback();
+    super.connectedCallback();
     // Avoid triggering click away listener on initial render
     document.addEventListener('click', this._clickAwayListener);
-    this.filterInput.focus();
+
+    setTimeout(() => {
+      this.filterInput?.focus();
+    }, 0);
   }
 
   override disconnectedCallback() {
@@ -133,34 +135,46 @@ export class LangList extends ShadowlessElement {
     this.dispatchEvent(createEvent('dispose', null));
   };
 
-  private _onLanguageClicked(language: string) {
-    this.selectedLanguage = language;
+  private _onLanguageClicked(language: ILanguageRegistration | null) {
+    // TODO use slot instead
     this.dispatchEvent(
       createEvent('selected-language-changed', {
-        language: this.selectedLanguage ?? 'Plain Text',
+        language: language?.id ?? null,
       })
     );
   }
 
   override render() {
-    const filteredLanguages = LangList.languages.filter(language => {
-      if (!this._filterText) {
-        return true;
-      }
-      return language.toLowerCase().startsWith(this._filterText.toLowerCase());
-    });
+    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
+      .filter(language => {
+        if (!this._filterText) {
+          return true;
+        }
+        return (
+          language.id.startsWith(this._filterText.toLowerCase()) ||
+          language.aliases?.some(alias =>
+            alias.startsWith(this._filterText.toLowerCase())
+          )
+        );
+      })
+      .sort(
+        (a, b) =>
+          (POPULAR_LANGUAGES_MAP[a.id as Lang] ?? Infinity) -
+          (POPULAR_LANGUAGES_MAP[b.id as Lang] ?? Infinity)
+      );
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (this._currentSelectedIndex >= filteredLanguages.length - 1) return;
-
-        this._currentSelectedIndex++;
+        this._currentSelectedIndex =
+          (this._currentSelectedIndex + 1) % filteredLanguages.length;
+        // TODO scroll to item
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (this._currentSelectedIndex <= -1) return;
-
-        this._currentSelectedIndex--;
+        this._currentSelectedIndex =
+          (this._currentSelectedIndex + filteredLanguages.length - 1) %
+          filteredLanguages.length;
+        // TODO scroll to item
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (
@@ -183,7 +197,7 @@ export class LangList extends ShadowlessElement {
             placeholder="Search"
             @input="${() => {
               this._filterText = this.filterInput?.value;
-              this._currentSelectedIndex = -1;
+              this._currentSelectedIndex = 0;
             }}"
             @keydown="${onLanguageSelect}"
           />
@@ -198,7 +212,7 @@ export class LangList extends ShadowlessElement {
                 class="lang-item"
                 ?hover=${index === this._currentSelectedIndex}
               >
-                ${language}
+                ${language.id[0].toUpperCase() + language.id.slice(1)}
               </icon-button>
             `
           )}
@@ -214,7 +228,10 @@ declare global {
   }
 
   interface HTMLElementEventMap {
-    'selected-language-changed': CustomEvent<{ language: string }>;
+    /**
+     * @deprecated Use slot instead
+     */
+    'selected-language-changed': CustomEvent<{ language: string | null }>;
     dispose: CustomEvent<null>;
   }
 }

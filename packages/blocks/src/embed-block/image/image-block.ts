@@ -2,24 +2,16 @@ import './placeholder/loading-card.js';
 import './placeholder/image-not-found.js';
 
 import type { Disposable } from '@blocksuite/global/utils';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type BlockHost,
-  ShadowlessElement,
-  WithDisposable,
-} from '../../__internal__/index.js';
-import { BlockChildrenContainer } from '../../__internal__/service/components.js';
 import type { EmbedBlockModel } from '../index.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    affine-image > affine-embed {
-      display: block;
-    }
     .affine-image-wrapper {
       padding: 8px;
       width: 100%;
@@ -30,6 +22,7 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       align-items: center;
       justify-content: center;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
+      overflow: hidden;
     }
     .affine-image-wrapper img {
       max-width: 100%;
@@ -54,13 +47,12 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .embed-editing-state {
-      box-shadow: 0 1px 10px -6px rgba(24, 39, 75, 0.8),
-        0 3px 16px -6px rgba(24, 39, 75, 0.4);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 10px;
       list-style: none;
       padding: 4px;
       width: 40px;
-      background-color: var(--affine-white-90);
+      background-color: var(--affine-background-overlay-panel-color);
       margin: 0;
     }
 
@@ -122,9 +114,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
 
   @property()
   model!: EmbedBlockModel;
-
-  @property()
-  host!: BlockHost;
 
   @query('.resizable-img')
   public readonly resizeImg!: HTMLElement;
@@ -211,12 +200,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
-
     const resizeImgStyle = {
       width: 'unset',
       height: 'unset',
@@ -241,14 +224,11 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     // For the first list item, we need to add a margin-top to make it align with the text
     // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <affine-embed .model=${this.model}>
-        <div class="affine-image-wrapper">
-          <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
-            ${img}
-          </div>
-          ${childrenContainer}
+      <div class="affine-image-wrapper">
+        <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
+          ${img}
         </div>
-      </affine-embed>
+      </div>
     `;
   }
 }

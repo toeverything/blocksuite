@@ -1,8 +1,7 @@
-import type { BlockHost } from '../../__internal__/index.js';
 import type { ListBlockModel } from '../list-model.js';
 
-const getIndex = (host: BlockHost, model: ListBlockModel) => {
-  const siblings = host.page.getParent(model)?.children || [];
+const getIndex = (model: ListBlockModel) => {
+  const siblings = model.page.getParent(model)?.children || [];
   const fakeIndex = siblings.findIndex(v => v === model);
 
   // fakeIndex is the index of the model in the parent's children array
@@ -22,19 +21,19 @@ const getIndex = (host: BlockHost, model: ListBlockModel) => {
   return index;
 };
 
-const getListDeep = (host: BlockHost, model: ListBlockModel): number => {
+const getListDeep = (model: ListBlockModel): number => {
   let deep = 0;
-  let parent = host.page.getParent(model);
+  let parent = model.page.getParent(model);
   while (parent?.flavour === model.flavour) {
     deep++;
-    parent = host.page.getParent(parent);
+    parent = model.page.getParent(parent);
   }
   return deep;
 };
 
-export const getListInfo = (host: BlockHost, model: ListBlockModel) => {
-  const deep = getListDeep(host, model);
-  const index = getIndex(host, model);
+export const getListInfo = (model: ListBlockModel) => {
+  const deep = getListDeep(model);
+  const index = getIndex(model);
 
   return { deep, index };
 };

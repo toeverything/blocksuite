@@ -1,5 +1,7 @@
+import { assertExists } from '@blocksuite/store';
+
 import { GRID_SIZE, type IBound } from './consts.js';
-import type { PhasorElement } from './elements/index.js';
+import type { SurfaceElement } from './elements/surface-element.js';
 import { intersects, isPointIn } from './utils/hit-utils.js';
 
 function getGridIndex(val: number) {
@@ -14,18 +16,24 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export function compare(a: PhasorElement, b: PhasorElement): number {
+// Dont compare by id, '398303718:2' > '398303718:14' is true
+export function compare<T extends { id: string; index: string }>(
+  a: T,
+  b: T
+): number {
+  if (a.index < b.index) return -1;
   if (a.index > b.index) return 1;
-  else if (a.index < b.index) return -1;
-  return a.id > b.id ? 1 : -1;
+  return 0;
 }
 
 export class GridManager {
-  private _grids: Map<string, Set<PhasorElement>> = new Map();
+  private _grids: Map<string, Set<SurfaceElement>> = new Map();
+  private _elementToGrids: Map<SurfaceElement, Set<Set<SurfaceElement>>> =
+    new Map();
 
   private _createGrid(row: number, col: number) {
     const id = row + '|' + col;
-    const elements: Set<PhasorElement> = new Set();
+    const elements: Set<SurfaceElement> = new Set();
     this._grids.set(id, elements);
     return elements;
   }
@@ -39,8 +47,11 @@ export class GridManager {
     return this._grids.size === 0;
   }
 
-  add(element: PhasorElement) {
+  add(element: SurfaceElement) {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
+    const grids = new Set<Set<SurfaceElement>>();
+    this._elementToGrids.set(element, grids);
+
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         let grid = this._getGrid(i, j);
@@ -48,18 +59,17 @@ export class GridManager {
           grid = this._createGrid(i, j);
         }
         grid.add(element);
+        grids.add(grid);
       }
     }
   }
 
-  remove(element: PhasorElement) {
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
-    for (let i = minRow; i <= maxRow; i++) {
-      for (let j = minCol; j <= maxCol; j++) {
-        const grid = this._getGrid(i, j);
-        if (!grid) continue;
-        grid.delete(element);
-      }
+  remove(element: SurfaceElement) {
+    const grids = this._elementToGrids.get(element);
+    assertExists(grids);
+
+    for (const grid of grids) {
+      grid.delete(element);
     }
   }
 
@@ -74,9 +84,9 @@ export class GridManager {
     );
   }
 
-  search(bound: IBound): PhasorElement[] {
+  search(bound: IBound): SurfaceElement[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
-    const results: Set<PhasorElement> = new Set();
+    const results: Set<SurfaceElement> = new Set();
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         const gridElements = this._getGrid(i, j);
@@ -96,13 +106,13 @@ export class GridManager {
     return sorted;
   }
 
-  pick(x: number, y: number): PhasorElement[] {
+  pick(x: number, y: number): SurfaceElement[] {
     const row = getGridIndex(x);
     const col = getGridIndex(y);
     const gridElements = this._getGrid(row, col);
     if (!gridElements) return [];
 
-    const results: PhasorElement[] = [];
+    const results: SurfaceElement[] = [];
     for (const element of gridElements) {
       if (isPointIn(element, x, y)) {
         results.push(element);

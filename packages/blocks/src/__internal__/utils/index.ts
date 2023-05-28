@@ -6,14 +6,14 @@
  */
 export * from './block-range.js';
 export * from './common-operations.js';
+export * from './drag-and-drop.js';
+export * from './event.js';
 export * from './filesys.js';
-export * from './gesture/index.js';
 export * from './hotkey.js';
-export * from './lit.js';
 export * from './query.js';
 export * from './rect.js';
+export * from './reordering.js';
 export * from './selection.js';
 // Compat with SSR
-// export * from './shortcut.js';
 export * from './std.js';
 export * from './types.js';

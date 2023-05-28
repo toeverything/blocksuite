@@ -40,6 +40,13 @@ export function CodeOptionTemplate({
       .affine-codeblock-option-container > div {
           position: fixed;
           z-index: 1;
+          box-shadow:var(--affine-shadow-2)
+      }
+      .affine-codeblock-option {
+        box-shadow:var(--affine-shadow-2);
+        padding:4px;
+        border-radius:8px;
+        background:var(--affine-background-overlay-panel-color)
       }
 
       ${tooltipStyle}
@@ -57,7 +64,7 @@ export function CodeOptionTemplate({
         @click=${() => copyCode(model as CodeBlockModel)}
       >
         ${CopyIcon}
-        <tool-tip inert tip-position="right-start" role="tooltip"
+        <tool-tip inert tip-position="right" role="tooltip"
           >Copy to Clipboard</tool-tip
         >
       </format-bar-button>
@@ -68,9 +75,7 @@ export function CodeOptionTemplate({
         @click=${onClickWrap}
       >
         ${wrap ? CancelWrapIcon : WrapIcon}
-        <tool-tip inert tip-position="right-start" role="tooltip"
-          >Wrap code</tool-tip
-        >
+        <tool-tip inert tip-position="right" role="tooltip">Wrap code</tool-tip>
       </format-bar-button>
       ${readonly
         ? ''
@@ -83,7 +88,7 @@ export function CodeOptionTemplate({
             }}
           >
             ${DeleteIcon}
-            <tool-tip inert tip-position="right-start" role="tooltip"
+            <tool-tip inert tip-position="right" role="tooltip"
               >Delete</tool-tip
             >
           </format-bar-button>`}

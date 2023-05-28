@@ -1,12 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 
-import type { SelectionEvent } from '../../../__internal__/index.js';
 import { createDragEvent, Point } from '../../../__internal__/index.js';
-import type { DefaultSelectionManager } from './default-selection-manager.js';
+import type { DefaultSelectionManager } from './selection-manager.js';
 import { autoScroll } from './utils.js';
 
 export const PreviewDragHandlers = {
-  onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onStart(selection: DefaultSelectionManager, e: PointerEventState) {
     const { container, state } = selection;
     state.blur();
     container.components.dragHandle?.onDragStart(
@@ -15,7 +15,7 @@ export const PreviewDragHandlers = {
     );
   },
 
-  onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onMove(selection: DefaultSelectionManager, e: PointerEventState) {
     autoScroll(selection, e, {
       init() {
         const { state } = selection;
@@ -56,7 +56,7 @@ export const PreviewDragHandlers = {
     });
   },
 
-  onEnd(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onEnd(selection: DefaultSelectionManager, e: PointerEventState) {
     const { container, state } = selection;
     state.clearRaf();
     state.lastPoint = null;

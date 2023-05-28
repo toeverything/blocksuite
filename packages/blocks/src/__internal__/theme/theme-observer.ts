@@ -3,7 +3,7 @@ import { Slot } from '@blocksuite/store';
 import type { CssVariablesMap } from './css-variables.js';
 import { VARIABLES } from './css-variables.js';
 
-function extractCssVariables(element: Element): CssVariablesMap {
+export function extractCssVariables(element: Element): CssVariablesMap {
   const styles = window.getComputedStyle(element);
   const variables = VARIABLES.reduce((acc, cssName) => {
     const value = styles.getPropertyValue(cssName).trim();
@@ -34,6 +34,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
 
   observer(element: Element) {
     this._observer?.disconnect();
+    this._cssVariables = extractCssVariables(element);
     this._observer = new MutationObserver(() => {
       const mode = element.getAttribute('data-theme');
       if (this._mode !== mode) {

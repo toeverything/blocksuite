@@ -156,6 +156,10 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         range.endContainer.contains(rootElement) &&
         Array.from(range.endContainer.childNodes).filter(
           node => node instanceof HTMLElement
+        ).length === 1 &&
+        range.startContainer.contains(rootElement) &&
+        Array.from(range.startContainer.childNodes).filter(
+          node => node instanceof HTMLElement
         ).length === 1
       ) {
         this._editor.focusEnd();
@@ -250,9 +254,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           }
 
           const newRange = this._editor.toDomRange(newVRange);
-          assertExists(newRange);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
+          if (newRange) {
+            assertExists(newRange);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          }
         }
       }
 

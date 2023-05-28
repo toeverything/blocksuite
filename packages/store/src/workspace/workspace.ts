@@ -14,7 +14,6 @@ import {
 } from '../store.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
-import { normalizeSubpage } from './indexer/normalize-subpage.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
@@ -119,9 +118,6 @@ export class Workspace {
       search: new SearchIndexer(this.doc),
       backlink: backlinkIndexer,
     };
-    backlinkIndexer.slots.indexUpdated.on(e => {
-      normalizeSubpage(e, this, backlinkIndexer);
-    });
 
     // TODO use BlockIndexer
     this.slots.pageAdded.on(id => {
@@ -162,6 +158,10 @@ export class Workspace {
   private get _pages() {
     // the meta space is not included
     return this._store.spaces as Map<`space:${string}`, Page>;
+  }
+
+  public getPageNameList() {
+    return [...this._pages.keys()];
   }
 
   get doc() {
@@ -251,8 +251,9 @@ export class Workspace {
     });
     const page = this.getPage(pageId) as Page;
 
+    let pageBlockId = pageId;
     if (init) {
-      const pageBlockId = page.addBlock(
+      pageBlockId = page.addBlock(
         'affine:page',
         typeof init === 'boolean'
           ? undefined
@@ -260,7 +261,7 @@ export class Workspace {
               title: new page.Text(init.title),
             }
       );
-      page.addBlock('affine:surface', {}, null);
+      page.addBlock('affine:surface', {}, pageBlockId);
       const frameId = page.addBlock('affine:frame', {}, pageBlockId);
       page.addBlock('affine:paragraph', {}, frameId);
     }
@@ -271,7 +272,7 @@ export class Workspace {
   setPageMeta(
     pageId: string,
     // You should not update subpageIds directly.
-    props: Partial<PageMeta & { subpageIds: never }>
+    props: Partial<PageMeta>
   ) {
     this.meta.setPageMeta(pageId, props);
   }
@@ -328,6 +329,29 @@ export class Workspace {
     link.click();
 
     URL.revokeObjectURL(fileUrl);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  importYDoc(): Promise<void> {
+    return new Promise((res, rej) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.ydoc';
+      input.multiple = false;
+      input.onchange = async () => {
+        const file = input.files?.item(0);
+        if (!file) {
+          return rej();
+        }
+        const buffer = await file.arrayBuffer();
+        Y.applyUpdate(this.doc, new Uint8Array(buffer));
+        res();
+      };
+      input.onerror = rej;
+      input.click();
+    });
   }
 
   /**

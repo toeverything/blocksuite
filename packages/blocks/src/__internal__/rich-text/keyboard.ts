@@ -68,8 +68,15 @@ export function createKeyboardBindings(
 
     linkedPage: {
       key: ['[', '【', '@'],
+      altKey: null,
       shiftKey: null,
       handler(range, { event, prefix }) {
+        if (range.length > 0) {
+          // When select text and press `[[` should not trigger transform,
+          // since it will break the bracket complete.
+          // Expected `[[selected text]]` instead of `@selected text]]`
+          return ALLOW_DEFAULT;
+        }
         if (
           (event.key === '[' || event.key === '【') &&
           !prefix.endsWith(event.key)
@@ -79,7 +86,7 @@ export function createKeyboardBindings(
         }
         const flag = page.awarenessStore.getFlag('enable_linked_page');
         if (!flag) return ALLOW_DEFAULT;
-        if (matchFlavours(model, ['affine:code'] as const)) {
+        if (matchFlavours(model, ['affine:code'])) {
           return ALLOW_DEFAULT;
         }
 
@@ -120,7 +127,7 @@ export function createKeyboardBindings(
         }
         // End of feature flag
 
-        if (matchFlavours(model, ['affine:code'] as const)) {
+        if (matchFlavours(model, ['affine:code'])) {
           return ALLOW_DEFAULT;
         }
         // if (context.format['code'] === true) {

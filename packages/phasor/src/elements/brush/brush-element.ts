@@ -1,133 +1,100 @@
-import type { IBound } from '../../consts.js';
-import { getStrokePoints } from '../../perfect-freehand/getStrokePoints.js';
-import { isPointIn } from '../../utils/hit-utils.js';
-import { simplePick } from '../../utils/std.js';
+import { getStroke } from '../../perfect-freehand/getStroke.js';
+import {
+  Bound,
+  getBoundFromPoints,
+  inflateBound,
+  transformPointsToNewBound,
+} from '../../utils/bound.js';
 import { Utils } from '../../utils/tl-utils.js';
-import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
-import { BaseElement, type HitTestOptions } from '../base-element.js';
-import type { BrushProps, SerializedBrushProps } from './types.js';
+import { SurfaceElement } from '../surface-element.js';
+import type { IBrush } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
-  return getStrokePoints(points, {
+  return getStroke(points, {
     size: lineWidth,
-    thinning: 0.65,
-    streamline: 0.65,
-    smoothing: 0.65,
+    thinning: 0.6,
+    streamline: 0.5,
+    smoothing: 0.5,
     easing: t => Math.sin((t * Math.PI) / 2),
     simulatePressure: true,
   });
 }
 
-export function getBrushBoundFromPoints(
-  points: number[][],
-  lineWidth: number
-): IBound {
-  const { minX, minY, width, height } = Utils.getBoundsFromPoints(points);
-  return {
-    x: minX - lineWidth / 2,
-    y: minY - lineWidth / 2,
-    w: width < lineWidth ? lineWidth : width + lineWidth,
-    h: height < lineWidth ? lineWidth : height + lineWidth,
-  };
-}
-
-export class BrushElement extends BaseElement {
-  type = 'brush' as const;
-  color = '#000000';
-  override x = 0;
-  override y = 0;
-  override w = 0;
-  override h = 0;
-
+export class BrushElement extends SurfaceElement<IBrush> {
   /* Brush mouse coords relative to left-top corner */
-  points: number[][] = [];
-  lineWidth = 4;
-
-  hitTest(x: number, y: number, options?: HitTestOptions) {
-    return isPointIn(this, x, y);
+  get points() {
+    const points = this.yMap.get('points') as IBrush['points'];
+    return points;
   }
 
-  render(ctx: CanvasRenderingContext2D) {
-    ctx.translate(this.lineWidth / 2, this.lineWidth / 2);
+  get color() {
+    const color = this.yMap.get('color') as IBrush['color'];
+    return color;
+  }
 
-    // render stroke points
+  get lineWidth() {
+    const lineWidth = this.yMap.get('lineWidth') as IBrush['lineWidth'];
+    return lineWidth;
+  }
+
+  override render(ctx: CanvasRenderingContext2D) {
     const stroke = getSolidStrokePoints(this.points, this.lineWidth);
-    const commands = Utils.getSvgPathFromStrokePoints(stroke);
+    const commands = Utils.getSvgPathFromStroke(stroke);
     const path = new Path2D(commands);
 
-    ctx.strokeStyle = this.transformPropertyValue(this.color);
-    ctx.lineWidth = this.lineWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke(path);
+    ctx.fillStyle = this.computedValue(this.color);
+    ctx.fill(path);
   }
 
-  serialize(): SerializedBrushProps {
-    return {
-      id: this.id,
-      index: this.index,
-      type: this.type,
-      xywh: this._xywh,
+  override applyUpdate(props: Partial<IBrush>) {
+    const updates: Partial<IBrush> = { ...props };
 
-      color: this.color,
-      lineWidth: this.lineWidth,
-      points: JSON.stringify(this.points),
-    };
-  }
+    const { points, xywh } = props;
 
-  static deserialize(data: Record<string, unknown>): BrushElement {
-    const element = new BrushElement(data.id as string);
+    if (points?.length) {
+      const lineWidth = this.lineWidth;
+      const bound = getBoundFromPoints(points);
+      const boundWidthLineWidth = inflateBound(bound, lineWidth);
+      const relativePoints = points.map(([x, y]) => {
+        return [x - boundWidthLineWidth.x, y - boundWidthLineWidth.y];
+      });
+      updates.points = relativePoints;
 
-    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    setXYWH(element, { x, y, w, h });
-    element.points = JSON.parse(data.points as string);
-
-    const { xywh, ...props } = BrushElement.getProps(element, data);
-    BrushElement.updateProps(element, props);
-
-    return element;
-  }
-
-  static updateProps(element: BrushElement, props: BrushProps) {
-    Object.assign(element, props);
-  }
-
-  static override getBoundProps(
-    element: BaseElement,
-    bound: IBound
-  ): Record<string, string> {
-    const { lineWidth } = element as BrushElement;
-    const elementH = Math.max(element.h - lineWidth, 1);
-    const elementW = Math.max(element.w - lineWidth, 1);
-    const boundH = Math.max(bound.h - lineWidth, 1);
-    const boundW = Math.max(bound.w - lineWidth, 1);
-    const points = (element as BrushElement).points.map(([x, y]) => {
-      return [boundW * (x / elementW), boundH * (y / elementH)];
-    });
-
-    return {
-      xywh: serializeXYWH(
-        bound.x,
-        bound.y,
-        boundW + lineWidth,
-        boundH + lineWidth
-      ),
-      points: JSON.stringify(points),
-    };
-  }
-
-  static override getProps(
-    element: BaseElement,
-    rawProps: BrushProps & { xywh?: string }
-  ): BrushProps & { xywh?: string } {
-    const props = simplePick(rawProps, ['index', 'color', 'lineWidth', 'xywh']);
-
-    if (props.lineWidth) {
-      const { x, y, w, h } = element;
-      const d = props.lineWidth - (element as BrushElement).lineWidth;
-      props.xywh = serializeXYWH(x, y, w + d, h + d);
+      updates.xywh = boundWidthLineWidth.serialize();
     }
 
-    return props;
+    if (xywh) {
+      const bound = Bound.deserialize(xywh);
+      const { lineWidth } = this;
+      const transformed = transformPointsToNewBound(
+        this.points.map(([x, y]) => ({ x, y })),
+        this,
+        lineWidth / 2,
+        bound,
+        lineWidth / 2
+      );
+
+      updates.points = transformed.points.map(p => [p.x, p.y]);
+      updates.xywh = transformed.bound.serialize();
+    }
+
+    if (props.lineWidth && props.lineWidth !== this.lineWidth) {
+      const bound = updates.xywh ? Bound.deserialize(updates.xywh) : this;
+      const points = updates.points ?? this.points;
+      const transformed = transformPointsToNewBound(
+        points.map(([x, y]) => ({ x, y })),
+        bound,
+        this.lineWidth / 2,
+        inflateBound(bound, props.lineWidth - this.lineWidth),
+        props.lineWidth / 2
+      );
+
+      updates.points = transformed.points.map(p => [p.x, p.y]);
+      updates.xywh = transformed.bound.serialize();
+    }
+
+    for (const key in updates) {
+      this.yMap.set(key, updates[key as keyof IBrush] as IBrush[keyof IBrush]);
+    }
   }
 }

@@ -1,13 +1,14 @@
 import * as blocks from '@blocksuite/blocks';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
+import { EditorContainer } from '@blocksuite/editor';
 import {
   configDebugLog,
   disableDebuglog,
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
-import type { BlobStorage } from '@blocksuite/store';
+import type { BlobStorage, Page } from '@blocksuite/store';
 import type { DocProvider, Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
@@ -51,6 +52,10 @@ export const initParam = providerArgs.includes('indexeddb')
   ? null
   : params.get('init');
 export const isE2E = room.startsWith('playwright');
+
+export const getOptions = (
+  fn: (params: URLSearchParams) => Record<string, string | number>
+) => fn(params);
 
 declare global {
   // eslint-disable-next-line no-var
@@ -139,11 +144,15 @@ export function initDebugConfig() {
   // enableDebugLog(['CRUD']);
 }
 
-async function initWithMarkdownContent(workspace: Workspace, url: URL) {
+async function initWithMarkdownContent(
+  workspace: Workspace,
+  url: URL,
+  pageId: string
+) {
   const { empty: emptyInit } = await import('./data/index.js');
 
-  emptyInit(workspace);
-  const page = workspace.getPage('page0');
+  emptyInit(workspace, pageId);
+  const page = workspace.getPage(pageId);
   assertExists(page);
   assertExists(page.root);
   const content = await fetch(url).then(res => res.text());
@@ -153,11 +162,12 @@ async function initWithMarkdownContent(workspace: Workspace, url: URL) {
 
 export async function tryInitExternalContent(
   workspace: Workspace,
-  initParam: string
+  initParam: string,
+  pageId: string
 ) {
   if (isValidUrl(initParam)) {
     const url = new URL(initParam);
-    await initWithMarkdownContent(workspace, url);
+    await initWithMarkdownContent(workspace, url, pageId);
   } else if (isBase64.test(initParam)) {
     Utils.applyYjsUpdateV2(workspace, initParam);
   }
@@ -214,6 +224,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_database: true,
       enable_edgeless_toolbar: true,
       enable_linked_page: true,
+      enable_bookmark_operation: false,
       readonly: {
         'space:page0': false,
       },
@@ -230,3 +241,22 @@ export function isValidUrl(urlLike: string) {
   }
   return url.protocol === 'http:' || url.protocol === 'https:';
 }
+
+export const createEditor = (page: Page, element: HTMLElement) => {
+  const editor = new EditorContainer();
+  editor.page = page;
+  editor.slots.pageLinkClicked.on(({ pageId }) => {
+    const target = page.workspace.getPage(pageId);
+    if (!target) {
+      throw new Error(`Failed to jump to page ${pageId}`);
+    }
+    editor.page = target;
+  });
+
+  element.append(editor);
+
+  editor.createBlockHub().then(blockHub => {
+    document.body.appendChild(blockHub);
+  });
+  return editor;
+};

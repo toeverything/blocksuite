@@ -1,36 +1,31 @@
-import { isPointIn } from '../../utils/hit-utils.js';
-import { deserializeXYWH, serializeXYWH, setXYWH } from '../../utils/xywh.js';
-import { BaseElement, type HitTestOptions } from '../base-element.js';
+import { type SerializedXYWH } from '../../utils/xywh.js';
+import type { IElementDefaultProps } from '../index.js';
+import { SurfaceElement } from '../surface-element.js';
 
-export class DebugElement extends BaseElement {
-  type = 'debug' as const;
-  color = '#000000';
+export interface IDebug {
+  id: string;
+  type: 'debug';
+  xywh: SerializedXYWH;
+  index: string;
+  seed: number;
 
-  hitTest(x: number, y: number, options?: HitTestOptions) {
-    return isPointIn(this, x, y);
+  color: string;
+}
+
+export const DebugElementDefaultProps: IElementDefaultProps<'debug'> = {
+  type: 'debug',
+  xywh: '[0,0,0,0]',
+
+  color: '#000000',
+};
+
+export class DebugElement extends SurfaceElement<IDebug> {
+  get color() {
+    const color = this.yMap.get('color') as IDebug['color'];
+    return color;
   }
 
-  serialize(): Record<string, unknown> {
-    return {
-      id: this.id,
-      index: this.index,
-      type: this.type,
-      xywh: serializeXYWH(this.x, this.y, this.w, this.h),
-      color: this.color,
-    };
-  }
-
-  static deserialize(data: Record<string, unknown>): DebugElement {
-    const element = new DebugElement(data.id as string);
-    element.index = data.index as string;
-
-    const [x, y, w, h] = deserializeXYWH(data.xywh as string);
-    setXYWH(element, { x, y, w, h });
-    element.color = data.color as string;
-    return element;
-  }
-
-  render(ctx: CanvasRenderingContext2D): void {
+  override render(ctx: CanvasRenderingContext2D): void {
     ctx.fillStyle = this.color;
     ctx.fillRect(0, 0, this.w, this.h);
   }

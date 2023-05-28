@@ -1,5 +1,9 @@
+import type { BaseBlockModel } from '@blocksuite/store';
+
+import type { BlockRange, SerializedBlock } from '../__internal__/index.js';
 import type { BlockTransformContext } from '../__internal__/index.js';
 import { BaseService } from '../__internal__/service/index.js';
+import { json2block } from '../__internal__/service/json2block.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
@@ -27,6 +31,18 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
       default:
         return text;
     }
+  }
+
+  override async json2Block(
+    focusedBlockModel: BaseBlockModel,
+    pastedBlocks: SerializedBlock[],
+    range?: BlockRange
+  ) {
+    const convertToPastedIfEmpty = focusedBlockModel.type !== 'text';
+    return json2block(focusedBlockModel, pastedBlocks, {
+      range,
+      convertToPastedIfEmpty,
+    });
   }
 }
 

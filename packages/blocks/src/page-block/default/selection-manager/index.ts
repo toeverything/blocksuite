@@ -1,4 +1,4 @@
-export { DefaultSelectionManager } from './default-selection-manager.js';
+export { DefaultSelectionManager } from './selection-manager.js';
 export {
   PageSelectionState,
   type PageSelectionType,

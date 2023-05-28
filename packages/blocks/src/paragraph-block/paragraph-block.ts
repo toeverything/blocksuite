@@ -1,24 +1,25 @@
 import '../__internal__/rich-text/rich-text.js';
 
-import { BlockHubIcon20 } from '@blocksuite/global/config';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
+  BlockHubIcon20,
+} from '@blocksuite/global/config';
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
+import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  type BlockHost,
-  isPageMode,
-  ShadowlessElement,
-} from '../__internal__/index.js';
+import { isPageMode } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { BlockChildrenContainer } from '../__internal__/service/components.js';
+import { registerService } from '../__internal__/service.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
+import paragraphService from './paragraph-service.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
   // Call event.preventDefault() to keep the mouse event from being sent as well.
@@ -27,7 +28,7 @@ function tipsPlaceholderPreventDefault(event: Event) {
 }
 
 function TipsPlaceholder(model: BaseBlockModel) {
-  if (!matchFlavours(model, ['affine:paragraph'] as const)) {
+  if (!matchFlavours(model, ['affine:paragraph'])) {
     throw new Error("TipsPlaceholder can't be used for this model");
   }
   if (model.type === 'text') {
@@ -44,7 +45,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
       if (!blockHub) {
         throw new Error('Failed to find blockHub!');
       }
-      blockHub.toggleMenu(true);
+      blockHub.toggleMenu();
     };
     return html`
       <div
@@ -70,7 +71,7 @@ function TipsPlaceholder(model: BaseBlockModel) {
 }
 
 @customElement('affine-paragraph')
-export class ParagraphBlockComponent extends ShadowlessElement {
+export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   static override styles = css`
     .affine-edgeless-block-child
       .affine-block-element:first-child
@@ -176,16 +177,12 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     }
   `;
 
-  @property()
-  model!: ParagraphBlockModel;
-
-  @property()
-  host!: BlockHost;
-
   @state()
   private _tipsPlaceholderTemplate = html``;
+
   @state()
   private _isComposing = false;
+
   @state()
   private _isFocus = false;
 
@@ -200,6 +197,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     super.connectedCallback();
     // Initial placeholder state
     this._updatePlaceholder();
+    registerService('affine:paragraph', paragraphService);
   }
 
   override firstUpdated() {
@@ -250,25 +248,36 @@ export class ParagraphBlockComponent extends ShadowlessElement {
     this._placeholderDisposables = new DisposableGroup();
   };
 
+  private isInDatabase = () => {
+    let parent = this.parentElement;
+    while (parent && parent !== document.body) {
+      if (parent.tagName.toLowerCase() === 'affine-database') {
+        return true;
+      }
+      parent = parent.parentElement;
+    }
+    return false;
+  };
+
   override render() {
     const { type } = this.model;
-    const childrenContainer = BlockChildrenContainer(
-      this.model,
-      this.host,
-      () => this.requestUpdate()
-    );
 
     // hide placeholder in database
-    const tipsPlaceholderTemplate =
-      this.host.flavour === 'affine:database'
-        ? ''
-        : this._tipsPlaceholderTemplate;
+    const tipsPlaceholderTemplate = this.isInDatabase()
+      ? ''
+      : this._tipsPlaceholderTemplate;
+
+    const children = html`<div
+      class="affine-block-children-container"
+      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+    >
+      ${this.content}
+    </div>`;
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
         ${tipsPlaceholderTemplate}
         <rich-text
-          .host=${this.host}
           .model=${this.model}
           .textSchema=${this.textSchema}
           @focusin=${this._onFocusIn}
@@ -277,7 +286,7 @@ export class ParagraphBlockComponent extends ShadowlessElement {
             fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
           })}
         ></rich-text>
-        ${childrenContainer}
+        ${children}
       </div>
     `;
   }

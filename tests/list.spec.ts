@@ -35,6 +35,7 @@ test('add new bulleted list', async ({ page }) => {
 
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Bulleted List');
+  await focusRichText(page, 0);
   await type(page, 'aa');
   await pressEnter(page);
   await type(page, 'aa');
@@ -50,6 +51,7 @@ test('add new toggle list', async ({ page }) => {
 
   await focusRichText(page, 0);
   await clickBlockTypeMenuItem(page, 'Toggle List');
+  await focusRichText(page, 0);
   await type(page, 'top');
   await pressTab(page);
   await pressEnter(page);
@@ -185,6 +187,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -216,6 +219,7 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -277,6 +281,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -297,6 +302,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -319,6 +325,7 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -350,6 +357,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="text1"
@@ -370,6 +378,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="text1"
@@ -463,7 +472,8 @@ test.describe('indent correctly when deleting list item', () => {
     await pressBackspace(page);
     await pressBackspace(page);
 
-    await assertBlockChildrenIds(page, '3', ['4', '6']);
+    await assertBlockChildrenIds(page, '3', ['4']);
+    await assertBlockChildrenIds(page, '7', ['6']);
   });
 
   test('merge two lists', async ({ page }) => {

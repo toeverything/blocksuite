@@ -1,11 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 
-import type { SelectionEvent } from '../../../__internal__/index.js';
-import type { DefaultSelectionManager } from './default-selection-manager.js';
+import type { DefaultSelectionManager } from './selection-manager.js';
 import { autoScroll } from './utils.js';
 
 export const BlockDragHandlers = {
-  onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onStart(selection: DefaultSelectionManager, e: PointerEventState) {
     const { state } = selection;
     // rich-text should be unfocused
     state.blur();
@@ -20,10 +20,10 @@ export const BlockDragHandlers = {
     state.refreshBlockRectCache();
   },
 
-  onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onMove(selection: DefaultSelectionManager, e: PointerEventState) {
     autoScroll(selection, e, {
       init() {
-        const { x, y } = e;
+        const { x, y } = e.point;
         const {
           draggingArea,
           viewport: { scrollLeft, scrollTop },
@@ -43,17 +43,17 @@ export const BlockDragHandlers = {
         selection.updateDraggingArea(draggingArea);
       },
       onMove() {
-        const { blockCache, draggingArea, viewport } = selection.state;
+        const { blockCache, draggingArea, viewportOffset } = selection.state;
 
         assertExists(draggingArea);
 
         const rect = selection.updateDraggingArea(draggingArea);
-        selection.selectBlocksByDraggingArea(blockCache, rect, viewport);
+        selection.selectBlocksByDraggingArea(blockCache, rect, viewportOffset);
       },
     });
   },
 
-  onEnd(selection: DefaultSelectionManager, _: SelectionEvent) {
+  onEnd(selection: DefaultSelectionManager, _: PointerEventState) {
     selection.state.type = 'block';
     selection.state.clearDraggingArea();
     selection.slots.draggingAreaUpdated.emit(null);

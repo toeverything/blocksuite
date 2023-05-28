@@ -1,9 +1,9 @@
+import { ShadowlessElement } from '@blocksuite/lit';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import { ShadowlessElement } from '../../index.js';
 import type { AffineTextAttributes } from './types.js';
 
 export function affineTextStyles(
@@ -24,10 +24,12 @@ export function affineTextStyles(
       'font-family': 'var(--affine-font-code-family)',
       background: 'var(--affine-background-code-block)',
       color: 'var(--affine-text-primary-color)',
-      'border-radius': '5px',
-      padding: '0 5px',
+      'border-radius': '4px',
+      padding: '3px 6px',
       'font-size': 'calc(var(--affine-font-base) - 4px)',
       'font-variant-ligatures': 'none',
+      'line-height': 'var(--affine-font-base)',
+      border: '1px solid var(--affine-border-color)',
     };
   }
 

@@ -391,6 +391,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -422,6 +423,7 @@ test('should indent and unindent works with children', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -462,6 +464,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -483,6 +486,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -527,6 +531,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -918,4 +923,58 @@ test('should placeholder works', async ({ page }) => {
   await blockHubPlaceholder.click();
   await expect(placeholder).toHaveCount(1);
   await expect(blockHubMenu).toBeVisible();
+});
+
+test.describe('press ArrowDown when cursor is at the last line of a block', () => {
+  test.beforeEach(async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await page.evaluate(() => {
+      const { page } = window;
+      const pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+      const frame = page.addBlock('affine:frame', {}, pageId);
+      page.addBlock(
+        'affine:paragraph',
+        {
+          text: new page.Text('This is the 2nd last block.'),
+        },
+        frame
+      );
+      page.addBlock(
+        'affine:paragraph',
+        {
+          text: new page.Text('This is the last block.'),
+        },
+        frame
+      );
+    });
+  });
+
+  test('move cursor to next block if this block is _not_ the last block in the page', async ({
+    page,
+  }) => {
+    // Click at the top-left corner of the 2nd last block to place the cursor at its start
+    await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
+    // Cursor should have been moved to the start of the last block.
+    await pressArrowDown(page);
+    await type(page, "I'm here. ");
+    await assertRichTexts(page, [
+      'This is the 2nd last block.',
+      "I'm here. This is the last block.",
+    ]);
+  });
+  test('move cursor to the end of line if the block is the last block in the page', async ({
+    page,
+  }) => {
+    // Click at the top-left corner of the last block to place the cursor at its start
+    await focusRichText(page, 1, { clickPosition: { x: 0, y: 0 } });
+    // Cursor should have been moved to the end of the only line.
+    await pressArrowDown(page);
+    await type(page, " I'm here.");
+    await assertRichTexts(page, [
+      'This is the 2nd last block.',
+      "This is the last block. I'm here.",
+    ]);
+  });
 });

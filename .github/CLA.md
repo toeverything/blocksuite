@@ -66,3 +66,9 @@ Example:
 - ZiJian Zuo, @zuozijian3720, 2023/04/21
 - boomyao, @boomyao, 2023/04/26
 - lmmmmmm, @Lmmmmmm-bb, 2023/04/27
+- 三咲智子 Kevin Deng, @sxzz, 2023/04/30
+- Doma, @SevenOutman, 2023/05/05
+- donglixiaoche, @donglixiaoche, 2023/05/06
+- Alkaidcc, @Alkaidcc, 2023/05/12
+- Hritik, @hritikchaudhary, 2023/05/19
+- yuanx, @imyuanx, 2023/05/18

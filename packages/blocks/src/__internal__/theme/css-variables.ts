@@ -1,35 +1,5 @@
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
-export const VARIABLES = [
-  '--affine-editor-width',
-
-  '--affine-theme-mode',
-  '--affine-editor-mode',
-  /* --affine-palette-transparent: special values added for the sake of logical consistency. */
-  '--affine-palette-transparent',
-
-  '--affine-popover-shadow',
-  '--affine-modal-shadow',
-  '--affine-tooltip-shadow',
-  '--affine-font-family',
-  '--affine-font-number-family',
-  '--affine-font-code-family',
-  '--affine-font-h-1',
-  '--affine-font-h-2',
-  '--affine-font-h-3',
-  '--affine-font-h-4',
-  '--affine-font-h-5',
-  '--affine-font-h-6',
-  '--affine-font-base',
-  '--affine-font-sm',
-  '--affine-font-xs',
-  '--affine-line-height',
-  '--affine-z-index-modal',
-  '--affine-z-index-popover',
-  '--affine-paragraph-space',
-  '--affine-popover-radius',
-  '--affine-zoom',
-  '--affine-scale',
-
+export const COLOR_VARIABLES = [
   '--affine-brand-color',
   '--affine-primary-color',
   '--affine-secondary-color',
@@ -110,6 +80,51 @@ export const VARIABLES = [
   '--affine-palette-shape-black',
   '--affine-palette-shape-grey',
   '--affine-tooltip',
+];
+
+export const SIZE_VARIABLES = [
+  '--affine-font-h-1',
+  '--affine-font-h-2',
+  '--affine-font-h-3',
+  '--affine-font-h-4',
+  '--affine-font-h-5',
+  '--affine-font-h-6',
+  '--affine-font-base',
+  '--affine-font-sm',
+  '--affine-font-xs',
+  '--affine-line-height',
+  '--affine-z-index-modal',
+  '--affine-z-index-popover',
+];
+
+export const FONT_FAMILY_VARIABLES = [
+  '--affine-font-family',
+  '--affine-font-number-family',
+  '--affine-font-code-family',
+];
+
+export const VARIABLES = [
+  '--affine-editor-width',
+
+  '--affine-theme-mode',
+  '--affine-editor-mode',
+  /* --affine-palette-transparent: special values added for the sake of logical consistency. */
+  '--affine-palette-transparent',
+
+  '--affine-popover-shadow',
+  '--affine-menu-shadow',
+  '--affine-float-button-shadow',
+  '--affine-shadow-1',
+  '--affine-shadow-2',
+  '--affine-shadow-3',
+
+  '--affine-paragraph-space',
+  '--affine-popover-radius',
+  '--affine-zoom',
+  '--affine-scale',
+  ...SIZE_VARIABLES,
+  ...COLOR_VARIABLES,
+  ...FONT_FAMILY_VARIABLES,
 ] as const;
 
 type VariablesType = typeof VARIABLES;

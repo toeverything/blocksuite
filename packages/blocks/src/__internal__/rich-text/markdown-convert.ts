@@ -3,7 +3,8 @@ import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
-import { getCodeLanguage } from '../../code-block/utils/code-languages.js';
+import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
+import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 import {
   asyncSetVRange,
   convertToDivider,
@@ -413,7 +414,9 @@ const matches: Match[] = [
 
       const codeId = page.addBlock(
         'affine:code',
-        { language: getCodeLanguage(match?.[1] || '') || 'Plain Text' },
+        {
+          language: getStandardLanguage(match?.[1] || '')?.id ?? FALLBACK_LANG,
+        },
         parent,
         index
       );
@@ -421,56 +424,6 @@ const matches: Match[] = [
       const codeBlock = page.getBlockById(codeId);
       assertExists(codeBlock);
       asyncSetVRange(codeBlock, { index: 0, length: 0 });
-
-      return true;
-    },
-  },
-  {
-    name: 'link',
-    pattern:
-      /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
-      if (!match) {
-        return false;
-      }
-
-      const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
-
-      vEditor.insertText(
-        {
-          index: startIndex + annotatedText.length,
-          length: 0,
-        },
-        ' '
-      );
-      model.page.captureSync();
-      vEditor.formatText(
-        {
-          index: startIndex,
-          length: annotatedText.length,
-        },
-        {
-          link: annotatedText,
-        }
-      );
-
-      vEditor.deleteText({
-        index: startIndex + annotatedText.length,
-        length: 1,
-      });
-
-      vEditor.setVRange({
-        index: startIndex + annotatedText.length,
-        length: 0,
-      });
 
       return true;
     },
@@ -568,7 +521,7 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-  if (matchFlavours(model, ['affine:code'] as const)) {
+  if (matchFlavours(model, ['affine:code'])) {
     return ALLOW_DEFAULT;
   }
   let isConverted = false;

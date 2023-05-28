@@ -5,6 +5,7 @@ import {
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -15,6 +16,7 @@ import {
   asyncGetRichTextByModel,
   type BlockComponentElement,
   type ExtendedModel,
+  focusBlockByModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
   getDefaultPage,
@@ -25,7 +27,6 @@ import {
   isCollapsedNativeSelection,
   isMultiBlockRange,
   resetNativeSelection,
-  type SelectionEvent,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -45,8 +46,6 @@ import type {
   PageSelectionState,
 } from '../default/selection-manager/index.js';
 import { calcCurrentSelectionPosition } from './position.js';
-
-const DEFAULT_SPACING = 64;
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
@@ -334,7 +333,7 @@ export function getCombinedFormat(
   // Skip code block or empty block
   const startModel = blockRange.models[0];
   if (
-    !matchFlavours(startModel, ['affine:code'] as const) &&
+    !matchFlavours(startModel, ['affine:code']) &&
     startModel.text &&
     startModel.text.length
   ) {
@@ -352,7 +351,7 @@ export function getCombinedFormat(
   // End block
   const endModel = blockRange.models[blockRange.models.length - 1];
   if (
-    !matchFlavours(endModel, ['affine:code'] as const) &&
+    !matchFlavours(endModel, ['affine:code']) &&
     endModel.text &&
     endModel.text.length
   ) {
@@ -370,7 +369,7 @@ export function getCombinedFormat(
   // Between blocks
   blockRange.models
     .slice(1, -1)
-    .filter(model => !matchFlavours(model, ['affine:code'] as const))
+    .filter(model => !matchFlavours(model, ['affine:code']))
     .filter(model => model.text && model.text.length)
     .forEach(model => {
       const vEditor = getVirgoByModel(model);
@@ -426,7 +425,7 @@ function formatBlockRange(
 
   // edge case 2: same model
   if (blockRange.models.length === 1) {
-    if (matchFlavours(startModel, ['affine:code'] as const)) return;
+    if (matchFlavours(startModel, ['affine:code'])) return;
     const vEditor = getVirgoByModel(startModel);
     vEditor?.slots.updated.once(() => {
       restoreSelection(blockRange);
@@ -438,13 +437,13 @@ function formatBlockRange(
   }
   // common case
   // format start model
-  if (!matchFlavours(startModel, ['affine:code'] as const)) {
+  if (!matchFlavours(startModel, ['affine:code'])) {
     startModel.text?.format(startOffset, startModel.text.length - startOffset, {
       [key]: format[key] ? null : true,
     });
   }
   // format end model
-  if (!matchFlavours(endModel, ['affine:code'] as const)) {
+  if (!matchFlavours(endModel, ['affine:code'])) {
     endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
   }
   // format between models
@@ -505,7 +504,41 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
 
   resetNativeSelection(null);
 }
+export function handleKeydownAfterSelectBlocks({
+  page,
+  keyboardEvent,
+  selectedBlocks,
+}: {
+  page: Page;
+  keyboardEvent: KeyboardEvent;
+  selectedBlocks: BaseBlockModel[];
+}) {
+  const { key } = keyboardEvent;
 
+  const parent = page.getParent(selectedBlocks[0]);
+  const index = parent?.children.indexOf(selectedBlocks[0]);
+  selectedBlocks.forEach(block => {
+    page.deleteBlock(block);
+  });
+  // TODO:
+  //  1. should add block which has same flavour as the parent?
+  //  2. If use Chinese input method, the input method state cannot be retained
+  const id = page.addBlock(
+    'affine:paragraph',
+    {
+      text: new page.Text(key),
+    },
+    parent,
+    index
+  );
+  // Wait block inserted to dom
+  requestAnimationFrame(() => {
+    const defaultPage = getDefaultPage(page);
+    const newBlock = page.getBlockById(id) as BaseBlockModel;
+    defaultPage?.selection.clear();
+    focusBlockByModel(newBlock, 'end');
+  });
+}
 export async function onModelTextUpdated(
   model: BaseBlockModel,
   callback: (text: RichText) => void
@@ -534,12 +567,13 @@ export async function onModelElementUpdated(
 export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const frames = page.root.children as TopLevelBlockModel[];
-    let offset = 0;
+    const frames = page.root.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[];
     frames.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.
-      // if (matchFlavours(model, ['affine:shape'] as const)) return;
+      // if (matchFlavours(model, ['affine:shape'])) return;
       const blockElement = getBlockElementByModel(model);
       if (!blockElement) return;
       const bound = blockElement.getBoundingClientRect();
@@ -548,11 +582,9 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
       const newModelHeight =
         bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
       if (!almostEqual(newModelHeight, h)) {
-        const newX = x + (offset === 0 ? 0 : offset + DEFAULT_SPACING);
         page.updateBlock(model, {
-          xywh: JSON.stringify([newX, y, w, Math.round(newModelHeight)]),
+          xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
         });
-        offset = newX + w;
       }
     });
   });
@@ -561,14 +593,14 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
 // Show format quick bar when double/triple clicking on text
 export function showFormatQuickBarByClicks(
   type: 'double' | 'triple',
-  e: SelectionEvent,
+  e: PointerEventState,
   page: Page,
   container?: HTMLElement,
   state?: PageSelectionState
 ) {
   const range =
     type === 'double'
-      ? handleNativeRangeDblClick(page, e)
+      ? handleNativeRangeDblClick()
       : handleNativeRangeTripleClick(e);
   if (e.raw.target instanceof HTMLTextAreaElement) return;
   if (!range || range.collapsed) return;

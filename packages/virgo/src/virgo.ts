@@ -1,7 +1,6 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { html } from 'lit';
-import * as Y from 'yjs';
+import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
 import {
@@ -24,11 +23,6 @@ import {
 } from './utils/index.js';
 import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
 
-export interface VEditorOptions {
-  // it is a option to determine default `_attributeRenderer`
-  defaultMode: 'rich' | 'pure';
-}
-
 type VirgoElement<T extends BaseTextAttributes = BaseTextAttributes> =
   HTMLElement & {
     virgoEditor: VEditor<T>;
@@ -42,6 +36,7 @@ export class VEditor<
   static getTextNodesFromElement = getTextNodesFromElement;
 
   private readonly _yText: Y.Text;
+  private readonly _isActive: () => boolean;
   private _rootElement: VirgoElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
@@ -68,7 +63,6 @@ export class VEditor<
     rangeUpdated: Slot<Range>;
     scrollUpdated: Slot<number>;
   };
-
   get yText() {
     return this._yText;
   }
@@ -119,22 +113,12 @@ export class VEditor<
   getDeltasByVRange = this.deltaService.getDeltasByVRange;
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
   mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
-
   constructor(
-    text: VEditor['yText'] | string,
-    options: VEditorOptions = {
-      defaultMode: 'rich',
+    yText: VEditor['yText'],
+    ops?: {
+      active?: () => boolean;
     }
   ) {
-    let yText: Y.Text;
-    if (typeof text === 'string') {
-      const temporaryYDoc = new Y.Doc();
-      yText = temporaryYDoc.getText('text');
-      yText.insert(0, text);
-    } else {
-      yText = text;
-    }
-
     if (!yText.doc) {
       throw new Error('yText must be attached to a Y.Doc');
     }
@@ -145,16 +129,8 @@ export class VEditor<
       );
     }
 
-    // we can change default render to pure for making `VEditor` to be a pure string render,
-    // you can change schema and renderer again after construction
-    if (options.defaultMode === 'pure') {
-      this._attributeService.setAttributeRenderer(delta => {
-        return html`<span><v-text .str="${delta.insert}"></v-text></span>`;
-      });
-    }
-
     this._yText = yText;
-
+    this._isActive = ops?.active ?? (() => true);
     this.slots = {
       mounted: new Slot(),
       unmounted: new Slot(),
@@ -213,7 +189,6 @@ export class VEditor<
 
   getTextPoint(rangeIndex: VRange['index']): TextPoint {
     assertExists(this._rootElement);
-
     const vLines = Array.from(this._rootElement.querySelectorAll('v-line'));
 
     let index = 0;
@@ -267,6 +242,10 @@ export class VEditor<
 
   get isReadonly() {
     return this._isReadonly;
+  }
+
+  get isActive() {
+    return this._isActive();
   }
 
   /**

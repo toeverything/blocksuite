@@ -18,6 +18,7 @@ import {
   pressBackspace,
   pressEnter,
   pressForwardDelete,
+  pressShiftEnter,
   redoByClick,
   redoByKeyboard,
   SHORT_KEY,
@@ -40,9 +41,9 @@ import {
   assertTitle,
   defaultStore,
 } from './utils/asserts.js';
-import { test } from './utils/playwright.js';
+import { scoped, test } from './utils/playwright.js';
 
-test('basic input', async ({ page }) => {
+test(scoped`basic input`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -53,7 +54,7 @@ test('basic input', async ({ page }) => {
   await assertText(page, 'hello');
 });
 
-test('basic init with external text', async ({ page }) => {
+test(scoped`basic init with external text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
 
   await page.evaluate(() => {
@@ -81,9 +82,10 @@ test('basic init with external text', async ({ page }) => {
 
   await assertTitle(page, 'hello');
   await assertRichTexts(page, ['world', 'foo bar']);
+  await focusRichText(page);
 });
 
-test('basic multi user state', async ({ browser, page: pageA }) => {
+test(scoped`basic multi user state`, async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
   await waitNextFrame(pageA);
@@ -92,7 +94,12 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
+  await enterPlaygroundRoom(pageB, {
+    flags: {},
+    room,
+    blobStorage: undefined,
+    noInit: true,
+  });
   await waitDefaultPageLoaded(pageB);
   await focusTitle(pageB);
   await assertTitle(pageB, 'hello');
@@ -101,35 +108,48 @@ test('basic multi user state', async ({ browser, page: pageA }) => {
   await assertTitle(pageA, 'hello world');
 });
 
-test('A open and edit, then joins B', async ({ browser, page: pageA }) => {
+test(
+  scoped`A open and edit, then joins B`,
+  async ({ browser, page: pageA }) => {
+    const room = await enterPlaygroundRoom(pageA);
+    await initEmptyParagraphState(pageA);
+    await waitNextFrame(pageA);
+    await focusRichText(pageA);
+    await type(pageA, 'hello');
+
+    const pageB = await browser.newPage();
+    await enterPlaygroundRoom(pageB, {
+      flags: {},
+      room,
+      blobStorage: undefined,
+      noInit: true,
+    });
+
+    // wait until pageB content updated
+    await assertText(pageB, 'hello');
+    await Promise.all([
+      assertText(pageA, 'hello'),
+      assertStore(pageA, defaultStore),
+      assertStore(pageB, defaultStore),
+      assertBlockChildrenIds(pageA, '0', ['1']),
+      assertBlockChildrenIds(pageB, '0', ['1']),
+    ]);
+  }
+);
+
+test(scoped`A first open, B first edit`, async ({ browser, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
   await waitNextFrame(pageA);
   await focusRichText(pageA);
-  await type(pageA, 'hello');
 
   const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
-
-  // wait until pageB content updated
-  await assertText(pageB, 'hello');
-  await Promise.all([
-    assertText(pageA, 'hello'),
-    assertStore(pageA, defaultStore),
-    assertStore(pageB, defaultStore),
-    assertBlockChildrenIds(pageA, '0', ['1']),
-    assertBlockChildrenIds(pageB, '0', ['1']),
-  ]);
-});
-
-test('A first open, B first edit', async ({ browser, page: pageA }) => {
-  const room = await enterPlaygroundRoom(pageA);
-  await initEmptyParagraphState(pageA);
-  await waitNextFrame(pageA);
-  await focusRichText(pageA);
-
-  const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room, undefined, true);
+  await enterPlaygroundRoom(pageB, {
+    flags: {},
+    room,
+    blobStorage: undefined,
+    noInit: true,
+  });
   await focusRichText(pageB);
 
   const slot = waitForRemoteUpdateSlot(pageA);
@@ -144,38 +164,41 @@ test('A first open, B first edit', async ({ browser, page: pageA }) => {
   ]);
 });
 
-test('does not sync when disconnected', async ({ browser, page: pageA }) => {
-  test.fail();
+test(
+  scoped`does not sync when disconnected`,
+  async ({ browser, page: pageA }) => {
+    test.fail();
 
-  const room = await enterPlaygroundRoom(pageA);
-  const pageB = await browser.newPage();
-  await enterPlaygroundRoom(pageB, {}, room);
+    const room = await enterPlaygroundRoom(pageA);
+    const pageB = await browser.newPage();
+    await enterPlaygroundRoom(pageB, { flags: {}, room });
 
-  await disconnectByClick(pageA);
-  await disconnectByClick(pageB);
+    await disconnectByClick(pageA);
+    await disconnectByClick(pageB);
 
-  // click together, both init with default id should lead to conflicts
-  await initEmptyParagraphState(pageA);
-  await initEmptyParagraphState(pageB);
+    // click together, both init with default id should lead to conflicts
+    await initEmptyParagraphState(pageA);
+    await initEmptyParagraphState(pageB);
 
-  await waitNextFrame(pageA);
-  await focusRichText(pageA);
-  await waitNextFrame(pageB);
-  await focusRichText(pageB);
-  await waitNextFrame(pageA);
+    await waitNextFrame(pageA);
+    await focusRichText(pageA);
+    await waitNextFrame(pageB);
+    await focusRichText(pageB);
+    await waitNextFrame(pageA);
 
-  await type(pageA, '');
-  await waitNextFrame(pageB);
-  await type(pageB, '');
-  await waitNextFrame(pageA);
-  await type(pageA, 'hello');
-  await waitNextFrame(pageB);
+    await type(pageA, '');
+    await waitNextFrame(pageB);
+    await type(pageB, '');
+    await waitNextFrame(pageA);
+    await type(pageA, 'hello');
+    await waitNextFrame(pageB);
 
-  await assertText(pageB, 'hello');
-  await assertText(pageA, 'hello'); // actually '\n'
-});
+    await assertText(pageB, 'hello');
+    await assertText(pageA, 'hello'); // actually '\n'
+  }
+);
 
-test('basic paired undo/redo', async ({ page }) => {
+test(scoped`basic paired undo/redo`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -193,7 +216,7 @@ test('basic paired undo/redo', async ({ page }) => {
   await assertText(page, 'hello');
 });
 
-test('undo/redo with keyboard', async ({ page }) => {
+test(scoped`undo/redo with keyboard`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -206,7 +229,7 @@ test('undo/redo with keyboard', async ({ page }) => {
   await assertText(page, 'hello');
 });
 
-test('undo after adding block twice', async ({ page }) => {
+test(scoped`undo after adding block twice`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -221,39 +244,42 @@ test('undo after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test('should readonly mode not be able to modify text', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const { paragraphId } = await initEmptyParagraphState(page);
+test(
+  scoped`should readonly mode not be able to modify text`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
 
-  await focusRichText(page);
-  await type(page, 'hello');
-  await switchReadonly(page);
+    await focusRichText(page);
+    await type(page, 'hello');
+    await switchReadonly(page);
 
-  await dragBetweenIndices(page, [0, 1], [0, 3]);
-  await page.keyboard.press(`${SHORT_KEY}+b`);
-  await assertStoreMatchJSX(
-    page,
-    `
+    await dragBetweenIndices(page, [0, 1], [0, 3]);
+    await page.keyboard.press(`${SHORT_KEY}+b`);
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text="hello"
   prop:type="text"
 />`,
-    paragraphId
-  );
+      paragraphId
+    );
 
-  await undoByKeyboard(page);
-  await assertStoreMatchJSX(
-    page,
-    `
+    await undoByKeyboard(page);
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text="hello"
   prop:type="text"
 />`,
-    paragraphId
-  );
-});
+      paragraphId
+    );
+  }
+);
 
-test('undo/redo twice after adding block twice', async ({ page }) => {
+test(scoped`undo/redo twice after adding block twice`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -275,11 +301,10 @@ test('undo/redo twice after adding block twice', async ({ page }) => {
   await assertRichTexts(page, ['hello', 'world']);
 });
 
-test('should undo/redo works on title', async ({ page }) => {
+test(scoped`should undo/redo works on title`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
-
   await focusTitle(page);
   await type(page, 'title');
   await focusRichText(page);
@@ -313,7 +338,7 @@ test('should undo/redo works on title', async ({ page }) => {
   await assertRichTexts(page, ['hello ']);
 });
 
-test('should undo/redo cursor works on title', async ({ page }) => {
+test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
@@ -347,7 +372,7 @@ test('should undo/redo cursor works on title', async ({ page }) => {
   await assertRichTexts(page, ['hello4']);
 });
 
-test('undo multi frames', async ({ page }) => {
+test(scoped`undo multi frames`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -361,7 +386,7 @@ test('undo multi frames', async ({ page }) => {
   await assertRichTexts(page, ['', '']);
 });
 
-test('change theme', async ({ page }) => {
+test(scoped`change theme`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   const currentTheme = await getCurrentHTMLTheme(page);
@@ -374,24 +399,25 @@ test('change theme', async ({ page }) => {
   expect(nextEditorTheme).toBe(expectNextTheme);
 });
 
-test('should be able to delete an emoji completely by pressing backspace once', async ({
-  page,
-}) => {
-  test.info().annotations.push({
-    type: 'issue',
-    description: 'https://github.com/toeverything/blocksuite/issues/2138',
-  });
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, '🌷🙅‍♂️🏳️‍🌈');
-  await pressBackspace(page);
-  await pressBackspace(page);
-  await pressBackspace(page);
-  await assertText(page, '');
-});
+test(
+  scoped`should be able to delete an emoji completely by pressing backspace once`,
+  async ({ page }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2138',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '🌷🙅‍♂️🏳️‍🌈');
+    await pressBackspace(page);
+    await pressBackspace(page);
+    await pressBackspace(page);
+    await assertText(page, '');
+  }
+);
 
-test('delete emoji in the middle of the text', async ({ page }) => {
+test(scoped`delete emoji in the middle of the text`, async ({ page }) => {
   test.info().annotations.push({
     type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/2138',
@@ -411,7 +437,7 @@ test('delete emoji in the middle of the text', async ({ page }) => {
   await assertText(page, '11111');
 });
 
-test('delete emoji forward', async ({ page }) => {
+test(scoped`delete emoji forward`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -427,20 +453,18 @@ test('delete emoji forward', async ({ page }) => {
   await assertText(page, '11111');
 });
 
-test('ZERO_WIDTH_SPACE should be counted by one cursor position', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await waitNextFrame(page);
-  await page.keyboard.press(`Shift+Enter`, { delay: 50 });
-  await type(page, 'asdfg');
-  await waitNextFrame(page);
-  await pressEnter(page);
-  await waitNextFrame(page);
-  await undoByKeyboard(page);
-  await pressBackspace(page);
-  const line = page.locator('v-line').last();
-  expect(await line.innerText()).toBe('asdf');
-});
+test(
+  scoped`ZERO_WIDTH_SPACE should be counted by one cursor position`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await pressShiftEnter(page);
+    await type(page, 'asdfg');
+    await pressEnter(page);
+    await undoByKeyboard(page);
+    await page.waitForTimeout(300);
+    await pressBackspace(page);
+    await assertRichTexts(page, ['\nasdf']);
+  }
+);

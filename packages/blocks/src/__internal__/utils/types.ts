@@ -1,8 +1,15 @@
+import type { BlockElement, UIEventDispatcher } from '@blocksuite/lit';
 import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import {
+  type BaseBlockModel,
+  DisposableGroup,
+  type Page,
+  type Slot,
+} from '@blocksuite/store';
 
-import type { Cell, Column } from '../../database-block/types.js';
+import type { Cell, Column } from '../../database-block/table/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
+import type { PageBlockModel } from '../../models.js';
 import type {
   BlockServiceInstanceByKey,
   ServiceFlavour,
@@ -16,6 +23,10 @@ import type { Point } from './rect.js';
 
 export type SelectionPosition = 'start' | 'end' | Point;
 
+export interface IPoint {
+  x: number;
+  y: number;
+}
 export interface BlockTransformContext {
   childText?: string;
   begin?: number;
@@ -27,6 +38,54 @@ export interface EditingState {
   model: BaseBlockModel;
   rect: DOMRect;
 }
+
+export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
+export type DatabaseTableViewRowSelect = {
+  type: 'select';
+  databaseId: string;
+  rowIds: string[];
+};
+type DatabaseTableViewRowClick = {
+  type: 'click';
+  databaseId: string;
+  rowIds: string[];
+};
+type DatabaseTableViewRowDelete = {
+  type: 'delete';
+  databaseId: string;
+  rowIds: string[];
+};
+type DatabaseTableViewRowClear = {
+  type: 'clear';
+};
+export type DatabaseTableViewRowState =
+  | DatabaseTableViewRowSelect
+  | DatabaseTableViewRowClick
+  | DatabaseTableViewRowDelete
+  | DatabaseTableViewRowClear;
+
+export type CellCoord = {
+  rowIndex: number;
+  cellIndex: number;
+};
+export type DatabaseTableViewCellSelect = {
+  type: 'select';
+  databaseId: string;
+  // Currently only supports single cell selection.
+  coords: [CellCoord];
+};
+type DatabaseTableViewCellEdit = {
+  type: 'edit';
+  databaseId: string;
+  coords: [CellCoord];
+};
+type DatabaseTableViewCellClear = {
+  type: 'clear';
+};
+export type DatabaseTableViewCellState =
+  | DatabaseTableViewCellSelect
+  | DatabaseTableViewCellEdit
+  | DatabaseTableViewCellClear;
 
 /** Common context interface definition for block models. */
 
@@ -48,13 +107,14 @@ export interface BlockHost extends BlockHostContext {
   readonly slots: CommonSlots;
 }
 
-/**
- * @deprecated Not used yet
- */
-export interface CommonBlockElement extends HTMLElement {
-  host: BlockHost;
-  model: BaseBlockModel;
-}
+type EditorMode = 'page' | 'edgeless';
+type EditorSlots = { pageModeSwitched: Slot<EditorMode> };
+
+export type AbstractEditor = {
+  page: Page;
+  mode: EditorMode;
+  readonly slots: CommonSlots & EditorSlots;
+} & HTMLElement;
 
 /**
  * type of `window.getSelection().type`
@@ -87,6 +147,10 @@ export enum BrushSize {
   Thick = 10,
 }
 
+export type TextMouseMode = {
+  type: 'text';
+};
+
 export type BrushMouseMode = {
   type: 'brush';
   color: CssVariableName;
@@ -98,8 +162,8 @@ export type PanMouseMode = {
   panning: boolean;
 };
 
-export type TextMouseMode = {
-  type: 'text';
+export type NoteMouseMode = {
+  type: 'note';
   background: CssVariableName;
 };
 
@@ -111,10 +175,11 @@ export type ConnectorMouseMode = {
 
 export type MouseMode =
   | DefaultMouseMode
+  | TextMouseMode
   | ShapeMouseMode
   | BrushMouseMode
   | PanMouseMode
-  | TextMouseMode
+  | NoteMouseMode
   | ConnectorMouseMode;
 
 export type SerializedBlock = {
@@ -183,3 +248,24 @@ export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
     : T extends keyof HTMLElementEventMap
     ? HTMLElementEventDetail<T>
     : never;
+
+export abstract class AbstractSelectionManager<
+  T extends BlockElement<PageBlockModel>
+> {
+  public readonly container: T;
+  protected readonly _dispatcher: UIEventDispatcher;
+  protected readonly _disposables = new DisposableGroup();
+
+  constructor(container: T, dispatcher: UIEventDispatcher) {
+    this.container = container;
+    this._dispatcher = dispatcher;
+  }
+
+  protected get page() {
+    return this.container.page;
+  }
+
+  abstract clear(): void;
+
+  abstract dispose(): void;
+}
