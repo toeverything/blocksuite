@@ -36,7 +36,7 @@ export class HandleResizeManager {
   }
 
   // TODO: add them to vec2
-  private _draw(shift = false) {
+  private _resize(shift = false) {
     const {
       _aspectRatio: aspectRatio,
       _dragDirection: direction,
@@ -235,7 +235,7 @@ export class HandleResizeManager {
       this._shift ||= e.shiftKey;
       this._dragPos.end = { x: e.x, y: e.y };
 
-      this._draw(this._shift);
+      this._resize(this._shift);
     };
 
     const _onPointerUp = (_: PointerEvent) => {
@@ -256,6 +256,6 @@ export class HandleResizeManager {
     if (this._shift === pressed) return;
 
     this._shift = pressed;
-    this._draw(pressed);
+    this._resize(pressed);
   }
 }
