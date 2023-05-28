@@ -945,7 +945,6 @@ export class EdgelessPageBlockComponent
                 disabled=${mouseMode.type === 'pan'}
                 .page=${page}
                 .state=${state}
-                .shift=${selection.shift}
                 .slots=${this.slots}
                 .surface=${surface}
               ></edgeless-selected-rect>

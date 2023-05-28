@@ -223,10 +223,8 @@ export class HandleResizeManager {
     this._commonBound = [x, y, x + w, y + h];
 
     this._dragDirection = direction;
-    this._dragPos.start = {
-      x: e.x,
-      y: e.y,
-    };
+    this._dragPos.start = { x: e.x, y: e.y };
+    this._dragPos.end = { ...this._dragPos.start };
     this._aspectRatio = w / h;
     this._resizeMode = resizeMode;
     this._zoom = zoom;
