@@ -93,6 +93,7 @@ export interface EdgelessSelectionSlots {
   mouseModeUpdated: Slot<MouseMode>;
   reorderingFramesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
+  shiftUpdated: Slot<boolean>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
