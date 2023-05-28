@@ -81,7 +81,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 
-    this._draw(e.keys.shift);
+    this._draw(e.keys.shift || this._edgeless.selection.shift);
   }
 
   onContainerDragEnd(e: PointerEventState) {
@@ -113,8 +113,6 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     assertExists(id);
     assertExists(_draggingArea);
 
-    shift ||= _edgeless.selection.shift;
-
     const { slots, surface } = _edgeless;
     const { viewport } = surface;
     const { zoom } = viewport;
@@ -125,11 +123,11 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     let { x: endX, y: endY } = end;
 
     if (shift) {
-      const w = Math.abs(endX - startX) / zoom;
-      const h = Math.abs(endY - startY) / zoom;
-      const max = Math.max(w, h);
-      endX = endX > startX ? startX + max : startX - max;
-      endY = endY > startY ? startY + max : startY - max;
+      const w = Math.abs(endX - startX);
+      const h = Math.abs(endY - startY);
+      const m = Math.max(w, h);
+      endX = startX + (endX > startX ? m : -m);
+      endY = startY + (endY > startY ? m : -m);
     }
 
     const [x, y] = viewport.toModelCoord(

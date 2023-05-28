@@ -1,7 +1,7 @@
 import { Bound } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
 
-import { HandleDirection } from './resize-handles.js';
+import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 type ResizeMoveHandler = (bounds: Map<string, Bound>) => void;
 
@@ -18,6 +18,8 @@ export class HandleResizeManager {
   /** Use [minX, minY, maxX, maxY] for convenience */
   private _commonBound = [0, 0, 0, 0];
 
+  private _aspectRatio = 1;
+
   constructor(onResizeMove: ResizeMoveHandler, onResizeEnd: ResizeEndHandler) {
     this._onResizeMove = onResizeMove;
     this._onResizeEnd = onResizeEnd;
@@ -27,6 +29,7 @@ export class HandleResizeManager {
     e: PointerEvent,
     direction: HandleDirection,
     bounds: Map<string, Bound>,
+    resizeMode: ResizeMode,
     zoom: number,
     shift: boolean
   ) => {
@@ -40,101 +43,177 @@ export class HandleResizeManager {
 
     this._dragDirection = direction;
     this._startDragPos = {
-      x: e.clientX,
-      y: e.clientY,
+      x: e.x,
+      y: e.y,
     };
+    this._aspectRatio = w / h;
 
     const _onPointerMove = (e: PointerEvent) => {
-      shift ||= e.shiftKey;
+      if (resizeMode === 'none') return;
+
       const {
+        _aspectRatio: aspectRatio,
         _dragDirection: direction,
-        _startDragPos: { x: startX, y: startY },
+        _startDragPos,
+        _commonBound,
       } = this;
 
-      const [oldCommonMinX, oldCommonMinY, oldCommonMaxX, oldCommonMaxY] =
-        this._commonBound;
-      const oldCommonW = oldCommonMaxX - oldCommonMinX;
-      const oldCommonH = oldCommonMaxY - oldCommonMinY;
+      const isCorner = resizeMode === 'corner';
+      const { x: startX, y: startY } = _startDragPos;
+      const { x: endX, y: endY } = e;
 
-      let [minX, minY, maxX, maxY] = this._commonBound;
+      const deltaX = (endX - startX) / zoom;
 
-      let deltaX = (e.clientX - startX) / zoom;
-      let deltaY = (e.clientY - startY) / zoom;
-      if (shift) {
-        const { w, h } = getCommonBound([...this._bounds.values()]) as Bound;
-        const aspectRatio = w / h;
-        deltaX = deltaX > deltaY ? deltaX : deltaY * aspectRatio;
-        deltaY = deltaY > deltaX ? deltaY : deltaX / aspectRatio;
+      const [oldMinX, oldMinY, oldMaxX, oldMaxY] = _commonBound;
+      const oldCommonW = oldMaxX - oldMinX;
+      const oldCommonH = oldMaxY - oldMinY;
+      let [minX, minY, maxX, maxY] = _commonBound;
+      let width = 0;
+      let height = 0;
+      let flipX = false;
+      let flipY = false;
+
+      if (isCorner) {
+        const deltaY = (endY - startY) / zoom;
+
+        switch (direction) {
+          // TODO
+          // case HandleDirection.Top: {
+          //   minY += deltaY;
+          //   break;
+          // }
+          // case HandleDirection.Right: {
+          //   maxX += deltaX;
+          //   break;
+          // }
+          // case HandleDirection.Bottom: {
+          //   maxY += deltaY;
+          //   break;
+          // }
+          // case HandleDirection.Left: {
+          //   minX += deltaX;
+          //   break;
+          // }
+          case HandleDirection.TopLeft: {
+            minX += deltaX;
+            minY += deltaY;
+            break;
+          }
+          case HandleDirection.BottomRight: {
+            maxX += deltaX;
+            maxY += deltaY;
+            break;
+          }
+          case HandleDirection.TopRight:
+            maxX += deltaX;
+            minY += deltaY;
+            break;
+          case HandleDirection.BottomLeft: {
+            minX += deltaX;
+            maxY += deltaY;
+            break;
+          }
+        }
+
+        const dw = maxX - minX;
+        const dh = maxY - minY;
+        const scaleX = dw / oldCommonW;
+        const scaleY = dh / oldCommonH;
+
+        flipX = scaleX < 0;
+        flipY = scaleY < 0;
+
+        if ((shift || e.shiftKey) && isCorner) {
+          const bw = Math.abs(dw);
+          const bh = Math.abs(dh);
+          const isTall = aspectRatio < bw / bh;
+          const th = bw * (flipY ? 1 : -1) * (1 / aspectRatio);
+          const tw = bh * (flipX ? 1 : -1) * aspectRatio;
+
+          switch (direction) {
+            // TODO
+            // case HandleDirection.Top: {
+            //   break;
+            // }
+            // case HandleDirection.Right: {
+            //   break;
+            // }
+            // case HandleDirection.Bottom: {
+            //   break;
+            // }
+            // case HandleDirection.Left: {
+            //   break;
+            // }
+            case HandleDirection.TopLeft: {
+              if (isTall) minY = maxY + th;
+              else minX = maxX + tw;
+              break;
+            }
+            case HandleDirection.BottomRight: {
+              if (isTall) maxY = minY - th;
+              else maxX = minX - tw;
+              break;
+            }
+            case HandleDirection.TopRight:
+              if (isTall) minY = maxY + th;
+              else maxX = minX - tw;
+              break;
+            case HandleDirection.BottomLeft: {
+              if (isTall) maxY = minY - th;
+              else minX = maxX + tw;
+              break;
+            }
+          }
+        }
+      } else {
+        switch (direction) {
+          case HandleDirection.Left:
+            minX += deltaX;
+            break;
+          case HandleDirection.Right:
+            maxX += deltaX;
+            break;
+        }
+
+        flipX = maxX < minX;
       }
 
-      switch (direction) {
-        case HandleDirection.TopLeft:
-        case HandleDirection.TopRight: {
-          minY += deltaY;
-          break;
-        }
-        case HandleDirection.BottomLeft:
-        case HandleDirection.BottomRight: {
-          maxY += deltaY;
-          break;
-        }
-      }
-
-      switch (direction) {
-        case HandleDirection.Left:
-        case HandleDirection.TopLeft:
-        case HandleDirection.BottomLeft: {
-          minX += deltaX;
-          break;
-        }
-        case HandleDirection.Right:
-        case HandleDirection.TopRight:
-        case HandleDirection.BottomRight: {
-          maxX += deltaX;
-          break;
-        }
-      }
-
-      const flipX = maxX < minX;
       if (flipX) {
-        [maxX, minX] = [minX, maxX];
+        const t = maxX;
+        maxX = minX;
+        minX = t;
       }
 
-      const flipY = maxY < minY;
       if (flipY) {
-        [maxY, minY] = [minY, maxY];
+        const t = maxY;
+        maxY = minY;
+        minY = t;
       }
+
+      width = Math.abs(maxX - minX);
+      height = Math.abs(maxY - minY);
 
       const newCommonBound = {
         x: minX,
         y: minY,
-        w: maxX - minX,
-        h: maxY - minY,
+        w: width,
+        h: height,
       };
 
       const newBounds = new Map<string, Bound>();
 
-      this._bounds.forEach((oldSelectableBound, id) => {
-        const {
-          x: oldSelectableX,
-          y: oldSelectableY,
-          w: oldSelectableW,
-          h: oldSelectableH,
-        } = oldSelectableBound;
+      this._bounds.forEach((bound, id) => {
+        const { x: oldX, y: oldY, w: oldW, h: oldH } = bound;
 
         const nx =
-          (flipX
-            ? oldCommonMaxX - oldSelectableX - oldSelectableW
-            : oldSelectableX - oldCommonMinX) / oldCommonW;
+          (flipX ? oldMaxX - oldX - oldW : oldX - oldMinX) / oldCommonW;
         const ny =
-          (flipY
-            ? oldCommonMaxY - oldSelectableY - oldSelectableH
-            : oldSelectableY - oldCommonMinY) / oldCommonH;
+          (flipY ? oldMaxY - oldY - oldH : oldY - oldMinY) / oldCommonH;
 
         const shapeX = newCommonBound.w * nx + newCommonBound.x;
         const shapeY = newCommonBound.h * ny + newCommonBound.y;
-        const shapeW = newCommonBound.w * (oldSelectableW / oldCommonW);
-        const shapeH = newCommonBound.h * (oldSelectableH / oldCommonH);
+        const shapeW = newCommonBound.w * (oldW / oldCommonW);
+        const shapeH = newCommonBound.h * (oldH / oldCommonH);
 
         newBounds.set(id, new Bound(shapeX, shapeY, shapeW, shapeH));
       });

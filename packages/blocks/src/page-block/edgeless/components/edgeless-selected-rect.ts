@@ -160,9 +160,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @property({ type: SurfaceManager })
   surface!: SurfaceManager;
 
-  @property()
-  shift!: boolean;
-
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
@@ -302,14 +299,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (
-      this.state.selected.length === 0 ||
-      (this.state.selected[0] instanceof TextElement && this.state.active)
-    )
-      return null;
-
-    const { page, state, surface, resizeMode, _resizeManager } = this;
+    const { state } = this;
     const { active, selected } = state;
+    if (
+      selected.length === 0 ||
+      (active && selected[0] instanceof TextElement)
+    ) {
+      return nothing;
+    }
+
+    const { page , surface, resizeMode, _resizeManager } = this;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = getCommonRectStyle(selectedRect, active, true);
@@ -344,7 +343,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
-          .selectionState=${this.state}
+          .selectionState=${state}
         >
         </edgeless-component-toolbar>`;
 

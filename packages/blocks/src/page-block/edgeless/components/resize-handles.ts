@@ -60,7 +60,7 @@ export function ResizeHandles(
       const handleLeft = ResizeHandle(HandleDirection.Left, onPointerDown);
       const handleRight = ResizeHandle(HandleDirection.Right, onPointerDown);
 
-      return html` ${handleLeft} ${handleRight} `;
+      return html`${handleLeft} ${handleRight}`;
     }
     case 'none': {
       return nothing;
