@@ -49,7 +49,6 @@ export class HandleResizeManager {
     const isCorner = resizeMode === 'corner';
     const { x: startX, y: startY } = dragPos.start;
     const { x: endX, y: endY } = dragPos.end;
-    dragPos.end = { x: endX, y: endY };
 
     const deltaX = (endX - startX) / zoom;
 
@@ -224,7 +223,7 @@ export class HandleResizeManager {
 
     this._dragDirection = direction;
     this._dragPos.start = { x: e.x, y: e.y };
-    this._dragPos.end = { ...this._dragPos.start };
+    this._dragPos.end = { x: e.x, y: e.y };
     this._aspectRatio = w / h;
     this._resizeMode = resizeMode;
     this._zoom = zoom;
