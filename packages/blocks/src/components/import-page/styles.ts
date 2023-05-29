@@ -7,7 +7,7 @@ export const styles = css`
     position: absolute;
     width: 480px;
     left: calc(50% - 480px / 2);
-    top: calc(50% - 316px / 2);
+    top: calc(50% - 270px / 2);
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
