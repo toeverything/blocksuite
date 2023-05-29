@@ -53,17 +53,17 @@ export class TextElement extends SurfaceElement<IText> {
   override render(ctx: CanvasRenderingContext2D) {
     const { w, text, color, fontSize, fontFamily, textAlign } = this;
 
-    const font = getFontString({
-      fontSize: fontSize,
-      fontFamily: fontFamily,
-    });
-
     const yText = text;
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
     const lines = deltaInsertsToChunks(deltas);
     this._lines = lines;
 
     const lineHeightPx = this.h / lines.length;
+    const font = getFontString({
+      fontSize: fontSize,
+      lineHeight: `${lineHeightPx}px`,
+      fontFamily: fontFamily,
+    });
     this._lineHeight = lineHeightPx;
     const horizontalOffset =
       textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
@@ -87,13 +87,12 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.fillStyle = color;
         ctx.textAlign = textAlign;
 
-        ctx.textBaseline = 'bottom';
+        ctx.textBaseline = 'ideographic';
 
         ctx.fillText(
           str,
           horizontalOffset + beforeTextWidth,
-          // --affine-line-height: calc(1em + 8px);
-          (lineIndex + 1) * lineHeightPx - 4
+          (lineIndex + 1) * lineHeightPx
         );
 
         beforeTextWidth += getTextWidth(str, fontFamily);

@@ -31,12 +31,9 @@ export const FileExporter = {
    * const stateJsonContent = JSON.stringify({ a: 1, b: 2, c: 3 })
    * FileExporter.exportFile("state.json", jsonContent, "application/json")
    */
-  exportTextFile(filename: string, text: string, mimeType: string) {
+  exportFile(filename: string, dataURL: string) {
     const element = document.createElement('a');
-    element.setAttribute(
-      'href',
-      'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
-    );
+    element.setAttribute('href', dataURL);
     const safeFilename = getSafeFileName(filename);
     element.setAttribute('download', safeFilename);
 
@@ -46,6 +43,12 @@ export const FileExporter = {
     element.click();
 
     document.body.removeChild(element);
+  },
+  exportTextFile(filename: string, text: string, mimeType: string) {
+    FileExporter.exportFile(
+      filename,
+      'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
+    );
   },
   exportHtml(pageTitle: string | undefined, htmlContent: string) {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
@@ -237,6 +240,10 @@ export const FileExporter = {
     const markdown = turndownService.turndown(htmlContent);
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
+  },
+  exportPng(pageTitle: string | undefined, dataURL: string) {
+    const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
+    FileExporter.exportFile(title + '.png', dataURL);
   },
 };
 
