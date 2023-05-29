@@ -1,5 +1,6 @@
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PointerEventState } from '@blocksuite/lit';
+import type { SurfaceManager } from '@blocksuite/phasor';
 import {
   ConnectorElement,
   deserializeXYWH,
@@ -343,57 +344,75 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     showFormatQuickBarByClicks('triple', e, this._page, this._edgeless);
   }
 
-  async onContainerDragStart(e: PointerEventState) {
+  private _determineDragType(e: PointerEventState): DefaultModeDragType {
     // Is dragging started from current selected rect
-    let dragType = DefaultModeDragType.None;
     if (this._isInSelectedRect(e.x, e.y)) {
-      dragType = this.state.active
+      return this.state.active
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
         this._setSelectionState([selected], false);
-        dragType = DefaultModeDragType.ContentMoving;
+        return DefaultModeDragType.ContentMoving;
       } else {
-        dragType = DefaultModeDragType.Selecting;
+        return DefaultModeDragType.Selecting;
       }
     }
+  }
+
+  private async _cloneContent(e: PointerEventState) {
+    this._lock = true;
+    const { surface } = this._edgeless;
+    const elements = (await Promise.all(
+      this.state.selected.map(async selected => {
+        return await this._cloneSelected(selected, surface);
+      })
+    )) as Selectable[];
+
+    this._setSelectionState(elements, false);
+  }
+
+  private async _cloneSelected(selected: Selectable, surface: SurfaceManager) {
+    if (isTopLevelBlock(selected)) {
+      const frameService = this._edgeless.getService('affine:frame');
+      const id = this._page.addBlock(
+        'affine:frame',
+        { xywh: selected.xywh },
+        this._page.root?.id
+      );
+      const frame = this._page.getBlockById(id);
+
+      assertExists(frame);
+      await frameService.json2Block(
+        frame,
+        frameService.block2Json(selected).children
+      );
+      return this._page.getBlockById(id);
+    } else {
+      const id = surface.addElement(
+        selected.type as keyof PhasorElementType,
+        selected.serialize() as unknown as Record<string, unknown>
+      );
+      return surface.pickById(id);
+    }
+  }
+
+  async onContainerDragStart(e: PointerEventState) {
+    // Determine the drag type based on the current state and event
+    let dragType = this._determineDragType(e);
+
+    // If alt key is pressed and content is moving, clone the content
     if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
-      const { surface, getService } = this._edgeless;
-
       dragType = DefaultModeDragType.AltCloning;
-      this._lock = true;
-      const elements = (await Promise.all(
-        this.state.selected.map(async selected => {
-          if (isTopLevelBlock(selected)) {
-            const frameService = getService('affine:frame');
-            const id = this._page.addBlock(
-              'affine:frame',
-              { xywh: selected.xywh },
-              this._page.root?.id
-            );
-            const frame = this._page.getBlockById(id);
-
-            assertExists(frame);
-            await frameService.json2Block(
-              frame,
-              frameService.block2Json(selected).children
-            );
-            return this._page.getBlockById(id);
-          } else {
-            const id = surface.addElement(
-              selected.type as keyof PhasorElementType,
-              selected.serialize() as unknown as Record<string, unknown>
-            );
-            return surface.pickById(id);
-          }
-        })
-      )) as Selectable[];
-
-      this._setSelectionState(elements, false);
+      await this._cloneContent(e);
     }
 
+    // Set up drag state
+    this.initializeDragState(e, dragType);
+  }
+
+  initializeDragState(e: PointerEventState, dragType: DefaultModeDragType) {
     this.dragType = dragType;
     this._startRange = caretRangeFromPoint(e.x, e.y);
     this._dragStartPos = { x: e.x, y: e.y };
