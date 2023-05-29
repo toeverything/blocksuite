@@ -253,14 +253,11 @@ export class DefaultPageBlockComponent
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      const firstParagraph = defaultFrame?.children.find(
-        block => block.flavour === 'affine:paragraph'
+      const firstText = defaultFrame?.children.find(block =>
+        matchFlavours(block, ['affine:paragraph', 'affine:list'])
       );
-      if (
-        firstParagraph &&
-        matchFlavours(firstParagraph, ['affine:paragraph'])
-      ) {
-        asyncFocusRichText(page, firstParagraph.id);
+      if (firstText) {
+        asyncFocusRichText(page, firstText.id);
       } else {
         const newFirstParagraphId = page.addBlock(
           'affine:paragraph',
