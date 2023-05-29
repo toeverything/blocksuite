@@ -365,7 +365,6 @@ export async function zoomByMouseWheel(
 }
 
 export async function optionMouseDrag(page: Page, start: IPoint, end: IPoint) {
-  console.log(start, end);
   await page.keyboard.down(MODIFIER_KEY);
   await dragBetweenCoords(page, start, end, { steps: 30 });
   await page.keyboard.up(MODIFIER_KEY);
