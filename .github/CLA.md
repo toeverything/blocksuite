@@ -72,4 +72,6 @@ Example:
 - Alkaidcc, @Alkaidcc, 2023/05/12
 - Hritik, @hritikchaudhary, 2023/05/19
 - yuanx, @imyuanx, 2023/05/18
+- Petr Glaser, @pegak, 2023/05/28
+- smallnine9, @smallnine9, 2023/05/28
 - Chen, @donteatfriedrice, 2023/05/28
