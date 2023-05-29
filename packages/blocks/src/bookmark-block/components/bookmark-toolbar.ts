@@ -11,7 +11,6 @@ import { toast } from '../..//components/toast.js';
 import { copyBlocks } from '../../__internal__/clipboard/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { type BookmarkProps, defaultBookmarkProps } from '../bookmark-model.js';
 import {
   CaptionIcon,
   CopyIcon,
@@ -21,7 +20,7 @@ import {
   LinkIcon,
   RefreshIcon,
 } from '../images/icons.js';
-import { refreshBookmarkBlock } from '../utils.js';
+import { cloneBookmarkProperties, refreshBookmarkBlock } from '../utils.js';
 
 export type ConfigItem = {
   type:
@@ -115,12 +114,7 @@ const config: ConfigItem[] = [
       const parent = page.getParent(model);
       const index = parent?.children.indexOf(model);
 
-      const clonedProps = Object.keys(
-        defaultBookmarkProps
-      ).reduce<BookmarkProps>((props, key) => {
-        props[key] = model[key];
-        return props;
-      }, {} as BookmarkProps);
+      const clonedProps = cloneBookmarkProperties(model);
 
       page.addBlock('affine:bookmark', clonedProps, parent, index);
 
