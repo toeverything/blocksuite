@@ -2,6 +2,7 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '@blocksuite/blocks';
+import { StrokeStyle } from '@blocksuite/phasor';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { addShapeElement, type InitFn } from './utils';
@@ -52,7 +53,8 @@ export const preset: InitFn = (workspace: Workspace, id: string) => {
     fillColor: DEFAULT_SHAPE_FILL_COLOR,
     strokeWidth: 4,
     strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    strokeStyle: 'solid',
+    strokeStyle: StrokeStyle.Solid,
+    roughness: 2,
   });
   contentParser.importMarkdown(presetMarkdown, frameId);
 };
