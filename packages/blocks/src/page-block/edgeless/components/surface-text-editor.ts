@@ -28,12 +28,16 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
     const element = this._element;
     if (edgeless && element) {
       const rect = this._virgoContainer.getBoundingClientRect();
+      const vLines = Array.from(
+        this._virgoContainer.querySelectorAll('v-line')
+      );
+      const lineHeight = vLines[0].getBoundingClientRect().height;
       edgeless.surface.updateElement(element.id, {
         xywh: new Bound(
           element.x,
           element.y,
           rect.width / edgeless.surface.viewport.zoom,
-          rect.height / edgeless.surface.viewport.zoom
+          vLines.length * lineHeight
         ).serialize(),
       });
       edgeless.slots.selectionUpdated.emit({
@@ -113,7 +117,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         minHeight: this._element.h < 20 ? 20 : this._element.h + 'px',
         fontSize: this._element.fontSize + 'px',
         fontFamily: this._element.fontFamily,
-        lineHeight: '1.5',
+        lineHeight: 'initial',
         outline: 'none',
         transform: `scale(${zoom}, ${zoom})`,
         transformOrigin: 'top left',

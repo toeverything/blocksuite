@@ -18,11 +18,13 @@ export const isSafari =
 export const getFontString = ({
   fontSize,
   fontFamily,
+  lineHeight,
 }: {
   fontSize: number;
+  lineHeight: string;
   fontFamily: string;
 }) => {
-  return `${fontSize}px ${fontFamily}`;
+  return `${fontSize}px/${lineHeight} ${fontFamily}`;
 };
 
 export function normalizeText(text: string): string {
