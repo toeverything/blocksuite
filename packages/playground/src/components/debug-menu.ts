@@ -403,7 +403,7 @@ export class DebugMenu extends ShadowlessElement {
     if (!html) return;
     html.setAttribute('data-theme', dark ? 'dark' : 'light');
 
-    this.insertTransitionStyle('color-transition', 0);
+    this._insertTransitionStyle('color-transition', 0);
 
     if (dark) {
       html.classList.add('dark');
@@ -414,7 +414,7 @@ export class DebugMenu extends ShadowlessElement {
     }
   }
 
-  private insertTransitionStyle(classKey: string, duration: number) {
+  private _insertTransitionStyle(classKey: string, duration: number) {
     const $html = document.documentElement;
     const $style = document.createElement('style');
     const slCSSKeys = ['sl-transition-x-fast'];
