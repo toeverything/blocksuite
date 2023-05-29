@@ -101,7 +101,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     });
   }
 
-  onPressShift(pressed: boolean) {
+  onPressShiftKey(pressed: boolean) {
     const id = this._draggingElementId;
     if (!id) return;
 

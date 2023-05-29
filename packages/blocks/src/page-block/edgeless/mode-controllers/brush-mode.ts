@@ -96,7 +96,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     noop();
   }
 
-  onPressShift(_: boolean) {
+  onPressShiftKey(_: boolean) {
     noop();
   }
 }

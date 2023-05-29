@@ -260,7 +260,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
     _disposables.add(
-      slots.pressShiftKey.on(pressed => this._resizeManager.onShift(pressed))
+      slots.pressShiftKeyUpdated.on(pressed =>
+        this._resizeManager.onPressShiftKey(pressed)
+      )
     );
 
     this._componentToolbarPopper = this._componentToolbar

@@ -106,7 +106,7 @@ function bindShift(
     e => {
       if (e.key.toLowerCase() === key && pressed !== e.shiftKey) {
         pressed = e.shiftKey;
-        edgeless.slots.pressShiftKey.emit(pressed);
+        edgeless.slots.pressShiftKeyUpdated.emit(pressed);
       }
     },
     {

@@ -251,7 +251,7 @@ export class HandleResizeManager {
     window.addEventListener('pointerup', _onPointerUp);
   };
 
-  onShift(pressed: boolean) {
+  onPressShiftKey(pressed: boolean) {
     if (this._shiftKey === pressed) return;
 
     this._shiftKey = pressed;

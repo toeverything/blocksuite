@@ -181,7 +181,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     noop();
   }
 
-  onPressShift(_: boolean) {
+  onPressShiftKey(_: boolean) {
     noop();
   }
 }

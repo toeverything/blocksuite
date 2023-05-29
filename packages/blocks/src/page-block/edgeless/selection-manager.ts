@@ -140,7 +140,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
   set shiftKey(pressed: boolean) {
     this._shiftKey = pressed;
-    this.currentController.onPressShift(pressed);
+    this.currentController.onPressShiftKey(pressed);
   }
 
   constructor(

@@ -51,9 +51,8 @@ export function bindCommonHotkey(page: Page) {
     hotkey.addListener(hotkeyStr, e => {
       // Prevent default behavior
       e.preventDefault();
-      if (page.awarenessStore.isReadonly(page)) {
-        return;
-      }
+
+      if (page.awarenessStore.isReadonly(page)) return;
 
       action({ page });
     });
@@ -66,10 +65,10 @@ export function bindCommonHotkey(page: Page) {
     hotkey.addListener(hotkeyStr, e => {
       // Prevent default behavior
       e.preventDefault();
+
       if (!enabledWhen(page)) return;
-      if (page.awarenessStore.isReadonly(page)) {
-        return;
-      }
+      if (page.awarenessStore.isReadonly(page)) return;
+
       action({ page });
     });
   });
@@ -79,9 +78,8 @@ export function bindCommonHotkey(page: Page) {
 
     hotkey.addListener(hotkeyStr, () => {
       const blockRange = getCurrentBlockRange(page);
-      if (!blockRange) {
-        return;
-      }
+      if (!blockRange) return;
+
       updateBlockType(blockRange.models, flavour, type);
     });
   });
@@ -104,8 +102,10 @@ export function bindCommonHotkey(page: Page) {
   // So we could just hook on the keydown event and detect whether user input a new character.
   hotkey.addListener(HOTKEYS.ANY_KEY, e => {
     if (!isPrintableKeyEvent(e) || page.readonly) return;
+
     const blockRange = getCurrentBlockRange(page);
     if (!blockRange) return;
+
     if (blockRange.type === 'Block') {
       handleKeydownAfterSelectBlocks({
         page,
