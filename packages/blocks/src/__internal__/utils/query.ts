@@ -643,7 +643,7 @@ function isEmbed({ tagName }: Element) {
  * Returns `true` if element is database.
  */
 function isDatabase({ tagName }: Element) {
-  return tagName === 'AFFINE-DATABASE-TABLE';
+  return tagName === 'AFFINE-DATABASE-TABLE' || tagName === 'AFFINE-DATABASE';
 }
 
 /**
@@ -911,7 +911,11 @@ export function getBlockElementsExcludeSubtrees(
  */
 export function getBlockElementsIncludeSubtrees(elements: Element[]) {
   return elements.reduce<Element[]>((elements, element) => {
-    elements.push(element, ...getBlockElementsByElement(element));
+    if (isDatabase(element)) {
+      elements.push(element);
+    } else {
+      elements.push(element, ...getBlockElementsByElement(element));
+    }
     return elements;
   }, []);
 }
