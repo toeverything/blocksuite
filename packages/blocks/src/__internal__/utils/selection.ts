@@ -10,7 +10,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
-import { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
   type BlockComponentElement,
@@ -157,9 +157,9 @@ export function focusBlockByModel(
     throw new Error("Can't focus frame or page!");
   }
 
-  const pageBlock = getPageBlock(model);
+  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
   assertExists(pageBlock);
-  const isPageMode = pageBlock instanceof DefaultPageBlockComponent;
+  const isPageMode = pageBlock.tagName === 'AFFINE-DEFAULT-PAGE';
 
   // If focus on a follow block, we should select the block
   if (
@@ -207,11 +207,11 @@ export function focusPreviousBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const pageBlock = getPageBlock(model);
+  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
   assertExists(pageBlock);
 
   let nextPosition = position;
-  if (pageBlock instanceof DefaultPageBlockComponent) {
+  if (pageBlock.tagName === 'AFFINE-DEFAULT-PAGE') {
     if (nextPosition) {
       pageBlock.lastSelectionPosition = nextPosition;
     } else if (pageBlock.lastSelectionPosition) {
@@ -230,11 +230,11 @@ export function focusNextBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const pageBlock = getPageBlock(model);
+  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
   assertExists(pageBlock);
 
   let nextPosition = position;
-  if (pageBlock instanceof DefaultPageBlockComponent) {
+  if (pageBlock.tagName === 'AFFINE-DEFAULT-PAGE') {
     if (nextPosition) {
       pageBlock.lastSelectionPosition = nextPosition;
     } else if (pageBlock.lastSelectionPosition) {

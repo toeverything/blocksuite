@@ -103,7 +103,7 @@ describe('migration', () => {
     assert.equal(oldTitle, newTitle.toString());
   });
 
-  test('migrate to new surface (v1 -> v2)', async () => {
+  test('migrate to new surface (add seed)', async () => {
     const doc = await loadBinary('legacy-surface-seed');
 
     const oldElement = (

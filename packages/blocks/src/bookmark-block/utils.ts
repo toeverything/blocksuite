@@ -1,9 +1,10 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { BookmarkBlockModel, BookmarkProps } from './bookmark-model.js';
+import { defaultBookmarkProps } from './bookmark-model.js';
 
 // Result is boolean used to record whether the meta data is crawled
-export const refreshBookmarkBlock = async (
+export const reloadBookmarkBlock = async (
   model: BaseBlockModel<BookmarkBlockModel>,
   force = false
 ) => {
@@ -25,4 +26,16 @@ export const refreshBookmarkBlock = async (
       hasCrawled: true,
     });
   }
+};
+
+export const cloneBookmarkProperties = (
+  model: BaseBlockModel<BookmarkBlockModel>
+) => {
+  return Object.keys(defaultBookmarkProps).reduce<BookmarkProps>(
+    (props, key) => {
+      props[key] = model[key];
+      return props;
+    },
+    {} as BookmarkProps
+  );
 };

@@ -5,38 +5,25 @@ import { type BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';
 
-import { toast } from '../..//components/toast.js';
-import { copyBlocks } from '../../__internal__/clipboard/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { type BookmarkProps, defaultBookmarkProps } from '../bookmark-model.js';
-import {
-  CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
-  DuplicateIcon,
-  EditIcon,
-  LinkIcon,
-  RefreshIcon,
-} from '../images/icons.js';
-import { refreshBookmarkBlock } from '../utils.js';
-
+import { CaptionIcon, EditIcon, LinkIcon, MoreIcon } from '../images/icons.js';
+import type {
+  MenuActionCallback,
+  OperationMenuPopper,
+} from './bookmark-operation-popper.js';
+import { createBookmarkOperationMenu } from './bookmark-operation-popper.js';
 export type ConfigItem = {
-  type:
-    | 'link'
-    | 'edit'
-    | 'refresh'
-    | 'copy'
-    | 'delete'
-    | 'duplicate'
-    | 'caption';
+  type: 'link' | 'edit' | 'caption';
   icon: TemplateResult;
   tooltip: string;
   action: (
     model: BaseBlockModel<BookmarkBlockModel>,
-    callback?: ToolbarActionCallback
+    callback?: ToolbarActionCallback,
+    element?: HTMLElement
   ) => void;
   divider?: boolean;
 };
@@ -54,8 +41,9 @@ const config: ConfigItem[] = [
       const index = parent?.children.indexOf(model);
 
       const yText = new Y.Text();
-      yText.insert(0, model.title || model.caption || model.url);
-      yText.format(0, model.url.length, { link: model.url });
+      const insert = model.title || model.caption || model.url;
+      yText.insert(0, insert);
+      yText.format(0, insert.length, { link: model.url });
       const text = new page.Text(yText);
       page.addBlock(
         'affine:paragraph',
@@ -87,63 +75,6 @@ const config: ConfigItem[] = [
       callback?.('edit');
     },
     divider: true,
-  },
-
-  {
-    type: 'copy',
-    icon: CopyIcon,
-    tooltip: 'Copy',
-    action: (model, callback) => {
-      copyBlocks({
-        type: 'Block',
-        models: [model],
-        startOffset: 0,
-        endOffset: 0,
-      });
-      toast('Copied Database to clipboard');
-      callback?.('copy');
-    },
-  },
-  {
-    type: 'duplicate',
-    icon: DuplicateIcon,
-    tooltip: 'Duplicate',
-    action: (model, callback) => {
-      const { page } = model;
-
-      const parent = page.getParent(model);
-      const index = parent?.children.indexOf(model);
-
-      const clonedProps = Object.keys(
-        defaultBookmarkProps
-      ).reduce<BookmarkProps>((props, key) => {
-        props[key] = model[key];
-        return props;
-      }, {} as BookmarkProps);
-
-      page.addBlock('affine:bookmark', clonedProps, parent, index);
-
-      callback?.('duplicate');
-    },
-  },
-  {
-    type: 'refresh',
-    icon: RefreshIcon,
-    tooltip: 'Refresh',
-    action: (model, callback) => {
-      refreshBookmarkBlock(model, true).then(() => {
-        callback?.('refresh');
-      });
-    },
-  },
-  {
-    type: 'delete',
-    icon: DeleteIcon,
-    tooltip: 'Delete',
-    action: (model, callback) => {
-      model.page.deleteBlock(model);
-      callback?.('delete');
-    },
   },
 ];
 
@@ -179,32 +110,72 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   model!: BaseBlockModel;
 
   @property()
-  onSelected?: ToolbarActionCallback;
+  onSelected?: ToolbarActionCallback & MenuActionCallback;
 
   @query('.bookmark-bar')
   formatQuickBarElement!: HTMLElement;
+
+  @query('.more-button-wrapper')
+  moreButton!: HTMLElement;
+
+  private _menu: OperationMenuPopper | null = null;
+
+  private _toggleMenu() {
+    if (this._menu) {
+      this._menu.dispose();
+      this._menu = null;
+    } else {
+      this._menu = createBookmarkOperationMenu(this.moreButton, {
+        model: this.model,
+        onSelected: type => {
+          this._toggleMenu();
+          this.onSelected?.(type);
+        },
+      });
+    }
+  }
 
   override connectedCallback() {
     super.connectedCallback();
   }
 
   override render() {
+    const buttons = repeat(
+      config,
+      ({ type }) => type,
+      ({ type, icon, tooltip, action, divider }) => {
+        return html`<icon-button
+            width="32px"
+            height="32px"
+            class="has-tool-tip ${type}"
+            @click=${() => {
+              action(this.model, this.onSelected, this);
+            }}
+          >
+            ${icon}
+            <tool-tip inert role="tooltip">${tooltip}</tool-tip>
+          </icon-button>
+          ${divider ? html`<div class="divider"></div>` : nothing} `;
+      }
+    );
+
     return html`
       <div class="bookmark-bar">
-        ${config.map(({ icon, tooltip, action, divider }) => {
-          return html`<icon-button
-              width="32px"
-              height="32px"
-              class="has-tool-tip"
-              @click=${() => {
-                action(this.model, this.onSelected);
-              }}
-            >
-              ${icon}
-              <tool-tip inert role="tooltip">${tooltip}</tool-tip>
-            </icon-button>
-            ${divider ? html`<div class="divider"></div>` : nothing} `;
-        })}
+        ${buttons}
+
+        <div class="more-button-wrapper">
+          <icon-button
+            width="32px"
+            height="32px"
+            class="has-tool-tip more-button"
+            @click=${() => {
+              this._toggleMenu();
+            }}
+          >
+            ${MoreIcon}
+            <tool-tip inert role="tooltip">More</tool-tip>
+          </icon-button>
+        </div>
       </div>
     `;
   }
