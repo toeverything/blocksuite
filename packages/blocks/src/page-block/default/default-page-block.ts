@@ -6,7 +6,12 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { type BaseBlockModel, Slot, Utils } from '@blocksuite/store';
+import {
+  type BaseBlockModel,
+  matchFlavours,
+  Slot,
+  Utils,
+} from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -249,7 +254,10 @@ export class DefaultPageBlockComponent
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
       const firstParagraph = model.children[1].children[0];
-      if (firstParagraph) {
+      if (
+        firstParagraph &&
+        matchFlavours(firstParagraph, ['affine:paragraph'])
+      ) {
         asyncFocusRichText(page, firstParagraph.id);
       } else {
         const newFirstParagraphId = page.addBlock(
