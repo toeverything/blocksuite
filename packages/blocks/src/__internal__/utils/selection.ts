@@ -160,7 +160,7 @@ export function focusBlockByModel(
 
   const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
   assertExists(pageBlock);
-  const isPageMode = pageBlock.model instanceof PageBlockModel;
+  const isPageMode = pageBlock.tagName === 'AFFINE-DEFAULT-PAGE';
 
   // If focus on a follow block, we should select the block
   if (
@@ -212,7 +212,7 @@ export function focusPreviousBlock(
   assertExists(pageBlock);
 
   let nextPosition = position;
-  if (pageBlock.model instanceof PageBlockModel) {
+  if (pageBlock.tagName === 'AFFINE-DEFAULT-PAGE') {
     if (nextPosition) {
       pageBlock.lastSelectionPosition = nextPosition;
     } else if (pageBlock.lastSelectionPosition) {
@@ -235,7 +235,7 @@ export function focusNextBlock(
   assertExists(pageBlock);
 
   let nextPosition = position;
-  if (pageBlock.model instanceof PageBlockModel) {
+  if (pageBlock.tagName === 'AFFINE-DEFAULT-PAGE') {
     if (nextPosition) {
       pageBlock.lastSelectionPosition = nextPosition;
     } else if (pageBlock.lastSelectionPosition) {
