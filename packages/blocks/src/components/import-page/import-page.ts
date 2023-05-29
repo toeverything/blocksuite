@@ -222,6 +222,8 @@ export class ImportPage extends WithDisposable(LitElement) {
           const files = Object.keys(zipFile.files);
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            if (file.startsWith('__MACOSX/')) continue;
+
             const lastSplitIndex = file.lastIndexOf('/');
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
@@ -346,9 +348,9 @@ export class ImportPage extends WithDisposable(LitElement) {
           ${NewIcon}
         </icon-button>
       </div>
-      <div class="footer">
+      <!-- <div class="footer">
         <div>Migrate from other versions of AFFiNE?</div>
-      </div>
+      </div> -->
     `;
   }
 }
