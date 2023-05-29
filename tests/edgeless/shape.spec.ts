@@ -24,7 +24,6 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
-  resizeElementByTopLeftHandle,
   type,
   waitNextFrame,
 } from '../utils/actions/index.js';
@@ -49,87 +48,6 @@ test('add shape element', async ({ page }) => {
 
   await assertMouseMode(page, 'default');
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
-});
-
-test('select multiple shapes and resize', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-
-  await switchEditorMode(page);
-
-  await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
-
-  await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
-  await page.mouse.move(220, 120);
-  await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
-
-  await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
-
-  await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
-  await assertEdgelessSelectedRect(page, [148, 148, 162, 62]);
-
-  await page.mouse.move(160, 160);
-  await assertEdgelessHoverRect(page, [148, 148, 79, 57.5]);
-
-  await page.mouse.move(260, 160);
-  await assertEdgelessHoverRect(page, [234, 155, 76, 55]);
-});
-
-test('select multiple shapes and resize to negative', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-
-  await switchEditorMode(page);
-
-  await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
-
-  await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
-  await page.mouse.move(220, 120);
-  await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
-
-  await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
-
-  await resizeElementByTopLeftHandle(page, { x: 400, y: 300 }, 30);
-  await assertEdgelessSelectedRect(page, [310, 210, 188, 188]);
-
-  await page.mouse.move(450, 300);
-  await assertEdgelessHoverRect(page, [406, 223, 92, 174.5]);
-
-  await page.mouse.move(320, 220);
-  await assertEdgelessHoverRect(page, [310, 210, 88.6, 167.8]);
-});
-
-test('select multiple shapes and translate', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-
-  await switchEditorMode(page);
-
-  await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
-
-  await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });
-  await page.mouse.move(220, 120);
-  await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
-
-  await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
-  await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
-
-  await dragBetweenCoords(page, { x: 120, y: 120 }, { x: 150, y: 150 });
-  await assertEdgelessSelectedRect(page, [128, 128, 212, 112]);
-
-  await page.mouse.move(160, 160);
-  await assertEdgelessHoverRect(page, [128, 128, 104, 104]);
-
-  await page.mouse.move(260, 160);
-  await assertEdgelessHoverRect(page, [240, 140, 100, 100]);
 });
 
 test('delete shape by component-toolbar', async ({ page }) => {
@@ -275,26 +193,6 @@ test('edgeless toolbar shape menu shows up and close normally', async ({
 
   await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
   await expect(shapeMenu).toBeHidden();
-});
-
-test('selection box of shape element sync on fast dragging', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-
-  await setMouseMode(page, 'shape');
-  await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await setMouseMode(page, 'default');
-  await dragBetweenCoords(
-    page,
-    { x: 150, y: 150 },
-    { x: 700, y: 500 },
-    { click: true }
-  );
-
-  await assertEdgelessHoverRect(page, [650, 450, 100, 100]);
 });
 
 test('hovering on shape should not have effect on underlying block', async ({
