@@ -39,11 +39,12 @@ export const preset: InitFn = (workspace: Workspace, id: string) => {
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
   // Import preset markdown content inside frame block
   const contentParser = new window.ContentParser(page);
+
   addShapeElement(page, surfaceBlockId, {
     id: '0',
     index: 'a0',
     type: 'shape',
-    xywh: '[0,0,100,100]',
+    xywh: '[0,-100,100,100]',
     seed: Math.floor(Math.random() * 2 ** 31),
 
     shapeType: 'rect',

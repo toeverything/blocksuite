@@ -1,3 +1,4 @@
+import type { IPoint } from '@blocksuite/blocks';
 import type { Page } from '@playwright/test';
 
 import { waitNextFrame } from './misc.js';
@@ -16,6 +17,10 @@ function getDebugMenu(page: Page) {
 
     addNewPageBtn: debugMenu.locator('sl-button[content="Add New Page"]'),
   };
+}
+
+export async function click(page: Page, point: IPoint) {
+  await page.mouse.click(point.x, point.y);
 }
 
 export async function undoByClick(page: Page) {

@@ -2,6 +2,7 @@
 import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocksuite/blocks';
+import type { IPoint } from '@blocksuite/blocks/std';
 import { sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
@@ -9,6 +10,7 @@ import { expect } from '@playwright/test';
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 import { SHORT_KEY, type } from './keyboard.js';
+import { MODIFIER_KEY } from './keyboard.js';
 import { getEditorLocator, waitForVirgoStateUpdated } from './misc.js';
 
 export async function getFrameRect(
@@ -360,6 +362,12 @@ export async function zoomByMouseWheel(
   await page.keyboard.down(SHORT_KEY);
   await page.mouse.wheel(stepX, stepY);
   await page.keyboard.up(SHORT_KEY);
+}
+
+export async function optionMouseDrag(page: Page, start: IPoint, end: IPoint) {
+  await page.keyboard.down(MODIFIER_KEY);
+  await dragBetweenCoords(page, start, end, { steps: 30 });
+  await page.keyboard.up(MODIFIER_KEY);
 }
 
 export function locatorComponentToolbar(page: Page) {
