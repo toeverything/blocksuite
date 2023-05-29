@@ -320,7 +320,7 @@ export class ImportPage extends WithDisposable(LitElement) {
         >
           ${ExportToMarkdownIcon}
         </icon-button>
-        <icon-button class="button-item" text="Html" @click=${this._importHtml}>
+        <icon-button class="button-item" text="HTML" @click=${this._importHtml}>
           ${ExportToHTMLIcon}
         </icon-button>
       </div>
