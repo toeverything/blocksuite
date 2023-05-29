@@ -16,8 +16,8 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "peerDependencies": {
-    "@blocksuite/store": "workspace:*",
     "@blocksuite/lit": "workspace:*",
+    "@blocksuite/store": "workspace:*",
     "yjs": "^13"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "@blocksuite/virgo": "workspace:*",
     "@popperjs/core": "^2.11.6",
     "hotkeys-js": "^3.10.1",
+    "html-to-image": "^1.11.11",
     "lit": "^2.7.3",
     "marked": "^4.2.12",
     "shiki": "^0.14.1",

@@ -8,6 +8,8 @@ declare type BlockSuiteFlags = {
 
   /**
    * Block selection can trigger format bar
+   *
+   * @deprecated Currently, this feature is stable enough.
    */
   enable_block_selection_format_bar: boolean;
 

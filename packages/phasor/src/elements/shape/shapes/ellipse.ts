@@ -21,6 +21,7 @@ export const EllipseMethods: ShapeMethods = {
       realFillColor,
       realStrokeColor,
       strokeStyle,
+      roughness,
     } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -31,7 +32,7 @@ export const EllipseMethods: ShapeMethods = {
 
     rc.ellipse(renderWidth / 2, renderHeight / 2, renderWidth, renderHeight, {
       seed,
-      roughness: 2,
+      roughness,
       strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
       stroke: realStrokeColor,
       strokeWidth,

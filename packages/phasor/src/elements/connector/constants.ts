@@ -10,5 +10,6 @@ export const ConnectorElementDefaultProps: IElementDefaultProps<'connector'> = {
   lineWidth: 4,
   color: '#000000',
   strokeStyle: StrokeStyle.Solid,
+  roughness: 2,
   controllers: [],
 };

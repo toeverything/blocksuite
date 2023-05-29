@@ -58,6 +58,11 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       font-size: var(--affine-font-sm);
       font-weight: 600;
     }
+    .affine-bookmark-titletext {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
     .affine-bookmark-icon {
       width: 18px;
       height: 18px;
@@ -223,7 +228,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
               <div class="affine-bookmark-icon">
                 ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
               </div>
-              ${title || 'Bookmark'}
+              <span class="affine-bookmark-titletext">
+                ${title || 'Bookmark'}
+              </span>
             </div>
 
             <div class="affine-bookmark-description">${description || url}</div>

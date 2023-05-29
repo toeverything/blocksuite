@@ -25,6 +25,7 @@ export const RectMethods: ShapeMethods = {
       realStrokeColor,
       radius,
       strokeStyle,
+      roughness,
     } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -55,7 +56,7 @@ export const RectMethods: ShapeMethods = {
       `,
       {
         seed,
-        roughness: 2,
+        roughness,
         strokeLineDash:
           strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
         stroke: realStrokeColor,

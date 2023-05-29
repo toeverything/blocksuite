@@ -283,6 +283,10 @@ export class DebugMenu extends ShadowlessElement {
     this.contentParser.exportMarkdown();
   }
 
+  private _exportPng() {
+    this.contentParser.exportPng();
+  }
+
   private _exportYDoc() {
     this.workspace.exportYDoc();
   }
@@ -652,6 +656,9 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._exportPdf}>
                 Export PDF
               </sl-menu-item>
+              <sl-menu-item @click=${this._exportPng}>
+                Export PNG
+              </sl-menu-item>
               <sl-menu-item @click=${this._exportYDoc}>
                 Export YDoc
               </sl-menu-item>
@@ -662,7 +669,7 @@ export class DebugMenu extends ShadowlessElement {
                 Import Markdown
               </sl-menu-item>
               <sl-menu-item @click=${this._importHtml}>
-                Import Html
+                Import HTML
               </sl-menu-item>
               <sl-menu-item @click=${this._importNotion}>
                 Import Notion
