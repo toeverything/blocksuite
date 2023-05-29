@@ -21,6 +21,7 @@ const dataWithoutXywh: Omit<IShape, 'xywh'> = {
   strokeWidth: 4,
   strokeColor: '#000000',
   strokeStyle: StrokeStyle.Solid,
+  roughness: 2,
 };
 
 const data: IShape = { ...dataWithoutXywh, xywh: '[0,0,20,20]' };

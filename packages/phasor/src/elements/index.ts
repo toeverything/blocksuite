@@ -75,3 +75,5 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
   IPhasorElementType[T],
   'id' | 'index' | 'seed'
 >;
+
+export type { IBrush, IConnector, IDebug, IShape, IText };
