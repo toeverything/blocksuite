@@ -218,7 +218,7 @@ export type SerializedBlock = {
   description?: string;
   icon?: string;
   image?: string;
-  url: string;
+  url?: string;
   hasCrawled?: boolean;
 };
 
