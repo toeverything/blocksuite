@@ -11,7 +11,6 @@ import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
-import { PageBlockModel } from '../../page-block/page-model.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
   type BlockComponentElement,
