@@ -196,7 +196,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     this._paragraphType = `${startModel.flavour}/${startModel.type}`;
     this._format = getCurrentCombinedFormat(this.page);
 
-    this.addEventListener('mousedown', (e: MouseEvent) => {
+    this.addEventListener('pointerdown', (e: MouseEvent) => {
       // Prevent click event from making selection lost
       e.preventDefault();
       e.stopPropagation();
