@@ -93,7 +93,7 @@ export interface EdgelessSelectionSlots {
   mouseModeUpdated: Slot<MouseMode>;
   reorderingFramesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
-  shiftUpdated: Slot<boolean>;
+  pressShift: Slot<boolean>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -211,7 +211,7 @@ export class EdgelessPageBlockComponent
     reorderingFramesUpdated: new Slot<ReorderingAction<Selectable>>(),
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
-    shiftUpdated: new Slot<boolean>(),
+    pressShift: new Slot<boolean>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -451,8 +451,8 @@ export class EdgelessPageBlockComponent
       )
     );
     _disposables.add(
-      slots.shiftUpdated.on(shift => {
-        this.selection.shift = shift;
+      slots.pressShift.on(pressed => {
+        this.selection.shiftKey = pressed;
         this.requestUpdate();
       })
     );

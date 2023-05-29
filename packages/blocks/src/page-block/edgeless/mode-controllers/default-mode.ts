@@ -507,7 +507,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     noop();
   }
 
-  onShift(_: boolean) {
+  onPressShift(_: boolean) {
     noop();
   }
 }

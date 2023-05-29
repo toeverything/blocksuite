@@ -87,7 +87,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   } | null = null;
 
   // pressed shift key
-  private _shift = false;
+  private _shiftKey = false;
 
   // selected blocks
   selectedBlocks: BlockComponentElement[] = [];
@@ -134,13 +134,13 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     return new DOMRect(minX, minY, maxX - minX, maxY - minY);
   }
 
-  get shift() {
-    return this._shift;
+  get shiftKey() {
+    return this._shiftKey;
   }
 
-  set shift(pressed: boolean) {
-    this._shift = pressed;
-    this.currentController.onShift(pressed);
+  set shiftKey(pressed: boolean) {
+    this._shiftKey = pressed;
+    this.currentController.onPressShift(pressed);
   }
 
   constructor(

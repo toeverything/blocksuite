@@ -81,7 +81,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 
-    this._resize(e.keys.shift || this._edgeless.selection.shift);
+    this._resize(e.keys.shift || this._edgeless.selection.shiftKey);
   }
 
   onContainerDragEnd(e: PointerEventState) {
@@ -101,7 +101,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     });
   }
 
-  onShift(pressed: boolean) {
+  onPressShift(pressed: boolean) {
     const id = this._draggingElementId;
     if (!id) return;
 

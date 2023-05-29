@@ -28,7 +28,7 @@ export class HandleResizeManager {
   private _resizeMode = 'none';
   private _zoom = 1;
 
-  private _shift = false;
+  private _shiftKey = false;
 
   constructor(onResizeMove: ResizeMoveHandler, onResizeEnd: ResizeEndHandler) {
     this._onResizeMove = onResizeMove;
@@ -231,10 +231,10 @@ export class HandleResizeManager {
     const _onPointerMove = (e: PointerEvent) => {
       if (resizeMode === 'none') return;
 
-      this._shift ||= e.shiftKey;
+      this._shiftKey ||= e.shiftKey;
       this._dragPos.end = { x: e.x, y: e.y };
 
-      this._resize(this._shift);
+      this._resize(this._shiftKey);
     };
 
     const _onPointerUp = (_: PointerEvent) => {
@@ -252,9 +252,9 @@ export class HandleResizeManager {
   };
 
   onShift(pressed: boolean) {
-    if (this._shift === pressed) return;
+    if (this._shiftKey === pressed) return;
 
-    this._shift = pressed;
+    this._shiftKey = pressed;
     this._resize(pressed);
   }
 }
