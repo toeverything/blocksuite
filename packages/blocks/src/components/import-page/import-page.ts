@@ -222,6 +222,8 @@ export class ImportPage extends WithDisposable(LitElement) {
           const files = Object.keys(zipFile.files);
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            if (file.startsWith('__MACOSX/')) continue;
+
             const lastSplitIndex = file.lastIndexOf('/');
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
