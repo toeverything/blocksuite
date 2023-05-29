@@ -38,7 +38,7 @@ import {
 import { test } from '../utils/playwright.js';
 
 test.describe('add shape', () => {
-  test('without pressing shift shortcut', async ({ page }) => {
+  test('without holding shift key', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
@@ -58,7 +58,7 @@ test.describe('add shape', () => {
     await assertEdgelessSelectedRect(page, [100, 100, 100, 50]);
   });
 
-  test('with pressing shift shortcut', async ({ page }) => {
+  test('with holding shift key', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);

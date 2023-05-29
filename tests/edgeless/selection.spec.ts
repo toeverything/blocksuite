@@ -208,3 +208,77 @@ test('when the selection is always a frame, it should remain in an active state'
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInFrame(page, ids.frameId);
 });
+
+test.describe('resize shapes', () => {
+  test.describe('without holding shift key', () => {
+    test('when dragging top-left corner', async ({ page }) => {
+      await enterPlaygroundRoom(page);
+      await initEmptyEdgelessState(page);
+
+      await switchEditorMode(page);
+
+      await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+      await page.mouse.move(110, 110);
+      await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+
+      await addBasicRectShapeElement(
+        page,
+        { x: 210, y: 110 },
+        { x: 310, y: 210 }
+      );
+      await page.mouse.move(220, 120);
+      await assertEdgelessHoverRect(page, [210, 110, 100, 100]);
+
+      await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
+      // brush min, max: [100, 100], [200, 200]
+      //  shap min, max: [210, 110], [310, 210]
+      //       min, max: [100, 100], [310, 210]
+      //           xywh: [100, 100, 210, 110]
+      await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
+
+      await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
+      await assertEdgelessSelectedRect(page, [148, 148, 162, 62]);
+
+      await page.mouse.move(160, 160);
+      await assertEdgelessSelectedRect(page, [148, 148, 162, 62]);
+
+      await page.mouse.move(260, 160);
+      await assertEdgelessSelectedRect(page, [148, 148, 162, 62]);
+
+      await resizeElementByTopLeftHandle(page, { x: 172, y: 0 });
+      await assertEdgelessSelectedRect(page, [310, 148, 10, 62]);
+    });
+  });
+
+  test.describe('with holding shift key', () => {
+    test('when dragging top-left corner', async ({ page }) => {
+      await enterPlaygroundRoom(page);
+      await initEmptyEdgelessState(page);
+
+      await switchEditorMode(page);
+
+      await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
+      await addBasicRectShapeElement(
+        page,
+        { x: 200, y: 100 },
+        { x: 300, y: 200 }
+      );
+
+      await dragBetweenCoords(page, { x: 50, y: 50 }, { x: 250, y: 250 });
+      await assertEdgelessSelectedRect(page, [98, 98, 202, 104]);
+
+      await page.keyboard.down('Shift');
+
+      await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
+      await assertEdgelessSelectedRect(page, [148, 124, 152, 78]);
+
+      // flip x
+      await resizeElementByTopLeftHandle(page, { x: 154, y: 0 });
+      await assertEdgelessSelectedRect(page, [300, 124, 152, 78]);
+
+      // flip y
+      await resizeElementByTopLeftHandle(page, { x: 0, y: 126 });
+      await assertEdgelessSelectedRect(page, [300, 202, 152, 78]);
+    });
+  });
+});
