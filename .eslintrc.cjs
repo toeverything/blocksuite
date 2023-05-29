@@ -16,6 +16,10 @@ const allPackages = [
 
 const createPattern = packageName => [
   {
+    group: ['roughjs/**'],
+    allowTypeImports: true,
+  },
+  {
     group: ['**/dist', '**/dist/**'],
     message: 'Don not import from dist',
     allowTypeImports: false,
