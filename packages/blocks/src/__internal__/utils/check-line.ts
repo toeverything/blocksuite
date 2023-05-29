@@ -228,5 +228,5 @@ export function checkLastLine(range: Range, container: HTMLElement) {
   // we need to check the next range again.
   const nextRangeRect = atLineEdgeRange.getBoundingClientRect();
   const nextLineHeight = nextRangeRect.height;
-  return nextRangeRect.bottom + nextLineHeight / 2 > containerRect.bottom;
+  return rangeRect.bottom + nextLineHeight / 2 > containerRect.bottom;
 }
