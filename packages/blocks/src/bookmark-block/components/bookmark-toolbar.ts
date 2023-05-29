@@ -54,8 +54,9 @@ const config: ConfigItem[] = [
       const index = parent?.children.indexOf(model);
 
       const yText = new Y.Text();
-      yText.insert(0, model.title || model.caption || model.url);
-      yText.format(0, model.url.length, { link: model.url });
+      const insert = model.title || model.caption || model.url;
+      yText.insert(0, insert);
+      yText.format(0, insert.length, { link: model.url });
       const text = new page.Text(yText);
       page.addBlock(
         'affine:paragraph',
