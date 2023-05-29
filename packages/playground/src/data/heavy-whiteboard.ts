@@ -2,7 +2,7 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '@blocksuite/blocks';
-import { serializeXYWH } from '@blocksuite/phasor';
+import { serializeXYWH, type ShapeType, StrokeStyle } from '@blocksuite/phasor';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
 import { getOptions } from '../utils';
@@ -42,14 +42,15 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
       xywh: `[${x},${y},100,100]`,
       seed: Math.floor(Math.random() * 2 ** 31),
 
-      shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4],
+      shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4] as ShapeType,
 
       radius: 0,
       filled: false,
       fillColor: DEFAULT_SHAPE_FILL_COLOR,
       strokeWidth: 4,
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-      strokeStyle: 'solid',
+      strokeStyle: StrokeStyle.Solid,
+      roughness: 2,
     });
   }
 

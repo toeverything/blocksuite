@@ -1,11 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
+import { toPng } from 'html-to-image';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
-import type { SerializedBlock } from '../utils/index.js';
+import { getEditorContainer, type SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type { FetchFileHandler } from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
@@ -53,6 +54,25 @@ export class ContentParser {
       (root as PageBlockModel).title.toString(),
       htmlContent
     );
+  }
+
+  public async exportPng() {
+    const root = this._page.root;
+    if (!root) return;
+    const editorContainer = getEditorContainer(this._page);
+    const styleElement = document.createElement('style');
+    styleElement.textContent =
+      'editor-container,.affine-editor-container {height: auto;}';
+    editorContainer.appendChild(styleElement);
+
+    FileExporter.exportPng(
+      (root as PageBlockModel).title.toString(),
+      await toPng(editorContainer, {
+        cacheBust: true,
+      })
+    );
+
+    editorContainer.removeChild(styleElement);
   }
 
   public async exportPdf() {

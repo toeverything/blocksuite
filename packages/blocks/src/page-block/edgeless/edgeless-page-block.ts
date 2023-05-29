@@ -235,10 +235,11 @@ export class EdgelessPageBlockComponent
 
   // just init surface, attach to dom later
   private _initSurface() {
-    const { page } = this;
+    const { page, parentElement } = this;
     const surfaceBlock = this.model.children.find(
       child => child.flavour === 'affine:surface'
     );
+    assertExists(parentElement);
     assertExists(surfaceBlock);
     const yBlock = page.getYBlockById(surfaceBlock.id);
     assertExists(yBlock);
@@ -249,7 +250,10 @@ export class EdgelessPageBlockComponent
     }
     this.surface = new SurfaceManager(yContainer, value => {
       if (isCssVariable(value)) {
-        const cssValue = getThemePropertyValue(this, value as CssVariableName);
+        const cssValue = getThemePropertyValue(
+          parentElement,
+          value as CssVariableName
+        );
         if (cssValue === undefined) {
           console.error(
             new Error(

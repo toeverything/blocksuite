@@ -37,6 +37,8 @@ export interface IConnector {
   lineWidth: number;
   color: string;
   strokeStyle: StrokeStyle;
+  // https://github.com/rough-stuff/rough/wiki#roughness
+  roughness?: number;
 
   startElement?: AttachedElement;
   endElement?: AttachedElement;

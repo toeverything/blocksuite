@@ -230,14 +230,14 @@ export class DragHandle extends WithDisposable(LitElement) {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
     };
-    this.onDropCallback = options.onDropCallback;
-    this.setDragType = options.setDragType;
-    this.setSelectedBlock = options.setSelectedBlock;
-    this._getSelectedBlocks = options.getSelectedBlocks;
-    this._getClosestBlockElement = options.getClosestBlockElement;
-    options.container.appendChild(this);
-    this._container = options.container;
     this.addEventListener('beforeprint', () => this.hide(true));
+    this.onDropCallback = options?.onDropCallback;
+    this.setDragType = options?.setDragType;
+    this.setSelectedBlock = options?.setSelectedBlock;
+    this._getSelectedBlocks = options?.getSelectedBlocks;
+    this._getClosestBlockElement = options?.getClosestBlockElement;
+    options?.container.appendChild(this);
+    this._container = options?.container;
   }
 
   /**

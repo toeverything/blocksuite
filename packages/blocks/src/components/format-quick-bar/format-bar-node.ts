@@ -9,6 +9,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import {
   assertExists,
   type BaseBlockModel,
+  matchFlavours,
   type Page,
 } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
@@ -297,6 +298,43 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       return html``;
     }
 
+    const styles = styleMap({
+      left: this.left,
+      top: this.top,
+    });
+
+    const actionItems = actionConfig
+      .filter(({ showWhen = () => true }) => showWhen(page, this.models))
+      .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
+        const enabled = enabledWhen(page);
+        const toolTip = enabled
+          ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
+          : html`<tool-tip tip-position="top" inert role="tooltip"
+              >${disabledToolTip}</tool-tip
+            >`;
+        return html`<format-bar-button
+          class="has-tool-tip"
+          data-testid=${id}
+          ?disabled=${!enabled}
+          @click=${() => enabled && action({ page })}
+        >
+          ${icon}${toolTip}
+        </format-bar-button>`;
+      });
+
+    if (
+      this.models.length === 1 &&
+      matchFlavours(this.models[0], ['affine:database'])
+    ) {
+      return html`<div
+        class="format-quick-bar"
+        style="${styles}"
+        @pointerdown=${stopPropagation}
+      >
+        ${actionItems}
+      </div>`;
+    }
+
     const paragraphIcon =
       paragraphConfig.find(
         ({ flavour, type }) => `${flavour}/${type}` === this._paragraphType
@@ -344,31 +382,6 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
         </format-bar-button>`
       );
 
-    const actionItems = actionConfig
-      .filter(({ showWhen = () => true }) => showWhen(page))
-      .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
-        const enabled = enabledWhen(page);
-        const toolTip = enabled
-          ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
-          : html`<tool-tip tip-position="top" inert role="tooltip"
-              >${disabledToolTip}</tool-tip
-            >`;
-        return html`<format-bar-button
-          class="has-tool-tip"
-          data-testid=${id}
-          ?disabled=${!enabled}
-          @click=${() => {
-            if (enabled) action({ page });
-          }}
-        >
-          ${icon}${toolTip}
-        </format-bar-button>`;
-      });
-
-    const styles = styleMap({
-      left: this.left,
-      top: this.top,
-    });
     return html` <div
       class="format-quick-bar"
       style="${styles}"
