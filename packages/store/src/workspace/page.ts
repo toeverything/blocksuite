@@ -377,7 +377,7 @@ export class Page extends Space<FlatBlockMap> {
     return id;
   }
 
-  private _populateParentToChildrenMap(
+  private _populateParentChildrenMap(
     blocksToMove: BaseBlockModel[],
     childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
     newParent: BaseBlockModel
@@ -475,7 +475,7 @@ export class Page extends Space<FlatBlockMap> {
     // A map to store parent block and their respective child blocks
     const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
 
-    this._populateParentToChildrenMap(
+    this._populateParentChildrenMap(
       blocksToMove,
       childBlocksPerParent,
       newParent
