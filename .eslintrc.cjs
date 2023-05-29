@@ -17,22 +17,24 @@ const allPackages = [
 const createPattern = packageName => [
   {
     group: ['roughjs/**'],
+    message:
+      'Do not import directly,see https://github.com/toeverything/blocksuite/issues/2821',
     allowTypeImports: true,
   },
   {
     group: ['**/dist', '**/dist/**'],
-    message: 'Don not import from dist',
+    message: 'Do not import from dist',
     allowTypeImports: false,
   },
   {
     group: ['**/src', '**/src/**'],
-    message: 'Don not import from src',
+    message: 'Do not import from src',
     allowTypeImports: false,
   },
   {
     group: ['**/*.css', '**/*.css?*'],
     message:
-      'Don not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
+      'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
     allowTypeImports: false,
   },
   {
