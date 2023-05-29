@@ -253,7 +253,7 @@ export class DefaultPageBlockComponent
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      const firstParagraph = model.children[1].children[0];
+      const firstParagraph = defaultFrame?.children.find(block => block.flavour === 'affine:paragraph');
       if (
         firstParagraph &&
         matchFlavours(firstParagraph, ['affine:paragraph'])
