@@ -11,6 +11,7 @@ import {
   getEdgelessSelectedRect,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
+  optionMouseDrag,
   setMouseMode,
   switchEditorMode,
   zoomByMouseWheel,
@@ -18,16 +19,21 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
+  click,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
   pressEnter,
+  redoByClick,
   type,
+  undoByClick,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
+  assertEdgelessNonSelectedRect,
+  assertEdgelessSelectedRect,
   assertFrameXYWH,
   assertRichTexts,
   assertSelection,
@@ -97,6 +103,26 @@ test('zoom by mouse', async ({ page }) => {
 
   const zoomed = [150, 270, original[2] * 0.75, original[3] * 0.75];
   await assertEdgelessHoverRect(page, zoomed);
+});
+
+test('option/alt mouse drag duplicate a new element', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 100 };
+  const end = { x: 200, y: 200 };
+  await addBasicRectShapeElement(page, start, end);
+  await optionMouseDrag(page, { x: 150, y: 150 }, { x: 250, y: 150 });
+
+  await assertEdgelessSelectedRect(page, [200, 100, 100, 100]);
+
+  await undoByClick(page);
+  await assertEdgelessNonSelectedRect(page);
+
+  await redoByClick(page);
+  await click(page, { x: 250, y: 150 });
+  await assertEdgelessSelectedRect(page, [200, 100, 100, 100]);
 });
 
 test('should cancel select when the selected point is outside the current selected element', async ({
