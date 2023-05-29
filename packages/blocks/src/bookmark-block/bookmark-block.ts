@@ -15,7 +15,6 @@ import { DefaultBanner } from './images/banners.js';
 import { DefaultIcon } from './images/icons.js';
 import { refreshBookmarkBlock } from './utils.js';
 
-// import { Slot } from '@blocksuite/global/dist/utils/slot.js';
 @customElement('affine-bookmark')
 export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   static override styles = css`
@@ -26,9 +25,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }
     .affine-bookmark-link {
       height: 112px;
-      background: linear-gradient(180deg, #f0f3fd 0%, #fcfcfd 100%);
-      border: 3px solid #fcfcfd;
-      box-shadow: 0 0 4px rgba(66, 65, 73, 0.14);
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-card-background-blue);
+      border: 3px solid var(--affine-background-secondary-color);
       border-radius: 12px;
       padding: 16px 24px;
       display: flex;
@@ -41,10 +40,15 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     .affine-bookmark-banner {
       width: 140px;
       height: 96px;
+      margin-left: 15px;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      flex-shrink: 0;
     }
-    .affine-bookmark-banner img {
-      width: 100%;
-      height: 100%;
+    .affine-bookmark-banner img,
+    .affine-bookmark-banner svg {
+      width: 140px;
+      height: 96px;
       object-fit: cover;
     }
     .affine-bookmark-content-wrapper {
@@ -58,11 +62,18 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       font-size: var(--affine-font-sm);
       font-weight: 600;
     }
+    .affine-bookmark-title-content {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .affine-bookmark-icon {
       width: 18px;
       height: 18px;
       margin-right: 4px;
       color: var(--affine-text-secondary-color);
+      flex-shrink: 0;
     }
     .affine-bookmark-icon img {
       width: 100%;
@@ -223,7 +234,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
               <div class="affine-bookmark-icon">
                 ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
               </div>
-              ${title || 'Bookmark'}
+              <div class="affine-bookmark-title-content">
+                ${title || 'Bookmark'}
+              </div>
             </div>
 
             <div class="affine-bookmark-description">${description || url}</div>
