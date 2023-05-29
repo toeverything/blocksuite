@@ -39,6 +39,7 @@ import { GUI } from 'dat.gui';
 import JSZip from 'jszip';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { createElement } from 'react';
 
 import { registerFormatBarCustomElement } from './custom-format-bar';
 import { createViewer } from './doc-inspector';
@@ -400,14 +401,35 @@ export class DebugMenu extends ShadowlessElement {
 
     this._dark = dark;
     localStorage.setItem('blocksuite:dark', dark ? 'true' : 'false');
-    html?.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if (!html) return;
+    html.setAttribute('data-theme', dark ? 'dark' : 'light');
+
+    this.insertTransitionStyle('color-transition', 0);
+
     if (dark) {
-      html?.classList.add('dark');
-      html?.classList.add('sl-theme-dark');
+      html.classList.add('dark');
+      html.classList.add('sl-theme-dark');
     } else {
-      html?.classList.remove('dark');
-      html?.classList.remove('sl-theme-dark');
+      html.classList.remove('dark');
+      html.classList.remove('sl-theme-dark');
     }
+  }
+
+  private insertTransitionStyle(classKey: string, duration: number) {
+    const $html = document.documentElement;
+    const $style = document.createElement('style');
+    const slCSSKeys = ['sl-transition-x-fast'];
+    $style.innerHTML = `html.${classKey} * { transition: all ${duration}ms 0ms linear !important; } :root { ${slCSSKeys.map(
+      key => `--${key}: ${duration}ms`
+    )} }`;
+
+    $html.appendChild($style);
+    $html.classList.add(classKey);
+
+    setTimeout(() => {
+      $style.remove();
+      $html.classList.remove(classKey);
+    }, duration);
   }
 
   private _toggleDarkMode() {
