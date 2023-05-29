@@ -160,9 +160,6 @@ export class DefaultPageBlockComponent
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
-
-    subpageLinked: new Slot<{ pageId: string }>(),
-    subpageUnlinked: new Slot<{ pageId: string }>(),
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
   };
 
