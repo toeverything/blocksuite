@@ -37,7 +37,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
           element.x,
           element.y,
           rect.width / edgeless.surface.viewport.zoom,
-          vLines.length * lineHeight
+          (vLines.length / edgeless.surface.viewport.zoom) * lineHeight
         ).serialize(),
       });
       edgeless.slots.selectionUpdated.emit({
