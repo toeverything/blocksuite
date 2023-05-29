@@ -254,7 +254,7 @@ export class DefaultPageBlockComponent
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
       const firstText = defaultFrame?.children.find(block =>
-        matchFlavours(block, ['affine:paragraph', 'affine:list'])
+        matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
       );
       if (firstText) {
         asyncFocusRichText(page, firstText.id);
