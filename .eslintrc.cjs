@@ -16,12 +16,6 @@ const allPackages = [
 
 const createPattern = packageName => [
   {
-    group: ['roughjs/**'],
-    message:
-      'Do not import directly,see https://github.com/toeverything/blocksuite/issues/2821',
-    allowTypeImports: true,
-  },
-  {
     group: ['**/dist', '**/dist/**'],
     message: 'Do not import from dist',
     allowTypeImports: false,
