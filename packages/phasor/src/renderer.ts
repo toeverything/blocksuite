@@ -1,6 +1,7 @@
 import { clamp, type IPoint, Point } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
-import { RoughCanvas } from 'roughjs/bin/canvas.js';
+import RoughJS from 'roughjs';
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
@@ -50,7 +51,7 @@ export class Renderer implements SurfaceViewport {
     const canvas = document.createElement('canvas');
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-    this.rc = new RoughCanvas(canvas);
+    this.rc = RoughJS.canvas(canvas);
   }
 
   get left() {
