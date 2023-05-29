@@ -152,6 +152,7 @@ export class ImportPage extends WithDisposable(LitElement) {
           const page = this.workspace.createPage({
             init: {
               title: '',
+              source: 'importFromMarkdown',
             },
           });
           const rootId = page.root?.id;
@@ -183,6 +184,7 @@ export class ImportPage extends WithDisposable(LitElement) {
           const page = this.workspace.createPage({
             init: {
               title: '',
+              source: 'importFromHtml',
             },
           });
           const rootId = page.root?.id;
@@ -228,6 +230,7 @@ export class ImportPage extends WithDisposable(LitElement) {
               const page = this.workspace.createPage({
                 init: {
                   title: '',
+                  source: 'importFromNotion',
                 },
               });
               pageMap.set(file, page);

@@ -15,7 +15,7 @@ import {
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
-import { type PageMeta, WorkspaceMeta } from './meta.js';
+import { type PageMeta, type PageSource, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Schema } from './schema.js';
 
@@ -224,7 +224,9 @@ export class Workspace {
    * will be created in the page simultaneously.
    */
   createPage(
-    options: { id?: string; init?: true | { title: string } } | string = {}
+    options:
+      | { id?: string; init?: true | { title: string; source?: PageSource } }
+      | string = {}
   ) {
     // Migration guide
     if (typeof options === 'string') {
@@ -248,6 +250,7 @@ export class Workspace {
       title: '',
       createDate: +new Date(),
       subpageIds: [],
+      source: '',
     });
     const page = this.getPage(pageId) as Page;
 
@@ -259,6 +262,7 @@ export class Workspace {
           ? undefined
           : {
               title: new page.Text(init.title),
+              source: init.source || '',
             }
       );
       page.addBlock('affine:surface', {}, pageBlockId);

@@ -7,6 +7,12 @@ import { type InlineSuggestionProvider, type StoreOptions } from '../store.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { Workspace } from './workspace.js';
 
+export type PageSource =
+  | ''
+  | 'importFromMarkdown'
+  | 'importFromHtml'
+  | 'importFromNotion';
+
 export type WorkspaceOptions = {
   experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
 } & StoreOptions;
@@ -21,6 +27,8 @@ export interface PageMeta {
    */
   subpageIds: string[];
   // please use `declare module '@blocksuite/store'` to extend this interface
+
+  source: PageSource;
 }
 
 type WorkspaceMetaState = {
