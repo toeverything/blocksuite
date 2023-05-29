@@ -96,6 +96,26 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(HOTKEYS.DELETE, backspace);
 }
 
+function bindShift(
+  edgeless: EdgelessPageBlockComponent,
+  key = 'shift',
+  pressed = false
+) {
+  hotkey.addListener(
+    HOTKEYS.ANY_KEY,
+    e => {
+      if (e.key.toLowerCase() === key && pressed !== e.shiftKey) {
+        pressed = e.shiftKey;
+        edgeless.slots.pressShiftKey.emit(pressed);
+      }
+    },
+    {
+      keydown: true,
+      keyup: true,
+    }
+  );
+}
+
 export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_EDGELESS);
   if (activeEditorManager.isActive(edgeless)) {
@@ -175,12 +195,8 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
 
     bindSpace(edgeless);
     bindDelete(edgeless);
-    bindCommonHotkey(edgeless.page, {
-      filter: (e: KeyboardEvent) =>
-        e.shiftKey && e.key.toLowerCase() === 'shift',
-      keydown: _ => edgeless.slots.pressShiftKey.emit(true),
-      keyup: _ => edgeless.slots.pressShiftKey.emit(false),
-    });
+    bindShift(edgeless);
+    bindCommonHotkey(edgeless.page);
   });
   return () => {
     hotkey.deleteScope(scope);

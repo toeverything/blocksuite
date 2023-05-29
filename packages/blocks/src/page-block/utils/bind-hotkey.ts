@@ -44,15 +44,7 @@ import {
 } from './container-operations.js';
 import { formatConfig } from './format-config.js';
 
-export function bindCommonHotkey(
-  page: Page,
-  anyKeyOptions?: {
-    pressed?: string;
-    filter: (e: KeyboardEvent) => boolean;
-    keydown: (e: KeyboardEvent) => void;
-    keyup: (e: KeyboardEvent) => void;
-  }
-) {
+export function bindCommonHotkey(page: Page) {
   if (page.readonly) return;
 
   formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
@@ -110,45 +102,23 @@ export function bindCommonHotkey(
   // We shouldn't prevent user input, because there could have CN/JP/KR... input,
   // that have pop-up for selecting local characters.
   // So we could just hook on the keydown event and detect whether user input a new character.
-  hotkey.addListener(
-    HOTKEYS.ANY_KEY,
-    e => {
-      if (anyKeyOptions) {
-        if (anyKeyOptions.pressed === e.key && e.type === 'keyup') {
-          anyKeyOptions.keyup(e);
-          anyKeyOptions.pressed = undefined;
-          return;
-        }
-        if (anyKeyOptions.filter(e)) {
-          anyKeyOptions.pressed = e.key;
-          anyKeyOptions.keydown(e);
-          return;
-        }
-      }
-
-      if (e.type === 'keyup') return;
-
-      if (!isPrintableKeyEvent(e) || page.readonly) return;
-      const blockRange = getCurrentBlockRange(page);
-      if (!blockRange) return;
-      if (blockRange.type === 'Block') {
-        handleKeydownAfterSelectBlocks({
-          page,
-          keyboardEvent: e,
-          selectedBlocks: blockRange.models,
-        });
-        return;
-      }
-
-      const range = blockRangeToNativeRange(blockRange);
-      if (!range || !isMultiBlockRange(range)) return;
-      deleteModelsByRange(page);
-    },
-    {
-      keyup: true,
-      keydown: true,
+  hotkey.addListener(HOTKEYS.ANY_KEY, e => {
+    if (!isPrintableKeyEvent(e) || page.readonly) return;
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) return;
+    if (blockRange.type === 'Block') {
+      handleKeydownAfterSelectBlocks({
+        page,
+        keyboardEvent: e,
+        selectedBlocks: blockRange.models,
+      });
+      return;
     }
-  );
+
+    const range = blockRangeToNativeRange(blockRange);
+    if (!range || !isMultiBlockRange(range)) return;
+    deleteModelsByRange(page);
+  });
 
   // !!!
   // Don't forget to remove hotkeys at `removeCommonHotKey`
