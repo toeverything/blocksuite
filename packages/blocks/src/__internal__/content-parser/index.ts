@@ -23,7 +23,8 @@ export class ContentParser {
   };
   private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _htmlParser: HtmlParser;
-
+  private urlPattern =
+    /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
   constructor(page: Page, fetchFileFunc?: FetchFileHandler) {
     this._page = page;
     this._htmlParser = new HtmlParser(this, page, fetchFileFunc);
@@ -195,10 +196,23 @@ export class ContentParser {
 
   public text2blocks(text: string): SerializedBlock[] {
     return text.split('\n').map((str: string) => {
+      const splitText = text.split(this.urlPattern);
+      const urls = text.match(this.urlPattern);
+      const result = [];
+
+      for (let i = 0; i < splitText.length; i++) {
+        if (splitText[i]) {
+          result.push({ insert: splitText[i] });
+        }
+        if (urls && urls[i]) {
+          result.push({ insert: urls[i], attributes: { link: urls[i] } });
+        }
+      }
+
       return {
         flavour: 'affine:paragraph',
         type: 'text',
-        text: [{ insert: str }],
+        text: result,
         children: [],
       };
     });

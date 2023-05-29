@@ -662,7 +662,7 @@ export class DebugMenu extends ShadowlessElement {
                 Import Markdown
               </sl-menu-item>
               <sl-menu-item @click=${this._importHtml}>
-                Import Html
+                Import HTML
               </sl-menu-item>
               <sl-menu-item @click=${this._importNotion}>
                 Import Notion
