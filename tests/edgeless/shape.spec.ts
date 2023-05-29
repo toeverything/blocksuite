@@ -37,17 +37,52 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('add shape element', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
+test.describe('add shape', () => {
+  test('without pressing shift shortcut', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
 
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
-  await addBasicRectShapeElement(page, start, end);
+    const start0 = { x: 100, y: 100 };
+    const end0 = { x: 150, y: 200 };
+    await addBasicRectShapeElement(page, start0, end0);
 
-  await assertMouseMode(page, 'default');
-  await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+    await assertMouseMode(page, 'default');
+    await assertEdgelessSelectedRect(page, [100, 100, 50, 100]);
+
+    const start1 = { x: 100, y: 100 };
+    const end1 = { x: 200, y: 150 };
+    await addBasicRectShapeElement(page, start1, end1);
+
+    await assertMouseMode(page, 'default');
+    await assertEdgelessSelectedRect(page, [100, 100, 100, 50]);
+  });
+
+  test('with pressing shift shortcut', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    await page.keyboard.down('Shift');
+
+    const start0 = { x: 100, y: 100 };
+    const end0 = { x: 150, y: 200 };
+    await addBasicRectShapeElement(page, start0, end0);
+
+    await page.keyboard.up('Shift');
+
+    await assertMouseMode(page, 'default');
+    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
+    await page.keyboard.down('Shift');
+
+    const start1 = { x: 100, y: 100 };
+    const end1 = { x: 200, y: 150 };
+    await addBasicRectShapeElement(page, start1, end1);
+
+    await assertMouseMode(page, 'default');
+    await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+  });
 });
 
 test('delete shape by component-toolbar', async ({ page }) => {

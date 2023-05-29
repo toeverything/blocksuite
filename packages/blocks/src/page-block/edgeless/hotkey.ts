@@ -178,12 +178,8 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     bindCommonHotkey(edgeless.page, {
       filter: (e: KeyboardEvent) =>
         e.shiftKey && e.key.toLowerCase() === 'shift',
-      keydown: _ => {
-        edgeless.slots.shiftUpdated.emit(true);
-      },
-      keyup: _ => {
-        edgeless.slots.shiftUpdated.emit(false);
-      },
+      keydown: _ => edgeless.slots.shiftUpdated.emit(true),
+      keyup: _ => edgeless.slots.shiftUpdated.emit(false),
     });
   });
   return () => {

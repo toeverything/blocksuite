@@ -116,8 +116,8 @@ export class HandleResizeManager {
         const bw = Math.abs(dw);
         const bh = Math.abs(dh);
         const isTall = aspectRatio < bw / bh;
-        const th = (bw * (flipY ? 1 : -1)) / aspectRatio;
-        const tw = bh * (flipX ? 1 : -1) * aspectRatio;
+        const th = (bw / aspectRatio) * (flipY ? 1 : -1);
+        const tw = bh * aspectRatio * (flipX ? 1 : -1);
 
         switch (direction) {
           // TODO
