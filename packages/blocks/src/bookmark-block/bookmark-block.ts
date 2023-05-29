@@ -10,12 +10,12 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { registerService } from '../__internal__/service.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import { BookmarkBlockService } from './bookmark-service.js';
+import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
 import { DefaultIcon } from './images/icons.js';
-import { refreshBookmarkBlock } from './utils.js';
+import { reloadBookmarkBlock } from './utils.js';
 
-// import { Slot } from '@blocksuite/global/dist/utils/slot.js';
 @customElement('affine-bookmark')
 export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   static override styles = css`
@@ -26,9 +26,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }
     .affine-bookmark-link {
       height: 112px;
-      background: linear-gradient(180deg, #f0f3fd 0%, #fcfcfd 100%);
-      border: 3px solid #fcfcfd;
-      box-shadow: 0 0 4px rgba(66, 65, 73, 0.14);
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-card-background-blue);
+      border: 3px solid var(--affine-background-secondary-color);
       border-radius: 12px;
       padding: 16px 24px;
       display: flex;
@@ -41,10 +41,15 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     .affine-bookmark-banner {
       width: 140px;
       height: 96px;
+      margin-left: 15px;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      flex-shrink: 0;
     }
-    .affine-bookmark-banner img {
-      width: 100%;
-      height: 100%;
+    .affine-bookmark-banner img,
+    .affine-bookmark-banner svg {
+      width: 140px;
+      height: 96px;
       object-fit: cover;
     }
     .affine-bookmark-content-wrapper {
@@ -58,9 +63,10 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       font-size: var(--affine-font-sm);
       font-weight: 600;
     }
-    .affine-bookmark-titletext {
-      text-overflow: ellipsis;
+    .affine-bookmark-title-content {
+      flex-grow: 1;
       overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
     .affine-bookmark-icon {
@@ -68,6 +74,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       height: 18px;
       margin-right: 4px;
       color: var(--affine-text-secondary-color);
+      flex-shrink: 0;
     }
     .affine-bookmark-icon img {
       width: 100%;
@@ -152,7 +159,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:bookmark', BookmarkBlockService);
-    refreshBookmarkBlock(this.model);
+    reloadBookmarkBlock(this.model);
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
     });
@@ -179,15 +186,18 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }, 100);
   }
 
-  private _onToolbarSelected: ToolbarActionCallback = type => {
-    if (type === 'caption') {
-      this._input.classList.add('caption-show');
-    }
+  private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
+    type => {
+      if (type === 'caption') {
+        this._input.classList.add('caption-show');
+      }
 
-    if (type === 'edit') {
-      this._showEditModal = true;
-    }
-  };
+      if (type === 'edit') {
+        this._showEditModal = true;
+      }
+
+      this._showToolbar = false;
+    };
   override render() {
     const { url, title, description, icon, image } = this.model;
 
@@ -228,9 +238,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
               <div class="affine-bookmark-icon">
                 ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
               </div>
-              <span class="affine-bookmark-titletext">
+              <div class="affine-bookmark-title-content">
                 ${title || 'Bookmark'}
-              </span>
+              </div>
             </div>
 
             <div class="affine-bookmark-description">${description || url}</div>

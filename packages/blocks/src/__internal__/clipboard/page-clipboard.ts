@@ -60,6 +60,8 @@ export class PageClipboard implements Clipboard {
     await service.json2Block(focusedBlockModel, normalizedBlocks, range);
 
     this._page.captureSync();
+
+    this._page.slots.pasted.emit(blocks);
   };
 
   private _onCopy = (
@@ -78,6 +80,8 @@ export class PageClipboard implements Clipboard {
     copyBlocks(range);
 
     this._page.captureSync();
+
+    this._page.slots.copied.emit();
   };
 
   private _onCut = (e: ClipboardEvent) => {
