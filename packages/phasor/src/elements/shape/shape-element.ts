@@ -41,7 +41,7 @@ export class ShapeElement extends SurfaceElement<IShape> {
   }
 
   get roughness() {
-    const roughness = this.yMap.get('roughness') as IShape['roughness'];
+    const roughness = (this.yMap.get('roughness') as IShape['roughness']) ?? 2;
     return roughness;
   }
 

@@ -22,7 +22,7 @@ export interface IShape {
   strokeColor: string;
   strokeStyle: StrokeStyle;
   // https://github.com/rough-stuff/rough/wiki#roughness
-  roughness: number;
+  roughness?: number;
 }
 
 export interface ShapeMethods {

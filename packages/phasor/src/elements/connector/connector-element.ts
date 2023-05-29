@@ -29,7 +29,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
   }
 
   get roughness() {
-    return this.yMap.get('roughness') as IConnector['roughness'];
+    return (this.yMap.get('roughness') as IConnector['roughness']) ?? 2;
   }
 
   get startElement() {

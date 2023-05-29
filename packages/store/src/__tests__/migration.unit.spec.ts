@@ -29,7 +29,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 4,
+      'affine:surface': 3,
     });
 
     assert.equal(
@@ -58,7 +58,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 4,
+      'affine:surface': 3,
     });
     const hasSurface = Object.entries(result['space:page0']).some(
       ([_, value]: [string, unknown]) =>
@@ -91,7 +91,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 4,
+      'affine:surface': 3,
     });
 
     const newTitle = (
@@ -136,7 +136,7 @@ describe('migration', () => {
       'affine:divider': 1,
       'affine:embed': 1,
       'affine:code': 1,
-      'affine:surface': 4,
+      'affine:surface': 3,
     });
 
     const newElement = (
@@ -148,56 +148,6 @@ describe('migration', () => {
     assert.deepEqual(newElement?.toJSON(), {
       ...oldElement?.toJSON(),
       seed: newElement?.get('seed'),
-    });
-  });
-
-  test('migrate to new surface (add roughness)', async () => {
-    const doc = await loadBinary('legacy-surface-roughness');
-
-    const oldElement = (
-      (doc.getMap('space:page0').get('2198666175:1') as Y.Map<unknown>).get(
-        'elements'
-      ) as Y.Map<Y.Map<unknown>>
-    ).get('S9GeJ1xZMZ');
-
-    assert.deepEqual(oldElement?.toJSON(), {
-      type: 'shape',
-      xywh: '[-180.703125,773.0390625,150.55078125,217.70703125]',
-      shapeType: 'rect',
-      radius: 0,
-      filled: false,
-      fillColor: '--affine-palette-transparent',
-      strokeWidth: 4,
-      strokeColor: '--affine-palette-line-black',
-      strokeStyle: 'solid',
-      id: 'S9GeJ1xZMZ',
-      index: 'a1',
-      seed: 734905257,
-    });
-
-    tryMigrate(doc);
-    assert.deepEqual(doc.toJSON()['space:meta']['versions'], {
-      'affine:bookmark': 1,
-      'affine:paragraph': 1,
-      'affine:database': 1,
-      'affine:page': 2,
-      'affine:list': 1,
-      'affine:frame': 1,
-      'affine:divider': 1,
-      'affine:embed': 1,
-      'affine:code': 1,
-      'affine:surface': 4,
-    });
-
-    const newElement = (
-      (doc.getMap('space:page0').get('2198666175:1') as Y.Map<unknown>).get(
-        'elements'
-      ) as Y.Map<Y.Map<unknown>>
-    ).get('S9GeJ1xZMZ');
-
-    assert.deepEqual(newElement?.toJSON(), {
-      ...oldElement?.toJSON(),
-      roughness: newElement?.get('roughness'),
     });
   });
 });

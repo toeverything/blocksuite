@@ -229,56 +229,6 @@ const migrations: Migration[] = [
       yChildren.insert(0, [surfaceId]);
     },
   },
-  {
-    desc: 'add roughness property in shape element and connector element',
-    condition: doc => {
-      const yVersions = doc
-        .getMap('space:meta')
-        .get('versions') as Y.Map<number>;
-      if (!yVersions) return false;
-
-      const surfaceVersion = yVersions.get('affine:surface');
-      if (!surfaceVersion) {
-        throw new MigrationError('affine:surface version not found');
-      }
-      return surfaceVersion < 4;
-    },
-    migrate: doc => {
-      // @ts-ignore
-      const pageIds = doc
-        .getMap('space:meta')
-        .get('pages')
-        .map((a: Y.Map<unknown>) => a.get('id')) as string[];
-      const yVersions = doc
-        .getMap('space:meta')
-        .get('versions') as Y.Map<number>;
-      yVersions.set('affine:surface', 4);
-
-      for (const pageId of pageIds) {
-        const spaceId = `space:${pageId}`;
-        const yBlocks = doc.getMap(spaceId);
-
-        for (const yBlock of yBlocks.values()) {
-          if (yBlock.get('sys:flavour') === 'affine:surface') {
-            const elements = yBlock.get('elements') as Y.Map<Y.Map<unknown>>;
-            if (!elements) break;
-
-            for (const element of elements.values()) {
-              if (
-                element.get('type') === 'shape' ||
-                element.get('type') === 'connector'
-              ) {
-                if (!element.get('roughness')) {
-                  element.set('roughness', 2);
-                }
-              }
-            }
-            break;
-          }
-        }
-      }
-    },
-  },
 ];
 
 export function tryMigrate(doc: Y.Doc) {
