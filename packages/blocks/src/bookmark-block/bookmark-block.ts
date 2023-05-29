@@ -10,10 +10,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { registerService } from '../__internal__/service.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import { BookmarkBlockService } from './bookmark-service.js';
+import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
 import { DefaultIcon } from './images/icons.js';
-import { refreshBookmarkBlock } from './utils.js';
+import { reloadBookmarkBlock } from './utils.js';
 
 @customElement('affine-bookmark')
 export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
@@ -158,7 +159,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:bookmark', BookmarkBlockService);
-    refreshBookmarkBlock(this.model);
+    reloadBookmarkBlock(this.model);
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
     });
@@ -185,15 +186,18 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }, 100);
   }
 
-  private _onToolbarSelected: ToolbarActionCallback = type => {
-    if (type === 'caption') {
-      this._input.classList.add('caption-show');
-    }
+  private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
+    type => {
+      if (type === 'caption') {
+        this._input.classList.add('caption-show');
+      }
 
-    if (type === 'edit') {
-      this._showEditModal = true;
-    }
-  };
+      if (type === 'edit') {
+        this._showEditModal = true;
+      }
+
+      this._showToolbar = false;
+    };
   override render() {
     const { url, title, description, icon, image } = this.model;
 

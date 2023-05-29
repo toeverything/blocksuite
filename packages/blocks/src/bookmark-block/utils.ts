@@ -4,7 +4,7 @@ import type { BookmarkBlockModel, BookmarkProps } from './bookmark-model.js';
 import { defaultBookmarkProps } from './bookmark-model.js';
 
 // Result is boolean used to record whether the meta data is crawled
-export const refreshBookmarkBlock = async (
+export const reloadBookmarkBlock = async (
   model: BaseBlockModel<BookmarkBlockModel>,
   force = false
 ) => {
