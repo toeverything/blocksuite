@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { randomSeed } from 'roughjs/bin/math.js';
+import RoughJS from 'roughjs';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
@@ -193,7 +193,7 @@ export class SurfaceManager {
       ...properties,
       id,
       index: generateKeyBetween(this.indexes.max, null),
-      seed: randomSeed(),
+      seed: RoughJS.newSeed(),
     };
 
     this._transact(() => {
