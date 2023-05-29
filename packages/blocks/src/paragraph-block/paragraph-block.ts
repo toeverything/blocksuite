@@ -8,11 +8,10 @@ import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isPageMode } from '../__internal__/index.js';
-import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
@@ -29,7 +28,7 @@ function tipsPlaceholderPreventDefault(event: Event) {
 }
 
 interface Style {
-  [name: string]: string | undefined | null;
+  [name: string]: string;
 }
 
 function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
@@ -178,7 +177,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     }
   `;
 
-  @property()
+  @state()
   tipsPos = { top: '50%', transform: 'translateY(-50%)', left: '2px' };
 
   @state()
@@ -196,7 +195,9 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   };
 
   private _placeholderDisposables = new DisposableGroup();
-  private _richTextElement?: RichText | null;
+
+  @query('rich-text')
+  private _richTextElement?: HTMLElement;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -206,7 +207,6 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   }
 
   override firstUpdated() {
-    this._richTextElement = this.renderRoot?.querySelector('rich-text');
     this.model.propsUpdated.on(() => {
       this._updatePlaceholder();
       this.requestUpdate();
@@ -219,11 +219,13 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       this._tipsPlaceholderTemplate = html``;
       return;
     }
+
     if (this.model.type === 'text' && !this._isFocus) {
       // Text block placeholder only show when focus and empty
       this._tipsPlaceholderTemplate = html``;
       return;
     }
+
     if (this._richTextElement) {
       const parentRect =
         this._richTextElement.parentElement?.getBoundingClientRect() as DOMRect;
@@ -231,10 +233,13 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
       const relativeTop = rect.top - parentRect.top;
       const relativeLeft = rect.left - parentRect.left;
-      this.tipsPos.top = `${relativeTop}px`;
-      this.tipsPos.transform = '';
-      this.tipsPos.left = `${relativeLeft + 2}px`;
+      this.tipsPos = {
+        top: `${relativeTop}px`,
+        transform: '',
+        left: `${relativeLeft + 2}px`,
+      };
     }
+
     this._tipsPlaceholderTemplate = TipsPlaceholder(this.model, this.tipsPos);
   };
 
