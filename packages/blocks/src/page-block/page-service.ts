@@ -25,8 +25,12 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     return `${text}${childText}`;
   }
 
+  // todo we don't support link and database in page block title
   private _getAllSubTexts(block: SerializedBlock) {
-    const texts = block.text || [];
+    if (block.flavour === 'affine:database') {
+      return [];
+    }
+    const texts = (block.text || []).filter(text => !text.attributes?.link);
     if (block.children) {
       block.children.forEach(child => {
         texts.push(...this._getAllSubTexts(child));
@@ -44,10 +48,8 @@ export class PageBlockService extends BaseService<PageBlockModel> {
       (pastedBlocks[0].children.length === 0 ||
         pastedBlocks[0].flavour === 'affine:page')
     ) {
-      // todo we don't support link in page block title
-      const titles = this._getAllSubTexts(pastedBlocks[0]).filter(
-        text => !text.attributes?.link
-      );
+      const titles = this._getAllSubTexts(pastedBlocks[0]);
+
       (focusedBlockModel as PageBlockModel).title.applyDelta(titles);
       pastedBlocks = pastedBlocks.slice(1);
     }
