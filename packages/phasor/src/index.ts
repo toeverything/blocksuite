@@ -1,5 +1,7 @@
 /// <reference types="@blocksuite/global" />
-import './type.js';
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="./type.d.ts" />
+
 export { StrokeStyle, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export type {
   AttachedElement,
