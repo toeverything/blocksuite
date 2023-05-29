@@ -114,7 +114,30 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    document.addEventListener('keydown', this.modalKeyboardListener);
+    requestAnimationFrame(() => {
+      const titleInput = document.querySelector(
+        `#${this.id} input.title`
+      ) as HTMLInputElement;
+      titleInput?.focus();
+    });
   }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('keydown', this.modalKeyboardListener);
+  }
+
+  private modalKeyboardListener = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      this._onEnsure();
+      this.onCancel?.();
+    }
+    if (e.key === 'Escape') {
+      this.onCancel?.();
+    }
+  };
 
   private _onEnsure() {
     const titleInput = document.querySelector(
@@ -156,16 +179,20 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
             class="bookmark-input title"
             placeholder="Title"
             value=${this.model.title}
+            tabindex="1"
+            autofocus
           />
           <input
             type="text"
             class="bookmark-input description"
             placeholder="Description"
             value=${this.model.description}
+            tabindex="2"
           />
           <div class="bookmark-modal-footer">
             <div
               class="bookmark-ensure-button"
+              tabindex="3"
               @click=${() => {
                 this._onEnsure();
                 this.onCancel?.();
