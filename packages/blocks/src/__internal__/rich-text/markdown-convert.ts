@@ -1,5 +1,5 @@
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, isEqual, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
@@ -521,7 +521,9 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-  if (matchFlavours(model, ['affine:code'])) {
+  const isParagraphQuoteBlock = isEqual(model.type, 'quote');
+  const isCodeBlock = matchFlavours(model, ['affine:code']);
+  if (isParagraphQuoteBlock || isCodeBlock) {
     return ALLOW_DEFAULT;
   }
   let isConverted = false;
