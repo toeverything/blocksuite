@@ -294,8 +294,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       </div>
     </a>`;
 
+    if (!url) {
+      return createModal;
+    }
+
     return html`
-      ${createModal} ${editModal}
+      ${editModal}
       <div
         class="affine-bookmark-block-container"
         @mouseover="${this._onHover}"
