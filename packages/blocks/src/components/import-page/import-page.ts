@@ -243,8 +243,7 @@ export class ImportPage extends WithDisposable(LitElement) {
               const isHtml = fileName.endsWith('.html');
               const rootId = page.root?.id;
               const fetchFileHandler = async (url: string) => {
-                const fileName =
-                  folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
+                const fileName = folder + (folder ? '/' : '') + decodeURI(url);
                 return (
                   (await zipFile.file(fileName)?.async('blob')) || new Blob()
                 );
