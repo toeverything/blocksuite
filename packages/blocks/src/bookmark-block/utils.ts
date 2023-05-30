@@ -3,15 +3,16 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import type { BookmarkBlockModel, BookmarkProps } from './bookmark-model.js';
 import { defaultBookmarkProps } from './bookmark-model.js';
+
 // Result is boolean used to record whether the meta data is crawled
-export const reloadBookmarkBlock = async (
+export async function reloadBookmarkBlock(
   model: BaseBlockModel<BookmarkBlockModel>,
   bookmarkElement: BookmarkBlockComponent,
   force = false
-) => {
+) {
   // @ts-ignore
   if (window?.apis?.ui?.getBookmarkDataByLink) {
-    if ((model.hasCrawled || !model.url) && !force) {
+    if ((model.crawled || !model.url) && !force) {
       return;
     }
 
@@ -26,16 +27,16 @@ export const reloadBookmarkBlock = async (
     model.page.updateBlock(model, {
       ...metaData,
       url: model.url,
-      hasCrawled: true,
+      crawled: true,
     });
 
     bookmarkElement.loading = false;
   }
-};
+}
 
-export const cloneBookmarkProperties = (
+export function cloneBookmarkProperties(
   model: BaseBlockModel<BookmarkBlockModel>
-) => {
+) {
   return Object.keys(defaultBookmarkProps).reduce<BookmarkProps>(
     (props, key) => {
       props[key] = model[key];
@@ -43,4 +44,4 @@ export const cloneBookmarkProperties = (
     },
     {} as BookmarkProps
   );
-};
+}

@@ -17,7 +17,7 @@ type MetaData = {
 export type BookmarkProps = {
   url: string;
   caption?: string;
-  hasCrawled?: boolean;
+  crawled?: boolean;
 } & MetaData;
 
 export const defaultBookmarkProps: BookmarkProps = {
@@ -27,8 +27,9 @@ export const defaultBookmarkProps: BookmarkProps = {
   icon: '',
   image: '',
   caption: '',
-  hasCrawled: false,
+  crawled: false,
 };
+
 export const BookmarkBlockSchema = defineBlockSchema({
   flavour: 'affine:bookmark',
   props: (internal): BookmarkProps => defaultBookmarkProps,
