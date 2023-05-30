@@ -5,7 +5,7 @@ import { html, svg, type TemplateResult } from 'lit';
 function fontIcon(svg: TemplateResult<2>, baseSize = 20) {
   // assume 1em = 16px
   const size = baseSize / 16;
-  // Control Icons with Font Sizeexport const BlockHubRoundedRectangleIcon
+  // Control Icons with Font Size
   // Set the width and height to be 1em, which will be the font-size of its parent element
   // See https://css-tricks.com/control-icons-with-font-size/
   const fontIconStyle = `
