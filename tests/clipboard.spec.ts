@@ -6,11 +6,13 @@ import {
   activeFrameInEdgeless,
   addBasicRectShapeElement,
   captureHistory,
+  changeEdgelessFrameBackground,
   copyByKeyboard,
   cutByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getAllFrames,
   getRichTextBoundingBox,
   importMarkdown,
   initDatabaseColumn,
@@ -28,10 +30,12 @@ import {
   pressTab,
   resetHistory,
   selectAllByKeyboard,
+  selectFrameInEdgeless,
   setSelection,
   setVirgoSelection,
   SHORT_KEY,
   switchEditorMode,
+  triggerComponentToolbarAction,
   type,
   undoByClick,
   waitForVirgoStateUpdated,
@@ -40,6 +44,7 @@ import {
 import {
   assertBlockTypes,
   assertClipItems,
+  assertEdgelessFrameBackground,
   assertEdgelessSelectedRect,
   assertRichTexts,
   assertSelection,
@@ -685,6 +690,30 @@ test(scoped`copy when text frame active in edgeless`, async ({ page }) => {
   await type(page, '555');
   await pasteByKeyboard(page, false);
   await assertText(page, '5551234');
+});
+
+test(scoped`paste frame block with background`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, '1234');
+
+  await switchEditorMode(page);
+  await selectFrameInEdgeless(page, ids.frameId);
+
+  await triggerComponentToolbarAction(page, 'changeFrameColor');
+  const color = '--affine-tag-blue';
+  await changeEdgelessFrameBackground(page, color);
+  await assertEdgelessFrameBackground(page, ids.frameId, color);
+
+  await copyByKeyboard(page);
+
+  await page.mouse.move(0, 0);
+  await pasteByKeyboard(page, false);
+  const frames = await getAllFrames(page);
+  await Array.from(frames).map(async frame => {
+    await assertEdgelessFrameBackground(page, frame.id, color);
+  });
 });
 
 test(scoped`copy and paste to selection block selection`, async ({ page }) => {

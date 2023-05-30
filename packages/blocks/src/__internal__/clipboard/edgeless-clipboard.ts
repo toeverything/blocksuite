@@ -174,7 +174,7 @@ export class EdgelessClipboard implements Clipboard {
     oldCommonBound: Bound
   ) {
     const frameIds = await Promise.all(
-      frames.map(async ({ xywh, children }) => {
+      frames.map(async ({ xywh, children, background }) => {
         const [oldX, oldY, oldW, oldH] = xywh
           ? deserializeXYWH(xywh)
           : [
@@ -193,6 +193,7 @@ export class EdgelessClipboard implements Clipboard {
           'affine:frame',
           {
             xywh: newXywh,
+            background,
           },
           this._page.root?.id
         );
