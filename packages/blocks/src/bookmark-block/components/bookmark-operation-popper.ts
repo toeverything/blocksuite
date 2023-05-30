@@ -111,9 +111,8 @@ const operations: Operation[] = [
         model,
         getBlockElementByModel(model) as BookmarkBlockComponent,
         true
-      ).then(() => {
-        callback?.('reload');
-      });
+      );
+      callback?.('reload');
     },
   },
   {
@@ -178,8 +177,6 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
             height="32px"
             class="menu-item ${type}"
             @click=${() => {
-              console.log('this.onSelected', this.onSelected);
-
               action(this.model, this.onSelected, this);
             }}
           >
