@@ -122,7 +122,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
       const titleInput = document.querySelector(
         `#${this.id} input.title`
       ) as HTMLInputElement;
-      titleInput?.focus();
+      titleInput.setSelectionRange(0, titleInput.value.length);
     });
   }
 
