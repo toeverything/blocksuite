@@ -97,6 +97,12 @@ const styles = css`
   .select-selected > .close-icon {
     display: flex;
     align-items: center;
+    fill: var(--affine-icon-color)
+  }
+
+  .select-selected > .close-icon:hover {
+    cursor: pointer;
+    background: var(--affine-hover-color);
   }
 
   .select-option-new {
