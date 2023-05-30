@@ -25,7 +25,7 @@ const autoIdentifyLink = (
   }
 
   const linkPattern =
-    /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+    /.*\.(com|cn|org|edu|net|gov|mil|info|biz|io|me)(\/\S*)?$/i;
 
   if (context.attributes?.link) {
     const linkDeltaInfo = editor.deltaService
