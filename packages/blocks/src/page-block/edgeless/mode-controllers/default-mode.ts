@@ -130,7 +130,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     }
 
     // handle single frame block click
-    if (selected.length === 1 && isTopLevelBlock(element)) {
+    if (!e.keys.shift && selected.length === 1 && isTopLevelBlock(element)) {
       if (
         (selected[0] === element && !active) ||
         (active && selected[0] !== element)
