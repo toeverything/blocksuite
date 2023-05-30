@@ -58,7 +58,7 @@ export class HtmlParser {
   ): Promise<Blob | null | undefined> => {
     if (this._customFetchFileHandler) {
       const customBlob = await this._customFetchFileHandler(fileName);
-      if (customBlob) {
+      if (customBlob && customBlob.size > 0) {
         return customBlob;
       }
     }
