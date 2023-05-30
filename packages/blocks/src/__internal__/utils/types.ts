@@ -220,6 +220,7 @@ export type SerializedBlock = {
   image?: string;
   url?: string;
   hasCrawled?: boolean;
+  background?: string;
 };
 
 export type EmbedBlockDoubleClickData = {
