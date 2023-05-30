@@ -199,6 +199,7 @@ const styles = css`
   }
 
   .block-hub-icon-container[selected='true'] {
+    background: var(--affine-hover-color);
   }
 
   .block-hub-icon-container:hover {
