@@ -220,6 +220,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     type => {
       if (type === 'caption') {
         this._input.classList.add('caption-show');
+        requestAnimationFrame(() => {
+          this._input.focus();
+        });
       }
 
       if (type === 'edit') {
