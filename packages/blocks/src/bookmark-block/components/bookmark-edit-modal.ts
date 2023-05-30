@@ -86,7 +86,7 @@ export const bookmarkModalStyles = html`
       justify-content: flex-end;
       margin-top: 40px;
     }
-    .bookmark-ensure-button {
+    .bookmark-confirm-button {
       padding: 4px 20px;
       height: 32px;
       display: flex;
@@ -107,6 +107,8 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   model!: BaseBlockModel<BookmarkBlockModel>;
   @property()
   onCancel?: () => void;
+  @property()
+  onConfirm?: () => void;
 
   override get id() {
     return `bookmark-modal-${this.model.id.split(':')[0]}`;
@@ -115,31 +117,31 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    document.addEventListener('keydown', this.modalKeyboardListener);
+    document.addEventListener('keydown', this._modalKeyboardListener);
     requestAnimationFrame(() => {
       const titleInput = document.querySelector(
         `#${this.id} input.title`
       ) as HTMLInputElement;
-      titleInput?.focus();
+      titleInput.focus();
+      titleInput.setSelectionRange(0, titleInput.value.length);
     });
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener('keydown', this.modalKeyboardListener);
+    document.removeEventListener('keydown', this._modalKeyboardListener);
   }
 
-  private modalKeyboardListener = (e: KeyboardEvent) => {
+  private _modalKeyboardListener = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      this._onEnsure();
-      this.onCancel?.();
+      this._onConfirm();
     }
     if (e.key === 'Escape') {
       this.onCancel?.();
     }
   };
 
-  private _onEnsure() {
+  private _onConfirm() {
     const titleInput = document.querySelector(
       `#${this.id} input.title`
     ) as HTMLInputElement;
@@ -151,6 +153,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
       title: titleInput.value,
       description: descInput.value,
     });
+    this.onConfirm?.();
   }
 
   override render() {
@@ -178,24 +181,22 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
             type="text"
             class="bookmark-input title"
             placeholder="Title"
-            value=${this.model.title}
+            value=${this.model.title || 'Bookmark'}
             tabindex="1"
-            autofocus
           />
           <input
             type="text"
             class="bookmark-input description"
             placeholder="Description"
-            value=${this.model.description}
+            value=${this.model.description || this.model.url}
             tabindex="2"
           />
           <div class="bookmark-modal-footer">
             <div
-              class="bookmark-ensure-button"
+              class="bookmark-confirm-button"
               tabindex="3"
               @click=${() => {
-                this._onEnsure();
-                this.onCancel?.();
+                this._onConfirm();
               }}
             >
               Save
