@@ -47,7 +47,12 @@ export const showFormatQuickBar = async ({
     return;
   }
   blockRange.models = blockRange.models.filter(model =>
-    matchFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code'])
+    matchFlavours(model, [
+      'affine:paragraph',
+      'affine:list',
+      'affine:code',
+      'affine:database',
+    ])
   );
   if (blockRange.models.length === 0) {
     return;

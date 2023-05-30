@@ -12,4 +12,5 @@ export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
   strokeWidth: 4,
   strokeColor: '#000000',
   strokeStyle: StrokeStyle.Solid,
+  roughness: 2,
 };

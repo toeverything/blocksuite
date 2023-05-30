@@ -1,3 +1,4 @@
+import type { SerializedBlock } from '@blocksuite/blocks';
 import { debug } from '@blocksuite/global/debug';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
@@ -80,6 +81,8 @@ export class Page extends Space<FlatBlockMap> {
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
+    copied: new Slot(),
+    pasted: new Slot<SerializedBlock[]>(),
   };
 
   constructor({
@@ -377,56 +380,134 @@ export class Page extends Space<FlatBlockMap> {
     return id;
   }
 
+  private _populateParentChildrenMap(
+    blocksToMove: BaseBlockModel[],
+    childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
+    newParent: BaseBlockModel
+  ) {
+    blocksToMove.forEach(block => {
+      const parentBlock = this.getParent(block);
+
+      if (!parentBlock) {
+        throw new Error("Can't find parent block for the current block");
+      }
+
+      this.schema.validate(block.flavour, newParent.flavour);
+
+      const childrenBlocksOfCurrentParent =
+        childBlocksPerParent.get(parentBlock);
+      if (childrenBlocksOfCurrentParent) {
+        if (
+          this.getNextSibling(
+            childrenBlocksOfCurrentParent[
+              childrenBlocksOfCurrentParent.length - 1
+            ]
+          ) !== block
+        ) {
+          throw new Error(
+            'The blocks to move are not contiguous under their parent'
+          );
+        }
+        childrenBlocksOfCurrentParent.push(block);
+      } else {
+        childBlocksPerParent.set(parentBlock, [block]);
+      }
+    });
+  }
+
+  private _repositionBlocks(
+    childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
+    targetParentChildren: Y.Array<string>,
+    targetSibling: BaseBlockModel | null,
+    shouldInsertBeforeSibling: boolean,
+    insertionOffset: number
+  ) {
+    for (const [parentBlock, blocksToMove] of childBlocksPerParent) {
+      const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
+      const sourceParentChildren = sourceParentBlock.get(
+        'sys:children'
+      ) as Y.Array<string>;
+
+      // Get the IDs of blocks to move
+      const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
+
+      // Remove the blocks from their current parent
+      const startIndex = sourceParentChildren
+        .toArray()
+        .findIndex(id => id === idsOfBlocksToMove[0]);
+      sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
+
+      // Determine the index at which to insert blocks in the new parent
+      let insertIndex = 0;
+      if (targetSibling) {
+        insertIndex = targetParentChildren
+          .toArray()
+          .findIndex(id => id === targetSibling.id);
+      }
+
+      // Insert the blocks at the correct position under their new parent
+      if (shouldInsertBeforeSibling) {
+        targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
+      } else {
+        targetParentChildren.insert(
+          insertIndex + insertionOffset,
+          idsOfBlocksToMove
+        );
+        insertionOffset += idsOfBlocksToMove.length;
+      }
+    }
+  }
+
+  // Moves blocks to a new parent. Optionally inserts blocks before a given sibling.
   @debug('CRUD')
   moveBlocks(
-    blocks: BaseBlockModel[],
+    blocksToMove: BaseBlockModel[],
     newParent: BaseBlockModel,
-    newSibling: BaseBlockModel | null = null,
-    insertBeforeSibling = true
+    targetSibling: BaseBlockModel | null = null,
+    shouldInsertBeforeSibling = true
   ) {
     if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
+      console.error('Cannot modify data in read-only mode');
       return;
     }
 
-    const firstBlock = blocks[0];
-    const currentParent = this.getParent(firstBlock);
-
-    // the blocks must have the same parent (siblings)
-    if (blocks.some(block => this.getParent(block) !== currentParent)) {
-      console.error('the blocks must have the same parent');
+    if (!newParent) {
+      throw new Error("Can't find new parent block");
     }
 
-    if (currentParent === null || newParent === null) {
-      throw new Error("Can't find parent model");
-    }
+    // A map to store parent block and their respective child blocks
+    const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
 
-    blocks.forEach(block => {
-      this.schema.validate(block.flavour, newParent.flavour);
-    });
+    this._populateParentChildrenMap(
+      blocksToMove,
+      childBlocksPerParent,
+      newParent
+    );
 
     this.transact(() => {
-      const yParentA = this._yBlocks.get(currentParent.id) as YBlock;
-      const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
-      const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
-      yChildrenA.delete(idx, blocks.length);
-      const yParentB = this._yBlocks.get(newParent.id) as YBlock;
-      const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
+      const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
+      const targetParentChildren = targetParentBlock.get(
+        'sys:children'
+      ) as Y.Array<string>;
 
-      let nextIdx = 0;
-      if (newSibling) {
-        nextIdx = yChildrenB.toArray().findIndex(id => id === newSibling.id);
-      }
+      // To be used for insertion after the target sibling
+      const insertionOffset = 1;
 
-      const ids = blocks.map(block => block.id);
-      if (insertBeforeSibling) {
-        yChildrenB.insert(nextIdx, ids);
-      } else {
-        yChildrenB.insert(nextIdx + 1, ids);
-      }
+      // Reposition blocks under their new parent
+      this._repositionBlocks(
+        childBlocksPerParent,
+        targetParentChildren,
+        targetSibling,
+        shouldInsertBeforeSibling,
+        insertionOffset
+      );
     });
 
-    currentParent.childrenUpdated.emit();
+    // Emit event to indicate that the children of these blocks have been updated
+    Array.from(childBlocksPerParent.keys()).forEach(parent =>
+      parent.childrenUpdated.emit()
+    );
+
     newParent.childrenUpdated.emit();
   }
 

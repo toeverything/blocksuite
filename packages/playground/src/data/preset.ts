@@ -2,6 +2,7 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '@blocksuite/blocks';
+import { StrokeStyle } from '@blocksuite/phasor';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { addShapeElement, type InitFn } from './utils';
@@ -38,11 +39,12 @@ export const preset: InitFn = (workspace: Workspace, id: string) => {
   const frameId = page.addBlock('affine:frame', {}, pageBlockId);
   // Import preset markdown content inside frame block
   const contentParser = new window.ContentParser(page);
+
   addShapeElement(page, surfaceBlockId, {
     id: '0',
     index: 'a0',
     type: 'shape',
-    xywh: '[0,0,100,100]',
+    xywh: '[0,-100,100,100]',
     seed: Math.floor(Math.random() * 2 ** 31),
 
     shapeType: 'rect',
@@ -52,7 +54,8 @@ export const preset: InitFn = (workspace: Workspace, id: string) => {
     fillColor: DEFAULT_SHAPE_FILL_COLOR,
     strokeWidth: 4,
     strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    strokeStyle: 'solid',
+    strokeStyle: StrokeStyle.Solid,
+    roughness: 2,
   });
   contentParser.importMarkdown(presetMarkdown, frameId);
 };

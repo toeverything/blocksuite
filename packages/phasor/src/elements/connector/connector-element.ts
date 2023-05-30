@@ -28,6 +28,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.yMap.get('strokeStyle') as IConnector['strokeStyle'];
   }
 
+  get roughness() {
+    return (this.yMap.get('roughness') as IConnector['roughness']) ?? 2;
+  }
+
   get startElement() {
     return this.yMap.get('startElement') as IConnector['startElement'];
   }
@@ -41,7 +45,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
-    const { seed, strokeStyle, color, lineWidth, controllers } = this;
+    const { seed, strokeStyle, color, roughness, lineWidth, controllers } =
+      this;
     const realStrokeColor = this.computedValue(color);
 
     if (this.mode === ConnectorMode.Orthogonal) {
@@ -49,7 +54,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
         controllers.map(controller => [controller.x, controller.y]),
         {
           seed,
-          roughness: 2,
+          roughness,
           strokeLineDash:
             strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
           stroke: realStrokeColor,
@@ -67,7 +72,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
         ],
         {
           seed,
-          roughness: 2,
+          roughness,
           strokeLineDash:
             strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
           stroke: realStrokeColor,
@@ -93,7 +98,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ],
       {
         seed,
-        roughness: 2,
+        roughness,
         strokeLineDash:
           strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
         stroke: realStrokeColor,

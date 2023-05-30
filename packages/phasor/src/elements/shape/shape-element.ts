@@ -40,6 +40,11 @@ export class ShapeElement extends SurfaceElement<IShape> {
     return strokeStyle;
   }
 
+  get roughness() {
+    const roughness = (this.yMap.get('roughness') as IShape['roughness']) ?? 2;
+    return roughness;
+  }
+
   get realStrokeColor() {
     return this.computedValue(this.strokeColor);
   }

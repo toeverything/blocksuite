@@ -20,7 +20,6 @@ import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
-
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export interface IPoint {
@@ -214,6 +213,13 @@ export type SerializedBlock = {
   };
   // frame block
   xywh?: string;
+  // bookmark block
+  title?: string;
+  description?: string;
+  icon?: string;
+  image?: string;
+  url?: string;
+  hasCrawled?: boolean;
 };
 
 export type EmbedBlockDoubleClickData = {
