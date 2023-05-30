@@ -47,6 +47,10 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       overflow: hidden;
       flex-shrink: 0;
     }
+    .affine-bookmark-banner.shadow {
+      box-shadow: var(--affine-shadow-1);
+    }
+
     .affine-bookmark-banner img,
     .affine-bookmark-banner svg {
       width: 140px;
@@ -292,7 +296,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         <div class="affine-bookmark-description">${description || url}</div>
         <div class="affine-bookmark-url">${url}</div>
       </div>
-      <div class="affine-bookmark-banner">
+      <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
         ${image ? html`<img src="${image}" alt="image" />` : DefaultBanner}
       </div>
     </a>`;

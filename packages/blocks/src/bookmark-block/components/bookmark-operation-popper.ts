@@ -133,6 +133,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
       border-radius: 8px 8px 8px 0;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
     }
     .menu-item {
       display: flex;
