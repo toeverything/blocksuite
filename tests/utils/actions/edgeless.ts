@@ -298,6 +298,12 @@ export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
   return bound;
 }
 
+export async function getAllFrames(page: Page) {
+  return await page.evaluate(() => {
+    return document.querySelectorAll('affine-frame');
+  });
+}
+
 export async function activeFrameInEdgeless(page: Page, frameId: string) {
   const bound = await getFrameBoundBoxInEdgeless(page, frameId);
   await page.mouse.dblclick(bound.x + 8, bound.y + 8);
