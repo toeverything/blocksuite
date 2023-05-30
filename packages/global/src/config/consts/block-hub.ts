@@ -17,7 +17,7 @@ import {
   QuoteIcon,
   TextIcon,
   TodoIcon,
-} from '../icons.js';
+} from '../icons/index.js';
 import { SHORT_KEY } from './platform.js';
 
 export type BlockConfig<
