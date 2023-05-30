@@ -16,10 +16,12 @@ import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 export class BookmarkCreateModal extends WithDisposable(LitElement) {
   @property()
   model!: BaseBlockModel<BookmarkBlockModel>;
+
   @property()
   onCancel?: () => void;
+
   @property()
-  onSure?: () => void;
+  onConfirm?: () => void;
 
   override get id() {
     return `bookmark-create-modal-${this.model.id.split(':')[0]}`;
@@ -45,14 +47,14 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
 
   private _modalKeyboardListener = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      this._onSure();
+      this._onConfirm();
     }
     if (e.key === 'Escape') {
       this.onCancel?.();
     }
   };
 
-  private _onSure() {
+  private _onConfirm() {
     const linkInput = document.querySelector(
       `#${this.id} input.link`
     ) as HTMLInputElement;
@@ -65,7 +67,7 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
     this.model.page.updateBlock(this.model, {
       url: linkInput.value,
     });
-    this.onSure?.();
+    this.onConfirm?.();
   }
 
   override render() {
@@ -104,10 +106,8 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
           <div class="bookmark-modal-footer">
             <div
               tabindex="2"
-              class="bookmark-sure-button"
-              @click=${() => {
-                this._onSure();
-              }}
+              class="bookmark-confirm-button"
+              @click=${() => this._onConfirm()}
             >
               Confirm
             </div>

@@ -86,7 +86,7 @@ export const bookmarkModalStyles = html`
       justify-content: flex-end;
       margin-top: 40px;
     }
-    .bookmark-sure-button {
+    .bookmark-confirm-button {
       padding: 4px 20px;
       height: 32px;
       display: flex;
@@ -108,7 +108,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   @property()
   onCancel?: () => void;
   @property()
-  onSure?: () => void;
+  onConfirm?: () => void;
 
   override get id() {
     return `bookmark-modal-${this.model.id.split(':')[0]}`;
@@ -134,14 +134,14 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
 
   private _modalKeyboardListener = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      this._onSure();
+      this._onConfirm();
     }
     if (e.key === 'Escape') {
       this.onCancel?.();
     }
   };
 
-  private _onSure() {
+  private _onConfirm() {
     const titleInput = document.querySelector(
       `#${this.id} input.title`
     ) as HTMLInputElement;
@@ -153,7 +153,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
       title: titleInput.value,
       description: descInput.value,
     });
-    this.onSure?.();
+    this.onConfirm?.();
   }
 
   override render() {
@@ -193,10 +193,10 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           />
           <div class="bookmark-modal-footer">
             <div
-              class="bookmark-sure-button"
+              class="bookmark-confirm-button"
               tabindex="3"
               @click=${() => {
-                this._onSure();
+                this._onConfirm();
               }}
             >
               Save

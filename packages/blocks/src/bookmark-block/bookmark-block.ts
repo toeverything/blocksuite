@@ -244,7 +244,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           .onCancel=${() => {
             this._showCreateModal = false;
           }}
-          .onSure=${() => {
+          .onConfirm=${() => {
             reloadBookmarkBlock(this.model, this, true);
             this._showCreateModal = false;
           }}
@@ -256,7 +256,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           .onCancel=${() => {
             this._showEditModal = false;
           }}
-          .onSure=${() => {
+          .onConfirm=${() => {
             this._showEditModal = false;
           }}
         ></bookmark-edit-modal>`
