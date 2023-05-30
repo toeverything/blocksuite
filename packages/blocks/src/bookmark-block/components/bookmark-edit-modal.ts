@@ -122,6 +122,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
       const titleInput = document.querySelector(
         `#${this.id} input.title`
       ) as HTMLInputElement;
+      titleInput.focus();
       titleInput.setSelectionRange(0, titleInput.value.length);
     });
   }
@@ -180,15 +181,14 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
             type="text"
             class="bookmark-input title"
             placeholder="Title"
-            value=${this.model.title}
+            value=${this.model.title || 'Bookmark'}
             tabindex="1"
-            autofocus
           />
           <input
             type="text"
             class="bookmark-input description"
             placeholder="Description"
-            value=${this.model.description}
+            value=${this.model.description || this.model.url}
             tabindex="2"
           />
           <div class="bookmark-modal-footer">
