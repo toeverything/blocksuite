@@ -86,7 +86,7 @@ export const bookmarkModalStyles = html`
       justify-content: flex-end;
       margin-top: 40px;
     }
-    .bookmark-ensure-button {
+    .bookmark-sure-button {
       padding: 4px 20px;
       height: 32px;
       display: flex;
@@ -107,6 +107,8 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   model!: BaseBlockModel<BookmarkBlockModel>;
   @property()
   onCancel?: () => void;
+  @property()
+  onSure?: () => void;
 
   override get id() {
     return `bookmark-modal-${this.model.id.split(':')[0]}`;
@@ -115,7 +117,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    document.addEventListener('keydown', this.modalKeyboardListener);
+    document.addEventListener('keydown', this._modalKeyboardListener);
     requestAnimationFrame(() => {
       const titleInput = document.querySelector(
         `#${this.id} input.title`
@@ -126,20 +128,19 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener('keydown', this.modalKeyboardListener);
+    document.removeEventListener('keydown', this._modalKeyboardListener);
   }
 
-  private modalKeyboardListener = (e: KeyboardEvent) => {
+  private _modalKeyboardListener = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      this._onEnsure();
-      this.onCancel?.();
+      this._onSure();
     }
     if (e.key === 'Escape') {
       this.onCancel?.();
     }
   };
 
-  private _onEnsure() {
+  private _onSure() {
     const titleInput = document.querySelector(
       `#${this.id} input.title`
     ) as HTMLInputElement;
@@ -151,6 +152,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
       title: titleInput.value,
       description: descInput.value,
     });
+    this.onSure?.();
   }
 
   override render() {
@@ -191,11 +193,10 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           />
           <div class="bookmark-modal-footer">
             <div
-              class="bookmark-ensure-button"
+              class="bookmark-sure-button"
               tabindex="3"
               @click=${() => {
-                this._onEnsure();
-                this.onCancel?.();
+                this._onSure();
               }}
             >
               Save

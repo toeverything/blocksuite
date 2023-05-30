@@ -18,6 +18,8 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
   model!: BaseBlockModel<BookmarkBlockModel>;
   @property()
   onCancel?: () => void;
+  @property()
+  onSure?: () => void;
 
   override get id() {
     return `bookmark-create-modal-${this.model.id.split(':')[0]}`;
@@ -32,9 +34,25 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
       ) as HTMLInputElement;
       linkInput.focus();
     });
+
+    document.addEventListener('keydown', this._modalKeyboardListener);
   }
 
-  private _onEnsure() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('keydown', this._modalKeyboardListener);
+  }
+
+  private _modalKeyboardListener = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      this._onSure();
+    }
+    if (e.key === 'Escape') {
+      this.onCancel?.();
+    }
+  };
+
+  private _onSure() {
     const linkInput = document.querySelector(
       `#${this.id} input.link`
     ) as HTMLInputElement;
@@ -47,7 +65,7 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
     this.model.page.updateBlock(this.model, {
       url: linkInput.value,
     });
-    this.onCancel?.();
+    this.onSure?.();
   }
 
   override render() {
@@ -77,6 +95,7 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
             Create a Bookmark that previews a link in card view.
           </div>
           <input
+            tabindex="1"
             type="text"
             class="bookmark-input link"
             placeholder="Input in https://..."
@@ -84,9 +103,10 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
 
           <div class="bookmark-modal-footer">
             <div
-              class="bookmark-ensure-button"
+              tabindex="2"
+              class="bookmark-sure-button"
               @click=${() => {
-                this._onEnsure();
+                this._onSure();
               }}
             >
               Confirm

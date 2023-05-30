@@ -13,7 +13,7 @@ import { BookmarkBlockService } from './bookmark-service.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
-import { DefaultIcon } from './images/icons.js';
+import { DefaultIcon, LoadingBanner } from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -37,6 +37,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       color: var(--affine-text-primary-color);
       overflow: hidden;
       line-height: calc(1em + 4px);
+      position: relative;
     }
     .affine-bookmark-banner {
       width: 140px;
@@ -74,6 +75,10 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       height: 18px;
       margin-right: 4px;
       color: var(--affine-text-secondary-color);
+      flex-shrink: 0;
+    }
+    .affine-bookmark-icon.disable {
+      color: var(--affine-placeholder-color);
       flex-shrink: 0;
     }
     .affine-bookmark-icon img {
@@ -119,6 +124,17 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     .affine-bookmark-caption.caption-show {
       display: inline-block;
     }
+    .affine-bookmark-loading {
+      width: 100%;
+      height: 112px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-hover-color);
+      border: 3px solid var(--affine-background-secondary-color);
+      color: var(--affine-placeholder-color);
+    }
   `;
 
   slots = {
@@ -140,7 +156,18 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   @state()
   private _caption!: string;
 
+  @state()
+  private _isLoading = false;
+
   private _timer: ReturnType<typeof setTimeout> | null = null;
+
+  set loading(value: boolean) {
+    this._isLoading = value;
+  }
+
+  get loading() {
+    return this._isLoading;
+  }
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -159,7 +186,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:bookmark', BookmarkBlockService);
-    reloadBookmarkBlock(this.model);
+    reloadBookmarkBlock(this.model, this);
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
     });
@@ -177,6 +204,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   private _onHover() {
+    if (this._isLoading) {
+      return;
+    }
     this._showToolbar = true;
     this._timer && clearTimeout(this._timer);
   }
@@ -207,12 +237,19 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           .onCancel=${() => {
             this._showCreateModal = false;
           }}
+          .onSure=${() => {
+            reloadBookmarkBlock(this.model, this, true);
+            this._showCreateModal = false;
+          }}
         ></bookmark-create-modal>`
       : nothing;
     const editModal = this._showEditModal
       ? html`<bookmark-edit-modal
           .model=${this.model}
           .onCancel=${() => {
+            this._showEditModal = false;
+          }}
+          .onSure=${() => {
             this._showEditModal = false;
           }}
         ></bookmark-edit-modal>`
@@ -224,6 +261,39 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         ></bookmark-toolbar>`
       : nothing;
 
+    const loading = this._isLoading
+      ? html`<div class="affine-bookmark-loading">
+          <div class="affine-bookmark-title">
+            <div class="affine-bookmark-icon disable">${DefaultIcon}</div>
+            <div class="affine-bookmark-title-content">Embedding</div>
+          </div>
+          <div class="affine-bookmark-banner">${LoadingBanner}</div>
+        </div>`
+      : nothing;
+
+    const linkCard = html`<a
+      href="${url}"
+      target="_blank"
+      class="affine-bookmark-link"
+    >
+      <div class="affine-bookmark-content-wrapper">
+        <div class="affine-bookmark-title">
+          <div class="affine-bookmark-icon">
+            ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
+          </div>
+          <div class="affine-bookmark-title-content">
+            ${title || 'Bookmark'}
+          </div>
+        </div>
+
+        <div class="affine-bookmark-description">${description || url}</div>
+        <div class="affine-bookmark-url">${url}</div>
+      </div>
+      <div class="affine-bookmark-banner">
+        ${image ? html`<img src="${image}" alt="image" />` : DefaultBanner}
+      </div>
+    </a>`;
+
     return html`
       ${createModal} ${editModal}
       <div
@@ -231,26 +301,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         @mouseover="${this._onHover}"
         @mouseout="${this._onHoverOut}"
       >
-        ${toolbar}
-        <a href="${url}" target="_blank" class="affine-bookmark-link">
-          <div class="affine-bookmark-content-wrapper">
-            <div class="affine-bookmark-title">
-              <div class="affine-bookmark-icon">
-                ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
-              </div>
-              <div class="affine-bookmark-title-content">
-                ${title || 'Bookmark'}
-              </div>
-            </div>
-
-            <div class="affine-bookmark-description">${description || url}</div>
-            <div class="affine-bookmark-url">${url}</div>
-          </div>
-          <div class="affine-bookmark-banner">
-            ${image ? html`<img src="${image}" alt="image" />` : DefaultBanner}
-          </div>
-        </a>
-
+        ${toolbar} ${this._isLoading ? loading : linkCard}
         <input
           .disabled=${this.model.page.readonly}
           placeholder="Write a caption"

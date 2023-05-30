@@ -7,6 +7,8 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../..//components/toast.js';
 import { copyBlocks } from '../../__internal__/clipboard/index.js';
+import { getBlockElementByModel } from '../../__internal__/index.js';
+import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
 import {
   CopyIcon,
@@ -15,6 +17,7 @@ import {
   RefreshIcon,
 } from '../images/icons.js';
 import { cloneBookmarkProperties, reloadBookmarkBlock } from '../utils.js';
+
 export type OperationMenuPopper = {
   element: BookmarkOperationMenu;
   dispose: () => void;
@@ -104,7 +107,11 @@ const operations: Operation[] = [
     icon: RefreshIcon,
     label: 'Reload',
     action: (model, callback) => {
-      reloadBookmarkBlock(model, true).then(() => {
+      reloadBookmarkBlock(
+        model,
+        getBlockElementByModel(model) as BookmarkBlockComponent,
+        true
+      ).then(() => {
         callback?.('reload');
       });
     },
@@ -147,6 +154,9 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
 
   @property()
   model!: BaseBlockModel;
+
+  @property()
+  root!: BookmarkBlockComponent;
 
   @property()
   onSelected?: MenuActionCallback;
