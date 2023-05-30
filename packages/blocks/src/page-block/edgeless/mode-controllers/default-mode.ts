@@ -122,9 +122,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
     const { selected, active } = this.state;
-
+    this._edgeless.clearSelectedBlocks();
     // click the inner area of active text and note element
     if (active && selected.length === 1 && selected[0] === element) {
+      handleNativeRangeClick(this._page, e);
       return;
     }
 
@@ -139,7 +140,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         // then the currently clicked frameBlock should also be in an active state when selected.
         this._setSelectionState([element], true);
         this._edgeless.slots.selectedBlocksUpdated.emit([]);
-        handleNativeRangeClick(this._page, e);
         return;
       }
     }
