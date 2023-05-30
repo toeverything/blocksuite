@@ -51,13 +51,11 @@ function ResizeHandle(
     onPointerDown && onPointerDown(e, handleDirection);
   };
 
-  return html`
-    <div
-      aria-label=${`handle-${handleDirection}`}
-      style=${styleMap(style)}
-      @pointerdown=${handlerPointerDown}
-    ></div>
-  `;
+  return html`<div
+    aria-label=${`handle-${handleDirection}`}
+    style=${styleMap(style)}
+    @pointerdown=${handlerPointerDown}
+  ></div>`;
 }
 
 export type ResizeMode = 'corner' | 'edge' | 'none';

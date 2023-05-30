@@ -5,7 +5,6 @@ import type {
   CssVariableName,
   DatabaseBlockModel,
   ListType,
-  SerializedBlock,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
