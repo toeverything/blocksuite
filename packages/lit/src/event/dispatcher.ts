@@ -22,7 +22,7 @@ const bypassEventNames = [
   'wheel',
 ] as const;
 
-const globalEventNames = ['selectionChange'] as const;
+const globalEventNames = ['selectionChange', 'virgo-vrange-updated'] as const;
 
 const eventNames = [
   'click',
@@ -107,7 +107,6 @@ export class UIEventDispatcher {
         this.run(eventName, UIEventStateContext.from(new UIEventState(e)));
       });
     });
-
     this._pointerControl.listen();
     this._keyboardControl.listen();
   }
