@@ -235,22 +235,18 @@ export class EdgelessChangeConnectorButton extends LitElement {
   }
 
   private _setShapeStrokeWidth(lineWidth: number) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'connector'>(ele.id, {
-          lineWidth,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'connector'>(ele.id, {
+        lineWidth,
       });
     });
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'connector'>(ele.id, {
-          strokeStyle,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'connector'>(ele.id, {
+        strokeStyle,
       });
     });
     this._forceUpdateSelection();

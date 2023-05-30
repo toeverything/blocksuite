@@ -253,45 +253,37 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeFillColor(color: CssVariableName) {
     const filled = !isTransparent(color);
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          filled,
-          fillColor: color,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        filled,
+        fillColor: color,
       });
     });
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeColor(color: CssVariableName) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeColor: color,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        strokeColor: color,
       });
     });
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeWidth(strokeWidth: number) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeWidth,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        strokeWidth,
       });
     });
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeStyle,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        strokeStyle,
       });
     });
     this._forceUpdateSelection();
