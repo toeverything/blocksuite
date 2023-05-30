@@ -208,12 +208,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   private _onHover() {
-    if (this._isLoading) {
-      return;
-    }
+    if (this._isLoading) return;
+
     this._showToolbar = true;
     this._timer && clearTimeout(this._timer);
   }
+
   private _onHoverOut() {
     this._timer = setTimeout(() => {
       this._showToolbar = false;
@@ -235,6 +235,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
       this._showToolbar = false;
     };
+
   override render() {
     const { url, title, description, icon, image } = this.model;
 
