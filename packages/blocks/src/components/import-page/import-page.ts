@@ -123,7 +123,7 @@ export class ImportPage extends WithDisposable(LitElement) {
   private async _importFile(
     fileExtension: string,
     needLoadingHandler: (files: File[]) => Promise<boolean>,
-    parseContentHandler: (files: File) => Promise<string[]>
+    parseContentHandler: (file: File) => Promise<string[]>
   ) {
     this.hidden = true;
     const files = await this._selectFile(fileExtension);
