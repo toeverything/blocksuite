@@ -577,6 +577,16 @@ export function hasBlockId(element: Element) {
 }
 
 /**
+ *
+ * @param element
+ * @returns Returns `true` if element is in title block
+ */
+
+export function isInTitleBlock(element: Element) {
+  return !!element.closest?.('.affine-default-page-block-title');
+}
+
+/**
  * Returns `true` if element is default page.
  */
 export function isDefaultPage({ tagName }: Element) {

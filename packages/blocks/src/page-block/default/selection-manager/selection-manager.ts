@@ -36,6 +36,7 @@ import {
   isEmbed,
   isImage,
   isInsidePageTitle,
+  isInTitleBlock,
   isSelectedBlocks,
   Point,
   Rect,
@@ -173,7 +174,9 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       ) {
         event.raw.preventDefault();
       }
-      this._onContainerPointerMove(ctx);
+      if (this.page.hasFrameBlock()) {
+        this._onContainerPointerMove(ctx);
+      }
     });
     this._add('contextMenu', this._onContainerContextMenu);
     this._add('virgo-vrange-updated', () => {
@@ -192,6 +195,15 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
         this._onSelectionChangeWithDebounce();
       }, 300)
     );
+  }
+
+  private _checkHasAnyFrameBlock() {
+    if (!this.page.hasFrameBlock()) {
+      const id = this.page.addBlock('affine:frame', {}, this.page.root);
+      this.page.addBlock('affine:paragraph', {}, id);
+      return true;
+    }
+    return false;
   }
 
   private _add = (name: EventName, fn: UIEventHandler) => {
@@ -327,13 +339,25 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
   private _onContainerClick = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
-    const container = getEditorContainerByElement(this.container);
-    activeEditorManager.setActive(container);
     const {
       point: { x, y },
       raw: { target, clientX, clientY, pageX },
       keys: { shift },
     } = e;
+
+    if (
+      this._checkHasAnyFrameBlock() &&
+      target &&
+      isInTitleBlock(target as Element)
+    ) {
+      requestAnimationFrame(() => {
+        handleNativeRangeClick(this.page, e, this.container);
+      });
+    }
+
+    const container = getEditorContainerByElement(this.container);
+    activeEditorManager.setActive(container);
+
     const { state } = this;
     const { viewport } = state;
     let { type } = state;

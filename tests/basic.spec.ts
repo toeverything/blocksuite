@@ -5,6 +5,7 @@ import { expect } from '@playwright/test';
 import {
   addFrameByClick,
   captureHistory,
+  click,
   disconnectByClick,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -12,6 +13,7 @@ import {
   focusTitle,
   getCurrentEditorTheme,
   getCurrentHTMLTheme,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   pressArrowLeft,
   pressArrowRight,
@@ -22,6 +24,7 @@ import {
   redoByClick,
   redoByKeyboard,
   SHORT_KEY,
+  switchEditorMode,
   switchReadonly,
   toggleDarkMode,
   type,
@@ -30,6 +33,7 @@ import {
   waitDefaultPageLoaded,
   waitForRemoteUpdateSlot,
   waitNextFrame,
+  withPressKey,
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenIds,
@@ -466,5 +470,28 @@ test(
     await page.waitForTimeout(300);
     await pressBackspace(page);
     await assertRichTexts(page, ['\nasdf']);
+  }
+);
+
+test(
+  scoped`when no frame block, click editing area auto add a new frame block`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+
+    await switchEditorMode(page);
+    await click(page, { x: 100, y: 280 });
+    await withPressKey(page, 'Backspace');
+    await switchEditorMode(page);
+    let frame = await page.evaluate(() => {
+      return document.querySelector('affine-frame');
+    });
+    expect(frame).toBeNull();
+    await click(page, { x: 100, y: 280 });
+
+    frame = await page.evaluate(() => {
+      return document.querySelector('affine-frame');
+    });
+    expect(frame).not.toBeNull();
   }
 );
