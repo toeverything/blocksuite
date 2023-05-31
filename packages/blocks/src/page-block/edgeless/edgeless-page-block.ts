@@ -72,6 +72,10 @@ import {
   type Selectable,
 } from './selection-manager.js';
 import {
+  EdgelessToolbar,
+  type ZoomAction,
+} from './toolbar/edgeless-toolbar.js';
+import {
   DEFAULT_FRAME_HEIGHT,
   DEFAULT_FRAME_OFFSET_X,
   DEFAULT_FRAME_OFFSET_Y,
@@ -173,6 +177,7 @@ export class EdgelessPageBlockComponent
    */
   components = {
     dragHandle: <DragHandle | null>null,
+    toolbar: <EdgelessToolbar | null>null,
   };
 
   mouseRoot!: HTMLElement;
@@ -183,9 +188,6 @@ export class EdgelessPageBlockComponent
   mouseMode: MouseMode = {
     type: 'default',
   };
-
-  @state()
-  private _toolbarEnabled = false;
 
   @state()
   private _rectsOfSelectedBlocks: DOMRect[] = [];
@@ -207,6 +209,7 @@ export class EdgelessPageBlockComponent
     mouseModeUpdated: new Slot<MouseMode>(),
     reorderingFramesUpdated: new Slot<ReorderingAction<Selectable>>(),
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    zoomUpdated: new Slot<ZoomAction>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -285,19 +288,34 @@ export class EdgelessPageBlockComponent
   }
 
   private _handleToolbarFlag() {
-    const clientID = this.page.doc.clientID;
+    const createToolbar = () => {
+      const toolbar = new EdgelessToolbar(this);
+      this.appendChild(toolbar);
+      this.components.toolbar = toolbar;
+    };
 
-    this._toolbarEnabled =
-      this.page.awarenessStore.getFlag('enable_edgeless_toolbar') ?? false;
+    if (
+      this.page.awarenessStore.getFlag('enable_edgeless_toolbar') &&
+      !this.components.toolbar
+    ) {
+      createToolbar();
+    }
 
     this._disposables.add(
       this.page.awarenessStore.slots.update.subscribe(
         msg => msg.state?.flags.enable_edgeless_toolbar,
         enable => {
-          this._toolbarEnabled = enable ?? false;
+          if (enable) {
+            if (this.components.toolbar) return;
+            createToolbar();
+            return;
+          }
+
+          this.components.toolbar?.remove();
+          this.components.toolbar = null;
         },
         {
-          filter: msg => msg.id === clientID,
+          filter: msg => msg.id === this.page.doc.clientID,
         }
       )
     );
@@ -318,13 +336,12 @@ export class EdgelessPageBlockComponent
         msg => msg.state?.flags.enable_drag_handle,
         enable => {
           if (enable) {
-            if (!this.components.dragHandle) {
-              createHandle();
-            }
-          } else {
-            this.components.dragHandle?.remove();
-            this.components.dragHandle = null;
+            if (this.components.dragHandle) return;
+            createHandle();
+            return;
           }
+          this.components.dragHandle?.remove();
+          this.components.dragHandle = null;
         },
         {
           filter: msg => msg.id === this.page.doc.clientID,
@@ -426,6 +443,11 @@ export class EdgelessPageBlockComponent
 
     _disposables.add(slots.reorderingFramesUpdated.on(this.reorderFrames));
     _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
+    _disposables.add(
+      slots.zoomUpdated.on((action: ZoomAction) =>
+        this.components.toolbar?.setZoomByAction(action)
+      )
+    );
   }
 
   /**
@@ -817,7 +839,6 @@ export class EdgelessPageBlockComponent
         );
       }
 
-      // Due to change `this._toolbarEnabled` in this function
       this._handleToolbarFlag();
       this.requestUpdate();
     });
@@ -922,15 +943,6 @@ export class EdgelessPageBlockComponent
             `
           : nothing}
       </div>
-      ${this._toolbarEnabled
-        ? html`
-            <edgeless-toolbar
-              .mouseMode=${mouseMode}
-              .zoom=${zoom}
-              .edgeless=${this}
-            ></edgeless-toolbar>
-          `
-        : nothing}
     `;
   }
 }

@@ -376,6 +376,33 @@ export async function zoomByMouseWheel(
   await page.keyboard.up(SHORT_KEY);
 }
 
+export async function zoomFitByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 50 });
+}
+
+export async function zoomOutByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 50 });
+}
+
+export async function zoomResetByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+0`, { delay: 50 });
+}
+
+export async function zoomInByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+=`, { delay: 50 });
+}
+
+export async function getZoomLevel(page: Page) {
+  const span = page.locator('.zoom-percent');
+  // fixme
+  await waitNextFrame(page, 60 / 0.25);
+  const text = await span.textContent();
+  if (!text) {
+    throw new Error('Missing .zoom-percent');
+  }
+  return Number(text.replace('%', ''));
+}
+
 export async function optionMouseDrag(page: Page, start: IPoint, end: IPoint) {
   await page.keyboard.down(MODIFIER_KEY);
   await dragBetweenCoords(page, start, end, { steps: 30 });
