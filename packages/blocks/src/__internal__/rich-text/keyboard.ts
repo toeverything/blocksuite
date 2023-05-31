@@ -194,7 +194,9 @@ export function createKeyDownHandler(
     const parentModel = model.page.getParent(model);
     const previousModel = model.page.getPreviousSibling(model);
     if (
-      (parentModel && matchFlavours(parentModel, ['affine:database'])) ||
+      (evt.key === 'Tab' &&
+        parentModel &&
+        matchFlavours(parentModel, ['affine:database'])) ||
       (previousModel && matchFlavours(previousModel, ['affine:database']))
     ) {
       evt.preventDefault();
