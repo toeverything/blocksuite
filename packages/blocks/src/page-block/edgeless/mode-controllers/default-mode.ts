@@ -506,4 +506,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerMouseOut(_: PointerEventState) {
     noop();
   }
+
+  onPressShiftKey(_: boolean) {
+    noop();
+  }
 }

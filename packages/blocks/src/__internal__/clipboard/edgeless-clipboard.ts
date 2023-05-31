@@ -57,6 +57,14 @@ export class EdgelessClipboard implements Clipboard {
     return this._edgeless.selection;
   }
 
+  get slots() {
+    return this._edgeless.slots;
+  }
+
+  get surface() {
+    return this._edgeless.surface;
+  }
+
   public dispose() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
@@ -81,11 +89,11 @@ export class EdgelessClipboard implements Clipboard {
         if (isTopLevelBlock(selected)) {
           this._page.deleteBlock(selected);
         } else {
-          this._edgeless.surface.removeElement(selected.id);
+          this.surface.removeElement(selected.id);
         }
       });
     });
-    this._edgeless.slots.selectionUpdated.emit({ active: false, selected: [] });
+    this.slots.selectionUpdated.emit({ active: false, selected: [] });
   };
 
   private _onCopy = (e: ClipboardEvent) => {
@@ -156,11 +164,11 @@ export class EdgelessClipboard implements Clipboard {
     const phasorElements =
       (elements
         ?.map(d => {
-          const id = this._edgeless.surface.addElement(
+          const id = this.surface.addElement(
             d.type as keyof PhasorElementType,
             d
           );
-          const element = this._edgeless.surface.pickById(id);
+          const element = this.surface.pickById(id);
           return element;
         })
         .filter(e => !!e) as PhasorElement[]) || [];
@@ -238,7 +246,7 @@ export class EdgelessClipboard implements Clipboard {
   ) {
     const newSelected = [
       ...(phasorElementIds
-        .map(id => this._edgeless.surface.pickById(id))
+        .map(id => this.surface.pickById(id))
         .filter(e => !!e) as PhasorElement[]),
       ...(frameIds
         .map(id => this._page.getBlockById(id))
@@ -247,7 +255,7 @@ export class EdgelessClipboard implements Clipboard {
         ) as TopLevelBlockModel[]),
     ];
 
-    this._edgeless.slots.selectionUpdated.emit({
+    this.slots.selectionUpdated.emit({
       active: false,
       selected: newSelected,
     });
@@ -271,7 +279,7 @@ export class EdgelessClipboard implements Clipboard {
     );
 
     const { lastMousePos } = this.selection;
-    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
+    const [modelX, modelY] = this.surface.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
     );
@@ -287,7 +295,7 @@ export class EdgelessClipboard implements Clipboard {
         ele.h
       );
 
-      this._edgeless.surface.updateElement(ele.id, {
+      this.surface.updateElement(ele.id, {
         xywh: newXYWH,
       });
     });

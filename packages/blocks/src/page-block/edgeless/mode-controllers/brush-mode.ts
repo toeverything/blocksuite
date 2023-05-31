@@ -95,4 +95,8 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
   onContainerMouseOut(e: PointerEventState) {
     noop();
   }
+
+  onPressShiftKey(_: boolean) {
+    noop();
+  }
 }

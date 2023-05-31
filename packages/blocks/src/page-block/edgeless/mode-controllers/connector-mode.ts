@@ -180,4 +180,8 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
   onContainerMouseOut(e: PointerEventState) {
     noop();
   }
+
+  onPressShiftKey(_: boolean) {
+    noop();
+  }
 }

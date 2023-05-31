@@ -64,4 +64,8 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
   onContainerMouseOut(e: PointerEventState) {
     noop();
   }
+
+  onPressShiftKey(_: boolean) {
+    noop();
+  }
 }
