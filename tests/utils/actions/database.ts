@@ -296,6 +296,7 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
   const column = page.locator('.affine-database-column').nth(index);
   const box = await getBoundingBox(column);
   const textElement = column.locator('.affine-database-column-text-input');
+  const inputElement = column.locator('.affine-database-column-input');
   const text = await textElement.innerText();
   const typeIcon = column.locator('.affine-database-column-type-icon');
   const renameIcon = column.locator('.affine-database-column-text-icon');
@@ -307,5 +308,6 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
     textElement,
     typeIcon,
     renameIcon,
+    inputElement,
   };
 }
