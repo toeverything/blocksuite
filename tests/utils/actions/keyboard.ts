@@ -28,7 +28,7 @@ export async function type(page: Page, content: string, delay = 50) {
 export async function withPressKey(
   page: Page,
   key: string,
-  fn: () => Promise<void> = () => new Promise(resolve => resolve())
+  fn: () => Promise<void>
 ) {
   await page.keyboard.down(key);
   await fn();

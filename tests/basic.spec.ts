@@ -33,7 +33,6 @@ import {
   waitDefaultPageLoaded,
   waitForRemoteUpdateSlot,
   waitNextFrame,
-  withPressKey,
 } from './utils/actions/index.js';
 import {
   assertBlockChildrenIds,
@@ -481,7 +480,7 @@ test(
 
     await switchEditorMode(page);
     await click(page, { x: 100, y: 280 });
-    await withPressKey(page, 'Backspace');
+    await pressBackspace(page);
     await switchEditorMode(page);
     let frame = await page.evaluate(() => {
       return document.querySelector('affine-frame');
