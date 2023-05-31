@@ -41,8 +41,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }
     .affine-bookmark-banner {
       width: 140px;
-      height: 96px;
-      margin-left: 15px;
+      height: 93px;
+      margin-left: 20px;
       border-radius: 8px 8px 0 0;
       overflow: hidden;
       flex-shrink: 0;
@@ -54,7 +54,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     .affine-bookmark-banner img,
     .affine-bookmark-banner svg {
       width: 140px;
-      height: 96px;
+      height: 93px;
       object-fit: cover;
     }
     .affine-bookmark-content-wrapper {
