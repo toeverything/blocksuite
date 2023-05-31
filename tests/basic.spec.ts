@@ -472,25 +472,24 @@ test(
   }
 );
 
-test(
-  scoped`when no frame block, click editing area auto add a new frame block`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
+test('when no frame block, click editing area auto add a new frame block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
 
-    await switchEditorMode(page);
-    await click(page, { x: 100, y: 280 });
-    await pressBackspace(page);
-    await switchEditorMode(page);
-    let frame = await page.evaluate(() => {
-      return document.querySelector('affine-frame');
-    });
-    expect(frame).toBeNull();
-    await click(page, { x: 100, y: 280 });
+  await switchEditorMode(page);
+  await click(page, { x: 100, y: 280 });
+  await pressBackspace(page);
+  await switchEditorMode(page);
+  let frame = await page.evaluate(() => {
+    return document.querySelector('affine-frame');
+  });
+  expect(frame).toBeNull();
+  await click(page, { x: 100, y: 280 });
 
-    frame = await page.evaluate(() => {
-      return document.querySelector('affine-frame');
-    });
-    expect(frame).not.toBeNull();
-  }
-);
+  frame = await page.evaluate(() => {
+    return document.querySelector('affine-frame');
+  });
+  expect(frame).not.toBeNull();
+});
