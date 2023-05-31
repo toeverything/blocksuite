@@ -320,8 +320,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     columnId: string,
     column: Column
   ) => {
-    if (this._editingColumnId === '') return;
-    if (this.readonly) return;
+    if (this._editingColumnId === '' || this.readonly) return;
     if (this._changingColumnTypeId === columnId) {
       this._changingColumnTypeId = '';
       return;
