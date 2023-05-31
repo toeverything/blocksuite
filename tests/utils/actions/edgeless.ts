@@ -9,7 +9,7 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
-import { SHORT_KEY, type } from './keyboard.js';
+import { SHIFT_KEY, SHORT_KEY, type } from './keyboard.js';
 import { MODIFIER_KEY } from './keyboard.js';
 import { getEditorLocator, waitForVirgoStateUpdated } from './misc.js';
 
@@ -374,6 +374,12 @@ export async function optionMouseDrag(page: Page, start: IPoint, end: IPoint) {
   await page.keyboard.down(MODIFIER_KEY);
   await dragBetweenCoords(page, start, end, { steps: 30 });
   await page.keyboard.up(MODIFIER_KEY);
+}
+
+export async function shiftClick(page: Page, point: IPoint) {
+  await page.keyboard.down(SHIFT_KEY);
+  await page.mouse.click(point.x, point.y);
+  await page.keyboard.up(SHIFT_KEY);
 }
 
 export function locatorComponentToolbar(page: Page) {
