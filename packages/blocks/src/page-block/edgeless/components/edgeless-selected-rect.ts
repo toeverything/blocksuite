@@ -135,7 +135,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     .affine-edgeless-selected-rect > [aria-label='handle-left']:after {
-      right: -3px;
+      left: -3px;
     }
 
     .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
