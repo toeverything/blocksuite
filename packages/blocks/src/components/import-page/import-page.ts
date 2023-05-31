@@ -223,65 +223,76 @@ export class ImportPage extends WithDisposable(LitElement) {
       },
       async file => {
         const pageIds: string[] = [];
-        const zip = new JSZip();
-        const zipFile = await zip.loadAsync(file);
-        const pageMap = new Map<string, Page>();
-        const files = Object.keys(zipFile.files);
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          if (file.startsWith('__MACOSX/')) continue;
+        const promises: Promise<void>[] = [];
+        const parseZipFile = async (file: File | Blob) => {
+          const zip = new JSZip();
+          const zipFile = await zip.loadAsync(file);
+          const pageMap = new Map<string, Page>();
+          const files = Object.keys(zipFile.files);
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.startsWith('__MACOSX/')) continue;
 
-          const lastSplitIndex = file.lastIndexOf('/');
-          const fileName = file.substring(lastSplitIndex + 1);
-          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-            const page = this.workspace.createPage({
-              init: {
-                title: '',
-              },
-            });
-            pageMap.set(file, page);
-          }
-        }
-        const pagePromises = Array.from(pageMap.keys()).map(async file => {
-          const page = pageMap.get(file);
-          if (!page) return;
-          const lastSplitIndex = file.lastIndexOf('/');
-          const folder = file.substring(0, lastSplitIndex) || '';
-          const fileName = file.substring(lastSplitIndex + 1);
-          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-            const isHtml = fileName.endsWith('.html');
-            const rootId = page.root?.id;
-            const fetchFileHandler = async (url: string) => {
-              const fileName = folder + (folder ? '/' : '') + decodeURI(url);
-              return (
-                (await zipFile.file(fileName)?.async('blob')) || new Blob()
-              );
-            };
-            const contentParser = new ContentParser(page, fetchFileHandler);
-            let text = (await zipFile.file(file)?.async('string')) || '';
-            pageMap.forEach((value, key) => {
-              const subPageLink = key.replaceAll(' ', '%20');
-              text = isHtml
-                ? text.replaceAll(
-                    `href="${subPageLink}"`,
-                    `href="${LINK_PRE + value.id}"`
-                  )
-                : text.replaceAll(
-                    `(${subPageLink})`,
-                    `(${LINK_PRE + value.id})`
-                  );
-            });
-            if (rootId) {
-              if (isHtml) {
-                await contentParser.importHtml(text, rootId);
-              } else {
-                await contentParser.importMarkdown(text, rootId);
+            const lastSplitIndex = file.lastIndexOf('/');
+            const fileName = file.substring(lastSplitIndex + 1);
+            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              const page = this.workspace.createPage({
+                init: {
+                  title: '',
+                },
+              });
+              pageMap.set(file, page);
+            }
+            if (fileName.endsWith('.zip')) {
+              const innerZipFile = await zipFile.file(fileName)?.async('blob');
+              if (innerZipFile) {
+                parseZipFile(innerZipFile);
               }
-              pageIds.push(page.id);
             }
           }
-        });
-        await Promise.all(pagePromises);
+          const pagePromises = Array.from(pageMap.keys()).map(async file => {
+            const page = pageMap.get(file);
+            if (!page) return;
+            const lastSplitIndex = file.lastIndexOf('/');
+            const folder = file.substring(0, lastSplitIndex) || '';
+            const fileName = file.substring(lastSplitIndex + 1);
+            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              const isHtml = fileName.endsWith('.html');
+              const rootId = page.root?.id;
+              const fetchFileHandler = async (url: string) => {
+                const fileName = folder + (folder ? '/' : '') + decodeURI(url);
+                return (
+                  (await zipFile.file(fileName)?.async('blob')) || new Blob()
+                );
+              };
+              const contentParser = new ContentParser(page, fetchFileHandler);
+              let text = (await zipFile.file(file)?.async('string')) || '';
+              pageMap.forEach((value, key) => {
+                const subPageLink = key.replaceAll(' ', '%20');
+                text = isHtml
+                  ? text.replaceAll(
+                      `href="${subPageLink}"`,
+                      `href="${LINK_PRE + value.id}"`
+                    )
+                  : text.replaceAll(
+                      `(${subPageLink})`,
+                      `(${LINK_PRE + value.id})`
+                    );
+              });
+              if (rootId) {
+                if (isHtml) {
+                  await contentParser.importHtml(text, rootId);
+                } else {
+                  await contentParser.importMarkdown(text, rootId);
+                }
+                pageIds.push(page.id);
+              }
+            }
+          });
+          promises.push(...pagePromises);
+        };
+        await parseZipFile(file);
+        await Promise.all(promises);
         return pageIds;
       }
     );
