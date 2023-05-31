@@ -28,7 +28,7 @@ export function showImportModal({
   abortController.signal.addEventListener('abort', () => disposables.dispose());
   disposables.add(() => importPage.remove());
   disposables.addFromEvent(window, 'mousedown', (e: Event) => {
-    if (e.target === importPage) return;
+    if (e.target === importPage || importPage.loading()) return;
     abortController.abort();
   });
 
