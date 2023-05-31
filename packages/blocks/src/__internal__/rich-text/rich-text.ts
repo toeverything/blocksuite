@@ -152,7 +152,8 @@ export class RichText extends ShadowlessElement {
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(
       this._vEditor,
-      keyboardBindings
+      keyboardBindings,
+      this.model
     );
 
     let ifPrefixSpace = false;

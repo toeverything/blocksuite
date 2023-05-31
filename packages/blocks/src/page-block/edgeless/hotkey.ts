@@ -1,12 +1,12 @@
-import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
-import { matchFlavours } from '@blocksuite/store';
+import {
+  FRAME_BACKGROUND_COLORS,
+  HOTKEYS,
+  SHORT_KEY,
+} from '@blocksuite/global/config';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
-import type {
-  MouseMode,
-  TopLevelBlockModel,
-} from '../../__internal__/utils/types.js';
+import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
 import {
   bindCommonHotkey,
@@ -53,10 +53,9 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
           return;
         }
 
-        edgeless.mouseMode = { type: 'pan', panning: false };
         shouldRevertMode = true;
         lastMode = mouseMode;
-
+        setMouseMode(edgeless, { type: 'pan', panning: false });
         return;
       }
       if (event.type === 'keyup') {
@@ -66,7 +65,10 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
         shouldRevertMode = false;
       }
     },
-    { keyup: true }
+    {
+      keydown: true,
+      keyup: true,
+    }
   );
 }
 
@@ -113,11 +115,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     );
 
     hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
-    hotkey.addListener('t', () =>
-      setMouseMode(edgeless, {
-        type: 'text',
-      })
-    );
+    hotkey.addListener('t', () => setMouseMode(edgeless, { type: 'text' }));
     hotkey.addListener('h', () =>
       setMouseMode(edgeless, { type: 'pan', panning: false })
     );
@@ -152,14 +150,27 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {
       keyboardEvent.preventDefault();
 
-      const frames = (edgeless.page.root?.children ?? []).filter(child =>
-        matchFlavours(child, ['affine:frame'])
-      ) as TopLevelBlockModel[];
-
       edgeless.slots.selectionUpdated.emit({
-        selected: [...frames, ...edgeless.surface.getElements()],
+        selected: [...edgeless.frames, ...edgeless.surface.getElements()],
         active: false,
       });
+    });
+
+    hotkey.addListener(`${SHORT_KEY}+1`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('fit');
+    });
+    hotkey.addListener(`${SHORT_KEY}+-`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('out');
+    });
+    hotkey.addListener(`${SHORT_KEY}+0`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('reset');
+    });
+    hotkey.addListener(`${SHORT_KEY}+=`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('in');
     });
 
     bindSpace(edgeless);

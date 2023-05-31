@@ -16,16 +16,18 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
-import { getService } from '../../../../../__internal__/service.js';
 import { getTagColor, onClickOutside } from '../../../../utils.js';
 import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
 } from '../../../consts.js';
 import { DatabaseCellElement, type TableViewCell } from '../../../register.js';
+import {
+  type CellSelectionEnterKeys,
+  selectCellByElement,
+} from '../../../selection-manager/cell.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
-import { getCellCoord } from '../../selection/utils.js';
 import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
@@ -296,23 +298,20 @@ export class SelectCellEditing
       const selected = this.cell?.value ?? [];
       const currentSelection = this.selectionList[index];
       this._onSelect(selected, currentSelection);
-      this._selectCell();
+      const cell =
+        this._selectOptionContainer.closest<HTMLElement>('.database-cell');
+      assertExists(cell);
+      this._selectCell(cell, 'Escape');
     }
   };
 
-  private _selectCell = (exitEditing = false) => {
+  private _selectCell = (
+    element: Element,
+    key: CellSelectionEnterKeys,
+    exitEditing = false
+  ) => {
     if (this.isSingleMode || exitEditing) this.rowHost.setEditing(false);
-
-    const service = getService('affine:database');
-    const cell =
-      this._selectOptionContainer.closest<HTMLElement>('.database-cell');
-    assertExists(cell);
-    const coord = getCellCoord(cell, this.databaseModel.id, 'Escape');
-    service.setCellSelection({
-      type: 'select',
-      databaseId: this.databaseModel.id,
-      coords: [coord],
-    });
+    selectCellByElement(element, this.databaseModel.id, key);
   };
 
   private _onDeleteSelected = (
@@ -353,7 +352,10 @@ export class SelectCellEditing
         this._onAddSelection(selectedValue);
       }
     } else if (event.key === 'Escape') {
-      this._selectCell(true);
+      this._selectCell(event.target as Element, 'Escape', true);
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      this._selectCell(event.target as Element, 'Tab', true);
     }
   };
 

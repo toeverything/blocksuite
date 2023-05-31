@@ -150,7 +150,8 @@ const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
 export function createKeyDownHandler(
   vEditor: AffineVEditor,
-  bindings: KeyboardBindings
+  bindings: KeyboardBindings,
+  model: BaseBlockModel
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, KeyboardBinding[]> = {};
   function normalize(binding: KeyboardBinding): KeyboardBinding {
@@ -190,6 +191,19 @@ export function createKeyDownHandler(
   });
 
   function keyDownHandler(evt: KeyboardEvent) {
+    const parentModel = model.page.getParent(model);
+    const previousModel = model.page.getPreviousSibling(model);
+    if (
+      (parentModel && matchFlavours(parentModel, ['affine:database'])) ||
+      (previousModel && matchFlavours(previousModel, ['affine:database']))
+    ) {
+      if (evt.key === 'Tab') {
+        evt.preventDefault();
+        evt.stopPropagation();
+        return;
+      }
+    }
+
     if (evt.defaultPrevented || evt.isComposing) return;
     const keyBindings = (bindingStore[evt.key] || []).concat(
       bindingStore[evt.which] || []
