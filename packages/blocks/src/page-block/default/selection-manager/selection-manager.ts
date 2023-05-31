@@ -174,7 +174,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       ) {
         event.raw.preventDefault();
       }
-      if (this.page.hasFrameBlock()) {
+      if (this.page.hasFlavour('affine:frame')) {
         this._onContainerPointerMove(ctx);
       }
     });
@@ -197,12 +197,14 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     );
   }
 
-  private _checkHasAnyFrameBlock() {
-    if (!this.page.hasFrameBlock()) {
-      const id = this.page.addBlock('affine:frame', {}, this.page.root);
-      this.page.addBlock('affine:paragraph', {}, id);
+  private _ensureFrameExists() {
+    const hasFrame = this.page.hasFlavour('affine:frame');
+    if (!hasFrame) {
+      const frameId = this.page.addBlock('affine:frame', {}, this.page.root);
+      this.page.addBlock('affine:paragraph', {}, frameId);
       return true;
     }
+
     return false;
   }
 
@@ -346,7 +348,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     } = e;
 
     if (
-      this._checkHasAnyFrameBlock() &&
+      this._ensureFrameExists() &&
       target &&
       isInTitleBlock(target as Element)
     ) {

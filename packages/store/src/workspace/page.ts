@@ -5,7 +5,7 @@ import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
-import { BaseBlockModel, internalPrimitives, type RoleType } from '../base.js';
+import { BaseBlockModel, internalPrimitives } from '../base.js';
 import { Space, type StackItem } from '../space.js';
 import { Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
@@ -203,8 +203,8 @@ export class Page extends Space<FlatBlockMap> {
     );
   }
 
-  hasFrameBlock() {
-    return this.getBlockByFlavour('affine:frame').length > 0;
+  hasFlavour(flavour: string) {
+    return this.getBlockByFlavour(flavour).length > 0;
   }
 
   getParent(target: BaseBlockModel | string): BaseBlockModel | null {
