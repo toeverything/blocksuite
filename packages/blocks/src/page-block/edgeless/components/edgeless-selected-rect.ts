@@ -77,6 +77,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       touchaction: none;
     }
 
+    :host([disabled='true'])
+      .affine-edgeless-selected-rect
+      > [aria-label^='handle'] {
+      pointer-events: none;
+    }
+
     .affine-edgeless-selected-rect > [aria-label='handle-top-left'] {
       cursor: nwse-resize;
       left: -6px;

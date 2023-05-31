@@ -872,7 +872,7 @@ export class EdgelessPageBlockComponent
     );
 
     const blockContainerStyle = {
-      cursor: getCursorMode(this.mouseMode),
+      cursor: getCursorMode(mouseMode),
       '--affine-edgeless-gap': `${gap}px`,
       '--affine-edgeless-grid': grid,
       '--affine-edgeless-x': `${translateX}px`,
@@ -905,6 +905,7 @@ export class EdgelessPageBlockComponent
         ${state.selected.length
           ? html`
               <edgeless-selected-rect
+                disabled=${mouseMode.type === 'pan'}
                 .page=${page}
                 .state=${state}
                 .slots=${this.slots}
