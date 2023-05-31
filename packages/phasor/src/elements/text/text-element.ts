@@ -84,7 +84,7 @@ export class TextElement extends SurfaceElement<IText> {
         }
         ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
         ctx.font = font;
-        ctx.fillStyle = color;
+        ctx.fillStyle = this.computedValue(color);
         ctx.textAlign = textAlign;
 
         ctx.textBaseline = 'ideographic';
