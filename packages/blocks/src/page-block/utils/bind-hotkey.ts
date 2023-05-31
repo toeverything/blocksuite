@@ -509,6 +509,7 @@ export function removeHotkeys() {
   removeCommonHotKey();
   hotkey.removeListener([
     HOTKEYS.BACKSPACE,
+    HOTKEYS.DELETE,
     HOTKEYS.SELECT_ALL,
 
     HOTKEYS.SHIFT_UP,

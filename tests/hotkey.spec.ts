@@ -17,6 +17,7 @@ import {
   pressArrowRight,
   pressArrowUp,
   pressEnter,
+  pressForwardDelete,
   readClipboardText,
   redoByClick,
   redoByKeyboard,
@@ -1056,4 +1057,29 @@ test('should support ctrl/cmd+g convert to database', async ({ page }) => {
   await expect(database).toBeVisible();
   const rows = page.locator('.affine-database-block-row');
   expect(await rows.count()).toBe(3);
+});
+
+test('should forwardDelete works when delete single character', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page, 0);
+  await type(page, 'hello');
+  await pressArrowLeft(page, 5);
+  await pressForwardDelete(page);
+  await assertRichTexts(page, ['ello']);
+});
+
+test('should forwardDelete works when delete multi characters', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page, 0);
+  await type(page, 'hello');
+  await pressArrowLeft(page, 5);
+  await setVirgoSelection(page, 1, 3);
+  await pressForwardDelete(page);
+  await assertRichTexts(page, ['ho']);
 });

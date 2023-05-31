@@ -11,12 +11,16 @@ import {
 import {
   handleBlockEndEnter,
   handleBlockSplit,
+  handleLineEndForwardDelete,
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
 } from '../rich-text/rich-text-operations.js';
 import type { AffineVEditor } from '../rich-text/virgo/types.js';
-import { isCollapsedAtBlockStart } from '../utils/index.js';
+import {
+  isCollapsedAtBlockEnd,
+  isCollapsedAtBlockStart,
+} from '../utils/index.js';
 
 export function onSoftEnter(
   model: BaseBlockModel,
@@ -176,7 +180,31 @@ export function onBackspace(
   }
   return ALLOW_DEFAULT;
 }
-
+export function onForwardDelete(
+  model: BaseBlockModel,
+  e: KeyboardEvent,
+  vEditor: AffineVEditor
+) {
+  e.stopPropagation();
+  if (isCollapsedAtBlockEnd(vEditor)) {
+    handleLineEndForwardDelete(model.page, model);
+    return PREVENT_DEFAULT;
+  }
+  // handle multiple selection
+  if (vEditor.getVRange()?.length) {
+    const range = vEditor.getVRange();
+    const text = model.text;
+    if (text && range) {
+      text.delete(range.index, range.length);
+      vEditor.setVRange({
+        index: range.index,
+        length: 0,
+      });
+    }
+    return PREVENT_DEFAULT;
+  }
+  return ALLOW_DEFAULT;
+}
 export function onKeyLeft(e: KeyboardEvent, range: VRange) {
   // range.length === 0 means collapsed selection
   if (range.length !== 0) {

@@ -543,7 +543,9 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
   handleUnknownBlockBackspace(model);
 }
-
+export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
+  // TODO
+}
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
   const range = getCurrentNativeRange();
   if (!range.collapsed) {
