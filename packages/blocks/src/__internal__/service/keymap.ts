@@ -12,11 +12,16 @@ import {
   handleBlockEndEnter,
   handleBlockSplit,
   handleLineStartBackspace,
+  handleLineStartLeftKey,
   handleSoftEnter,
   handleUnindent,
 } from '../rich-text/rich-text-operations.js';
 import type { AffineVEditor } from '../rich-text/virgo/types.js';
-import { isCollapsedAtBlockStart } from '../utils/index.js';
+import { checkFirstLine } from '../utils/check-line.js';
+import {
+  getCurrentNativeRange,
+  isCollapsedAtBlockStart,
+} from '../utils/index.js';
 
 export function onSoftEnter(
   model: BaseBlockModel,
@@ -177,7 +182,12 @@ export function onBackspace(
   return ALLOW_DEFAULT;
 }
 
-export function onKeyLeft(e: KeyboardEvent, range: VRange) {
+export function onKeyLeft(
+  model: BaseBlockModel,
+  e: KeyboardEvent,
+  range: VRange,
+  editableContainer: Element
+) {
   // range.length === 0 means collapsed selection
   if (range.length !== 0) {
     e.stopPropagation();
@@ -187,6 +197,11 @@ export function onKeyLeft(e: KeyboardEvent, range: VRange) {
   if (!lineStart) {
     e.stopPropagation();
     return ALLOW_DEFAULT;
+  }
+  const nativeRange = getCurrentNativeRange();
+  const isFirstLine = checkFirstLine(nativeRange, editableContainer);
+  if (isFirstLine && lineStart) {
+    handleLineStartLeftKey(model.page, model);
   }
   // Need jump to previous block
   return PREVENT_DEFAULT;

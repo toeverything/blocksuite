@@ -544,6 +544,16 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   handleUnknownBlockBackspace(model);
 }
 
+function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
+  if (!matchFlavours(model, ['affine:paragraph'])) return false;
+  console.log('works');
+  return true;
+}
+
+export function handleLineStartLeftKey(page: Page, model: ExtendedModel) {
+  handleParagraphBlockLeftKey(page, model);
+}
+
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
   const range = getCurrentNativeRange();
   if (!range.collapsed) {
