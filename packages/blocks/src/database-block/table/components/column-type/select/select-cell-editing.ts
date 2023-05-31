@@ -35,7 +35,7 @@ const styles = css`
   affine-database-select-cell-editing {
     z-index: 2;
     border: 1px solid var(--affine-border-color);
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-2);
   }

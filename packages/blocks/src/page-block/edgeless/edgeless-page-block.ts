@@ -332,7 +332,7 @@ export class EdgelessPageBlockComponent
         }
         this.components.dragHandle?.hide();
         if (this.selection.selectedBlocks.length) {
-          slots.selectedBlocksUpdated.emit(this.selection.selectedBlocks);
+          slots.selectedBlocksUpdated.emit([...this.selection.selectedBlocks]);
         }
         this.requestUpdate();
       })
@@ -403,9 +403,7 @@ export class EdgelessPageBlockComponent
         });
 
         // FIXME: force updating selection for triggering re-render `selected-rect`
-        slots.selectionUpdated.emit({
-          ...this.selection.state,
-        });
+        slots.selectionUpdated.emit({ ...this.selection.state });
       })
     );
 
@@ -774,7 +772,8 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.slots.selectedBlocksUpdated.emit(this.selection.selectedBlocks);
+      this.slots.selectedBlocksUpdated.emit([...this.selection.selectedBlocks]);
+      this.slots.selectionUpdated.emit({ ...this.selection.state });
     });
     resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
