@@ -99,7 +99,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       {
         key: 'import-linked-page',
         name: `Import`,
-        active: filteredPageList.length + 1 === this._activatedItemIndex,
+        active: filteredPageList.length === this._activatedItemIndex,
         icon: ImportIcon,
         action: () => this._importPage(),
       },
@@ -141,7 +141,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         const item = this._actionList[this._activatedItemIndex];
         if (
           item.key === 'create-linked-page' ||
-          item.key === 'create-subpage'
+          item.key === 'import-linked-page'
         ) {
           return;
         }
