@@ -311,12 +311,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    this._disposables.add(
-      this.edgeless.slots.mouseModeUpdated.on(() => this.requestUpdate())
-    );
-    this._disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => this.requestUpdate())
-    );
+    const {
+      _disposables,
+      edgeless: { slots },
+    } = this;
+    _disposables.add(slots.mouseModeUpdated.on(() => this.requestUpdate()));
+    _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
   }
 
   override render() {

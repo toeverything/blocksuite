@@ -362,7 +362,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
         ${resizeHandles} ${connectorHandles}
       </div>
-      ${resizeHandles} ${componentToolbar}
+      ${componentToolbar}
     `;
   }
 }
