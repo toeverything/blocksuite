@@ -152,6 +152,15 @@ export class EdgelessPageBlockComponent
       transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
         scale(var(--affine-zoom));
     }
+
+    .affine-edgeless-hover-rect {
+      position: absolute;
+      border-radius: 0;
+      pointer-events: none;
+      box-sizing: border-box;
+      z-index: 1;
+      border: var(--affine-border-width) solid var(--affine-blue);
+    }
   `;
 
   flavour = 'edgeless' as const;
@@ -332,7 +341,7 @@ export class EdgelessPageBlockComponent
         }
         this.components.dragHandle?.hide();
         if (this.selection.selectedBlocks.length) {
-          slots.selectedBlocksUpdated.emit(this.selection.selectedBlocks);
+          slots.selectedBlocksUpdated.emit([...this.selection.selectedBlocks]);
         }
         this.requestUpdate();
       })
@@ -403,9 +412,7 @@ export class EdgelessPageBlockComponent
         });
 
         // FIXME: force updating selection for triggering re-render `selected-rect`
-        slots.selectionUpdated.emit({
-          ...this.selection.state,
-        });
+        slots.selectionUpdated.emit({ ...this.selection.state });
       })
     );
 
@@ -774,7 +781,8 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.slots.selectedBlocksUpdated.emit(this.selection.selectedBlocks);
+      this.slots.selectedBlocksUpdated.emit([...this.selection.selectedBlocks]);
+      this.slots.selectionUpdated.emit({ ...this.selection.state });
     });
     resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
@@ -864,7 +872,7 @@ export class EdgelessPageBlockComponent
     );
 
     const blockContainerStyle = {
-      cursor: getCursorMode(this.mouseMode),
+      cursor: getCursorMode(mouseMode),
       '--affine-edgeless-gap': `${gap}px`,
       '--affine-edgeless-grid': grid,
       '--affine-edgeless-x': `${translateX}px`,
@@ -897,6 +905,7 @@ export class EdgelessPageBlockComponent
         ${state.selected.length
           ? html`
               <edgeless-selected-rect
+                disabled=${mouseMode.type === 'pan'}
                 .page=${page}
                 .state=${state}
                 .slots=${this.slots}

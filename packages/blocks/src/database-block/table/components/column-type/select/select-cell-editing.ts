@@ -35,7 +35,7 @@ const styles = css`
   affine-database-select-cell-editing {
     z-index: 2;
     border: 1px solid var(--affine-border-color);
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-2);
   }
@@ -98,7 +98,12 @@ const styles = css`
     display: flex;
     align-items: center;
   }
-
+  .select-selected > .close-icon:hover {
+    cursor: pointer;
+  }
+  .select-selected > .close-icon > svg {
+    fill: var(--affine-black-90);
+  }
   .select-option-new {
     display: flex;
     flex-direction: row;
@@ -130,7 +135,6 @@ const styles = css`
     width: 16px;
     height: 16px;
   }
-
   .select-option {
     display: flex;
     justify-content: space-between;
