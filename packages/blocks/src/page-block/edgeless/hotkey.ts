@@ -1,4 +1,5 @@
 import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
+import { matchFlavours } from '@blocksuite/store';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
@@ -152,11 +153,13 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
 
     hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {
       keyboardEvent.preventDefault();
-      const pageModels = (edgeless.page.root?.children.filter(
-        child => child.flavour === 'affine:frame'
-      ) ?? []) as TopLevelBlockModel[];
+
+      const frames = (edgeless.page.root?.children ?? []).filter(child =>
+        matchFlavours(child, ['affine:frame'])
+      ) as TopLevelBlockModel[];
+
       edgeless.slots.selectionUpdated.emit({
-        selected: [...pageModels, ...edgeless.surface.getElementList()],
+        selected: [...frames, ...edgeless.surface.getElements()],
         active: false,
       });
     });

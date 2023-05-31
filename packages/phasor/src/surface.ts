@@ -314,7 +314,7 @@ export class SurfaceManager {
     });
   }
 
-  getElementList = () => {
+  getElements() {
     return [...this._elements.values()];
-  };
+  }
 }
