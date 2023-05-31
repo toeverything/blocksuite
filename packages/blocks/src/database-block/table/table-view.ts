@@ -51,6 +51,7 @@ const styles = css`
   }
   .affine-database-block-table::-webkit-scrollbar {
     -webkit-appearance: none;
+    display: block;
   }
   .affine-database-block-table::-webkit-scrollbar:horizontal {
     height: 4px;
