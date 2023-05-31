@@ -139,9 +139,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const delta = zoom - this.zoom;
 
     const innerSmoothZoom = () => {
-      if (this._rafId) {
-        cancelAnimationFrame(this._rafId);
-      }
+      if (this._rafId) cancelAnimationFrame(this._rafId);
       this._rafId = requestAnimationFrame(() => {
         const sign = delta > 0 ? 1 : -1;
         const total = 10;
@@ -213,9 +211,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { viewport } = this.edgeless.surface;
     const delta = { x: x - viewport.centerX, y: y - viewport.centerY };
     const innerSmoothTranslate = () => {
-      if (this._rafId) {
-        cancelAnimationFrame(this._rafId);
-      }
+      if (this._rafId) cancelAnimationFrame(this._rafId);
       this._rafId = requestAnimationFrame(() => {
         const rate = 10;
         const step = { x: delta.x / rate, y: delta.y / rate };

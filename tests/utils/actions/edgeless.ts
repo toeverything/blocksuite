@@ -11,7 +11,11 @@ import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 import { SHIFT_KEY, SHORT_KEY, type } from './keyboard.js';
 import { MODIFIER_KEY } from './keyboard.js';
-import { getEditorLocator, waitForVirgoStateUpdated } from './misc.js';
+import {
+  getEditorLocator,
+  waitForVirgoStateUpdated,
+  waitNextFrame,
+} from './misc.js';
 
 export async function getFrameRect(
   page: Page,
@@ -368,6 +372,33 @@ export async function zoomByMouseWheel(
   await page.keyboard.down(SHORT_KEY);
   await page.mouse.wheel(stepX, stepY);
   await page.keyboard.up(SHORT_KEY);
+}
+
+export async function zoomFitByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 50 });
+}
+
+export async function zoomOutByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 50 });
+}
+
+export async function zoomResetByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+0`, { delay: 50 });
+}
+
+export async function zoomInByKeyboard(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+=`, { delay: 50 });
+}
+
+export async function getZoomLevel(page: Page) {
+  const span = page.locator('.zoom-percent');
+  // fixme
+  await waitNextFrame(page, 60 / 0.25);
+  const text = await span.textContent();
+  if (!text) {
+    throw new Error('Missing .zoom-percent');
+  }
+  return Number(text.replace('%', ''));
 }
 
 export async function optionMouseDrag(page: Page, start: IPoint, end: IPoint) {
