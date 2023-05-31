@@ -26,6 +26,8 @@ export function initChangeColumnWidthHandlers(
   let changeColumnWidthConfig: ColumnWidthConfig | null = null;
 
   const onColumnWidthPointerdown = (event: PointerEvent, index: number) => {
+    event.stopPropagation();
+
     // all rows cell in current column
     const currentColumnCells = Array.from(
       tableContainer.querySelectorAll<HTMLElement>(
@@ -54,6 +56,7 @@ export function initChangeColumnWidthHandlers(
   };
 
   const onColumnWidthPointermove = (event: PointerEvent) => {
+    event.stopPropagation();
     if (!changeColumnWidthConfig) return;
 
     const {
@@ -135,6 +138,8 @@ export function initChangeColumnWidthHandlers(
   };
 
   const onColumnWidthPointerup = (event: PointerEvent) => {
+    event.stopPropagation();
+
     changeActiveColumnIndex(-1);
     if (!changeColumnWidthConfig) return;
     const { rafId, index, rowCells } = changeColumnWidthConfig;
