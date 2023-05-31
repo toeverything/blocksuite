@@ -1,4 +1,4 @@
-import { getStrokePoints } from '../../perfect-freehand/getStrokePoints.js';
+import { getStroke } from '../../perfect-freehand/getStroke.js';
 import {
   Bound,
   getBoundFromPoints,
@@ -10,11 +10,11 @@ import { SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
-  return getStrokePoints(points, {
+  return getStroke(points, {
     size: lineWidth,
-    thinning: 0.65,
-    streamline: 0.65,
-    smoothing: 0.65,
+    thinning: 0.6,
+    streamline: 0.5,
+    smoothing: 0.5,
     easing: t => Math.sin((t * Math.PI) / 2),
     simulatePressure: true,
   });
@@ -39,14 +39,11 @@ export class BrushElement extends SurfaceElement<IBrush> {
 
   override render(ctx: CanvasRenderingContext2D) {
     const stroke = getSolidStrokePoints(this.points, this.lineWidth);
-    const commands = Utils.getSvgPathFromStrokePoints(stroke);
+    const commands = Utils.getSvgPathFromStroke(stroke);
     const path = new Path2D(commands);
 
-    ctx.strokeStyle = this.transformPropertyValue(this.color);
-    ctx.lineWidth = this.lineWidth;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke(path);
+    ctx.fillStyle = this.computedValue(this.color);
+    ctx.fill(path);
   }
 
   override applyUpdate(props: Partial<IBrush>) {

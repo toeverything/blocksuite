@@ -40,6 +40,36 @@ export class DatabaseCellContainer
     return this.databaseModel.page.readonly;
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    const disposables = this._disposables;
+    disposables.addFromEvent(this, 'click', this._onClick);
+  }
+
+  protected override firstUpdated() {
+    this.setAttribute('data-block-is-database-input', 'true');
+    this.setAttribute('data-row-id', this.rowModel.id);
+    this.setAttribute('data-column-id', this.column.id);
+  }
+
+  private _onClick = (event: Event) => {
+    if (this.readonly) return;
+
+    this._isEditing = true;
+    this.removeEventListener('click', this._onClick);
+    setTimeout(() => {
+      onClickOutside(
+        this,
+        () => {
+          this.addEventListener('click', this._onClick);
+          this._isEditing = false;
+        },
+        'mousedown'
+      );
+    });
+  };
+
   setValue(value: unknown, option: SetValueOption = { captureSync: true }) {
     queueMicrotask(() => {
       if (option.captureSync) {
@@ -77,44 +107,6 @@ export class DatabaseCellContainer
   setHeight = (height: number) => {
     this.style.height = `${height + CELL_PADDING * 2}px`;
   };
-
-  protected override firstUpdated() {
-    this.setAttribute('data-block-is-database-input', 'true');
-    this.setAttribute('data-row-id', this.rowModel.id);
-    this.setAttribute('data-column-id', this.column.id);
-
-    // prevent block selection
-    const onStopPropagation = (event: Event) => event.stopPropagation();
-    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
-    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
-  }
-
-  private _onClick = (event: Event) => {
-    if (this.readonly) return;
-
-    this._isEditing = true;
-    this.removeEventListener('click', this._onClick);
-    setTimeout(() => {
-      onClickOutside(
-        this,
-        () => {
-          this.addEventListener('click', this._onClick);
-          this._isEditing = false;
-        },
-        'mousedown'
-      );
-    });
-  };
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.addEventListener('click', this._onClick);
-  }
-
-  override disconnectedCallback() {
-    this.removeEventListener('click', this._onClick);
-    super.disconnectedCallback();
-  }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {

@@ -2,25 +2,26 @@
 import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
-import { ShadowlessElement } from '@blocksuite/lit';
-import type { TemplateResult } from 'lit';
+import { BlockElement } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 
-import { getDefaultPageBlock } from '../__internal__/index.js';
+import { getPageBlock } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
 import { registerService } from '../__internal__/service.js';
+import { DefaultPageBlockComponent } from '../index.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListBlockService } from './list-service.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 @customElement('affine-list')
-export class ListBlockComponent extends ShadowlessElement {
+export class ListBlockComponent extends BlockElement<ListBlockModel> {
   static override styles = css`
     .affine-list-block-container {
       box-sizing: border-box;
@@ -53,7 +54,7 @@ export class ListBlockComponent extends ShadowlessElement {
       align-items: center;
       justify-content: flex-start;
       align-self: flex-start;
-      color: var(--affine-code-color);
+      color: var(--affine-list-color);
       font-size: 14px;
       line-height: var(--affine-line-height);
       user-select: none;
@@ -76,14 +77,8 @@ export class ListBlockComponent extends ShadowlessElement {
     }
   `;
 
-  @property()
-  model!: ListBlockModel;
-
   @state()
   showChildren = true;
-
-  @property()
-  content!: TemplateResult;
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
@@ -91,8 +86,11 @@ export class ListBlockComponent extends ShadowlessElement {
   };
 
   private _select() {
-    const { selection } = getDefaultPageBlock(this.model);
-    selection?.selectOneBlock(this);
+    const pageBlock = getPageBlock(this.model);
+    assertExists(pageBlock);
+    if (pageBlock instanceof DefaultPageBlockComponent) {
+      pageBlock.selection.selectOneBlock(this);
+    }
   }
 
   private _onClickIcon = (e: MouseEvent) => {

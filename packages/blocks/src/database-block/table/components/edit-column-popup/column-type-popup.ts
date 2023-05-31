@@ -52,9 +52,10 @@ const styles = css`
     width: 200px;
     padding: 8px;
     border: 1px solid var(--affine-border-color);
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-menu-shadow);
+    font-family: var(--affine-font-family);
   }
   ${actionStyles}
   .action > svg {

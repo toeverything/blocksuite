@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  assertMouseMode,
   pickColorAtPoints,
   selectBrushColor,
   selectBrushSize,
@@ -18,6 +19,7 @@ import {
 import {
   assertEdgelessColorSameWithHexColor,
   assertEdgelessHoverRect,
+  assertEdgelessSelectedRect,
   assertSameColor,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -44,10 +46,9 @@ test('add brush element', async ({ page }) => {
 
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 200 };
-  await addBasicBrushElement(page, start, end);
+  await addBasicBrushElement(page, start, end, false);
 
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+  await assertMouseMode(page, 'brush');
 });
 
 test('resize brush element', async ({ page }) => {
@@ -116,8 +117,8 @@ test('add brush element with different size', async ({ page }) => {
 
   await assertEdgelessColorSameWithHexColor(page, color, topEdge);
   await assertEdgelessColorSameWithHexColor(page, color, bottomEdge);
-  assertSameColor(nearTopEdge, '#000000');
-  assertSameColor(nearBottomEdge, '#000000');
+  assertSameColor(nearTopEdge, '#4f90ff');
+  assertSameColor(nearBottomEdge, '#4f90ff');
 });
 
 test('change brush element size by component-toolbar', async ({ page }) => {

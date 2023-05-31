@@ -53,6 +53,18 @@ export class EdgelessClipboard implements Clipboard {
     document.body.addEventListener('paste', this._onPaste);
   }
 
+  get selection() {
+    return this._edgeless.selection;
+  }
+
+  get slots() {
+    return this._edgeless.slots;
+  }
+
+  get surface() {
+    return this._edgeless.surface;
+  }
+
   public dispose() {
     document.body.removeEventListener('cut', this._onCut);
     document.body.removeEventListener('copy', this._onCopy);
@@ -66,22 +78,22 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     this._onCopy(e);
 
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
+    const { state } = this.selection;
+    if (state.active) {
       deleteModelsByRange(this._page);
       return;
     }
 
     this._page.transact(() => {
-      selection.selected.forEach(selected => {
+      state.selected.forEach(selected => {
         if (isTopLevelBlock(selected)) {
           this._page.deleteBlock(selected);
         } else {
-          this._edgeless.surface.removeElement(selected.id);
+          this.surface.removeElement(selected.id);
         }
       });
     });
-    this._edgeless.slots.selectionUpdated.emit({ active: false, selected: [] });
+    this.slots.selectionUpdated.emit({ active: false, selected: [] });
   };
 
   private _onCopy = (e: ClipboardEvent) => {
@@ -89,15 +101,15 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
+    const { state } = this.selection;
     // when frame active, handle copy like page mode
-    if (selection.active) {
+    if (state.active) {
       const range = getCurrentBlockRange(this._page);
       assertExists(range);
       copyBlocks(range);
       return;
     }
-    const data = selection.selected
+    const data = state.selected
       .map(selected => {
         if (isTopLevelBlock(selected)) {
           return getBlockClipboardInfo(selected).json;
@@ -116,8 +128,8 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const selection = this._edgeless.getSelection().blockSelectionState;
-    if (selection.active) {
+    const { state } = this.selection;
+    if (state.active) {
       this._pasteInTextFrame(e);
       return;
     }
@@ -152,11 +164,11 @@ export class EdgelessClipboard implements Clipboard {
     const phasorElements =
       (elements
         ?.map(d => {
-          const id = this._edgeless.surface.addElement(
+          const id = this.surface.addElement(
             d.type as keyof PhasorElementType,
             d
           );
-          const element = this._edgeless.surface.pickById(id);
+          const element = this.surface.pickById(id);
           return element;
         })
         .filter(e => !!e) as PhasorElement[]) || [];
@@ -170,7 +182,7 @@ export class EdgelessClipboard implements Clipboard {
     oldCommonBound: Bound
   ) {
     const frameIds = await Promise.all(
-      frames.map(async ({ xywh, children }) => {
+      frames.map(async ({ xywh, children, background }) => {
         const [oldX, oldY, oldW, oldH] = xywh
           ? deserializeXYWH(xywh)
           : [
@@ -189,6 +201,7 @@ export class EdgelessClipboard implements Clipboard {
           'affine:frame',
           {
             xywh: newXywh,
+            background,
           },
           this._page.root?.id
         );
@@ -233,14 +246,16 @@ export class EdgelessClipboard implements Clipboard {
   ) {
     const newSelected = [
       ...(phasorElementIds
-        .map(id => this._edgeless.surface.pickById(id))
+        .map(id => this.surface.pickById(id))
         .filter(e => !!e) as PhasorElement[]),
       ...(frameIds
         .map(id => this._page.getBlockById(id))
-        .filter(f => !!f) as TopLevelBlockModel[]),
+        .filter(
+          f => !!f && f.flavour === 'affine:frame'
+        ) as TopLevelBlockModel[]),
     ];
 
-    this._edgeless.slots.selectionUpdated.emit({
+    this.slots.selectionUpdated.emit({
       active: false,
       selected: newSelected,
     });
@@ -263,8 +278,8 @@ export class EdgelessClipboard implements Clipboard {
       groupedByType.frames || []
     );
 
-    const lastMousePos = this._edgeless.getSelection().lastMousePos;
-    const [modelX, modelY] = this._edgeless.surface.toModelCoord(
+    const { lastMousePos } = this.selection;
+    const [modelX, modelY] = this.surface.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
     );
@@ -280,7 +295,7 @@ export class EdgelessClipboard implements Clipboard {
         ele.h
       );
 
-      this._edgeless.surface.updateElement(ele.id, {
+      this.surface.updateElement(ele.id, {
         xywh: newXYWH,
       });
     });

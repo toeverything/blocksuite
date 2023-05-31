@@ -43,10 +43,22 @@ export async function json2block(
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
 
+    const shouldSplitBlock = focusedBlockModel.text?.length !== range.endOffset;
+
+    shouldSplitBlock &&
+      (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
+
     if (shouldMergeFirstBlock) {
       focusedBlockModel.text?.insertList(
         firstBlock.text || [],
         range?.startOffset || 0
+      );
+
+      await addSerializedBlocks(
+        page,
+        firstBlock.children || [],
+        focusedBlockModel,
+        0
       );
 
       await setRange(focusedBlockModel, {
@@ -54,12 +66,6 @@ export async function json2block(
         length: 0,
       });
     } else {
-      const shouldSplitBlock =
-        focusedBlockModel.text?.length !== range.endOffset;
-
-      shouldSplitBlock &&
-        (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
-
       const [id] = await addSerializedBlocks(
         page,
         pastedBlocks,
@@ -90,6 +96,12 @@ export async function json2block(
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
       range?.startOffset || 0
+    );
+    await addSerializedBlocks(
+      page,
+      firstBlock.children || [],
+      focusedBlockModel,
+      0
     );
   }
 
@@ -152,6 +164,7 @@ export async function addSerializedBlocks(
   for (let i = 0; i < serializedBlocks.length; i++) {
     const json = serializedBlocks[i];
     const flavour = json.flavour as keyof BlockModels;
+    // XXX: block props should not be written here !!!
     const blockProps = {
       flavour,
       type: json.type as string,
@@ -161,9 +174,15 @@ export async function addSerializedBlocks(
       width: json.width,
       height: json.height,
       language: json.language,
-      title: json.databaseProps?.title,
+      title: json.databaseProps?.title || json.title,
       titleColumnName: json.databaseProps?.titleColumnName,
       titleColumnWidth: json.databaseProps?.titleColumnWidth,
+      // bookmark
+      url: json.url,
+      description: json.description,
+      icon: json.icon,
+      image: json.image,
+      crawled: json.crawled,
     };
     const id = page.addBlock(flavour, blockProps, parent, index + i);
     addedBlockIds.push(id);

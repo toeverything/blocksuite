@@ -69,6 +69,7 @@ export function createLink(page: Page) {
   setTimeout(async () => {
     const linkState = await showLinkPopover({
       anchorEl: mockSelection.shadowRoot?.querySelector('div') as HTMLElement,
+      page,
     });
 
     mockSelection.remove();

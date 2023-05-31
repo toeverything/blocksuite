@@ -3,16 +3,16 @@ import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
   BlockHubIcon,
+  BlockHubRoundedRectangleIcon,
   CrossIcon,
   DatabaseTableViewIcon,
-  ImageIcon,
+  EmbedIcon,
   NumberedListIconLarge,
-  RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import {
   customElement,
@@ -35,7 +35,6 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
-  WithDisposable,
 } from '../__internal__/index.js';
 import { type DragIndicator } from './drag-handle.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
@@ -47,6 +46,12 @@ const styles = css`
     user-select: none;
   }
 
+  @media print {
+    affine-block-hub {
+      display: none;
+    }
+  }
+
   .affine-block-hub-container {
     width: 274px;
     position: absolute;
@@ -55,6 +60,7 @@ const styles = css`
     display: none;
     justify-content: center;
     fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
     font-size: var(--affine-font-sm);
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-menu-shadow);
@@ -113,7 +119,6 @@ const styles = css`
 
   .card-container-inner:hover .card-container {
     background: var(--affine-hover-color);
-    fill: var(--affine-primary-color);
     top: -2px;
     left: -2px;
   }
@@ -185,11 +190,16 @@ const styles = css`
     position: relative;
     border-radius: 4px;
     fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
     height: 36px;
+  }
+  .block-hub-icon-container svg {
+    width: 24px;
+    height: 24px;
   }
 
   .block-hub-icon-container[selected='true'] {
-    fill: var(--affine-primary-color);
+    background: var(--affine-hover-color);
   }
 
   .block-hub-icon-container:hover {
@@ -219,7 +229,6 @@ const styles = css`
   .new-icon:hover {
     box-shadow: var(--affine-menu-shadow);
     background: var(--affine-white);
-    fill: var(--affine-primary-color);
   }
 
   .icon-expanded {
@@ -342,7 +351,8 @@ function BlockHubMenu(
   visibleCardType: CardListType | null,
   isCardListVisible: boolean,
   showTooltip: boolean,
-  maxHeight: number
+  maxHeight: number,
+  page: Page
 ) {
   const menuNum = enableDatabase ? 5 : 4;
   const height = menuNum * 44 + 10;
@@ -358,9 +368,14 @@ function BlockHubMenu(
   );
 
   const blockHubFileCards = BlockHubCards(
-    BLOCKHUB_FILE_ITEMS,
+    BLOCKHUB_FILE_ITEMS.filter(({ flavour }) => {
+      if (flavour === 'affine:bookmark') {
+        return page.awarenessStore.getFlag('enable_bookmark_operation');
+      }
+      return true;
+    }),
     'file',
-    'Image or file',
+    'Content & Media',
     maxHeight,
     shouldDisplayCard('file', expanded, isCardListVisible, visibleCardType),
     isGrabbing,
@@ -383,7 +398,7 @@ function BlockHubMenu(
         affine-flavour="affine:paragraph"
         affine-type="text"
       >
-        ${RectIcon}
+        ${BlockHubRoundedRectangleIcon}
         <tool-tip
           inert
           role="tooltip"
@@ -411,7 +426,7 @@ function BlockHubMenu(
         type="file"
         selected=${visibleCardType === 'file' ? 'true' : 'false'}
       >
-        ${blockHubFileCards} ${ImageIcon}
+        ${blockHubFileCards} ${EmbedIcon}
       </div>
       ${enableDatabase
         ? html`
@@ -446,9 +461,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
    */
   @property()
   public getAllowedBlocks: () => BaseBlockModel[];
-
-  @property()
-  public onDragStarted: () => void;
 
   @property()
   public getHoveringFrameState: (point: Point) => {
@@ -492,12 +504,21 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   @query('[role="menuitem"]')
   private _blockHubMenuEntry!: HTMLElement;
 
+  private _page: Page;
+
+  private readonly _onDragStartCallback: () => void;
+
   private readonly _onDropCallback: (
     e: DragEvent,
     point: Point,
     lastModelState: EditingState | null,
     lastType: DroppingType
   ) => Promise<void>;
+
+  private readonly _onClickCardCallback: (data: {
+    flavour: string;
+    type?: string;
+  }) => Promise<void>;
 
   private _currentClientX = 0;
   private _currentClientY = 0;
@@ -521,21 +542,26 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect?: Rect;
       scale: number;
     };
-    onDragStarted: () => void;
-    onDropCallback: (
+    onDragStart: () => void;
+    onDrop: (
       e: DragEvent,
       point: Point,
       lastModelState: EditingState | null,
       lastType: DroppingType
     ) => Promise<void>;
+    onClickCard: (data: { flavour: string; type?: string }) => Promise<void>;
+    page: Page;
   }) {
     super();
+    this._page = options.page;
     this._mouseRoot = options.mouseRoot;
     this._enableDatabase = options.enableDatabase;
-    this.onDragStarted = options.onDragStarted;
     this.getAllowedBlocks = options.getAllowedBlocks;
     this.getHoveringFrameState = options.getHoveringFrameState;
-    this._onDropCallback = options.onDropCallback;
+
+    this._onDragStartCallback = options.onDragStart;
+    this._onDropCallback = options.onDrop;
+    this._onClickCardCallback = options.onClickCard;
   }
 
   override connectedCallback() {
@@ -569,6 +595,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._blockHubCards.forEach(card => {
       disposables.addFromEvent(card, 'mousedown', this._onCardMouseDown);
       disposables.addFromEvent(card, 'mouseup', this._onCardMouseUp);
+      disposables.addFromEvent(card, 'click', e => this._onClickCard(e, card));
     });
     for (const blockHubMenu of this._blockHubMenus) {
       disposables.addFromEvent(
@@ -594,12 +621,16 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       'mouseover',
       this._onBlockHubEntryMouseOver
     );
-    disposables.addFromEvent(document, 'click', this._onClick);
+    disposables.addFromEvent(document, 'click', this._onClickOutside);
     disposables.addFromEvent(
       this._blockHubButton,
       'click',
       this._onBlockHubButtonClick
     );
+    disposables.addFromEvent(this._blockHubButton, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
     disposables.addFromEvent(
       this._blockHubIconsContainer,
       'transitionstart',
@@ -640,20 +671,31 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onClick = (e: MouseEvent) => {
+  private _onClickOutside = (e: MouseEvent) => {
     const target = e.target;
     if (target instanceof HTMLElement && !target.closest('affine-block-hub')) {
       this._hideCardList();
     }
   };
 
-  public toggleMenu(open: boolean) {
-    if (open) {
-      this._expanded = true;
-    } else {
-      this._expanded = false;
-      this._hideCardList();
+  private _onClickCard = (e: MouseEvent, blockHubElement: HTMLElement) => {
+    const affineType = blockHubElement.getAttribute('affine-type');
+    assertExists(affineType);
+    const data: {
+      flavour: string;
+      type?: string;
+    } = {
+      flavour: blockHubElement.getAttribute('affine-flavour') ?? '',
+    };
+    if (affineType) {
+      data.type = affineType;
     }
+    this._onClickCardCallback(data);
+  };
+
+  public toggleMenu() {
+    this._expanded = !this._expanded;
+    if (!this._expanded) this._hideCardList();
   }
 
   private _onBlockHubButtonClick = (_: MouseEvent) => {
@@ -688,7 +730,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
     event.dataTransfer.setData('affine/block-hub', JSON.stringify(data));
     this._lastDraggingFlavour = data.flavour;
-    this.onDragStarted();
+    this._onDragStartCallback();
   };
 
   private _onMouseDown = (e: MouseEvent) => {
@@ -844,7 +886,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._visibleCardType,
       this._isCardListVisible,
       this._showTooltip,
-      this._maxHeight
+      this._maxHeight,
+      this._page
     );
 
     const blockHubCards = BlockHubCards(

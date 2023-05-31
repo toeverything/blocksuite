@@ -5,6 +5,7 @@ import {
   isCaptionElement,
   isDatabaseInput,
   isInsideDatabaseTitle,
+  isInsideEdgelessTextEditor,
   isInsidePageTitle,
   isInsideRichText,
 } from './query.js';
@@ -53,6 +54,10 @@ function shouldFilterHotkey(event: KeyboardEvent) {
       (isInsideDatabaseTitle(event.target) || isDatabaseInput(event.target)) &&
       isUndoRedo(event)
     ) {
+      return false;
+    }
+    // undo/redo should work in edgeless text editor
+    if (isInsideEdgelessTextEditor(event.target) && isUndoRedo(event)) {
       return false;
     }
     // Some event dispatch from body

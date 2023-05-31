@@ -12,7 +12,7 @@ export default defineConfig({
         text: 'Playground',
         link: 'https://blocksuite-toeverything.vercel.app/?init',
       },
-      { text: 'Docs', link: '/introduction' },
+      { text: 'Docs', link: '/blocksuite-overview' },
       // { text: 'API', link: '' },
       {
         text: 'Releases',
@@ -23,7 +23,13 @@ export default defineConfig({
     sidebar: [
       {
         text: 'Introduction',
-        items: [{ text: 'Introduction', link: '/introduction' }],
+        items: [
+          { text: 'BlockSuite Overview', link: '/blocksuite-overview' },
+          {
+            text: 'The Local-First Paradigm',
+            link: '/the-local-first-paradigm',
+          },
+        ],
       },
       {
         text: 'Using BlockSuite',

@@ -1,23 +1,26 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
+import type { PointerEventState } from '@blocksuite/lit';
 import {
-  type Bound,
-  ConnectorElement,
+  Bound,
   type Controller,
   type PhasorElement,
   type SurfaceManager,
   type SurfaceViewport,
+  TextElement,
 } from '@blocksuite/phasor';
-import { ConnectorMode } from '@blocksuite/phasor';
+import { ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
 import {
   contains,
   deserializeXYWH,
   intersects,
   isPointIn as isPointInFromPhasor,
+  normalizeWheelDeltaY,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
+import { assertExists, type Page } from '@blocksuite/store';
+import * as Y from 'yjs';
 
 import {
   handleNativeRangeAtPoint,
@@ -25,8 +28,9 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import type { SelectionEvent } from '../../__internal__/utils/gesture/selection-event.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
+import { DEFAULT_TEXT_COLOR } from './components/component-toolbar/change-text-button.js';
+import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
   EdgelessContainer,
   EdgelessPageBlockComponent,
@@ -40,9 +44,6 @@ export const DEFAULT_FRAME_WIDTH = 448;
 export const DEFAULT_FRAME_HEIGHT = 72;
 export const DEFAULT_FRAME_OFFSET_X = 30;
 export const DEFAULT_FRAME_OFFSET_Y = 40;
-
-export const ZOOM_MAX = 3.0;
-export const ZOOM_MIN = 0.1;
 
 const ATTACHED_DISTANCE = 20;
 
@@ -122,14 +123,8 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
         e.clientY - rect.y
       );
 
-      let delta = e.deltaX !== 0 ? -e.deltaX : -e.deltaY;
-      // The delta step when using the mouse wheel is greater than 100, resulting in overly fast zooming
-      // Chromium reports deltaX/deltaY scaled by host device scale factor.
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
-      if (Math.abs(delta) > 100) {
-        delta = 10 * Math.sign(delta);
-      }
-      viewport.applyDeltaZoom(delta);
+      const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
+      viewport.setZoom(zoom);
       const newZoom = viewport.zoom;
 
       const offsetX = centerX - baseX;
@@ -188,14 +183,19 @@ export function pickBy(
   return selectedShapes.length
     ? selectedShapes[selectedShapes.length - 1]
     : pickTopBlock(
-        (page.root?.children as TopLevelBlockModel[]) ?? [],
+        (page.root?.children as TopLevelBlockModel[]).filter(
+          child => child.flavour === 'affine:frame'
+        ) ?? [],
         modelX,
         modelY
       );
 }
 
 function pickById(surface: SurfaceManager, page: Page, id: string) {
-  const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+  const blocks =
+    (page.root?.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[]) ?? [];
   const element = surface.pickById(id) || blocks.find(b => b.id === id);
   return element;
 }
@@ -434,7 +434,7 @@ export function handleElementChangedEffectForConnector(
           fixed
         );
 
-        surface.updateElement(id, {
+        surface.updateElement<'connector'>(id, {
           controllers: routes,
         });
       }
@@ -450,47 +450,46 @@ export function getBackgroundGrid(
 ) {
   const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
   const gap = 20 * step * zoom;
-  const translateX = -viewportX * zoom + gap / 2;
-  const translateY = -viewportY * zoom + gap / 2;
-
-  const gridStyle = {
-    backgroundImage:
-      'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)',
-  };
-  const defaultStyle = {};
-  const style = showGrid ? gridStyle : defaultStyle;
+  const translateX = -viewportX * zoom;
+  const translateY = -viewportY * zoom;
 
   return {
-    style,
     gap,
     translateX,
     translateY,
+    grid: showGrid
+      ? 'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)'
+      : 'unset',
   };
 }
 
-export function addText(
+export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
-  event: SelectionEvent,
+  event: PointerEventState,
   width = DEFAULT_FRAME_WIDTH
 ) {
   const frameId = edgeless.addFrameWithPoint(
-    new Point(event.x, event.y),
-    width
+    new Point(event.point.x, event.point.y),
+    {
+      width,
+    }
   );
   page.addBlock('affine:paragraph', {}, frameId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
   // Wait for mouseMode updated
   requestAnimationFrame(() => {
-    const blocks = (page.root?.children as TopLevelBlockModel[]) ?? [];
+    const blocks =
+      (page.root?.children.filter(
+        child => child.flavour === 'affine:frame'
+      ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === frameId);
     if (element) {
-      const selectionState = {
+      edgeless.slots.selectionUpdated.emit({
         selected: [element],
         active: true,
-      };
-      edgeless.slots.selectionUpdated.emit(selectionState);
+      });
 
       // Waiting dom updated, `frame mask` is removed
       edgeless.updateComplete.then(() => {
@@ -500,4 +499,56 @@ export function addText(
       });
     }
   });
+}
+
+export function mountTextEditor(
+  textElement: TextElement,
+  edgeless: EdgelessPageBlockComponent
+) {
+  const textEditor = new SurfaceTextEditor();
+  const pageBlockContainer = edgeless.pageBlockContainer;
+
+  pageBlockContainer.appendChild(textEditor);
+  textEditor.mount(textElement, edgeless);
+  textEditor.vEditor?.focusEnd();
+  edgeless.selection.switchToDefaultMode({
+    selected: [textElement],
+    active: true,
+  });
+}
+
+export function addText(
+  edgeless: EdgelessPageBlockComponent,
+  event: PointerEventState
+) {
+  const selected = edgeless.surface.pickTop(event.x, event.y);
+  if (!selected) {
+    const [modelX, modelY] = edgeless.surface.viewport.toModelCoord(
+      event.x,
+      event.y
+    );
+    const id = edgeless.surface.addElement('text', {
+      xywh: new Bound(modelX, modelY, 32, 32).serialize(),
+      text: new Y.Text(),
+      textAlign: 'left',
+      fontSize: 24,
+      color: DEFAULT_TEXT_COLOR,
+    });
+    edgeless.page.captureSync();
+    const textElement = edgeless.surface.pickById(id);
+    assertExists(textElement);
+    if (textElement instanceof TextElement) {
+      mountTextEditor(textElement, edgeless);
+    }
+  }
+}
+
+export function xywhArrayToObject(element: TopLevelBlockModel) {
+  const [x, y, w, h] = deserializeXYWH(element.xywh);
+  return {
+    x,
+    y,
+    w,
+    h,
+  };
 }

@@ -1,11 +1,9 @@
 import { Rectangle } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import { deserializeXYWH, StrokeStyle } from '@blocksuite/phasor';
 
-import type {
-  ConnectorMouseMode,
-  SelectionEvent,
-} from '../../../__internal__/index.js';
+import type { ConnectorMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import type { Selectable, SelectionArea } from '../selection-manager.js';
 import {
@@ -38,23 +36,23 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     return pickBy(surface, this._page, x, y, filter);
   }
 
-  onContainerClick(e: SelectionEvent): void {
+  onContainerClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerContextMenu(e: SelectionEvent): void {
+  onContainerContextMenu(e: PointerEventState): void {
     noop();
   }
 
-  onContainerDblClick(e: SelectionEvent): void {
+  onContainerDblClick(e: PointerEventState): void {
     noop();
   }
 
-  onContainerTripleClick(e: SelectionEvent) {
+  onContainerTripleClick(e: PointerEventState) {
     noop();
   }
 
-  onContainerDragStart(e: SelectionEvent) {
+  onContainerDragStart(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._page.captureSync();
@@ -108,7 +106,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragMove(e: SelectionEvent) {
+  onContainerDragMove(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     assertExists(this._draggingElementId);
@@ -149,7 +147,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
       mode
     );
 
-    this._surface.updateElement(id, {
+    this._surface.updateElement<'connector'>(id, {
       controllers: routes,
       endElement:
         end && endPosition ? { id: end.id, position: endPosition } : undefined,
@@ -158,22 +156,32 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragEnd(e: SelectionEvent) {
+  onContainerDragEnd(e: PointerEventState) {
+    const id = this._draggingElementId;
+    assertExists(id);
+
     this._draggingElementId = null;
     this._draggingArea = null;
+
     this._page.captureSync();
-    this._edgeless.slots.surfaceUpdated.emit();
+
+    const element = this._surface.pickById(id);
+    assertExists(element);
+    this._edgeless.selection.switchToDefaultMode({
+      selected: [element],
+      active: false,
+    });
   }
 
-  onContainerMouseMove(e: SelectionEvent) {
+  onContainerMouseMove(e: PointerEventState) {
     noop();
   }
 
-  onContainerMouseOut(e: SelectionEvent) {
+  onContainerMouseOut(e: PointerEventState) {
     noop();
   }
 
-  clearSelection() {
+  onPressShiftKey(_: boolean) {
     noop();
   }
 }

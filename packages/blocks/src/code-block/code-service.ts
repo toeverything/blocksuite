@@ -50,18 +50,26 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     block: CodeBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ): string {
-    const codeElement = document.querySelector(
-      `[${BLOCK_ID_ATTR}="${block.id}"] pre`
+    const richTextElement = document.querySelector(
+      `[${BLOCK_ID_ATTR}="${block.id}"] rich-text`
     );
-    if (!codeElement) {
+    if (!richTextElement) {
       return super.block2html(block, {
         childText,
         begin,
         end,
       });
     }
-    codeElement.setAttribute('code-lang', block.language);
-    return codeElement.outerHTML;
+    const preElement = document.createElement('pre');
+    const codeElement = document.createElement('code');
+    preElement.setAttribute('code-lang', block.language);
+    codeElement.innerHTML = Array.from(
+      richTextElement.querySelectorAll('v-line')
+    )
+      .map(line => line.textContent + '\n')
+      .join('');
+    preElement.append(codeElement);
+    return preElement.outerHTML;
   }
 
   override async json2Block(

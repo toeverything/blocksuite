@@ -41,6 +41,9 @@ export function DataBaseRowContainer(
         flex-direction: row;
         border-bottom: 1px solid var(--affine-border-color);
       }
+      .affine-database-block-row.selected > .database-cell {
+        background: transparent;
+      }
       .affine-database-block-row > .affine-database-block-row-cell:first-child {
         background: var(--affine-hover-color);
       }
@@ -57,10 +60,17 @@ export function DataBaseRowContainer(
         border-right: 1px solid var(--affine-border-color);
         transform: translateX(0);
       }
-      .affine-database-block-row-cell-content > .affine-block-element {
+      .affine-database-block-row-cell-content > [data-block-id] {
         width: 100%;
       }
+      .affine-database-block-row-cell-content > affine-paragraph {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+      }
       .affine-database-block-row-cell-content > affine-paragraph > .text {
+        width: 100%;
         margin-top: unset;
       }
       .database-cell {
@@ -81,7 +91,8 @@ export function DataBaseRowContainer(
           return html`
             <div
               class="affine-database-block-row database-row"
-              data-row-id="${idx}"
+              data-row-index="${idx}"
+              data-row-id="${child.id}"
             >
               <div
                 class="affine-database-block-row-cell database-cell"

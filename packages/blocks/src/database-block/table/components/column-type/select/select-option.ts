@@ -1,11 +1,10 @@
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { setupVirgoScroll } from '../../../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../../../components/virgo-input/virgo-input.js';
-import { WithDisposable } from '../../../../../std.js';
 import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { SelectTag } from '../../../types.js';
@@ -19,13 +18,14 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     }
     .select-option-text {
       display: inline-block;
-      min-width: 2px;
+      min-width: 22px;
       height: 100%;
       max-width: 100%;
       padding: 2px 10px;
       border-radius: 4px;
       background: var(--affine-tag-pink);
       overflow: hidden;
+      cursor: text;
     }
     .select-option-text:focus {
       outline: none;
@@ -96,10 +96,14 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     this._container.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        this.saveSelectionName(this.index);
+        if (this._vInput.value.length > 0) {
+          this.saveSelectionName(this.index);
+        }
       }
       if (event.key === 'Escape') {
+        event.stopPropagation();
         event.preventDefault();
+
         this.setEditingIndex(-1);
         this._container.blur();
       }
@@ -128,8 +132,12 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   override render() {
     const style = styleMap({
       backgroundColor: this.select.color,
+      cursor: this.editing ? 'text' : 'pointer',
     });
-    return html`<div class="select-option-text" style=${style}></div>`;
+    return html`<div
+      class="select-option-text virgo-editor"
+      style=${style}
+    ></div>`;
   }
 }
 

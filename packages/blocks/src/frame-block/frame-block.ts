@@ -1,15 +1,14 @@
 /// <reference types="vite/client" />
-import { ShadowlessElement } from '@blocksuite/lit';
-import type { TemplateResult } from 'lit';
+import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
 import type { FrameBlockModel } from './frame-model.js';
 import { FrameBlockService } from './frame-service.js';
 
 @customElement('affine-frame')
-export class FrameBlockComponent extends ShadowlessElement {
+export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   static override styles = css`
     .affine-frame-block-container {
       display: flow-root;
@@ -18,12 +17,6 @@ export class FrameBlockComponent extends ShadowlessElement {
       background-color: var(--affine-hover-color);
     }
   `;
-
-  @property()
-  model!: FrameBlockModel;
-
-  @property()
-  content!: TemplateResult;
 
   override connectedCallback() {
     super.connectedCallback();

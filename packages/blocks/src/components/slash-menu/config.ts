@@ -1,10 +1,13 @@
 import {
+  BookmarkIcon,
   CopyIcon,
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
   DeleteIcon,
+  DualLinkIcon,
   DuplicateIcon,
   ImageIcon20,
+  NewPageIcon,
   NowIcon,
   paragraphConfig,
   // PasteIcon,
@@ -22,9 +25,12 @@ import {
 import type { TemplateResult } from 'lit';
 
 import { normalizeDelta } from '../../__internal__/clipboard/utils/commons.js';
+import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
+import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
+  createBookmarkBlock,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
@@ -37,6 +43,7 @@ import {
   onModelTextUpdated,
   updateBlockType,
 } from '../../page-block/utils/index.js';
+import { showLinkedPagePopover } from '../linked-page/index.js';
 import { toast } from '../toast.js';
 
 export type SlashItem = {
@@ -49,7 +56,11 @@ export type SlashItem = {
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
 };
 
-function insertContent(model: BaseBlockModel, text: string) {
+function insertContent(
+  model: BaseBlockModel,
+  text: string,
+  attributes?: AffineTextAttributes
+) {
   if (!model.text) {
     throw new Error("Can't insert text! Text not found");
   }
@@ -59,7 +70,7 @@ function insertContent(model: BaseBlockModel, text: string) {
   }
   const vRange = vEditor.getVRange();
   const index = vRange ? vRange.index : model.text.length;
-  model.text.insert(text, index);
+  model.text.insert(text, index, attributes);
   // Update the caret to the end of the inserted text
   vEditor.setVRange({
     index: index + text.length,
@@ -168,8 +179,39 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           action: ({ model }) => updateBlockType([model], flavour, type),
         })),
     },
+
     {
-      name: 'Image & File',
+      name: 'Pages',
+      items: [
+        {
+          name: 'New Page',
+          icon: NewPageIcon,
+          showWhen: model =>
+            !!model.page.awarenessStore.getFlag('enable_linked_page'),
+          action: ({ page, model }) => {
+            const newPage = page.workspace.createPage({
+              init: true,
+            });
+            insertContent(model, REFERENCE_NODE, {
+              reference: { type: 'LinkedPage', pageId: newPage.id },
+            });
+          },
+        },
+        {
+          name: 'Link Page',
+          alias: ['dual link'],
+          icon: DualLinkIcon,
+          showWhen: model =>
+            !!model.page.awarenessStore.getFlag('enable_linked_page'),
+          action: ({ model }) => {
+            insertContent(model, '@');
+            showLinkedPagePopover({ model, range: getCurrentNativeRange() });
+          },
+        },
+      ],
+    },
+    {
+      name: 'Content & Media',
       items: [
         {
           name: 'Image',
@@ -178,7 +220,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
               return false;
             }
-            if (!insideDatabase(model)) {
+            if (insideDatabase(model)) {
               return false;
             }
             return true;
@@ -191,6 +233,29 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             parent.children.indexOf(model);
             const props = await uploadImageFromLocal(page);
             page.addSiblingBlocks(model, props);
+          },
+        },
+        {
+          name: 'Bookmark',
+          icon: BookmarkIcon,
+          showWhen: model => {
+            if (
+              !model.page.awarenessStore.getFlag('enable_bookmark_operation')
+            ) {
+              return false;
+            }
+            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+              return false;
+            }
+            return !insideDatabase(model);
+          },
+          async action({ page, model }) {
+            const parent = page.getParent(model);
+            if (!parent) {
+              return;
+            }
+            const index = parent.children.indexOf(model);
+            createBookmarkBlock(parent, index + 1);
           },
         },
       ],
@@ -233,12 +298,11 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             // https://stackoverflow.com/questions/8888491/how-do-you-display-javascript-datetime-in-12-hour-am-pm-format
             const date = new Date();
             let hours = date.getHours();
-            const minutes = date.getMinutes();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
             const amOrPm = hours >= 12 ? 'pm' : 'am';
             hours = hours % 12;
             hours = hours ? hours : 12; // the hour '0' should be '12'
-            const min = minutes < 10 ? '0' + minutes : minutes;
-            const strTime = hours + ':' + min + ' ' + amOrPm;
+            const strTime = hours + ':' + minutes + ' ' + amOrPm;
             insertContent(model, strTime);
           },
         },

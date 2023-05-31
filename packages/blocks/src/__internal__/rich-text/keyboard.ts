@@ -71,6 +71,12 @@ export function createKeyboardBindings(
       altKey: null,
       shiftKey: null,
       handler(range, { event, prefix }) {
+        if (range.length > 0) {
+          // When select text and press `[[` should not trigger transform,
+          // since it will break the bracket complete.
+          // Expected `[[selected text]]` instead of `@selected text]]`
+          return ALLOW_DEFAULT;
+        }
         if (
           (event.key === '[' || event.key === '【') &&
           !prefix.endsWith(event.key)
@@ -80,7 +86,7 @@ export function createKeyboardBindings(
         }
         const flag = page.awarenessStore.getFlag('enable_linked_page');
         if (!flag) return ALLOW_DEFAULT;
-        if (matchFlavours(model, ['affine:code'] as const)) {
+        if (matchFlavours(model, ['affine:code'])) {
           return ALLOW_DEFAULT;
         }
 
@@ -144,7 +150,8 @@ const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
 export function createKeyDownHandler(
   vEditor: AffineVEditor,
-  bindings: KeyboardBindings
+  bindings: KeyboardBindings,
+  model: BaseBlockModel
 ): (evt: KeyboardEvent) => void {
   const bindingStore: Record<string, KeyboardBinding[]> = {};
   function normalize(binding: KeyboardBinding): KeyboardBinding {
@@ -184,6 +191,19 @@ export function createKeyDownHandler(
   });
 
   function keyDownHandler(evt: KeyboardEvent) {
+    const parentModel = model.page.getParent(model);
+    const previousModel = model.page.getPreviousSibling(model);
+    if (
+      (parentModel && matchFlavours(parentModel, ['affine:database'])) ||
+      (previousModel && matchFlavours(previousModel, ['affine:database']))
+    ) {
+      if (evt.key === 'Tab') {
+        evt.preventDefault();
+        evt.stopPropagation();
+        return;
+      }
+    }
+
     if (evt.defaultPrevented || evt.isComposing) return;
     const keyBindings = (bindingStore[evt.key] || []).concat(
       bindingStore[evt.which] || []

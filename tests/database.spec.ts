@@ -125,7 +125,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await switchColumnType(page, 'rich-text');
   await initDatabaseDynamicRowWithData(page, '123', true);
 
-  const cell = getFirstColumnCell(page, 'rich-text-container');
+  const cell = getFirstColumnCell(page, 'affine-database-rich-text');
   await cell.click();
   await pressArrowLeft(page);
   await pressEnter(page);
@@ -166,6 +166,9 @@ test('should hide placeholder of paragraph in database', async ({ page }) => {
 test('should show or hide database toolbar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseRow(page);
 
   const db = await getDatabaseMouse(page);
   await db.mouseOver();
@@ -286,18 +289,19 @@ test('should support rename column', async ({ page }) => {
 
   await initDatabaseColumn(page, 'abc');
 
-  const { textElement: title } = await getDatabaseHeaderColumn(page, 1);
-  expect(await title.innerText()).toBe('abc');
+  const { textElement, inputElement } = await getDatabaseHeaderColumn(page, 1);
+  expect(await textElement.innerText()).toBe('abc');
 
   await performColumnAction(page, '3', 'rename');
+  await inputElement.click();
   await type(page, '123');
   await pressEnter(page);
-  expect(await title.innerText()).toBe('123');
+  expect(await textElement.innerText()).toBe('abc123');
 
   await undoByClick(page);
-  expect(await title.innerText()).toBe('abc');
+  expect(await textElement.innerText()).toBe('abc');
   await redoByClick(page);
-  expect(await title.innerText()).toBe('123');
+  expect(await textElement.innerText()).toBe('abc123');
 });
 
 test('should support add new column', async ({ page }) => {
@@ -443,8 +447,8 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'rich-text');
 
     // For now, rich-text will only be initialized on click
-    // Therefore, for the time being, here is to detect whether there is '.rich-text-container'
-    const cell = getFirstColumnCell(page, 'rich-text-container');
+    // Therefore, for the time being, here is to detect whether there is '.affine-database-rich-text'
+    const cell = getFirstColumnCell(page, 'affine-database-rich-text');
     expect(await cell.count()).toBe(1);
 
     await initDatabaseDynamicRowWithData(page, '123');
@@ -538,13 +542,13 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'checkbox');
 
     const checkbox = getFirstColumnCell(page, 'checkbox');
-    expect(await checkbox.isChecked()).toBe(false);
+    await expect(checkbox).not.toHaveClass('checked');
 
     await checkbox.click();
-    expect(await checkbox.isChecked()).toBe(true);
+    await expect(checkbox).toHaveClass(/checked/);
 
     await undoByClick(page);
-    expect(await checkbox.isChecked()).toBe(false);
+    await expect(checkbox).not.toHaveClass('checked');
   });
 
   test('switch to progress', async ({ page }) => {
@@ -752,7 +756,7 @@ test('should display the add column button on the right side of database correct
   await dragBetweenCoords(
     page,
     { x: box.x, y: box.y },
-    { x: box.x + 100, y: box.y },
+    { x: box.x + 120, y: box.y },
     {
       steps: 50,
       beforeMouseUp: async () => {
@@ -913,11 +917,22 @@ test('should title column support quick renaming', async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'a', true);
   await focusDatabaseHeader(page, 1);
-  const { textElement, renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  const { textElement, renameIcon, saveIcon } = await getDatabaseHeaderColumn(
+    page,
+    1
+  );
   await renameIcon.click();
   await waitNextFrame(page);
   await type(page, '123');
-  await clickDatabaseOutside(page);
+  await saveIcon.click();
+  expect(await textElement.innerText()).toBe('123');
+
+  await undoByClick(page);
+  expect(await textElement.innerText()).toBe('Column 1');
+  await renameIcon.click();
+  await waitNextFrame(page);
+  await type(page, '123');
+  await pressEnter(page);
   expect(await textElement.innerText()).toBe('123');
 });
 
@@ -931,7 +946,8 @@ test('should title column support quick changing of column type', async ({
   await initDatabaseDynamicRowWithData(page, 'a', true);
   await initDatabaseDynamicRowWithData(page, 'b');
   await focusDatabaseHeader(page, 1);
-  const { typeIcon } = await getDatabaseHeaderColumn(page, 1);
+  const { typeIcon, renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  await renameIcon.click();
   await typeIcon.click();
   await waitNextFrame(page);
   await clickColumnType(page, 'select');

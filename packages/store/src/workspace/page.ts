@@ -1,3 +1,4 @@
+import type { SerializedBlock } from '@blocksuite/blocks';
 import { debug } from '@blocksuite/global/debug';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
@@ -60,7 +61,7 @@ export class Page extends Space<FlatBlockMap> {
   private readonly _workspace: Workspace;
   private readonly _idGenerator: IdGenerator;
   private _history!: Y.UndoManager;
-  private _root: (BaseBlockModel | null)[] | null = null;
+  private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
 
@@ -69,7 +70,7 @@ export class Page extends Space<FlatBlockMap> {
 
   readonly slots = {
     historyUpdated: new Slot(),
-    rootAdded: new Slot<(BaseBlockModel | null)[]>(),
+    rootAdded: new Slot<BaseBlockModel>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
     yUpdated: new Slot(),
@@ -80,14 +81,8 @@ export class Page extends Space<FlatBlockMap> {
       type: 'add' | 'delete' | 'update';
       id: string;
     }>(),
-    /**
-     * @deprecated
-     */
-    subpageUpdated: new Slot<{
-      type: 'add' | 'delete';
-      id: string;
-      subpageIds: string[];
-    }>(),
+    copied: new Slot(),
+    pasted: new Slot<SerializedBlock[]>(),
   };
 
   constructor({
@@ -132,30 +127,11 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   get root() {
-    const root = Array.isArray(this._root) ? this._root[0] : this._root;
-    if (!root) return root;
-
-    const rootSchema = this.schema.flavourSchemaMap.get(root.flavour);
-    if (rootSchema?.model.role !== 'root') {
-      console.error('data broken');
-    }
-    return root;
+    return this._root;
   }
 
-  get surface() {
-    return Array.isArray(this._root) ? this._root[1] : null;
-  }
-
-  /** @internal Used for getting surface elements for phasor. */
-  get ySurfaceContainer() {
-    assertExists(this.surface);
-    const ySurface = this._yBlocks.get(this.surface.id);
-    if (ySurface?.has('elements')) {
-      return ySurface.get('elements') as Y.Map<unknown>;
-    } else {
-      ySurface?.set('elements', new Y.Map());
-      return ySurface?.get('elements') as Y.Map<unknown>;
-    }
+  getYBlockById(id: string) {
+    return this._yBlocks.get(id);
   }
 
   get isEmpty() {
@@ -178,6 +154,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get YText() {
     return Y.Text;
+  }
+
+  get YMap() {
+    return Y.Map;
   }
 
   get Text() {
@@ -223,29 +203,33 @@ export class Page extends Space<FlatBlockMap> {
     );
   }
 
-  getParentById(
-    rootId: string,
-    target: BaseBlockModel | string
-  ): BaseBlockModel | null {
-    const targetId = typeof target === 'string' ? target : target.id;
-    if (rootId === targetId) return null;
-
-    const root = this._blockMap.get(rootId);
-    if (!root) return null;
-
-    for (const [childId] of root.childMap) {
-      if (childId === targetId) return root;
-
-      const parent = this.getParentById(childId, target);
-      if (parent !== null) return parent;
-    }
-    return null;
+  hasFlavour(flavour: string) {
+    return this.getBlockByFlavour(flavour).length > 0;
   }
 
-  getParent(block: BaseBlockModel | string) {
-    if (!this.root) return null;
+  getParent(target: BaseBlockModel | string): BaseBlockModel | null {
+    const root = this._root;
+    const targetId = typeof target === 'string' ? target : target.id;
+    if (!root || root.id === targetId) return null;
 
-    return this.getParentById(this.root.id, block);
+    const findParent = (parentId: string): BaseBlockModel | null => {
+      const parentModel = this._blockMap.get(parentId);
+      if (!parentModel) return null;
+
+      for (const [childId] of parentModel.childMap) {
+        if (childId === targetId) return parentModel;
+
+        const parent = findParent(childId);
+        if (parent !== null) return parent;
+      }
+
+      return null;
+    };
+
+    const parent = findParent(root.id);
+    if (parent !== null) return parent;
+
+    return null;
   }
 
   getPreviousSibling(block: BaseBlockModel) {
@@ -382,14 +366,10 @@ export class Page extends Space<FlatBlockMap> {
 
       syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
-      if (typeof parent === 'string') {
-        parent = this._blockMap.get(parent) ?? null;
-      }
+      const parentModel =
+        typeof parent === 'string' ? this._blockMap.get(parent) : parent;
 
-      let parentId = null;
-      if (parent !== null) {
-        parentId = parent?.id ?? this.root?.id;
-      }
+      const parentId = parentModel?.id ?? this._root?.id;
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -404,56 +384,134 @@ export class Page extends Space<FlatBlockMap> {
     return id;
   }
 
+  private _populateParentChildrenMap(
+    blocksToMove: BaseBlockModel[],
+    childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
+    newParent: BaseBlockModel
+  ) {
+    blocksToMove.forEach(block => {
+      const parentBlock = this.getParent(block);
+
+      if (!parentBlock) {
+        throw new Error("Can't find parent block for the current block");
+      }
+
+      this.schema.validate(block.flavour, newParent.flavour);
+
+      const childrenBlocksOfCurrentParent =
+        childBlocksPerParent.get(parentBlock);
+      if (childrenBlocksOfCurrentParent) {
+        if (
+          this.getNextSibling(
+            childrenBlocksOfCurrentParent[
+              childrenBlocksOfCurrentParent.length - 1
+            ]
+          ) !== block
+        ) {
+          throw new Error(
+            'The blocks to move are not contiguous under their parent'
+          );
+        }
+        childrenBlocksOfCurrentParent.push(block);
+      } else {
+        childBlocksPerParent.set(parentBlock, [block]);
+      }
+    });
+  }
+
+  private _repositionBlocks(
+    childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
+    targetParentChildren: Y.Array<string>,
+    targetSibling: BaseBlockModel | null,
+    shouldInsertBeforeSibling: boolean,
+    insertionOffset: number
+  ) {
+    for (const [parentBlock, blocksToMove] of childBlocksPerParent) {
+      const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
+      const sourceParentChildren = sourceParentBlock.get(
+        'sys:children'
+      ) as Y.Array<string>;
+
+      // Get the IDs of blocks to move
+      const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
+
+      // Remove the blocks from their current parent
+      const startIndex = sourceParentChildren
+        .toArray()
+        .findIndex(id => id === idsOfBlocksToMove[0]);
+      sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
+
+      // Determine the index at which to insert blocks in the new parent
+      let insertIndex = 0;
+      if (targetSibling) {
+        insertIndex = targetParentChildren
+          .toArray()
+          .findIndex(id => id === targetSibling.id);
+      }
+
+      // Insert the blocks at the correct position under their new parent
+      if (shouldInsertBeforeSibling) {
+        targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
+      } else {
+        targetParentChildren.insert(
+          insertIndex + insertionOffset,
+          idsOfBlocksToMove
+        );
+        insertionOffset += idsOfBlocksToMove.length;
+      }
+    }
+  }
+
+  // Moves blocks to a new parent. Optionally inserts blocks before a given sibling.
   @debug('CRUD')
   moveBlocks(
-    blocks: BaseBlockModel[],
+    blocksToMove: BaseBlockModel[],
     newParent: BaseBlockModel,
-    newSibling: BaseBlockModel | null = null,
-    insertBeforeSibling = true
+    targetSibling: BaseBlockModel | null = null,
+    shouldInsertBeforeSibling = true
   ) {
     if (this.readonly) {
-      console.error('cannot modify data in readonly mode');
+      console.error('Cannot modify data in read-only mode');
       return;
     }
 
-    const firstBlock = blocks[0];
-    const currentParent = this.getParent(firstBlock);
-
-    // the blocks must have the same parent (siblings)
-    if (blocks.some(block => this.getParent(block) !== currentParent)) {
-      console.error('the blocks must have the same parent');
+    if (!newParent) {
+      throw new Error("Can't find new parent block");
     }
 
-    if (currentParent === null || newParent === null) {
-      throw new Error("Can't find parent model");
-    }
+    // A map to store parent block and their respective child blocks
+    const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
 
-    blocks.forEach(block => {
-      this.schema.validate(block.flavour, newParent.flavour);
-    });
+    this._populateParentChildrenMap(
+      blocksToMove,
+      childBlocksPerParent,
+      newParent
+    );
 
     this.transact(() => {
-      const yParentA = this._yBlocks.get(currentParent.id) as YBlock;
-      const yChildrenA = yParentA.get('sys:children') as Y.Array<string>;
-      const idx = yChildrenA.toArray().findIndex(id => id === firstBlock.id);
-      yChildrenA.delete(idx, blocks.length);
-      const yParentB = this._yBlocks.get(newParent.id) as YBlock;
-      const yChildrenB = yParentB.get('sys:children') as Y.Array<string>;
+      const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
+      const targetParentChildren = targetParentBlock.get(
+        'sys:children'
+      ) as Y.Array<string>;
 
-      let nextIdx = 0;
-      if (newSibling) {
-        nextIdx = yChildrenB.toArray().findIndex(id => id === newSibling.id);
-      }
+      // To be used for insertion after the target sibling
+      const insertionOffset = 1;
 
-      const ids = blocks.map(block => block.id);
-      if (insertBeforeSibling) {
-        yChildrenB.insert(nextIdx, ids);
-      } else {
-        yChildrenB.insert(nextIdx + 1, ids);
-      }
+      // Reposition blocks under their new parent
+      this._repositionBlocks(
+        childBlocksPerParent,
+        targetParentChildren,
+        targetSibling,
+        shouldInsertBeforeSibling,
+        insertionOffset
+      );
     });
 
-    currentParent.childrenUpdated.emit();
+    // Emit event to indicate that the children of these blocks have been updated
+    Array.from(childBlocksPerParent.keys()).forEach(parent =>
+      parent.childrenUpdated.emit()
+    );
+
     newParent.childrenUpdated.emit();
   }
 
@@ -717,17 +775,9 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
-    let isRoot = false;
-    let isSurface = false;
 
     const props = toBlockProps(yBlock);
     const model = this._createBlockModel({ ...props, id }, yBlock);
-    if (model.flavour === 'affine:surface') {
-      isSurface = true;
-    }
-    if (model.flavour === 'affine:page') {
-      isRoot = true;
-    }
     this._blockMap.set(id, model);
 
     const yChildren = yBlock.get('sys:children');
@@ -751,30 +801,24 @@ export class Page extends Space<FlatBlockMap> {
       });
     }
 
-    if (isRoot) {
-      this._root = Array.isArray(this._root)
-        ? [model, this._root[1]]
-        : [model, null];
+    if (model.role === 'root') {
+      this._root = model;
       this.slots.rootAdded.emit(this._root);
       this.workspace.slots.pageAdded.emit(this.id);
-    } else if (isSurface) {
-      this._root = Array.isArray(this._root)
-        ? [this._root[0], model]
-        : [null, model];
-      this.slots.rootAdded.emit(this._root);
-    } else {
-      const parent = this.getParent(model);
-      const index = parent?.childMap.get(model.id);
-      if (parent && index !== undefined) {
-        parent.children[index] = model;
-        parent.childrenUpdated.emit();
-      }
+      return;
+    }
+
+    const parent = this.getParent(model);
+    const index = parent?.childMap.get(model.id);
+    if (parent && index !== undefined) {
+      parent.children[index] = model;
+      parent.childrenUpdated.emit();
     }
   }
 
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
-    if (model === this._root?.[0]) {
+    if (model === this._root) {
       this.slots.rootDeleted.emit(id);
     } else {
       // TODO dispatch model delete event

@@ -11,6 +11,7 @@ packages=(
   "store"
   "virgo"
   "connector"
+  "lit"
 )
 
 for package in "${packages[@]}"

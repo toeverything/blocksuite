@@ -15,6 +15,7 @@ import {
   pressArrowDown,
   pressArrowRight,
   pressEnter,
+  registerFormatBarCustomElements,
   setSelection,
   switchReadonly,
   type,
@@ -214,6 +215,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -259,6 +261,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -304,6 +307,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text={
@@ -349,6 +353,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -389,6 +394,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -424,6 +430,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -464,6 +471,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -490,6 +498,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -518,6 +527,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -689,6 +699,7 @@ test('should format quick bar position correct at the start of second line', asy
 
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).toBeVisible();
+  await waitNextFrame(page);
 
   const formatBox = await formatQuickBar.boundingBox();
   if (!formatBox) {
@@ -760,6 +771,7 @@ test('should format quick bar work in single block selection', async ({
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -829,6 +841,7 @@ test('should format quick bar work in multiple block selection', async ({
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text={
@@ -903,6 +916,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:list
     prop:checked={false}
@@ -930,6 +944,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:paragraph
     prop:text="123"
@@ -974,6 +989,7 @@ test('should format quick bar show after convert to code block', async ({
     `
 <affine:frame
   prop:background="--affine-background-secondary-color"
+  prop:index="a0"
 >
   <affine:code
     prop:language="Plain Text"
@@ -1080,7 +1096,7 @@ test('should the database action icon show correctly', async ({ page }) => {
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY },
-    { steps: 10 }
+    { steps: 20 }
   );
   await expect(databaseAction).toBeVisible();
   await expect(databaseAction).toHaveAttribute('disabled', '');
@@ -1181,4 +1197,15 @@ test('should update the format quick bar state when there is a change in keyboar
     await page.keyboard.press('ArrowRight');
     await expect(formatBar.boldBtn).not.toHaveAttribute('active', '');
   });
+});
+
+test('should register custom elements in format quick bar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await registerFormatBarCustomElements(page);
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });

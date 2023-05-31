@@ -1,3 +1,5 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+
 import type { IBound, StrokeStyle } from '../../consts.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
 import type { HitTestOptions } from '../surface-element.js';
@@ -7,9 +9,10 @@ export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
 export interface IShape {
   id: string;
-  index: string;
-  type: string;
+  type: 'shape';
   xywh: SerializedXYWH;
+  index: string;
+  seed: number;
 
   shapeType: ShapeType;
   radius: number;
@@ -18,10 +21,16 @@ export interface IShape {
   strokeWidth: number;
   strokeColor: string;
   strokeStyle: StrokeStyle;
+  // https://github.com/rough-stuff/rough/wiki#roughness
+  roughness?: number;
 }
 
 export interface ShapeMethods {
-  render: (ctx: CanvasRenderingContext2D, element: ShapeElement) => void;
+  render: (
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    element: ShapeElement
+  ) => void;
   hitTest: (
     x: number,
     y: number,

@@ -1,5 +1,5 @@
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, isEqual, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
@@ -430,56 +430,6 @@ const matches: Match[] = [
   },
   {
     name: 'link',
-    pattern:
-      /(((https?|ftp|file):\/\/)|www.)[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
-      if (!match) {
-        return false;
-      }
-
-      const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
-
-      vEditor.insertText(
-        {
-          index: startIndex + annotatedText.length,
-          length: 0,
-        },
-        ' '
-      );
-      model.page.captureSync();
-      vEditor.formatText(
-        {
-          index: startIndex,
-          length: annotatedText.length,
-        },
-        {
-          link: annotatedText,
-        }
-      );
-
-      vEditor.deleteText({
-        index: startIndex + annotatedText.length,
-        length: 1,
-      });
-
-      vEditor.setVRange({
-        index: startIndex + annotatedText.length,
-        length: 0,
-      });
-
-      return true;
-    },
-  },
-  {
-    name: 'link',
     pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
     action: (
       model: BaseBlockModel,
@@ -571,7 +521,9 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-  if (matchFlavours(model, ['affine:code'])) {
+  const isParagraphQuoteBlock = isEqual(model.type, 'quote');
+  const isCodeBlock = matchFlavours(model, ['affine:code']);
+  if (isParagraphQuoteBlock || isCodeBlock) {
     return ALLOW_DEFAULT;
   }
   let isConverted = false;

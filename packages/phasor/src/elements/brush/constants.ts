@@ -1,6 +1,6 @@
-import type { IBrush } from './types.js';
+import type { IElementDefaultProps } from '../index.js';
 
-export const BrushElementDefaultProps: Omit<IBrush, 'id' | 'index'> = {
+export const BrushElementDefaultProps: IElementDefaultProps<'brush'> = {
   type: 'brush',
   xywh: '[0,0,0,0]',
 

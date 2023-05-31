@@ -28,14 +28,17 @@ export interface Controller {
 
 export interface IConnector {
   id: string;
-  index: string;
-  type: string;
+  type: 'connector';
   xywh: SerializedXYWH;
+  index: string;
+  seed: number;
 
   mode: ConnectorMode;
   lineWidth: number;
   color: string;
   strokeStyle: StrokeStyle;
+  // https://github.com/rough-stuff/rough/wiki#roughness
+  roughness?: number;
 
   startElement?: AttachedElement;
   endElement?: AttachedElement;

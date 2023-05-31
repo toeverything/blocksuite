@@ -50,8 +50,9 @@ function capPointerdown(
     const { clientX, clientY } = mousePointerEvent;
     const deltaX = clientX - startX;
     const deltaY = clientY - startY;
-    const modelX = elementX + deltaX;
-    const modelY = elementY + deltaY;
+    const { zoom } = surface.viewport;
+    const modelX = elementX + deltaX / zoom;
+    const modelY = elementY + deltaY / zoom;
     const [x, y] = surface.toViewCoord(modelX, modelY);
 
     const { start, end } = getConnectorAttachedInfo(element, surface, page);
@@ -94,7 +95,7 @@ function capPointerdown(
     }
 
     if (position === 'start') {
-      surface.updateElement(element.id, {
+      surface.updateElement<'connector'>(element.id, {
         controllers: routes,
         startElement:
           picked && attachedPointPosition
@@ -102,7 +103,7 @@ function capPointerdown(
             : undefined,
       });
     } else {
-      surface.updateElement(element.id, {
+      surface.updateElement<'connector'>(element.id, {
         controllers: routes,
         endElement:
           picked && attachedPointPosition
@@ -207,7 +208,7 @@ function centerControllerPointerdown(
       absoluteControllers[position + 1] = newPoint1;
     }
 
-    surface.updateElement(element.id, {
+    surface.updateElement<'connector'>(element.id, {
       controllers: simplifyPath(absoluteControllers),
     });
 

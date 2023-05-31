@@ -1,19 +1,20 @@
-import type { SelectionEvent } from '../../../__internal__/index.js';
+import type { PointerEventState } from '@blocksuite/lit';
+
 import {
   handleNativeRangeDragMove,
   noop,
   Point,
 } from '../../../__internal__/index.js';
-import type { DefaultSelectionManager } from './default-selection-manager.js';
+import type { DefaultSelectionManager } from './selection-manager.js';
 import { autoScroll } from './utils.js';
 
 export const NativeDragHandlers = {
-  onStart(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onStart(selection: DefaultSelectionManager, e: PointerEventState) {
     selection.state.resetStartRange(e);
     selection.state.type = 'native';
   },
 
-  onMove(selection: DefaultSelectionManager, e: SelectionEvent) {
+  onMove(selection: DefaultSelectionManager, e: PointerEventState) {
     autoScroll(selection, e, {
       init() {
         selection.state.lastPoint = new Point(e.raw.clientX, e.raw.clientY);
@@ -24,7 +25,7 @@ export const NativeDragHandlers = {
     });
   },
 
-  onEnd(selection: DefaultSelectionManager, _: SelectionEvent) {
+  onEnd(selection: DefaultSelectionManager, _: PointerEventState) {
     selection.state.clearRaf();
   },
 };

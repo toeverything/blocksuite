@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { NativePoint, VRange } from '../types.js';
 import {
   type BaseTextAttributes,
@@ -150,6 +151,18 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);
+    if (
+      range.startContainer === range.endContainer &&
+      range.startContainer.textContent === ZERO_WIDTH_SPACE &&
+      range.startOffset === 1
+    ) {
+      range.setStart(range.startContainer, 0);
+      range.setEnd(range.endContainer, 0);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return;
+    }
+
     if (!range) return;
     if (!range.intersectsNode(rootElement)) {
       if (
@@ -254,9 +267,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           }
 
           const newRange = this._editor.toDomRange(newVRange);
-          assertExists(newRange);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
+          if (newRange) {
+            assertExists(newRange);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          }
         }
       }
 

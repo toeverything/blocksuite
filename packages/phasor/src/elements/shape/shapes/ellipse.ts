@@ -1,26 +1,27 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+
 import { type IBound, StrokeStyle } from '../../../consts.js';
-import { setLineDash } from '../../../utils/canvas.js';
 import { Utils } from '../../../utils/tl-utils.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 
-function createEllipsePath(width: number, height: number) {
-  const path = new Path2D();
-  path.ellipse(width / 2, height / 2, width / 2, height / 2, 0, 0, 2 * Math.PI);
-  return path;
-}
-
 export const EllipseMethods: ShapeMethods = {
-  render(ctx: CanvasRenderingContext2D, element: ShapeElement) {
+  render(
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    element: ShapeElement
+  ) {
     const {
       w,
       h,
+      seed,
       strokeWidth,
       filled,
       realFillColor,
       realStrokeColor,
       strokeStyle,
+      roughness,
     } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -29,19 +30,14 @@ export const EllipseMethods: ShapeMethods = {
 
     ctx.translate(renderOffset, renderOffset);
 
-    const path = createEllipsePath(renderWidth, renderHeight);
-
-    if (filled) {
-      ctx.fillStyle = realFillColor;
-      ctx.fill(path);
-    }
-
-    if (strokeWidth > 0 && strokeStyle !== StrokeStyle.None) {
-      ctx.strokeStyle = realStrokeColor;
-      setLineDash(ctx, strokeStyle);
-      ctx.lineWidth = strokeWidth;
-      ctx.stroke(path);
-    }
+    rc.ellipse(renderWidth / 2, renderHeight / 2, renderWidth, renderHeight, {
+      seed,
+      roughness,
+      strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+      stroke: realStrokeColor,
+      strokeWidth,
+      fill: filled ? realFillColor : undefined,
+    });
   },
 
   hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {

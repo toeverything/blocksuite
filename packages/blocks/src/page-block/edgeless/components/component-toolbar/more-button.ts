@@ -2,13 +2,17 @@ import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
-import type { SurfaceManager } from '@blocksuite/phasor';
+import { WithDisposable } from '@blocksuite/lit';
+import type { SurfaceElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { WithDisposable } from '../../../../__internal__/index.js';
+import {
+  type ReorderingType,
+  type TopLevelBlockModel,
+} from '../../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../selection-manager.js';
 import { isTopLevelBlock } from '../../utils.js';
@@ -16,24 +20,26 @@ import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  value: 'delete' | 'moveToBack' | 'moveToFront';
+  type: 'delete' | ReorderingType;
   disabled?: boolean;
 };
 const ACTIONS: Action[] = [
   // FIXME: should implement these function
-  // { name: 'Copy', value: 'copy', disabled: true },
-  // { name: 'Paste', value: 'paste', disabled: true },
-  // { name: 'Duplicate', value: 'duplicate', disabled: true },
-  { name: 'Bring to front', value: 'moveToFront' },
-  { name: 'Send to back', value: 'moveToBack' },
-  // { name: 'Copy as PNG', value: 'copy as PNG', disabled: true },
-  { name: 'Delete', value: 'delete' },
+  // { name: 'Copy', type: 'copy', disabled: true },
+  // { name: 'Paste', type: 'paste', disabled: true },
+  // { name: 'Duplicate', type: 'duplicate', disabled: true },
+  { name: 'Bring to front', type: 'front' },
+  { name: 'Bring forward', type: 'forward' },
+  { name: 'Send backward', type: 'backward' },
+  { name: 'Send to back', type: 'back' },
+  // { name: 'Copy as PNG', type: 'copy as PNG', disabled: true },
+  { name: 'Delete', type: 'delete' },
 ];
 
 function Actions(onClick: (action: Action) => void) {
   return repeat(
     ACTIONS,
-    action => action.value,
+    action => action.type,
     action =>
       html`<div
         class="action-item"
@@ -50,9 +56,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
-      fill: none;
-      stroke: currentColor;
       color: var(--affine-text-primary-color);
+      fill: currentColor;
     }
 
     .more-actions-container {
@@ -113,6 +118,25 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   private _actionsMenuPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  private _splitElements(): {
+    frames: TopLevelBlockModel[];
+    shapes: SurfaceElement[];
+  } {
+    const frames: TopLevelBlockModel[] = [];
+    const shapes: SurfaceElement[] = [];
+    this.elements.forEach(element => {
+      if (isTopLevelBlock(element)) {
+        frames.push(element);
+      } else {
+        shapes.push(element);
+      }
+    });
+    return {
+      frames,
+      shapes,
+    };
+  }
+
   private _delete() {
     this.page.captureSync();
     this.elements.forEach(element => {
@@ -128,18 +152,28 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ selected: [], active: false });
   }
 
-  private _runAction = (action: Action) => {
-    switch (action.value) {
-      case 'delete': {
+  private _runAction = ({ type }: Action) => {
+    switch (type) {
+      case 'delete':
         this._delete();
         break;
-      }
-      case 'moveToBack': {
-        this.surface.moveToBack(this.elements.map(ele => ele.id));
-        break;
-      }
-      case 'moveToFront': {
-        this.surface.moveToFront(this.elements.map(ele => ele.id));
+      case 'front':
+      case 'forward':
+      case 'backward':
+      case 'back': {
+        const { frames, shapes } = this._splitElements();
+        if (frames.length) {
+          this.slots.reorderingFramesUpdated.emit({
+            elements: frames,
+            type,
+          });
+        }
+        if (shapes.length) {
+          this.slots.reorderingShapesUpdated.emit({
+            elements: shapes,
+            type,
+          });
+        }
         break;
       }
     }

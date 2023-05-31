@@ -1,7 +1,7 @@
 import { FontLinkedPageIcon, FontPageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page, PageMeta } from '@blocksuite/store';
 import {
   type DeltaInsert,
@@ -12,11 +12,7 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
-import {
-  getBlockElementById,
-  getModelByElement,
-  WithDisposable,
-} from '../utils/index.js';
+import { getBlockElementById, getModelByElement } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 

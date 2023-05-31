@@ -2,6 +2,7 @@ import '../../components/tool-icon-button.js';
 import './brush-menu.js';
 
 import { PenIcon } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -19,7 +20,8 @@ interface BrushMenuPopper {
 
 function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
   const brushMenu = document.createElement('edgeless-brush-menu');
-  document.body.appendChild(brushMenu);
+  assertExists(reference.shadowRoot);
+  reference.shadowRoot.appendChild(brushMenu);
   const popper = createPopper(reference, brushMenu, {
     placement: 'top',
     modifiers: [
@@ -55,6 +57,9 @@ export class EdgelessBrushToolButton extends LitElement {
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
+  @property()
+  setMouseMode!: (mouseMode: MouseMode) => void;
+
   @state()
   private _popperShow = false;
 
@@ -71,16 +76,6 @@ export class EdgelessBrushToolButton extends LitElement {
       this._brushMenu.element.edgeless = this.edgeless;
       this._popperShow = true;
     }
-  }
-
-  private _trySetBrushMode() {
-    if (this.mouseMode.type === 'brush') return;
-
-    this.edgeless.slots.mouseModeUpdated.emit({
-      type: 'brush',
-      lineWidth: 4,
-      color: DEFAULT_SELECTED_COLOR,
-    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -110,7 +105,11 @@ export class EdgelessBrushToolButton extends LitElement {
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @click=${() => {
-          this._trySetBrushMode();
+          this.setMouseMode({
+            type: 'brush',
+            lineWidth: 4,
+            color: DEFAULT_SELECTED_COLOR,
+          });
           this._toggleBrushMenu();
         }}
       >

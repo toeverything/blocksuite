@@ -5,15 +5,23 @@ import { literal } from 'lit/static-html.js';
 
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 
 @customElement('affine-database-number-cell-editing')
-class NumberCellEditing extends DatabaseCellElement<Y.Text> {
+export class NumberCellEditing
+  extends DatabaseCellElement<Y.Text>
+  implements TableViewCell
+{
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
       width: 100%;
       height: 100%;
+      cursor: text;
     }
 
     .affine-database-number {
@@ -25,11 +33,18 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
       outline: none;
     }
     .affine-database-number v-line {
+      display: flex !important;
+      align-items: center;
+      height: 100%;
       width: 100%;
+    }
+    .affine-database-number v-line > div {
+      flex-grow: 1;
     }
   `;
 
   static override tag = literal`affine-database-number-cell-editing`;
+  cellType = 'number' as const;
 
   @query('.affine-database-number')
   private _container!: HTMLDivElement;
@@ -85,7 +100,7 @@ class NumberCellEditing extends DatabaseCellElement<Y.Text> {
   };
 
   protected override render() {
-    return html`<div class="affine-database-number number"></div>`;
+    return html`<div class="affine-database-number number virgo-editor"></div>`;
   }
 }
 

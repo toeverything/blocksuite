@@ -1,6 +1,7 @@
 import {
   asyncFocusRichText,
   BlockHub,
+  createBookmarkBlock,
   getAllowSelectedBlocks,
   getEdgelessPage,
   getServiceOrRegister,
@@ -10,13 +11,14 @@ import {
 import {
   type BlockComponentElement,
   getClosestFrameBlockElementById,
+  getCurrentBlockRange,
   getHoveringFrame,
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
 import { PAGE_BLOCK_PADDING_BOTTOM } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -30,7 +32,51 @@ export const createBlockHub: (
   const blockHub = new BlockHub({
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
-    onDropCallback: async (e, point, end, type) => {
+    onClickCard: async (data: { flavour: string; type?: string }) => {
+      const models = [];
+
+      const isDatabase = data.flavour === 'affine:database';
+      if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
+        console.warn('database block is not enabled');
+        return;
+      }
+      if (data.flavour === 'affine:embed' && data.type === 'image') {
+        models.push(...(await uploadImageFromLocal(page)));
+      } else {
+        models.push(data);
+      }
+      const last = page.root?.lastItem();
+      const range = getCurrentBlockRange(page);
+      if (range) {
+        const lastModel = range.models[range.models.length - 1];
+        if (data.flavour === 'affine:bookmark') {
+          const parent = page.getParent(lastModel);
+          assertExists(parent);
+          const index = parent.children.indexOf(lastModel);
+          createBookmarkBlock(parent, index + 1);
+          return;
+        }
+        const arr = page.addSiblingBlocks(lastModel, models, 'after');
+        const lastId = arr[arr.length - 1];
+        asyncFocusRichText(page, lastId);
+      } else if (last) {
+        if (data.flavour === 'affine:bookmark') {
+          createBookmarkBlock(page.root?.lastItem() as BaseBlockModel);
+          return;
+        }
+        // add to end
+        let lastId = page.root?.lastItem()?.id;
+        models.forEach(model => {
+          lastId = page.addBlock(
+            model.flavour ?? 'affine:paragraph',
+            model,
+            page.root?.lastItem()
+          );
+        });
+        lastId && asyncFocusRichText(page, lastId);
+      }
+    },
+    onDrop: async (e, point, end, type) => {
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
@@ -58,6 +104,12 @@ export const createBlockHub: (
           const ids = page.addBlocks(models, model);
           focusId = ids[0];
           parentId = model.id;
+        } else if (props.flavour === 'affine:bookmark') {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+          focusId = createBookmarkBlock(parent, index + 1);
+          parentId = parent.id;
         } else {
           const parent = page.getParent(model);
           assertExists(parent);
@@ -103,7 +155,7 @@ export const createBlockHub: (
       }
       pageBlock.setSelection(frameId, true, focusId, point);
     },
-    onDragStarted: () => {
+    onDragStart: () => {
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
@@ -146,6 +198,7 @@ export const createBlockHub: (
       }
       return state;
     },
+    page,
   });
 
   return blockHub;

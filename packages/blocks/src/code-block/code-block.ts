@@ -4,12 +4,12 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
 import { css, html, render } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
   BUNDLED_LANGUAGES,
@@ -20,11 +20,7 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import {
-  getViewportElement,
-  queryCurrentMode,
-  WithDisposable,
-} from '../__internal__/index.js';
+import { getViewportElement, queryCurrentMode } from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
@@ -36,7 +32,7 @@ import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
 
 @customElement('affine-code')
-export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
+export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   static override styles = css`
     code-block {
       position: relative;
@@ -47,7 +43,7 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       font-size: var(--affine-font-sm);
       line-height: var(--affine-line-height);
       position: relative;
-      padding: 32px 0;
+      padding: 32px 0px 12px 0px;
       background: var(--affine-background-code-block);
       border-radius: 10px;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
@@ -106,6 +102,16 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       /* to make sure the resize observer can be triggered as expected */
       display: block;
       position: relative;
+      width: 90%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 20px;
+    }
+
+    .affine-code-block-container .rich-text-container {
+      position: relative;
+      border-radius: 5px;
+      padding: 4px 12px 4px 60px;
     }
 
     #line-numbers {
@@ -116,16 +122,9 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       color: var(--affine-text-secondary-color);
     }
 
-    .affine-code-block-container .rich-text-container {
-      position: relative;
-      border-radius: 5px;
-      padding: 4px 12px 4px 60px;
-    }
-
     .affine-code-block-container .virgo-editor {
       width: 90%;
       margin: 0;
-      overflow-x: auto;
     }
 
     .affine-code-block-container affine-code-line span v-text {
@@ -134,6 +133,16 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
     .affine-code-block-container affine-code-line span {
       white-space: pre;
+    }
+
+    .affine-code-block-container.wrap #line-numbers {
+      top: calc(var(--affine-line-height) + 4px);
+    }
+
+    .affine-code-block-container.wrap #line-numbers > div {
+      margin-top: calc(
+        var(--top, 0) / var(--affine-zoom, 1) - var(--affine-line-height)
+      );
     }
 
     .affine-code-block-container.wrap v-line > div {
@@ -160,12 +169,6 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
 
     ${tooltipStyle}
   `;
-
-  @property()
-  model!: CodeBlockModel;
-
-  @property()
-  content!: TemplateResult;
 
   @state()
   private _showLangList = false;
@@ -411,46 +414,16 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
   }
 
   private _updateLineNumbers() {
-    const lineNumbersContainer = this.querySelector(
-      '#line-numbers'
-    ) as HTMLElement;
-    const richTextContainer = this.querySelector('.rich-text-container');
+    const lineNumbersContainer =
+      this.querySelector<HTMLElement>('#line-numbers');
     assertExists(lineNumbersContainer);
-    assertExists(richTextContainer);
 
-    const richTextRect = richTextContainer.getBoundingClientRect();
+    const next = this._wrap ? generateLineNumberRender() : lineNumberRender;
 
-    const lines = Array.from(this.querySelectorAll('v-line')).map(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      line => line.querySelector('v-text span')!
+    render(
+      repeat(Array.from(this.querySelectorAll('v-line')), next),
+      lineNumbersContainer
     );
-    const lineNumbers = [];
-    for (const [index, line] of lines.entries()) {
-      const rect = line.getBoundingClientRect();
-      const top = rect.top - richTextRect.top;
-      const height = rect.height;
-
-      lineNumbers.push(html`<div
-        style="${styleMap({
-          top: `${top}px`,
-          height: `${height}px`,
-          position: 'absolute',
-          display: 'flex',
-        })}"
-      >
-        <span
-          style="${styleMap({
-            position: 'absolute',
-            top: '-2px',
-            height: '1em',
-            lineHeight: '1em',
-          })}"
-          >${index + 1}</span
-        >
-      </div>`);
-    }
-
-    render(lineNumbers, lineNumbersContainer);
   }
 
   override render() {
@@ -465,6 +438,20 @@ export class CodeBlockComponent extends WithDisposable(ShadowlessElement) {
       </div>
       ${this._codeOptionTemplate()}`;
   }
+}
+
+function generateLineNumberRender(top = 0) {
+  return function lineNumberRender(e: HTMLElement, index: number) {
+    const style = {
+      '--top': `${top}px`,
+    };
+    top = e.getBoundingClientRect().height;
+    return html`<div style=${styleMap(style)}>${index + 1}</div>`;
+  };
+}
+
+function lineNumberRender(_: HTMLElement, index: number) {
+  return html`<div>${index + 1}</div>`;
 }
 
 declare global {

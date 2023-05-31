@@ -1,8 +1,12 @@
-import { VEditor } from '@blocksuite/virgo';
+import { VEditor, type VRange } from '@blocksuite/virgo';
 import * as Y from 'yjs';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
-import { isDecimal } from './utils.js';
+
+interface StackItem {
+  meta: Map<'v-range', VRange | null>;
+  type: 'undo' | 'redo';
+}
 
 export class VirgoInput {
   static YTEXT_NAME = 'YTEXT_NAME';
@@ -42,9 +46,6 @@ export class VirgoInput {
 
     if (type) {
       this.type = type;
-      if (type === 'number' && !isDecimal(text) && text.length > 0) {
-        throw new Error('Illegal digital type text.');
-      }
     }
 
     if (yText instanceof Y.Text) {
@@ -59,7 +60,25 @@ export class VirgoInput {
       this.yText.insert(0, text);
     }
 
-    this.undoManager = new Y.UndoManager(this.yText);
+    this.undoManager = new Y.UndoManager(this.yText, {
+      trackedOrigins: new Set([this.yDoc.clientID]),
+    });
+    this.undoManager.on(
+      'stack-item-added',
+      (event: { stackItem: StackItem }) => {
+        const vRange = this.vEditor.getVRange();
+        event.stackItem.meta.set('v-range', vRange);
+      }
+    );
+    this.undoManager.on(
+      'stack-item-popped',
+      (event: { stackItem: StackItem }) => {
+        const vRange = event.stackItem.meta.get('v-range');
+        if (vRange) {
+          this.vEditor.setVRange(vRange);
+        }
+      }
+    );
 
     this.vEditor = new VEditor(this.yText, {
       active: () =>
@@ -89,15 +108,6 @@ export class VirgoInput {
           }
           const text =
             data.length > restLength ? data.slice(0, restLength) : data;
-          const originalText = this.vEditor.yText.toString();
-          const tmpText = `${originalText.substring(
-            0,
-            vRange.index
-          )}${text}${originalText.substring(vRange.index)}`;
-
-          if (this.type === 'number' && !isDecimal(tmpText)) {
-            return;
-          }
 
           this.vEditor.insertText(vRange, text);
           this.vEditor.setVRange({
@@ -112,13 +122,16 @@ export class VirgoInput {
         if (!vRange) {
           return ctx;
         }
-        if (vRange.length > 0) {
-          this.vEditor.yText.delete(vRange.index, vRange.length);
-        }
 
-        const originalText = this.vEditor.yText.toString();
+        let originalText = this.vEditor.yText.toString();
+        if (vRange.length > 0) {
+          originalText = `${originalText.substring(
+            0,
+            vRange.index
+          )}${originalText.substring(vRange.index + vRange.length)}`;
+        }
         const tmpText = `${originalText.substring(0, vRange.index)}${
-          ctx.data
+          ctx.data ?? ''
         }${originalText.substring(vRange.index)}`;
 
         let flag = true;
@@ -128,15 +141,9 @@ export class VirgoInput {
           flag = false;
         }
 
-        if (this.type === 'number' && !isDecimal(tmpText)) {
-          ctx.skipDefault = true;
-          flag = false;
-        }
-
         if (flag) {
           this.undoManager.stopCapturing();
         }
-
         return ctx;
       },
       virgoCompositionEnd: ctx => {
@@ -144,11 +151,14 @@ export class VirgoInput {
         if (!vRange) {
           return ctx;
         }
-        if (vRange.length > 0) {
-          this.vEditor.yText.delete(vRange.index, vRange.length);
-        }
 
-        const originalText = this.vEditor.yText.toString();
+        let originalText = this.vEditor.yText.toString();
+        if (vRange.length > 0) {
+          originalText = `${originalText.substring(
+            0,
+            vRange.index
+          )}${originalText.substring(vRange.index + vRange.length)}`;
+        }
         const tmpText = `${originalText.substring(0, vRange.index)}${
           ctx.data
         }${originalText.substring(vRange.index)}`;
@@ -157,11 +167,6 @@ export class VirgoInput {
 
         if (tmpText.length >= this.maxLength) {
           // We should not use `skipDefault` because we need to clear text node from IME.
-          ctx.data = '';
-          flag = false;
-        }
-
-        if (this.type === 'number' && !isDecimal(tmpText)) {
           ctx.data = '';
           flag = false;
         }
@@ -187,6 +192,17 @@ export class VirgoInput {
         }
       },
     });
+
+    rootElement.addEventListener('blur', () => {
+      if (this.type === 'number') {
+        const text = this.yText.toString();
+        const num = parseFloat(text);
+        const transformedText = isNaN(num) ? '' : num.toString();
+        if (text !== transformedText) {
+          this.setValue(transformedText);
+        }
+      }
+    });
   }
 
   get value() {
@@ -204,10 +220,6 @@ export class VirgoInput {
   setValue(str: string) {
     if (str.length > this.maxLength) {
       throw new Error('The text exceeds the limit length.');
-    }
-
-    if (this.type === 'number' && !isDecimal(str)) {
-      throw new Error('Illegal digital type text.');
     }
 
     this.yText.delete(0, this.yText.length);

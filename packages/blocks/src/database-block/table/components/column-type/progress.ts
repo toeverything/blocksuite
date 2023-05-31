@@ -3,7 +3,11 @@ import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { literal } from 'lit/static-html.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -35,12 +39,10 @@ const styles = css`
     width: 100%;
     height: 13px;
     border-radius: 22px;
-    background: var(--affine-hover-color);
   }
 
   .affine-database-progress-fg {
     height: 100%;
-    background: var(--affine-success-color);
   }
 
   .affine-database-progress-drag-handle {
@@ -68,6 +70,12 @@ const styles = css`
   }
 `;
 
+const progressColors = {
+  empty: 'var(--affine-black-10)',
+  processing: 'var(--affine-processing-color)',
+  success: 'var(--affine-success-color)',
+};
+
 type DragConfig = {
   stepWidth: number;
   containerWidth: number;
@@ -75,10 +83,14 @@ type DragConfig = {
 };
 
 @customElement('affine-database-progress-cell-editing')
-class ProgressCellEditing extends DatabaseCellElement<number> {
+class ProgressCellEditing
+  extends DatabaseCellElement<number>
+  implements TableViewCell
+{
   static override styles = styles;
 
   static override tag = literal`affine-database-progress-cell-editing`;
+  cellType = 'progress' as const;
 
   @query('.affine-database-progress-drag-handle')
   private _dragHandle!: HTMLElement;
@@ -167,9 +179,17 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
 
   protected override render() {
     const progress = this.cell?.value ?? 0;
-
+    let backgroundColor = progressColors.processing;
+    if (progress === 100) {
+      backgroundColor = progressColors.success;
+    }
     const fgStyles = styleMap({
       width: `${progress}%`,
+      backgroundColor,
+    });
+    const bgStyles = styleMap({
+      backgroundColor:
+        progress === 0 ? progressColors.empty : 'var(--affine-hover-color)',
     });
 
     return html`<div
@@ -177,7 +197,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       @mousedown=${(e: Event) => e.preventDefault()}
     >
       <div class="affine-database-progress-bar">
-        <div class="affine-database-progress-bg">
+        <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>
           <div class="affine-database-progress-drag-handle"></div>
         </div>

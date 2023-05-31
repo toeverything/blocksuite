@@ -317,7 +317,7 @@ export async function initEmptyEdgelessState(page: Page) {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    page.addBlock('affine:surface', {}, null);
+    page.addBlock('affine:surface', {}, pageId);
     const frameId = page.addBlock('affine:frame', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
     page.resetHistory();
@@ -904,4 +904,26 @@ export async function getCurrentThemeCSSPropertyValue(
         .themeObserver.cssVariables?.[property];
     }, property);
   return value;
+}
+
+export async function transformMarkdown(page: Page, data: string) {
+  const promiseResult = await page.evaluate(
+    ({ data }) => {
+      const contentParser = new window.ContentParser(window.page);
+      return contentParser.markdown2Block(data);
+    },
+    { data }
+  );
+  return await promiseResult;
+}
+
+export async function transformHtml(page: Page, data: string) {
+  const promiseResult = await page.evaluate(
+    ({ data }) => {
+      const contentParser = new window.ContentParser(window.page);
+      return contentParser.htmlText2Block(data);
+    },
+    { data }
+  );
+  return await promiseResult;
 }

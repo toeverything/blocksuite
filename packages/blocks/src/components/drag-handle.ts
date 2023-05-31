@@ -4,9 +4,10 @@ import {
   type Disposable,
   isFirefox,
 } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
+import type { PointerEventState } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, LitElement, render, svg } from 'lit';
+import { css, html, LitElement, render } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -21,18 +22,7 @@ import {
   isContainedIn,
   Point,
   type Rect,
-  type SelectionEvent,
-  WithDisposable,
 } from '../__internal__/index.js';
-
-const handleIcon = svg`
-<path d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
-fill="var(--affine-icon-color)" stroke="var(--affine-icon-color)"
-stroke-width="1.5"/>
-<path d="M5 8.5L7.5 10.5L10.5 7"
-stroke="var(--affine-white-90)"
-stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-`;
 
 const handlePreventDocumentDragOverDelay = (event: MouseEvent) => {
   // Refs: https://stackoverflow.com/a/65910078
@@ -158,10 +148,11 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     .affine-drag-handle-line {
       opacity: 0;
+      width: 1px;
       height: 100%;
       position: absolute;
-      left: ${DRAG_HANDLE_WIDTH / 2 - 1}px;
-      border-right: 1px solid var(--affine-icon-color);
+      left: ${(DRAG_HANDLE_WIDTH - 1) / 2}px;
+      background-color: var(--affine-icon-color);
       transition: opacity ease-in-out 300ms;
       pointer-events: none;
     }
@@ -175,15 +166,35 @@ export class DragHandle extends WithDisposable(LitElement) {
       height: ${DRAG_HANDLE_HEIGHT}px;
       /* background-color: var(--affine-white-90); */
       pointer-events: auto;
+      color: var(--affine-icon-color);
+    }
+
+    @media print {
+      .affine-drag-handle-line {
+        display: none;
+      }
+
+      .affine-drag-handle {
+        display: none;
+      }
     }
 
     .affine-drag-handle-normal {
-      display: block;
+      display: flex;
+      stroke: currentcolor;
+    }
+
+    .affine-drag-handle-hover {
+      fill: currentcolor;
+      transition: opacity ease-in-out 300ms;
+    }
+
+    .affine-drag-handle-hover path.ok {
+      stroke: var(--affine-white-90);
     }
 
     .affine-drag-handle-hover {
       display: none;
-      transition: opacity ease-in-out 300ms;
     }
 
     :host(:hover) .affine-drag-handle-normal,
@@ -193,7 +204,7 @@ export class DragHandle extends WithDisposable(LitElement) {
 
     :host(:hover) .affine-drag-handle-hover,
     :host([data-selected]) .affine-drag-handle-hover {
-      display: block !important;
+      display: flex !important;
       /* padding-top: 5px !important; FIXME */
     }
   `;
@@ -207,7 +218,10 @@ export class DragHandle extends WithDisposable(LitElement) {
       lastType: DroppingType
     ) => void;
     setDragType: (dragging: boolean) => void;
-    setSelectedBlock: (selectedBlock: EditingState | null) => void;
+    setSelectedBlock: (
+      selectedBlock: EditingState | null,
+      element?: Element
+    ) => void;
     getSelectedBlocks: () => BlockComponentElement[] | null;
     getClosestBlockElement: (point: Point) => Element | null;
   }) {
@@ -216,13 +230,14 @@ export class DragHandle extends WithDisposable(LitElement) {
       console.warn('you may forget to set `getAllowedBlocks`');
       return [];
     };
-    this.onDropCallback = options.onDropCallback;
-    this.setDragType = options.setDragType;
-    this.setSelectedBlock = options.setSelectedBlock;
-    this._getSelectedBlocks = options.getSelectedBlocks;
-    this._getClosestBlockElement = options.getClosestBlockElement;
-    options.container.appendChild(this);
-    this._container = options.container;
+    this.addEventListener('beforeprint', () => this.hide(true));
+    this.onDropCallback = options?.onDropCallback;
+    this.setDragType = options?.setDragType;
+    this.setSelectedBlock = options?.setSelectedBlock;
+    this._getSelectedBlocks = options?.getSelectedBlocks;
+    this._getClosestBlockElement = options?.getClosestBlockElement;
+    options?.container.appendChild(this);
+    this._container = options?.container;
   }
 
   /**
@@ -244,7 +259,10 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   public setDragType: (dragging: boolean) => void;
 
-  public setSelectedBlock: (selectedBlock: EditingState | null) => void;
+  public setSelectedBlock: (
+    selectedBlock: EditingState | null,
+    element?: Element
+  ) => void;
 
   private _getSelectedBlocks: () => BlockComponentElement[] | null;
 
@@ -279,7 +297,10 @@ export class DragHandle extends WithDisposable(LitElement) {
     return this._getSelectedBlocks() ?? [];
   }
 
-  onContainerMouseMove(event: SelectionEvent, modelState: EditingState | null) {
+  onContainerMouseMove(
+    event: PointerEventState,
+    modelState: EditingState | null
+  ) {
     const frameBlock = this._container.querySelector(
       '.affine-frame-block-container'
     );
@@ -484,7 +505,7 @@ export class DragHandle extends WithDisposable(LitElement) {
         0,
         Math.min(
           clientY - startY - (DRAG_HANDLE_HEIGHT * scale) / 2,
-          height - DRAG_HANDLE_HEIGHT
+          height - DRAG_HANDLE_HEIGHT * scale
         )
       ) / scale
     );
@@ -545,14 +566,11 @@ export class DragHandle extends WithDisposable(LitElement) {
   private _onClick = (e: MouseEvent) => {
     const { selectedBlocks } = this;
     let { _handleAnchorState: modelState } = this;
-    if (
-      modelState &&
-      selectedBlocks.length &&
-      modelState.element === selectedBlocks[0]
-    ) {
+    const element = modelState?.element;
+    if (modelState && selectedBlocks.length && element === selectedBlocks[0]) {
       modelState = null;
     }
-    this.setSelectedBlock(modelState);
+    this.setSelectedBlock(modelState, element);
     this.toggleAttribute('data-selected', Boolean(modelState));
     e.stopPropagation();
   };
@@ -691,38 +709,44 @@ export class DragHandle extends WithDisposable(LitElement) {
     return html`
       <div class="affine-drag-handle-line"></div>
       <div class="affine-drag-handle" draggable="true">
-        <div class="affine-drag-handle-normal">
-          <svg
-            width="16"
-            height="18"
-            viewBox="0 0 16 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect
-              x="7.7782"
-              y="0.707107"
-              width="10"
-              height="10"
-              rx="2.5"
-              transform="rotate(45 7.7782 0.707107)"
-              stroke="var(--affine-icon-color)"
-            />
-          </svg>
-        </div>
+        <svg
+          class="affine-drag-handle-normal"
+          width="16"
+          height="18"
+          viewBox="0 0 16 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            x="7.7782"
+            y="0.707107"
+            width="10"
+            height="10"
+            rx="2.5"
+            transform="rotate(45 7.7782 0.707107)"
+          />
+        </svg>
 
-        <div class="affine-drag-handle-hover">
-          <svg
-            class="handle-hover"
-            width="16"
-            height="18"
-            viewBox="0 0 16 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            ${handleIcon}
-          </svg>
-        </div>
+        <svg
+          class="affine-drag-handle-hover"
+          width="16"
+          height="18"
+          viewBox="0 0 16 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
+            stroke-width="1.5"
+          />
+          <path
+            class="ok"
+            d="M5 8.5L7.5 10.5L10.5 7"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
       </div>
     `;
   }

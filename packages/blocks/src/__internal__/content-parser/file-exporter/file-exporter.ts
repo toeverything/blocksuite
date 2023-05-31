@@ -1,4 +1,5 @@
 /* eslint-disable no-control-regex */
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import TurndownService from 'turndown';
 
 import { globalCSS } from './exporter-style.js';
@@ -30,12 +31,9 @@ export const FileExporter = {
    * const stateJsonContent = JSON.stringify({ a: 1, b: 2, c: 3 })
    * FileExporter.exportFile("state.json", jsonContent, "application/json")
    */
-  exportTextFile(filename: string, text: string, mimeType: string) {
+  exportFile(filename: string, dataURL: string) {
     const element = document.createElement('a');
-    element.setAttribute(
-      'href',
-      'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
-    );
+    element.setAttribute('href', dataURL);
     const safeFilename = getSafeFileName(filename);
     element.setAttribute('download', safeFilename);
 
@@ -45,6 +43,12 @@ export const FileExporter = {
     element.click();
 
     document.body.removeChild(element);
+  },
+  exportTextFile(filename: string, text: string, mimeType: string) {
+    FileExporter.exportFile(
+      filename,
+      'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
+    );
   },
   exportHtml(pageTitle: string | undefined, htmlContent: string) {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
@@ -237,6 +241,10 @@ export const FileExporter = {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
     FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
   },
+  exportPng(pageTitle: string | undefined, dataURL: string) {
+    const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
+    FileExporter.exportFile(title + '.png', dataURL);
+  },
 };
 
 /** @internal surround plain html content in a document with head and basic styles */
@@ -255,7 +263,7 @@ function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
   ${htmlCss}
 </head>
 <body>
-<div style="margin:0 auto;padding:1rem;max-width:720px">
+<div style="margin:0 auto;padding:1rem;max-width:${EDITOR_WIDTH}px">
 ${htmlContent}
 </div>
 </body>

@@ -1,7 +1,7 @@
 import { StrokeStyle } from '../../consts.js';
-import type { IShape } from './types.js';
+import type { IElementDefaultProps } from '../index.js';
 
-export const ShapeElementDefaultProps: Omit<IShape, 'id' | 'index'> = {
+export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
   type: 'shape',
   xywh: '[0,0,0,0]',
 
@@ -12,4 +12,5 @@ export const ShapeElementDefaultProps: Omit<IShape, 'id' | 'index'> = {
   strokeWidth: 4,
   strokeColor: '#000000',
   strokeStyle: StrokeStyle.Solid,
+  roughness: 2,
 };

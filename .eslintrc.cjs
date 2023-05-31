@@ -11,23 +11,24 @@ const allPackages = [
   'virgo',
   'connector',
   'lit',
+  'hosts',
 ];
 
 const createPattern = packageName => [
   {
     group: ['**/dist', '**/dist/**'],
-    message: 'Don not import from dist',
+    message: 'Do not import from dist',
     allowTypeImports: false,
   },
   {
     group: ['**/src', '**/src/**'],
-    message: 'Don not import from src',
+    message: 'Do not import from src',
     allowTypeImports: false,
   },
   {
     group: ['**/*.css', '**/*.css?*'],
     message:
-      'Don not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
+      'Do not import CSS directly, see https://github.com/toeverything/blocksuite/issues/525',
     allowTypeImports: false,
   },
   {
@@ -60,6 +61,7 @@ module.exports = {
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
     'packages/connector/dist/*',
+    'packages/hosts/dist/*',
   ],
   overrides: [
     {

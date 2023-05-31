@@ -5,6 +5,7 @@ import {
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -15,6 +16,7 @@ import {
   asyncGetRichTextByModel,
   type BlockComponentElement,
   type ExtendedModel,
+  focusBlockByModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
   getDefaultPage,
@@ -25,7 +27,6 @@ import {
   isCollapsedNativeSelection,
   isMultiBlockRange,
   resetNativeSelection,
-  type SelectionEvent,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -503,7 +504,41 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
 
   resetNativeSelection(null);
 }
+export function handleKeydownAfterSelectBlocks({
+  page,
+  keyboardEvent,
+  selectedBlocks,
+}: {
+  page: Page;
+  keyboardEvent: KeyboardEvent;
+  selectedBlocks: BaseBlockModel[];
+}) {
+  const { key } = keyboardEvent;
 
+  const parent = page.getParent(selectedBlocks[0]);
+  const index = parent?.children.indexOf(selectedBlocks[0]);
+  selectedBlocks.forEach(block => {
+    page.deleteBlock(block);
+  });
+  // TODO:
+  //  1. should add block which has same flavour as the parent?
+  //  2. If use Chinese input method, the input method state cannot be retained
+  const id = page.addBlock(
+    'affine:paragraph',
+    {
+      text: new page.Text(key),
+    },
+    parent,
+    index
+  );
+  // Wait block inserted to dom
+  requestAnimationFrame(() => {
+    const defaultPage = getDefaultPage(page);
+    const newBlock = page.getBlockById(id) as BaseBlockModel;
+    defaultPage?.selection.clear();
+    focusBlockByModel(newBlock, 'end');
+  });
+}
 export async function onModelTextUpdated(
   model: BaseBlockModel,
   callback: (text: RichText) => void
@@ -532,7 +567,9 @@ export async function onModelElementUpdated(
 export function tryUpdateFrameSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const frames = page.root.children as TopLevelBlockModel[];
+    const frames = page.root.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as TopLevelBlockModel[];
     frames.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.
@@ -556,14 +593,14 @@ export function tryUpdateFrameSize(page: Page, zoom: number) {
 // Show format quick bar when double/triple clicking on text
 export function showFormatQuickBarByClicks(
   type: 'double' | 'triple',
-  e: SelectionEvent,
+  e: PointerEventState,
   page: Page,
   container?: HTMLElement,
   state?: PageSelectionState
 ) {
   const range =
     type === 'double'
-      ? handleNativeRangeDblClick(page, e)
+      ? handleNativeRangeDblClick()
       : handleNativeRangeTripleClick(e);
   if (e.raw.target instanceof HTMLTextAreaElement) return;
   if (!range || range.collapsed) return;

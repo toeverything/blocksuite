@@ -1,17 +1,15 @@
+import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+
 import { StrokeStyle } from '../../consts.js';
 import {
   Bound,
   inflateBound,
   transformPointsToNewBound,
 } from '../../utils/bound.js';
-import { setLineDash } from '../../utils/canvas.js';
 import { SurfaceElement } from '../surface-element.js';
-import { drawArrow } from './draw-arrow.js';
-import { drawOrthogonal } from './draw-orthogonal.js';
-import { drawStraight } from './draw-straight.js';
 import type { IConnector } from './types.js';
 import { ConnectorMode } from './types.js';
-import { getConnectorPointsBound } from './utils.js';
+import { getArrowPoints, getConnectorPointsBound } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
   get mode() {
@@ -30,6 +28,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.yMap.get('strokeStyle') as IConnector['strokeStyle'];
   }
 
+  get roughness() {
+    return (this.yMap.get('roughness') as IConnector['roughness']) ?? 2;
+  }
+
   get startElement() {
     return this.yMap.get('startElement') as IConnector['startElement'];
   }
@@ -42,28 +44,67 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.yMap.get('controllers') as IConnector['controllers'];
   }
 
-  override render(ctx: CanvasRenderingContext2D) {
-    const path = new Path2D();
+  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+    const { seed, strokeStyle, color, roughness, lineWidth, controllers } =
+      this;
+    const realStrokeColor = this.computedValue(color);
+
     if (this.mode === ConnectorMode.Orthogonal) {
-      drawOrthogonal(path, this.controllers);
+      rc.linearPath(
+        controllers.map(controller => [controller.x, controller.y]),
+        {
+          seed,
+          roughness,
+          strokeLineDash:
+            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+          stroke: realStrokeColor,
+          strokeWidth: lineWidth,
+        }
+      );
     } else {
-      drawStraight(path, this.controllers);
+      rc.linearPath(
+        [
+          [controllers[0].x, controllers[0].y],
+          [
+            controllers[controllers.length - 1].x,
+            controllers[controllers.length - 1].y,
+          ],
+        ],
+        {
+          seed,
+          roughness,
+          strokeLineDash:
+            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+          stroke: realStrokeColor,
+          strokeWidth: lineWidth,
+        }
+      );
     }
 
     const last = this.controllers[this.controllers.length - 1];
     const secondToLast = this.controllers[this.controllers.length - 2];
-    const arrowPath = new Path2D();
-    drawArrow(arrowPath, [secondToLast.x, secondToLast.y], [last.x, last.y]);
 
-    ctx.strokeStyle = this.transformPropertyValue(this.color);
-    setLineDash(ctx, this.strokeStyle);
-    ctx.lineWidth = this.lineWidth;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.stroke(path);
-
-    setLineDash(ctx, StrokeStyle.Solid);
-    ctx.stroke(arrowPath);
+    //TODO: Adjust arrow direction
+    const { sides, end } = getArrowPoints(
+      [secondToLast.x, secondToLast.y],
+      [last.x, last.y],
+      35
+    );
+    rc.linearPath(
+      [
+        [sides[0][0], sides[0][1]],
+        [end[0], end[1]],
+        [sides[1][0], sides[1][1]],
+      ],
+      {
+        seed,
+        roughness,
+        strokeLineDash:
+          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+        stroke: realStrokeColor,
+        strokeWidth: lineWidth,
+      }
+    );
   }
 
   override applyUpdate(props: Partial<IConnector>) {
