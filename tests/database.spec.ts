@@ -289,18 +289,19 @@ test('should support rename column', async ({ page }) => {
 
   await initDatabaseColumn(page, 'abc');
 
-  const { textElement: title } = await getDatabaseHeaderColumn(page, 1);
-  expect(await title.innerText()).toBe('abc');
+  const { textElement, inputElement } = await getDatabaseHeaderColumn(page, 1);
+  expect(await textElement.innerText()).toBe('abc');
 
   await performColumnAction(page, '3', 'rename');
+  await inputElement.click();
   await type(page, '123');
   await pressEnter(page);
-  expect(await title.innerText()).toBe('123');
+  expect(await textElement.innerText()).toBe('abc123');
 
   await undoByClick(page);
-  expect(await title.innerText()).toBe('abc');
+  expect(await textElement.innerText()).toBe('abc');
   await redoByClick(page);
-  expect(await title.innerText()).toBe('123');
+  expect(await textElement.innerText()).toBe('abc123');
 });
 
 test('should support add new column', async ({ page }) => {
