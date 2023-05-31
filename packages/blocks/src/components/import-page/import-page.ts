@@ -280,7 +280,10 @@ export class ImportPage extends WithDisposable(LitElement) {
 
   private _openLearnImportLink(event: MouseEvent) {
     event.stopPropagation();
-    window.open('https://community.affine.pro', '_blank');
+    window.open(
+      'https://affine.pro/blog/import-your-data-from-notion-into-affine',
+      '_blank'
+    );
   }
 
   override render() {
@@ -309,7 +312,9 @@ export class ImportPage extends WithDisposable(LitElement) {
       </header>
       <div>
         AFFiNE will gradually support more and more file types for import.
-        <a href="https://community.affine.pro" target="_blank"
+        <a
+          href="https://community.affine.pro/c/feature-requests/import-export"
+          target="_blank"
           >Provide feedback.</a
         >
       </div>
