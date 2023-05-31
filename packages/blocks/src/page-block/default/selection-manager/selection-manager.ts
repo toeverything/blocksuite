@@ -176,11 +176,11 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       this._onContainerPointerMove(ctx);
     });
     this._add('contextMenu', this._onContainerContextMenu);
-    this._add('selectionChange', () => {
+    this._add('virgo-vrange-updated', () => {
       this._onSelectionChangeWithoutDebounce();
     });
     this._add(
-      'selectionChange',
+      'virgo-vrange-updated',
       debounce((ctx: UIEventStateContext) => {
         const { event } = ctx.get('defaultState');
 
