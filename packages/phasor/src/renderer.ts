@@ -173,6 +173,10 @@ export class Renderer implements SurfaceViewport {
     this._shouldUpdate = true;
   }
 
+  refresh() {
+    this._shouldUpdate = true;
+  }
+
   attach(container: HTMLElement) {
     assertNotExists(
       this._container,
