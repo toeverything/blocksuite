@@ -307,6 +307,7 @@ export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() => {
     const json = window.workspace.doc.toJSON();
     delete json['space:meta'].pages[0].createDate;
+    delete json['space:meta'].pages[0].source;
     return json;
   })) as SerializedStore;
   expect(actual).toEqual(expected);
