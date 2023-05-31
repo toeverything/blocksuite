@@ -36,7 +36,6 @@ import {
   isEmbed,
   isImage,
   isInsidePageTitle,
-  isInTitleBlock,
   isSelectedBlocks,
   Point,
   Rect,
@@ -347,11 +346,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       keys: { shift },
     } = e;
 
-    if (
-      this._ensureFrameExists() &&
-      target &&
-      isInTitleBlock(target as Element)
-    ) {
+    if (this._ensureFrameExists() && isInsidePageTitle(target)) {
       requestAnimationFrame(() => {
         handleNativeRangeClick(this.page, e, this.container);
       });
