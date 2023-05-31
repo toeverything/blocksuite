@@ -152,6 +152,15 @@ export class EdgelessPageBlockComponent
       transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
         scale(var(--affine-zoom));
     }
+
+    .affine-edgeless-hover-rect {
+      position: absolute;
+      border-radius: 0;
+      pointer-events: none;
+      box-sizing: border-box;
+      z-index: 1;
+      border: var(--affine-border-width) solid var(--affine-blue);
+    }
   `;
 
   flavour = 'edgeless' as const;
