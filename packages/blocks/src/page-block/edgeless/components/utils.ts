@@ -13,15 +13,11 @@ export function getCommonRectStyle(
   selected = false
 ) {
   return {
-    position: 'absolute',
+    '--affine-border-width': `${active ? 2 : 1}px`,
     left: rect.x + 'px',
     top: rect.y + 'px',
     width: rect.width + 'px',
     height: rect.height + 'px',
-    borderRadius: '0',
-    pointerEvents: 'none',
-    boxSizing: 'border-box',
-    zIndex: '1',
     backgroundColor: !active && selected ? 'var(--affine-hover-color)' : '',
   };
 }
