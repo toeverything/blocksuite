@@ -210,19 +210,21 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = {
-      border: `${this.state.active ? 2 : 1}px solid var(--affine-blue)`,
+      border: `${active ? 2 : 1}px solid var(--affine-blue)`,
       ...getCommonRectStyle(selectedRect, active, true),
     };
 
     const hasResizeHandles = !active && !page.readonly;
-    const resizeHandles = ResizeHandles(
-      selectedRect,
-      resizeMode,
-      (e: PointerEvent, direction: HandleDirection) => {
-        const bounds = getSelectableBounds(this.state.selected);
-        _resizeManager.onPointerDown(e, direction, bounds, this.zoom);
-      }
-    );
+    const resizeHandles = hasResizeHandles
+      ? ResizeHandles(
+          selectedRect,
+          resizeMode,
+          (e: PointerEvent, direction: HandleDirection) => {
+            const bounds = getSelectableBounds(selected);
+            _resizeManager.onPointerDown(e, direction, bounds, this.zoom);
+          }
+        )
+      : nothing;
 
     const connectorHandles =
       selected.length === 1 && selected[0].type === 'connector'
@@ -231,12 +233,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             this.surface,
             this.page,
             () => {
-              this.slots.selectionUpdated.emit({ ...this.state });
+              this.slots.selectionUpdated.emit({ ...state });
             }
           )
-        : null;
+        : nothing;
 
-    const componentToolbar = this.state.active
+    const componentToolbar = active
       ? nothing
       : html`<edgeless-component-toolbar
           .selected=${selected}
@@ -248,7 +250,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         </edgeless-component-toolbar>`;
 
     return html`
-      ${hasResizeHandles ? resizeHandles : null}
+      ${resizeHandles}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
         ${connectorHandles}
       </div>
