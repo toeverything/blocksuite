@@ -37,7 +37,7 @@ export const styles = css`
     box-shadow: var(--affine-menu-shadow);
     padding: 8px;
     border: 1px solid var(--affine-border-color);
-    border-radius: 4px;
+    border-radius: 8px;
     z-index: 1;
     font-family: var(--affine-font-family);
   }
