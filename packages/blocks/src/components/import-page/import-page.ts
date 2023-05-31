@@ -60,6 +60,10 @@ export class ImportPage extends WithDisposable(LitElement) {
     this._onMouseMove = this._onMouseMove.bind(this);
   }
 
+  loading(): boolean {
+    return this._loading;
+  }
+
   override updated(changedProps: PropertyValues) {
     if (changedProps.has('x') || changedProps.has('y')) {
       this.style.transform = `translate(${this.x}px, ${this.y}px)`;
@@ -119,7 +123,7 @@ export class ImportPage extends WithDisposable(LitElement) {
   private async _importFile(
     fileExtension: string,
     needLoadingHandler: (files: File[]) => Promise<boolean>,
-    parseContentHandler: (files: File[]) => Promise<void>
+    parseContentHandler: (file: File) => Promise<string[]>
   ) {
     this.hidden = true;
     const files = await this._selectFile(fileExtension);
@@ -130,7 +134,14 @@ export class ImportPage extends WithDisposable(LitElement) {
     } else {
       this.abortController.abort();
     }
-    await parseContentHandler(files);
+
+    const pageIds: string[] = [];
+    for (const file of files) {
+      const importPageIds = await parseContentHandler(file);
+      pageIds.push(...importPageIds);
+    }
+    this._onImportSuccess(pageIds);
+
     needLoading && this.abortController.abort();
   }
 
@@ -145,21 +156,20 @@ export class ImportPage extends WithDisposable(LitElement) {
         }
         return false;
       },
-      async files => {
-        const pageIds: string[] = [];
-        for (const file of files) {
-          const text = await file.text();
-          const page = this.workspace.createPage({
-            init: {
-              title: '',
-            },
-          });
-          const rootId = page.root?.id;
-          const contentParser = new ContentParser(page);
-          rootId && (await contentParser.importMarkdown(text, rootId));
-          pageIds.push(page.id);
+      async file => {
+        const text = await file.text();
+        const page = this.workspace.createPage({
+          init: {
+            title: '',
+          },
+        });
+        const rootId = page.root?.id;
+        const contentParser = new ContentParser(page);
+        if (rootId) {
+          await contentParser.importMarkdown(text, rootId);
+          return [page.id];
         }
-        this._onImportSuccess(pageIds);
+        return [];
       }
     );
   }
@@ -175,22 +185,20 @@ export class ImportPage extends WithDisposable(LitElement) {
         }
         return false;
       },
-      async files => {
-        const pageIds: string[] = [];
-        for (const file of files) {
-          const pageIds: string[] = [];
-          const text = await file.text();
-          const page = this.workspace.createPage({
-            init: {
-              title: '',
-            },
-          });
-          const rootId = page.root?.id;
-          const contentParser = new ContentParser(page);
-          rootId && (await contentParser.importHtml(text, rootId));
-          pageIds.push(page.id);
+      async file => {
+        const text = await file.text();
+        const page = this.workspace.createPage({
+          init: {
+            title: '',
+          },
+        });
+        const rootId = page.root?.id;
+        const contentParser = new ContentParser(page);
+        if (rootId) {
+          await contentParser.importHtml(text, rootId);
+          return [page.id];
         }
-        this._onImportSuccess(pageIds);
+        return [];
       }
     );
   }
@@ -213,67 +221,68 @@ export class ImportPage extends WithDisposable(LitElement) {
         }
         return false;
       },
-      async files => {
+      async file => {
         const pageIds: string[] = [];
-        for (const file of files) {
-          const zip = new JSZip();
-          const zipFile = await zip.loadAsync(file);
-          const pageMap = new Map<string, Page>();
-          const files = Object.keys(zipFile.files);
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (file.startsWith('__MACOSX/')) continue;
+        const zip = new JSZip();
+        const zipFile = await zip.loadAsync(file);
+        const pageMap = new Map<string, Page>();
+        const files = Object.keys(zipFile.files);
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (file.startsWith('__MACOSX/')) continue;
 
-            const lastSplitIndex = file.lastIndexOf('/');
-            const fileName = file.substring(lastSplitIndex + 1);
-            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-              const page = this.workspace.createPage({
-                init: {
-                  title: '',
-                },
-              });
-              pageMap.set(file, page);
+          const lastSplitIndex = file.lastIndexOf('/');
+          const fileName = file.substring(lastSplitIndex + 1);
+          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+            const page = this.workspace.createPage({
+              init: {
+                title: '',
+              },
+            });
+            pageMap.set(file, page);
+          }
+        }
+        const pagePromises = Array.from(pageMap.keys()).map(async file => {
+          const page = pageMap.get(file);
+          if (!page) return;
+          const lastSplitIndex = file.lastIndexOf('/');
+          const folder = file.substring(0, lastSplitIndex) || '';
+          const fileName = file.substring(lastSplitIndex + 1);
+          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+            const isHtml = fileName.endsWith('.html');
+            const rootId = page.root?.id;
+            const fetchFileHandler = async (url: string) => {
+              const fileName = folder + (folder ? '/' : '') + decodeURI(url);
+              return (
+                (await zipFile.file(fileName)?.async('blob')) || new Blob()
+              );
+            };
+            const contentParser = new ContentParser(page, fetchFileHandler);
+            let text = (await zipFile.file(file)?.async('string')) || '';
+            pageMap.forEach((value, key) => {
+              const subPageLink = key.replaceAll(' ', '%20');
+              text = isHtml
+                ? text.replaceAll(
+                    `href="${subPageLink}"`,
+                    `href="${LINK_PRE + value.id}"`
+                  )
+                : text.replaceAll(
+                    `(${subPageLink})`,
+                    `(${LINK_PRE + value.id})`
+                  );
+            });
+            if (rootId) {
+              if (isHtml) {
+                await contentParser.importHtml(text, rootId);
+              } else {
+                await contentParser.importMarkdown(text, rootId);
+              }
+              pageIds.push(page.id);
             }
           }
-          pageMap.forEach(async (page, file) => {
-            const lastSplitIndex = file.lastIndexOf('/');
-            const folder = file.substring(0, lastSplitIndex) || '';
-            const fileName = file.substring(lastSplitIndex + 1);
-            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-              const isHtml = fileName.endsWith('.html');
-              const rootId = page.root?.id;
-              const fetchFileHandler = async (url: string) => {
-                const fileName = folder + (folder ? '/' : '') + decodeURI(url);
-                return (
-                  (await zipFile.file(fileName)?.async('blob')) || new Blob()
-                );
-              };
-              const contentParser = new ContentParser(page, fetchFileHandler);
-              let text = (await zipFile.file(file)?.async('string')) || '';
-              pageMap.forEach((value, key) => {
-                const subPageLink = key.replaceAll(' ', '%20');
-                text = isHtml
-                  ? text.replaceAll(
-                      `href="${subPageLink}"`,
-                      `href="${LINK_PRE + value.id}"`
-                    )
-                  : text.replaceAll(
-                      `(${subPageLink})`,
-                      `(${LINK_PRE + value.id})`
-                    );
-              });
-              if (rootId) {
-                if (isHtml) {
-                  await contentParser.importHtml(text, rootId);
-                } else {
-                  await contentParser.importMarkdown(text, rootId);
-                }
-              }
-            }
-          });
-          pageIds.push(...[...pageMap.values()].map(page => page.id));
-        }
-        this._onImportSuccess(pageIds);
+        });
+        await Promise.all(pagePromises);
+        return pageIds;
       }
     );
   }

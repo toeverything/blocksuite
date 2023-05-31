@@ -78,6 +78,9 @@ export const styles = css`
       ),
       var(--affine-white);
   }
+  .affine-database-column-content.edit .affine-database-column-text-icon {
+    opacity: 1;
+  }
   .affine-database-column-text {
     flex: 1;
     display: flex;
@@ -96,17 +99,16 @@ export const styles = css`
     border-radius: 4px;
   }
   .affine-database-column-type-icon.edit {
-    background: var(--affine-white);
-    border-color: var(--affine-border-color);
-  }
-  .affine-database-column-type-icon.active {
-    border-color: var(--affine-border-color);
     background: linear-gradient(
         0deg,
         var(--affine-hover-color),
         var(--affine-hover-color)
       ),
       var(--affine-white);
+    border-color: var(--affine-border-color);
+  }
+  .affine-database-column-type-icon.edit:hover {
+    background: var(--affine-white);
   }
   .affine-database-column-type-icon svg {
     width: 16px;
@@ -137,6 +139,19 @@ export const styles = css`
     border: 1px solid var(--affine-border-color);
     border-radius: 4px;
     opacity: 0;
+  }
+  .affine-database-column-text-save-icon {
+    display: flex;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    fill: var(--affine-icon-color);
+  }
+  .affine-database-column-text-save-icon:hover {
+    background: var(--affine-white);
+    border-color: var(--affine-border-color);
   }
   .affine-database-column-text-icon svg {
     fill: var(--affine-icon-color);

@@ -317,4 +317,8 @@ export class SurfaceManager {
       }
     });
   }
+
+  getElements() {
+    return [...this._elements.values()];
+  }
 }
