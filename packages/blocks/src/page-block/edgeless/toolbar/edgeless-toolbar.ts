@@ -119,7 +119,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _imageLoading = false;
-  private _rfid: number | null = null;
+  private _rafId: number | null = null;
 
   private _setCenter(x: number, y: number) {
     this.edgeless.surface.viewport.setCenter(x, y);
@@ -139,10 +139,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const delta = zoom - this.zoom;
 
     const innerSmoothZoom = () => {
-      if (this._rfid) {
-        cancelAnimationFrame(this._rfid);
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
       }
-      this._rfid = requestAnimationFrame(() => {
+      this._rafId = requestAnimationFrame(() => {
         const sign = delta > 0 ? 1 : -1;
         const total = 10;
         const step = delta / total;
@@ -213,10 +213,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { viewport } = this.edgeless.surface;
     const delta = { x: x - viewport.centerX, y: y - viewport.centerY };
     const innerSmoothTranslate = () => {
-      if (this._rfid) {
-        cancelAnimationFrame(this._rfid);
+      if (this._rafId) {
+        cancelAnimationFrame(this._rafId);
       }
-      this._rfid = requestAnimationFrame(() => {
+      this._rafId = requestAnimationFrame(() => {
         const rate = 10;
         const step = { x: delta.x / rate, y: delta.y / rate };
         const nextCenter = {
@@ -324,7 +324,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const type = this.mouseMode.type;
+    const { type } = this.mouseMode;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
 
     return html`
