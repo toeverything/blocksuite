@@ -6,6 +6,7 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { isCssVariable } from '../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { getSelectedRect } from './utils.js';
 
@@ -121,6 +122,9 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         outline: 'none',
         transform: `scale(${zoom}, ${zoom})`,
         transformOrigin: 'top left',
+        color: isCssVariable(this._element.color)
+          ? `var(${this._element.color})`
+          : this._element.color,
       });
     }
 
