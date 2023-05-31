@@ -5,6 +5,7 @@ import { expect } from '@playwright/test';
 import {
   addFrameByClick,
   captureHistory,
+  click,
   disconnectByClick,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -12,6 +13,7 @@ import {
   focusTitle,
   getCurrentEditorTheme,
   getCurrentHTMLTheme,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   pressArrowLeft,
   pressArrowRight,
@@ -22,6 +24,7 @@ import {
   redoByClick,
   redoByKeyboard,
   SHORT_KEY,
+  switchEditorMode,
   switchReadonly,
   toggleDarkMode,
   type,
@@ -468,3 +471,25 @@ test(
     await assertRichTexts(page, ['\nasdf']);
   }
 );
+
+test('when no frame block, click editing area auto add a new frame block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await click(page, { x: 100, y: 280 });
+  await pressBackspace(page);
+  await switchEditorMode(page);
+  let frame = await page.evaluate(() => {
+    return document.querySelector('affine-frame');
+  });
+  expect(frame).toBeNull();
+  await click(page, { x: 100, y: 280 });
+
+  frame = await page.evaluate(() => {
+    return document.querySelector('affine-frame');
+  });
+  expect(frame).not.toBeNull();
+});
