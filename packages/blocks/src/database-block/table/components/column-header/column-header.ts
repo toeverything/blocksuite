@@ -461,6 +461,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                     @keydown=${(event: KeyboardEvent) =>
                       this._onKeydown(event, 'title')}
                     @blur=${() => this._saveColumnTitle('title')}
+                    @pointerdown=${(event: PointerEvent) =>
+                      event.stopPropagation()}
                   />`
                 : html`<div class="affine-database-column-text-content">
                     <div class="affine-database-column-text-input">
@@ -523,6 +525,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                           @keydown=${(event: KeyboardEvent) =>
                             this._onKeydown(event, 'normal', column)}
                           @blur=${() => this._saveColumnTitle('normal', column)}
+                          @pointerdown=${(event: PointerEvent) =>
+                            event.stopPropagation()}
                         />`
                       : html`<div class="affine-database-column-text-content">
                           <div class="affine-database-column-text-input">
