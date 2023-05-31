@@ -300,6 +300,7 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
   const text = await textElement.innerText();
   const typeIcon = column.locator('.affine-database-column-type-icon');
   const renameIcon = column.locator('.affine-database-column-text-icon');
+  const saveIcon = column.locator('.affine-database-column-text-save-icon');
 
   return {
     column,
@@ -309,5 +310,6 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
     typeIcon,
     renameIcon,
     inputElement,
+    saveIcon,
   };
 }
