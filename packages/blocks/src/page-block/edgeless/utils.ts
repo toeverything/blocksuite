@@ -29,6 +29,7 @@ import {
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
+import { DEFAULT_TEXT_COLOR } from './components/component-toolbar/change-text-button.js';
 import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
   EdgelessContainer,
@@ -531,6 +532,7 @@ export function addText(
       text: new Y.Text(),
       textAlign: 'left',
       fontSize: 24,
+      color: DEFAULT_TEXT_COLOR,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);

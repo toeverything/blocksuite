@@ -385,9 +385,15 @@ export class HtmlParser {
     ignoreEmptyText = true
   ): DeltaOperation[] {
     if (element instanceof Text) {
+      let isLinkPage = false;
+      if (textStyle.reference) {
+        isLinkPage =
+          (textStyle.reference as Record<string, unknown>).type ===
+          'LinkedPage';
+      }
       return (element.textContent || '').split('\n').map(text => {
         return {
-          insert: text,
+          insert: isLinkPage ? ' ' : text,
           attributes: textStyle,
         };
       });

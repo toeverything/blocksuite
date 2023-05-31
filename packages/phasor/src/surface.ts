@@ -146,6 +146,10 @@ export class SurfaceManager {
     doc.transact(callback, doc.clientID);
   }
 
+  refresh() {
+    this._renderer.refresh();
+  }
+
   updateIndexes(
     keys: string[],
     elements: PhasorElement[],

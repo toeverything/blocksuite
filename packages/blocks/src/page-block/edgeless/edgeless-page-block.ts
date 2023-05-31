@@ -47,7 +47,10 @@ import {
 import { getService, registerService } from '../../__internal__/service.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
-import { getThemePropertyValue } from '../../__internal__/theme/utils.js';
+import {
+  getThemePropertyValue,
+  listenToThemeChange,
+} from '../../__internal__/theme/utils.js';
 import type {
   BlockHost,
   DragHandle,
@@ -274,6 +277,11 @@ export class EdgelessPageBlockComponent
       }
       return value;
     });
+    this._disposables.add(
+      listenToThemeChange(this, () => {
+        this.surface.refresh();
+      })
+    );
   }
 
   private _handleToolbarFlag() {
