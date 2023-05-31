@@ -101,7 +101,7 @@ const styles = css`
   .select-selected > .close-icon:hover {
     cursor: pointer;
   }
-  .select-selected > .close-icon > svg{
+  .select-selected > .close-icon > svg {
     fill: var(--affine-black-90);
   }
   .select-option-new {
