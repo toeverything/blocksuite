@@ -24,6 +24,11 @@ export async function reloadBookmarkBlock(
       model.url
     )) as BookmarkProps;
 
+    // check is block exist
+    if (!model.page.getBlockById(model.id)) {
+      return;
+    }
+
     model.page.updateBlock(model, {
       ...metaData,
       url: model.url,

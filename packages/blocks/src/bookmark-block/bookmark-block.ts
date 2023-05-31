@@ -7,13 +7,18 @@ import { Slot } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
+import { queryCurrentMode } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import { BookmarkBlockService } from './bookmark-service.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
-import { DefaultIcon, LoadingBanner } from './images/icons.js';
+import {
+  DarkLoadingBanner,
+  DefaultIcon,
+  LoadingBanner,
+} from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -138,6 +143,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       background: var(--affine-hover-color);
       border: 3px solid var(--affine-background-secondary-color);
       color: var(--affine-placeholder-color);
+      border-radius: 12px;
     }
   `;
 
@@ -238,6 +244,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   override render() {
     const { url, title, description, icon, image } = this.model;
+    const mode = queryCurrentMode();
 
     const createModal = this._showCreateModal
       ? html`<bookmark-create-modal
@@ -270,12 +277,16 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       : nothing;
 
     const loading = this._isLoading
-      ? html`<div class="affine-bookmark-loading">
+      ? html`<div
+          class="affine-bookmark-loading ${mode === 'light' ? '' : 'dark'}"
+        >
           <div class="affine-bookmark-title">
             <div class="affine-bookmark-icon disable">${DefaultIcon}</div>
             <div class="affine-bookmark-title-content">Embedding</div>
           </div>
-          <div class="affine-bookmark-banner">${LoadingBanner}</div>
+          <div class="affine-bookmark-banner">
+            ${mode === 'light' ? LoadingBanner : DarkLoadingBanner}
+          </div>
         </div>`
       : nothing;
 
