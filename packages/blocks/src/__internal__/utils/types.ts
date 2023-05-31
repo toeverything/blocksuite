@@ -219,7 +219,8 @@ export type SerializedBlock = {
   icon?: string;
   image?: string;
   url?: string;
-  hasCrawled?: boolean;
+  crawled?: boolean;
+  background?: string;
 };
 
 export type EmbedBlockDoubleClickData = {

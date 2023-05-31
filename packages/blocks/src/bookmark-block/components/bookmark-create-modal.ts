@@ -16,8 +16,12 @@ import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 export class BookmarkCreateModal extends WithDisposable(LitElement) {
   @property()
   model!: BaseBlockModel<BookmarkBlockModel>;
+
   @property()
   onCancel?: () => void;
+
+  @property()
+  onConfirm?: () => void;
 
   override get id() {
     return `bookmark-create-modal-${this.model.id.split(':')[0]}`;
@@ -32,9 +36,25 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
       ) as HTMLInputElement;
       linkInput.focus();
     });
+
+    document.addEventListener('keydown', this._modalKeyboardListener);
   }
 
-  private _onEnsure() {
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('keydown', this._modalKeyboardListener);
+  }
+
+  private _modalKeyboardListener = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      this._onConfirm();
+    }
+    if (e.key === 'Escape') {
+      this.onCancel?.();
+    }
+  };
+
+  private _onConfirm() {
     const linkInput = document.querySelector(
       `#${this.id} input.link`
     ) as HTMLInputElement;
@@ -47,7 +67,7 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
     this.model.page.updateBlock(this.model, {
       url: linkInput.value,
     });
-    this.onCancel?.();
+    this.onConfirm?.();
   }
 
   override render() {
@@ -77,6 +97,7 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
             Create a Bookmark that previews a link in card view.
           </div>
           <input
+            tabindex="1"
             type="text"
             class="bookmark-input link"
             placeholder="Input in https://..."
@@ -84,10 +105,9 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
 
           <div class="bookmark-modal-footer">
             <div
-              class="bookmark-ensure-button"
-              @click=${() => {
-                this._onEnsure();
-              }}
+              tabindex="2"
+              class="bookmark-confirm-button"
+              @click=${() => this._onConfirm()}
             >
               Confirm
             </div>

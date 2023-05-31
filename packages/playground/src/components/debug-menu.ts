@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import '@shoelace-style/shoelace/dist/themes/light.css';
-import '@shoelace-style/shoelace/dist/themes/dark.css';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
-import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/components/icon/icon.js';
 import '@shoelace-style/shoelace/dist/components/button-group/button-group.js';
-import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
-import '@shoelace-style/shoelace/dist/components/divider/divider.js';
-import '@shoelace-style/shoelace/dist/components/menu/menu.js';
-import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
-import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
-import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/color-picker/color-picker.js';
+import '@shoelace-style/shoelace/dist/components/divider/divider.js';
+import '@shoelace-style/shoelace/dist/components/dropdown/dropdown.js';
+import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
+import '@shoelace-style/shoelace/dist/components/icon/icon.js';
+import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
+import '@shoelace-style/shoelace/dist/components/menu/menu.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
+import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
   activeEditorManager,
@@ -404,14 +404,35 @@ export class DebugMenu extends ShadowlessElement {
 
     this._dark = dark;
     localStorage.setItem('blocksuite:dark', dark ? 'true' : 'false');
-    html?.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if (!html) return;
+    html.setAttribute('data-theme', dark ? 'dark' : 'light');
+
+    this._insertTransitionStyle('color-transition', 0);
+
     if (dark) {
-      html?.classList.add('dark');
-      html?.classList.add('sl-theme-dark');
+      html.classList.add('dark');
+      html.classList.add('sl-theme-dark');
     } else {
-      html?.classList.remove('dark');
-      html?.classList.remove('sl-theme-dark');
+      html.classList.remove('dark');
+      html.classList.remove('sl-theme-dark');
     }
+  }
+
+  private _insertTransitionStyle(classKey: string, duration: number) {
+    const $html = document.documentElement;
+    const $style = document.createElement('style');
+    const slCSSKeys = ['sl-transition-x-fast'];
+    $style.innerHTML = `html.${classKey} * { transition: all ${duration}ms 0ms linear !important; } :root { ${slCSSKeys.map(
+      key => `--${key}: ${duration}ms`
+    )} }`;
+
+    $html.appendChild($style);
+    $html.classList.add(classKey);
+
+    setTimeout(() => {
+      $style.remove();
+      $html.classList.remove(classKey);
+    }, duration);
   }
 
   private _toggleDarkMode() {

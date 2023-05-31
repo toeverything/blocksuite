@@ -3,11 +3,11 @@ import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
   BlockHubIcon,
+  BlockHubRoundedRectangleIcon,
   CrossIcon,
   DatabaseTableViewIcon,
   EmbedIcon,
   NumberedListIconLarge,
-  RectIcon,
   TextIconLarge,
 } from '@blocksuite/global/config';
 import { assertExists, isFirefox } from '@blocksuite/global/utils';
@@ -119,8 +119,6 @@ const styles = css`
 
   .card-container-inner:hover .card-container {
     background: var(--affine-hover-color);
-    fill: var(--affine-primary-color);
-    color: var(--affine-primary-color);
     top: -2px;
     left: -2px;
   }
@@ -201,8 +199,7 @@ const styles = css`
   }
 
   .block-hub-icon-container[selected='true'] {
-    fill: var(--affine-primary-color);
-    color: var(--affine-primary-color);
+    background: var(--affine-hover-color);
   }
 
   .block-hub-icon-container:hover {
@@ -232,7 +229,6 @@ const styles = css`
   .new-icon:hover {
     box-shadow: var(--affine-menu-shadow);
     background: var(--affine-white);
-    fill: var(--affine-primary-color);
   }
 
   .icon-expanded {
@@ -402,7 +398,7 @@ function BlockHubMenu(
         affine-flavour="affine:paragraph"
         affine-type="text"
       >
-        ${RectIcon}
+        ${BlockHubRoundedRectangleIcon}
         <tool-tip
           inert
           role="tooltip"
