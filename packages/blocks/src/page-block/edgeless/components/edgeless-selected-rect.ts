@@ -46,6 +46,102 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       user-select: none;
     }
 
+    .affine-edgeless-selected-rect {
+      position: absolute;
+      border-radius: 0;
+      pointer-events: none;
+      box-sizing: border-box;
+      z-index: 1;
+      border: var(--affine-border-width) solid var(--affine-blue);
+    }
+
+    .affine-edgeless-selected-rect > [aria-label^='handle'] {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      z-index: 10;
+      border: 2px var(--affine-blue) solid;
+      background: white;
+      pointer-events: auto;
+      user-select: none;
+      outline: none;
+
+      /**
+       * Fix: pointerEvent stops firing after a short time.
+       * When a gesture is started, the browser intersects the touch-action values of the touched element and its ancestors,
+       * up to the one that implements the gesture (in other words, the first containing scrolling element)
+       * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
+       */
+      touchaction: none;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-top-left'] {
+      cursor: nwse-resize;
+      left: -6px;
+      top: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-top-right'] {
+      cursor: nesw-resize;
+      top: -6px;
+      right: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-bottom-right'] {
+      cursor: nwse-resize;
+      right: -6px;
+      bottom: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-bottom-left'] {
+      cursor: nesw-resize;
+      bottom: -6px;
+      left: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left'],
+    .affine-edgeless-selected-rect > [aria-label='handle-right'] {
+      cursor: ew-resize;
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      width: 6px;
+      border: 0;
+      background: transparent;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left'] {
+      left: -3.5px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-right'] {
+      right: -3.5px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left']:after,
+    .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      z-index: 10;
+      border: 2px var(--affine-blue) solid;
+      content: '';
+      top: calc(50% - 6px);
+      background: white;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left']:after {
+      right: -3px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
+      right: -3px;
+    }
+
     edgeless-component-toolbar {
       /* greater than handle */
       z-index: 11;
@@ -209,18 +305,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { active, selected } = state;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
-    const style = {
-      border: `${active ? 2 : 1}px solid var(--affine-blue)`,
-      ...getCommonRectStyle(selectedRect, active, true),
-    };
+    const style = getCommonRectStyle(selectedRect, active, true);
 
     const hasResizeHandles = !active && !page.readonly;
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
-          selectedRect,
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) => {
-            const bounds = getSelectableBounds(selected);
+            const bounds = getSelectableBounds(this.state.selected);
             _resizeManager.onPointerDown(e, direction, bounds, this.zoom);
           }
         )
@@ -250,9 +342,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         </edgeless-component-toolbar>`;
 
     return html`
-      ${resizeHandles}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
-        ${connectorHandles}
+        ${resizeHandles} ${connectorHandles}
       </div>
       ${componentToolbar}
     `;
