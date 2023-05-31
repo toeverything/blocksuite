@@ -113,6 +113,11 @@ export class HtmlParser {
       'tableParser',
       this._tableParser
     );
+
+    this._contentParser.registerParserHtmlText2Block(
+      'headerParser',
+      this._headerParser
+    );
   }
 
   // TODO parse children block
@@ -212,12 +217,8 @@ export class HtmlParser {
           break;
         case 'HEADER':
           result = await this._contentParser.getParserHtmlText2Block(
-            'commonParser'
-          )?.({
-            element: node,
-            flavour: 'affine:page',
-            type: tagName.toLowerCase(),
-          });
+            'headerParser'
+          )?.(node);
           break;
         case 'TABLE':
           result = await this._contentParser.getParserHtmlText2Block(
@@ -714,6 +715,25 @@ export class HtmlParser {
         },
       ];
     }
+    return result;
+  };
+
+  private _headerParser = async (
+    element: Element
+  ): Promise<SerializedBlock[] | null> => {
+    let node = element;
+    if (element.getElementsByClassName('page-title').length > 0) {
+      node = element.getElementsByClassName('page-title')[0];
+    }
+
+    const tagName = node.tagName;
+    const result = await this._contentParser.getParserHtmlText2Block(
+      'commonParser'
+    )?.({
+      element: node,
+      flavour: 'affine:page',
+      type: tagName.toLowerCase(),
+    });
     return result;
   };
 }
