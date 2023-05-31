@@ -346,7 +346,9 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       keys: { shift },
     } = e;
 
-    if (this._ensureFrameExists() && isInsidePageTitle(target)) {
+    const hasAddedFrame = this._ensureFrameExists();
+
+    if (hasAddedFrame && isInsidePageTitle(target)) {
       requestAnimationFrame(() => {
         handleNativeRangeClick(this.page, e, this.container);
       });
