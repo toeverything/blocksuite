@@ -98,15 +98,12 @@ const styles = css`
     display: flex;
     align-items: center;
   }
-
   .select-selected > .close-icon:hover {
     cursor: pointer;
   }
-
   .select-selected > .close-icon > svg{
     fill: var(--affine-black-90);
   }
-
   .select-option-new {
     display: flex;
     flex-direction: row;
@@ -138,7 +135,6 @@ const styles = css`
     width: 16px;
     height: 16px;
   }
-
   .select-option {
     display: flex;
     justify-content: space-between;
