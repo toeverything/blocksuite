@@ -11,7 +11,11 @@ import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 import { SHORT_KEY, type } from './keyboard.js';
 import { MODIFIER_KEY } from './keyboard.js';
-import { getEditorLocator, waitForVirgoStateUpdated } from './misc.js';
+import {
+  getEditorLocator,
+  waitForVirgoStateUpdated,
+  waitNextFrame,
+} from './misc.js';
 
 export async function getFrameRect(
   page: Page,
@@ -40,6 +44,8 @@ export async function registerFormatBarCustomElements(page: Page) {
 
 export async function switchEditorMode(page: Page) {
   await page.click('sl-button[content="Switch Editor Mode"]');
+  // FIXME: listen to editor loaded event
+  await waitNextFrame(page);
 }
 
 export async function switchEditorEmbedMode(page: Page) {
