@@ -164,6 +164,12 @@ export class Page extends Space<FlatBlockMap> {
     return Text;
   }
 
+  withoutTransact(callback: () => void) {
+    this.shouldTransact = false;
+    callback();
+    this.shouldTransact = true;
+  }
+
   undo() {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -516,11 +522,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   @debug('CRUD')
-  updateBlock<T extends Partial<BlockProps>>(
-    model: BaseBlockModel,
-    props: T,
-    shouldTransact = true
-  ) {
+  updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
@@ -552,7 +554,7 @@ export class Page extends Space<FlatBlockMap> {
       const schema = this.schema.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
       syncBlockProps(schema, yBlock, props, this._ignoredKeys);
-    }, shouldTransact);
+    });
 
     model.propsUpdated.emit();
 

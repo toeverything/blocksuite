@@ -29,15 +29,13 @@ export async function reloadBookmarkBlock(
       return;
     }
 
-    model.page.updateBlock(
-      model,
-      {
+    model.page.withoutTransact(() => {
+      model.page.updateBlock(model, {
         ...metaData,
         url: model.url,
         crawled: true,
-      },
-      false
-    );
+      });
+    });
 
     bookmarkElement.loading = false;
   }
