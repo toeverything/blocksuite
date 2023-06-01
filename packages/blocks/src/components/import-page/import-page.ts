@@ -15,6 +15,8 @@ import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
+import type { SerializedBlock } from '../../__internal__/utils/index.js';
+import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
@@ -221,18 +223,26 @@ export class ImportPage extends WithDisposable(LitElement) {
         return false;
       },
       async file => {
-        const pageIds: string[] = [];
+        let pageIds: string[] = [];
+        const allPageMap: Map<string, Page>[] = [];
+        const dataBaseSubPages: string[] = [];
         const parseZipFile = async (file: File | Blob) => {
           const zip = new JSZip();
           const zipFile = await zip.loadAsync(file);
           const pageMap = new Map<string, Page>();
+          allPageMap.push(pageMap);
           const files = Object.keys(zipFile.files);
           const promises: Promise<void>[] = [];
+          const csvFiles = files
+            .filter(file => file.endsWith('.csv'))
+            .map(file => file.substring(0, file.length - 4));
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
             if (file.startsWith('__MACOSX/')) continue;
 
             const lastSplitIndex = file.lastIndexOf('/');
+            if (csvFiles.includes(file.substring(0, lastSplitIndex))) continue;
+
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
               const page = this.workspace.createPage({
@@ -284,19 +294,116 @@ export class ImportPage extends WithDisposable(LitElement) {
                   }
                 }
               };
+
+              const tableParserHandler = async (element: Element) => {
+                if (element.tagName === 'TABLE') {
+                  const parentElement = element.parentElement;
+                  if (
+                    parentElement?.tagName === 'DIV' &&
+                    parentElement.hasAttribute('id')
+                  ) {
+                    parentElement.id && dataBaseSubPages.push(parentElement.id);
+                    const tbodyElement = element.querySelector('tbody');
+                    tbodyElement?.querySelectorAll('tr').forEach(ele => {
+                      ele.id && dataBaseSubPages.push(ele.id);
+                    });
+                  }
+                }
+                if (element.getAttribute('href')?.endsWith('.csv')) {
+                  const href = element.getAttribute('href') || '';
+                  const fileName = this.joinWebPaths(folder, decodeURI(href));
+                  const tableString = await zipFile
+                    .file(fileName)
+                    ?.async('string');
+
+                  let result: SerializedBlock[] | null = [];
+                  let id = 1;
+                  const titles: string[] = [];
+                  const rows: string[][] = [];
+                  tableString?.split('\n').forEach((row, index) => {
+                    if (index === 0) {
+                      titles.push(...row.split(','));
+                    } else {
+                      const rowArray = row.split(',');
+                      rows.push(rowArray);
+                    }
+                  });
+
+                  const columns: Column[] = titles
+                    .slice(1)
+                    .map((value, index) => {
+                      return {
+                        name: value,
+                        type: 'rich-text',
+                        width: 200,
+                        hide: false,
+                        id: '' + id++,
+                      };
+                    });
+                  if (rows.length > 0) {
+                    for (let i = 0; i < rows[0].length - columns.length; i++) {
+                      columns.push({
+                        name: '',
+                        type: 'rich-text',
+                        width: 200,
+                        hide: false,
+                        id: '' + id++,
+                      });
+                    }
+                  }
+                  const databasePropsId = id++;
+                  const cells: Record<string, Record<string, Cell>> = {};
+                  const children: SerializedBlock[] = [];
+                  rows.forEach(row => {
+                    children.push({
+                      flavour: 'affine:paragraph',
+                      type: 'text',
+                      text: [{ insert: row[0] }],
+                      children: [],
+                    });
+                    const rowId = '' + id++;
+                    cells[rowId] = {};
+                    row.slice(1).forEach((value, index) => {
+                      cells[rowId][columns[index].id] = {
+                        columnId: columns[index].id,
+                        value,
+                      };
+                    });
+                  });
+
+                  result = [
+                    {
+                      flavour: 'affine:database',
+                      databaseProps: {
+                        id: '' + databasePropsId,
+                        title: element.textContent || 'Database',
+                        titleColumnName: titles[0],
+                        titleColumnWidth: 432,
+                        rowIds: Object.keys(cells),
+                        cells: cells,
+                        columns: columns,
+                      },
+                      children: children,
+                    },
+                  ];
+                  return result;
+                }
+                return null;
+              };
               const contentParser = new ContentParser(
                 page,
                 fetchFileHandler,
-                textStyleHandler
+                textStyleHandler,
+                tableParserHandler
               );
               const text = (await zipFile.file(file)?.async('string')) || '';
               if (rootId) {
+                pageIds.push(page.id);
                 if (isHtml) {
                   await contentParser.importHtml(text, rootId);
                 } else {
                   await contentParser.importMarkdown(text, rootId);
                 }
-                pageIds.push(page.id);
               }
             }
           });
@@ -305,6 +412,21 @@ export class ImportPage extends WithDisposable(LitElement) {
         };
         const allPromises = await parseZipFile(file);
         await Promise.all(allPromises.flat());
+        dataBaseSubPages.forEach(notionId => {
+          const dbSubPageId = notionId.replace(/-/g, '');
+          allPageMap.forEach(pageMap => {
+            for (const [key, value] of pageMap) {
+              if (
+                key.endsWith(` ${dbSubPageId}.html`) ||
+                key.endsWith(` ${dbSubPageId}.md`)
+              ) {
+                pageIds = pageIds.filter(id => id !== value.id);
+                this.workspace.removePage(value.id);
+                break;
+              }
+            }
+          });
+        });
         return pageIds;
       }
     );
