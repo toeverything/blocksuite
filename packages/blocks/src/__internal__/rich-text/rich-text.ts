@@ -233,15 +233,6 @@ export class RichText extends ShadowlessElement {
     });
 
     this._vEditor.setReadonly(this.model.page.readonly);
-    const inlineSuggestionProvider =
-      this.model.page.workspace.inlineSuggestionProvider;
-    if (inlineSuggestionProvider) {
-      this._inlineSuggestController.init({
-        provider: inlineSuggestionProvider,
-        model: this.model,
-        vEditor: this._vEditor,
-      });
-    }
   }
 
   override updated() {

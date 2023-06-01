@@ -1,7 +1,7 @@
-import type { Array as YArray } from 'yjs';
+import { Array as YArray, Map as YMap } from 'yjs';
 
 import type { ProxyConfig } from './config.js';
-import { toPlainValue } from './utils.js';
+import { createYProxy } from './proxy.js';
 
 export function subscribeYArray(
   arr: unknown[],
@@ -10,10 +10,6 @@ export function subscribeYArray(
 ): void {
   const { deep = false } = config;
   yArray.observe(event => {
-    if (event.changes.keys.size === 0) {
-      // skip empty event
-      return;
-    }
     let retain = 0;
     event.changes.delta.forEach(change => {
       if (change.retain) {
@@ -23,16 +19,19 @@ export function subscribeYArray(
         arr.splice(retain, change.delete);
       }
       if (change.insert) {
-        if (Array.isArray(change.insert)) {
-          const value = deep ? change.insert.map(toPlainValue) : change.insert;
-          arr.splice(retain, 0, ...value);
+        const arr = [change.insert].flat();
+        if (deep) {
+          const proxyList = arr.map(value => {
+            if (value instanceof YMap || value instanceof YArray) {
+              return createYProxy(value, config);
+            }
+            return value;
+          });
+          arr.splice(retain, 0, ...proxyList);
         } else {
-          arr.splice(
-            retain,
-            0,
-            deep ? toPlainValue(change.insert) : change.insert
-          );
+          arr.splice(retain, 0, ...arr);
         }
+
         retain += change.insert.length;
       }
     });

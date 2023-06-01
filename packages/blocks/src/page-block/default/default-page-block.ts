@@ -564,6 +564,10 @@ export class DefaultPageBlockComponent
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
+            <backlink-button
+              .host="${this}"
+              .page="${this.page}"
+            ></backlink-button>
           </div>
           ${this.content}
         </div>

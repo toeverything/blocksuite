@@ -110,28 +110,6 @@ describe('pageMeta', () => {
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
   });
-
-  // TODO deprecated test
-  it('can shift subpage', () => {
-    const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
-
-    const page0 = workspace.createPage({ id: 'page0' });
-    const page1 = workspace.createPage({ id: 'page1' });
-    const page2 = workspace.createPage({ id: 'page2' });
-
-    assert.deepEqual(
-      workspace.meta.pageMetas.map(m => m.id),
-      ['page0', 'page1', 'page2']
-    );
-
-    workspace.shiftPage(page1.id, 0);
-
-    assert.deepEqual(
-      workspace.meta.pageMetas.map(m => m.id),
-      ['page1', 'page0', 'page2']
-    );
-  });
 });
 
 describe('addBlock', () => {

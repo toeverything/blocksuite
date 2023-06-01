@@ -8,6 +8,8 @@ import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
 import { Store, type StoreOptions } from '../store.js';
+import { BacklinkIndexer } from './indexer/backlink.js';
+import { BlockIndexer } from './indexer/base.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Schema } from './schema.js';
@@ -32,6 +34,10 @@ export class Workspace {
     // call this when a blob is updated, deleted or created
     //  workspace will update re-fetch the blob and update the page
     blobUpdate: new Slot<void>(),
+  };
+
+  indexer: {
+    backlink: BacklinkIndexer;
   };
 
   constructor(storeOptions: WorkspaceOptions) {
@@ -91,6 +97,11 @@ export class Workspace {
 
     this.meta = new WorkspaceMeta(this.doc);
     this._bindPageMetaEvents();
+
+    const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
+    this.indexer = {
+      backlink: new BacklinkIndexer(blockIndexer),
+    };
   }
 
   get id() {
@@ -241,13 +252,6 @@ export class Workspace {
     props: Partial<PageMeta>
   ) {
     this.meta.setPageMeta(pageId, props);
-  }
-
-  /**
-   * @deprecated
-   */
-  shiftPage(pageId: string, newIndex: number) {
-    this.meta.shiftPageMeta(pageId, newIndex);
   }
 
   removePage(pageId: string) {

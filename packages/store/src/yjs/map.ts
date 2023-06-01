@@ -1,8 +1,8 @@
-import type { Map as YMap } from 'yjs';
+import { Array as YArray, Map as YMap } from 'yjs';
 
 import type { ProxyConfig } from './config.js';
+import { createYProxy } from './proxy.js';
 import type { UnRecord } from './utils.js';
-import { toPlainValue } from './utils.js';
 
 export function subscribeYMap(
   object: UnRecord,
@@ -24,7 +24,12 @@ export function subscribeYMap(
       if (type.action === 'delete') {
         delete object[key];
       } else if (type.action === 'add' || type.action === 'update') {
-        object[key] = deep ? toPlainValue(yMap.get(key)) : yMap.get(key);
+        const current = yMap.get(key);
+        if (deep && (current instanceof YMap || current instanceof YArray)) {
+          object[key] = createYProxy(current, config);
+        } else {
+          object[key] = current;
+        }
       }
     });
   });
