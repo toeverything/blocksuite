@@ -29,11 +29,15 @@ export async function reloadBookmarkBlock(
       return;
     }
 
-    model.page.updateBlock(model, {
-      ...metaData,
-      url: model.url,
-      crawled: true,
-    });
+    model.page.updateBlock(
+      model,
+      {
+        ...metaData,
+        url: model.url,
+        crawled: true,
+      },
+      false
+    );
 
     bookmarkElement.loading = false;
   }
