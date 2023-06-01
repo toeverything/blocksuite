@@ -310,52 +310,6 @@ export class ImportPage extends WithDisposable(LitElement) {
     );
   }
 
-  async _test(file: File) {
-    const pageIds: string[] = [];
-    const promises: Promise<void>[] = [];
-    const parseZipFile = async (file: File | Blob) => {
-      const zip = new JSZip();
-      const zipFile = await zip.loadAsync(file);
-      const pageMap = new Map<string, Page>();
-      const files = Object.keys(zipFile.files);
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.startsWith('__MACOSX/')) continue;
-
-        const lastSplitIndex = file.lastIndexOf('/');
-        const fileName = file.substring(lastSplitIndex + 1);
-        if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-          const page = this.workspace.createPage({
-            init: {
-              title: '',
-            },
-          });
-          pageMap.set(file, page);
-        }
-        if (fileName.endsWith('.zip')) {
-          const innerZipFile = await zipFile.file(fileName)?.async('blob');
-          if (innerZipFile) {
-            await parseZipFile(innerZipFile);
-          }
-        }
-      }
-      const pagePromises = Array.from(pageMap.keys()).map(async file => {
-        const page = pageMap.get(file);
-        if (!page) return;
-        const lastSplitIndex = file.lastIndexOf('/');
-        const fileName = file.substring(lastSplitIndex + 1);
-        if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-          const text = (await zipFile.file(file)?.async('string')) || '';
-          console.log(text);
-        }
-      });
-      promises.push(...pagePromises);
-    };
-    await parseZipFile(file);
-    await Promise.all(promises);
-    return pageIds;
-  }
-
   private joinWebPaths(...paths: string[]): string {
     const fullPath = paths.join('/').replace(/\/+/g, '/');
     const parts = fullPath.split('/').filter(Boolean);
