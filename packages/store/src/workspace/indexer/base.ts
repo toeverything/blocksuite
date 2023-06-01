@@ -2,7 +2,7 @@ import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { YArrayEvent, YMapEvent, YTextEvent } from 'yjs';
 
-import type { BlockSuiteDoc, BlockSuiteDocData } from '../../yjs/index.js';
+import type { BlockSuiteDoc } from '../../yjs/index.js';
 import type { YBlock } from '../page.js';
 
 type PageId = string;
@@ -39,7 +39,7 @@ export class BlockIndexer {
   };
 
   constructor(
-    doc: BlockSuiteDoc<BlockSuiteDocData>,
+    doc: BlockSuiteDoc,
     {
       immediately = false,
       slots,

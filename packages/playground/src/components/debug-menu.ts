@@ -726,19 +726,6 @@ function getTabGroupTemplate({
         >
           <div>
             <div>${page.title || 'Untitled'}</div>
-            <!-- TODO deprecated subpage -->
-            <div>
-              ${page.subpageIds
-                .map(
-                  pageId =>
-                    (
-                      pageList.find(meta => meta.id === pageId) ?? {
-                        title: 'Page Not Found',
-                      }
-                    ).title || 'Untitled'
-                )
-                .join(',')}
-            </div>
           </div>
         </sl-tab>`
     )}

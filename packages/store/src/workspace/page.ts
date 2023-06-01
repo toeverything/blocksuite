@@ -18,7 +18,6 @@ import {
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { createYProxy } from '../yjs/index.js';
 import type { PageMeta } from './meta.js';
-import { tryMigrate } from './migrations.js';
 import type { Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
@@ -654,7 +653,7 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
-      tryMigrate(this.doc);
+      // tryMigrate(this.doc);
       this._handleVersion();
     }
 

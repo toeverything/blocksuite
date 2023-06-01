@@ -1,7 +1,8 @@
-import type * as Y from 'yjs';
+import * as Y from 'yjs';
 
 import type { AwarenessStore, UserRange } from './awareness.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
+import { createYMapProxy } from './yjs/index.js';
 
 export interface StackItem {
   meta: Map<'cursor-location', UserRange | undefined>;
@@ -22,8 +23,10 @@ export class Space<
    * can be used interchangeably with ySpace
    */
   protected readonly _proxy: State;
+  protected readonly _ySpaceDoc: Y.Doc;
   /**
    * @internal The actual underlying Yjs map
+   * TODO: should be Subdocument
    */
   protected readonly _ySpace: Y.Map<State[keyof State]>;
 
@@ -31,9 +34,13 @@ export class Space<
     this.id = id;
     this.doc = doc;
     this.awarenessStore = awarenessStore;
+
+    this._ySpaceDoc = new Y.Doc();
     const prefixedId = this.id.startsWith('space:') ? this.id : this.prefixedId;
-    this._ySpace = this.doc.getMap(prefixedId);
-    this._proxy = this.doc.getMapProxy<string, State>(prefixedId);
+    doc.spaces.set(prefixedId, this._ySpaceDoc);
+
+    this._ySpace = this._ySpaceDoc.getMap('data');
+    this._proxy = createYMapProxy(this._ySpace as Y.Map<unknown>);
   }
 
   get prefixedId() {
@@ -44,6 +51,9 @@ export class Space<
    * If `shouldTransact` is `false`, the transaction will not be push to the history stack.
    */
   transact(fn: () => void, shouldTransact = true) {
-    this.doc.transact(fn, shouldTransact ? this.doc.clientID : undefined);
+    this._ySpaceDoc.transact(
+      fn,
+      shouldTransact ? this.doc.clientID : undefined
+    );
   }
 }

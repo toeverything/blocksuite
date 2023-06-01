@@ -1,26 +1,14 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { AwarenessStore } from '../awareness.js';
-import { Space } from '../space.js';
-import { type InlineSuggestionProvider, type StoreOptions } from '../store.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { Workspace } from './workspace.js';
 
-export type WorkspaceOptions = {
-  experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
-} & StoreOptions;
-
+// please use `declare module '@blocksuite/store'` to extend this interface
 export interface PageMeta {
   id: string;
   title: string;
   createDate: number;
-  /**
-   * Note: YOU SHOULD NOT UPDATE THIS FIELD MANUALLY.
-   * @deprecated
-   */
-  subpageIds: string[];
-  // please use `declare module '@blocksuite/store'` to extend this interface
 }
 
 type WorkspaceMetaState = {
@@ -30,16 +18,25 @@ type WorkspaceMetaState = {
   avatar?: string;
 };
 
-export class WorkspaceMeta extends Space<WorkspaceMetaState> {
+export class WorkspaceMeta {
+  readonly id: string = 'meta';
+  readonly doc: BlockSuiteDoc;
+
   private _prevPages = new Set<string>();
+
   pageMetaAdded = new Slot<string>();
   pageMetaRemoved = new Slot<string>();
   pageMetasUpdated = new Slot();
   commonFieldsUpdated = new Slot();
 
-  constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
-    super(id, doc, awarenessStore);
-    this._ySpace.observeDeep(this._handleWorkspaceMetaEvents);
+  protected readonly _yMap: Y.Map<WorkspaceMetaState[keyof WorkspaceMetaState]>;
+  protected readonly _proxy: WorkspaceMetaState;
+
+  constructor(doc: BlockSuiteDoc) {
+    this.doc = doc;
+    this._yMap = this.doc.getMap(this.id);
+    this._proxy = this.doc.getMapProxy<string, WorkspaceMetaState>(this.id);
+    this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
   }
 
   get pages() {
@@ -84,7 +81,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
         pages.insert(index, [yPage]);
       }
       if (!this.pages) {
-        this._ySpace.set('pages', pages);
+        this._yMap.set('pages', pages);
       }
     });
   }
@@ -98,7 +95,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
 
     this.doc.transact(() => {
       if (!this.pages) {
-        this._ySpace.set('pages', new Y.Array());
+        this._yMap.set('pages', new Y.Array());
       }
       if (index === -1) return;
       assertExists(this.pages);
@@ -158,7 +155,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
       workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
         (versions as Y.Map<unknown>).set(flavour, schema.version);
       });
-      this._ySpace.set('versions', versions);
+      this._yMap.set('versions', versions);
       return;
     } else {
       console.error(`Workspace versions already set.`);
@@ -209,7 +206,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
     pageMetas.forEach(pageMeta => {
       // newly added space can't be found
       // unless explicitly getMap after meta updated
-      this.doc.getMap('space:' + pageMeta.id);
+      // this.doc.getMap('space:' + pageMeta.id);
 
       if (!_prevPages.has(pageMeta.id)) {
         this.pageMetaAdded.emit(pageMeta.id);
@@ -238,7 +235,7 @@ export class WorkspaceMeta extends Space<WorkspaceMetaState> {
   ) => {
     events.forEach(e => {
       const hasKey = (k: string) =>
-        e.target === this._ySpace && e.changes.keys.has(k);
+        e.target === this._yMap && e.changes.keys.has(k);
 
       if (
         e.target === this.pages ||
