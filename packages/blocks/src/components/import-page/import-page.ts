@@ -225,7 +225,7 @@ export class ImportPage extends WithDisposable(LitElement) {
       async file => {
         let pageIds: string[] = [];
         const allPageMap: Map<string, Page>[] = [];
-        const dataBaseSubPages: string[] = [];
+        const dataBaseSubPages = new Set<string>();
         const parseZipFile = async (file: File | Blob) => {
           const zip = new JSZip();
           const zipFile = await zip.loadAsync(file);
@@ -302,12 +302,12 @@ export class ImportPage extends WithDisposable(LitElement) {
                     parentElement?.tagName === 'DIV' &&
                     parentElement.hasAttribute('id')
                   ) {
-                    parentElement.id && dataBaseSubPages.push(parentElement.id);
-                    const tbodyElement = element.querySelector('tbody');
-                    tbodyElement?.querySelectorAll('tr').forEach(ele => {
-                      ele.id && dataBaseSubPages.push(ele.id);
-                    });
+                    parentElement.id && dataBaseSubPages.add(parentElement.id);
                   }
+                  const tbodyElement = element.querySelector('tbody');
+                  tbodyElement?.querySelectorAll('tr').forEach(ele => {
+                    ele.id && dataBaseSubPages.add(ele.id);
+                  });
                 }
                 if (
                   element.tagName === 'A' &&
