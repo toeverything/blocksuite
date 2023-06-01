@@ -17,6 +17,10 @@ export type TextStyleHandler = (
   styles: Record<string, unknown>
 ) => void;
 
+export type TableParserHandler = (
+  element: Element
+) => Promise<SerializedBlock[] | null>;
+
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
 const INLINE_TAGS = [
@@ -46,17 +50,20 @@ export class HtmlParser {
   private _page: Page;
   private _customFetchFileHandler?: FetchFileHandler;
   private _customTextStyleHandler?: TextStyleHandler;
+  private _customTableParserHandler?: TableParserHandler;
 
   constructor(
     contentParser: ContentParser,
     page: Page,
     fetchFileHandler?: FetchFileHandler,
-    textStyleHandler?: TextStyleHandler
+    textStyleHandler?: TextStyleHandler,
+    tableParserHandler?: TableParserHandler
   ) {
     this._contentParser = contentParser;
     this._page = page;
     this._customFetchFileHandler = fetchFileHandler;
     this._customTextStyleHandler = textStyleHandler;
+    this._customTableParserHandler = tableParserHandler;
   }
 
   private _fetchFileHandler = async (
@@ -650,6 +657,12 @@ export class HtmlParser {
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     let result: SerializedBlock[] | null = [];
+    if (this._customTableParserHandler) {
+      result = await this._customTableParserHandler(element);
+      if (result && result.length > 0) {
+        return result;
+      }
+    }
     if (element.tagName === 'TABLE') {
       const theadElement = element.querySelector('thead');
       const tbodyElement = element.querySelector('tbody');

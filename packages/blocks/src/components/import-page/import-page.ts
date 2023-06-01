@@ -221,18 +221,26 @@ export class ImportPage extends WithDisposable(LitElement) {
         return false;
       },
       async file => {
-        const pageIds: string[] = [];
+        const pageIds = new Set<string>();
+        const allPageMap: Map<string, Page>[] = [];
+        const dataBaseSubPages: string[] = [];
         const parseZipFile = async (file: File | Blob) => {
           const zip = new JSZip();
           const zipFile = await zip.loadAsync(file);
           const pageMap = new Map<string, Page>();
+          allPageMap.push(pageMap);
           const files = Object.keys(zipFile.files);
           const promises: Promise<void>[] = [];
+          const csvFiles = files
+            .filter(file => file.endsWith('.csv'))
+            .map(file => file.substring(0, file.length - 4));
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
             if (file.startsWith('__MACOSX/')) continue;
 
             const lastSplitIndex = file.lastIndexOf('/');
+            if (csvFiles.includes(file.substring(0, lastSplitIndex))) continue;
+
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
               const page = this.workspace.createPage({
@@ -284,10 +292,28 @@ export class ImportPage extends WithDisposable(LitElement) {
                   }
                 }
               };
+
+              const tableParserHandler = async (element: Element) => {
+                if (element.tagName === 'TABLE') {
+                  const parentElement = element.parentElement;
+                  if (
+                    parentElement?.tagName === 'DIV' &&
+                    parentElement.hasAttribute('id')
+                  ) {
+                    parentElement.id && dataBaseSubPages.push(parentElement.id);
+                    const tbodyElement = element.querySelector('tbody');
+                    tbodyElement?.querySelectorAll('tr').forEach(ele => {
+                      ele.id && dataBaseSubPages.push(ele.id);
+                    });
+                  }
+                }
+                return null;
+              };
               const contentParser = new ContentParser(
                 page,
                 fetchFileHandler,
-                textStyleHandler
+                textStyleHandler,
+                tableParserHandler
               );
               const text = (await zipFile.file(file)?.async('string')) || '';
               if (rootId) {
@@ -296,7 +322,7 @@ export class ImportPage extends WithDisposable(LitElement) {
                 } else {
                   await contentParser.importMarkdown(text, rootId);
                 }
-                pageIds.push(page.id);
+                pageIds.add(page.id);
               }
             }
           });
@@ -305,7 +331,22 @@ export class ImportPage extends WithDisposable(LitElement) {
         };
         const allPromises = await parseZipFile(file);
         await Promise.all(allPromises.flat());
-        return pageIds;
+        dataBaseSubPages.forEach(notionId => {
+          const dbSubPageId = notionId.replace(/-/g, '');
+          allPageMap.forEach(pageMap => {
+            for (const [key, value] of pageMap) {
+              if (
+                key.endsWith(` ${dbSubPageId}.html`) ||
+                key.endsWith(` ${dbSubPageId}.md`)
+              ) {
+                pageIds.delete(value.id);
+                this.workspace.removePage(value.id);
+                break;
+              }
+            }
+          });
+        });
+        return Array.from(pageIds.keys());
       }
     );
   }

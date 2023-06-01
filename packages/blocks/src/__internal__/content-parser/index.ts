@@ -8,7 +8,11 @@ import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import { getEditorContainer, type SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
-import type { FetchFileHandler, TextStyleHandler } from './parse-html.js';
+import type {
+  FetchFileHandler,
+  TableParserHandler,
+  TextStyleHandler,
+} from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
@@ -29,14 +33,16 @@ export class ContentParser {
   constructor(
     page: Page,
     fetchFileHandler?: FetchFileHandler,
-    textStyleHandler?: TextStyleHandler
+    textStyleHandler?: TextStyleHandler,
+    tableParserHandler?: TableParserHandler
   ) {
     this._page = page;
     this._htmlParser = new HtmlParser(
       this,
       page,
       fetchFileHandler,
-      textStyleHandler
+      textStyleHandler,
+      tableParserHandler
     );
     this._htmlParser.registerParsers();
   }
