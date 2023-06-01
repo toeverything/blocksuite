@@ -223,9 +223,9 @@ export class ImportPage extends WithDisposable(LitElement) {
         return false;
       },
       async file => {
-        let pageIds: string[] = [];
+        const pageIds: string[] = [];
         const allPageMap: Map<string, Page>[] = [];
-        const dataBaseSubPages = new Set<string>();
+        // const dataBaseSubPages = new Set<string>();
         const parseZipFile = async (file: File | Blob) => {
           const zip = new JSZip();
           const zipFile = await zip.loadAsync(file);
@@ -296,19 +296,19 @@ export class ImportPage extends WithDisposable(LitElement) {
               };
 
               const tableParserHandler = async (element: Element) => {
-                if (element.tagName === 'TABLE') {
-                  const parentElement = element.parentElement;
-                  if (
-                    parentElement?.tagName === 'DIV' &&
-                    parentElement.hasAttribute('id')
-                  ) {
-                    parentElement.id && dataBaseSubPages.add(parentElement.id);
-                  }
-                  const tbodyElement = element.querySelector('tbody');
-                  tbodyElement?.querySelectorAll('tr').forEach(ele => {
-                    ele.id && dataBaseSubPages.add(ele.id);
-                  });
-                }
+                // if (element.tagName === 'TABLE') {
+                //   const parentElement = element.parentElement;
+                //   if (
+                //     parentElement?.tagName === 'DIV' &&
+                //     parentElement.hasAttribute('id')
+                //   ) {
+                //     parentElement.id && dataBaseSubPages.add(parentElement.id);
+                //   }
+                //   const tbodyElement = element.querySelector('tbody');
+                //   tbodyElement?.querySelectorAll('tr').forEach(ele => {
+                //     ele.id && dataBaseSubPages.add(ele.id);
+                //   });
+                // }
                 if (
                   element.tagName === 'A' &&
                   element.getAttribute('href')?.endsWith('.csv')
@@ -420,21 +420,21 @@ export class ImportPage extends WithDisposable(LitElement) {
         };
         const allPromises = await parseZipFile(file);
         await Promise.all(allPromises.flat());
-        dataBaseSubPages.forEach(notionId => {
-          const dbSubPageId = notionId.replace(/-/g, '');
-          allPageMap.forEach(pageMap => {
-            for (const [key, value] of pageMap) {
-              if (
-                key.endsWith(` ${dbSubPageId}.html`) ||
-                key.endsWith(` ${dbSubPageId}.md`)
-              ) {
-                pageIds = pageIds.filter(id => id !== value.id);
-                this.workspace.removePage(value.id);
-                break;
-              }
-            }
-          });
-        });
+        // dataBaseSubPages.forEach(notionId => {
+        //   const dbSubPageId = notionId.replace(/-/g, '');
+        //   allPageMap.forEach(pageMap => {
+        //     for (const [key, value] of pageMap) {
+        //       if (
+        //         key.endsWith(` ${dbSubPageId}.html`) ||
+        //         key.endsWith(` ${dbSubPageId}.md`)
+        //       ) {
+        //         pageIds = pageIds.filter(id => id !== value.id);
+        //         this.workspace.removePage(value.id);
+        //         break;
+        //       }
+        //     }
+        //   });
+        // });
         return pageIds;
       }
     );
