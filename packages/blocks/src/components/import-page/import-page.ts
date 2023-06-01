@@ -223,7 +223,7 @@ export class ImportPage extends WithDisposable(LitElement) {
         return false;
       },
       async file => {
-        const pageIds = new Set<string>();
+        let pageIds: string[] = [];
         const allPageMap: Map<string, Page>[] = [];
         const dataBaseSubPages: string[] = [];
         const parseZipFile = async (file: File | Blob) => {
@@ -376,8 +376,8 @@ export class ImportPage extends WithDisposable(LitElement) {
                       flavour: 'affine:database',
                       databaseProps: {
                         id: '' + databasePropsId,
-                        title: 'Database',
-                        titleColumnName: element.textContent || '',
+                        title: element.textContent || 'Database',
+                        titleColumnName: titles[0],
                         titleColumnWidth: 432,
                         rowIds: Object.keys(cells),
                         cells: cells,
@@ -398,12 +398,12 @@ export class ImportPage extends WithDisposable(LitElement) {
               );
               const text = (await zipFile.file(file)?.async('string')) || '';
               if (rootId) {
+                pageIds.push(page.id);
                 if (isHtml) {
                   await contentParser.importHtml(text, rootId);
                 } else {
                   await contentParser.importMarkdown(text, rootId);
                 }
-                pageIds.add(page.id);
               }
             }
           });
@@ -420,14 +420,14 @@ export class ImportPage extends WithDisposable(LitElement) {
                 key.endsWith(` ${dbSubPageId}.html`) ||
                 key.endsWith(` ${dbSubPageId}.md`)
               ) {
-                pageIds.delete(value.id);
+                pageIds = pageIds.filter(id => id !== value.id);
                 this.workspace.removePage(value.id);
                 break;
               }
             }
           });
         });
-        return Array.from(pageIds.keys());
+        return pageIds;
       }
     );
   }
