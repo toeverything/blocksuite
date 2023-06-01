@@ -362,57 +362,57 @@ export class Workspace {
     const unprefix = (str: string) =>
       str.replace('sys:', '').replace('prop:', '').replace('space:', '');
     const visited = new Set();
-    const firstPageBlocks = json[pageId];
+    const pageBlocks = json[pageId];
 
     let page: Page | null = null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sanitize = async (props: any) => {
       const result: Record<string, unknown> = {};
+
+      //TODO: https://github.com/toeverything/blocksuite/issues/2939
+      if (props['sys:flavour'] === 'affine:surface' && props['elements']) {
+        for (const [, element] of Object.entries(
+          props['elements']
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ) as any[]) {
+          if (element['type'] === 'text') {
+            const yText = new Y.Text();
+            yText.applyDelta(element['text']);
+            element['text'] = yText;
+          }
+        }
+      }
+
+      // setup embed source
+      if (props['sys:flavour'] === 'affine:embed') {
+        let resp;
+        try {
+          resp = await fetch(props['prop:sourceId'], {
+            cache: 'no-cache',
+            mode: 'cors',
+            headers: {
+              Origin: window.location.origin,
+            },
+          });
+        } catch (error) {
+          throw new Error(`Failed to fetch embed source. error: ${error}`);
+        }
+        const imgBlob = await resp.blob();
+        if (!imgBlob.type.startsWith('image/')) {
+          throw new Error('Embed source is not an image');
+        }
+
+        assertExists(page);
+        const storage = page.blobs;
+        assertExists(storage);
+        const id = await storage.set(imgBlob);
+        props['prop:sourceId'] = id;
+      }
+
       for (const key of Object.keys(props)) {
         if (key === 'sys:children' || key === 'sys:flavour') {
-          return;
-        }
-
-        //TODO: https://github.com/toeverything/blocksuite/issues/2939
-        if (props['sys:flavour'] === 'affine:surface' && props['elements']) {
-          for (const [, element] of Object.entries(
-            props['elements']
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ) as any[]) {
-            if (element['type'] === 'text') {
-              const yText = new Y.Text();
-              yText.applyDelta(props[key]);
-              element['text'] = yText;
-            }
-          }
-        }
-
-        // setup embed source
-        if (props['sys:flavour'] === 'affine:embed') {
-          let resp;
-          try {
-            resp = await fetch(props['prop:sourceId'], {
-              cache: 'no-cache',
-              mode: 'cors',
-              headers: {
-                Origin: window.location.origin,
-              },
-            });
-          } catch (error) {
-            console.error(error);
-            throw new Error('Failed to fetch embed source');
-          }
-          const imgBlob = await resp.blob();
-          if (!imgBlob.type.startsWith('image/')) {
-            throw new Error('Embed source is not an image');
-          }
-
-          assertExists(page);
-          const storage = page.blobs;
-          assertExists(storage);
-          const id = await storage.set(imgBlob);
-          result['prop:sourceId'] = id;
+          continue;
         }
 
         result[unprefix(key)] = props[key];
@@ -435,21 +435,20 @@ export class Workspace {
     ) => {
       if (visited.has(props['sys:id'])) return;
       const sanitizedProps = await sanitize(props);
-      assertExists(sanitizedProps);
       page.addBlock(props['sys:flavour'], sanitizedProps, parent);
       for (const id of props['sys:children']) {
-        addBlockByProps(page, firstPageBlocks[id], props['sys:id']);
+        addBlockByProps(page, pageBlocks[id], props['sys:id']);
         visited.add(id);
       }
     };
 
-    const importPage = (pageId: string) => {
+    const importPage = async (pageId: string) => {
       page = this.createPage({ id: unprefix(pageId) });
 
-      Object.values(firstPageBlocks).forEach(prefixedProps => {
+      for (const block of Object.values(pageBlocks)) {
         assertExists(page);
-        addBlockByProps(page, prefixedProps, null);
-      });
+        await addBlockByProps(page, block, null);
+      }
     };
 
     importPage(pageId);
