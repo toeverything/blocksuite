@@ -77,7 +77,11 @@ export function syncBlockProps(
     if (value !== undefined) {
       if (Array.isArray(value) || isPureObject(value)) {
         if (isSurface && key === 'elements') {
-          yBlock.set(key, native2Y(value, true));
+          const elementsMap = new Y.Map();
+          for (const element of Object.values(value)) {
+            elementsMap.set(element.id, native2Y(element, false));
+          }
+          yBlock.set(key, elementsMap);
         } else {
           yBlock.set(`prop:${key}`, native2Y(value, true));
         }

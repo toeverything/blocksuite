@@ -373,9 +373,9 @@ export class Workspace {
         }
 
         if (props['sys:flavour'] === 'affine:surface' && props['elements']) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           for (const [, element] of Object.entries(
             props['elements']
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ) as any[]) {
             if (element['type'] === 'text') {
               const yText = new Y.Text();
