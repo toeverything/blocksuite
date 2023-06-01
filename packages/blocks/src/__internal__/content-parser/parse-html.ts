@@ -618,7 +618,7 @@ export class HtmlParser {
           },
         ];
       } else {
-        const storage = await this._page.blobs;
+        const storage = this._page.blobs;
         assertExists(storage);
         const id = await storage.set(imgBlob);
         result = [

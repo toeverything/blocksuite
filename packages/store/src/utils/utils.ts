@@ -62,6 +62,7 @@ export function syncBlockProps(
       }
       return;
     }
+
     if (
       !isPrimitive(value) &&
       !Array.isArray(value) &&
@@ -70,9 +71,16 @@ export function syncBlockProps(
       throw new Error('Only top level primitives are supported for now');
     }
 
+    // https://github.com/toeverything/blocksuite/issues/2939
+    //TODO: elements property should not be handled differently
+    const isSurface = schema.model.flavour === 'affine:surface';
     if (value !== undefined) {
       if (Array.isArray(value) || isPureObject(value)) {
-        yBlock.set(`prop:${key}`, native2Y(value, true));
+        if (isSurface && key === 'elements') {
+          yBlock.set(key, native2Y(value, true));
+        } else {
+          yBlock.set(`prop:${key}`, native2Y(value, true));
+        }
       } else {
         yBlock.set(`prop:${key}`, value);
       }
