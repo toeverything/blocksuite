@@ -27,8 +27,6 @@ export class Space<
    */
   protected readonly _ySpace: Y.Map<State[keyof State]>;
 
-  shouldTransact = true;
-
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     this.id = id;
     this.doc = doc;
@@ -46,9 +44,6 @@ export class Space<
    * If `shouldTransact` is `false`, the transaction will not be push to the history stack.
    */
   transact(fn: () => void, shouldTransact = true) {
-    this.doc.transact(
-      fn,
-      shouldTransact && this.shouldTransact ? this.doc.clientID : undefined
-    );
+    this.doc.transact(fn, shouldTransact ? this.doc.clientID : undefined);
   }
 }

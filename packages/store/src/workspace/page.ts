@@ -64,6 +64,7 @@ export class Page extends Space<FlatBlockMap> {
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
+  private _shouldTransact = true;
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(Object.keys(new BaseBlockModel()));
@@ -165,9 +166,16 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   withoutTransact(callback: () => void) {
-    this.shouldTransact = false;
+    this._shouldTransact = false;
     callback();
-    this.shouldTransact = true;
+    this._shouldTransact = true;
+  }
+
+  override transact(
+    fn: () => void,
+    shouldTransact: boolean = this._shouldTransact
+  ) {
+    super.transact(fn, shouldTransact);
   }
 
   undo() {
