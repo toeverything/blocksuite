@@ -117,7 +117,7 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'demo', attributes: {} }],
       children: [],
     },
@@ -278,7 +278,7 @@ test(scoped`import notion html-format list`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'demo', attributes: {} }],
       children: [],
     },
@@ -420,7 +420,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'demo', attributes: {} }],
       children: [],
     },
@@ -789,7 +789,7 @@ test(scoped`import notion html-format toggle list`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'demo', attributes: {} }],
       children: [],
     },
@@ -963,7 +963,7 @@ test(scoped`import notion html-format inline`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'inline', attributes: {} }],
       children: [],
     },

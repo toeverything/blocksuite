@@ -121,36 +121,42 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
-    this._edgeless.clearSelectedBlocks();
-
     const { selected, active } = this.state;
-    if (selected.length !== 1) {
-      this._setSelectionState([element], false);
+    this._edgeless.clearSelectedBlocks();
+    // click the inner area of active text and note element
+    if (active && selected.length === 1 && selected[0] === element) {
+      handleNativeRangeClick(this._page, e);
       return;
     }
 
-    // phasor element
-    if (isPhasorElement(element)) {
-      if (selected[0] instanceof TextElement && active) {
-        return;
-      }
-      this._setSelectionState([element], false);
-    }
-    // frame block
-    else {
-      if (selected[0] === element) {
-        this._setSelectionState([element], true);
-      } else {
+    // handle single frame block click
+    if (!e.keys.shift && selected.length === 1 && isTopLevelBlock(element)) {
+      if (
+        (selected[0] === element && !active) ||
+        (active && selected[0] !== element)
+      ) {
         // issue #1809
         // If the previously selected element is a frameBlock and is in an active state,
         // then the currently clicked frameBlock should also be in an active state when selected.
-        this._setSelectionState(
-          [element],
-          active && isTopLevelBlock(selected[0])
-        );
+        this._setSelectionState([element], true);
+        this._edgeless.slots.selectedBlocksUpdated.emit([]);
+        return;
       }
-      this._edgeless.slots.selectedBlocksUpdated.emit([]);
-      handleNativeRangeClick(this._page, e);
+    }
+
+    // hold shift key to multi select or de-select element
+    if (e.keys.shift) {
+      const selections = [...selected];
+      if (selected.includes(element)) {
+        this._setSelectionState(
+          selections.filter(item => item !== element),
+          false
+        );
+      } else {
+        this._setSelectionState([...selections, element], false);
+      }
+    } else {
+      this._setSelectionState([element], false);
     }
   }
 
@@ -498,6 +504,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerMouseOut(_: PointerEventState) {
+    noop();
+  }
+
+  onPressShiftKey(_: boolean) {
     noop();
   }
 }

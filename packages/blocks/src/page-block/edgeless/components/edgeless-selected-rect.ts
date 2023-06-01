@@ -46,6 +46,108 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       user-select: none;
     }
 
+    .affine-edgeless-selected-rect {
+      position: absolute;
+      border-radius: 0;
+      pointer-events: none;
+      box-sizing: border-box;
+      z-index: 1;
+      border: var(--affine-border-width) solid var(--affine-blue);
+    }
+
+    .affine-edgeless-selected-rect > [aria-label^='handle'] {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      z-index: 10;
+      border: 2px var(--affine-blue) solid;
+      background: white;
+      pointer-events: auto;
+      user-select: none;
+      outline: none;
+
+      /**
+       * Fix: pointerEvent stops firing after a short time.
+       * When a gesture is started, the browser intersects the touch-action values of the touched element and its ancestors,
+       * up to the one that implements the gesture (in other words, the first containing scrolling element)
+       * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
+       */
+      touchaction: none;
+    }
+
+    :host([disabled='true'])
+      .affine-edgeless-selected-rect
+      > [aria-label^='handle'] {
+      pointer-events: none;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-top-left'] {
+      cursor: nwse-resize;
+      left: -6px;
+      top: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-top-right'] {
+      cursor: nesw-resize;
+      top: -6px;
+      right: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-bottom-right'] {
+      cursor: nwse-resize;
+      right: -6px;
+      bottom: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-bottom-left'] {
+      cursor: nesw-resize;
+      bottom: -6px;
+      left: -6px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left'],
+    .affine-edgeless-selected-rect > [aria-label='handle-right'] {
+      cursor: ew-resize;
+      top: 0;
+      bottom: 0;
+      height: 100%;
+      width: 6px;
+      border: 0;
+      background: transparent;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left'] {
+      left: -3.5px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-right'] {
+      right: -3.5px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left']:after,
+    .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      z-index: 10;
+      border: 2px var(--affine-blue) solid;
+      content: '';
+      top: calc(50% - 6px);
+      background: white;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-left']:after {
+      left: -3px;
+    }
+
+    .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
+      right: -3px;
+    }
+
     edgeless-component-toolbar {
       /* greater than handle */
       z-index: 11;
@@ -81,7 +183,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragMove,
       this._onDragEnd
     );
-    this.addEventListener('mousedown', stopPropagation);
+    this.addEventListener('pointerdown', stopPropagation);
   }
 
   get zoom() {
@@ -102,8 +204,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragMove = (newBounds: Map<string, Bound>) => {
+    const { page, state, surface } = this;
     const selectedMap = new Map<string, Selectable>(
-      this.state.selected.map(element => [element.id, element])
+      state.selected.map(element => [element.id, element])
     );
 
     newBounds.forEach((bound, id) => {
@@ -125,25 +228,22 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           frameH = FRAME_MIN_HEIGHT;
           frameY = bound.y;
         }
-        const xywh = JSON.stringify([frameX, frameY, frameW, frameH]);
-        this.page.updateBlock(element, { xywh });
+        page.updateBlock(element, {
+          xywh: JSON.stringify([frameX, frameY, frameW, frameH]),
+        });
       } else {
         if (element instanceof TextElement) {
-          bound.w = element.w * (bound.h / element.h);
-          this.surface.updateElement<'text'>(id, {
+          const p = bound.h / element.h;
+          bound.w = element.w * p;
+          surface.updateElement<'text'>(id, {
             xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
-            fontSize: element.fontSize * (bound.h / element.h),
+            fontSize: element.fontSize * p,
           });
         } else {
-          this.surface.setElementBound(element.id, bound);
+          surface.setElementBound(element.id, bound);
         }
       }
-      handleElementChangedEffectForConnector(
-        element,
-        [element],
-        this.surface,
-        this.page
-      );
+      handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
     this.requestUpdate();
@@ -159,6 +259,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   override firstUpdated() {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.pressShiftKeyUpdated.on(pressed =>
+        this._resizeManager.onPressShiftKey(pressed)
+      )
+    );
 
     this._componentToolbarPopper = this._componentToolbar
       ? createPopper(this._selectedRect, this._componentToolbar, {
@@ -199,29 +304,33 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (
-      this.state.selected.length === 0 ||
-      (this.state.selected[0] instanceof TextElement && this.state.active)
-    )
-      return null;
-
-    const { page, state, surface, resizeMode, _resizeManager } = this;
+    const { state } = this;
     const { active, selected } = state;
+    if (
+      selected.length === 0 ||
+      (active && selected[0] instanceof TextElement)
+    ) {
+      return nothing;
+    }
+
+    const { page, surface, resizeMode, _resizeManager } = this;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
-    const style = {
-      border: `${active ? 2 : 1}px solid var(--affine-blue)`,
-      ...getCommonRectStyle(selectedRect, active, true),
-    };
+    const style = getCommonRectStyle(selectedRect, active, true);
 
     const hasResizeHandles = !active && !page.readonly;
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
-          selectedRect,
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) => {
             const bounds = getSelectableBounds(selected);
-            _resizeManager.onPointerDown(e, direction, bounds, this.zoom);
+            _resizeManager.onPointerDown(
+              e,
+              direction,
+              bounds,
+              resizeMode,
+              this.zoom
+            );
           }
         )
       : nothing;
@@ -245,14 +354,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
-          .selectionState=${this.state}
+          .selectionState=${state}
         >
         </edgeless-component-toolbar>`;
 
     return html`
-      ${resizeHandles}
       <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
-        ${connectorHandles}
+        ${resizeHandles} ${connectorHandles}
       </div>
       ${componentToolbar}
     `;

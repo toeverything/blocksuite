@@ -69,7 +69,7 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
     noop();
   }
 
-  syncDraggingArea() {
+  onPressShiftKey(_: boolean) {
     noop();
   }
 }

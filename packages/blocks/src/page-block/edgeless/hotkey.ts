@@ -1,4 +1,8 @@
-import { FRAME_BACKGROUND_COLORS, HOTKEYS } from '@blocksuite/global/config';
+import {
+  FRAME_BACKGROUND_COLORS,
+  HOTKEYS,
+  SHORT_KEY,
+} from '@blocksuite/global/config';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
@@ -49,10 +53,9 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
           return;
         }
 
-        edgeless.mouseMode = { type: 'pan', panning: false };
         shouldRevertMode = true;
         lastMode = mouseMode;
-
+        setMouseMode(edgeless, { type: 'pan', panning: false });
         return;
       }
       if (event.type === 'keyup') {
@@ -62,7 +65,10 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
         shouldRevertMode = false;
       }
     },
-    { keyup: true }
+    {
+      keydown: true,
+      keyup: true,
+    }
   );
 }
 
@@ -90,6 +96,26 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(HOTKEYS.DELETE, backspace);
 }
 
+function bindShift(
+  edgeless: EdgelessPageBlockComponent,
+  key = 'shift',
+  pressed = false
+) {
+  hotkey.addListener(
+    HOTKEYS.ANY_KEY,
+    e => {
+      if (e.key.toLowerCase() === key && pressed !== e.shiftKey) {
+        pressed = e.shiftKey;
+        edgeless.slots.pressShiftKeyUpdated.emit(pressed);
+      }
+    },
+    {
+      keydown: true,
+      keyup: true,
+    }
+  );
+}
+
 export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
   const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_EDGELESS);
   if (activeEditorManager.isActive(edgeless)) {
@@ -109,11 +135,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     );
 
     hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
-    hotkey.addListener('t', () =>
-      setMouseMode(edgeless, {
-        type: 'text',
-      })
-    );
+    hotkey.addListener('t', () => setMouseMode(edgeless, { type: 'text' }));
     hotkey.addListener('h', () =>
       setMouseMode(edgeless, { type: 'pan', panning: false })
     );
@@ -145,8 +167,35 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
       setMouseMode(edgeless, { type: 'default' }, true);
     });
 
+    hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {
+      keyboardEvent.preventDefault();
+
+      edgeless.slots.selectionUpdated.emit({
+        selected: [...edgeless.frames, ...edgeless.surface.getElements()],
+        active: false,
+      });
+    });
+
+    hotkey.addListener(`${SHORT_KEY}+1`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('fit');
+    });
+    hotkey.addListener(`${SHORT_KEY}+-`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('out');
+    });
+    hotkey.addListener(`${SHORT_KEY}+0`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('reset');
+    });
+    hotkey.addListener(`${SHORT_KEY}+=`, e => {
+      e.preventDefault();
+      edgeless.slots.zoomUpdated.emit('in');
+    });
+
     bindSpace(edgeless);
     bindDelete(edgeless);
+    bindShift(edgeless);
     bindCommonHotkey(edgeless.page);
   });
   return () => {

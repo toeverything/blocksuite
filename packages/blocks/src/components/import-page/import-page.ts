@@ -15,12 +15,13 @@ import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
+import type { SerializedBlock } from '../../__internal__/utils/index.js';
+import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
 export type OnSuccessHandler = (pageIds: string[]) => void;
 
-const LINK_PRE = 'Affine-LinkedPage-';
 const SHOW_LOADING_SIZE = 1024 * 200;
 
 @customElement('import-page')
@@ -58,6 +59,10 @@ export class ImportPage extends WithDisposable(LitElement) {
     this._startY = 0;
 
     this._onMouseMove = this._onMouseMove.bind(this);
+  }
+
+  loading(): boolean {
+    return this._loading;
   }
 
   override updated(changedProps: PropertyValues) {
@@ -119,7 +124,7 @@ export class ImportPage extends WithDisposable(LitElement) {
   private async _importFile(
     fileExtension: string,
     needLoadingHandler: (files: File[]) => Promise<boolean>,
-    parseContentHandler: (files: File[]) => Promise<void>
+    parseContentHandler: (file: File) => Promise<string[]>
   ) {
     this.hidden = true;
     const files = await this._selectFile(fileExtension);
@@ -130,7 +135,14 @@ export class ImportPage extends WithDisposable(LitElement) {
     } else {
       this.abortController.abort();
     }
-    await parseContentHandler(files);
+
+    const pageIds: string[] = [];
+    for (const file of files) {
+      const importPageIds = await parseContentHandler(file);
+      pageIds.push(...importPageIds);
+    }
+    this._onImportSuccess(pageIds);
+
     needLoading && this.abortController.abort();
   }
 
@@ -145,21 +157,20 @@ export class ImportPage extends WithDisposable(LitElement) {
         }
         return false;
       },
-      async files => {
-        const pageIds: string[] = [];
-        for (const file of files) {
-          const text = await file.text();
-          const page = this.workspace.createPage({
-            init: {
-              title: '',
-            },
-          });
-          const rootId = page.root?.id;
-          const contentParser = new ContentParser(page);
-          rootId && (await contentParser.importMarkdown(text, rootId));
-          pageIds.push(page.id);
+      async file => {
+        const text = await file.text();
+        const page = this.workspace.createPage({
+          init: {
+            title: '',
+          },
+        });
+        const rootId = page.root?.id;
+        const contentParser = new ContentParser(page);
+        if (rootId) {
+          await contentParser.importMarkdown(text, rootId);
+          return [page.id];
         }
-        this._onImportSuccess(pageIds);
+        return [];
       }
     );
   }
@@ -175,22 +186,20 @@ export class ImportPage extends WithDisposable(LitElement) {
         }
         return false;
       },
-      async files => {
-        const pageIds: string[] = [];
-        for (const file of files) {
-          const pageIds: string[] = [];
-          const text = await file.text();
-          const page = this.workspace.createPage({
-            init: {
-              title: '',
-            },
-          });
-          const rootId = page.root?.id;
-          const contentParser = new ContentParser(page);
-          rootId && (await contentParser.importHtml(text, rootId));
-          pageIds.push(page.id);
+      async file => {
+        const text = await file.text();
+        const page = this.workspace.createPage({
+          init: {
+            title: '',
+          },
+        });
+        const rootId = page.root?.id;
+        const contentParser = new ContentParser(page);
+        if (rootId) {
+          await contentParser.importHtml(text, rootId);
+          return [page.id];
         }
-        this._onImportSuccess(pageIds);
+        return [];
       }
     );
   }
@@ -213,18 +222,27 @@ export class ImportPage extends WithDisposable(LitElement) {
         }
         return false;
       },
-      async files => {
-        const pageIds: string[] = [];
-        for (const file of files) {
+      async file => {
+        let pageIds: string[] = [];
+        const allPageMap: Map<string, Page>[] = [];
+        const dataBaseSubPages: string[] = [];
+        const parseZipFile = async (file: File | Blob) => {
           const zip = new JSZip();
           const zipFile = await zip.loadAsync(file);
           const pageMap = new Map<string, Page>();
+          allPageMap.push(pageMap);
           const files = Object.keys(zipFile.files);
+          const promises: Promise<void>[] = [];
+          const csvFiles = files
+            .filter(file => file.endsWith('.csv'))
+            .map(file => file.substring(0, file.length - 4));
           for (let i = 0; i < files.length; i++) {
             const file = files[i];
             if (file.startsWith('__MACOSX/')) continue;
 
             const lastSplitIndex = file.lastIndexOf('/');
+            if (csvFiles.includes(file.substring(0, lastSplitIndex))) continue;
+
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
               const page = this.workspace.createPage({
@@ -234,8 +252,16 @@ export class ImportPage extends WithDisposable(LitElement) {
               });
               pageMap.set(file, page);
             }
+            if (fileName.endsWith('.zip')) {
+              const innerZipFile = await zipFile.file(fileName)?.async('blob');
+              if (innerZipFile) {
+                promises.push(...(await parseZipFile(innerZipFile)));
+              }
+            }
           }
-          pageMap.forEach(async (page, file) => {
+          const pagePromises = Array.from(pageMap.keys()).map(async file => {
+            const page = pageMap.get(file);
+            if (!page) return;
             const lastSplitIndex = file.lastIndexOf('/');
             const folder = file.substring(0, lastSplitIndex) || '';
             const fileName = file.substring(lastSplitIndex + 1);
@@ -243,26 +269,136 @@ export class ImportPage extends WithDisposable(LitElement) {
               const isHtml = fileName.endsWith('.html');
               const rootId = page.root?.id;
               const fetchFileHandler = async (url: string) => {
-                const fileName = folder + (folder ? '/' : '') + decodeURI(url);
+                const fileName = this.joinWebPaths(folder, decodeURI(url));
                 return (
                   (await zipFile.file(fileName)?.async('blob')) || new Blob()
                 );
               };
-              const contentParser = new ContentParser(page, fetchFileHandler);
-              let text = (await zipFile.file(file)?.async('string')) || '';
-              pageMap.forEach((value, key) => {
-                const subPageLink = key.replaceAll(' ', '%20');
-                text = isHtml
-                  ? text.replaceAll(
-                      `href="${subPageLink}"`,
-                      `href="${LINK_PRE + value.id}"`
-                    )
-                  : text.replaceAll(
-                      `(${subPageLink})`,
-                      `(${LINK_PRE + value.id})`
-                    );
-              });
+              const textStyleHandler = (
+                element: HTMLElement,
+                textStyle: Record<string, unknown>
+              ) => {
+                if (textStyle['link']) {
+                  const link = textStyle['link'] as string;
+                  const subPageLink = this.joinWebPaths(
+                    folder,
+                    decodeURI(link)
+                  );
+                  const linkPage = pageMap.get(subPageLink);
+                  if (linkPage) {
+                    textStyle['reference'] = {
+                      pageId: linkPage.id,
+                      type: 'LinkedPage',
+                    };
+                    delete textStyle['link'];
+                  }
+                }
+              };
+
+              const tableParserHandler = async (element: Element) => {
+                if (element.tagName === 'TABLE') {
+                  const parentElement = element.parentElement;
+                  if (
+                    parentElement?.tagName === 'DIV' &&
+                    parentElement.hasAttribute('id')
+                  ) {
+                    parentElement.id && dataBaseSubPages.push(parentElement.id);
+                    const tbodyElement = element.querySelector('tbody');
+                    tbodyElement?.querySelectorAll('tr').forEach(ele => {
+                      ele.id && dataBaseSubPages.push(ele.id);
+                    });
+                  }
+                }
+                if (element.getAttribute('href')?.endsWith('.csv')) {
+                  const href = element.getAttribute('href') || '';
+                  const fileName = this.joinWebPaths(folder, decodeURI(href));
+                  const tableString = await zipFile
+                    .file(fileName)
+                    ?.async('string');
+
+                  let result: SerializedBlock[] | null = [];
+                  let id = 1;
+                  const titles: string[] = [];
+                  const rows: string[][] = [];
+                  tableString?.split('\n').forEach((row, index) => {
+                    if (index === 0) {
+                      titles.push(...row.split(','));
+                    } else {
+                      const rowArray = row.split(',');
+                      rows.push(rowArray);
+                    }
+                  });
+
+                  const columns: Column[] = titles
+                    .slice(1)
+                    .map((value, index) => {
+                      return {
+                        name: value,
+                        type: 'rich-text',
+                        width: 200,
+                        hide: false,
+                        id: '' + id++,
+                      };
+                    });
+                  if (rows.length > 0) {
+                    for (let i = 0; i < rows[0].length - columns.length; i++) {
+                      columns.push({
+                        name: '',
+                        type: 'rich-text',
+                        width: 200,
+                        hide: false,
+                        id: '' + id++,
+                      });
+                    }
+                  }
+                  const databasePropsId = id++;
+                  const cells: Record<string, Record<string, Cell>> = {};
+                  const children: SerializedBlock[] = [];
+                  rows.forEach(row => {
+                    children.push({
+                      flavour: 'affine:paragraph',
+                      type: 'text',
+                      text: [{ insert: row[0] }],
+                      children: [],
+                    });
+                    const rowId = '' + id++;
+                    cells[rowId] = {};
+                    row.slice(1).forEach((value, index) => {
+                      cells[rowId][columns[index].id] = {
+                        columnId: columns[index].id,
+                        value,
+                      };
+                    });
+                  });
+
+                  result = [
+                    {
+                      flavour: 'affine:database',
+                      databaseProps: {
+                        id: '' + databasePropsId,
+                        title: element.textContent || 'Database',
+                        titleColumnName: titles[0],
+                        titleColumnWidth: 432,
+                        rowIds: Object.keys(cells),
+                        cells: cells,
+                        columns: columns,
+                      },
+                      children: children,
+                    },
+                  ];
+                  return result;
+                }
+                return null;
+              };
+              const contentParser = new ContentParser(
+                page,
+                fetchFileHandler,
+                textStyleHandler,
+                tableParserHandler
+              );
+              const text = (await zipFile.file(file)?.async('string')) || '';
               if (rootId) {
+                pageIds.push(page.id);
                 if (isHtml) {
                   await contentParser.importHtml(text, rootId);
                 } else {
@@ -271,11 +407,50 @@ export class ImportPage extends WithDisposable(LitElement) {
               }
             }
           });
-          pageIds.push(...[...pageMap.values()].map(page => page.id));
-        }
-        this._onImportSuccess(pageIds);
+          promises.push(...pagePromises);
+          return promises;
+        };
+        const allPromises = await parseZipFile(file);
+        await Promise.all(allPromises.flat());
+        dataBaseSubPages.forEach(notionId => {
+          const dbSubPageId = notionId.replace(/-/g, '');
+          allPageMap.forEach(pageMap => {
+            for (const [key, value] of pageMap) {
+              if (
+                key.endsWith(` ${dbSubPageId}.html`) ||
+                key.endsWith(` ${dbSubPageId}.md`)
+              ) {
+                pageIds = pageIds.filter(id => id !== value.id);
+                this.workspace.removePage(value.id);
+                break;
+              }
+            }
+          });
+        });
+        return pageIds;
       }
     );
+  }
+
+  private joinWebPaths(...paths: string[]): string {
+    const fullPath = paths.join('/').replace(/\/+/g, '/');
+    const parts = fullPath.split('/').filter(Boolean);
+
+    const resolvedParts: string[] = [];
+
+    parts.forEach(part => {
+      if (part === '.') {
+        return;
+      }
+
+      if (part === '..') {
+        resolvedParts.pop();
+      } else {
+        resolvedParts.push(part);
+      }
+    });
+
+    return resolvedParts.join('/');
   }
 
   private _openLearnImportLink(event: MouseEvent) {

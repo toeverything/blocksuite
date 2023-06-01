@@ -3,6 +3,7 @@ import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-frame-button.js';
+import './change-text-button.js';
 import './more-button.js';
 
 import type {
@@ -10,6 +11,7 @@ import type {
   ConnectorElement,
   ShapeElement,
   SurfaceManager,
+  TextElement,
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
@@ -31,6 +33,7 @@ type CategorizedElements = {
   brush: BrushElement[];
   frame: TopLevelBlockModel[];
   connector: ConnectorElement[];
+  text: TextElement[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -133,9 +136,22 @@ export class EdgelessComponentToolbar extends LitElement {
       : null;
   }
 
+  private _getTextButton(textElements: TextElement[]) {
+    return textElements?.length
+      ? html`<edgeless-change-text-button
+          .texts=${textElements}
+          .page=${this.page}
+          .surface=${this.surface}
+          .slots=${this.slots}
+          .selectionState=${this.selectionState}
+        >
+        </edgeless-change-text-button>`
+      : null;
+  }
+
   override render() {
     const groupedSelected = this._groupSelected();
-    const { shape, brush, connector, frame } = groupedSelected;
+    const { shape, brush, connector, frame, text } = groupedSelected;
 
     // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -151,6 +167,7 @@ export class EdgelessComponentToolbar extends LitElement {
           this._getBrushButton(brush),
           this._getConnectorButton(connector),
           this._getFrameButton(frame),
+          this._getTextButton(text),
         ].filter(b => !!b);
 
     const divider = !buttons.length

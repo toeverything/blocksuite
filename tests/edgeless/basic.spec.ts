@@ -13,6 +13,7 @@ import {
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
   setMouseMode,
+  shiftClick,
   switchEditorMode,
   zoomByMouseWheel,
 } from '../utils/actions/edgeless.js';
@@ -209,4 +210,26 @@ test('the tooltip of more button should be hidden when the action menu is shown'
 
   await page.mouse.click(moreButtonBox.x + 10, moreButtonBox.y + 10);
   await expect(tooltip).toBeVisible();
+});
+
+test('shift click multi select and de-select', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 0, y: 0 };
+  const end = { x: 100, y: 100 };
+  await addBasicRectShapeElement(page, start, end);
+  start.x = 100;
+  end.x = 200;
+  await addBasicRectShapeElement(page, start, end);
+
+  await click(page, { x: 50, y: 50 });
+  await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
+
+  shiftClick(page, { x: 150, y: 50 });
+  await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
+
+  shiftClick(page, { x: 150, y: 50 });
+  await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
 });

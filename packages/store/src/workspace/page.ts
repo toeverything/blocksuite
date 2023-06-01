@@ -203,6 +203,10 @@ export class Page extends Space<FlatBlockMap> {
     );
   }
 
+  hasFlavour(flavour: string) {
+    return this.getBlockByFlavour(flavour).length > 0;
+  }
+
   getParent(target: BaseBlockModel | string): BaseBlockModel | null {
     const root = this._root;
     const targetId = typeof target === 'string' ? target : target.id;

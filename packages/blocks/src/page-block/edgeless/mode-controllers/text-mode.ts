@@ -46,7 +46,7 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     noop();
   }
 
-  syncDraggingArea() {
+  onPressShiftKey(_: boolean) {
     noop();
   }
 }

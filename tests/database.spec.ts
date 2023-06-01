@@ -289,18 +289,19 @@ test('should support rename column', async ({ page }) => {
 
   await initDatabaseColumn(page, 'abc');
 
-  const { textElement: title } = await getDatabaseHeaderColumn(page, 1);
-  expect(await title.innerText()).toBe('abc');
+  const { textElement, inputElement } = await getDatabaseHeaderColumn(page, 1);
+  expect(await textElement.innerText()).toBe('abc');
 
   await performColumnAction(page, '3', 'rename');
+  await inputElement.click();
   await type(page, '123');
   await pressEnter(page);
-  expect(await title.innerText()).toBe('123');
+  expect(await textElement.innerText()).toBe('abc123');
 
   await undoByClick(page);
-  expect(await title.innerText()).toBe('abc');
+  expect(await textElement.innerText()).toBe('abc');
   await redoByClick(page);
-  expect(await title.innerText()).toBe('123');
+  expect(await textElement.innerText()).toBe('abc123');
 });
 
 test('should support add new column', async ({ page }) => {
@@ -916,11 +917,22 @@ test('should title column support quick renaming', async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'a', true);
   await focusDatabaseHeader(page, 1);
-  const { textElement, renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  const { textElement, renameIcon, saveIcon } = await getDatabaseHeaderColumn(
+    page,
+    1
+  );
   await renameIcon.click();
   await waitNextFrame(page);
   await type(page, '123');
-  await clickDatabaseOutside(page);
+  await saveIcon.click();
+  expect(await textElement.innerText()).toBe('123');
+
+  await undoByClick(page);
+  expect(await textElement.innerText()).toBe('Column 1');
+  await renameIcon.click();
+  await waitNextFrame(page);
+  await type(page, '123');
+  await pressEnter(page);
   expect(await textElement.innerText()).toBe('123');
 });
 
@@ -934,7 +946,8 @@ test('should title column support quick changing of column type', async ({
   await initDatabaseDynamicRowWithData(page, 'a', true);
   await initDatabaseDynamicRowWithData(page, 'b');
   await focusDatabaseHeader(page, 1);
-  const { typeIcon } = await getDatabaseHeaderColumn(page, 1);
+  const { typeIcon, renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  await renameIcon.click();
   await typeIcon.click();
   await waitNextFrame(page);
   await clickColumnType(page, 'select');

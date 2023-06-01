@@ -15,6 +15,7 @@ import {
   ViewBarIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
   deserializeXYWH,
@@ -24,7 +25,7 @@ import {
   ZOOM_STEP,
 } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import {
   clamp,
@@ -38,8 +39,10 @@ import { stopPropagation } from '../utils.js';
 
 const FIT_TO_SCREEN_PADDING = 200;
 
+export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
+
 @customElement('edgeless-toolbar')
-export class EdgelessToolbar extends LitElement {
+export class EdgelessToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
@@ -100,16 +103,23 @@ export class EdgelessToolbar extends LitElement {
     }
   `;
 
-  @property()
-  mouseMode!: MouseMode;
+  edgeless: EdgelessPageBlockComponent;
 
-  @property()
-  zoom!: number;
+  constructor(edgeless: EdgelessPageBlockComponent) {
+    super();
+    this.edgeless = edgeless;
+  }
 
-  @property()
-  edgeless!: EdgelessPageBlockComponent;
+  get mouseMode() {
+    return this.edgeless.mouseMode;
+  }
+
+  get zoom() {
+    return this.edgeless.surface.viewport.zoom;
+  }
 
   private _imageLoading = false;
+  private _rafId: number | null = null;
 
   private _setCenter(x: number, y: number) {
     this.edgeless.surface.viewport.setCenter(x, y);
@@ -129,7 +139,8 @@ export class EdgelessToolbar extends LitElement {
     const delta = zoom - this.zoom;
 
     const innerSmoothZoom = () => {
-      requestAnimationFrame(() => {
+      if (this._rafId) cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => {
         const sign = delta > 0 ? 1 : -1;
         const total = 10;
         const step = delta / total;
@@ -200,7 +211,8 @@ export class EdgelessToolbar extends LitElement {
     const { viewport } = this.edgeless.surface;
     const delta = { x: x - viewport.centerX, y: y - viewport.centerY };
     const innerSmoothTranslate = () => {
-      requestAnimationFrame(() => {
+      if (this._rafId) cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => {
         const rate = 10;
         const step = { x: delta.x / rate, y: delta.y / rate };
         const nextCenter = {
@@ -284,8 +296,31 @@ export class EdgelessToolbar extends LitElement {
     this.edgeless.selection.setMouseMode(mouseMode);
   };
 
+  setZoomByAction(action: ZoomAction) {
+    switch (action) {
+      case 'fit':
+        this._zoomToFit();
+        break;
+      case 'reset':
+        this._smoothZoom(1.0);
+        break;
+      case 'in':
+      case 'out':
+        this._setZoomByStep(ZOOM_STEP * (action === 'in' ? 1 : -1));
+    }
+  }
+
+  override firstUpdated() {
+    const {
+      _disposables,
+      edgeless: { slots },
+    } = this;
+    _disposables.add(slots.mouseModeUpdated.on(() => this.requestUpdate()));
+    _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+  }
+
   override render() {
-    const type = this.mouseMode?.type;
+    const { type } = this.mouseMode;
     const formattedZoom = `${Math.round(this.zoom * 100)}%`;
 
     return html`
