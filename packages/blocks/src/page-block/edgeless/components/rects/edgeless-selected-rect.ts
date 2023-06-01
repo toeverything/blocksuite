@@ -52,15 +52,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       border-radius: 8px;
     }
 
-    .affine-edgeless-selected-rect > [aria-label^='handle'] {
+    .affine-edgeless-selected-rect .handle {
       position: absolute;
-      width: 12px;
-      height: 12px;
-      box-sizing: border-box;
-      border-radius: 6px;
-      z-index: 10;
-      border: 2px var(--affine-blue) solid;
-      background: white;
       pointer-events: auto;
       user-select: none;
       outline: none;
@@ -74,38 +67,72 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       touchaction: none;
     }
 
-    :host([disabled='true'])
-      .affine-edgeless-selected-rect
-      > [aria-label^='handle'] {
+    .affine-edgeless-selected-rect .handle[aria-label^='top-'],
+    .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] {
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      border-radius: 50%;
+      z-index: 10;
+      border: 2px var(--affine-blue) solid;
+      background: white;
+    }
+
+    .affine-edgeless-selected-rect .handle[aria-label^='rotate-'] {
+      width: 12px;
+      height: 12px;
+      box-sizing: border-box;
+      z-index: 9;
+      background: red;
+    }
+
+    :host([disabled='true']) .affine-edgeless-selected-rect .handle {
       pointer-events: none;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-top-left'] {
+    /* calc(-1px - (12px - 1px) / 2) = -6.5px */
+    .affine-edgeless-selected-rect .handle[aria-label='top-left'] {
       cursor: nwse-resize;
-      left: -6px;
-      top: -6px;
+      left: -6.5px;
+      top: -6.5px;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-left'] {
+      left: -12.5px;
+      top: -12.5px;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-top-right'] {
+    .affine-edgeless-selected-rect .handle[aria-label='top-right'] {
       cursor: nesw-resize;
-      top: -6px;
-      right: -6px;
+      top: -6.5px;
+      right: -6.5px;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-right'] {
+      top: -12.5px;
+      right: -12.5px;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-bottom-right'] {
+    .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] {
       cursor: nwse-resize;
-      right: -6px;
-      bottom: -6px;
+      right: -6.5px;
+      bottom: -6.5px;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-right'] {
+      right: -12.5px;
+      bottom: -12.5px;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-bottom-left'] {
+    .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] {
       cursor: nesw-resize;
-      bottom: -6px;
-      left: -6px;
+      bottom: -6.5px;
+      left: -6.5px;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-left'] {
+      bottom: -12.5px;
+      left: -12.5px;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-left'],
-    .affine-edgeless-selected-rect > [aria-label='handle-right'] {
+    .affine-edgeless-selected-rect .handle[aria-label='left'],
+    .affine-edgeless-selected-rect .handle[aria-label='right'] {
       cursor: ew-resize;
       top: 0;
       bottom: 0;
@@ -115,16 +142,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       background: transparent;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-left'] {
+    /* calc(-1px - (6px - 1px) / 2) = -3.5px */
+    .affine-edgeless-selected-rect .handle[aria-label='left'] {
       left: -3.5px;
     }
-
-    .affine-edgeless-selected-rect > [aria-label='handle-right'] {
+    .affine-edgeless-selected-rect .handle[aria-label='right'] {
       right: -3.5px;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-left']:after,
-    .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
+    .affine-edgeless-selected-rect .handle[aria-label='left']:after,
+    .affine-edgeless-selected-rect .handle[aria-label='right']:after {
       position: absolute;
       width: 7px;
       height: 7px;
@@ -137,12 +164,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       background: white;
     }
 
-    .affine-edgeless-selected-rect > [aria-label='handle-left']:after {
-      left: -1px;
+    /* calc((6px - 12px) / 2) = -3px */
+    .affine-edgeless-selected-rect .handle[aria-label='left']:after {
+      left: -3px;
     }
-
-    .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
-      right: -1px;
+    .affine-edgeless-selected-rect .handle[aria-label='right']:after {
+      right: -3px;
     }
 
     edgeless-component-toolbar {

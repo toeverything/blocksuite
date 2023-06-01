@@ -7,6 +7,10 @@ export enum HandleDirection {
   BottomLeft = 'bottom-left',
   TopRight = 'top-right',
   BottomRight = 'bottom-right',
+  RotateTopLeft = 'rotate-top-left',
+  RotateBottomLeft = 'rotate-bottom-left',
+  RotateTopRight = 'rotate-top-right',
+  RotateBottomRight = 'rotate-bottom-right',
 }
 
 function ResizeHandle(
@@ -19,7 +23,8 @@ function ResizeHandle(
   };
 
   return html`<div
-    aria-label=${`handle-${handleDirection}`}
+    class="handle"
+    aria-label=${handleDirection}
     @pointerdown=${handlerPointerDown}
   ></div>`;
 }
@@ -47,6 +52,22 @@ export function ResizeHandles(
         HandleDirection.BottomRight,
         onPointerDown
       );
+      const handleRotateTopLeft = ResizeHandle(
+        HandleDirection.RotateTopLeft,
+        onPointerDown
+      );
+      const handleRotateTopRight = ResizeHandle(
+        HandleDirection.RotateTopRight,
+        onPointerDown
+      );
+      const handleRotateBottomLeft = ResizeHandle(
+        HandleDirection.RotateBottomLeft,
+        onPointerDown
+      );
+      const handleRotateBottomRight = ResizeHandle(
+        HandleDirection.RotateBottomRight,
+        onPointerDown
+      );
 
       // prettier-ignore
       return html`
@@ -54,6 +75,10 @@ export function ResizeHandles(
         ${handleTopRight}
         ${handleBottomLeft}
         ${handleBottomRight}
+        ${handleRotateTopLeft}
+        ${handleRotateTopRight}
+        ${handleRotateBottomLeft}
+        ${handleRotateBottomRight}
       `;
     }
     case 'edge': {
