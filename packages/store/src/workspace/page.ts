@@ -120,11 +120,6 @@ export class Page extends Space<FlatBlockMap> {
     return this.workspace.blobs;
   }
 
-  /** key-value store of blocks */
-  private get _yBlocks(): YBlocks {
-    return this._ySpace;
-  }
-
   get root() {
     return this._root;
   }

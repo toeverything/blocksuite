@@ -24,11 +24,7 @@ export class Space<
    */
   protected readonly _proxy: State;
   protected readonly _ySpaceDoc: Y.Doc;
-  /**
-   * @internal The actual underlying Yjs map
-   * TODO: should be Subdocument
-   */
-  protected readonly _ySpace: Y.Map<State[keyof State]>;
+  protected readonly _yBlocks: Y.Map<State[keyof State]>;
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     this.id = id;
@@ -39,8 +35,8 @@ export class Space<
     const prefixedId = this.id.startsWith('space:') ? this.id : this.prefixedId;
     doc.spaces.set(prefixedId, this._ySpaceDoc);
 
-    this._ySpace = this._ySpaceDoc.getMap('data');
-    this._proxy = createYMapProxy(this._ySpace as Y.Map<unknown>);
+    this._yBlocks = this._ySpaceDoc.getMap('blocks');
+    this._proxy = createYMapProxy(this._yBlocks as Y.Map<unknown>);
   }
 
   get prefixedId() {
