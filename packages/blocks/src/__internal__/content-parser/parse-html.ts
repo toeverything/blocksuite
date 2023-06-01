@@ -697,7 +697,12 @@ export class HtmlParser {
         };
       });
       if (rows.length > 0) {
-        for (let i = 0; i < rows[0].length - columns.length; i++) {
+        let maxLen = rows[0].length;
+        for (let i = 1; i < rows.length; i++) {
+          maxLen = Math.max(maxLen, rows[i].length);
+        }
+        const addNum = maxLen - columns.length;
+        for (let i = 0; i < addNum; i++) {
           columns.push({
             name: '',
             type: 'rich-text',

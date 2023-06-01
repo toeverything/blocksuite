@@ -6,12 +6,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { DatabaseTableViewRowSelect } from '../../../../std.js';
 
 type SelectionState = Pick<DatabaseTableViewRowSelect, 'databaseId' | 'rowIds'>;
-type SelectionCache = {
-  left: number;
-  top: number;
-  height: number;
-  rowIds: string[];
-};
 
 @customElement('database-row-level-selection')
 export class RowLevelSelection extends WithDisposable(LitElement) {
@@ -26,8 +20,6 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
       background: var(--affine-primary-color-04);
     }
   `;
-
-  private _selectionCache: SelectionCache | null = null;
 
   @property()
   container!: HTMLElement;
@@ -69,17 +61,6 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
 
     if (!startRow || !endRow) return hideStyles;
 
-    if (this._selectionCache) {
-      const { left, top, height, rowIds: cacheRowIds } = this._selectionCache;
-      if (isRowIdsSame(rowIds, cacheRowIds)) {
-        return styleMap({
-          left: `${left}px`,
-          top: `${top}px`,
-          height: `${height}px`,
-        });
-      }
-    }
-
     const containerPos = this.container.getBoundingClientRect();
     const { left, top } = startRow.getBoundingClientRect();
 
@@ -93,12 +74,6 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
       height: `${scaledHeight}px`,
     });
 
-    this._selectionCache = {
-      left: scaledLeft,
-      top: scaledTop,
-      height: scaledHeight,
-      rowIds,
-    };
     return styles;
   };
 
@@ -145,9 +120,4 @@ function calcSelectionHeight(container: Element, rowIds: string[]) {
     const { height } = row.getBoundingClientRect();
     return acc + height;
   }, 0);
-}
-
-function isRowIdsSame(rowIds: string[], rowIdsCache: string[]) {
-  // ids are in the same order, so a simplified comparison can be done
-  return rowIds.toString() === rowIdsCache.toString();
 }

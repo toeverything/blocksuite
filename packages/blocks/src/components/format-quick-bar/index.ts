@@ -54,13 +54,21 @@ export const showFormatQuickBar = async ({
       'affine:database',
     ])
   );
-  if (blockRange.models.length === 0) {
+  const models = blockRange.models;
+
+  if (models.length === 0) {
+    return;
+  }
+  if (
+    matchFlavours(models[0], ['affine:database']) &&
+    blockRange.type === 'Native'
+  ) {
     return;
   }
 
   const formatQuickBar = new FormatQuickBar();
   formatQuickBar.page = page;
-  formatQuickBar.models = blockRange.models;
+  formatQuickBar.models = models;
   formatQuickBar.abortController = abortController;
   const positionUpdatedSlot = new Slot();
   formatQuickBar.positionUpdated = positionUpdatedSlot;
