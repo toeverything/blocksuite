@@ -12,7 +12,10 @@ export type FetchFileHandler = (
   fileName: string
 ) => Promise<Blob | null | undefined>;
 
-export const LINK_PRE = 'Affine-LinkedPage-';
+export type TextStyleHandler = (
+  element: HTMLElement,
+  styles: Record<string, unknown>
+) => void;
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -42,15 +45,18 @@ export class HtmlParser {
   private _contentParser: ContentParser;
   private _page: Page;
   private _customFetchFileHandler?: FetchFileHandler;
+  private _customTextStyleHandler?: TextStyleHandler;
 
   constructor(
     contentParser: ContentParser,
     page: Page,
-    fetchFileFunc?: FetchFileHandler
+    fetchFileHandler?: FetchFileHandler,
+    textStyleHandler?: TextStyleHandler
   ) {
     this._contentParser = contentParser;
     this._page = page;
-    this._customFetchFileHandler = fetchFileFunc;
+    this._customFetchFileHandler = fetchFileHandler;
+    this._customTextStyleHandler = textStyleHandler;
   }
 
   private _fetchFileHandler = async (
@@ -112,6 +118,11 @@ export class HtmlParser {
     this._contentParser.registerParserHtmlText2Block(
       'tableParser',
       this._tableParser
+    );
+
+    this._contentParser.registerParserHtmlText2Block(
+      'headerParser',
+      this._headerParser
     );
   }
 
@@ -212,12 +223,8 @@ export class HtmlParser {
           break;
         case 'HEADER':
           result = await this._contentParser.getParserHtmlText2Block(
-            'commonParser'
-          )?.({
-            element: node,
-            flavour: 'affine:page',
-            type: tagName.toLowerCase(),
-          });
+            'headerParser'
+          )?.(node);
           break;
         case 'TABLE':
           result = await this._contentParser.getParserHtmlText2Block(
@@ -404,6 +411,8 @@ export class HtmlParser {
     }
     const childNodes = Array.from(htmlElement.childNodes);
     const currentTextStyle = getTextStyle(htmlElement);
+    this._customTextStyleHandler &&
+      this._customTextStyleHandler(htmlElement, currentTextStyle);
 
     if (!childNodes.length) {
       return ignoreEmptyText
@@ -716,6 +725,25 @@ export class HtmlParser {
     }
     return result;
   };
+
+  private _headerParser = async (
+    element: Element
+  ): Promise<SerializedBlock[] | null> => {
+    let node = element;
+    if (element.getElementsByClassName('page-title').length > 0) {
+      node = element.getElementsByClassName('page-title')[0];
+    }
+
+    const tagName = node.tagName;
+    const result = await this._contentParser.getParserHtmlText2Block(
+      'commonParser'
+    )?.({
+      element: node,
+      flavour: 'affine:page',
+      type: tagName.toLowerCase(),
+    });
+    return result;
+  };
 }
 
 const getIsLink = (htmlElement: HTMLElement) => {
@@ -750,14 +778,7 @@ const getTextStyle = (htmlElement: HTMLElement) => {
   if (getIsLink(htmlElement)) {
     const linkUrl =
       htmlElement.getAttribute('href') || htmlElement.getAttribute('src');
-    if (linkUrl?.startsWith(LINK_PRE)) {
-      textStyle['reference'] = {
-        pageId: linkUrl.substring(LINK_PRE.length),
-        type: 'LinkedPage',
-      };
-    } else {
-      textStyle['link'] = linkUrl;
-    }
+    textStyle['link'] = linkUrl;
   }
 
   if (tagName === 'EM' || style['fontStyle'] === 'italic') {

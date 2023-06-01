@@ -20,7 +20,6 @@ import { styles } from './styles.js';
 
 export type OnSuccessHandler = (pageIds: string[]) => void;
 
-const LINK_PRE = 'Affine-LinkedPage-';
 const SHOW_LOADING_SIZE = 1024 * 200;
 
 @customElement('import-page')
@@ -223,68 +222,113 @@ export class ImportPage extends WithDisposable(LitElement) {
       },
       async file => {
         const pageIds: string[] = [];
-        const zip = new JSZip();
-        const zipFile = await zip.loadAsync(file);
-        const pageMap = new Map<string, Page>();
-        const files = Object.keys(zipFile.files);
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          if (file.startsWith('__MACOSX/')) continue;
+        const parseZipFile = async (file: File | Blob) => {
+          const zip = new JSZip();
+          const zipFile = await zip.loadAsync(file);
+          const pageMap = new Map<string, Page>();
+          const files = Object.keys(zipFile.files);
+          const promises: Promise<void>[] = [];
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.startsWith('__MACOSX/')) continue;
 
-          const lastSplitIndex = file.lastIndexOf('/');
-          const fileName = file.substring(lastSplitIndex + 1);
-          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-            const page = this.workspace.createPage({
-              init: {
-                title: '',
-              },
-            });
-            pageMap.set(file, page);
-          }
-        }
-        const pagePromises = Array.from(pageMap.keys()).map(async file => {
-          const page = pageMap.get(file);
-          if (!page) return;
-          const lastSplitIndex = file.lastIndexOf('/');
-          const folder = file.substring(0, lastSplitIndex) || '';
-          const fileName = file.substring(lastSplitIndex + 1);
-          if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-            const isHtml = fileName.endsWith('.html');
-            const rootId = page.root?.id;
-            const fetchFileHandler = async (url: string) => {
-              const fileName = folder + (folder ? '/' : '') + decodeURI(url);
-              return (
-                (await zipFile.file(fileName)?.async('blob')) || new Blob()
-              );
-            };
-            const contentParser = new ContentParser(page, fetchFileHandler);
-            let text = (await zipFile.file(file)?.async('string')) || '';
-            pageMap.forEach((value, key) => {
-              const subPageLink = key.replaceAll(' ', '%20');
-              text = isHtml
-                ? text.replaceAll(
-                    `href="${subPageLink}"`,
-                    `href="${LINK_PRE + value.id}"`
-                  )
-                : text.replaceAll(
-                    `(${subPageLink})`,
-                    `(${LINK_PRE + value.id})`
-                  );
-            });
-            if (rootId) {
-              if (isHtml) {
-                await contentParser.importHtml(text, rootId);
-              } else {
-                await contentParser.importMarkdown(text, rootId);
+            const lastSplitIndex = file.lastIndexOf('/');
+            const fileName = file.substring(lastSplitIndex + 1);
+            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              const page = this.workspace.createPage({
+                init: {
+                  title: '',
+                },
+              });
+              pageMap.set(file, page);
+            }
+            if (fileName.endsWith('.zip')) {
+              const innerZipFile = await zipFile.file(fileName)?.async('blob');
+              if (innerZipFile) {
+                promises.push(...(await parseZipFile(innerZipFile)));
               }
-              pageIds.push(page.id);
             }
           }
-        });
-        await Promise.all(pagePromises);
+          const pagePromises = Array.from(pageMap.keys()).map(async file => {
+            const page = pageMap.get(file);
+            if (!page) return;
+            const lastSplitIndex = file.lastIndexOf('/');
+            const folder = file.substring(0, lastSplitIndex) || '';
+            const fileName = file.substring(lastSplitIndex + 1);
+            if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              const isHtml = fileName.endsWith('.html');
+              const rootId = page.root?.id;
+              const fetchFileHandler = async (url: string) => {
+                const fileName = this.joinWebPaths(folder, decodeURI(url));
+                return (
+                  (await zipFile.file(fileName)?.async('blob')) || new Blob()
+                );
+              };
+              const textStyleHandler = (
+                element: HTMLElement,
+                textStyle: Record<string, unknown>
+              ) => {
+                if (textStyle['link']) {
+                  const link = textStyle['link'] as string;
+                  const subPageLink = this.joinWebPaths(
+                    folder,
+                    decodeURI(link)
+                  );
+                  const linkPage = pageMap.get(subPageLink);
+                  if (linkPage) {
+                    textStyle['reference'] = {
+                      pageId: linkPage.id,
+                      type: 'LinkedPage',
+                    };
+                    delete textStyle['link'];
+                  }
+                }
+              };
+              const contentParser = new ContentParser(
+                page,
+                fetchFileHandler,
+                textStyleHandler
+              );
+              const text = (await zipFile.file(file)?.async('string')) || '';
+              if (rootId) {
+                if (isHtml) {
+                  await contentParser.importHtml(text, rootId);
+                } else {
+                  await contentParser.importMarkdown(text, rootId);
+                }
+                pageIds.push(page.id);
+              }
+            }
+          });
+          promises.push(...pagePromises);
+          return promises;
+        };
+        const allPromises = await parseZipFile(file);
+        await Promise.all(allPromises.flat());
         return pageIds;
       }
     );
+  }
+
+  private joinWebPaths(...paths: string[]): string {
+    const fullPath = paths.join('/').replace(/\/+/g, '/');
+    const parts = fullPath.split('/').filter(Boolean);
+
+    const resolvedParts: string[] = [];
+
+    parts.forEach(part => {
+      if (part === '.') {
+        return;
+      }
+
+      if (part === '..') {
+        resolvedParts.pop();
+      } else {
+        resolvedParts.push(part);
+      }
+    });
+
+    return resolvedParts.join('/');
   }
 
   private _openLearnImportLink(event: MouseEvent) {
