@@ -224,10 +224,6 @@ export class VirgoInput {
 
     this.yText.delete(0, this.yText.length);
     this.yText.insert(0, str);
-    this.vEditor.setVRange({
-      index: str.length,
-      length: 0,
-    });
     this.undoManager.stopCapturing();
   }
 
