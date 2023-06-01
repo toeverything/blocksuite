@@ -192,6 +192,13 @@ export class HtmlParser {
             result = await this._contentParser.getParserHtmlText2Block(
               'embedItemParser'
             )?.(node.firstChild);
+          } else if (
+            node.firstElementChild?.tagName === 'A' ||
+            node.firstElementChild?.getAttribute('href')?.endsWith('.csv')
+          ) {
+            result = await this._contentParser.getParserHtmlText2Block(
+              'tableParser'
+            )?.(node.firstChild);
           } else {
             result = await this._contentParser.getParserHtmlText2Block(
               'commonParser'

@@ -15,6 +15,8 @@ import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
+import type { SerializedBlock } from '../../__internal__/utils/index.js';
+import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
@@ -306,6 +308,85 @@ export class ImportPage extends WithDisposable(LitElement) {
                       ele.id && dataBaseSubPages.push(ele.id);
                     });
                   }
+                }
+                if (element.getAttribute('href')?.endsWith('.csv')) {
+                  const href = element.getAttribute('href') || '';
+                  const fileName = this.joinWebPaths(folder, decodeURI(href));
+                  const tableString = await zipFile
+                    .file(fileName)
+                    ?.async('string');
+
+                  let result: SerializedBlock[] | null = [];
+                  let id = 1;
+                  const titles: string[] = [];
+                  const rows: string[][] = [];
+                  tableString?.split('\n').forEach((row, index) => {
+                    if (index === 0) {
+                      titles.push(...row.split(','));
+                    } else {
+                      const rowArray = row.split(',');
+                      rows.push(rowArray);
+                    }
+                  });
+
+                  const columns: Column[] = titles
+                    .slice(1)
+                    .map((value, index) => {
+                      return {
+                        name: value,
+                        type: 'rich-text',
+                        width: 200,
+                        hide: false,
+                        id: '' + id++,
+                      };
+                    });
+                  if (rows.length > 0) {
+                    for (let i = 0; i < rows[0].length - columns.length; i++) {
+                      columns.push({
+                        name: '',
+                        type: 'rich-text',
+                        width: 200,
+                        hide: false,
+                        id: '' + id++,
+                      });
+                    }
+                  }
+                  const databasePropsId = id++;
+                  const cells: Record<string, Record<string, Cell>> = {};
+                  const children: SerializedBlock[] = [];
+                  rows.forEach(row => {
+                    children.push({
+                      flavour: 'affine:paragraph',
+                      type: 'text',
+                      text: [{ insert: row[0] }],
+                      children: [],
+                    });
+                    const rowId = '' + id++;
+                    cells[rowId] = {};
+                    row.slice(1).forEach((value, index) => {
+                      cells[rowId][columns[index].id] = {
+                        columnId: columns[index].id,
+                        value,
+                      };
+                    });
+                  });
+
+                  result = [
+                    {
+                      flavour: 'affine:database',
+                      databaseProps: {
+                        id: '' + databasePropsId,
+                        title: 'Database',
+                        titleColumnName: element.textContent || '',
+                        titleColumnWidth: 432,
+                        rowIds: Object.keys(cells),
+                        cells: cells,
+                        columns: columns,
+                      },
+                      children: children,
+                    },
+                  ];
+                  return result;
                 }
                 return null;
               };
