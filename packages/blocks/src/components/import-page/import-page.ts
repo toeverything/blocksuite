@@ -309,7 +309,10 @@ export class ImportPage extends WithDisposable(LitElement) {
                     });
                   }
                 }
-                if (element.getAttribute('href')?.endsWith('.csv')) {
+                if (
+                  element.tagName === 'A' &&
+                  element.getAttribute('href')?.endsWith('.csv')
+                ) {
                   const href = element.getAttribute('href') || '';
                   const fileName = this.joinWebPaths(folder, decodeURI(href));
                   const tableString = await zipFile
@@ -341,7 +344,12 @@ export class ImportPage extends WithDisposable(LitElement) {
                       };
                     });
                   if (rows.length > 0) {
-                    for (let i = 0; i < rows[0].length - columns.length; i++) {
+                    let maxLen = rows[0].length;
+                    for (let i = 1; i < rows.length; i++) {
+                      maxLen = Math.max(maxLen, rows[i].length);
+                    }
+                    const addNum = maxLen - columns.length;
+                    for (let i = 0; i < addNum; i++) {
                       columns.push({
                         name: '',
                         type: 'rich-text',
