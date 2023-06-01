@@ -10,6 +10,8 @@ import { sha } from '../persistence/blob/utils.js';
 import { Store, type StoreOptions } from '../store.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
+import type { QueryContent } from './indexer/search.js';
+import { SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Schema } from './schema.js';
@@ -37,6 +39,7 @@ export class Workspace {
   };
 
   indexer: {
+    search: SearchIndexer;
     backlink: BacklinkIndexer;
   };
 
@@ -100,6 +103,7 @@ export class Workspace {
 
     const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
     this.indexer = {
+      search: new SearchIndexer(this.doc),
       backlink: new BacklinkIndexer(blockIndexer),
     };
   }
@@ -264,6 +268,10 @@ export class Workspace {
     page.dispose();
     this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
+  }
+
+  search(query: QueryContent) {
+    return this.indexer.search.search(query);
   }
 
   /**
