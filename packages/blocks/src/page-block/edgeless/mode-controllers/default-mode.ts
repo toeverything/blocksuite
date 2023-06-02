@@ -19,7 +19,7 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
-  handleNativeRangeClick,
+  handleNativeRangeAtPoint,
   handleNativeRangeDragMove,
   isEmpty,
   noop,
@@ -125,7 +125,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._edgeless.clearSelectedBlocks();
     // click the inner area of active text and note element
     if (active && selected.length === 1 && selected[0] === element) {
-      handleNativeRangeClick(this._page, e);
+      handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
       return;
     }
 

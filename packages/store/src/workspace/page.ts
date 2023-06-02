@@ -319,7 +319,7 @@ export class Page extends Space<FlatBlockMap> {
   @debug('CRUD')
   addBlock(
     flavour: string,
-    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>> = {},
+    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour'>> = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
@@ -345,7 +345,7 @@ export class Page extends Space<FlatBlockMap> {
     );
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
-    const id = this._idGenerator();
+    const id = blockProps.id ?? this._idGenerator();
     clonedProps.id = id;
 
     this.transact(() => {
