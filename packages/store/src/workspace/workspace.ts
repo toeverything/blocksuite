@@ -7,10 +7,7 @@ import { BlockSchema } from '../base.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
-import {
-  Store,
-  type StoreOptions,
-} from '../store.js';
+import { Store, type StoreOptions } from '../store.js';
 import { Text } from '../text-adapter.js';
 import { serializeYDoc } from '../utils/jsx.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
@@ -418,10 +415,7 @@ export class Workspace {
 
   /** @internal Only for testing */
   exportSnapshot() {
-    return 
-    
-    
-    (this.doc);
+    return serializeYDoc(this.doc);
   }
 
   /** @internal Only for testing */
