@@ -43,7 +43,7 @@ export class Renderer implements SurfaceViewport {
 
   /**
    * it's not for real edgeless element to render
-   * it's for
+   * it's for other information like align or else.
    */
   private _renderables: Set<Renderable> = new Set();
 
