@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
@@ -150,24 +151,26 @@ export class Store {
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
    */
   exportJSX(pageId: string, blockId?: string) {
-    const json = serializeYDoc(this.doc) as unknown as SerializedStore;
     const prefixedPageId = pageId.startsWith('space:')
       ? pageId
       : `space:${pageId}`;
-    const pageJson = json[prefixedPageId];
+    const doc = this.doc.spaces.get(prefixedPageId);
+    assertExists(doc);
+    const pageJson = serializeYDoc(doc);
     if (!pageJson) {
       throw new Error(`Page ${pageId} doesn't exist`);
     }
+    const blockJson = pageJson.blocks as Record<string, unknown>;
     if (!blockId) {
-      const pageBlockId = Object.keys(pageJson).at(0);
+      const pageBlockId = Object.keys(blockJson).at(0);
       if (!pageBlockId) {
         return null;
       }
       blockId = pageBlockId;
     }
-    if (!pageJson[blockId]) {
+    if (!blockJson[blockId]) {
       return null;
     }
-    return yDocToJSXNode(pageJson, blockId);
+    return yDocToJSXNode(blockJson, blockId);
   }
 }

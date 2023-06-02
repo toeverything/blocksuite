@@ -4,6 +4,7 @@
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
+import { ac } from 'vitest/dist/types-0373403c';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
@@ -14,6 +15,7 @@ import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragr
 import type { BaseBlockModel, Page } from '../index.js';
 import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
+import type { BlockSuiteDoc } from '../yjs';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -30,10 +32,24 @@ export const BlockSchemas = [
 
 const defaultPageId = 'page0';
 const spaceId = `space:${defaultPageId}`;
-const spaceMetaId = 'space:meta';
+const spaceMetaId = 'meta';
 
 function serialize(page: Page) {
   return page.doc.toJSON();
+}
+
+function serializeWorkspace(doc: BlockSuiteDoc): Record<string, any> {
+  const spaces = {};
+  doc.spaces.forEach((subDoc, key) => {
+    spaces[key] = subDoc.toJSON();
+  });
+  const json = doc.toJSON();
+  delete json.spaces;
+
+  return {
+    ...json,
+    spaces,
+  };
 }
 
 function waitOnce<T>(slot: Slot<T>) {
@@ -58,8 +74,8 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    const page = workspace.createPage({ id: 'page0' });
-    const actual = serialize(page);
+    workspace.createPage({ id: 'page0' });
+    const actual = serializeWorkspace(workspace.doc);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
     assert.equal(workspace.isEmpty, false);
@@ -72,43 +88,17 @@ describe('basic', () => {
         pages: [
           {
             id: 'page0',
-            subpageIds: [],
             title: '',
           },
         ],
-        versions: {},
+        blockVersions: {},
       },
-      [spaceId]: {},
+      spaces: {
+        [spaceId]: {
+          blocks: {},
+        },
+      },
     });
-  });
-});
-
-describe('pageMeta', () => {
-  // TODO deprecated subpage tests
-  it.fails('can create subpage', async () => {
-    const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
-
-    const parentPage = workspace.createPage({ id: defaultPageId });
-    const subpage = workspace.createPage({ id: 'subpage0' });
-    const pageId = parentPage.addBlock('affine:page', {}, parentPage.id);
-    const frameId = parentPage.addBlock('affine:frame', {}, pageId);
-    parentPage.addBlock(
-      'affine:paragraph',
-      {
-        text: parentPage.Text.fromDelta([
-          {
-            insert: ' ',
-            attributes: { reference: { type: 'Subpage', pageId: subpage.id } },
-          },
-        ]),
-      },
-      frameId
-    );
-
-    // wait for the backlink index to be updated
-    await new Promise(resolve => setTimeout(resolve, 0));
-    assert.deepEqual(parentPage.meta.subpageIds, [subpage.id]);
   });
 });
 
@@ -119,7 +109,7 @@ describe('addBlock', () => {
       title: new page.Text(),
     });
 
-    assert.deepEqual(serialize(page)[spaceId], {
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': [],
@@ -133,7 +123,7 @@ describe('addBlock', () => {
     const page = createTestPage();
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
-    assert.deepEqual(serialize(page)[spaceId], {
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -158,7 +148,7 @@ describe('addBlock', () => {
       frameId
     );
 
-    assert.deepEqual(serialize(page)[spaceId], {
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': ['1'],
         'sys:flavour': 'affine:page',
@@ -229,7 +219,8 @@ describe('addBlock', () => {
     assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
-    const serializedChildren = serialize(page)[spaceId]['0']['sys:children'];
+    const serializedChildren = serializeWorkspace(page.doc).spaces[spaceId]
+      .blocks['0']['sys:children'];
     assert.deepEqual(serializedChildren, ['1']);
     assert.equal(root.children[0].id, '1');
   });
@@ -250,7 +241,10 @@ describe('addBlock', () => {
 
     // @ts-expect-error
     assert.equal(workspace._pages.size, 1);
-    assert.deepEqual(serialize(page0)['space:page0'], {});
+    assert.deepEqual(
+      serializeWorkspace(page0.doc).spaces['space:page0'].blocks,
+      {}
+    );
 
     workspace.removePage(page1.id);
     // @ts-expect-error
@@ -319,7 +313,7 @@ describe('deleteBlock', () => {
     page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    assert.deepEqual(serialize(page)[spaceId], {
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
         'sys:children': [],
         'sys:flavour': 'affine:page',
@@ -329,7 +323,7 @@ describe('deleteBlock', () => {
     });
 
     page.deleteBlock(page.root as BaseBlockModel);
-    assert.deepEqual(serialize(page)[spaceId], {});
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {});
   });
 
   it('can delete model with parent', () => {
@@ -340,7 +334,7 @@ describe('deleteBlock', () => {
     page.addBlock('affine:paragraph', {}, frameId);
 
     // before delete
-    assert.deepEqual(serialize(page)[spaceId], {
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
@@ -367,7 +361,7 @@ describe('deleteBlock', () => {
     page.deleteBlock(root.children[0].children[0]);
 
     // after delete
-    assert.deepEqual(serialize(page)[spaceId], {
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
         'prop:title': '',
         'sys:children': ['1'],
