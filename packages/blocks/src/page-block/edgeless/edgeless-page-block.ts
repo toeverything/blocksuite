@@ -857,7 +857,9 @@ export class EdgelessPageBlockComponent
 
     // should be updated on any frame add and delete
     this.page.root?.childrenUpdated.on(() => {
-      this._frameResizeObserver.resetListener(this.page);
+      requestAnimationFrame(() => {
+        this._frameResizeObserver.resetListener(this.page);
+      });
     });
   }
 
