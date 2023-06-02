@@ -24,7 +24,6 @@ import {
 } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { normalizeDelta } from '../../__internal__/clipboard/utils/commons.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getServiceOrRegister } from '../../__internal__/service.js';
@@ -406,9 +405,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
               model.flavour,
               {
                 type: model.type,
-                text: page.Text.fromDelta(
-                  normalizeDelta(page, model.text.toDelta())
-                ),
+                text: page.Text.fromDelta(model.text.toDelta()),
                 // @ts-expect-error
                 checked: model.checked,
               },

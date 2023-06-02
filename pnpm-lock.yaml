@@ -1,4 +1,8 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 patchedDependencies:
   hotkeys-js@3.10.1:
@@ -147,12 +151,12 @@ importers:
       hotkeys-js:
         specifier: ^3.10.1
         version: 3.10.1(patch_hash=otx73r74oyscqvo3amwccrzngy)
-      jszip:
-        specifier: ^3.10.1
-        version: 3.10.1
       html-to-image:
         specifier: ^1.11.11
         version: 1.11.11
+      jszip:
+        specifier: ^3.10.1
+        version: 3.10.1
       lit:
         specifier: ^2.7.3
         version: 2.7.3
