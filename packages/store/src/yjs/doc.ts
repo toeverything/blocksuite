@@ -18,6 +18,20 @@ export class BlockSuiteDoc extends Y.Doc {
     return this._spaces;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  override toJSON(): Record<string, any> {
+    const json = super.toJSON();
+    delete json.spaces;
+    const spaces: Record<string, unknown> = {};
+    this.spaces.forEach((doc, key) => {
+      spaces[key] = doc.toJSON();
+    });
+    return {
+      ...json,
+      spaces,
+    };
+  }
+
   getMapProxy<
     Key extends keyof BlockSuiteDocData & string,
     Value extends Record<

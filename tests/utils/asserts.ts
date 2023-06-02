@@ -45,15 +45,14 @@ import { currentEditorIndex } from './multiple-editor.js';
 import { getStringFromRichText } from './virgo.js';
 
 export const defaultStore: SerializedStore = {
-  'space:meta': {
+  meta: {
     pages: [
       {
         id: 'page0',
-        subpageIds: [],
         title: '',
       },
     ],
-    versions: {
+    blockVersions: {
       'affine:paragraph': 1,
       'affine:page': 2,
       'affine:database': 1,
@@ -66,27 +65,31 @@ export const defaultStore: SerializedStore = {
       'affine:bookmark': 1,
     },
   },
-  'space:page0': {
-    '0': {
-      'prop:title': '',
-      'sys:id': '0',
-      'sys:flavour': 'affine:page',
-      'sys:children': ['1'],
-    },
-    '1': {
-      'sys:flavour': 'affine:frame',
-      'sys:id': '1',
-      'sys:children': ['2'],
-      'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
-      'prop:background': '--affine-background-secondary-color',
-      'prop:index': 'a0',
-    },
-    '2': {
-      'sys:flavour': 'affine:paragraph',
-      'sys:id': '2',
-      'sys:children': [],
-      'prop:text': 'hello',
-      'prop:type': 'text',
+  spaces: {
+    'space:page0': {
+      blocks: {
+        '0': {
+          'prop:title': '',
+          'sys:id': '0',
+          'sys:flavour': 'affine:page',
+          'sys:children': ['1'],
+        },
+        '1': {
+          'sys:flavour': 'affine:frame',
+          'sys:id': '1',
+          'sys:children': ['2'],
+          'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
+          'prop:background': '--affine-background-secondary-color',
+          'prop:index': 'a0',
+        },
+        '2': {
+          'sys:flavour': 'affine:paragraph',
+          'sys:id': '2',
+          'sys:children': [],
+          'prop:text': 'hello',
+          'prop:type': 'text',
+        },
+      },
     },
   },
 };
@@ -306,7 +309,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() => {
     const json = window.workspace.doc.toJSON();
-    delete json['space:meta'].pages[0].createDate;
+    delete json.meta.pages[0].createDate;
     return json;
   })) as SerializedStore;
   expect(actual).toEqual(expected);
