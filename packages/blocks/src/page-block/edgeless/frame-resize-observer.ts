@@ -14,9 +14,10 @@ export class FrameResizeObserver {
    * So we need to cache observed element.
    */
   private _cachedElements = new Map<string, Element>();
+  private _lastRect = new Map<string, DOMRect>();
 
   slots = {
-    resize: new Slot<Map<string, DOMRect>>(),
+    resize: new Slot<Map<string, DOMRectReadOnly>>(),
   };
 
   constructor() {
@@ -35,6 +36,19 @@ export class FrameResizeObserver {
       const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
       const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
       if (!id) return;
+      if (this._lastRect.has(id)) {
+        const rect = this._lastRect.get(id);
+        if (
+          rect &&
+          rect.x === entry.contentRect.x &&
+          rect.y === entry.contentRect.y &&
+          rect.width === entry.contentRect.width &&
+          rect.height === entry.contentRect.height
+        ) {
+          return;
+        }
+      }
+      this._lastRect.set(id, entry.contentRect);
       resizedFrames.set(id, entry.contentRect);
     });
 

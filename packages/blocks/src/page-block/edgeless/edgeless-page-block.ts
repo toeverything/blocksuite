@@ -848,15 +848,20 @@ export class EdgelessPageBlockComponent
       }
 
       this._handleToolbarFlag();
+      this._frameResizeObserver.resetListener(this.page);
       this.requestUpdate();
     });
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
+
+    // should be updated on any frame add and delete
+    this.page.root?.childrenUpdated.on(() => {
+      this._frameResizeObserver.resetListener(this.page);
+    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
-    this._frameResizeObserver.resetListener(this.page);
     super.updated(changedProperties);
   }
 
