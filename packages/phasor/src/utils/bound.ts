@@ -9,7 +9,7 @@ export class Bound implements IBound {
   w: number;
   h: number;
 
-  constructor(x: number, y: number, w: number, h: number) {
+  constructor(x = 0, y = 0, w = 0, h = 0) {
     this.x = x;
     this.y = y;
     this.w = w;
@@ -90,6 +90,10 @@ export class Bound implements IBound {
 
   serialize(): SerializedXYWH {
     return serializeXYWH(this.x, this.y, this.w, this.h);
+  }
+
+  clone(): Bound {
+    return new Bound(this.x, this.y, this.w, this.h);
   }
 
   static deserialize(s: string) {

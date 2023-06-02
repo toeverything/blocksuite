@@ -74,6 +74,7 @@ import {
   type EdgelessSelectionState,
   type Selectable,
 } from './selection-manager.js';
+import { EdgelessSnapManager } from './snap-manager.js';
 import {
   EdgelessToolbar,
   type ZoomAction,
@@ -228,6 +229,8 @@ export class EdgelessPageBlockComponent
   getService = getService;
 
   selection!: EdgelessSelectionManager;
+
+  snap!: EdgelessSnapManager;
 
   // Gets the top level frames.
   get frames() {
@@ -829,6 +832,7 @@ export class EdgelessPageBlockComponent
         this,
         this.root.uiEventDispatcher
       );
+      this.snap = new EdgelessSnapManager(this, this.surface);
     }
     if (changedProperties.has('mouseMode')) {
       this.selection.mouseMode = this.mouseMode;

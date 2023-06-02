@@ -1,6 +1,6 @@
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PointerEventState } from '@blocksuite/lit';
-import type { SurfaceManager } from '@blocksuite/phasor';
+import { Bound, type SurfaceManager } from '@blocksuite/phasor';
 import {
   Bound,
   ConnectorElement,
@@ -77,6 +77,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _lock = false;
   // Do not select the text, when click again after activating the frame.
   private _isDoubleClickedOnMask = false;
+  private _alignBound = new Bound();
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
@@ -173,7 +174,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _handleSurfaceDragMove(
     selected: PhasorElement,
-    e: PointerEventState
+    e: PointerEventState,
+    align: { dx: number; dy: number }
   ) {
     if (!this._lock) {
       this._lock = true;
@@ -183,8 +185,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const { zoom } = surface.viewport;
     const deltaX = this._dragLastPos.x - e.x;
     const deltaY = this._dragLastPos.y - e.y;
-    const boundX = selected.x - deltaX / zoom;
-    const boundY = selected.y - deltaY / zoom;
+    const boundX = selected.x - deltaX / zoom + align.dx;
+    const boundY = selected.y - deltaY / zoom + align.dy;
     const boundW = selected.w;
     const boundH = selected.h;
 
@@ -206,13 +208,14 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _handleBlockDragMove(
     block: TopLevelBlockModel,
-    e: PointerEventState
+    e: PointerEventState,
+    align: { dx: number; dy: number }
   ) {
     const [modelX, modelY, modelW, modelH] = JSON.parse(block.xywh) as XYWH;
     const { zoom } = this._edgeless.surface.viewport;
     const xywh = JSON.stringify([
-      modelX + e.delta.x / zoom,
-      modelY + e.delta.y / zoom,
+      modelX + e.delta.x / zoom + align.dx,
+      modelY + e.delta.y / zoom + align.dy,
       modelW,
       modelH,
     ]);
@@ -425,6 +428,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._startRange = caretRangeFromPoint(e.x, e.y);
     this._dragStartPos = { x: e.x, y: e.y };
     this._dragLastPos = { x: e.x, y: e.y };
+
+    this._alignBound = this._edgeless.snap.prepareAlign(this.state.selected);
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -448,11 +453,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
+        const curBound = this._alignBound.clone();
+        curBound.x += e.x - this._dragStartPos.x;
+        curBound.y += e.y - this._dragStartPos.y;
+        const rst = this._edgeless.snap.align(curBound);
         this.state.selected.forEach(element => {
           if (isPhasorElement(element)) {
-            this._handleSurfaceDragMove(element, e);
+            this._handleSurfaceDragMove(element, e, rst);
           } else {
-            this._handleBlockDragMove(element, e);
+            this._handleBlockDragMove(element, e, rst);
           }
         });
         this._forceUpdateSelection();

@@ -1,5 +1,9 @@
 import type { BlockElement, UIEventDispatcher } from '@blocksuite/lit';
-import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
+import type {
+  ConnectorMode,
+  PhasorElement,
+  ShapeType,
+} from '@blocksuite/phasor';
 import {
   type BaseBlockModel,
   DisposableGroup,
@@ -129,6 +133,8 @@ export type ExtendedModel = BaseBlockModel & Record<string, any>;
 
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel = FrameBlockModel;
+
+export type onEdgelessElement = FrameBlockModel | PhasorElement;
 
 export type DefaultMouseMode = {
   type: 'default';

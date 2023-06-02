@@ -31,11 +31,21 @@ export interface SurfaceViewport {
   applyDeltaCenter(deltaX: number, deltaY: number): void;
 }
 
+export abstract class Renderable {
+  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
+}
+
 export class Renderer implements SurfaceViewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   rc: RoughCanvas;
   gridManager = new GridManager();
+
+  /**
+   * it's not for real edgeless element to render
+   * it's for
+   */
+  private _renderables: Set<Renderable> = new Set();
 
   private _container!: HTMLElement;
   private _left = 0;
@@ -265,6 +275,20 @@ export class Renderer implements SurfaceViewport {
       ctx.restore();
     }
 
+    for (const renderable of this._renderables) {
+      renderable.render(ctx, rc);
+    }
+
     ctx.restore();
+  }
+
+  public addRenderable(renderable: Renderable) {
+    this._renderables.add(renderable);
+    this._shouldUpdate = true;
+  }
+
+  public removeRenderable(renderable: Renderable) {
+    this._renderables.delete(renderable);
+    this._shouldUpdate = true;
   }
 }
