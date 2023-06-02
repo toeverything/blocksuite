@@ -1,5 +1,4 @@
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import { sleep } from '@blocksuite/store';
 import { expect } from '@playwright/test';
 
 import {
@@ -437,7 +436,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await assertNativeSelectionRangeCount(page, 1);
 });
 
-test.only('continuous undo and redo (frame blcok add operation) should work', async ({
+test('continuous undo and redo (frame blcok add operation) should work', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
