@@ -14,7 +14,7 @@ export class FrameResizeObserver {
    * So we need to cache observed element.
    */
   private _cachedElements = new Map<string, Element>();
-  private _lastRect = new Map<string, DOMRect>();
+  private _lastRect = new Map<string, DOMRectReadOnly>();
 
   slots = {
     resize: new Slot<Map<string, DOMRectReadOnly>>(),
