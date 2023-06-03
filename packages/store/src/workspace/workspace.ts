@@ -356,24 +356,19 @@ export class Workspace {
 
   /**
    * @internal
-   *
-   * Recieve an exported workspace snapshot and import it into the current workspace.
-   * Specify which page you want to import by passing the `fromPageId` parameter.
-   * Specify the page you want to change by passing the `toPageId` parameter and it will
+   * Import an object expression of a page.
+   * Specify the page you want to update by passing the `pageId` parameter and it will
    * create a new page if it does not exist.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async importPageSnapshot(json: any, fromPageId: string, toPageId: string) {
-    if (!json['space:meta']) return;
-
+  async importPageSnapshot(json: any, pageId: string) {
     const unprefix = (str: string) =>
       str.replace('sys:', '').replace('prop:', '').replace('space:', '');
     const visited = new Set();
-    const fromPageBlocks = json[`space:${fromPageId}`];
 
-    let toPage = this.getPage(toPageId);
-    if (!toPage) {
-      toPage = this.createPage({ id: toPageId });
+    let page = this.getPage(pageId);
+    if (!page) {
+      page = this.createPage({ id: pageId });
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -413,8 +408,8 @@ export class Workspace {
           throw new Error('Embed source is not an image');
         }
 
-        assertExists(toPage);
-        const storage = toPage.blobs;
+        assertExists(page);
+        const storage = page.blobs;
         assertExists(storage);
         const id = await storage.set(imgBlob);
         props['prop:sourceId'] = id;
@@ -447,14 +442,14 @@ export class Workspace {
       const sanitizedProps = await sanitize(props);
       page.addBlock(props['sys:flavour'], sanitizedProps, parent);
       for (const id of props['sys:children']) {
-        addBlockByProps(page, fromPageBlocks[id], props['sys:id']);
+        addBlockByProps(page, json[id], props['sys:id']);
         visited.add(id);
       }
     };
 
-    for (const block of Object.values(fromPageBlocks)) {
-      assertExists(fromPageBlocks);
-      await addBlockByProps(toPage, block, null);
+    for (const block of Object.values(json)) {
+      assertExists(json);
+      await addBlockByProps(page, block, null);
     }
   }
 
