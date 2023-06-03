@@ -133,6 +133,7 @@ export type Erasable = NoteBlockModel | PhasorElement;
 
 export type DefaultTool = {
   type: 'default';
+  cursor?: string;
 };
 
 export type ShapeTool = {

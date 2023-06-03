@@ -33,6 +33,7 @@ import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
+import { generateCursorRotateIcon } from '../utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -99,6 +100,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-left'] {
       left: -12.5px;
       top: -12.5px;
+      cursor: ${generateCursorRotateIcon(270)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='top-right'] {
@@ -109,6 +111,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-right'] {
       top: -12.5px;
       right: -12.5px;
+      cursor: ${generateCursorRotateIcon(0)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] {
@@ -119,6 +122,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-right'] {
       right: -12.5px;
       bottom: -12.5px;
+      cursor: ${generateCursorRotateIcon(90)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] {
@@ -129,6 +133,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-left'] {
       bottom: -12.5px;
       left: -12.5px;
+      cursor: ${generateCursorRotateIcon(180)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'],
