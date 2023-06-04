@@ -1,14 +1,18 @@
 import { Bound } from '@blocksuite/phasor';
 import { getCommonBound } from '@blocksuite/phasor';
 
+import type { IPoint } from '../../../std.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 type ResizeMoveHandler = (bounds: Map<string, Bound>) => void;
+
+type RotateMoveHandler = (point: IPoint, rotate: number) => void;
 
 type ResizeEndHandler = () => void;
 
 export class HandleResizeManager {
   private _onResizeMove: ResizeMoveHandler;
+  private _onRotateMove: RotateMoveHandler;
   private _onResizeEnd: ResizeEndHandler;
 
   private _dragDirection: HandleDirection = HandleDirection.Left;
@@ -30,8 +34,13 @@ export class HandleResizeManager {
 
   private _shiftKey = false;
 
-  constructor(onResizeMove: ResizeMoveHandler, onResizeEnd: ResizeEndHandler) {
+  constructor(
+    onResizeMove: ResizeMoveHandler,
+    onRotateMove: RotateMoveHandler,
+    onResizeEnd: ResizeEndHandler
+  ) {
     this._onResizeMove = onResizeMove;
+    this._onRotateMove = onRotateMove;
     this._onResizeEnd = onResizeEnd;
   }
 
@@ -203,6 +212,7 @@ export class HandleResizeManager {
 
       newBounds.set(id, new Bound(shapeX, shapeY, shapeW, shapeH));
     });
+
     this._onResizeMove(newBounds);
   }
 
@@ -228,10 +238,66 @@ export class HandleResizeManager {
     this._resizeMode = resizeMode;
     this._zoom = zoom;
 
+    const rotated = direction.startsWith('rotate-');
+    if (rotated) {
+      let x = 0;
+      let y = 0;
+      switch (direction) {
+        case HandleDirection.RotateTopLeft:
+          x = e.x + w / 2;
+          y = e.y + h / 2;
+          break;
+        case HandleDirection.RotateBottomLeft:
+          x = e.x + w / 2;
+          y = e.y - h / 2;
+          break;
+        case HandleDirection.RotateTopRight:
+          x = e.x - w / 2;
+          y = e.y + h / 2;
+          break;
+        case HandleDirection.RotateBottomRight:
+          x = e.x - w / 2;
+          y = e.y - h / 2;
+          break;
+      }
+      this._dragPos.end = {
+        x,
+        y,
+      };
+    }
+
     const _onPointerMove = (e: PointerEvent) => {
       if (resizeMode === 'none') return;
 
       this._shiftKey ||= e.shiftKey;
+
+      if (rotated) {
+        const {
+          _commonBound: [minX, minY, maxX, maxY],
+          _dragPos: {
+            start: { x: startX, y: startY },
+            end: { x: centerX, y: centerY },
+          },
+        } = this;
+
+        const r0 = Math.atan2(startY - centerY, startX - centerX);
+        const r1 = Math.atan2(e.y - centerY, e.x - centerX);
+        const dr = ((r1 - r0) * 180) / Math.PI;
+
+        this._onRotateMove(
+          // center of element in suface
+          { x: minX + (maxX - minX) / 2, y: minY + (maxY - minY) / 2 },
+          dr
+        );
+
+        this._dragPos.start = {
+          x: e.x,
+          y: e.y,
+        };
+
+        return;
+      }
+
       this._dragPos.end = { x: e.x, y: e.y };
 
       this._resize(this._shiftKey);

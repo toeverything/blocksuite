@@ -9,6 +9,7 @@ export interface IDebug {
   xywh: SerializedXYWH;
   index: string;
   seed: number;
+  rotate: number;
 
   color: string;
 }
@@ -16,6 +17,9 @@ export interface IDebug {
 export const DebugElementDefaultProps: IElementDefaultProps<'debug'> = {
   type: 'debug',
   xywh: '[0,0,0,0]',
+
+  rotate: 0,
+
   color: '#000000',
 };
 
@@ -29,8 +33,20 @@ export class DebugElement extends SurfaceElement<IDebug> {
     throw new Error('Method not implemented.');
   }
 
-  override render(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(0, 0, this.w, this.h);
+  override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix): void {
+    const {
+      rotate,
+      color,
+      widthAndHeight: [w, h],
+    } = this;
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
+
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, w, h);
   }
 }

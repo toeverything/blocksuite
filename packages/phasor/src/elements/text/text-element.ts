@@ -39,14 +39,28 @@ export class TextElement extends SurfaceElement<IText> {
     );
   }
 
-  override render(ctx: CanvasRenderingContext2D) {
-    const { w, text, color, fontSize, fontFamily, textAlign } = this;
+  override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
+    const {
+      rotate,
+      text,
+      color,
+      fontSize,
+      fontFamily,
+      textAlign,
+      widthAndHeight: [w, h],
+    } = this;
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
 
     const yText = text;
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
     const lines = deltaInsertsToChunks(deltas);
 
-    const lineHeightPx = this.h / lines.length;
+    const lineHeightPx = h / lines.length;
     const font = getFontString({
       fontSize: fontSize,
       lineHeight: `${lineHeightPx}px`,

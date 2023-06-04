@@ -16,12 +16,11 @@ const kRect = 1 - 0.5522847498;
 export const RectMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) {
     const {
-      w,
-      h,
       seed,
       strokeWidth,
       filled,
@@ -30,14 +29,20 @@ export const RectMethods: ShapeMethods = {
       radius,
       strokeStyle,
       roughness,
+      rotate,
+      widthAndHeight: [w, h],
     } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
     const r = Math.min(renderWidth * radius, renderHeight * radius);
+    const cx = w / 2;
+    const cy = h / 2;
 
-    ctx.translate(renderOffset, renderOffset);
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
 
     rc.path(
       `

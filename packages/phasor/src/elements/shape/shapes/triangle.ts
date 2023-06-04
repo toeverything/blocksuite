@@ -14,12 +14,11 @@ import type { ShapeMethods } from '../types.js';
 export const TriangleMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) {
     const {
-      w,
-      h,
       seed,
       strokeWidth,
       filled,
@@ -27,13 +26,19 @@ export const TriangleMethods: ShapeMethods = {
       realStrokeColor,
       strokeStyle,
       roughness,
+      rotate,
+      widthAndHeight: [w, h],
     } = element;
 
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
+    const cx = w / 2;
+    const cy = h / 2;
 
-    ctx.translate(renderOffset, renderOffset);
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
 
     rc.polygon(
       [

@@ -1,12 +1,13 @@
 import '../component-toolbar/component-toolbar.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import type { Bound } from '@blocksuite/phasor';
-import type { SurfaceManager } from '@blocksuite/phasor';
 import {
+  type Bound,
   type ConnectorElement,
   deserializeXYWH,
+  type PhasorElement,
   serializeXYWH,
+  type SurfaceManager,
   TextElement,
 } from '@blocksuite/phasor';
 import { matchFlavours, type Page } from '@blocksuite/store';
@@ -16,6 +17,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
+import type { IPoint } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import {
@@ -33,7 +35,7 @@ import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
-import { generateCursorRotateIcon } from '../utils.js';
+import { generateCursorUrl } from '../utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -100,7 +102,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-left'] {
       left: -12.5px;
       top: -12.5px;
-      cursor: ${generateCursorRotateIcon(270)};
+      cursor: ${generateCursorUrl(270)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='top-right'] {
@@ -111,7 +113,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-right'] {
       top: -12.5px;
       right: -12.5px;
-      cursor: ${generateCursorRotateIcon(0)};
+      cursor: ${generateCursorUrl(0)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] {
@@ -122,7 +124,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-right'] {
       right: -12.5px;
       bottom: -12.5px;
-      cursor: ${generateCursorRotateIcon(90)};
+      cursor: ${generateCursorUrl(90)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] {
@@ -133,7 +135,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-left'] {
       bottom: -12.5px;
       left: -12.5px;
-      cursor: ${generateCursorRotateIcon(180)};
+      cursor: ${generateCursorUrl(180)};
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'],
@@ -208,6 +210,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     super();
     this._resizeManager = new HandleResizeManager(
       this._onDragMove,
+      this._onDragRotate,
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
@@ -270,6 +273,37 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           surface.setElementBound(element.id, bound);
         }
       }
+      handleElementChangedEffectForConnector(element, [element], surface, page);
+    });
+
+    this.requestUpdate();
+  };
+
+  private _onDragRotate = (center: IPoint, rotate: number) => {
+    const {
+      page,
+      state: { selected },
+      surface,
+    } = this;
+    const { x, y } = center;
+    const m = new DOMMatrix().translate(x, y).rotate(rotate).translate(-x, -y);
+
+    const elements = selected.filter(
+      element => !isTopLevelBlock(element)
+    ) as PhasorElement[];
+
+    elements.forEach(element => {
+      const { id, rotate: oldRotate = 0 } = element;
+      const [x, y, w, h] = element.deserializeXYWH();
+      const hw = w / 2;
+      const hh = h / 2;
+      const nc = m.transformPoint(new DOMPoint(x + hw, y + hh));
+
+      surface.updateElement(id, {
+        xywh: serializeXYWH(nc.x - hw, nc.y - hh, w, h),
+        rotate: oldRotate + rotate,
+      });
+
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 

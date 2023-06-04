@@ -5,7 +5,11 @@ import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
 import { isPointIn } from '../utils/math-utils.js';
-import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -13,6 +17,7 @@ export interface ISurfaceElement {
   xywh: SerializedXYWH;
   index: string;
   seed: number;
+  rotate: number;
 }
 
 export interface HitTestOptions {
@@ -69,29 +74,39 @@ export abstract class SurfaceElement<
     return xywh;
   }
 
+  get seed() {
+    const seed = this.yMap.get('seed') as T['seed'];
+    return seed;
+  }
+
+  get rotate() {
+    const rotate = this.yMap.get('rotate') as T['rotate'];
+    return rotate;
+  }
+
   get x() {
-    const [x] = deserializeXYWH(this.xywh);
+    const [x] = this.deserializeXYWH();
     return x;
   }
 
   get y() {
-    const [, y] = deserializeXYWH(this.xywh);
+    const [, y] = this.deserializeXYWH();
     return y;
   }
 
   get w() {
-    const [, , w] = deserializeXYWH(this.xywh);
+    const [, , w] = this.deserializeXYWH();
     return w;
   }
 
   get h() {
-    const [, , , h] = deserializeXYWH(this.xywh);
+    const [, , , h] = this.deserializeXYWH();
     return h;
   }
 
-  get seed() {
-    const seed = this.yMap.get('seed') as T['seed'];
-    return seed;
+  get widthAndHeight() {
+    const [, , w, h] = this.deserializeXYWH();
+    return [w, h];
   }
 
   get localRecord() {
@@ -102,6 +117,10 @@ export abstract class SurfaceElement<
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
     }
+  }
+
+  deserializeXYWH(): XYWH {
+    return deserializeXYWH(this.xywh);
   }
 
   serialize(): T {
@@ -129,7 +148,7 @@ export abstract class SurfaceElement<
     this.renderer = null;
   }
 
-  render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+  render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix, rc: RoughCanvas) {
     return;
   }
 }

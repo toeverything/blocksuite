@@ -57,12 +57,32 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     );
   }
 
-  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
-    const { seed, strokeStyle, color, roughness, lineWidth, controllers } =
-      this;
+  override render(
+    ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
+    rc: RoughCanvas
+  ) {
+    const {
+      rotate,
+      seed,
+      strokeStyle,
+      color,
+      roughness,
+      lineWidth,
+      controllers,
+      mode,
+      widthAndHeight: [w, h],
+    } = this;
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
+
     const realStrokeColor = this.computedValue(color);
 
-    if (this.mode === ConnectorMode.Orthogonal) {
+    if (mode === ConnectorMode.Orthogonal) {
       rc.linearPath(
         controllers.map(controller => [controller.x, controller.y]),
         {
@@ -94,8 +114,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       );
     }
 
-    const last = this.controllers[this.controllers.length - 1];
-    const secondToLast = this.controllers[this.controllers.length - 2];
+    const last = controllers[controllers.length - 1];
+    const secondToLast = controllers[controllers.length - 2];
 
     // TODO: Adjust arrow direction
     const { sides, end } = getArrowPoints(

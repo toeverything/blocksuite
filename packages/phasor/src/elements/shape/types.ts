@@ -22,6 +22,7 @@ export interface IShape extends ISurfaceElement {
 export interface ShapeMethods {
   render: (
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) => void;

@@ -63,8 +63,12 @@ export class ShapeElement extends SurfaceElement<IShape> {
     return ShapeMethodsMap[this.shapeType].intersectWithLine(start, end, this);
   }
 
-  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+  override render(
+    ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
+    rc: RoughCanvas
+  ) {
     const { render } = ShapeMethodsMap[this.shapeType];
-    render(ctx, rc, this);
+    render(ctx, matrix, rc, this);
   }
 }
