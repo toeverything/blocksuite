@@ -117,7 +117,7 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'demo', attributes: {} }],
       children: [],
     },
@@ -278,7 +278,7 @@ test(scoped`import notion html-format list`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'demo', attributes: {} }],
       children: [],
     },
@@ -420,43 +420,88 @@ test(scoped`import notion html-format table`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
-      text: [{ insert: 'demo', attributes: {} }],
+      type: 'h1',
+      text: [
+        {
+          insert: 'demo',
+          attributes: {},
+        },
+      ],
       children: [],
     },
     {
       flavour: 'affine:database',
       databaseProps: {
-        id: '2',
+        id: '3',
         title: 'Database',
         titleColumnWidth: 432,
-        rowIds: ['3', '4', '5'],
+        rowIds: ['4', '5', '6'],
         cells: {
-          '3': { '1': { columnId: '1', value: 'table-title2' } },
-          '4': { '1': { columnId: '1', value: 'table-content2' } },
-          '5': { '1': { columnId: '1', value: '' } },
+          '4': {
+            '1': {
+              columnId: '1',
+              value: 'table-title2',
+            },
+          },
+          '5': {
+            '1': {
+              columnId: '1',
+              value: 'table-content2',
+            },
+          },
+          '6': {
+            '1': {
+              columnId: '1',
+              value: '',
+            },
+          },
         },
         columns: [
-          { name: '', type: 'rich-text', width: 200, hide: false, id: '1' },
+          {
+            name: '',
+            type: 'rich-text',
+            width: 200,
+            hide: false,
+            id: '1',
+          },
+          {
+            name: '',
+            type: 'rich-text',
+            width: 200,
+            hide: false,
+            id: '2',
+          },
         ],
       },
       children: [
         {
           flavour: 'affine:paragraph',
           type: 'text',
-          text: [{ insert: 'table-title1' }],
+          text: [
+            {
+              insert: 'table-title1',
+            },
+          ],
           children: [],
         },
         {
           flavour: 'affine:paragraph',
           type: 'text',
-          text: [{ insert: 'table-content1' }],
+          text: [
+            {
+              insert: 'table-content1',
+            },
+          ],
           children: [],
         },
         {
           flavour: 'affine:paragraph',
           type: 'text',
-          text: [{ insert: '' }],
+          text: [
+            {
+              insert: '',
+            },
+          ],
           children: [],
         },
       ],
@@ -789,7 +834,7 @@ test(scoped`import notion html-format toggle list`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'demo', attributes: {} }],
       children: [],
     },
@@ -963,7 +1008,7 @@ test(scoped`import notion html-format inline`, async ({ page }) => {
   const expectedValue = [
     {
       flavour: 'affine:page',
-      type: 'header',
+      type: 'h1',
       text: [{ insert: 'inline', attributes: {} }],
       children: [],
     },
