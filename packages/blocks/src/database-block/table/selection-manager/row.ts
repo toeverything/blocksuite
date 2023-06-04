@@ -15,6 +15,7 @@ import {
 } from '../../../std.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { DatabaseBlockService } from '../../database-service.js';
+import { getDatabaseById } from '../components/selection/utils.js';
 import {
   getClosestDatabase,
   getClosestDatabaseId,
@@ -45,7 +46,7 @@ export class RowSelectionManager {
     this._add('dragMove', this._onDragMove);
     this._add('dragEnd', this._onDragEnd);
     this._add('click', this._onClick);
-    this._add('keyDown', this._onRowSelectionDelete);
+    this._add('keyDown', this._onKeydown);
   }
 
   private _onDragStart = (ctx: UIEventStateContext) => {
@@ -156,13 +157,38 @@ export class RowSelectionManager {
     }
   };
 
-  private _onRowSelectionDelete = (ctx: UIEventStateContext) => {
+  private _onKeydown = (ctx: UIEventStateContext) => {
     const e = ctx.get('keyboardState');
     const event = e.raw;
 
-    if (event.key !== 'Delete') return;
-    event.preventDefault();
+    const key = event.key;
+    if (key === 'Delete' || key === 'Backspace') {
+      event.preventDefault();
+      this._onRowSelectionDelete();
+    } else if (key === 'Escape') {
+      const service = getService('affine:database');
+      const cellSelection = service.getLastCellSelection();
+      if (cellSelection) {
+        const {
+          databaseId,
+          coords: [coord],
+        } = cellSelection;
+        // clear cell selection
+        service.clearCellLevelSelection();
 
+        // select row
+        const database = getDatabaseById(databaseId);
+        const rowIds = getSelectedRowIdsByIndexes(database, [coord.rowIndex]);
+        service.setRowSelection({
+          type: 'select',
+          rowIds,
+          databaseId,
+        });
+      }
+    }
+  };
+
+  private _onRowSelectionDelete = () => {
     const service = getService('affine:database');
     const rowSelection = service.getLastRowSelection();
     if (!rowSelection) return;
