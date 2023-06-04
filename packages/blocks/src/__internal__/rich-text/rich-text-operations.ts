@@ -5,6 +5,7 @@ import type { BlockModelProps } from '@blocksuite/global/types';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text, Utils } from '@blocksuite/store';
+import { match } from 'assert';
 
 import type { PageBlockModel } from '../../models.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
@@ -546,7 +547,12 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
 function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:paragraph'])) return false;
-  console.log('works');
+  const previousBlockFlavour = getPreviousBlock(model)?.flavour;
+  if (previousBlockFlavour == 'affine:surface') {
+    console.log('works');
+    return PREVENT_DEFAULT;
+  }
+  ALLOW_DEFAULT;
   return true;
 }
 
