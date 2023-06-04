@@ -286,7 +286,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       surface,
     } = this;
     const { x, y } = center;
-    const m = new DOMMatrix().translate(x, y).rotate(rotate).translate(-x, -y);
+    const matrix = new DOMMatrix()
+      .translateSelf(x, y)
+      .rotateSelf(rotate)
+      .translateSelf(-x, -y);
 
     const elements = selected.filter(
       element => !isTopLevelBlock(element)
@@ -297,7 +300,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const [x, y, w, h] = element.deserializeXYWH();
       const hw = w / 2;
       const hh = h / 2;
-      const nc = m.transformPoint(new DOMPoint(x + hw, y + hh));
+      // new center of element
+      const nc = matrix.transformPoint(new DOMPoint(x + hw, y + hh));
 
       surface.updateElement(id, {
         xywh: serializeXYWH(nc.x - hw, nc.y - hh, w, h),
