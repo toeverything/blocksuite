@@ -74,10 +74,6 @@ export class HandleResizeManager {
     let newWidth = originalWidth;
     let newHeight = originalheight;
 
-    const matrix = new DOMMatrix();
-
-    const newBounds = new Map<string, Bound>();
-
     if (isCorner) {
       // force equal scaling when multiple elements are selected
       // shift ||= this._bounds.size > 1;
@@ -164,7 +160,16 @@ export class HandleResizeManager {
       scaleY = newHeight / originalheight;
     }
 
-    matrix.scaleSelf(scaleX, scaleY, 1, originX, originY, 0);
+    const matrix = new DOMMatrix().scaleSelf(
+      scaleX,
+      scaleY,
+      1,
+      originX,
+      originY,
+      0
+    );
+
+    const newBounds = new Map<string, Bound>();
 
     this._bounds.forEach((bound, id) => {
       const { x: oldX, y: oldY, w: oldW, h: oldH } = bound;
