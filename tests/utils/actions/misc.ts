@@ -719,6 +719,23 @@ export const getCenterPosition: (
   };
 };
 
+export const getCenterPositionByLocator: (
+  page: Page,
+  locator: Locator
+) => Promise<{ x: number; y: number }> = async (
+  page: Page,
+  locator: Locator
+) => {
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Failed to getCenterPosition! Can't get bounding box");
+  }
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2,
+  };
+};
+
 export const getBoundingClientRect: (
   page: Page,
   selector: string
