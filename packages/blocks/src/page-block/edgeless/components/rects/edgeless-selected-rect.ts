@@ -47,6 +47,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     .affine-edgeless-selected-rect {
       position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: center;
       border-radius: 0;
       pointer-events: none;
       box-sizing: border-box;
@@ -206,6 +209,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _lock = false;
   private _resizeManager: HandleResizeManager;
 
+  private _rotate = 0;
+
   constructor() {
     super();
     this._resizeManager = new HandleResizeManager(
@@ -227,9 +232,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     ) {
       return 'none';
     }
-    const hasBlockElement = this.state.selected.find(elem =>
-      isTopLevelBlock(elem)
-    );
+    const hasBlockElement = this.state.selected.find(isTopLevelBlock);
     return hasBlockElement ? 'edge' : 'corner';
   }
 
@@ -282,8 +285,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _onDragRotate = (center: IPoint, rotate: number) => {
     const {
       page,
-      state: { selected },
       surface,
+      state: { selected },
     } = this;
     const { x, y } = center;
     const matrix = new DOMMatrix()
@@ -301,16 +304,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const hw = w / 2;
       const hh = h / 2;
       // new center of element
-      const nc = matrix.transformPoint(new DOMPoint(x + hw, y + hh));
+      // const point = new DOMPoint(x + hw, y + hh).matrixTransform(matrix);
+      const point = matrix.transformPoint(new DOMPoint(x + hw, y + hh));
 
       surface.updateElement(id, {
-        xywh: serializeXYWH(nc.x - hw, nc.y - hh, w, h),
+        xywh: serializeXYWH(point.x - hw, point.y - hh, w, h),
         rotate: oldRotate + rotate,
       });
 
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
+    this._rotate += rotate;
     this.requestUpdate();
   };
 
@@ -358,6 +363,22 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     });
   }
 
+  override willUpdate(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('state')) {
+      const {
+        state: { selected },
+      } = this;
+      if (selected.length === 1) {
+        const element = selected[0];
+        if (!isTopLevelBlock(element)) {
+          this._rotate = element.rotate ?? 0;
+          return;
+        }
+      }
+      this._rotate = 0;
+    }
+  }
+
   override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     // when viewport updates, popper should update too.
@@ -374,13 +395,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       return nothing;
     }
 
+    const { page, surface, resizeMode, _resizeManager } = this;
+
     const isSingleHiddenNote =
       selected.length === 1 &&
       isTopLevelBlock(selected[0]) &&
       matchFlavours(selected[0], ['affine:note']) &&
       selected[0].hidden;
 
-    const { page, surface, resizeMode, _resizeManager } = this;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = {
@@ -415,9 +437,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             selected[0] as ConnectorElement,
             this.surface,
             this.page,
-            () => {
-              this.slots.selectionUpdated.emit({ ...state });
-            }
+            () => this.slots.selectionUpdated.emit({ ...state })
           )
         : nothing;
 
