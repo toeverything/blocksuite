@@ -514,3 +514,27 @@ test.describe('indent correctly when deleting list item', () => {
     await assertBlockChildrenIds(page, '10', ['11']);
   });
 });
+
+test('delete list item with nested children items', async ({ page }) => {
+  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+
+  await focusRichText(page, 0);
+  await type(page, '1');
+
+  await focusRichText(page, 1);
+  await type(page, '2');
+
+  await focusRichText(page, 2);
+  await pressTab(page);
+  await type(page, '3');
+
+  await pressEnter(page); // 0(1(2,3,4,5))
+  await type(page, '3');
+
+  await focusRichText(page, 1);
+  await pressBackspace(page);
+  await pressBackspace(page);
+  await pressBackspace(page); // 0(1(2,4,5))
+
+  await assertBlockChildrenIds(page, '1', ['2', '4', '5']);
+});
