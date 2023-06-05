@@ -163,7 +163,6 @@ export class RowSelectionManager {
 
     const key = event.key;
     if (key === 'Delete' || key === 'Backspace') {
-      event.preventDefault();
       this._onRowSelectionDelete();
     } else if (key === 'Escape') {
       const service = getService('affine:database');
