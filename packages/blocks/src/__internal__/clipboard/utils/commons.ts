@@ -227,7 +227,6 @@ export function copySurfaceText(edgeless: EdgelessPageBlockComponent) {
     const vEditor = surfaceTextEditor.vEditor;
     assertExists(vEditor);
     const vRange = vEditor.getVRange();
-    console.log(vRange);
     if (vRange) {
       const text = vEditor.yText
         .toString()
