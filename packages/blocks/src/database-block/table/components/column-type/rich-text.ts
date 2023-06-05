@@ -154,6 +154,10 @@ export class TextCell
 
   private _handleKeyDown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape') {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        return;
+      }
       event.stopPropagation();
     }
 
