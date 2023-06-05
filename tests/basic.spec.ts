@@ -493,3 +493,33 @@ test('when no frame block, click editing area auto add a new frame block', async
   });
   expect(frame).not.toBeNull();
 });
+
+test(scoped`automatic identify url text`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'https://google.com');
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text={
+        <>
+          <text
+            insert="https://google.com"
+            link="https://google.com"
+          />
+        </>
+      }
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});

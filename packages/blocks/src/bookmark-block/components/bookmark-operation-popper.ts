@@ -81,7 +81,7 @@ const operations: Operation[] = [
         startOffset: 0,
         endOffset: 0,
       });
-      toast('Copied original link to clipboard');
+      toast('Copied link to clipboard');
       callback?.('copy');
     },
   },
