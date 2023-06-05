@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 import {
   assertMouseMode,
   enterPlaygroundRoom,
@@ -17,12 +19,27 @@ test('add text element in default mode', async ({ page }) => {
   await switchEditorMode(page);
   await setMouseMode(page, 'default');
 
-  await page.mouse.dblclick(30, 40);
+  await page.mouse.dblclick(130, 140);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
   await assertEdgelessText(page, 'hello');
   await assertMouseMode(page, 'default');
+
+  await page.mouse.click(120, 140);
+
+  expect(await page.locator('surface-text-editor').count()).toBe(0);
+
+  await page.mouse.dblclick(145, 155);
+  await page.locator('surface-text-editor').waitFor({
+    state: 'attached',
+  });
+  await type(page, 'hello');
+  await assertEdgelessText(page, 'hellohello');
+
+  await page.mouse.click(145, 155);
+  await type(page, 'ddd\n');
+  await assertEdgelessText(page, 'hddd\nellohello');
 });
 
 test('add text element in text mode', async ({ page }) => {
@@ -32,10 +49,25 @@ test('add text element in text mode', async ({ page }) => {
   await switchEditorMode(page);
   await setMouseMode(page, 'text');
 
-  await page.mouse.click(30, 40);
+  await page.mouse.click(130, 140);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
   await assertEdgelessText(page, 'hello');
   await assertMouseMode(page, 'default');
+
+  await page.mouse.click(120, 140);
+
+  expect(await page.locator('surface-text-editor').count()).toBe(0);
+
+  await page.mouse.dblclick(145, 155);
+  await page.locator('surface-text-editor').waitFor({
+    state: 'attached',
+  });
+  await type(page, 'hello');
+  await assertEdgelessText(page, 'hellohello');
+
+  await page.mouse.click(145, 155);
+  await type(page, 'ddd\n');
+  await assertEdgelessText(page, 'hddd\nellohello');
 });

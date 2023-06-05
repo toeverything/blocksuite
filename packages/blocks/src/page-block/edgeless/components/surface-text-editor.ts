@@ -114,8 +114,6 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         position: 'absolute',
         left: rect.x + 'px',
         top: rect.y + 'px',
-        minWidth: this._element.w < 20 ? 20 : this._element.w + 'px',
-        minHeight: this._element.h < 20 ? 20 : this._element.h + 'px',
         fontSize: this._element.fontSize + 'px',
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',
