@@ -617,7 +617,12 @@ export class Page extends Space<FlatBlockMap> {
       model.children.forEach(child => {
         this.schema.validate(child.flavour, bringChildrenTo.flavour);
       });
-      bringChildrenTo.children.push(...model.children);
+      // When bring children to parent, insert children to the original position of model
+      if (bringChildrenTo === parent && index > -1) {
+        parent.children.splice(index, 0, ...model.children);
+      } else {
+        bringChildrenTo.children.push(...model.children);
+      }
     }
     this._blockMap.delete(model.id);
 
