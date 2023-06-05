@@ -53,16 +53,16 @@ export class HandleResizeManager {
       _aspectRatio: aspectRatio,
       _dragDirection: direction,
       _dragPos: dragPos,
-      _resizeMode: resizeMode,
-      _zoom: zoom,
+      _resizeMode,
+      _zoom,
       _commonBound,
     } = this;
 
-    const isCorner = resizeMode === 'corner';
+    const isCorner = _resizeMode === 'corner';
     const { x: startX, y: startY } = dragPos.start;
     const { x: endX, y: endY } = dragPos.end;
 
-    const deltaX = (endX - startX) / zoom;
+    const deltaX = (endX - startX) / _zoom;
 
     let [minX, minY, maxX, maxY] = _commonBound;
     const originalWidth = maxX - minX;
@@ -78,7 +78,7 @@ export class HandleResizeManager {
       // force equal scaling when multiple elements are selected
       // shift ||= this._bounds.size > 1;
 
-      const deltaY = (endY - startY) / zoom;
+      const deltaY = (endY - startY) / _zoom;
 
       switch (direction) {
         // TODO
@@ -172,12 +172,12 @@ export class HandleResizeManager {
     const newBounds = new Map<string, Bound>();
 
     this._bounds.forEach((bound, id) => {
-      const { x: oldX, y: oldY, w: oldW, h: oldH } = bound;
-      const cx = oldX + oldW / 2;
-      const cy = oldY + oldH / 2;
+      const { x, y, w, h } = bound;
+      const cx = x + w / 2;
+      const cy = y + h / 2;
 
-      const newWidth = Math.abs(oldW * scaleX);
-      const newHeight = Math.abs(oldH * scaleY);
+      const newWidth = Math.abs(w * scaleX);
+      const newHeight = Math.abs(h * scaleY);
       const point = new DOMPoint(cx, cy).matrixTransform(matrix);
 
       newBounds.set(
