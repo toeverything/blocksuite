@@ -73,7 +73,7 @@ const operations: Operation[] = [
   {
     type: 'copy',
     icon: CopyIcon,
-    label: 'Copy',
+    label: 'Copy original link',
     action: (model, callback) => {
       copyBlocks({
         type: 'Block',
