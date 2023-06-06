@@ -144,4 +144,16 @@ describe('bound utils', () => {
       )
     ).toBeFalsy();
   });
+
+  it('isIntersectWithBound', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(5, 5, 10, 10);
+    expect(a.isIntersectWithBound(b)).toBeTruthy();
+  });
+
+  it('isIntersectWithBound no intersection', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(11, 11, 10, 10);
+    expect(a.isIntersectWithBound(b)).toBeFalsy();
+  });
 });

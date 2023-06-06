@@ -1,7 +1,8 @@
 import { clamp, type Point } from '@blocksuite/blocks';
 import { almostEqual } from '@blocksuite/blocks';
-const EPSILON = 1e-12;
-const MACHINE_EPSILON = 1.12e-16;
+
+import { EPSILON, MACHINE_EPSILON } from './numerical.js';
+
 export class Line {
   static intersect(
     sp: Point,

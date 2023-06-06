@@ -18,8 +18,6 @@ export default defineConfig({
       console.warn(`Unexpected ${type} log`, log);
       throw new Error(log);
     },
-    environment: 'jsdom',
-    // browser: true,
-    // browser:
+    browser: true,
   },
 });

@@ -2,6 +2,7 @@ import { Point } from '@blocksuite/blocks';
 
 import type { IBound } from '../consts.js';
 import { Line } from './line.js';
+import { EPSILON } from './numerical.js';
 import { Utils } from './tl-utils.js';
 import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
 
@@ -66,6 +67,15 @@ export class Bound implements IBound {
       if (p) rst.push(p);
     });
     return rst.length === 0 ? null : rst;
+  }
+
+  isIntersectWithBound(bound: Bound, epsilon = EPSILON) {
+    return (
+      bound.maxX > this.minX - epsilon &&
+      bound.maxY > this.minY - epsilon &&
+      bound.minX < this.maxX + epsilon &&
+      bound.minY < this.maxY + epsilon
+    );
   }
 
   serialize(): SerializedXYWH {

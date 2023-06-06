@@ -16,7 +16,6 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "jsdom": "^22.1.0",
     "nanoid": "^4.0.1",
     "yjs": "^13.6.0"
   },
