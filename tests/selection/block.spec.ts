@@ -10,6 +10,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
+  getCenterPositionByLocator,
   getIndexCoordinate,
   getRichTextBoundingBox,
   initEmptyParagraphState,
@@ -23,6 +24,7 @@ import {
   redoByKeyboard,
   resetHistory,
   shamefullyBlurActiveElement,
+  shiftClick,
   SHORT_KEY,
   type,
   undoByKeyboard,
@@ -1146,4 +1148,27 @@ test('should select with shift-click', async ({ page }) => {
   });
 
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(3);
+});
+
+test('when shift-click should select correct number of list blocks', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 2);
+  await pressEnter(page);
+  await type(page, '10');
+  await pressEnter(page);
+  await type(page, '11');
+  await assertRichTexts(page, ['123', '456', '789', '10', '11']);
+
+  await clickListIcon(page, 3);
+  const fifthLocator = page.getByText('11');
+  const targetPos = await getCenterPositionByLocator(page, fifthLocator);
+  await shiftClick(page, targetPos);
+  const rects = page.locator('affine-selected-blocks > *');
+  await expect(rects).toHaveCount(2);
 });

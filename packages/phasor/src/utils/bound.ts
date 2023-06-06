@@ -1,4 +1,8 @@
+import { Point } from '@blocksuite/blocks';
+
 import type { IBound } from '../consts.js';
+import { Line } from './line.js';
+import { EPSILON } from './numerical.js';
 import { Utils } from './tl-utils.js';
 import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
 
@@ -13,6 +17,69 @@ export class Bound implements IBound {
     this.y = y;
     this.w = w;
     this.h = h;
+  }
+
+  static from(arg1: IBound) {
+    return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
+  }
+
+  get center() {
+    return new Point(this.x + this.w / 2, this.y + this.h / 2);
+  }
+
+  get minX() {
+    return this.x;
+  }
+
+  get minY() {
+    return this.y;
+  }
+
+  get maxX() {
+    return this.x + this.w;
+  }
+
+  get maxY() {
+    return this.y + this.h;
+  }
+
+  get tl() {
+    return new Point(this.x, this.y);
+  }
+
+  get tr() {
+    return new Point(this.x + this.w, this.y);
+  }
+
+  get bl() {
+    return new Point(this.x, this.y + this.h);
+  }
+
+  get br() {
+    return new Point(this.x + this.w, this.y + this.h);
+  }
+
+  intersectLine(sp: Point, ep: Point, infinite = false) {
+    const rst: Point[] = [];
+    [
+      [this.tl, this.tr],
+      [this.tl, this.bl],
+      [this.tr, this.br],
+      [this.bl, this.br],
+    ].forEach(([p1, p2]) => {
+      const p = Line.intersect(sp, ep, p1, p2, infinite);
+      if (p) rst.push(p);
+    });
+    return rst.length === 0 ? null : rst;
+  }
+
+  isIntersectWithBound(bound: Bound, epsilon = EPSILON) {
+    return (
+      bound.maxX > this.minX - epsilon &&
+      bound.maxY > this.minY - epsilon &&
+      bound.minX < this.maxX + epsilon &&
+      bound.minY < this.maxY + epsilon
+    );
   }
 
   serialize(): SerializedXYWH {
