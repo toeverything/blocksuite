@@ -583,17 +583,4 @@ export class Vec {
   static min = (...v: number[][]) => {
     return [Math.min(...v.map(a => a[0])), Math.min(...v.map(a => a[1]))];
   };
-
-  static rotAround = (A: number[], C: number[], r: number): number[] => {
-    const s = Math.sin(r);
-    const c = Math.cos(r);
-
-    const px = A[0] - C[0];
-    const py = A[1] - C[1];
-
-    const nx = px * c - py * s;
-    const ny = px * s + py * c;
-
-    return [nx + C[0], ny + C[1]];
-  };
 }

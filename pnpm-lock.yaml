@@ -147,12 +147,12 @@ importers:
       hotkeys-js:
         specifier: ^3.10.1
         version: 3.10.1(patch_hash=otx73r74oyscqvo3amwccrzngy)
-      html-to-image:
-        specifier: ^1.11.11
-        version: 1.11.11
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
+      html-to-image:
+        specifier: ^1.11.11
+        version: 1.11.11
       lit:
         specifier: ^2.7.3
         version: 2.7.3
@@ -265,9 +265,6 @@ importers:
 
   packages/phasor:
     dependencies:
-      '@blocksuite/blocks':
-        specifier: workspace:*
-        version: link:../blocks
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global

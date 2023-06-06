@@ -3,12 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { Point } from './rect.js';
 
 describe('Point', () => {
-  it('static from should return a point', () => {
-    expect(Point.from([0, 0])).toEqual(new Point(0, 0));
-    expect(Point.from(0, 0)).toEqual(new Point(0, 0));
-    expect(Point.from({ x: 0, y: 0 })).toEqual(new Point(0, 0));
-  });
-
   it('should return a min point', () => {
     const a = new Point(0, 0);
     const b = new Point(-1, 1);
@@ -60,22 +54,5 @@ describe('Point', () => {
   it('#scale', () => {
     const a = new Point(1, 2);
     expect(a.scale(2)).toEqual(new Point(2, 4));
-  });
-
-  it('#cross', () => {
-    const a = new Point(1, 2);
-    const b = new Point(3, 4);
-    expect(a.cross(b)).toBe(-2);
-  });
-
-  it('#lerp', () => {
-    const a = new Point(1, 2);
-    const b = new Point(3, 4);
-    expect(a.lerp(b, 0.5)).toEqual(new Point(2, 3));
-  });
-
-  it('#toArray', () => {
-    const a = new Point(1, 2);
-    expect(a.toArray()).toEqual([1, 2]);
   });
 });

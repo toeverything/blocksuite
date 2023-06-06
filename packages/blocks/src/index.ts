@@ -27,7 +27,6 @@ export * from './__internal__/utils/block-range.js';
 export * from './__internal__/utils/common-operations.js';
 export * from './__internal__/utils/filesys.js';
 export * from './__internal__/utils/query.js';
-export * from './__internal__/utils/rect.js';
 export * as SelectionUtils from './__internal__/utils/selection.js';
 export * from './__internal__/utils/std.js';
 export * from './__internal__/utils/types.js';
