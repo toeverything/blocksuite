@@ -90,12 +90,14 @@ test('copy and paste', async ({ page }) => {
 
   await page.mouse.move(145, 155);
   await page.mouse.down();
-  await page.mouse.move(165, 155);
+  await page.mouse.move(165, 155, {
+    steps: 10,
+  });
   await page.mouse.up();
 
   await page.keyboard.press(`${SHORT_KEY}+c`);
 
-  await waitNextFrame(page);
+  await waitNextFrame(page, 200);
   await type(page, 'ddd');
   await assertEdgelessText(page, 'hdddo');
 
