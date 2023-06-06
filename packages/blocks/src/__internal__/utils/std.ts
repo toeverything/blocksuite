@@ -36,8 +36,8 @@ export function isEmpty(model: BaseBlockModel): boolean {
   );
 }
 
-export function almostEqual(a: number, b: number) {
-  return Math.abs(a - b) < 0.0001;
+export function almostEqual(a: number, b: number, epsilon = 0.0001) {
+  return Math.abs(a - b) < epsilon;
 }
 
 export function createEvent<
