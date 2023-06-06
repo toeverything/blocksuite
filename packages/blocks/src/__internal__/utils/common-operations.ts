@@ -44,7 +44,7 @@ export function isCollapsedAtBlockStart(vEditor: VEditor) {
 
 export function isCollapsedAtBlockEnd(vEditor: VEditor) {
   const vRange = vEditor.getVRange();
-  return vRange?.index === vEditor.yText.length;
+  return vRange?.index === vEditor.yText.length && vRange?.length === 0;
 }
 
 export function isInSamePath(
