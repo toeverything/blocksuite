@@ -1,4 +1,4 @@
-import { Bound,Renderable } from '@blocksuite/phasor';
+import { Bound, Renderable } from '@blocksuite/phasor';
 
 import { Point } from '../../__internal__/utils/rect.js';
 import type { onEdgelessElement } from '../../__internal__/utils/types.js';
