@@ -26,6 +26,12 @@ describe('bound utils', () => {
     expect(bound.br.equals(Point.from(3, 3))).toBe(true);
   });
 
+  it('from', () => {
+    const b1 = new Bound(1, 1, 2, 2);
+    const b2 = Bound.from(b1);
+    expect(b1).toMatchObject(b2);
+  });
+
   it('getCommonBound basic', () => {
     const bounds = Array(10)
       .fill(0)

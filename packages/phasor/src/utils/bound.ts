@@ -19,6 +19,10 @@ export class Bound implements IBound {
     this.h = h;
   }
 
+  static from(arg1: IBound) {
+    return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
+  }
+
   get center() {
     return new Point(this.x + this.w / 2, this.y + this.h / 2);
   }
