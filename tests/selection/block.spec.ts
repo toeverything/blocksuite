@@ -19,6 +19,7 @@ import {
   pasteByKeyboard,
   pressBackspace,
   pressEnter,
+  pressForwardDelete,
   pressTab,
   redoByKeyboard,
   resetHistory,
@@ -63,6 +64,33 @@ test('block level range delete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
+test('block level range delete by forwardDelete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await resetHistory(page);
+
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left, y: box123.top - 10 };
+
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const below789 = { x: box789.right - 10, y: box789.bottom + 10 };
+
+  await dragBetweenCoords(page, below789, above123);
+  await pressForwardDelete(page);
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertRichTexts(page, ['']);
+
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+  // FIXME
+  // await assertRichTexts(page, ['123', '456', '789']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['']);
+});
+
 // XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
 test('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -73,6 +101,20 @@ test('select all and delete', async ({ page }) => {
   await page.keyboard.press(`${SHORT_KEY}+a`);
   await shamefullyBlurActiveElement(page);
   await page.keyboard.press('Backspace');
+  await focusRichText(page, 0);
+  await type(page, 'abc');
+  await assertRichTexts(page, ['abc']);
+});
+
+test('select all and delete by forwardDelete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
   await focusRichText(page, 0);
   await type(page, 'abc');
   await assertRichTexts(page, ['abc']);
@@ -119,6 +161,25 @@ test('click the list icon can select and delete', async ({ page }) => {
   await clickListIcon(page, 0);
   await shamefullyBlurActiveElement(page);
   await pressBackspace(page);
+  await assertRichTexts(page, ['', '']);
+});
+
+test('click the list icon can select and delete by forwardDelete', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await clickListIcon(page, 0);
+  await pressForwardDelete(page);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
+  await assertRichTexts(page, ['', '456', '789']);
+  await clickListIcon(page, 0);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
   await assertRichTexts(page, ['', '']);
 });
 
