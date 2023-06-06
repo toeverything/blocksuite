@@ -310,6 +310,15 @@ export async function getAllFrames(page: Page) {
   });
 }
 
+export async function countBlock(page: Page, flavour: string) {
+  return await page.evaluate(
+    ([flavour]) => {
+      return Array.from(document.querySelectorAll(flavour)).length;
+    },
+    [flavour]
+  );
+}
+
 export async function activeFrameInEdgeless(page: Page, frameId: string) {
   const bound = await getFrameBoundBoxInEdgeless(page, frameId);
   await page.mouse.dblclick(bound.x + 8, bound.y + 8);

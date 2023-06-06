@@ -325,7 +325,7 @@ export class Page extends Space<FlatBlockMap> {
   @debug('CRUD')
   addBlock(
     flavour: string,
-    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>> = {},
+    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour'>> = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
@@ -351,7 +351,7 @@ export class Page extends Space<FlatBlockMap> {
     );
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
-    const id = this._idGenerator();
+    const id = blockProps.id ?? this._idGenerator();
     clonedProps.id = id;
 
     this.transact(() => {
@@ -617,7 +617,12 @@ export class Page extends Space<FlatBlockMap> {
       model.children.forEach(child => {
         this.schema.validate(child.flavour, bringChildrenTo.flavour);
       });
-      bringChildrenTo.children.push(...model.children);
+      // When bring children to parent, insert children to the original position of model
+      if (bringChildrenTo === parent && index > -1) {
+        parent.children.splice(index, 0, ...model.children);
+      } else {
+        bringChildrenTo.children.push(...model.children);
+      }
     }
     this._blockMap.delete(model.id);
 

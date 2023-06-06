@@ -28,10 +28,13 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     }
 
     const fn = () => {
-      if (newVRange) {
+      // There may be multiple range update events in one frame,
+      // so we need to obtain the latest vRange.
+      // see https://github.com/toeverything/blocksuite/issues/2982
+      if (this._vRange) {
         // when using input method _vRange will return to the starting point,
         // so we need to re-sync
-        this._applyVRange(newVRange);
+        this._applyVRange(this._vRange);
       }
     };
 

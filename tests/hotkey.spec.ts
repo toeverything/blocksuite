@@ -1057,3 +1057,18 @@ test('should support ctrl/cmd+g convert to database', async ({ page }) => {
   const rows = page.locator('.affine-database-block-row');
   expect(await rows.count()).toBe(3);
 });
+
+test('should drag multiple block and input text works', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2982',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await type(page, 'ab');
+  await assertRichTexts(page, ['1ab89']);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+});

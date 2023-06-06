@@ -12,6 +12,8 @@ import {
   Store,
   type StoreOptions,
 } from '../store.js';
+import { Text } from '../text-adapter.js';
+import { serializeYDoc } from '../utils/jsx.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
 import { type QueryContent, SearchIndexer } from './indexer/search.js';
@@ -331,11 +333,9 @@ export class Workspace {
     URL.revokeObjectURL(fileUrl);
   }
 
-  /**
-   * @internal Only for testing
-   */
-  importYDoc(): Promise<void> {
-    return new Promise((res, rej) => {
+  /** @internal Only for testing */
+  async importYDoc() {
+    return new Promise<void>((resolve, reject) => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.ydoc';
@@ -343,20 +343,122 @@ export class Workspace {
       input.onchange = async () => {
         const file = input.files?.item(0);
         if (!file) {
-          return rej();
+          return reject();
         }
         const buffer = await file.arrayBuffer();
         Y.applyUpdate(this.doc, new Uint8Array(buffer));
-        res();
+        resolve();
       };
-      input.onerror = rej;
+      input.onerror = reject;
       input.click();
     });
   }
 
   /**
-   * @internal Only for testing
+   * @internal
+   * Import an object expression of a page.
+   * Specify the page you want to update by passing the `pageId` parameter and it will
+   * create a new page if it does not exist.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async importPageSnapshot(json: any, pageId: string) {
+    const unprefix = (str: string) =>
+      str.replace('sys:', '').replace('prop:', '').replace('space:', '');
+    const visited = new Set();
+
+    let page = this.getPage(pageId);
+    if (!page) {
+      page = this.createPage({ id: pageId });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sanitize = async (props: any) => {
+      const result: Record<string, unknown> = {};
+
+      //TODO: https://github.com/toeverything/blocksuite/issues/2939
+      if (props['sys:flavour'] === 'affine:surface' && props['elements']) {
+        for (const [, element] of Object.entries(
+          props['elements']
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ) as any[]) {
+          if (element['type'] === 'text') {
+            const yText = new Y.Text();
+            yText.applyDelta(element['text']);
+            element['text'] = yText;
+          }
+        }
+      }
+
+      // setup embed source
+      if (props['sys:flavour'] === 'affine:embed') {
+        let resp;
+        try {
+          resp = await fetch(props['prop:sourceId'], {
+            cache: 'no-cache',
+            mode: 'cors',
+            headers: {
+              Origin: window.location.origin,
+            },
+          });
+        } catch (error) {
+          throw new Error(`Failed to fetch embed source. error: ${error}`);
+        }
+        const imgBlob = await resp.blob();
+        if (!imgBlob.type.startsWith('image/')) {
+          throw new Error('Embed source is not an image');
+        }
+
+        assertExists(page);
+        const storage = page.blobs;
+        assertExists(storage);
+        const id = await storage.set(imgBlob);
+        props['prop:sourceId'] = id;
+      }
+
+      for (const key of Object.keys(props)) {
+        if (key === 'sys:children' || key === 'sys:flavour') {
+          continue;
+        }
+
+        result[unprefix(key)] = props[key];
+
+        // delta array to Y.Text
+        if (key === 'prop:text' || key === 'prop:title') {
+          const yText = new Y.Text();
+          yText.applyDelta(props[key]);
+          result[unprefix(key)] = new Text(yText);
+        }
+      }
+      return result;
+    };
+
+    const addBlockByProps = async (
+      page: Page,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      props: any,
+      parent: string | null
+    ) => {
+      if (visited.has(props['sys:id'])) return;
+      const sanitizedProps = await sanitize(props);
+      page.addBlock(props['sys:flavour'], sanitizedProps, parent);
+      for (const id of props['sys:children']) {
+        addBlockByProps(page, json[id], props['sys:id']);
+        visited.add(id);
+      }
+    };
+
+    for (const block of Object.values(json)) {
+      assertExists(json);
+      await addBlockByProps(page, block, null);
+    }
+  }
+
+  /** @internal Only for testing */
+  exportSnapshot() {
+    return serializeYDoc(this.doc);
+  }
+
+  /** @internal Only for testing */
   exportJSX(blockId?: string, pageId = this.meta.pageMetas.at(0)?.id) {
     assertExists(pageId);
     return this._store.exportJSX(pageId, blockId);
