@@ -1,5 +1,4 @@
 /// <reference types="@blocksuite/global" />
-
 export { StrokeStyle, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from './consts.js';
 export type {
   AttachedElement,
@@ -14,6 +13,5 @@ export { Renderer } from './renderer.js';
 export * from './surface.js';
 export * from './utils/bound.js';
 export * from './utils/hit-utils.js';
-export * from './utils/line.js';
 export * from './utils/std.js';
 export * from './utils/xywh.js';
