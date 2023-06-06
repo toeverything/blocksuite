@@ -88,12 +88,42 @@ export class Bound implements IBound {
     );
   }
 
+  unite(bound: Bound) {
+    const x1 = Math.min(this.x, bound.x),
+      y1 = Math.min(this.y, bound.y),
+      x2 = Math.max(this.maxX, bound.maxX),
+      y2 = Math.max(this.maxY, bound.maxY);
+    return new Bound(x1, y1, x2 - x1, y2 - y1);
+  }
+
   serialize(): SerializedXYWH {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 
   clone(): Bound {
     return new Bound(this.x, this.y, this.w, this.h);
+  }
+
+  isHorizontalCross(bound: Bound) {
+    return !(this.maxY < bound.minY || this.minY > bound.maxY);
+  }
+
+  isVerticalCross(bound: Bound) {
+    return !(this.maxX < bound.minX || this.minX > bound.maxX);
+  }
+
+  horizontalDistance(bound: Bound) {
+    return Math.min(
+      Math.abs(this.minX - bound.maxX),
+      Math.abs(this.maxX - bound.minX)
+    );
+  }
+
+  verticalDistance(bound: Bound) {
+    return Math.min(
+      Math.abs(this.minY - bound.maxY),
+      Math.abs(this.maxY - bound.minY)
+    );
   }
 
   static deserialize(s: string) {

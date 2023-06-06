@@ -16,7 +16,7 @@ export * from './elements/index.js';
 export { compare } from './grid.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export type { SurfaceViewport } from './renderer.js';
-export { Renderer } from './renderer.js';
+export { Renderable,Renderer } from './renderer.js';
 export * from './surface.js';
 export * from './utils/bound.js';
 export { intersects, isPointIn, lineIntersects } from './utils/math-utils.js';

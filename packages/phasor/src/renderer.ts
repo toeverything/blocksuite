@@ -29,6 +29,9 @@ export interface SurfaceViewport {
   setCenter(centerX: number, centerY: number): void;
   setZoom(zoom: number, focusPoint?: IPoint): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
+
+  addRenderable(renderable: Renderable): void;
+  removeRenderable(renderable: Renderable): void;
 }
 
 export abstract class Renderable {
@@ -276,7 +279,9 @@ export class Renderer implements SurfaceViewport {
     }
 
     for (const renderable of this._renderables) {
+      ctx.save();
       renderable.render(ctx, rc);
+      ctx.restore();
     }
 
     ctx.restore();

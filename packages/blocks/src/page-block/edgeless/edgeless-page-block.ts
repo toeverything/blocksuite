@@ -832,7 +832,7 @@ export class EdgelessPageBlockComponent
         this,
         this.root.uiEventDispatcher
       );
-      this.snap = new EdgelessSnapManager(this, this.surface);
+      this.snap = new EdgelessSnapManager(this);
     }
     if (changedProperties.has('mouseMode')) {
       this.selection.mouseMode = this.mouseMode;

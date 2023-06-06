@@ -151,4 +151,46 @@ describe('bound utils', () => {
     const b = new Bound(11, 11, 10, 10);
     expect(a.isIntersectWithBound(b)).toBeFalsy();
   });
+
+  it('unite', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(5, 5, 10, 10);
+    expect(a.unite(b).serialize()).toBe('[0,0,15,15]');
+  });
+
+  it('isHorizontalCross', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(5, 5, 10, 10);
+    expect(a.isHorizontalCross(b)).toBeTruthy();
+  });
+
+  it('isHorizontalCross no intersection', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(11, 11, 10, 10);
+    expect(a.isHorizontalCross(b)).toBeFalsy();
+  });
+
+  it('isVerticalCross', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(5, 5, 10, 10);
+    expect(a.isVerticalCross(b)).toBeTruthy();
+  });
+
+  it('isVerticalCross no intersection', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(11, 11, 10, 10);
+    expect(a.isVerticalCross(b)).toBeFalsy();
+  });
+
+  it('horizontalDistance', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(15, 15, 10, 10);
+    expect(a.horizontalDistance(b)).toBe(5);
+  });
+
+  it('verticalDistance', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(15, 15, 10, 10);
+    expect(a.verticalDistance(b)).toBe(5);
+  });
 });
