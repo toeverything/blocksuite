@@ -11,12 +11,16 @@ import {
 import {
   handleBlockEndEnter,
   handleBlockSplit,
+  handleLineEndDelete,
   handleLineStartBackspace,
   handleSoftEnter,
   handleUnindent,
 } from '../rich-text/rich-text-operations.js';
 import type { AffineVEditor } from '../rich-text/virgo/types.js';
-import { isCollapsedAtBlockStart } from '../utils/index.js';
+import {
+  isCollapsedAtBlockEnd,
+  isCollapsedAtBlockStart,
+} from '../utils/index.js';
 
 export function onSoftEnter(
   model: BaseBlockModel,
@@ -172,6 +176,19 @@ export function onBackspace(
   e.stopPropagation();
   if (isCollapsedAtBlockStart(vEditor)) {
     handleLineStartBackspace(model.page, model);
+    return PREVENT_DEFAULT;
+  }
+  return ALLOW_DEFAULT;
+}
+
+export function onDelete(
+  model: BaseBlockModel,
+  e: KeyboardEvent,
+  vEditor: AffineVEditor
+) {
+  e.stopPropagation();
+  if (isCollapsedAtBlockEnd(vEditor)) {
+    handleLineEndDelete(model.page, model);
     return PREVENT_DEFAULT;
   }
   return ALLOW_DEFAULT;

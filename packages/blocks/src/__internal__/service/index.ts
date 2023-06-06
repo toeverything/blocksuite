@@ -22,6 +22,7 @@ import {
   enterMarkdownMatch,
   hardEnter,
   onBackspace,
+  onDelete,
   onKeyLeft,
   onKeyRight,
   onSoftEnter,
@@ -216,6 +217,13 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
         key: 'Backspace',
         handler(range, context) {
           return onBackspace(block, context.event, this.vEditor);
+        },
+      },
+      delete: {
+        key: 'Delete',
+        handler(range, context) {
+          // TODO: support macos ctrl + d
+          return onDelete(block, context.event, this.vEditor);
         },
       },
       up: {
