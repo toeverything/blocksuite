@@ -11,10 +11,6 @@ export function subscribeYMap(
 ): void {
   const { deep = false } = config;
   yMap.observe(event => {
-    if (event.changes.keys.size === 0) {
-      // skip empty event
-      return;
-    }
     event.keysChanged.forEach(key => {
       const type = event.changes.keys.get(key);
       if (!type) {

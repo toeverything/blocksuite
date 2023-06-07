@@ -17,6 +17,7 @@ import {
   uuidv4,
 } from './utils/id-generator.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
+import type { SubdocEvent } from './yjs/index.js';
 import { BlockSuiteDoc } from './yjs/index.js';
 
 export interface SerializedStore {
@@ -138,6 +139,15 @@ export class Store {
           awareness: this.awarenessStore.awareness,
         })
     );
+    this.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
+      loaded.forEach(subdoc => {
+        providers.forEach(Provider => {
+          new Provider(subdoc.guid, subdoc, {
+            awareness: this.awarenessStore.awareness,
+          });
+        });
+      });
+    });
   }
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);

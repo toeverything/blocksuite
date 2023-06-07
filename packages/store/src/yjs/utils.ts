@@ -1,3 +1,4 @@
+import type { Doc as YDoc } from 'yjs';
 import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
 
 export type Native2Y<T> = T extends Record<string, infer U>
@@ -40,3 +41,9 @@ export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
 }
 
 export type UnRecord = Record<string, unknown>;
+
+export type SubdocEvent = {
+  loaded: Set<YDoc>;
+  removed: Set<YDoc>;
+  added: Set<YDoc>;
+};

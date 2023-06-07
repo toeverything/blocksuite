@@ -57,6 +57,10 @@ export class WorkspaceMeta {
     return this._proxy.avatar;
   }
 
+  get blockVersions() {
+    return this._proxy.blockVersions;
+  }
+
   setName(name: string) {
     this.doc.transact(() => {
       this._proxy.name = name;

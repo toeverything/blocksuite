@@ -18,6 +18,8 @@ export class Space<
   readonly doc: BlockSuiteDoc;
   readonly awarenessStore: AwarenessStore;
 
+  private _loaded: boolean;
+
   /**
    * @internal Used for convenient access to the underlying Yjs map,
    * can be used interchangeably with ySpace
@@ -31,9 +33,18 @@ export class Space<
     this.doc = doc;
     this.awarenessStore = awarenessStore;
 
-    this._ySpaceDoc = new Y.Doc();
     const prefixedId = this.id.startsWith('space:') ? this.id : this.prefixedId;
-    doc.spaces.set(prefixedId, this._ySpaceDoc);
+    let subDoc = doc.spaces.get(prefixedId);
+    if (!subDoc) {
+      subDoc = new Y.Doc();
+      doc.spaces.set(prefixedId, subDoc);
+      this._loaded = true;
+    } else {
+      subDoc.load();
+      this._loaded = false;
+      doc.on('subdocs', this._onSubdocEvent);
+    }
+    this._ySpaceDoc = subDoc;
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
     this._proxy = createYMapProxy(this._yBlocks as Y.Map<unknown>);
@@ -42,6 +53,20 @@ export class Space<
   get prefixedId() {
     return `space:${this.id}`;
   }
+
+  get loaded() {
+    return this._loaded;
+  }
+
+  private _onSubdocEvent = ({ loaded }: { loaded: Set<Y.Doc> }): void => {
+    const result = Array.from(loaded).find(
+      doc => doc.guid === this._ySpaceDoc.guid
+    );
+    if (result) {
+      this._loaded = true;
+      this.doc.off('subdocs', this._onSubdocEvent);
+    }
+  };
 
   /**
    * If `shouldTransact` is `false`, the transaction will not be push to the history stack.

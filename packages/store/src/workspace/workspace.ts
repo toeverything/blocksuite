@@ -190,6 +190,8 @@ export class Workspace {
         idGenerator: this._store.idGenerator,
       });
       this._store.addSpace(page);
+
+      // TODO: try after subdoc loaded
       page.trySyncFromExistingDoc();
     });
 
@@ -207,9 +209,7 @@ export class Workspace {
    * If the `init` parameter is passed, a `surface`, `frame`, and `paragraph` block
    * will be created in the page simultaneously.
    */
-  createPage(
-    options: { id?: string; init?: true | { title: string } } | string = {}
-  ) {
+  createPage(options: { id?: string } | string = {}) {
     // Migration guide
     if (typeof options === 'string') {
       options = { id: options };
@@ -222,7 +222,7 @@ export class Workspace {
     }
     // End of migration guide. Remove this in the next major version
 
-    const { id: pageId = this.idGenerator(), init } = options;
+    const { id: pageId = this.idGenerator() } = options;
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }
@@ -232,23 +232,7 @@ export class Workspace {
       title: '',
       createDate: +new Date(),
     });
-    const page = this.getPage(pageId) as Page;
-
-    let pageBlockId = pageId;
-    if (init) {
-      pageBlockId = page.addBlock(
-        'affine:page',
-        typeof init === 'boolean'
-          ? undefined
-          : {
-              title: new page.Text(init.title),
-            }
-      );
-      page.addBlock('affine:surface', {}, pageBlockId);
-      const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-      page.addBlock('affine:paragraph', {}, frameId);
-    }
-    return page;
+    return this.getPage(pageId) as Page;
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
