@@ -116,7 +116,6 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
     this.model.propsUpdated.on(() => {
-      console.log('update');
       this.requestUpdate();
     });
   }

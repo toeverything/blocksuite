@@ -10,3 +10,4 @@ export * from './heavy';
 export * from './heavy-whiteboard';
 export * from './multiple-editor';
 export * from './preset';
+export type { InitFn } from './utils';

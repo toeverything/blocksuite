@@ -306,7 +306,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
   private _filter = (index: number): boolean => {
     const rowTitle = this.model.children[index];
-    const allRow = Object.values(this.model.cells[rowTitle.id]).map(v => [
+    const allRow = Object.values(this.model.cells[rowTitle.id] ?? {}).map(v => [
       v.columnId,
       v.value,
     ]);

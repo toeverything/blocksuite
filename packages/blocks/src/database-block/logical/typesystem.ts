@@ -265,7 +265,6 @@ export class Typesystem {
     template: TFunction
   ): TFunction {
     const ctx = { ...context };
-    console.log(template);
     template.args.forEach((arg, i) => {
       const realArg = realArgs[i];
       if (realArg) {
