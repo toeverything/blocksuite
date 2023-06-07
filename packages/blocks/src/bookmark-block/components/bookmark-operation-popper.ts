@@ -73,7 +73,7 @@ const operations: Operation[] = [
   {
     type: 'copy',
     icon: CopyIcon,
-    label: 'Copy',
+    label: 'Copy original link',
     action: (model, callback) => {
       copyBlocks({
         type: 'Block',
@@ -81,7 +81,7 @@ const operations: Operation[] = [
         startOffset: 0,
         endOffset: 0,
       });
-      toast('Copied Database to clipboard');
+      toast('Copied link to clipboard');
       callback?.('copy');
     },
   },

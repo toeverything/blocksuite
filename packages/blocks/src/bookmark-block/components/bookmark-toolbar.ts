@@ -147,7 +147,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
         return html`<icon-button
             width="32px"
             height="32px"
-            class="has-tool-tip ${type}"
+            class="bookmark-toolbar-button has-tool-tip ${type}"
             @click=${() => {
               action(this.model, this.onSelected, this);
             }}

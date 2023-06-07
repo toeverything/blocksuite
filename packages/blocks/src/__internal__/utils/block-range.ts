@@ -258,9 +258,11 @@ export function getExtendBlockRange(
 export function getVRangeByNode(node: Node): VRange | null {
   if (!node.parentElement) return null;
 
-  const virgoElement: VEditor['_rootElement'] = node.parentElement.closest(
-    '[data-virgo-root="true"]'
-  );
+  const virgoElement: VEditor['_rootElement'] =
+    node.parentElement.closest('[data-virgo-root="true"]') ||
+    (node instanceof HTMLElement
+      ? node.querySelector('[data-virgo-root="true"]')
+      : null);
   const vEditor = virgoElement?.virgoEditor;
   if (!vEditor) return null;
 
