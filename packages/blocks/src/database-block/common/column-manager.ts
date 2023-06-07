@@ -188,9 +188,22 @@ columnManager.registerConvert(selectHelper, multiSelectHelper, column => [
   column,
   cell => [cell],
 ]);
+columnManager.registerConvert(selectHelper, richTextHelper, column => [
+  column,
+  cell => new Text(column.options.find(v => v.id === cell)?.value ?? '').yText,
+]);
 columnManager.registerConvert(multiSelectHelper, selectHelper, column => [
   column,
   cell => cell[0],
+]);
+columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
+  column,
+  cell =>
+    new Text(
+      cell
+        ?.map(id => column.options.find(v => v.id === id)?.value ?? '')
+        .join(',')
+    ).yText,
 ]);
 columnManager.registerConvert(numberHelper, richTextHelper, column => [
   {},

@@ -200,7 +200,7 @@ export async function assertDatabaseCellRichTexts(
   expect(actualTexts).toEqual(text);
 }
 
-export async function assertDatabaseCellNumberText(
+export async function assertDatabaseCellNumber(
   page: Page,
   {
     rowIndex = 0,
@@ -221,11 +221,11 @@ export async function assertDatabaseCellNumberText(
       const cell = row?.querySelector(
         `.database-cell:nth-child(${columnIndex + 1})`
       );
-      const richText = cell?.querySelector<RichText>(
+      const richText = cell?.querySelector<HTMLInputElement>(
         'affine-database-number-cell-editing'
       );
       if (!richText) throw new Error('Missing database rich text cell');
-      return richText.vEditor.yText.toString();
+      return richText.value ?? '';
     },
     { rowIndex, columnIndex }
   );
@@ -281,7 +281,10 @@ export async function focusDatabaseHeader(page: Page, columnIndex = 0) {
 }
 
 export async function getDatabaseMouse(page: Page) {
-  const databaseRect = await getBoundingClientRect(page, 'affine-database');
+  const databaseRect = await getBoundingClientRect(
+    page,
+    '.affine-database-table'
+  );
   return {
     mouseOver: async () => {
       await page.mouse.move(databaseRect.x, databaseRect.y);

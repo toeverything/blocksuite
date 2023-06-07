@@ -19,6 +19,7 @@ export function changeColumnType(
   if (!update) {
     const newColumn = columnManager.create(targetType, targetColumn.name);
     updateColumn(columnId, newColumn, targetModel);
+    targetModel.updateCellByColumn(columnId, () => undefined);
   } else {
     updateColumn(
       columnId,
