@@ -7,7 +7,6 @@ import type { SelectColumnData } from '../../../../common/column-manager.js';
 import {
   DatabaseCellElement,
   defineColumnRenderer,
-  type TableViewCell,
 } from '../../../register.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectCellEditing } from './select-cell-editing.js';

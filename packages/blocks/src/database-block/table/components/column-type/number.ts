@@ -1,5 +1,5 @@
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
 import {
@@ -46,27 +46,39 @@ export class NumberCellEditing
     }
   `;
 
+  @query('input')
+  private _inputEle!: HTMLInputElement;
+
   static override tag = literal`affine-database-number-cell-editing`;
   cellType = 'number' as const;
 
-  override firstUpdated() {
-    this._disposables.addFromEvent(this, 'click', this._onClick);
-  }
-
-  private _onClick = () => {
-    this.databaseModel.page.captureSync();
+  focusEnd = () => {
+    const end = this._inputEle.value.length;
+    setTimeout(() => {
+      this._inputEle.setSelectionRange(end, end);
+    });
   };
 
-  private _input = (e: InputEvent) => {
-    const ele = e.target as HTMLInputElement;
-    this.rowHost.setValue(Number(ele.value));
+  private _blur = (e: Event) => {
+    if (!this._inputEle.value) {
+      return;
+    }
+    const value = Number(this._inputEle.value);
+    if (Object.is(value, NaN)) {
+      this._inputEle.value = `${this.cell?.value ?? ''}`;
+      return;
+    }
+    this.rowHost.setValue(value, { captureSync: true });
+  };
+  private _focus = (e: Event) => {
+    this.focusEnd();
   };
 
   protected override render() {
     return html`<input
-      type="number"
-      value="${this.cell?.value}"
-      @input="${this._input}"
+      .value="${this.cell?.value ?? ''}"
+      @focus="${this._focus}"
+      @blur="${this._blur}"
       class="affine-database-number number"
     />`;
   }

@@ -1,4 +1,9 @@
 import { type SelectTag } from '@blocksuite/blocks';
+import {
+  numberHelper,
+  richTextHelper,
+  selectHelper,
+} from '@blocksuite/blocks/database-block/common/column-manager';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
@@ -34,26 +39,11 @@ export const database: InitFn = (workspace: Workspace, id: string) => {
     frameId
   );
   const database = page.getBlockById(databaseId) as DatabaseBlockModel;
-  const col1 = database.updateColumn({
-    name: 'Number',
-    type: 'number',
-    width: 200,
-    hide: false,
-    decimal: 0,
-  });
-  const col2 = database.updateColumn({
-    name: 'Single Select',
-    type: 'select',
-    width: 200,
-    hide: false,
-    selection,
-  });
-  const col3 = database.updateColumn({
-    name: 'Rich Text',
-    type: 'rich-text',
-    width: 200,
-    hide: false,
-  });
+  const col1 = database.updateColumn(numberHelper.create('Number'));
+  const col2 = database.updateColumn(
+    selectHelper.create('Single Select', { options: selection })
+  );
+  const col3 = database.updateColumn(richTextHelper.create('Rich Text'));
 
   database.applyColumnUpdate();
 
@@ -72,16 +62,14 @@ export const database: InitFn = (workspace: Workspace, id: string) => {
     databaseId
   );
 
-  const num = new page.YText();
-  num.insert(0, '0.1');
   database.updateCell(p1, {
     columnId: col1,
-    value: num,
+    value: 0.1,
   });
 
   database.updateCell(p2, {
     columnId: col2,
-    value: [selection[1]],
+    value: selection[1].id,
   });
 
   const text = new page.YText();
@@ -94,6 +82,7 @@ export const database: InitFn = (workspace: Workspace, id: string) => {
 
   // Add a paragraph after database
   page.addBlock('affine:paragraph', {}, frameId);
+  database.addView('table');
   page.resetHistory();
 };
 

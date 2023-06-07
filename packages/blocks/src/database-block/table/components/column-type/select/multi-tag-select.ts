@@ -12,6 +12,7 @@ import { nanoid } from '@blocksuite/store';
 import { createPopper } from '@popperjs/core';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -22,10 +23,16 @@ import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
 } from '../../../consts.js';
+import {
+  type CellSelectionEnterKeys,
+  selectCellByElement,
+} from '../../../selection-manager/cell.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import type { SelectOption } from './select-option.js';
 import { SelectActionPopup } from './select-option-popup.js';
+
+const KEYS_WHITE_LIST = ['Enter', 'ArrowUp', 'ArrowDown'];
 
 const styles = css`
   affine-database-multi-tag-select {
@@ -105,6 +112,14 @@ const styles = css`
     align-items: center;
   }
 
+  .select-selected > .close-icon:hover {
+    cursor: pointer;
+  }
+
+  .select-selected > .close-icon > svg {
+    fill: var(--affine-black-90);
+  }
+
   .select-option-new {
     display: flex;
     flex-direction: row;
@@ -148,8 +163,10 @@ const styles = css`
     padding: 4px;
     border-radius: 4px;
     margin-bottom: 4px;
+    cursor: pointer;
   }
 
+  .select-option.selected,
   .select-option:hover {
     background: var(--affine-hover-color);
   }
@@ -205,6 +222,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   tempValue: string | undefined = undefined;
 
   static override styles = styles;
+  cellType = 'select' as const;
 
   @property()
   mode: SelectMode = SelectMode.Single;
@@ -241,12 +259,19 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   @state()
   private _editingId?: string;
 
+  @state()
+  private _selectedOptionIndex = -1;
+
   @query('.select-option-container')
   private _selectOptionContainer!: HTMLDivElement;
   private _selectColor: string | undefined = undefined;
 
   get isSingleMode() {
     return this.mode === SelectMode.Single;
+  }
+
+  get selectionList() {
+    return this.options;
   }
 
   protected override firstUpdated() {
@@ -256,6 +281,13 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this._disposables.addFromEvent(
+      document.body,
+      'keydown',
+      this._onSelectOption
+    );
+
     createPopper(
       {
         getBoundingClientRect: () => {
@@ -272,6 +304,61 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       }
     );
   }
+
+  protected override updated(_changedProperties: Map<PropertyKey, unknown>) {
+    super.updated(_changedProperties);
+
+    if (_changedProperties.has('cell')) {
+      this._selectInput.focus();
+    }
+  }
+
+  private _onSelectOption = (event: KeyboardEvent) => {
+    const key = event.key;
+
+    if (KEYS_WHITE_LIST.indexOf(key) <= -1) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const maxIndex = this.selectionList.length - 1;
+    if (this._selectedOptionIndex === maxIndex && key === 'ArrowDown') {
+      this._selectedOptionIndex = 0;
+      return;
+    }
+    if (this._selectedOptionIndex <= 0 && key === 'ArrowUp') {
+      this._selectedOptionIndex = maxIndex;
+      return;
+    }
+
+    if (key === 'ArrowDown') {
+      this._selectedOptionIndex++;
+    } else if (key === 'ArrowUp') {
+      this._selectedOptionIndex--;
+    } else if (key === 'Enter') {
+      const index = this._selectedOptionIndex;
+      if (index === -1) return;
+      if (this.isSingleMode) {
+        this._selectedOptionIndex = -1;
+      }
+
+      const selected = this.value;
+      const currentSelection = this.selectionList[index];
+      this._onSelect(selected, currentSelection.id);
+      const cell =
+        this._selectOptionContainer.closest<HTMLElement>('.database-cell');
+      assertExists(cell);
+      this._selectCell(cell, 'Escape');
+    }
+  };
+
+  private _selectCell = (
+    element: Element,
+    key: CellSelectionEnterKeys,
+    exitEditing = false
+  ) => {
+    if (this.isSingleMode || exitEditing) this.editComplete();
+    selectCellByElement(element, this.databaseModel.id, key);
+  };
 
   private _onDeleteSelected = (selectedValue: string[], value: string) => {
     const filteredValue = selectedValue.filter(item => item !== value);
@@ -303,6 +390,11 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       } else {
         this._onAddSelection(selectedValue);
       }
+    } else if (event.key === 'Escape') {
+      this._selectCell(event.target as Element, 'Escape', true);
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      this._selectCell(event.target as Element, 'Tab', true);
     }
   };
 
@@ -473,16 +565,25 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
             select => select.id,
             (select, index) => {
               const isEditing = select.id === this._editingId;
+              const isSelected = index === this._selectedOptionIndex;
               const onOptionIconClick = isEditing
                 ? () => this._onSaveSelectionName(select.id)
                 : () => this._showSelectAction(select.id);
+              const classes = classMap({
+                'select-option': true,
+                selected: isSelected,
+                editing: isEditing,
+              });
               return html`
-                <div class="select-option ${isEditing ? 'editing' : ''}">
+                <div class="${classes}">
                   <div
                     class="select-option-text-container"
                     @click="${() => this._onSelect(selectedTag, select.id)}"
                   >
                     <affine-database-select-option
+                      style=${styleMap({
+                        cursor: isEditing ? 'text' : 'pointer',
+                      })}
                       data-select-option-id="${select.id}"
                       .databaseModel="${this.databaseModel}"
                       .select="${select}"
