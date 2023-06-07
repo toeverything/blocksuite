@@ -35,7 +35,6 @@ import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
-import { generateCursorUrl } from '../utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -75,75 +74,103 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     .affine-edgeless-selected-rect .handle[aria-label^='top-'],
     .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] {
+      width: 18px;
+      height: 18px;
+      box-sizing: border-box;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .affine-edgeless-selected-rect .handle[aria-label^='top-'] .resize,
+    .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] .resize {
+      position: absolute;
       width: 12px;
       height: 12px;
       box-sizing: border-box;
       border-radius: 50%;
-      z-index: 10;
       border: 2px var(--affine-blue) solid;
       background: white;
+      pointer-events: auto;
+    }
+    .affine-edgeless-selected-rect .handle .resize.nwse {
+      cursor: nwse-resize;
+    }
+    .affine-edgeless-selected-rect .handle .resize.nesw {
+      cursor: nesw-resize;
+    }
+    .affine-edgeless-selected-rect .handle .resize.ew {
+      cursor: ew-resize;
     }
 
-    .affine-edgeless-selected-rect .handle[aria-label^='rotate-'] {
+    .affine-edgeless-selected-rect .handle[aria-label^='top-'] .rotate,
+    .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] .rotate {
+      position: absolute;
       width: 12px;
       height: 12px;
       box-sizing: border-box;
-      z-index: 9;
       background: red;
+      pointer-events: auto;
     }
 
     :host([disabled='true']) .affine-edgeless-selected-rect .handle {
       pointer-events: none;
     }
 
-    /* calc(-1px - (12px - 1px) / 2) = -6.5px */
+    /* -18 + 6.5 */
     .affine-edgeless-selected-rect .handle[aria-label='top-left'] {
-      cursor: nwse-resize;
-      left: -6.5px;
-      top: -6.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-left'] {
       left: -12.5px;
       top: -12.5px;
-      cursor: ${generateCursorUrl(270)};
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='top-left'] .resize {
+      right: 0;
+      bottom: 0;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='top-left'] .rotate {
+      right: 6px;
+      bottom: 6px;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='top-right'] {
-      cursor: nesw-resize;
-      top: -6.5px;
-      right: -6.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label^='rotate-top-right'] {
       top: -12.5px;
       right: -12.5px;
-      cursor: ${generateCursorUrl(0)};
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='top-right'] .resize {
+      left: 0;
+      bottom: 0;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='top-right'] .rotate {
+      left: 6px;
+      bottom: 6px;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] {
-      cursor: nwse-resize;
-      right: -6.5px;
-      bottom: -6.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-right'] {
       right: -12.5px;
       bottom: -12.5px;
-      cursor: ${generateCursorUrl(90)};
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] .resize {
+      left: 0;
+      top: 0;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] .rotate {
+      left: 6px;
+      top: 6px;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] {
-      cursor: nesw-resize;
-      bottom: -6.5px;
-      left: -6.5px;
-    }
-    .affine-edgeless-selected-rect .handle[aria-label^='rotate-bottom-left'] {
       bottom: -12.5px;
       left: -12.5px;
-      cursor: ${generateCursorUrl(180)};
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] .resize {
+      right: 0;
+      top: 0;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] .rotate {
+      right: 6px;
+      top: 6px;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'],
     .affine-edgeless-selected-rect .handle[aria-label='right'] {
-      cursor: ew-resize;
       top: 0;
       bottom: 0;
       height: 100%;
@@ -151,7 +178,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       border: 0;
       background: transparent;
     }
-
     /* calc(-1px - (6px - 1px) / 2) = -3.5px */
     .affine-edgeless-selected-rect .handle[aria-label='left'] {
       left: -3.5px;
@@ -160,8 +186,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       right: -3.5px;
     }
 
-    .affine-edgeless-selected-rect .handle[aria-label='left']:after,
-    .affine-edgeless-selected-rect .handle[aria-label='right']:after {
+    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize,
+    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize {
+      width: 100%;
+      height: 100%;
+    }
+
+    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after,
+    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
       position: absolute;
       width: 7px;
       height: 7px;
@@ -175,10 +207,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     /* calc((6px - 12px) / 2) = -3px */
-    .affine-edgeless-selected-rect .handle[aria-label='left']:after {
+    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after {
       left: -3px;
     }
-    .affine-edgeless-selected-rect .handle[aria-label='right']:after {
+    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
       right: -3px;
     }
 
@@ -236,13 +268,21 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return hasBlockElement ? 'edge' : 'corner';
   }
 
-  private _onDragMove = (newBounds: Map<string, Bound>) => {
+  private _onDragMove = (
+    newBounds: Map<
+      string,
+      {
+        bound: Bound;
+        flip: IPoint;
+      }
+    >
+  ) => {
     const { page, state, surface } = this;
     const selectedMap = new Map<string, Selectable>(
       state.selected.map(element => [element.id, element])
     );
 
-    newBounds.forEach((bound, id) => {
+    newBounds.forEach(({ bound, flip }, id) => {
       const element = selectedMap.get(id);
       if (!element) return;
 
@@ -271,9 +311,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           surface.updateElement<'text'>(id, {
             xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
             fontSize: element.fontSize * p,
+            flipX: flip.x,
+            flipY: flip.y,
           });
         } else {
-          surface.setElementBound(element.id, bound);
+          surface.updateElement(id, {
+            xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+            flipX: flip.x,
+            flipY: flip.y,
+          });
         }
       }
       handleElementChangedEffectForConnector(element, [element], surface, page);
@@ -315,7 +361,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
-    this._rotate += rotate;
+    this._rotate = (this._rotate + rotate) % 360;
     this.requestUpdate();
   };
 
@@ -324,6 +370,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this.page.captureSync();
     }
     this._lock = false;
+    this.requestUpdate();
   };
 
   private _computeComponentToolbarPosition() {
@@ -395,14 +442,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       return nothing;
     }
 
-    const { page, surface, resizeMode, _resizeManager } = this;
-
     const isSingleHiddenNote =
       selected.length === 1 &&
       isTopLevelBlock(selected[0]) &&
       matchFlavours(selected[0], ['affine:note']) &&
       selected[0].hidden;
 
+    const { page, surface, resizeMode, _resizeManager, _rotate, zoom } = this;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
     const style = {
@@ -425,7 +471,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               direction,
               bounds,
               resizeMode,
-              this.zoom
+              zoom,
+              _rotate
             );
           }
         )

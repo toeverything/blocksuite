@@ -90,18 +90,27 @@ export class BrushElement extends SurfaceElement<IBrush> {
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
     const {
-      rotate,
       points,
       lineWidth,
       color,
+      rotate,
+      flipX,
+      flipY,
       widthAndHeight: [w, h],
     } = this;
     const cx = w / 2;
     const cy = h / 2;
 
-    ctx.setTransform(
-      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
-    );
+    matrix.translateSelf(cx, cy).rotateSelf(rotate);
+
+    if (flipX < 0) {
+      matrix = matrix.flipX();
+    }
+    if (flipY < 0) {
+      matrix = matrix.flipY();
+    }
+
+    ctx.setTransform(matrix.translateSelf(-cx, -cy));
 
     const stroke = getSolidStrokePoints(points, lineWidth);
     const commands = getSvgPathFromStroke(stroke);

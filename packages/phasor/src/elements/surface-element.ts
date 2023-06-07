@@ -18,6 +18,8 @@ export interface ISurfaceElement {
   index: string;
   seed: number;
   rotate: number;
+  flipX: number;
+  flipY: number;
 }
 
 export interface HitTestOptions {
@@ -82,6 +84,16 @@ export abstract class SurfaceElement<
   get rotate() {
     const rotate = this.yMap.get('rotate') as T['rotate'];
     return rotate;
+  }
+
+  get flipX() {
+    const flipX = this.yMap.get('flipX') as T['flipX'];
+    return flipX;
+  }
+
+  get flipY() {
+    const flipY = this.yMap.get('flipY') as T['flipY'];
+    return flipY;
   }
 
   get x() {

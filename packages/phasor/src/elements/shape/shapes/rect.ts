@@ -30,6 +30,8 @@ export const RectMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
+      flipX,
+      flipY,
       widthAndHeight: [w, h],
     } = element;
 
@@ -40,9 +42,20 @@ export const RectMethods: ShapeMethods = {
     const cx = w / 2;
     const cy = h / 2;
 
-    ctx.setTransform(
-      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
-    );
+    matrix.translateSelf(cx, cy);
+
+    if (flipX < 0) {
+      matrix = matrix.flipX();
+    }
+    if (flipY < 0) {
+      matrix = matrix.flipY();
+    }
+
+    ctx.setTransform(matrix.rotateSelf(rotate).translateSelf(-cx, -cy));
+
+    // ctx.setTransform(
+    //   matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    // );
 
     rc.path(
       `

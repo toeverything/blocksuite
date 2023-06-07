@@ -5,6 +5,8 @@ export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
   type: 'shape',
   xywh: '[0,0,0,0]',
   rotate: 0,
+  flipX: 1,
+  flipY: 1,
 
   shapeType: 'rect',
   radius: 0,

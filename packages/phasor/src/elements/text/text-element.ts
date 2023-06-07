@@ -41,20 +41,32 @@ export class TextElement extends SurfaceElement<IText> {
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
     const {
-      rotate,
       text,
       color,
       fontSize,
       fontFamily,
       textAlign,
+      rotate,
+      flipX,
+      flipY,
       widthAndHeight: [w, h],
     } = this;
     const cx = w / 2;
     const cy = h / 2;
 
-    ctx.setTransform(
-      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
-    );
+    // ctx.setTransform(
+    //   matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    // );
+    matrix.translateSelf(cx, cy);
+
+    if (flipX < 0) {
+      matrix = matrix.flipX();
+    }
+    if (flipY < 0) {
+      matrix = matrix.flipY();
+    }
+
+    ctx.setTransform(matrix.rotateSelf(rotate).translateSelf(-cx, -cy));
 
     const yText = text;
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];

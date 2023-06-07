@@ -4,6 +4,8 @@ export const BrushElementDefaultProps: IElementDefaultProps<'brush'> = {
   type: 'brush',
   xywh: '[0,0,0,0]',
   rotate: 0,
+  flipX: 1,
+  flipY: 1,
 
   points: [],
   color: '#000000',
