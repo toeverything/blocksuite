@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 
 import { StrokeStyle } from '../../consts.js';
@@ -25,6 +25,8 @@ const dataWithoutXywh: Omit<IShape, 'xywh'> = {
 };
 
 const data: IShape = { ...dataWithoutXywh, xywh: '[0,0,20,20]' };
+
+vi.stubEnv('IS_UNIT_TEST', 'true');
 
 describe('shape element', () => {
   const doc = new Y.Doc();

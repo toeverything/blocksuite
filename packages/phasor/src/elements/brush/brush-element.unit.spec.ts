@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 
 import { SurfaceManager } from '../../surface.js';
@@ -19,6 +19,8 @@ const data: IBrush = {
   color: '#000000',
   lineWidth: 4,
 };
+
+vi.stubEnv('IS_UNIT_TEST', 'true');
 
 describe('brush element', () => {
   const doc = new Y.Doc();
