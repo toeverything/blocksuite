@@ -353,11 +353,10 @@ test(scoped`import notion markdown-format table`, async ({ page }) => {
           {
             name: 'table-title2',
             type: 'rich-text',
-            width: 200,
-            hide: false,
+            data: {},
             id: '1',
           },
-          { name: '', type: 'rich-text', width: 200, hide: false, id: '2' },
+          { name: '', type: 'rich-text', data: {}, id: '2' },
         ],
       },
       children: [
