@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { computePosition, offset } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -29,12 +29,14 @@ import {
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import type { SelectOption } from './select-option.js';
+import { SelectOptionColor } from './select-option-color.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
 const KEYS_WHITE_LIST = ['Enter', 'ArrowUp', 'ArrowDown'];
 
 const styles = css`
   affine-database-select-cell-editing {
+    position: fixed;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
     border-radius: 8px;
@@ -138,6 +140,7 @@ const styles = css`
     height: 16px;
   }
   .select-option {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -242,7 +245,7 @@ export class SelectCellEditing
       this._onSelectOption
     );
 
-    createPopper(
+    computePosition(
       {
         getBoundingClientRect: () => {
           const rect = this.rowHost.getBoundingClientRect();
@@ -256,7 +259,12 @@ export class SelectCellEditing
         placement: 'bottom-start',
         strategy: 'fixed',
       }
-    );
+    ).then(({ x, y }) => {
+      Object.assign(this.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
   }
 
   protected override updated(_changedProperties: Map<PropertyKey, unknown>) {
@@ -429,20 +437,56 @@ export class SelectCellEditing
     });
   };
 
-  private _onSelectAction = (type: SelectTagActionType, index: number) => {
+  private _onSelectAction = (
+    type: SelectTagActionType,
+    index: number,
+    element: Element,
+    onActionPopupClose: () => void
+  ) => {
     if (type === 'rename') {
       this._setEditingIndex(index);
-      return;
-    }
-
-    if (type === 'delete') {
+      onActionPopupClose();
+    } else if (type === 'delete') {
       this.databaseModel.updateColumn({
         ...this.column,
         selection: this.selectionList.filter((_, i) => i !== index),
       });
       const select = this.selectionList[index];
       this.databaseModel.deleteSelectedCellTag(this.column.id, select);
-      return;
+      onActionPopupClose();
+    } else if (type === 'change-color') {
+      const optionColor = new SelectOptionColor();
+      optionColor.onChange = color => {
+        this.databaseModel.changeSelectTagColor(this.column.id, index, color);
+        onActionPopupClose();
+        onClose();
+      };
+      element.appendChild(optionColor);
+      const onClose = () => optionColor.remove();
+
+      computePosition(element, optionColor, {
+        placement: 'right-start',
+        middleware: [
+          offset({
+            mainAxis: 4,
+            crossAxis: 36,
+          }),
+        ],
+      }).then(({ x, y }) => {
+        Object.assign(optionColor.style, {
+          position: 'absolute',
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      });
+
+      onClickOutside(
+        optionColor,
+        ele => {
+          ele.remove();
+        },
+        'mousedown'
+      );
     }
   };
 
@@ -451,29 +495,22 @@ export class SelectCellEditing
     assertExists(selectOption);
 
     const action = new SelectActionPopup();
-    action.onAction = this._onSelectAction;
+    action.onAction = (type, index) =>
+      this._onSelectAction(type, index, selectOption, onClose);
+
     action.index = index;
     selectOption.appendChild(action);
     const onClose = () => action.remove();
-    action.onClose = onClose;
 
-    createPopper(
-      {
-        getBoundingClientRect: () => {
-          const optionIcon = selectOption.querySelector('.select-option-icon');
-          assertExists(optionIcon);
-          const { height } = action.getBoundingClientRect();
-          const rect = optionIcon.getBoundingClientRect();
-          rect.y = rect.y + height + 36;
-          rect.x = rect.x + 33;
-          return rect;
-        },
-      },
-      action,
-      {
-        placement: 'bottom-end',
-      }
-    );
+    computePosition(selectOption, action, {
+      placement: 'bottom-end',
+    }).then(({ x, y }) => {
+      Object.assign(action.style, {
+        position: 'absolute',
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
     onClickOutside(selectOption as HTMLElement, onClose, 'mousedown');
   };
 

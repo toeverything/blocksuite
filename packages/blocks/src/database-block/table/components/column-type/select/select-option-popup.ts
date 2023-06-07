@@ -1,4 +1,8 @@
-import { DeleteIcon, PenIcon } from '@blocksuite/global/config';
+import {
+  DatabaseSelectionColor,
+  DeleteIcon,
+  PenIcon,
+} from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -11,6 +15,11 @@ const tagActions: SelectTagAction[] = [
     type: 'rename',
     text: 'Rename',
     icon: PenIcon,
+  },
+  {
+    type: 'change-color',
+    text: 'Change Color',
+    icon: DatabaseSelectionColor,
   },
   {
     type: 'divider',
@@ -56,13 +65,9 @@ export class SelectActionPopup extends LitElement {
   @property()
   onAction!: (type: SelectTagActionType, index: number) => void;
 
-  @property()
-  onClose!: () => void;
-
   private _onAction = (e: Event, type: SelectTagActionType) => {
     e.stopPropagation();
     this.onAction(type, this.index);
-    this.onClose();
   };
 
   override render() {
