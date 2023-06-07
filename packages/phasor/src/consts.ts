@@ -3,6 +3,8 @@ export const ZOOM_MIN = 0.1;
 export const ZOOM_STEP = 0.25;
 export const GRID_SIZE = 3000;
 
+export const VITE_IS_UNIT_TEST = 'VITE_IS_UNIT_TEST';
+
 export interface IBound {
   x: number;
   y: number;
