@@ -186,6 +186,14 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
+  replaceChild(
+    model: BlockModels['affine:database'],
+    oldChildId: string,
+    newChildId: string
+  ) {
+    model.replaceChild(oldChildId, newChildId);
+  }
+
   clearSelection() {
     this.clearRowSelection();
     this.clearCellLevelSelection();

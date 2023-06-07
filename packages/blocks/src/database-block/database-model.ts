@@ -223,6 +223,14 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       });
     });
   }
+
+  replaceChild(oldChildId: string, newChildId: string) {
+    this.page.transact(() => {
+      const cells = { ...this.cells[oldChildId] };
+      delete this.cells[oldChildId];
+      this.cells[newChildId] = cells;
+    });
+  }
 }
 
 export const DatabaseBlockSchema = defineBlockSchema({

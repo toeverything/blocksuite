@@ -8,6 +8,7 @@ import type {
   BookmarkBlockModel,
 } from '../../bookmark-block/index.js';
 import type { ListType } from '../../list-block/index.js';
+import { getService } from '../service.js';
 import {
   asyncGetRichTextByModel,
   getBlockElementByModel,
@@ -72,6 +73,7 @@ export function convertToList(
   if (matchFlavours(model, ['affine:list']) && model['type'] === listType) {
     return false;
   }
+
   if (matchFlavours(model, ['affine:paragraph'])) {
     const parent = page.getParent(model);
     if (!parent) return false;
@@ -87,10 +89,17 @@ export function convertToList(
       children: model.children,
       ...otherProperties,
     };
+    const parentModel = page.getParent(model);
+    const deletedId = model.id;
     page.deleteBlock(model);
 
     const id = page.addBlock('affine:list', blockProps, parent, index);
     asyncFocusRichText(page, id);
+
+    if (parentModel && matchFlavours(parentModel, ['affine:database'])) {
+      const service = getService('affine:database');
+      service.replaceChild(parentModel, deletedId, id);
+    }
   } else if (
     matchFlavours(model, ['affine:list']) &&
     model['type'] !== listType
