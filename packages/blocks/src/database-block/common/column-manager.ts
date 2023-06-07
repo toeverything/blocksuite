@@ -24,9 +24,11 @@ type ColumnOps<
 };
 
 class ColumnManager {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private map = new Map<string, ColumnHelper<any, any>>();
   private convert = new Map<
     string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (columnData: any) => [any, (cell: any) => any]
   >();
 
@@ -61,7 +63,11 @@ class ColumnManager {
   }
 
   create(targetType: string, name: string, data?: unknown) {
-    return this.map.get(targetType)!.create(name, data);
+    const column = this.map.get(targetType);
+    if (!column) {
+      throw new Error(`${targetType} is not exist`);
+    }
+    return column?.create(name, data);
   }
 
   typeOf(type: string, data: unknown): TType {

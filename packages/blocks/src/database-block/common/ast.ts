@@ -96,7 +96,7 @@ const evalRef = (
   const value = evalRef(ref.ref, row);
   const fn = propertyMatcher.findData(v => v.name === ref.propertyFuncName);
   try {
-    return fn!.impl(value);
+    return fn?.impl(value);
   } catch (e) {
     console.error(e);
     return;
@@ -122,9 +122,8 @@ export const evalFilter = (
       const value = evalRef(filter.left, row);
       const func = filterMatcher.findData(v => v.name === filter.function);
       const args = filter.args.map(value => evalValue(value, row));
-      // console.log(toRaw(filter), toRaw(value), toRaw(func), args)
       try {
-        const impl = func!.impl(value, ...args);
+        const impl = func?.impl(value, ...args);
         // console.log(impl)
         return impl;
       } catch (e) {

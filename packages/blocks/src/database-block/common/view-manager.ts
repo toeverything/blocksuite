@@ -1,6 +1,4 @@
-import { richTextHelper } from '../common/column-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import { filterMatcher } from '../logical/filter-matcher.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column } from '../types.js';
 import type { FilterGroup } from './ast.js';
@@ -81,17 +79,7 @@ export const ViewOperationMap: {
         filter: {
           type: 'group',
           op: 'and',
-          conditions: [
-            {
-              type: 'filter',
-              left: {
-                type: 'ref',
-                name: model.id,
-              },
-              function: filterMatcher.match(richTextHelper.dataType({}))!.name,
-              args: [],
-            },
-          ],
+          conditions: [],
         },
       };
     },

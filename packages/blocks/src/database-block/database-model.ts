@@ -125,7 +125,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         this.columns.splice(index, 0, col);
       }
       this.views.forEach(view => {
-        ViewOperationMap[view.mode].addColumn(this, view as any, col, index);
+        ViewOperationMap[view.mode].addColumn(this, view as never, col, index);
       });
     });
     return id;
@@ -162,7 +162,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     this.page.transact(() => {
       this.columns.splice(index, 1);
       this.views.forEach(view => {
-        ViewOperationMap[view.mode].deleteColumn(this, view as any, columnId);
+        ViewOperationMap[view.mode].deleteColumn(this, view as never, columnId);
       });
     });
   }

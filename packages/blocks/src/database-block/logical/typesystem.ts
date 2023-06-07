@@ -171,7 +171,7 @@ const createDataHelper = <T extends DataTypeShape = Record<string, unknown>>(
 const DataHelper = createDataHelper();
 
 export class Typesystem {
-  dataMap = new Map<string, DataDefine<any>>();
+  dataMap = new Map<string, DataDefine>();
 
   defineData<T extends DataTypeShape>(
     config: DataDefineConfig<T>
