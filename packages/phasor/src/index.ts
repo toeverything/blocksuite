@@ -13,5 +13,8 @@ export { Renderer } from './renderer.js';
 export * from './surface.js';
 export * from './utils/bound.js';
 export * from './utils/hit-utils.js';
+export * from './utils/line.js';
+export * from './utils/numerical.js';
+export * from './utils/point.js';
 export * from './utils/std.js';
 export * from './utils/xywh.js';

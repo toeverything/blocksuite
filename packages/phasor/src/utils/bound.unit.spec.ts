@@ -7,6 +7,7 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from './bound.js';
+import { Point } from './point.js';
 
 describe('bound utils', () => {
   it('Bound basic', () => {
@@ -14,6 +15,21 @@ describe('bound utils', () => {
     const serialized = bound.serialize();
     expect(serialized).toBe('[1,1,2,2]');
     expect(Bound.deserialize(serialized)).toMatchObject(bound);
+    expect(bound.center.equals(Point.from(2, 2))).toBe(true);
+    expect(bound.minX).toBe(1);
+    expect(bound.minY).toBe(1);
+    expect(bound.maxX).toBe(3);
+    expect(bound.maxY).toBe(3);
+    expect(bound.tl.equals(Point.from(1, 1))).toBe(true);
+    expect(bound.tr.equals(Point.from(3, 1))).toBe(true);
+    expect(bound.bl.equals(Point.from(1, 3))).toBe(true);
+    expect(bound.br.equals(Point.from(3, 3))).toBe(true);
+  });
+
+  it('from', () => {
+    const b1 = new Bound(1, 1, 2, 2);
+    const b2 = Bound.from(b1);
+    expect(b1).toMatchObject(b2);
   });
 
   it('getCommonBound basic', () => {
@@ -113,5 +129,37 @@ describe('bound utils', () => {
     expect(transformed.points[0].x).toBeCloseTo(6.1667);
     expect(transformed.points[0].y).toBeCloseTo(6.1667);
     expect(transformed.points[0].other).toBe(10);
+  });
+
+  it('intersectLine', () => {
+    const bound = new Bound(0, 0, 10, 10);
+    expect(
+      bound.intersectLine(
+        Point.from({ x: 0, y: 0 }),
+        Point.from({ x: 10, y: 10 })
+      )
+    ).toBeTruthy();
+  });
+
+  it('intersectline no intersection', () => {
+    const bound = new Bound(0, 0, 10, 10);
+    expect(
+      bound.intersectLine(
+        Point.from({ x: 0, y: -1 }),
+        Point.from({ x: 10, y: -10 })
+      )
+    ).toBeFalsy();
+  });
+
+  it('isIntersectWithBound', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(5, 5, 10, 10);
+    expect(a.isIntersectWithBound(b)).toBeTruthy();
+  });
+
+  it('isIntersectWithBound no intersection', () => {
+    const a = new Bound(0, 0, 10, 10);
+    const b = new Bound(11, 11, 10, 10);
+    expect(a.isIntersectWithBound(b)).toBeFalsy();
   });
 });

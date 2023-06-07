@@ -2,12 +2,14 @@ import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PointerEventState } from '@blocksuite/lit';
 import type { SurfaceManager } from '@blocksuite/phasor';
 import {
+  Bound,
   ConnectorElement,
   deserializeXYWH,
   getCommonBound,
   isPointIn,
   type PhasorElement,
   type PhasorElementType,
+  Point,
   TextElement,
   type XYWH,
 } from '@blocksuite/phasor';
@@ -23,7 +25,6 @@ import {
   handleNativeRangeDragMove,
   isEmpty,
   noop,
-  Point,
   Rect,
   resetNativeSelection,
   type TopLevelBlockModel,
@@ -414,7 +415,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       await this._cloneContent(e);
     }
 
-    // Set up drag state
+    // Set up drag stvate
     this.initializeDragState(e, dragType);
   }
 
@@ -437,7 +438,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         const w = Math.abs(startX - e.x);
         const h = Math.abs(startY - e.y);
         const { zoom } = this._surface.viewport;
-        const bound = { x, y, w: w / zoom, h: h / zoom };
+        const bound = new Bound(x, y, w / zoom, h / zoom);
 
         const blocks = pickBlocksByBound(this._blocks, bound);
         const elements = this._surface.pickByBound(bound);

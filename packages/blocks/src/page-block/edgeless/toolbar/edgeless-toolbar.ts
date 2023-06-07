@@ -20,6 +20,7 @@ import {
   Bound,
   deserializeXYWH,
   getCommonBound,
+  Point,
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,
@@ -30,7 +31,6 @@ import { customElement } from 'lit/decorators.js';
 import {
   clamp,
   type MouseMode,
-  Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
