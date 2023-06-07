@@ -147,6 +147,14 @@ export function getRowsContainer(databaseId: string) {
   return container;
 }
 
+export function getDatabaseById(id: string) {
+  const database = document.querySelector<HTMLElement>(
+    `affine-database[data-block-id="${id}"]`
+  );
+  assertExists(database);
+  return database;
+}
+
 function getCellCoordByElement(cell: HTMLElement, databaseId: string) {
   const rowsContainer = getRowsContainer(databaseId);
   const cellRects = getAllCellsRect(rowsContainer);
@@ -283,14 +291,6 @@ function getNextCellCoordByArrowDown(
 
 function getNextCellCoordByEscape(currentCellCoord: CellCoord) {
   return currentCellCoord;
-}
-
-function getDatabaseById(id: string) {
-  const database = document.querySelector<HTMLElement>(
-    `affine-database[data-block-id="${id}"]`
-  );
-  assertExists(database);
-  return database;
 }
 
 function getCellLevelSelection(container: Element) {

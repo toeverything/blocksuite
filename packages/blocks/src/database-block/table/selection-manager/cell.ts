@@ -114,6 +114,11 @@ export function selectCellByElement(
   const nextCoord = getCellCoord(currentCell, databaseId, key);
 
   const service = getService('affine:database');
+  // TODO
+  // Maybe we can no longer trigger the cell selection logic after selecting the row selection.
+  const hasRowSelection = service.getLastRowSelection() !== null;
+  if (hasRowSelection) return;
+
   service.setCellSelection({
     type: 'select',
     coords: [nextCoord],

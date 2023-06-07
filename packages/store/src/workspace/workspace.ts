@@ -354,17 +354,22 @@ export class Workspace {
     });
   }
 
-  /** @internal Only for testing */
+  /**
+   * @internal
+   * Import an object expression of a page.
+   * Specify the page you want to update by passing the `pageId` parameter and it will
+   * create a new page if it does not exist.
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  importSnapshot(json: any, pageId: string) {
-    if (!json['space:meta']) return;
-
+  async importPageSnapshot(json: any, pageId: string) {
     const unprefix = (str: string) =>
       str.replace('sys:', '').replace('prop:', '').replace('space:', '');
     const visited = new Set();
-    const pageBlocks = json[pageId];
 
-    let page: Page | null = null;
+    let page = this.getPage(pageId);
+    if (!page) {
+      page = this.createPage({ id: pageId });
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sanitize = async (props: any) => {
@@ -437,21 +442,15 @@ export class Workspace {
       const sanitizedProps = await sanitize(props);
       page.addBlock(props['sys:flavour'], sanitizedProps, parent);
       for (const id of props['sys:children']) {
-        addBlockByProps(page, pageBlocks[id], props['sys:id']);
+        addBlockByProps(page, json[id], props['sys:id']);
         visited.add(id);
       }
     };
 
-    const importPage = async (pageId: string) => {
-      page = this.createPage({ id: unprefix(pageId) });
-
-      for (const block of Object.values(pageBlocks)) {
-        assertExists(page);
-        await addBlockByProps(page, block, null);
-      }
-    };
-
-    importPage(pageId);
+    for (const block of Object.values(json)) {
+      assertExists(json);
+      await addBlockByProps(page, block, null);
+    }
   }
 
   /** @internal Only for testing */

@@ -1,5 +1,11 @@
-import type { BaseBlockModel, DeltaOperation, Page } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type DeltaOperation,
+  type Page,
+} from '@blocksuite/store';
 
+import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import { ContentParser } from '../../content-parser/index.js';
 import type { AffineTextAttributes } from '../../rich-text/virgo/types.js';
 import { getService } from '../../service.js';
@@ -213,4 +219,28 @@ export function normalizePasteBlocks(page: Page, blocks: SerializedBlock[]) {
     });
 
   return blocks;
+}
+
+export function copySurfaceText(edgeless: EdgelessPageBlockComponent) {
+  const surfaceTextEditor = edgeless.querySelector('surface-text-editor');
+  if (surfaceTextEditor) {
+    const vEditor = surfaceTextEditor.vEditor;
+    assertExists(vEditor);
+    const vRange = vEditor.getVRange();
+    if (vRange) {
+      const text = vEditor.yText
+        .toString()
+        .slice(vRange.index, vRange.index + vRange.length);
+      const clipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, text);
+
+      surfaceTextEditor.setKeeping(true);
+      // this function will make virgo editor lose focus
+      performNativeCopy([clipboardItem]);
+      surfaceTextEditor.setKeeping(false);
+
+      // restore focus and selection
+      vEditor.rootElement.focus();
+      vEditor.setVRange(vRange);
+    }
+  }
 }

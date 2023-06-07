@@ -111,11 +111,21 @@ test('enter shortcut on focusing embed block and its caption', async ({
   await moveToImage(page);
   await assertImageOption(page);
 
+  const caption = page.locator('.affine-embed-wrapper-caption');
   await focusCaption(page);
-  await assertKeyboardWorkInInput(
-    page,
-    page.locator('.affine-embed-wrapper-caption')
-  );
+  await assertKeyboardWorkInInput(page, caption);
+  await type(page, '123');
+
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2495',
+  });
+
+  // blur
+  await page.mouse.click(0, 500);
+  await caption.click({ position: { x: 0, y: 0 } });
+  await type(page, 'abc');
+  await expect(caption).toHaveValue('abc123');
 });
 
 test('popup menu should follow position of image when scrolling', async ({

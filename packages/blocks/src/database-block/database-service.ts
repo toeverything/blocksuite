@@ -77,6 +77,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         };
         setDatabaseCellSelection(databaseId, coords);
       } else if (type === 'edit') {
+        this._lastCellSelection = null;
         const { databaseId, coords } = state;
         setDatabaseCellEditing(databaseId, coords[0]);
       } else if (type === 'clear') {

@@ -64,6 +64,7 @@ export class Page extends Space<FlatBlockMap> {
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
+  private _shouldTransact = true;
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(Object.keys(new BaseBlockModel()));
@@ -162,6 +163,19 @@ export class Page extends Space<FlatBlockMap> {
 
   get Text() {
     return Text;
+  }
+
+  withoutTransact(callback: () => void) {
+    this._shouldTransact = false;
+    callback();
+    this._shouldTransact = true;
+  }
+
+  override transact(
+    fn: () => void,
+    shouldTransact: boolean = this._shouldTransact
+  ) {
+    super.transact(fn, shouldTransact);
   }
 
   undo() {
@@ -617,7 +631,12 @@ export class Page extends Space<FlatBlockMap> {
       model.children.forEach(child => {
         this.schema.validate(child.flavour, bringChildrenTo.flavour);
       });
-      bringChildrenTo.children.push(...model.children);
+      // When bring children to parent, insert children to the original position of model
+      if (bringChildrenTo === parent && index > -1) {
+        parent.children.splice(index, 0, ...model.children);
+      } else {
+        bringChildrenTo.children.push(...model.children);
+      }
     }
     this._blockMap.delete(model.id);
 

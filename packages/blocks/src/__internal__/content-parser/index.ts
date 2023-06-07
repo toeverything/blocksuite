@@ -231,8 +231,8 @@ export class ContentParser {
 
   public text2blocks(text: string): SerializedBlock[] {
     return text.split('\n').map((str: string) => {
-      const splitText = text.split(this.urlPattern);
-      const urls = text.match(this.urlPattern);
+      const splitText = str.split(this.urlPattern);
+      const urls = str.match(this.urlPattern);
       const result = [];
 
       for (let i = 0; i < splitText.length; i++) {

@@ -20,10 +20,10 @@ const threshold = SCROLL_THRESHOLD / 2;
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
-    a.left + offset.x <= b.right &&
-    a.right + offset.x >= b.left &&
-    a.top + offset.y <= b.bottom &&
-    a.bottom + offset.y >= b.top
+    a.left + offset.x < b.right &&
+    a.right + offset.x > b.left &&
+    a.top + offset.y < b.bottom &&
+    a.bottom + offset.y > b.top
   );
 }
 
