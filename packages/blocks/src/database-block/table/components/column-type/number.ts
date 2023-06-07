@@ -63,15 +63,24 @@ export class NumberCellEditing
     if (!this._inputEle.value) {
       return;
     }
-    const value = Number(this._inputEle.value);
+    this._setValue();
+  };
+  private _setValue = (str: string = this._inputEle.value) => {
+    const value = Number.parseFloat(str);
     if (Object.is(value, NaN)) {
       this._inputEle.value = `${this.cell?.value ?? ''}`;
       return;
     }
     this.rowHost.setValue(value, { captureSync: true });
+    this._inputEle.value = `${this.cell?.value ?? ''}`;
   };
   private _focus = (e: Event) => {
     this.focusEnd();
+  };
+  private _keydown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      this._setValue();
+    }
   };
 
   protected override render() {
@@ -79,6 +88,7 @@ export class NumberCellEditing
       .value="${this.cell?.value ?? ''}"
       @focus="${this._focus}"
       @blur="${this._blur}"
+      @keydown="${this._keydown}"
       class="affine-database-number number"
     />`;
   }

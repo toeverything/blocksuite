@@ -212,24 +212,15 @@ export async function assertDatabaseCellNumber(
     text: string;
   }
 ) {
-  const actualTexts = await page.evaluate(
-    ({ rowIndex, columnIndex }) => {
-      const rows = document.querySelector('.affine-database-block-rows');
-      const row = rows?.querySelector(
-        `.database-row:nth-child(${rowIndex + 1})`
-      );
-      const cell = row?.querySelector(
-        `.database-cell:nth-child(${columnIndex + 1})`
-      );
-      const richText = cell?.querySelector<HTMLInputElement>(
-        'affine-database-number-cell-editing'
-      );
-      if (!richText) throw new Error('Missing database rich text cell');
-      return richText.value ?? '';
-    },
-    { rowIndex, columnIndex }
-  );
-  expect(actualTexts).toEqual(text);
+  const actualText = await page
+    .locator('.affine-database-block-rows')
+    .locator('.database-row')
+    .nth(rowIndex)
+    .locator('.database-cell')
+    .nth(columnIndex)
+    .locator('.number')
+    .inputValue();
+  expect(actualText).toEqual(text);
 }
 
 export async function assertDatabaseTitleText(page: Page, text: string) {

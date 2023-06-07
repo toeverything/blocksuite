@@ -256,6 +256,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       if (this._searchInput.value) {
         this._searchInput.value = '';
         this.setSearchState(SearchState.SearchInput);
+        this.setSearchString('');
       } else {
         this._resetSearchStatus();
         this._searchContainer.classList.add('hidden');
@@ -267,6 +268,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     event.stopPropagation();
     this._searchInput.value = '';
     this.setSearchState(SearchState.SearchInput);
+    this.setSearchString('');
   };
 
   private _onShowSearch = () => {
