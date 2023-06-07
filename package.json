@@ -75,7 +75,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-wc": "^1.4.0",
-    "happy-dom": "^9.20.3",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.0",
     "madge": "^6.0.0",

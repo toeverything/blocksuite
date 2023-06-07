@@ -30,8 +30,7 @@ import {
 import { serializeXYWH } from './utils/xywh.js';
 
 export class SurfaceManager {
-  // this field will only be null during unit test
-  private _renderer: Renderer | null = null;
+  private _renderer: Renderer;
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<string, SurfaceElement>();
   private _bindings = new Map<string, Set<string>>();
@@ -44,9 +43,7 @@ export class SurfaceManager {
     yContainer: Y.Map<unknown>,
     computedValue: ComputedValue = v => v
   ) {
-    if (process.env.IS_UNIT_TEST !== 'true') {
-      this._renderer = new Renderer();
-    }
+    this._renderer = new Renderer();
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
     this._computedValue = computedValue;
 
@@ -55,7 +52,6 @@ export class SurfaceManager {
   }
 
   get viewport(): SurfaceViewport {
-    assertExists(this._renderer);
     return this._renderer;
   }
 
@@ -82,7 +78,6 @@ export class SurfaceManager {
   private _syncFromExistingContainer() {
     this._transact(() => {
       this._yContainer.forEach(yElement => {
-        assertExists(this._renderer);
         const type = yElement.get('type') as keyof PhasorElementType;
 
         const ElementCtor = ElementCtors[type];
@@ -108,7 +103,6 @@ export class SurfaceManager {
     // skip empty event
     if (event.changes.keys.size === 0) return;
     event.keysChanged.forEach(id => {
-      assertExists(this._renderer);
       const type = event.changes.keys.get(id);
       if (!type) {
         console.error('invalid event', event);
@@ -153,7 +147,6 @@ export class SurfaceManager {
   }
 
   refresh() {
-    assertExists(this._renderer);
     this._renderer.refresh();
   }
 
@@ -179,12 +172,10 @@ export class SurfaceManager {
   }
 
   attach(container: HTMLElement) {
-    assertExists(this._renderer);
     this._renderer.attach(container);
   }
 
   onResize() {
-    assertExists(this._renderer);
     this._renderer.onResize();
   }
 
@@ -251,12 +242,10 @@ export class SurfaceManager {
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {
-    assertExists(this._renderer);
     return this._renderer.toModelCoord(viewX, viewY);
   }
 
   toViewCoord(modelX: number, modelY: number): [number, number] {
-    assertExists(this._renderer);
     return this._renderer.toViewCoord(modelX, modelY);
   }
 
@@ -269,7 +258,6 @@ export class SurfaceManager {
     y: number,
     options?: HitTestOptions
   ): SurfaceElement[] {
-    assertExists(this._renderer);
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter(element => {
@@ -285,7 +273,6 @@ export class SurfaceManager {
   }
 
   pickByBound(bound: IBound): SurfaceElement[] {
-    assertExists(this._renderer);
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: SurfaceElement) => {
       return contains(bound, element) || intersects(bound, element);
@@ -314,7 +301,6 @@ export class SurfaceManager {
 
   /** @internal Only for testing */
   initDefaultGestureHandler() {
-    assertExists(this._renderer);
     const { _renderer } = this;
     _renderer.canvas.addEventListener('wheel', e => {
       e.preventDefault();
