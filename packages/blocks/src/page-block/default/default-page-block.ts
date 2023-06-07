@@ -1,11 +1,17 @@
 /// <reference types="vite/client" />
 import {
   BLOCK_ID_ATTR,
+  PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { type BaseBlockModel, Slot, Utils } from '@blocksuite/store';
+import {
+  type BaseBlockModel,
+  matchFlavours,
+  Slot,
+  Utils,
+} from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -73,8 +79,8 @@ export class DefaultPageBlockComponent
       padding-bottom: ${PAGE_BLOCK_PADDING_BOTTOM}px;
 
       /* Leave a place for drag-handle */
-      padding-left: 24px;
-      padding-right: 24px;
+      padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
+      padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
     }
 
     .affine-default-page-block-title {
@@ -159,9 +165,6 @@ export class DefaultPageBlockComponent
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
     nativeSelectionToggled: new Slot<boolean>(),
-
-    subpageLinked: new Slot<{ pageId: string }>(),
-    subpageUnlinked: new Slot<{ pageId: string }>(),
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
   };
 
@@ -227,7 +230,9 @@ export class DefaultPageBlockComponent
     if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
-    const defaultFrame = model.children[0];
+    const defaultFrame = model.children.find(
+      child => child.flavour === 'affine:frame'
+    );
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();
@@ -245,9 +250,11 @@ export class DefaultPageBlockComponent
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      const firstParagraph = model.children[0].children[0];
-      if (firstParagraph) {
-        asyncFocusRichText(page, firstParagraph.id);
+      const firstText = defaultFrame?.children.find(block =>
+        matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
+      );
+      if (firstText) {
+        asyncFocusRichText(page, firstText.id);
       } else {
         const newFirstParagraphId = page.addBlock(
           'affine:paragraph',
@@ -505,6 +512,7 @@ export class DefaultPageBlockComponent
       mouseRoot: this.mouseRoot,
       slots: this.slots,
       container: this,
+      dispatcher: this.root.uiEventDispatcher,
     });
   }
 

@@ -32,16 +32,30 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   if (!parent) {
     return;
   }
+
+  const getProps = ():
+    | ['affine:list', Partial<BlockModelProps['affine:list']>]
+    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
+    const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
+    if (shouldInheritFlavour) {
+      return [model.flavour, { type: model.type }];
+    }
+    return ['affine:paragraph', { type: 'text' }];
+  };
+  const [flavour, blockProps] = getProps();
+
   if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
     page.captureSync();
     const index = parent.children.findIndex(child => child.id === model.id);
     let newParent: BaseBlockModel = parent;
     let newBlockIndex = index + 1;
+    const childrenLength = parent.children.length;
 
-    if (
-      index === parent.children.length - 1 &&
-      model.text?.yText.length === 0
-    ) {
+    if (index === childrenLength - 1 && model.text?.yText.length === 0) {
+      if (childrenLength !== 1) {
+        page.deleteBlock(model);
+      }
+
       const nextModel = page.getNextSibling(newParent);
       if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
         asyncFocusRichText(page, nextModel.id, {
@@ -60,7 +74,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
       newBlockIndex = prevIndex + 1;
     }
 
-    const id = page.addBlock('affine:paragraph', {}, newParent, newBlockIndex);
+    const id = page.addBlock(flavour, blockProps, newParent, newBlockIndex);
     asyncFocusRichText(page, id);
     return;
   }
@@ -70,17 +84,6 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   }
   // make adding text block by enter a standalone operation
   page.captureSync();
-
-  const getProps = ():
-    | ['affine:list', Partial<BlockModelProps['affine:list']>]
-    | ['affine:paragraph', Partial<BlockModelProps['affine:paragraph']>] => {
-    const shouldInheritFlavour = matchFlavours(model, ['affine:list']);
-    if (shouldInheritFlavour) {
-      return [model.flavour, { type: model.type }];
-    }
-    return ['affine:paragraph', { type: 'text' }];
-  };
-  const [flavour, blockProps] = getProps();
 
   const id = !model.children.length
     ? page.addBlock(flavour, blockProps, parent, index + 1)
@@ -124,6 +127,13 @@ export function handleBlockSplit(
   splitLength: number
 ) {
   if (!(model.text instanceof Text)) return;
+
+  // On press enter, it may convert symbols from yjs ContentString
+  // to yjs ContentFormat. Once it happens, the converted symbol will
+  // be deleted and not counted as model.text.yText.length.
+  // Example: "`a`[enter]" -> yText[<ContentFormat: Code>, "a", <ContentFormat: Code>]
+  // In this case, we should not split the block.
+  if (model.text.yText.length < splitIndex + splitLength) return;
 
   const parent = page.getParent(model);
   if (!parent) return;
@@ -399,10 +409,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   ) {
     if (
       !previousSibling ||
-      !matchFlavours(previousSibling, [
-        'affine:paragraph',
-        'affine:list',
-      ] as const)
+      !matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
     )
       return false;
 
@@ -473,10 +480,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   const previousSibling = getPreviousBlock(model);
 
   if (matchFlavours(parent, ['affine:database'])) {
-    const databaseRowsCount = parent.children.length;
-    if (databaseRowsCount === 1) {
-      return true;
-    } else if (previousSibling) {
+    if (previousSibling) {
       page.deleteBlock(model);
       focusBlockByModel(previousSibling);
       return true;
@@ -495,7 +499,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:paragraph'] as const)) return false;
+  if (!matchFlavours(model, ['affine:paragraph'])) return false;
 
   // When deleting at line start of a paragraph block,
   // firstly switch it to normal text, then delete this empty block.

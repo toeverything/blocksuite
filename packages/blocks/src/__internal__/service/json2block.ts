@@ -164,6 +164,7 @@ export async function addSerializedBlocks(
   for (let i = 0; i < serializedBlocks.length; i++) {
     const json = serializedBlocks[i];
     const flavour = json.flavour as keyof BlockModels;
+    // XXX: block props should not be written here !!!
     const blockProps = {
       flavour,
       type: json.type as string,
@@ -173,9 +174,15 @@ export async function addSerializedBlocks(
       width: json.width,
       height: json.height,
       language: json.language,
-      title: json.databaseProps?.title,
+      title: json.databaseProps?.title || json.title,
       titleColumnName: json.databaseProps?.titleColumnName,
       titleColumnWidth: json.databaseProps?.titleColumnWidth,
+      // bookmark
+      url: json.url,
+      description: json.description,
+      icon: json.icon,
+      image: json.image,
+      crawled: json.crawled,
     };
     const id = page.addBlock(flavour, blockProps, parent, index + i);
     addedBlockIds.push(id);

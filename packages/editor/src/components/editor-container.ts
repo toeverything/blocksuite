@@ -1,17 +1,13 @@
-import type {
-  DefaultPageBlockComponent,
-  EdgelessPageBlockComponent,
-} from '@blocksuite/blocks';
 import {
   type AbstractEditor,
   activeEditorManager,
+  type DefaultPageBlockComponent,
+  type EdgelessPageBlockComponent,
   edgelessPreset,
+  getPageBlock,
+  getServiceOrRegister,
   type PageBlockModel,
   pagePreset,
-} from '@blocksuite/blocks';
-import {
-  getDefaultPageBlock,
-  getServiceOrRegister,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import {
@@ -89,8 +85,7 @@ export class EditorContainer
       if (!pageModel) return;
 
       if (this.mode === 'page') {
-        const pageBlock = getDefaultPageBlock(pageModel);
-        pageBlock.selection.clear();
+        getPageBlock(pageModel)?.selection.clear();
       }
 
       const selection = getSelection();
@@ -219,6 +214,12 @@ export class EditorContainer
           overflow: hidden;
           font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
+        }
+        @media print {
+          editor-container,
+          .affine-editor-container {
+            height: auto;
+          }
         }
       </style>
       ${rootContainer} ${remoteSelectionContainer}

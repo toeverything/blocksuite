@@ -298,6 +298,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:code
       prop:language="Plain Text"
@@ -344,6 +345,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:code
       prop:language="Plain Text"
@@ -443,7 +445,7 @@ test('drag select code block can delete it', async ({ page }) => {
     page,
     { x: position.startX, y: position.startY },
     { x: position.endX, y: position.endY },
-    { steps: 10 }
+    { steps: 20 }
   );
   await page.waitForTimeout(10);
   await page.keyboard.press('Backspace');

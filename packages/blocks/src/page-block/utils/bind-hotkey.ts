@@ -9,12 +9,14 @@ import type { Page } from '@blocksuite/store';
 import {
   blockRangeToNativeRange,
   focusBlockByModel,
+  getDefaultPage,
   hotkey,
   isMultiBlockRange,
   isPageMode,
   isPrintableKeyEvent,
 } from '../../__internal__/index.js';
 import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
+import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
@@ -24,7 +26,6 @@ import {
   focusPreviousBlock,
   focusTitle,
   getCurrentNativeRange,
-  getDefaultPageBlock,
   getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
@@ -50,9 +51,8 @@ export function bindCommonHotkey(page: Page) {
     hotkey.addListener(hotkeyStr, e => {
       // Prevent default behavior
       e.preventDefault();
-      if (page.awarenessStore.isReadonly(page)) {
-        return;
-      }
+
+      if (page.awarenessStore.isReadonly(page)) return;
 
       action({ page });
     });
@@ -65,23 +65,21 @@ export function bindCommonHotkey(page: Page) {
     hotkey.addListener(hotkeyStr, e => {
       // Prevent default behavior
       e.preventDefault();
+
       if (!enabledWhen(page)) return;
-      if (page.awarenessStore.isReadonly(page)) {
-        return;
-      }
+      if (page.awarenessStore.isReadonly(page)) return;
+
       action({ page });
     });
   });
 
   paragraphConfig.forEach(({ flavour, type, hotkey: hotkeyStr }) => {
-    if (!hotkeyStr) {
-      return;
-    }
+    if (!hotkeyStr) return;
+
     hotkey.addListener(hotkeyStr, () => {
       const blockRange = getCurrentBlockRange(page);
-      if (!blockRange) {
-        return;
-      }
+      if (!blockRange) return;
+
       updateBlockType(blockRange.models, flavour, type);
     });
   });
@@ -104,10 +102,10 @@ export function bindCommonHotkey(page: Page) {
   // So we could just hook on the keydown event and detect whether user input a new character.
   hotkey.addListener(HOTKEYS.ANY_KEY, e => {
     if (!isPrintableKeyEvent(e) || page.readonly) return;
+
     const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      return;
-    }
+    if (!blockRange) return;
+
     if (blockRange.type === 'Block') {
       handleKeydownAfterSelectBlocks({
         page,
@@ -149,9 +147,8 @@ export function handleUp(
   }
 ) {
   const blockRange = getCurrentBlockRange(page);
-  if (!blockRange) {
-    return;
-  }
+  if (!blockRange) return;
+
   if (blockRange.type === 'Block') {
     if (!selection) {
       console.error(
@@ -160,10 +157,10 @@ export function handleUp(
       );
       return;
     }
-    const { state } = selection;
-    const selectedModel = getModelByElement(state.selectedBlocks[0]);
-    const pageBlock = getDefaultPageBlock(selectedModel);
+    const selectedModel = getModelByElement(selection.state.selectedBlocks[0]);
     selection.clear();
+    const pageBlock = getDefaultPage(page);
+    assertExists(pageBlock);
     focusPreviousBlock(
       selectedModel,
       pageBlock.lastSelectionPosition instanceof Point
@@ -219,7 +216,6 @@ export function handleUp(
       return;
     }
     focusPreviousBlock(model, new Point(left, top), zoom);
-    return;
   }
 }
 
@@ -234,10 +230,9 @@ export function handleDown(
   }
 ) {
   const blockRange = getCurrentBlockRange(page);
-  if (!blockRange) {
-    return;
-  }
-  if (blockRange.type === 'Block' && selection) {
+  if (!blockRange) return;
+
+  if (blockRange.type === 'Block') {
     if (!selection) {
       console.error(
         'Failed to handle down: selection is not provided',
@@ -245,8 +240,7 @@ export function handleDown(
       );
       return;
     }
-    const { state } = selection;
-    const lastEle = state.selectedBlocks.at(-1);
+    const lastEle = selection.state.selectedBlocks.at(-1);
     if (!lastEle) {
       throw new Error(
         "Failed to handleDown! Can't find last selected element!"
@@ -254,11 +248,12 @@ export function handleDown(
     }
     const selectedModel = getModelByElement(lastEle);
     selection.clear();
-    const page = getDefaultPageBlock(selectedModel);
+    const pageBlock = getDefaultPage(page);
+    assertExists(pageBlock);
     focusNextBlock(
       selectedModel,
-      page.lastSelectionPosition instanceof Point
-        ? page.lastSelectionPosition
+      pageBlock.lastSelectionPosition instanceof Point
+        ? pageBlock.lastSelectionPosition
         : 'start'
     );
     e.preventDefault();
@@ -316,9 +311,7 @@ export function handleDown(
       return;
     }
     focusNextBlock(model, new Point(left, bottom), zoom);
-    return;
   }
-  return;
 }
 
 function handleTab(
@@ -327,9 +320,8 @@ function handleTab(
   selection: DefaultSelectionManager
 ) {
   const blockRange = getCurrentBlockRange(page);
-  if (!blockRange) {
-    return;
-  }
+  if (!blockRange) return;
+
   e.preventDefault();
   const models = blockRange.models;
   handleMultiBlockIndent(page, models);
@@ -371,9 +363,8 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
 
   hotkey.addListener(ENTER, e => {
     const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      return;
-    }
+    if (!blockRange) return;
+
     if (blockRange.type === 'Block') {
       e.preventDefault();
 
@@ -412,31 +403,42 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     vEditor?.slots.updated.once(() => {
       focusBlockByModel(endModel, 'start');
     });
-    return;
   });
 
   hotkey.addListener(BACKSPACE, e => {
     // delete blocks
     deleteModelsByRange(page);
     e.preventDefault();
-    return;
   });
 
   hotkey.addListener(UP, e => {
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) return;
+
+    const parent = page.getParent(blockRange.models[0]);
+    if (parent && matchFlavours(parent, ['affine:database'])) {
+      const service = getService('affine:database');
+      if (service.getLastCellSelection()) return;
+    }
     handleUp(e, page, { selection });
   });
   hotkey.addListener(DOWN, e => {
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) return;
+
+    const parent = page.getParent(blockRange.models[0]);
+    if (parent && matchFlavours(parent, ['affine:database'])) {
+      const service = getService('affine:database');
+      if (service.getLastCellSelection()) return;
+    }
     handleDown(e, page, { selection });
   });
   hotkey.addListener(LEFT, e => {
     const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      return;
-    }
-    if (blockRange.type === 'Block') {
-      // Do nothing
-      return;
-    }
+    if (!blockRange) return;
+
+    // Do nothing
+    if (blockRange.type === 'Block') return;
     // See https://github.com/toeverything/blocksuite/issues/2260
     if (blockRange.models.length > 1) {
       e.preventDefault();
@@ -450,17 +452,17 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       return;
     }
     focusPreviousBlock(blockRange.models[0], 'end');
-    return;
   });
   hotkey.addListener(RIGHT, e => {
     const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) {
-      return;
+    if (!blockRange) return;
+
+    if (matchFlavours(blockRange.models[0], ['affine:database'])) {
+      const service = getService('affine:database');
+      if (service.getLastCellSelection()) return;
     }
-    if (blockRange.type === 'Block') {
-      // Do nothing
-      return;
-    }
+    // Do nothing
+    if (blockRange.type === 'Block') return;
     // See https://github.com/toeverything/blocksuite/issues/2260
     if (blockRange.models.length > 1) {
       e.preventDefault();
@@ -474,7 +476,6 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
       return;
     }
     focusNextBlock(blockRange.models[0], 'start');
-    return;
   });
 
   hotkey.addListener(TAB, e => handleTab(e, page, selection));

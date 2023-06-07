@@ -7,6 +7,7 @@ import type { SelectColumnData } from '../../../../common/column-manager.js';
 import {
   DatabaseCellElement,
   defineColumnRenderer,
+  type TableViewCell,
 } from '../../../register.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectCellEditing } from './select-cell-editing.js';
@@ -14,6 +15,8 @@ import { SelectCellEditing } from './select-cell-editing.js';
 @customElement('affine-database-select-cell')
 class SelectCell extends DatabaseCellElement<string, SelectColumnData> {
   static override tag = literal`affine-database-select-cell`;
+
+  cellType = 'select' as const;
 
   override render() {
     const value = this.cell?.value ? [this.cell?.value] : [];

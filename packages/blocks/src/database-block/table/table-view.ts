@@ -29,6 +29,8 @@ import { onClickOutside } from '../utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
+import { CellSelectionManager } from './selection-manager/cell.js';
+import { RowSelectionManager } from './selection-manager/row.js';
 import { SearchState } from './types.js';
 
 const styles = css`
@@ -49,12 +51,16 @@ const styles = css`
     width: 100%;
     padding-bottom: 4px;
     overflow-x: scroll;
+    overflow-y: hidden;
     border-top: 1.5px solid var(--affine-border-color);
   }
 
+  .affine-database-block-table:hover {
+    padding-bottom: 0px;
+  }
   .affine-database-block-table::-webkit-scrollbar {
-    margin-top: 4px;
     -webkit-appearance: none;
+    display: block;
   }
 
   .affine-database-block-table::-webkit-scrollbar:horizontal {
@@ -63,13 +69,22 @@ const styles = css`
 
   .affine-database-block-table::-webkit-scrollbar-thumb {
     border-radius: 2px;
+    background-color: var(--affine-black-10);
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar:horizontal {
+    height: 8px;
   }
 
   .affine-database-block-table:hover::-webkit-scrollbar-thumb {
-    background-color: var(--affine-black-10);
+    border-radius: 16px;
+    background-color: var(--affine-black-30);
+  }
+  .affine-database-block-table:hover::-webkit-scrollbar-track {
+    background-color: var(--affine-hover-color);
   }
 
   .affine-database-table-container {
+    position: relative;
     width: fit-content;
     min-width: 100%;
   }
@@ -97,7 +112,9 @@ const styles = css`
   }
 
   .affine-database-block-footer:hover {
-    background-color: var(--affine-hover-color);
+    position: relative;
+    z-index: 1;
+    background-color: var(--affine-hover-color-filled);
   }
 
   .affine-database-block-footer:hover .affine-database-block-add-row {
@@ -155,6 +172,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @state()
   private _hoverState = false;
 
+  private _rowSelection!: RowSelectionManager;
+  private _cellSelection!: CellSelectionManager;
+
   private _columnRenderer = registerInternalRenderer();
   get columnRenderer() {
     return this._columnRenderer;
@@ -167,10 +187,19 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
+    this._updateHoverState();
+    this._initRowSelectionEvents();
+    this._initCellSelectionEvents();
+
     const disposables = this._disposables;
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
+    disposables.addFromEvent(
+      this,
+      'keydown',
+      this._cellSelection.onCellSelectionChange
+    );
   }
 
   override firstUpdated() {
@@ -189,6 +218,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
         cell.requestUpdate();
       });
       this.querySelector('affine-database-column-header')?.requestUpdate();
+      this._updateHoverState();
     });
 
     if (this.readonly) return;
@@ -200,6 +230,36 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
       this._onDatabaseScroll
     );
   }
+
+  private _updateHoverState() {
+    if (this.model.children.length === 0) {
+      this._hoverState = true;
+      return;
+    }
+
+    this._resetHoverState();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+
+    this._rowSelection.dispose();
+    this._cellSelection.dispose();
+  }
+
+  private _initRowSelectionEvents = () => {
+    this._rowSelection = new RowSelectionManager(
+      this.root.uiEventDispatcher,
+      this.model
+    );
+  };
+
+  private _initCellSelectionEvents = () => {
+    this._cellSelection = new CellSelectionManager(
+      this.root.uiEventDispatcher,
+      this.model
+    );
+  };
 
   private _setSearchState = (state: SearchState) => {
     this._searchState = state;
@@ -279,7 +339,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
   private _onMouseLeave = () => {
     if (this._searchState === SearchState.SearchIcon) {
-      this._resetHoverState();
+      this._updateHoverState();
     }
   };
 

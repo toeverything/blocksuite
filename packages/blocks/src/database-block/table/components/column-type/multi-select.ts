@@ -3,18 +3,26 @@ import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import type { SelectColumnData } from '../../../common/column-manager.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 import type { SelectTag } from '../../types.js';
 import { SelectMode } from '../../types.js';
 
 @customElement('affine-database-multi-select-cell')
-class MultiSelectCell extends DatabaseCellElement<string[], SelectColumnData> {
+class MultiSelectCell
+  extends DatabaseCellElement<string[], SelectColumnData>
+  implements TableViewCell
+{
   static override styles = css`
     :host {
       width: 100%;
     }
   `;
   static override tag = literal`affine-database-multi-select-cell`;
+  cellType = 'multi-select' as const;
 
   override render() {
     return html`
@@ -27,11 +35,12 @@ class MultiSelectCell extends DatabaseCellElement<string[], SelectColumnData> {
 }
 
 @customElement('affine-database-multi-select-cell-editing')
-class MultiSelectCellEditing extends DatabaseCellElement<
-  string[],
-  SelectColumnData
-> {
+class MultiSelectCellEditing
+  extends DatabaseCellElement<string[], SelectColumnData>
+  implements TableViewCell
+{
   static override tag = literal`affine-database-multi-select-cell-editing`;
+  cellType = 'multi-select' as const;
 
   get _options(): SelectTag[] {
     return this.column.data.options;

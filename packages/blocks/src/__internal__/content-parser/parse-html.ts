@@ -4,8 +4,22 @@ import type { DeltaOperation, Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
+
+export type FetchFileHandler = (
+  fileName: string
+) => Promise<Blob | null | undefined>;
+
+export type TextStyleHandler = (
+  element: HTMLElement,
+  styles: Record<string, unknown>
+) => void;
+
+export type TableParserHandler = (
+  element: Element
+) => Promise<SerializedBlock[] | null>;
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -28,16 +42,59 @@ const INLINE_TAGS = [
   'ABBR',
   'CITE',
   'BDI',
+  'TIME',
 ];
 
 export class HtmlParser {
   private _contentParser: ContentParser;
   private _page: Page;
+  private _customFetchFileHandler?: FetchFileHandler;
+  private _customTextStyleHandler?: TextStyleHandler;
+  private _customTableParserHandler?: TableParserHandler;
 
-  constructor(contentParser: ContentParser, page: Page) {
+  constructor(
+    contentParser: ContentParser,
+    page: Page,
+    fetchFileHandler?: FetchFileHandler,
+    textStyleHandler?: TextStyleHandler,
+    tableParserHandler?: TableParserHandler
+  ) {
     this._contentParser = contentParser;
     this._page = page;
+    this._customFetchFileHandler = fetchFileHandler;
+    this._customTextStyleHandler = textStyleHandler;
+    this._customTableParserHandler = tableParserHandler;
   }
+
+  private _fetchFileHandler = async (
+    fileName: string
+  ): Promise<Blob | null | undefined> => {
+    if (this._customFetchFileHandler) {
+      const customBlob = await this._customFetchFileHandler(fileName);
+      if (customBlob && customBlob.size > 0) {
+        return customBlob;
+      }
+    }
+
+    let resp;
+    try {
+      resp = await fetch(fileName, {
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          Origin: window.location.origin,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+    const imgBlob = await resp.blob();
+    if (!imgBlob.type.startsWith('image/')) {
+      return null;
+    }
+    return imgBlob;
+  };
 
   public registerParsers() {
     this._contentParser.registerParserHtmlText2Block(
@@ -63,6 +120,16 @@ export class HtmlParser {
     this._contentParser.registerParserHtmlText2Block(
       'embedItemParser',
       this._embedItemParser
+    );
+
+    this._contentParser.registerParserHtmlText2Block(
+      'tableParser',
+      this._tableParser
+    );
+
+    this._contentParser.registerParserHtmlText2Block(
+      'headerParser',
+      this._headerParser
     );
   }
 
@@ -125,6 +192,13 @@ export class HtmlParser {
             result = await this._contentParser.getParserHtmlText2Block(
               'embedItemParser'
             )?.(node.firstChild);
+          } else if (
+            node.firstElementChild?.tagName === 'A' ||
+            node.firstElementChild?.getAttribute('href')?.endsWith('.csv')
+          ) {
+            result = await this._contentParser.getParserHtmlText2Block(
+              'tableParser'
+            )?.(node.firstChild);
           } else {
             result = await this._contentParser.getParserHtmlText2Block(
               'commonParser'
@@ -153,12 +227,23 @@ export class HtmlParser {
             'codeBlockParser'
           )?.(node);
           break;
+        case 'FIGURE':
         case 'IMG':
           {
             result = await this._contentParser.getParserHtmlText2Block(
               'embedItemParser'
             )?.(node);
           }
+          break;
+        case 'HEADER':
+          result = await this._contentParser.getParserHtmlText2Block(
+            'headerParser'
+          )?.(node);
+          break;
+        case 'TABLE':
+          result = await this._contentParser.getParserHtmlText2Block(
+            'tableParser'
+          )?.(node);
           break;
         default:
           break;
@@ -255,6 +340,7 @@ export class HtmlParser {
       const node = childNodes.item(i);
       if (!node) continue;
       if (node.nodeName === '#comment') continue;
+      if (node.nodeName === 'STYLE') continue;
       if (!isChildNode) {
         if (node instanceof Text) {
           textValues.push(
@@ -291,6 +377,20 @@ export class HtmlParser {
       };
     }
 
+    if (
+      textValues.length === 0 &&
+      children.length > 0 &&
+      flavour === 'affine:list'
+    ) {
+      return {
+        flavour: flavour as keyof BlockSchemas,
+        type: type,
+        checked: checked,
+        text: children[0].text,
+        children: children.slice(1),
+      };
+    }
+
     return {
       flavour: flavour as keyof BlockSchemas,
       type: type,
@@ -306,16 +406,27 @@ export class HtmlParser {
     ignoreEmptyText = true
   ): DeltaOperation[] {
     if (element instanceof Text) {
+      let isLinkPage = false;
+      if (textStyle.reference) {
+        isLinkPage =
+          (textStyle.reference as Record<string, unknown>).type ===
+          'LinkedPage';
+      }
       return (element.textContent || '').split('\n').map(text => {
         return {
-          insert: text,
+          insert: isLinkPage ? ' ' : text,
           attributes: textStyle,
         };
       });
     }
     const htmlElement = element as HTMLElement;
+    if (htmlElement.classList.contains('katex-mathml')) {
+      return [];
+    }
     const childNodes = Array.from(htmlElement.childNodes);
     const currentTextStyle = getTextStyle(htmlElement);
+    this._customTextStyleHandler &&
+      this._customTextStyleHandler(htmlElement, currentTextStyle);
 
     if (!childNodes.length) {
       return ignoreEmptyText
@@ -349,6 +460,32 @@ export class HtmlParser {
   ): Promise<SerializedBlock[] | null> => {
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
+    if (
+      element.firstElementChild?.tagName === 'DETAIL' ||
+      element.firstElementChild?.firstElementChild?.tagName === 'SUMMARY'
+    ) {
+      const summary = await this._contentParser.getParserHtmlText2Block(
+        'commonParser'
+      )?.({
+        element: element.firstElementChild.firstElementChild,
+        flavour: 'affine:list',
+        type: type,
+      });
+      const childNodes = element.firstElementChild.childNodes;
+      const children = [];
+      for (let i = 1; i < childNodes.length; i++) {
+        const node = childNodes.item(i);
+        if (!node) continue;
+        if (node instanceof Element) {
+          const childNode = await this._nodeParser(node);
+          childNode && children.push(...childNode);
+        }
+      }
+      if (summary && summary.length > 0) {
+        summary[0].children = [...(summary[0].children || []), ...children];
+      }
+      return summary;
+    }
     let checked;
     let inputEl;
     if (
@@ -462,39 +599,174 @@ export class HtmlParser {
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     let result: SerializedBlock[] | null = [];
-    if (element instanceof HTMLImageElement) {
-      const imgUrl = (element as HTMLImageElement).src;
-      let resp;
-      try {
-        resp = await fetch(imgUrl, {
-          cache: 'no-cache',
-          mode: 'cors',
-          headers: {
-            Origin: window.location.origin,
-          },
+    let imgElement = null;
+    const texts = [];
+    if (element.tagName === 'FIGURE') {
+      imgElement = element.querySelector('img');
+      const figcaptionElement = element.querySelector('figcaption');
+      if (figcaptionElement) {
+        const captionResult = await this._contentParser.getParserHtmlText2Block(
+          'commonParser'
+        )?.({
+          element: figcaptionElement,
+          flavour: 'affine:paragraph',
+          type: 'text',
         });
-      } catch (error) {
-        console.error(error);
+        if (captionResult && captionResult.length > 0) {
+          texts.push(...(captionResult[0].text || []));
+        }
+      }
+    } else if (element instanceof HTMLImageElement) {
+      imgElement = element;
+      texts.push({ insert: '' });
+    }
+    if (imgElement) {
+      const imgUrl = imgElement.getAttribute('src') || '';
+      const imgBlob = await this._fetchFileHandler(imgUrl);
+      if (!imgBlob || imgBlob.size === 0) {
+        const texts = [
+          {
+            insert: imgUrl,
+            attributes: {
+              link: imgUrl,
+            },
+          },
+        ];
+        result = [
+          {
+            flavour: 'affine:paragraph',
+            type: 'text',
+            children: [],
+            text: texts,
+          },
+        ];
+      } else {
+        const storage = this._page.blobs;
+        assertExists(storage);
+        const id = await storage.set(imgBlob);
+        result = [
+          {
+            flavour: 'affine:embed',
+            type: 'image',
+            sourceId: id,
+            children: [],
+            text: texts,
+          },
+        ];
+      }
+    }
+
+    return result;
+  };
+
+  // TODO parse children block, this is temporary solution
+  private _tableParser = async (
+    element: Element
+  ): Promise<SerializedBlock[] | null> => {
+    let result: SerializedBlock[] | null = [];
+    if (this._customTableParserHandler) {
+      result = await this._customTableParserHandler(element);
+      if (result && result.length > 0) {
         return result;
       }
-      const imgBlob = await resp.blob();
-      if (!imgBlob.type.startsWith('image/')) {
-        return result;
+    }
+    if (element.tagName === 'TABLE') {
+      const theadElement = element.querySelector('thead');
+      const tbodyElement = element.querySelector('tbody');
+      const titleTrEle = theadElement?.querySelector('tr');
+      let id = 1;
+      const titles: string[] = [];
+      titleTrEle?.querySelectorAll('th').forEach(ele => {
+        titles.push(ele.textContent || '');
+      });
+      const rows: string[][] = [];
+      tbodyElement?.querySelectorAll('tr').forEach(ele => {
+        const row: string[] = [];
+        ele.querySelectorAll('td').forEach(ele => {
+          row.push(ele.textContent || '');
+        });
+        rows.push(row);
+      });
+      const columns: Column[] = titles.slice(1).map((value, index) => {
+        return {
+          name: value,
+          type: 'rich-text',
+          width: 200,
+          hide: false,
+          id: '' + id++,
+        };
+      });
+      if (rows.length > 0) {
+        let maxLen = rows[0].length;
+        for (let i = 1; i < rows.length; i++) {
+          maxLen = Math.max(maxLen, rows[i].length);
+        }
+        const addNum = maxLen - columns.length;
+        for (let i = 0; i < addNum; i++) {
+          columns.push({
+            name: '',
+            type: 'rich-text',
+            width: 200,
+            hide: false,
+            id: '' + id++,
+          });
+        }
       }
-      const storage = await this._page.blobs;
-      assertExists(storage);
-      const id = await storage.set(imgBlob);
+      const databasePropsId = id++;
+      const cells: Record<string, Record<string, Cell>> = {};
+      const children: SerializedBlock[] = [];
+      rows.forEach(row => {
+        children.push({
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: row[0] }],
+          children: [],
+        });
+        const rowId = '' + id++;
+        cells[rowId] = {};
+        row.slice(1).forEach((value, index) => {
+          cells[rowId][columns[index].id] = {
+            columnId: columns[index].id,
+            value,
+          };
+        });
+      });
+
       result = [
         {
-          flavour: 'affine:embed',
-          type: 'image',
-          sourceId: id,
-          children: [],
-          text: [{ insert: '' }],
+          flavour: 'affine:database',
+          databaseProps: {
+            id: '' + databasePropsId,
+            title: 'Database',
+            titleColumnName: titles[0],
+            titleColumnWidth: 432,
+            rowIds: Object.keys(cells),
+            cells: cells,
+            columns: columns,
+          },
+          children: children,
         },
       ];
     }
+    return result;
+  };
 
+  private _headerParser = async (
+    element: Element
+  ): Promise<SerializedBlock[] | null> => {
+    let node = element;
+    if (element.getElementsByClassName('page-title').length > 0) {
+      node = element.getElementsByClassName('page-title')[0];
+    }
+
+    const tagName = node.tagName;
+    const result = await this._contentParser.getParserHtmlText2Block(
+      'commonParser'
+    )?.({
+      element: node,
+      flavour: 'affine:page',
+      type: tagName.toLowerCase(),
+    });
     return result;
   };
 }
@@ -529,8 +801,9 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['bold'] = true;
   }
   if (getIsLink(htmlElement)) {
-    textStyle['link'] =
+    const linkUrl =
       htmlElement.getAttribute('href') || htmlElement.getAttribute('src');
+    textStyle['link'] = linkUrl;
   }
 
   if (tagName === 'EM' || style['fontStyle'] === 'italic') {

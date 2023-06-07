@@ -37,9 +37,8 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       flex-direction: row;
       align-items: center;
       justify-content: center;
-      fill: none;
-      stroke: currentColor;
       color: var(--affine-text-primary-color);
+      fill: currentColor;
     }
 
     menu-divider {
@@ -77,7 +76,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     }
 
     .brush-size-button[active] div {
-      background-color: var(--affine-primary-color);
+      background-color: var(--affine-blue);
     }
 
     .brush-size-button .thin {

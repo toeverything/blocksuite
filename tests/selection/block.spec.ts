@@ -10,6 +10,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
+  getCenterPositionByLocator,
   getIndexCoordinate,
   getRichTextBoundingBox,
   initEmptyParagraphState,
@@ -23,6 +24,7 @@ import {
   redoByKeyboard,
   resetHistory,
   shamefullyBlurActiveElement,
+  shiftClick,
   SHORT_KEY,
   type,
   undoByKeyboard,
@@ -180,19 +182,21 @@ test('should indent multi-selection block', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 26 - 24, coord.y - 10);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x + 20, coord.y + 50);
+  await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
   await page.mouse.up();
 
   await page.keyboard.press('Tab');
 
   await assertStoreMatchJSX(
     page,
-    `<affine:page>
+    `
+<affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -532,8 +536,8 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -573,8 +577,8 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -644,8 +648,8 @@ test('should not clear selected rects when clicking on scrollbar', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -727,8 +731,8 @@ test('should not clear selected rects when scrolling the wheel', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -876,8 +880,8 @@ test('should clear block selection before native selection', async ({
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: first.left + 1,
@@ -944,8 +948,8 @@ test('should not be misaligned when the editor container has padding or margin',
   await dragBetweenCoords(
     page,
     {
-      x: first.left - 1,
-      y: first.top - 1,
+      x: first.left - 10,
+      y: first.top - 10,
     },
     {
       x: last.left + 1,
@@ -1006,6 +1010,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -1143,4 +1148,27 @@ test('should select with shift-click', async ({ page }) => {
   });
 
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(3);
+});
+
+test('when shift-click should select correct number of list blocks', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 2);
+  await pressEnter(page);
+  await type(page, '10');
+  await pressEnter(page);
+  await type(page, '11');
+  await assertRichTexts(page, ['123', '456', '789', '10', '11']);
+
+  await clickListIcon(page, 3);
+  const fifthLocator = page.getByText('11');
+  const targetPos = await getCenterPositionByLocator(page, fifthLocator);
+  await shiftClick(page, targetPos);
+  const rects = page.locator('affine-selected-blocks > *');
+  await expect(rects).toHaveCount(2);
 });

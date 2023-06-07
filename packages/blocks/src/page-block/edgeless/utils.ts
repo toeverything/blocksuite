@@ -1,12 +1,14 @@
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
-import type {
+import type { PointerEventState } from '@blocksuite/lit';
+import {
   Bound,
-  Controller,
-  PhasorElement,
-  SurfaceManager,
-  SurfaceViewport,
+  type Controller,
+  type PhasorElement,
+  type SurfaceManager,
+  type SurfaceViewport,
+  TextElement,
 } from '@blocksuite/phasor';
 import { ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
 import {
@@ -17,7 +19,8 @@ import {
   normalizeWheelDeltaY,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
+import { assertExists, type Page } from '@blocksuite/store';
+import * as Y from 'yjs';
 
 import {
   handleNativeRangeAtPoint,
@@ -25,8 +28,9 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import type { SelectionEvent } from '../../__internal__/utils/gesture/selection-event.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
+import { DEFAULT_TEXT_COLOR } from './components/component-toolbar/change-text-button.js';
+import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
   EdgelessContainer,
   EdgelessPageBlockComponent,
@@ -40,9 +44,6 @@ export const DEFAULT_FRAME_WIDTH = 448;
 export const DEFAULT_FRAME_HEIGHT = 72;
 export const DEFAULT_FRAME_OFFSET_X = 30;
 export const DEFAULT_FRAME_OFFSET_Y = 40;
-
-export const ZOOM_MAX = 3.0;
-export const ZOOM_MIN = 0.1;
 
 const ATTACHED_DISTANCE = 20;
 
@@ -123,7 +124,7 @@ export function initWheelEventHandlers(container: EdgelessContainer) {
       );
 
       const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
-      viewport.applyDeltaZoom(zoom);
+      viewport.setZoom(zoom);
       const newZoom = viewport.zoom;
 
       const offsetX = centerX - baseX;
@@ -449,33 +450,31 @@ export function getBackgroundGrid(
 ) {
   const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
   const gap = 20 * step * zoom;
-  const translateX = -viewportX * zoom + gap / 2;
-  const translateY = -viewportY * zoom + gap / 2;
-
-  const gridStyle = {
-    backgroundImage:
-      'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)',
-  };
-  const defaultStyle = {};
-  const style = showGrid ? gridStyle : defaultStyle;
+  const translateX = -viewportX * zoom;
+  const translateY = -viewportY * zoom;
 
   return {
-    style,
     gap,
     translateX,
     translateY,
+    grid: showGrid
+      ? 'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)'
+      : 'unset',
   };
 }
 
-export function addText(
+export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
-  event: SelectionEvent,
+  event: PointerEventState,
   width = DEFAULT_FRAME_WIDTH
 ) {
-  const frameId = edgeless.addFrameWithPoint(new Point(event.x, event.y), {
-    width,
-  });
+  const frameId = edgeless.addFrameWithPoint(
+    new Point(event.point.x, event.point.y),
+    {
+      width,
+    }
+  );
   page.addBlock('affine:paragraph', {}, frameId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
@@ -487,11 +486,10 @@ export function addText(
       ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === frameId);
     if (element) {
-      const selectionState = {
+      edgeless.slots.selectionUpdated.emit({
         selected: [element],
         active: true,
-      };
-      edgeless.slots.selectionUpdated.emit(selectionState);
+      });
 
       // Waiting dom updated, `frame mask` is removed
       edgeless.updateComplete.then(() => {
@@ -501,4 +499,56 @@ export function addText(
       });
     }
   });
+}
+
+export function mountTextEditor(
+  textElement: TextElement,
+  edgeless: EdgelessPageBlockComponent
+) {
+  const textEditor = new SurfaceTextEditor();
+  const pageBlockContainer = edgeless.pageBlockContainer;
+
+  pageBlockContainer.appendChild(textEditor);
+  textEditor.mount(textElement, edgeless);
+  textEditor.vEditor?.focusEnd();
+  edgeless.selection.switchToDefaultMode({
+    selected: [textElement],
+    active: true,
+  });
+}
+
+export function addText(
+  edgeless: EdgelessPageBlockComponent,
+  event: PointerEventState
+) {
+  const selected = edgeless.surface.pickTop(event.x, event.y);
+  if (!selected) {
+    const [modelX, modelY] = edgeless.surface.viewport.toModelCoord(
+      event.x,
+      event.y
+    );
+    const id = edgeless.surface.addElement('text', {
+      xywh: new Bound(modelX, modelY, 32, 32).serialize(),
+      text: new Y.Text(),
+      textAlign: 'left',
+      fontSize: 24,
+      color: DEFAULT_TEXT_COLOR,
+    });
+    edgeless.page.captureSync();
+    const textElement = edgeless.surface.pickById(id);
+    assertExists(textElement);
+    if (textElement instanceof TextElement) {
+      mountTextEditor(textElement, edgeless);
+    }
+  }
+}
+
+export function xywhArrayToObject(element: TopLevelBlockModel) {
+  const [x, y, w, h] = deserializeXYWH(element.xywh);
+  return {
+    x,
+    y,
+    w,
+    h,
+  };
 }

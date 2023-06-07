@@ -2,6 +2,7 @@ import '../tool-icon-button.js';
 import '../color-panel.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 
+import { LineStyleIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   type ShapeElement,
@@ -23,7 +24,7 @@ import type { ColorEvent } from '../color-panel.js';
 import { isTransparent } from '../color-panel.js';
 import { ColorUnit } from '../color-panel.js';
 import type { LineSizeButtonProps } from '../line-size-button.js';
-import { LineSizeButton, lineSizeButtonStyles } from '../line-size-button.js';
+import { lineSizeButtonStyles } from '../line-size-button.js';
 import type { LineStyleButtonProps } from '../line-style-button.js';
 import {
   LineStylesPanel,
@@ -138,9 +139,9 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        fill: none;
-        stroke: currentColor;
         color: var(--affine-text-primary-color);
+        stroke: none;
+        fill: currentColor;
       }
 
       menu-divider {
@@ -153,6 +154,11 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       edgeless-shape-menu[data-show] {
         display: block;
+      }
+
+      .change-shape-button {
+        fill: none;
+        stroke: currentColor;
       }
 
       .color-panel-container {
@@ -247,45 +253,37 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeFillColor(color: CssVariableName) {
     const filled = !isTransparent(color);
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          filled,
-          fillColor: color,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        filled,
+        fillColor: color,
       });
     });
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeColor(color: CssVariableName) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeColor: color,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        strokeColor: color,
       });
     });
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeWidth(strokeWidth: number) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeWidth,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        strokeWidth,
       });
     });
     this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
-    this.page.transact(() => {
-      this.elements.forEach(ele => {
-        this.surface.updateElement<'shape'>(ele.id, {
-          strokeStyle,
-        });
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        strokeStyle,
       });
     });
     this._forceUpdateSelection();
@@ -386,6 +384,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         class="change-shape-button"
         .tooltip=${this._popperShow ? '' : 'Switch type'}
+        .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._shapeMenuPopper?.toggle()}
       >
@@ -399,6 +398,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         class="fill-color-button"
         .tooltip=${this._popperShow ? '' : 'Shape color'}
+        .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._fillColorMenuPopper?.toggle()}
       >
@@ -416,6 +416,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         class="stroke-color-button"
         .tooltip=${this._popperShow ? '' : 'Border color'}
+        .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._strokeColorMenuPopper?.toggle()}
       >
@@ -433,14 +434,15 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       <menu-divider .vertical=${true}></menu-divider>
 
-      ${LineSizeButton({
-        className: 'line-styles-button',
-        size: selectedLineSize,
-        tooltip: this._popperShow ? '' : 'Line style',
-        onClick: () => {
-          this._lineStylesPanelPopper?.toggle();
-        },
-      })}
+      <edgeless-tool-icon-button
+        class="line-styles-button"
+        .tooltip=${this._popperShow ? '' : 'Border style'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+        @click=${() => this._lineStylesPanelPopper?.toggle()}
+      >
+        ${LineStyleIcon}
+      </edgeless-tool-icon-button>
       ${LineStylesPanel({
         selectedLineSize,
         selectedLineStyle,

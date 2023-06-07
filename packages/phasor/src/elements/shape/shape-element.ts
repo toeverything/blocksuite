@@ -40,12 +40,17 @@ export class ShapeElement extends SurfaceElement<IShape> {
     return strokeStyle;
   }
 
+  get roughness() {
+    const roughness = (this.yMap.get('roughness') as IShape['roughness']) ?? 2;
+    return roughness;
+  }
+
   get realStrokeColor() {
-    return this.transformPropertyValue(this.strokeColor);
+    return this.computedValue(this.strokeColor);
   }
 
   get realFillColor() {
-    return this.transformPropertyValue(this.fillColor);
+    return this.computedValue(this.fillColor);
   }
 
   override hitTest(x: number, y: number, options?: HitTestOptions) {

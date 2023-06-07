@@ -1,16 +1,22 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
+import { toPng } from 'html-to-image';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
-import type { SerializedBlock } from '../utils/index.js';
+import { getEditorContainer, type SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
+import type {
+  FetchFileHandler,
+  TableParserHandler,
+  TextStyleHandler,
+} from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
-type ParseHtml2BlockFunc = (
+type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
@@ -20,12 +26,24 @@ export class ContentParser {
   readonly slots = {
     beforeHtml2Block: new Slot<Element>(),
   };
-  private _parsers: Record<string, ParseHtml2BlockFunc> = {};
+  private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _htmlParser: HtmlParser;
-
-  constructor(page: Page) {
+  private urlPattern =
+    /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
+  constructor(
+    page: Page,
+    fetchFileHandler?: FetchFileHandler,
+    textStyleHandler?: TextStyleHandler,
+    tableParserHandler?: TableParserHandler
+  ) {
     this._page = page;
-    this._htmlParser = new HtmlParser(this, page);
+    this._htmlParser = new HtmlParser(
+      this,
+      page,
+      fetchFileHandler,
+      textStyleHandler,
+      tableParserHandler
+    );
     this._htmlParser.registerParsers();
   }
 
@@ -33,7 +51,7 @@ export class ContentParser {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[0].children
+      this._getSelectedBlock(root).children[1].children
     );
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
@@ -45,12 +63,37 @@ export class ContentParser {
     const root = this._page.root;
     if (!root) return;
     const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[0].children
+      this._getSelectedBlock(root).children[1].children
     );
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       htmlContent
     );
+  }
+
+  public async exportPng() {
+    const root = this._page.root;
+    if (!root) return;
+    const editorContainer = getEditorContainer(this._page);
+    const styleElement = document.createElement('style');
+    styleElement.textContent =
+      'editor-container,.affine-editor-container {height: auto;}';
+    editorContainer.appendChild(styleElement);
+
+    FileExporter.exportPng(
+      (root as PageBlockModel).title.toString(),
+      await toPng(editorContainer, {
+        cacheBust: true,
+      })
+    );
+
+    editorContainer.removeChild(styleElement);
+  }
+
+  public async exportPdf() {
+    const root = this._page.root;
+    if (!root) return;
+    window.print();
   }
 
   public async block2Html(blocks: SelectedBlock[]): Promise<string> {
@@ -164,20 +207,47 @@ export class ContentParser {
     service.json2Block(insertBlockModel, blocks);
   }
 
-  public registerParserHtmlText2Block(name: string, func: ParseHtml2BlockFunc) {
-    this._parsers[name] = func;
+  public async importHtml(text: string, insertPositionId: string) {
+    const blocks = await this.htmlText2Block(text);
+    const insertBlockModel = this._page.getBlockById(insertPositionId);
+
+    assertExists(insertBlockModel);
+    const { getServiceOrRegister } = await import('../service.js');
+    const service = await getServiceOrRegister(insertBlockModel.flavour);
+
+    service.json2Block(insertBlockModel, blocks);
   }
 
-  public getParserHtmlText2Block(name: string): ParseHtml2BlockFunc {
+  public registerParserHtmlText2Block(
+    name: string,
+    handler: ParseHtml2BlockHandler
+  ) {
+    this._parsers[name] = handler;
+  }
+
+  public getParserHtmlText2Block(name: string): ParseHtml2BlockHandler {
     return this._parsers[name] || null;
   }
 
   public text2blocks(text: string): SerializedBlock[] {
     return text.split('\n').map((str: string) => {
+      const splitText = str.split(this.urlPattern);
+      const urls = str.match(this.urlPattern);
+      const result = [];
+
+      for (let i = 0; i < splitText.length; i++) {
+        if (splitText[i]) {
+          result.push({ insert: splitText[i] });
+        }
+        if (urls && urls[i]) {
+          result.push({ insert: urls[i], attributes: { link: urls[i] } });
+        }
+      }
+
       return {
         flavour: 'affine:paragraph',
         type: 'text',
-        text: [{ insert: str }],
+        text: result,
         children: [],
       };
     });

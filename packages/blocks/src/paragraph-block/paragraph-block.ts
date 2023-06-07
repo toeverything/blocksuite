@@ -8,7 +8,7 @@ import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isPageMode } from '../__internal__/index.js';
@@ -27,31 +27,40 @@ function tipsPlaceholderPreventDefault(event: Event) {
   event.preventDefault();
 }
 
-function TipsPlaceholder(model: BaseBlockModel) {
+interface Style {
+  [name: string]: string;
+}
+
+function TipsPlaceholder(model: BaseBlockModel, tipsPos: Style) {
   if (!matchFlavours(model, ['affine:paragraph'])) {
     throw new Error("TipsPlaceholder can't be used for this model");
   }
   if (model.type === 'text') {
     if (!isPageMode(model.page)) {
-      return html`<div class="tips-placeholder">Type '/' for commands</div> `;
+      return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
+        Type '/' for commands
+      </div> `;
     }
 
     const blockHub = document.querySelector('affine-block-hub');
     if (!blockHub) {
       // Fall back
-      return html`<div class="tips-placeholder">Type '/' for commands</div> `;
+      return html`<div class="tips-placeholder" style=${styleMap(tipsPos)}>
+        Type '/' for commands
+      </div>`;
     }
     const onClick = () => {
       if (!blockHub) {
         throw new Error('Failed to find blockHub!');
       }
-      blockHub.toggleMenu(true);
+      blockHub.toggleMenu();
     };
     return html`
       <div
         class="tips-placeholder"
         @click=${onClick}
         @pointerdown=${tipsPlaceholderPreventDefault}
+        style=${styleMap(tipsPos)}
       >
         Click ${BlockHubIcon20} to insert blocks, type '/' for commands
       </div>
@@ -154,9 +163,6 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       display: flex;
       align-items: center;
       gap: 4px;
-      left: 2px;
-      top: 50%;
-      transform: translateY(-50%);
       pointer-events: none;
       color: var(--affine-placeholder-color);
       fill: var(--affine-placeholder-color);
@@ -170,6 +176,9 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       fill: var(--affine-primary-color);
     }
   `;
+
+  @state()
+  tipsPos = { top: '50%', transform: 'translateY(-50%)', left: '2px' };
 
   @state()
   private _tipsPlaceholderTemplate = html``;
@@ -186,6 +195,9 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   };
 
   private _placeholderDisposables = new DisposableGroup();
+
+  @query('rich-text')
+  private _richTextElement?: HTMLElement;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -207,12 +219,28 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       this._tipsPlaceholderTemplate = html``;
       return;
     }
+
     if (this.model.type === 'text' && !this._isFocus) {
       // Text block placeholder only show when focus and empty
       this._tipsPlaceholderTemplate = html``;
       return;
     }
-    this._tipsPlaceholderTemplate = TipsPlaceholder(this.model);
+
+    if (this._richTextElement) {
+      const parentRect =
+        this._richTextElement.parentElement?.getBoundingClientRect() as DOMRect;
+      const rect = this._richTextElement.getBoundingClientRect();
+
+      const relativeTop = rect.top - parentRect.top;
+      const relativeLeft = rect.left - parentRect.left;
+      this.tipsPos = {
+        top: `${relativeTop}px`,
+        transform: '',
+        left: `${relativeLeft + 2}px`,
+      };
+    }
+
+    this._tipsPlaceholderTemplate = TipsPlaceholder(this.model, this.tipsPos);
   };
 
   private _onFocusIn = (e: FocusEvent) => {

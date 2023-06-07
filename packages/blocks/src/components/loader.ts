@@ -11,7 +11,7 @@ export class Loader extends LitElement {
   static override styles = css`
     .load-container {
       margin: 10px auto;
-      width: 150px;
+      width: var(--loader-width);
       text-align: center;
     }
 
@@ -68,6 +68,9 @@ export class Loader extends LitElement {
   @property()
   radius: string | number = '8px';
 
+  @property()
+  width: string | number = '150px';
+
   constructor() {
     super();
   }
@@ -78,6 +81,12 @@ export class Loader extends LitElement {
       this.setAttribute(BLOCK_ID_ATTR, this.hostModel.id);
       this.setAttribute(BLOCK_SERVICE_LOADING_ATTR, 'true');
     }
+
+    const width = this.width;
+    this.style.setProperty(
+      '--loader-width',
+      typeof width === 'string' ? width : `${width}px`
+    );
   }
 
   override render() {

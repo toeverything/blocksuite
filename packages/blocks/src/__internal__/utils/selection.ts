@@ -5,26 +5,26 @@ import {
   matchFlavours,
   nonTextBlock,
 } from '@blocksuite/global/utils';
+import type { PointerEventState } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { FrameBlockComponent } from '../../frame-block/index.js';
-import type { RichText } from '../rich-text/rich-text.js';
+import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import { asyncFocusRichText } from './common-operations.js';
-import type { IPoint, SelectionEvent } from './gesture/index.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
   getDefaultPage,
-  getDefaultPageBlock,
   getElementFromEventTarget,
   getModelByElement,
   getModelsByRange,
   getNextBlock,
+  getPageBlock,
   getPreviousBlock,
 } from './query.js';
 import { Rect } from './rect.js';
-import type { SelectionPosition } from './types.js';
+import type { IPoint, SelectionPosition } from './types.js';
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;
@@ -156,46 +156,48 @@ export function focusBlockByModel(
   if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
     throw new Error("Can't focus frame or page!");
   }
-  const defaultPageBlock = getDefaultPageBlock(model);
+
+  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
+  assertExists(pageBlock);
+  const isPageMode = pageBlock.tagName === 'AFFINE-DEFAULT-PAGE';
+
   // If focus on a follow block, we should select the block
   if (
+    isPageMode &&
     matchFlavours(model, [
       'affine:embed',
       'affine:divider',
       'affine:code',
       'affine:database',
+      'affine:bookmark',
     ])
   ) {
-    if (!defaultPageBlock.selection) {
-      // TODO fix this
-      // In the edgeless mode
-      return;
-    }
-    defaultPageBlock.selection.state.clearSelection();
+    pageBlock.selection.state.clearSelection();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
-    rect && defaultPageBlock.slots.selectedRectsUpdated.emit([rect]);
+    rect && pageBlock.slots.selectedRectsUpdated.emit([rect]);
     const element = getBlockElementByModel(model);
     assertExists(element);
-    defaultPageBlock.selection.state.selectedBlocks.push(element);
+    pageBlock.selection.state.selectedBlocks.push(element);
     if (matchFlavours(model, ['affine:database'])) {
       const elements = model.children
         .map(child => getBlockElementByModel(child))
         .filter(
           (element): element is BlockComponentElement => element !== null
         );
-      defaultPageBlock.selection.state.selectedBlocks.push(...elements);
+      pageBlock.selection.state.selectedBlocks.push(...elements);
     }
-    defaultPageBlock.selection.state.type = 'block';
+    pageBlock.selection.state.type = 'block';
     resetNativeSelection(null);
     (document.activeElement as HTMLTextAreaElement).blur();
     return;
   }
   const element = getBlockElementByModel(model);
   const editableContainer = element?.querySelector('[contenteditable]');
-  defaultPageBlock.selection &&
-    defaultPageBlock.selection.state.clearSelection();
   if (editableContainer) {
-    defaultPageBlock.selection?.setFocusedBlock(element as Element);
+    if (isPageMode) {
+      pageBlock.selection.state.clearSelection();
+      pageBlock.selection.setFocusedBlock(element as Element);
+    }
     focusRichText(editableContainer, position, zoom);
   }
 }
@@ -205,13 +207,16 @@ export function focusPreviousBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const page = getDefaultPageBlock(model);
+  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
+  assertExists(pageBlock);
 
   let nextPosition = position;
-  if (nextPosition) {
-    page.lastSelectionPosition = nextPosition;
-  } else if (page.lastSelectionPosition) {
-    nextPosition = page.lastSelectionPosition;
+  if (pageBlock.tagName === 'AFFINE-DEFAULT-PAGE') {
+    if (nextPosition) {
+      pageBlock.lastSelectionPosition = nextPosition;
+    } else if (pageBlock.lastSelectionPosition) {
+      nextPosition = pageBlock.lastSelectionPosition;
+    }
   }
 
   const preNodeModel = getPreviousBlock(model);
@@ -225,15 +230,19 @@ export function focusNextBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const page = getDefaultPageBlock(model);
-  let nextPosition = position;
-  if (nextPosition) {
-    page.lastSelectionPosition = nextPosition;
-  } else if (page.lastSelectionPosition) {
-    nextPosition = page.lastSelectionPosition;
-  }
-  const nextNodeModel = getNextBlock(model);
+  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
+  assertExists(pageBlock);
 
+  let nextPosition = position;
+  if (pageBlock.tagName === 'AFFINE-DEFAULT-PAGE') {
+    if (nextPosition) {
+      pageBlock.lastSelectionPosition = nextPosition;
+    } else if (pageBlock.lastSelectionPosition) {
+      nextPosition = pageBlock.lastSelectionPosition;
+    }
+  }
+
+  const nextNodeModel = getNextBlock(model);
   if (nextNodeModel) {
     focusBlockByModel(nextNodeModel, nextPosition, zoom);
   }
@@ -248,36 +257,7 @@ export function resetNativeSelection(range: Range | null) {
 
 export function clearSelection(page: Page) {
   if (!page.root) return;
-  const defaultPageBlock = getDefaultPageBlock(page.root);
-
-  if ('selection' in defaultPageBlock) {
-    // this is not EdgelessPageBlockComponent
-    defaultPageBlock.selection.clear();
-  }
-}
-
-/**
- * @deprecated Use {@link focusBlockByModel} instead.
- */
-export function focusRichTextByOffset(richTextParent: HTMLElement, x: number) {
-  const richText = richTextParent.querySelector('rich-text');
-  assertExists(richText);
-  const bbox = richText.getBoundingClientRect();
-  const y = bbox.y + bbox.height / 2;
-  const range = caretRangeFromPoint(x, y);
-  if (range?.startContainer instanceof Node) {
-    resetNativeSelection(range);
-  }
-}
-
-/**
- * @deprecated Use {@link focusBlockByModel} instead.
- */
-export function focusRichTextStart(richText: RichText) {
-  const start = richText.querySelector('p')?.childNodes[0] as ChildNode;
-  const range = document.createRange();
-  range.setStart(start, 0);
-  resetNativeSelection(range);
+  getPageBlock(page.root)?.selection.clear();
 }
 
 /**
@@ -382,10 +362,10 @@ function handleInFrameDragMove(
 
 export function handleNativeRangeDragMove(
   startRange: Range | null,
-  e: SelectionEvent
+  e: PointerEventState
 ) {
   const isEdgelessMode = !!document.querySelector('affine-edgeless-page');
-  const { clientX: x, clientY: y } = e.raw;
+  const { clientX: x, clientY: y, target } = e.raw;
 
   // Range from current mouse position
   let currentRange = caretRangeFromPoint(x, y);
@@ -422,7 +402,14 @@ export function handleNativeRangeDragMove(
   if (!currentFrame) return;
 
   if (shouldUpdateCurrentRange) {
-    const closestEditor = getClosestEditor(y, currentFrame);
+    let closestEditor: Element | null = null;
+    // In some cases, the target element may be HTMLDocument.
+    if (target && 'closest' in target) {
+      closestEditor = (target as HTMLElement).closest('.virgo-editor');
+    }
+    if (!closestEditor) {
+      closestEditor = getClosestEditor(y, currentFrame);
+    }
     if (!closestEditor) return;
 
     const newPoint = normalizePointIntoContainer({ x, y }, closestEditor);
@@ -473,7 +460,7 @@ function normalizePointIntoContainer(point: IPoint, container: Element) {
   return newPoint;
 }
 
-export function isBlankArea(e: SelectionEvent) {
+export function isBlankArea(e: PointerEventState) {
   const { cursor } = window.getComputedStyle(e.raw.target as Element);
   return cursor !== 'text';
 }
@@ -481,7 +468,11 @@ export function isBlankArea(e: SelectionEvent) {
 // Retarget selection back to the nearest block
 // when user clicks on the edge of page (page mode) or frame (edgeless mode).
 // See https://github.com/toeverything/blocksuite/pull/878
-function retargetClick(page: Page, e: SelectionEvent, container?: HTMLElement) {
+function retargetClick(
+  page: Page,
+  e: PointerEventState,
+  container?: HTMLElement
+) {
   const targetElement = getElementFromEventTarget(e.raw.target);
   const block = targetElement?.closest(`[${BLOCK_ID_ATTR}]`) as {
     model?: BaseBlockModel;
@@ -523,7 +514,7 @@ function retargetClick(page: Page, e: SelectionEvent, container?: HTMLElement) {
 
 export function handleNativeRangeClick(
   page: Page,
-  e: SelectionEvent,
+  e: PointerEventState,
   container?: HTMLElement
 ) {
   // if not left click
@@ -543,7 +534,7 @@ export function handleNativeRangeAtPoint(x: number, y: number) {
   }
 }
 
-export function handleNativeRangeDblClick(page: Page, e: SelectionEvent) {
+export function handleNativeRangeDblClick() {
   const selection = window.getSelection();
   if (selection && selection.isCollapsed && selection.anchorNode) {
     const editableContainer =
@@ -704,7 +695,7 @@ function trySelectBySegmenter(
       selection,
       currentChar
     );
-    if (currentCharIndex === -1) return null;
+    if (currentCharIndex === -1 || currentNodeIndex === -1) return null;
 
     // length for expand left
     let leftLength = currentCharIndex;
@@ -826,14 +817,14 @@ export function getSplicedTitle(title: HTMLTextAreaElement) {
   return text.join('');
 }
 
-export function isEmbed(e: SelectionEvent) {
+export function isEmbed(e: PointerEventState) {
   if ((e.raw.target as HTMLElement).classList.contains('resize')) {
     return true;
   }
   return false;
 }
 
-export function isDatabase(e: SelectionEvent) {
+export function isDatabase(e: PointerEventState) {
   const target = e.raw.target;
   if (!(target instanceof HTMLElement)) {
     // When user click on the list indicator,
@@ -932,7 +923,7 @@ export function getClosestFrame(clientY: number) {
 /**
  * Handle native range with triple click.
  */
-export function handleNativeRangeTripleClick(e: SelectionEvent) {
+export function handleNativeRangeTripleClick(e: PointerEventState) {
   const {
     raw: { clientX, clientY },
   } = e;

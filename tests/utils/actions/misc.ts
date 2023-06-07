@@ -719,6 +719,23 @@ export const getCenterPosition: (
   };
 };
 
+export const getCenterPositionByLocator: (
+  page: Page,
+  locator: Locator
+) => Promise<{ x: number; y: number }> = async (
+  page: Page,
+  locator: Locator
+) => {
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Failed to getCenterPosition! Can't get bounding box");
+  }
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2,
+  };
+};
+
 export const getBoundingClientRect: (
   page: Page,
   selector: string
@@ -904,4 +921,26 @@ export async function getCurrentThemeCSSPropertyValue(
         .themeObserver.cssVariables?.[property];
     }, property);
   return value;
+}
+
+export async function transformMarkdown(page: Page, data: string) {
+  const promiseResult = await page.evaluate(
+    ({ data }) => {
+      const contentParser = new window.ContentParser(window.page);
+      return contentParser.markdown2Block(data);
+    },
+    { data }
+  );
+  return await promiseResult;
+}
+
+export async function transformHtml(page: Page, data: string) {
+  const promiseResult = await page.evaluate(
+    ({ data }) => {
+      const contentParser = new window.ContentParser(window.page);
+      return contentParser.htmlText2Block(data);
+    },
+    { data }
+  );
+  return await promiseResult;
 }

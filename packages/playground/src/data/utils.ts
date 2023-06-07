@@ -1,11 +1,18 @@
-import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import type { IShape } from '@blocksuite/phasor';
+import { assertExists, type Page, type Workspace } from '@blocksuite/store';
 import * as Y from 'yjs';
+
+export interface InitFn {
+  (workspace: Workspace, pageId: string): void;
+  id: string;
+  displayName: string;
+  description: string;
+}
 
 export function addShapeElement(
   page: Page,
   surfaceBlockId: string,
-  shape: Record<string, unknown>
+  shape: IShape
 ) {
   const shapeYElement = new Y.Map();
   for (const [key, value] of Object.entries(shape)) {

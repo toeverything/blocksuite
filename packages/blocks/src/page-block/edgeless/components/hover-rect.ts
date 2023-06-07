@@ -11,10 +11,7 @@ export function EdgelessHoverRect(
   if (!hoverState) return null;
   const rect = hoverState.rect;
 
-  const style = {
-    ...getCommonRectStyle(rect),
-    border: '1px solid var(--affine-primary-color)',
-  };
+  const style = getCommonRectStyle(rect);
 
   return html`
     <div class="affine-edgeless-hover-rect" style=${styleMap(style)}></div>

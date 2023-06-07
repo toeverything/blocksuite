@@ -1,6 +1,7 @@
 import type { UnionToIntersection } from '@blocksuite/global/types';
 
 import type { BaseService } from './__internal__/service/index.js';
+import { BookmarkBlockService } from './bookmark-block/index.js';
 import { CodeBlockService } from './code-block/index.js';
 import { DatabaseBlockService } from './database-block/database-service.js';
 import { DividerBlockService } from './divider-block/index.js';
@@ -18,6 +19,7 @@ export const blockService = {
   'affine:embed': EmbedBlockService,
   'affine:divider': DividerBlockService,
   'affine:frame': FrameBlockService,
+  'affine:bookmark': BookmarkBlockService,
 } satisfies {
   [key in Flavour]?: { new (): BaseService };
 };

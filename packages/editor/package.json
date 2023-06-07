@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Default BlockSuite-based editor built for AFFiNE.",
   "main": "src/index.ts",
   "type": "module",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@toeverything/theme": "0.5.7",
+    "@toeverything/theme": "0.0.0-20230530064828-8cd3bf6",
     "lit": "^2.7.3",
     "marked": "^4.2.12",
     "turndown": "^7.1.1"

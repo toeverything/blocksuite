@@ -53,6 +53,10 @@ export const initParam = providerArgs.includes('indexeddb')
   : params.get('init');
 export const isE2E = room.startsWith('playwright');
 
+export const getOptions = (
+  fn: (params: URLSearchParams) => Record<string, string | number>
+) => fn(params);
+
 declare global {
   // eslint-disable-next-line no-var
   var targetPageId: string | undefined;
@@ -220,6 +224,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_database: true,
       enable_edgeless_toolbar: true,
       enable_linked_page: true,
+      enable_bookmark_operation: true,
       readonly: {
         'space:page0': false,
       },

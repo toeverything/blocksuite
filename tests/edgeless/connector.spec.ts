@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
+  assertMouseMode,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
@@ -37,8 +38,8 @@ test('add connector element', async ({ page }) => {
 
   await addBasicConnectorElement(page, start, end);
 
-  await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 111]);
+  await assertMouseMode(page, 'default');
+  await assertEdgelessSelectedRect(page, [98, 98, 104, 107]);
 });
 
 test('connector attached element', async ({ page }) => {
@@ -60,7 +61,7 @@ test('connector attached element', async ({ page }) => {
   await addBasicConnectorElement(page, connector.start, connector.end);
 
   await page.mouse.move(connector.start.x + 5, connector.start.y + 5);
-  await assertEdgelessHoverRect(page, [148, 198, 161, 104]);
+  await assertEdgelessHoverRect(page, [148, 198, 157, 104]);
 
   const connector2 = {
     start: { x: 170, y: 150 },
@@ -70,7 +71,7 @@ test('connector attached element', async ({ page }) => {
   await addBasicConnectorElement(page, connector2.start, connector2.end);
 
   await page.mouse.move(connector2.end.x - 5, connector2.end.y - 5);
-  await assertEdgelessHoverRect(page, [168, 148, 141, 24]);
+  await assertEdgelessHoverRect(page, [168, 148, 137, 24]);
 });
 
 test('drag element which attaches connector', async ({ page }) => {
@@ -91,7 +92,7 @@ test('drag element which attaches connector', async ({ page }) => {
   await addBasicConnectorElement(page, connector.start, connector.end);
 
   await page.mouse.move(connector.start.x + 5, connector.start.y + 5);
-  await assertEdgelessHoverRect(page, [148, 198, 161, 104]);
+  await assertEdgelessHoverRect(page, [148, 198, 157, 104]);
 
   await dragBetweenCoords(
     page,
@@ -106,7 +107,7 @@ test('drag element which attaches connector', async ({ page }) => {
   );
 
   await page.mouse.move(connector.end.x - 5, connector.end.y - 5);
-  await assertEdgelessHoverRect(page, [178, 228, 131, 74]);
+  await assertEdgelessHoverRect(page, [178, 228, 127, 74]);
 });
 
 test('resize element which attaches connector', async ({ page }) => {
@@ -127,13 +128,13 @@ test('resize element which attaches connector', async ({ page }) => {
   await addBasicConnectorElement(page, connector.start, connector.end);
 
   await page.mouse.move(connector.start.x + 5, connector.start.y + 5);
-  await assertEdgelessHoverRect(page, [148, 198, 161, 104]);
+  await assertEdgelessHoverRect(page, [148, 198, 157, 104]);
 
   await page.mouse.click(rect.start.x + 5, rect.start.y + 5);
   await resizeElementByTopLeftHandle(page, { x: 20, y: 0 });
 
   await page.mouse.move(connector.end.x - 5, connector.end.y - 5);
-  await assertEdgelessHoverRect(page, [158, 198, 151, 104]);
+  await assertEdgelessHoverRect(page, [158, 198, 147, 104]);
 });
 
 test('resize connector by capital resize handler', async ({ page }) => {
@@ -147,12 +148,12 @@ test('resize connector by capital resize handler', async ({ page }) => {
   await addBasicConnectorElement(page, start, end);
 
   await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 111]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 107]);
 
   await page.mouse.click(start.x + 5, start.y + 5);
 
   await resizeConnectorByStartCapitalHandler(page, { x: -20, y: -20 }, 10);
-  await assertEdgelessSelectedRect(page, [78, 78, 124, 131]);
+  await assertEdgelessSelectedRect(page, [78, 78, 124, 127]);
 });
 
 test('resize connector by capital resize handler in embed mode', async ({
@@ -169,12 +170,12 @@ test('resize connector by capital resize handler in embed mode', async ({
   await addBasicConnectorElement(page, start, end);
 
   await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 111]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 107]);
 
   await page.mouse.click(start.x + 5, start.y + 5);
 
   await resizeConnectorByStartCapitalHandler(page, { x: -20, y: -20 }, 10);
-  await assertEdgelessSelectedRect(page, [78, 78, 124, 131]);
+  await assertEdgelessSelectedRect(page, [78, 78, 124, 127]);
 });
 
 test('change connector line width', async ({ page }) => {
@@ -201,8 +202,8 @@ test('change connector line width', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [
-    [start.x + 20, start.y - 5],
-    [start.x + 20, start.y + 4],
+    [start.x + 10, start.y - 3],
+    [start.x + 10, start.y + 3],
   ]);
   expect(pickedColor[0]).toBe(pickedColor[1]);
 });

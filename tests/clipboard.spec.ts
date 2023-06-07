@@ -1,14 +1,18 @@
 import './utils/declare-test-window.js';
 
+import { EDITOR_WIDTH } from '@blocksuite/global/config';
+
 import {
   activeFrameInEdgeless,
   addBasicRectShapeElement,
   captureHistory,
+  changeEdgelessFrameBackground,
   copyByKeyboard,
   cutByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
+  getAllFrames,
   getRichTextBoundingBox,
   importMarkdown,
   initDatabaseColumn,
@@ -26,10 +30,12 @@ import {
   pressTab,
   resetHistory,
   selectAllByKeyboard,
+  selectFrameInEdgeless,
   setSelection,
   setVirgoSelection,
   SHORT_KEY,
   switchEditorMode,
+  triggerComponentToolbarAction,
   type,
   undoByClick,
   waitForVirgoStateUpdated,
@@ -38,6 +44,7 @@ import {
 import {
   assertBlockTypes,
   assertClipItems,
+  assertEdgelessFrameBackground,
   assertEdgelessSelectedRect,
   assertRichTexts,
   assertSelection,
@@ -343,6 +350,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -384,6 +392,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -496,6 +505,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -515,6 +525,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -566,6 +577,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:database
       prop:columns="Array [1]"
@@ -603,6 +615,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:database
       prop:columns="Array [1]"
@@ -644,8 +657,13 @@ test(
       }
     );
 
-    await dragBetweenCoords(page, { x: 50, y: 90 }, { x: 400, y: 400 });
-    await assertEdgelessSelectedRect(page, [90, 100, 720, 272]);
+    await dragBetweenCoords(
+      page,
+      { x: 50, y: 90 },
+      { x: 400, y: 400 },
+      { steps: 10 }
+    );
+    await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
 
     await copyByKeyboard(page);
 
@@ -653,7 +671,7 @@ test(
 
     await pasteByKeyboard(page, false);
 
-    await assertEdgelessSelectedRect(page, [40, 264, 720, 272]);
+    await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
   }
 );
 
@@ -672,6 +690,30 @@ test(scoped`copy when text frame active in edgeless`, async ({ page }) => {
   await type(page, '555');
   await pasteByKeyboard(page, false);
   await assertText(page, '5551234');
+});
+
+test(scoped`paste frame block with background`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, '1234');
+
+  await switchEditorMode(page);
+  await selectFrameInEdgeless(page, ids.frameId);
+
+  await triggerComponentToolbarAction(page, 'changeFrameColor');
+  const color = '--affine-tag-blue';
+  await changeEdgelessFrameBackground(page, color);
+  await assertEdgelessFrameBackground(page, ids.frameId, color);
+
+  await copyByKeyboard(page);
+
+  await page.mouse.move(0, 0);
+  await pasteByKeyboard(page, false);
+  const frames = await getAllFrames(page);
+  await Array.from(frames).map(async frame => {
+    await assertEdgelessFrameBackground(page, frame.id, color);
+  });
 });
 
 test(scoped`copy and paste to selection block selection`, async ({ page }) => {
@@ -722,6 +764,7 @@ test(
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -746,6 +789,7 @@ test(
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -822,4 +866,54 @@ test(scoped`paste in list format`, async ({ page }) => {
     { clipData }
   );
   await assertRichTexts(page, ['test111', '222']);
+});
+
+test(scoped`auto identify url`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  // set up clipboard data using html
+  const clipData = {
+    'text/plain': `test https://www.google.com`,
+  };
+  await waitNextFrame(page);
+  await page.evaluate(
+    ({ clipData }) => {
+      const dT = new DataTransfer();
+      const e = new ClipboardEvent('paste', { clipboardData: dT });
+      Object.defineProperty(e, 'target', {
+        writable: false,
+        value: document.body,
+      });
+      e.clipboardData?.setData('text/plain', clipData['text/plain']);
+      document.body.dispatchEvent(e);
+    },
+    { clipData }
+  );
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text={
+        <>
+          <text
+            insert="test "
+          />
+          <text
+            insert="https://www.google.com"
+            link="https://www.google.com"
+          />
+        </>
+      }
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
 });

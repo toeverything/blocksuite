@@ -8,11 +8,16 @@ import type { TableMixColumn } from '../common/view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { Cell, ColumnType, RowHost } from './types.js';
 
+export abstract class TableViewCell extends ShadowlessElement {
+  abstract readonly cellType: ColumnType;
+}
+
 export abstract class DatabaseCellElement<
   Value,
   Data extends Record<string, unknown> = Record<string, unknown>
 > extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
+
   @property()
   rowHost!: RowHost<Value, SelectColumnData>;
   @property()

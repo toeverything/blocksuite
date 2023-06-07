@@ -40,6 +40,7 @@ const styles = css`
   .affine-database-toolbar svg {
     width: 16px;
     height: 16px;
+    fill: var(--affine-icon-color);
   }
 
   .affine-database-toolbar-item {

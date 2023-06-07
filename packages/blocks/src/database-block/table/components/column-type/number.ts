@@ -2,10 +2,17 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 
 @customElement('affine-database-number-cell-editing')
-class NumberCellEditing extends DatabaseCellElement<number> {
+export class NumberCellEditing
+  extends DatabaseCellElement<number>
+  implements TableViewCell
+{
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
@@ -40,6 +47,7 @@ class NumberCellEditing extends DatabaseCellElement<number> {
   `;
 
   static override tag = literal`affine-database-number-cell-editing`;
+  cellType = 'number' as const;
 
   override firstUpdated() {
     this._disposables.addFromEvent(this, 'click', this._onClick);

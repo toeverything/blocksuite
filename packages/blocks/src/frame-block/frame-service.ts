@@ -30,6 +30,7 @@ export class FrameBlockService extends BaseService<FrameBlockModel> {
       type: block.type as string,
       text: delta,
       xywh: block.xywh,
+      background: block.background,
       children: block.children?.map((child, index) => {
         if (index === block.children.length - 1) {
           return getService(child.flavour).block2Json(child, 0, end);

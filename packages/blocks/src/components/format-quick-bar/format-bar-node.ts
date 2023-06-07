@@ -9,9 +9,11 @@ import { WithDisposable } from '@blocksuite/lit';
 import {
   assertExists,
   type BaseBlockModel,
+  matchFlavours,
   type Page,
 } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
+import type { PropertyValues } from 'lit';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -96,6 +98,7 @@ function ParagraphPanel(
     @mouseout="${onHoverEnd}"
   >
     ${paragraphConfig
+      .filter(({ flavour }) => flavour !== 'affine:divider')
       .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
       .map(
         ({ flavour, type, name, icon }) => html`<format-bar-button
@@ -111,9 +114,16 @@ function ParagraphPanel(
   </div>`;
 }
 
+type CustomElementCreator = (
+  page: Page,
+  // todo(himself65): support get current block range
+  getBlockRange: () => ReturnType<typeof getCurrentBlockRange>
+) => HTMLDivElement;
+
 @customElement('format-quick-bar')
 export class FormatQuickBar extends WithDisposable(LitElement) {
   static override styles = formatQuickBarStyle;
+  static customElements: CustomElementCreator[] = [];
 
   @property()
   page!: Page;
@@ -154,6 +164,31 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   @query('.format-quick-bar')
   formatQuickBarElement!: HTMLElement;
 
+  @query('.custom-items')
+  customItemsElement!: HTMLElement;
+
+  private _customElements: HTMLDivElement[] = [];
+
+  protected override update(changedProperties: PropertyValues) {
+    super.update(changedProperties);
+    if (
+      this._customElements.length === 0 &&
+      FormatQuickBar.customElements.length !== 0
+    ) {
+      this._customElements = FormatQuickBar.customElements.map(element =>
+        element(this.page, () => getCurrentBlockRange(this.page))
+      );
+      this.customItemsElement.append(...this._customElements);
+      this._disposables.add(() => {
+        this._customElements.forEach(element => {
+          element.remove();
+        });
+        this._customElements = [];
+        this.customItemsElement.innerHTML = '';
+      });
+    }
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -161,7 +196,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     this._paragraphType = `${startModel.flavour}/${startModel.type}`;
     this._format = getCurrentCombinedFormat(this.page);
 
-    this.addEventListener('mousedown', (e: MouseEvent) => {
+    this.addEventListener('pointerdown', (e: MouseEvent) => {
       // Prevent click event from making selection lost
       e.preventDefault();
       e.stopPropagation();
@@ -263,6 +298,43 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       return html``;
     }
 
+    const styles = styleMap({
+      left: this.left,
+      top: this.top,
+    });
+
+    const actionItems = actionConfig
+      .filter(({ showWhen = () => true }) => showWhen(page, this.models))
+      .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
+        const enabled = enabledWhen(page);
+        const toolTip = enabled
+          ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
+          : html`<tool-tip tip-position="top" inert role="tooltip"
+              >${disabledToolTip}</tool-tip
+            >`;
+        return html`<format-bar-button
+          class="has-tool-tip"
+          data-testid=${id}
+          ?disabled=${!enabled}
+          @click=${() => enabled && action({ page })}
+        >
+          ${icon}${toolTip}
+        </format-bar-button>`;
+      });
+
+    if (
+      this.models.length === 1 &&
+      matchFlavours(this.models[0], ['affine:database'])
+    ) {
+      return html`<div
+        class="format-quick-bar"
+        style="${styles}"
+        @pointerdown=${stopPropagation}
+      >
+        ${actionItems}
+      </div>`;
+    }
+
     const paragraphIcon =
       paragraphConfig.find(
         ({ flavour, type }) => `${flavour}/${type}` === this._paragraphType
@@ -310,36 +382,15 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
         </format-bar-button>`
       );
 
-    const actionItems = actionConfig
-      .filter(({ showWhen = () => true }) => showWhen(page))
-      .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
-        const enabled = enabledWhen(page);
-        const toolTip = enabled
-          ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
-          : html`<tool-tip tip-position="top" inert role="tooltip"
-              >${disabledToolTip}</tool-tip
-            >`;
-        return html`<format-bar-button
-          class="has-tool-tip"
-          data-testid=${id}
-          ?disabled=${!enabled}
-          @click=${() => {
-            if (enabled) action({ page });
-          }}
-        >
-          ${icon}${toolTip}
-        </format-bar-button>`;
-      });
-
-    const styles = styleMap({
-      left: this.left,
-      top: this.top,
-    });
     return html` <div
       class="format-quick-bar"
       style="${styles}"
       @pointerdown=${stopPropagation}
     >
+      <div class="custom-items"></div>
+      ${this._customElements.length > 0
+        ? html`<div class="divider"></div>`
+        : null}
       ${paragraphItems}
       <div class="divider"></div>
       ${formatItems}

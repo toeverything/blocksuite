@@ -1,3 +1,4 @@
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { expect } from '@playwright/test';
 
 import {
@@ -17,9 +18,6 @@ import {
 import { getBoundingClientRect } from './utils/actions/misc.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
-
-// '../packages/blocks/src/__internal__/utils/consts.ts'
-const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
 
 test('only have one drag handle in screen', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -142,6 +140,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -193,6 +192,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -250,6 +250,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -308,6 +309,7 @@ test('move to the last block of each level in multi-level nesting', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -380,7 +382,7 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
     page,
     [0, 0],
     [1, 3],
-    { x: -80, y: 0 },
+    { x: -60, y: 0 },
     { x: 80, y: 0 },
     {
       steps: 50,
@@ -430,6 +432,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -494,6 +497,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
 <affine:page>
   <affine:frame
     prop:background="--affine-background-secondary-color"
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -590,7 +594,7 @@ test('should create preview when dragging', async ({ page }) => {
     page,
     [0, 0],
     [1, 3],
-    { x: -80, y: 0 },
+    { x: -60, y: 0 },
     { x: 80, y: 0 },
     {
       steps: 50,
@@ -623,7 +627,7 @@ test('should cover all selected blocks', async ({ page }) => {
     page,
     [0, 0],
     [1, 3],
-    { x: -80, y: 0 },
+    { x: -60, y: 0 },
     { x: 80, y: 0 },
     {
       steps: 50,
@@ -678,7 +682,7 @@ test('should drag and drop blocks under block-level selection', async ({
     page,
     [0, 0],
     [1, 3],
-    { x: -80, y: 0 },
+    { x: -60, y: 0 },
     { x: 80, y: 0 },
     {
       steps: 50,
@@ -726,7 +730,7 @@ test('should trigger click event on editor container when clicking on blocks und
     page,
     [0, 0],
     [1, 3],
-    { x: -80, y: 0 },
+    { x: -60, y: 0 },
     { x: 80, y: 0 },
     {
       steps: 50,
@@ -772,28 +776,17 @@ test('should get to selected block when dragging unselected block', async ({
     throw new Error();
   }
 
-  await page.mouse.move(
-    editorRect1.x + 5,
-    editorRect1.y + editorRect1.height / 2
-  );
-
-  await page.mouse.move(
-    editorRect1.x - 20,
-    editorRect1.y + editorRect1.height / 2
-  );
+  await page.mouse.move(editorRect1.x - 5, editorRect0.y);
   await page.mouse.down();
   await page.mouse.up();
 
   const blockSelections = page.locator('affine-selected-blocks > *');
   await expect(blockSelections).toHaveCount(1);
 
-  await page.mouse.move(
-    editorRect0.x - 20,
-    editorRect0.y + editorRect0.height / 2
-  );
+  await page.mouse.move(editorRect1.x - 5, editorRect0.y);
   await page.mouse.down();
   await page.mouse.move(
-    editorRect1.x - 20,
+    editorRect1.x - 5,
     editorRect1.y + editorRect1.height / 2 + 1,
     {
       steps: 10,
@@ -864,4 +857,103 @@ test('should clear the currently selected block when clicked again', async ({
   }
 
   expect(editorRect0).toEqual(selectedBlockRect);
+});
+
+test('should support moving blocks from multiple frames', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
+    });
+    page.addBlock('affine:surface', {}, pageId);
+
+    ['123', '456', '789', '987', '654', '321'].forEach(text => {
+      const frameId = page.addBlock('affine:frame', {}, pageId);
+      page.addBlock(
+        'affine:paragraph',
+        {
+          text: new page.Text(text),
+        },
+        frameId
+      );
+    });
+
+    page.resetHistory();
+  });
+
+  await dragBetweenIndices(
+    page,
+    [1, 0],
+    [2, 3],
+    { x: -60, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const blockSelections = page.locator('affine-selected-blocks > *');
+  await expect(blockSelections).toHaveCount(2);
+
+  const editors = page.locator('rich-text');
+  const editorRect1 = await editors.nth(1).boundingBox();
+  const editorRect3 = await editors.nth(3).boundingBox();
+  if (!editorRect1 || !editorRect3) {
+    throw new Error();
+  }
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: editorRect1.x + 10,
+      y: editorRect1.y + editorRect1.height / 2,
+    },
+    {
+      x: editorRect3.x + 10,
+      y: editorRect3.y + editorRect3.height / 2 + 1,
+    },
+    {
+      steps: 50,
+    }
+  );
+
+  await assertRichTexts(page, ['123', '987', '456', '789', '654', '321']);
+  await expect(blockSelections).toHaveCount(2);
+
+  await dragBetweenIndices(
+    page,
+    [5, 0],
+    [4, 3],
+    { x: -60, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
+    }
+  );
+
+  const editorRect0 = await editors.nth(0).boundingBox();
+  const editorRect5 = await editors.nth(5).boundingBox();
+  if (!editorRect0 || !editorRect5) {
+    throw new Error();
+  }
+
+  await dragBetweenCoords(
+    page,
+    {
+      x: editorRect5.x + 10,
+      y: editorRect5.y + editorRect5.height / 2,
+    },
+    {
+      x: editorRect0.x + 10,
+      y: editorRect0.y + editorRect0.height / 2 - 1,
+    },
+    {
+      steps: 50,
+    }
+  );
+
+  await assertRichTexts(page, ['654', '321', '123', '987', '456', '789']);
+  await expect(blockSelections).toHaveCount(2);
 });

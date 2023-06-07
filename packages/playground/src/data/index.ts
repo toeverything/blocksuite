@@ -4,6 +4,12 @@
  * the page structure will be automatically loaded from provider.
  * In these cases, these functions should not be called.
  */
+export * from './database';
+export * from './empty';
+export * from './heavy';
+export * from './heavy-whiteboard';
+export * from './multiple-editor';
+export * from './preset';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

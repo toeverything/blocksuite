@@ -3,7 +3,11 @@ import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { literal } from 'lit/static-html.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -79,10 +83,14 @@ type DragConfig = {
 };
 
 @customElement('affine-database-progress-cell-editing')
-class ProgressCellEditing extends DatabaseCellElement<number> {
+class ProgressCellEditing
+  extends DatabaseCellElement<number>
+  implements TableViewCell
+{
   static override styles = styles;
 
   static override tag = literal`affine-database-progress-cell-editing`;
+  cellType = 'progress' as const;
 
   @query('.affine-database-progress-drag-handle')
   private _dragHandle!: HTMLElement;

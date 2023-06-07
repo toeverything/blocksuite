@@ -6,23 +6,37 @@ import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../../list-block/utils/icons.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import {
+  DatabaseCellElement,
+  defineColumnRenderer,
+  type TableViewCell,
+} from '../../register.js';
 
 @customElement('affine-database-checkbox-cell')
-class CheckboxCell extends DatabaseCellElement<boolean> {
+class CheckboxCell
+  extends DatabaseCellElement<boolean>
+  implements TableViewCell
+{
   static override tag = literal`affine-database-checkbox-cell`;
+  cellType = 'checkbox' as const;
 
   static override styles = css`
     affine-database-checkbox-cell {
       display: block;
       width: 100%;
       height: 100%;
+      cursor: pointer;
     }
 
     .affine-database-checkbox-container {
+      height: 100%;
+    }
+
+    .affine-database-checkbox {
       display: flex;
       align-items: center;
       height: 100%;
+      width: 100%;
     }
   `;
 

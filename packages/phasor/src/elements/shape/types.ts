@@ -9,9 +9,9 @@ export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
 export interface IShape {
   id: string;
-  index: string;
-  type: string;
+  type: 'shape';
   xywh: SerializedXYWH;
+  index: string;
   seed: number;
 
   shapeType: ShapeType;
@@ -21,6 +21,8 @@ export interface IShape {
   strokeWidth: number;
   strokeColor: string;
   strokeStyle: StrokeStyle;
+  // https://github.com/rough-stuff/rough/wiki#roughness
+  roughness?: number;
 }
 
 export interface ShapeMethods {

@@ -16,10 +16,14 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
-export function compare(a: SurfaceElement, b: SurfaceElement): number {
+// Dont compare by id, '398303718:2' > '398303718:14' is true
+export function compare<T extends { id: string; index: string }>(
+  a: T,
+  b: T
+): number {
+  if (a.index < b.index) return -1;
   if (a.index > b.index) return 1;
-  else if (a.index < b.index) return -1;
-  return a.id > b.id ? 1 : -1;
+  return 0;
 }
 
 export class GridManager {

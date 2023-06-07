@@ -2,6 +2,7 @@ import type { TemplateResult } from 'lit/html.js';
 
 import type { BlockModelProps } from '../../types.js';
 import {
+  BookmarkIcon,
   BulletedListIcon,
   CodeBlockIcon,
   DividerIcon,
@@ -16,7 +17,7 @@ import {
   QuoteIcon,
   TextIcon,
   TodoIcon,
-} from '../icons.js';
+} from '../icons/index.js';
 import { SHORT_KEY } from './platform.js';
 
 export type BlockConfig<
@@ -251,5 +252,13 @@ export const BLOCKHUB_FILE_ITEMS = [
     description: 'Upload images.',
     icon: ImageIcon,
     tooltip: 'Drag/Click to insert Image',
+  },
+  {
+    flavour: 'affine:bookmark',
+    type: 'bookmark',
+    name: 'Bookmark',
+    description: 'Insert a link in card view.',
+    icon: BookmarkIcon,
+    tooltip: 'Drag/Click to insert Bookmark',
   },
 ];

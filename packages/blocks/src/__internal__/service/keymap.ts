@@ -53,7 +53,7 @@ export function hardEnter(
   if (
     isEmptyList &&
     parent &&
-    matchFlavours(parent, ['affine:frame']) &&
+    matchFlavours(parent, ['affine:frame', 'affine:database']) &&
     model.children.length === 0
   ) {
     // TODO use `handleLineStartBackspace` directly is not concise enough,

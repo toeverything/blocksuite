@@ -21,16 +21,15 @@ import {
   getModelByBlockElement,
   isInSamePath,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
+import {
+  getService,
+  getServiceOrRegister,
+} from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
-import {
-  getClosestDatabaseId,
-  getClosestRowId,
-} from './selection-manager/database-selection-manager/utils.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
@@ -516,10 +515,11 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
 
       page.captureSync();
 
+      const parent = page.getParent(model);
+      const dragBlockParent = page.getParent(models[0]);
       if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
-        const parent = page.getParent(model);
         assertExists(parent);
         page.moveBlocks(models, parent, model, type === 'before');
       }
@@ -529,6 +529,19 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       // pageBlock.selection.state.type = 'block';
 
       pageBlock.updateComplete.then(() => {
+        if (
+          dragBlockParent &&
+          matchFlavours(dragBlockParent, ['affine:database'])
+        ) {
+          const service = getService('affine:database');
+          service.refreshRowSelection();
+        }
+
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          pageBlock.selection.clear();
+          return;
+        }
+
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
@@ -543,23 +556,34 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
     setDragType(dragging: boolean) {
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
-    setSelectedBlock(modelState: EditingState | null) {
-      if (modelState) {
-        const { element } = modelState;
-        const rowId = getClosestRowId(element);
-        if (rowId !== -1) {
-          const databaseId = getClosestDatabaseId(element);
+    setSelectedBlock(modelState: EditingState | null, element) {
+      if (element && element.closest('affine-database')) {
+        const service = getService('affine:database');
+        const toggled = service.toggleRowSelection(element);
+        if (toggled) {
+          pageBlock.selection.clear();
+          return;
+        }
+      }
 
-          const databaseService = getService('affine:database');
-          databaseService.setTableViewSelection({
-            type: 'select',
-            databaseId,
-            rowIds: [rowId],
-          });
+      const model = modelState?.model;
+      if (model) {
+        const parent = model.page.getParent(model);
+        if (parent && matchFlavours(parent, ['affine:database'])) {
+          const service = getService('affine:database');
+          service.setRowSelectionByElement(modelState.element);
           return;
         }
       }
       pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
+
+      const service = getServiceOrRegister('affine:database');
+      Promise.resolve(service).then(service => {
+        const rowSelection = service.getLastRowSelection();
+        if (rowSelection) {
+          service.clearRowSelection();
+        }
+      });
     },
     getSelectedBlocks() {
       return pageBlock.selection.state.selectedBlocks;

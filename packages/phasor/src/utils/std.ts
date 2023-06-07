@@ -2,6 +2,8 @@ import { nanoid } from 'nanoid';
 
 import { ZOOM_STEP } from '../consts.js';
 
+export { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing';
+
 export function generateElementId() {
   return nanoid(10);
 }
