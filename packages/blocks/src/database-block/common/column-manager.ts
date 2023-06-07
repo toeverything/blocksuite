@@ -91,6 +91,19 @@ class ColumnHelper<
     };
   }
 
+  createWithId(
+    id: string,
+    name: string,
+    data?: T
+  ): { type: string; name: string; data: T; id: string } {
+    return {
+      id,
+      type: this.type,
+      name,
+      data: data ?? this.ops.defaultData(),
+    };
+  }
+
   render(data: T) {
     return this.ops.configRender(data);
   }
