@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 
-import { VITE_IS_UNIT_TEST } from '../../consts.js';
 import { StrokeStyle } from '../../consts.js';
 import { SurfaceManager } from '../../surface.js';
 import { Bound } from '../../utils/bound.js';
@@ -27,7 +26,7 @@ const dataWithoutXywh: Omit<IShape, 'xywh'> = {
 
 const data: IShape = { ...dataWithoutXywh, xywh: '[0,0,20,20]' };
 
-vi.stubEnv(VITE_IS_UNIT_TEST, 'true');
+vi.stubEnv('IS_UNIT_TEST', 'true');
 
 describe('shape element', () => {
   const doc = new Y.Doc();

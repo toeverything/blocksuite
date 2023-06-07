@@ -44,7 +44,7 @@ export class SurfaceManager {
     yContainer: Y.Map<unknown>,
     computedValue: ComputedValue = v => v
   ) {
-    if (import.meta.env.VITE_IS_UNIT_TEST !== 'true') {
+    if (process.env.IS_UNIT_TEST !== 'true') {
       this._renderer = new Renderer();
     }
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
