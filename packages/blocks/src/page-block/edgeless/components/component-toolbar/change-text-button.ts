@@ -45,7 +45,8 @@ const TEXT_COLORS: CssVariableName[] = [
   '--affine-palette-line-black',
   '--affine-palette-line-grey',
 ];
-export const DEFAULT_TEXT_COLOR = TEXT_COLORS[10];
+export const DEFAULT_DARK_TEXT_COLOR = TEXT_COLORS[9];
+export const DEFAULT_LIGHT_TEXT_COLOR = TEXT_COLORS[10];
 
 @customElement('edgeless-change-text-button')
 export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
