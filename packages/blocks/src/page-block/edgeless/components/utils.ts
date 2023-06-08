@@ -1,7 +1,7 @@
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { Bound, getCommonBound } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
+import { computePosition, flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import type { Selectable } from '../selection-manager.js';
@@ -114,6 +114,9 @@ export function createButtonPopper(
       middleware: [
         offset({
           mainAxis: 10,
+        }),
+        flip({
+          fallbackPlacements: ['bottom'],
         }),
       ],
     }).then(({ x, y }) => {

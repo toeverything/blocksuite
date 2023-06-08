@@ -264,7 +264,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           mainAxis: 12,
         }),
         flip({
-          fallbackPlacements: ['bottom', 'right', 'left'],
+          fallbackPlacements: ['bottom'],
         }),
       ],
     }).then(({ x, y }) => {
