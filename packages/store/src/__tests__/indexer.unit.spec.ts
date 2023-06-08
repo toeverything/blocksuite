@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import type { Page } from '../index.js';
 import { Generator, Workspace } from '../index.js';
 
 function createTestOptions() {
@@ -19,11 +20,21 @@ export const BlockSchemas = [
   FrameBlockSchema,
 ];
 
+function createTestPage(pageId = 'page0', workspace?: Workspace) {
+  const options = createTestOptions();
+  const _workspace = workspace || new Workspace(options).register(BlockSchemas);
+  const page = _workspace.createPage({ id: pageId });
+  return new Promise<Page>(resolve => {
+    page.onLoadSlot.once(() => {
+      resolve(page);
+    });
+  });
+}
+
 describe.skip('workspace.search works', () => {
-  it('workspace search matching', () => {
-    const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
-    const page = workspace.createPage({ id: 'page0' });
+  it('workspace search matching', async () => {
+    const page = await createTestPage();
+    const workspace = page.workspace;
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(''),
@@ -60,17 +71,11 @@ describe.skip('workspace.search works', () => {
 });
 
 describe('backlink works', () => {
-  // const blockIndexer = new BlockIndexer(workspace.doc, {
-  //   slots: workspace.slots,
-  // });
-
   it('backlink indexer works with subpage', async () => {
-    const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const page = await createTestPage();
+    const workspace = page.workspace;
+    const subpage = await createTestPage('page1', workspace);
     const backlinkIndexer = workspace.indexer.backlink;
-
-    const page = workspace.createPage({ id: 'page0' });
-    const subpage = workspace.createPage({ id: 'page1' });
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(''),
@@ -111,12 +116,10 @@ describe('backlink works', () => {
   });
 
   it('backlink indexer works with linked page', async () => {
-    const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const page0 = await createTestPage();
+    const workspace = page0.workspace;
+    const page1 = await createTestPage('page1', workspace);
     const backlinkIndexer = workspace.indexer.backlink;
-
-    const page0 = workspace.createPage({ id: 'page0' });
-    const page1 = workspace.createPage({ id: 'page1' });
 
     const page0Id = page0.addBlock('affine:page');
     const frame0Id = page0.addBlock('affine:frame', {}, page0Id);

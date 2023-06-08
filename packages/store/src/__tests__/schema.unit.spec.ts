@@ -12,6 +12,7 @@ import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragr
 import { SchemaValidateError } from '../../../global/src/error/index.js';
 import { defineBlockSchema } from '../base';
 import { Generator } from '../store';
+import type { Page } from '../workspace';
 import { Workspace } from '../workspace';
 
 function createTestOptions() {
@@ -59,12 +60,17 @@ const defaultPageId = 'page0';
 function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  return workspace.createPage({ id: pageId });
+  const page = workspace.createPage({ id: pageId });
+  return new Promise<Page>(resolve => {
+    page.onLoadSlot.once(() => {
+      resolve(page);
+    });
+  });
 }
 
 describe('schema', () => {
-  it('should be able to validate schema by role', () => {
-    const page = createTestPage();
+  it('should be able to validate schema by role', async () => {
+    const page = await createTestPage();
     const pageId = page.addBlock('affine:page', {});
     const frameId = page.addBlock('affine:frame', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
@@ -86,8 +92,8 @@ describe('schema', () => {
     ).not.toThrow();
   });
 
-  it('should glob match works', () => {
-    const page = createTestPage();
+  it('should glob match works', async () => {
+    const page = await createTestPage();
     const pageId = page.addBlock('affine:page', {});
     const frameId = page.addBlock('affine:frame', {}, pageId);
 

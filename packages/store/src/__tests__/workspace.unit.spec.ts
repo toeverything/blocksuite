@@ -63,10 +63,15 @@ function createRoot(page: Page) {
   return page.root;
 }
 
-function createTestPage(pageId = defaultPageId) {
+async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
-  return workspace.createPage({ id: pageId });
+  const page = workspace.createPage({ id: pageId });
+  return new Promise<Page>(resolve => {
+    page.onLoadSlot.once(() => {
+      resolve(page);
+    });
+  });
 }
 
 describe('basic', () => {
@@ -75,37 +80,39 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    workspace.createPage({ id: 'page0' });
-    const actual = serializeWorkspace(workspace.doc);
-    const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
+    const page = workspace.createPage({ id: 'page0' });
+    page.onLoadSlot.once(() => {
+      const actual = serializeWorkspace(workspace.doc);
+      const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
-    assert.equal(workspace.isEmpty, false);
-    assert.equal(typeof actualPage.createDate, 'number');
-    // @ts-ignore
-    delete actualPage.createDate;
+      assert.equal(workspace.isEmpty, false);
+      assert.equal(typeof actualPage.createDate, 'number');
+      // @ts-ignore
+      delete actualPage.createDate;
 
-    assert.deepEqual(actual, {
-      [spaceMetaId]: {
-        pages: [
-          {
-            id: 'page0',
-            title: '',
-          },
-        ],
-        blockVersions: {},
-      },
-      spaces: {
-        [spaceId]: {
-          blocks: {},
+      assert.deepEqual(actual, {
+        [spaceMetaId]: {
+          pages: [
+            {
+              id: 'page0',
+              title: '',
+            },
+          ],
+          blockVersions: {},
         },
-      },
+        spaces: {
+          [spaceId]: {
+            blocks: {},
+          },
+        },
+      });
     });
   });
 });
 
 describe('addBlock', () => {
-  it('can add single model', () => {
-    const page = createTestPage();
+  it('can add single model', async () => {
+    const page = await createTestPage();
     page.addBlock('affine:page', {
       title: new page.Text(),
     });
@@ -120,8 +127,8 @@ describe('addBlock', () => {
     });
   });
 
-  it('can add model with props', () => {
-    const page = createTestPage();
+  it('can add model with props', async () => {
+    const page = await createTestPage();
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
     assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
@@ -134,8 +141,8 @@ describe('addBlock', () => {
     });
   });
 
-  it('can add multi models', () => {
-    const page = createTestPage();
+  it('can add multi models', async () => {
+    const page = await createTestPage();
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
@@ -189,7 +196,7 @@ describe('addBlock', () => {
   });
 
   it('can observe slot events', async () => {
-    const page = createTestPage();
+    const page = await createTestPage();
 
     queueMicrotask(() =>
       page.addBlock('affine:page', {
@@ -201,7 +208,7 @@ describe('addBlock', () => {
   });
 
   it('can add block to root', async () => {
-    const page = createTestPage();
+    const page = await createTestPage();
 
     let frameId: string;
 
@@ -226,12 +233,20 @@ describe('addBlock', () => {
     assert.equal(root.children[0].id, '1');
   });
 
-  it('can add and remove multi pages', () => {
+  it('can add and remove multi pages', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
 
     const page0 = workspace.createPage({ id: 'page0' });
     const page1 = workspace.createPage({ id: 'page1' });
+    await Promise.all([
+      new Promise(resolve => {
+        page0.onLoadSlot.once(resolve);
+      }),
+      new Promise(resolve => {
+        page1.onLoadSlot.once(resolve);
+      }),
+    ]);
     // @ts-expect-error
     assert.equal(workspace._pages.size, 2);
 
@@ -308,8 +323,8 @@ describe('addBlock', () => {
 });
 
 describe('deleteBlock', () => {
-  it('can delete single model', () => {
-    const page = createTestPage();
+  it('can delete single model', async () => {
+    const page = await createTestPage();
 
     page.addBlock('affine:page', {
       title: new page.Text(),
@@ -327,8 +342,8 @@ describe('deleteBlock', () => {
     assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {});
   });
 
-  it('can delete model with parent', () => {
-    const page = createTestPage();
+  it('can delete model with parent', async () => {
+    const page = await createTestPage();
     const root = createRoot(page);
     const frameId = page.addBlock('affine:frame', {}, root.id);
 
@@ -383,8 +398,8 @@ describe('deleteBlock', () => {
 });
 
 describe('getBlock', () => {
-  it('can get block by id', () => {
-    const page = createTestPage();
+  it('can get block by id', async () => {
+    const page = await createTestPage();
     const root = createRoot(page);
     const frameId = page.addBlock('affine:frame', {}, root.id);
 
@@ -399,8 +414,8 @@ describe('getBlock', () => {
     assert.equal(invalid, null);
   });
 
-  it('can get parent', () => {
-    const page = createTestPage();
+  it('can get parent', async () => {
+    const page = await createTestPage();
     const root = createRoot(page);
     const frameId = page.addBlock('affine:frame', {}, root.id);
 
@@ -416,8 +431,8 @@ describe('getBlock', () => {
     assert.equal(invalid, null);
   });
 
-  it('can get previous sibling', () => {
-    const page = createTestPage();
+  it('can get previous sibling', async () => {
+    const page = await createTestPage();
     const root = createRoot(page);
     const frameId = page.addBlock('affine:frame', {}, root.id);
 
@@ -458,10 +473,11 @@ describe('workspace.exportJSX works', () => {
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
 
-  it('workspace with multiple blocks children matches snapshot', () => {
+  it('workspace with multiple blocks children matches snapshot', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage({ id: 'page0' });
+    await new Promise(resolve => page.onLoadSlot.once(resolve));
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),

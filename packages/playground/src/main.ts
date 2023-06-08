@@ -74,7 +74,10 @@ export async function initPageContentByParam(
   // Load built-in init function when `?init=heavy` param provided
   if (functionMap.has(param)) {
     functionMap.get(param)?.(workspace, pageId);
-    workspace.getPage(pageId)?.resetHistory();
+    const page = workspace.getPage(pageId);
+    page?.onLoadSlot.once(() => {
+      page.resetHistory();
+    });
     return;
   }
 
