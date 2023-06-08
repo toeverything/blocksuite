@@ -80,8 +80,10 @@ export class HandleResizeManager {
     assertExists(_target);
 
     const isCorner = _resizeMode === 'corner';
-    const { x: startX, y: startY } = dragPos.start;
-    const { x: endX, y: endY } = dragPos.end;
+    const {
+      start: { x: startX, y: startY },
+      end: { x: endX, y: endY },
+    } = dragPos;
 
     const [minX, minY, maxX, maxY] = _commonBound;
     const original = {
@@ -134,6 +136,8 @@ export class HandleResizeManager {
         }
       }
 
+      // forced adjustment by aspect ratio
+      // shift ||= this._bounds.size > 1;
       const deltaY = (endY - startY) / _zoom;
       const fp = fixedPoint.matrixTransform(m0);
       let dp = draggingPoint.matrixTransform(m0);
@@ -143,10 +147,12 @@ export class HandleResizeManager {
 
       let cx = (fp.x + dp.x) / 2;
       let cy = (fp.y + dp.y) / 2;
+
       let m1 = new DOMMatrix()
         .translateSelf(cx, cy)
         .rotateSelf(-rotate)
         .translateSelf(-cx, -cy);
+
       let f = fp.matrixTransform(m1);
       let d = dp.matrixTransform(m1);
 
@@ -159,8 +165,7 @@ export class HandleResizeManager {
 
       if (shift) {
         const newAspectRatio = Math.abs(rect.w / rect.h);
-        const isTall = aspectRatio < newAspectRatio;
-        if (isTall) {
+        if (aspectRatio < newAspectRatio) {
           scale.y = Math.abs(scale.x) * (scale.y < 0 ? -1 : 1);
           rect.h = scale.y * original.h;
         } else {
@@ -183,8 +188,8 @@ export class HandleResizeManager {
         f = fp.matrixTransform(m1);
         d = dp.matrixTransform(m1);
 
-        // newWidth = d.x - f.x;
-        // newHeight = d.y - f.y;
+        // rect.w = d.x - f.x;
+        // rect.h = d.y - f.y;
         rect.cx = (d.x + f.x) / 2;
         rect.cy = (d.y + f.y) / 2;
       }
@@ -200,9 +205,9 @@ export class HandleResizeManager {
           break;
       }
 
-      rect.h = maxY - minY;
+      // rect.h = maxY - minY;
+      // scale.y = rect.h / original.h;
       scale.x = rect.w / original.w;
-      scale.y = rect.h / original.h;
     }
 
     const newBounds = new Map<
