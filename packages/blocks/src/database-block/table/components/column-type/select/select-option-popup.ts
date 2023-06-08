@@ -1,4 +1,5 @@
 import {
+  ArrowDownIcon,
   DatabaseSelectionColor,
   DeleteIcon,
   PenIcon,
@@ -35,6 +36,7 @@ const tagActions: SelectTagAction[] = [
 export class SelectActionPopup extends LitElement {
   static override styles = css`
     :host {
+      position: absolute;
       z-index: 11;
     }
     .affine-database-select-action {
@@ -57,6 +59,15 @@ export class SelectActionPopup extends LitElement {
     .delete {
       fill: var(--affine-icon-color);
     }
+
+    .change-color {
+      display: flex;
+      align-items: center;
+    }
+    .change-color svg {
+      fill: var(--affine-icon-color);
+      transform: rotate(-90deg);
+    }
   `;
 
   @property()
@@ -73,21 +84,26 @@ export class SelectActionPopup extends LitElement {
   override render() {
     return html`
       <div class="affine-database-select-action">
-        ${tagActions.map(action => {
-          if (isDivider(action))
-            return html`<div class="action-divider"></div>`;
+        <div class="action-container">
+          ${tagActions.map(action => {
+            if (isDivider(action))
+              return html`<div class="action-divider"></div>`;
 
-          return html`
-            <div
-              class="action ${action.type}"
-              @mousedown=${(e: Event) => this._onAction(e, action.type)}
-            >
-              <div class="action-content">
-                ${action.icon}<span>${action.text}</span>
+            return html`
+              <div
+                class="action ${action.type}"
+                @mousedown=${(e: Event) => this._onAction(e, action.type)}
+              >
+                <div class="action-content">
+                  ${action.icon}<span>${action.text}</span>
+                </div>
+                <div class=${action.type}>
+                  ${action.type === 'change-color' ? ArrowDownIcon : null}
+                </div>
               </div>
-            </div>
-          `;
-        })}
+            `;
+          })}
+        </div>
       </div>
     `;
   }

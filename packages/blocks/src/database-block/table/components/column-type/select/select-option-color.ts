@@ -7,6 +7,9 @@ import { selectOptionColors } from '../../../../utils.js';
 @customElement('affine-database-select-option-color')
 export class SelectOptionColor extends LitElement {
   static override styles = css`
+    :host {
+      position: absolute;
+    }
     .affine-database-select-option-color {
       width: 200px;
       padding: 8px;

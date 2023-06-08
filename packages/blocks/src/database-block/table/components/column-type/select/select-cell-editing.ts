@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { nanoid } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
+import { autoPlacement, computePosition, offset } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -257,7 +257,6 @@ export class SelectCellEditing
       this,
       {
         placement: 'bottom-start',
-        strategy: 'fixed',
       }
     ).then(({ x, y }) => {
       Object.assign(this.style, {
@@ -465,16 +464,17 @@ export class SelectCellEditing
       const onClose = () => optionColor.remove();
 
       computePosition(element, optionColor, {
-        placement: 'right-start',
+        // placement: 'right-start',
         middleware: [
           offset({
             mainAxis: 4,
-            crossAxis: 36,
+          }),
+          autoPlacement({
+            allowedPlacements: ['right-start', 'bottom-start'],
           }),
         ],
       }).then(({ x, y }) => {
         Object.assign(optionColor.style, {
-          position: 'absolute',
           left: `${x}px`,
           top: `${y}px`,
         });
@@ -495,8 +495,11 @@ export class SelectCellEditing
     assertExists(selectOption);
 
     const action = new SelectActionPopup();
-    action.onAction = (type, index) =>
-      this._onSelectAction(type, index, selectOption, onClose);
+    action.onAction = (type, index) => {
+      const reference = action.shadowRoot?.firstElementChild;
+      assertExists(reference);
+      this._onSelectAction(type, index, reference, onClose);
+    };
 
     action.index = index;
     selectOption.appendChild(action);
@@ -506,7 +509,6 @@ export class SelectCellEditing
       placement: 'bottom-end',
     }).then(({ x, y }) => {
       Object.assign(action.style, {
-        position: 'absolute',
         left: `${x}px`,
         top: `${y}px`,
       });
