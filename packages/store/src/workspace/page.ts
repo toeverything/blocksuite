@@ -727,7 +727,6 @@ export class Page extends Space<FlatBlockMap> {
 
   private _historyAddObserver = (event: { stackItem: StackItem }) => {
     if (isWeb) {
-      console.log(event);
       event.stackItem.meta.set(
         'cursor-location',
         this.awarenessStore.getLocalRange(this)

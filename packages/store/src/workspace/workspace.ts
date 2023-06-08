@@ -192,7 +192,6 @@ export class Workspace {
       this._store.addSpace(page);
 
       page.onLoadSlot.once(() => {
-        console.log(this.doc.toJSON());
         page.trySyncFromExistingDoc();
       });
     });
