@@ -361,7 +361,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
-    this._rotate = (this._rotate + rotate) % 360;
+    this._rotate += rotate;
     this.requestUpdate();
   };
 

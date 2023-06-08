@@ -101,16 +101,14 @@ export class BrushElement extends SurfaceElement<IBrush> {
     const cx = w / 2;
     const cy = h / 2;
 
-    matrix.translateSelf(cx, cy).rotateSelf(rotate);
-
+    matrix = matrix.translate(cx, cy).rotate(rotate);
     if (flipX < 0) {
       matrix = matrix.flipX();
     }
     if (flipY < 0) {
       matrix = matrix.flipY();
     }
-
-    ctx.setTransform(matrix.translateSelf(-cx, -cy));
+    ctx.setTransform(matrix.translate(-cx, -cy));
 
     const stroke = getSolidStrokePoints(points, lineWidth);
     const commands = getSvgPathFromStroke(stroke);

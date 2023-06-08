@@ -38,19 +38,14 @@ export const EllipseMethods: ShapeMethods = {
     const cx = w / 2;
     const cy = h / 2;
 
-    // ctx.setTransform(
-    //   matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
-    // );
-    matrix.translateSelf(cx, cy);
-
+    matrix = matrix.translate(cx, cy).rotate(rotate);
     if (flipX < 0) {
       matrix = matrix.flipX();
     }
     if (flipY < 0) {
       matrix = matrix.flipY();
     }
-
-    ctx.setTransform(matrix.rotateSelf(rotate).translateSelf(-cx, -cy));
+    ctx.setTransform(matrix.translate(-cx, -cy));
 
     rc.ellipse(renderWidth / 2, renderHeight / 2, renderWidth, renderHeight, {
       seed,

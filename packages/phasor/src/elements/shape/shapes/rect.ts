@@ -42,20 +42,14 @@ export const RectMethods: ShapeMethods = {
     const cx = w / 2;
     const cy = h / 2;
 
-    matrix.translateSelf(cx, cy);
-
+    matrix = matrix.translate(cx, cy).rotate(rotate);
     if (flipX < 0) {
       matrix = matrix.flipX();
     }
     if (flipY < 0) {
       matrix = matrix.flipY();
     }
-
-    ctx.setTransform(matrix.rotateSelf(rotate).translateSelf(-cx, -cy));
-
-    // ctx.setTransform(
-    //   matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
-    // );
+    ctx.setTransform(matrix.translate(-cx, -cy));
 
     rc.path(
       `
