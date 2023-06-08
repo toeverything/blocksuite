@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import { Line } from './line.js';
-import { Point } from './point.js';
 
 describe('Line', () => {
   it('should intersect', () => {

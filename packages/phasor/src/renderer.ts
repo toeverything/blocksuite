@@ -4,10 +4,9 @@ import { RoughCanvas } from 'roughjs/bin/canvas.js';
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
-import { intersects } from './utils/hit-utils.js';
-import { Utils } from './utils/math-utils.js';
+import { intersects } from './utils/math-utils.js';
+import { clamp } from './utils/math-utils.js';
 import { type IPoint, Point } from './utils/point.js';
-const { clamp } = Utils;
 
 export interface SurfaceViewport {
   readonly left: number;

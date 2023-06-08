@@ -1,5 +1,5 @@
-import { Utils } from './math-utils.js';
-const { clamp } = Utils;
+import { clamp } from './math-utils.js';
+
 export interface IPoint {
   x: number;
   y: number;

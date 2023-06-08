@@ -1,7 +1,6 @@
 import type { IBound } from '../consts.js';
 import { Line } from './line.js';
-import { Utils } from './math-utils.js';
-import { EPSILON } from './numerical.js';
+import { EPSILON, getBoundsFromPoints } from './math-utils.js';
 import { Point } from './point.js';
 import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
 
@@ -135,7 +134,7 @@ export function contains(a: IBound, b: IBound): boolean {
 }
 
 export function getBoundFromPoints(points: number[][]) {
-  const { minX, minY, width, height } = Utils.getBoundsFromPoints(points);
+  const { minX, minY, width, height } = getBoundsFromPoints(points);
   return new Bound(minX, minY, width, height);
 }
 

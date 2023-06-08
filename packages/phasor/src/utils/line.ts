@@ -1,7 +1,6 @@
-import { Utils } from './math-utils.js';
-import { almostEqual, EPSILON, MACHINE_EPSILON } from './numerical.js';
+import { clamp } from './math-utils.js';
+import { almostEqual, EPSILON, MACHINE_EPSILON } from './math-utils.js';
 import type { Point } from './point.js';
-const { clamp } = Utils;
 
 export class Line {
   static intersect(

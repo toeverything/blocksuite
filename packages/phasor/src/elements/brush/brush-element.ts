@@ -5,7 +5,7 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from '../../utils/bound.js';
-import { Utils } from '../../utils/math-utils.js';
+import { getSvgPathFromStroke } from '../../utils/math-utils.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 
@@ -39,7 +39,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
 
   override render(ctx: CanvasRenderingContext2D) {
     const stroke = getSolidStrokePoints(this.points, this.lineWidth);
-    const commands = Utils.getSvgPathFromStroke(stroke);
+    const commands = getSvgPathFromStroke(stroke);
     const path = new Path2D(commands);
 
     ctx.fillStyle = this.computedValue(this.color);

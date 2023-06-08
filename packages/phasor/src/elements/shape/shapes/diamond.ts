@@ -1,7 +1,7 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, StrokeStyle } from '../../../consts.js';
-import { Utils } from '../../../utils/math-utils.js';
+import { pointInPolygon } from '../../../utils/math-utils.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
@@ -56,6 +56,6 @@ export const DiamondMethods: ShapeMethods = {
       [bound.x + bound.w / 2, bound.y + bound.h],
       [bound.x + 0, bound.y + bound.h / 2],
     ];
-    return Utils.pointInPolygon([x, y], points);
+    return pointInPolygon([x, y], points);
   },
 };
