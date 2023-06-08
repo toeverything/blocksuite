@@ -583,4 +583,13 @@ export class Vec {
   static min = (...v: number[][]) => {
     return [Math.min(...v.map(a => a[0])), Math.min(...v.map(a => a[1]))];
   };
+
+  static toVec = (v: { x: number; y: number }) => [v.x, v.y];
+
+  static toPoint = (v: IVec) => {
+    return {
+      x: v[0],
+      y: v[1],
+    };
+  };
 }
