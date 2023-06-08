@@ -1,8 +1,11 @@
-import type { PointerEventState } from '@blocksuite/lit';
-import type { UIEventDispatcher } from '@blocksuite/lit';
-import type { EventName, UIEventHandler } from '@blocksuite/lit';
+import type {
+  EventName,
+  PointerEventState,
+  UIEventDispatcher,
+  UIEventHandler,
+} from '@blocksuite/lit';
 import type { PhasorElement } from '@blocksuite/phasor';
-import { normalizeWheelDeltaY, Point } from '@blocksuite/phasor';
+import { normalizeWheelDeltaY } from '@blocksuite/phasor';
 
 import {
   AbstractSelectionManager,
@@ -13,6 +16,7 @@ import {
   isInsidePageTitle,
   isPinchEvent,
   type MouseMode,
+  Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';

@@ -2,7 +2,7 @@
 // Credits to tldraw
 
 import type { IBound } from '../consts.js';
-import { Vec } from './vec.js';
+import { type IVec, Vec } from './vec.js';
 
 export const EPSILON = 1e-12;
 export const MACHINE_EPSILON = 1.12e-16;
@@ -148,4 +148,37 @@ export function getSvgPathFromStroke(
 
 function average(a: number, b: number): number {
   return (a + b) / 2;
+}
+
+export function lineIntersects(
+  sp: IVec,
+  ep: IVec,
+  sp2: IVec,
+  ep2: IVec,
+  infinite = false
+) {
+  const v1 = Vec.sub(ep, sp);
+  const v2 = Vec.sub(ep2, sp2);
+  const cross = Vec.cpr(v1, v2);
+  // Avoid divisions by 0, and errors when getting too close to 0
+  if (almostEqual(cross, 0, MACHINE_EPSILON)) return null;
+  const d = Vec.sub(sp, sp2);
+  let u1 = Vec.cpr(v2, d) / cross;
+  const u2 = Vec.cpr(v1, d) / cross,
+    // Check the ranges of the u parameters if the line is not
+    // allowed to extend beyond the definition points, but
+    // compare with EPSILON tolerance over the [0, 1] bounds.
+    epsilon = /*#=*/ EPSILON,
+    uMin = -epsilon,
+    uMax = 1 + epsilon;
+
+  if (infinite || (uMin < u1 && u1 < uMax && uMin < u2 && u2 < uMax)) {
+    // Address the tolerance at the bounds by clipping to
+    // the actual range.
+    if (!infinite) {
+      u1 = clamp(u1, 0, 1);
+    }
+    return Vec.lrp(sp, v1, u1);
+  }
+  return null;
 }

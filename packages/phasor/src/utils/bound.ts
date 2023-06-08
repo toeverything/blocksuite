@@ -1,7 +1,6 @@
 import type { IBound } from '../consts.js';
-import { Line } from './line.js';
-import { EPSILON, getBoundsFromPoints } from './math-utils.js';
-import { Point } from './point.js';
+import { EPSILON, getBoundsFromPoints, lineIntersects } from './math-utils.js';
+import type { IVec } from './vec.js';
 import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
 
 export class Bound implements IBound {
@@ -21,8 +20,8 @@ export class Bound implements IBound {
     return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
   }
 
-  get center() {
-    return new Point(this.x + this.w / 2, this.y + this.h / 2);
+  get center(): IVec {
+    return [this.x + this.w / 2, this.y + this.h / 2];
   }
 
   get minX() {
@@ -41,31 +40,31 @@ export class Bound implements IBound {
     return this.y + this.h;
   }
 
-  get tl() {
-    return new Point(this.x, this.y);
+  get tl(): IVec {
+    return [this.x, this.y];
   }
 
   get tr() {
-    return new Point(this.x + this.w, this.y);
+    return [this.x + this.w, this.y];
   }
 
   get bl() {
-    return new Point(this.x, this.y + this.h);
+    return [this.x, this.y + this.h];
   }
 
   get br() {
-    return new Point(this.x + this.w, this.y + this.h);
+    return [this.x + this.w, this.y + this.h];
   }
 
-  intersectLine(sp: Point, ep: Point, infinite = false) {
-    const rst: Point[] = [];
+  intersectLine(sp: IVec, ep: IVec, infinite = false) {
+    const rst: IVec[] = [];
     [
       [this.tl, this.tr],
       [this.tl, this.bl],
       [this.tr, this.br],
       [this.bl, this.br],
     ].forEach(([p1, p2]) => {
-      const p = Line.intersect(sp, ep, p1, p2, infinite);
+      const p = lineIntersects(sp, ep, p1, p2, infinite);
       if (p) rst.push(p);
     });
     return rst.length === 0 ? null : rst;

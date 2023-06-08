@@ -7,7 +7,6 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from './bound.js';
-import { Point } from './point.js';
 
 describe('bound utils', () => {
   it('Bound basic', () => {
@@ -15,15 +14,15 @@ describe('bound utils', () => {
     const serialized = bound.serialize();
     expect(serialized).toBe('[1,1,2,2]');
     expect(Bound.deserialize(serialized)).toMatchObject(bound);
-    expect(bound.center.equals(Point.from(2, 2))).toBe(true);
+    expect(bound.center).toMatchObject([2, 2]);
     expect(bound.minX).toBe(1);
     expect(bound.minY).toBe(1);
     expect(bound.maxX).toBe(3);
     expect(bound.maxY).toBe(3);
-    expect(bound.tl.equals(Point.from(1, 1))).toBe(true);
-    expect(bound.tr.equals(Point.from(3, 1))).toBe(true);
-    expect(bound.bl.equals(Point.from(1, 3))).toBe(true);
-    expect(bound.br.equals(Point.from(3, 3))).toBe(true);
+    expect(bound.tl).toMatchObject([1, 1]);
+    expect(bound.tr).toMatchObject([3, 1]);
+    expect(bound.bl).toMatchObject([1, 3]);
+    expect(bound.br).toMatchObject([3, 3]);
   });
 
   it('from', () => {
@@ -133,22 +132,12 @@ describe('bound utils', () => {
 
   it('intersectLine', () => {
     const bound = new Bound(0, 0, 10, 10);
-    expect(
-      bound.intersectLine(
-        Point.from({ x: 0, y: 0 }),
-        Point.from({ x: 10, y: 10 })
-      )
-    ).toBeTruthy();
+    expect(bound.intersectLine([0, 0], [10, 10])).toBeTruthy();
   });
 
   it('intersectline no intersection', () => {
     const bound = new Bound(0, 0, 10, 10);
-    expect(
-      bound.intersectLine(
-        Point.from({ x: 0, y: -1 }),
-        Point.from({ x: 10, y: -10 })
-      )
-    ).toBeFalsy();
+    expect(bound.intersectLine([0, -1], [10, -10])).toBeFalsy();
   });
 
   it('isIntersectWithBound', () => {

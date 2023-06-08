@@ -9,7 +9,6 @@ import {
   isPointIn,
   type PhasorElement,
   type PhasorElementType,
-  Point,
   TextElement,
   type XYWH,
 } from '@blocksuite/phasor';
@@ -25,6 +24,7 @@ import {
   handleNativeRangeDragMove,
   isEmpty,
   noop,
+  Point,
   Rect,
   resetNativeSelection,
   type TopLevelBlockModel,
