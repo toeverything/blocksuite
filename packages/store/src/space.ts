@@ -1,3 +1,4 @@
+import { Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { AwarenessStore, UserRange } from './awareness.js';
@@ -18,7 +19,9 @@ export class Space<
   readonly doc: BlockSuiteDoc;
   readonly awarenessStore: AwarenessStore;
 
-  private _loaded: boolean;
+  private _loaded!: boolean;
+
+  onLoadSlot = new Slot();
 
   /**
    * @internal Used for convenient access to the underlying Yjs map,
@@ -33,18 +36,7 @@ export class Space<
     this.doc = doc;
     this.awarenessStore = awarenessStore;
 
-    const prefixedId = this.id.startsWith('space:') ? this.id : this.prefixedId;
-    let subDoc = doc.spaces.get(prefixedId);
-    if (!subDoc) {
-      subDoc = new Y.Doc();
-      doc.spaces.set(prefixedId, subDoc);
-      this._loaded = true;
-    } else {
-      subDoc.load();
-      this._loaded = false;
-      doc.on('subdocs', this._onSubdocEvent);
-    }
-    this._ySpaceDoc = subDoc;
+    this._ySpaceDoc = this._loadSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
     this._proxy = createYMapProxy(this._yBlocks as Y.Map<unknown>);
@@ -58,6 +50,24 @@ export class Space<
     return this._loaded;
   }
 
+  private _loadSubDoc = () => {
+    const prefixedId = this.id.startsWith('space:') ? this.id : this.prefixedId;
+    let subDoc = this.doc.spaces.get(prefixedId);
+    if (!subDoc) {
+      subDoc = new Y.Doc();
+      this.doc.spaces.set(prefixedId, subDoc);
+      this._loaded = true;
+      setImmediate(() => {
+        this.onLoadSlot.emit();
+      });
+    } else {
+      subDoc.load();
+      this._loaded = false;
+      this.doc.on('subdocs', this._onSubdocEvent);
+    }
+    return subDoc;
+  };
+
   private _onSubdocEvent = ({ loaded }: { loaded: Set<Y.Doc> }): void => {
     const result = Array.from(loaded).find(
       doc => doc.guid === this._ySpaceDoc.guid
@@ -65,6 +75,7 @@ export class Space<
     if (result) {
       this._loaded = true;
       this.doc.off('subdocs', this._onSubdocEvent);
+      this.onLoadSlot.emit();
     }
   };
 

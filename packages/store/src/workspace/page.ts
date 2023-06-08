@@ -707,10 +707,9 @@ export class Page extends Space<FlatBlockMap> {
     // events we actually generated locally.
     // _yBlocks.unobserveDeep(this._handleYEvents);
     _yBlocks.observeDeep(this._handleYEvents);
-
     this._history = new Y.UndoManager([_yBlocks], {
-      trackedOrigins: new Set([this.doc.clientID]),
-      doc: this.doc,
+      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
+      doc: this._ySpaceDoc,
     });
 
     this._history.on('stack-cleared', this._historyObserver);

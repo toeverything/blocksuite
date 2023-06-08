@@ -189,10 +189,12 @@ export class Workspace {
         awarenessStore: this.awarenessStore,
         idGenerator: this._store.idGenerator,
       });
-      this._store.addSpace(page);
 
-      // TODO: try after subdoc loaded
-      page.trySyncFromExistingDoc();
+      page.onLoadSlot.once(() => {
+        page.trySyncFromExistingDoc();
+      });
+
+      this._store.addSpace(page);
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
