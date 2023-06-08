@@ -26,14 +26,10 @@ import {
   handleNativeRangeAtPoint,
   type MouseMode,
   Point,
-  queryCurrentMode,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
-import {
-  DEFAULT_DARK_TEXT_COLOR,
-  DEFAULT_LIGHT_TEXT_COLOR,
-} from './components/component-toolbar/change-text-button.js';
+import { DEFAULT_LINE_COLOR } from './components/color-panel.js';
 import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
   EdgelessContainer,
@@ -531,14 +527,12 @@ export function addText(
       event.x,
       event.y
     );
-    const mode = queryCurrentMode();
     const id = edgeless.surface.addElement('text', {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new Y.Text(),
       textAlign: 'left',
       fontSize: 24,
-      color:
-        mode === 'dark' ? DEFAULT_DARK_TEXT_COLOR : DEFAULT_LIGHT_TEXT_COLOR,
+      color: DEFAULT_LINE_COLOR,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);

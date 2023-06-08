@@ -9,7 +9,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
-import { DEFAULT_SELECTED_COLOR } from '../../components/color-panel.js';
+import { DEFAULT_LINE_COLOR } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';
 
@@ -105,7 +105,7 @@ export class EdgelessConnectorToolButton extends LitElement {
           this.setMouseMode({
             type: 'connector',
             mode: ConnectorMode.Orthogonal,
-            color: DEFAULT_SELECTED_COLOR,
+            color: DEFAULT_LINE_COLOR,
           });
           this._toggleMenu();
         }}
