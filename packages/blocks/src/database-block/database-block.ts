@@ -33,15 +33,19 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     const current = views.find(v => v.id === this.currentView) ?? views[0];
     // console.log(current);
     const databaseTag = literal`affine-database-${unsafeStatic(current.mode)}`;
-
+    const view = this.model.page.awarenessStore.getFlag(
+      'enable_database_filter'
+    )
+      ? html`<database-view-header
+          .currentView="${current.id}"
+          .setViewId="${this._setViewId}"
+          .model="${this.model}"
+        ></database-view-header>`
+      : '';
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
       <div>
-        <database-view-header
-          .currentView='${current.id}'
-          .setViewId='${this._setViewId}'
-          .model='${this.model}'
-        ></database-view-header>
+        ${view}
         <${databaseTag}
           .root='${this.root}'
           .model='${this.model}'

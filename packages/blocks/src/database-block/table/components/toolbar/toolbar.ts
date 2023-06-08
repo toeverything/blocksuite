@@ -387,7 +387,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
         ? null
         : DatabaseSearchClose
       : null;
-
+    const filter = this.targetModel.page.awarenessStore.getFlag(
+      'enable_database_filter'
+    )
+      ? html` <div
+          @click="${this._showFilter}"
+          class="affine-database-filter-button"
+        >
+          Filter
+        </div>`
+      : '';
     const searchTool = html`
       <div
         class="affine-database-search-container ${expandSearch
@@ -421,9 +430,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     return html` <div
       class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
     >
-      <div @click="${this._showFilter}" class="affine-database-filter-button">
-        Filter
-      </div>
+      ${filter}
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>

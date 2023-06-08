@@ -506,7 +506,6 @@ test(scoped`import notion html-format table`, async ({ page }) => {
   ];
 
   const blocks = await transformMarkdown(page, tempText);
-  const str = JSON.stringify(blocks);
   expect(blocks).toEqual(expectedValue);
 });
 

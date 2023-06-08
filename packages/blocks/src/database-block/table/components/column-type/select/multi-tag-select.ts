@@ -9,7 +9,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nanoid } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { autoPlacement, computePosition, offset } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -30,12 +30,14 @@ import {
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import type { SelectOption } from './select-option.js';
+import { SelectOptionColor } from './select-option-color.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
 const KEYS_WHITE_LIST = ['Enter', 'ArrowUp', 'ArrowDown'];
 
 const styles = css`
   affine-database-multi-tag-select {
+    position: fixed;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
     border-radius: 4px;
@@ -156,6 +158,7 @@ const styles = css`
   }
 
   .select-option {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -288,7 +291,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       this._onSelectOption
     );
 
-    createPopper(
+    computePosition(
       {
         getBoundingClientRect: () => {
           const rect = this.container.getBoundingClientRect();
@@ -300,9 +303,13 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       this,
       {
         placement: 'bottom-start',
-        strategy: 'fixed',
       }
-    );
+    ).then(({ x, y }) => {
+      Object.assign(this.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
   }
 
   protected override updated(_changedProperties: Map<PropertyKey, unknown>) {
@@ -437,7 +444,12 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
     this.editComplete();
   };
 
-  private _onSelectAction = (type: SelectTagActionType, id: string) => {
+  private _onSelectAction = (
+    type: SelectTagActionType,
+    id: string,
+    element: Element,
+    onActionPopupClose: () => void
+  ) => {
     if (type === 'rename') {
       this._setEditingId(id);
       return;
@@ -447,6 +459,41 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       this.deleteTag(id);
       return;
     }
+    if (type === 'change-color') {
+      const optionColor = new SelectOptionColor();
+      optionColor.onChange = color => {
+        this._onSaveSelectionColor(id, color);
+        onActionPopupClose();
+        onClose();
+      };
+      element.appendChild(optionColor);
+      const onClose = () => optionColor.remove();
+
+      computePosition(element, optionColor, {
+        // placement: 'right-start',
+        middleware: [
+          offset({
+            mainAxis: 4,
+          }),
+          autoPlacement({
+            allowedPlacements: ['right-start', 'bottom-start'],
+          }),
+        ],
+      }).then(({ x, y }) => {
+        Object.assign(optionColor.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      });
+
+      onClickOutside(
+        optionColor,
+        ele => {
+          ele.remove();
+        },
+        'mousedown'
+      );
+    }
   };
 
   private _showSelectAction = (id: string) => {
@@ -455,29 +502,23 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
     assertExists(selectOption);
 
     const action = new SelectActionPopup();
-    action.onAction = this._onSelectAction;
+    action.onAction = (type, id) => {
+      const reference = action.shadowRoot?.firstElementChild;
+      assertExists(reference);
+      this._onSelectAction(type, id, reference, onClose);
+    };
     action.tagId = id;
     selectOption.appendChild(action);
     const onClose = () => action.remove();
-    action.onClose = onClose;
 
-    createPopper(
-      {
-        getBoundingClientRect: () => {
-          const optionIcon = selectOption.querySelector('.select-option-icon');
-          assertExists(optionIcon);
-          const { height } = action.getBoundingClientRect();
-          const rect = optionIcon.getBoundingClientRect();
-          rect.y = rect.y + height + 36;
-          rect.x = rect.x + 33;
-          return rect;
-        },
-      },
-      action,
-      {
-        placement: 'bottom-end',
-      }
-    );
+    computePosition(selectOption, action, {
+      placement: 'bottom-end',
+    }).then(({ x, y }) => {
+      Object.assign(action.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
     onClickOutside(selectOption as HTMLElement, onClose, 'mousedown');
   };
 
@@ -492,6 +533,12 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       this.changeTag({ ...selection, value });
     }
     this._setEditingId();
+  };
+  private _onSaveSelectionColor = (id: string, color: string) => {
+    const selection = this.options.find(tag => tag.id === id);
+    if (selection) {
+      this.changeTag({ ...selection, color });
+    }
   };
 
   private _setEditingId = (id?: string) => {
