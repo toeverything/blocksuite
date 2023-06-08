@@ -144,13 +144,13 @@ export class Renderer implements SurfaceViewport {
    */
   setZoom(zoom: number, focusPoint?: IPoint) {
     const prevZoom = this.zoom;
-    focusPoint = focusPoint ?? this._center;
+    focusPoint = (focusPoint ?? this._center) as IPoint;
     this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
     const newZoom = this.zoom;
 
-    const offset = Vec.sub(Vec.toVec(this.center), Vec.toVec(focusPoint!));
+    const offset = Vec.sub(Vec.toVec(this.center), Vec.toVec(focusPoint));
     const newCenter = Vec.add(
-      Vec.toVec(focusPoint!),
+      Vec.toVec(focusPoint),
       Vec.mul(offset, prevZoom / newZoom)
     );
     this.setCenter(newCenter[0], newCenter[1]);
