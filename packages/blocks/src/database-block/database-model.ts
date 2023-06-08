@@ -275,6 +275,41 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       });
     });
   }
+
+  changeSelectTagColor(columnId: Column['id'], index: number, color: string) {
+    this.page.transact(() => {
+      const column = this.getColumn(columnId);
+      if (!column) return;
+      if (column.type !== 'select' && column.type !== 'multi-select') return;
+      const selectionArray = column.selection as SelectTag[];
+      const selection = selectionArray[index];
+      selectionArray[index] = {
+        ...selection,
+        color,
+      };
+
+      Object.keys(this.cells).forEach(rowId => {
+        const cell = this.cells[rowId][columnId];
+        if (!cell) return;
+
+        const selected = cell.value as SelectTag[];
+        const newSelected = [...selected].map(item => {
+          if (item.id === selection.id) {
+            return {
+              ...item,
+              color,
+            };
+          }
+          return item;
+        });
+
+        this.cells[rowId][columnId] = {
+          columnId,
+          value: newSelected,
+        };
+      });
+    });
+  }
 }
 
 export const DatabaseBlockSchema = defineBlockSchema({

@@ -266,7 +266,11 @@ export class Workspace {
       page.addBlock('affine:surface', {}, pageBlockId);
       const frameId = page.addBlock('affine:frame', {}, pageBlockId);
       page.addBlock('affine:paragraph', {}, frameId);
+      // To make sure the content of new page would not be clear
+      // By undo operation for the first time
+      page.resetHistory();
     }
+
     return page;
   }
 

@@ -57,7 +57,9 @@ export const preset: InitFn = (workspace: Workspace, id: string) => {
     strokeStyle: StrokeStyle.Solid,
     roughness: 2,
   });
-  contentParser.importMarkdown(presetMarkdown, frameId);
+  contentParser.importMarkdown(presetMarkdown, frameId).then(() => {
+    page.resetHistory();
+  });
 };
 
 preset.id = 'preset';

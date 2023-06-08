@@ -77,7 +77,8 @@ export type ColumnActionType =
   | 'insert-right'
   | 'move-left'
   | 'move-right'
-  | 'delete';
+  | 'delete'
+  | 'change-color';
 export type ColumnAction = ActionMenuItem<ColumnActionType> | Divider;
 
 type DatabaseActionType =
@@ -95,7 +96,7 @@ export type Divider = {
 export type TitleColumnActionType = 'rename' | 'insert-right';
 export type TitleColumnAction = ActionMenuItem<TitleColumnActionType>;
 
-export type SelectTagActionType = 'rename' | 'delete';
+export type SelectTagActionType = 'rename' | 'change-color' | 'delete';
 export type SelectTagAction = ActionMenuItem<SelectTagActionType> | Divider;
 
 export type ToolbarAction = ActionMenuItem<ToolbarActionType> | Divider;
