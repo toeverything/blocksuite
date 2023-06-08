@@ -14,7 +14,10 @@ import type {
   NoteMouseMode,
   TopLevelBlockModel,
 } from '../../../../__internal__/utils/types.js';
-import { DEFAULT_FRAME_COLOR } from '../../../../frame-block/frame-model.js';
+import {
+  DEFAULT_FRAME_COLOR,
+  FRAME_COLORS,
+} from '../../../../frame-block/frame-model.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent } from '../color-panel.js';
@@ -132,7 +135,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-color-panel
         .value=${selectedBackground}
-        .options=${DEFAULT_FRAME_COLOR}
+        .options=${FRAME_COLORS}
         .showLetterMark=${true}
         @select=${(event: ColorEvent) => {
           this._setBlockBackground(event.detail);
