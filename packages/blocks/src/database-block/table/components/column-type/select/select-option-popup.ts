@@ -60,11 +60,11 @@ export class SelectActionPopup extends LitElement {
       fill: var(--affine-icon-color);
     }
 
-    .change-color {
+    .extra-icon {
       display: flex;
       align-items: center;
     }
-    .change-color svg {
+    .extra-icon svg {
       fill: var(--affine-icon-color);
       transform: rotate(-90deg);
     }
@@ -97,9 +97,9 @@ export class SelectActionPopup extends LitElement {
                 <div class="action-content">
                   ${action.icon}<span>${action.text}</span>
                 </div>
-                <div class=${action.type}>
-                  ${action.type === 'change-color' ? ArrowDownIcon : null}
-                </div>
+                ${action.type === 'change-color'
+                  ? html`<div class="extra-icon">${ArrowDownIcon}</div>`
+                  : null}
               </div>
             `;
           })}
