@@ -240,7 +240,7 @@ const migrations: Migration[] = [
 
       const databaseVersion = yVersions.get('affine:database');
       if (!databaseVersion) {
-        throw new MigrationError('affine:database version not found');
+        return false;
       }
       return databaseVersion < 2;
     },
