@@ -5,7 +5,7 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from '../../utils/bound.js';
-import { Utils } from '../../utils/tl-utils.js';
+import { Utils } from '../../utils/math-utils.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 

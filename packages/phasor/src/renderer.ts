@@ -5,8 +5,8 @@ import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { intersects } from './utils/hit-utils.js';
+import { Utils } from './utils/math-utils.js';
 import { type IPoint, Point } from './utils/point.js';
-import { Utils } from './utils/tl-utils.js';
 const { clamp } = Utils;
 
 export interface SurfaceViewport {

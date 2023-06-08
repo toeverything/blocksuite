@@ -1,4 +1,4 @@
-import { Utils } from './tl-utils.js';
+import { Utils } from './math-utils.js';
 const { clamp } = Utils;
 export interface IPoint {
   x: number;

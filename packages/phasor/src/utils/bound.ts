@@ -1,8 +1,8 @@
 import type { IBound } from '../consts.js';
 import { Line } from './line.js';
+import { Utils } from './math-utils.js';
 import { EPSILON } from './numerical.js';
 import { Point } from './point.js';
-import { Utils } from './tl-utils.js';
 import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
 
 export class Bound implements IBound {

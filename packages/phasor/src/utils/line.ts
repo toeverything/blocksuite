@@ -1,6 +1,6 @@
+import { Utils } from './math-utils.js';
 import { almostEqual, EPSILON, MACHINE_EPSILON } from './numerical.js';
 import type { Point } from './point.js';
-import { Utils } from './tl-utils.js';
 const { clamp } = Utils;
 
 export class Line {

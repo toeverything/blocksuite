@@ -1,7 +1,7 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, StrokeStyle } from '../../../consts.js';
-import { Utils } from '../../../utils/tl-utils.js';
+import { Utils } from '../../../utils/math-utils.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
