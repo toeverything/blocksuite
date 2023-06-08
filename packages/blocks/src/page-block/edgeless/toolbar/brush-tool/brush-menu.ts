@@ -54,6 +54,8 @@ function BrushSizeButtonGroup(
 export class EdgelessBrushMenu extends LitElement {
   static override styles = css`
     :host {
+      position: absolute;
+      height: 76px;
       width: 260px;
       z-index: 1;
     }

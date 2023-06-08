@@ -9,8 +9,7 @@ import {
 } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
-import type { Instance as PopperInstance } from '@popperjs/core';
-import { createPopper } from '@popperjs/core';
+import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -172,8 +171,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @query('edgeless-component-toolbar')
   private _componentToolbar?: EdgelessComponentToolbar;
 
-  private _componentToolbarPopper: PopperInstance | null = null;
-
   private _lock = false;
   private _resizeManager: HandleResizeManager;
 
@@ -256,6 +253,28 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._lock = false;
   };
 
+  private _computeComponentToolbarPosition() {
+    const componentToolbar = this._componentToolbar;
+    if (!componentToolbar) return;
+
+    computePosition(this._selectedRect, componentToolbar, {
+      placement: 'top',
+      middleware: [
+        offset({
+          mainAxis: 12,
+        }),
+        flip({
+          fallbackPlacements: ['bottom', 'right', 'left'],
+        }),
+      ],
+    }).then(({ x, y }) => {
+      Object.assign(componentToolbar.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
+  }
+
   override firstUpdated() {
     const { _disposables, slots } = this;
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
@@ -265,42 +284,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       )
     );
 
-    this._componentToolbarPopper = this._componentToolbar
-      ? createPopper(this._selectedRect, this._componentToolbar, {
-          placement: 'top',
-          modifiers: [
-            {
-              name: 'offset',
-              options: {
-                offset: [0, 12],
-              },
-            },
-            {
-              name: 'flip',
-              options: {
-                fallbackPlacements: ['bottom'],
-              },
-            },
-          ],
-        })
-      : null;
-    _disposables.add(() => this._componentToolbarPopper?.destroy());
+    const componentToolbar = this._componentToolbar;
+    if (!componentToolbar) return;
 
-    if (this._componentToolbar) {
-      // This hook is not waiting all children updated.
-      // But children effect popper position. So we use ResizeObserver watching sizing change.
-      const resizeObserver = new ResizeObserver(() =>
-        this._componentToolbarPopper?.update()
-      );
-      resizeObserver.observe(this._componentToolbar);
-      _disposables.add(() => resizeObserver.disconnect());
-    }
+    autoUpdate(this._selectedRect, componentToolbar, () => {
+      this._computeComponentToolbarPosition();
+    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
-    // when viewport updates, popper should update too.
-    this._componentToolbarPopper?.update();
     super.updated(changedProperties);
+    // when viewport updates, popper should update too.
+    this._computeComponentToolbarPosition();
   }
 
   override render() {
