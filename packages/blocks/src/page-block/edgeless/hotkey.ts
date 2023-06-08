@@ -11,7 +11,7 @@ import {
   handleDown,
   handleUp,
 } from '../utils/index.js';
-import { DEFAULT_LINE_COLOR } from './components/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR } from './components/color-panel.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -145,7 +145,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     hotkey.addListener('p', () =>
       setMouseMode(edgeless, {
         type: 'brush',
-        color: DEFAULT_LINE_COLOR,
+        color: GET_DEFAULT_LINE_COLOR(),
         lineWidth: BrushSize.Thin,
       })
     );

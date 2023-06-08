@@ -15,15 +15,15 @@ import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import {
   type ColorEvent,
-  DEFAULT_LINE_COLOR,
   type EdgelessColorPanel,
+  GET_DEFAULT_LINE_COLOR,
 } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as CssVariableName) : DEFAULT_LINE_COLOR;
+  return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonSize(elements: BrushElement[]): BrushSize | null {

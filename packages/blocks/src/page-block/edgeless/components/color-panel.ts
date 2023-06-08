@@ -38,7 +38,7 @@ export const LINE_COLORS: CssVariableName[] = [
   '--affine-palette-line-white',
 ];
 
-export const DEFAULT_LINE_COLOR =
+export const GET_DEFAULT_LINE_COLOR = () =>
   queryCurrentMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
 
 export function isTransparent(color: CssVariableName) {

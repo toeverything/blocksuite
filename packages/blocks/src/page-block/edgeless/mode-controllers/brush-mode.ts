@@ -3,13 +3,13 @@ import type { PointerEventState } from '@blocksuite/lit';
 
 import type { BrushMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { DEFAULT_LINE_COLOR } from '../components/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR } from '../components/color-panel.js';
 import { MouseModeController } from './index.js';
 
 export class BrushModeController extends MouseModeController<BrushMouseMode> {
   readonly mouseMode = <BrushMouseMode>{
     type: 'brush',
-    color: DEFAULT_LINE_COLOR,
+    color: GET_DEFAULT_LINE_COLOR(),
     lineWidth: 4,
   };
 

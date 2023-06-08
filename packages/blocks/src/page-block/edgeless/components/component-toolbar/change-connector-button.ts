@@ -25,8 +25,8 @@ import {
 } from '../../utils.js';
 import {
   type ColorEvent,
-  DEFAULT_LINE_COLOR,
   type EdgelessColorPanel,
+  GET_DEFAULT_LINE_COLOR,
 } from '../color-panel.js';
 import type { LineSizeButtonProps } from '../line-size-button.js';
 import { lineSizeButtonStyles } from '../line-size-button.js';
@@ -44,7 +44,7 @@ function getMostCommonColor(
 ): CssVariableName | null {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.color);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as CssVariableName) : DEFAULT_LINE_COLOR;
+  return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {

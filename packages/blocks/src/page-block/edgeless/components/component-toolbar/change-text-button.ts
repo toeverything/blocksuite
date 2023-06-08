@@ -19,7 +19,7 @@ import type { EdgelessAlignPanel } from '../align-panel.js';
 import {
   type ColorEvent,
   ColorUnit,
-  DEFAULT_LINE_COLOR,
+  GET_DEFAULT_LINE_COLOR,
   LINE_COLORS,
 } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
@@ -27,7 +27,7 @@ import { createButtonPopper } from '../utils.js';
 function getMostCommonColor(texts: TextElement[]): TextElement['color'] {
   const colors = countBy(texts, (text: TextElement) => text.color);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as TextElement['color']) : DEFAULT_LINE_COLOR;
+  return max ? (max[0] as TextElement['color']) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonAlign(texts: TextElement[]): TextElement['textAlign'] {
