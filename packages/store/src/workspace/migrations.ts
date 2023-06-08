@@ -1,3 +1,4 @@
+import type { Column, SelectTag } from '@blocksuite/blocks';
 import { MigrationError } from '@blocksuite/global/error';
 import * as Y from 'yjs';
 
@@ -227,6 +228,111 @@ const migrations: Migration[] = [
       }
 
       yChildren.insert(0, [surfaceId]);
+    },
+  },
+  {
+    desc: 'convert database block to view version',
+    condition: doc => {
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      if (!yVersions) return false;
+
+      const databaseVersion = yVersions.get('affine:database');
+      if (!databaseVersion) {
+        throw new MigrationError('affine:database version not found');
+      }
+      return databaseVersion < 2;
+    },
+    migrate: doc => {
+      // @ts-ignore
+      const pageIds = doc
+        .getMap('space:meta')
+        .get('pages')
+        .map((a: Y.Map<unknown>) => a.get('id')) as string[];
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      yVersions.set('affine:database', 2);
+
+      pageIds.forEach(pageId => {
+        const spaceId = `space:${pageId}`;
+        const yBlocks = doc.getMap(spaceId);
+        [...yBlocks.values()].forEach(yBlock => {
+          if (yBlock.get('sys:flavour') === 'affine:database') {
+            yBlock.delete('prop:mode');
+            yBlock.set('prop:views', new Y.Array());
+            const columns = yBlock.get('prop:columns').toJSON() as {
+              id: string;
+              name: string;
+              hide: boolean;
+              type: string;
+              width: number;
+              selection?: SelectTag[];
+            }[];
+            const views = [
+              {
+                id: 'default',
+                name: 'Table',
+                columns: columns.map(col => ({
+                  id: col.id,
+                  width: col.width,
+                  hide: col.hide,
+                })),
+                filter: { type: 'group', op: 'and', conditions: [] },
+                mode: 'table',
+              },
+            ];
+            const cells = yBlock.get('prop:cells').toJSON() as Record<
+              string,
+              Record<
+                string,
+                {
+                  id: string;
+                  value: unknown;
+                }
+              >
+            >;
+            const convertColumn = (
+              id: string,
+              update: (cell: { id: string; value: unknown }) => void
+            ) => {
+              Object.values(cells).forEach(row => {
+                update(row[id]);
+              });
+            };
+            const newColumns: Column[] = columns.map(v => {
+              let data: Record<string, unknown> = {};
+              if (v.type === 'select' || v.type === 'multi-select') {
+                data = { options: v.selection };
+                if (v.type === 'select') {
+                  convertColumn(v.id, cell => {
+                    if (typeof cell.value === 'object') {
+                      // @ts-ignore
+                      cell.value = cell.value?.id;
+                    }
+                  });
+                } else {
+                  convertColumn(v.id, cell => {
+                    if (Array.isArray(cell.value)) {
+                      cell.value = cell.value.map(v => v.id);
+                    }
+                  });
+                }
+              }
+              return {
+                id: v.id,
+                type: v.type,
+                name: v.name,
+                data,
+              };
+            });
+            yBlock.set('prop:columns', newColumns);
+            yBlock.set('prop:views', views);
+            yBlock.set('prop:cells', cells);
+          }
+        });
+      });
     },
   },
 ];

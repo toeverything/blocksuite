@@ -289,7 +289,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   }),
   metadata: {
     role: 'hub',
-    version: 1,
+    version: 2,
     tag: literal`affine-database`,
     parent: ['affine:frame'],
     children: ['affine:paragraph', 'affine:list'],
