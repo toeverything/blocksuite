@@ -148,9 +148,6 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.2.9
         version: registry.npmmirror.com/@floating-ui/dom@1.2.9
-      '@popperjs/core':
-        specifier: ^2.11.6
-        version: 2.11.6
       hotkeys-js:
         specifier: ^3.10.1
         version: 3.10.1(patch_hash=otx73r74oyscqvo3amwccrzngy)
@@ -1416,10 +1413,6 @@ packages:
   /@polka/url@1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
-
-  /@popperjs/core@2.11.6:
-    resolution: {integrity: sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==}
-    dev: false
 
   /@rich-data/json-plugin@3.0.0-20230329005843-d296129(@rich-data/viewer@3.0.0-20230329005843-d296129)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-z/e6jMq/oBLWXXTLZLgXs0VzHUJO8E1/YPEmpygtceAQ7nz5GEUbaGIvCKWVPzWl+RQRn+ehmu/JMAtcTfst7Q==}
