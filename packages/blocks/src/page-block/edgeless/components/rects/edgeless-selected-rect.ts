@@ -118,8 +118,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     /* -18 + 6.5 */
     .affine-edgeless-selected-rect .handle[aria-label='top-left'] {
-      left: -12.5px;
-      top: -12.5px;
+      left: -12px;
+      top: -12px;
     }
     .affine-edgeless-selected-rect .handle[aria-label='top-left'] .resize {
       right: 0;
@@ -131,8 +131,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='top-right'] {
-      top: -12.5px;
-      right: -12.5px;
+      top: -12px;
+      right: -12px;
     }
     .affine-edgeless-selected-rect .handle[aria-label='top-right'] .resize {
       left: 0;
@@ -144,8 +144,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] {
-      right: -12.5px;
-      bottom: -12.5px;
+      right: -12px;
+      bottom: -12px;
     }
     .affine-edgeless-selected-rect .handle[aria-label='bottom-right'] .resize {
       left: 0;
@@ -157,8 +157,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] {
-      bottom: -12.5px;
-      left: -12.5px;
+      bottom: -12px;
+      left: -12px;
     }
     .affine-edgeless-selected-rect .handle[aria-label='bottom-left'] .resize {
       right: 0;

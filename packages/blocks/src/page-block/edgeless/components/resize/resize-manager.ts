@@ -70,10 +70,10 @@ export class HandleResizeManager {
       _aspectRatio: aspectRatio,
       _dragDirection: direction,
       _dragPos: dragPos,
+      _rotate: rotate,
       _resizeMode,
       _zoom,
       _commonBound,
-      _rotate,
       _target,
     } = this;
 
@@ -83,194 +83,126 @@ export class HandleResizeManager {
     const { x: startX, y: startY } = dragPos.start;
     const { x: endX, y: endY } = dragPos.end;
 
-    let minX = _commonBound[0];
-    let maxX = _commonBound[2];
-    const minY = _commonBound[1];
-    const maxY = _commonBound[3];
-    const originalWidth = maxX - minX;
-    const originalHeight = maxY - minY;
-    const originalCenterX = minX + originalWidth / 2;
-    const originalCenterY = minY + originalHeight / 2;
+    const [minX, minY, maxX, maxY] = _commonBound;
+    const original = {
+      w: maxX - minX,
+      h: maxY - minY,
+      cx: (minX + maxX) / 2,
+      cy: (minY + maxY) / 2,
+    };
+    const rect = { ...original };
     const scale = { x: 1, y: 1 };
-    const origin = { x: 0, y: 0 };
-    let newWidth = originalWidth;
-    let newHeight = originalHeight;
-    let centerX = originalCenterX;
-    let centerY = originalCenterY;
-
-    const targetParent = _target.parentElement;
-    assertExists(targetParent);
+    const fixedPoint = new DOMPoint(0, 0);
+    const draggingPoint = new DOMPoint(0, 0);
 
     const deltaX = (endX - startX) / _zoom;
 
     const m0 = new DOMMatrix()
-      .translateSelf(originalCenterX, originalCenterY)
-      .rotateSelf(_rotate)
-      .translateSelf(-originalCenterX, -originalCenterY);
+      .translateSelf(original.cx, original.cy)
+      .rotateSelf(rotate)
+      .translateSelf(-original.cx, -original.cy);
 
     if (isCorner) {
-      const deltaY = (endY - startY) / _zoom;
-
       switch (direction) {
         case HandleDirection.TopLeft: {
-          const a = { x: minX, y: minY };
-          const c = { x: maxX, y: maxY };
-
-          origin.x = c.x;
-          origin.y = c.y;
-
-          const a1 = new DOMPoint(a.x, a.y).matrixTransform(m0);
-          const c1 = new DOMPoint(c.x, c.y).matrixTransform(m0);
-
-          a1.x += deltaX;
-          a1.y += deltaY;
-
-          const cx1 = (a1.x + c1.x) / 2;
-          const cy1 = (a1.y + c1.y) / 2;
-
-          const m1 = new DOMMatrix()
-            .translateSelf(cx1, cy1)
-            .rotateSelf(-_rotate)
-            .translateSelf(-cx1, -cy1);
-
-          const a2 = new DOMPoint(a1.x, a1.y).matrixTransform(m1);
-          const c2 = new DOMPoint(c1.x, c1.y).matrixTransform(m1);
-
-          newWidth = c2.x - a2.x;
-          newHeight = c2.y - a2.y;
-          centerX = (c2.x + a2.x) / 2;
-          centerY = (c2.y + a2.y) / 2;
-
-          scale.x = newWidth / originalWidth;
-          scale.y = newHeight / originalHeight;
+          fixedPoint.x = maxX;
+          fixedPoint.y = maxY;
+          draggingPoint.x = minX;
+          draggingPoint.y = minY;
           break;
         }
         case HandleDirection.TopRight: {
-          const b = { x: maxX, y: minY };
-          const d = { x: minX, y: maxY };
-
-          origin.x = d.x;
-          origin.y = d.y;
-
-          const b1 = new DOMPoint(b.x, b.y).matrixTransform(m0);
-          const d1 = new DOMPoint(d.x, d.y).matrixTransform(m0);
-
-          b1.x += deltaX;
-          b1.y += deltaY;
-
-          const cx1 = (b1.x + d1.x) / 2;
-          const cy1 = (b1.y + d1.y) / 2;
-
-          const m1 = new DOMMatrix()
-            .translateSelf(cx1, cy1)
-            .rotateSelf(-_rotate)
-            .translateSelf(-cx1, -cy1);
-
-          const b2 = new DOMPoint(b1.x, b1.y).matrixTransform(m1);
-          const d2 = new DOMPoint(d1.x, d1.y).matrixTransform(m1);
-
-          newWidth = b2.x - d2.x;
-          newHeight = d2.y - b2.y;
-          centerX = (b2.x + d2.x) / 2;
-          centerY = (b2.y + d2.y) / 2;
-
-          scale.x = newWidth / originalWidth;
-          scale.y = newHeight / originalHeight;
+          fixedPoint.x = minX;
+          fixedPoint.y = maxY;
+          draggingPoint.x = maxX;
+          draggingPoint.y = minY;
           break;
         }
         case HandleDirection.BottomRight: {
-          const a = { x: minX, y: minY };
-          const c = { x: maxX, y: maxY };
-
-          origin.x = a.x;
-          origin.y = a.y;
-
-          const a1 = new DOMPoint(a.x, a.y).matrixTransform(m0);
-          const c1 = new DOMPoint(c.x, c.y).matrixTransform(m0);
-
-          c1.x += deltaX;
-          c1.y += deltaY;
-
-          const cx1 = (a1.x + c1.x) / 2;
-          const cy1 = (a1.y + c1.y) / 2;
-
-          const m1 = new DOMMatrix()
-            .translateSelf(cx1, cy1)
-            .rotateSelf(-_rotate)
-            .translateSelf(-cx1, -cy1);
-
-          const a2 = new DOMPoint(a1.x, a1.y).matrixTransform(m1);
-          const c2 = new DOMPoint(c1.x, c1.y).matrixTransform(m1);
-
-          newWidth = c2.x - a2.x;
-          newHeight = c2.y - a2.y;
-          centerX = (c2.x + a2.x) / 2;
-          centerY = (c2.y + a2.y) / 2;
-
-          scale.x = newWidth / originalWidth;
-          scale.y = newHeight / originalHeight;
+          fixedPoint.x = minX;
+          fixedPoint.y = minY;
+          draggingPoint.x = maxX;
+          draggingPoint.y = maxY;
           break;
         }
         case HandleDirection.BottomLeft: {
-          const b = { x: maxX, y: minY };
-          const d = { x: minX, y: maxY };
-
-          origin.x = b.x;
-          origin.y = b.y;
-
-          const b1 = new DOMPoint(b.x, b.y).matrixTransform(m0);
-          const d1 = new DOMPoint(d.x, d.y).matrixTransform(m0);
-
-          d1.x += deltaX;
-          d1.y += deltaY;
-
-          const cx1 = (b1.x + d1.x) / 2;
-          const cy1 = (b1.y + d1.y) / 2;
-
-          const m1 = new DOMMatrix()
-            .translateSelf(cx1, cy1)
-            .rotateSelf(-_rotate)
-            .translateSelf(-cx1, -cy1);
-
-          const b2 = new DOMPoint(b1.x, b1.y).matrixTransform(m1);
-          const d2 = new DOMPoint(d1.x, d1.y).matrixTransform(m1);
-
-          newWidth = b2.x - d2.x;
-          newHeight = d2.y - b2.y;
-          centerX = (b2.x + d2.x) / 2;
-          centerY = (b2.y + d2.y) / 2;
-
-          scale.x = newWidth / originalWidth;
-          scale.y = newHeight / originalHeight;
+          fixedPoint.x = maxX;
+          fixedPoint.y = minY;
+          draggingPoint.x = minX;
+          draggingPoint.y = maxY;
           break;
         }
       }
 
+      const deltaY = (endY - startY) / _zoom;
+      const fp = fixedPoint.matrixTransform(m0);
+      let dp = draggingPoint.matrixTransform(m0);
+
+      dp.x += deltaX;
+      dp.y += deltaY;
+
+      let cx = (fp.x + dp.x) / 2;
+      let cy = (fp.y + dp.y) / 2;
+      let m1 = new DOMMatrix()
+        .translateSelf(cx, cy)
+        .rotateSelf(-rotate)
+        .translateSelf(-cx, -cy);
+      let f = fp.matrixTransform(m1);
+      let d = dp.matrixTransform(m1);
+
+      rect.w = d.x - f.x;
+      rect.h = d.y - f.y;
+      rect.cx = (d.x + f.x) / 2;
+      rect.cy = (d.y + f.y) / 2;
+      scale.x = rect.w / original.w;
+      scale.y = rect.h / original.h;
+
       if (shift) {
-        const newAspectRatio = Math.abs(newWidth / newHeight);
+        const newAspectRatio = Math.abs(rect.w / rect.h);
         const isTall = aspectRatio < newAspectRatio;
         if (isTall) {
           scale.y = Math.abs(scale.x) * (scale.y < 0 ? -1 : 1);
+          rect.h = scale.y * original.h;
         } else {
           scale.x = Math.abs(scale.y) * (scale.x < 0 ? -1 : 1);
+          rect.w = scale.x * original.w;
         }
+        draggingPoint.x = fixedPoint.x + rect.w;
+        draggingPoint.y = fixedPoint.y + rect.h;
+
+        dp = draggingPoint.matrixTransform(m0);
+
+        cx = (fp.x + dp.x) / 2;
+        cy = (fp.y + dp.y) / 2;
+
+        m1 = new DOMMatrix()
+          .translateSelf(cx, cy)
+          .rotateSelf(-rotate)
+          .translateSelf(-cx, -cy);
+
+        f = fp.matrixTransform(m1);
+        d = dp.matrixTransform(m1);
+
+        // newWidth = d.x - f.x;
+        // newHeight = d.y - f.y;
+        rect.cx = (d.x + f.x) / 2;
+        rect.cy = (d.y + f.y) / 2;
       }
     } else {
       switch (direction) {
         case HandleDirection.Left:
-          minX += deltaX;
-          origin.x = maxX;
+          rect.w = maxX - minX - deltaX;
+          fixedPoint.x = maxX;
           break;
         case HandleDirection.Right:
-          maxX += deltaX;
-          origin.x = minX;
+          rect.w = maxX - minX + deltaX;
+          fixedPoint.x = minX;
           break;
       }
 
-      newWidth = maxX - minX;
-      newHeight = maxY - minY;
-      scale.x = newWidth / originalWidth;
-      scale.y = newHeight / originalHeight;
+      rect.h = maxY - minY;
+      scale.x = rect.w / original.w;
+      scale.y = rect.h / original.h;
     }
 
     const newBounds = new Map<
@@ -283,20 +215,22 @@ export class HandleResizeManager {
 
     // TODO: on same rotate
     if (isCorner && this._bounds.size === 1) {
-      this._bounds.forEach(({ bound: { x, y, w, h }, flip }, id) => {
+      this._bounds.forEach(({ bound: { w, h }, flip }, id) => {
         const newWidth = Math.abs(w * scale.x);
         const newHeight = Math.abs(h * scale.y);
 
         newBounds.set(id, {
           bound: new Bound(
-            centerX - newWidth / 2,
-            centerY - newHeight / 2,
+            rect.cx - newWidth / 2,
+            rect.cy - newHeight / 2,
             newWidth,
             newHeight
           ),
           flip: {
-            x: flip.x,
-            y: flip.y,
+            x: flip.x * (scale.x < 0 ? -1 : 1),
+            y: flip.y * (scale.y < 0 ? -1 : 1),
+            // x: flip.x,
+            // y: flip.y,
           },
         });
       });
@@ -309,8 +243,8 @@ export class HandleResizeManager {
       scale.x,
       scale.y,
       1,
-      origin.x,
-      origin.y,
+      fixedPoint.x,
+      fixedPoint.y,
       0
     );
 
