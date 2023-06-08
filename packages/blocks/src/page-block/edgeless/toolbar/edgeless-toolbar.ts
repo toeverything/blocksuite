@@ -198,7 +198,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     if (cofficient === 1) {
       this._smoothTranslate(centerX, centerY);
     } else {
-      const center = viewport.center;
+      const center = new Point(viewport.centerX, viewport.centerY);
       const newCenter = new Point(centerX, centerY);
       const focusPoint = newCenter
         .subtract(center.scale(cofficient))

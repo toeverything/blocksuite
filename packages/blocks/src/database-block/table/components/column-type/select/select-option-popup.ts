@@ -1,4 +1,9 @@
-import { DeleteIcon, PenIcon } from '@blocksuite/global/config';
+import {
+  ArrowDownIcon,
+  DatabaseSelectionColor,
+  DeleteIcon,
+  PenIcon,
+} from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -11,6 +16,11 @@ const tagActions: SelectTagAction[] = [
     type: 'rename',
     text: 'Rename',
     icon: PenIcon,
+  },
+  {
+    type: 'change-color',
+    text: 'Change Color',
+    icon: DatabaseSelectionColor,
   },
   {
     type: 'divider',
@@ -26,6 +36,7 @@ const tagActions: SelectTagAction[] = [
 export class SelectActionPopup extends LitElement {
   static override styles = css`
     :host {
+      position: absolute;
       z-index: 11;
     }
     .affine-database-select-action {
@@ -48,6 +59,15 @@ export class SelectActionPopup extends LitElement {
     .delete {
       fill: var(--affine-icon-color);
     }
+
+    .extra-icon {
+      display: flex;
+      align-items: center;
+    }
+    .extra-icon svg {
+      fill: var(--affine-icon-color);
+      transform: rotate(-90deg);
+    }
   `;
 
   @property()
@@ -56,33 +76,34 @@ export class SelectActionPopup extends LitElement {
   @property()
   onAction!: (type: SelectTagActionType, index: number) => void;
 
-  @property()
-  onClose!: () => void;
-
   private _onAction = (e: Event, type: SelectTagActionType) => {
     e.stopPropagation();
     this.onAction(type, this.index);
-    this.onClose();
   };
 
   override render() {
     return html`
       <div class="affine-database-select-action">
-        ${tagActions.map(action => {
-          if (isDivider(action))
-            return html`<div class="action-divider"></div>`;
+        <div class="action-container">
+          ${tagActions.map(action => {
+            if (isDivider(action))
+              return html`<div class="action-divider"></div>`;
 
-          return html`
-            <div
-              class="action ${action.type}"
-              @mousedown=${(e: Event) => this._onAction(e, action.type)}
-            >
-              <div class="action-content">
-                ${action.icon}<span>${action.text}</span>
+            return html`
+              <div
+                class="action ${action.type}"
+                @mousedown=${(e: Event) => this._onAction(e, action.type)}
+              >
+                <div class="action-content">
+                  ${action.icon}<span>${action.text}</span>
+                </div>
+                ${action.type === 'change-color'
+                  ? html`<div class="extra-icon">${ArrowDownIcon}</div>`
+                  : null}
               </div>
-            </div>
-          `;
-        })}
+            `;
+          })}
+        </div>
       </div>
     `;
   }
