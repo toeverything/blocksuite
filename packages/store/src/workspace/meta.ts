@@ -130,6 +130,13 @@ export class WorkspaceMeta {
     });
   }
 
+  get hasVersion() {
+    if (!this.blockVersions) {
+      return false;
+    }
+    return Object.keys(this.blockVersions).length > 0;
+  }
+
   /**
    * @internal Only for page initialization
    */

@@ -709,7 +709,6 @@ export class Page extends Space<FlatBlockMap> {
     _yBlocks.observeDeep(this._handleYEvents);
     this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this._ySpaceDoc.clientID]),
-      doc: this._ySpaceDoc,
     });
 
     this._history.on('stack-cleared', this._historyObserver);
@@ -728,6 +727,7 @@ export class Page extends Space<FlatBlockMap> {
 
   private _historyAddObserver = (event: { stackItem: StackItem }) => {
     if (isWeb) {
+      console.log(event);
       event.stackItem.meta.set(
         'cursor-location',
         this.awarenessStore.getLocalRange(this)
@@ -959,7 +959,7 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
-    if (this._yBlocks.size === 0) {
+    if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.

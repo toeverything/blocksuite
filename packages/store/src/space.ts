@@ -43,7 +43,7 @@ export class Space<
   }
 
   get prefixedId() {
-    return `space:${this.id}`;
+    return this.id.startsWith('space:') ? this.id : `space:${this.id}`;
   }
 
   get loaded() {
@@ -51,7 +51,8 @@ export class Space<
   }
 
   private _loadSubDoc = () => {
-    const prefixedId = this.id.startsWith('space:') ? this.id : this.prefixedId;
+    const prefixedId = this.prefixedId;
+
     let subDoc = this.doc.spaces.get(prefixedId);
     if (!subDoc) {
       subDoc = new Y.Doc();
@@ -65,6 +66,7 @@ export class Space<
       this._loaded = false;
       this.doc.on('subdocs', this._onSubdocEvent);
     }
+
     return subDoc;
   };
 
@@ -72,11 +74,12 @@ export class Space<
     const result = Array.from(loaded).find(
       doc => doc.guid === this._ySpaceDoc.guid
     );
-    if (result) {
-      this._loaded = true;
-      this.doc.off('subdocs', this._onSubdocEvent);
-      this.onLoadSlot.emit();
+    if (!result) {
+      return;
     }
+    this.doc.off('subdocs', this._onSubdocEvent);
+    this._loaded = true;
+    this.onLoadSlot.emit();
   };
 
   /**

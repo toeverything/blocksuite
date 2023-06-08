@@ -189,12 +189,12 @@ export class Workspace {
         awarenessStore: this.awarenessStore,
         idGenerator: this._store.idGenerator,
       });
+      this._store.addSpace(page);
 
       page.onLoadSlot.once(() => {
+        console.log(this.doc.toJSON());
         page.trySyncFromExistingDoc();
       });
-
-      this._store.addSpace(page);
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());

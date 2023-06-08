@@ -28,8 +28,7 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 
 export const preset: InitFn = (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-
-  setTimeout(() => {
+  page.onLoadSlot.once(async () => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text('Welcome to BlockSuite Playground'),
@@ -58,8 +57,9 @@ export const preset: InitFn = (workspace: Workspace, id: string) => {
       strokeStyle: StrokeStyle.Solid,
       roughness: 2,
     });
-    contentParser.importMarkdown(presetMarkdown, frameId);
-  }, 10);
+    await contentParser.importMarkdown(presetMarkdown, frameId);
+    page.resetHistory();
+  });
 };
 
 preset.id = 'preset';
