@@ -93,6 +93,7 @@ export class HandleResizeManager {
       cy: (minY + maxY) / 2,
     };
     const rect = { ...original };
+    const arrow = { x: 1, y: 1 };
     const scale = { x: 1, y: 1 };
     const fixedPoint = new DOMPoint(0, 0);
     const draggingPoint = new DOMPoint(0, 0);
@@ -111,6 +112,8 @@ export class HandleResizeManager {
           fixedPoint.y = maxY;
           draggingPoint.x = minX;
           draggingPoint.y = minY;
+          arrow.x = -1;
+          arrow.y = -1;
           break;
         }
         case HandleDirection.TopRight: {
@@ -118,6 +121,8 @@ export class HandleResizeManager {
           fixedPoint.y = maxY;
           draggingPoint.x = maxX;
           draggingPoint.y = minY;
+          arrow.x = 1;
+          arrow.y = -1;
           break;
         }
         case HandleDirection.BottomRight: {
@@ -125,9 +130,13 @@ export class HandleResizeManager {
           fixedPoint.y = minY;
           draggingPoint.x = maxX;
           draggingPoint.y = maxY;
+          arrow.x = 1;
+          arrow.y = 1;
           break;
         }
         case HandleDirection.BottomLeft: {
+          arrow.x = -1;
+          arrow.y = 1;
           fixedPoint.x = maxX;
           fixedPoint.y = minY;
           draggingPoint.x = minX;
@@ -156,8 +165,29 @@ export class HandleResizeManager {
       let f = fp.matrixTransform(m1);
       let d = dp.matrixTransform(m1);
 
-      rect.w = d.x - f.x;
-      rect.h = d.y - f.y;
+      switch (direction) {
+        case HandleDirection.TopLeft: {
+          rect.w = f.x - d.x;
+          rect.h = f.y - d.y;
+          break;
+        }
+        case HandleDirection.TopRight: {
+          rect.w = d.x - f.x;
+          rect.h = f.y - d.y;
+          break;
+        }
+        case HandleDirection.BottomRight: {
+          rect.w = d.x - f.x;
+          rect.h = d.y - f.y;
+          break;
+        }
+        case HandleDirection.BottomLeft: {
+          rect.w = f.x - d.x;
+          rect.h = d.y - f.y;
+          break;
+        }
+      }
+
       rect.cx = (d.x + f.x) / 2;
       rect.cy = (d.y + f.y) / 2;
       scale.x = rect.w / original.w;
@@ -172,8 +202,8 @@ export class HandleResizeManager {
           scale.x = Math.abs(scale.y) * (scale.x < 0 ? -1 : 1);
           rect.w = scale.x * original.w;
         }
-        draggingPoint.x = fixedPoint.x + rect.w;
-        draggingPoint.y = fixedPoint.y + rect.h;
+        draggingPoint.x = fixedPoint.x + rect.w * arrow.x;
+        draggingPoint.y = fixedPoint.y + rect.h * arrow.y;
 
         dp = draggingPoint.matrixTransform(m0);
 
