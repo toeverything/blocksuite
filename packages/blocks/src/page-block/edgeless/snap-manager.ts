@@ -1,7 +1,7 @@
 import { Bound, Renderable } from '@blocksuite/phasor';
 
 import { Point } from '../../__internal__/utils/rect.js';
-import type { onEdgelessElement } from '../../__internal__/utils/types.js';
+import type { Alignable } from '../../__internal__/utils/types.js';
 import { type FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 
@@ -80,7 +80,7 @@ export class EdgelessSnapManager {
   private _threshold = 5;
   private _snapRender = new SnapRender(this);
 
-  public prepareAlign(elements: onEdgelessElement[]): Bound {
+  public prepareAlign(elements: Alignable[]): Bound {
     if (elements.length === 0) return new Bound();
     const { page, surface } = this.container;
     const { viewport } = surface;
@@ -91,11 +91,11 @@ export class EdgelessSnapManager {
     const phasorElements = surface.getElements();
 
     this._alignBounds = [];
-    (<onEdgelessElement[]>[...frames, ...phasorElements]).forEach(element => {
-      const bound = Bound.deserialize(element.xywh);
+    (<Alignable[]>[...frames, ...phasorElements]).forEach(alignable => {
+      const bound = Bound.deserialize(alignable.xywh);
       if (
         viewportBounds.isIntersectWithBound(bound) &&
-        !elements.includes(element)
+        !elements.includes(alignable)
       ) {
         this._alignBounds.push(bound);
       }

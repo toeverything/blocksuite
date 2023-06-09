@@ -134,7 +134,7 @@ export type ExtendedModel = BaseBlockModel & Record<string, any>;
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel = FrameBlockModel;
 
-export type onEdgelessElement = FrameBlockModel | PhasorElement;
+export type Alignable = FrameBlockModel | PhasorElement;
 
 export type DefaultMouseMode = {
   type: 'default';
