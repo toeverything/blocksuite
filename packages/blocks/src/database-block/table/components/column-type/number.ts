@@ -60,6 +60,7 @@ export class NumberCellEditing
     }
     this._setValue();
   };
+
   private _setValue = (str: string = this._inputEle.value) => {
     const value = Number.parseFloat(str);
     if (Object.is(value, NaN)) {
@@ -69,9 +70,7 @@ export class NumberCellEditing
     this.rowHost.setValue(value, { captureSync: true });
     this._inputEle.value = `${this.cell?.value ?? ''}`;
   };
-  private _focus = (e: Event) => {
-    this.focusEnd();
-  };
+
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       this._setValue();
@@ -80,10 +79,10 @@ export class NumberCellEditing
 
   protected override render() {
     return html`<input
-      .value="${this.cell?.value ?? ''}"
-      @focus="${this._focus}"
-      @blur="${this._blur}"
-      @keydown="${this._keydown}"
+      .value=${this.cell?.value ?? ''}
+      @blur=${this._blur}
+      @keydown=${this._keydown}
+      @pointerdown=${(e: Event) => e.stopPropagation()}
       class="affine-database-number number"
     />`;
   }
