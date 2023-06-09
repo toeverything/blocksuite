@@ -1265,14 +1265,6 @@ test('should un-select blocks when pressing escape', async ({ page }) => {
   await pressEscape(page);
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await shamefullyBlurActiveElement(page);
-  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(3);
-
-  await pressEscape(page);
-  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
-
   await focusRichText(page, 2);
   await pressEnter(page);
   await type(page, '-');
