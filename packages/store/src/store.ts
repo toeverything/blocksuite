@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
+import type * as Y from 'yjs';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
-import { type Y } from './index.js';
 import type { BlobStorage } from './persistence/blob/types.js';
 import type {
   DocProvider,
