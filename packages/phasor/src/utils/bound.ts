@@ -20,6 +20,15 @@ export class Bound implements IBound {
     return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
   }
 
+  get points(): IVec[] {
+    return [
+      [this.x, this.y],
+      [this.x + this.w, this.y],
+      [this.x + this.w, this.y + this.h],
+      [this.x, this.y + this.h],
+    ];
+  }
+
   get center(): IVec {
     return [this.x + this.w / 2, this.y + this.h / 2];
   }
