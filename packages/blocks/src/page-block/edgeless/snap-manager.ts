@@ -15,10 +15,10 @@ class SnapRender extends Renderable {
 
   update(
     alignPoints: [Point, Point][],
-    alignDistrubitePoints: [Point, Point][]
+    alignDistributePoints: [Point, Point][]
   ) {
     this._alignPoints = alignPoints;
-    this._alignDistributePoints = alignDistrubitePoints;
+    this._alignDistributePoints = alignDistributePoints;
   }
 
   override render(ctx: CanvasRenderingContext2D) {
@@ -76,7 +76,7 @@ export class EdgelessSnapManager {
 
   private _alignBounds: Bound[] = [];
   private _alignPoints: [Point, Point][] = [];
-  private _alignDistrubitePoints: [Point, Point][] = [];
+  private _alignDistributePoints: [Point, Point][] = [];
   private _threshold = 5;
   private _snapRender = new SnapRender(this);
 
@@ -198,7 +198,7 @@ export class EdgelessSnapManager {
     }
 
     // distribute align
-    this._alignDistrubitePoints = [];
+    this._alignDistributePoints = [];
     if (rst.dx === 0) {
       const wBoxes: Bound[] = [];
       this._alignBounds.forEach(box => {
@@ -242,11 +242,11 @@ export class EdgelessSnapManager {
                 lb.minX,
                 lb.maxX,
               ].sort((a, b) => a - b);
-              this._alignDistrubitePoints[0] = [
+              this._alignDistributePoints[0] = [
                 new Point(xs[1], y),
                 new Point(xs[2], y),
               ];
-              this._alignDistrubitePoints[1] = [
+              this._alignDistributePoints[1] = [
                 new Point(xs[3], y),
                 new Point(xs[4], y),
               ];
@@ -308,11 +308,11 @@ export class EdgelessSnapManager {
                 ub.minY,
                 ub.maxY,
               ].sort((a, b) => a - b);
-              this._alignDistrubitePoints[3] = [
+              this._alignDistributePoints[3] = [
                 new Point(x, ys[1]),
                 new Point(x, ys[2]),
               ];
-              this._alignDistrubitePoints[4] = [
+              this._alignDistributePoints[4] = [
                 new Point(x, ys[3]),
                 new Point(x, ys[4]),
               ];
@@ -339,13 +339,13 @@ export class EdgelessSnapManager {
     const { viewport } = this.container.surface;
     this._alignBounds = [];
     this._alignPoints = [];
-    this._alignDistrubitePoints = [];
+    this._alignDistributePoints = [];
     viewport.removeRenderable(this._snapRender);
   }
 
   private _draw() {
     const { surface } = this.container;
-    this._snapRender.update(this._alignPoints, this._alignDistrubitePoints);
+    this._snapRender.update(this._alignPoints, this._alignDistributePoints);
     surface.refresh();
   }
 }
