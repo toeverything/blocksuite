@@ -219,7 +219,7 @@ export class EdgelessSnapManager {
             rb = lb;
             lb = temp;
           }
-          /** 中间对齐 */
+          /** align middle */
           let _centerX = 0;
           const updateDif = () => {
             dif = Math.abs(bound.center[0] - _centerX);
@@ -227,7 +227,7 @@ export class EdgelessSnapManager {
               min = dif;
               rst.dx = _centerX - bound.center[0];
               /**
-               * 计算待绘制点
+               * calculate points to draw
                */
               const ys = [lb.minY, lb.maxY, rb.minY, rb.maxY].sort(
                 (a, b) => a - b
@@ -256,10 +256,10 @@ export class EdgelessSnapManager {
             _centerX = (lb.maxX + rb.minX) / 2;
             updateDif();
           }
-          /** 左边对齐 */
+          /** align left */
           _centerX = lb.minX - (rb.minX - lb.maxX) - bound.w / 2;
           updateDif();
-          /** 右边对齐 */
+          /** align right */
           _centerX = rb.minX - lb.maxX + rb.maxX + bound.w / 2;
           updateDif();
         }
@@ -285,7 +285,7 @@ export class EdgelessSnapManager {
             ub = db;
             db = temp;
           }
-          /** 中间对齐 */
+          /** align middle */
           let _centerY = 0;
           const updateDif = () => {
             dif = Math.abs(bound.center[1] - _centerY);
@@ -293,7 +293,7 @@ export class EdgelessSnapManager {
               min = dif;
               rst.dy = _centerY - bound.center[1];
               /**
-               * 计算待绘制点
+               * calculate points to draw
                */
               const xs = [ub.minX, ub.maxX, db.minX, db.maxX].sort(
                 (a, b) => a - b
@@ -322,10 +322,10 @@ export class EdgelessSnapManager {
             _centerY = (ub.maxY + db.minY) / 2;
             updateDif();
           }
-          /** 上边对齐 */
+          /** align upper */
           _centerY = ub.minY - (db.minY - ub.maxY) - bound.h / 2;
           updateDif();
-          /** 下边对齐 */
+          /** align lower */
           _centerY = db.minY - ub.maxY + db.maxY + bound.h / 2;
           updateDif();
         }
