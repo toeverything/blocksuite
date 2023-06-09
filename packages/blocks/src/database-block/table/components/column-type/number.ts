@@ -33,17 +33,6 @@ export class NumberCellEditing
     .affine-database-number:focus {
       outline: none;
     }
-
-    .affine-database-number v-line {
-      display: flex !important;
-      align-items: center;
-      height: 100%;
-      width: 100%;
-    }
-
-    .affine-database-number v-line > div {
-      flex-grow: 1;
-    }
   `;
 
   @query('input')
