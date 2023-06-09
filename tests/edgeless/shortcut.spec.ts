@@ -2,6 +2,8 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicRectShapeElement,
+  deleteAll,
+  getEdgelessSelectedRect,
   getZoomLevel,
   locatorEdgelessToolButton,
   switchEditorMode,
@@ -12,8 +14,16 @@ import {
 } from '../utils/actions/edgeless.js';
 import {
   enterPlaygroundRoom,
+  focusRichText,
+  getFrameBoundBoxInEdgeless,
   initEmptyEdgelessState,
+  isDOMRectSame,
+  pressBackspace,
   pressEscape,
+  pressForwardDelete,
+  selectAllByKeyboard,
+  selectFrameInEdgeless,
+  type,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessNonSelectedRect,
@@ -122,5 +132,67 @@ test.describe('zooming', () => {
 
     zoom = await getZoomLevel(page);
     expect(zoom).toBe(150);
+  });
+});
+
+test('(command + A) select all elements when no active', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+  const start = { x: 0, y: 0 };
+  const end = { x: 100, y: 100 };
+  await addBasicRectShapeElement(page, start, end);
+  start.x = 100;
+  end.x = 200;
+  await addBasicRectShapeElement(page, start, end);
+  await selectAllByKeyboard(page);
+
+  await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
+});
+
+test('(command + A) not select all elements when active', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { frameId } = await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await switchEditorMode(page);
+
+  const start = { x: 0, y: 0 };
+  const end = { x: 100, y: 100 };
+  await addBasicRectShapeElement(page, start, end);
+  await selectAllByKeyboard(page);
+
+  const box = await getEdgelessSelectedRect(page);
+
+  await selectFrameInEdgeless(page, frameId);
+  const box1 = await getEdgelessSelectedRect(page);
+
+  // second click become active
+  await selectFrameInEdgeless(page, frameId);
+  await selectAllByKeyboard(page);
+
+  const box2 = await getEdgelessSelectedRect(page);
+
+  expect(isDOMRectSame(box2, box1)).toBe(true);
+});
+
+test.describe('delete', () => {
+  test('do not delete element when active', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { frameId } = await initEmptyEdgelessState(page);
+    await focusRichText(page);
+    await type(page, 'hello');
+    await switchEditorMode(page);
+    await selectFrameInEdgeless(page, frameId);
+    const box1 = await getEdgelessSelectedRect(page);
+    await selectFrameInEdgeless(page, frameId);
+    await pressBackspace(page);
+    const box2 = await getEdgelessSelectedRect(page);
+    expect(isDOMRectSame(box2, box1)).toBe(true);
+
+    await pressForwardDelete(page);
+    const box3 = await getEdgelessSelectedRect(page);
+    expect(isDOMRectSame(box3, box1)).toBe(true);
   });
 });

@@ -944,3 +944,9 @@ export async function transformHtml(page: Page, data: string) {
   );
   return await promiseResult;
 }
+
+export function isDOMRectSame(a: DOMRect, b: DOMRect) {
+  return (
+    a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height
+  );
+}

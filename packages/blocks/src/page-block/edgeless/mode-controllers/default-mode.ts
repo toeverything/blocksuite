@@ -140,6 +140,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         // If the previously selected element is a frameBlock and is in an active state,
         // then the currently clicked frameBlock should also be in an active state when selected.
         this._setSelectionState([element], true);
+        handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
         this._edgeless.slots.selectedBlocksUpdated.emit([]);
         return;
       }
