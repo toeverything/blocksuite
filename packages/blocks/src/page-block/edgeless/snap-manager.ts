@@ -4,9 +4,11 @@ import { Point } from '../../__internal__/utils/rect.js';
 import type { onEdgelessElement } from '../../__internal__/utils/types.js';
 import { type FrameBlockModel } from '../../frame-block/frame-model.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+
 class SnapRender extends Renderable {
-  private alignPoints: [Point, Point][] = [];
-  private alignDistrubitePoints: [Point, Point][] = [];
+  private _alignPoints: [Point, Point][] = [];
+  private _alignDistrubitePoints: [Point, Point][] = [];
+
   constructor(private snapManager: EdgelessSnapManager) {
     super();
   }
@@ -15,13 +17,14 @@ class SnapRender extends Renderable {
     alignPoints: [Point, Point][],
     alignDistrubitePoints: [Point, Point][]
   ) {
-    this.alignPoints = alignPoints;
-    this.alignDistrubitePoints = alignDistrubitePoints;
+    this._alignPoints = alignPoints;
+    this._alignDistrubitePoints = alignDistrubitePoints;
   }
+
   override render(ctx: CanvasRenderingContext2D) {
     if (
-      this.alignPoints.length === 0 &&
-      this.alignDistrubitePoints.length === 0
+      this._alignPoints.length === 0 &&
+      this._alignDistrubitePoints.length === 0
     )
       return;
     const { viewport } = this.snapManager.container.surface;
@@ -30,7 +33,7 @@ class SnapRender extends Renderable {
     ctx.strokeStyle = '#1672F3';
     ctx.lineWidth = strokeWidth;
     ctx.beginPath();
-    this.alignPoints.forEach(points => {
+    this._alignPoints.forEach(points => {
       let d = '';
       if (points[0].x === points[1].x) {
         const x = points[0].x;
@@ -45,7 +48,7 @@ class SnapRender extends Renderable {
       }
       ctx.stroke(new Path2D(d));
     });
-    this.alignDistrubitePoints.forEach(points => {
+    this._alignDistrubitePoints.forEach(points => {
       const bar = 10 / viewport.zoom;
       let d = '';
       if (points[0].x === points[1].x) {
@@ -71,30 +74,30 @@ class SnapRender extends Renderable {
 export class EdgelessSnapManager {
   constructor(public container: EdgelessPageBlockComponent) {}
 
-  private alignBounds: Bound[] = [];
-  private alignPoints: [Point, Point][] = [];
-  private alignDistrubitePoints: [Point, Point][] = [];
-  private threshold = 5;
-  private snapRender = new SnapRender(this);
+  private _alignBounds: Bound[] = [];
+  private _alignPoints: [Point, Point][] = [];
+  private _alignDistrubitePoints: [Point, Point][] = [];
+  private _threshold = 5;
+  private _snapRender = new SnapRender(this);
 
   public prepareAlign(elements: onEdgelessElement[]): Bound {
     if (elements.length === 0) return new Bound();
     const { page, surface } = this.container;
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);
-    viewport.addRenderable(this.snapRender);
+    viewport.addRenderable(this._snapRender);
 
     const frames = page.getBlockByFlavour('affine:frame') as FrameBlockModel[];
     const phasorElements = surface.getElements();
 
-    this.alignBounds = [];
+    this._alignBounds = [];
     (<onEdgelessElement[]>[...frames, ...phasorElements]).forEach(element => {
       const bound = Bound.deserialize(element.xywh);
       if (
         viewportBounds.isIntersectWithBound(bound) &&
         !elements.includes(element)
       ) {
-        this.alignBounds.push(bound);
+        this._alignBounds.push(bound);
       }
     });
 
@@ -105,12 +108,12 @@ export class EdgelessSnapManager {
 
   public align(bound: Bound): { dx: number; dy: number } {
     const rst = { dx: 0, dy: 0 };
-    const { threshold } = this;
+    const { _threshold: threshold } = this;
     const { surface } = this.container;
     const { viewport } = surface;
 
-    this.alignPoints = [];
-    for (const other of this.alignBounds) {
+    this._alignPoints = [];
+    for (const other of this._alignBounds) {
       // Calculate center-to-center and center-to-side distances
       const centerXDistance = other.center[0] - bound.center[0];
       const centerYDistance = other.center[1] - bound.center[1];
@@ -169,7 +172,7 @@ export class EdgelessSnapManager {
           bound.maxX + rst.dx,
           bound.maxX + rst.dx,
         ][index];
-        this.alignPoints[0] = [
+        this._alignPoints[0] = [
           new Point(alignPointX, bound.center[1]),
           new Point(alignPointX, other.center[1]),
         ];
@@ -187,7 +190,7 @@ export class EdgelessSnapManager {
           bound.maxY + rst.dy,
           bound.maxY + rst.dy,
         ][index];
-        this.alignPoints[1] = [
+        this._alignPoints[1] = [
           new Point(bound.center[0], alignPointY),
           new Point(other.center[0], alignPointY),
         ];
@@ -195,10 +198,10 @@ export class EdgelessSnapManager {
     }
 
     // distribute align
-    this.alignDistrubitePoints = [];
+    this._alignDistrubitePoints = [];
     if (rst.dx === 0) {
       const wBoxes: Bound[] = [];
-      this.alignBounds.forEach(box => {
+      this._alignBounds.forEach(box => {
         if (box.isHorizontalCross(bound)) {
           wBoxes.push(box);
         }
@@ -239,11 +242,11 @@ export class EdgelessSnapManager {
                 lb.minX,
                 lb.maxX,
               ].sort((a, b) => a - b);
-              this.alignDistrubitePoints[0] = [
+              this._alignDistrubitePoints[0] = [
                 new Point(xs[1], y),
                 new Point(xs[2], y),
               ];
-              this.alignDistrubitePoints[1] = [
+              this._alignDistrubitePoints[1] = [
                 new Point(xs[3], y),
                 new Point(xs[4], y),
               ];
@@ -264,7 +267,7 @@ export class EdgelessSnapManager {
     }
     if (rst.dy === 0) {
       const hBoxes: Bound[] = [];
-      this.alignBounds.forEach(box => {
+      this._alignBounds.forEach(box => {
         if (box.isVerticalCross(bound)) {
           hBoxes.push(box);
         }
@@ -305,11 +308,11 @@ export class EdgelessSnapManager {
                 ub.minY,
                 ub.maxY,
               ].sort((a, b) => a - b);
-              this.alignDistrubitePoints[3] = [
+              this._alignDistrubitePoints[3] = [
                 new Point(x, ys[1]),
                 new Point(x, ys[2]),
               ];
-              this.alignDistrubitePoints[4] = [
+              this._alignDistrubitePoints[4] = [
                 new Point(x, ys[3]),
                 new Point(x, ys[4]),
               ];
@@ -328,21 +331,21 @@ export class EdgelessSnapManager {
         }
       }
     }
-    this.draw();
+    this._draw();
     return rst;
   }
 
-  public reset(): void {
+  public reset() {
     const { viewport } = this.container.surface;
-    this.alignBounds = [];
-    this.alignPoints = [];
-    this.alignDistrubitePoints = [];
-    viewport.removeRenderable(this.snapRender);
+    this._alignBounds = [];
+    this._alignPoints = [];
+    this._alignDistrubitePoints = [];
+    viewport.removeRenderable(this._snapRender);
   }
 
-  private draw() {
+  private _draw() {
     const { surface } = this.container;
-    this.snapRender.update(this.alignPoints, this.alignDistrubitePoints);
+    this._snapRender.update(this._alignPoints, this._alignDistrubitePoints);
     surface.refresh();
   }
 }
