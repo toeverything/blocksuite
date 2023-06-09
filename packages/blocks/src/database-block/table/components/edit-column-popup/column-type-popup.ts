@@ -48,6 +48,7 @@ const columnTypes: ColumnHeader[] = [
 
 const styles = css`
   :host {
+    position: absolute;
     z-index: 1;
     width: 200px;
     padding: 8px;

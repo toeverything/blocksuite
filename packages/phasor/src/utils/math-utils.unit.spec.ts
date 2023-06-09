@@ -4,9 +4,13 @@ import { lineIntersects } from './math-utils.js';
 
 describe('Line', () => {
   it('should intersect', () => {
-    const rst = lineIntersects([0, 0], [1, 1], [0, 1], [1, 0]);
+    let rst = lineIntersects([0, 0], [1, 1], [0, 1], [1, 0]);
     expect(rst).toBeDefined();
     expect(rst).toMatchObject([0.5, 0.5]);
+
+    rst = lineIntersects([5, 5], [15, 5], [10, 0], [10, 10]);
+    expect(rst).toBeDefined();
+    expect(rst).toMatchObject([10, 5]);
   });
 
   it('should not intersect', () => {

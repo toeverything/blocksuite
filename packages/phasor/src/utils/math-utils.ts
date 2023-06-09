@@ -178,7 +178,7 @@ export function lineIntersects(
     if (!infinite) {
       u1 = clamp(u1, 0, 1);
     }
-    return Vec.lrp(sp, v1, u1);
+    return Vec.lrp(sp, ep, u1);
   }
   return null;
 }
