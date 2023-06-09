@@ -11,10 +11,7 @@ import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type {
-  BaseBlockModel,
-  DocProvider,
-} from '../../../packages/store/src/index.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -244,8 +241,8 @@ export async function waitForRemoteUpdateSlot(page: Page) {
     return new Promise<void>(resolve => {
       const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
       const providers = window.workspace.subdocProviders;
-      const debugProvider = Object.values(providers)
-        .flatMap((x): DocProvider[] => x)
+      const debugProvider = Array.from(providers.values())
+        .flat()
         .find(provider => provider instanceof DebugDocProvider) as InstanceType<
         typeof DebugDocProvider
       >;

@@ -74,7 +74,10 @@ export class WorkspaceMeta {
   }
 
   get pageMetas() {
-    return [...(this._proxy.pages as PageMeta[])] ?? ([] as PageMeta[]);
+    if (!this._proxy.pages) {
+      return [] as PageMeta[];
+    }
+    return [...(this._proxy.pages as PageMeta[])];
   }
 
   getPageMeta(id: string) {

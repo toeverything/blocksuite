@@ -42,7 +42,6 @@ export class DebugDocProvider extends WebrtcProvider implements DocProvider {
 
   connect = () => {
     super.connect();
-    console.log(this._doc);
     this._doc.on('update', this._handleRemoteUpdate);
   };
 
