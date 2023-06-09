@@ -34,10 +34,6 @@ const defaultPageId = 'page0';
 const spaceId = `space:${defaultPageId}`;
 const spaceMetaId = 'meta';
 
-function serialize(page: Page) {
-  return page.doc.toJSON();
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeWorkspace(doc: BlockSuiteDoc): Record<string, any> {
   const spaces = {};
