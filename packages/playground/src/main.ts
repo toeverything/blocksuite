@@ -8,6 +8,7 @@ import '@blocksuite/editor/themes/affine.css';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
@@ -39,6 +40,11 @@ function subscribePage(workspace: Workspace) {
     if (!app) {
       return;
     }
+    const subdocProviders = workspace.subdocProviders.get(`space:${pageId}`);
+    assertExists(subdocProviders);
+    subdocProviders.forEach(provider => {
+      provider.connect?.();
+    });
     const page = workspace.getPage(pageId) as Page;
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);

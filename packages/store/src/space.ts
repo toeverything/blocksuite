@@ -50,6 +50,10 @@ export class Space<
     return this._loaded;
   }
 
+  get spaceDoc() {
+    return this._ySpaceDoc;
+  }
+
   waitForLoaded = async () => {
     if (this.loaded) {
       return this;

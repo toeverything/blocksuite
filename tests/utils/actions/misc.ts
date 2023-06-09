@@ -11,7 +11,10 @@ import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import type {
+  BaseBlockModel,
+  DocProvider,
+} from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -122,6 +125,13 @@ async function initEmptyEditor(
       }
 
       if (noInit) {
+        workspace.meta.pageMetas.forEach(meta => {
+          const pageId = meta.id;
+          const page = workspace.getPage(pageId);
+          if (page) {
+            initPage(page);
+          }
+        });
         workspace.slots.pageAdded.on(pageId => {
           const page = workspace.getPage(pageId);
           if (!page) {
@@ -131,7 +141,9 @@ async function initEmptyEditor(
         });
       } else {
         const page = workspace.createPage({ id: 'page0' });
-        initPage(page);
+        page.waitForLoaded().then(() => {
+          initPage(page);
+        });
       }
     },
     [flags, noInit, multiEditor] as const
@@ -165,11 +177,6 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
   await page.goto(url.toString());
   const readyPromise = waitForPageReady(page);
-  await page.evaluate(() => {
-    if (typeof window.$blocksuite !== 'object') {
-      throw new Error('window.$blocksuite is not object');
-    }
-  }, []);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -195,7 +202,14 @@ export async function enterPlaygroundRoom(
   });
 
   await initEmptyEditor(page, ops?.flags, ops?.noInit, multiEditor);
+
   await readyPromise;
+
+  await page.evaluate(() => {
+    if (typeof window.$blocksuite !== 'object') {
+      throw new Error('window.$blocksuite is not object');
+    }
+  }, []);
   return room;
 }
 
@@ -229,9 +243,12 @@ export async function waitForRemoteUpdateSlot(page: Page) {
   return page.evaluate(() => {
     return new Promise<void>(resolve => {
       const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
-      const debugProvider = window.workspace.providers.find(
-        provider => provider instanceof DebugDocProvider
-      ) as InstanceType<typeof DebugDocProvider>;
+      const providers = window.workspace.subdocProviders;
+      const debugProvider = Object.values(providers)
+        .flatMap((x): DocProvider[] => x)
+        .find(provider => provider instanceof DebugDocProvider) as InstanceType<
+        typeof DebugDocProvider
+      >;
       const callback = window.$blocksuite.blocks.debounce(() => {
         disposable.dispose();
         resolve();

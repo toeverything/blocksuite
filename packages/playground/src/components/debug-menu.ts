@@ -18,6 +18,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import {
   activeEditorManager,
   COLOR_VARIABLES,
+  createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
@@ -359,7 +360,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
-    this.workspace.slots.pageAdded.on(e => {
+    this.workspace.slots.pageAdded.on(() => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
     this.workspace.slots.pageRemoved.on(() => {
@@ -651,7 +652,7 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Add New Page"
-              @click=${() => createPage(this.workspace)}
+              @click=${() => createPageBlock(this.workspace)}
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
@@ -670,9 +671,9 @@ export class DebugMenu extends ShadowlessElement {
   }
 }
 
-function createPage(workspace: Workspace) {
+function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator();
-  workspace.createPage({ id, init: true });
+  createPage(workspace, { id });
 }
 
 function getTabGroupTemplate({

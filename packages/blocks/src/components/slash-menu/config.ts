@@ -30,6 +30,7 @@ import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
   createBookmarkBlock,
+  createPage,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
@@ -187,10 +188,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           icon: NewPageIcon,
           showWhen: model =>
             !!model.page.awarenessStore.getFlag('enable_linked_page'),
-          action: ({ page, model }) => {
-            const newPage = page.workspace.createPage({
-              init: true,
-            });
+          action: async ({ page, model }) => {
+            const newPage = await createPage(page.workspace);
             insertContent(model, REFERENCE_NODE, {
               reference: { type: 'LinkedPage', pageId: newPage.id },
             });

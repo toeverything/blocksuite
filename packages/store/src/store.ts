@@ -3,6 +3,7 @@ import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
+import { type Y } from './index.js';
 import type { BlobStorage } from './persistence/blob/types.js';
 import type {
   DocProvider,
@@ -91,6 +92,7 @@ export class Store {
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
+  readonly subdocProviders: Map<string, DocProvider[]> = new Map();
   readonly idGenerator: IdGenerator;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
@@ -141,11 +143,20 @@ export class Store {
     );
     this.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
       loaded.forEach(subdoc => {
-        providers.forEach(Provider => {
-          new Provider(subdoc.guid, subdoc, {
+        const space = this._findSpaceByDoc(subdoc);
+        console.log('subdoc loaded');
+        console.log(space);
+        if (!space) {
+          return;
+        }
+
+        const subdocProviders = providers.map(Provider => {
+          return new Provider(subdoc.guid, subdoc, {
             awareness: this.awarenessStore.awareness,
           });
         });
+
+        this.subdocProviders.set(space.prefixedId, subdocProviders);
       });
     });
   }
@@ -155,7 +166,14 @@ export class Store {
 
   removeSpace(space: Space) {
     this.spaces.delete(space.prefixedId);
+    this.subdocProviders.delete(space.prefixedId);
   }
+
+  private _findSpaceByDoc = (doc: Y.Doc) => {
+    return Array.from(this.spaces.values()).find(space => {
+      return space.spaceDoc.guid === doc.guid;
+    });
+  };
 
   /**
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'

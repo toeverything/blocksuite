@@ -135,6 +135,10 @@ export class Workspace {
     return this._store.providers;
   }
 
+  get subdocProviders() {
+    return this._store.subdocProviders;
+  }
+
   get blobs() {
     return this._blobStorage;
   }
