@@ -9,7 +9,7 @@ import {
 } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
-import { computePosition } from '@floating-ui/dom';
+import { autoPlacement, computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -368,9 +368,19 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     };
     filter.style.zIndex = '999';
     this.append(filter);
-    createPopper(event.target as HTMLElement, filter, {
-      placement: 'top',
+    computePosition(event.target as HTMLElement, filter, {
+      middleware: [
+        autoPlacement({
+          allowedPlacements: ['right-start', 'bottom-start'],
+        }),
+      ],
+    }).then(({ x, y }) => {
+      Object.assign(filter.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
+
     onClickOutside(
       filter,
       () => {
