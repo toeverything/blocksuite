@@ -95,6 +95,7 @@ export class HandleResizeManager {
     const rect = { ...original };
     const arrow = { x: 1, y: 1 };
     const scale = { x: 1, y: 1 };
+    const flip = { x: 1, y: 1 };
     const fixedPoint = new DOMPoint(0, 0);
     const draggingPoint = new DOMPoint(0, 0);
 
@@ -108,30 +109,30 @@ export class HandleResizeManager {
     if (isCorner) {
       switch (direction) {
         case HandleDirection.TopLeft: {
+          arrow.x = -1;
+          arrow.y = -1;
           fixedPoint.x = maxX;
           fixedPoint.y = maxY;
           draggingPoint.x = minX;
           draggingPoint.y = minY;
-          arrow.x = -1;
-          arrow.y = -1;
           break;
         }
         case HandleDirection.TopRight: {
+          arrow.x = 1;
+          arrow.y = -1;
           fixedPoint.x = minX;
           fixedPoint.y = maxY;
           draggingPoint.x = maxX;
           draggingPoint.y = minY;
-          arrow.x = 1;
-          arrow.y = -1;
           break;
         }
         case HandleDirection.BottomRight: {
+          arrow.x = 1;
+          arrow.y = 1;
           fixedPoint.x = minX;
           fixedPoint.y = minY;
           draggingPoint.x = maxX;
           draggingPoint.y = maxY;
-          arrow.x = 1;
-          arrow.y = 1;
           break;
         }
         case HandleDirection.BottomLeft: {
@@ -154,16 +155,16 @@ export class HandleResizeManager {
       dp.x += deltaX;
       dp.y += deltaY;
 
-      let cx = (fp.x + dp.x) / 2;
-      let cy = (fp.y + dp.y) / 2;
+      const cx = (fp.x + dp.x) / 2;
+      const cy = (fp.y + dp.y) / 2;
 
-      let m1 = new DOMMatrix()
+      const m1 = new DOMMatrix()
         .translateSelf(cx, cy)
         .rotateSelf(-rotate)
         .translateSelf(-cx, -cy);
 
-      let f = fp.matrixTransform(m1);
-      let d = dp.matrixTransform(m1);
+      const f = fp.matrixTransform(m1);
+      const d = dp.matrixTransform(m1);
 
       switch (direction) {
         case HandleDirection.TopLeft: {
@@ -192,14 +193,16 @@ export class HandleResizeManager {
       rect.cy = (d.y + f.y) / 2;
       scale.x = rect.w / original.w;
       scale.y = rect.h / original.h;
+      flip.x = scale.x < 0 ? -1 : 1;
+      flip.y = scale.y < 0 ? -1 : 1;
 
       if (shift) {
         const newAspectRatio = Math.abs(rect.w / rect.h);
         if (aspectRatio < newAspectRatio) {
-          scale.y = Math.abs(scale.x) * (scale.y < 0 ? -1 : 1);
+          scale.y = Math.abs(scale.x) * flip.y;
           rect.h = scale.y * original.h;
         } else {
-          scale.x = Math.abs(scale.y) * (scale.x < 0 ? -1 : 1);
+          scale.x = Math.abs(scale.y) * flip.x;
           rect.w = scale.x * original.w;
         }
         draggingPoint.x = fixedPoint.x + rect.w * arrow.x;
@@ -207,21 +210,8 @@ export class HandleResizeManager {
 
         dp = draggingPoint.matrixTransform(m0);
 
-        cx = (fp.x + dp.x) / 2;
-        cy = (fp.y + dp.y) / 2;
-
-        m1 = new DOMMatrix()
-          .translateSelf(cx, cy)
-          .rotateSelf(-rotate)
-          .translateSelf(-cx, -cy);
-
-        f = fp.matrixTransform(m1);
-        d = dp.matrixTransform(m1);
-
-        // rect.w = d.x - f.x;
-        // rect.h = d.y - f.y;
-        rect.cx = (d.x + f.x) / 2;
-        rect.cy = (d.y + f.y) / 2;
+        rect.cx = (fp.x + dp.x) / 2;
+        rect.cy = (fp.y + dp.y) / 2;
       }
     } else {
       switch (direction) {
@@ -235,10 +225,11 @@ export class HandleResizeManager {
           break;
       }
 
-      // rect.h = maxY - minY;
-      // scale.y = rect.h / original.h;
       scale.x = rect.w / original.w;
+      flip.x = scale.x < 0 ? -1 : 1;
     }
+
+    const { x: flipX, y: flipY } = flip;
 
     const newBounds = new Map<
       string,
@@ -250,22 +241,20 @@ export class HandleResizeManager {
 
     // TODO: on same rotate
     if (isCorner && this._bounds.size === 1) {
-      this._bounds.forEach(({ bound: { w, h }, flip }, id) => {
-        const newWidth = Math.abs(w * scale.x);
-        const newHeight = Math.abs(h * scale.y);
+      this._bounds.forEach(({ flip }, id) => {
+        const width = Math.abs(rect.w);
+        const height = Math.abs(rect.h);
 
         newBounds.set(id, {
           bound: new Bound(
-            rect.cx - newWidth / 2,
-            rect.cy - newHeight / 2,
-            newWidth,
-            newHeight
+            rect.cx - width / 2,
+            rect.cy - height / 2,
+            width,
+            height
           ),
           flip: {
-            x: flip.x * (scale.x < 0 ? -1 : 1),
-            y: flip.y * (scale.y < 0 ? -1 : 1),
-            // x: flip.x,
-            // y: flip.y,
+            x: flipX * flip.x,
+            y: flipY * flip.y,
           },
         });
       });
@@ -298,8 +287,8 @@ export class HandleResizeManager {
           newHeight
         ),
         flip: {
-          x: flip.x * (scale.x < 0 ? -1 : 1),
-          y: flip.y * (scale.y < 0 ? -1 : 1),
+          x: flipX * flip.x,
+          y: flipY * flip.y,
         },
       });
     });
@@ -323,7 +312,7 @@ export class HandleResizeManager {
 
     this._onRotateMove(
       // center of element in suface
-      { x: minX + (maxX - minX) / 2, y: minY + (maxY - minY) / 2 },
+      { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
       dr
     );
 
