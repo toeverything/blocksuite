@@ -2,7 +2,6 @@ import '../tool-icon-button.js';
 import '../../toolbar/shape-tool/shape-menu.js';
 import '../color-panel.js';
 
-import { FRAME_BACKGROUND_COLORS } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
@@ -15,6 +14,10 @@ import type {
   NoteMouseMode,
   TopLevelBlockModel,
 } from '../../../../__internal__/utils/types.js';
+import {
+  DEFAULT_FRAME_COLOR,
+  FRAME_COLORS,
+} from '../../../../frame-block/frame-model.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent } from '../color-panel.js';
@@ -22,12 +25,12 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonBackground(
   frames: TopLevelBlockModel[]
-): NoteMouseMode['background'] | null {
+): NoteMouseMode['background'] {
   const shapeTypes = countBy(frames, (frame: TopLevelBlockModel) => {
     return frame.background;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as NoteMouseMode['background']) : null;
+  return max ? (max[0] as NoteMouseMode['background']) : DEFAULT_FRAME_COLOR;
 }
 
 @customElement('edgeless-change-frame-button')
@@ -120,8 +123,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedBackground =
-      getMostCommonBackground(this.frames) || FRAME_BACKGROUND_COLORS[0];
+    const selectedBackground = getMostCommonBackground(this.frames);
 
     return html`
       <edgeless-tool-icon-button
@@ -133,7 +135,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-color-panel
         .value=${selectedBackground}
-        .options=${FRAME_BACKGROUND_COLORS}
+        .options=${FRAME_COLORS}
         .showLetterMark=${true}
         @select=${(event: ColorEvent) => {
           this._setBlockBackground(event.detail);

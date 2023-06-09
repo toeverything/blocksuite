@@ -13,14 +13,17 @@ import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { ColorEvent, EdgelessColorPanel } from '../color-panel.js';
-import { DEFAULT_SELECTED_COLOR } from '../color-panel.js';
+import {
+  type ColorEvent,
+  type EdgelessColorPanel,
+  GET_DEFAULT_LINE_COLOR,
+} from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as CssVariableName) : null;
+  return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonSize(elements: BrushElement[]): BrushSize | null {
@@ -149,8 +152,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedColor =
-      getMostCommonColor(this.elements) ?? DEFAULT_SELECTED_COLOR;
+    const selectedColor = getMostCommonColor(this.elements);
     const style = {
       backgroundColor: `var(${selectedColor})`,
     };

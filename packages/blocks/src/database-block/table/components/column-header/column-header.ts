@@ -12,7 +12,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { createPopper } from '@popperjs/core';
+import { computePosition } from '@floating-ui/dom';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -301,7 +301,14 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       this.addColumn(insertIdex);
     };
     document.body.appendChild(editColumn);
-    createPopper(reference, editColumn, { placement: 'bottom-start' });
+    computePosition(reference, editColumn, {
+      placement: 'bottom-start',
+    }).then(({ x, y }) => {
+      Object.assign(editColumn.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
     onClickOutside(
       editColumn,
       (ele, target) => {
@@ -348,8 +355,13 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     const reference = target.closest('.affine-database-column-content');
     assertExists(reference);
 
-    createPopper(reference, popup, {
+    computePosition(reference, popup, {
       placement: 'bottom-start',
+    }).then(({ x, y }) => {
+      Object.assign(popup.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
     onClickOutside(
       popup,

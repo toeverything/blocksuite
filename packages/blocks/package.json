@@ -26,7 +26,6 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.2.9",
-    "@popperjs/core": "^2.11.6",
     "hotkeys-js": "^3.10.1",
     "html-to-image": "^1.11.11",
     "jszip": "^3.10.1",
