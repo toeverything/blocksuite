@@ -569,7 +569,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
-  await waitNextFrame(page);
+  await page.waitForTimeout(100);
 
   await assertStoreMatchJSX(
     page,
@@ -581,10 +581,10 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   >
     <affine:database
       prop:columns="Array [1]"
-      prop:mode="table"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
+      prop:views="Array [1]"
     >
       <affine:paragraph
         prop:type="text"
@@ -592,10 +592,10 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     </affine:database>
     <affine:database
       prop:columns="Array [1]"
-      prop:mode="table"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
+      prop:views="Array [1]"
     >
       <affine:paragraph
         prop:type="text"
@@ -619,15 +619,18 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   >
     <affine:database
       prop:columns="Array [1]"
-      prop:mode="table"
       prop:title="Database 1"
       prop:titleColumnName="Title"
       prop:titleColumnWidth={432}
+      prop:views="Array [1]"
     >
       <affine:paragraph
         prop:type="text"
       />
     </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
     <affine:paragraph
       prop:type="text"
     />
