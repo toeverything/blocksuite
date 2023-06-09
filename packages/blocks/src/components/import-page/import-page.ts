@@ -17,6 +17,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { ContentParser } from '../../__internal__/content-parser/index.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
 import { createPage } from '../../__internal__/utils/index.js';
+import { richTextHelper } from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
@@ -324,13 +325,7 @@ export class ImportPage extends WithDisposable(LitElement) {
                   const columns: Column[] = titles
                     .slice(1)
                     .map((value, index) => {
-                      return {
-                        name: value,
-                        type: 'rich-text',
-                        width: 200,
-                        hide: false,
-                        id: '' + id++,
-                      };
+                      return richTextHelper.createWithId('' + id++, value);
                     });
                   if (rows.length > 0) {
                     let maxLen = rows[0].length;
@@ -339,13 +334,7 @@ export class ImportPage extends WithDisposable(LitElement) {
                     }
                     const addNum = maxLen - columns.length;
                     for (let i = 0; i < addNum; i++) {
-                      columns.push({
-                        name: '',
-                        type: 'rich-text',
-                        width: 200,
-                        hide: false,
-                        id: '' + id++,
-                      });
+                      columns.push(richTextHelper.createWithId('' + id++, ''));
                     }
                   }
                   const databasePropsId = id++;

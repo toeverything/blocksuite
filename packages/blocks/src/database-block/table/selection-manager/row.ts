@@ -84,9 +84,12 @@ export class RowSelectionManager {
     }
 
     const e = ctx.get('pointerState');
-    e.raw.preventDefault();
-
     const { clientX: x, clientY: y, target } = e.raw;
+    // If the target is not an input element, prevent the default behavior of the browser
+    if (!(target instanceof HTMLInputElement)) {
+      e.raw.preventDefault();
+    }
+
     if (!isInDatabase(target as HTMLElement)) {
       return false;
     }

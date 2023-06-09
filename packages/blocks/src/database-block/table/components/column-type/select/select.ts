@@ -1,72 +1,29 @@
-import { css } from 'lit';
+import './multi-tag-view.js';
+
 import { customElement } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal } from 'lit/static-html.js';
 
+import type { SelectColumnData } from '../../../../common/column-manager.js';
 import {
   DatabaseCellElement,
   defineColumnRenderer,
-  type TableViewCell,
 } from '../../../register.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectCellEditing } from './select-cell-editing.js';
 
 @customElement('affine-database-select-cell')
-class SelectCell
-  extends DatabaseCellElement<SelectTag[]>
-  implements TableViewCell
-{
-  static override styles = css`
-    affine-database-select-cell {
-      display: flex;
-      align-items: center;
-      width: calc(100% + 8px);
-      height: 100%;
-      margin: -2px -4px;
-    }
-    .affine-database-select-cell-container * {
-      box-sizing: border-box;
-    }
-    .affine-database-select-cell-container {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
-      width: 100%;
-      cursor: pointer;
-      font-size: var(--affine-font-sm);
-    }
-    .affine-database-select-cell-container .select-selected {
-      height: 28px;
-      padding: 2px 10px;
-      border-radius: 4px;
-      white-space: nowrap;
-      background: var(--affine-tag-white);
-    }
-  `;
-
+class SelectCell extends DatabaseCellElement<string, SelectColumnData> {
   static override tag = literal`affine-database-select-cell`;
 
   cellType = 'select' as const;
 
   override render() {
-    const values = this.cell?.value ?? [];
+    const value = this.cell?.value ? [this.cell?.value] : [];
     return html`
-      <div
-        class="affine-database-select-cell-container"
-        style=${styleMap({
-          maxWidth: `${this.column.width}px`,
-        })}
-      >
-        ${values.map(item => {
-          const style = styleMap({
-            backgroundColor: item.color,
-          });
-          return html`<span class="select-selected" style=${style}
-            >${item.value}</span
-          >`;
-        })}
-      </div>
+      <affine-database-multi-tag-view
+        .value="${value}"
+        .options="${this.column.data.options}"
+      ></affine-database-multi-tag-view>
     `;
   }
 }

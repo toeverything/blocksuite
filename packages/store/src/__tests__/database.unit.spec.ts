@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { beforeEach, describe, expect, test } from 'vitest';
 
+import {
+  numberHelper,
+  richTextHelper,
+  selectHelper,
+} from '../../../blocks/src/database-block/common/column-manager';
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
-import type {
-  Cell,
-  Column,
-  SelectTag,
-} from '../../../blocks/src/database-block/types.js';
+import type { Cell, Column } from '../../../blocks/src/database-block/types.js';
 import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { BaseBlockModel, Page } from '../index.js';
-import { Generator } from '../index.js';
-import { Workspace } from '../index.js';
+import { Generator, Workspace } from '../index.js';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -50,9 +50,9 @@ describe('DatabaseManager', () => {
   let col3: Column['id'];
 
   const selection = [
-    { value: 'Done', color: 'var(--affine-tag-white)' },
-    { value: 'TODO', color: 'var(--affine-tag-pink)' },
-    { value: 'WIP', color: 'var(--affine-tag-blue)' },
+    { id: '1', value: 'Done', color: 'var(--affine-tag-white)' },
+    { id: '2', value: 'TODO', color: 'var(--affine-tag-pink)' },
+    { id: '3', value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
 
   beforeEach(async () => {
@@ -79,26 +79,13 @@ describe('DatabaseManager', () => {
     ) as DatabaseBlockModel;
     db = databaseModel;
 
-    col1 = db.updateColumn({
-      name: 'Number',
-      type: 'number',
-      width: 200,
-      hide: false,
-      decimal: 0,
-    });
-    col2 = db.updateColumn({
-      name: 'Single Select',
-      type: 'select',
-      width: 200,
-      hide: false,
-      selection,
-    });
-    col3 = db.updateColumn({
-      name: 'Rich Text',
-      type: 'rich-text',
-      width: 200,
-      hide: false,
-    });
+    col1 = db.updateColumn(numberHelper.create('Number'));
+    col2 = db.updateColumn(
+      selectHelper.create('Single Select', {
+        options: selection,
+      })
+    );
+    col3 = db.updateColumn(richTextHelper.create('Rich Text'));
 
     page.updateBlock(databaseModel, {
       columns: [col1, col2, col3],
@@ -130,13 +117,8 @@ describe('DatabaseManager', () => {
   });
 
   test('getColumn', () => {
-    const column: Column = {
-      id: 'testColumnId',
-      name: 'Test Column',
-      type: 'number',
-      width: 100,
-      hide: false,
-    };
+    const column = numberHelper.create('testColumnId');
+    column.id = 'testColumnId';
     db.updateColumn(column);
 
     const result = db.getColumn(column.id);
@@ -144,13 +126,7 @@ describe('DatabaseManager', () => {
   });
 
   test('updateColumn', () => {
-    const column: Omit<Column, 'id'> & { id?: Column['id'] } = {
-      name: 'Test Column',
-      type: 'number',
-      width: 100,
-      hide: false,
-    };
-
+    const column = numberHelper.create('Test Column');
     const id = db.updateColumn(column);
     const result = db.getColumn(id);
 
@@ -159,14 +135,9 @@ describe('DatabaseManager', () => {
   });
 
   test('deleteColumn', () => {
+    const column = numberHelper.create('Test Column');
     const columnId = 'testColumnId';
-    const column: Column = {
-      id: columnId,
-      name: 'Test Column',
-      type: 'number',
-      width: 100,
-      hide: false,
-    };
+    column.id = columnId;
 
     db.updateColumn(column);
     expect(db.getColumn(columnId)).toEqual(column);
@@ -183,13 +154,8 @@ describe('DatabaseManager', () => {
       },
       frameBlockId
     );
-    const column: Column = {
-      id: 'testColumnId',
-      name: 'Test Column',
-      type: 'number',
-      width: 100,
-      hide: false,
-    };
+    const column = numberHelper.create('Test Column');
+    column.id = 'testColumnId';
     const cell: Cell = {
       columnId: column.id,
       value: 42,
@@ -229,13 +195,9 @@ describe('DatabaseManager', () => {
   });
 
   test('copyCellsByColumn', () => {
-    const newColId = db.updateColumn({
-      name: 'Copied Select',
-      type: 'select',
-      width: 200,
-      hide: false,
-      selection,
-    });
+    const newColId = db.updateColumn(
+      selectHelper.create('Copied Select', { options: selection })
+    );
 
     db.copyCellsByColumn(col2, newColId);
 
@@ -265,20 +227,6 @@ describe('DatabaseManager', () => {
     db.convertCellsByColumn(col1, 'rich-text');
     const richTextCell = db.getCell(p1, col1);
     expect(richTextCell?.value.toString()).toEqual('0.1');
-  });
-
-  test('renameSelectedCellTag', () => {
-    const newSelection: SelectTag = {
-      color: '#fff',
-      value: 'Option 3',
-    };
-    db.renameSelectedCellTag(col2, selection[1], newSelection);
-
-    const cell = db.getCell(p2, col2);
-    expect(cell).toEqual({
-      columnId: col2,
-      value: [newSelection],
-    });
   });
 
   test('deleteSelectedCellTag', () => {

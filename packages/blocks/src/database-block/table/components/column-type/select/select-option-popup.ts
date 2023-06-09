@@ -39,6 +39,7 @@ export class SelectActionPopup extends LitElement {
       position: absolute;
       z-index: 11;
     }
+
     .affine-database-select-action {
       width: 200px;
       padding: 8px;
@@ -47,14 +48,17 @@ export class SelectActionPopup extends LitElement {
       background: var(--affine-white);
       box-shadow: var(--affine-menu-shadow);
     }
+
     ${actionStyles}
     .action {
       color: var(--affine-text-primary-color);
     }
+
     .action svg {
       width: 20px;
       height: 20px;
     }
+
     .rename,
     .delete {
       fill: var(--affine-icon-color);
@@ -71,14 +75,14 @@ export class SelectActionPopup extends LitElement {
   `;
 
   @property()
-  index!: number;
+  tagId!: string;
 
   @property()
-  onAction!: (type: SelectTagActionType, index: number) => void;
+  onAction!: (type: SelectTagActionType, id: string) => void;
 
   private _onAction = (e: Event, type: SelectTagActionType) => {
     e.stopPropagation();
-    this.onAction(type, this.index);
+    this.onAction(type, this.tagId);
   };
 
   override render() {
@@ -87,12 +91,12 @@ export class SelectActionPopup extends LitElement {
         <div class="action-container">
           ${tagActions.map(action => {
             if (isDivider(action))
-              return html`<div class="action-divider"></div>`;
+              return html` <div class="action-divider"></div>`;
 
             return html`
               <div
                 class="action ${action.type}"
-                @mousedown=${(e: Event) => this._onAction(e, action.type)}
+                @click="${(e: Event) => this._onAction(e, action.type)}"
               >
                 <div class="action-content">
                   ${action.icon}<span>${action.text}</span>
