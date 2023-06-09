@@ -112,13 +112,13 @@ export class EdgelessSnapManager {
     this.alignPoints = [];
     for (const other of this.alignBounds) {
       // Calculate center-to-center and center-to-side distances
-      const centerXDistance = other.center.x - bound.center.x;
-      const centerYDistance = other.center.y - bound.center.y;
+      const centerXDistance = other.center[0] - bound.center[0];
+      const centerYDistance = other.center[1] - bound.center[1];
 
-      const leftDistance = other.minX - bound.center.x;
-      const rightDistance = other.maxX - bound.center.x;
-      const topDistance = other.minY - bound.center.y;
-      const bottomDistance = other.maxY - bound.center.y;
+      const leftDistance = other.minX - bound.center[0];
+      const rightDistance = other.maxX - bound.center[0];
+      const topDistance = other.minY - bound.center[1];
+      const bottomDistance = other.maxY - bound.center[1];
 
       // Calculate side-to-side distances
       const leftToLeft = other.minX - bound.minX;
@@ -161,7 +161,7 @@ export class EdgelessSnapManager {
         const index = xDistancesAbs.indexOf(closestX);
         rst.dx = xDistances[index];
         const alignPointX = [
-          other.center.x,
+          other.center[0],
           other.minX,
           other.maxX,
           bound.minX + rst.dx,
@@ -170,8 +170,8 @@ export class EdgelessSnapManager {
           bound.maxX + rst.dx,
         ][index];
         this.alignPoints[0] = [
-          new Point(alignPointX, bound.center.y),
-          new Point(alignPointX, other.center.y),
+          new Point(alignPointX, bound.center[1]),
+          new Point(alignPointX, other.center[1]),
         ];
       }
 
@@ -179,7 +179,7 @@ export class EdgelessSnapManager {
         const index = yDistancesAbs.indexOf(closestY);
         rst.dy = yDistances[index];
         const alignPointY = [
-          other.center.y,
+          other.center[1],
           other.minY,
           other.maxY,
           bound.minY + rst.dy,
@@ -188,8 +188,8 @@ export class EdgelessSnapManager {
           bound.maxY + rst.dy,
         ][index];
         this.alignPoints[1] = [
-          new Point(bound.center.x, alignPointY),
-          new Point(other.center.x, alignPointY),
+          new Point(bound.center[0], alignPointY),
+          new Point(other.center[0], alignPointY),
         ];
       }
     }
@@ -219,10 +219,10 @@ export class EdgelessSnapManager {
           /** 中间对齐 */
           let _centerX = 0;
           const updateDif = () => {
-            dif = Math.abs(bound.center.x - _centerX);
+            dif = Math.abs(bound.center[0] - _centerX);
             if (dif <= threshold && dif < min) {
               min = dif;
-              rst.dx = _centerX - bound.center.x;
+              rst.dx = _centerX - bound.center[0];
               /**
                * 计算待绘制点
                */
@@ -285,10 +285,10 @@ export class EdgelessSnapManager {
           /** 中间对齐 */
           let _centerY = 0;
           const updateDif = () => {
-            dif = Math.abs(bound.center.y - _centerY);
+            dif = Math.abs(bound.center[1] - _centerY);
             if (dif <= threshold && dif < min) {
               min = dif;
-              rst.dy = _centerY - bound.center.y;
+              rst.dy = _centerY - bound.center[1];
               /**
                * 计算待绘制点
                */
