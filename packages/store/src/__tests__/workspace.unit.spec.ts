@@ -63,45 +63,41 @@ async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
   const page = workspace.createPage({ id: pageId });
-  return new Promise<Page>(resolve => {
-    page.onLoadSlot.once(() => {
-      resolve(page);
-    });
-  });
+  await page.waitForLoaded();
+  return page;
 }
 
 describe('basic', () => {
-  it('can init workspace', () => {
+  it('can init workspace', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
     const page = workspace.createPage({ id: 'page0' });
-    page.onLoadSlot.once(() => {
-      const actual = serializeWorkspace(workspace.doc);
-      const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
+    await page.waitForLoaded();
+    const actual = serializeWorkspace(workspace.doc);
+    const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
-      assert.equal(workspace.isEmpty, false);
-      assert.equal(typeof actualPage.createDate, 'number');
-      // @ts-ignore
-      delete actualPage.createDate;
+    assert.equal(workspace.isEmpty, false);
+    assert.equal(typeof actualPage.createDate, 'number');
+    // @ts-ignore
+    delete actualPage.createDate;
 
-      assert.deepEqual(actual, {
-        [spaceMetaId]: {
-          pages: [
-            {
-              id: 'page0',
-              title: '',
-            },
-          ],
-          blockVersions: {},
-        },
-        spaces: {
-          [spaceId]: {
-            blocks: {},
+    assert.deepEqual(actual, {
+      [spaceMetaId]: {
+        pages: [
+          {
+            id: 'page0',
+            title: '',
           },
+        ],
+        blockVersions: {},
+      },
+      spaces: {
+        [spaceId]: {
+          blocks: {},
         },
-      });
+      },
     });
   });
 });
@@ -235,14 +231,7 @@ describe('addBlock', () => {
 
     const page0 = workspace.createPage({ id: 'page0' });
     const page1 = workspace.createPage({ id: 'page1' });
-    await Promise.all([
-      new Promise(resolve => {
-        page0.onLoadSlot.once(resolve);
-      }),
-      new Promise(resolve => {
-        page1.onLoadSlot.once(resolve);
-      }),
-    ]);
+    await Promise.all([page0.waitForLoaded(), page1.waitForLoaded()]);
     // @ts-expect-error
     assert.equal(workspace._pages.size, 2);
 
@@ -473,7 +462,7 @@ describe('workspace.exportJSX works', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
     const page = workspace.createPage({ id: 'page0' });
-    await new Promise(resolve => page.onLoadSlot.once(resolve));
+    await page.waitForLoaded();
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),

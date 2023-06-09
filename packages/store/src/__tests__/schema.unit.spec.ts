@@ -57,15 +57,12 @@ const BlockSchemas = [
 ];
 
 const defaultPageId = 'page0';
-function createTestPage(pageId = defaultPageId) {
+async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(BlockSchemas);
   const page = workspace.createPage({ id: pageId });
-  return new Promise<Page>(resolve => {
-    page.onLoadSlot.once(() => {
-      resolve(page);
-    });
-  });
+  await page.waitForLoaded();
+  return page;
 }
 
 describe('schema', () => {

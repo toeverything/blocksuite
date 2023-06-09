@@ -21,7 +21,7 @@ export class Space<
 
   private _loaded!: boolean;
 
-  onLoadSlot = new Slot();
+  private _onLoadSlot = new Slot();
 
   /**
    * @internal Used for convenient access to the underlying Yjs map,
@@ -50,6 +50,26 @@ export class Space<
     return this._loaded;
   }
 
+  waitForLoaded = async () => {
+    if (this.loaded) {
+      return this;
+    }
+
+    await new Promise(resolve =>
+      this._onLoadSlot.once(() => {
+        resolve(undefined);
+      })
+    );
+
+    return this;
+  };
+
+  destroy() {
+    this._ySpaceDoc.destroy();
+    this._onLoadSlot.dispose();
+    this._loaded = false;
+  }
+
   private _loadSubDoc = () => {
     const prefixedId = this.prefixedId;
 
@@ -59,7 +79,7 @@ export class Space<
       this.doc.spaces.set(prefixedId, subDoc);
       this._loaded = true;
       setImmediate(() => {
-        this.onLoadSlot.emit();
+        this._onLoadSlot.emit();
       });
     } else {
       subDoc.load();
@@ -79,7 +99,7 @@ export class Space<
     }
     this.doc.off('subdocs', this._onSubdocEvent);
     this._loaded = true;
-    this.onLoadSlot.emit();
+    this._onLoadSlot.emit();
   };
 
   /**

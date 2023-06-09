@@ -75,9 +75,8 @@ export async function initPageContentByParam(
   if (functionMap.has(param)) {
     functionMap.get(param)?.(workspace, pageId);
     const page = workspace.getPage(pageId);
-    page?.onLoadSlot.once(() => {
-      page.resetHistory();
-    });
+    await page?.waitForLoaded();
+    page?.resetHistory();
     return;
   }
 

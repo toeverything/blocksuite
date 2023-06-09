@@ -20,15 +20,12 @@ export const BlockSchemas = [
   FrameBlockSchema,
 ];
 
-function createTestPage(pageId = 'page0', workspace?: Workspace) {
+async function createTestPage(pageId = 'page0', workspace?: Workspace) {
   const options = createTestOptions();
   const _workspace = workspace || new Workspace(options).register(BlockSchemas);
   const page = _workspace.createPage({ id: pageId });
-  return new Promise<Page>(resolve => {
-    page.onLoadSlot.once(() => {
-      resolve(page);
-    });
-  });
+  await page.waitForLoaded();
+  return page;
 }
 
 describe.skip('workspace.search works', () => {

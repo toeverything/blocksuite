@@ -31,11 +31,8 @@ async function createTestPage(pageId = 'page0') {
   const options = createTestOptions();
   const workspace = new Workspace(options).register(AffineSchemas);
   const page = workspace.createPage({ id: pageId });
-  return new Promise<Page>(resolve => {
-    page.onLoadSlot.once(() => {
-      resolve(page);
-    });
-  });
+  await page.waitForLoaded();
+  return page;
 }
 
 describe('DatabaseManager', () => {

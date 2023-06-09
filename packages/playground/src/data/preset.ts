@@ -26,40 +26,39 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export const preset: InitFn = (workspace: Workspace, id: string) => {
+export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  page.onLoadSlot.once(async () => {
-    // Add page block and surface block at root level
-    const pageBlockId = page.addBlock('affine:page', {
-      title: new Text('Welcome to BlockSuite Playground'),
-    });
-    const surfaceBlockId = page.addBlock('affine:surface', {}, pageBlockId);
-
-    // Add frame block inside page block
-    const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-    // Import preset markdown content inside frame block
-    const contentParser = new window.ContentParser(page);
-
-    addShapeElement(page, surfaceBlockId, {
-      id: '0',
-      index: 'a0',
-      type: 'shape',
-      xywh: '[0,-100,100,100]',
-      seed: Math.floor(Math.random() * 2 ** 31),
-
-      shapeType: 'rect',
-
-      radius: 0,
-      filled: false,
-      fillColor: DEFAULT_SHAPE_FILL_COLOR,
-      strokeWidth: 4,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-      strokeStyle: StrokeStyle.Solid,
-      roughness: 2,
-    });
-    await contentParser.importMarkdown(presetMarkdown, frameId);
-    page.resetHistory();
+  await page.waitForLoaded();
+  // Add page block and surface block at root level
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new Text('Welcome to BlockSuite Playground'),
   });
+  const surfaceBlockId = page.addBlock('affine:surface', {}, pageBlockId);
+
+  // Add frame block inside page block
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  // Import preset markdown content inside frame block
+  const contentParser = new window.ContentParser(page);
+
+  addShapeElement(page, surfaceBlockId, {
+    id: '0',
+    index: 'a0',
+    type: 'shape',
+    xywh: '[0,-100,100,100]',
+    seed: Math.floor(Math.random() * 2 ** 31),
+
+    shapeType: 'rect',
+
+    radius: 0,
+    filled: false,
+    fillColor: DEFAULT_SHAPE_FILL_COLOR,
+    strokeWidth: 4,
+    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+    strokeStyle: StrokeStyle.Solid,
+    roughness: 2,
+  });
+  await contentParser.importMarkdown(presetMarkdown, frameId);
+  page.resetHistory();
 };
 
 preset.id = 'preset';
