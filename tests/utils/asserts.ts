@@ -56,7 +56,7 @@ export const defaultStore: SerializedStore = {
     versions: {
       'affine:paragraph': 1,
       'affine:page': 2,
-      'affine:database': 1,
+      'affine:database': 2,
       'affine:list': 1,
       'affine:frame': 1,
       'affine:divider': 1,
