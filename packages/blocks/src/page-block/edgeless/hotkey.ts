@@ -168,6 +168,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
 
     hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {
       if (edgeless.selection.isActive) return;
+
       keyboardEvent.preventDefault();
       edgeless.slots.selectionUpdated.emit({
         selected: [...edgeless.frames, ...edgeless.surface.getElements()],
