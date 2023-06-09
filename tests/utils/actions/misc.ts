@@ -931,7 +931,7 @@ export async function transformMarkdown(page: Page, data: string) {
     },
     { data }
   );
-  return await promiseResult;
+  return promiseResult;
 }
 
 export async function transformHtml(page: Page, data: string) {
@@ -942,5 +942,5 @@ export async function transformHtml(page: Page, data: string) {
     },
     { data }
   );
-  return await promiseResult;
+  return promiseResult;
 }

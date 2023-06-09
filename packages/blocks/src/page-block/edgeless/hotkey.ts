@@ -74,6 +74,8 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
     // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
+    if (edgeless.selection.isActive) return;
+
     const { selected } = edgeless.selection.state;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
@@ -165,8 +167,9 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     });
 
     hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {
-      keyboardEvent.preventDefault();
+      if (edgeless.selection.isActive) return;
 
+      keyboardEvent.preventDefault();
       edgeless.slots.selectionUpdated.emit({
         selected: [...edgeless.frames, ...edgeless.surface.getElements()],
         active: false,
