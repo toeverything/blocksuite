@@ -81,9 +81,8 @@ export function deleteModelsByRange(
   page: Page,
   blockRange = getCurrentBlockRange(page)
 ) {
-  if (!blockRange) {
-    return null;
-  }
+  if (!blockRange) return null;
+
   if (blockRange.type === 'Block') {
     const newBlock = handleBlockSelectionBatchDelete(page, blockRange.models);
     return newBlock;

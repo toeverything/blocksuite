@@ -676,6 +676,13 @@ export function assertRectEqual(a: Rect, b: Rect) {
   expect(a.h).toBeCloseTo(b.h, 0);
 }
 
+export function assertDOMRectEqual(a: DOMRect, b: DOMRect) {
+  expect(a.x).toBeCloseTo(b.x, 0);
+  expect(a.y).toBeCloseTo(b.y, 0);
+  expect(a.width).toBeCloseTo(b.width, 0);
+  expect(a.height).toBeCloseTo(b.height, 0);
+}
+
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
   const editor = getEditorLocator(page);
