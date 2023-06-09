@@ -73,7 +73,9 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
   function backspace(e: KeyboardEvent) {
     // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
+
     if (edgeless.selection.isActive) return;
+
     const { selected } = edgeless.selection.state;
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
