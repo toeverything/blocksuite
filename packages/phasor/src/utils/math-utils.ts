@@ -31,6 +31,10 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
 }
 
+export function arrayAlmostEqual(a: number[], b: number[], epsilon = 0.0001) {
+  return a.length === b.length && a.every((v, i) => almostEqual(v, b[i]));
+}
+
 export function clamp(n: number, min: number, max?: number): number {
   return Math.max(min, typeof max !== 'undefined' ? Math.min(n, max) : n);
 }
@@ -181,4 +185,85 @@ export function lineIntersects(
     return Vec.lrp(sp, ep, u1);
   }
   return null;
+}
+
+//reference https://www.xarg.org/book/computer-graphics/line-segment-ellipse-intersection/
+export function lineEllipseIntersects(
+  A: IVec,
+  B: IVec,
+  C: IVec,
+  rx: number,
+  ry: number,
+  rad = 0
+) {
+  A = Vec.rot(Vec.sub(A, C), -rad);
+  B = Vec.rot(Vec.sub(B, C), -rad);
+
+  rx *= rx;
+  ry *= ry;
+
+  const rst = [];
+
+  const v = Vec.sub(B, A);
+
+  const a = rx * v[1] * v[1] + ry * v[0] * v[0];
+  const b = 2 * (rx * A[1] * v[1] + ry * A[0] * v[0]);
+  const c = rx * A[1] * A[1] + ry * A[0] * A[0] - rx * ry;
+
+  const D = b * b - 4 * a * c; // Discriminant
+
+  if (D >= 0) {
+    const sqrtD = Math.sqrt(D);
+    const t1 = (-b + sqrtD) / (2 * a);
+    const t2 = (-b - sqrtD) / (2 * a);
+
+    if (0 <= t1 && t1 <= 1)
+      rst.push(Vec.add(Vec.rot(Vec.add(Vec.mul(v, t1), A), rad), C));
+
+    if (0 <= t2 && t2 <= 1 && Math.abs(t1 - t2) > 1e-16)
+      rst.push(Vec.add(Vec.rot(Vec.add(Vec.mul(v, t2), A), rad), C));
+  }
+
+  if (rst.length === 0) return null;
+  return rst;
+}
+
+export function linePolygonIntersects(
+  sp: IVec,
+  ep: IVec,
+  points: IVec[]
+): IVec[] | null {
+  const result: IVec[] = [];
+  const len = points.length;
+
+  for (let i = 0; i < len; i++) {
+    const p = points[i];
+    const p2 = points[(i + 1) % len];
+    const rst = lineIntersects(sp, ep, p, p2);
+    if (rst) {
+      result.push(rst);
+    }
+  }
+
+  return result.length ? result : null;
+}
+
+export function linePolylineIntersects(
+  sp: IVec,
+  ep: IVec,
+  points: IVec[]
+): IVec[] | null {
+  const result: IVec[] = [];
+  const len = points.length;
+
+  for (let i = 0; i < len - 1; i++) {
+    const p = points[i];
+    const p2 = points[i + 1];
+    const rst = lineIntersects(sp, ep, p, p2);
+    if (rst) {
+      result.push(rst);
+    }
+  }
+
+  return result.length ? result : null;
 }
