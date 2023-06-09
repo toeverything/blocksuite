@@ -42,14 +42,14 @@ export class RowSelectionManager {
     this._model = model;
     this._service = getService('affine:database');
 
-    this._add('pointerDown', this._onPointerDown);
-    this._add('pointerMove', this._onPointerMove);
-    this._add('pointerUp', this._onPointerUp);
+    this._add('dragStart', this._onDragStart);
+    this._add('dragMove', this._onDragMove);
+    this._add('dragEnd', this._onDragEnd);
     this._add('click', this._onClick);
     this._add('keyDown', this._onKeydown);
   }
 
-  private _onPointerDown = (ctx: UIEventStateContext) => {
+  private _onDragStart = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
 
     const { clientX: x, clientY: y, target } = e.raw;
@@ -78,8 +78,8 @@ export class RowSelectionManager {
     return true;
   };
 
-  private _onPointerMove = (ctx: UIEventStateContext) => {
-    if (!this._isInDatabase || !this._startRange) {
+  private _onDragMove = (ctx: UIEventStateContext) => {
+    if (!this._isInDatabase) {
       return false;
     }
 
@@ -137,7 +137,7 @@ export class RowSelectionManager {
     return true;
   };
 
-  private _onPointerUp = (ctx: UIEventStateContext) => {
+  private _onDragEnd = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
     const target = e.raw.target as HTMLElement;
     if (!isInDatabase(target)) {
