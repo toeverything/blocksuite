@@ -280,6 +280,7 @@ export class Renderer implements SurfaceViewport {
 
     for (const renderable of this._renderables) {
       ctx.save();
+      ctx.translate(-viewportBounds.x, -viewportBounds.y);
       renderable.render(ctx, rc);
       ctx.restore();
     }

@@ -25,8 +25,6 @@ class SnapRender extends Renderable {
     )
       return;
     const { viewport } = this.snapManager.container.surface;
-    const viewportBounds = Bound.from(viewport.viewportBounds);
-    const { x: vx, y: vy } = viewportBounds;
     const strokeWidth = 1 / viewport.zoom;
     const offset = 5 / viewport.zoom;
     ctx.strokeStyle = '#1672F3';
@@ -35,14 +33,14 @@ class SnapRender extends Renderable {
     this.alignPoints.forEach(points => {
       let d = '';
       if (points[0].x === points[1].x) {
-        const x = points[0].x - vx;
-        const minY = Math.min(points[0].y, points[1].y) - vy;
-        const maxY = Math.max(points[0].y, points[1].y) - vy;
+        const x = points[0].x;
+        const minY = Math.min(points[0].y, points[1].y);
+        const maxY = Math.max(points[0].y, points[1].y);
         d = `M${x},${minY - offset}L${x},${maxY}`;
       } else {
-        const y = points[0].y - vy;
-        const minX = Math.min(points[0].x, points[1].x) - vx;
-        const maxX = Math.max(points[0].x, points[1].x) - vx;
+        const y = points[0].y;
+        const minX = Math.min(points[0].x, points[1].x);
+        const maxX = Math.max(points[0].x, points[1].x);
         d = `M${minX - offset},${y}L${maxX + offset},${y}`;
       }
       ctx.stroke(new Path2D(d));
@@ -51,16 +49,16 @@ class SnapRender extends Renderable {
       const bar = 10 / viewport.zoom;
       let d = '';
       if (points[0].x === points[1].x) {
-        const x = points[0].x - vx;
-        const minY = Math.min(points[0].y, points[1].y) + offset - vy;
-        const maxY = Math.max(points[0].y, points[1].y) - offset - vy;
+        const x = points[0].x;
+        const minY = Math.min(points[0].y, points[1].y) + offset;
+        const maxY = Math.max(points[0].y, points[1].y) - offset;
         d = `M${x},${minY}L${x},${maxY}
         M${x - bar},${minY}L${x + bar},${minY}
         M${x - bar},${maxY}L${x + bar},${maxY} `;
       } else {
-        const y = points[0].y - vy;
-        const minX = Math.min(points[0].x, points[1].x) + offset - vx;
-        const maxX = Math.max(points[0].x, points[1].x) - offset - vx;
+        const y = points[0].y;
+        const minX = Math.min(points[0].x, points[1].x) + offset;
+        const maxX = Math.max(points[0].x, points[1].x) - offset;
         d = `M${minX},${y}L${maxX},${y}
         M${minX},${y - bar}L${minX},${y + bar}
         M${maxX},${y - bar}L${maxX},${y + bar}`;
