@@ -10,11 +10,11 @@ import {
   type SurfaceManager,
   TextElement,
 } from '@blocksuite/phasor';
-import { matchFlavours, type Page } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
@@ -45,6 +45,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     .affine-edgeless-selected-rect {
+      --top: 0;
+      --left: 0;
+      --rotate: 0;
       position: absolute;
       top: 0;
       left: 0;
@@ -54,7 +57,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       z-index: 1;
       border: var(--affine-border-width) solid var(--affine-blue);
+<<<<<<< HEAD
       border-radius: 8px;
+||||||| parent of 2a3bfb7f (fix: calculate the rectangle boundaries when multiple elements are selected)
+=======
+      transform: translate(var(--left), var(--top)) rotate(var(--rotate));
+>>>>>>> 2a3bfb7f (fix: calculate the rectangle boundaries when multiple elements are selected)
     }
 
     .affine-edgeless-selected-rect .handle {
@@ -243,6 +251,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _rotate = 0;
 
+  private _style: StyleInfo = {};
+
   constructor() {
     super();
     this._resizeManager = new HandleResizeManager(
@@ -362,6 +372,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     });
 
     this._rotate += rotate;
+
+    this._style['--rotate'] = `${this._rotate}deg`;
+
     this.requestUpdate();
   };
 
@@ -413,16 +426,33 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   override willUpdate(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('state')) {
       const {
-        state: { selected },
+        state: { selected, active },
+        surface,
+        _rotate,
       } = this;
+      const rect = getSelectedRect(selected, surface.viewport);
+
+      this._style = {
+        '--affine-border-width': `${active ? 2 : 1}px`,
+        '--top': `${rect.top}px`,
+        '--left': `${rect.left}px`,
+        '--rotate': `${_rotate}deg`,
+        width: `${rect.width}px`,
+        height: `${rect.height}px`,
+        backgroundColor: !active && selected ? 'var(--affine-hover-color)' : '',
+      };
+
       if (selected.length === 1) {
         const element = selected[0];
         if (!isTopLevelBlock(element)) {
           this._rotate = element.rotate ?? 0;
+          this._style['--rotate'] = `${this._rotate}deg`;
           return;
         }
       }
+
       this._rotate = 0;
+      this._style['--rotate'] = `${this._rotate}deg`;
     }
   }
 
@@ -442,23 +472,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       return nothing;
     }
 
-    const isSingleHiddenNote =
-      selected.length === 1 &&
-      isTopLevelBlock(selected[0]) &&
-      matchFlavours(selected[0], ['affine:note']) &&
-      selected[0].hidden;
-
-    const { page, surface, resizeMode, _resizeManager, _rotate, zoom } = this;
-    const selectedRect = getSelectedRect(selected, surface.viewport);
-
-    const style = {
-      '--affine-border-width': `${active ? 2 : 1}px`,
-      left: selectedRect.x + 'px',
-      top: selectedRect.y + 'px',
-      width: selectedRect.width + 'px',
-      height: selectedRect.height + 'px',
-      borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
-    };
+    const { page, resizeMode, _resizeManager, zoom, _rotate, _style } = this;
 
     const hasResizeHandles = !active && !page.readonly;
     const resizeHandles = hasResizeHandles
@@ -500,7 +514,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         </edgeless-component-toolbar>`;
 
     return html`
-      <div class="affine-edgeless-selected-rect" style=${styleMap(style)}>
+      <div class="affine-edgeless-selected-rect" style=${styleMap(_style)}>
         ${resizeHandles} ${connectorHandles}
       </div>
       ${componentToolbar}
