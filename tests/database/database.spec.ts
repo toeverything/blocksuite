@@ -46,13 +46,13 @@ import {
   undoByClick,
   undoByKeyboard,
   waitNextFrame,
-} from './utils/actions/index.js';
+} from '../utils/actions/index.js';
 import {
   assertBlockCount,
   assertBlockProps,
   assertLocatorVisible,
-} from './utils/asserts.js';
-import { test } from './utils/playwright.js';
+} from '../utils/asserts.js';
+import { test } from '../utils/playwright.js';
 
 test('edit database block title and create new rows', async ({ page }) => {
   await enterPlaygroundRoom(page);

@@ -138,12 +138,6 @@ export class RowSelectionManager {
   };
 
   private _onPointerUp = (ctx: UIEventStateContext) => {
-    const e = ctx.get('pointerState');
-    const target = e.raw.target as HTMLElement;
-    if (!isInDatabase(target)) {
-      return;
-    }
-
     this._startRange = null;
     this._setColumnWidthHandleDisplay('block');
     return true;
