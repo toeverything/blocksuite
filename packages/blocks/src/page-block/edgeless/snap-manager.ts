@@ -7,9 +7,9 @@ import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 
 class SnapRender extends Renderable {
   private _alignPoints: [Point, Point][] = [];
-  private _alignDistrubitePoints: [Point, Point][] = [];
+  private _alignDistributePoints: [Point, Point][] = [];
 
-  constructor(private snapManager: EdgelessSnapManager) {
+  constructor(private _snapManager: EdgelessSnapManager) {
     super();
   }
 
@@ -18,16 +18,16 @@ class SnapRender extends Renderable {
     alignDistrubitePoints: [Point, Point][]
   ) {
     this._alignPoints = alignPoints;
-    this._alignDistrubitePoints = alignDistrubitePoints;
+    this._alignDistributePoints = alignDistrubitePoints;
   }
 
   override render(ctx: CanvasRenderingContext2D) {
     if (
       this._alignPoints.length === 0 &&
-      this._alignDistrubitePoints.length === 0
+      this._alignDistributePoints.length === 0
     )
       return;
-    const { viewport } = this.snapManager.container.surface;
+    const { viewport } = this._snapManager.container.surface;
     const strokeWidth = 1 / viewport.zoom;
     const offset = 5 / viewport.zoom;
     ctx.strokeStyle = '#1672F3';
@@ -48,7 +48,7 @@ class SnapRender extends Renderable {
       }
       ctx.stroke(new Path2D(d));
     });
-    this._alignDistrubitePoints.forEach(points => {
+    this._alignDistributePoints.forEach(points => {
       const bar = 10 / viewport.zoom;
       let d = '';
       if (points[0].x === points[1].x) {
