@@ -11,6 +11,10 @@ export function subscribeYArray(
   const { deep = false } = config;
   yArray.observe(event => {
     let retain = 0;
+    if (event.changes.keys.size === 0) {
+      // skip empty event
+      return;
+    }
     event.changes.delta.forEach(change => {
       if (change.retain) {
         retain += change.retain;
