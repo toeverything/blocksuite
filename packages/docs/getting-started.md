@@ -45,18 +45,6 @@ Or equivalently, you can also use the declarative style:
 </body>
 ```
 
-We use [Kalam](https://fonts.google.com/specimen/Kalam) as the default font for the text in edgeless mode so you
-need to add link to your HTML file:
-
-```html
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Kalam&display=swap"
-  rel="stylesheet"
-/>
-```
-
 However, the `SimpleAffineEditor` here is just a [thin wrapper with dozens of lines](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts) that doesn't enable the opt-in collaboration and [data persistence](./data-persistence) features. If you are going to support more complicated real-world use cases (e.g., with customized block models and configured data sources), this will involve the use of these three following core packages:
 
 - The [`@blocksuite/store`](https://github.com/toeverything/blocksuite/tree/master/packages/store) package is a data store built for general-purpose state management.
