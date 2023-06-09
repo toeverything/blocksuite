@@ -135,7 +135,7 @@ test.describe('zooming', () => {
   });
 });
 
-test('(command + A) select all elements when no active', async ({ page }) => {
+test('cmd + A should select all elements by default', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -151,7 +151,7 @@ test('(command + A) select all elements when no active', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
 });
 
-test('(command + A) not select all elements when active', async ({ page }) => {
+test('cmd + A should not fire inside active frame', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { frameId } = await initEmptyEdgelessState(page);
   await focusRichText(page);
@@ -162,8 +162,6 @@ test('(command + A) not select all elements when active', async ({ page }) => {
   const end = { x: 100, y: 100 };
   await addBasicRectShapeElement(page, start, end);
   await selectAllByKeyboard(page);
-
-  const box = await getEdgelessSelectedRect(page);
 
   await selectFrameInEdgeless(page, frameId);
   const box1 = await getEdgelessSelectedRect(page);
