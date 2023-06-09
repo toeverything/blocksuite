@@ -79,7 +79,7 @@ export class RowSelectionManager {
   };
 
   private _onPointerMove = (ctx: UIEventStateContext) => {
-    if (!this._isInDatabase) {
+    if (!this._isInDatabase || !this._startRange) {
       return false;
     }
 
