@@ -1,7 +1,7 @@
 import '../ref/ref.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { createPopper } from '@popperjs/core';
+import { autoPlacement,computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -65,9 +65,19 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
       },
     }));
     this.append(menu);
-    createPopper(this.filterSelect, menu, {
-      placement: 'top',
+    computePosition(this.filterSelect, menu, {
+      middleware: [
+        autoPlacement({
+          allowedPlacements: ['right-start', 'bottom-start'],
+        }),
+      ],
+    }).then(({ x, y }) => {
+      Object.assign(menu.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
+
     onClickOutside(
       menu,
       () => {

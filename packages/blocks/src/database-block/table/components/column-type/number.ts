@@ -69,9 +69,6 @@ export class NumberCellEditing
     this.rowHost.setValue(value, { captureSync: true });
     this._inputEle.value = `${this.cell?.value ?? ''}`;
   };
-  private _focus = (e: Event) => {
-    this.focusEnd();
-  };
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       this._setValue();
@@ -81,7 +78,6 @@ export class NumberCellEditing
   protected override render() {
     return html`<input
       .value="${this.cell?.value ?? ''}"
-      @focus="${this._focus}"
       @blur="${this._blur}"
       @keydown="${this._keydown}"
       class="affine-database-number number"

@@ -1,7 +1,7 @@
 import './menu.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { createPopper } from '@popperjs/core';
+import { autoPlacement, computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -71,8 +71,17 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
       },
     }));
     this.popupContainer()?.appendChild(menu);
-    createPopper(event.target as HTMLElement, menu, {
-      placement: 'bottom-start',
+    computePosition(event.target as HTMLElement, menu, {
+      middleware: [
+        autoPlacement({
+          allowedPlacements: ['right-start', 'bottom-start'],
+        }),
+      ],
+    }).then(({ x, y }) => {
+      Object.assign(menu.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
     onClickOutside(
       menu,
@@ -101,8 +110,17 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
       },
     ];
     this.popupContainer()?.appendChild(menu);
-    createPopper(event.target as HTMLElement, menu, {
-      placement: 'bottom-start',
+    computePosition(event.target as HTMLElement, menu, {
+      middleware: [
+        autoPlacement({
+          allowedPlacements: ['right-start', 'bottom-start'],
+        }),
+      ],
+    }).then(({ x, y }) => {
+      Object.assign(menu.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
     onClickOutside(
       menu,
