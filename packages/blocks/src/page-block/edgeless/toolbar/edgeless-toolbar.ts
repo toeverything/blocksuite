@@ -4,7 +4,6 @@ import './brush-tool/brush-tool-button.js';
 import './connector-tool/connector-tool-button.js';
 
 import {
-  FRAME_BACKGROUND_COLORS,
   HandIcon,
   ImageIcon,
   MinusIcon,
@@ -33,6 +32,7 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
+import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -380,7 +380,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${() =>
             this.setMouseMode({
               type: 'note',
-              background: FRAME_BACKGROUND_COLORS[0],
+              background: DEFAULT_FRAME_COLOR,
             })}
         >
           ${NoteIcon}
