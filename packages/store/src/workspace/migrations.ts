@@ -307,9 +307,8 @@ const migrations: Migration[] = [
                 data = { options: v.selection };
                 if (v.type === 'select') {
                   convertColumn(v.id, cell => {
-                    if (typeof cell.value === 'object') {
-                      // @ts-ignore
-                      cell.value = cell.value?.id;
+                    if (Array.isArray(cell.value)) {
+                      cell.value = cell.value[0]?.id;
                     }
                   });
                 } else {
@@ -319,6 +318,13 @@ const migrations: Migration[] = [
                     }
                   });
                 }
+              }
+              if (v.type === 'number') {
+                convertColumn(v.id, cell => {
+                  if (typeof cell.value === 'string') {
+                    cell.value = Number.parseFloat(cell.value.toString());
+                  }
+                });
               }
               return {
                 id: v.id,
