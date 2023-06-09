@@ -27,6 +27,14 @@ const AffineSchemas = [
   DatabaseBlockSchema,
 ];
 
+async function createTestPage(pageId = 'page0') {
+  const options = createTestOptions();
+  const workspace = new Workspace(options).register(AffineSchemas);
+  const page = workspace.createPage({ id: pageId });
+  await page.waitForLoaded();
+  return page;
+}
+
 describe('DatabaseManager', () => {
   let workspace: Workspace;
   let page: Page;
@@ -47,10 +55,9 @@ describe('DatabaseManager', () => {
     { id: '3', value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
 
-  beforeEach(() => {
-    const options = createTestOptions();
-    workspace = new Workspace(options).register(AffineSchemas);
-    page = workspace.createPage({ id: 'page0' });
+  beforeEach(async () => {
+    page = await createTestPage();
+    workspace = page.workspace;
     page.awarenessStore.setFlag('enable_database', true);
 
     pageBlockId = page.addBlock('affine:page', {

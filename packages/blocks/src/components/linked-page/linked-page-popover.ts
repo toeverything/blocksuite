@@ -9,6 +9,7 @@ import { html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { createPage } from '../../__internal__/index.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineVEditor } from '../../__internal__/rich-text/virgo/types.js';
 import {
@@ -199,13 +200,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     });
   }
 
-  private _createPage() {
+  private async _createPage() {
     const pageName = this._query;
-    const page = this._page.workspace.createPage({
-      init: {
-        title: pageName,
-      },
-    });
+
+    const page = await createPage(this._page.workspace, { title: pageName });
 
     this._insertLinkedNode('LinkedPage', page.id);
   }

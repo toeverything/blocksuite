@@ -18,7 +18,6 @@ import {
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { createYProxy } from '../yjs/index.js';
 import type { PageMeta } from './meta.js';
-import { tryMigrate } from './migrations.js';
 import type { Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
@@ -120,11 +119,6 @@ export class Page extends Space<FlatBlockMap> {
 
   get blobs() {
     return this.workspace.blobs;
-  }
-
-  /** key-value store of blocks */
-  private get _yBlocks(): YBlocks {
-    return this._ySpace;
   }
 
   get root() {
@@ -673,7 +667,7 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
-      tryMigrate(this.doc);
+      // tryMigrate(this.doc);
       this._handleVersion();
     }
 
@@ -713,10 +707,8 @@ export class Page extends Space<FlatBlockMap> {
     // events we actually generated locally.
     // _yBlocks.unobserveDeep(this._handleYEvents);
     _yBlocks.observeDeep(this._handleYEvents);
-
     this._history = new Y.UndoManager([_yBlocks], {
-      trackedOrigins: new Set([this.doc.clientID]),
-      doc: this.doc,
+      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
     });
 
     this._history.on('stack-cleared', this._historyObserver);
@@ -966,7 +958,7 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
-    if (this._yBlocks.size === 0) {
+    if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.

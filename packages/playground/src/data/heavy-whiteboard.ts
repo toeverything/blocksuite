@@ -10,7 +10,10 @@ import { addShapeElement, type InitFn } from './utils';
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 
-export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
+export const heavyWhiteboard: InitFn = async (
+  workspace: Workspace,
+  id: string
+) => {
   const { count } = getOptions((params: URLSearchParams) => {
     const count = Number(params.get('count')) || 100;
     return {
@@ -21,6 +24,7 @@ export const heavyWhiteboard: InitFn = (workspace: Workspace, id: string) => {
   };
 
   const page = workspace.createPage({ id });
+  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

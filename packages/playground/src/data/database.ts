@@ -9,11 +9,11 @@ import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
-export const database: InitFn = (workspace: Workspace, id: string) => {
+export const database: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
+  await page.waitForLoaded();
   page.awarenessStore.setFlag('enable_database', true);
   page.awarenessStore.setFlag('enable_database_filter', true);
-
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),

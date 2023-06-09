@@ -3,7 +3,7 @@ import { Text, type Workspace } from '@blocksuite/store';
 import { getOptions } from '../utils';
 import { type InitFn } from './utils';
 
-export const heavy: InitFn = (workspace: Workspace, pageId: string) => {
+export const heavy: InitFn = async (workspace: Workspace, pageId: string) => {
   const { count } = getOptions((params: URLSearchParams) => {
     const count = Number(params.get('count')) || 1000;
     return {
@@ -14,6 +14,7 @@ export const heavy: InitFn = (workspace: Workspace, pageId: string) => {
   };
 
   const page = workspace.createPage({ id: pageId });
+  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

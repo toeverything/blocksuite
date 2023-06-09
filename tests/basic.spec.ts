@@ -156,6 +156,8 @@ test(scoped`A first open, B first edit`, async ({ browser, page: pageA }) => {
   await focusRichText(pageB);
 
   const slot = waitForRemoteUpdateSlot(pageA);
+  await waitNextFrame(pageA);
+  await waitNextFrame(pageB);
   await type(pageB, 'hello');
   await slot;
   // wait until pageA content updated

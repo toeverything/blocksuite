@@ -16,6 +16,7 @@ import { customElement, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
+import { createPage } from '../../__internal__/utils/index.js';
 import { richTextHelper } from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
@@ -160,11 +161,7 @@ export class ImportPage extends WithDisposable(LitElement) {
       },
       async file => {
         const text = await file.text();
-        const page = this.workspace.createPage({
-          init: {
-            title: '',
-          },
-        });
+        const page = await createPage(this.workspace);
         const rootId = page.root?.id;
         const contentParser = new ContentParser(page);
         if (rootId) {
@@ -189,11 +186,7 @@ export class ImportPage extends WithDisposable(LitElement) {
       },
       async file => {
         const text = await file.text();
-        const page = this.workspace.createPage({
-          init: {
-            title: '',
-          },
-        });
+        const page = await createPage(this.workspace);
         const rootId = page.root?.id;
         const contentParser = new ContentParser(page);
         if (rootId) {
@@ -246,11 +239,7 @@ export class ImportPage extends WithDisposable(LitElement) {
 
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-              const page = this.workspace.createPage({
-                init: {
-                  title: '',
-                },
-              });
+              const page = await createPage(this.workspace);
               pageMap.set(file, page);
             }
             if (fileName.endsWith('.zip')) {
