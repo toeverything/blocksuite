@@ -4,7 +4,7 @@ import './connector-menu.js';
 import { ConnectorIcon } from '@blocksuite/global/config';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -24,23 +24,24 @@ function createConnectorMenuPopper(
   const menu = document.createElement('edgeless-connector-menu');
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(menu);
-  const popper = createPopper(reference, menu, {
+  computePosition(reference, menu, {
     placement: 'top',
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: [0, 12],
-        },
-      },
+    middleware: [
+      offset({
+        mainAxis: 10,
+      }),
     ],
+  }).then(({ x, y }) => {
+    Object.assign(menu.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+    });
   });
 
   return {
     element: menu,
     dispose: () => {
       menu.remove();
-      popper.destroy();
     },
   };
 }

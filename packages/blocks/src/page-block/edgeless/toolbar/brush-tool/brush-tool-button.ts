@@ -3,7 +3,7 @@ import './brush-menu.js';
 
 import { PenIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
@@ -22,23 +22,25 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
   const brushMenu = document.createElement('edgeless-brush-menu');
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(brushMenu);
-  const popper = createPopper(reference, brushMenu, {
+
+  computePosition(reference, brushMenu, {
     placement: 'top',
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: [0, 12],
-        },
-      },
+    middleware: [
+      offset({
+        mainAxis: 10,
+      }),
     ],
+  }).then(({ x, y }) => {
+    Object.assign(brushMenu.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+    });
   });
 
   return {
     element: brushMenu,
     dispose: () => {
       brushMenu.remove();
-      popper.destroy();
     },
   };
 }
