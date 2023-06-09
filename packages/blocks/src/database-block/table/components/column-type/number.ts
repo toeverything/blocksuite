@@ -33,6 +33,7 @@ export class NumberCellEditing
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
+      background-color: transparent;
     }
 
     .affine-database-number:focus {
