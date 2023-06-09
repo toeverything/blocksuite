@@ -44,6 +44,7 @@ export class NumberCellEditing
   focusEnd = () => {
     const end = this._inputEle.value.length;
     setTimeout(() => {
+      this._inputEle.focus();
       this._inputEle.setSelectionRange(end, end);
     });
   };
