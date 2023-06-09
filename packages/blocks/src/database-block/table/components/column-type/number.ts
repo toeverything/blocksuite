@@ -82,7 +82,6 @@ export class NumberCellEditing
       .value=${this.cell?.value ?? ''}
       @blur=${this._blur}
       @keydown=${this._keydown}
-      @pointerdown=${(e: Event) => e.stopPropagation()}
       class="affine-database-number number"
     />`;
   }
