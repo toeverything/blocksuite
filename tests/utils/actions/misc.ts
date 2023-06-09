@@ -931,7 +931,7 @@ export async function transformMarkdown(page: Page, data: string) {
     },
     { data }
   );
-  return await promiseResult;
+  return promiseResult;
 }
 
 export async function transformHtml(page: Page, data: string) {
@@ -942,11 +942,5 @@ export async function transformHtml(page: Page, data: string) {
     },
     { data }
   );
-  return await promiseResult;
-}
-
-export function isDOMRectSame(a: DOMRect, b: DOMRect) {
-  return (
-    a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height
-  );
+  return promiseResult;
 }

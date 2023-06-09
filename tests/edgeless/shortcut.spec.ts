@@ -15,9 +15,7 @@ import {
 import {
   enterPlaygroundRoom,
   focusRichText,
-  getFrameBoundBoxInEdgeless,
   initEmptyEdgelessState,
-  isDOMRectSame,
   pressBackspace,
   pressEscape,
   pressForwardDelete,
@@ -26,6 +24,7 @@ import {
   type,
 } from '../utils/actions/index.js';
 import {
+  assertDOMRectEqual,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
 } from '../utils/asserts.js';
@@ -172,7 +171,7 @@ test('cmd + A should not fire inside active frame', async ({ page }) => {
 
   const box2 = await getEdgelessSelectedRect(page);
 
-  expect(isDOMRectSame(box2, box1)).toBe(true);
+  assertDOMRectEqual(box1, box2);
 });
 
 test.describe('delete', () => {
@@ -187,10 +186,10 @@ test.describe('delete', () => {
     await selectFrameInEdgeless(page, frameId);
     await pressBackspace(page);
     const box2 = await getEdgelessSelectedRect(page);
-    expect(isDOMRectSame(box2, box1)).toBe(true);
+    assertDOMRectEqual(box1, box2);
 
     await pressForwardDelete(page);
     const box3 = await getEdgelessSelectedRect(page);
-    expect(isDOMRectSame(box3, box1)).toBe(true);
+    assertDOMRectEqual(box1, box3);
   });
 });
