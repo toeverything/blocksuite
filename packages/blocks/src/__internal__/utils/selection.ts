@@ -17,7 +17,7 @@ import {
   getBlockElementByModel,
   getDefaultPage,
   getElementFromEventTarget,
-  getModelByElement,
+  getModelByBlockElement,
   getModelsByRange,
   getNextBlock,
   getPageBlock,
@@ -489,12 +489,16 @@ function retargetClick(
 
   const { clientX, clientY } = e.raw;
 
-  const horizontalElement = getClosestEditor(clientY, container);
-  if (horizontalElement?.closest('affine-database')) return;
-  if (!horizontalElement) return;
+  const horizontalEditorElement = getClosestEditor(clientY, container);
+  const horizontalBlockElement = getClosestBlock(clientY, container);
 
-  const model = getModelByElement(horizontalElement);
-  const rect = horizontalElement.getBoundingClientRect();
+  if (horizontalBlockElement?.closest('affine-database')) return;
+  if (!horizontalBlockElement) return;
+
+  const model = getModelByBlockElement(horizontalBlockElement);
+
+  const rect = horizontalBlockElement.getBoundingClientRect();
+
   if (matchFlavours(model, nonTextBlock) && clientY > rect.bottom) {
     const parent = page.getParent(model);
     assertExists(parent);
@@ -503,11 +507,14 @@ function retargetClick(
     return;
   }
 
+  if (!horizontalEditorElement) {
+    return;
+  }
   if (clientX < rect.left) {
-    const range = setStartRange(horizontalElement);
+    const range = setStartRange(horizontalEditorElement);
     resetNativeSelection(range);
   } else {
-    const range = setEndRange(horizontalElement);
+    const range = setEndRange(horizontalEditorElement);
     resetNativeSelection(range);
   }
 }
@@ -911,6 +918,13 @@ export function getHorizontalClosestElement(
  */
 export function getClosestEditor(clientY: number, container = document.body) {
   return getHorizontalClosestElement(clientY, '.virgo-editor', container);
+}
+
+/**
+ * Get the closest block element in the horizontal position
+ */
+export function getClosestBlock(clientY: number, container = document.body) {
+  return getHorizontalClosestElement(clientY, `[${BLOCK_ID_ATTR}]`, container);
 }
 
 /**
