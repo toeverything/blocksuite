@@ -145,8 +145,6 @@ export class Store {
     this.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
       loaded.forEach(subdoc => {
         const space = this._findSpaceByDoc(subdoc);
-        console.log('subdoc loaded');
-        console.log(space);
         if (!space) {
           return;
         }
