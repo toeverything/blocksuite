@@ -58,6 +58,7 @@ export const nonTextBlock: (keyof BlockModels)[] = [
   'affine:divider',
   'affine:embed',
   'affine:code',
+  'affine:bookmark',
 ];
 
 export const isNonTextBlock = <
