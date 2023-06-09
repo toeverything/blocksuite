@@ -9,7 +9,7 @@ import {
 } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -304,13 +304,20 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       return;
     }
     this.setSearchState(SearchState.Action);
-    this._toolbarAction = new ToolbarActionPopup();
-    this._toolbarAction.targetModel = this.targetModel;
-    this._toolbarAction.close = this._closeToolbarAction;
+    const toolbarAction = new ToolbarActionPopup();
+    toolbarAction.targetModel = this.targetModel;
+    toolbarAction.close = this._closeToolbarAction;
+    this._toolbarAction = toolbarAction;
     this._moreActionContainer.appendChild(this._toolbarAction);
-    createPopper(this._moreActionContainer, this._toolbarAction, {
+    computePosition(this._moreActionContainer, this._toolbarAction, {
       placement: 'bottom',
+    }).then(({ x, y }) => {
+      Object.assign(toolbarAction.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
+
     onClickOutside(
       this._moreActionContainer,
       () => {

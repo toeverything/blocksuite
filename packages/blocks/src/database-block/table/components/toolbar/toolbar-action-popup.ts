@@ -5,7 +5,7 @@ import {
   DatabaseTableViewIcon,
   DeleteIcon,
 } from '@blocksuite/global/config';
-import { createPopper } from '@popperjs/core';
+import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -59,6 +59,7 @@ const databaseTypes: SwitchViewAction[] = [
 class DatabaseTypePopup extends LitElement {
   static override styles = css`
     :host {
+      position: absolute;
       width: 200px;
       padding: 8px;
       border: 1px solid var(--affine-border-color);
@@ -139,6 +140,7 @@ class DatabaseTypePopup extends LitElement {
 export class ToolbarActionPopup extends LitElement {
   static override styles = css`
     :host {
+      position: absolute;
       width: 200px;
       height: 128px;
       padding: 8px;
@@ -202,19 +204,24 @@ export class ToolbarActionPopup extends LitElement {
 
   private _onShowDatabaseType = () => {
     if (this._databaseTypePopup) return;
-    this._databaseTypePopup = new DatabaseTypePopup();
-    this._databaseTypePopup.dbType = 'table';
+    const databaseTypePopup = new DatabaseTypePopup();
+    databaseTypePopup.dbType = 'table';
+    this._databaseTypePopup = databaseTypePopup;
     this._container.appendChild(this._databaseTypePopup);
-    createPopper(this._container, this._databaseTypePopup, {
+
+    computePosition(this._container, databaseTypePopup, {
       placement: 'right-start',
-      modifiers: [
-        {
-          name: 'offset',
-          options: {
-            offset: [-9, 12],
-          },
-        },
+      middleware: [
+        offset({
+          mainAxis: 9,
+          crossAxis: -9,
+        }),
       ],
+    }).then(({ x, y }) => {
+      Object.assign(databaseTypePopup.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
   };
 
@@ -256,7 +263,7 @@ export class ToolbarActionPopup extends LitElement {
 
   override render() {
     return html`<div class="affine-database-toolbar-action-popup">
-      ${this._renderActions()}
+      <div class="action-container">${this._renderActions()}</div>
     </div>`;
   }
 }

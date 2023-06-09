@@ -25,9 +25,14 @@ export class NumberCellEditing
       display: flex;
       align-items: center;
       height: 100%;
-      border: none;
       width: 100%;
       padding: 0;
+      border: none;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
+      color: var(--affine-text-primary-color);
+      font-weight: 400;
     }
 
     .affine-database-number:focus {
