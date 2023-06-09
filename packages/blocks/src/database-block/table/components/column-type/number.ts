@@ -78,12 +78,16 @@ export class NumberCellEditing
     }
   };
 
+  private _pointerMove = (e: PointerEvent) => {
+    e.stopPropagation();
+  };
+
   protected override render() {
     return html`<input
       .value=${this.cell?.value ?? ''}
       @blur=${this._blur}
       @keydown=${this._keydown}
-      @pointerdown=${(e: Event) => e.stopPropagation()}
+      @pointermove=${this._pointerMove}
       class="affine-database-number number"
     />`;
   }
