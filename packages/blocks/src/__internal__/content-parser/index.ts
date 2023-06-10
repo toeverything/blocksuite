@@ -5,8 +5,14 @@ import { toPng } from 'html-to-image';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
+import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
-import { getEditorContainer, type SerializedBlock } from '../utils/index.js';
+import {
+  getEditorContainer,
+  getPageBlock,
+  isPageMode,
+  type SerializedBlock,
+} from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,
@@ -73,21 +79,46 @@ export class ContentParser {
 
   public async exportPng() {
     const root = this._page.root;
+
     if (!root) return;
     const editorContainer = getEditorContainer(this._page);
-    const styleElement = document.createElement('style');
-    styleElement.textContent =
-      'editor-container,.affine-editor-container {height: auto;}';
-    editorContainer.appendChild(styleElement);
+    if (isPageMode(this._page)) {
+      const styleElement = document.createElement('style');
+      styleElement.textContent =
+        'editor-container,.affine-editor-container {height: auto;}';
+      editorContainer.appendChild(styleElement);
+      FileExporter.exportPng(
+        (root as PageBlockModel).title.toString(),
+        await toPng(editorContainer, {
+          cacheBust: true,
+        })
+      );
+      editorContainer.removeChild(styleElement);
+    } else {
+      const styleElement = document.createElement('style');
+      const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
+      const bound = edgeless.getElementsBound();
+      assertExists(bound);
+      const { x, y, w, h } = bound;
+      styleElement.textContent = `
+        edgeless-toolbar {display: none;}
+        editor-container,.affine-editor-container {height: ${h}px; width: ${w}px}
+      `;
+      editorContainer.appendChild(styleElement);
 
-    FileExporter.exportPng(
-      (root as PageBlockModel).title.toString(),
-      await toPng(editorContainer, {
-        cacheBust: true,
-      })
-    );
-
-    editorContainer.removeChild(styleElement);
+      const width = edgeless.surface.viewport.width;
+      const height = edgeless.surface.viewport.height;
+      edgeless.surface.viewport.setCenter(x + width / 2, y + height / 2);
+      setTimeout(async () => {
+        FileExporter.exportPng(
+          (root as PageBlockModel).title.toString(),
+          await toPng(editorContainer, {
+            cacheBust: true,
+          })
+        );
+        editorContainer.removeChild(styleElement);
+      }, 0);
+    }
   }
 
   public async exportPdf() {
