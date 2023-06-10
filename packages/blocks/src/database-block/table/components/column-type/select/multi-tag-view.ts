@@ -1,6 +1,6 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -40,11 +40,26 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  @query('.affine-database-select-cell-container')
+  selectContainer!: HTMLElement;
+
   @property()
   value: string[] = [];
 
   @property()
   options: SelectTag[] = [];
+
+  @property()
+  setHeight: ((height: number) => void) | undefined;
+
+  protected override updated(_changedProperties: Map<string, unknown>) {
+    super.updated(_changedProperties);
+
+    if (this.setHeight) {
+      const { height } = this.selectContainer.getBoundingClientRect();
+      this.setHeight(height);
+    }
+  }
 
   override render() {
     const values = this.value;

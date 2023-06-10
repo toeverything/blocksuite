@@ -82,10 +82,9 @@ const styles = css`
   }
   .selected svg {
     color: var(--affine-text-emphasis-color);
-  }
-  .selected.rich-text svg {
     fill: var(--affine-text-emphasis-color);
   }
+
   /* .action.disabled {
     cursor: not-allowed;
   }

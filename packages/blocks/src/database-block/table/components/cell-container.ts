@@ -28,6 +28,13 @@ export class DatabaseCellContainer
     affine-database-cell-container * {
       box-sizing: border-box;
     }
+
+    affine-database-multi-select-cell,
+    affine-database-select-cell {
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
   `;
 
   @state()
@@ -97,6 +104,15 @@ export class DatabaseCellContainer
     this.style.height = `${height + CELL_PADDING * 2}px`;
   };
 
+  updateColumnProperty(apply: (oldProperty: Column) => Partial<Column>): void {
+    const newProperty = apply(this.column);
+    this.databaseModel.page.captureSync();
+    this.databaseModel.updateColumn({
+      ...this.column,
+      ...newProperty,
+    });
+  }
+
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
     const renderer = this.columnRenderer.get(this.column.type);
@@ -129,14 +145,6 @@ export class DatabaseCellContainer
         .cell='${cell}'
       ></${previewTag}>
     `;
-  }
-  updateColumnProperty(apply: (oldProperty: Column) => Partial<Column>): void {
-    const newProperty = apply(this.column);
-    this.databaseModel.page.captureSync();
-    this.databaseModel.updateColumn({
-      ...this.column,
-      ...newProperty,
-    });
   }
 }
 
