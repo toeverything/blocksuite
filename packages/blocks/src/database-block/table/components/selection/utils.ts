@@ -81,7 +81,7 @@ export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
     richText.vEditor?.focusEnd();
   } else if (cell.cellType === 'number') {
     const richTextCell = cell as NumberCellEditing;
-    richTextCell.vEditor?.focusEnd();
+    richTextCell.focusEnd();
   } else if (cell.cellType === 'rich-text') {
     const richTextCell = cell as TextCell;
     richTextCell.vEditor?.focusEnd();

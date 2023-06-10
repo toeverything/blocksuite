@@ -45,3 +45,17 @@ Happy hacking!
 ::: tip
 By default, all block operations within a certain period of time are aggregated into a single history record, which is particularly useful for rich-text editing. If you added 10 blocks at once and need to undo each addition separately, you can use `page.captureSync()` before adding each block.
 :::
+
+::: tip
+We use [Kalam](https://fonts.google.com/specimen/Kalam) as the default font for the text in edgeless mode, so you may need to add it into your HTML file:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Kalam&display=swap"
+  rel="stylesheet"
+/>
+```
+
+:::

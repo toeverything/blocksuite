@@ -12,6 +12,7 @@ import {
   getCurrentBlockRange,
   getDefaultPage,
 } from '../../__internal__/index.js';
+import { multiSelectHelper } from '../../database-block/common/column-manager.js';
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import { styles } from './styles.js';
 
@@ -79,13 +80,9 @@ export class DatabaseModal extends LitElement {
     assertExists(databaseModel);
 
     // default column
-    databaseModel.updateColumn({
-      name: 'Tag',
-      type: 'multi-select',
-      width: 200,
-      hide: false,
-      selection: [],
-    });
+    databaseModel.updateColumn(
+      multiSelectHelper.create('Tag', { options: [] })
+    );
     databaseModel.applyColumnUpdate();
 
     this.page.moveBlocks(models, databaseModel);
