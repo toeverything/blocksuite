@@ -50,7 +50,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
   options: SelectTag[] = [];
 
   @property()
-  setHeight: ((height: number) => void) | undefined;
+  setHeight?: (height: number) => void;
 
   protected override updated(_changedProperties: Map<string, unknown>) {
     super.updated(_changedProperties);
