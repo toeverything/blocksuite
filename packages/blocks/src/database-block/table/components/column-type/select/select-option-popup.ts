@@ -80,6 +80,9 @@ export class SelectActionPopup extends LitElement {
   @property()
   onAction!: (type: SelectTagActionType, id: string) => void;
 
+  @property()
+  onClosePopup!: () => void;
+
   private _onAction = (e: Event, type: SelectTagActionType) => {
     e.stopPropagation();
     this.onAction(type, this.tagId);
@@ -93,10 +96,21 @@ export class SelectActionPopup extends LitElement {
             if (isDivider(action))
               return html` <div class="action-divider"></div>`;
 
+            const onMouseEnter =
+              action.type === 'change-color'
+                ? (e: Event) => this._onAction(e, action.type)
+                : this.onClosePopup;
+
+            const onClick =
+              action.type !== 'change-color'
+                ? (e: Event) => this._onAction(e, action.type)
+                : undefined;
+
             return html`
               <div
                 class="action ${action.type}"
-                @click="${(e: Event) => this._onAction(e, action.type)}"
+                @mouseenter=${onMouseEnter}
+                @click=${onClick}
               >
                 <div class="action-content">
                   ${action.icon}<span>${action.text}</span>
