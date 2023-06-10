@@ -100,7 +100,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       {
         key: 'import-linked-page',
         name: `Import`,
-        active: filteredPageList.length === this._activatedItemIndex,
+        active: filteredPageList.length + 1 === this._activatedItemIndex,
         icon: ImportIcon,
         action: () => this._importPage(),
       },
@@ -272,7 +272,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         @click=${action}
         @mousemove=${() => {
           // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
-          this._activatedItemIndex = this._actionList.length - 1 + index;
+          this._activatedItemIndex = this._actionList.length + index;
         }}
         >${icon}</icon-button
       >`
