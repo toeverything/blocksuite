@@ -703,7 +703,7 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('Delete the blank line between two dividers by forwardDelete', async ({
+test('Delete the second divider between two dividers by forwardDelete', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -714,10 +714,12 @@ test('Delete the blank line between two dividers by forwardDelete', async ({
 
   await pressEnter(page);
   await type(page, '--- ');
+  await assertDivider(page, 2);
   await pressArrowUp(page, 2);
   await pressForwardDelete(page);
-  await assertDivider(page, 2);
-  await assertRichTexts(page, ['']);
+  await pressForwardDelete(page);
+  await assertDivider(page, 1);
+  await assertRichTexts(page, ['', '', '']);
 });
 
 test('should delete line with content after divider should not lost content', async ({
@@ -744,6 +746,7 @@ test('should forwardDelete driver works properly', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, '123');
+  await pressEnter(page);
   await type(page, '--- ');
   await assertDivider(page, 1);
   // Jump to first line start
@@ -754,7 +757,7 @@ test('should forwardDelete driver works properly', async ({ page }) => {
   await page.waitForTimeout(50);
   await pressForwardDelete(page);
   await assertDivider(page, 0);
-  await assertRichTexts(page, ['123']);
+  await assertRichTexts(page, ['123', '', '']);
 });
 
 test('the cursor should move to closest editor block when clicking outside container', async ({
