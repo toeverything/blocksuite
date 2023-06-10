@@ -55,7 +55,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
   protected override updated(_changedProperties: Map<string, unknown>) {
     super.updated(_changedProperties);
 
-    if (this.setHeight) {
+    if (this.setHeight && this.value.length > 0) {
       const { height } = this.selectContainer.getBoundingClientRect();
       this.setHeight(height);
     }
