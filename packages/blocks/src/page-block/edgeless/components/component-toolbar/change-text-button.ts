@@ -1,8 +1,8 @@
 import '../align-panel.js';
 
 import {
-  AlighLeftIcon,
   AlignCenterIcon,
+  AlignLeftIcon,
   AlignRightIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -173,7 +173,7 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
         @click=${() => this._textAlignPopper?.toggle()}
       >
         ${selectedAlign === 'left'
-          ? AlighLeftIcon
+          ? AlignLeftIcon
           : selectedAlign === 'center'
           ? AlignCenterIcon
           : AlignRightIcon}
