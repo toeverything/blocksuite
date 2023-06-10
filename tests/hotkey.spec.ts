@@ -1082,6 +1082,8 @@ test('should forwardDelete works when delete multi characters', async ({
   await setVirgoSelection(page, 1, 3);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['ho']);
+});
+
 test('should drag multiple block and input text works', async ({ page }) => {
   test.info().annotations.push({
     type: 'issue',
