@@ -321,7 +321,7 @@ export class HandleResizeManager {
     const endRad = Math.atan2(endY - centerY, endX - centerX);
     let diffRad = endRad - startRad;
 
-    // 15deg * n = 0, 15, 30, 45, ...
+    // 15deg * n = 0, 15, 30, 45, ... 360
     if (shiftKey) {
       const prevRad = (_rotate * Math.PI) / 180;
       let angle = prevRad + diffRad;
