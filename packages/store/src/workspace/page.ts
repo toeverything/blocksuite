@@ -18,7 +18,6 @@ import {
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import { createYProxy } from '../yjs/index.js';
 import type { PageMeta } from './meta.js';
-import { tryMigrate } from './migrations.js';
 import type { Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
@@ -64,6 +63,7 @@ export class Page extends Space<FlatBlockMap> {
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
+  private _shouldTransact = true;
 
   // TODO use schema
   private _ignoredKeys = new Set<string>(Object.keys(new BaseBlockModel()));
@@ -121,11 +121,6 @@ export class Page extends Space<FlatBlockMap> {
     return this.workspace.blobs;
   }
 
-  /** key-value store of blocks */
-  private get _yBlocks(): YBlocks {
-    return this._ySpace;
-  }
-
   get root() {
     return this._root;
   }
@@ -162,6 +157,19 @@ export class Page extends Space<FlatBlockMap> {
 
   get Text() {
     return Text;
+  }
+
+  withoutTransact(callback: () => void) {
+    this._shouldTransact = false;
+    callback();
+    this._shouldTransact = true;
+  }
+
+  override transact(
+    fn: () => void,
+    shouldTransact: boolean = this._shouldTransact
+  ) {
+    super.transact(fn, shouldTransact);
   }
 
   undo() {
@@ -325,7 +333,7 @@ export class Page extends Space<FlatBlockMap> {
   @debug('CRUD')
   addBlock(
     flavour: string,
-    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour' | 'id'>> = {},
+    blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour'>> = {},
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
   ): string {
@@ -351,7 +359,7 @@ export class Page extends Space<FlatBlockMap> {
     );
 
     const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
-    const id = this._idGenerator();
+    const id = blockProps.id ?? this._idGenerator();
     clonedProps.id = id;
 
     this.transact(() => {
@@ -617,7 +625,12 @@ export class Page extends Space<FlatBlockMap> {
       model.children.forEach(child => {
         this.schema.validate(child.flavour, bringChildrenTo.flavour);
       });
-      bringChildrenTo.children.push(...model.children);
+      // When bring children to parent, insert children to the original position of model
+      if (bringChildrenTo === parent && index > -1) {
+        parent.children.splice(index, 0, ...model.children);
+      } else {
+        bringChildrenTo.children.push(...model.children);
+      }
     }
     this._blockMap.delete(model.id);
 
@@ -654,7 +667,7 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
-      tryMigrate(this.doc);
+      // tryMigrate(this.doc);
       this._handleVersion();
     }
 
@@ -694,10 +707,8 @@ export class Page extends Space<FlatBlockMap> {
     // events we actually generated locally.
     // _yBlocks.unobserveDeep(this._handleYEvents);
     _yBlocks.observeDeep(this._handleYEvents);
-
     this._history = new Y.UndoManager([_yBlocks], {
-      trackedOrigins: new Set([this.doc.clientID]),
-      doc: this.doc,
+      trackedOrigins: new Set([this._ySpaceDoc.clientID]),
     });
 
     this._history.on('stack-cleared', this._historyObserver);
@@ -947,7 +958,7 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
-    if (this._yBlocks.size === 0) {
+    if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.

@@ -7,7 +7,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
-import { InlineSuggestionController } from './inline-suggestion.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 
@@ -111,8 +110,6 @@ export class RichText extends ShadowlessElement {
       scroll-margin-top: 50px;
       scroll-margin-bottom: 30px;
     }
-
-    ${InlineSuggestionController.styles}
   `;
 
   @query('.affine-rich-text')
@@ -131,9 +128,6 @@ export class RichText extends ShadowlessElement {
   get vEditor() {
     return this._vEditor;
   }
-
-  private _inlineSuggestController: InlineSuggestionController =
-    new InlineSuggestionController(this);
 
   override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
@@ -233,15 +227,6 @@ export class RichText extends ShadowlessElement {
     });
 
     this._vEditor.setReadonly(this.model.page.readonly);
-    const inlineSuggestionProvider =
-      this.model.page.workspace.inlineSuggestionProvider;
-    if (inlineSuggestionProvider) {
-      this._inlineSuggestController.init({
-        provider: inlineSuggestionProvider,
-        model: this.model,
-        vEditor: this._vEditor,
-      });
-    }
   }
 
   override updated() {
@@ -251,13 +236,7 @@ export class RichText extends ShadowlessElement {
   }
 
   override render() {
-    return html`<div
-        class="affine-rich-text virgo-editor"
-        @keydown=${this._inlineSuggestController.onKeyDown}
-        @focusin=${this._inlineSuggestController.onFocusIn}
-        @focusout=${this._inlineSuggestController.onFocusOut}
-      ></div>
-      ${this._inlineSuggestController.render()}`;
+    return html`<div class="affine-rich-text virgo-editor"></div>`;
   }
 }
 

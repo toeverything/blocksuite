@@ -1082,4 +1082,17 @@ test('should forwardDelete works when delete multi characters', async ({
   await setVirgoSelection(page, 1, 3);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['ho']);
+test('should drag multiple block and input text works', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2982',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await type(page, 'ab');
+  await assertRichTexts(page, ['1ab89']);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 });

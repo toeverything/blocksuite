@@ -81,7 +81,7 @@ export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
     richText.vEditor?.focusEnd();
   } else if (cell.cellType === 'number') {
     const richTextCell = cell as NumberCellEditing;
-    richTextCell.vEditor?.focusEnd();
+    richTextCell.focusEnd();
   } else if (cell.cellType === 'rich-text') {
     const richTextCell = cell as TextCell;
     richTextCell.vEditor?.focusEnd();
@@ -145,6 +145,14 @@ export function getRowsContainer(databaseId: string) {
   );
   assertExists(container);
   return container;
+}
+
+export function getDatabaseById(id: string) {
+  const database = document.querySelector<HTMLElement>(
+    `affine-database[data-block-id="${id}"]`
+  );
+  assertExists(database);
+  return database;
 }
 
 function getCellCoordByElement(cell: HTMLElement, databaseId: string) {
@@ -283,14 +291,6 @@ function getNextCellCoordByArrowDown(
 
 function getNextCellCoordByEscape(currentCellCoord: CellCoord) {
   return currentCellCoord;
-}
-
-function getDatabaseById(id: string) {
-  const database = document.querySelector<HTMLElement>(
-    `affine-database[data-block-id="${id}"]`
-  );
-  assertExists(database);
-  return database;
 }
 
 function getCellLevelSelection(container: Element) {

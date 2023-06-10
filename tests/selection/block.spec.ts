@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import { assert } from 'console';
 
 import {
   activeEmbed,
@@ -10,6 +11,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
+  getCenterPositionByLocator,
   getIndexCoordinate,
   getRichTextBoundingBox,
   initEmptyParagraphState,
@@ -24,6 +26,7 @@ import {
   redoByKeyboard,
   resetHistory,
   shamefullyBlurActiveElement,
+  shiftClick,
   SHORT_KEY,
   type,
   undoByKeyboard,
@@ -1207,4 +1210,82 @@ test('should select with shift-click', async ({ page }) => {
   });
 
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(3);
+});
+
+test('when shift-click should select correct number of list blocks', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 2);
+  await pressEnter(page);
+  await type(page, '10');
+  await pressEnter(page);
+  await type(page, '11');
+  await assertRichTexts(page, ['123', '456', '789', '10', '11']);
+
+  await clickListIcon(page, 3);
+  const fifthLocator = page.getByText('11');
+  const targetPos = await getCenterPositionByLocator(page, fifthLocator);
+  await shiftClick(page, targetPos);
+  const rects = page.locator('affine-selected-blocks > *');
+  await expect(rects).toHaveCount(2);
+});
+
+test('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initImageState(page);
+
+  await page.evaluate(async () => {
+    const viewport = document.querySelector('.affine-default-viewport');
+    if (!viewport) {
+      throw new Error();
+    }
+    viewport.scrollTo(0, 1000);
+  });
+
+  const pageRect = await page.evaluate(() => {
+    const pageBlock = document.querySelector('affine-default-page');
+    return pageBlock?.getBoundingClientRect() || null;
+  });
+
+  assert(pageRect !== null);
+  await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:type="text"
+    />
+  </affine:frame>
+  <affine:page>
+    <affine:frame
+      prop:background="--affine-background-secondary-color"
+      prop:index="a0"
+    >
+      <affine:embed
+        prop:caption=""
+        prop:height={0}
+        prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
+        prop:type="image"
+        prop:width={0}
+      />
+      <affine:paragraph
+        prop:type="text"
+      />
+    </affine:frame>
+  </affine:page>
+</affine:page>`
+  );
 });

@@ -74,6 +74,10 @@ export class EmbedBlockComponent extends BlockElement<EmbedBlockModel> {
         document.activeElement.blur();
       }
     });
+
+    this._input.addEventListener('pointerup', (e: Event) => {
+      e.stopPropagation();
+    });
   }
 
   private _onInputChange() {

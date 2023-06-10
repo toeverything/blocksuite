@@ -18,6 +18,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import {
   activeEditorManager,
   COLOR_VARIABLES,
+  createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
@@ -26,17 +27,15 @@ import {
   updateBlockType,
   VARIABLES,
 } from '@blocksuite/blocks';
-import { LINK_PRE } from '@blocksuite/blocks/__internal__/content-parser/parse-html';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { type Page, Utils, type Workspace } from '@blocksuite/store';
+import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { GUI } from 'dat.gui';
-import JSZip from 'jszip';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -296,93 +295,6 @@ export class DebugMenu extends ShadowlessElement {
     this.requestUpdate();
   }
 
-  private async _selectFile(accept: string): Promise<File> {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = accept;
-    input.multiple = false;
-    input.click();
-    return new Promise((resolve, reject) => {
-      input.onchange = () => {
-        const file = input.files?.item(0);
-        if (!file) {
-          reject();
-        }
-        resolve(file as File);
-      };
-      input.onerror = () => {
-        reject();
-      };
-    });
-  }
-
-  private async _importMarkDown() {
-    const file = await this._selectFile('.md');
-    const text = await file.text();
-    const rootId = this.page.root?.id;
-    rootId && (await this.contentParser.importMarkdown(text, rootId));
-  }
-
-  private async _importHtml() {
-    const file = await this._selectFile('.html');
-    const text = await file.text();
-    const rootId = this.page.root?.id;
-    rootId && (await this.contentParser.importHtml(text, rootId));
-  }
-
-  private async _importNotion() {
-    const file = await this._selectFile('.zip');
-    const zip = new JSZip();
-    const zipFile = await zip.loadAsync(file);
-    const pageMap = new Map<string, Page>();
-    const files = Object.keys(zipFile.files);
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const lastSplitIndex = file.lastIndexOf('/');
-      const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-        const page = this.page.workspace.createPage({
-          init: {
-            title: '',
-          },
-        });
-        pageMap.set(file, page);
-      }
-    }
-    pageMap.forEach(async (page, file) => {
-      const lastSplitIndex = file.lastIndexOf('/');
-      const folder = file.substring(0, lastSplitIndex) || '';
-      const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-        const isHtml = fileName.endsWith('.html');
-        const rootId = page.root?.id;
-        const fetchFileHandler = async (url: string) => {
-          const fileName =
-            folder + (folder ? '/' : '') + url.replaceAll('%20', ' ');
-          return (await zipFile.file(fileName)?.async('blob')) || new Blob();
-        };
-        const contentParser = new window.ContentParser(page, fetchFileHandler);
-        let text = (await zipFile.file(file)?.async('string')) || '';
-        pageMap.forEach((value, key) => {
-          const subPageLink = key.replaceAll(' ', '%20');
-          text = isHtml
-            ? text.replaceAll(
-                `href="${subPageLink}"`,
-                `href="${LINK_PRE + value.id}"`
-              )
-            : text.replaceAll(`(${subPageLink})`, `(${LINK_PRE + value.id})`);
-        });
-        if (rootId) {
-          if (isHtml) {
-            await contentParser.importHtml(text, rootId);
-          } else {
-            await contentParser.importMarkdown(text, rootId);
-          }
-        }
-      }
-    });
-  }
-
   private async _inspect() {
     await createViewer(this.workspace.doc.toJSON());
   }
@@ -448,7 +360,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
-    this.workspace.slots.pageAdded.on(e => {
+    this.workspace.slots.pageAdded.on(() => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
     this.workspace.slots.pageRemoved.on(() => {
@@ -686,15 +598,6 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._importYDoc}>
                 Import YDoc
               </sl-menu-item>
-              <sl-menu-item @click=${this._importMarkDown}>
-                Import Markdown
-              </sl-menu-item>
-              <sl-menu-item @click=${this._importHtml}>
-                Import HTML
-              </sl-menu-item>
-              <sl-menu-item @click=${this._importNotion}>
-                Import Notion
-              </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
@@ -749,7 +652,7 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Add New Page"
-              @click=${() => createPage(this.workspace)}
+              @click=${() => createPageBlock(this.workspace)}
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
@@ -768,9 +671,9 @@ export class DebugMenu extends ShadowlessElement {
   }
 }
 
-function createPage(workspace: Workspace) {
+function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator();
-  workspace.createPage({ id, init: true });
+  createPage(workspace, { id });
 }
 
 function getTabGroupTemplate({
@@ -824,19 +727,6 @@ function getTabGroupTemplate({
         >
           <div>
             <div>${page.title || 'Untitled'}</div>
-            <!-- TODO deprecated subpage -->
-            <div>
-              ${page.subpageIds
-                .map(
-                  pageId =>
-                    (
-                      pageList.find(meta => meta.id === pageId) ?? {
-                        title: 'Page Not Found',
-                      }
-                    ).title || 'Untitled'
-                )
-                .join(',')}
-            </div>
           </div>
         </sl-tab>`
     )}

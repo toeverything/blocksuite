@@ -8,7 +8,11 @@ import type { PageBlockModel } from '../../models.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import { getEditorContainer, type SerializedBlock } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
-import type { FetchFileHandler } from './parse-html.js';
+import type {
+  FetchFileHandler,
+  TableParserHandler,
+  TextStyleHandler,
+} from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
@@ -26,9 +30,20 @@ export class ContentParser {
   private _htmlParser: HtmlParser;
   private urlPattern =
     /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
-  constructor(page: Page, fetchFileFunc?: FetchFileHandler) {
+  constructor(
+    page: Page,
+    fetchFileHandler?: FetchFileHandler,
+    textStyleHandler?: TextStyleHandler,
+    tableParserHandler?: TableParserHandler
+  ) {
     this._page = page;
-    this._htmlParser = new HtmlParser(this, page, fetchFileFunc);
+    this._htmlParser = new HtmlParser(
+      this,
+      page,
+      fetchFileHandler,
+      textStyleHandler,
+      tableParserHandler
+    );
     this._htmlParser.registerParsers();
   }
 
@@ -216,8 +231,8 @@ export class ContentParser {
 
   public text2blocks(text: string): SerializedBlock[] {
     return text.split('\n').map((str: string) => {
-      const splitText = text.split(this.urlPattern);
-      const urls = text.match(this.urlPattern);
+      const splitText = str.split(this.urlPattern);
+      const urls = str.match(this.urlPattern);
       const result = [];
 
       for (let i = 0; i < splitText.length; i++) {

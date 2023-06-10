@@ -1,5 +1,6 @@
 import type { IBound } from '../consts.js';
-import { Utils } from './tl-utils.js';
+import { EPSILON, getBoundsFromPoints, lineIntersects } from './math-utils.js';
+import type { IVec } from './vec.js';
 import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
 
 export class Bound implements IBound {
@@ -13,6 +14,78 @@ export class Bound implements IBound {
     this.y = y;
     this.w = w;
     this.h = h;
+  }
+
+  static from(arg1: IBound) {
+    return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
+  }
+
+  get points(): IVec[] {
+    return [
+      [this.x, this.y],
+      [this.x + this.w, this.y],
+      [this.x + this.w, this.y + this.h],
+      [this.x, this.y + this.h],
+    ];
+  }
+
+  get center(): IVec {
+    return [this.x + this.w / 2, this.y + this.h / 2];
+  }
+
+  get minX() {
+    return this.x;
+  }
+
+  get minY() {
+    return this.y;
+  }
+
+  get maxX() {
+    return this.x + this.w;
+  }
+
+  get maxY() {
+    return this.y + this.h;
+  }
+
+  get tl(): IVec {
+    return [this.x, this.y];
+  }
+
+  get tr() {
+    return [this.x + this.w, this.y];
+  }
+
+  get bl() {
+    return [this.x, this.y + this.h];
+  }
+
+  get br() {
+    return [this.x + this.w, this.y + this.h];
+  }
+
+  intersectLine(sp: IVec, ep: IVec, infinite = false) {
+    const rst: IVec[] = [];
+    [
+      [this.tl, this.tr],
+      [this.tl, this.bl],
+      [this.tr, this.br],
+      [this.bl, this.br],
+    ].forEach(([p1, p2]) => {
+      const p = lineIntersects(sp, ep, p1, p2, infinite);
+      if (p) rst.push(p);
+    });
+    return rst.length === 0 ? null : rst;
+  }
+
+  isIntersectWithBound(bound: Bound, epsilon = EPSILON) {
+    return (
+      bound.maxX > this.minX - epsilon &&
+      bound.maxY > this.minY - epsilon &&
+      bound.minX < this.maxX + epsilon &&
+      bound.minY < this.maxY + epsilon
+    );
   }
 
   serialize(): SerializedXYWH {
@@ -69,7 +142,7 @@ export function contains(a: IBound, b: IBound): boolean {
 }
 
 export function getBoundFromPoints(points: number[][]) {
-  const { minX, minY, width, height } = Utils.getBoundsFromPoints(points);
+  const { minX, minY, width, height } = getBoundsFromPoints(points);
   return new Bound(minX, minY, width, height);
 }
 

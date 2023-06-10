@@ -2,6 +2,7 @@ import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PointerEventState } from '@blocksuite/lit';
 import type { SurfaceManager } from '@blocksuite/phasor';
 import {
+  Bound,
   ConnectorElement,
   deserializeXYWH,
   getCommonBound,
@@ -19,7 +20,7 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
-  handleNativeRangeClick,
+  handleNativeRangeAtPoint,
   handleNativeRangeDragMove,
   isEmpty,
   noop,
@@ -125,7 +126,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._edgeless.clearSelectedBlocks();
     // click the inner area of active text and note element
     if (active && selected.length === 1 && selected[0] === element) {
-      handleNativeRangeClick(this._page, e);
+      handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
       return;
     }
 
@@ -139,6 +140,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         // If the previously selected element is a frameBlock and is in an active state,
         // then the currently clicked frameBlock should also be in an active state when selected.
         this._setSelectionState([element], true);
+        handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
         this._edgeless.slots.selectedBlocksUpdated.emit([]);
         return;
       }
@@ -414,7 +416,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       await this._cloneContent(e);
     }
 
-    // Set up drag state
+    // Set up drag stvate
     this.initializeDragState(e, dragType);
   }
 
@@ -437,7 +439,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         const w = Math.abs(startX - e.x);
         const h = Math.abs(startY - e.y);
         const { zoom } = this._surface.viewport;
-        const bound = { x, y, w: w / zoom, h: h / zoom };
+        const bound = new Bound(x, y, w / zoom, h / zoom);
 
         const blocks = pickBlocksByBound(this._blocks, bound);
         const elements = this._surface.pickByBound(bound);

@@ -122,6 +122,13 @@ async function initEmptyEditor(
       }
 
       if (noInit) {
+        workspace.meta.pageMetas.forEach(meta => {
+          const pageId = meta.id;
+          const page = workspace.getPage(pageId);
+          if (page) {
+            initPage(page);
+          }
+        });
         workspace.slots.pageAdded.on(pageId => {
           const page = workspace.getPage(pageId);
           if (!page) {
@@ -131,7 +138,9 @@ async function initEmptyEditor(
         });
       } else {
         const page = workspace.createPage({ id: 'page0' });
-        initPage(page);
+        page.waitForLoaded().then(() => {
+          initPage(page);
+        });
       }
     },
     [flags, noInit, multiEditor] as const
@@ -165,11 +174,6 @@ export async function enterPlaygroundRoom(
   url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
   await page.goto(url.toString());
   const readyPromise = waitForPageReady(page);
-  await page.evaluate(() => {
-    if (typeof window.$blocksuite !== 'object') {
-      throw new Error('window.$blocksuite is not object');
-    }
-  }, []);
 
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
@@ -195,7 +199,14 @@ export async function enterPlaygroundRoom(
   });
 
   await initEmptyEditor(page, ops?.flags, ops?.noInit, multiEditor);
+
   await readyPromise;
+
+  await page.evaluate(() => {
+    if (typeof window.$blocksuite !== 'object') {
+      throw new Error('window.$blocksuite is not object');
+    }
+  }, []);
   return room;
 }
 
@@ -229,9 +240,12 @@ export async function waitForRemoteUpdateSlot(page: Page) {
   return page.evaluate(() => {
     return new Promise<void>(resolve => {
       const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
-      const debugProvider = window.workspace.providers.find(
-        provider => provider instanceof DebugDocProvider
-      ) as InstanceType<typeof DebugDocProvider>;
+      const providers = window.workspace.subdocProviders;
+      const debugProvider = Array.from(providers.values())
+        .flat()
+        .find(provider => provider instanceof DebugDocProvider) as InstanceType<
+        typeof DebugDocProvider
+      >;
       const callback = window.$blocksuite.blocks.debounce(() => {
         disposable.dispose();
         resolve();
@@ -719,6 +733,23 @@ export const getCenterPosition: (
   };
 };
 
+export const getCenterPositionByLocator: (
+  page: Page,
+  locator: Locator
+) => Promise<{ x: number; y: number }> = async (
+  page: Page,
+  locator: Locator
+) => {
+  const box = await locator.boundingBox();
+  if (!box) {
+    throw new Error("Failed to getCenterPosition! Can't get bounding box");
+  }
+  return {
+    x: box.x + box.width / 2,
+    y: box.y + box.height / 2,
+  };
+};
+
 export const getBoundingClientRect: (
   page: Page,
   selector: string
@@ -914,7 +945,7 @@ export async function transformMarkdown(page: Page, data: string) {
     },
     { data }
   );
-  return await promiseResult;
+  return promiseResult;
 }
 
 export async function transformHtml(page: Page, data: string) {
@@ -925,5 +956,5 @@ export async function transformHtml(page: Page, data: string) {
     },
     { data }
   );
-  return await promiseResult;
+  return promiseResult;
 }

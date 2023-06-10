@@ -2,6 +2,7 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 
 import { Point } from '../../../../../__internal__/index.js';
+import type { DatabaseViewDataMap } from '../../../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { ColumnDragIndicator } from './column-drag-indicator.js';
 import { ColumnDragPreview } from './column-drag-preview.js';
@@ -20,6 +21,7 @@ export type ColumnDragConfig = {
 };
 
 export function initMoveColumnHandlers(
+  view: DatabaseViewDataMap['table'],
   headerContainer: HTMLElement,
   tableContainer: HTMLElement,
   targetModel: DatabaseBlockModel
@@ -173,8 +175,12 @@ export function initMoveColumnHandlers(
     }
 
     targetModel.page.captureSync();
-    targetModel.moveColumn(fromIndex, toIndex);
-    targetModel.applyColumnUpdate();
+    targetModel.updateView(view.id, 'table', data => {
+      const column = data.columns[fromIndex];
+      data.columns.splice(fromIndex, 1);
+      data.columns.splice(toIndex, 0, column);
+    });
+    targetModel.applyViewsUpdate();
   };
 
   const disposables = new DisposableGroup();
