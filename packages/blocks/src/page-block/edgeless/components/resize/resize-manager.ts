@@ -5,6 +5,9 @@ import { assertExists } from '@blocksuite/store';
 import type { IPoint } from '../../../std.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
+// 15deg
+const SHIFT_LOCKING_ANGLE = Math.PI / 12;
+
 type ResizeMoveHandler = (
   bounds: Map<
     string,
@@ -12,7 +15,8 @@ type ResizeMoveHandler = (
       bound: Bound;
       flip: IPoint;
     }
-  >
+  >,
+  rect?: Bound
 ) => void;
 
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
@@ -50,7 +54,8 @@ export class HandleResizeManager {
   private _shiftKey = false;
 
   private _rotate = 0;
-  private _rotated = false;
+  private _rotation = false;
+  private _origin: { x: number; y: number } = { x: 0, y: 0 };
 
   private _target: HTMLElement | null = null;
 
@@ -65,10 +70,10 @@ export class HandleResizeManager {
   }
 
   // TODO: move to vec2
-  private _onResize(shift = false) {
+  private _onResize(shiftKey = false) {
     const {
       _aspectRatio: aspectRatio,
-      _dragDirection: direction,
+      _dragDirection,
       _dragPos: dragPos,
       _rotate: rotate,
       _resizeMode,
@@ -93,9 +98,9 @@ export class HandleResizeManager {
       cy: (minY + maxY) / 2,
     };
     const rect = { ...original };
-    const arrow = { x: 1, y: 1 };
     const scale = { x: 1, y: 1 };
     const flip = { x: 1, y: 1 };
+    const direction = { x: 1, y: 1 };
     const fixedPoint = new DOMPoint(0, 0);
     const draggingPoint = new DOMPoint(0, 0);
 
@@ -107,10 +112,10 @@ export class HandleResizeManager {
       .translateSelf(-original.cx, -original.cy);
 
     if (isCorner) {
-      switch (direction) {
+      switch (_dragDirection) {
         case HandleDirection.TopLeft: {
-          arrow.x = -1;
-          arrow.y = -1;
+          direction.x = -1;
+          direction.y = -1;
           fixedPoint.x = maxX;
           fixedPoint.y = maxY;
           draggingPoint.x = minX;
@@ -118,8 +123,8 @@ export class HandleResizeManager {
           break;
         }
         case HandleDirection.TopRight: {
-          arrow.x = 1;
-          arrow.y = -1;
+          direction.x = 1;
+          direction.y = -1;
           fixedPoint.x = minX;
           fixedPoint.y = maxY;
           draggingPoint.x = maxX;
@@ -127,8 +132,8 @@ export class HandleResizeManager {
           break;
         }
         case HandleDirection.BottomRight: {
-          arrow.x = 1;
-          arrow.y = 1;
+          direction.x = 1;
+          direction.y = 1;
           fixedPoint.x = minX;
           fixedPoint.y = minY;
           draggingPoint.x = maxX;
@@ -136,8 +141,8 @@ export class HandleResizeManager {
           break;
         }
         case HandleDirection.BottomLeft: {
-          arrow.x = -1;
-          arrow.y = 1;
+          direction.x = -1;
+          direction.y = 1;
           fixedPoint.x = maxX;
           fixedPoint.y = minY;
           draggingPoint.x = minX;
@@ -166,7 +171,7 @@ export class HandleResizeManager {
       const f = fp.matrixTransform(m1);
       const d = dp.matrixTransform(m1);
 
-      switch (direction) {
+      switch (_dragDirection) {
         case HandleDirection.TopLeft: {
           rect.w = f.x - d.x;
           rect.h = f.y - d.y;
@@ -196,7 +201,7 @@ export class HandleResizeManager {
       flip.x = scale.x < 0 ? -1 : 1;
       flip.y = scale.y < 0 ? -1 : 1;
 
-      if (shift) {
+      if (shiftKey) {
         const newAspectRatio = Math.abs(rect.w / rect.h);
         if (aspectRatio < newAspectRatio) {
           scale.y = Math.abs(scale.x) * flip.y;
@@ -205,8 +210,8 @@ export class HandleResizeManager {
           scale.x = Math.abs(scale.y) * flip.x;
           rect.w = scale.x * original.w;
         }
-        draggingPoint.x = fixedPoint.x + rect.w * arrow.x;
-        draggingPoint.y = fixedPoint.y + rect.h * arrow.y;
+        draggingPoint.x = fixedPoint.x + rect.w * direction.x;
+        draggingPoint.y = fixedPoint.y + rect.h * direction.y;
 
         dp = draggingPoint.matrixTransform(m0);
 
@@ -214,7 +219,7 @@ export class HandleResizeManager {
         rect.cy = (fp.y + dp.y) / 2;
       }
     } else {
-      switch (direction) {
+      switch (_dragDirection) {
         case HandleDirection.Left:
           rect.w = maxX - minX - deltaX;
           fixedPoint.x = maxX;
@@ -259,7 +264,7 @@ export class HandleResizeManager {
         });
       });
 
-      this._onResizeMove(newBounds);
+      this._onResizeMove(newBounds, Array.from(newBounds.values())[0].bound);
       return;
     }
 
@@ -293,30 +298,61 @@ export class HandleResizeManager {
       });
     });
 
-    this._onResizeMove(newBounds);
+    const width = Math.abs(rect.w);
+    const height = Math.abs(rect.h);
+    this._onResizeMove(
+      newBounds,
+      new Bound(rect.cx - width / 2, rect.cy - height / 2, width, height)
+    );
   }
 
-  private _onRotate(x: number, y: number, shift = false) {
+  private _onRotate(shiftKey = false) {
     const {
       _commonBound: [minX, minY, maxX, maxY],
       _dragPos: {
         start: { x: startX, y: startY },
-        end: { x: centerX, y: centerY },
+        end: { x: endX, y: endY },
       },
+      _origin: { x: centerX, y: centerY },
+      _rotate,
     } = this;
 
-    // start radius, end radius, diff radius
-    const sr = Math.atan2(startY - centerY, startX - centerX);
-    const er = Math.atan2(y - centerY, x - centerX);
-    const dr = ((er - sr) * 180) / Math.PI;
+    const startRad = Math.atan2(startY - centerY, startX - centerX);
+    const endRad = Math.atan2(endY - centerY, endX - centerX);
+    let diffRad = endRad - startRad;
+
+    // 15deg * n = 0, 15, 30, 45, ...
+    if (shiftKey) {
+      const prevRad = (_rotate * Math.PI) / 180;
+      let angle = prevRad + diffRad;
+      angle += SHIFT_LOCKING_ANGLE / 2;
+      angle -= angle % SHIFT_LOCKING_ANGLE;
+      diffRad = angle - prevRad;
+    }
+
+    const diff = (diffRad * 180) / Math.PI;
+
+    let x = endX;
+    let y = endY;
+    if (shiftKey) {
+      const point = new DOMPoint(startX, startY).matrixTransform(
+        new DOMMatrix()
+          .translateSelf(centerX, centerY)
+          .rotateSelf(diff)
+          .translateSelf(-centerX, -centerY)
+      );
+      x = point.x;
+      y = point.y;
+    }
 
     this._onRotateMove(
       // center of element in suface
       { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
-      dr
+      diff
     );
 
     this._dragPos.start = { x, y };
+    this._rotate += diff;
   }
 
   onPointerDown = (
@@ -353,10 +389,9 @@ export class HandleResizeManager {
     this._zoom = zoom;
     this._rotate = rotate;
 
-    this._rotated = this._target.classList.contains('rotate');
-    // console.log(this._rotated);
+    this._rotation = this._target.classList.contains('rotate');
 
-    if (this._rotated) {
+    if (this._rotation) {
       const rect = document
         .querySelector('edgeless-selected-rect')
         ?.shadowRoot?.querySelector('.affine-edgeless-selected-rect')
@@ -365,20 +400,19 @@ export class HandleResizeManager {
       const x = rect.left + rect.width / 2;
       const y = rect.top + rect.height / 2;
       // center of `selected-rect` in viewport
-      this._dragPos.end = { x, y };
+      this._origin = { x, y };
     }
 
     const _onPointerMove = ({ x, y, shiftKey }: PointerEvent) => {
       if (resizeMode === 'none') return;
 
       this._shiftKey ||= shiftKey;
+      this._dragPos.end = { x, y };
 
-      if (this._rotated) {
-        this._onRotate(x, y, this._shiftKey);
+      if (this._rotation) {
+        this._onRotate(this._shiftKey);
         return;
       }
-
-      this._dragPos.end = { x, y };
 
       this._onResize(this._shiftKey);
     };
@@ -390,6 +424,8 @@ export class HandleResizeManager {
       this._dragPos = { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
       this._commonBound = [0, 0, 0, 0];
       this._rotate = 0;
+      this._rotation = false;
+      this._origin = { x: 0, y: 0 };
       this._target = null;
 
       document.removeEventListener('pointermove', _onPointerMove);
@@ -403,9 +439,8 @@ export class HandleResizeManager {
     if (this._shiftKey === pressed) return;
     this._shiftKey = pressed;
 
-    if (this._rotated) {
-      const { x, y } = this._dragPos.end;
-      this._onRotate(x, y, this._shiftKey);
+    if (this._rotation) {
+      this._onRotate(this._shiftKey);
       return;
     }
 

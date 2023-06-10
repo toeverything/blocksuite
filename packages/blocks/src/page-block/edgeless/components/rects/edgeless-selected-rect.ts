@@ -285,7 +285,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         bound: Bound;
         flip: IPoint;
       }
-    >
+    >,
+    rect?: Bound
   ) => {
     const { page, state, surface } = this;
     const selectedMap = new Map<string, Selectable>(
@@ -335,6 +336,21 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
+    if (rect) {
+      const { viewport } = surface;
+      const [x, y] = viewport.toViewCoord(rect.x, rect.y);
+      const r = new DOMRect(
+        x,
+        y,
+        rect.w * viewport.zoom,
+        rect.h * viewport.zoom
+      );
+      this._style['--left'] = `${r.left}px`;
+      this._style['--top'] = `${r.top}px`;
+      this._style.width = `${r.width}px`;
+      this._style.height = `${r.height}px`;
+    }
+
     this.requestUpdate();
   };
 
@@ -343,12 +359,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       page,
       surface,
       state: { selected },
+      _rotate,
     } = this;
-    const { x, y } = center;
     const matrix = new DOMMatrix()
-      .translateSelf(x, y)
+      .translateSelf(center.x, center.y)
       .rotateSelf(rotate)
-      .translateSelf(-x, -y);
+      .translateSelf(-center.x, -center.y);
 
     const elements = selected.filter(
       element => !isTopLevelBlock(element)
@@ -357,24 +373,30 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     elements.forEach(element => {
       const { id, rotate: oldRotate = 0 } = element;
       const [x, y, w, h] = element.deserializeXYWH();
-      const hw = w / 2;
-      const hh = h / 2;
-      // new center of element
-      // const point = new DOMPoint(x + hw, y + hh).matrixTransform(matrix);
-      const point = matrix.transformPoint(new DOMPoint(x + hw, y + hh));
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+
+      const c = new DOMPoint(cx, cy).matrixTransform(matrix);
+
+      let angle = oldRotate + rotate;
+      // normalize angle to positive value
+      if (angle < 0) angle += 360;
+      angle %= 360;
 
       surface.updateElement(id, {
-        xywh: serializeXYWH(point.x - hw, point.y - hh, w, h),
-        rotate: oldRotate + rotate,
+        xywh: serializeXYWH(c.x - w / 2, c.y - h / 2, w, h),
+        rotate: angle,
       });
 
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
-    this._rotate += rotate;
+    let angle = rotate + _rotate;
+    if (rotate < 0) angle += 360;
+    angle %= 360;
 
-    this._style['--rotate'] = `${this._rotate}deg`;
-
+    this._rotate = angle;
+    this._style['--rotate'] = `${angle}deg`;
     this.requestUpdate();
   };
 
