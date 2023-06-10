@@ -678,7 +678,8 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
       page.deleteBlock(firstChild);
       return true;
     }
-    if (!firstChild && !nextSibling) return true;
+    const nextBlock = getNextBlock(model);
+    if (!firstChild && !nextBlock) return true;
     return (
       handleParagraphOrListChild(page, model, firstChild) ||
       handleParagraphOrListSibling(page, model, nextSibling)
