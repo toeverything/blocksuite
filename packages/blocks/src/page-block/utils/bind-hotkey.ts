@@ -351,7 +351,7 @@ function handleEscape(
   // Clear the selection and foucs the last text block
   if (selection.state.type === 'block') {
     // TODO: need to confirm
-    // There are how many types of text blocks?
+    // How many types of text blocks are there?
     const textFlavours = [
       'affine:paragraph',
       'affine:code',
