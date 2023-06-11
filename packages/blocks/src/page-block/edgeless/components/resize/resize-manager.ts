@@ -3,6 +3,7 @@ import { getCommonBound } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 
 import type { IPoint } from '../../../std.js';
+import { FRAME_MIN_WIDTH } from '../utils.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 // 15deg
@@ -219,19 +220,34 @@ export class HandleResizeManager {
         rect.cy = (fp.y + dp.y) / 2;
       }
     } else {
+      // handle frames
       switch (_dragDirection) {
-        case HandleDirection.Left:
-          rect.w = maxX - minX - deltaX;
+        case HandleDirection.Left: {
+          direction.x = -1;
           fixedPoint.x = maxX;
+          draggingPoint.x = minX + deltaX;
+          rect.w = fixedPoint.x - draggingPoint.x;
           break;
-        case HandleDirection.Right:
-          rect.w = maxX - minX + deltaX;
+        }
+        case HandleDirection.Right: {
+          direction.x = 1;
           fixedPoint.x = minX;
+          draggingPoint.x = maxX + deltaX;
+          rect.w = draggingPoint.x - fixedPoint.x;
           break;
+        }
       }
 
       scale.x = rect.w / original.w;
       flip.x = scale.x < 0 ? -1 : 1;
+
+      if (Math.abs(rect.w) < FRAME_MIN_WIDTH) {
+        rect.w = FRAME_MIN_WIDTH * flip.x;
+        scale.x = rect.w / original.w;
+        draggingPoint.x = fixedPoint.x + rect.w * direction.x;
+      }
+
+      rect.cx = (draggingPoint.x + fixedPoint.x) / 2;
     }
 
     const { x: flipX, y: flipY } = flip;

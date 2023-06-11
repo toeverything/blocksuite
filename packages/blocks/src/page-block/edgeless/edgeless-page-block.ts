@@ -162,13 +162,27 @@ export class EdgelessPageBlockComponent
 
     .affine-edgeless-layer {
       position: absolute;
+      top: 0;
+      left: 0;
       contain: layout style size;
       transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
         scale(var(--affine-zoom));
     }
 
+    .affine-edgeless-block-child {
+      position: absolute;
+      transform-origin: center;
+      box-sizing: border-box;
+      border: 2px solid var(--affine-white-10);
+      border-radius: 8px;
+      box-shadow: var(--affine-shadow-3);
+      pointerevents: all;
+    }
+
     .affine-edgeless-hover-rect {
       position: absolute;
+      top: 0;
+      left: 0;
       border-radius: 0;
       pointer-events: none;
       box-sizing: border-box;
@@ -971,15 +985,24 @@ export class EdgelessPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const { edgelessTool, page, selection, surface, _rectsOfSelectedBlocks } =
-      this;
+    const {
+      _rectsOfSelectedBlocks,
+      edgelessTool,
+      page,
+      root,
+      selection,
+      showGrid,
+      slots,
+      sortedNotes,
+      surface,
+    } = this;
     const { state, draggingArea } = selection;
     const { viewport } = surface;
 
     const notesContainer = EdgelessNotesContainer(
-      this.sortedNotes,
+      sortedNotes,
       state.active,
-      this.root.renderModel
+      root.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
@@ -992,7 +1015,7 @@ export class EdgelessPageBlockComponent
       viewportX,
       viewportY,
       zoom,
-      this.showGrid
+      showGrid
     );
 
     const blockContainerStyle = {
@@ -1026,13 +1049,13 @@ export class EdgelessPageBlockComponent
           }}
         ></affine-selected-blocks>
         ${hoverRectTpl} ${draggingAreaTpl}
-        ${state.selected.length
+        ${state.selected.length > 0
           ? html`
               <edgeless-selected-rect
                 disabled=${edgelessTool.type === 'pan'}
                 .page=${page}
                 .state=${state}
-                .slots=${this.slots}
+                .slots=${slots}
                 .surface=${surface}
               ></edgeless-selected-rect>
             `
