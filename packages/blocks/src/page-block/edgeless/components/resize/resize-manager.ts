@@ -335,18 +335,19 @@ export class HandleResizeManager {
 
     const startRad = Math.atan2(startY - centerY, startX - centerX);
     const endRad = Math.atan2(endY - centerY, endX - centerX);
-    let diffRad = endRad - startRad;
+    let deltaRad = endRad - startRad;
 
+    // snape angle
     // 15deg * n = 0, 15, 30, 45, ... 360
     if (shiftKey) {
       const prevRad = (_rotate * Math.PI) / 180;
-      let angle = prevRad + diffRad;
+      let angle = prevRad + deltaRad;
       angle += SHIFT_LOCKING_ANGLE / 2;
       angle -= angle % SHIFT_LOCKING_ANGLE;
-      diffRad = angle - prevRad;
+      deltaRad = angle - prevRad;
     }
 
-    const diff = (diffRad * 180) / Math.PI;
+    const delta = (deltaRad * 180) / Math.PI;
 
     let x = endX;
     let y = endY;
@@ -354,7 +355,7 @@ export class HandleResizeManager {
       const point = new DOMPoint(startX, startY).matrixTransform(
         new DOMMatrix()
           .translateSelf(centerX, centerY)
-          .rotateSelf(diff)
+          .rotateSelf(delta)
           .translateSelf(-centerX, -centerY)
       );
       x = point.x;
@@ -364,11 +365,11 @@ export class HandleResizeManager {
     this._onRotateMove(
       // center of element in suface
       { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
-      diff
+      delta
     );
 
     this._dragPos.start = { x, y };
-    this._rotate += diff;
+    this._rotate += delta;
   }
 
   onPointerDown = (
