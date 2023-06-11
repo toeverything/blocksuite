@@ -107,7 +107,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _applyVRange = (vRange: VRange): void => {
-    if (!this._editor.isActive) {
+    if (!this._editor.isActive()) {
       return;
     }
     const selectionRoot = findDocumentOrShadowRoot(this._editor);
