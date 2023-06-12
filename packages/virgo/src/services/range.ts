@@ -102,21 +102,12 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return domRangeToVirgoRange(selection, rootElement, yText);
   };
 
-  mergeRanges = (range1: VRange, range2: VRange): VRange => {
-    return {
-      index: Math.max(range1.index, range2.index),
-      length:
-        Math.min(range1.index + range1.length, range2.index + range2.length) -
-        Math.max(range1.index, range2.index),
-    };
-  };
-
   onScrollUpdated = (scrollLeft: number) => {
     this._lastScrollLeft = scrollLeft;
   };
 
   private _applyVRange = (vRange: VRange): void => {
-    if (!this._editor.isActive) {
+    if (!this._editor.isActive()) {
       return;
     }
     const selectionRoot = findDocumentOrShadowRoot(this._editor);

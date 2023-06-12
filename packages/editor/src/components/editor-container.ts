@@ -10,6 +10,7 @@ import {
   pagePreset,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { ContentParser } from '@blocksuite/blocks/content-parser';
 import {
   BlockSuiteRoot,
   ShadowlessElement,
@@ -184,6 +185,10 @@ export class EditorContainer
       await new Promise(res => this.page.slots.rootAdded.once(res));
     }
     return createBlockHub(this, this.page);
+  }
+
+  createContentParser() {
+    return new ContentParser(this.page);
   }
 
   override render() {

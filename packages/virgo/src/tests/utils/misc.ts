@@ -52,6 +52,26 @@ export async function getDeltaFromVirgoRichText(
   }, index);
 }
 
+export async function getVRangeFromVirgoRichText(
+  page: Page,
+  index = 0
+): Promise<VRange | null> {
+  await page.waitForTimeout(100);
+  return await page.evaluate(index => {
+    const richTexts = document
+      .querySelector('test-page')
+      ?.querySelectorAll('virgo-test-rich-text');
+
+    if (!richTexts) {
+      throw new Error('Cannot find virgo-test-rich-text');
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const editor = (richTexts[index] as any).vEditor as VEditor;
+    return editor.getVRange();
+  }, index);
+}
+
 export async function setVirgoRichTextRange(
   page: Page,
   vRange: VRange,
