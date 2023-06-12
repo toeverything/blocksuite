@@ -446,7 +446,7 @@ export const ImportIcon = html`<svg
   />
 </svg>`;
 
-export const AlighLeftIcon = html`<svg
+export const AlignLeftIcon = html`<svg
   width="24"
   height="24"
   viewBox="0 0 24 24"
