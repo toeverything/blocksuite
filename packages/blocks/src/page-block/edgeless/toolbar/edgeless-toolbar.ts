@@ -251,12 +251,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       const sh = height > 100 ? height - 100 : height;
       const p = options.width / options.height;
       if (s >= 1) {
-        options.height =
-          options.height > sh ? sh : Math.min(options.height, sh);
+        options.height = Math.min(options.height, sh);
         options.width = p * options.height;
       } else {
         const sw = sh * s;
-        options.width = options.width > sw ? sw : Math.min(options.width, sw);
+        options.width = Math.min(options.width, sw);
         options.height = options.width / p;
       }
     }

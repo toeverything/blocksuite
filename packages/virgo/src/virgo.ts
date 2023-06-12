@@ -22,11 +22,13 @@ import {
   textPointToDomPoint,
 } from './utils/index.js';
 import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
+import { intersectVRange } from './utils/v-range.js';
 
-type VirgoElement<T extends BaseTextAttributes = BaseTextAttributes> =
-  HTMLElement & {
-    virgoEditor: VEditor<T>;
-  };
+export type VirgoRootElement<
+  T extends BaseTextAttributes = BaseTextAttributes
+> = HTMLElement & {
+  virgoEditor: VEditor<T>;
+};
 
 export class VEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
@@ -36,8 +38,7 @@ export class VEditor<
   static getTextNodesFromElement = getTextNodesFromElement;
 
   private readonly _yText: Y.Text;
-  private readonly _isActive: () => boolean;
-  private _rootElement: VirgoElement<TextAttributes> | null = null;
+  private _rootElement: VirgoRootElement<TextAttributes> | null = null;
   private _isReadonly = false;
 
   private _eventService: VirgoEventService<TextAttributes> =
@@ -54,6 +55,9 @@ export class VEditor<
 
   shouldLineScrollIntoView = true;
   shouldCursorScrollIntoView = true;
+
+  readonly isActive: () => boolean;
+  readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
 
   slots: {
     mounted: Slot;
@@ -116,7 +120,8 @@ export class VEditor<
   constructor(
     yText: VEditor['yText'],
     ops?: {
-      active?: () => boolean;
+      active?: VEditor['isActive'];
+      embed?: VEditor['isEmbed'];
     }
   ) {
     if (!yText.doc) {
@@ -130,7 +135,8 @@ export class VEditor<
     }
 
     this._yText = yText;
-    this._isActive = ops?.active ?? (() => true);
+    this.isActive = ops?.active ?? (() => true);
+    this.isEmbed = ops?.embed ?? (() => false);
     this.slots = {
       mounted: new Slot(),
       unmounted: new Slot(),
@@ -145,7 +151,7 @@ export class VEditor<
   }
 
   mount(rootElement: HTMLElement) {
-    const virgoElement = rootElement as VirgoElement<TextAttributes>;
+    const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
     virgoElement.virgoEditor = this;
     this._rootElement = virgoElement;
     this._rootElement.replaceChildren();
@@ -244,10 +250,6 @@ export class VEditor<
     return this._isReadonly;
   }
 
-  get isActive() {
-    return this._isActive();
-  }
-
   /**
    * the vRange is synced to the native selection asynchronically
    */
@@ -306,10 +308,9 @@ export class VEditor<
     deltas
       .filter(([delta, deltaVRange]) => match(delta, deltaVRange))
       .forEach(([delta, deltaVRange]) => {
-        const targetVRange = this._rangeService.mergeRanges(
-          vRange,
-          deltaVRange
-        );
+        const targetVRange = intersectVRange(vRange, deltaVRange);
+
+        if (!targetVRange) return;
 
         if (mode === 'replace') {
           this.resetText(targetVRange);

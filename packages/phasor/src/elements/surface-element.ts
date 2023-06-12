@@ -101,14 +101,6 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return seed;
   }
 
-  get minWidth() {
-    return this.w;
-  }
-
-  get minHeight() {
-    return this.h;
-  }
-
   applyUpdate(updates: Partial<T>) {
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);

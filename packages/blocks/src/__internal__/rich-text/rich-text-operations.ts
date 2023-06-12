@@ -141,12 +141,8 @@ export function handleBlockSplit(
   page.captureSync();
   const right = model.text.split(splitIndex, splitLength);
 
-  let newParent = parent;
-  let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (matchFlavours(model, ['affine:list']) && model.children.length > 0) {
-    newParent = model;
-    newBlockIndex = 0;
-  }
+  const newParent = parent;
+  const newBlockIndex = newParent.children.indexOf(model) + 1;
   const children = [...model.children];
   page.updateBlock(model, { children: [] });
   const id = page.addBlock(

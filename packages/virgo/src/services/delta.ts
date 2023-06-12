@@ -165,8 +165,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
         chunk.forEach(delta => {
           const element = renderElement(
             delta,
-            this._editor.attributeService.normalizeAttributes,
-            this._editor.attributeService.attributeRenderer
+            this._editor.attributeService.normalizeAttributes
           );
 
           elementTs.push(element);

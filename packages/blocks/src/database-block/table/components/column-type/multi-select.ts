@@ -1,4 +1,3 @@
-import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
@@ -16,19 +15,15 @@ class MultiSelectCell
   extends DatabaseCellElement<string[], SelectColumnData>
   implements TableViewCell
 {
-  static override styles = css`
-    :host {
-      width: 100%;
-    }
-  `;
   static override tag = literal`affine-database-multi-select-cell`;
   cellType = 'multi-select' as const;
 
   override render() {
     return html`
       <affine-database-multi-tag-view
-        .value="${this.cell?.value ?? []}"
-        .options="${this.column.data.options}"
+        .value=${this.cell?.value ?? []}
+        .options=${this.column.data.options}
+        .setHeight=${this.rowHost.setHeight}
       ></affine-database-multi-tag-view>
     `;
   }
