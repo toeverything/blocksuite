@@ -13,6 +13,7 @@ import {
   asyncSetVRange,
 } from '../utils/common-operations.js';
 import {
+  getDefaultPage,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
@@ -544,9 +545,17 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
 function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:paragraph'])) return false;
-  const previousBlockFlavour = getPreviousBlock(model)?.flavour;
-  if (previousBlockFlavour == 'affine:surface') {
-    return PREVENT_DEFAULT;
+  const pageElement = getDefaultPage(page);
+  if (!pageElement) {
+    // Maybe in edgeless mode
+    return null;
+  }
+  const titleVEditor = pageElement.titleVEditor;
+  const previousBlock = getPreviousBlock(model);
+  if (previousBlock !== null) {
+    if (matchFlavours(previousBlock, ['affine:surface'])) {
+      titleVEditor.focusEnd();
+    }
   }
   ALLOW_DEFAULT;
   return true;
