@@ -28,35 +28,12 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
-  private _maxTextWidth = 0;
-  private _maxTextHeight = 0;
-
-  override get minWidth() {
-    return this._maxTextWidth;
-  }
-
-  override get minHeight() {
-    return this._maxTextHeight;
-  }
-
-  private _lineHeight = 0;
-  private _lines: ITextDelta[][] = [];
-
-  get lineHeight() {
-    return this._lineHeight;
-  }
-
-  get lines() {
-    return this._lines;
-  }
-
   override render(ctx: CanvasRenderingContext2D) {
     const { w, text, color, fontSize, fontFamily, textAlign } = this;
 
     const yText = text;
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
     const lines = deltaInsertsToChunks(deltas);
-    this._lines = lines;
 
     const lineHeightPx = this.h / lines.length;
     const font = getFontString({
@@ -64,7 +41,6 @@ export class TextElement extends SurfaceElement<IText> {
       lineHeight: `${lineHeightPx}px`,
       fontFamily: fontFamily,
     });
-    this._lineHeight = lineHeightPx;
     const horizontalOffset =
       textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
@@ -103,14 +79,6 @@ export class TextElement extends SurfaceElement<IText> {
 
         ctx.restore();
       }
-
-      if (beforeTextWidth > this._maxTextWidth) {
-        this._maxTextWidth = beforeTextWidth;
-      }
-    }
-
-    if (this._maxTextHeight < lines.length * lineHeightPx) {
-      this._maxTextHeight = lines.length * lineHeightPx;
     }
   }
 }
