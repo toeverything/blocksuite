@@ -27,14 +27,14 @@
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.2.9",
     "hotkeys-js": "^3.10.1",
-    "html-to-image": "^1.11.11",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
     "lit": "^2.7.3",
     "marked": "^4.2.12",
     "shiki": "^0.14.1",
     "turndown": "^7.1.1",
-    "zod": "^3.21.4",
-    "jspdf": "^2.5.1"
+    "zod": "^3.21.4"
   },
   "exports": {
     "./dist/*": "./dist/*",

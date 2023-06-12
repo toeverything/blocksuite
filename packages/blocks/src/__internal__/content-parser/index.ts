@@ -79,7 +79,7 @@ export class ContentParser {
   public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
-    const html2image = await import('html-to-image');
+    const html2canvas = (await import('html2canvas')).default;
 
     const editorContainer = getEditorContainer(this._page);
     if (isPageMode(this._page)) {
@@ -90,9 +90,7 @@ export class ContentParser {
 
       // todo check render and image
 
-      const data = await html2image.toCanvas(editorContainer, {
-        cacheBust: true,
-      });
+      const data = await html2canvas(editorContainer);
       editorContainer.removeChild(styleElement);
       return data;
     } else {
@@ -120,7 +118,7 @@ export class ContentParser {
 
       const promise = new Promise(resolve => {
         setTimeout(async () => {
-          const pngData = await html2image.toCanvas(editorContainer, {
+          const pngData = await html2canvas(editorContainer, {
             cacheBust: true,
           });
           resolve(pngData);
