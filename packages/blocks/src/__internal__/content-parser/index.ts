@@ -1,8 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
-import { toCanvas } from 'html-to-image';
-import jsPDF from 'jspdf';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
@@ -81,6 +79,7 @@ export class ContentParser {
   public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
+    const html2image = await import('html-to-image');
 
     const editorContainer = getEditorContainer(this._page);
     if (isPageMode(this._page)) {
@@ -89,7 +88,7 @@ export class ContentParser {
         'editor-container,.affine-editor-container {height: auto;}';
       editorContainer.appendChild(styleElement);
 
-      const data = await toCanvas(editorContainer, {
+      const data = await html2image.toCanvas(editorContainer, {
         cacheBust: true,
       });
       editorContainer.removeChild(styleElement);
@@ -117,7 +116,7 @@ export class ContentParser {
 
       const promise = new Promise(resolve => {
         setTimeout(async () => {
-          const pngData = await toCanvas(editorContainer, {
+          const pngData = await html2image.toCanvas(editorContainer, {
             cacheBust: true,
           });
           resolve(pngData);
@@ -150,7 +149,8 @@ export class ContentParser {
     if (!canvasImage) {
       return;
     }
-    const pdf = new jsPDF(
+    const jspdf = await import('jspdf');
+    const pdf = new jspdf.jsPDF(
       canvasImage.width < canvasImage.height ? 'p' : 'l',
       'pt',
       [canvasImage.width, canvasImage.height]
