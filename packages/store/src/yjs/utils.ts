@@ -19,13 +19,18 @@ export function isPureObject(value: unknown): value is object {
 }
 
 export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
+  if (value instanceof YText) {
+    if (value.doc) {
+      return value.clone() as Native2Y<T>;
+    }
+    return value as Native2Y<T>;
+  }
   if (Array.isArray(value)) {
     const yArray: YArray<unknown> = new YArray<unknown>();
     const result = value.map(item => {
       return deep ? native2Y(item, deep) : item;
     });
     yArray.insert(0, result);
-
     return yArray as Native2Y<T>;
   }
   if (isPureObject(value)) {
@@ -33,10 +38,8 @@ export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
     Object.entries(value).forEach(([key, value]) => {
       yMap.set(key, deep ? native2Y(value, deep) : value);
     });
-
     return yMap as Native2Y<T>;
   }
-
   return value as Native2Y<T>;
 }
 
