@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
-import { toPng } from 'html-to-image';
 import { toCanvas } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { marked } from 'marked';
