@@ -78,6 +78,15 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     createDatabasePopup(event.target as HTMLElement, menu);
   };
 
+  private _deleteCondition(i: number) {
+    const conditions = [...this.data.conditions];
+    conditions.splice(i, 1);
+    this.setData({
+      ...this.data,
+      conditions,
+    });
+  }
+
   override render() {
     const data = this.data;
     return html`
@@ -116,6 +125,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                     .data="${filter}"
                   ></filter-group-view>
                 `}
+            <div @click="${() => this._deleteCondition(i)}">x</div>
           </div>`;
         })}
         <span class="add-new" @click="${this._addNew}">Add New</span>
