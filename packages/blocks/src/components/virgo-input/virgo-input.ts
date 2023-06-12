@@ -199,7 +199,12 @@ export class VirgoInput {
         const num = parseFloat(text);
         const transformedText = isNaN(num) ? '' : num.toString();
         if (text !== transformedText) {
+          this.setActive(false);
           this.setValue(transformedText);
+          // prevent vRange applied after value changed
+          requestAnimationFrame(() => {
+            this.setActive(true);
+          });
         }
       }
     });

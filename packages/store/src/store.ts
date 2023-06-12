@@ -1,5 +1,7 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
+import type * as Y from 'yjs';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
 import type { BlobStorage } from './persistence/blob/types.js';
@@ -16,6 +18,7 @@ import {
   uuidv4,
 } from './utils/id-generator.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
+import type { SubdocEvent } from './yjs/index.js';
 import { BlockSuiteDoc } from './yjs/index.js';
 
 export interface SerializedStore {
@@ -55,13 +58,6 @@ export interface SSROptions {
   isSSR?: boolean;
 }
 
-// TODO Support ReadableStream
-export type InlineSuggestionProvider = (context: {
-  title: string;
-  text: string;
-  abortSignal: AbortSignal;
-}) => string | Promise<string>; // | Promise<ReadableStream<string>>;
-
 export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends SSROptions {
@@ -82,6 +78,7 @@ const flagsPreset = {
   enable_slash_menu: true,
 
   enable_database: false,
+  enable_database_filter: false,
   enable_toggle_block: false,
   enable_block_selection_format_bar: true,
   enable_linked_page: false,
@@ -96,6 +93,7 @@ export class Store {
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
+  readonly subdocProviders: Map<string, DocProvider[]> = new Map();
   readonly idGenerator: IdGenerator;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
@@ -144,6 +142,22 @@ export class Store {
           awareness: this.awarenessStore.awareness,
         })
     );
+    this.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
+      loaded.forEach(subdoc => {
+        const space = this._findSpaceByDoc(subdoc);
+        if (!space) {
+          return;
+        }
+
+        const subdocProviders = providers.map(Provider => {
+          return new Provider(subdoc.guid, subdoc, {
+            awareness: this.awarenessStore.awareness,
+          });
+        });
+
+        this.subdocProviders.set(space.prefixedId, subdocProviders);
+      });
+    });
   }
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
@@ -151,30 +165,39 @@ export class Store {
 
   removeSpace(space: Space) {
     this.spaces.delete(space.prefixedId);
+    this.subdocProviders.delete(space.prefixedId);
   }
+
+  private _findSpaceByDoc = (doc: Y.Doc) => {
+    return Array.from(this.spaces.values()).find(space => {
+      return space.spaceDoc.guid === doc.guid;
+    });
+  };
 
   /**
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
    */
   exportJSX(pageId: string, blockId?: string) {
-    const json = serializeYDoc(this.doc) as unknown as SerializedStore;
     const prefixedPageId = pageId.startsWith('space:')
       ? pageId
       : `space:${pageId}`;
-    const pageJson = json[prefixedPageId];
+    const doc = this.doc.spaces.get(prefixedPageId);
+    assertExists(doc);
+    const pageJson = serializeYDoc(doc);
     if (!pageJson) {
       throw new Error(`Page ${pageId} doesn't exist`);
     }
+    const blockJson = pageJson.blocks as Record<string, unknown>;
     if (!blockId) {
-      const pageBlockId = Object.keys(pageJson).at(0);
+      const pageBlockId = Object.keys(blockJson).at(0);
       if (!pageBlockId) {
         return null;
       }
       blockId = pageBlockId;
     }
-    if (!pageJson[blockId]) {
+    if (!blockJson[blockId]) {
       return null;
     }
-    return yDocToJSXNode(pageJson, blockId);
+    return yDocToJSXNode(blockJson, blockId);
   }
 }

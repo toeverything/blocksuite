@@ -5,7 +5,7 @@ import { html } from 'lit/static-html.js';
 import { onClickOutside } from '../../utils.js';
 import type { ColumnRendererHelper } from '../register.js';
 import { DatabaseCellElement } from '../register.js';
-import type { RowHost, SetValueOption } from '../types.js';
+import type { Column, RowHost, SetValueOption } from '../types.js';
 
 /** affine-database-cell-container padding */
 const CELL_PADDING = 8;
@@ -27,6 +27,13 @@ export class DatabaseCellContainer
 
     affine-database-cell-container * {
       box-sizing: border-box;
+    }
+
+    affine-database-multi-select-cell,
+    affine-database-select-cell {
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
     }
   `;
 
@@ -93,9 +100,11 @@ export class DatabaseCellContainer
     }
   };
 
-  updateColumnProperty(
-    apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
-  ) {
+  setHeight = (height: number) => {
+    this.style.height = `${height + CELL_PADDING * 2}px`;
+  };
+
+  updateColumnProperty(apply: (oldProperty: Column) => Partial<Column>): void {
     const newProperty = apply(this.column);
     this.databaseModel.page.captureSync();
     this.databaseModel.updateColumn({
@@ -103,10 +112,6 @@ export class DatabaseCellContainer
       ...newProperty,
     });
   }
-
-  setHeight = (height: number) => {
-    this.style.height = `${height + CELL_PADDING * 2}px`;
-  };
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
@@ -121,23 +126,23 @@ export class DatabaseCellContainer
       const editingTag = renderer.components.CellEditing.tag;
       return html`
         <${editingTag}
-          data-is-editing-cell="true"
-          .rowHost=${this}
-          .databaseModel=${this.databaseModel}
-          .rowModel=${this.rowModel}
-          .column=${this.column}
-          .cell=${cell}
+          data-is-editing-cell='true'
+          .rowHost='${this}'
+          .databaseModel='${this.databaseModel}'
+          .rowModel='${this.rowModel}'
+          .column='${this.column}'
+          .cell='${cell}'
         ></${editingTag}>
       `;
     }
     const previewTag = renderer.components.Cell.tag;
     return html`
       <${previewTag}
-        .rowHost=${this}
-        .databaseModel=${this.databaseModel}
-        .rowModel=${this.rowModel}
-        .column=${this.column}
-        .cell=${cell}
+        .rowHost='${this}'
+        .databaseModel='${this.databaseModel}'
+        .rowModel='${this.rowModel}'
+        .column='${this.column}'
+        .cell='${cell}'
       ></${previewTag}>
     `;
   }

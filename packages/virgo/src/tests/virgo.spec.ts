@@ -7,6 +7,7 @@ import {
   focusVirgoRichText,
   getDeltaFromVirgoRichText,
   getVirgoRichTextLine,
+  getVRangeFromVirgoRichText,
   press,
   setVirgoRichTextRange,
   type,
@@ -802,4 +803,45 @@ test('yText should not contain \r', async ({ page }) => {
   expect(message).toBe(
     'yText must not contain \r because it will break the range synchronization'
   );
+});
+
+test('embed element in virgo', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+
+  const editorACode = page.getByText('code').nth(0);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await page.waitForTimeout(100);
+
+  await type(page, 'abcdefg');
+
+  expect(await editorA.innerText()).toBe('abcdefg');
+
+  await setVirgoRichTextRange(page, { index: 2, length: 3 });
+
+  editorACode.click();
+  await page.waitForTimeout(100);
+
+  await page.keyboard.press('ArrowLeft');
+  let vRange = await getVRangeFromVirgoRichText(page);
+  expect(vRange).toEqual({ index: 2, length: 0 });
+  await page.keyboard.press('ArrowLeft');
+  vRange = await getVRangeFromVirgoRichText(page);
+  expect(vRange).toEqual({ index: 1, length: 0 });
+  await page.keyboard.press('ArrowRight');
+  vRange = await getVRangeFromVirgoRichText(page);
+  expect(vRange).toEqual({ index: 2, length: 0 });
+  await page.keyboard.press('ArrowRight');
+  vRange = await getVRangeFromVirgoRichText(page);
+  expect(vRange).toEqual({ index: 2, length: 3 });
+  await page.keyboard.press('ArrowRight');
+  vRange = await getVRangeFromVirgoRichText(page);
+  expect(vRange).toEqual({ index: 5, length: 0 });
+  await page.keyboard.press('ArrowRight');
+  vRange = await getVRangeFromVirgoRichText(page);
+  expect(vRange).toEqual({ index: 6, length: 0 });
 });

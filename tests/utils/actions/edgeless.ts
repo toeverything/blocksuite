@@ -9,7 +9,13 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
-import { SHIFT_KEY, SHORT_KEY, type } from './keyboard.js';
+import {
+  pressBackspace,
+  selectAllByKeyboard,
+  SHIFT_KEY,
+  SHORT_KEY,
+  type,
+} from './keyboard.js';
 import { MODIFIER_KEY } from './keyboard.js';
 import {
   getEditorLocator,
@@ -230,6 +236,11 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   await page.mouse.click(x, y);
   await waitForVirgoStateUpdated(page);
   await type(page, text);
+}
+
+export async function deleteAll(page: Page) {
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
 }
 
 export async function resizeElementByTopLeftHandle(

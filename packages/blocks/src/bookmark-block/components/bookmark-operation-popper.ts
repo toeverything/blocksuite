@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -35,23 +35,24 @@ export function createBookmarkOperationMenu(
   menu.onSelected = props.onSelected;
 
   reference.appendChild(menu);
-  const popper = createPopper(reference, menu, {
+  computePosition(reference, menu, {
     placement: 'top-start',
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: [0, 6],
-        },
-      },
+    middleware: [
+      offset({
+        mainAxis: 6,
+      }),
     ],
+  }).then(({ x, y }) => {
+    Object.assign(menu.style, {
+      left: `${x}px`,
+      top: `${y}px`,
+    });
   });
 
   return {
     element: menu,
     dispose: () => {
       menu.remove();
-      popper.destroy();
     },
   };
 }
@@ -81,7 +82,7 @@ const operations: Operation[] = [
         startOffset: 0,
         endOffset: 0,
       });
-      toast('Copied Database to clipboard');
+      toast('Copied link to clipboard');
       callback?.('copy');
     },
   },
@@ -129,6 +130,9 @@ const operations: Operation[] = [
 @customElement('bookmark-operation-menu')
 export class BookmarkOperationMenu extends WithDisposable(LitElement) {
   static override styles = css`
+    :host {
+      position: absolute;
+    }
     .bookmark-operation-menu {
       border-radius: 8px 8px 8px 0;
       padding: 8px;

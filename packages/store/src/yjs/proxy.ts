@@ -1,10 +1,74 @@
 import { Array as YArray, Map as YMap } from 'yjs';
 
-import { subscribeYArray } from './array.js';
 import type { ProxyConfig } from './config.js';
-import { subscribeYMap } from './map.js';
 import type { UnRecord } from './utils.js';
 import { isPureObject, native2Y } from './utils.js';
+
+function subscribeYMap(
+  object: UnRecord,
+  yMap: YMap<unknown>,
+  config: ProxyConfig
+): void {
+  const { deep = false } = config;
+  yMap.observe(event => {
+    event.keysChanged.forEach(key => {
+      const type = event.changes.keys.get(key);
+      if (!type) {
+        console.error('impossible event', event);
+        return;
+      }
+      if (type.action === 'delete') {
+        delete object[key];
+      } else if (type.action === 'add' || type.action === 'update') {
+        const current = yMap.get(key);
+        if (deep && (current instanceof YMap || current instanceof YArray)) {
+          object[key] = createYProxy(current, config);
+        } else {
+          object[key] = current;
+        }
+      }
+    });
+  });
+}
+
+function subscribeYArray(
+  arr: unknown[],
+  yArray: YArray<unknown>,
+  config: ProxyConfig
+): void {
+  const { deep = false } = config;
+  yArray.observe(event => {
+    let retain = 0;
+    if (event.changes.keys.size === 0) {
+      // skip empty event
+      return;
+    }
+    event.changes.delta.forEach(change => {
+      if (change.retain) {
+        retain += change.retain;
+      }
+      if (change.delete) {
+        arr.splice(retain, change.delete);
+      }
+      if (change.insert) {
+        const arr = [change.insert].flat();
+        if (deep) {
+          const proxyList = arr.map(value => {
+            if (value instanceof YMap || value instanceof YArray) {
+              return createYProxy(value, config);
+            }
+            return value;
+          });
+          arr.splice(retain, 0, ...proxyList);
+        } else {
+          arr.splice(retain, 0, ...arr);
+        }
+
+        retain += change.insert.length;
+      }
+    });
+  });
+}
 
 export function initialize(
   array: unknown[],

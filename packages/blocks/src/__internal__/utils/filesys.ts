@@ -29,26 +29,28 @@ export const uploadImageFromLocal = async (
   });
   const onChange = async () => {
     if (!fileInput.files) return;
-    const storage = await page.blobs;
+    const storage = page.blobs;
     assertExists(storage);
+
     const files = fileInput.files;
-    if (files.length === 1) {
-      const file = files[0];
-      if (getSize) {
-        getSize(await readImageSize(file));
-      }
+    const res = [];
+    const maxImageSize = { width: 0, height: 0 };
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const id = await storage.set(file);
-      resolvePromise([{ ...baseProps, sourceId: id }]);
-    } else {
-      const res = [];
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const id = await storage.set(file);
-        res.push({ ...baseProps, sourceId: id });
+      res.push({ ...baseProps, sourceId: id });
+      if (getSize) {
+        const size = await readImageSize(file);
+        maxImageSize.width = Math.max(maxImageSize.width, size.width);
+        maxImageSize.height = Math.max(maxImageSize.height, size.height);
       }
-      resolvePromise(res);
+    }
+    // When edgeless mode, update the options by max image size
+    if (getSize) {
+      getSize(maxImageSize);
     }
 
+    resolvePromise(res);
     fileInput.removeEventListener('change', onChange);
     fileInput.remove();
   };

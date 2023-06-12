@@ -14,6 +14,7 @@ import type {
   DatabaseTableViewRowState,
 } from '../std.js';
 import { asyncFocusRichText, type SerializedBlock } from '../std.js';
+import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import {
   clearAllDatabaseCellSelection,
@@ -77,6 +78,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
         };
         setDatabaseCellSelection(databaseId, coords);
       } else if (type === 'edit') {
+        this._lastCellSelection = null;
         const { databaseId, coords } = state;
         setDatabaseCellEditing(databaseId, coords[0]);
       } else if (type === 'clear') {
@@ -114,13 +116,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     // default column
-    blockModel.updateColumn({
-      name: 'Tag',
-      type: 'multi-select',
-      width: 200,
-      hide: false,
-      selection: [],
-    });
+    blockModel.addColumn(
+      multiSelectHelper.create('Tag', {
+        options: [],
+      })
+    );
     blockModel.applyColumnUpdate();
   }
 

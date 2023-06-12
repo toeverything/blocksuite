@@ -75,3 +75,6 @@ Example:
 - Petr Glaser, @pegak, 2023/05/28
 - smallnine9, @smallnine9, 2023/05/28
 - Chen, @donteatfriedrice, 2023/05/28
+- Till, @tillkwl, 2023/06/04
+- Yuexun Jiang, @ahonn, 2023/06/06
+- Hyden Liu, @HydenLiu, 2023/06/11

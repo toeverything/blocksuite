@@ -3,7 +3,7 @@ import type * as Y from 'yjs';
 
 import type { Renderer } from '../renderer.js';
 import type { SurfaceManager } from '../surface.js';
-import { isPointIn } from '../utils/hit-utils.js';
+import { isPointIn } from '../utils/math-utils.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
 
 export interface ISurfaceElement {
@@ -99,14 +99,6 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
   get seed() {
     const seed = this.yMap.get('seed') as T['seed'];
     return seed;
-  }
-
-  get minWidth() {
-    return this.w;
-  }
-
-  get minHeight() {
-    return this.h;
   }
 
   applyUpdate(updates: Partial<T>) {

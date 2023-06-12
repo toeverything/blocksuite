@@ -20,10 +20,19 @@ const threshold = SCROLL_THRESHOLD / 2;
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
-    a.left + offset.x <= b.right &&
-    a.right + offset.x >= b.left &&
-    a.top + offset.y <= b.bottom &&
-    a.bottom + offset.y >= b.top
+    a.left + offset.x < b.right &&
+    a.right + offset.x > b.left &&
+    a.top + offset.y < b.bottom &&
+    a.bottom + offset.y > b.top
+  );
+}
+
+function insides(a: DOMRect, b: DOMRect, offset: IPoint) {
+  return (
+    a.left + offset.x > b.left &&
+    a.right + offset.x < b.right &&
+    a.top + offset.y > b.top &&
+    a.bottom + offset.y < b.bottom
   );
 }
 
@@ -51,6 +60,13 @@ export function filterBlocksExcludeSubtrees(
     if (intersects(rect, bound, offset)) {
       if (prevIndex === -1) {
         prevIndex = i;
+        if (insides(bound, rect, offset)) {
+          const prevBlock = entries[prevIndex][0];
+          // inside database block
+          if (matchFlavours(prevBlock.model, ['affine:database'])) {
+            continue;
+          }
+        }
       } else {
         let prevBlock = entries[prevIndex][0];
         // prev block before and contains block

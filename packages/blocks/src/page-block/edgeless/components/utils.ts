@@ -1,7 +1,7 @@
 import type { SurfaceViewport } from '@blocksuite/phasor';
 import { Bound, getCommonBound } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { computePosition, flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import type { Selectable } from '../selection-manager.js';
@@ -108,41 +108,37 @@ export function createButtonPopper(
     /** DEFAULT EMPTY FUNCTION */
   }
 ) {
-  const popper = createPopper(reference, popperElement, {
-    placement: 'top',
-    modifiers: [
-      {
-        name: 'offset',
-        options: {
-          offset: [0, 12],
-        },
-      },
-    ],
-  });
+  function compute() {
+    computePosition(reference, popperElement, {
+      placement: 'top',
+      middleware: [
+        offset({
+          mainAxis: 10,
+        }),
+        flip({
+          fallbackPlacements: ['bottom'],
+        }),
+      ],
+    }).then(({ x, y }) => {
+      Object.assign(popperElement.style, {
+        position: 'absolute',
+        zIndex: 1,
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
+  }
 
   const show = () => {
     popperElement.setAttribute(ATTR_SHOW, '');
-    popper.setOptions(options => ({
-      ...options,
-      modifiers: [
-        ...(options.modifiers ?? []),
-        { name: 'eventListeners', enabled: false },
-      ],
-    }));
-    popper.update();
+    compute();
     stateUpdated({ display: 'show' });
   };
 
   const hide = () => {
     popperElement.removeAttribute(ATTR_SHOW);
 
-    popper.setOptions(options => ({
-      ...options,
-      modifiers: [
-        ...(options.modifiers ?? []),
-        { name: 'eventListeners', enabled: false },
-      ],
-    }));
+    compute();
     stateUpdated({ display: 'hidden' });
   };
 
@@ -157,12 +153,10 @@ export function createButtonPopper(
   const clickAway = listenClickAway(reference, () => hide());
 
   return {
-    popper,
     show,
     hide,
     toggle,
     dispose: () => {
-      popper.destroy();
       clickAway.dispose();
     },
   };

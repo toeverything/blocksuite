@@ -15,6 +15,7 @@ import {
 } from '../../../std.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { DatabaseBlockService } from '../../database-service.js';
+import { getDatabaseById } from '../components/selection/utils.js';
 import {
   getClosestDatabase,
   getClosestDatabaseId,
@@ -41,14 +42,15 @@ export class RowSelectionManager {
     this._model = model;
     this._service = getService('affine:database');
 
-    this._add('dragStart', this._onDragStart);
-    this._add('dragMove', this._onDragMove);
-    this._add('dragEnd', this._onDragEnd);
+    this._add('pointerDown', this._onPointerDown);
+    this._add('pointerMove', this._onPointerMove);
+    this._add('pointerUp', this._onPointerUp);
     this._add('click', this._onClick);
-    this._add('keyDown', this._onRowSelectionDelete);
+    this._add('keyDown', this._onKeydown);
+    this._stopDragEvents();
   }
 
-  private _onDragStart = (ctx: UIEventStateContext) => {
+  private _onPointerDown = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
 
     const { clientX: x, clientY: y, target } = e.raw;
@@ -77,15 +79,18 @@ export class RowSelectionManager {
     return true;
   };
 
-  private _onDragMove = (ctx: UIEventStateContext) => {
-    if (!this._isInDatabase) {
+  private _onPointerMove = (ctx: UIEventStateContext) => {
+    if (!this._isInDatabase || !this._startRange) {
       return false;
     }
 
     const e = ctx.get('pointerState');
-    e.raw.preventDefault();
-
     const { clientX: x, clientY: y, target } = e.raw;
+    // If the target is not an input element, prevent the default behavior of the browser
+    if (!(target instanceof HTMLInputElement)) {
+      e.raw.preventDefault();
+    }
+
     if (!isInDatabase(target as HTMLElement)) {
       return false;
     }
@@ -115,7 +120,6 @@ export class RowSelectionManager {
       }
     } else {
       // cross cell, row-level selection
-      e.raw.preventDefault();
       resetNativeSelection(null);
 
       const rowIndexes = getSelectedRowIndexes(startCell, endCell);
@@ -133,15 +137,10 @@ export class RowSelectionManager {
     return true;
   };
 
-  private _onDragEnd = (ctx: UIEventStateContext) => {
-    const e = ctx.get('pointerState');
-    const target = e.raw.target as HTMLElement;
-    if (!isInDatabase(target)) {
-      return;
-    }
-
+  private _onPointerUp = (ctx: UIEventStateContext) => {
     this._startRange = null;
     this._setColumnWidthHandleDisplay('block');
+    return true;
   };
 
   private _onClick = (ctx: UIEventStateContext) => {
@@ -156,13 +155,49 @@ export class RowSelectionManager {
     }
   };
 
-  private _onRowSelectionDelete = (ctx: UIEventStateContext) => {
+  private _onKeydown = (ctx: UIEventStateContext) => {
     const e = ctx.get('keyboardState');
     const event = e.raw;
 
-    if (event.key !== 'Delete') return;
-    event.preventDefault();
+    const key = event.key;
+    if (key === 'Delete' || key === 'Backspace') {
+      this._onRowSelectionDelete();
+    } else if (key === 'Escape') {
+      const service = getService('affine:database');
+      const cellSelection = service.getLastCellSelection();
+      if (cellSelection) {
+        const {
+          databaseId,
+          coords: [coord],
+        } = cellSelection;
+        // clear cell selection
+        service.clearCellLevelSelection();
 
+        // select row
+        const database = getDatabaseById(databaseId);
+        const rowIds = getSelectedRowIdsByIndexes(database, [coord.rowIndex]);
+        service.setRowSelection({
+          type: 'select',
+          rowIds,
+          databaseId,
+        });
+      }
+    }
+  };
+
+  private _stopDragEvents = () => {
+    this._add('dragStart', stopPropagation);
+    this._add('dragMove', stopPropagation);
+    this._add('dragEnd', stopPropagation);
+
+    function stopPropagation(ctx: UIEventStateContext) {
+      const e = ctx.get('pointerState');
+      const event = e.raw;
+      event.stopPropagation();
+    }
+  };
+
+  private _onRowSelectionDelete = () => {
     const service = getService('affine:database');
     const rowSelection = service.getLastRowSelection();
     if (!rowSelection) return;

@@ -4,6 +4,7 @@ import { assert, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import { tryMigrate } from '../workspace/migrations.js';
+import { multiView, singleView } from './database.json';
 
 async function loadBinary(name: string) {
   const url = new URL(`./ydocs/${name}.ydoc`, import.meta.url);
@@ -84,7 +85,7 @@ describe('migration', () => {
     tryMigrate(doc);
     assert.deepEqual(doc.toJSON()['space:meta']['versions'], {
       'affine:paragraph': 1,
-      'affine:database': 1,
+      'affine:database': 2,
       'affine:page': 2,
       'affine:list': 1,
       'affine:frame': 1,
@@ -129,7 +130,7 @@ describe('migration', () => {
     tryMigrate(doc);
     assert.deepEqual(doc.toJSON()['space:meta']['versions'], {
       'affine:paragraph': 1,
-      'affine:database': 1,
+      'affine:database': 2,
       'affine:page': 2,
       'affine:list': 1,
       'affine:frame': 1,
@@ -149,5 +150,36 @@ describe('migration', () => {
       ...oldElement?.toJSON(),
       seed: newElement?.get('seed'),
     });
+  });
+  test('migrate to new database block (support multi-view)', async () => {
+    {
+      const doc = await loadBinary('legacy-database-single-view');
+
+      const oldDatabase = doc
+        .getMap('space:page0')
+        .get('451460207:15') as Y.Map<unknown>;
+
+      assert.deepEqual(oldDatabase?.toJSON(), singleView);
+
+      tryMigrate(doc);
+      assert.deepEqual(doc.toJSON()['space:meta']['versions'], {
+        'affine:bookmark': 1,
+        'affine:paragraph': 1,
+        'affine:database': 2,
+        'affine:page': 2,
+        'affine:list': 1,
+        'affine:frame': 1,
+        'affine:divider': 1,
+        'affine:embed': 1,
+        'affine:code': 1,
+        'affine:surface': 3,
+      });
+
+      const newDatabase = doc
+        .getMap('space:page0')
+        .get('451460207:15') as Y.Map<unknown>;
+
+      assert.deepEqual(newDatabase?.toJSON(), multiView);
+    }
   });
 });

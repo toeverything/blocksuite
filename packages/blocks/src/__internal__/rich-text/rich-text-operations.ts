@@ -49,11 +49,13 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     const index = parent.children.findIndex(child => child.id === model.id);
     let newParent: BaseBlockModel = parent;
     let newBlockIndex = index + 1;
+    const childrenLength = parent.children.length;
 
-    if (
-      index === parent.children.length - 1 &&
-      model.text?.yText.length === 0
-    ) {
+    if (index === childrenLength - 1 && model.text?.yText.length === 0) {
+      if (childrenLength !== 1) {
+        page.deleteBlock(model);
+      }
+
       const nextModel = page.getNextSibling(newParent);
       if (nextModel && matchFlavours(nextModel, ['affine:paragraph'])) {
         asyncFocusRichText(page, nextModel.id, {
@@ -139,12 +141,8 @@ export function handleBlockSplit(
   page.captureSync();
   const right = model.text.split(splitIndex, splitLength);
 
-  let newParent = parent;
-  let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (matchFlavours(model, ['affine:list']) && model.children.length > 0) {
-    newParent = model;
-    newBlockIndex = 0;
-  }
+  const newParent = parent;
+  const newBlockIndex = newParent.children.indexOf(model) + 1;
   const children = [...model.children];
   page.updateBlock(model, { children: [] });
   const id = page.addBlock(
