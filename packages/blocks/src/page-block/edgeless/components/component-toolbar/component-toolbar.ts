@@ -41,9 +41,13 @@ type CategorizedElements = {
 export class EdgelessComponentToolbar extends LitElement {
   static override styles = css`
     :host {
-      display: block;
+      display: none;
       position: absolute;
       user-select: none;
+    }
+
+    :host([data-show]) {
+      display: block;
     }
 
     .container {

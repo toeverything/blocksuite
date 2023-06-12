@@ -246,10 +246,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return false;
   }
 
-  private _forceUpdateSelection() {
-    // FIXME: force triggering selection change to re-render selection rect
-    this._edgeless.slots.selectionUpdated.emit({
-      ...this.state,
+  private _forceUpdateSelection(
+    delta: { x: number; y: number },
+    dragging = false
+  ) {
+    this._edgeless.slots.selectedRectUpdated.emit({
+      type: 'drag',
+      delta,
+      dragging,
     });
   }
 
@@ -458,7 +462,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           }
         });
-        this._forceUpdateSelection();
+        this._forceUpdateSelection(e.delta, true);
         break;
       }
       case DefaultModeDragType.NativeEditing: {
@@ -501,7 +505,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
     this._edgeless.snap.cleanupAlignables();
-    this._forceUpdateSelection();
+    this._forceUpdateSelection(e.delta);
   }
 
   onContainerMouseMove(e: PointerEventState) {

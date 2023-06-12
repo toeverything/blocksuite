@@ -95,6 +95,19 @@ export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
   selectionUpdated: Slot<EdgelessSelectionState>;
+  selectedRectUpdated: Slot<
+    | {
+        type: 'drag';
+        delta: {
+          x: number;
+          y: number;
+        };
+        dragging?: boolean;
+      }
+    | {
+        type: 'resize';
+      }
+  >;
   surfaceUpdated: Slot;
   edgelessToolUpdated: Slot<EdgelessTool>;
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
@@ -225,6 +238,19 @@ export class EdgelessPageBlockComponent
     viewportUpdated: new Slot(),
     selectedBlocksUpdated: new Slot<BlockComponentElement[]>(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
+    selectedRectUpdated: new Slot<
+      | {
+          type: 'drag';
+          delta: {
+            x: number;
+            y: number;
+          };
+          dragging?: boolean;
+        }
+      | {
+          type: 'resize';
+        }
+    >(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
@@ -460,8 +486,7 @@ export class EdgelessPageBlockComponent
           }
         });
 
-        // FIXME: force updating selection for triggering re-render `selected-rect`
-        slots.selectionUpdated.emit({ ...this.selection.state });
+        slots.selectedRectUpdated.emit({ type: 'resize' });
       })
     );
 
