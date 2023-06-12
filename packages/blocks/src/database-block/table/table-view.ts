@@ -25,7 +25,7 @@ import type {
   TableMixColumn,
 } from '../common/view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import { onClickOutside } from '../utils.js';
+import { isText, onClickOutside } from '../utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import { DataBaseRowContainer } from './components/row-container.js';
@@ -58,6 +58,7 @@ const styles = css`
   .affine-database-block-table:hover {
     padding-bottom: 0px;
   }
+
   .affine-database-block-table::-webkit-scrollbar {
     -webkit-appearance: none;
     display: block;
@@ -71,6 +72,7 @@ const styles = css`
     border-radius: 2px;
     background-color: var(--affine-black-10);
   }
+
   .affine-database-block-table:hover::-webkit-scrollbar:horizontal {
     height: 8px;
   }
@@ -79,6 +81,7 @@ const styles = css`
     border-radius: 16px;
     background-color: var(--affine-black-30);
   }
+
   .affine-database-block-table:hover::-webkit-scrollbar-track {
     background-color: var(--affine-hover-color);
   }
@@ -308,9 +311,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     const rowTitle = this.model.children[index];
     const allRow = Object.values(this.model.cells[rowTitle.id] ?? {}).map(v => [
       v.columnId,
-      v.value,
+      isText(v.value) ? v.value.toString() : v.value,
     ]);
-    allRow.push([this.model.id, rowTitle.text?.yText]);
+    allRow.push([this.model.id, rowTitle.text?.yText.toString()]);
     const rowMap = Object.fromEntries(allRow);
     if (!this._searchFilter(rowMap)) {
       return false;

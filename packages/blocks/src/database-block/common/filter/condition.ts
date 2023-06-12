@@ -1,19 +1,17 @@
 import '../ref/ref.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
-import type {
-  SingleFilter,
-  Variable,
-  VariableOrProperty,
-} from '../../common/ast.js';
-import { firstFilterName, getRefType } from '../../common/ast.js';
-import { DatabaseMenuComponent } from '../../common/menu.js';
 import { filterMatcher } from '../../logical/filter-matcher.js';
-import { onClickOutside } from '../../utils.js';
+import { tBoolean, typesystem } from '../../logical/typesystem.js';
+import type { SingleFilter, Variable, VariableOrProperty } from '../ast.js';
+import { firstFilterByRef, getRefType } from '../ast.js';
+import { renderLiteral } from '../literal/index.js';
+import { DatabaseMenuComponent } from '../menu.js';
+import { createDatabasePopup } from '../popup.js';
 
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
@@ -30,12 +28,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
   filterSelect!: HTMLElement;
 
   private _setRef = (ref: VariableOrProperty) => {
-    this.setData({
-      type: 'filter',
-      left: ref,
-      function: firstFilterName(this.vars, ref),
-      args: [],
-    });
+    this.setData(firstFilterByRef(this.vars, ref));
   };
 
   private _filterLabel() {
@@ -61,37 +54,29 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
           ...this.data,
           function: v.name,
         });
-        menu.remove();
       },
     }));
-    this.append(menu);
-    computePosition(this.filterSelect, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
+    createDatabasePopup(this.filterSelect, menu);
+  }
 
-    onClickOutside(
-      menu,
-      () => {
-        menu.remove();
-      },
-      'mousedown'
-    );
+  private _args() {
+    const fn = filterMatcher.find(v => v.data.name === this.data.function);
+    if (!fn) {
+      return [];
+    }
+    const refType = getRefType(this.vars, this.data.left);
+    if (!refType) {
+      return [];
+    }
+    const type = typesystem.instance({}, [refType], tBoolean.create(), fn.type);
+    return type.args.slice(1);
   }
 
   override render() {
     const data = this.data;
 
     return html`
-      <div style="display:flex;align-items:center;">
+      <div style="display:flex;align-items:center;white-space: nowrap">
         <variable-ref-view
           .data="${data.left}"
           .setData="${this._setRef}"
@@ -103,8 +88,19 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
             ${this._filterLabel()}
           </div>
         </div>
-        <!--        <component v-for='(v,i) in inputs' :is='v.input' :key='i' :type='v.type'-->
-        <!--                   v-model:value='data.args[i]'></component>-->
+        <div>
+          ${repeat(this._args(), (v, i) => {
+            const value = this.data.args[i];
+            return renderLiteral(v, value?.value, value => {
+              const newArr = this.data.args.slice();
+              newArr[i] = { type: 'literal', value };
+              this.setData({
+                ...this.data,
+                args: newArr,
+              });
+            });
+          })}
+        </div>
       </div>
     `;
   }

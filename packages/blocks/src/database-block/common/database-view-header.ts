@@ -1,7 +1,6 @@
 import './menu.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -9,7 +8,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { DatabaseMenuComponent } from '../common/menu.js';
 import { ViewOperationMap } from '../common/view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import { onClickOutside } from '../utils.js';
+import { createDatabasePopup } from './popup.js';
 
 @customElement('database-view-header')
 export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
@@ -67,29 +66,9 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
         const view = this.model.addView(type as keyof typeof ViewOperationMap);
         this.setViewId(view.id);
         this.model.applyViewsUpdate();
-        menu.remove();
       },
     }));
-    this.popupContainer()?.appendChild(menu);
-    computePosition(event.target as HTMLElement, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
-    onClickOutside(
-      menu,
-      (ele, target) => {
-        ele.remove();
-      },
-      'mousedown'
-    );
+    createDatabasePopup(event.target as HTMLElement, menu);
   }
 
   _viewMenu(event: MouseEvent, id: string) {
@@ -104,31 +83,11 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
           }
           this.model.deleteView(id);
           this.model.applyViewsUpdate();
-          menu.remove();
         },
         type: 'action',
       },
     ];
-    this.popupContainer()?.appendChild(menu);
-    computePosition(event.target as HTMLElement, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
-    onClickOutside(
-      menu,
-      (ele, target) => {
-        ele.remove();
-      },
-      'mousedown'
-    );
+    createDatabasePopup(event.target as HTMLElement, menu);
   }
 
   override connectedCallback() {

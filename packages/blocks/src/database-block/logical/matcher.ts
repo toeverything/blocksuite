@@ -6,16 +6,20 @@ type MatcherData<Data, Type extends TType = TType> = { type: Type; data: Data };
 export class Matcher<Data, Type extends TType = TType> {
   private list: MatcherData<Data, Type>[] = [];
 
-  constructor(private _match?: (type: TType, target: TType) => boolean) {}
+  constructor(
+    private _match: (
+      type: TType,
+      target: TType
+    ) => boolean = typesystem.isSubtype.bind(typesystem)
+  ) {}
 
   register(type: Type, data: Data) {
     this.list.push({ type, data });
   }
 
   match(type: TType) {
-    const match = this._match ?? typesystem.isSubtype.bind(typesystem);
     for (const t of this.list) {
-      if (match(t.type, type)) {
+      if (this._match(t.type, type)) {
         return t.data;
       }
     }
@@ -23,10 +27,9 @@ export class Matcher<Data, Type extends TType = TType> {
   }
 
   allMatched(type: TType): MatcherData<Data>[] {
-    const match = this._match ?? typesystem.isSubtype.bind(typesystem);
     const result: MatcherData<Data>[] = [];
     for (const t of this.list) {
-      if (match(t.type, type)) {
+      if (this._match(t.type, type)) {
         result.push(t);
       }
     }
@@ -34,10 +37,9 @@ export class Matcher<Data, Type extends TType = TType> {
   }
 
   allMatchedData(type: TType): Data[] {
-    const match = this._match ?? typesystem.isSubtype.bind(typesystem);
     const result: Data[] = [];
     for (const t of this.list) {
-      if (match(t.type, type)) {
+      if (this._match(t.type, type)) {
         result.push(t.data);
       }
     }

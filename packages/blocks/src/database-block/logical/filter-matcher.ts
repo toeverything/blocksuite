@@ -1,6 +1,7 @@
 import { Text } from 'yjs';
 
 import { Matcher } from './matcher.js';
+import type { TFunction } from './typesystem.js';
 import {
   tArray,
   tBoolean,
@@ -16,10 +17,13 @@ import {
   typesystem,
 } from './typesystem.js';
 
-export const filterMatcher = new Matcher<{
-  name: string;
-  impl: (...args: unknown[]) => boolean;
-}>((type, target) => {
+export const filterMatcher = new Matcher<
+  {
+    name: string;
+    impl: (...args: unknown[]) => boolean;
+  },
+  TFunction
+>((type, target) => {
   if (type.type !== 'function') {
     return false;
   }

@@ -1,5 +1,3 @@
-import type { Text } from '@blocksuite/store';
-
 import type { SelectTag } from '../types.js';
 
 export interface TUnion {
@@ -88,6 +86,9 @@ export type TDataType<Data extends DataTypeShape = Record<string, unknown>> = {
 export type ValueOfData<T extends DataDefine> = T extends DataDefine<infer R>
   ? R
   : never;
+export type TypeOfData<T extends DataDefine> = T extends DataDefine<infer R>
+  ? TDataType<R>
+  : never;
 
 export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
   constructor(
@@ -173,9 +174,9 @@ const DataHelper = createDataHelper();
 export class Typesystem {
   dataMap = new Map<string, DataDefine>();
 
-  defineData<T extends DataTypeShape>(
-    config: DataDefineConfig<T>
-  ): DataDefine<T> {
+  defineData<MetaData extends DataTypeShape>(
+    config: DataDefineConfig<MetaData>
+  ): DataDefine<MetaData> {
     const result = new DataDefine(config, this.dataMap);
     this.dataMap.set(config.name, result);
     return result;
@@ -277,33 +278,37 @@ export class Typesystem {
 }
 
 export const typesystem = new Typesystem();
+
 export const tUnknown = typesystem.defineData(DataHelper.create('Unknown'));
-export const tNumber = typesystem.defineData(
-  DataHelper.create<{ value: number }>('Number')
-);
-export const tString = typesystem.defineData(
-  DataHelper.create<{ value: string }>('String')
-);
-export const tRichText = typesystem.defineData(
-  DataHelper.create<{ value: Text['yText'] }>('RichText')
-);
-export const tBoolean = typesystem.defineData(
-  DataHelper.create<{ value: boolean }>('Boolean')
-);
-export const tDate = typesystem.defineData(
-  DataHelper.create<{ value: number }>('Date')
-);
-export const tURL = typesystem.defineData(
-  DataHelper.extends(tString).create('URL')
-);
-export const tEmail = typesystem.defineData(
-  DataHelper.extends(tString).create('Email')
-);
-export const tPhone = typesystem.defineData(
-  DataHelper.extends(tString).create('Phone')
-);
-export const tTag = typesystem.defineData(DataHelper.create<SelectTag>('Tag'));
-// export const tArray = typesystem.defineData(DataHelper.extends(tString).create<{
-//   color: string;
-//   id: string
-// }>('Phone'));
+export const tNumber = typesystem.defineData<{ value: number }>({
+  name: 'Number',
+  supers: [],
+});
+export const tString = typesystem.defineData<{ value: string }>({
+  name: 'String',
+  supers: [],
+});
+export const tBoolean = typesystem.defineData<{ value: boolean }>({
+  name: 'Boolean',
+  supers: [],
+});
+export const tDate = typesystem.defineData<{ value: number }>({
+  name: 'Date',
+  supers: [],
+});
+export const tURL = typesystem.defineData({
+  name: 'URL',
+  supers: [],
+});
+export const tEmail = typesystem.defineData({
+  name: 'Email',
+  supers: [],
+});
+export const tPhone = typesystem.defineData({
+  name: 'Phone',
+  supers: [],
+});
+export const tTag = typesystem.defineData<{ tags: SelectTag[] }>({
+  name: 'Tag',
+  supers: [],
+});

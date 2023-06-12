@@ -25,7 +25,7 @@ export type Literal = {
   type: 'literal';
   value: unknown;
 };
-export type Value = VariableRef | Literal;
+export type Value = /*VariableRef*/ Literal;
 export type SingleFilter = {
   type: 'filter';
   left: VariableOrProperty;
@@ -59,6 +59,18 @@ export const firstFilterName = (vars: Variable[], ref: VariableOrProperty) => {
     throw new Error(`can't resolve ref type`);
   }
   return filterMatcher.match(type)?.name;
+};
+
+export const firstFilterByRef = (
+  vars: Variable[],
+  ref: VariableOrProperty
+): SingleFilter => {
+  return {
+    type: 'filter',
+    left: ref,
+    function: firstFilterName(vars, ref),
+    args: [],
+  };
 };
 
 export const firstFilter = (vars: Variable[]): SingleFilter => {
@@ -104,7 +116,7 @@ const evalRef = (
 };
 
 const evalValue = (value: Value, row: Record<string, unknown>): unknown => {
-  return value;
+  return value.value;
   //TODO
   // switch (value.type) {
   //     case "ref":
@@ -123,8 +135,11 @@ export const evalFilter = (
       const func = filterMatcher.findData(v => v.name === filter.function);
       const args = filter.args.map(value => evalValue(value, row));
       try {
+        if ((func?.impl.length ?? 0) > args.length + 1) {
+          // skip
+          return true;
+        }
         const impl = func?.impl(value, ...args);
-        // console.log(impl)
         return impl;
       } catch (e) {
         console.error(e);

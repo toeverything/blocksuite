@@ -7,9 +7,8 @@ import {
   tArray,
   tBoolean,
   tNumber,
-  tRichText,
+  tString,
   tTag,
-  tUnion,
 } from '../logical/typesystem.js';
 import type { SelectTag } from '../types.js';
 
@@ -127,7 +126,7 @@ export const columnManager = new ColumnManager();
 export const richTextHelper = columnManager.register<Text['yText']>(
   'rich-text',
   {
-    type: () => tRichText.create(),
+    type: () => tString.create(),
     defaultData: () => ({}),
     configRender: () => html``,
     cellToString: data => data?.toString() ?? '',
@@ -139,7 +138,7 @@ export type SelectColumnData = {
 export const selectHelper = columnManager.register<string, SelectColumnData>(
   'select',
   {
-    type: data => tArray(tUnion(data.options.map(v => tTag.create(v)))),
+    type: data => tArray(tTag.create({ tags: data.options })),
     defaultData: () => ({
       options: [],
     }),
@@ -152,7 +151,7 @@ export const multiSelectHelper = columnManager.register<
   string[],
   SelectColumnData
 >('multi-select', {
-  type: data => tArray(tUnion(data.options.map(v => tTag.create(v)))),
+  type: data => tArray(tTag.create({ tags: data.options })),
   defaultData: () => ({
     options: [],
   }),

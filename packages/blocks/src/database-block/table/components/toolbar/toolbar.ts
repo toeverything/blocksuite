@@ -9,16 +9,19 @@ import {
 } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
+import { computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
+import type { FilterGroup } from '../../../common/ast.js';
+import { firstFilterByRef } from '../../../common/ast.js';
 import {
   columnManager,
   richTextHelper,
 } from '../../../common/column-manager.js';
-import { FilterGroupView } from '../../../common/filter/filter-group.js';
+import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
+import { popSelectField } from '../../../common/ref/ref.js';
 import type {
   DatabaseViewDataMap,
   TableMixColumn,
@@ -343,10 +346,19 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     this.addRow(0);
   };
 
-  private _showFilter(event: MouseEvent) {
-    this.targetModel.page.captureSync();
-    const filter = new FilterGroupView();
-    filter.vars = [
+  private get _filter() {
+    return this.view.filter;
+  }
+
+  private set _filter(filter: FilterGroup) {
+    this.targetModel.updateView(this.view.id, 'table', data => {
+      data.filter = filter;
+    });
+    this.targetModel.applyViewsUpdate();
+  }
+
+  private get _vars() {
+    return [
       {
         name: this.targetModel.titleColumnName,
         id: this.targetModel.id,
@@ -358,37 +370,34 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
         type: columnManager.typeOf(v.type, v.data),
       })),
     ];
-    filter.data = this.view.filter;
-    filter.setData = group => {
-      this.targetModel.updateView(this.view.id, 'table', data => {
-        data.filter = group;
-      });
-      this.targetModel.applyViewsUpdate();
-      filter.data = this.view.filter;
-    };
-    filter.style.zIndex = '999';
-    this.append(filter);
-    computePosition(event.target as HTMLElement, filter, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(filter.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
+  }
 
-    onClickOutside(
-      filter,
-      () => {
-        filter.remove();
-        this.targetModel.applyViewsUpdate();
-      },
-      'mousedown'
-    );
+  private _showFilter(event: MouseEvent) {
+    const popAdvance = () => {
+      popAdvanceFilter(event.target as HTMLElement, {
+        vars: this._vars,
+        value: this._filter,
+        onChange: group => {
+          this._filter = group;
+        },
+      });
+    };
+    if (!this._filter.conditions.length) {
+      popSelectField(event.target as HTMLElement, {
+        vars: this._vars,
+        onSelect: ref => {
+          this._filter = {
+            ...this._filter,
+            conditions: [firstFilterByRef(this._vars, ref)],
+          };
+          setTimeout(() => {
+            popAdvance();
+          });
+        },
+      });
+      return;
+    }
+    popAdvance();
   }
 
   override render() {

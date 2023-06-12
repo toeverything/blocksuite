@@ -1,25 +1,21 @@
 import './condition.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { Filter, FilterGroup, Variable } from '../../common/ast.js';
-import { firstFilter, firstFilterInGroup } from '../../common/ast.js';
-import { DatabaseMenuComponent } from '../../common/menu.js';
-import { onClickOutside } from '../../utils.js';
+import type { Filter, FilterGroup, Variable } from '../ast.js';
+import { firstFilter, firstFilterInGroup } from '../ast.js';
+import { DatabaseMenuComponent, popMenu } from '../menu.js';
+import { createDatabasePopup } from '../popup.js';
 
 @customElement('filter-group-view')
 export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .filter-group-view {
+    filter-group-view {
       background-color: white;
-      padding: 8px;
-      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
     }
   `;
   @property()
@@ -34,7 +30,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   @property()
   setData!: (filter: FilterGroup) => void;
 
-  opMap = {
+  private opMap = {
     and: 'And',
     or: 'Or',
   };
@@ -49,54 +45,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   };
 
   private _addNew = () => {
-    const menu = new DatabaseMenuComponent();
-    menu.menuGroup = [
-      {
-        type: 'action',
-        label: 'filter',
-        click: () => {
-          this.setData({
-            ...this.data,
-            conditions: [...this.data.conditions, firstFilter(this.vars)],
-          });
-          menu.remove();
-        },
-      },
-      {
-        type: 'action',
-        label: 'filter group',
-        click: () => {
-          this.setData({
-            ...this.data,
-            conditions: [
-              ...this.data.conditions,
-              firstFilterInGroup(this.vars),
-            ],
-          });
-          menu.remove();
-        },
-      },
-    ];
-    this.append(menu);
-    computePosition(this.addNew, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
+    popAddNewFilter(this.addNew, {
+      value: this.data,
+      onChange: this.setData,
+      vars: this.vars,
     });
-    onClickOutside(
-      menu,
-      () => {
-        menu.remove();
-      },
-      'mousedown'
-    );
   };
   private _selectOp = (event: MouseEvent) => {
     const menu = new DatabaseMenuComponent();
@@ -109,7 +62,6 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             ...this.data,
             op: 'and',
           });
-          menu.remove();
         },
       },
       {
@@ -120,37 +72,16 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             ...this.data,
             op: 'or',
           });
-          menu.remove();
         },
       },
     ];
-    this.append(menu);
-    computePosition(event.target as HTMLElement, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
-
-    onClickOutside(
-      menu,
-      () => {
-        menu.remove();
-      },
-      'mousedown'
-    );
+    createDatabasePopup(event.target as HTMLElement, menu);
   };
 
   override render() {
     const data = this.data;
     return html`
-      <div class="filter-group-view">
+      <div>
         ${repeat(data.conditions, (filter, i) => {
           let op: TemplateResult;
           if (i === 0) {
@@ -198,3 +129,66 @@ declare global {
     'filter-group-view': FilterGroupView;
   }
 }
+
+export const popAdvanceFilter = (
+  target: HTMLElement,
+  props: {
+    vars: Variable[];
+    value: FilterGroup;
+    onChange: (value: FilterGroup) => void;
+  }
+) => {
+  const div = document.createElement('div');
+  div.style.position = 'absolute';
+  div.style.zIndex = '999';
+  div.style.boxShadow = '3px 3px 10px rgba(0, 0, 0, 0.1)';
+  div.style.padding = '8px';
+  div.style.borderRadius = '4px';
+  div.style.backgroundColor = 'white';
+  const filter = new FilterGroupView();
+  filter.vars = props.vars;
+  filter.data = props.value;
+  filter.setData = group => {
+    props.onChange(group);
+    filter.data = group;
+  };
+  div.append(filter);
+  createDatabasePopup(target, div);
+};
+
+export const popAddNewFilter = (
+  target: HTMLElement,
+  props: {
+    value: FilterGroup;
+    onChange: (value: FilterGroup) => void;
+    vars: Variable[];
+  }
+) => {
+  popMenu(target, {
+    options: [
+      {
+        type: 'action',
+        label: 'filter',
+        click: () => {
+          props.onChange({
+            ...props.value,
+            conditions: [...props.value.conditions, firstFilter(props.vars)],
+          });
+        },
+      },
+      {
+        type: 'action',
+        label: 'filter group',
+        click: () => {
+          props.onChange({
+            ...props.value,
+            conditions: [
+              ...props.value.conditions,
+              firstFilterInGroup(props.vars),
+            ],
+          });
+        },
+      },
+    ],
+  });
+};
