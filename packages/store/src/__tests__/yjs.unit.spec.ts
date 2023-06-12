@@ -97,5 +97,21 @@ describe('blocksuite yjs', () => {
         (map.get('arr') as Y.Array<Y.Map<number>>).get(0).get('counter')
       ).toBe(1);
     });
+
+    test('with y text', () => {
+      const ydoc = new Y.Doc();
+      const map = ydoc.getMap('map');
+      const inner = new Y.Map();
+      map.set('inner', inner);
+      const text = new Y.Text('hello');
+      inner.set('text', text);
+
+      const proxy = createYMapProxy<{ inner: { text: Y.Text } }>(map, {
+        deep: true,
+      });
+      proxy.inner = { ...proxy.inner };
+      expect(proxy.inner.text).toBeInstanceOf(Y.Text);
+      expect(proxy.inner.text.toJSON()).toBe('hello');
+    });
   });
 });
