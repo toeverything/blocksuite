@@ -31,6 +31,7 @@ export class IconButton extends LitElement {
     }
 
     :host > span {
+      flex: 1;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
