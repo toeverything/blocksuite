@@ -39,6 +39,7 @@ import {
   pressEnter,
   pressEscape,
   pressShiftEnter,
+  pressSpace,
   redoByClick,
   redoByKeyboard,
   switchColumnType,
@@ -956,4 +957,33 @@ test('should title column support quick changing of column type', async ({
   await clickColumnType(page, 'select');
   const cell = getFirstColumnCell(page, 'select-selected');
   expect(await cell.count()).toBe(1);
+});
+
+test('should support modifying the content format of the title column', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'a', true);
+  await initDatabaseColumn(page, 'text');
+  await switchColumnType(page, 'rich-text', 2);
+  await initDatabaseDynamicRowWithData(page, 'abc123', false, 1);
+
+  await focusRichText(page);
+  await type(page, '1');
+  await pressArrowLeft(page);
+  await type(page, '-');
+  await pressSpace(page);
+
+  await assertDatabaseCellRichTexts(page, { columnIndex: 2, text: 'abc123' });
+  const cell = getFirstColumnCell(page, 'select-selected');
+  expect(await cell.count()).toBe(1);
+  expect(await cell.nth(0).innerText()).toBe('a');
+
+  await undoByClick(page);
+  await assertDatabaseCellRichTexts(page, { columnIndex: 2, text: 'abc123' });
+  expect(await cell.count()).toBe(1);
+  expect(await cell.nth(0).innerText()).toBe('a');
 });
