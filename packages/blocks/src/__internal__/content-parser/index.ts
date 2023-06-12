@@ -2,6 +2,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { toPng } from 'html-to-image';
+import { toCanvas } from 'html-to-image';
+import jsPDF from 'jspdf';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
@@ -77,23 +79,22 @@ export class ContentParser {
     );
   }
 
-  public async exportPng() {
+  public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
-
     if (!root) return;
+
     const editorContainer = getEditorContainer(this._page);
     if (isPageMode(this._page)) {
       const styleElement = document.createElement('style');
       styleElement.textContent =
         'editor-container,.affine-editor-container {height: auto;}';
       editorContainer.appendChild(styleElement);
-      FileExporter.exportPng(
-        (root as PageBlockModel).title.toString(),
-        await toPng(editorContainer, {
-          cacheBust: true,
-        })
-      );
+
+      const data = await toCanvas(editorContainer, {
+        cacheBust: true,
+      });
       editorContainer.removeChild(styleElement);
+      return data;
     } else {
       const styleElement = document.createElement('style');
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
@@ -102,29 +103,71 @@ export class ContentParser {
       const { x, y, w, h } = bound;
       styleElement.textContent = `
         edgeless-toolbar {display: none;}
-        editor-container,.affine-editor-container {height: ${h}px; width: ${w}px}
+        editor-container,.affine-editor-container {height: ${
+          h + 100
+        }px; width: ${w + 100}px}
       `;
       editorContainer.appendChild(styleElement);
 
       const width = edgeless.surface.viewport.width;
       const height = edgeless.surface.viewport.height;
-      edgeless.surface.viewport.setCenter(x + width / 2, y + height / 2);
-      setTimeout(async () => {
-        FileExporter.exportPng(
-          (root as PageBlockModel).title.toString(),
-          await toPng(editorContainer, {
+      edgeless.surface.viewport.setCenter(
+        x + width / 2 - 50,
+        y + height / 2 - 50
+      );
+
+      const promise = new Promise(resolve => {
+        setTimeout(async () => {
+          const pngData = await toCanvas(editorContainer, {
             cacheBust: true,
-          })
-        );
-        editorContainer.removeChild(styleElement);
-      }, 0);
+          });
+          resolve(pngData);
+        }, 0);
+      });
+      const data = (await promise) as HTMLCanvasElement;
+      editorContainer.removeChild(styleElement);
+      return data;
     }
+  }
+
+  public async exportPng() {
+    const root = this._page.root;
+    if (!root) return;
+    const canvasImage = await this.transPageToCanvas();
+    if (!canvasImage) {
+      return;
+    }
+
+    FileExporter.exportPng(
+      (this._page.root as PageBlockModel).title.toString(),
+      canvasImage.toDataURL('PNG')
+    );
   }
 
   public async exportPdf() {
     const root = this._page.root;
     if (!root) return;
-    window.print();
+    const canvasImage = await this.transPageToCanvas();
+    if (!canvasImage) {
+      return;
+    }
+    const pdf = new jsPDF(
+      canvasImage.width < canvasImage.height ? 'p' : 'l',
+      'pt',
+      [canvasImage.width, canvasImage.height]
+    );
+    pdf.addImage(
+      canvasImage.toDataURL('PNG'),
+      'PNG',
+      0,
+      0,
+      canvasImage.width,
+      canvasImage.height
+    );
+    FileExporter.exportFile(
+      (root as PageBlockModel).title.toString() + '.pdf',
+      pdf.output('dataurlstring')
+    );
   }
 
   public async block2Html(blocks: SelectedBlock[]): Promise<string> {
