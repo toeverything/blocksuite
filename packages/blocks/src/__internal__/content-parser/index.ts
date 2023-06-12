@@ -120,7 +120,7 @@ export class ContentParser {
             cacheBust: true,
           });
           resolve(pngData);
-        }, 0);
+        }, 500);
       });
       const data = (await promise) as HTMLCanvasElement;
       editorContainer.removeChild(styleElement);
