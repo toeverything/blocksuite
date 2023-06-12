@@ -88,6 +88,8 @@ export class ContentParser {
         'editor-container,.affine-editor-container {height: auto;}';
       editorContainer.appendChild(styleElement);
 
+      // todo check render and image
+
       const data = await html2image.toCanvas(editorContainer, {
         cacheBust: true,
       });
@@ -113,6 +115,8 @@ export class ContentParser {
         x + width / 2 - 50,
         y + height / 2 - 50
       );
+
+      // todo check render and image
 
       const promise = new Promise(resolve => {
         setTimeout(async () => {
