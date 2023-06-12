@@ -8,10 +8,13 @@ import {
 } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import {
+  Bound,
   compare,
   deserializeXYWH,
   generateKeyBetween,
   generateNKeysBetween,
+  getCommonBound,
+  type IBound,
   intersects,
   type PhasorElement,
   serializeXYWH,
@@ -800,6 +803,23 @@ export class EdgelessPageBlockComponent
     if (this.selection.selectedBlocks.length) {
       this.slots.selectedBlocksUpdated.emit([]);
     }
+  }
+
+  getElementsBound(): IBound | null {
+    const bounds = [];
+
+    this.frames.forEach(frame => {
+      const frameXYWH = deserializeXYWH(frame.xywh);
+      const frameBound = new Bound(...frameXYWH);
+      bounds.push(frameBound);
+    });
+
+    const surfaceElementsBound = this.surface.getElementsBound();
+    if (surfaceElementsBound) {
+      bounds.push(surfaceElementsBound);
+    }
+
+    return getCommonBound(bounds);
   }
 
   override update(changedProperties: Map<string, unknown>) {
