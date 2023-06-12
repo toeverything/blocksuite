@@ -4,7 +4,6 @@ import './brush-tool/brush-tool-button.js';
 import './connector-tool/connector-tool-button.js';
 
 import {
-  FRAME_BACKGROUND_COLORS,
   HandIcon,
   ImageIcon,
   MinusIcon,
@@ -33,6 +32,7 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
+import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -198,7 +198,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     if (cofficient === 1) {
       this._smoothTranslate(centerX, centerY);
     } else {
-      const center = viewport.center;
+      const center = new Point(viewport.centerX, viewport.centerY);
       const newCenter = new Point(centerX, centerY);
       const focusPoint = newCenter
         .subtract(center.scale(cofficient))
@@ -251,12 +251,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       const sh = height > 100 ? height - 100 : height;
       const p = options.width / options.height;
       if (s >= 1) {
-        options.height =
-          options.height > sh ? sh : Math.min(options.height, sh);
+        options.height = Math.min(options.height, sh);
         options.width = p * options.height;
       } else {
         const sw = sh * s;
-        options.width = options.width > sw ? sw : Math.min(options.width, sw);
+        options.width = Math.min(options.width, sw);
         options.height = options.width / p;
       }
     }
@@ -380,7 +379,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${() =>
             this.setMouseMode({
               type: 'note',
-              background: FRAME_BACKGROUND_COLORS[0],
+              background: DEFAULT_FRAME_COLOR,
             })}
         >
           ${NoteIcon}

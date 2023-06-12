@@ -41,6 +41,7 @@ export class EdgelessComponentToolbar extends LitElement {
   static override styles = css`
     :host {
       display: block;
+      position: absolute;
       user-select: none;
     }
 

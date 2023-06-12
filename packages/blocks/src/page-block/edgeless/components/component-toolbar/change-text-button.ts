@@ -1,8 +1,8 @@
 import '../align-panel.js';
 
 import {
-  AlighLeftIcon,
   AlignCenterIcon,
+  AlignLeftIcon,
   AlignRightIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -16,13 +16,18 @@ import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { EdgelessAlignPanel } from '../align-panel.js';
-import { type ColorEvent, ColorUnit } from '../color-panel.js';
+import {
+  type ColorEvent,
+  ColorUnit,
+  GET_DEFAULT_LINE_COLOR,
+  LINE_COLORS,
+} from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(texts: TextElement[]): TextElement['color'] | null {
+function getMostCommonColor(texts: TextElement[]): TextElement['color'] {
   const colors = countBy(texts, (text: TextElement) => text.color);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as TextElement['color']) : null;
+  return max ? (max[0] as TextElement['color']) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonAlign(texts: TextElement[]): TextElement['textAlign'] {
@@ -30,22 +35,6 @@ function getMostCommonAlign(texts: TextElement[]): TextElement['textAlign'] {
   const max = maxBy(Object.entries(aligns), ([k, count]) => count);
   return max ? (max[0] as TextElement['textAlign']) : 'left';
 }
-
-const TEXT_COLORS: CssVariableName[] = [
-  '--affine-palette-line-yellow',
-  '--affine-palette-line-orange',
-  '--affine-palette-line-tangerine',
-  '--affine-palette-line-red',
-  '--affine-palette-line-magenta',
-  '--affine-palette-line-purple',
-  '--affine-palette-line-navy',
-  '--affine-palette-line-blue',
-  '--affine-palette-line-green',
-  '--affine-palette-line-white',
-  '--affine-palette-line-black',
-  '--affine-palette-line-grey',
-];
-export const DEFAULT_TEXT_COLOR = TEXT_COLORS[10];
 
 @customElement('edgeless-change-text-button')
 export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
@@ -151,7 +140,7 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedColor = getMostCommonColor(this.texts) ?? TEXT_COLORS[0];
+    const selectedColor = getMostCommonColor(this.texts);
     const selectedAlign = getMostCommonAlign(this.texts);
 
     return html`
@@ -167,7 +156,7 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
       <div class="color-panel-container text-color">
         <edgeless-color-panel
           .value=${selectedColor}
-          .options=${TEXT_COLORS}
+          .options=${LINE_COLORS}
           @select=${(event: ColorEvent) => {
             this._setTextColor(event.detail);
           }}
@@ -184,7 +173,7 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
         @click=${() => this._textAlignPopper?.toggle()}
       >
         ${selectedAlign === 'left'
-          ? AlighLeftIcon
+          ? AlignLeftIcon
           : selectedAlign === 'center'
           ? AlignCenterIcon
           : AlignRightIcon}

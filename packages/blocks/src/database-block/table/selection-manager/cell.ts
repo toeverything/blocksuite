@@ -107,8 +107,11 @@ export function selectCellByElement(
   if (!rowsContainer) return;
   if (!currentCell) return;
 
+  //TODO each cell component needs expose a blur method
   const editor = currentCell.querySelector<HTMLElement>('.virgo-editor');
   editor?.blur();
+  const input = currentCell.querySelector<HTMLElement>('input');
+  input?.blur();
   resetNativeSelection(null);
 
   const nextCoord = getCellCoord(currentCell, databaseId, key);

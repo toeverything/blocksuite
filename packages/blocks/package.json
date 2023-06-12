@@ -25,15 +25,15 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "@popperjs/core": "^2.11.6",
+    "@floating-ui/dom": "^1.2.9",
     "hotkeys-js": "^3.10.1",
     "html-to-image": "^1.11.11",
+    "jszip": "^3.10.1",
     "lit": "^2.7.3",
     "marked": "^4.2.12",
     "shiki": "^0.14.1",
     "turndown": "^7.1.1",
-    "zod": "^3.21.4",
-    "jszip": "^3.10.1"
+    "zod": "^3.21.4"
   },
   "exports": {
     "./dist/*": "./dist/*",

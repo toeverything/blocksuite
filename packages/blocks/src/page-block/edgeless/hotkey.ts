@@ -1,20 +1,17 @@
-import {
-  FRAME_BACKGROUND_COLORS,
-  HOTKEYS,
-  SHORT_KEY,
-} from '@blocksuite/global/config';
+import { HOTKEYS, SHORT_KEY } from '@blocksuite/global/config';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
+import { DEFAULT_FRAME_COLOR } from '../../frame-block/frame-model.js';
 import {
   bindCommonHotkey,
   deleteModelsByRange,
   handleDown,
   handleUp,
 } from '../utils/index.js';
-import { DEFAULT_SELECTED_COLOR } from './components/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR } from './components/color-panel.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -76,6 +73,8 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
   function backspace(e: KeyboardEvent) {
     // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
+
+    if (edgeless.selection.isActive) return;
 
     const { selected } = edgeless.selection.state;
     selected.forEach(element => {
@@ -142,13 +141,13 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     hotkey.addListener('n', () =>
       setMouseMode(edgeless, {
         type: 'note',
-        background: FRAME_BACKGROUND_COLORS[0],
+        background: DEFAULT_FRAME_COLOR,
       })
     );
     hotkey.addListener('p', () =>
       setMouseMode(edgeless, {
         type: 'brush',
-        color: DEFAULT_SELECTED_COLOR,
+        color: GET_DEFAULT_LINE_COLOR(),
         lineWidth: BrushSize.Thin,
       })
     );
@@ -168,8 +167,9 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     });
 
     hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {
-      keyboardEvent.preventDefault();
+      if (edgeless.selection.isActive) return;
 
+      keyboardEvent.preventDefault();
       edgeless.slots.selectionUpdated.emit({
         selected: [...edgeless.frames, ...edgeless.surface.getElements()],
         active: false,

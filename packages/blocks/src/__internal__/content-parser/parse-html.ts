@@ -4,6 +4,7 @@ import type { DeltaOperation, Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import { richTextHelper } from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
@@ -688,13 +689,7 @@ export class HtmlParser {
         rows.push(row);
       });
       const columns: Column[] = titles.slice(1).map((value, index) => {
-        return {
-          name: value,
-          type: 'rich-text',
-          width: 200,
-          hide: false,
-          id: '' + id++,
-        };
+        return richTextHelper.createWithId('' + id++, value);
       });
       if (rows.length > 0) {
         let maxLen = rows[0].length;
@@ -703,13 +698,7 @@ export class HtmlParser {
         }
         const addNum = maxLen - columns.length;
         for (let i = 0; i < addNum; i++) {
-          columns.push({
-            name: '',
-            type: 'rich-text',
-            width: 200,
-            hide: false,
-            id: '' + id++,
-          });
+          columns.push(richTextHelper.createWithId('' + id++, ''));
         }
       }
       const databasePropsId = id++;
