@@ -7,23 +7,18 @@ import { BlockSchema } from '../base.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
-import {
-  type InlineSuggestionProvider,
-  Store,
-  type StoreOptions,
-} from '../store.js';
+import { Store, type StoreOptions } from '../store.js';
 import { Text } from '../text-adapter.js';
 import { serializeYDoc } from '../utils/jsx.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
-import { type QueryContent, SearchIndexer } from './indexer/search.js';
+import type { QueryContent } from './indexer/search.js';
+import { SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Schema } from './schema.js';
 
-export type WorkspaceOptions = {
-  experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
-} & StoreOptions;
+export type WorkspaceOptions = StoreOptions;
 
 export class Workspace {
   static Y = Y;
@@ -50,13 +45,7 @@ export class Workspace {
     backlink: BacklinkIndexer;
   };
 
-  readonly inlineSuggestionProvider?: InlineSuggestionProvider;
-
-  constructor({
-    experimentalInlineSuggestionProvider,
-    ...storeOptions
-  }: WorkspaceOptions) {
-    this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
+  constructor(storeOptions: WorkspaceOptions) {
     this._schema = new Schema(this);
 
     this._store = new Store(storeOptions);
@@ -111,21 +100,14 @@ export class Workspace {
       },
     };
 
-    this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
+    this.meta = new WorkspaceMeta(this.doc);
     this._bindPageMetaEvents();
 
     const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
-    const backlinkIndexer = new BacklinkIndexer(blockIndexer);
     this.indexer = {
       search: new SearchIndexer(this.doc),
-      backlink: backlinkIndexer,
+      backlink: new BacklinkIndexer(blockIndexer),
     };
-
-    // TODO use BlockIndexer
-    this.slots.pageAdded.on(id => {
-      // For potentially batch-added blocks, it's best to build index asynchronously
-      queueMicrotask(() => this.indexer.search.onPageCreated(id));
-    });
   }
 
   get id() {
@@ -151,6 +133,10 @@ export class Workspace {
 
   get providers() {
     return this._store.providers;
+  }
+
+  get subdocProviders() {
+    return this._store.subdocProviders;
   }
 
   get blobs() {
@@ -208,7 +194,10 @@ export class Workspace {
         idGenerator: this._store.idGenerator,
       });
       this._store.addSpace(page);
-      page.trySyncFromExistingDoc();
+
+      page.waitForLoaded().then(() => {
+        page.trySyncFromExistingDoc();
+      });
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
@@ -225,9 +214,7 @@ export class Workspace {
    * If the `init` parameter is passed, a `surface`, `frame`, and `paragraph` block
    * will be created in the page simultaneously.
    */
-  createPage(
-    options: { id?: string; init?: true | { title: string } } | string = {}
-  ) {
+  createPage(options: { id?: string } | string = {}) {
     // Migration guide
     if (typeof options === 'string') {
       options = { id: options };
@@ -240,7 +227,7 @@ export class Workspace {
     }
     // End of migration guide. Remove this in the next major version
 
-    const { id: pageId = this.idGenerator(), init } = options;
+    const { id: pageId = this.idGenerator() } = options;
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }
@@ -249,25 +236,8 @@ export class Workspace {
       id: pageId,
       title: '',
       createDate: +new Date(),
-      subpageIds: [],
     });
-    const page = this.getPage(pageId) as Page;
-
-    let pageBlockId = pageId;
-    if (init) {
-      pageBlockId = page.addBlock(
-        'affine:page',
-        typeof init === 'boolean'
-          ? undefined
-          : {
-              title: new page.Text(init.title),
-            }
-      );
-      page.addBlock('affine:surface', {}, pageBlockId);
-      const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-      page.addBlock('affine:paragraph', {}, frameId);
-    }
-    return page;
+    return this.getPage(pageId) as Page;
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
@@ -279,36 +249,14 @@ export class Workspace {
     this.meta.setPageMeta(pageId, props);
   }
 
-  /**
-   * @deprecated
-   */
-  shiftPage(pageId: string, newIndex: number) {
-    this.meta.shiftPageMeta(pageId, newIndex);
-  }
-
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
     assertExists(pageMeta);
-
-    if (pageMeta.subpageIds.length) {
-      // remove subpages first
-      pageMeta.subpageIds.forEach((subpageId: string) => {
-        if (subpageId === pageId) {
-          console.error(
-            'Unexpected subpage found when remove page! A page cannot be its own subpage',
-            pageMeta
-          );
-          return;
-        }
-        this.removePage(subpageId);
-      });
-    }
 
     const page = this.getPage(pageId);
     if (!page) return;
 
     page.dispose();
-    this.indexer.backlink.removeSubpageNode(this, pageId);
     this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
   }

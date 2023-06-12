@@ -1,5 +1,3 @@
-import type { CssVariableName } from '@blocksuite/blocks';
-
 import { SHORT_KEY } from './consts/platform.js';
 
 export * from './consts/block-hub.js';
@@ -41,12 +39,3 @@ export const PAGE_BLOCK_PADDING_BOTTOM = 150;
 export const PAGE_BLOCK_CHILD_PADDING = 24;
 export const DRAG_HANDLE_OFFSET_LEFT = 1;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;
-
-export const FRAME_BACKGROUND_COLORS: CssVariableName[] = [
-  '--affine-background-secondary-color',
-  '--affine-tag-yellow',
-  '--affine-tag-red',
-  '--affine-tag-green',
-  '--affine-tag-blue',
-  '--affine-tag-purple',
-];

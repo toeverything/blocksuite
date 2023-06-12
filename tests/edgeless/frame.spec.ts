@@ -7,7 +7,6 @@ import {
   assertMouseMode,
   changeEdgelessFrameBackground,
   countBlock,
-  getAllFrames,
   getFrameRect,
   locatorComponentToolbar,
   locatorEdgelessToolButton,

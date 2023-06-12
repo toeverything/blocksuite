@@ -1,13 +1,11 @@
 import {
   assertExists,
   type BaseBlockModel,
-  type DeltaOperation,
   type Page,
 } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import { ContentParser } from '../../content-parser/index.js';
-import type { AffineTextAttributes } from '../../rich-text/virgo/types.js';
 import { getService } from '../../service.js';
 import {
   type BlockRange,
@@ -171,54 +169,6 @@ export async function clipboardData2Blocks(
   }
 
   return contentParser.text2blocks(textClipData);
-}
-
-/**
- * Note: This function will modify the deltas **in place**
- */
-export function normalizeDelta(page: Page, deltas: DeltaOperation[]) {
-  const backlinkIndexer = page.workspace.indexer.backlink;
-  deltas.forEach(delta => {
-    if (
-      !(
-        delta &&
-        delta.attributes &&
-        delta.attributes.reference &&
-        delta.attributes.reference.type === 'Subpage'
-      )
-    ) {
-      return;
-    }
-
-    const refNode: NonNullable<AffineTextAttributes['reference']> =
-      delta.attributes.reference;
-    const parentPage = backlinkIndexer.getParentPage(refNode.pageId);
-    if (!parentPage) {
-      return;
-    }
-    // Each subpage can only be referenced once in a workspace
-    delta.attributes = {
-      ...delta.attributes,
-      reference: {
-        ...refNode,
-        type: 'LinkedPage',
-      },
-    };
-  });
-  return deltas;
-}
-
-/**
- * Replace Subpage reference to LinkedPage reference when try to paste duplicated subpage
- */
-export function normalizePasteBlocks(page: Page, blocks: SerializedBlock[]) {
-  blocks
-    .filter(block => block.text)
-    .forEach(block => {
-      normalizeDelta(page, block.text as DeltaOperation[]);
-    });
-
-  return blocks;
 }
 
 export function copySurfaceText(edgeless: EdgelessPageBlockComponent) {
