@@ -14,12 +14,12 @@ import {
   generateKeyBetween,
   generateNKeysBetween,
   getCommonBound,
+  type IBound,
   intersects,
   type PhasorElement,
   serializeXYWH,
   SurfaceManager,
 } from '@blocksuite/phasor';
-import type { IBound } from '@blocksuite/phasor/consts.js';
 import {
   assertExists,
   type BaseBlockModel,
