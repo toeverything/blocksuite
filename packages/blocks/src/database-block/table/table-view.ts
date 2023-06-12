@@ -14,7 +14,6 @@ import { html } from 'lit/static-html.js';
 
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import { evalFilter } from '../common/ast.js';
 import {
   columnManager,
   multiSelectHelper,
@@ -25,6 +24,7 @@ import type {
   TableMixColumn,
 } from '../common/view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
+import { evalFilter } from '../logical/eval-filter.js';
 import { isText, onClickOutside } from '../utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
