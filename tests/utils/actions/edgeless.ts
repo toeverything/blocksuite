@@ -244,11 +244,6 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   await type(page, text);
 }
 
-export async function deleteAll(page: Page) {
-  await selectAllByKeyboard(page);
-  await pressBackspace(page);
-}
-
 export async function resizeElementByTopLeftHandle(
   page: Page,
   delta: { x: number; y: number },
