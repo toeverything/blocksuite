@@ -3,9 +3,7 @@ import { expect } from '@playwright/test';
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
   addBasicRectShapeElement,
-  autoFit,
   deleteAll,
-  getEdgelessHoverRect,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
