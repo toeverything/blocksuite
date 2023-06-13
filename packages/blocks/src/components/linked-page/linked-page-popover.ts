@@ -82,7 +82,8 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         icon: PageIcon,
         action: () => this._insertLinkedNode('LinkedPage', page.id),
       })),
-      // The active condition is a bit tricky here
+
+      // XXX The active condition is a bit tricky here
       {
         key: 'create-linked-page',
         name: `Create "${displayPageName}" page`,
