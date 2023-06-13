@@ -431,7 +431,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       assertExists(this.state.activeComponent);
       if (clickBlockInfo.model.type === 'image') {
         state.type = 'embed';
-        state.selectedEmbeds.push(state.activeComponent as EmbedBlockComponent);
+        state.selectedEmbed = state.activeComponent as EmbedBlockComponent;
         this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
       } else {
         state.type = 'block';
@@ -684,7 +684,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
         true
       );
     } else {
-      this.state.draggingArea = null;
       this.slots.draggingAreaUpdated.emit(null);
       this.refreshSelectedBlocksRects();
     }
@@ -717,8 +716,8 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
   }
 
   refreshEmbedRects(hoverEditingState: EditingState | null = null) {
-    const { activeComponent, selectedEmbeds, viewport } = this.state;
-    if (activeComponent && selectedEmbeds.length) {
+    const { activeComponent, selectedEmbed, viewport } = this.state;
+    if (activeComponent && selectedEmbed) {
       const rect = getSelectedStateRectByBlockElement(activeComponent);
       const embedRects = [
         new DOMRect(rect.left, rect.top, rect.width, rect.height),
@@ -941,6 +940,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       slots.selectedRectsUpdated.emit([]);
       slots.draggingAreaUpdated.emit(null);
 
+      // TODO XXX
       // `ESC`
       // clear `format quick bar`
       this.container.querySelector('format-quick-bar')?.remove();
