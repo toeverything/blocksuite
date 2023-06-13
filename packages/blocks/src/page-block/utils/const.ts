@@ -43,7 +43,7 @@ export const actionConfig = [
     id: 'convert-to-database',
     name: 'Group as Database',
     disabledToolTip:
-      'Contains Block types that cannot be converted to Database. Learn more',
+      'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon,
     hotkey: `${SHORT_KEY}+g`,
     showWhen: (page: Page, models: BaseBlockModel[]) => {
