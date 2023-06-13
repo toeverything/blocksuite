@@ -1,17 +1,15 @@
 import {
   type Bound,
-  type PhasorElement,
-  type PhasorElementType,
-  TextElement,
-} from '@blocksuite/phasor';
-import {
+  compare,
   deserializeXYWH,
   getCommonBound,
+  type PhasorElement,
+  type PhasorElementType,
   Renderer,
   serializeXYWH,
+  TextElement,
 } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, type Page } from '@blocksuite/store';
 import { render } from 'lit';
 
 import type { FrameBlockModel } from '../../models.js';
@@ -333,19 +331,37 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   async copyAsPng(frames: FrameBlockModel[], shapes: PhasorElement[]) {
+    // sort by `index`
+    frames = [...frames].sort(compare);
+    shapes = [...shapes].sort(compare);
+
     const html2Image = await import('html-to-image');
-    const rect = getSelectedRect(
+    const { _edgeless } = this;
+    const { surface } = _edgeless;
+    const { viewport } = surface;
+    const { zoom } = viewport;
+    const { left, top, right, bottom, width, height } = getSelectedRect(
       [...frames, ...shapes],
-      this._edgeless.surface.viewport
+      viewport
     );
+    const min = surface.toModelCoord(left, top);
+    const max = surface.toModelCoord(right, bottom);
+    const cx = (min[0] + max[0]) / 2;
+    const cy = (min[1] + max[1]) / 2;
+    const vx = cx - width / 2 / zoom;
+    const vy = cy - height / 2 / zoom;
 
     const container = document.createElement('div');
-    // container.style.position = '';
-    // container.style.zIndex = '-10';
-    container.style.width = `${rect.width}px`;
-    container.style.height = `${rect.height}px`;
+    container.style.position = 'relative';
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+    _edgeless.appendChild(container);
 
     const fragment = document.createDocumentFragment();
+    const layer = document.createElement('div');
+    layer.style.position = 'absolute';
+    layer.style.zIndex = '-1';
+    layer.style.transform = `scale(${zoom})`;
     for (let i = 0; i < frames.length; i++) {
       const element = frames[i];
       const frame = getBlockElementById(element.id) as BlockComponentElement;
@@ -353,26 +369,22 @@ export class EdgelessClipboard implements Clipboard {
       const parent = frame.parentElement;
       assertExists(parent);
 
+      const [x, y] = deserializeXYWH(element.xywh);
       const div = document.createElement('div');
       div.className = parent.className;
       div.setAttribute('style', parent.getAttribute('style') || '');
+      div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
       render(frame.render(), div);
-      fragment.appendChild(div);
+      layer.appendChild(div);
     }
+    fragment.appendChild(layer);
     container.appendChild(fragment);
 
     const renderer = new Renderer();
     renderer.load(shapes);
-    const min = this._edgeless.surface.toModelCoord(rect.x, rect.y);
-    const max = this._edgeless.surface.toModelCoord(
-      rect.x + rect.width,
-      rect.y + rect.height
-    );
-    renderer.setCenter((min[0] + max[0]) / 2, (min[1] + max[1]) / 2);
-    renderer.setZoom(this._edgeless.surface.viewport.zoom);
+    renderer.setCenter(cx, cy);
+    renderer.setZoom(zoom);
     renderer.attach(container);
-
-    this._edgeless.appendChild(container);
 
     try {
       // waiting for canvas to render
@@ -388,8 +400,8 @@ export class EdgelessClipboard implements Clipboard {
         }),
       ]);
     } catch (error) {
+      container.remove();
       console.error(error);
-      // container.remove();
     }
   }
 }
