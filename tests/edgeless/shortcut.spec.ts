@@ -73,7 +73,7 @@ test('pressing the ESC key will return to the default state', async ({
 });
 
 test.describe('zooming', () => {
-  test.only('zoom fit to screen', async ({ page }) => {
+  test('zoom fit to screen', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
