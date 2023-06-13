@@ -2,14 +2,9 @@ import { assertExists, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
+import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
-import {
-  tArray,
-  tBoolean,
-  tNumber,
-  tString,
-  tTag,
-} from '../logical/typesystem.js';
+import { tArray } from '../logical/typesystem.js';
 import type { SelectTag } from '../types.js';
 
 type ColumnOps<

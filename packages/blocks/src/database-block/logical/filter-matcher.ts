@@ -1,13 +1,9 @@
+import { tBoolean, tDate, tNumber, tString, tTag } from './data-type.js';
 import { Matcher } from './matcher.js';
 import type { TFunction } from './typesystem.js';
 import {
   tArray,
-  tBoolean,
-  tDate,
   tFunction,
-  tNumber,
-  tString,
-  tTag,
   tTypeRef,
   tTypeVar,
   tUnion,

@@ -5,8 +5,9 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { tBoolean } from '../../logical/data-type.js';
 import { filterMatcher } from '../../logical/filter-matcher.js';
-import { tBoolean, typesystem } from '../../logical/typesystem.js';
+import { typesystem } from '../../logical/typesystem.js';
 import type { SingleFilter, Variable, VariableOrProperty } from '../ast.js';
 import { firstFilterByRef, getRefType } from '../ast.js';
 import { renderLiteral } from '../literal/index.js';

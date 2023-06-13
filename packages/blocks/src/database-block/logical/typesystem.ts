@@ -1,5 +1,3 @@
-import type { SelectTag } from '../types.js';
-
 export interface TUnion {
   type: 'union';
   title: 'union';
@@ -280,35 +278,3 @@ export class Typesystem {
 export const typesystem = new Typesystem();
 
 export const tUnknown = typesystem.defineData(DataHelper.create('Unknown'));
-export const tNumber = typesystem.defineData<{ value: number }>({
-  name: 'Number',
-  supers: [],
-});
-export const tString = typesystem.defineData<{ value: string }>({
-  name: 'String',
-  supers: [],
-});
-export const tBoolean = typesystem.defineData<{ value: boolean }>({
-  name: 'Boolean',
-  supers: [],
-});
-export const tDate = typesystem.defineData<{ value: number }>({
-  name: 'Date',
-  supers: [],
-});
-export const tURL = typesystem.defineData({
-  name: 'URL',
-  supers: [],
-});
-export const tEmail = typesystem.defineData({
-  name: 'Email',
-  supers: [],
-});
-export const tPhone = typesystem.defineData({
-  name: 'Phone',
-  supers: [],
-});
-export const tTag = typesystem.defineData<{ tags: SelectTag[] }>({
-  name: 'Tag',
-  supers: [],
-});

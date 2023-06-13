@@ -1,14 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
+import { tBoolean, tDate, tNumber, tString, tTag } from '../data-type.js';
 import { filterMatcher } from '../filter-matcher.js';
-import {
-  tArray,
-  tBoolean,
-  tDate,
-  tNumber,
-  tString,
-  tTag,
-} from '../typesystem.js';
+import { tArray } from '../typesystem.js';
 
 describe('match filter', () => {
   test('boolean filter match', () => {

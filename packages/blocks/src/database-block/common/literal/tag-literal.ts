@@ -1,4 +1,5 @@
-import type { tTag, TypeOfData } from '../../logical/typesystem.js';
+import type { tTag } from '../../logical/data-type.js';
+import type { TypeOfData } from '../../logical/typesystem.js';
 import { popMenu } from '../menu.js';
 import { LiteralElement } from './literal-element.js';
 

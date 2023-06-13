@@ -1,15 +1,10 @@
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
+import { tNumber, tString, tTag } from '../../logical/data-type.js';
 import { Matcher } from '../../logical/matcher.js';
 import type { TType } from '../../logical/typesystem.js';
-import {
-  tArray,
-  tNumber,
-  tString,
-  tTag,
-  tUnknown,
-} from '../../logical/typesystem.js';
+import { tArray, tUnknown } from '../../logical/typesystem.js';
 import { ArrayLiteral } from './array-literal.js';
 import type { LiteralElement } from './literal-element.js';
 import { NumberLiteral } from './number-literal.js';
