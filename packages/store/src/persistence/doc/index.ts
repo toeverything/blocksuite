@@ -5,11 +5,10 @@ export { DebugDocProvider } from './debug-provider.js';
 
 /**
  * Different examples of providers could include webrtc sync,
- * database sync like SQLite / LevelDB, or even web IndexDB.
- *
+ * database sync like SQLite, LevelDB or IndexedDB.
  * Usually a provider will also implement {@link DocProviderCreator}.
  */
-export interface DocBaseProvider {
+export interface BaseDocProvider {
   flavour: string;
 
   /**
@@ -21,13 +20,11 @@ export interface DocBaseProvider {
 
 /**
  * @description
- * If a provider is marked as a background provider,
- *  it supposed to be connected in the background
- *
+ * If a provider is marked as passive, it's supposed to be connected in the background.
  * This means that the data might be stale when you use it.
  */
-export interface DocBackgroundProvider extends DocBaseProvider {
-  background: true;
+export interface PassiveDocProvider extends BaseDocProvider {
+  passive: true;
   get connected(): boolean;
   connect(): void;
   disconnect(): void;
@@ -35,13 +32,11 @@ export interface DocBackgroundProvider extends DocBaseProvider {
 
 /**
  * @description
- * If a provider is marked as a necessary provider,
- *  it supposed to be connected before you can use it.
- *
+ * If a provider is marked as active, it's supposed to be connected before you can use it.
  * This means that the data will be fresh before you use it.
  */
-export interface DocNecessaryProvider extends DocBaseProvider {
-  necessary: true;
+export interface ActiveDocProvider extends BaseDocProvider {
+  active: true;
   sync(): void;
 
   /**
@@ -51,7 +46,7 @@ export interface DocNecessaryProvider extends DocBaseProvider {
   get whenReady(): Promise<void>;
 }
 
-export type DocProvider = DocBackgroundProvider | DocNecessaryProvider;
+export type DocProvider = PassiveDocProvider | ActiveDocProvider;
 
 export type DocProviderCreator = (
   id: string,

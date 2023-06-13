@@ -4,7 +4,7 @@ import type { Awareness } from 'y-protocols/awareness';
 import { Room, WebrtcProvider } from 'y-webrtc';
 import type * as Y from 'yjs';
 
-import type { DocBackgroundProvider } from './index.js';
+import type { PassiveDocProvider } from './index.js';
 
 // When using playground from blocksuite repo, t./idb-provider.js "serve" script in "@blocksuite/store" package.
 // We use our own sync server because a local service for sync makes everything much faster for dev.
@@ -25,9 +25,9 @@ const signaling = isLocalhost ? LOCAL_SIGNALING : DEFAULT_SIGNALING;
 
 export class DebugDocProvider
   extends WebrtcProvider
-  implements DocBackgroundProvider
+  implements PassiveDocProvider
 {
-  public readonly background = true as const;
+  public readonly passive = true as const;
   public readonly flavour = 'blocksuite-debug';
   public remoteUpdateSlot = new Slot<unknown>();
 

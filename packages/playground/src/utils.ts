@@ -10,9 +10,9 @@ import {
 import * as globalUtils from '@blocksuite/global/utils';
 import type {
   BlobStorage,
-  DocBackgroundProvider,
   DocProviderCreator,
   Page,
+  PassiveDocProvider,
 } from '@blocksuite/store';
 import type { Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
@@ -37,9 +37,9 @@ const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
-class IndexedDBProviderWrapper implements DocBackgroundProvider {
+class IndexedDBProviderWrapper implements PassiveDocProvider {
   public readonly flavour = 'blocksuite-indexeddb';
-  public readonly background = true as const;
+  public readonly passive = true as const;
   private _connected = false;
   #provider: IndexedDBProvider;
   constructor(id: string, doc: Y.Doc) {
