@@ -7,7 +7,7 @@ export { DebugDocProvider } from './debug-provider.js';
  * Different examples of providers could include webrtc sync,
  * database sync like SQLite / LevelDB, or even web IndexDB.
  *
- * Usually a class will also implement {@link DocProviderConstructor}.
+ * Usually a provider will also implement {@link DocProviderCreator}.
  */
 export interface DocBaseProvider {
   flavour: string;
@@ -22,7 +22,7 @@ export interface DocBaseProvider {
 /**
  * @description
  * If a provider is marked as a background provider,
- *  we will connect it in the `useEffect` in React.js.
+ *  it supposed to be connected in the background
  *
  * This means that the data might be stale when you use it.
  */
