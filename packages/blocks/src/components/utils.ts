@@ -135,6 +135,9 @@ export const createKeydownObserver = ({
           return;
         }
         case 'ArrowUp': {
+          if (e.isComposing) {
+            return;
+          }
           if (e.shiftKey) {
             abortController.abort();
             return;
@@ -144,6 +147,9 @@ export const createKeydownObserver = ({
           return;
         }
         case 'ArrowDown': {
+          if (e.isComposing) {
+            return;
+          }
           if (e.shiftKey) {
             abortController.abort();
             return;
@@ -154,6 +160,9 @@ export const createKeydownObserver = ({
         }
         case 'ArrowLeft':
         case 'ArrowRight': {
+          if (e.isComposing) {
+            return;
+          }
           abortController.abort();
           return;
         }
