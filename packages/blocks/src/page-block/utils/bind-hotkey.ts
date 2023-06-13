@@ -7,8 +7,11 @@ import {
 import type { Page } from '@blocksuite/store';
 
 import {
+  type BlockComponentElement,
   blockRangeToNativeRange,
   focusBlockByModel,
+  focusRichText,
+  getBlockElementByModel,
   getDefaultPage,
   hotkey,
   isMultiBlockRange,
@@ -334,6 +337,81 @@ function handleTab(
   }
 }
 
+function handleEscape(
+  e: KeyboardEvent,
+  page: Page,
+  selection: DefaultSelectionManager
+) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) return;
+  // Get the current range block models
+  const blockModels = blockRange.models;
+  assertExists(blockModels);
+  // If the selection type is block
+  // Clear the selection and foucs the last text block
+  if (selection.state.type === 'block') {
+    // TODO: need to confirm
+    // How many types of text blocks are there?
+    const textFlavours = [
+      'affine:paragraph',
+      'affine:code',
+      'affine:quote',
+      'affine:list',
+    ];
+
+    const lastTextIndex = blockModels.findLastIndex(blockModel =>
+      matchFlavours(blockModel, textFlavours)
+    );
+    let lastTextBlockModel;
+    if (lastTextIndex !== -1) {
+      // If there is a text block in current range, set it as the last text block
+      lastTextBlockModel = blockModels[lastTextIndex];
+    } else {
+      // TODO: need to confirm
+      // Should focus on which block if there is no text block in current range?
+      const lastBlockModel = blockModels.at(-1);
+      assertExists(lastBlockModel);
+      // To find the nearest text block from next siblings
+      const nextSiblings = lastBlockModel.page.getNextSiblings(lastBlockModel);
+      lastTextBlockModel = nextSiblings.find(blockModel =>
+        matchFlavours(blockModel, textFlavours)
+      );
+      // If no text block in next siblings, find it from previous siblings
+      if (!lastTextBlockModel) {
+        const previousSiblings =
+          lastBlockModel.page.getPreviousSiblings(lastBlockModel);
+        lastTextBlockModel = previousSiblings.findLast(blockModel =>
+          matchFlavours(blockModel, textFlavours)
+        );
+      }
+    }
+
+    selection.clear();
+    selection.state.type = 'native';
+
+    assertExists(lastTextBlockModel);
+    const lastTextBlockElement = getBlockElementByModel(lastTextBlockModel);
+    focusRichText(lastTextBlockElement as Element, 'end');
+  } else if (
+    selection.state.type === 'native' ||
+    selection.state.type === 'none'
+  ) {
+    // If the selection type is native or none
+    // Select the current range blocks
+    const blockElements = blockModels.map(blockModel =>
+      getBlockElementByModel(blockModel)
+    );
+    // Clear the selection
+    // To make sure clear the highlight when select multiple blocks
+    selection.clear();
+    selection.state.blur();
+    selection.state.type = 'block';
+    selection.setSelectedBlocks(blockElements as BlockComponentElement[]);
+  }
+
+  e.stopPropagation();
+}
+
 export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   const {
     BACKSPACE,
@@ -349,6 +427,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     ENTER,
     TAB,
     SPACE,
+    ESC,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
@@ -493,6 +572,11 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     }
   });
 
+  hotkey.addListener(ESC, e => {
+    e.preventDefault();
+    handleEscape(e, page, selection);
+  });
+
   // !!!
   // Don't forget to remove hotkeys at `removeHotkeys`
 }
@@ -513,5 +597,6 @@ export function removeHotkeys() {
     HOTKEYS.ENTER,
     HOTKEYS.TAB,
     HOTKEYS.SPACE,
+    HOTKEYS.ESC,
   ]);
 }
