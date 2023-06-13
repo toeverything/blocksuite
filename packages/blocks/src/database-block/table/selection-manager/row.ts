@@ -187,11 +187,14 @@ export class RowSelectionManager {
 
   private _stopDragEvents = () => {
     this._add('dragStart', stopPropagation);
-    this._add('dragMove', stopPropagation);
-    this._add('dragEnd', stopPropagation);
 
     function stopPropagation(ctx: UIEventStateContext) {
-      return true;
+      const e = ctx.get('pointerState');
+      const target = e.raw.target as HTMLElement;
+      if (isInDatabase(target)) {
+        return true;
+      }
+      return false;
     }
   };
 
