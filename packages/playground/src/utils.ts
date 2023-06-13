@@ -8,7 +8,12 @@ import {
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
-import type { BlobStorage, DocProviderCreator, Page } from '@blocksuite/store';
+import type {
+  BlobStorage,
+  DocBackgroundProvider,
+  DocProviderCreator,
+  Page,
+} from '@blocksuite/store';
 import type { Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
@@ -17,7 +22,6 @@ import {
   createMemoryStorage,
   createSimpleServerStorage,
   DebugDocProvider,
-  type DocNecessaryProvider,
   Generator,
   Utils,
   Workspace,
@@ -33,20 +37,24 @@ const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
-class IndexedDBProviderWrapper implements DocNecessaryProvider {
+class IndexedDBProviderWrapper implements DocBackgroundProvider {
   public readonly flavour = 'blocksuite-indexeddb';
-  public readonly necessary = true as const;
+  public readonly background = true as const;
+  private _connected = false;
   #provider: IndexedDBProvider;
   constructor(id: string, doc: Y.Doc) {
     this.#provider = createIndexedDBProvider(id, doc);
   }
-
-  public sync() {
+  connect() {
     this.#provider.connect();
+    this._connected = true;
   }
-
-  get whenReady(): Promise<void> {
-    return this.#provider.whenSynced;
+  disconnect() {
+    this.#provider.disconnect();
+    this._connected = false;
+  }
+  get connected() {
+    return this._connected;
   }
 }
 

@@ -193,14 +193,16 @@ export class DebugMenu extends ShadowlessElement {
   private _toggleConnection() {
     if (this._connected) {
       this.workspace.providers.forEach(provider => {
-        if (!provider || !provider.disconnect) return;
-        provider.disconnect();
+        if ('background' in provider && provider.connected) {
+          provider.disconnect();
+        }
       });
       this._connected = false;
     } else {
       this.workspace.providers.forEach(provider => {
-        if (!provider || !provider.connect) return;
-        provider.connect();
+        if ('background' in provider && !provider.connected) {
+          provider.connect();
+        }
       });
       this._connected = true;
     }
