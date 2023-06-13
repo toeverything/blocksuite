@@ -28,7 +28,7 @@ export interface DocBaseProvider {
  */
 export interface DocBackgroundProvider extends DocBaseProvider {
   // if this is true,
-  //  we will connect the provider on the background
+  //  the provider will be connected on the background
   background: true;
   get connected(): boolean;
   connect(): void;
@@ -38,11 +38,7 @@ export interface DocBackgroundProvider extends DocBaseProvider {
 /**
  * @description
  * If a provider is marked as a necessary provider,
- *  we will connect it once you read the workspace.
- *
- * This means that the data will be fresh when you use it.
- *
- * Currently, there is only one necessary provider: `local-indexeddb`.
+ *  it supposed to be connected before you can use it.
  */
 export interface DocNecessaryProvider extends DocBaseProvider {
   // if this is true,
