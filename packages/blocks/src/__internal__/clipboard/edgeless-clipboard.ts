@@ -409,8 +409,9 @@ export class EdgelessClipboard implements Clipboard {
         }),
       ]);
     } catch (error) {
-      container.remove();
       console.error(error);
     }
+
+    container.remove();
   }
 }
