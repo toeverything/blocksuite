@@ -191,9 +191,7 @@ export class RowSelectionManager {
     this._add('dragEnd', stopPropagation);
 
     function stopPropagation(ctx: UIEventStateContext) {
-      const e = ctx.get('pointerState');
-      const event = e.raw;
-      event.stopPropagation();
+      return true;
     }
   };
 
