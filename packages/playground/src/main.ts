@@ -100,10 +100,10 @@ async function main() {
 
   const syncProviders = async (providers: DocProvider[]) => {
     for (const provider of providers) {
-      if ('necessary' in provider) {
+      if ('active' in provider) {
         provider.sync();
         await provider.whenReady;
-      } else if ('background' in provider) {
+      } else if ('passive' in provider) {
         provider.connect();
       }
     }
