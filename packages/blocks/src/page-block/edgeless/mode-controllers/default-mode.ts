@@ -422,7 +422,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._dragStartPos = { x: e.x, y: e.y };
     this._dragLastPos = { x: e.x, y: e.y };
 
-    this._alignBound = this._edgeless.snap.prepareAlign(this.state.selected);
+    this._alignBound = this._edgeless.snap.setupAlignables(this.state.selected);
 
     this._selectedBounds = this.state.selected.map(element => {
       return Bound.deserialize(element.xywh);
@@ -515,7 +515,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
-    this._edgeless.snap.reset();
+    this._edgeless.snap.cleanupAlignables();
     this._forceUpdateSelection();
   }
 
