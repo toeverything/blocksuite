@@ -39,6 +39,8 @@ export interface DocBackgroundProvider extends DocBaseProvider {
  * @description
  * If a provider is marked as a necessary provider,
  *  it supposed to be connected before you can use it.
+ *
+ * This means that the data will be fresh before you use it.
  */
 export interface DocNecessaryProvider extends DocBaseProvider {
   // if this is true,
