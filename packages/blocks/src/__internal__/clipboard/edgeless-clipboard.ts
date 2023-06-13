@@ -332,8 +332,8 @@ export class EdgelessClipboard implements Clipboard {
 
   async copyAsPng(frames: FrameBlockModel[], shapes: PhasorElement[]) {
     // sort by `index`
-    frames = [...frames].sort(compare);
-    shapes = [...shapes].sort(compare);
+    frames.sort(compare);
+    shapes.sort(compare);
 
     const html2Image = await import('html-to-image');
     const { _edgeless } = this;
