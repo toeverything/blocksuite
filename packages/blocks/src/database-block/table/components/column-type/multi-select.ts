@@ -22,7 +22,7 @@ class MultiSelectCell
     return html`
       <affine-database-multi-tag-view
         .value=${this.value ?? []}
-        .options=${this.columnData}
+        .options=${this.columnData.options}
         .setHeight=${this.setHeight}
       ></affine-database-multi-tag-view>
     `;
