@@ -160,7 +160,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'copy-as-png': {
-        this.slots.copyAsPng.emit(this.elements);
+        const { frames, shapes } = this._splitElements();
+        this.slots.copyAsPng.emit({
+          frames,
+          shapes,
+        });
         break;
       }
       case 'front':

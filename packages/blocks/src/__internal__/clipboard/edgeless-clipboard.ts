@@ -7,11 +7,15 @@ import {
 import {
   deserializeXYWH,
   getCommonBound,
+  Renderer,
   serializeXYWH,
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
+import { render } from 'lit';
 
+import type { FrameBlockModel } from '../../models.js';
+import { getSelectedRect } from '../../page-block/edgeless/components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -20,7 +24,12 @@ import {
 import { isTopLevelBlock } from '../../page-block/edgeless/utils/query.js';
 import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
-import type { SerializedBlock, TopLevelBlockModel } from '../index.js';
+import {
+  type BlockComponentElement,
+  getBlockElementById,
+  type SerializedBlock,
+  type TopLevelBlockModel,
+} from '../index.js';
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
@@ -323,17 +332,64 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(elements: Selectable[]) {
-    // const blob = null;
+  async copyAsPng(frames: FrameBlockModel[], shapes: PhasorElement[]) {
+    const html2Image = await import('html-to-image');
+    const rect = getSelectedRect(
+      [...frames, ...shapes],
+      this._edgeless.surface.viewport
+    );
+
+    const container = document.createElement('div');
+    // container.style.position = '';
+    // container.style.zIndex = '-10';
+    container.style.width = `${rect.width}px`;
+    container.style.height = `${rect.height}px`;
+
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < frames.length; i++) {
+      const element = frames[i];
+      const frame = getBlockElementById(element.id) as BlockComponentElement;
+      assertExists(frame);
+      const parent = frame.parentElement;
+      assertExists(parent);
+
+      const div = document.createElement('div');
+      div.className = parent.className;
+      div.setAttribute('style', parent.getAttribute('style') || '');
+      render(frame.render(), div);
+      fragment.appendChild(div);
+    }
+    container.appendChild(fragment);
+
+    const renderer = new Renderer();
+    renderer.load(shapes);
+    const min = this._edgeless.surface.toModelCoord(rect.x, rect.y);
+    const max = this._edgeless.surface.toModelCoord(
+      rect.x + rect.width,
+      rect.y + rect.height
+    );
+    renderer.setCenter((min[0] + max[0]) / 2, (min[1] + max[1]) / 2);
+    renderer.setZoom(this._edgeless.surface.viewport.zoom);
+    renderer.attach(container);
+
+    this._edgeless.appendChild(container);
+
     try {
+      // waiting for canvas to render
+      await new Promise(requestAnimationFrame);
+
+      const blob = await html2Image.toBlob(container, {
+        cacheBust: true,
+      });
+      assertExists(blob);
       await navigator.clipboard.write([
         new ClipboardItem({
-          // 'image/png': blob
-          // [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob
+          [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
         }),
       ]);
     } catch (error) {
       console.error(error);
+      // container.remove();
     }
   }
 }

@@ -100,7 +100,10 @@ export interface EdgelessSelectionSlots {
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
-  copyAsPng: Slot<Selectable[]>;
+  copyAsPng: Slot<{
+    notes: NoteBlockModel[];
+    shapes: PhasorElement[];
+  }>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -219,7 +222,10 @@ export class EdgelessPageBlockComponent
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
-    copyAsPng: new Slot<Selectable[]>(),
+    copyAsPng: new Slot<{
+      notes: NoteBlockModel[];
+      shapes: PhasorElement[];
+    }>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -469,10 +475,12 @@ export class EdgelessPageBlockComponent
 
     let canCopyAsPng = true;
     _disposables.add(
-      slots.copyAsPng.on((elements: Selectable[]) => {
+      slots.copyAsPng.on(({ notes, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
-        this.clipboard.copyAsPng(elements).finally(() => (canCopyAsPng = true));
+        this.clipboard
+          .copyAsPng(notes, shapes)
+          .finally(() => (canCopyAsPng = true));
       })
     );
   }
