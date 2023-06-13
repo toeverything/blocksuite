@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 import * as actions from '../utils/actions/edgeless.js';
 import {
   getNoteBoundBoxInEdgeless,
@@ -12,9 +14,13 @@ import {
   enterPlaygroundRoom,
   getBoundingRect,
   initEmptyEdgelessState,
+  initThreeNotes,
   initThreeParagraphs,
+  initThreeShapes,
   pressEnter,
   resizeElementByTopLeftHandle,
+  selectAllByKeyboard,
+  triggerComponentToolbarAction,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
@@ -268,4 +274,38 @@ test.describe('resize shapes', () => {
       await assertEdgelessSelectedRect(page, [300, 202, 152, 78]);
     });
   });
+});
+
+test.fixme('copy to clipboard as PNG', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await initThreeShapes(page);
+  await initThreeNotes(page);
+  await waitNextFrame(page);
+
+  await page.mouse.click(0, 0);
+
+  await selectAllByKeyboard(page);
+
+  await triggerComponentToolbarAction(page, 'copyAsPng');
+
+  await waitNextFrame(page);
+
+  const items = await page.evaluate(async () => {
+    const items = await navigator.clipboard.read();
+    return items;
+  });
+
+  expect(items.length).toBe(1);
+
+  const item = items.at(0);
+
+  if (!item) {
+    throw new Error('Missing ClipboardItem');
+  }
+
+  expect(item.types).toBe(['image/png']);
 });
