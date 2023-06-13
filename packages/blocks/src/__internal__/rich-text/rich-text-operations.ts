@@ -557,7 +557,10 @@ export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
     if (paragraphIndex === 0) {
       const frameParent = page.getParent(parent);
       if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
-        const frameIndex = frameParent.children.indexOf(parent);
+        const frameIndex = frameParent.children
+          // page block may contain other blocks like surface
+          .filter(block => matchFlavours(block, ['affine:frame']))
+          .indexOf(parent);
         if (frameIndex === 0) {
           titleVEditor.focusEnd();
           return;
