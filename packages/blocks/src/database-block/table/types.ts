@@ -3,7 +3,8 @@ import type { TemplateResult } from 'lit';
 import type { DatabaseMode } from '../types.js';
 
 export type SetValueOption = {
-  captureSync: boolean;
+  captureSync?: boolean;
+  sync?: boolean;
 };
 
 export interface RowHost<

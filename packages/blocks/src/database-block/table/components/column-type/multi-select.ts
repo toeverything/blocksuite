@@ -21,9 +21,9 @@ class MultiSelectCell
   override render() {
     return html`
       <affine-database-multi-tag-view
-        .value=${this.cell?.value ?? []}
-        .options=${this.column.data.options}
-        .setHeight=${this.rowHost.setHeight}
+        .value=${this.value ?? []}
+        .options=${this.columnData}
+        .setHeight=${this.setHeight}
       ></affine-database-multi-tag-view>
     `;
   }
@@ -38,23 +38,23 @@ class MultiSelectCellEditing
   cellType = 'multi-select' as const;
 
   get _options(): SelectTag[] {
-    return this.column.data.options;
+    return this.columnData.options;
   }
 
   get _value() {
-    return this.cell?.value ?? [];
+    return this.value ?? [];
   }
 
   _onChange = (ids: string[]) => {
-    this.rowHost.setValue(ids);
+    this.onChange(ids);
   };
 
   _editComplete = () => {
-    this.rowHost.setEditing(false);
+    this.setEditing(false);
   };
 
   _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.rowHost.updateColumnProperty(oldProperty => {
+    this.updateColumnProperty(oldProperty => {
       return {
         data: {
           ...oldProperty.data,
@@ -94,8 +94,8 @@ class MultiSelectCellEditing
         .newTag="${this._newTag}"
         .deleteTag="${this._deleteTag}"
         .changeTag="${this._changeTag}"
-        .container="${this.rowHost}"
-        .databaseModel="${this.databaseModel}"
+        .container="${this.container}"
+        .page="${this.page}"
       >
       </affine-database-multi-tag-select>
     `;
@@ -104,10 +104,6 @@ class MultiSelectCellEditing
 
 export const MultiSelectColumnRenderer = defineColumnRenderer(
   'multi-select',
-  () => ({
-    selection: [] as SelectTag[],
-  }),
-  () => [] as SelectTag[],
   {
     Cell: MultiSelectCell,
     CellEditing: MultiSelectCellEditing,

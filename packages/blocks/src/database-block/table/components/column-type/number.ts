@@ -65,11 +65,11 @@ export class NumberCellEditing
   private _setValue = (str: string = this._inputEle.value) => {
     const value = Number.parseFloat(str);
     if (Object.is(value, NaN)) {
-      this._inputEle.value = `${this.cell?.value ?? ''}`;
+      this._inputEle.value = `${this.value ?? ''}`;
       return;
     }
-    this.rowHost.setValue(value, { captureSync: true });
-    this._inputEle.value = `${this.cell?.value ?? ''}`;
+    this.onChange(value, { captureSync: true });
+    this._inputEle.value = `${this.value ?? ''}`;
   };
 
   private _keydown = (e: KeyboardEvent) => {
@@ -80,7 +80,7 @@ export class NumberCellEditing
 
   protected override render() {
     return html`<input
-      .value=${this.cell?.value ?? ''}
+      .value=${this.value ?? ''}
       @blur=${this._blur}
       @keydown=${this._keydown}
       class="affine-database-number number"
@@ -90,10 +90,6 @@ export class NumberCellEditing
 
 export const NumberColumnRenderer = defineColumnRenderer(
   'number',
-  () => ({
-    decimal: 0,
-  }),
-  page => null,
   {
     Cell: NumberCellEditing,
     CellEditing: null,
