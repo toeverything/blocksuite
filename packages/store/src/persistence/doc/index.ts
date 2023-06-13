@@ -27,8 +27,6 @@ export interface DocBaseProvider {
  * This means that the data might be stale when you use it.
  */
 export interface DocBackgroundProvider extends DocBaseProvider {
-  // if this is true,
-  //  the provider will be connected on the background
   background: true;
   get connected(): boolean;
   connect(): void;
@@ -43,8 +41,6 @@ export interface DocBackgroundProvider extends DocBaseProvider {
  * This means that the data will be fresh before you use it.
  */
 export interface DocNecessaryProvider extends DocBaseProvider {
-  // if this is true,
-  //  we will ensure that the provider is connected before you can use it
   necessary: true;
   sync(): void;
 
