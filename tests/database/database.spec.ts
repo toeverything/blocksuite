@@ -16,6 +16,7 @@ import {
   initEmptyDatabaseWithParagraphState,
   pasteByKeyboard,
   pressArrowLeft,
+  pressArrowRight,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -135,6 +136,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await assertDatabaseCellRichTexts(page, { text: '123' });
 
   await cell.click();
+  await pressArrowRight(page);
   await pressArrowLeft(page);
   await pressShiftEnter(page);
   await assertDatabaseCellRichTexts(page, { text: '12\n3' });
