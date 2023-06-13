@@ -88,12 +88,14 @@ export class TextCell
       height: 100%;
       outline: none;
     }
+
     .affine-database-rich-text v-line {
       display: flex !important;
       align-items: center;
       height: 100%;
       width: 100%;
     }
+
     .affine-database-rich-text v-line > div {
       flex-grow: 1;
     }
@@ -106,45 +108,39 @@ export class TextCell
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
 
-  private get readonly() {
-    return this.databaseModel.page.readonly;
-  }
-
   protected override firstUpdated() {
     this._onInitVEditor();
     this._disposables.addFromEvent(this, 'click', this._handleClick);
   }
 
   private _handleClick() {
-    this.databaseModel.page.captureSync();
+    this.page.captureSync();
   }
 
   private _initYText = (text?: string) => {
-    const yText = new this.databaseModel.page.YText(text);
-    this.databaseModel.updateCell(this.rowModel.id, {
-      columnId: this.column.id,
-      value: yText,
-    });
+    const yText = new this.page.YText(text);
+
+    this.onChange(yText, { sync: true });
     return yText;
   };
 
   private _onInitVEditor() {
     let value: Y.Text;
-    if (!this.cell?.value) {
+    if (!this.value) {
       value = this._initYText();
     } else {
       // When copying the database, the type of the value is `string`.s
-      if (typeof this.cell.value === 'string') {
-        value = this._initYText(this.cell.value);
+      if (typeof this.value === 'string') {
+        value = this._initYText(this.value);
       } else {
-        value = this.cell.value;
+        value = this.value;
       }
     }
 
     this.vEditor = new VEditor(value, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.databaseModel.page, this.vEditor);
+    setupVirgoScroll(this.page, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
@@ -168,7 +164,7 @@ export class TextCell
         this._onSoftEnter();
       } else {
         // exit editing
-        this.rowHost.setEditing(false);
+        this.setEditing(false);
         this._container.blur();
       }
       event.preventDefault();
@@ -224,12 +220,11 @@ export class TextCell
   };
 
   private _onSoftEnter = () => {
-    if (this.cell && this.vEditor) {
+    if (this.value && this.vEditor) {
       const vRange = this.vEditor.getVRange();
       assertExists(vRange);
 
-      const page = this.databaseModel.page;
-      page.captureSync();
+      this.page.captureSync();
       const text = new Text(this.vEditor.yText);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({
@@ -240,14 +235,12 @@ export class TextCell
   };
 
   override render() {
-    return html`<div class="affine-database-rich-text virgo-editor"></div>`;
+    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
   }
 }
 
 export const RichTextColumnRenderer = defineColumnRenderer(
   'rich-text',
-  () => ({}),
-  page => new page.YText(''),
   {
     Cell: TextCell,
     CellEditing: null,
