@@ -11,7 +11,9 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     block: BookmarkBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    return block.url;
+    return `<p><a href="${block.url}">${
+      block.title ? block.title : 'Bookmark'
+    }</a></p>`;
   }
   override block2Text(
     block: BookmarkBlockModel,
