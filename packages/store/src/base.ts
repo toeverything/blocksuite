@@ -128,6 +128,17 @@ export function defineBlockSchema({
   return schema;
 }
 
+/**
+ * The MagicProps function is used to append the props to the class.
+ * For example:
+ *
+ * ```ts
+ * class MyBlock extends MagicProps()<{ foo: string }> {}
+ * const myBlock = new MyBlock();
+ * // You'll get type checking for the foo prop
+ * myBlock.foo = 'bar';
+ * ```
+ */
 function MagicProps(): {
   new <Props>(): Props;
 } {
