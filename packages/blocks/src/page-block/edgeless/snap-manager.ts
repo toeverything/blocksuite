@@ -1,4 +1,4 @@
-import { Bound, Renderable } from '@blocksuite/phasor';
+import { Bound, Overlay } from '@blocksuite/phasor';
 
 import { Point } from '../../__internal__/utils/rect.js';
 import type { Alignable } from '../../__internal__/utils/types.js';
@@ -14,7 +14,7 @@ interface Distance {
   indexY: number;
 }
 
-export class EdgelessSnapManager extends Renderable {
+export class EdgelessSnapManager extends Overlay {
   constructor(public container: EdgelessPageBlockComponent) {
     super();
   }
@@ -29,7 +29,7 @@ export class EdgelessSnapManager extends Renderable {
     const { page, surface } = this.container;
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);
-    viewport.addRenderable(this);
+    viewport.addOverlay(this);
 
     const frames = page.getBlockByFlavour('affine:frame') as FrameBlockModel[];
     const phasorElements = surface.getElements();
@@ -348,7 +348,7 @@ export class EdgelessSnapManager extends Renderable {
     this._alignBounds = [];
     this._alignPoints = [];
     this._alignDistributePoints = [];
-    viewport.removeRenderable(this);
+    viewport.removeOverlay(this);
   }
 
   private _draw() {

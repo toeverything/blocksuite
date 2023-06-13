@@ -30,12 +30,16 @@ export interface SurfaceViewport {
   setZoom(zoom: number, focusPoint?: IPoint): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
 
-  addRenderable(renderable: Renderable): void;
-  removeRenderable(renderable: Renderable): void;
+  addOverlay(overlay: Overlay): void;
+  removeOverlay(overlay: Overlay): void;
 }
 
-export abstract class Renderable {
-  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
+/**
+ * An overlay is a layer covered on top of elements,
+ * can be used for rendering non-CRDT state indicators.
+ */
+export abstract class Overlay {
+  abstract render(ctx: CanvasRenderingContext2D): void;
 }
 
 export class Renderer implements SurfaceViewport {
@@ -44,11 +48,7 @@ export class Renderer implements SurfaceViewport {
   rc: RoughCanvas;
   gridManager = new GridManager();
 
-  /**
-   * it's not for real edgeless element to render
-   * it's for other information like align or else.
-   */
-  private _renderables: Set<Renderable> = new Set();
+  private _overlays: Set<Overlay> = new Set();
 
   private _container!: HTMLElement;
   private _left = 0;
@@ -278,23 +278,23 @@ export class Renderer implements SurfaceViewport {
       ctx.restore();
     }
 
-    for (const renderable of this._renderables) {
+    for (const overlay of this._overlays) {
       ctx.save();
       ctx.translate(-viewportBounds.x, -viewportBounds.y);
-      renderable.render(ctx, rc);
+      overlay.render(ctx);
       ctx.restore();
     }
 
     ctx.restore();
   }
 
-  public addRenderable(renderable: Renderable) {
-    this._renderables.add(renderable);
+  public addOverlay(overlay: Overlay) {
+    this._overlays.add(overlay);
     this._shouldUpdate = true;
   }
 
-  public removeRenderable(renderable: Renderable) {
-    this._renderables.delete(renderable);
+  public removeOverlay(overlay: Overlay) {
+    this._overlays.delete(overlay);
     this._shouldUpdate = true;
   }
 }
