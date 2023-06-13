@@ -544,21 +544,25 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 }
 
 function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:paragraph'])) return false;
+  if (!matchFlavours(model, ['affine:paragraph'])) return;
   const pageElement = getDefaultPage(page);
   if (!pageElement) {
     // Maybe in edgeless mode
-    return null;
+    return;
   }
   const titleVEditor = pageElement.titleVEditor;
-  const previousBlock = getPreviousBlock(model);
-  if (previousBlock !== null) {
-    if (matchFlavours(previousBlock, ['affine:surface'])) {
-      titleVEditor.focusEnd();
+  const parent = page.getParent(model);
+  if (parent && matchFlavours(parent, ['affine:frame'])) {
+    const frameParent = page.getParent(parent);
+    if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
+      const frameIndex = frameParent.children.indexOf(parent);
+      if (frameIndex === 0) {
+        // The first frame, move to title
+        titleVEditor.focusEnd();
+        return;
+      }
     }
   }
-  ALLOW_DEFAULT;
-  return true;
 }
 
 export function handleLineStartLeftKey(page: Page, model: ExtendedModel) {
