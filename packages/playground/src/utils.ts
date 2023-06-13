@@ -8,8 +8,8 @@ import {
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
-import type { BlobStorage, Page } from '@blocksuite/store';
-import type { DocProvider, Y } from '@blocksuite/store';
+import type { BlobStorage, DocProviderCreator, Page } from '@blocksuite/store';
+import type { Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
   assertExists,
@@ -17,7 +17,7 @@ import {
   createMemoryStorage,
   createSimpleServerStorage,
   DebugDocProvider,
-  type DocProviderConstructor,
+  type DocNecessaryProvider,
   Generator,
   Utils,
   Workspace,
@@ -33,16 +33,20 @@ const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
-class IndexedDBProviderWrapper implements DocProvider {
+class IndexedDBProviderWrapper implements DocNecessaryProvider {
+  public readonly flavour = 'blocksuite-indexeddb';
+  public readonly necessary = true as const;
   #provider: IndexedDBProvider;
   constructor(id: string, doc: Y.Doc) {
     this.#provider = createIndexedDBProvider(id, doc);
   }
-  connect() {
+
+  public sync() {
     this.#provider.connect();
   }
-  disconnect() {
-    this.#provider.disconnect();
+
+  get whenReady(): Promise<void> {
+    return this.#provider.whenSynced;
   }
 }
 
@@ -178,17 +182,19 @@ export async function tryInitExternalContent(
  * We use webrtcDocProvider by default if the `providers` param is missing.
  */
 export function createWorkspaceOptions(): WorkspaceOptions {
-  const providers: DocProviderConstructor[] = [];
+  const providerCreators: DocProviderCreator[] = [];
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
   if (providerArgs.includes('webrtc')) {
-    providers.push(DebugDocProvider);
+    providerCreators.push(
+      (id, doc, options) => new DebugDocProvider(id, doc, options)
+    );
     idGenerator = Generator.AutoIncrementByClientId; // works in multi-user mode
   }
 
   if (providerArgs.includes('indexeddb')) {
-    providers.push(IndexedDBProviderWrapper);
+    providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
     idGenerator = Generator.UUIDv4; // works in production
   }
 
@@ -213,7 +219,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
 
   return {
     id: room,
-    providers,
+    providerCreators,
     idGenerator,
     blobStorages,
     defaultFlags: {

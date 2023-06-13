@@ -4,7 +4,7 @@ import type { Awareness } from 'y-protocols/awareness';
 import { Room, WebrtcProvider } from 'y-webrtc';
 import type * as Y from 'yjs';
 
-import type { DocProvider } from './index.js';
+import type { DocBackgroundProvider } from './index.js';
 
 // When using playground from blocksuite repo, t./idb-provider.js "serve" script in "@blocksuite/store" package.
 // We use our own sync server because a local service for sync makes everything much faster for dev.
@@ -23,9 +23,17 @@ const isLocalhost =
     window.location.hostname === '127.0.0.1');
 const signaling = isLocalhost ? LOCAL_SIGNALING : DEFAULT_SIGNALING;
 
-export class DebugDocProvider extends WebrtcProvider implements DocProvider {
-  private readonly _doc: Y.Doc;
+export class DebugDocProvider
+  extends WebrtcProvider
+  implements DocBackgroundProvider
+{
+  public readonly background = true as const;
+  public readonly flavour = 'blocksuite-debug';
   public remoteUpdateSlot = new Slot<unknown>();
+
+  private readonly _doc: Y.Doc;
+  private _connected = false;
+
   constructor(id: string, doc: Y.Doc, options?: { awareness?: Awareness }) {
     super(id, doc, {
       awareness: options?.awareness,
@@ -40,17 +48,23 @@ export class DebugDocProvider extends WebrtcProvider implements DocProvider {
     }
   };
 
+  get connected() {
+    return this._connected;
+  }
+
   connect = () => {
     super.connect();
     this._doc.on('update', this._handleRemoteUpdate);
+    this._connected = true;
   };
 
   disconnect = () => {
     super.disconnect();
     this._doc.off('update', this._handleRemoteUpdate);
+    this._connected = false;
   };
 
-  public clearData() {
+  public cleanup() {
     // Do nothing for now
     return Promise.resolve();
   }
