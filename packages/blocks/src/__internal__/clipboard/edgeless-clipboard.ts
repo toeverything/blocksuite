@@ -331,6 +331,11 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   async copyAsPng(frames: FrameBlockModel[], shapes: PhasorElement[]) {
+    const framesLen = frames.length;
+    const shapesLen = shapes.length;
+
+    if (framesLen + shapesLen === 0) return;
+
     // sort by `index`
     frames.sort(compare);
     shapes.sort(compare);
@@ -357,34 +362,38 @@ export class EdgelessClipboard implements Clipboard {
     container.style.height = `${height}px`;
     _edgeless.appendChild(container);
 
-    const fragment = document.createDocumentFragment();
-    const layer = document.createElement('div');
-    layer.style.position = 'absolute';
-    layer.style.zIndex = '-1';
-    layer.style.transform = `scale(${zoom})`;
-    for (let i = 0; i < frames.length; i++) {
-      const element = frames[i];
-      const frame = getBlockElementById(element.id) as BlockComponentElement;
-      assertExists(frame);
-      const parent = frame.parentElement;
-      assertExists(parent);
+    if (framesLen) {
+      const fragment = document.createDocumentFragment();
+      const layer = document.createElement('div');
+      layer.style.position = 'absolute';
+      layer.style.zIndex = '-1';
+      layer.style.transform = `scale(${zoom})`;
+      for (let i = 0; i < framesLen; i++) {
+        const element = frames[i];
+        const frame = getBlockElementById(element.id) as BlockComponentElement;
+        assertExists(frame);
+        const parent = frame.parentElement;
+        assertExists(parent);
 
-      const [x, y] = deserializeXYWH(element.xywh);
-      const div = document.createElement('div');
-      div.className = parent.className;
-      div.setAttribute('style', parent.getAttribute('style') || '');
-      div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
-      render(frame.render(), div);
-      layer.appendChild(div);
+        const [x, y] = deserializeXYWH(element.xywh);
+        const div = document.createElement('div');
+        div.className = parent.className;
+        div.setAttribute('style', parent.getAttribute('style') || '');
+        div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
+        render(frame.render(), div);
+        layer.appendChild(div);
+      }
+      fragment.appendChild(layer);
+      container.appendChild(fragment);
     }
-    fragment.appendChild(layer);
-    container.appendChild(fragment);
 
-    const renderer = new Renderer();
-    renderer.load(shapes);
-    renderer.setCenter(cx, cy);
-    renderer.setZoom(zoom);
-    renderer.attach(container);
+    if (shapesLen) {
+      const renderer = new Renderer();
+      renderer.load(shapes);
+      renderer.setCenter(cx, cy);
+      renderer.setZoom(zoom);
+      renderer.attach(container);
+    }
 
     try {
       // waiting for canvas to render
