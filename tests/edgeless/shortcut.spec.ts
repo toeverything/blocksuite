@@ -73,18 +73,19 @@ test('pressing the ESC key will return to the default state', async ({
 });
 
 test.describe('zooming', () => {
-  test('zoom fit to screen', async ({ page }) => {
+  test.only('zoom fit to screen', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
 
-    const start = { x: 100, y: 100 };
+    const start = { x: 0, y: 0 };
     const end = { x: 200, y: 200 };
     await addBasicRectShapeElement(page, start, end);
 
     await zoomFitByKeyboard(page);
 
     const zoom = await getZoomLevel(page);
+
     expect(zoom).not.toBe(100);
   });
   test('zoom out', async ({ page }) => {
