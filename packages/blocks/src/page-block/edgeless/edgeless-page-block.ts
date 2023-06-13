@@ -100,6 +100,7 @@ export interface EdgelessSelectionSlots {
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
+  copyAsPng: Slot<Selectable[]>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -218,6 +219,7 @@ export class EdgelessPageBlockComponent
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
+    copyAsPng: new Slot<Selectable[]>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -462,6 +464,15 @@ export class EdgelessPageBlockComponent
       slots.pressShiftKeyUpdated.on(pressed => {
         this.selection.shiftKey = pressed;
         this.requestUpdate();
+      })
+    );
+
+    let canCopyAsPng = true;
+    _disposables.add(
+      slots.copyAsPng.on((elements: Selectable[]) => {
+        if (!canCopyAsPng) return;
+        canCopyAsPng = false;
+        this.clipboard.copyAsPng(elements).finally(() => (canCopyAsPng = true));
       })
     );
   }

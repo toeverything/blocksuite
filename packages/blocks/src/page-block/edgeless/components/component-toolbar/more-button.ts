@@ -153,10 +153,6 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ selected: [], active: false });
   }
 
-  private _copyAsPNG() {
-    // todo
-  }
-
   private _runAction = ({ type }: Action) => {
     switch (type) {
       case 'delete': {
@@ -164,7 +160,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'copy-as-png': {
-        this._copyAsPNG();
+        this.slots.copyAsPng.emit(this.elements);
         break;
       }
       case 'front':

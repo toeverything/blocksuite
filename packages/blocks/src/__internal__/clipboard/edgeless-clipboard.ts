@@ -34,6 +34,7 @@ import {
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
+  CLIPBOARD_MIMETYPE,
   createSurfaceClipboardItems,
   getSurfaceClipboardData,
   performNativeCopy,
@@ -320,5 +321,19 @@ export class EdgelessClipboard implements Clipboard {
       elements.map(ele => ele.id),
       noteIds
     );
+  }
+
+  async copyAsPng(elements: Selectable[]) {
+    // const blob = null;
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          // 'image/png': blob
+          // [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob
+        }),
+      ]);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
