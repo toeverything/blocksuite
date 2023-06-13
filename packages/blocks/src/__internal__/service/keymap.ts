@@ -12,16 +12,12 @@ import {
   handleBlockEndEnter,
   handleBlockSplit,
   handleLineStartBackspace,
-  handleLineStartLeftKey,
+  handleParagraphBlockLeftKey,
   handleSoftEnter,
   handleUnindent,
 } from '../rich-text/rich-text-operations.js';
 import type { AffineVEditor } from '../rich-text/virgo/types.js';
-import { checkFirstLine } from '../utils/check-line.js';
-import {
-  getCurrentNativeRange,
-  isCollapsedAtBlockStart,
-} from '../utils/index.js';
+import { isCollapsedAtBlockStart } from '../utils/index.js';
 
 export function onSoftEnter(
   model: BaseBlockModel,
@@ -198,11 +194,7 @@ export function onKeyLeft(
     e.stopPropagation();
     return ALLOW_DEFAULT;
   }
-  const nativeRange = getCurrentNativeRange();
-  const isFirstLine = checkFirstLine(nativeRange, editableContainer);
-  if (isFirstLine && lineStart) {
-    handleLineStartLeftKey(model.page, model);
-  }
+  handleParagraphBlockLeftKey(model.page, model);
   // Need jump to previous block
   return PREVENT_DEFAULT;
 }

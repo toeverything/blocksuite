@@ -543,7 +543,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   handleUnknownBlockBackspace(model);
 }
 
-function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
+export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:paragraph'])) return;
   const pageElement = getDefaultPage(page);
   if (!pageElement) {
@@ -553,20 +553,18 @@ function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   const titleVEditor = pageElement.titleVEditor;
   const parent = page.getParent(model);
   if (parent && matchFlavours(parent, ['affine:frame'])) {
-    const frameParent = page.getParent(parent);
-    if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
-      const frameIndex = frameParent.children.indexOf(parent);
-      if (frameIndex === 0) {
-        // The first frame, move to title
-        titleVEditor.focusEnd();
-        return;
+    const paragraphIndex = parent.children.indexOf(model);
+    if (paragraphIndex === 0) {
+      const frameParent = page.getParent(parent);
+      if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
+        const frameIndex = frameParent.children.indexOf(parent);
+        if (frameIndex === 0) {
+          titleVEditor.focusEnd();
+          return;
+        }
       }
     }
   }
-}
-
-export function handleLineStartLeftKey(page: Page, model: ExtendedModel) {
-  handleParagraphBlockLeftKey(page, model);
 }
 
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
