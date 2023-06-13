@@ -5,10 +5,12 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
+  autoFit,
   decreaseZoomLevel,
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
+  getZoomLevel,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
@@ -38,6 +40,7 @@ import {
   assertFrameXYWH,
   assertRichTexts,
   assertSelection,
+  assertZoomLevel,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -232,4 +235,18 @@ test('shift click multi select and de-select', async ({ page }) => {
 
   shiftClick(page, { x: 150, y: 50 });
   await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
+});
+
+test('Before and after switching to Edgeless, the previous zoom ratio and position when Edgeless was opened should be remembered#2479', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await assertZoomLevel(page, 100);
+  await increaseZoomLevel(page);
+  await assertZoomLevel(page, 125);
+  await switchEditorMode(page);
+  await switchEditorMode(page);
+  await assertZoomLevel(page, 125);
 });

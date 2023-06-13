@@ -163,6 +163,9 @@ export class EditorContainer
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mode')) {
       this.slots.pageModeSwitched.emit(this.mode);
+      if (this.mode === 'page') {
+        this._storeViewportInfo();
+      }
     }
 
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
@@ -185,6 +188,17 @@ export class EditorContainer
       await new Promise(res => this.page.slots.rootAdded.once(res));
     }
     return createBlockHub(this, this.page);
+  }
+
+  private _storeViewportInfo() {
+    const edgelessPage = this.querySelector('affine-edgeless-page');
+    if (edgelessPage) {
+      const { viewport } = edgelessPage.surface;
+      localStorage.setItem(
+        this.page.id,
+        JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
+      );
+    }
   }
 
   createContentParser() {

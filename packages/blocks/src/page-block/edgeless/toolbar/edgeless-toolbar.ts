@@ -36,8 +36,6 @@ import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
 
-const FIT_TO_SCREEN_PADDING = 100;
-
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
 @customElement('edgeless-toolbar')
@@ -159,35 +157,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _zoomToFit() {
-    const bounds = [];
-
-    this.edgeless.frames.forEach(frame => {
-      bounds.push(Bound.deserialize(frame.xywh));
-    });
-
-    const surfaceElementsBound = this.edgeless.surface.getElementsBound();
-    if (surfaceElementsBound) {
-      bounds.push(surfaceElementsBound);
-    }
-
+    const { centerX, centerY, zoom } = this.edgeless.getFitToScreenData();
     const { viewport } = this.edgeless.surface;
-    let { centerX, centerY, zoom } = viewport;
-
-    if (bounds.length) {
-      const { width, height } = viewport;
-      const bound = getCommonBound(bounds);
-      assertExists(bound);
-
-      zoom = Math.min(
-        (width - FIT_TO_SCREEN_PADDING) / bound.w,
-        (height - FIT_TO_SCREEN_PADDING) / bound.h
-      );
-
-      centerX = bound.x + bound.w / 2;
-      centerY = bound.y + bound.h / 2;
-    } else {
-      zoom = 1;
-    }
     const preZoom = this.zoom;
     const newZoom = zoom;
     const cofficient = preZoom / newZoom;
