@@ -15,13 +15,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  Bound,
-  getCommonBound,
-  ZOOM_MAX,
-  ZOOM_MIN,
-  ZOOM_STEP,
-} from '@blocksuite/phasor';
+import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
