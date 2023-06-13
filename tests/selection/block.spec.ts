@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { assert } from 'console';
 
 import {
   activeEmbed,
@@ -1196,7 +1195,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
     return pageBlock?.getBoundingClientRect() || null;
   });
 
-  assert(pageRect !== null);
+  expect(pageRect).not.toBeNull();
   await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
 
   await assertStoreMatchJSX(
