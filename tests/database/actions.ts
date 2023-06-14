@@ -131,6 +131,7 @@ export function getFirstColumnCell(page: Page, cellClass: string) {
 export async function performSelectColumnTagAction(
   page: Page,
   actionClass: string,
+  operation: 'click' | 'hover' = 'click',
   index = 0
 ) {
   const cell = getFirstColumnCell(
@@ -148,13 +149,34 @@ export async function performSelectColumnTagAction(
   const actionIcon = selectOption.locator('.select-option-icon');
   await actionIcon.click();
   const action = page.locator(`.${actionClass}`);
-  await action.click();
+  if (operation === 'click') {
+    await action.click();
+  } else if (operation === 'hover') {
+    await action.hover();
+    const firstColorOption = page.locator('.option-color').nth(0);
+    await firstColorOption.click();
+    await clickDatabaseOutside(page);
+  }
 
   return {
     cellSelected: cell.locator('.select-selected'),
     selectOption: selectOptions,
     saveIcon: actionIcon,
   };
+}
+
+export async function assertSelectedStyle(
+  page: Page,
+  key: keyof CSSStyleDeclaration,
+  value: string
+) {
+  const style = await page.evaluate(key => {
+    const selectedTag = document.querySelector<HTMLElement>('.select-selected');
+    if (!selectedTag) throw new Error('Missing selected tag');
+    return selectedTag.style[key];
+  }, key);
+
+  expect(style).toBe(value);
 }
 
 export async function clickDatabaseOutside(page: Page) {
