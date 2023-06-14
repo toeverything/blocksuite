@@ -2,39 +2,21 @@ import { type DatabaseBlockModel } from '@blocksuite/blocks';
 import { expect } from '@playwright/test';
 
 import {
-  assertColumnWidth,
-  assertDatabaseCellNumber,
-  assertDatabaseCellRichTexts,
   assertDatabaseColumnOrder,
-  assertDatabaseSearching,
-  assertDatabaseTitleColumnText,
-  assertDatabaseTitleText,
-  blurDatabaseSearch,
-  clickColumnType,
-  clickDatabaseOutside,
   dragBetweenCoords,
   enterPlaygroundRoom,
-  focusDatabaseHeader,
-  focusDatabaseSearch,
   focusDatabaseTitle,
   focusRichText,
   getBlockModel,
   getBoundingBox,
-  getDatabaseBodyRow,
-  getDatabaseBodyRows,
-  getDatabaseHeaderColumn,
-  getDatabaseMouse,
-  getFirstColumnCell,
-  initDatabaseColumn,
   initDatabaseDynamicRowWithData,
   initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
   initEmptyDatabaseWithParagraphState,
   pasteByKeyboard,
-  performColumnAction,
-  performSelectColumnTagAction,
   pressArrowLeft,
+  pressArrowRight,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -42,7 +24,6 @@ import {
   pressSpace,
   redoByClick,
   redoByKeyboard,
-  switchColumnType,
   type,
   undoByClick,
   undoByKeyboard,
@@ -54,6 +35,28 @@ import {
   assertLocatorVisible,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
+import {
+  assertColumnWidth,
+  assertDatabaseCellNumber,
+  assertDatabaseCellRichTexts,
+  assertDatabaseSearching,
+  assertDatabaseTitleColumnText,
+  assertDatabaseTitleText,
+  blurDatabaseSearch,
+  clickColumnType,
+  clickDatabaseOutside,
+  focusDatabaseHeader,
+  focusDatabaseSearch,
+  getDatabaseBodyRow,
+  getDatabaseBodyRows,
+  getDatabaseHeaderColumn,
+  getDatabaseMouse,
+  getFirstColumnCell,
+  initDatabaseColumn,
+  performColumnAction,
+  performSelectColumnTagAction,
+  switchColumnType,
+} from './actions.js';
 
 test('edit database block title and create new rows', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -134,6 +137,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await assertDatabaseCellRichTexts(page, { text: '123' });
 
   await cell.click();
+  await pressArrowRight(page);
   await pressArrowLeft(page);
   await pressShiftEnter(page);
   await assertDatabaseCellRichTexts(page, { text: '12\n3' });

@@ -8,7 +8,6 @@ import {
   DatabaseCellElement,
   defineColumnRenderer,
 } from '../../../register.js';
-import type { SelectTag } from '../../../types.js';
 import { SelectCellEditing } from './select-cell-editing.js';
 
 @customElement('affine-database-select-cell')
@@ -18,11 +17,11 @@ class SelectCell extends DatabaseCellElement<string, SelectColumnData> {
   cellType = 'select' as const;
 
   override render() {
-    const value = this.cell?.value ? [this.cell?.value] : [];
+    const value = this.value ? [this.value] : [];
     return html`
       <affine-database-multi-tag-view
         .value="${value}"
-        .options="${this.column.data.options}"
+        .options="${this.columnData.options}"
       ></affine-database-multi-tag-view>
     `;
   }
@@ -30,10 +29,6 @@ class SelectCell extends DatabaseCellElement<string, SelectColumnData> {
 
 export const SelectColumnRenderer = defineColumnRenderer(
   'select',
-  () => ({
-    selection: [] as SelectTag[],
-  }),
-  () => [] as SelectTag[],
   {
     Cell: SelectCell,
     CellEditing: SelectCellEditing,

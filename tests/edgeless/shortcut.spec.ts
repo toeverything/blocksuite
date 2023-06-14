@@ -78,13 +78,14 @@ test.describe('zooming', () => {
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
 
-    const start = { x: 100, y: 100 };
+    const start = { x: 0, y: 0 };
     const end = { x: 200, y: 200 };
     await addBasicRectShapeElement(page, start, end);
 
     await zoomFitByKeyboard(page);
 
     const zoom = await getZoomLevel(page);
+
     expect(zoom).not.toBe(100);
   });
   test('zoom out', async ({ page }) => {

@@ -17,7 +17,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
-  deserializeXYWH,
   getCommonBound,
   ZOOM_MAX,
   ZOOM_MIN,
@@ -37,7 +36,7 @@ import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
 
-const FIT_TO_SCREEN_PADDING = 200;
+const FIT_TO_SCREEN_PADDING = 100;
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
@@ -162,12 +161,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private _zoomToFit() {
     const bounds = [];
 
-    const frame = this.edgeless.frames[0];
-    if (frame) {
-      const frameXYWH = deserializeXYWH(frame.xywh);
-      const frameBound = new Bound(...frameXYWH);
-      bounds.push(frameBound);
-    }
+    this.edgeless.frames.forEach(frame => {
+      bounds.push(Bound.deserialize(frame.xywh));
+    });
 
     const surfaceElementsBound = this.edgeless.surface.getElementsBound();
     if (surfaceElementsBound) {

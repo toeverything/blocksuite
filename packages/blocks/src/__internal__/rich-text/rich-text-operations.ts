@@ -13,6 +13,7 @@ import {
   asyncSetVRange,
 } from '../utils/common-operations.js';
 import {
+  getDefaultPage,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
@@ -540,6 +541,33 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   }
 
   handleUnknownBlockBackspace(model);
+}
+
+export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
+  if (!matchFlavours(model, ['affine:paragraph'])) return;
+  const pageElement = getDefaultPage(page);
+  if (!pageElement) {
+    // Maybe in edgeless mode
+    return;
+  }
+  const titleVEditor = pageElement.titleVEditor;
+  const parent = page.getParent(model);
+  if (parent && matchFlavours(parent, ['affine:frame'])) {
+    const paragraphIndex = parent.children.indexOf(model);
+    if (paragraphIndex === 0) {
+      const frameParent = page.getParent(parent);
+      if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
+        const frameIndex = frameParent.children
+          // page block may contain other blocks like surface
+          .filter(block => matchFlavours(block, ['affine:frame']))
+          .indexOf(parent);
+        if (frameIndex === 0) {
+          titleVEditor.focusEnd();
+          return;
+        }
+      }
+    }
+  }
 }
 
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {

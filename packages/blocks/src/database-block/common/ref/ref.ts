@@ -1,12 +1,11 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { Variable, VariableOrProperty } from '../../common/ast.js';
-import { DatabaseMenuComponent } from '../../common/menu.js';
 import { propertyMatcher } from '../../logical/property-matcher.js';
-import { onClickOutside } from '../../utils.js';
+import type { Variable, VariableOrProperty, VariableRef } from '../ast.js';
+import { DatabaseMenuComponent } from '../menu.js';
+import { createDatabasePopup } from '../popup.js';
 
 @customElement('variable-ref-view')
 export class VariableRefView extends WithDisposable(ShadowlessElement) {
@@ -64,39 +63,10 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
   propertySelect!: HTMLElement;
 
   selectField() {
-    const menu = new DatabaseMenuComponent();
-    menu.menuGroup = this.vars.map(v => ({
-      type: 'action',
-      label: v.name,
-      click: () => {
-        this.setData({
-          type: 'ref',
-          name: v.id,
-        });
-        menu.remove();
-      },
-    }));
-    this.append(menu);
-    computePosition(this.fieldSelect, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
+    popSelectField(this.fieldSelect, {
+      vars: this.vars,
+      onSelect: ref => this.setData(ref),
     });
-
-    onClickOutside(
-      menu,
-      () => {
-        menu.remove();
-      },
-      'mousedown'
-    );
   }
 
   selectProperty() {
@@ -116,32 +86,15 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
           ref: { type: 'ref', name: field },
           propertyFuncName: v.name,
         });
-        menu.remove();
       },
     }));
-    this.append(menu);
-    computePosition(this.fieldSelect, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
-    onClickOutside(
-      menu,
-      () => {
-        menu.remove();
-      },
-      'mousedown'
-    );
+    createDatabasePopup(this.propertySelect, menu);
   }
 
   override render() {
+    // const property = html`<span class='property-select' @click='${this.selectProperty}'
+    //       >${this.property ?? '⋮'}</span>
+    //       `;
     return html`
       <div style="display:flex;align-items:center;">
         <div style="display:flex;align-items:center;">
@@ -152,9 +105,6 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
         <div style="display:flex;align-items:center;">
           ${this.property &&
           html`<span style="margin-right: 4px;">${`'s`}</span>`}
-          <span class="property-select" @click="${this.selectProperty}"
-            >${this.property ?? '⋮'}</span
-          >
           <PlainSelect
             :value="propertyName"
             @update:value="setPropertyName"
@@ -171,3 +121,23 @@ declare global {
     'variable-ref-view': VariableRefView;
   }
 }
+export const popSelectField = (
+  target: HTMLElement,
+  props: {
+    vars: Variable[];
+    onSelect: (ref: VariableRef) => void;
+  }
+) => {
+  const menu = new DatabaseMenuComponent();
+  menu.menuGroup = props.vars.map(v => ({
+    type: 'action',
+    label: v.name,
+    click: () => {
+      props.onSelect({
+        type: 'ref',
+        name: v.id,
+      });
+    },
+  }));
+  createDatabasePopup(target, menu);
+};

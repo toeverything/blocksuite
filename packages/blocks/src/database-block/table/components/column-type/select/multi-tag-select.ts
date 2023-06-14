@@ -8,6 +8,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import { autoPlacement, computePosition, offset } from '@floating-ui/dom';
 import { css } from 'lit';
@@ -17,16 +18,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { getTagColor, onClickOutside } from '../../../../utils.js';
 import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
 } from '../../../consts.js';
-import {
-  type CellSelectionEnterKeys,
-  selectCellByElement,
-} from '../../../selection-manager/cell.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import type { SelectOption } from './select-option.js';
@@ -80,6 +76,7 @@ const styles = css`
   .select-option-container {
     padding: 8px;
     color: var(--affine-black-90);
+    fill: var(--affine-black-90);
   }
 
   .select-option-container-header {
@@ -238,7 +235,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   @property()
   container!: HTMLElement;
   @property()
-  databaseModel!: DatabaseBlockModel;
+  page!: Page;
 
   @property()
   onChange!: (value: string[]) => void;
@@ -315,7 +312,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   protected override updated(_changedProperties: Map<PropertyKey, unknown>) {
     super.updated(_changedProperties);
 
-    if (_changedProperties.has('cell')) {
+    if (_changedProperties.has('value')) {
       this._selectInput.focus();
     }
   }
@@ -354,17 +351,8 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       const cell =
         this._selectOptionContainer.closest<HTMLElement>('.database-cell');
       assertExists(cell);
-      this._selectCell(cell, 'Escape');
+      this.editComplete();
     }
-  };
-
-  private _selectCell = (
-    element: Element,
-    key: CellSelectionEnterKeys,
-    exitEditing = false
-  ) => {
-    if (this.isSingleMode || exitEditing) this.editComplete();
-    selectCellByElement(element, this.databaseModel.id, key);
   };
 
   private _onDeleteSelected = (selectedValue: string[], value: string) => {
@@ -398,10 +386,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
         this._onAddSelection(selectedValue);
       }
     } else if (event.key === 'Escape') {
-      this._selectCell(event.target as Element, 'Escape', true);
-    } else if (event.key === 'Tab') {
-      event.preventDefault();
-      this._selectCell(event.target as Element, 'Tab', true);
+      this.editComplete();
     }
   };
 
@@ -632,7 +617,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
                         cursor: isEditing ? 'text' : 'pointer',
                       })}
                       data-select-option-id="${select.id}"
-                      .databaseModel="${this.databaseModel}"
+                      .page="${this.page}"
                       .select="${select}"
                       .editing="${isEditing}"
                       .index="${index}"

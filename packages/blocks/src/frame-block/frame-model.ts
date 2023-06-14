@@ -1,6 +1,5 @@
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
-import { literal } from 'lit/static-html.js';
 
 import type { CssVariableName } from '../__internal__/theme/css-variables.js';
 
@@ -25,7 +24,6 @@ export const FrameBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'hub',
-    tag: literal`affine-frame`,
     parent: ['affine:page'],
     children: [
       'affine:paragraph',
