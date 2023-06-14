@@ -1,5 +1,4 @@
 import { BaseBlockModel, defineBlockSchema, Text } from '@blocksuite/store';
-import { literal } from 'lit/static-html.js';
 
 import type {
   DatabaseViewData,
@@ -290,7 +289,6 @@ export const DatabaseBlockSchema = defineBlockSchema({
   metadata: {
     role: 'hub',
     version: 2,
-    tag: literal`affine-database`,
     parent: ['affine:frame'],
     children: ['affine:paragraph', 'affine:list'],
   },
