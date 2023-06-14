@@ -52,6 +52,14 @@ test('shortcut', async ({ page }) => {
   await page.keyboard.press('h');
   const panButton = locatorEdgelessToolButton(page, 'pan');
   await expect(panButton).toHaveAttribute('active', '');
+
+  await page.keyboard.press('l');
+  const connectorButton = locatorEdgelessToolButton(page, 'connector');
+  await expect(connectorButton).toHaveAttribute('active', '');
+
+  await page.mouse.click(100, 100);
+  await page.keyboard.press('x');
+  await expect(connectorButton).toHaveAttribute('active', '');
 });
 
 test('pressing the ESC key will return to the default state', async ({

@@ -42,6 +42,7 @@ import {
   assertDatabaseSearching,
   assertDatabaseTitleColumnText,
   assertDatabaseTitleText,
+  assertSelectedStyle,
   blurDatabaseSearch,
   clickColumnType,
   clickDatabaseOutside,
@@ -663,6 +664,17 @@ test.describe('select column tag action', () => {
     const { cellSelected } = await performSelectColumnTagAction(page, 'delete');
     await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
+  });
+
+  test('should support modifying select tag color', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+
+    await performSelectColumnTagAction(page, 'change-color', 'hover');
+    await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
   });
 });
 
