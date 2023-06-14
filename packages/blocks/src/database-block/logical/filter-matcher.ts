@@ -1,14 +1,9 @@
-import { Text } from 'yjs';
-
+import { tBoolean, tDate, tNumber, tString, tTag } from './data-type.js';
 import { Matcher } from './matcher.js';
+import type { TFunction } from './typesystem.js';
 import {
   tArray,
-  tBoolean,
-  tDate,
   tFunction,
-  tNumber,
-  tString,
-  tTag,
   tTypeRef,
   tTypeVar,
   tUnion,
@@ -16,28 +11,31 @@ import {
   typesystem,
 } from './typesystem.js';
 
-export const filterMatcher = new Matcher<{
+export type FilterMatcherDataType = {
   name: string;
   impl: (...args: unknown[]) => boolean;
-}>((type, target) => {
-  if (type.type !== 'function') {
-    return false;
+};
+export const filterMatcher = new Matcher<FilterMatcherDataType, TFunction>(
+  (type, target) => {
+    if (type.type !== 'function') {
+      return false;
+    }
+    const staticType = typesystem.subst(
+      Object.fromEntries(type.typeVars?.map(v => [v.name, v.bound]) ?? []),
+      type
+    );
+    const firstArg = staticType.args[0];
+    return firstArg && typesystem.isSubtype(firstArg, target);
   }
-  const staticType = typesystem.subst(
-    Object.fromEntries(type.typeVars?.map(v => [v.name, v.bound]) ?? []),
-    type
-  );
-  const firstArg = staticType.args[0];
-  return firstArg && typesystem.isSubtype(firstArg, target);
-});
+);
 
 filterMatcher.register(
   tFunction({ args: [tUnknown.create()], rt: tBoolean.create() }),
   {
     name: 'Is not empty',
     impl: value => {
-      if (value instanceof Text) {
-        return !!value.toString();
+      if (typeof value === 'string') {
+        return !!value;
       }
       return value != null;
     },
@@ -48,8 +46,8 @@ filterMatcher.register(
   {
     name: 'Is empty',
     impl: value => {
-      if (value instanceof Text) {
-        return !value.toString();
+      if (typeof value === 'string') {
+        return !value;
       }
       return value == null;
     },
@@ -63,7 +61,7 @@ filterMatcher.register(
   {
     name: 'Is',
     impl: (value, target) => {
-      return typeof value === 'string' && value == target;
+      return value == target;
     },
   }
 );
@@ -75,7 +73,7 @@ filterMatcher.register(
   {
     name: 'Is not',
     impl: (value, target) => {
-      return typeof value === 'string' && value != target;
+      return value != target;
     },
   }
 );

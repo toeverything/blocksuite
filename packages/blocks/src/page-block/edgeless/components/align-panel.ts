@@ -1,6 +1,6 @@
 import {
-  AlighLeftIcon,
   AlignCenterIcon,
+  AlignLeftIcon,
   AlignRightIcon,
 } from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
@@ -47,7 +47,7 @@ export class EdgelessAlignPanel extends LitElement {
             this._onSelect('left');
           }}
         >
-          ${AlighLeftIcon}
+          ${AlignLeftIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Center'}

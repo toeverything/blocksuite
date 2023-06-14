@@ -100,69 +100,72 @@ export const createKeydownObserver = ({
       return;
     }
 
-    if (isControlledKeyboardEvent(e) || e.key.length !== 1) {
-      switch (e.key) {
-        case 'Escape': {
-          abortController.abort();
-          return;
-        }
-        case 'Backspace': {
-          if (!query.length) {
-            abortController.abort();
-          }
-          updateQuery();
-          return;
-        }
-        case 'Enter': {
-          if (e.isComposing) {
-            return;
-          }
-          if (e.shiftKey) {
-            abortController.abort();
-            return;
-          }
-          onConfirm();
-          e.preventDefault();
-          return;
-        }
-        case 'Tab': {
-          if (e.shiftKey) {
-            onMove(-1);
-          } else {
-            onMove(1);
-          }
-          e.preventDefault();
-          return;
-        }
-        case 'ArrowUp': {
-          if (e.shiftKey) {
-            abortController.abort();
-            return;
-          }
-          onMove(-1);
-          e.preventDefault();
-          return;
-        }
-        case 'ArrowDown': {
-          if (e.shiftKey) {
-            abortController.abort();
-            return;
-          }
-          onMove(1);
-          e.preventDefault();
-          return;
-        }
-        case 'ArrowLeft':
-        case 'ArrowRight': {
-          abortController.abort();
-          return;
-        }
-        default:
-          // Other control keys
-          return;
-      }
+    if (
+      // input abc, 123, etc.
+      (!isControlledKeyboardEvent(e) && e.key.length === 1) ||
+      e.isComposing
+    ) {
+      updateQuery();
+      return;
     }
-    updateQuery();
+
+    switch (e.key) {
+      case 'Escape': {
+        abortController.abort();
+        return;
+      }
+      case 'Backspace': {
+        if (!query.length) {
+          abortController.abort();
+        }
+        updateQuery();
+        return;
+      }
+      case 'Enter': {
+        if (e.shiftKey) {
+          abortController.abort();
+          return;
+        }
+        onConfirm();
+        e.preventDefault();
+        return;
+      }
+      case 'Tab': {
+        if (e.shiftKey) {
+          onMove(-1);
+        } else {
+          onMove(1);
+        }
+        e.preventDefault();
+        return;
+      }
+      case 'ArrowUp': {
+        if (e.shiftKey) {
+          abortController.abort();
+          return;
+        }
+        onMove(-1);
+        e.preventDefault();
+        return;
+      }
+      case 'ArrowDown': {
+        if (e.shiftKey) {
+          abortController.abort();
+          return;
+        }
+        onMove(1);
+        e.preventDefault();
+        return;
+      }
+      case 'ArrowLeft':
+      case 'ArrowRight': {
+        abortController.abort();
+        return;
+      }
+      default:
+        // Other control keys
+        return;
+    }
   };
 
   target.addEventListener(

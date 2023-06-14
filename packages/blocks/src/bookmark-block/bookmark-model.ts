@@ -1,5 +1,4 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
-import { literal } from 'lit/static-html.js';
 
 // This type is declared in Affine, this block will move to Affine
 type MetaData = {
@@ -36,7 +35,6 @@ export const BookmarkBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    tag: literal`affine-bookmark`,
     parent: ['affine:frame'],
   },
 });

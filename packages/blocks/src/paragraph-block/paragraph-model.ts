@@ -1,5 +1,4 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
-import { literal } from 'lit/static-html.js';
 
 export type ParagraphType =
   | 'text'
@@ -20,7 +19,6 @@ export const ParagraphBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    tag: literal`affine-paragraph`,
     parent: [
       'affine:frame',
       'affine:database',

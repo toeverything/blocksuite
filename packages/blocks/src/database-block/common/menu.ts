@@ -3,10 +3,12 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { createDatabasePopup } from './popup.js';
+
 export type Action = {
   type: 'action';
   label: string;
-  click: () => void;
+  click: () => false | void;
 };
 export type Menu = Action;
 export type MenuGroup = Menu[];
@@ -14,7 +16,7 @@ export type MenuGroup = Menu[];
 @customElement('database-menu-component')
 export class DatabaseMenuComponent extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .database-menu-component {
+    database-menu-component {
       display: flex;
       flex-direction: column;
       user-select: none;
@@ -23,6 +25,7 @@ export class DatabaseMenuComponent extends WithDisposable(ShadowlessElement) {
       background-color: white;
       padding: 4px 0;
       position: absolute;
+      z-index: 999;
     }
 
     .database-menu-component-action-wrapper {
@@ -49,10 +52,15 @@ export class DatabaseMenuComponent extends WithDisposable(ShadowlessElement) {
     return html`
       <div class="database-menu-component">
         ${repeat(group, menu => {
+          const click = () => {
+            if (menu.click() !== false) {
+              this.remove();
+            }
+          };
           return html` <div class="database-menu-component-action-wrapper">
             <div
               class="database-menu-component-action-button"
-              @click="${menu.click}"
+              @click="${click}"
             >
               ${menu.label}
             </div>
@@ -68,3 +76,13 @@ declare global {
     'database-menu-component': DatabaseMenuComponent;
   }
 }
+export const popMenu = (
+  target: HTMLElement,
+  props: {
+    options: MenuGroup;
+  }
+) => {
+  const menu = new DatabaseMenuComponent();
+  menu.menuGroup = props.options;
+  createDatabasePopup(target, menu);
+};

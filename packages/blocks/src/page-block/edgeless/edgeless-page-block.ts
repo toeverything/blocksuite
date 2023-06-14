@@ -8,10 +8,13 @@ import {
 } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import {
+  Bound,
   compare,
   deserializeXYWH,
   generateKeyBetween,
   generateNKeysBetween,
+  getCommonBound,
+  type IBound,
   intersects,
   type PhasorElement,
   serializeXYWH,
@@ -71,6 +74,7 @@ import {
   type EdgelessSelectionState,
   type Selectable,
 } from './selection-manager.js';
+import { EdgelessSnapManager } from './snap-manager.js';
 import {
   EdgelessToolbar,
   type ZoomAction,
@@ -225,6 +229,8 @@ export class EdgelessPageBlockComponent
   getService = getService;
 
   selection!: EdgelessSelectionManager;
+
+  snap!: EdgelessSnapManager;
 
   // Gets the top level frames.
   get frames() {
@@ -802,6 +808,23 @@ export class EdgelessPageBlockComponent
     }
   }
 
+  getElementsBound(): IBound | null {
+    const bounds = [];
+
+    this.frames.forEach(frame => {
+      const frameXYWH = deserializeXYWH(frame.xywh);
+      const frameBound = new Bound(...frameXYWH);
+      bounds.push(frameBound);
+    });
+
+    const surfaceElementsBound = this.surface.getElementsBound();
+    if (surfaceElementsBound) {
+      bounds.push(surfaceElementsBound);
+    }
+
+    return getCommonBound(bounds);
+  }
+
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
@@ -809,6 +832,7 @@ export class EdgelessPageBlockComponent
         this,
         this.root.uiEventDispatcher
       );
+      this.snap = new EdgelessSnapManager(this);
     }
     if (changedProperties.has('mouseMode')) {
       this.selection.mouseMode = this.mouseMode;

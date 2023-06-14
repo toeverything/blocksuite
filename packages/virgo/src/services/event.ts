@@ -7,6 +7,13 @@ import {
   findDocumentOrShadowRoot,
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
+import {
+  intersectVRange,
+  isPoint,
+  isVRangeContain,
+  isVRangeEdge,
+  isVRangeEqual,
+} from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export interface VHandlerContext<
@@ -184,6 +191,9 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
 
+    if (this._handleEmbedRange(selection)) {
+      return;
+    }
     const vRange = this._editor.toVRange(selection);
     if (vRange) {
       this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
@@ -333,5 +343,53 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onScroll = (event: Event) => {
     this._editor.slots.scrollUpdated.emit(this._editor.rootElement.scrollLeft);
+  };
+
+  private _handleEmbedRange = (selection: Selection) => {
+    const vRange = this._editor.toVRange(selection);
+    if (!vRange) return false;
+    let newVRange: VRange | null = null;
+    const deltaEntrys = this._editor.deltaService.getDeltasByVRange(vRange);
+    for (const [delta, deltaVRange] of deltaEntrys) {
+      if (this._editor.isEmbed(delta)) {
+        if (isVRangeContain(deltaVRange, vRange)) {
+          if (isPoint(vRange) && isVRangeEdge(vRange.index, deltaVRange)) {
+            continue;
+          }
+          newVRange = deltaVRange;
+        } else if (!isVRangeContain(vRange, deltaVRange)) {
+          const iVRange = intersectVRange(deltaVRange, vRange);
+          if (!iVRange || isPoint(iVRange)) return false;
+          // aaa[bb|b]cc|c -> aaa[bbb]|cc|c
+          if (deltaVRange.index < vRange.index) {
+            newVRange = {
+              index: deltaVRange.index + deltaVRange.length,
+              length:
+                vRange.index +
+                vRange.length -
+                deltaVRange.index -
+                deltaVRange.length,
+            };
+
+            // a|aa[b|bb]ccc -> a|aa|[bbb]ccc
+          } else if (deltaVRange.index > vRange.index) {
+            newVRange = {
+              index: vRange.index,
+              length: deltaVRange.index - vRange.index,
+            };
+          }
+        }
+      }
+    }
+
+    if (newVRange && !isVRangeEqual(newVRange, vRange)) {
+      const newRange = this._editor.toDomRange(newVRange);
+      if (!newRange) return false;
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      return true;
+    } else {
+      return false;
+    }
   };
 }

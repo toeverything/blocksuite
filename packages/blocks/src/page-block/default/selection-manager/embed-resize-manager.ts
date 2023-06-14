@@ -40,7 +40,7 @@ export class EmbedResizeManager {
 
   onMove(e: PointerEventState) {
     const activeComponent =
-      this.state.activeComponent || this.state.selectedEmbeds[0];
+      this.state.activeComponent || this.state.selectedEmbed;
     if (!activeComponent) return;
 
     let width = 0;

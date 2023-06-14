@@ -236,7 +236,12 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
         key: 'ArrowLeft',
         shiftKey: false,
         handler(range, context) {
-          return onKeyLeft(context.event, range);
+          return onKeyLeft(
+            block,
+            context.event,
+            range,
+            this.vEditor.rootElement
+          );
         },
       },
       right: {

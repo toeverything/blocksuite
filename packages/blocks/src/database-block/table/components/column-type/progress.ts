@@ -116,7 +116,7 @@ class ProgressCellEditing
     const { width } = this._progressBg.getBoundingClientRect();
     const visibleWidth = width - 6;
     this._progressBgWidth = visibleWidth;
-    const value = this.cell?.value;
+    const value = this.value;
     if (value) {
       this._setDragHandlePosition(value);
     }
@@ -130,8 +130,8 @@ class ProgressCellEditing
   protected override updated(_changedProperties: Map<string, unknown>) {
     super.updated(_changedProperties);
 
-    if (_changedProperties.has('cell')) {
-      this._setDragHandlePosition(this.cell?.value ?? 0);
+    if (_changedProperties.has('value')) {
+      this._setDragHandlePosition(this.value ?? 0);
     }
   }
 
@@ -149,7 +149,7 @@ class ProgressCellEditing
       boundLeft: left,
       containerWidth: visibleWidth,
     };
-    this.databaseModel.page.captureSync();
+    this.page.captureSync();
   };
 
   private _onPointerMove = (event: PointerEvent) => {
@@ -167,18 +167,18 @@ class ProgressCellEditing
       steps = Math.floor((x - boundLeft) / stepWidth);
     }
 
-    if (this.cell?.value !== steps) {
-      this.rowHost.setValue(steps, { captureSync: false });
+    if (this.value !== steps) {
+      this.onChange(steps, { captureSync: false });
     }
   };
 
   private _onPointerUp = () => {
     this._dragConfig = null;
-    this.databaseModel.page.captureSync();
+    this.page.captureSync();
   };
 
   protected override render() {
-    const progress = this.cell?.value ?? 0;
+    const progress = this.value ?? 0;
     let backgroundColor = progressColors.processing;
     if (progress === 100) {
       backgroundColor = progressColors.success;
@@ -209,8 +209,6 @@ class ProgressCellEditing
 
 export const ProgressColumnRenderer = defineColumnRenderer(
   'progress',
-  () => ({}),
-  () => 0,
   {
     Cell: ProgressCellEditing,
     CellEditing: null,

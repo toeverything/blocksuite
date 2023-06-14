@@ -1,10 +1,11 @@
-import { html, LitElement, type TemplateResult } from 'lit';
+import { assertExists } from '@blocksuite/global/utils';
+import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
-import { getDefaultAttributeRenderer } from '../utils/attribute-renderer.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
+import type { VirgoRootElement } from '../virgo.js';
 
 @customElement('v-element')
 export class VirgoElement<
@@ -15,15 +16,23 @@ export class VirgoElement<
     insert: ZERO_WIDTH_SPACE,
   };
 
-  @property({ type: Function, attribute: false })
-  attributeRenderer: (delta: DeltaInsert<T>) => TemplateResult<1> =
-    getDefaultAttributeRenderer<T>();
-
   override render() {
+    const rootElement = this.closest(
+      '[data-virgo-root="true"]'
+    ) as VirgoRootElement;
+    assertExists(rootElement, 'v-element must be inside a v-root');
+    const virgoEditor = rootElement.virgoEditor;
+    assertExists(
+      virgoEditor,
+      'v-element must be inside a v-root with virgo-editor'
+    );
+
+    const attributeRenderer = virgoEditor.attributeService.attributeRenderer;
+
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
     return html`<span data-virgo-element="true"
-      >${this.attributeRenderer(this.delta)}</span
+      >${attributeRenderer(this.delta)}</span
     >`;
   }
 

@@ -43,7 +43,7 @@ function EdgelessBlockChild(
     zIndex: `${index}`,
     boxSizing: 'border-box',
     borderRadius: '8px',
-    border: '2px solid var(--affine-white-10)',
+    border: '2px solid var(--affine-black-10)',
     boxShadow: 'var(--affine-shadow-3)',
   };
 
