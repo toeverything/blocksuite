@@ -236,7 +236,8 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       // Update option position when scrolling
       const rect = ANCHOR_EL.getBoundingClientRect();
       this._optionPosition = {
-        x: rect.right + 12,
+        // when image size is too large, the option popup should show inside
+        x: rect.width > 680 ? rect.right - 50 : rect.right + 12,
         y: Math.min(
           Math.max(rect.top, HEADER_HEIGHT + 12),
           rect.bottom - OPTION_ELEMENT_HEIGHT
