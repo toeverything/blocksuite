@@ -19,7 +19,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import type {
   BlockHost,
-  CommonSlots,
   EditingState,
   SelectionPosition,
 } from '../../__internal__/index.js';
@@ -156,7 +155,7 @@ export class DefaultPageBlockComponent
   @query('.affine-default-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  slots: DefaultSelectionSlots & CommonSlots = {
+  slots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
