@@ -300,8 +300,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerClick(e: PointerEventState) {
-    this._tryDeleteEmptyBlocks();
-
     const selected = this._pick(e.x, e.y);
 
     if (selected) {
