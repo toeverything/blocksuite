@@ -19,6 +19,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import type {
   BlockHost,
+  CommonSlots,
   EditingState,
   SelectionPosition,
 } from '../../__internal__/index.js';
@@ -35,11 +36,7 @@ import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateFrameSize } from '../utils/index.js';
-import {
-  DraggingArea,
-  EmbedEditingContainer,
-  EmbedSelectedRectsContainer,
-} from './components.js';
+import { DraggingArea, EmbedSelectedRectsContainer } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
@@ -159,12 +156,11 @@ export class DefaultPageBlockComponent
   @query('.affine-default-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  slots = {
+  slots: DefaultSelectionSlots & CommonSlots = {
     draggingAreaUpdated: new Slot<DOMRect | null>(),
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
-    nativeSelectionToggled: new Slot<boolean>(),
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
   };
 
@@ -538,17 +534,12 @@ export class DefaultPageBlockComponent
       this.selection.refreshRemoteSelection();
     });
 
-    const { page, selection } = this;
+    const { selection } = this;
     const { viewportOffset } = selection.state;
 
     const draggingArea = DraggingArea(this._draggingArea);
     const selectedEmbedContainer = EmbedSelectedRectsContainer(
       this._selectedEmbedRects,
-      viewportOffset
-    );
-    const embedEditingContainer = EmbedEditingContainer(
-      page.readonly ? null : this._embedEditingState,
-      this.slots,
       viewportOffset
     );
     const isEmpty =
@@ -579,7 +570,7 @@ export class DefaultPageBlockComponent
           }}"
           .offset="${viewportOffset}"
         ></affine-selected-blocks>
-        ${draggingArea} ${selectedEmbedContainer} ${embedEditingContainer}
+        ${draggingArea} ${selectedEmbedContainer}
       </div>
     `;
   }
