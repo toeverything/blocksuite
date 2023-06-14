@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { assert } from 'console';
 
 import {
   activeEmbed,
@@ -21,6 +20,8 @@ import {
   pasteByKeyboard,
   pressBackspace,
   pressEnter,
+  pressEscape,
+  pressSpace,
   pressTab,
   redoByKeyboard,
   resetHistory,
@@ -1194,7 +1195,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
     return pageBlock?.getBoundingClientRect() || null;
   });
 
-  assert(pageRect !== null);
+  expect(pageRect).not.toBeNull();
   await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
 
   await assertStoreMatchJSX(
@@ -1227,4 +1228,49 @@ test('click bottom of page and if the last is embed block, editor should insert 
   </affine:page>
 </affine:page>`
   );
+});
+
+test('should select blocks when pressing escape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 2);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+  await page.keyboard.press('Escape');
+
+  const cords = await getIndexCoordinate(page, [1, 2]);
+  await page.mouse.move(cords.x + 10, cords.y + 10, { steps: 20 });
+  await page.mouse.down();
+  await page.mouse.move(cords.x + 20, cords.y + 30, { steps: 20 });
+  await page.mouse.up();
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(2);
+});
+
+test('should un-select blocks when pressing escape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 2);
+  await pressEscape(page);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+
+  await pressEscape(page);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
+
+  await focusRichText(page, 2);
+  await pressEnter(page);
+  await type(page, '-');
+  await pressSpace(page);
+  await clickListIcon(page, 0);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+
+  await pressEscape(page);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });

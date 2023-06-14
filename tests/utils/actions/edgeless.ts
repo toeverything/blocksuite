@@ -202,6 +202,12 @@ export async function increaseZoomLevel(page: Page) {
   await sleep(AWAIT_TIMEOUT);
 }
 
+export async function autoFit(page: Page) {
+  const btn = locatorEdgelessToolButton(page, 'fitToScreen', false);
+  await btn.click();
+  await sleep(AWAIT_TIMEOUT);
+}
+
 export async function addBasicBrushElement(
   page: Page,
   start: { x: number; y: number },
@@ -236,11 +242,6 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   await page.mouse.click(x, y);
   await waitForVirgoStateUpdated(page);
   await type(page, text);
-}
-
-export async function deleteAll(page: Page) {
-  await selectAllByKeyboard(page);
-  await pressBackspace(page);
 }
 
 export async function resizeElementByTopLeftHandle(
@@ -433,6 +434,11 @@ export async function shiftClick(page: Page, point: IPoint) {
   await page.keyboard.down(SHIFT_KEY);
   await page.mouse.click(point.x, point.y);
   await page.keyboard.up(SHIFT_KEY);
+}
+
+export async function deleteAll(page: Page) {
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
 }
 
 export function locatorComponentToolbar(page: Page) {

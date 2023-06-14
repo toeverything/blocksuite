@@ -1,12 +1,9 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import type { SelectColumnData } from '../common/column-manager.js';
-import type { TableMixColumn } from '../common/view-manager.js';
-import type { DatabaseBlockModel } from '../database-model.js';
-import type { Cell, ColumnType, RowHost } from './types.js';
+import type { Column, ColumnType, SetValueOption } from './types.js';
 
 export abstract class TableViewCell extends ShadowlessElement {
   abstract readonly cellType: ColumnType;
@@ -19,15 +16,26 @@ export abstract class DatabaseCellElement<
   static tag: ReturnType<typeof literal>;
 
   @property()
-  rowHost!: RowHost<Value, SelectColumnData>;
+  page!: Page;
+
   @property()
-  databaseModel!: DatabaseBlockModel;
+  updateColumnProperty!: (
+    apply: (oldProperty: Column<Data>) => Partial<Column<Data>>
+  ) => void;
   @property()
-  rowModel!: BaseBlockModel;
+  readonly!: boolean;
   @property()
-  column!: TableMixColumn<Data>;
+  columnData!: Data;
   @property()
-  cell: Cell<Value> | null = null;
+  value: Value | null = null;
+  @property()
+  onChange!: (value: Value | null, ops?: SetValueOption) => void;
+  @property()
+  setHeight!: (height: number) => void;
+  @property()
+  setEditing!: (editing: boolean) => void;
+  @property()
+  container!: HTMLElement;
 }
 
 export interface ColumnRenderer<
@@ -37,14 +45,14 @@ export interface ColumnRenderer<
 > {
   displayName: string;
   type: Type;
-  propertyCreator: () => Property;
   components: ColumnComponents;
-  defaultValue: (page: Page) => Value;
 }
 
-export interface ColumnComponents<Value = unknown> {
-  Cell: typeof DatabaseCellElement<Value>;
-  CellEditing: typeof DatabaseCellElement<Value> | null;
+export interface ColumnComponents {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Cell: typeof DatabaseCellElement<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CellEditing: typeof DatabaseCellElement<any, any> | null;
 }
 
 export function defineColumnRenderer<
@@ -53,8 +61,6 @@ export function defineColumnRenderer<
   Value
 >(
   type: Type,
-  propertyCreator: () => Property,
-  defaultValue: (page: Page) => Value,
   components: ColumnComponents,
   config: {
     displayName: string;
@@ -63,9 +69,7 @@ export function defineColumnRenderer<
   return {
     displayName: config.displayName,
     type,
-    propertyCreator,
     components,
-    defaultValue,
   };
 }
 

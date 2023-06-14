@@ -1,4 +1,5 @@
 import { HOTKEYS, SHORT_KEY } from '@blocksuite/global/config';
+import { ConnectorMode } from '@blocksuite/phasor';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
@@ -135,6 +136,20 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
 
     hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
     hotkey.addListener('t', () => setMouseMode(edgeless, { type: 'text' }));
+    hotkey.addListener('l', () =>
+      setMouseMode(edgeless, {
+        type: 'connector',
+        mode: ConnectorMode.Straight,
+        color: GET_DEFAULT_LINE_COLOR(),
+      })
+    );
+    hotkey.addListener('x', () =>
+      setMouseMode(edgeless, {
+        type: 'connector',
+        mode: ConnectorMode.Orthogonal,
+        color: GET_DEFAULT_LINE_COLOR(),
+      })
+    );
     hotkey.addListener('h', () =>
       setMouseMode(edgeless, { type: 'pan', panning: false })
     );

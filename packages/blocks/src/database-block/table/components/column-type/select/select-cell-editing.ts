@@ -15,24 +15,24 @@ export class SelectCellEditing extends DatabaseCellElement<
   static override tag = literal`affine-database-select-cell-editing`;
 
   get _options(): SelectTag[] {
-    return this.column.data.options;
+    return this.columnData.options;
   }
 
   get _value() {
-    const value = this.cell?.value;
+    const value = this.value;
     return value ? [value] : [];
   }
 
   _onChange = ([id]: string[]) => {
-    this.rowHost.setValue(id);
+    this.onChange(id);
   };
 
   _editComplete = () => {
-    this.rowHost.setEditing(false);
+    this.setEditing(false);
   };
 
   _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.rowHost.updateColumnProperty(oldProperty => {
+    this.updateColumnProperty(oldProperty => {
       return {
         data: {
           ...oldProperty.data,
@@ -71,8 +71,8 @@ export class SelectCellEditing extends DatabaseCellElement<
         .newTag="${this._newTag}"
         .deleteTag="${this._deleteTag}"
         .changeTag="${this._changeTag}"
-        .container="${this.rowHost}"
-        .databaseModel="${this.databaseModel}"
+        .container="${this.container}"
+        .page="${this.page}"
       >
       </affine-database-multi-tag-select>
     `;

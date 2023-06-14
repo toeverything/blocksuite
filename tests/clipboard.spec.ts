@@ -2,6 +2,7 @@ import './utils/declare-test-window.js';
 
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
 
+import { initDatabaseColumn } from './database/actions.js';
 import {
   activeFrameInEdgeless,
   addBasicRectShapeElement,
@@ -15,7 +16,6 @@ import {
   getAllFrames,
   getRichTextBoundingBox,
   importMarkdown,
-  initDatabaseColumn,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
   initEmptyEdgelessState,

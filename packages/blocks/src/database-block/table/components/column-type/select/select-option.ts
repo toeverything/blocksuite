@@ -1,11 +1,11 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { setupVirgoScroll } from '../../../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../../../components/virgo-input/virgo-input.js';
-import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { SelectTag } from '../../../types.js';
 
@@ -42,7 +42,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   `;
 
   @property()
-  databaseModel!: DatabaseBlockModel;
+  page!: Page;
 
   @property()
   select!: SelectTag;
@@ -92,7 +92,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       rootElement: this._container,
       maxLength: SELECT_TAG_NAME_MAX_LENGTH,
     });
-    setupVirgoScroll(this.databaseModel.page, this._vEditor);
+    setupVirgoScroll(this.page, this._vEditor);
     // When editing the current select, other sibling selects should not be edited
     this._vEditor.setReadonly(!this.editing);
     this._container.addEventListener('keydown', event => {

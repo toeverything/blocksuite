@@ -1,6 +1,5 @@
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
 import type { PointerEventState } from '@blocksuite/lit';
-import type { SurfaceManager } from '@blocksuite/phasor';
 import {
   Bound,
   ConnectorElement,
@@ -9,8 +8,8 @@ import {
   isPointIn,
   type PhasorElement,
   type PhasorElementType,
+  type SurfaceManager,
   TextElement,
-  type XYWH,
 } from '@blocksuite/phasor';
 
 import {
@@ -77,6 +76,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _lock = false;
   // Do not select the text, when click again after activating the frame.
   private _isDoubleClickedOnMask = false;
+  private _alignBound = new Bound();
+  private _selectedBounds: Bound[] = [];
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
@@ -173,32 +174,27 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _handleSurfaceDragMove(
     selected: PhasorElement,
-    e: PointerEventState
+    initialBound: Bound,
+    e: PointerEventState,
+    align: { dx: number; dy: number }
   ) {
     if (!this._lock) {
       this._lock = true;
       this._page.captureSync();
     }
+
     const { surface } = this._edgeless;
     const { zoom } = surface.viewport;
-    const deltaX = this._dragLastPos.x - e.x;
-    const deltaY = this._dragLastPos.y - e.y;
-    const boundX = selected.x - deltaX / zoom;
-    const boundY = selected.y - deltaY / zoom;
-    const boundW = selected.w;
-    const boundH = selected.h;
+    const bound = initialBound.clone();
+    bound.x += (e.x - this._dragStartPos.x) / zoom + align.dx;
+    bound.y += (e.y - this._dragStartPos.y) / zoom + align.dy;
 
     if (
       selected.type !== 'connector' ||
       (selected instanceof ConnectorElement &&
         isConnectorAndBindingsAllSelected(selected, this.state.selected))
     ) {
-      surface.setElementBound(selected.id, {
-        x: boundX,
-        y: boundY,
-        w: boundW,
-        h: boundH,
-      });
+      surface.setElementBound(selected.id, bound);
     }
 
     this._handleDragMoveEffect(selected);
@@ -206,17 +202,17 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _handleBlockDragMove(
     block: TopLevelBlockModel,
-    e: PointerEventState
+    initialBound: Bound,
+    e: PointerEventState,
+    align: { dx: number; dy: number }
   ) {
-    const [modelX, modelY, modelW, modelH] = JSON.parse(block.xywh) as XYWH;
-    const { zoom } = this._edgeless.surface.viewport;
-    const xywh = JSON.stringify([
-      modelX + e.delta.x / zoom,
-      modelY + e.delta.y / zoom,
-      modelW,
-      modelH,
-    ]);
-    this._page.updateBlock(block, { xywh });
+    const { surface } = this._edgeless;
+    const { zoom } = surface.viewport;
+    const bound = initialBound.clone();
+    bound.x += (e.x - this._dragStartPos.x) / zoom + align.dx;
+    bound.y += (e.y - this._dragStartPos.y) / zoom + align.dy;
+
+    this._page.updateBlock(block, { xywh: bound.serialize() });
     this._handleDragMoveEffect(block);
 
     // TODO: refactor
@@ -425,9 +421,16 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this._startRange = caretRangeFromPoint(e.x, e.y);
     this._dragStartPos = { x: e.x, y: e.y };
     this._dragLastPos = { x: e.x, y: e.y };
+
+    this._alignBound = this._edgeless.snap.setupAlignables(this.state.selected);
+
+    this._selectedBounds = this.state.selected.map(element => {
+      return Bound.deserialize(element.xywh);
+    });
   }
 
   onContainerDragMove(e: PointerEventState) {
+    const zoom = this._edgeless.surface.viewport.zoom;
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
         const startX = this._dragStartPos.x;
@@ -448,11 +451,26 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       }
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
-        this.state.selected.forEach(element => {
+        const curBound = this._alignBound.clone();
+
+        curBound.x += (e.x - this._dragStartPos.x) / zoom;
+        curBound.y += (e.y - this._dragStartPos.y) / zoom;
+        const alignRst = this._edgeless.snap.align(curBound);
+        this.state.selected.forEach((element, index) => {
           if (isPhasorElement(element)) {
-            this._handleSurfaceDragMove(element, e);
+            this._handleSurfaceDragMove(
+              element,
+              this._selectedBounds[index],
+              e,
+              alignRst
+            );
           } else {
-            this._handleBlockDragMove(element, e);
+            this._handleBlockDragMove(
+              element,
+              this._selectedBounds[index],
+              e,
+              alignRst
+            );
           }
         });
         this._forceUpdateSelection();
@@ -473,7 +491,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   onContainerDragEnd(e: PointerEventState) {
     if (this._lock) {
       this._page.captureSync();
-
       this._lock = false;
     }
 
@@ -497,6 +514,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     this.dragType = DefaultModeDragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
+    this._selectedBounds = [];
+    this._edgeless.snap.cleanupAlignables();
     this._forceUpdateSelection();
   }
 

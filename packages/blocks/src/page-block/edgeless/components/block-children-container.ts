@@ -33,18 +33,19 @@ function EdgelessBlockChild(
 
   const style = {
     position: 'absolute',
-    transform: `translate(${modelX}px, ${modelY}px)`,
-    transformOrigin: '0 0',
+    zIndex: `${index}`,
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    background: `var(${background ?? DEFAULT_FRAME_COLOR})`,
-    pointerEvents: 'all',
-    zIndex: `${index}`,
-    boxSizing: 'border-box',
+    border: '2px solid var(--affine-black-10)',
     borderRadius: '8px',
-    border: '2px solid var(--affine-white-10)',
+    boxSizing: 'border-box',
+    background: `var(${background ?? DEFAULT_FRAME_COLOR})`,
     boxShadow: 'var(--affine-shadow-3)',
+    pointerEvents: 'all',
+    overflow: 'hidden',
+    transform: `translate(${modelX}px, ${modelY}px)`,
+    transformOrigin: '0 0',
   };
 
   const mask = active ? nothing : EdgelessMask();

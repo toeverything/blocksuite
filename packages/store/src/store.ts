@@ -7,7 +7,7 @@ import { AwarenessStore, type RawAwarenessState } from './awareness.js';
 import type { BlobStorage } from './persistence/blob/types.js';
 import type {
   DocProvider,
-  DocProviderConstructor,
+  DocProviderCreator,
 } from './persistence/doc/index.js';
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
@@ -62,7 +62,7 @@ export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends SSROptions {
   id: string;
-  providers?: DocProviderConstructor[];
+  providerCreators?: DocProviderCreator[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
@@ -100,7 +100,7 @@ export class Store {
   constructor(
     {
       id,
-      providers = [],
+      providerCreators = [],
       awareness,
       idGenerator,
       defaultFlags,
@@ -136,12 +136,12 @@ export class Store {
       }
     }
 
-    this.providers = providers.map(
-      ProviderConstructor =>
-        new ProviderConstructor(id, this.doc, {
-          awareness: this.awarenessStore.awareness,
-        })
+    this.providers = providerCreators.map(creator =>
+      creator(id, this.doc, {
+        awareness: this.awarenessStore.awareness,
+      })
     );
+
     this.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
       loaded.forEach(subdoc => {
         const space = this._findSpaceByDoc(subdoc);
@@ -149,8 +149,8 @@ export class Store {
           return;
         }
 
-        const subdocProviders = providers.map(Provider => {
-          return new Provider(subdoc.guid, subdoc, {
+        const subdocProviders = providerCreators.map(creator => {
+          return creator(subdoc.guid, subdoc, {
             awareness: this.awarenessStore.awareness,
           });
         });
@@ -159,6 +159,7 @@ export class Store {
       });
     });
   }
+
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
   }
