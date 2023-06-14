@@ -118,8 +118,8 @@ test('should modify the value when the input loses focus', async ({ page }) => {
 
   await clickDatabaseOutside(page);
   const cell = getFirstColumnCell(page, 'number');
-  const text = await cell.inputValue();
-  expect(text).toBe('1');
+  const text = await cell.textContent();
+  expect(text?.trim()).toBe('1');
 });
 
 test('should rich-text column support soft enter', async ({ page }) => {
@@ -504,6 +504,7 @@ test.describe('switch column type', () => {
     await initDatabaseDynamicRowWithData(page, '123abc', true);
     getFirstColumnCell(page, 'number');
     await pressEnter(page);
+    await clickDatabaseOutside(page);
     await waitNextFrame(page, 100);
     await assertDatabaseCellNumber(page, {
       text: '123',
@@ -577,7 +578,7 @@ test.describe('switch column type', () => {
       width: progressBgWidth,
     } = await getBoundingBox(progressBg);
     await page.mouse.move(progressBgX, progressBgY);
-
+    await page.mouse.click(progressBgX, progressBgY);
     const dragHandle = page.locator('.affine-database-progress-drag-handle');
     const {
       x: dragX,

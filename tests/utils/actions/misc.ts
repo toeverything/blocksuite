@@ -15,6 +15,7 @@ import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
+  pressEscape,
   pressSpace,
   pressTab,
   SHORT_KEY,
@@ -428,6 +429,7 @@ export async function initDatabaseDynamicRowWithData(
   await cell.click();
   await type(page, data);
   await pressEnter(page);
+  await pressEscape(page);
 }
 
 export async function focusDatabaseTitle(page: Page) {
