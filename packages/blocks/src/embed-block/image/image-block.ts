@@ -221,6 +221,7 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     const HOVER_DELAY = 300;
     const ANCHOR_EL: HTMLElement = this.resizeImg;
 
+    let hover = false;
     let timer: number;
     const updatePosition = () => {
       // Update option position when scrolling
@@ -234,7 +235,8 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
         ),
       };
     };
-    this.hoverState.on(hover => {
+    this.hoverState.on(newHover => {
+      hover = newHover;
       clearTimeout(timer);
       if (hover) {
         updatePosition();
@@ -249,6 +251,12 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     );
     this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', e =>
       this.hoverState.emit(false)
+    );
+    this._disposables.add(
+      this.model.propsUpdated.on(() => {
+        if (!hover) return;
+        updatePosition();
+      })
     );
     const viewportElement = getViewportElement(this.model.page);
     if (viewportElement) {
