@@ -49,16 +49,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       padding-left: 12px;
     }
 
-    .embed-editing-state {
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 10px;
-      list-style: none;
-      padding: 4px;
-      width: 40px;
-      background-color: var(--affine-background-overlay-panel-color);
-      margin: 0;
-    }
-
     .resizable .resizes {
       /* width: 100%; */
       height: 100%;

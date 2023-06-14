@@ -35,9 +35,19 @@ export function ImageOptionsTemplate({
   return html`
     <style>
       .affine-embed-editing-state-container > div {
-        position: absolute;
+        position: fixed;
         display: block;
         z-index: 1;
+      }
+
+      .embed-editing-state {
+        box-shadow: var(--affine-shadow-2);
+        border-radius: 10px;
+        list-style: none;
+        padding: 4px;
+        width: 40px;
+        background-color: var(--affine-background-overlay-panel-color);
+        margin: 0;
       }
       ${tooltipStyle}
     </style>
