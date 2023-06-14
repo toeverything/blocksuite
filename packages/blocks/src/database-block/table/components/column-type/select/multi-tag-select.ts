@@ -76,6 +76,7 @@ const styles = css`
   .select-option-container {
     padding: 8px;
     color: var(--affine-black-90);
+    fill: var(--affine-black-90);
   }
 
   .select-option-container-header {
