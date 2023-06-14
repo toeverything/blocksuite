@@ -14,7 +14,6 @@ function subscribeYMap(
     event.keysChanged.forEach(key => {
       const type = event.changes.keys.get(key);
       if (!type) {
-        console.error('impossible event', event);
         return;
       }
       if (type.action === 'delete') {

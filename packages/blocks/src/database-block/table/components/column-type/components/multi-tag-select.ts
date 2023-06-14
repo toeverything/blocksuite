@@ -76,6 +76,7 @@ const styles = css`
   .select-option-container {
     padding: 8px;
     color: var(--affine-black-90);
+    fill: var(--affine-black-90);
   }
 
   .select-option-container-header {
@@ -264,6 +265,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   @query('.select-option-container')
   private _selectOptionContainer!: HTMLDivElement;
   private _selectColor: string | undefined = undefined;
+  private _optionColor: SelectOptionColor | null = null;
 
   get isSingleMode() {
     return this.mode === SelectMode.Single;
@@ -453,12 +455,15 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       return;
     }
     if (type === 'change-color') {
+      if (this._optionColor) return;
+
       const optionColor = new SelectOptionColor();
       optionColor.onChange = color => {
         this._onSaveSelectionColor(id, color);
         onActionPopupClose();
         onClose();
       };
+      this._optionColor = optionColor;
       element.appendChild(optionColor);
       const onClose = () => optionColor.remove();
 
@@ -469,7 +474,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
             mainAxis: 4,
           }),
           autoPlacement({
-            allowedPlacements: ['right-start', 'bottom-start'],
+            allowedPlacements: ['right-start', 'left-start'],
           }),
         ],
       }).then(({ x, y }) => {
@@ -482,6 +487,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       onClickOutside(
         optionColor,
         ele => {
+          this._optionColor = null;
           ele.remove();
         },
         'mousedown'
@@ -499,6 +505,10 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       const reference = action.shadowRoot?.firstElementChild;
       assertExists(reference);
       this._onSelectAction(type, id, reference, onClose);
+    };
+    action.onClosePopup = () => {
+      this._optionColor?.remove();
+      this._optionColor = null;
     };
     action.tagId = id;
     selectOption.appendChild(action);

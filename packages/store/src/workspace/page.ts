@@ -777,7 +777,6 @@ export class Page extends Space<FlatBlockMap> {
     blockModel.yBlock = block;
     blockModel.flavour = schema.model.flavour;
     blockModel.role = schema.model.role;
-    blockModel.tag = schema.model.tag;
 
     blockModel.onCreated();
 
