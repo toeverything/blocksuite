@@ -9,7 +9,7 @@ import type {
   FrameBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -64,6 +64,7 @@ export const defaultStore: SerializedStore = {
       'affine:surface': 3,
       'affine:bookmark': 1,
     },
+    workspaceVersion: WORKSPACE_VERSION,
   },
   spaces: {
     'space:page0': {
