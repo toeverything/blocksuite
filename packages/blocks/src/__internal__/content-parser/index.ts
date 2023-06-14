@@ -113,6 +113,7 @@ export class ContentParser {
         x + width / 2 - 50,
         y + height / 2 - 50
       );
+      edgeless.surface.onResize();
 
       // todo check render and image
 
@@ -122,7 +123,7 @@ export class ContentParser {
             cacheBust: true,
           });
           resolve(pngData);
-        }, 500);
+        }, 0);
       });
       const data = (await promise) as HTMLCanvasElement;
       editorContainer.removeChild(styleElement);
