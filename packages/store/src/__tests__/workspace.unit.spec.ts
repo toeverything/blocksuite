@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
 import { ac } from 'vitest/dist/types-0373403c';
@@ -91,6 +91,7 @@ describe('basic', () => {
             title: '',
           },
         ],
+        workspaceVersion: WORKSPACE_VERSION,
         blockVersions: {},
       },
       spaces: {
