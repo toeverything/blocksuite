@@ -80,6 +80,7 @@ export class ContentParser {
     const root = this._page.root;
     if (!root) return;
     const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
 
     const editorContainer = getEditorContainer(this._page);
     if (isPageMode(this._page)) {
