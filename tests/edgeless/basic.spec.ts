@@ -237,9 +237,13 @@ test('shift click multi select and de-select', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
 });
 
-test('Before and after switching to Edgeless, the previous zoom ratio and position when Edgeless was opened should be remembered#2479', async ({
+test('Before and after switching to Edgeless, the previous zoom ratio and position when Edgeless was opened should be remembered', async ({
   page,
 }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2479',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
