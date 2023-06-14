@@ -19,6 +19,12 @@ export function isPureObject(value: unknown): value is object {
 }
 
 export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
+  if (value instanceof YText) {
+    if (value.doc) {
+      return value.clone() as Native2Y<T>;
+    }
+    return value as Native2Y<T>;
+  }
   if (Array.isArray(value)) {
     const yArray: YArray<unknown> = new YArray<unknown>();
     const result = value.map(item => {

@@ -1,6 +1,5 @@
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
-import { literal } from 'lit/static-html.js';
 
 type PageProps = {
   title: Text;
@@ -28,7 +27,6 @@ export const PageBlockSchema = defineBlockSchema({
   metadata: {
     version: 2,
     role: 'root',
-    tag: literal`affine-page`,
   },
   toModel: () => new PageBlockModel(),
 });
