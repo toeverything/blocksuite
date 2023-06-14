@@ -6,7 +6,6 @@ import { html } from 'lit/static-html.js';
 
 import type { TableMixColumn } from '../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { onClickOutside } from '../../utils.js';
 import type { ColumnRendererHelper } from '../register.js';
 import type { Column, RowHost, SetValueOption } from '../types.js';
 
@@ -59,35 +58,11 @@ export class DatabaseCellContainer
     return this.databaseModel.page.readonly;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    const disposables = this._disposables;
-    disposables.addFromEvent(this, 'click', this._onClick);
-  }
-
   protected override firstUpdated() {
     this.setAttribute('data-block-is-database-input', 'true');
     this.setAttribute('data-row-id', this.rowModel.id);
     this.setAttribute('data-column-id', this.column.id);
   }
-
-  private _onClick = (event: Event) => {
-    if (this.readonly) return;
-
-    this._isEditing = true;
-    this.removeEventListener('click', this._onClick);
-    setTimeout(() => {
-      onClickOutside(
-        this,
-        () => {
-          this.addEventListener('click', this._onClick);
-          this._isEditing = false;
-        },
-        'mousedown'
-      );
-    });
-  };
 
   setValue = (
     value: unknown,
@@ -118,12 +93,7 @@ export class DatabaseCellContainer
   setEditing = (isEditing: boolean) => {
     this._isEditing = isEditing;
     if (!isEditing) {
-      this.databaseModel;
-    }
-    if (!this._isEditing) {
-      setTimeout(() => {
-        this.addEventListener('click', this._onClick);
-      });
+      // TODO select cell
     }
   };
 
@@ -146,31 +116,14 @@ export class DatabaseCellContainer
   override render() {
     const renderer = this.columnRenderer.get(this.column.type);
     const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
-
-    if (
+    const tag =
       !this.readonly &&
       this._isEditing &&
       renderer.components.CellEditing !== null
-    ) {
-      const editingTag = renderer.components.CellEditing.tag;
-      return html`
-        <${editingTag}
-          data-is-editing-cell='true'
-          .updateColumnProperty='${this.updateColumnProperty}'
-          .readonly='${this.readonly}'
-          .page='${this.databaseModel.page}'
-          .columnData='${this.column.data}'
-          .value='${cell?.value}'
-          .onChange='${this.setValue}'
-          .setHeight='${this.setHeight}'
-          .setEditing='${this.setEditing}'
-          .container='${this}'
-        ></${editingTag}>
-      `;
-    }
-    const previewTag = renderer.components.Cell.tag;
+        ? renderer.components.CellEditing.tag
+        : renderer.components.Cell.tag;
     return html`
-      <${previewTag}
+      <${tag}
         .updateColumnProperty='${this.updateColumnProperty}'
         .readonly='${this.readonly}'
         .page='${this.databaseModel.page}'
@@ -180,8 +133,8 @@ export class DatabaseCellContainer
         .setHeight='${this.setHeight}'
         .setEditing='${this.setEditing}'
         .container='${this}'
-      ></${previewTag}>
-    `;
+        .isEditing='${this._isEditing}'
+      ></${tag}>`;
   }
 }
 

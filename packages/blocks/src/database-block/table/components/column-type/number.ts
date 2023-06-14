@@ -1,5 +1,5 @@
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
 import {
@@ -8,11 +8,47 @@ import {
   type TableViewCell,
 } from '../../register.js';
 
-@customElement('affine-database-number-cell-editing')
+class NumberCell extends DatabaseCellElement<number> implements TableViewCell {
+  static override tag = literal`affine-database-number-cell`;
+  cellType = 'number' as const;
+
+  static override styles = css`
+    affine-database-number-cell {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .affine-database-number {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      border: none;
+      font-family: var(--affine-font-family);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
+      color: var(--affine-text-primary-color);
+      font-weight: 400;
+      background-color: transparent;
+    }
+  `;
+
+  override render() {
+    return html` <div class="affine-database-number number">
+      ${this.value ?? ''}
+    </div>`;
+  }
+}
+
 export class NumberCellEditing
   extends DatabaseCellElement<number>
   implements TableViewCell
 {
+  static override tag = literal`affine-database-number-cell-editing`;
+  cellType = 'number' as const;
+
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
@@ -44,15 +80,10 @@ export class NumberCellEditing
   @query('input')
   private _inputEle!: HTMLInputElement;
 
-  static override tag = literal`affine-database-number-cell-editing`;
-  cellType = 'number' as const;
-
   focusEnd = () => {
     const end = this._inputEle.value.length;
-    setTimeout(() => {
-      this._inputEle.focus();
-      this._inputEle.setSelectionRange(end, end);
-    });
+    this._inputEle.focus();
+    this._inputEle.setSelectionRange(end, end);
   };
 
   private _blur = (e: Event) => {
@@ -78,11 +109,15 @@ export class NumberCellEditing
     }
   };
 
-  protected override render() {
+  override firstUpdated() {
+    this.focusEnd();
+  }
+
+  override render() {
     return html`<input
-      .value=${this.value ?? ''}
-      @blur=${this._blur}
-      @keydown=${this._keydown}
+      .value="${this.value ?? ''}"
+      @blur="${this._blur}"
+      @keydown="${this._keydown}"
       class="affine-database-number number"
     />`;
   }
@@ -91,8 +126,8 @@ export class NumberCellEditing
 export const NumberColumnRenderer = defineColumnRenderer(
   'number',
   {
-    Cell: NumberCellEditing,
-    CellEditing: null,
+    Cell: NumberCell,
+    CellEditing: NumberCellEditing,
   },
   {
     displayName: 'Number',

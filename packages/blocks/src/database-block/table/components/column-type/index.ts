@@ -4,7 +4,7 @@ import { MultiSelectColumnRenderer } from './multi-select.js';
 import { NumberColumnRenderer } from './number.js';
 import { ProgressColumnRenderer } from './progress.js';
 import { RichTextColumnRenderer } from './rich-text.js';
-import { SelectColumnRenderer } from './select/select.js';
+import { SelectColumnRenderer } from './select.js';
 
 export function registerInternalRenderer() {
   const columnRenderer = new ColumnRendererHelper();

@@ -1,5 +1,4 @@
 import { css, html } from 'lit';
-import { customElement } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
 import {
@@ -12,7 +11,6 @@ import {
   type TableViewCell,
 } from '../../register.js';
 
-@customElement('affine-database-checkbox-cell')
 class CheckboxCell
   extends DatabaseCellElement<boolean>
   implements TableViewCell
@@ -40,20 +38,15 @@ class CheckboxCell
     }
   `;
 
-  protected override firstUpdated() {
-    this._disposables.addFromEvent(this, 'click', this._onChange);
+  override _setEditing() {
+    this.onChange(!this.value);
   }
 
-  private _onChange() {
-    const checked = !this.value;
-    this.onChange(checked);
-  }
-
-  protected override render() {
+  override render() {
     const checked = this.value ?? false;
 
     const icon = checked ? checkboxChecked() : checkboxUnchecked();
-    return html`<div class="affine-database-checkbox-container">
+    return html` <div class="affine-database-checkbox-container">
       <div class="affine-database-checkbox checkbox ${checked && 'checked'}">
         ${icon}
       </div>

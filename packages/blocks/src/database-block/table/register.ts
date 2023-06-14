@@ -3,6 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
+import { onClickOutside } from '../utils.js';
 import type { Column, ColumnType, SetValueOption } from './types.js';
 
 export abstract class TableViewCell extends ShadowlessElement {
@@ -19,23 +20,57 @@ export abstract class DatabaseCellElement<
   page!: Page;
 
   @property()
+  readonly!: boolean;
+  @property()
+  setHeight!: (height: number) => void;
+  @property()
+  container!: HTMLElement;
+
+  @property()
   updateColumnProperty!: (
     apply: (oldProperty: Column<Data>) => Partial<Column<Data>>
   ) => void;
-  @property()
-  readonly!: boolean;
   @property()
   columnData!: Data;
   @property()
   value: Value | null = null;
   @property()
   onChange!: (value: Value | null, ops?: SetValueOption) => void;
+
   @property()
-  setHeight!: (height: number) => void;
+  isEditing!: boolean;
+
   @property()
   setEditing!: (editing: boolean) => void;
-  @property()
-  container!: HTMLElement;
+
+  protected _setEditing(editing: boolean) {
+    this.setEditing(editing);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.width = '100%';
+    this.style.height = '100%';
+    this.style.cursor = 'pointer';
+    this._disposables.addFromEvent(this, 'click', () => {
+      setTimeout(() => {
+        this._setEditing(true);
+      });
+    });
+    const cancelClickOutside = onClickOutside(
+      this,
+      () => {
+        if (this.isEditing) {
+          this._setEditing(false);
+        }
+      },
+      'click',
+      true
+    );
+    this._disposables.add({
+      dispose: cancelClickOutside,
+    });
+  }
 }
 
 export interface ColumnRenderer<
@@ -66,6 +101,16 @@ export function defineColumnRenderer<
     displayName: string;
   }
 ): ColumnRenderer<Type, Property, Value> {
+  customElements.define(
+    components.Cell.tag._$litStatic$,
+    components.Cell as never
+  );
+  if (components.CellEditing) {
+    customElements.define(
+      components.CellEditing.tag._$litStatic$,
+      components.CellEditing as never
+    );
+  }
   return {
     displayName: config.displayName,
     type,

@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/store';
 import type { CellCoord } from '../../../../std.js';
 import type { TableViewCell } from '../../register.js';
 import type { NumberCellEditing } from '../column-type/number.js';
-import type { TextCell } from '../column-type/rich-text.js';
+import type { RichTextCell } from '../column-type/rich-text.js';
 import { CellLevelSelection } from './cell-selection.js';
 import { RowLevelSelection } from './row-selection.js';
 
@@ -83,7 +83,7 @@ export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
     const richTextCell = cell as NumberCellEditing;
     richTextCell.focusEnd();
   } else if (cell.cellType === 'rich-text') {
-    const richTextCell = cell as TextCell;
+    const richTextCell = cell as RichTextCell;
     richTextCell.vEditor?.focusEnd();
   } else {
     // checkbox column

@@ -1,4 +1,6 @@
-import { customElement } from 'lit/decorators.js';
+import './components/multi-tag-view.js';
+import './components/multi-tag-select.js';
+
 import { html, literal } from 'lit/static-html.js';
 
 import type { SelectColumnData } from '../../../common/column-manager.js';
@@ -10,7 +12,6 @@ import {
 import type { SelectTag } from '../../types.js';
 import { SelectMode } from '../../types.js';
 
-@customElement('affine-database-multi-select-cell')
 class MultiSelectCell
   extends DatabaseCellElement<string[], SelectColumnData>
   implements TableViewCell
@@ -21,15 +22,14 @@ class MultiSelectCell
   override render() {
     return html`
       <affine-database-multi-tag-view
-        .value=${this.value ?? []}
-        .options=${this.columnData.options}
-        .setHeight=${this.setHeight}
+        .value="${this.value ?? []}"
+        .options="${this.columnData.options}"
+        .setHeight="${this.setHeight}"
       ></affine-database-multi-tag-view>
     `;
   }
 }
 
-@customElement('affine-database-multi-select-cell-editing')
 class MultiSelectCellEditing
   extends DatabaseCellElement<string[], SelectColumnData>
   implements TableViewCell

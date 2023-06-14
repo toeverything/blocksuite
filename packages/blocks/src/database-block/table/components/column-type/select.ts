@@ -1,18 +1,37 @@
-import './multi-tag-select.js';
+import './components/multi-tag-select.js';
+import './components/multi-tag-view.js';
 
-import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
-import type { SelectColumnData } from '../../../../common/column-manager.js';
-import { DatabaseCellElement } from '../../../register.js';
+import type { SelectColumnData } from '../../../common/column-manager.js';
 import type { SelectTag } from '../../../types.js';
+import type { TableViewCell } from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-@customElement('affine-database-select-cell-editing')
-export class SelectCellEditing extends DatabaseCellElement<
-  string,
-  SelectColumnData
-> {
+class SelectCell
+  extends DatabaseCellElement<string[], SelectColumnData>
+  implements TableViewCell
+{
+  static override tag = literal`affine-database-select-cell`;
+  cellType = 'select' as const;
+
+  override render() {
+    const value = this.value ? [this.value] : [];
+    return html`
+      <affine-database-multi-tag-view
+        .value="${value}"
+        .options="${this.columnData.options}"
+      ></affine-database-multi-tag-view>
+    `;
+  }
+}
+
+export class SelectCellEditing
+  extends DatabaseCellElement<string, SelectColumnData>
+  implements TableViewCell
+{
   static override tag = literal`affine-database-select-cell-editing`;
+  cellType = 'select' as const;
 
   get _options(): SelectTag[] {
     return this.columnData.options;
@@ -78,3 +97,14 @@ export class SelectCellEditing extends DatabaseCellElement<
     `;
   }
 }
+
+export const SelectColumnRenderer = defineColumnRenderer(
+  'select',
+  {
+    Cell: SelectCell,
+    CellEditing: SelectCellEditing,
+  },
+  {
+    displayName: 'Select',
+  }
+);

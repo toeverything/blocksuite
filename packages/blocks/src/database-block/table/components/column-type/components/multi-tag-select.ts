@@ -350,7 +350,9 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       const cell =
         this._selectOptionContainer.closest<HTMLElement>('.database-cell');
       assertExists(cell);
-      this.editComplete();
+      if (this.isSingleMode) {
+        this.editComplete();
+      }
     }
   };
 
@@ -395,7 +397,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
 
     const isExist = selectedValue.findIndex(item => item === select) > -1;
     if (isExist) {
-      this.editComplete();
+      // this.editComplete();
       return;
     }
 
@@ -406,7 +408,11 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
         ? [this.tempValue]
         : [...selectedValue, this.tempValue];
       this.onChange(newValue);
-      this.editComplete();
+      if (this.isSingleMode) {
+        setTimeout(() => {
+          this.editComplete();
+        }, 4);
+      }
     }
   };
 
@@ -425,7 +431,10 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       ? [newSelect.id]
       : [...selectedValue, newSelect.id];
     this.onChange(newValue);
-    this.editComplete();
+    this._inputValue = '';
+    if (this.isSingleMode) {
+      this.editComplete();
+    }
   };
 
   private _onSelectAction = (
@@ -581,6 +590,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
             class="select-input"
             placeholder="Type here..."
             maxlength="${SELECT_TAG_NAME_MAX_LENGTH}"
+            .value=${this._inputValue}
             @input="${this._onSelectSearchInput}"
             @keydown="${(event: KeyboardEvent) =>
               this._onSelectOrAdd(event, selectedTag)}"

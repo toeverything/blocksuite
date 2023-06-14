@@ -1,5 +1,7 @@
+/* eslint-disable lit/binding-positions,lit/no-invalid-html */
 import type { TemplateResult } from 'lit';
-import { html } from 'lit';
+import type { StaticValue } from 'lit/static-html.js';
+import { html, literal } from 'lit/static-html.js';
 
 import { tNumber, tString, tTag } from '../../logical/data-type.js';
 import { Matcher } from '../../logical/matcher.js';
@@ -50,33 +52,29 @@ type LiteralData = {
 };
 export const literalMatcher = new Matcher<LiteralData>();
 const createRenderFunction = (
-  type: string,
+  type: StaticValue,
   component: AnyLiteralComponent
 ): LiteralData => {
-  const name = `ast-${type}-literal`;
-  customElements.define(name, component as never);
-  const fn = new Function(
-    'html',
-    'type',
-    'value',
-    'onChange',
-    `return html\`<${name} .type='\${type}' .value='\${value}' .onChange='\${onChange}'></${name}>\`;`
-  );
+  customElements.define(type._$litStatic$, component as never);
   return {
-    render: (...args) => fn(html, ...args),
+    render: (type, value, onChange) => html`
+      <${type} .type='${type}' .value='${value}' .onChange='${onChange}'></${type}>`,
     component: component,
   };
 };
 literalMatcher.register(
   tString.create(),
-  createRenderFunction('string', StringLiteral)
+  createRenderFunction(literal`ast-string-literal`, StringLiteral)
 );
 literalMatcher.register(
   tNumber.create(),
-  createRenderFunction('number', NumberLiteral)
+  createRenderFunction(literal`ast-number-literal`, NumberLiteral)
 );
 literalMatcher.register(
   tArray(tUnknown.create()),
-  createRenderFunction('array', ArrayLiteral)
+  createRenderFunction(literal`ast-array-literal`, ArrayLiteral)
 );
-literalMatcher.register(tTag.create(), createRenderFunction('tag', TagLiteral));
+literalMatcher.register(
+  tTag.create(),
+  createRenderFunction(literal`ast-tag-literal`, TagLiteral)
+);
