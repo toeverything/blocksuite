@@ -51,6 +51,7 @@ export class HandleResizeManager {
     {
       bound: Bound;
       flip: IPoint;
+      rotate: number;
     }
   >();
 
@@ -82,6 +83,7 @@ export class HandleResizeManager {
 
   set originalRect(rect: DOMRect) {
     this._originalRect = rect;
+    this._aspectRatio = rect.width / rect.height;
     this._currentRect = new DOMRect(rect.x, rect.y, rect.width, rect.height);
   }
 
@@ -96,9 +98,7 @@ export class HandleResizeManager {
     this._zoom = zoom;
 
     if (originalRect) {
-      const { x, y, width, height } = originalRect;
-      this._originalRect = new DOMRect(x, y, width, height);
-      this._currentRect = new DOMRect(x, y, width, height);
+      this.originalRect = originalRect;
     }
   }
 
@@ -116,13 +116,13 @@ export class HandleResizeManager {
       {
         bound: Bound;
         flip: IPoint;
+        rotate: number;
       }
     >
   ) {
     this._bounds = bounds;
   }
 
-  // TODO: move to vec2
   private _onResize(shiftKey = false) {
     const {
       _aspectRatio,
@@ -205,8 +205,9 @@ export class HandleResizeManager {
         }
       }
 
-      // forced adjustment by aspect ratio
+      // force adjustment by aspect ratio
       // shift ||= this.bounds.size > 1;
+
       const deltaY = (endY - startY) / _zoom;
       const fp = fixedPoint.matrixTransform(m0);
       let dp = draggingPoint.matrixTransform(m0);
@@ -324,52 +325,100 @@ export class HandleResizeManager {
       }
     >();
 
-    // TODO: on same rotate
-    if (isCorner && this._bounds.size === 1) {
-      this._bounds.forEach(({ flip }, id) => {
+    let process: (
+      value: { bound: Bound; flip: IPoint; rotate: number },
+      key: string
+    ) => void;
+
+    if (isCorner) {
+      if (this._bounds.size === 1) {
+        process = ({ flip }, id) => {
+          newBounds.set(id, {
+            bound: new Bound(x, y, width, height),
+            flip: {
+              x: flipX * flip.x,
+              y: flipY * flip.y,
+            },
+          });
+        };
+      } else {
+        // TODO: on same rotate
+        process = () => {
+          console.log(123);
+        };
+      }
+    } else {
+      // include frames, <---->
+      const m2 = new DOMMatrix().scaleSelf(
+        scale.x,
+        scale.y,
+        1,
+        fixedPoint.x,
+        fixedPoint.y,
+        0
+      );
+      process = ({ bound: { x, y, w, h }, flip, rotate }, id) => {
+        const cx = x + w / 2;
+        const cy = y + h / 2;
+
+        const center = new DOMPoint(cx, cy).matrixTransform(m2);
+
+        let newWidth: number;
+        let newHeight: number;
+
+        // TODO: determine if it is a frame
+        if (rotate) {
+          const m = new DOMMatrix()
+            .translateSelf(cx, cy)
+            .rotateSelf(rotate)
+            .translateSelf(-cx, -cy);
+          const a = new DOMPoint(x, y).matrixTransform(m);
+          const b = new DOMPoint(x + w, y).matrixTransform(m);
+          const c = new DOMPoint(x + w, y + h).matrixTransform(m);
+          const d = new DOMPoint(x, y + h).matrixTransform(m);
+
+          const minX = Math.min(a.x, b.x, c.x, d.x);
+          const maxX = Math.max(a.x, b.x, c.x, d.x);
+          const rw = Math.abs(maxX - minX);
+          const hrw = rw / 2;
+
+          center.y = cy;
+
+          if (_currentRect.width <= rw) {
+            newWidth = w * (_currentRect.width / rw);
+            newHeight = newWidth / (w / h);
+            center.x = _currentRect.left + _currentRect.width / 2;
+          } else {
+            const p = (cx - hrw - _originalRect.left) / _originalRect.width;
+            const lx = _currentRect.left + p * _currentRect.width + hrw;
+            center.x = Math.max(
+              _currentRect.left + hrw,
+              Math.min(lx, _currentRect.left + _currentRect.width - hrw)
+            );
+            newWidth = w;
+            newHeight = h;
+          }
+        } else {
+          newWidth = Math.abs(w * scale.x);
+          newHeight = Math.abs(h * scale.y);
+        }
+
         newBounds.set(id, {
-          bound: new Bound(x, y, width, height),
+          bound: new Bound(
+            center.x - newWidth / 2,
+            center.y - newHeight / 2,
+            newWidth,
+            newHeight
+          ),
           flip: {
             x: flipX * flip.x,
             y: flipY * flip.y,
           },
         });
-      });
-
-      this._onResizeMove(newBounds);
-      return;
+      };
     }
 
-    const m2 = new DOMMatrix().scaleSelf(
-      scale.x,
-      scale.y,
-      1,
-      fixedPoint.x,
-      fixedPoint.y,
-      0
-    );
-
-    this._bounds.forEach(({ bound: { x, y, w, h }, flip }, id) => {
-      const cx = x + w / 2;
-      const cy = y + h / 2;
-      const center = new DOMPoint(cx, cy).matrixTransform(m2);
-      const newWidth = Math.abs(w * scale.x);
-      const newHeight = Math.abs(h * scale.y);
-
-      newBounds.set(id, {
-        bound: new Bound(
-          center.x - newWidth / 2,
-          center.y - newHeight / 2,
-          newWidth,
-          newHeight
-        ),
-        flip: {
-          x: flipX * flip.x,
-          y: flipY * flip.y,
-        },
-      });
-    });
-
+    this._bounds.forEach(process);
     this._onResizeMove(newBounds);
   }
 
@@ -388,7 +437,7 @@ export class HandleResizeManager {
     const endRad = Math.atan2(endY - centerY, endX - centerX);
     let deltaRad = endRad - startRad;
 
-    // snape angle
+    // snap angle
     // 15deg * n = 0, 15, 30, 45, ... 360
     if (shiftKey) {
       const prevRad = (_rotate * Math.PI) / 180;
