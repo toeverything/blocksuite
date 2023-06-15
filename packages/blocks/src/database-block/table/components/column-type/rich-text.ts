@@ -3,7 +3,7 @@ import type { Y } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
-import { query } from 'lit/decorators.js';
+import { query, state } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import type {
@@ -99,9 +99,13 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
 
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
-
+  @state()
+  _value = this.value?.toString() ?? '';
   protected override firstUpdated() {
-    this._onInitVEditor();
+    this._value = this.value?.toString() ?? '';
+    this.value?.observe(() => {
+      this._value = this.value?.toString() ?? '';
+    });
   }
 
   private _initYText = (text?: string) => {
@@ -133,7 +137,9 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
   }
 
   override render() {
-    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
+    return html` <div class="affine-database-rich-text virgo-editor">
+      ${this._value}
+    </div>`;
   }
 }
 

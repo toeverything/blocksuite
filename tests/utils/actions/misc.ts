@@ -426,15 +426,10 @@ export async function initDatabaseDynamicRowWithData(
   }
   const lastRow = page.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
-  await waitNextFrame(page, 100);
   await cell.click();
-  await waitNextFrame(page, 100);
   await type(page, data);
-  await waitNextFrame(page, 100);
   await pressEnter(page);
-  await waitNextFrame(page, 100);
   await pressEscape(page);
-  await waitNextFrame(page, 100);
 }
 
 export async function focusDatabaseTitle(page: Page) {
