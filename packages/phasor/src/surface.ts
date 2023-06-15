@@ -224,6 +224,7 @@ export class SurfaceManager {
       const element = this._elements.get(id);
       assertExists(element);
       element.applyUpdate(properties);
+      this.updateElementView(id, properties as IElementViewProps<T>);
     });
   }
 

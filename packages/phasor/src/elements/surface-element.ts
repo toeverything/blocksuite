@@ -123,7 +123,6 @@ export class SurfaceElement<
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
     }
-    this.applyViewUpdate(updates as Partial<K>);
   }
 
   applyViewUpdate(updates: Partial<K>) {
