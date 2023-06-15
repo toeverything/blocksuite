@@ -222,7 +222,6 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   tempValue: string | undefined = undefined;
 
   static override styles = styles;
-  cellType = 'select' as const;
 
   @property()
   mode: SelectMode = SelectMode.Single;

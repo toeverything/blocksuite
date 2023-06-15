@@ -442,7 +442,7 @@ test.describe('switch column type', () => {
     });
 
     await initDatabaseDynamicRowWithData(page, '123abc');
-    expect(await cell.inputValue()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
   });
 
   test('switch to rich-text', async ({ page }) => {
@@ -530,7 +530,7 @@ test.describe('switch column type', () => {
 
     await initDatabaseDynamicRowWithData(page, '123', true);
     const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.inputValue()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
 
     await switchColumnType(page, 'select');
     await initDatabaseDynamicRowWithData(page, 'abc');

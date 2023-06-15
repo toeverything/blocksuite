@@ -12,11 +12,7 @@ import type {
 } from '../../../../__internal__/rich-text/virgo/types.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
-import {
-  DatabaseCellElement,
-  defineColumnRenderer,
-  type TableViewCell,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 function toggleStyle(
   vEditor: AffineVEditor,
@@ -66,12 +62,8 @@ function toggleStyle(
   vEditor.syncVRange();
 }
 
-export class RichTextCell
-  extends DatabaseCellElement<Y.Text>
-  implements TableViewCell
-{
+export class RichTextCell extends DatabaseCellElement<Y.Text> {
   static override tag = literal`affine-database-rich-text-cell`;
-  cellType = 'rich-text' as const;
 
   static override styles = css`
     affine-database-rich-text-cell {
@@ -145,12 +137,8 @@ export class RichTextCell
   }
 }
 
-export class RichTextCellEditing
-  extends DatabaseCellElement<Y.Text>
-  implements TableViewCell
-{
+export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
   static override tag = literal`affine-database-rich-text-cell-editing`;
-  cellType = 'rich-text' as const;
 
   static override styles = css`
     affine-database-rich-text-cell-editing {
@@ -231,6 +219,8 @@ export class RichTextCellEditing
         return;
       }
       event.stopPropagation();
+    } else {
+      this._setEditing(false);
     }
 
     if (!this.vEditor) return;
@@ -240,7 +230,7 @@ export class RichTextCellEditing
         this._onSoftEnter();
       } else {
         // exit editing
-        this.setEditing(false);
+        this._setEditing(false);
         this._container.blur();
       }
       event.preventDefault();

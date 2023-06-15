@@ -3,11 +3,7 @@ import { query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { literal } from 'lit/static-html.js';
 
-import {
-  DatabaseCellElement,
-  defineColumnRenderer,
-  type TableViewCell,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -84,12 +80,8 @@ type DragConfig = {
   boundLeft: number;
 };
 
-class ProgressCell
-  extends DatabaseCellElement<number>
-  implements TableViewCell
-{
+class ProgressCell extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-progress-cell`;
-  cellType = 'progress' as const;
 
   static override styles = styles;
 
@@ -131,12 +123,8 @@ class ProgressCell
   }
 }
 
-class ProgressCellEditing
-  extends DatabaseCellElement<number>
-  implements TableViewCell
-{
+class ProgressCellEditing extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-progress-cell-editing`;
-  cellType = 'progress' as const;
 
   static override styles = styles;
 
@@ -149,25 +137,16 @@ class ProgressCellEditing
   private _dragConfig: DragConfig | null = null;
   private _progressBgWidth = 0;
 
-  _bgClick(e: MouseEvent) {
-    this.onChange(
-      Math.round(
-        (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth
-      )
-    );
-  }
-
   override firstUpdated() {
     const disposables = this._disposables;
 
     disposables.addFromEvent(
-      this._dragHandle,
+      this._progressBg,
       'pointerdown',
       this._onPointerDown
     );
-    disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
-    disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
-    disposables.addFromEvent(document, 'pointermove', this._onDocumentMove);
+    disposables.addFromEvent(document, 'pointermove', this._onPointerMove);
+    disposables.addFromEvent(document, 'pointerup', this._onPointerUp);
 
     const { width } = this._progressBg.getBoundingClientRect();
     const visibleWidth = width - 6;
@@ -191,11 +170,6 @@ class ProgressCellEditing
     }
   }
 
-  private _onDocumentMove = () => {
-    if (!this._dragConfig) return;
-    this._onPointerUp();
-  };
-
   private _onPointerDown = (event: PointerEvent) => {
     event.stopPropagation();
     const { left, width } = this._progressBg.getBoundingClientRect();
@@ -206,6 +180,7 @@ class ProgressCellEditing
       containerWidth: visibleWidth,
     };
     this.page.captureSync();
+    this._onPointerMove(event);
   };
 
   private _onPointerMove = (event: PointerEvent) => {
@@ -253,11 +228,7 @@ class ProgressCellEditing
       @mousedown="${(e: Event) => e.preventDefault()}"
     >
       <div class="affine-database-progress-bar">
-        <div
-          class="affine-database-progress-bg"
-          @click="${this._bgClick}"
-          style=${bgStyles}
-        >
+        <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>
           <div class="affine-database-progress-drag-handle"></div>
         </div>

@@ -1,4 +1,9 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type {
+  BlockSuiteRoot} from '@blocksuite/lit';
+import {
+  ShadowlessElement,
+  WithDisposable,
+} from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -7,16 +12,14 @@ import { html } from 'lit/static-html.js';
 import type { TableMixColumn } from '../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { ColumnRendererHelper } from '../register.js';
-import type { Column, RowHost, SetValueOption } from '../types.js';
+import { selectCurrentCell } from '../selection-manager/cell.js';
+import type { SetValueOption } from '../types.js';
 
 /** affine-database-cell-container padding */
 const CELL_PADDING = 8;
 
 @customElement('affine-database-cell-container')
-export class DatabaseCellContainer
-  extends WithDisposable(ShadowlessElement)
-  implements RowHost
-{
+export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-database-cell-container {
       display: flex;
@@ -53,6 +56,8 @@ export class DatabaseCellContainer
 
   @property()
   databaseModel!: DatabaseBlockModel;
+  @property()
+  root!: BlockSuiteRoot;
 
   private get readonly() {
     return this.databaseModel.page.readonly;
@@ -92,24 +97,18 @@ export class DatabaseCellContainer
 
   setEditing = (isEditing: boolean) => {
     this._isEditing = isEditing;
-    if (!isEditing) {
-      // TODO select cell
-    }
+    selectCurrentCell(this, isEditing);
   };
 
   setHeight = (height: number) => {
     this.style.height = `${height + CELL_PADDING * 2}px`;
   };
 
-  updateColumnProperty = (
-    apply: (oldProperty: Column) => Partial<Column>
+  updateColumnData = (
+    apply: (data: Record<string, unknown>) => Partial<Record<string, unknown>>
   ): void => {
-    const newProperty = apply(this.column);
     this.databaseModel.page.captureSync();
-    this.databaseModel.updateColumn({
-      ...this.column,
-      ...newProperty,
-    });
+    this.databaseModel.updateColumnData(this.column.id, apply);
   };
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
@@ -124,15 +123,15 @@ export class DatabaseCellContainer
         : renderer.components.Cell.tag;
     return html`
       <${tag}
-        .updateColumnProperty='${this.updateColumnProperty}'
-        .readonly='${this.readonly}'
         .page='${this.databaseModel.page}'
+        .root='${this.root}'
+        .updateColumnData='${this.updateColumnData}'
+        .readonly='${this.readonly}'
         .columnData='${this.column.data}'
         .value='${cell?.value}'
         .onChange='${this.setValue}'
         .setHeight='${this.setHeight}'
         .setEditing='${this.setEditing}'
-        .container='${this}'
         .isEditing='${this._isEditing}'
       ></${tag}>`;
   }

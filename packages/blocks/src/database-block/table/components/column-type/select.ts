@@ -5,15 +5,10 @@ import { html, literal } from 'lit/static-html.js';
 
 import type { SelectColumnData } from '../../../common/column-manager.js';
 import type { SelectTag } from '../../../types.js';
-import type { TableViewCell } from '../../register.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-class SelectCell
-  extends DatabaseCellElement<string[], SelectColumnData>
-  implements TableViewCell
-{
+class SelectCell extends DatabaseCellElement<string[], SelectColumnData> {
   static override tag = literal`affine-database-select-cell`;
-  cellType = 'select' as const;
 
   override render() {
     const value = this.value ? [this.value] : [];
@@ -26,12 +21,11 @@ class SelectCell
   }
 }
 
-export class SelectCellEditing
-  extends DatabaseCellElement<string, SelectColumnData>
-  implements TableViewCell
-{
+export class SelectCellEditing extends DatabaseCellElement<
+  string,
+  SelectColumnData
+> {
   static override tag = literal`affine-database-select-cell-editing`;
-  cellType = 'select' as const;
 
   get _options(): SelectTag[] {
     return this.columnData.options;
@@ -47,16 +41,14 @@ export class SelectCellEditing
   };
 
   _editComplete = () => {
-    this.setEditing(false);
+    this._setEditing(false);
   };
 
   _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.updateColumnProperty(oldProperty => {
+    this.updateColumnData(data => {
       return {
-        data: {
-          ...oldProperty.data,
-          options: update(oldProperty.data.options),
-        },
+        ...data,
+        options: update(data.options),
       };
     });
   };
@@ -90,7 +82,7 @@ export class SelectCellEditing
         .newTag="${this._newTag}"
         .deleteTag="${this._deleteTag}"
         .changeTag="${this._changeTag}"
-        .container="${this.container}"
+        .container="${this.parentElement}"
         .page="${this.page}"
       >
       </affine-database-multi-tag-select>
