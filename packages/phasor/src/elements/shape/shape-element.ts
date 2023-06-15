@@ -1,5 +1,6 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
+import { DEFAULT_ROUGHNESS } from '../../consts.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
@@ -41,7 +42,8 @@ export class ShapeElement extends SurfaceElement<IShape> {
   }
 
   get roughness() {
-    const roughness = (this.yMap.get('roughness') as IShape['roughness']) ?? 2;
+    const roughness =
+      (this.yMap.get('roughness') as IShape['roughness']) ?? DEFAULT_ROUGHNESS;
     return roughness;
   }
 

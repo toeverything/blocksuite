@@ -59,6 +59,8 @@ export class Space<
       return this;
     }
 
+    this._ySpaceDoc.load();
+
     await new Promise(resolve =>
       this._onLoadSlot.once(() => {
         resolve(undefined);
@@ -86,7 +88,6 @@ export class Space<
         this._onLoadSlot.emit();
       });
     } else {
-      subDoc.load();
       this._loaded = false;
       this.doc.on('subdocs', this._onSubdocEvent);
     }

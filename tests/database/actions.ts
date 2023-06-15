@@ -1,15 +1,15 @@
 import type { ColumnType } from '@blocksuite/blocks';
 import { expect, type Locator, type Page } from '@playwright/test';
 
-import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import { assertClassName } from '../asserts.js';
-import { pressEnter, pressEscape, type } from './keyboard.js';
+import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
+import { pressEnter, pressEscape, type } from '../utils/actions/keyboard.js';
 import {
   getBoundingBox,
   getBoundingClientRect,
   getEditorLocator,
   waitNextFrame,
-} from './misc.js';
+} from '../utils/actions/misc.js';
+import { assertClassName } from '../utils/asserts.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
   await focusDatabaseHeader(page);
@@ -131,6 +131,7 @@ export function getFirstColumnCell(page: Page, cellClass: string) {
 export async function performSelectColumnTagAction(
   page: Page,
   actionClass: string,
+  operation: 'click' | 'hover' = 'click',
   index = 0
 ) {
   const cell = getFirstColumnCell(
@@ -148,13 +149,34 @@ export async function performSelectColumnTagAction(
   const actionIcon = selectOption.locator('.select-option-icon');
   await actionIcon.click();
   const action = page.locator(`.${actionClass}`);
-  await action.click();
+  if (operation === 'click') {
+    await action.click();
+  } else if (operation === 'hover') {
+    await action.hover();
+    const firstColorOption = page.locator('.option-color').nth(0);
+    await firstColorOption.click();
+    await clickDatabaseOutside(page);
+  }
 
   return {
     cellSelected: cell.locator('.select-selected'),
     selectOption: selectOptions,
     saveIcon: actionIcon,
   };
+}
+
+export async function assertSelectedStyle(
+  page: Page,
+  key: keyof CSSStyleDeclaration,
+  value: string
+) {
+  const style = await page.evaluate(key => {
+    const selectedTag = document.querySelector<HTMLElement>('.select-selected');
+    if (!selectedTag) throw new Error('Missing selected tag');
+    return selectedTag.style[key];
+  }, key);
+
+  expect(style).toBe(value);
 }
 
 export async function clickDatabaseOutside(page: Page) {
@@ -306,4 +328,35 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
     inputElement,
     saveIcon,
   };
+}
+
+export async function assertRowsSelection(
+  page: Page,
+  rowIndexes: [start: number, end: number]
+) {
+  const selection = page.locator('.database-row-level-selection');
+  const selectionBox = await getBoundingBox(selection);
+
+  const startIndex = rowIndexes[0];
+  const endIndex = rowIndexes[1];
+
+  if (startIndex === endIndex) {
+    // single row
+    const row = getDatabaseBodyRow(page, startIndex);
+    const rowBox = await getBoundingBox(row);
+    expect(selectionBox).toEqual(rowBox);
+  } else {
+    // multiple rows
+    // Only test at most two lines when testing.
+    const startRow = getDatabaseBodyRow(page, startIndex);
+    const endRow = getDatabaseBodyRow(page, endIndex);
+    const startRowBox = await getBoundingBox(startRow);
+    const endRowBox = await getBoundingBox(endRow);
+    expect(selectionBox).toEqual({
+      x: startRowBox.x,
+      y: startRowBox.y,
+      width: startRowBox.width,
+      height: startRowBox.height + endRowBox.height,
+    });
+  }
 }

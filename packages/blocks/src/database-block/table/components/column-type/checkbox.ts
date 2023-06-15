@@ -45,13 +45,12 @@ class CheckboxCell
   }
 
   private _onChange() {
-    const checked = !this.cell?.value;
-
-    this.rowHost.setValue(checked);
+    const checked = !this.value;
+    this.onChange(checked);
   }
 
   protected override render() {
-    const checked = this.cell?.value ?? false;
+    const checked = this.value ?? false;
 
     const icon = checked ? checkboxChecked() : checkboxUnchecked();
     return html`<div class="affine-database-checkbox-container">
@@ -64,8 +63,6 @@ class CheckboxCell
 
 export const CheckboxColumnRenderer = defineColumnRenderer(
   'checkbox',
-  () => ({}),
-  () => false,
   {
     Cell: CheckboxCell,
     CellEditing: null,

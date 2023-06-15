@@ -13,6 +13,7 @@ import {
   handleBlockSplit,
   handleLineEndForwardDelete,
   handleLineStartBackspace,
+  handleParagraphBlockLeftKey,
   handleSoftEnter,
   handleUnindent,
 } from '../rich-text/rich-text-operations.js';
@@ -205,7 +206,13 @@ export function onForwardDelete(
   }
   return ALLOW_DEFAULT;
 }
-export function onKeyLeft(e: KeyboardEvent, range: VRange) {
+
+export function onKeyLeft(
+  model: BaseBlockModel,
+  e: KeyboardEvent,
+  range: VRange,
+  editableContainer: Element
+) {
   // range.length === 0 means collapsed selection
   if (range.length !== 0) {
     e.stopPropagation();
@@ -216,6 +223,7 @@ export function onKeyLeft(e: KeyboardEvent, range: VRange) {
     e.stopPropagation();
     return ALLOW_DEFAULT;
   }
+  handleParagraphBlockLeftKey(model.page, model);
   // Need jump to previous block
   return PREVENT_DEFAULT;
 }

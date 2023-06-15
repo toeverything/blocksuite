@@ -54,7 +54,7 @@ const attributeRenderer = (delta: DeltaInsert) => {
         'word-wrap': 'break-word',
       });
 
-  // just for test
+  // split it to test v-element with multiple v-text
   if (delta.insert.length > 4) {
     const leftStr = delta.insert.slice(0, 3);
     const rightStr = delta.insert.slice(3);
@@ -314,7 +314,9 @@ export class TestPage extends ShadowlessElement {
     });
 
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new VEditor(textA);
+    const editorA = new VEditor(textA, {
+      embed: delta => !!delta.attributes?.code,
+    });
     editorA.setAttributeRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);

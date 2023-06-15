@@ -1,10 +1,13 @@
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import type { TableMixColumn } from '../../common/view-manager.js';
+import type { DatabaseBlockModel } from '../../database-model.js';
 import { onClickOutside } from '../../utils.js';
 import type { ColumnRendererHelper } from '../register.js';
-import { DatabaseCellElement } from '../register.js';
 import type { Column, RowHost, SetValueOption } from '../types.js';
 
 /** affine-database-cell-container padding */
@@ -12,7 +15,7 @@ const CELL_PADDING = 8;
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer
-  extends DatabaseCellElement<unknown>
+  extends WithDisposable(ShadowlessElement)
   implements RowHost
 {
   static override styles = css`
@@ -28,6 +31,13 @@ export class DatabaseCellContainer
     affine-database-cell-container * {
       box-sizing: border-box;
     }
+
+    affine-database-multi-select-cell,
+    affine-database-select-cell {
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
   `;
 
   @state()
@@ -35,6 +45,15 @@ export class DatabaseCellContainer
 
   @property()
   columnRenderer!: ColumnRendererHelper;
+
+  @property()
+  rowModel!: BaseBlockModel;
+
+  @property()
+  column!: TableMixColumn;
+
+  @property()
+  databaseModel!: DatabaseBlockModel;
 
   private get readonly() {
     return this.databaseModel.page.readonly;
@@ -70,9 +89,14 @@ export class DatabaseCellContainer
     });
   };
 
-  setValue(value: unknown, option: SetValueOption = { captureSync: true }) {
-    queueMicrotask(() => {
-      if (option.captureSync) {
+  setValue = (
+    value: unknown,
+    option: SetValueOption = { captureSync: true }
+  ) => {
+    const captureSync = option.captureSync ?? true;
+    const sync = option.sync ?? false;
+    const run = () => {
+      if (captureSync) {
         this.databaseModel.page.captureSync();
       }
       this.databaseModel.updateCell(this.rowModel.id, {
@@ -81,11 +105,21 @@ export class DatabaseCellContainer
       });
       this.databaseModel.applyColumnUpdate();
       this.requestUpdate();
-    });
-  }
+    };
+    if (sync) {
+      run();
+    } else {
+      queueMicrotask(() => {
+        run();
+      });
+    }
+  };
 
   setEditing = (isEditing: boolean) => {
     this._isEditing = isEditing;
+    if (!isEditing) {
+      this.databaseModel;
+    }
     if (!this._isEditing) {
       setTimeout(() => {
         this.addEventListener('click', this._onClick);
@@ -95,6 +129,17 @@ export class DatabaseCellContainer
 
   setHeight = (height: number) => {
     this.style.height = `${height + CELL_PADDING * 2}px`;
+  };
+
+  updateColumnProperty = (
+    apply: (oldProperty: Column) => Partial<Column>
+  ): void => {
+    const newProperty = apply(this.column);
+    this.databaseModel.page.captureSync();
+    this.databaseModel.updateColumn({
+      ...this.column,
+      ...newProperty,
+    });
   };
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
@@ -111,32 +156,32 @@ export class DatabaseCellContainer
       return html`
         <${editingTag}
           data-is-editing-cell='true'
-          .rowHost='${this}'
-          .databaseModel='${this.databaseModel}'
-          .rowModel='${this.rowModel}'
-          .column='${this.column}'
-          .cell='${cell}'
+          .updateColumnProperty='${this.updateColumnProperty}'
+          .readonly='${this.readonly}'
+          .page='${this.databaseModel.page}'
+          .columnData='${this.column.data}'
+          .value='${cell?.value}'
+          .onChange='${this.setValue}'
+          .setHeight='${this.setHeight}'
+          .setEditing='${this.setEditing}'
+          .container='${this}'
         ></${editingTag}>
       `;
     }
     const previewTag = renderer.components.Cell.tag;
     return html`
       <${previewTag}
-        .rowHost='${this}'
-        .databaseModel='${this.databaseModel}'
-        .rowModel='${this.rowModel}'
-        .column='${this.column}'
-        .cell='${cell}'
+        .updateColumnProperty='${this.updateColumnProperty}'
+        .readonly='${this.readonly}'
+        .page='${this.databaseModel.page}'
+        .columnData='${this.column.data}'
+        .value='${cell?.value}'
+        .onChange='${this.setValue}'
+        .setHeight='${this.setHeight}'
+        .setEditing='${this.setEditing}'
+        .container='${this}'
       ></${previewTag}>
     `;
-  }
-  updateColumnProperty(apply: (oldProperty: Column) => Partial<Column>): void {
-    const newProperty = apply(this.column);
-    this.databaseModel.page.captureSync();
-    this.databaseModel.updateColumn({
-      ...this.column,
-      ...newProperty,
-    });
   }
 }
 

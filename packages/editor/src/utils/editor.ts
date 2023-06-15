@@ -156,6 +156,14 @@ export const createBlockHub: (
         const result = pageBlock.addNewFrame(models, point);
         frameId = result.frameId;
         focusId = result.ids[0];
+        const model = page.getBlockById(focusId);
+        assertExists(model);
+        if (model.flavour === 'affine:database') {
+          const service = await getServiceOrRegister<'affine:database'>(
+            props.flavour
+          );
+          service.initDatabaseBlock(page, model, model.id);
+        }
       }
       pageBlock.setSelection(frameId, true, focusId, point);
     },

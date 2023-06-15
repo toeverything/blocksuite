@@ -1,4 +1,3 @@
-import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
@@ -16,19 +15,15 @@ class MultiSelectCell
   extends DatabaseCellElement<string[], SelectColumnData>
   implements TableViewCell
 {
-  static override styles = css`
-    :host {
-      width: 100%;
-    }
-  `;
   static override tag = literal`affine-database-multi-select-cell`;
   cellType = 'multi-select' as const;
 
   override render() {
     return html`
       <affine-database-multi-tag-view
-        .value="${this.cell?.value ?? []}"
-        .options="${this.column.data.options}"
+        .value=${this.value ?? []}
+        .options=${this.columnData.options}
+        .setHeight=${this.setHeight}
       ></affine-database-multi-tag-view>
     `;
   }
@@ -43,23 +38,23 @@ class MultiSelectCellEditing
   cellType = 'multi-select' as const;
 
   get _options(): SelectTag[] {
-    return this.column.data.options;
+    return this.columnData.options;
   }
 
   get _value() {
-    return this.cell?.value ?? [];
+    return this.value ?? [];
   }
 
   _onChange = (ids: string[]) => {
-    this.rowHost.setValue(ids);
+    this.onChange(ids);
   };
 
   _editComplete = () => {
-    this.rowHost.setEditing(false);
+    this.setEditing(false);
   };
 
   _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.rowHost.updateColumnProperty(oldProperty => {
+    this.updateColumnProperty(oldProperty => {
       return {
         data: {
           ...oldProperty.data,
@@ -99,8 +94,8 @@ class MultiSelectCellEditing
         .newTag="${this._newTag}"
         .deleteTag="${this._deleteTag}"
         .changeTag="${this._changeTag}"
-        .container="${this.rowHost}"
-        .databaseModel="${this.databaseModel}"
+        .container="${this.container}"
+        .page="${this.page}"
       >
       </affine-database-multi-tag-select>
     `;
@@ -109,10 +104,6 @@ class MultiSelectCellEditing
 
 export const MultiSelectColumnRenderer = defineColumnRenderer(
   'multi-select',
-  () => ({
-    selection: [] as SelectTag[],
-  }),
-  () => [] as SelectTag[],
   {
     Cell: MultiSelectCell,
     CellEditing: MultiSelectCellEditing,

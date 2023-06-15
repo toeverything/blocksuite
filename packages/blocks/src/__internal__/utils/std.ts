@@ -27,6 +27,7 @@ export function supportsChildren(model: BaseBlockModel): boolean {
 }
 
 export function isEmpty(model: BaseBlockModel): boolean {
+  if (model.flavour === 'affine:database') return model.children.length === 0;
   if (model.children.length !== 0) {
     const found = model.children.find(c => !isEmpty(c));
     return !found;

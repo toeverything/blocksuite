@@ -1,6 +1,6 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import { StrokeStyle } from '../../consts.js';
+import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import {
   Bound,
   inflateBound,
@@ -29,7 +29,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
   }
 
   get roughness() {
-    return (this.yMap.get('roughness') as IConnector['roughness']) ?? 2;
+    return (
+      (this.yMap.get('roughness') as IConnector['roughness']) ??
+      DEFAULT_ROUGHNESS
+    );
   }
 
   get startElement() {

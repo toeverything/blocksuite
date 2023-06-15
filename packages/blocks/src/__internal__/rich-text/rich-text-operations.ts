@@ -13,6 +13,7 @@ import {
   asyncSetVRange,
 } from '../utils/common-operations.js';
 import {
+  getDefaultPage,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
@@ -141,12 +142,8 @@ export function handleBlockSplit(
   page.captureSync();
   const right = model.text.split(splitIndex, splitLength);
 
-  let newParent = parent;
-  let newBlockIndex = newParent.children.indexOf(model) + 1;
-  if (matchFlavours(model, ['affine:list']) && model.children.length > 0) {
-    newParent = model;
-    newBlockIndex = 0;
-  }
+  const newParent = parent;
+  const newBlockIndex = newParent.children.indexOf(model) + 1;
   const children = [...model.children];
   page.updateBlock(model, { children: [] });
   const id = page.addBlock(
@@ -764,6 +761,7 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
 
   handleUnknownBlockBackspace(model);
 }
+
 export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
   if (
     handleCodeBlockForwardDelete(page, model) ||
@@ -775,6 +773,34 @@ export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
   }
   handleUnknownBlockForwardDelete(model);
 }
+
+export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
+  if (!matchFlavours(model, ['affine:paragraph'])) return;
+  const pageElement = getDefaultPage(page);
+  if (!pageElement) {
+    // Maybe in edgeless mode
+    return;
+  }
+  const titleVEditor = pageElement.titleVEditor;
+  const parent = page.getParent(model);
+  if (parent && matchFlavours(parent, ['affine:frame'])) {
+    const paragraphIndex = parent.children.indexOf(model);
+    if (paragraphIndex === 0) {
+      const frameParent = page.getParent(parent);
+      if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
+        const frameIndex = frameParent.children
+          // page block may contain other blocks like surface
+          .filter(block => matchFlavours(block, ['affine:frame']))
+          .indexOf(parent);
+        if (frameIndex === 0) {
+          titleVEditor.focusEnd();
+          return;
+        }
+      }
+    }
+  }
+}
+
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
   const range = getCurrentNativeRange();
   if (!range.collapsed) {
