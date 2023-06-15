@@ -120,10 +120,8 @@ export class ContentParser {
 
       const promise = new Promise(resolve => {
         setTimeout(async () => {
-          const pngData = await html2canvas(editorContainer, {
-            cacheBust: true,
-          });
-          resolve(pngData);
+          const canvasData = await html2canvas(editorContainer);
+          resolve(canvasData);
         }, 0);
       });
       const data = (await promise) as HTMLCanvasElement;
