@@ -637,10 +637,16 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._onTransitionStart
     );
     disposables.addFromEvent(window, 'resize', this._onResize);
+
     this._indicator = <DragIndicator>(
-      document.createElement('affine-drag-indicator')
+      document.querySelector('affine-drag-indicator')
     );
-    document.body.appendChild(this._indicator);
+    if (!this._indicator) {
+      this._indicator = <DragIndicator>(
+        document.createElement('affine-drag-indicator')
+      );
+      document.body.appendChild(this._indicator);
+    }
   }
 
   override disconnectedCallback() {
