@@ -181,6 +181,7 @@ export function onBackspace(
   }
   return ALLOW_DEFAULT;
 }
+
 export function onForwardDelete(
   model: BaseBlockModel,
   e: KeyboardEvent,

@@ -1074,6 +1074,10 @@ test('should forwardDelete works when delete single character', async ({
 test('should forwardDelete works when delete multi characters', async ({
   page,
 }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/3122',
+  });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page, 0);

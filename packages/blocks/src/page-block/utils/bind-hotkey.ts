@@ -495,7 +495,6 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     // delete blocks
     deleteModelsByRange(page);
     e.preventDefault();
-    return;
   });
 
   hotkey.addListener(UP, e => {
