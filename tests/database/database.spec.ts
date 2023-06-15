@@ -611,7 +611,7 @@ test.describe('select column tag action', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
     await initDatabaseDynamicRowWithData(page, 'abc');
-
+    await pressEscape(page);
     const { cellSelected, selectOption, saveIcon } =
       await performSelectColumnTagAction(page, 'rename');
     await waitNextFrame(page);
@@ -635,7 +635,7 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     const { selectOption } = await performSelectColumnTagAction(page, 'rename');
     await waitNextFrame(page);
     await type(page, '456');
@@ -660,7 +660,7 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     const { cellSelected } = await performSelectColumnTagAction(page, 'delete');
     await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
@@ -672,7 +672,7 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     await performSelectColumnTagAction(page, 'change-color', 'hover');
     await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
   });
