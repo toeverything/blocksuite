@@ -97,44 +97,51 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
 
   vEditor: AffineVEditor | null = null;
 
-  @query('.affine-database-rich-text')
-  private _container!: HTMLDivElement;
+  // @query('.affine-database-rich-text')
+  // private _container!: HTMLDivElement;
   @state()
   _value = this.value?.toString() ?? '';
-  protected override firstUpdated() {
+  override connectedCallback() {
+    super.connectedCallback();
     this._value = this.value?.toString() ?? '';
-    this.value?.observe(() => {
+    const cb = () => {
       this._value = this.value?.toString() ?? '';
+    };
+    this.value?.observe(cb);
+    this._disposables.add({
+      dispose: () => {
+        this.value?.unobserve(cb);
+      },
     });
   }
 
-  private _initYText = (text?: string) => {
-    const yText = new this.page.YText(text);
+  // private _initYText = (text?: string) => {
+  //   const yText = new this.page.YText(text);
+  //
+  //   this.onChange(yText, { sync: true });
+  //   return yText;
+  // };
 
-    this.onChange(yText, { sync: true });
-    return yText;
-  };
-
-  private _onInitVEditor() {
-    let value: Y.Text;
-    if (!this.value) {
-      value = this._initYText();
-    } else {
-      // When copying the database, the type of the value is `string`.s
-      if (typeof this.value === 'string') {
-        value = this._initYText(this.value);
-      } else {
-        value = this.value;
-      }
-    }
-
-    this.vEditor = new VEditor(value, {
-      active: () => activeEditorManager.isActive(this),
-    });
-    setupVirgoScroll(this.page, this.vEditor);
-    this.vEditor.mount(this._container);
-    this.vEditor.setReadonly(true);
-  }
+  // private _onInitVEditor() {
+  //   let value: Y.Text;
+  //   if (!this.value) {
+  //     value = this._initYText();
+  //   } else {
+  //     // When copying the database, the type of the value is `string`.s
+  //     if (typeof this.value === 'string') {
+  //       value = this._initYText(this.value);
+  //     } else {
+  //       value = this.value;
+  //     }
+  //   }
+  //
+  //   this.vEditor = new VEditor(value, {
+  //     active: () => activeEditorManager.isActive(this),
+  //   });
+  //   setupVirgoScroll(this.page, this.vEditor);
+  //   this.vEditor.mount(this._container);
+  //   this.vEditor.setReadonly(true);
+  // }
 
   override render() {
     return html` <div class="affine-database-rich-text virgo-editor">
