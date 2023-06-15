@@ -164,7 +164,7 @@ export class EditorContainer
     if (changedProperties.has('mode')) {
       this.slots.pageModeSwitched.emit(this.mode);
       if (this.mode === 'page') {
-        this._storeViewportInfo();
+        this._saveViewportLocalRecord();
       }
     }
 
@@ -190,7 +190,7 @@ export class EditorContainer
     return createBlockHub(this, this.page);
   }
 
-  private _storeViewportInfo() {
+  private _saveViewportLocalRecord() {
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;

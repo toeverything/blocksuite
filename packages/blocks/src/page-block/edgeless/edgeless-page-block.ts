@@ -863,7 +863,7 @@ export class EdgelessPageBlockComponent
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
       this._frameResizeObserver.resetListener(this.page);
-      if (!this._trySetupViewportData()) {
+      if (!this._tryLoadViewportLocalRecord()) {
         this._initViewport();
       }
 
@@ -882,7 +882,7 @@ export class EdgelessPageBlockComponent
     });
   }
 
-  private _trySetupViewportData() {
+  private _tryLoadViewportLocalRecord() {
     const { viewport } = this.surface;
     const key = 'blocksuite:' + this.page.id + ':edgelessViewport';
     const viewportData = localStorage.getItem(key);
