@@ -215,7 +215,7 @@ export async function assertDatabaseCellRichTexts(
         cell?.querySelector<RichText>('affine-database-rich-text-cell') ??
         cell?.querySelector<RichText>('affine-database-rich-text-cell-editing');
       if (!richText) throw new Error('Missing database rich text cell');
-      return richText.vEditor?.yText.toString() ?? richText.innerText.trim();
+      return richText.vEditor.yText.toString();
     },
     { rowIndex, columnIndex }
   );
