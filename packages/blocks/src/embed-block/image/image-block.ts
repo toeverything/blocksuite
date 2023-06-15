@@ -3,11 +3,14 @@ import './placeholder/image-not-found.js';
 
 import type { Disposable } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { getViewportElement } from '../../__internal__/utils/query.js';
 import type { EmbedBlockModel } from '../index.js';
+import { ImageOptionsTemplate } from './image-options.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
@@ -22,8 +25,8 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       align-items: center;
       justify-content: center;
       margin-top: calc(var(--affine-paragraph-space) + 8px);
-      overflow: hidden;
     }
+
     .affine-image-wrapper img {
       max-width: 100%;
       margin: auto;
@@ -44,16 +47,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       right: -52px;
       margin: 0;
       padding-left: 12px;
-    }
-
-    .embed-editing-state {
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 10px;
-      list-style: none;
-      padding: 4px;
-      width: 40px;
-      background-color: var(--affine-background-overlay-panel-color);
-      margin: 0;
     }
 
     .resizable .resizes {
@@ -101,6 +94,7 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     }
 
     .resizable-img {
+      position: relative;
       border: 1px solid var(--affine-white-90);
     }
     .resizable-img:hover {
@@ -109,6 +103,17 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
 
     .resizable-img img {
       width: 100%;
+    }
+
+    /* hover area */
+    .resizable-img::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50px;
+      height: 100%;
+      transform: translateX(100%);
     }
   `;
 
@@ -134,6 +139,11 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     'loading';
 
   private _retryCount = 0;
+
+  private hoverState = new Slot<boolean>();
+
+  @state()
+  private _optionPosition: { x: number; y: number } | null = null;
 
   override async firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -189,6 +199,8 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
     );
+    // Wait for DOM to be ready
+    setTimeout(() => this._observePosition());
   }
 
   override disconnectedCallback() {
@@ -197,6 +209,73 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       URL.revokeObjectURL(this._source);
     }
     super.disconnectedCallback();
+  }
+
+  private _observePosition() {
+    // At AFFiNE, avoid the option element to be covered by the header
+    // we need to reserve the space for the header
+    const HEADER_HEIGHT = 64;
+    // The height of the option element
+    // You need to change this value manually if you change the style of the option element
+    const OPTION_ELEMENT_HEIGHT = 136;
+    const HOVER_DELAY = 300;
+    const ANCHOR_EL: HTMLElement = this.resizeImg;
+
+    let hover = false;
+    let timer: number;
+    const updatePosition = () => {
+      // Update option position when scrolling
+      const rect = ANCHOR_EL.getBoundingClientRect();
+      this._optionPosition = {
+        // when image size is too large, the option popup should show inside
+        x: rect.width > 680 ? rect.right - 50 : rect.right + 12,
+        y: Math.min(
+          Math.max(rect.top, HEADER_HEIGHT + 12),
+          rect.bottom - OPTION_ELEMENT_HEIGHT
+        ),
+      };
+    };
+    this.hoverState.on(newHover => {
+      hover = newHover;
+      clearTimeout(timer);
+      if (hover) {
+        updatePosition();
+        return;
+      }
+      timer = window.setTimeout(() => {
+        this._optionPosition = null;
+      }, HOVER_DELAY);
+    });
+    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', e =>
+      this.hoverState.emit(true)
+    );
+    this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', e =>
+      this.hoverState.emit(false)
+    );
+    this._disposables.add(
+      this.model.propsUpdated.on(() => {
+        if (!hover) return;
+        updatePosition();
+      })
+    );
+    const viewportElement = getViewportElement(this.model.page);
+    if (viewportElement) {
+      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
+        if (!this._optionPosition) return;
+        updatePosition();
+      });
+    }
+  }
+
+  private _imageOptionsTemplate() {
+    if (!this._optionPosition) return null;
+    return html`<affine-portal
+      .template=${ImageOptionsTemplate({
+        model: this.model,
+        position: this._optionPosition,
+        hoverState: this.hoverState,
+      })}
+    ></affine-portal>`;
   }
 
   override render() {
@@ -226,7 +305,7 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     return html`
       <div class="affine-image-wrapper">
         <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
-          ${img}
+          ${img} ${this._imageOptionsTemplate()}
         </div>
       </div>
     `;

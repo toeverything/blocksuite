@@ -66,6 +66,7 @@ import { tryUpdateFrameSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
+import { FIT_TO_SCREEN_PADDING } from './consts.js';
 import { createDragHandle } from './create-drag-handle.js';
 import { FrameResizeObserver } from './frame-resize-observer.js';
 import { bindEdgelessHotkeys } from './hotkey.js';
@@ -861,18 +862,12 @@ export class EdgelessPageBlockComponent
       // Should be called in requestAnimationFrame,
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
-
-      const frame = this.frames.find(child => child.flavour === 'affine:frame');
-      if (frame) {
-        const [modelX, modelY, modelW, modelH] = deserializeXYWH(frame.xywh);
-        this.surface.viewport.setCenter(
-          modelX + modelW / 2,
-          modelY + modelH / 2
-        );
+      this._frameResizeObserver.resetListener(this.page);
+      if (!this._tryLoadViewportLocalRecord()) {
+        this._initViewport();
       }
 
       this._handleToolbarFlag();
-      this._frameResizeObserver.resetListener(this.page);
       this.requestUpdate();
     });
 
@@ -885,6 +880,64 @@ export class EdgelessPageBlockComponent
         this._frameResizeObserver.resetListener(this.page);
       });
     });
+  }
+
+  private _tryLoadViewportLocalRecord() {
+    const { viewport } = this.surface;
+    const key = 'blocksuite:' + this.page.id + ':edgelessViewport';
+    const viewportData = localStorage.getItem(key);
+    if (viewportData) {
+      try {
+        const { x, y, zoom } = JSON.parse(viewportData);
+        viewport.setCenter(x, y);
+        viewport.setZoom(zoom);
+        this.slots.viewportUpdated.emit();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  public getFitToScreenData() {
+    const bounds = [];
+
+    this.frames.forEach(frame => {
+      bounds.push(Bound.deserialize(frame.xywh));
+    });
+
+    const surfaceElementsBound = this.surface.getElementsBound();
+    if (surfaceElementsBound) {
+      bounds.push(surfaceElementsBound);
+    }
+
+    const { viewport } = this.surface;
+    let { centerX, centerY, zoom } = viewport;
+
+    if (bounds.length) {
+      const { width, height } = viewport;
+      const bound = getCommonBound(bounds);
+      assertExists(bound);
+
+      zoom = Math.min(
+        (width - FIT_TO_SCREEN_PADDING) / bound.w,
+        (height - FIT_TO_SCREEN_PADDING) / bound.h
+      );
+
+      centerX = bound.x + bound.w / 2;
+      centerY = bound.y + bound.h / 2;
+    } else {
+      zoom = 1;
+    }
+    return { zoom, centerX, centerY };
+  }
+  private _initViewport() {
+    const viewData = this.getFitToScreenData();
+    const { viewport } = this.surface;
+    viewport.setCenter(viewData.centerX, viewData.centerY);
+    viewport.setZoom(viewData.zoom);
+    this.slots.viewportUpdated.emit();
   }
 
   override updated(changedProperties: Map<string, unknown>) {
