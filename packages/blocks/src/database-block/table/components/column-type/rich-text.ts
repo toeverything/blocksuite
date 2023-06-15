@@ -3,7 +3,7 @@ import type { Y } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
-import { query, state } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import type {
@@ -97,56 +97,44 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
 
   vEditor: AffineVEditor | null = null;
 
-  // @query('.affine-database-rich-text')
-  // private _container!: HTMLDivElement;
-  @state()
-  _value = this.value?.toString() ?? '';
-  override connectedCallback() {
-    super.connectedCallback();
-    this._value = this.value?.toString() ?? '';
-    const cb = () => {
-      this._value = this.value?.toString() ?? '';
-    };
-    this.value?.observe(cb);
-    this._disposables.add({
-      dispose: () => {
-        this.value?.unobserve(cb);
-      },
-    });
+  @query('.affine-database-rich-text')
+  private _container!: HTMLDivElement;
+
+  protected override firstUpdated() {
+    this._onInitVEditor();
+    this.page.captureSync();
   }
 
-  // private _initYText = (text?: string) => {
-  //   const yText = new this.page.YText(text);
-  //
-  //   this.onChange(yText, { sync: true });
-  //   return yText;
-  // };
+  private _initYText = (text?: string) => {
+    const yText = new this.page.YText(text);
 
-  // private _onInitVEditor() {
-  //   let value: Y.Text;
-  //   if (!this.value) {
-  //     value = this._initYText();
-  //   } else {
-  //     // When copying the database, the type of the value is `string`.s
-  //     if (typeof this.value === 'string') {
-  //       value = this._initYText(this.value);
-  //     } else {
-  //       value = this.value;
-  //     }
-  //   }
-  //
-  //   this.vEditor = new VEditor(value, {
-  //     active: () => activeEditorManager.isActive(this),
-  //   });
-  //   setupVirgoScroll(this.page, this.vEditor);
-  //   this.vEditor.mount(this._container);
-  //   this.vEditor.setReadonly(true);
-  // }
+    this.onChange(yText, { sync: true });
+    return yText;
+  };
+
+  private _onInitVEditor() {
+    let value: Y.Text;
+    if (!this.value) {
+      value = this._initYText();
+    } else {
+      // When copying the database, the type of the value is `string`.s
+      if (typeof this.value === 'string') {
+        value = this._initYText(this.value);
+      } else {
+        value = this.value;
+      }
+    }
+
+    this.vEditor = new VEditor(value, {
+      active: () => activeEditorManager.isActive(this),
+    });
+    setupVirgoScroll(this.page, this.vEditor);
+    this.vEditor.mount(this._container);
+    this.vEditor.setReadonly(true);
+  }
 
   override render() {
-    return html` <div class="affine-database-rich-text virgo-editor">
-      ${this._value}
-    </div>`;
+    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
   }
 }
 
