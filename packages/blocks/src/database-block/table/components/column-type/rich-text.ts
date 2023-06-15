@@ -61,82 +61,81 @@ function toggleStyle(
 
   vEditor.syncVRange();
 }
-// TODO
-// export class RichTextCell extends DatabaseCellElement<Y.Text> {
-//   static override tag = literal`affine-database-rich-text-cell`;
-//
-//   static override styles = css`
-//     affine-database-rich-text-cell {
-//       display: flex;
-//       align-items: center;
-//       width: 100%;
-//       height: 100%;
-//       user-select: none;
-//     }
-//
-//     .affine-database-rich-text {
-//       display: flex;
-//       flex-direction: column;
-//       justify-content: center;
-//       width: 100%;
-//       height: 100%;
-//       outline: none;
-//     }
-//
-//     .affine-database-rich-text v-line {
-//       display: flex !important;
-//       align-items: center;
-//       height: 100%;
-//       width: 100%;
-//     }
-//
-//     .affine-database-rich-text v-line > div {
-//       flex-grow: 1;
-//     }
-//   `;
-//
-//   vEditor: AffineVEditor | null = null;
-//
-//   @query('.affine-database-rich-text')
-//   private _container!: HTMLDivElement;
-//
-//   protected override firstUpdated() {
-//     this._onInitVEditor();
-//     this.page.captureSync();
-//   }
-//
-//   private _initYText = (text?: string) => {
-//     const yText = new this.page.YText(text);
-//
-//     this.onChange(yText, { sync: true });
-//     return yText;
-//   };
-//
-//   private _onInitVEditor() {
-//     let value: Y.Text;
-//     if (!this.value) {
-//       value = this._initYText();
-//     } else {
-//       // When copying the database, the type of the value is `string`.s
-//       if (typeof this.value === 'string') {
-//         value = this._initYText(this.value);
-//       } else {
-//         value = this.value;
-//       }
-//     }
-//
-//     this.vEditor = new VEditor(value, {
-//       active: () => activeEditorManager.isActive(this),
-//     });
-//     setupVirgoScroll(this.page, this.vEditor);
-//     this.vEditor.mount(this._container);
-//     this.vEditor.setReadonly(true);
-//   }
-//
-//   override render() {
-//     return html` <div class="affine-database-rich-text virgo-editor"></div>`;
-//   }
-// }
+export class RichTextCell extends DatabaseCellElement<Y.Text> {
+  static override tag = literal`affine-database-rich-text-cell`;
+
+  static override styles = css`
+    affine-database-rich-text-cell {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      user-select: none;
+    }
+
+    .affine-database-rich-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+
+    .affine-database-rich-text v-line {
+      display: flex !important;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .affine-database-rich-text v-line > div {
+      flex-grow: 1;
+    }
+  `;
+
+  vEditor: AffineVEditor | null = null;
+
+  @query('.affine-database-rich-text')
+  private _container!: HTMLDivElement;
+
+  protected override firstUpdated() {
+    this._onInitVEditor();
+    this.page.captureSync();
+  }
+
+  private _initYText = (text?: string) => {
+    const yText = new this.page.YText(text);
+
+    this.onChange(yText, { sync: true });
+    return yText;
+  };
+
+  private _onInitVEditor() {
+    let value: Y.Text;
+    if (!this.value) {
+      value = this._initYText();
+    } else {
+      // When copying the database, the type of the value is `string`.s
+      if (typeof this.value === 'string') {
+        value = this._initYText(this.value);
+      } else {
+        value = this.value;
+      }
+    }
+
+    this.vEditor = new VEditor(value, {
+      active: () => activeEditorManager.isActive(this),
+    });
+    setupVirgoScroll(this.page, this.vEditor);
+    this.vEditor.mount(this._container);
+    this.vEditor.setReadonly(true);
+  }
+
+  override render() {
+    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
+  }
+}
 
 export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
   static override tag = literal`affine-database-rich-text-cell-editing`;
@@ -223,7 +222,6 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     } else {
       this._setEditing(false);
       this._container.blur();
-      this.page.captureSync();
     }
 
     if (!this.vEditor) return;
@@ -311,8 +309,8 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
 export const RichTextColumnRenderer = defineColumnRenderer(
   'rich-text',
   {
-    Cell: RichTextCellEditing,
-    CellEditing: null,
+    Cell: RichTextCell,
+    CellEditing: RichTextCellEditing,
   },
   {
     displayName: 'Rich Text',
