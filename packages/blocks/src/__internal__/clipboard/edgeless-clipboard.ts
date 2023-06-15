@@ -340,7 +340,9 @@ export class EdgelessClipboard implements Clipboard {
     frames.sort(compare);
     shapes.sort(compare);
 
-    const html2Image = await import('html-to-image');
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
     const { _edgeless } = this;
     const { surface } = _edgeless;
     const { viewport } = surface;
@@ -399,10 +401,18 @@ export class EdgelessClipboard implements Clipboard {
       // waiting for canvas to render
       await new Promise(requestAnimationFrame);
 
-      const blob = await html2Image.toBlob(container, {
-        cacheBust: true,
-      });
+      const canvas: HTMLCanvasElement = await html2canvas(container);
+      assertExists(canvas);
+
+      const blob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob(
+          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
+          CLIPBOARD_MIMETYPE.IMAGE_PNG
+        )
+      );
+
       assertExists(blob);
+
       await navigator.clipboard.write([
         new ClipboardItem({
           [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
