@@ -6,6 +6,7 @@ import {
   edgelessPreset,
   getPageBlock,
   getServiceOrRegister,
+  OutsideDragManager,
   type PageBlockModel,
   pagePreset,
   ThemeObserver,
@@ -16,7 +17,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { isFirefox, type Page, Slot } from '@blocksuite/store';
+import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -63,6 +64,8 @@ export class EditorContainer
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
   }
+
+  public outsideDragManager = new OutsideDragManager(this);
 
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
@@ -158,6 +161,26 @@ export class EditorContainer
         }
       });
     }
+
+    // Adding images from outside by dragging
+    this.outsideDragManager.registerHandler(
+      files => Array.from(files).every(file => /^image\//.test(file.type)),
+      async images => {
+        const storage = await this.page.blobs;
+        assertExists(storage);
+        const result = [];
+        for (const img of Array.from(images)) {
+          const id = await storage.set(img);
+          const props = {
+            flavour: 'affine:embed',
+            type: 'image',
+            sourceId: id,
+          };
+          result.push(props);
+        }
+        return result;
+      }
+    );
   }
 
   override updated(changedProperties: Map<string, unknown>) {
