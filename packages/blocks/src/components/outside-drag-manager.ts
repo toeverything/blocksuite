@@ -3,12 +3,12 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
   asyncFocusRichText,
+  calcDropTarget,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
 } from '../__internal__/index.js';
 import type { DragIndicator } from './index.js';
-import { DragHandle } from './index.js';
 
 interface OutsideDragHandler {
   filter: (files: FileList) => boolean;
@@ -34,15 +34,11 @@ export class OutsideDragManager {
       document.body.appendChild(this._indicator);
     }
 
-    this._disposables.addFromEvent(
-      editor,
-      'dragover',
-      this._onDragOver.bind(this)
-    );
-    this._disposables.addFromEvent(editor, 'drop', this._onDrop.bind(this));
+    this._disposables.addFromEvent(editor, 'dragover', this._onDragOver);
+    this._disposables.addFromEvent(editor, 'drop', this._onDrop);
   }
 
-  private _onDragOver(event: DragEvent) {
+  private _onDragOver = (event: DragEvent) => {
     const page = this._editor.querySelector('affine-default-page');
     if (page === null) {
       return;
@@ -58,16 +54,17 @@ export class OutsideDragManager {
     let rect = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      const result = DragHandle.calcTarget(point, model, element, [], 1, false);
+      const result = calcDropTarget(point, model, element, [], 1);
       if (result && model.flavour !== 'affine:database') {
         rect = result.rect;
         this._targetModel = result.modelState.model;
       }
     }
     this._indicator.rect = rect;
-  }
+  };
 
-  private async _onDrop(event: DragEvent) {
+  private _onDrop = async (event: DragEvent) => {
+    event.preventDefault();
     assertExists(event.dataTransfer);
     const files = event.dataTransfer?.files;
     if (!files || files.length === 0) {
@@ -76,7 +73,6 @@ export class OutsideDragManager {
     for (const handler of this._handlers) {
       const { filter, file2props } = handler;
       if (filter(files)) {
-        event.preventDefault();
         const blocks = await file2props(files);
         if (this._targetModel) {
           const page = this._targetModel.page;
@@ -90,7 +86,7 @@ export class OutsideDragManager {
       }
     }
     this._indicator.rect = null;
-  }
+  };
 
   registerHandler(
     filter: (files: FileList) => boolean,
