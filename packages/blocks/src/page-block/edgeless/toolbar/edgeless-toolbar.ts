@@ -26,6 +26,7 @@ import {
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
 import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
+import type { EmbedBlockModel } from '../../../index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -193,55 +194,19 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private async _addImage() {
     this._imageLoading = true;
-    const options = {
-      width: 0,
-      height: 0,
-      offsetX: 0,
-      offsetY: 0,
-    };
 
-    const models = await uploadImageFromLocal(this.edgeless.page, realSize =>
-      Object.assign(options, realSize)
-    );
+    const models = await uploadImageFromLocal(this.edgeless.page, true);
+    const len = models.length;
+    let i = 0;
+    let lastFrameId: string;
 
-    const { left, width, top, height } =
-      this.edgeless.pageBlockContainer.getBoundingClientRect();
-
-    if (options.width && options.height) {
-      const s = width / height;
-      const sh = height > 100 ? height - 100 : height;
-      const p = options.width / options.height;
-      if (s >= 1) {
-        options.height = Math.min(options.height, sh);
-        options.width = p * options.height;
-      } else {
-        const sw = sh * s;
-        options.width = Math.min(options.width, sw);
-        options.height = options.width / p;
-      }
+    for (; i < len; i++) {
+      const model = models[i];
+      const frame = this.edgeless.addImage(model as EmbedBlockModel);
+      lastFrameId = frame.frameId;
     }
 
-    const { zoom } = this.edgeless.surface.viewport;
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    let x = 0;
-    let y = 0;
-    if (zoom > 1) {
-      x = centerX - options.width / 2;
-      y = centerY - options.height / 2;
-      options.width /= zoom;
-      options.height /= zoom;
-    } else {
-      x = centerX - (options.width * zoom) / 2;
-      y = centerY - (options.height * zoom) / 2;
-    }
-
-    const { frameId } = this.edgeless.addNewFrame(
-      models,
-      new Point(x, y),
-      options
-    );
-    const frame = this.edgeless.frames.find(frame => frame.id === frameId);
+    const frame = this.edgeless.frames.find(frame => frame.id === lastFrameId);
     assertExists(frame);
 
     this.edgeless.selection.switchToDefaultMode({

@@ -4,6 +4,8 @@ import {
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
+  type EmbedBlockModel,
+  type FrameBlockComponent,
   getPageBlock,
   getServiceOrRegister,
   OutsideDragManager,
@@ -13,11 +15,25 @@ import {
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import {
+  asyncFocusRichText,
+  type BlockComponentElement,
+  type DropResult,
+  getClosestFrameBlockElementById,
+  type Point,
+  readImageSize,
+} from '@blocksuite/blocks/std';
+import {
   BlockSuiteRoot,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  isFirefox,
+  type Page,
+  Slot,
+} from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -61,16 +77,93 @@ export class EditorContainer
 
   readonly themeObserver = new ThemeObserver();
 
+  public outsideDragManager = new OutsideDragManager(
+    this._onDropEnd.bind(this)
+  );
+
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
   }
-
-  public outsideDragManager = new OutsideDragManager(this);
 
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
     pageModeSwitched: new Slot(),
   };
+
+  // TODO: merge block-hub logic
+  private async _onDropEnd(
+    point: Point,
+    models: Partial<BaseBlockModel>[],
+    result: DropResult | null
+  ) {
+    const len = models.length;
+    if (!len) return;
+
+    const { page, mode } = this;
+    const isPageMode = mode === 'page';
+
+    page.captureSync();
+
+    let type = result?.type || 'none';
+    let model = result?.modelState.model || null;
+
+    if (type === 'none' && isPageMode) {
+      type = 'after';
+      if (!model) {
+        const lastFrame = document.querySelector(
+          'affine-frame:last-of-type'
+        ) as FrameBlockComponent;
+        assertExists(lastFrame);
+        model = lastFrame.model.lastItem();
+      }
+    }
+
+    if (type === 'database') {
+      type = 'after';
+    }
+
+    let frameId;
+    let focusId;
+
+    if (type !== 'none' && model) {
+      const parent = page.getParent(model);
+      assertExists(parent);
+      const ids = page.addSiblingBlocks(model, models, type);
+      focusId = ids[ids.length - 1];
+
+      if (isPageMode) {
+        asyncFocusRichText(page, focusId);
+        return;
+      }
+
+      const targetFrameBlock = getClosestFrameBlockElementById(
+        parent.id,
+        this._edgelessPageBlock
+      ) as BlockComponentElement;
+      assertExists(targetFrameBlock);
+      frameId = targetFrameBlock.model.id;
+    }
+
+    if (isPageMode) return;
+
+    const pageBlock = this._edgelessPageBlock;
+    assertExists(pageBlock);
+
+    // In edgeless mode
+    // Creates new frames on blank area.
+    let i = 0;
+    for (; i < len; i++) {
+      const model = models[i];
+      if (model.flavour === 'affine:embed' && model.type === 'image') {
+        const frame = pageBlock.addImage(model as EmbedBlockModel, point);
+        frameId = frame?.frameId;
+      }
+    }
+
+    if (!frameId || !focusId) return;
+
+    pageBlock.setSelection(frameId, true, focusId, point);
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -140,6 +233,17 @@ export class EditorContainer
       })
     );
 
+    this._disposables.addFromEvent(
+      this,
+      'dragover',
+      this.outsideDragManager.onDragOver
+    );
+    this._disposables.addFromEvent(
+      this,
+      'drop',
+      this.outsideDragManager.onDrop
+    );
+
     this.themeObserver.observer(document.documentElement);
     this._disposables.add(this.themeObserver);
   }
@@ -162,25 +266,19 @@ export class EditorContainer
       });
     }
 
-    // Adding images from outside by dragging
-    this.outsideDragManager.registerHandler(
-      files => Array.from(files).every(file => /^image\//.test(file.type)),
-      async images => {
-        const storage = await this.page.blobs;
-        assertExists(storage);
-        const result = [];
-        for (const img of Array.from(images)) {
-          const id = await storage.set(img);
-          const props = {
-            flavour: 'affine:embed',
-            type: 'image',
-            sourceId: id,
-          };
-          result.push(props);
-        }
-        return result;
-      }
-    );
+    // adds files from outside by dragging and dropping
+    this.outsideDragManager.register('image/*', async (file: File) => {
+      const storage = this.page.blobs;
+      assertExists(storage);
+      const sourceId = await storage.set(file);
+      const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
+      return {
+        flavour: 'affine:embed',
+        type: 'image',
+        sourceId,
+        ...size,
+      };
+    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {

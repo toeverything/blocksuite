@@ -17,8 +17,11 @@ type Props = Partial<BaseBlockModel>;
 
 export const uploadImageFromLocal = async (
   page: Page,
-  getSize?: (size: { width: number; height: number }) => void
+  shouldReadImageSize = false
 ): Promise<Array<Props>> => {
+  const storage = page.blobs;
+  assertExists(storage);
+
   const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
   const fileInput = createImageInputElement();
   document.body.appendChild(fileInput);
@@ -29,25 +32,20 @@ export const uploadImageFromLocal = async (
   });
   const onChange = async () => {
     if (!fileInput.files) return;
-    const storage = page.blobs;
-    assertExists(storage);
 
     const files = fileInput.files;
+    const len = files.length;
     const res = [];
-    const maxImageSize = { width: 0, height: 0 };
-    for (let i = 0; i < files.length; i++) {
+    let i = 0;
+
+    for (; i < len; i++) {
       const file = files[i];
-      const id = await storage.set(file);
-      res.push({ ...baseProps, sourceId: id });
-      if (getSize) {
-        const size = await readImageSize(file);
-        maxImageSize.width = Math.max(maxImageSize.width, size.width);
-        maxImageSize.height = Math.max(maxImageSize.height, size.height);
+      const sourceId = await storage.set(file);
+      const props = { ...baseProps, sourceId };
+      if (shouldReadImageSize) {
+        Object.assign(props, await readImageSize(file));
       }
-    }
-    // When edgeless mode, update the options by max image size
-    if (getSize) {
-      getSize(maxImageSize);
+      res.push(props);
     }
 
     resolvePromise(res);
@@ -60,7 +58,7 @@ export const uploadImageFromLocal = async (
   return await pending;
 };
 
-function readImageSize(file: File) {
+export function readImageSize(file: File) {
   return new Promise<{ width: number; height: number }>(resolve => {
     let width = 0;
     let height = 0;

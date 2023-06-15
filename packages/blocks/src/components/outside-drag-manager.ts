@@ -1,29 +1,31 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import {
-  asyncFocusRichText,
   calcDropTarget,
+  type DropResult,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
 } from '../__internal__/index.js';
 import type { DragIndicator } from './index.js';
 
-interface OutsideDragHandler {
-  filter: (files: FileList) => boolean;
-  file2props: (files: FileList) => Promise<Array<Partial<BaseBlockModel>>>;
-}
+export type DropEndHandler = (
+  point: Point,
+  blocks: Partial<BaseBlockModel>[],
+  result: DropResult | null
+) => Promise<void>;
+
+type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;
 
 export class OutsideDragManager {
-  private _editor: HTMLElement;
   private _indicator!: DragIndicator;
-  private _disposables = new DisposableGroup();
-  private _handlers: Array<OutsideDragHandler> = [];
-  private _targetModel: BaseBlockModel | null = null;
+  private _point: Point | null = null;
+  private _result: DropResult | null = null;
+  private _onDropEnd: DropEndHandler;
+  private _handlers: Map<string, ImportHandler> = new Map();
 
-  constructor(editor: HTMLElement) {
-    this._editor = editor;
+  constructor(onDropEnd: DropEndHandler) {
+    this._onDropEnd = onDropEnd;
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
@@ -33,65 +35,82 @@ export class OutsideDragManager {
       );
       document.body.appendChild(this._indicator);
     }
-
-    this._disposables.addFromEvent(editor, 'dragover', this._onDragOver);
-    this._disposables.addFromEvent(editor, 'drop', this._onDrop);
   }
 
-  private _onDragOver = (event: DragEvent) => {
-    const page = this._editor.querySelector('affine-default-page');
-    if (page === null) {
-      return;
-    }
-
+  onDragOver = (event: DragEvent) => {
     event.preventDefault();
-    const x = event.clientX;
-    const y = event.clientY;
-    const point = new Point(x, y);
-    const element = getClosestBlockElementByPoint(point, {
-      rect: page.innerRect,
-    });
+
+    const { clientX, clientY } = event;
+    const point = new Point(clientX, clientY);
+    const element = getClosestBlockElementByPoint(point.clone());
+
+    let result = null;
     let rect = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      const result = calcDropTarget(point, model, element, [], 1);
-      if (result && model.flavour !== 'affine:database') {
+      result = calcDropTarget(point, model, element, [], 1);
+      if (result) {
         rect = result.rect;
-        this._targetModel = result.modelState.model;
       }
     }
+
+    this._result = result;
     this._indicator.rect = rect;
   };
 
-  private _onDrop = async (event: DragEvent) => {
+  onDrop = async (event: DragEvent) => {
     event.preventDefault();
-    assertExists(event.dataTransfer);
+
     const files = event.dataTransfer?.files;
-    if (!files || files.length === 0) {
-      return;
-    }
-    for (const handler of this._handlers) {
-      const { filter, file2props } = handler;
-      if (filter(files)) {
-        const blocks = await file2props(files);
-        if (this._targetModel) {
-          const page = this._targetModel.page;
-          page.captureSync();
-          const parent = page.getParent(this._targetModel);
-          assertExists(parent);
-          const ids = page.addSiblingBlocks(this._targetModel, blocks);
-          const focusId = ids[0];
-          asyncFocusRichText(page, focusId);
-        }
+    if (!files || files.length === 0) return;
+
+    const { clientX, clientY } = event;
+    this._point = new Point(clientX, clientY);
+
+    const blocks = [];
+    const len = files.length;
+    let i = 0;
+
+    for (; i < len; i++) {
+      const file = files[i];
+      const handler = this.get(file.type);
+
+      if (!handler) {
+        console.warn(`This ${file.type} is not currently supported.`);
+        continue;
       }
+
+      const block = await handler(file);
+      if (block) blocks.push(block);
     }
+
+    await this._onDropEnd(this._point, blocks, this._result);
+
+    this._result = null;
     this._indicator.rect = null;
   };
 
-  registerHandler(
-    filter: (files: FileList) => boolean,
-    file2props: (files: FileList) => Promise<Array<Partial<BaseBlockModel>>>
-  ) {
-    this._handlers.push({ filter, file2props });
+  get(type: string): ImportHandler | undefined {
+    // `image/png`
+    let handler = this._handlers.get(type);
+    if (!handler) {
+      // `image/*`
+      handler = this._handlers.get(type.replace(/\/(.*)$/, '/*'));
+      if (!handler) {
+        // `*`
+        handler = this._handlers.get('*');
+      }
+    }
+    return handler;
+  }
+
+  /**
+   * Registers a processing function to handle the specified type.
+   *
+   * @param type - MIME type
+   * @parram handler - A processing handler
+   */
+  register(type: string, handler: ImportHandler) {
+    this._handlers.set(type, handler);
   }
 }

@@ -38,7 +38,7 @@ import {
   bringForward,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
-  type Point,
+  Point,
   reorder,
   type ReorderingAction,
   type ReorderingRange,
@@ -57,6 +57,7 @@ import {
 import type {
   BlockHost,
   DragHandle,
+  EmbedBlockModel,
   FrameBlockModel,
   MouseMode,
   PageBlockModel,
@@ -771,6 +772,62 @@ export class EdgelessPageBlockComponent
     this.page.moveBlocks(blocks, frameModel);
 
     focus && this.setSelection(frameId, true, blocks[0].id, point);
+  }
+
+  addImage(model: Partial<EmbedBlockModel>, point?: Point) {
+    const options = {
+      width: model.width ?? 0,
+      height: model.height ?? 0,
+    };
+    // force update size of image
+    {
+      delete model.width;
+      delete model.height;
+    }
+
+    const rect = this.pageBlockContainer.getBoundingClientRect();
+    const { width, height } = rect;
+
+    if (options.width && options.height) {
+      const w = width > 100 ? width - 100 : width;
+      const h = height > 100 ? height - 100 : height;
+      const s = w / h;
+      const p = options.width / options.height;
+      if (s >= 1) {
+        options.height = Math.min(options.height, h);
+        options.width = options.height * p;
+      } else {
+        options.width = Math.min(options.width, w);
+        options.height = options.width / p;
+      }
+    }
+
+    const { zoom } = this.surface.viewport;
+
+    if (!point) point = new Point(0, 0);
+
+    if (point.x === 0 && point.y === 0) {
+      const { centerX, centerY } = this.surface.viewport;
+      const [cx, cy] = this.surface.toViewCoord(centerX, centerY);
+      point.x = cx;
+      point.y = cy;
+    }
+    const cx = point.x;
+    const cy = point.y;
+
+    let x = 0;
+    let y = 0;
+    if (zoom > 1) {
+      x = cx - options.width / 2;
+      y = cy - options.height / 2;
+      options.width /= zoom;
+      options.height /= zoom;
+    } else {
+      x = cx - (options.width * zoom) / 2;
+      y = cy - (options.height * zoom) / 2;
+    }
+
+    return this.addNewFrame([model], new Point(x, y), options);
   }
 
   /*
