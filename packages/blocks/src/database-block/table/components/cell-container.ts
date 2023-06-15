@@ -1,9 +1,5 @@
-import type {
-  BlockSuiteRoot} from '@blocksuite/lit';
-import {
-  ShadowlessElement,
-  WithDisposable,
-} from '@blocksuite/lit';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
