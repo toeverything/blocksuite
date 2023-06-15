@@ -427,6 +427,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     ENTER,
     TAB,
     SPACE,
+    DELETE,
     ESC,
   } = HOTKEYS;
 
@@ -485,6 +486,12 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   });
 
   hotkey.addListener(BACKSPACE, e => {
+    // delete blocks
+    deleteModelsByRange(page);
+    e.preventDefault();
+  });
+
+  hotkey.addListener(DELETE, e => {
     // delete blocks
     deleteModelsByRange(page);
     e.preventDefault();
@@ -585,6 +592,7 @@ export function removeHotkeys() {
   removeCommonHotKey();
   hotkey.removeListener([
     HOTKEYS.BACKSPACE,
+    HOTKEYS.DELETE,
     HOTKEYS.SELECT_ALL,
 
     HOTKEYS.SHIFT_UP,

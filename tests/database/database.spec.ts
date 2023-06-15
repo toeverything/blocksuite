@@ -973,3 +973,22 @@ test('should title column support quick changing of column type', async ({
   const cell = getFirstColumnCell(page, 'select-selected');
   expect(await cell.count()).toBe(1);
 });
+
+test('should save the previous header being edited when editing the next column header', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'a', true);
+  await focusDatabaseHeader(page, 0);
+  const { textElement, renameIcon: titleRenameIcon } =
+    await getDatabaseHeaderColumn(page, 0);
+  await titleRenameIcon.click();
+  await type(page, '123');
+
+  const { renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  await renameIcon.click();
+  expect(await textElement.innerText()).toBe('123');
+});
