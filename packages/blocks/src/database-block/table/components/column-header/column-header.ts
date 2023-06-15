@@ -430,6 +430,18 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   private _onEditColumnTitle = (event: MouseEvent, columnId: string) => {
     event.stopPropagation();
+    // If the last clicked column header is being edited, save it first.
+    if (this._editingColumnId !== '') {
+      const column = this.columns.find(
+        column => column.id === this._editingColumnId
+      );
+      if (column) {
+        this._saveColumnTitle('normal', column);
+      } else {
+        this._saveColumnTitle('title');
+      }
+    }
+
     this.setEditingColumnId(columnId);
   };
 
