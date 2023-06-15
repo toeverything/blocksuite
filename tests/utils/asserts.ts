@@ -25,6 +25,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import { getZoomLevel } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -744,4 +745,9 @@ export async function assertEdgelessColorSameWithHexColor(
   const edgelessHexColor = toHex(themeColor as string);
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
+}
+
+export async function assertZoomLevel(page: Page, zoom: number) {
+  const z = await getZoomLevel(page);
+  expect(z).toBe(zoom);
 }
