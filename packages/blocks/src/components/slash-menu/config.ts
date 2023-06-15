@@ -335,7 +335,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
               'affine:database',
               {},
               page.getParent(model),
-              index
+              index + 1
             );
             const service = await getServiceOrRegister('affine:database');
             service.initDatabaseBlock(page, model, id, false);

@@ -9,7 +9,7 @@ import type {
   FrameBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -25,6 +25,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import { getZoomLevel } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -64,6 +65,7 @@ export const defaultStore: SerializedStore = {
       'affine:surface': 3,
       'affine:bookmark': 1,
     },
+    workspaceVersion: WORKSPACE_VERSION,
   },
   spaces: {
     'space:page0': {
@@ -743,4 +745,9 @@ export async function assertEdgelessColorSameWithHexColor(
   const edgelessHexColor = toHex(themeColor as string);
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
+}
+
+export async function assertZoomLevel(page: Page, zoom: number) {
+  const z = await getZoomLevel(page);
+  expect(z).toBe(zoom);
 }
