@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/store';
 
+import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import type { CellCoord } from '../../../../std.js';
 import type { DatabaseCellElement } from '../../register.js';
 import { CellLevelSelection } from './cell-selection.js';
@@ -126,9 +127,9 @@ export function getRowsContainer(databaseId: string) {
 }
 
 export function getDatabaseById(id: string) {
-  const database = document.querySelector<HTMLElement>(
-    `affine-database[data-block-id="${id}"]`
-  );
+  const database = activeEditorManager
+    .getActiveEditor()
+    ?.querySelector<HTMLElement>(`affine-database[data-block-id="${id}"]`);
   assertExists(database);
   return database;
 }
