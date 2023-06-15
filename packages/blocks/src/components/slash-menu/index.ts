@@ -1,9 +1,13 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
-import { getVirgoByModel, throttle } from '../../__internal__/utils/index.js';
+import {
+  getPageBlock,
+  getVirgoByModel,
+  throttle,
+} from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
-import { SlashMenu } from './slash-menu-popover.js';
+import type { SlashMenu } from './slash-menu-popover.js';
 
 let globalAbortController = new AbortController();
 
@@ -80,7 +84,12 @@ export function showSlashMenu({
   globalAbortController.abort();
   globalAbortController = abortController;
 
-  const slashMenu = new SlashMenu();
+  const defaultPage = getPageBlock(model);
+  if (!defaultPage || !defaultPage.components.SlashMenu) {
+    return;
+  }
+
+  const slashMenu = new defaultPage.components.SlashMenu();
   slashMenu.model = model;
   slashMenu.abortController = abortController;
 

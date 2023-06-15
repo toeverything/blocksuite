@@ -34,6 +34,7 @@ import {
 import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DragHandle } from '../../components/index.js';
+import { SlashMenu } from '../../components/slash-menu/slash-menu-popover.js';
 import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
@@ -136,6 +137,7 @@ export class DefaultPageBlockComponent
    */
   components = {
     dragHandle: <DragHandle | null>null,
+    SlashMenu: <typeof SlashMenu | null>SlashMenu,
   };
 
   mouseRoot!: HTMLElement;
