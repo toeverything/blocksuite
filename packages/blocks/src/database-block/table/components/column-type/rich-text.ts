@@ -223,6 +223,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     } else {
       this._setEditing(false);
       this._container.blur();
+      this.page.captureSync();
     }
 
     if (!this.vEditor) return;
