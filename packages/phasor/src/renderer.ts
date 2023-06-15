@@ -271,7 +271,10 @@ export class Renderer implements SurfaceViewport {
       ctx.save();
       ctx.translate(dx, dy);
 
-      if (intersects(element, viewportBounds) && element.display) {
+      if (intersects(element, viewportBounds) && element.view.display) {
+        if (element.view.opacity !== undefined) {
+          ctx.globalAlpha = element.view.opacity;
+        }
         element.render(ctx, rc);
       }
 

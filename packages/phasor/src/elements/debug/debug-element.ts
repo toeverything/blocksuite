@@ -1,6 +1,9 @@
 import { type SerializedXYWH } from '../../utils/xywh.js';
 import type { IElementDefaultProps } from '../index.js';
-import { SurfaceElement } from '../surface-element.js';
+import {
+  type ISurfaceElementView,
+  SurfaceElement,
+} from '../surface-element.js';
 
 export interface IDebug {
   id: string;
@@ -12,10 +15,11 @@ export interface IDebug {
   color: string;
 }
 
+export interface IDebugView extends Omit<ISurfaceElementView, 'type'>, IDebug {}
+
 export const DebugElementDefaultProps: IElementDefaultProps<'debug'> = {
   type: 'debug',
   xywh: '[0,0,0,0]',
-
   color: '#000000',
 };
 

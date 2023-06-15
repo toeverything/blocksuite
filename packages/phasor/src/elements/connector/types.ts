@@ -1,5 +1,6 @@
 import type { StrokeStyle } from '../../consts.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { ISurfaceElementView } from '../surface-element.js';
 
 export enum ConnectorMode {
   Straight,
@@ -46,3 +47,7 @@ export interface IConnector {
   // relative to element x,y.
   controllers: Controller[];
 }
+
+export interface IConnectorView
+  extends Omit<ISurfaceElementView, 'type'>,
+    IConnector {}

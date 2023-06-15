@@ -13,6 +13,11 @@ export interface ISurfaceElement {
   index: string;
   seed: number;
 }
+export type SurfaceElementKey = keyof ISurfaceElement;
+export interface ISurfaceElementView extends ISurfaceElement {
+  display: boolean;
+  opacity: number;
+}
 
 export interface HitTestOptions {
   expandStroke: boolean;
@@ -21,39 +26,52 @@ export interface HitTestOptions {
 
 export type ComputedValue = (value: string) => string;
 
-export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
+export class SurfaceElement<
+  T extends ISurfaceElement = ISurfaceElement,
+  K extends ISurfaceElementView = ISurfaceElementView
+> {
   yMap: Y.Map<unknown>;
 
   protected renderer: Renderer | null = null;
   protected surface: SurfaceManager | null = null;
+  protected _view = {} as K;
 
   computedValue: ComputedValue = v => v;
 
-  private _display = true;
-
-  get display() {
-    return this._display;
-  }
-
-  setDisplay(display: boolean) {
-    this._display = display;
-    this.renderer?.removeElement(this);
-    this.renderer?.addElement(this);
-  }
-
-  constructor(yMap: Y.Map<unknown>, surface: SurfaceManager, data?: T) {
+  constructor(
+    yMap: Y.Map<unknown>,
+    surface: SurfaceManager,
+    data: Partial<T> = {},
+    viewData: Partial<K> = {}
+  ) {
     if (!yMap.doc) {
       throw new Error('yMap must be bound to a Y.Doc');
     }
 
     this.yMap = yMap;
-    if (data) {
-      for (const key in data) {
-        this.yMap.set(key, data[key] as T[keyof T]);
-      }
+
+    for (const key in data) {
+      this.yMap.set(key, data[key] as T[keyof T]);
     }
 
+    viewData.display = viewData.display ?? true;
+    viewData.opacity = viewData.opacity ?? 1;
+
+    [
+      ...Array.from(this.yMap.entries()),
+      ...Array.from(Object.entries(viewData)),
+    ].forEach(([key, value]) => {
+      Object.defineProperty(this.view, key, {
+        value,
+        writable: false,
+        configurable: true,
+      });
+    });
     this.surface = surface;
+  }
+
+  get view(): K {
+    return this._view;
   }
 
   get id() {
@@ -105,6 +123,17 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
     }
+    this.applyViewUpdate(updates as Partial<K>);
+  }
+
+  applyViewUpdate(updates: Partial<K>) {
+    for (const key in updates) {
+      Object.defineProperty(this.view, key, {
+        value: updates[key],
+      });
+    }
+    this.renderer?.removeElement(this);
+    this.renderer?.addElement(this);
   }
 
   serialize(): T {
@@ -115,19 +144,12 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return isPointIn(this, x, y);
   }
 
-  private _onMap = () => {
-    this.renderer?.removeElement(this);
-    this.renderer?.addElement(this);
-  };
-
   mount(renderer: Renderer) {
     this.renderer = renderer;
     this.renderer.addElement(this);
-    this.yMap.observeDeep(this._onMap);
   }
 
   unmount() {
-    this.yMap.unobserveDeep(this._onMap);
     this.renderer?.removeElement(this);
     this.renderer = null;
   }

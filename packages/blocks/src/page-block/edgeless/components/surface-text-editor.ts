@@ -74,7 +74,10 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
     this.requestUpdate();
     requestAnimationFrame(() => {
       assertExists(this._vEditor);
-      this._element?.setDisplay(false);
+      this._element &&
+        this._edgeless?.surface.updateElementView(this._element.id, {
+          display: false,
+        });
       this._vEditor.mount(this._virgoContainer);
 
       this._virgoContainer.addEventListener(
@@ -92,7 +95,10 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
 
   private _unmount() {
     this.vEditor?.unmount();
-    this._element?.setDisplay(true);
+    this._element &&
+      this._edgeless?.surface.updateElementView(this._element.id, {
+        display: true,
+      });
 
     if (this._element?.text.length === 0) {
       this._edgeless?.surface.removeElement(this._element?.id);

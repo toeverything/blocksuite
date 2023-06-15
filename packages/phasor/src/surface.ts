@@ -8,7 +8,9 @@ import {
   ElementCtors,
   ElementDefaultProps,
   type IElementCreateProps,
+  type IElementViewProps,
   type IPhasorElementType,
+  type IPhasorElementViewType,
   type PhasorElement,
   type PhasorElementType,
   type SurfaceElement,
@@ -223,6 +225,15 @@ export class SurfaceManager {
       assertExists(element);
       element.applyUpdate(properties);
     });
+  }
+
+  updateElementView<T extends keyof IPhasorElementViewType>(
+    id: string,
+    properties: IElementViewProps<T>
+  ) {
+    const element = this._elements.get(id);
+    assertExists(element);
+    element.applyViewUpdate(properties);
   }
 
   setElementBound(id: string, bound: IBound) {

@@ -1,19 +1,17 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import type { IBound, StrokeStyle } from '../../consts.js';
-import type { SerializedXYWH } from '../../utils/xywh.js';
-import type { HitTestOptions } from '../surface-element.js';
+import type {
+  HitTestOptions,
+  ISurfaceElement,
+  ISurfaceElementView,
+} from '../surface-element.js';
 import type { ShapeElement } from './shape-element.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
 
-export interface IShape {
-  id: string;
+export interface IShape extends ISurfaceElement {
   type: 'shape';
-  xywh: SerializedXYWH;
-  index: string;
-  seed: number;
-
   shapeType: ShapeType;
   radius: number;
   filled: boolean;
@@ -24,6 +22,8 @@ export interface IShape {
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
 }
+
+export interface IShapeView extends Omit<ISurfaceElementView, 'type'>, IShape {}
 
 export interface ShapeMethods {
   render: (

@@ -1,4 +1,5 @@
 import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { ISurfaceElementView } from '../surface-element.js';
 
 export interface IBrush {
   id: string;
@@ -12,3 +13,5 @@ export interface IBrush {
   color: string;
   lineWidth: number;
 }
+
+export interface IBrushView extends Omit<ISurfaceElementView, 'type'>, IBrush {}

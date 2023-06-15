@@ -1,21 +1,22 @@
 import type { SurfaceElement } from '../index.js';
 import { BrushElement } from './brush/brush-element.js';
 import { BrushElementDefaultProps } from './brush/constants.js';
-import type { IBrush } from './brush/types.js';
+import type { IBrush, IBrushView } from './brush/types.js';
 import { ConnectorElement } from './connector/connector-element.js';
 import { ConnectorElementDefaultProps } from './connector/constants.js';
-import type { IConnector } from './connector/types.js';
+import type { IConnector, IConnectorView } from './connector/types.js';
 import {
   DebugElement,
   DebugElementDefaultProps,
   type IDebug,
+  type IDebugView,
 } from './debug/debug-element.js';
 import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
-import type { IShape } from './shape/types.js';
+import type { IShape, IShapeView } from './shape/types.js';
 import { TextElementDefaultProps } from './text/constants.js';
 import { TextElement } from './text/text-element.js';
-import type { IText } from './text/types.js';
+import type { IText, ITextView } from './text/types.js';
 
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
@@ -48,6 +49,14 @@ export type IPhasorElementType = {
   text: IText;
 };
 
+export type IPhasorElementViewType = {
+  shape: IShapeView;
+  debug: IDebugView;
+  brush: IBrushView;
+  connector: IConnectorView;
+  text: ITextView;
+};
+
 export const ElementCtors = {
   debug: DebugElement,
   brush: BrushElement,
@@ -69,6 +78,9 @@ export const ElementDefaultProps: Record<
 
 export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
   Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
+>;
+export type IElementViewProps<T extends keyof IPhasorElementViewType> = Partial<
+  Omit<IPhasorElementViewType[T], 'id' | 'index' | 'seed'>
 >;
 
 export type IElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
