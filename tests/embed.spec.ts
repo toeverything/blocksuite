@@ -177,11 +177,6 @@ test('popup menu should follow position of image when scrolling', async ({
   await page.waitForTimeout(150);
 
   const [imageRect, menuRect] = await page.evaluate(async () => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-
     const image = document.querySelector('.affine-image-wrapper img');
     if (!image) {
       throw new Error();
@@ -197,8 +192,8 @@ test('popup menu should follow position of image when scrolling', async ({
     ] as const;
   });
 
-  // < 1.059180567624251
-  expect(imageRect.top).toBeCloseTo(menuRect.top, -0.325);
+  //              -64                        +76
+  expect(imageRect.top).toBeCloseTo(menuRect.top - 76 - 64, -0.325);
 });
 
 test('select image should not show format bar', async ({ page }) => {

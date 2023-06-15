@@ -274,7 +274,7 @@ test('should database title and rich-text support undo/redo', async ({
   await initDatabaseColumn(page);
   await switchColumnType(page, 'rich-text');
   await initDatabaseDynamicRowWithData(page, '123', true);
-
+  await pressArrowLeft(page);
   await undoByKeyboard(page);
   await assertDatabaseCellRichTexts(page, { text: '' });
   await redoByKeyboard(page);
@@ -441,7 +441,7 @@ test.describe('switch column type', () => {
     });
 
     await initDatabaseDynamicRowWithData(page, '123abc');
-    expect(await cell.inputValue()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
   });
 
   test('switch to rich-text', async ({ page }) => {
@@ -529,7 +529,7 @@ test.describe('switch column type', () => {
 
     await initDatabaseDynamicRowWithData(page, '123', true);
     const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.inputValue()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
 
     await switchColumnType(page, 'select');
     await initDatabaseDynamicRowWithData(page, 'abc');
@@ -973,4 +973,23 @@ test('should title column support quick changing of column type', async ({
   await clickColumnType(page, 'select');
   const cell = getFirstColumnCell(page, 'select-selected');
   expect(await cell.count()).toBe(1);
+});
+
+test('should save the previous header being edited when editing the next column header', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'a', true);
+  await focusDatabaseHeader(page, 0);
+  const { textElement, renameIcon: titleRenameIcon } =
+    await getDatabaseHeaderColumn(page, 0);
+  await titleRenameIcon.click();
+  await type(page, '123');
+
+  const { renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  await renameIcon.click();
+  expect(await textElement.innerText()).toBe('123');
 });

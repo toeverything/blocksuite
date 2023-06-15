@@ -19,7 +19,6 @@ import type { DatabaseBlockModel } from './database-model.js';
 import {
   clearAllDatabaseCellSelection,
   clearAllDatabaseRowsSelection,
-  setDatabaseCellEditing,
   setDatabaseCellSelection,
   setDatabaseRowsSelection,
 } from './table/components/selection/utils.js';
@@ -33,10 +32,8 @@ type LastTableViewRowSelection = {
   databaseId: string;
   rowIds: string[];
 };
-type LastTableViewCellSelection = Pick<
-  DatabaseTableViewCellSelect,
-  'databaseId' | 'coords'
->;
+type LastTableViewCellSelection = Omit<DatabaseTableViewCellSelect, 'type'>;
+
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   private _lastRowSelection: LastTableViewRowSelection | null = null;
   private _lastCellSelection: LastTableViewCellSelection | null = null;
@@ -70,17 +67,14 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       const { type } = state;
 
       if (type === 'select') {
-        const { databaseId, coords } = state;
+        const { databaseId, coords, isEditing } = state;
         //  select
         this._lastCellSelection = {
           databaseId,
           coords,
+          isEditing,
         };
-        setDatabaseCellSelection(databaseId, coords);
-      } else if (type === 'edit') {
-        this._lastCellSelection = null;
-        const { databaseId, coords } = state;
-        setDatabaseCellEditing(databaseId, coords[0]);
+        setDatabaseCellSelection(databaseId, coords, isEditing);
       } else if (type === 'clear') {
         // clear
         this._lastCellSelection = null;

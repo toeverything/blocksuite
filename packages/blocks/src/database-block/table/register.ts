@@ -1,14 +1,11 @@
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
 import { onClickOutside } from '../utils.js';
-import type { Column, ColumnType, SetValueOption } from './types.js';
-
-export abstract class TableViewCell extends ShadowlessElement {
-  abstract readonly cellType: ColumnType;
-}
+import type { ColumnType, SetValueOption } from './types.js';
 
 export abstract class DatabaseCellElement<
   Value,
@@ -18,18 +15,16 @@ export abstract class DatabaseCellElement<
 
   @property()
   page!: Page;
+  @property()
+  root!: BlockSuiteRoot;
 
   @property()
   readonly!: boolean;
   @property()
   setHeight!: (height: number) => void;
-  @property()
-  container!: HTMLElement;
 
   @property()
-  updateColumnProperty!: (
-    apply: (oldProperty: Column<Data>) => Partial<Column<Data>>
-  ) => void;
+  updateColumnData!: (apply: (oldProperty: Data) => Partial<Data>) => void;
   @property()
   columnData!: Data;
   @property()
@@ -41,10 +36,18 @@ export abstract class DatabaseCellElement<
   isEditing!: boolean;
 
   @property()
-  setEditing!: (editing: boolean) => void;
+  protected setEditing!: (editing: boolean) => void;
 
   protected _setEditing(editing: boolean) {
     this.setEditing(editing);
+  }
+
+  public enterEditMode() {
+    this._setEditing(true);
+  }
+
+  public exitEditMode() {
+    this._setEditing(false);
   }
 
   override connectedCallback() {
@@ -63,7 +66,7 @@ export abstract class DatabaseCellElement<
           this._setEditing(false);
         }
       },
-      'click',
+      'mousedown',
       true
     );
     this._disposables.add({

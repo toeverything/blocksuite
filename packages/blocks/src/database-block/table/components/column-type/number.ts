@@ -2,15 +2,10 @@ import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
-import {
-  DatabaseCellElement,
-  defineColumnRenderer,
-  type TableViewCell,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-class NumberCell extends DatabaseCellElement<number> implements TableViewCell {
+class NumberCell extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-number-cell`;
-  cellType = 'number' as const;
 
   static override styles = css`
     affine-database-number-cell {
@@ -42,12 +37,8 @@ class NumberCell extends DatabaseCellElement<number> implements TableViewCell {
   }
 }
 
-export class NumberCellEditing
-  extends DatabaseCellElement<number>
-  implements TableViewCell
-{
+export class NumberCellEditing extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-number-cell-editing`;
-  cellType = 'number' as const;
 
   static override styles = css`
     affine-database-number-cell-editing {
@@ -106,6 +97,9 @@ export class NumberCellEditing
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       this._setValue();
+      setTimeout(() => {
+        this.exitEditMode();
+      });
     }
   };
 

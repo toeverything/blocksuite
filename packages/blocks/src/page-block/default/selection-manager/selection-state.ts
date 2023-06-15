@@ -11,7 +11,7 @@ import {
   Point,
   resetNativeSelection,
 } from '../../../__internal__/index.js';
-import type { EmbedBlockComponent } from '../../../embed-block/index.js';
+import type { EmbedBlockComponent } from '../../../embed-block/embed-block.js';
 
 export type PageSelectionType =
   | 'native'
@@ -33,6 +33,7 @@ export interface PageViewport {
 }
 
 export class PageSelectionState {
+  // TODO add readonly
   type: PageSelectionType;
   viewport: PageViewport = {
     left: 0,
@@ -48,7 +49,13 @@ export class PageSelectionState {
   /**
    * @deprecated TODO merge to `selectedBlocks` or `_activeComponent`
    */
-  selectedEmbed: EmbedBlockComponent | null = null;
+  get selectedEmbed() {
+    if (this.type === 'embed') {
+      return this._activeComponent as EmbedBlockComponent;
+    }
+    return null;
+  }
+
   selectedBlocks: BlockComponentElement[] = [];
   // null: SELECT_ALL
   focusedBlock: BlockComponentElement | null = null;
@@ -164,7 +171,6 @@ export class PageSelectionState {
 
   clearEmbedSelection() {
     this.type = 'none';
-    this.selectedEmbed = null;
     this._activeComponent = null;
   }
 

@@ -183,6 +183,7 @@ test.describe('reference node', () => {
   test('should reference node attributes correctly', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);
+    const { id } = await addNewPage(page);
     await focusRichText(page);
     await type(page, '[[');
     await pressEnter(page);
@@ -197,7 +198,7 @@ test.describe('reference node', () => {
         insert=" "
         reference={
           Object {
-            "pageId": "page0",
+            "pageId": "${id}",
             "type": "LinkedPage",
           }
         }
@@ -225,6 +226,7 @@ test.describe('reference node', () => {
   }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);
+    const { id } = await addNewPage(page);
     await focusRichText(page);
 
     await type(page, '1');
@@ -254,7 +256,7 @@ test.describe('reference node', () => {
         insert=" "
         reference={
           Object {
-            "pageId": "page0",
+            "pageId": "${id}",
             "type": "LinkedPage",
           }
         }
@@ -297,8 +299,12 @@ test.describe('reference node', () => {
   test('should create reference node works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
+    const defaultPageId = 'page0';
+    const { id: newId } = await addNewPage(page);
+    await switchToPage(page, newId);
     await focusTitle(page);
     await type(page, 'title');
+    await switchToPage(page, defaultPageId);
 
     await focusRichText(page);
     await type(page, '@');
@@ -314,9 +320,12 @@ test.describe('reference node', () => {
     await expect(refNode).toBeVisible();
     await expect(refNode).toHaveCount(1);
     await assertReferenceText('title');
+
+    await switchToPage(page, newId);
     await focusTitle(page);
     await pressBackspace(page);
     await type(page, '1');
+    await switchToPage(page, defaultPageId);
     await assertReferenceText('titl1');
   });
 
@@ -467,7 +476,7 @@ test.describe('linked page popover', () => {
     await focusRichText(page);
     await type(page, '@');
     await expect(linkedPagePopover).toBeVisible();
-    await expect(pageBtn).toHaveCount(3);
+    await expect(pageBtn).toHaveCount(2);
 
     await assertActivePageIdx(0);
     await page.keyboard.press('ArrowDown');
@@ -480,7 +489,7 @@ test.describe('linked page popover', () => {
     await page.keyboard.press('Shift+Tab');
     await assertActivePageIdx(0);
 
-    await expect(pageBtn).toHaveText(['page0', 'page1', 'page2']);
+    await expect(pageBtn).toHaveText(['page1', 'page2']);
     // page2
     //  ^  ^
     await type(page, 'a2');
