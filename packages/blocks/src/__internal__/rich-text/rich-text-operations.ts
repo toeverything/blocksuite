@@ -369,7 +369,21 @@ function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
   return true;
 }
 
+// When deleting at line end of a code block,
+// do nothing
+function handleCodeBlockForwardDelete(page: Page, model: ExtendedModel) {
+  if (!matchFlavours(model, ['affine:code'])) return false;
+  return true;
+}
+
 function handleDatabaseBlockBackspace(page: Page, model: ExtendedModel) {
+  if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
+    return false;
+
+  return true;
+}
+
+function handleDatabaseBlockForwardDelete(page: Page, model: ExtendedModel) {
   if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
     return false;
 
@@ -397,6 +411,73 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
   return true;
 }
 
+// When deleting at line end of a list block,
+// check current block's children and siblings
+/**
+ * Example:
+- Line1  <-(cursor here)
+    - Line2
+        - Line3
+        - Line4
+    - Line5
+        - Line6
+- Line7
+    - Line8
+- Line9
+ */
+function handleListBlockForwardDelete(page: Page, model: ExtendedModel) {
+  if (!matchFlavours(model, ['affine:list'])) return false;
+  const firstChild = model.firstChild();
+  if (firstChild) {
+    model.text?.join(firstChild.text as Text);
+    const grandChildren = firstChild.children;
+    if (grandChildren) {
+      page.moveBlocks(grandChildren, model);
+      page.deleteBlock(firstChild);
+      return true;
+    } else {
+      page.deleteBlock(firstChild);
+      return true;
+    }
+  } else {
+    const nextSibling = page.getNextSibling(model);
+    if (nextSibling) {
+      model.text?.join(nextSibling.text as Text);
+      if (nextSibling.children) {
+        const parent = page.getParent(nextSibling);
+        if (!parent) return false;
+        page.moveBlocks(nextSibling.children, parent, model, false);
+        page.deleteBlock(nextSibling);
+        return true;
+      } else {
+        page.deleteBlock(nextSibling);
+        return true;
+      }
+    } else {
+      const nextBlock = getNextBlock(model);
+      if (!nextBlock) {
+        // do nothing
+        return true;
+      }
+      model.text?.join(nextBlock.text as Text);
+      if (nextBlock.children) {
+        const parent = page.getParent(nextBlock);
+        if (!parent) return false;
+        page.moveBlocks(
+          nextBlock.children,
+          parent,
+          page.getParent(model),
+          false
+        );
+        page.deleteBlock(nextBlock);
+        return true;
+      } else {
+        page.deleteBlock(nextBlock);
+        return true;
+      }
+    }
+  }
+}
 function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   function handleParagraphOrListSibling(
     page: Page,
@@ -523,9 +604,147 @@ function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
   return true;
 }
 
+function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
+  function handleParagraphOrList(
+    page: Page,
+    model: ExtendedModel,
+    nextSibling: ExtendedModel | null,
+    firstChild: ExtendedModel | null
+  ) {
+    function handleParagraphOrListSibling(
+      page: Page,
+      model: ExtendedModel,
+      nextSibling: ExtendedModel | null
+    ) {
+      if (
+        nextSibling &&
+        matchFlavours(nextSibling, ['affine:paragraph', 'affine:list'])
+      ) {
+        model.text?.join(nextSibling.text as Text);
+        if (nextSibling.children) {
+          const parent = page.getParent(nextSibling);
+          if (!parent) return false;
+          page.moveBlocks(nextSibling.children, parent, model, false);
+          page.deleteBlock(nextSibling);
+          return true;
+        } else {
+          page.deleteBlock(nextSibling);
+          return true;
+        }
+      } else {
+        const nextBlock = getNextBlock(model);
+        if (
+          !nextBlock ||
+          !matchFlavours(nextBlock, ['affine:paragraph', 'affine:list'])
+        )
+          return false;
+        model.text?.join(nextBlock.text as Text);
+        if (nextBlock.children) {
+          const parent = page.getParent(nextBlock);
+          if (!parent) return false;
+          page.moveBlocks(
+            nextBlock.children,
+            parent,
+            page.getParent(model),
+            false
+          );
+          page.deleteBlock(nextBlock);
+          return true;
+        } else {
+          page.deleteBlock(nextBlock);
+          return true;
+        }
+      }
+    }
+    function handleParagraphOrListChild(
+      page: Page,
+      model: ExtendedModel,
+      firstChild: ExtendedModel | null
+    ) {
+      if (
+        !firstChild ||
+        !matchFlavours(firstChild, ['affine:paragraph', 'affine:list'])
+      ) {
+        return false;
+      }
+      const grandChildren = firstChild.children;
+      model.text?.join(firstChild.text as Text);
+      if (grandChildren) {
+        page.moveBlocks(grandChildren, model);
+      }
+      page.deleteBlock(firstChild);
+      return true;
+    }
+    const nextBlock = getNextBlock(model);
+    if (!firstChild && !nextBlock) return true;
+    return (
+      handleParagraphOrListChild(page, model, firstChild) ||
+      handleParagraphOrListSibling(page, model, nextSibling)
+    );
+  }
+  function handleEmbedDividerCode(
+    nextSibling: ExtendedModel | null,
+    firstChild: ExtendedModel | null
+  ) {
+    function handleEmbedDividerCodeChild(firstChild: ExtendedModel | null) {
+      if (
+        !firstChild ||
+        !matchFlavours(firstChild, [
+          'affine:embed',
+          'affine:divider',
+          'affine:code',
+        ])
+      )
+        return false;
+      focusBlockByModel(firstChild);
+      return true;
+    }
+    function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
+      if (
+        !nextSibling ||
+        !matchFlavours(nextSibling, [
+          'affine:embed',
+          'affine:divider',
+          'affine:code',
+        ])
+      )
+        return false;
+      focusBlockByModel(nextSibling);
+      return true;
+    }
+    return (
+      handleEmbedDividerCodeChild(firstChild) ||
+      handleEmbedDividerCodeSibling(nextSibling)
+    );
+  }
+
+  if (!matchFlavours(model, ['affine:paragraph'])) return false;
+
+  const parent = page.getParent(model);
+  if (!parent) return false;
+  const nextSibling = page.getNextSibling(model);
+  const firstChild = model.firstChild();
+  if (matchFlavours(parent, ['affine:database'])) {
+    // TODO
+    return false;
+  } else {
+    return (
+      handleParagraphOrList(page, model, nextSibling, firstChild) ||
+      handleEmbedDividerCode(nextSibling, firstChild)
+    );
+  }
+}
+
 function handleUnknownBlockBackspace(model: ExtendedModel) {
   throw new Error(
     'Failed to handle backspace! Unknown block flavours! flavour:' +
+      model.flavour
+  );
+}
+
+function handleUnknownBlockForwardDelete(model: ExtendedModel) {
+  throw new Error(
+    'Failed to handle forwarddelete! Unknown block flavours! flavour:' +
       model.flavour
   );
 }
@@ -541,6 +760,18 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   }
 
   handleUnknownBlockBackspace(model);
+}
+
+export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
+  if (
+    handleCodeBlockForwardDelete(page, model) ||
+    handleListBlockForwardDelete(page, model) ||
+    handleParagraphBlockForwardDelete(page, model)
+  ) {
+    handleDatabaseBlockForwardDelete(page, model);
+    return;
+  }
+  handleUnknownBlockForwardDelete(model);
 }
 
 export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
