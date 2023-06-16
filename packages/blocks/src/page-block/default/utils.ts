@@ -489,7 +489,7 @@ export function getAllowSelectedBlocks(
 
   const dfs = (blocks: BaseBlockModel[]) => {
     for (const block of blocks) {
-      if (block.flavour !== 'affine:frame') {
+      if (block.flavour !== 'affine:note') {
         result.push(block);
       }
       block.children.length && dfs(block.children);

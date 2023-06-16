@@ -2,15 +2,15 @@ import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { expect } from '@playwright/test';
 
 import {
-  activeFrameInEdgeless,
+  activeNoteInEdgeless,
   addNote,
   assertMouseMode,
-  changeEdgelessFrameBackground,
+  changeEdgelessNoteBackground,
   countBlock,
-  getFrameRect,
+  getNoteRect,
   locatorComponentToolbar,
   locatorEdgelessToolButton,
-  selectFrameInEdgeless,
+  selectNoteInEdgeless,
   setMouseMode,
   switchEditorMode,
   triggerComponentToolbarAction,
@@ -37,12 +37,12 @@ import {
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
-  assertEdgelessFrameBackground,
   assertEdgelessHoverRect,
   assertEdgelessNonSelectedRect,
+  assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
-  assertFrameXYWH,
   assertNativeSelectionRangeCount,
+  assertNoteXYWH,
   assertRectEqual,
   assertRichTexts,
   assertSelection,
@@ -52,7 +52,7 @@ import { test } from '../utils/playwright.js';
 const CENTER_X = 450;
 const CENTER_Y = 300;
 
-test('can drag selected non-active frame', async ({ page }) => {
+test('can drag selected non-active note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await focusRichText(page);
@@ -60,7 +60,7 @@ test('can drag selected non-active frame', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -69,13 +69,13 @@ test('can drag selected non-active frame', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertFrameXYWH(page, [0, 100, EDITOR_WIDTH, 80]);
+  await assertNoteXYWH(page, [0, 100, EDITOR_WIDTH, 80]);
 });
 
-test('resize frame in edgeless mode', async ({ page }) => {
+test('resize note in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
@@ -83,10 +83,10 @@ test('resize frame in edgeless mode', async ({ page }) => {
   await switchEditorMode(page);
   await page.mouse.move(100, 100); // FIXME: no update until mousemove
 
-  expect(ids.frameId).toBe('2'); // 0 for page, 1 for surface
-  await selectFrameInEdgeless(page, ids.frameId);
+  expect(ids.noteId).toBe('2'); // 0 for page, 1 for surface
+  await selectNoteInEdgeless(page, ids.noteId);
 
-  const initRect = await getFrameRect(page, ids);
+  const initRect = await getNoteRect(page, ids);
   const leftHandle = page.locator('[aria-label="handle-left"]');
   const box = await leftHandle.boundingBox();
   if (box === null) throw new Error();
@@ -96,7 +96,7 @@ test('resize frame in edgeless mode', async ({ page }) => {
     { x: box.x + 5, y: box.y + 5 },
     { x: box.x + 105, y: box.y + 5 }
   );
-  const draggedRect = await getFrameRect(page, ids);
+  const draggedRect = await getNoteRect(page, ids);
   assertRectEqual(draggedRect, {
     x: initRect.x + 100,
     y: initRect.y,
@@ -106,7 +106,7 @@ test('resize frame in edgeless mode', async ({ page }) => {
 
   await switchEditorMode(page);
   await switchEditorMode(page);
-  const newRect = await getFrameRect(page, ids);
+  const newRect = await getNoteRect(page, ids);
   assertRectEqual(newRect, draggedRect);
 });
 
@@ -150,25 +150,25 @@ test('add empty Note', async ({ page }) => {
   await assertEdgelessNonSelectedRect(page);
 });
 
-test('always keep at least 1 frame block', async ({ page }) => {
+test('always keep at least 1 note block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
   await setMouseMode(page, 'default');
 
-  // clicking in default mode will try to remove empty frame block
+  // clicking in default mode will try to remove empty note block
   await page.mouse.click(0, 0);
 
-  const frames = await page.locator('affine-frame').all();
-  expect(frames.length).toEqual(1);
+  const notes = await page.locator('affine-note').all();
+  expect(notes.length).toEqual(1);
 });
 
 test('edgeless arrow up/down', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
 
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
@@ -179,9 +179,9 @@ test('edgeless arrow up/down', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
-  // 0 for page, 1 for surface, 2 for frame, 3 for paragraph
+  // 0 for page, 1 for surface, 2 for note, 3 for paragraph
   expect(ids.paragraphId).toBe('3');
   await clickBlockById(page, ids.paragraphId);
 
@@ -195,7 +195,7 @@ test('edgeless arrow up/down', async ({ page }) => {
   await assertSelection(page, 0, 4, 0);
 });
 
-test('dragging un-selected frame', async ({ page }) => {
+test('dragging un-selected note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await focusRichText(page);
@@ -204,37 +204,37 @@ test('dragging un-selected frame', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  const frameBox = await page
+  const noteBox = await page
     .locator('.affine-edgeless-block-child')
     .boundingBox();
-  if (!frameBox) {
-    throw new Error('Missing edgeless affine-frame');
+  if (!noteBox) {
+    throw new Error('Missing edgeless affine-note');
   }
-  await page.mouse.move(frameBox.x + 5, frameBox.y + 5);
+  await page.mouse.move(noteBox.x + 5, noteBox.y + 5);
   await assertEdgelessHoverRect(page, [
-    frameBox.x,
-    frameBox.y,
-    frameBox.width,
-    frameBox.height,
+    noteBox.x,
+    noteBox.y,
+    noteBox.width,
+    noteBox.height,
   ]);
 
   await dragBetweenCoords(
     page,
-    { x: frameBox.x + 5, y: frameBox.y + 5 },
-    { x: frameBox.x + 25, y: frameBox.y + 25 },
+    { x: noteBox.x + 5, y: noteBox.y + 5 },
+    { x: noteBox.x + 25, y: noteBox.y + 25 },
     { steps: 10 }
   );
 
-  await page.mouse.move(frameBox.x + 25, frameBox.y + 25);
+  await page.mouse.move(noteBox.x + 25, noteBox.y + 25);
   await assertEdgelessHoverRect(page, [
-    frameBox.x + 20,
-    frameBox.y + 20,
-    frameBox.width,
-    frameBox.height,
+    noteBox.x + 20,
+    noteBox.y + 20,
+    noteBox.width,
+    noteBox.height,
   ]);
 });
 
-test('drag handle should be shown when a frame is actived in default mode or hidden in other modes', async ({
+test('drag handle should be shown when a note is actived in default mode or hidden in other modes', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -244,14 +244,14 @@ test('drag handle should be shown when a frame is actived in default mode or hid
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  const frameBox = await page
+  const noteBox = await page
     .locator('.affine-edgeless-block-child')
     .boundingBox();
-  if (!frameBox) {
-    throw new Error('Missing edgeless affine-frame');
+  if (!noteBox) {
+    throw new Error('Missing edgeless affine-note');
   }
 
-  const [x, y] = [frameBox.x + 26, frameBox.y + frameBox.height / 2];
+  const [x, y] = [noteBox.x + 26, noteBox.y + noteBox.height / 2];
 
   await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
@@ -270,7 +270,7 @@ test('drag handle should be shown when a frame is actived in default mode or hid
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 });
 
-test('drag handle should work inside one frame', async ({ page }) => {
+test('drag handle should work inside one note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
@@ -284,7 +284,7 @@ test('drag handle should work inside one frame', async ({ page }) => {
   await assertRichTexts(page, ['456', '789', '123']);
 });
 
-test('drag handle should work across multiple frames', async ({ page }) => {
+test('drag handle should work across multiple notes', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
@@ -315,7 +315,7 @@ test('drag handle should work across multiple frames', async ({ page }) => {
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });
 
-test('drag handle should add new frame when dragged outside frame', async ({
+test('drag handle should add new note when dragged outside note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -367,13 +367,13 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await initThreeParagraphs(page);
   await switchEditorMode(page);
 
-  await selectFrameInEdgeless(page, ids.frameId);
+  await selectNoteInEdgeless(page, ids.noteId);
 
   const toolbar = locatorComponentToolbar(page);
   await expect(toolbar).toBeVisible();
 
   await page.mouse.click(0, 0);
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await expect(toolbar).toBeHidden();
 });
 
@@ -389,23 +389,23 @@ test('double click toolbar zoom button, should not add text', async ({
   await assertEdgelessNonSelectedRect(page);
 });
 
-test('change frame color', async ({ page }) => {
+test('change note color', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
   await switchEditorMode(page);
 
-  await assertEdgelessFrameBackground(
+  await assertEdgelessNoteBackground(
     page,
-    ids.frameId,
+    ids.noteId,
     '--affine-background-secondary-color'
   );
 
-  await selectFrameInEdgeless(page, ids.frameId);
-  await triggerComponentToolbarAction(page, 'changeFrameColor');
+  await selectNoteInEdgeless(page, ids.noteId);
+  await triggerComponentToolbarAction(page, 'changeNoteColor');
   const color = '--affine-tag-blue';
-  await changeEdgelessFrameBackground(page, color);
-  await assertEdgelessFrameBackground(page, ids.frameId, color);
+  await changeEdgelessNoteBackground(page, color);
+  await assertEdgelessNoteBackground(page, ids.noteId, color);
 });
 
 test('cursor for active and inactive state', async ({ page }) => {
@@ -435,7 +435,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await assertNativeSelectionRangeCount(page, 1);
 });
 
-test('continuous undo and redo (frame blcok add operation) should work', async ({
+test('continuous undo and redo (note blcok add operation) should work', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -447,7 +447,7 @@ test('continuous undo and redo (frame blcok add operation) should work', async (
   await click(page, { x: 60, y: 270 });
   await copyByKeyboard(page);
 
-  let count = await countBlock(page, 'affine-frame');
+  let count = await countBlock(page, 'affine-note');
   expect(count).toBe(1);
 
   await page.mouse.move(100, 100);
@@ -462,22 +462,22 @@ test('continuous undo and redo (frame blcok add operation) should work', async (
   await pasteByKeyboard(page, false);
   await waitNextFrame(page, 1000);
 
-  count = await countBlock(page, 'affine-frame');
+  count = await countBlock(page, 'affine-note');
   expect(count).toBe(4);
 
   await undoByClick(page);
-  count = await countBlock(page, 'affine-frame');
+  count = await countBlock(page, 'affine-note');
   expect(count).toBe(3);
 
   await undoByClick(page);
-  count = await countBlock(page, 'affine-frame');
+  count = await countBlock(page, 'affine-note');
   expect(count).toBe(2);
 
   await redoByClick(page);
-  count = await countBlock(page, 'affine-frame');
+  count = await countBlock(page, 'affine-note');
   expect(count).toBe(3);
 
   await redoByClick(page);
-  count = await countBlock(page, 'affine-frame');
+  count = await countBlock(page, 'affine-note');
   expect(count).toBe(4);
 });

@@ -6,7 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
-import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
+import { DEFAULT_NOTE_COLOR } from '../../../note-block/note-model.js';
 
 function EdgelessMask() {
   const style = {
@@ -40,7 +40,7 @@ function EdgelessBlockChild(
     border: '2px solid var(--affine-black-10)',
     borderRadius: '8px',
     boxSizing: 'border-box',
-    background: `var(${background ?? DEFAULT_FRAME_COLOR})`,
+    background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
     boxShadow: 'var(--affine-shadow-3)',
     pointerEvents: 'all',
     overflow: 'hidden',
@@ -58,13 +58,13 @@ function EdgelessBlockChild(
 }
 
 export function EdgelessBlockChildrenContainer(
-  frames: TopLevelBlockModel[],
+  notes: TopLevelBlockModel[],
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
   return html`
     ${repeat(
-      frames,
+      notes,
       child => child.id,
       (child, index) => EdgelessBlockChild(index, child, active, renderer)
     )}

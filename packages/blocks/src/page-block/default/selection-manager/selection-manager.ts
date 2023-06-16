@@ -169,7 +169,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       ) {
         event.raw.preventDefault();
       }
-      if (this.page.hasFlavour('affine:frame')) {
+      if (this.page.hasFlavour('affine:note')) {
         this._onContainerPointerMove(ctx);
       }
     });
@@ -192,11 +192,11 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     );
   }
 
-  private _ensureFrameExists() {
-    const hasFrame = this.page.hasFlavour('affine:frame');
-    if (!hasFrame) {
-      const frameId = this.page.addBlock('affine:frame', {}, this.page.root);
-      this.page.addBlock('affine:paragraph', {}, frameId);
+  private _ensureNoteExists() {
+    const hasNote = this.page.hasFlavour('affine:note');
+    if (!hasNote) {
+      const noteId = this.page.addBlock('affine:note', {}, this.page.root);
+      this.page.addBlock('affine:paragraph', {}, noteId);
       return true;
     }
 
@@ -342,9 +342,9 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       keys: { shift },
     } = e;
 
-    const hasAddedFrame = this._ensureFrameExists();
+    const hasAddedNote = this._ensureNoteExists();
 
-    if (hasAddedFrame && isInsidePageTitle(target)) {
+    if (hasAddedNote && isInsidePageTitle(target)) {
       requestAnimationFrame(() => {
         handleNativeRangeClick(this.page, e, this.container);
       });

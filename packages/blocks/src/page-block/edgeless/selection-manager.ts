@@ -62,7 +62,7 @@ export interface EdgelessHoverState {
 }
 
 export interface EdgelessSelectionState {
-  /* The selected frame or surface element */
+  /* The selected note or phasor element */
   selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
@@ -387,18 +387,18 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       return null;
     }
     const { surface } = this.container;
-    const frames = (this.page.root?.children ?? []).filter(
-      child => child.flavour === 'affine:frame'
+    const notes = (this.page.root?.children ?? []).filter(
+      child => child.flavour === 'affine:note'
     ) as TopLevelBlockModel[];
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
     const hovered: Selectable | null =
-      surface.pickTop(modelX, modelY) || pickTopBlock(frames, modelX, modelY);
+      surface.pickTop(modelX, modelY) || pickTopBlock(notes, modelX, modelY);
 
     // See https://github.com/toeverything/blocksuite/issues/1812
     if (
-      // if not frame block
+      // if not note block
       !isTopLevelBlock(hovered) ||
       // if in other mouse mode
       this.mouseMode.type !== 'default' ||

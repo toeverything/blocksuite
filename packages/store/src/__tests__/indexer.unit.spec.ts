@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 // Use manual per-module import/export to support vitest environment on Node.js
-import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
+import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { Page } from '../index.js';
@@ -17,7 +17,7 @@ function createTestOptions() {
 export const BlockSchemas = [
   ParagraphBlockSchema,
   PageBlockSchema,
-  FrameBlockSchema,
+  NoteBlockSchema,
 ];
 
 async function createTestPage(pageId = 'page0', workspace?: Workspace) {
@@ -36,7 +36,7 @@ describe.skip('workspace.search works', () => {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(''),
     });
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
 
     page.addBlock(
       'affine:paragraph',
@@ -45,7 +45,7 @@ describe.skip('workspace.search works', () => {
           '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
         ),
       },
-      frameId
+      noteId
     );
 
     page.addBlock(
@@ -55,7 +55,7 @@ describe.skip('workspace.search works', () => {
           '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
         ),
       },
-      frameId
+      noteId
     );
 
     const id = page.id.replace('space:', '');
@@ -77,7 +77,7 @@ describe('backlink works', () => {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(''),
     });
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
 
     const text = page.Text.fromDelta([
       {
@@ -90,7 +90,7 @@ describe('backlink works', () => {
       {
         text,
       },
-      frameId
+      noteId
     );
 
     // wait for the backlink index to be updated
@@ -119,7 +119,7 @@ describe('backlink works', () => {
     const backlinkIndexer = workspace.indexer.backlink;
 
     const page0Id = page0.addBlock('affine:page');
-    const frame0Id = page0.addBlock('affine:frame', {}, page0Id);
+    const note0Id = page0.addBlock('affine:note', {}, page0Id);
 
     page0.addBlock(
       'affine:paragraph',
@@ -131,7 +131,7 @@ describe('backlink works', () => {
           },
         ]),
       },
-      frame0Id
+      note0Id
     );
     const paragraphId2 = page0.addBlock(
       'affine:paragraph',
@@ -143,12 +143,12 @@ describe('backlink works', () => {
           },
         ]),
       },
-      frame0Id
+      note0Id
     );
     const paragraph2 = page0.getBlockById(paragraphId2);
 
     const page1Id = page1.addBlock('affine:page');
-    const frame1Id = page1.addBlock('affine:frame', {}, page1Id);
+    const note1Id = page1.addBlock('affine:note', {}, page1Id);
 
     page1.addBlock(
       'affine:paragraph',
@@ -160,7 +160,7 @@ describe('backlink works', () => {
           },
         ]),
       },
-      frame1Id
+      note1Id
     );
     const paragraphId4 = page1.addBlock(
       'affine:paragraph',
@@ -172,7 +172,7 @@ describe('backlink works', () => {
           },
         ]),
       },
-      frame1Id
+      note1Id
     );
     const paragraph4 = page1.getBlockById(paragraphId4);
 
@@ -205,8 +205,9 @@ describe('backlink works', () => {
       },
     ]);
 
-    paragraph2.text.delete(0, paragraph2.text.length);
-    page1.updateBlock(paragraph4, { text: new page1.Text() });
+    paragraph2?.text?.delete(0, paragraph2.text.length);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    page1.updateBlock(paragraph4!, { text: new page1.Text() });
 
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {

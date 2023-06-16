@@ -4,16 +4,16 @@ import { EDITOR_WIDTH } from '@blocksuite/global/config';
 
 import { initDatabaseColumn } from './database/actions.js';
 import {
-  activeFrameInEdgeless,
+  activeNoteInEdgeless,
   addBasicRectShapeElement,
   captureHistory,
-  changeEdgelessFrameBackground,
+  changeEdgelessNoteBackground,
   copyByKeyboard,
   cutByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  getAllFrames,
+  getAllNotes,
   getRichTextBoundingBox,
   importMarkdown,
   initDatabaseDynamicRowWithData,
@@ -30,7 +30,7 @@ import {
   pressTab,
   resetHistory,
   selectAllByKeyboard,
-  selectFrameInEdgeless,
+  selectNoteInEdgeless,
   setSelection,
   setVirgoSelection,
   SHORT_KEY,
@@ -44,7 +44,7 @@ import {
 import {
   assertBlockTypes,
   assertClipItems,
-  assertEdgelessFrameBackground,
+  assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
   assertRichTexts,
   assertSelection,
@@ -246,14 +246,14 @@ test(scoped`split block when paste`, async ({ page }) => {
 
 test(scoped`import markdown`, async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await resetHistory(page);
   const clipData = `# text
 # h1
 `;
   await setVirgoSelection(page, 1, 1);
-  await importMarkdown(page, frameId, clipData);
+  await importMarkdown(page, noteId, clipData);
   await page.waitForTimeout(100);
   await assertRichTexts(page, ['text', 'h1', '']);
   await undoByClick(page);
@@ -262,7 +262,7 @@ test(scoped`import markdown`, async ({ page }) => {
 // FIXME
 test(scoped`copy clipItems format`, async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await captureHistory(page);
 
@@ -273,7 +273,7 @@ test(scoped`copy clipItems format`, async ({ page }) => {
       - dd
 `;
 
-  await importMarkdown(page, frameId, clipData);
+  await importMarkdown(page, noteId, clipData);
   await page.waitForTimeout(100);
   await setSelection(page, 4, 1, 5, 1);
   await assertClipItems(page, 'text/plain', 'bc');
@@ -348,7 +348,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -373,7 +373,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
       prop:text="4"
       prop:type="bulleted"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -390,7 +390,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -431,7 +431,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
         prop:type="bulleted"
       />
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -503,7 +503,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -511,7 +511,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
       prop:checked={false}
       prop:type="bulleted"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
   await waitNextFrame(page);
@@ -523,7 +523,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -548,7 +548,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
       prop:text="4"
       prop:type="bulleted"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -575,7 +575,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -604,7 +604,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     <affine:paragraph
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -613,7 +613,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -634,13 +634,13 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     <affine:paragraph
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
 
 test(
-  scoped`copy phasor element and text frame in edgeless mode`,
+  scoped`copy phasor element and text note in edgeless mode`,
   async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
@@ -678,7 +678,7 @@ test(
   }
 );
 
-test(scoped`copy when text frame active in edgeless`, async ({ page }) => {
+test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
@@ -686,7 +686,7 @@ test(scoped`copy when text frame active in edgeless`, async ({ page }) => {
 
   await switchEditorMode(page);
 
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
   await setVirgoSelection(page, 0, 4);
   await copyByKeyboard(page);
@@ -695,27 +695,27 @@ test(scoped`copy when text frame active in edgeless`, async ({ page }) => {
   await assertText(page, '5551234');
 });
 
-test(scoped`paste frame block with background`, async ({ page }) => {
+test(scoped`paste note block with background`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
   await type(page, '1234');
 
   await switchEditorMode(page);
-  await selectFrameInEdgeless(page, ids.frameId);
+  await selectNoteInEdgeless(page, ids.noteId);
 
-  await triggerComponentToolbarAction(page, 'changeFrameColor');
+  await triggerComponentToolbarAction(page, 'changeNoteColor');
   const color = '--affine-tag-blue';
-  await changeEdgelessFrameBackground(page, color);
-  await assertEdgelessFrameBackground(page, ids.frameId, color);
+  await changeEdgelessNoteBackground(page, color);
+  await assertEdgelessNoteBackground(page, ids.noteId, color);
 
   await copyByKeyboard(page);
 
   await page.mouse.move(0, 0);
   await pasteByKeyboard(page, false);
-  const frames = await getAllFrames(page);
-  await Array.from(frames).map(async frame => {
-    await assertEdgelessFrameBackground(page, frame.id, color);
+  const notes = await getAllNotes(page);
+  await Array.from(notes).map(async note => {
+    await assertEdgelessNoteBackground(page, note.id, color);
   });
 });
 
@@ -765,7 +765,7 @@ test(
       page,
       /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -773,7 +773,7 @@ test(
       prop:text="123"
       prop:type="quote"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
 
@@ -790,7 +790,7 @@ test(
       page,
       /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -802,7 +802,7 @@ test(
       prop:text="123"
       prop:type="quote"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
   }
@@ -898,7 +898,7 @@ test(scoped`auto identify url`, async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -916,7 +916,7 @@ test(scoped`auto identify url`, async ({ page }) => {
       }
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });

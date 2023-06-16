@@ -211,7 +211,7 @@ export class Workspace {
 
   /**
    * By default, only an empty page will be created.
-   * If the `init` parameter is passed, a `surface`, `frame`, and `paragraph` block
+   * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
    * will be created in the page simultaneously.
    */
   createPage(options: { id?: string } | string = {}) {

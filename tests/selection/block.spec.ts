@@ -257,7 +257,7 @@ test('should indent multi-selection block', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -274,7 +274,7 @@ test('should indent multi-selection block', async ({ page }) => {
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -467,7 +467,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -582,7 +582,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     }
     const distance = viewport.scrollHeight - viewport.clientHeight;
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -690,7 +690,7 @@ test('should not clear selected rects when clicking on scrollbar', async ({
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance / 2);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -773,7 +773,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance / 2);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -856,7 +856,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance / 2);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -992,7 +992,7 @@ test('should not be misaligned when the editor container has padding or margin',
       throw new Error();
     }
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -1071,7 +1071,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -1088,7 +1088,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -1262,16 +1262,16 @@ test('click bottom of page and if the last is embed block, editor should insert 
   await assertStoreMatchJSX(
     page,
     `<affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
     <affine:paragraph
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
   <affine:page>
-    <affine:frame
+    <affine:note
       prop:background="--affine-background-secondary-color"
       prop:index="a0"
     >
@@ -1285,7 +1285,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
       <affine:paragraph
         prop:type="text"
       />
-    </affine:frame>
+    </affine:note>
   </affine:page>
 </affine:page>`
   );

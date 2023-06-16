@@ -306,7 +306,7 @@ export function handleUnindent(
   capture = true
 ) {
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:frame'])) {
+  if (!parent || matchFlavours(parent, ['affine:note'])) {
     // Topmost, do nothing
     return;
   }
@@ -565,7 +565,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     } else {
       return handleNoPreviousSibling(page, model, previousSibling);
     }
-  } else if (matchFlavours(parent, ['affine:frame'])) {
+  } else if (matchFlavours(parent, ['affine:note'])) {
     return (
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
       handleEmbedDividerCodeSibling(page, model, previousSibling) ||
@@ -783,16 +783,16 @@ export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   }
   const titleVEditor = pageElement.titleVEditor;
   const parent = page.getParent(model);
-  if (parent && matchFlavours(parent, ['affine:frame'])) {
+  if (parent && matchFlavours(parent, ['affine:note'])) {
     const paragraphIndex = parent.children.indexOf(model);
     if (paragraphIndex === 0) {
-      const frameParent = page.getParent(parent);
-      if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
-        const frameIndex = frameParent.children
+      const noteParent = page.getParent(parent);
+      if (noteParent && matchFlavours(noteParent, ['affine:page'])) {
+        const noteIndex = noteParent.children
           // page block may contain other blocks like surface
-          .filter(block => matchFlavours(block, ['affine:frame']))
+          .filter(block => matchFlavours(block, ['affine:note']))
           .indexOf(parent);
-        if (frameIndex === 0) {
+        if (noteIndex === 0) {
           titleVEditor.focusEnd();
           return;
         }

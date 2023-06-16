@@ -227,7 +227,7 @@ async function initMockImage(page: Page) {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock('affine:page');
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
     page.addBlock(
       'affine:embed',
       {
@@ -236,7 +236,7 @@ async function initMockImage(page: Page) {
         width: 200,
         height: 180,
       },
-      frameId
+      noteId
     );
     page.captureSync();
   });

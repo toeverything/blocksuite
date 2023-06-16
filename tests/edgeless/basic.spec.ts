@@ -37,7 +37,7 @@ import {
   assertEdgelessHoverRect,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
-  assertFrameXYWH,
+  assertNoteXYWH,
   assertRichTexts,
   assertSelection,
   assertZoomLevel,
@@ -70,7 +70,7 @@ test('can zoom viewport', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
   const original = [50, 260, EDITOR_WIDTH, 80];
@@ -96,7 +96,7 @@ test('zoom by mouse', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertFrameXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
   const original = [50, 260, EDITOR_WIDTH, 80];

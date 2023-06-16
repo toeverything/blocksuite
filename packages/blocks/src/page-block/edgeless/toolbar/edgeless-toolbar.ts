@@ -25,7 +25,7 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
-import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
+import { DEFAULT_NOTE_COLOR } from '../../../note-block/note-model.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -236,16 +236,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       y = centerY - (options.height * zoom) / 2;
     }
 
-    const { frameId } = this.edgeless.addNewFrame(
+    const { noteId } = this.edgeless.addNewNote(
       models,
       new Point(x, y),
       options
     );
-    const frame = this.edgeless.frames.find(frame => frame.id === frameId);
-    assertExists(frame);
+    const note = this.edgeless.notes.find(note => note.id === noteId);
+    assertExists(note);
 
     this.edgeless.selection.switchToDefaultMode({
-      selected: [frame],
+      selected: [note],
       active: false,
     });
 
@@ -340,7 +340,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${() =>
             this.setMouseMode({
               type: 'note',
-              background: DEFAULT_FRAME_COLOR,
+              background: DEFAULT_NOTE_COLOR,
             })}
         >
           ${NoteIcon}

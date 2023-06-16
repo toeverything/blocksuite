@@ -15,7 +15,7 @@ interface Migration {
 // New migration should be added to the end of this list
 const migrations: Migration[] = [
   {
-    desc: 'convert affine:group to affine:frame',
+    desc: 'convert affine:group to affine:note',
     condition: doc => {
       const yVersions = doc
         .getMap('space:meta')
@@ -37,7 +37,7 @@ const migrations: Migration[] = [
         // @ts-ignore
         yBlocks.forEach((yBlock: Y.Map<unknown>) => {
           if (yBlock.get('sys:flavour') === 'affine:group') {
-            yBlock.set('sys:flavour', 'affine:frame');
+            yBlock.set('sys:flavour', 'affine:note');
           }
         });
       }
@@ -46,7 +46,7 @@ const migrations: Migration[] = [
         .getMap('space:meta')
         .get('versions') as Y.Map<number>;
       yVersions.delete('affine:group');
-      yVersions.set('affine:frame', 1);
+      yVersions.set('affine:note', 1);
     },
   },
   {
