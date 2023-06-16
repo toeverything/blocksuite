@@ -1075,6 +1075,84 @@ test('should indent native multi-selection block', async ({ page }) => {
   );
 });
 
+test('should unindent native multi-selection block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  let box456 = await getRichTextBoundingBox(page, '3');
+  let inside456 = { x: box456.left + 1, y: box456.top + 1 };
+
+  let box789 = await getRichTextBoundingBox(page, '4');
+  let inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
+
+  // from top to bottom
+  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:frame>
+</affine:page>`
+  );
+
+  box456 = await getRichTextBoundingBox(page, '3');
+  inside456 = { x: box456.left + 1, y: box456.top + 1 };
+
+  box789 = await getRichTextBoundingBox(page, '4');
+  inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
+
+  // from top to bottom
+  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
+
+  await pressShiftTab(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:frame
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+  </affine:frame>
+</affine:page>`
+  );
+});
+
 test('should clear native selection before block selection', async ({
   page,
 }) => {

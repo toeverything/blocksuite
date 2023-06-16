@@ -19,6 +19,7 @@ export const HOTKEYS = {
   SELECT_ALL: `${SHORT_KEY}+a`,
   SHIFT_UP: 'shift+up',
   SHIFT_DOWN: 'shift+down',
+  SHIFT_TAB: 'shift+tab',
 
   UP: 'up',
   DOWN: 'down',

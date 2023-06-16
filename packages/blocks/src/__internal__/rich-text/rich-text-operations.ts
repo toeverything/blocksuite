@@ -223,61 +223,52 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
   if (!models.length) return;
-  const previousSibling = page.getPreviousSibling(models[0]);
-  const nextSibling = page.getNextSibling(models.at(-1) as BaseBlockModel);
 
-  if (!previousSibling || !supportsChildren(previousSibling)) {
-    // Bottom, can not indent, do nothing
-    return;
-  }
-  if (
-    !models.every((model, idx, array) => {
-      const previousModel = array.at(idx - 1);
-      if (!previousModel) {
-        return false;
-      }
-      const p1 = page.getParent(model);
-      const p2 = page.getParent(previousModel);
-      return p1 && p2 && p1.id === p2.id;
-    })
-  ) {
-    return;
-  }
-  page.captureSync();
-  const parent = page.getParent(models[0]);
-  assertExists(parent);
-  models.forEach(model => {
-    // 1. backup target block children and remove them from target block
-    const children = model.children;
-    page.updateBlock(model, {
-      children: [],
-    });
-
-    // 2. remove target block from parent block
-    page.updateBlock(parent, {
-      children: parent.children.filter(child => child.id !== model.id),
-    });
-
-    // 3. append target block and children to previous sibling block
-    page.updateBlock(previousSibling, {
-      children: [...previousSibling.children, model, ...children],
-    });
-
-    // 4. If the target block is a numbered list, update the prefix of next siblings
-    if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
-      let next = nextSibling;
-      while (
-        next &&
-        matchFlavours(next, ['affine:list']) &&
-        model.type === 'numbered'
-      ) {
-        page.updateBlock(next, {});
-        next = page.getNextSibling(next);
-      }
+  // Find the first model that can be indented
+  let firstIndentIndex = -1;
+  let previousSibling: BaseBlockModel | null = null;
+  for (let i = 0; i < models.length; i++) {
+    previousSibling = page.getPreviousSibling(models[i]);
+    if (previousSibling && supportsChildren(previousSibling)) {
+      firstIndentIndex = i;
+      break;
     }
+  }
 
-    assertExists(model);
-    asyncSetVRange(model, { index: 0, length: 0 });
+  // No model can be indented
+  if (firstIndentIndex === -1) return;
+
+  page.captureSync();
+  // Models waiting to be indented
+  const indentModels = models.slice(firstIndentIndex);
+  indentModels.forEach(model => {
+    const parent = page.getParent(model);
+    assertExists(parent);
+    // Only indent the model which parent is not in the `indentModels`
+    // When parent is in the `indentModels`, it means the parent has been indented
+    // And the model should be indented with its parent
+    if (!indentModels.includes(parent)) {
+      previousSibling = page.getPreviousSibling(model);
+      // If previous sibling is not found or does not support children
+      // Handle next model
+      if (!previousSibling || !supportsChildren(previousSibling)) {
+        return;
+      }
+      // If previous sibling is found and supports children, indent the model by following steps
+      // 1. Remove model from parent
+      const remainingChildren = parent.children.filter(
+        child => child.id !== model.id
+      );
+      page.updateBlock(parent, {
+        children: remainingChildren,
+      });
+      // 2. Add model to previous sibling
+      page.updateBlock(previousSibling as BaseBlockModel, {
+        children: [...(previousSibling as BaseBlockModel).children, model],
+      });
+
+      asyncSetVRange(model, { index: 0, length: 0 });
+    }
   });
 }
 
@@ -358,6 +349,36 @@ export function handleUnindent(
 
   assertExists(model);
   asyncSetVRange(model, { index: offset, length: 0 });
+}
+
+export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
+  if (!models.length) return;
+
+  // Find the first model that can be unindented
+  let firstUnindentIndex = -1;
+  let firstParent: BaseBlockModel | null;
+  for (let i = 0; i < models.length; i++) {
+    firstParent = page.getParent(models[i]);
+    if (firstParent && !matchFlavours(firstParent, ['affine:frame'])) {
+      firstUnindentIndex = i;
+      break;
+    }
+  }
+
+  // Find all the models that can be unindented
+  const unindentModels = models.slice(firstUnindentIndex);
+  // Form bottom to top
+  // Only unindent the models which parent is not in the unindentModels
+  // When parent is in the unindentModels
+  // It means that children will be unindented with their parent
+  for (let i = unindentModels.length - 1; i >= 0; i--) {
+    const model = unindentModels[i];
+    const parent = page.getParent(model);
+    assertExists(parent);
+    if (!unindentModels.includes(parent)) {
+      handleUnindent(page, model);
+    }
+  }
 }
 
 // When deleting at line start of a code block,
