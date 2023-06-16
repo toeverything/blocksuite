@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/blocks",
@@ -18,7 +18,7 @@
   "engines": {
     "node": ">=16.9.0"
   },
-  "packageManager": "pnpm@8.5.0",
+  "packageManager": "pnpm@8.6.1",
   "scripts": {
     "serve": "pnpm --filter @blocksuite/store serve",
     "preview": "run-p serve preview:playground",
@@ -75,6 +75,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-wc": "^1.4.0",
+    "happy-dom": "^9.20.3",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.0",
     "madge": "^6.0.0",

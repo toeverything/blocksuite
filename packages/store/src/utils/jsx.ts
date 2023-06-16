@@ -71,6 +71,10 @@ export function yDocToJSXNode(
     props['prop:columns'] = `Array [${props['prop:columns'].length}]`;
   }
 
+  if ('prop:views' in props && props['prop:views'] instanceof Array) {
+    props['prop:views'] = `Array [${props['prop:views'].length}]`;
+  }
+
   return {
     $$typeof: testSymbol,
     type: flavour,

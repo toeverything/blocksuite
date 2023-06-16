@@ -5,6 +5,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../__internal__/theme/css-variables.js';
+import { queryCurrentMode } from '../../../__internal__/utils/query.js';
 
 export class ColorEvent extends Event {
   detail: CssVariableName;
@@ -22,9 +23,7 @@ export class ColorEvent extends Event {
   }
 }
 
-// export class ColorEvent extends CustomEvent<RawCssVariableNames> {}
-
-const DEFAULT_COLORS: CssVariableName[] = [
+export const LINE_COLORS: CssVariableName[] = [
   '--affine-palette-line-yellow',
   '--affine-palette-line-orange',
   '--affine-palette-line-tangerine',
@@ -38,7 +37,9 @@ const DEFAULT_COLORS: CssVariableName[] = [
   '--affine-palette-line-grey',
   '--affine-palette-line-white',
 ];
-export const DEFAULT_SELECTED_COLOR = DEFAULT_COLORS[9];
+
+export const GET_DEFAULT_LINE_COLOR = () =>
+  queryCurrentMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
 
 export function isTransparent(color: CssVariableName) {
   return color.toLowerCase() === '--affine-palette-transparent';
@@ -193,7 +194,7 @@ export class EdgelessColorPanel extends LitElement {
   value?: CssVariableName;
 
   @property()
-  options: CssVariableName[] = DEFAULT_COLORS;
+  options: CssVariableName[] = LINE_COLORS;
 
   @property()
   showLetterMark = false;

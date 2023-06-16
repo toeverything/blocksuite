@@ -2,57 +2,61 @@ import { type DatabaseBlockModel } from '@blocksuite/blocks';
 import { expect } from '@playwright/test';
 
 import {
-  assertColumnWidth,
-  assertDatabaseCellNumberText,
-  assertDatabaseCellRichTexts,
   assertDatabaseColumnOrder,
-  assertDatabaseSearching,
-  assertDatabaseTitleColumnText,
-  assertDatabaseTitleText,
-  blurDatabaseSearch,
-  clickColumnType,
-  clickDatabaseOutside,
   dragBetweenCoords,
   enterPlaygroundRoom,
-  focusDatabaseHeader,
-  focusDatabaseSearch,
   focusDatabaseTitle,
   focusRichText,
   getBlockModel,
   getBoundingBox,
-  getDatabaseBodyRow,
-  getDatabaseBodyRows,
-  getDatabaseHeaderColumn,
-  getDatabaseMouse,
-  getFirstColumnCell,
-  initDatabaseColumn,
   initDatabaseDynamicRowWithData,
   initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
   initEmptyDatabaseWithParagraphState,
   pasteByKeyboard,
-  performColumnAction,
-  performSelectColumnTagAction,
   pressArrowLeft,
+  pressArrowRight,
   pressBackspace,
   pressEnter,
   pressEscape,
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
-  switchColumnType,
   type,
   undoByClick,
   undoByKeyboard,
   waitNextFrame,
-} from './utils/actions/index.js';
+} from '../utils/actions/index.js';
 import {
   assertBlockCount,
   assertBlockProps,
   assertLocatorVisible,
-} from './utils/asserts.js';
-import { test } from './utils/playwright.js';
+} from '../utils/asserts.js';
+import { test } from '../utils/playwright.js';
+import {
+  assertColumnWidth,
+  assertDatabaseCellNumber,
+  assertDatabaseCellRichTexts,
+  assertDatabaseSearching,
+  assertDatabaseTitleColumnText,
+  assertDatabaseTitleText,
+  assertSelectedStyle,
+  blurDatabaseSearch,
+  clickColumnType,
+  clickDatabaseOutside,
+  focusDatabaseHeader,
+  focusDatabaseSearch,
+  getDatabaseBodyRow,
+  getDatabaseBodyRows,
+  getDatabaseHeaderColumn,
+  getDatabaseMouse,
+  getFirstColumnCell,
+  initDatabaseColumn,
+  performColumnAction,
+  performSelectColumnTagAction,
+  switchColumnType,
+} from './actions.js';
 
 test('edit database block title and create new rows', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -79,10 +83,10 @@ test('edit database block title and create new rows', async ({ page }) => {
   });
   await initDatabaseRowWithData(page, '');
   await initDatabaseRowWithData(page, '');
-  await assertBlockProps(page, '3', {
+  await assertBlockProps(page, '4', {
     flavour: 'affine:paragraph',
   });
-  await assertBlockProps(page, '4', {
+  await assertBlockProps(page, '5', {
     flavour: 'affine:paragraph',
   });
   await undoByClick(page);
@@ -114,7 +118,8 @@ test('should modify the value when the input loses focus', async ({ page }) => {
 
   await clickDatabaseOutside(page);
   const cell = getFirstColumnCell(page, 'number');
-  expect(await cell.innerText()).toBe('1');
+  const text = await cell.textContent();
+  expect(text?.trim()).toBe('1');
 });
 
 test('should rich-text column support soft enter', async ({ page }) => {
@@ -132,6 +137,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await assertDatabaseCellRichTexts(page, { text: '123' });
 
   await cell.click();
+  await pressArrowRight(page);
   await pressArrowLeft(page);
   await pressShiftEnter(page);
   await assertDatabaseCellRichTexts(page, { text: '12\n3' });
@@ -268,7 +274,7 @@ test('should database title and rich-text support undo/redo', async ({
   await initDatabaseColumn(page);
   await switchColumnType(page, 'rich-text');
   await initDatabaseDynamicRowWithData(page, '123', true);
-
+  await pressArrowLeft(page);
   await undoByKeyboard(page);
   await assertDatabaseCellRichTexts(page, { text: '' });
   await redoByKeyboard(page);
@@ -292,7 +298,7 @@ test('should support rename column', async ({ page }) => {
   const { textElement, inputElement } = await getDatabaseHeaderColumn(page, 1);
   expect(await textElement.innerText()).toBe('abc');
 
-  await performColumnAction(page, '3', 'rename');
+  await performColumnAction(page, '4', 'rename');
   await inputElement.click();
   await type(page, '123');
   await pressEnter(page);
@@ -332,11 +338,11 @@ test('should support right insert column', async ({ page }) => {
 
   await initDatabaseColumn(page);
 
-  await performColumnAction(page, '3', 'insert-right');
+  await performColumnAction(page, '4', 'insert-right');
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(4);
 
-  await assertDatabaseColumnOrder(page, ['3', '4']);
+  await assertDatabaseColumnOrder(page, ['4', '5']);
 });
 
 test('should support left insert column', async ({ page }) => {
@@ -345,11 +351,11 @@ test('should support left insert column', async ({ page }) => {
 
   await initDatabaseColumn(page);
 
-  await performColumnAction(page, '3', 'insert-left');
+  await performColumnAction(page, '4', 'insert-left');
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(4);
 
-  await assertDatabaseColumnOrder(page, ['4', '3']);
+  await assertDatabaseColumnOrder(page, ['5', '4']);
 });
 
 test('should support delete column', async ({ page }) => {
@@ -361,7 +367,7 @@ test('should support delete column', async ({ page }) => {
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(3);
 
-  await performColumnAction(page, '3', 'delete');
+  await performColumnAction(page, '4', 'delete');
   expect(await columns.count()).toBe(2);
 });
 
@@ -372,7 +378,7 @@ test('should support duplicate column', async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, '123', true);
 
-  await performColumnAction(page, '3', 'duplicate');
+  await performColumnAction(page, '4', 'duplicate');
   const cells = page.locator('.affine-database-select-cell-container');
   expect(await cells.count()).toBe(2);
 
@@ -389,10 +395,10 @@ test('should support move column right', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, '123', true);
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
-  await assertDatabaseColumnOrder(page, ['3', '5']);
+  await assertDatabaseColumnOrder(page, ['4', '6']);
 
-  await performColumnAction(page, '3', 'move-right');
-  await assertDatabaseColumnOrder(page, ['5', '3']);
+  await performColumnAction(page, '4', 'move-right');
+  await assertDatabaseColumnOrder(page, ['6', '4']);
 
   await undoByClick(page);
   const { column } = await getDatabaseHeaderColumn(page, 2);
@@ -409,15 +415,15 @@ test('should support move column left', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, '123', true);
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
-  await assertDatabaseColumnOrder(page, ['3', '5']);
+  await assertDatabaseColumnOrder(page, ['4', '6']);
 
   const { column } = await getDatabaseHeaderColumn(page, 0);
   await column.click();
   const moveLeft = page.locator('.move-left');
   expect(await moveLeft.count()).toBe(0);
 
-  await performColumnAction(page, '5', 'move-left');
-  await assertDatabaseColumnOrder(page, ['5', '3']);
+  await performColumnAction(page, '6', 'move-left');
+  await assertDatabaseColumnOrder(page, ['6', '4']);
 });
 
 test.describe('switch column type', () => {
@@ -430,12 +436,12 @@ test.describe('switch column type', () => {
     await switchColumnType(page, 'number');
 
     const cell = getFirstColumnCell(page, 'number');
-    await assertDatabaseCellNumberText(page, {
+    await assertDatabaseCellNumber(page, {
       text: '',
     });
 
     await initDatabaseDynamicRowWithData(page, '123abc');
-    expect(await cell.innerText()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
   });
 
   test('switch to rich-text', async ({ page }) => {
@@ -453,7 +459,7 @@ test.describe('switch column type', () => {
 
     await initDatabaseDynamicRowWithData(page, '123');
     await initDatabaseDynamicRowWithData(page, 'abc');
-    await assertDatabaseCellRichTexts(page, { text: '123abc' });
+    await assertDatabaseCellRichTexts(page, { text: '123abc123abc' });
   });
 
   test('switch between multi-select and select', async ({ page }) => {
@@ -497,7 +503,10 @@ test.describe('switch column type', () => {
 
     await initDatabaseDynamicRowWithData(page, '123abc', true);
     getFirstColumnCell(page, 'number');
-    await assertDatabaseCellNumberText(page, {
+    await pressEnter(page);
+    await clickDatabaseOutside(page);
+    await waitNextFrame(page, 100);
+    await assertDatabaseCellNumber(page, {
       text: '123',
     });
 
@@ -506,7 +515,7 @@ test.describe('switch column type', () => {
     await assertDatabaseCellRichTexts(page, { text: '123abc' });
 
     await switchColumnType(page, 'number');
-    await assertDatabaseCellNumberText(page, {
+    await assertDatabaseCellNumber(page, {
       text: '',
     });
   });
@@ -520,7 +529,7 @@ test.describe('switch column type', () => {
 
     await initDatabaseDynamicRowWithData(page, '123', true);
     const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.innerText()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
 
     await switchColumnType(page, 'select');
     await initDatabaseDynamicRowWithData(page, 'abc');
@@ -528,7 +537,7 @@ test.describe('switch column type', () => {
     expect(await selectCell.innerText()).toBe('abc');
 
     await switchColumnType(page, 'number');
-    await assertDatabaseCellNumberText(page, {
+    await assertDatabaseCellNumber(page, {
       text: '',
     });
   });
@@ -569,7 +578,7 @@ test.describe('switch column type', () => {
       width: progressBgWidth,
     } = await getBoundingBox(progressBg);
     await page.mouse.move(progressBgX, progressBgY);
-
+    await page.mouse.click(progressBgX, progressBgY);
     const dragHandle = page.locator('.affine-database-progress-drag-handle');
     const {
       x: dragX,
@@ -602,7 +611,7 @@ test.describe('select column tag action', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
     await initDatabaseDynamicRowWithData(page, 'abc');
-
+    await pressEscape(page);
     const { cellSelected, selectOption, saveIcon } =
       await performSelectColumnTagAction(page, 'rename');
     await waitNextFrame(page);
@@ -626,7 +635,7 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     const { selectOption } = await performSelectColumnTagAction(page, 'rename');
     await waitNextFrame(page);
     await type(page, '456');
@@ -651,10 +660,21 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     const { cellSelected } = await performSelectColumnTagAction(page, 'delete');
     await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
+  });
+
+  test('should support modifying select tag color', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    await pressEscape(page);
+    await performSelectColumnTagAction(page, 'change-color', 'hover');
+    await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
   });
 });
 
@@ -697,10 +717,10 @@ test('should support copy database through action menu', async ({ page }) => {
 
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
-
+  await waitNextFrame(page);
   await assertBlockCount(page, 'database', 2);
   const db1Model = (await getBlockModel(page, '2')) as DatabaseBlockModel;
-  const db2Model = (await getBlockModel(page, '6')) as DatabaseBlockModel;
+  const db2Model = (await getBlockModel(page, '7')) as DatabaseBlockModel;
   expect(db1Model.title.toString()).toEqual(db2Model.title.toString());
 });
 
@@ -953,4 +973,28 @@ test('should title column support quick changing of column type', async ({
   await clickColumnType(page, 'select');
   const cell = getFirstColumnCell(page, 'select-selected');
   expect(await cell.count()).toBe(1);
+});
+
+test('should save the previous header being edited when editing the next column header', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await initDatabaseDynamicRowWithData(page, 'a', true);
+  await focusDatabaseHeader(page, 0);
+  const { textElement, renameIcon: titleRenameIcon } =
+    await getDatabaseHeaderColumn(page, 0);
+  await titleRenameIcon.click();
+  await type(page, '123');
+
+  const { renameIcon } = await getDatabaseHeaderColumn(page, 1);
+  await renameIcon.click();
+  expect(await textElement.innerText()).toBe('123');
+
+  await titleRenameIcon.click();
+  await type(page, '456');
+  await initDatabaseColumn(page);
+  expect(await textElement.innerText()).toBe('456');
 });

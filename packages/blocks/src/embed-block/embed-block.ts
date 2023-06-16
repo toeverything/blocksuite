@@ -3,6 +3,7 @@ import { css, html, nothing, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
+import { stopPropagation } from '../page-block/edgeless/utils.js';
 import type { EmbedBlockModel } from './embed-model.js';
 import { EmbedBlockService } from './embed-service.js';
 
@@ -74,6 +75,10 @@ export class EmbedBlockComponent extends BlockElement<EmbedBlockModel> {
         document.activeElement.blur();
       }
     });
+
+    this._input.addEventListener('pointerup', (e: Event) => {
+      e.stopPropagation();
+    });
   }
 
   private _onInputChange() {
@@ -103,9 +108,7 @@ export class EmbedBlockComponent extends BlockElement<EmbedBlockModel> {
             value=${this._caption}
             @input=${this._onInputChange}
             @blur=${this._onInputBlur}
-            @click=${(e: Event) => {
-              e.stopPropagation();
-            }}
+            @click=${stopPropagation}
           />
         </div>
       </div>

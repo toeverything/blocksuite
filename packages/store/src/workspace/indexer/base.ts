@@ -2,7 +2,7 @@ import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { YArrayEvent, YMapEvent, YTextEvent } from 'yjs';
 
-import type { BlockSuiteDoc, BlockSuiteDocData } from '../../yjs/index.js';
+import type { BlockSuiteDoc } from '../../yjs/index.js';
 import type { YBlock } from '../page.js';
 
 type PageId = string;
@@ -22,7 +22,7 @@ export type IndexBlockEvent =
     };
 
 export class BlockIndexer {
-  private readonly _doc: Y.Doc;
+  private readonly _doc: BlockSuiteDoc;
   private readonly _workspaceSlots: {
     pageAdded: Slot<string>;
     pageRemoved: Slot<string>;
@@ -39,7 +39,7 @@ export class BlockIndexer {
   };
 
   constructor(
-    doc: BlockSuiteDoc<BlockSuiteDocData>,
+    doc: BlockSuiteDoc,
     {
       immediately = false,
       slots,
@@ -74,8 +74,8 @@ export class BlockIndexer {
   private _initIndex() {
     const doc = this._doc;
     const share = doc.share;
-    if (!share.has('space:meta')) {
-      throw new Error("Failed to initialize indexer: 'space:meta' not found");
+    if (!share.has('meta')) {
+      throw new Error('Failed to initialize indexer: workspace meta not found');
     }
 
     let disposeMap: Record<string, (() => void) | null> = {};
@@ -84,9 +84,7 @@ export class BlockIndexer {
       disposeMap = {};
     });
 
-    Array.from(doc.share.keys())
-      // filter out 'space:meta'
-      .filter(pageId => pageId !== 'space:meta')
+    Array.from(doc.spaces.keys())
       .map(pageId =>
         pageId.startsWith('space:') ? pageId.slice('space:'.length) : pageId
       )
@@ -121,19 +119,20 @@ export class BlockIndexer {
     });
   }
 
-  private _indexPage(pageId: string, yPage: Y.Map<YBlock>) {
-    yPage.forEach((block, blockId) => {
+  private _indexPage(pageId: string, yPage: Y.Doc) {
+    const yBlocks = yPage.get('blocks') as Y.Map<YBlock>;
+    yBlocks.forEach((block, blockId) => {
       this._indexBlock({ action: 'add', pageId, blockId, block });
     });
 
     const observer = (
       events: Y.YEvent<Y.AbstractType<unknown>>[],
       transaction: Y.Transaction
-    ) => this._yPageObserver(events, transaction, { pageId, yPage });
+    ) => this._yPageObserver(events, transaction, { pageId, yPage: yBlocks });
 
-    yPage.observeDeep(observer);
+    yBlocks.observeDeep(observer);
     return () => {
-      yPage.unobserveDeep(observer);
+      yBlocks.unobserveDeep(observer);
     };
   }
 
@@ -211,12 +210,12 @@ export class BlockIndexer {
     });
   };
 
-  private _getPage(pageId: PageId): Y.Map<YBlock> | undefined {
+  private _getPage(pageId: PageId): Y.Doc | undefined {
     if (pageId.startsWith('space:')) {
       console.warn('Unexpected page prefix', pageId);
     }
     pageId = `space:${pageId}`;
-    return this._doc.getMap(pageId);
+    return this._doc.spaces.get(pageId) as Y.Doc | undefined;
   }
 
   refreshIndex() {

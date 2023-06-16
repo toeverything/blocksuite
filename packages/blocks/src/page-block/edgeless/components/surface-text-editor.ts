@@ -19,9 +19,14 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
 
   private _element: TextElement | null = null;
   private _edgeless: EdgelessPageBlockComponent | null = null;
+  private _keeping = false;
 
   get vEditor() {
     return this._vEditor;
+  }
+
+  setKeeping(keeping: boolean) {
+    this._keeping = keeping;
   }
 
   private _syncRect() {
@@ -75,6 +80,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
       this._virgoContainer.addEventListener(
         'blur',
         () => {
+          if (this._keeping) return;
           this._unmount();
         },
         {
@@ -114,8 +120,6 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         position: 'absolute',
         left: rect.x + 'px',
         top: rect.y + 'px',
-        minWidth: this._element.w < 20 ? 20 : this._element.w + 'px',
-        minHeight: this._element.h < 20 ? 20 : this._element.h + 'px',
         fontSize: this._element.fontSize + 'px',
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',

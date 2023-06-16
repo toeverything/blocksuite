@@ -11,16 +11,34 @@ export type BlockSuiteDocAllowedValue =
   | Y.Text;
 export type BlockSuiteDocData = Record<string, BlockSuiteDocAllowedValue>;
 
-export class BlockSuiteDoc<
-  Data extends BlockSuiteDocData = BlockSuiteDocData
-> extends Y.Doc {
+export class BlockSuiteDoc extends Y.Doc {
+  private _spaces: Y.Map<Y.Doc> = this.getMap('spaces');
+
+  get spaces() {
+    return this._spaces;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  override toJSON(): Record<string, any> {
+    const json = super.toJSON();
+    delete json.spaces;
+    const spaces: Record<string, unknown> = {};
+    this.spaces.forEach((doc, key) => {
+      spaces[key] = doc.toJSON();
+    });
+    return {
+      ...json,
+      spaces,
+    };
+  }
+
   getMapProxy<
-    Key extends keyof Data & string,
-    Value extends Record<string, unknown> = Data[Key] extends Record<
+    Key extends keyof BlockSuiteDocData & string,
+    Value extends Record<
       string,
       unknown
-    >
-      ? Data[Key]
+    > = BlockSuiteDocData[Key] extends Record<string, unknown>
+      ? BlockSuiteDocData[Key]
       : never
   >(key: Key, config: ProxyConfig = {}): Value {
     const map = super.getMap(key);
@@ -28,8 +46,10 @@ export class BlockSuiteDoc<
   }
 
   getArrayProxy<
-    Key extends keyof Data & string,
-    Value extends unknown[] = Data[Key] extends unknown[] ? Data[Key] : never
+    Key extends keyof BlockSuiteDocData & string,
+    Value extends unknown[] = BlockSuiteDocData[Key] extends unknown[]
+      ? BlockSuiteDocData[Key]
+      : never
   >(key: Key, config: ProxyConfig = {}): Value {
     const array = super.getArray(key);
     return createYArrayProxy(array, config) as Value;

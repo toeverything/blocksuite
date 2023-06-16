@@ -1,6 +1,9 @@
-import type { PointerEventState } from '@blocksuite/lit';
-import type { UIEventDispatcher } from '@blocksuite/lit';
-import type { EventName, UIEventHandler } from '@blocksuite/lit';
+import type {
+  EventName,
+  PointerEventState,
+  UIEventDispatcher,
+  UIEventHandler,
+} from '@blocksuite/lit';
 import type { PhasorElement } from '@blocksuite/phasor';
 import { normalizeWheelDeltaY } from '@blocksuite/phasor';
 

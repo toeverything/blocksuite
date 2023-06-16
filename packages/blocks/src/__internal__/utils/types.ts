@@ -1,5 +1,9 @@
 import type { BlockElement, UIEventDispatcher } from '@blocksuite/lit';
-import type { ConnectorMode, ShapeType } from '@blocksuite/phasor';
+import type {
+  ConnectorMode,
+  PhasorElement,
+  ShapeType,
+} from '@blocksuite/phasor';
 import {
   type BaseBlockModel,
   DisposableGroup,
@@ -20,12 +24,14 @@ import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
+
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export interface IPoint {
   x: number;
   y: number;
 }
+
 export interface BlockTransformContext {
   childText?: string;
   begin?: number;
@@ -72,18 +78,13 @@ export type DatabaseTableViewCellSelect = {
   databaseId: string;
   // Currently only supports single cell selection.
   coords: [CellCoord];
-};
-type DatabaseTableViewCellEdit = {
-  type: 'edit';
-  databaseId: string;
-  coords: [CellCoord];
+  isEditing: boolean;
 };
 type DatabaseTableViewCellClear = {
   type: 'clear';
 };
 export type DatabaseTableViewCellState =
   | DatabaseTableViewCellSelect
-  | DatabaseTableViewCellEdit
   | DatabaseTableViewCellClear;
 
 /** Common context interface definition for block models. */
@@ -129,6 +130,8 @@ export type ExtendedModel = BaseBlockModel & Record<string, any>;
 
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel = FrameBlockModel;
+
+export type Alignable = FrameBlockModel | PhasorElement;
 
 export type DefaultMouseMode = {
   type: 'default';

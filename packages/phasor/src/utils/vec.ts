@@ -1,6 +1,6 @@
 // Inlined from https://raw.githubusercontent.com/tldraw/tldraw/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/vec/src/index.ts
 // Credits to tldraw
-
+export type IVec = number[];
 export class Vec {
   /**
    * Clamp a value into a range.
@@ -582,5 +582,14 @@ export class Vec {
    */
   static min = (...v: number[][]) => {
     return [Math.min(...v.map(a => a[0])), Math.min(...v.map(a => a[1]))];
+  };
+
+  static toVec = (v: { x: number; y: number }) => [v.x, v.y];
+
+  static toPoint = (v: IVec) => {
+    return {
+      x: v[0],
+      y: v[1],
+    };
   };
 }

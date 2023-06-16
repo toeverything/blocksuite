@@ -22,6 +22,7 @@ import {
   enterMarkdownMatch,
   hardEnter,
   onBackspace,
+  onForwardDelete,
   onKeyLeft,
   onKeyRight,
   onSoftEnter,
@@ -218,6 +219,12 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
           return onBackspace(block, context.event, this.vEditor);
         },
       },
+      delete: {
+        key: 'Delete',
+        handler(range, context) {
+          return onForwardDelete(block, context.event, this.vEditor);
+        },
+      },
       up: {
         key: 'ArrowUp',
         shiftKey: false,
@@ -236,7 +243,12 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
         key: 'ArrowLeft',
         shiftKey: false,
         handler(range, context) {
-          return onKeyLeft(context.event, range);
+          return onKeyLeft(
+            block,
+            context.event,
+            range,
+            this.vEditor.rootElement
+          );
         },
       },
       right: {

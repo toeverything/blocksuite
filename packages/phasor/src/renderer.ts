@@ -1,18 +1,19 @@
-import { clamp, type IPoint, Point } from '@blocksuite/blocks/std';
 import { assertNotExists } from '@blocksuite/global/utils';
 import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
-import { intersects } from './utils/hit-utils.js';
-
+import { intersects } from './utils/math-utils.js';
+import { clamp } from './utils/math-utils.js';
+import { type IPoint } from './utils/point.js';
+import { Vec } from './utils/vec.js';
 export interface SurfaceViewport {
   readonly left: number;
   readonly top: number;
   readonly width: number;
   readonly height: number;
-  readonly center: Point;
+  readonly center: IPoint;
   readonly centerX: number;
   readonly centerY: number;
   readonly zoom: number;
@@ -26,8 +27,19 @@ export interface SurfaceViewport {
   toViewCoord(logicalX: number, logicalY: number): [number, number];
 
   setCenter(centerX: number, centerY: number): void;
-  setZoom(zoom: number, focusPoint?: Point): void;
+  setZoom(zoom: number, focusPoint?: IPoint): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
+
+  addOverlay(overlay: Overlay): void;
+  removeOverlay(overlay: Overlay): void;
+}
+
+/**
+ * An overlay is a layer covered on top of elements,
+ * can be used for rendering non-CRDT state indicators.
+ */
+export abstract class Overlay {
+  abstract render(ctx: CanvasRenderingContext2D): void;
 }
 
 export class Renderer implements SurfaceViewport {
@@ -36,6 +48,8 @@ export class Renderer implements SurfaceViewport {
   rc: RoughCanvas;
   gridManager = new GridManager();
 
+  private _overlays: Set<Overlay> = new Set();
+
   private _container!: HTMLElement;
   private _left = 0;
   private _top = 0;
@@ -43,7 +57,7 @@ export class Renderer implements SurfaceViewport {
   private _height = 0;
 
   private _zoom = 1.0;
-  private _center = new Point();
+  private _center = { x: 0, y: 0 };
   private _shouldUpdate = false;
 
   constructor() {
@@ -131,7 +145,8 @@ export class Renderer implements SurfaceViewport {
   }
 
   setCenter(centerX: number, centerY: number) {
-    this._center.set(centerX, centerY);
+    this._center.x = centerX;
+    this._center.y = centerY;
     this._shouldUpdate = true;
   }
 
@@ -140,15 +155,18 @@ export class Renderer implements SurfaceViewport {
    * @param zoom zoom
    * @param focusPoint canvas coordinate
    */
-  setZoom(zoom: number, focusPoint?: Point) {
+  setZoom(zoom: number, focusPoint?: IPoint) {
     const prevZoom = this.zoom;
-    focusPoint = focusPoint ?? this._center;
+    focusPoint = (focusPoint ?? this._center) as IPoint;
     this._zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
     const newZoom = this.zoom;
 
-    const offset = this.center.subtract(focusPoint);
-    const newCenter = focusPoint.add(offset.scale(prevZoom / newZoom));
-    this.setCenter(newCenter.x, newCenter.y);
+    const offset = Vec.sub(Vec.toVec(this.center), Vec.toVec(focusPoint));
+    const newCenter = Vec.add(
+      Vec.toVec(focusPoint),
+      Vec.mul(offset, prevZoom / newZoom)
+    );
+    this.setCenter(newCenter[0], newCenter[1]);
     this._shouldUpdate = true;
   }
 
@@ -260,6 +278,23 @@ export class Renderer implements SurfaceViewport {
       ctx.restore();
     }
 
+    for (const overlay of this._overlays) {
+      ctx.save();
+      ctx.translate(-viewportBounds.x, -viewportBounds.y);
+      overlay.render(ctx);
+      ctx.restore();
+    }
+
     ctx.restore();
+  }
+
+  public addOverlay(overlay: Overlay) {
+    this._overlays.add(overlay);
+    this._shouldUpdate = true;
+  }
+
+  public removeOverlay(overlay: Overlay) {
+    this._overlays.delete(overlay);
+    this._shouldUpdate = true;
   }
 }

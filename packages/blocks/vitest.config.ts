@@ -18,6 +18,6 @@ export default defineConfig({
       console.warn(`Unexpected ${type} log`, log);
       throw new Error(log);
     },
-    browser: true,
+    environment: 'happy-dom',
   },
 });

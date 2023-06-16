@@ -1,3 +1,4 @@
+import type { Doc as YDoc } from 'yjs';
 import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
 
 export type Native2Y<T> = T extends Record<string, infer U>
@@ -18,6 +19,12 @@ export function isPureObject(value: unknown): value is object {
 }
 
 export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
+  if (value instanceof YText) {
+    if (value.doc) {
+      return value.clone() as Native2Y<T>;
+    }
+    return value as Native2Y<T>;
+  }
   if (Array.isArray(value)) {
     const yArray: YArray<unknown> = new YArray<unknown>();
     const result = value.map(item => {
@@ -39,19 +46,10 @@ export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
   return value as Native2Y<T>;
 }
 
-export function toPlainValue(v: unknown): unknown {
-  if (v instanceof YMap) {
-    const obj: Record<string, unknown> = {};
-    v.forEach((value, key) => {
-      obj[key] = toPlainValue(value);
-    });
-
-    return obj;
-  }
-  if (v instanceof YArray) {
-    return v.toArray().map(x => toPlainValue(x));
-  }
-  return v;
-}
-
 export type UnRecord = Record<string, unknown>;
+
+export type SubdocEvent = {
+  loaded: Set<YDoc>;
+  removed: Set<YDoc>;
+  added: Set<YDoc>;
+};

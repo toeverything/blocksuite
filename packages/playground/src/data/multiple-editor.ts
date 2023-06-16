@@ -4,8 +4,9 @@ import { Text, type Workspace } from '@blocksuite/store';
 import { createEditor } from '../utils';
 import { type InitFn } from './utils';
 
-export const multiEditor: InitFn = (workspace: Workspace, id: string) => {
+export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
+  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -36,11 +37,12 @@ multiEditor.id = 'multiple-editor';
 multiEditor.displayName = 'Multiple Editor Example';
 multiEditor.description = 'Multiple Editor basic example';
 
-export const multiEditorVertical: InitFn = (
+export const multiEditorVertical: InitFn = async (
   workspace: Workspace,
   pageId: string
 ) => {
   const page = workspace.createPage({ id: pageId });
+  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

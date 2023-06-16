@@ -1,9 +1,8 @@
 import { assertExists } from '@blocksuite/store';
 
+import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import type { CellCoord } from '../../../../std.js';
-import type { TableViewCell } from '../../register.js';
-import type { NumberCellEditing } from '../column-type/number.js';
-import type { TextCell } from '../column-type/rich-text.js';
+import type { DatabaseCellElement } from '../../register.js';
 import { CellLevelSelection } from './cell-selection.js';
 import { RowLevelSelection } from './row-selection.js';
 
@@ -45,13 +44,15 @@ export function setDatabaseRowsSelection(databaseId: string, rowIds: string[]) {
 
 export function setDatabaseCellSelection(
   databaseId: string,
-  coords: [CellCoord]
+  coords: [CellCoord],
+  isEditing: boolean
 ) {
   const container = getRowsContainer(databaseId);
   const cellLevelSelection = getCellLevelSelection(container);
   cellLevelSelection.setSelection({
     databaseId,
     coords,
+    isEditing,
   });
 
   const currentCell = getCellElementByCoord(coords[0], databaseId);
@@ -71,31 +72,9 @@ export function clearAllDatabaseCellSelection() {
 export function setDatabaseCellEditing(databaseId: string, coord: CellCoord) {
   const currentCell = getCellElementByCoord(coord, databaseId);
   const cell = currentCell.firstElementChild
-    ?.firstElementChild as TableViewCell;
+    ?.firstElementChild as DatabaseCellElement<unknown>;
   assertExists(cell);
-
-  let shouldClearCellSelection = true;
-  const richText = cell?.querySelector('rich-text');
-  if (richText) {
-    // title column
-    richText.vEditor?.focusEnd();
-  } else if (cell.cellType === 'number') {
-    const richTextCell = cell as NumberCellEditing;
-    richTextCell.vEditor?.focusEnd();
-  } else if (cell.cellType === 'rich-text') {
-    const richTextCell = cell as TextCell;
-    richTextCell.vEditor?.focusEnd();
-  } else {
-    // checkbox column
-    if (cell.cellType === 'checkbox') {
-      shouldClearCellSelection = false;
-    }
-    cell.click();
-  }
-
-  if (shouldClearCellSelection) {
-    clearDatabaseCellSelectionByDatabaseId(databaseId);
-  }
+  cell.enterEditMode();
 }
 
 export function getCellCoord(
@@ -145,6 +124,14 @@ export function getRowsContainer(databaseId: string) {
   );
   assertExists(container);
   return container;
+}
+
+export function getDatabaseById(id: string) {
+  const database = activeEditorManager
+    .getActiveEditor()
+    ?.querySelector<HTMLElement>(`affine-database[data-block-id="${id}"]`);
+  assertExists(database);
+  return database;
 }
 
 function getCellCoordByElement(cell: HTMLElement, databaseId: string) {
@@ -285,14 +272,6 @@ function getNextCellCoordByEscape(currentCellCoord: CellCoord) {
   return currentCellCoord;
 }
 
-function getDatabaseById(id: string) {
-  const database = document.querySelector<HTMLElement>(
-    `affine-database[data-block-id="${id}"]`
-  );
-  assertExists(database);
-  return database;
-}
-
 function getCellLevelSelection(container: Element) {
   let cellLevelSelection = container.querySelector(
     'database-cell-level-selection'
@@ -303,12 +282,4 @@ function getCellLevelSelection(container: Element) {
   }
 
   return cellLevelSelection;
-}
-
-function clearDatabaseCellSelectionByDatabaseId(databaseId: string) {
-  const container = getRowsContainer(databaseId);
-  const cellLevelSelection = container.querySelector(
-    'database-cell-level-selection'
-  );
-  cellLevelSelection?.clearSelection();
 }

@@ -244,11 +244,11 @@ export class HandleResizeManager {
       this._dragPos = { start: { x: 0, y: 0 }, end: { x: 0, y: 0 } };
       this._commonBound = [0, 0, 0, 0];
 
-      window.removeEventListener('pointermove', _onPointerMove);
-      window.removeEventListener('pointerup', _onPointerUp);
+      document.removeEventListener('pointermove', _onPointerMove);
+      document.removeEventListener('pointerup', _onPointerUp);
     };
-    window.addEventListener('pointermove', _onPointerMove);
-    window.addEventListener('pointerup', _onPointerUp);
+    document.addEventListener('pointermove', _onPointerMove);
+    document.addEventListener('pointerup', _onPointerUp);
   };
 
   onPressShiftKey(pressed: boolean) {

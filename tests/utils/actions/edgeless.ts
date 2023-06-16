@@ -9,7 +9,13 @@ import { expect } from '@playwright/test';
 
 import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
-import { SHIFT_KEY, SHORT_KEY, type } from './keyboard.js';
+import {
+  pressBackspace,
+  selectAllByKeyboard,
+  SHIFT_KEY,
+  SHORT_KEY,
+  type,
+} from './keyboard.js';
 import { MODIFIER_KEY } from './keyboard.js';
 import {
   getEditorLocator,
@@ -196,6 +202,12 @@ export async function increaseZoomLevel(page: Page) {
   await sleep(AWAIT_TIMEOUT);
 }
 
+export async function autoFit(page: Page) {
+  const btn = locatorEdgelessToolButton(page, 'fitToScreen', false);
+  await btn.click();
+  await sleep(AWAIT_TIMEOUT);
+}
+
 export async function addBasicBrushElement(
   page: Page,
   start: { x: number; y: number },
@@ -310,6 +322,15 @@ export async function getAllFrames(page: Page) {
   });
 }
 
+export async function countBlock(page: Page, flavour: string) {
+  return await page.evaluate(
+    ([flavour]) => {
+      return Array.from(document.querySelectorAll(flavour)).length;
+    },
+    [flavour]
+  );
+}
+
 export async function activeFrameInEdgeless(page: Page, frameId: string) {
   const bound = await getFrameBoundBoxInEdgeless(page, frameId);
   await page.mouse.dblclick(bound.x + 8, bound.y + 8);
@@ -413,6 +434,11 @@ export async function shiftClick(page: Page, point: IPoint) {
   await page.keyboard.down(SHIFT_KEY);
   await page.mouse.click(point.x, point.y);
   await page.keyboard.up(SHIFT_KEY);
+}
+
+export async function deleteAll(page: Page) {
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
 }
 
 export function locatorComponentToolbar(page: Page) {

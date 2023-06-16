@@ -1,7 +1,8 @@
-import type {
-  Bound,
-  PhasorElement,
-  PhasorElementType,
+import {
+  type Bound,
+  type PhasorElement,
+  type PhasorElementType,
+  TextElement,
 } from '@blocksuite/phasor';
 import {
   deserializeXYWH,
@@ -29,6 +30,7 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocks,
+  copySurfaceText,
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
@@ -104,9 +106,13 @@ export class EdgelessClipboard implements Clipboard {
     const { state } = this.selection;
     // when frame active, handle copy like page mode
     if (state.active) {
-      const range = getCurrentBlockRange(this._page);
-      assertExists(range);
-      copyBlocks(range);
+      if (state.selected[0] instanceof TextElement) {
+        copySurfaceText(this._edgeless);
+      } else {
+        const range = getCurrentBlockRange(this._page);
+        assertExists(range);
+        copyBlocks(range);
+      }
       return;
     }
     const data = state.selected
@@ -130,7 +136,10 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     const { state } = this.selection;
     if (state.active) {
-      this._pasteInTextFrame(e);
+      if (!(state.selected[0] instanceof TextElement)) {
+        this._pasteInTextFrame(e);
+      }
+      // use build-in paste handler in virgo when paste in surface text element
       return;
     }
 
@@ -149,7 +158,7 @@ export class EdgelessClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    await deleteModelsByRange(this._page);
+    deleteModelsByRange(this._page);
 
     const range = getCurrentBlockRange(this._page);
 

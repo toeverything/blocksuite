@@ -4,7 +4,6 @@ import './brush-tool/brush-tool-button.js';
 import './connector-tool/connector-tool-button.js';
 
 import {
-  FRAME_BACKGROUND_COLORS,
   HandIcon,
   ImageIcon,
   MinusIcon,
@@ -16,14 +15,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  Bound,
-  deserializeXYWH,
-  getCommonBound,
-  ZOOM_MAX,
-  ZOOM_MIN,
-  ZOOM_STEP,
-} from '@blocksuite/phasor';
+import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -33,11 +25,10 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
+import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
-
-const FIT_TO_SCREEN_PADDING = 200;
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
@@ -160,45 +151,15 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _zoomToFit() {
-    const bounds = [];
-
-    const frame = this.edgeless.frames[0];
-    if (frame) {
-      const frameXYWH = deserializeXYWH(frame.xywh);
-      const frameBound = new Bound(...frameXYWH);
-      bounds.push(frameBound);
-    }
-
-    const surfaceElementsBound = this.edgeless.surface.getElementsBound();
-    if (surfaceElementsBound) {
-      bounds.push(surfaceElementsBound);
-    }
-
+    const { centerX, centerY, zoom } = this.edgeless.getFitToScreenData();
     const { viewport } = this.edgeless.surface;
-    let { centerX, centerY, zoom } = viewport;
-
-    if (bounds.length) {
-      const { width, height } = viewport;
-      const bound = getCommonBound(bounds);
-      assertExists(bound);
-
-      zoom = Math.min(
-        (width - FIT_TO_SCREEN_PADDING) / bound.w,
-        (height - FIT_TO_SCREEN_PADDING) / bound.h
-      );
-
-      centerX = bound.x + bound.w / 2;
-      centerY = bound.y + bound.h / 2;
-    } else {
-      zoom = 1;
-    }
     const preZoom = this.zoom;
     const newZoom = zoom;
     const cofficient = preZoom / newZoom;
     if (cofficient === 1) {
       this._smoothTranslate(centerX, centerY);
     } else {
-      const center = viewport.center;
+      const center = new Point(viewport.centerX, viewport.centerY);
       const newCenter = new Point(centerX, centerY);
       const focusPoint = newCenter
         .subtract(center.scale(cofficient))
@@ -251,12 +212,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       const sh = height > 100 ? height - 100 : height;
       const p = options.width / options.height;
       if (s >= 1) {
-        options.height =
-          options.height > sh ? sh : Math.min(options.height, sh);
+        options.height = Math.min(options.height, sh);
         options.width = p * options.height;
       } else {
         const sw = sh * s;
-        options.width = options.width > sw ? sw : Math.min(options.width, sw);
+        options.width = Math.min(options.width, sw);
         options.height = options.width / p;
       }
     }
@@ -380,7 +340,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${() =>
             this.setMouseMode({
               type: 'note',
-              background: FRAME_BACKGROUND_COLORS[0],
+              background: DEFAULT_FRAME_COLOR,
             })}
         >
           ${NoteIcon}

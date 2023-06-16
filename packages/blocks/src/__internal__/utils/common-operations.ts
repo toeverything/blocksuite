@@ -1,18 +1,11 @@
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { Workspace } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import type {
-  BookmarkBlockComponent,
-  BookmarkBlockModel,
-} from '../../bookmark-block/index.js';
 import type { ListType } from '../../list-block/index.js';
-import {
-  asyncGetRichTextByModel,
-  getBlockElementByModel,
-  getVirgoByModel,
-} from './query.js';
+import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
@@ -40,6 +33,11 @@ export function asyncFocusRichText(
 export function isCollapsedAtBlockStart(vEditor: VEditor) {
   const vRange = vEditor.getVRange();
   return vRange?.index === 0 && vRange?.length === 0;
+}
+
+export function isCollapsedAtBlockEnd(vEditor: VEditor) {
+  const vRange = vEditor.getVRange();
+  return vRange?.index === vEditor.yText.length && vRange?.length === 0;
 }
 
 export function isInSamePath(
@@ -184,4 +182,23 @@ export function convertToDivider(
     }
   }
   return true;
+}
+
+export async function createPage(
+  workspace: Workspace,
+  options: { id?: string; title?: string } = {}
+) {
+  const page = workspace.createPage({ id: options.id });
+  await page.waitForLoaded();
+
+  const pageBlockId = page.addBlock('affine:page', {
+    title: new page.Text(options.title ?? ''),
+  });
+  page.addBlock('affine:surface', {}, pageBlockId);
+  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  page.addBlock('affine:paragraph', {}, frameId);
+  // To make sure the content of new page would not be clear
+  // By undo operation for the first time
+  page.resetHistory();
+  return page;
 }

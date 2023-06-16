@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/components/card/card.js';
 
+import { tryMigrate } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -47,6 +48,17 @@ export class StartPanel extends LitElement {
             </sl-card>
           `
         )}
+        <sl-card
+          class="card"
+          @click=${() => {
+            window.workspace.importYDoc();
+            tryMigrate(window.workspace.doc);
+          }}
+        >
+          <div slot="header">Import YDoc</div>
+          Import a YDoc from a binary file. It will run migration after import
+          and we can use it to test migration.
+        </sl-card>
       </div>
     `;
   }

@@ -2,8 +2,9 @@ import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
-export const empty: InitFn = (workspace: Workspace, id: string) => {
+export const empty: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
+  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

@@ -33,6 +33,8 @@ export const createBlockHub: (
     mouseRoot: editor,
     enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
     onClickCard: async (data: { flavour: string; type?: string }) => {
+      // To make sure get the current page
+      const page = editor.page;
       const models = [];
 
       const isDatabase = data.flavour === 'affine:database';
@@ -68,6 +70,8 @@ export const createBlockHub: (
       }
     },
     onDrop: async (e, point, end, type) => {
+      // To make sure get the current page
+      const page = editor.page;
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
@@ -141,9 +145,21 @@ export const createBlockHub: (
         frameId = targetFrameBlock.model.id;
       } else {
         // Creates new frame block on blank area.
-        const result = pageBlock.addNewFrame(models, point);
+        const result = pageBlock.addNewFrame(
+          models,
+          point,
+          isDatabase ? { width: 752 } : undefined
+        );
         frameId = result.frameId;
         focusId = result.ids[0];
+        const model = page.getBlockById(focusId);
+        assertExists(model);
+        if (isDatabase) {
+          const service = await getServiceOrRegister<'affine:database'>(
+            props.flavour
+          );
+          service.initDatabaseBlock(page, model, model.id);
+        }
       }
       pageBlock.setSelection(frameId, true, focusId, point);
     },

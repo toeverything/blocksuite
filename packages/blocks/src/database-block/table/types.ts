@@ -3,33 +3,23 @@ import type { TemplateResult } from 'lit';
 import type { DatabaseMode } from '../types.js';
 
 export type SetValueOption = {
-  captureSync: boolean;
+  captureSync?: boolean;
+  sync?: boolean;
 };
 
-export interface RowHost<Value = unknown> extends HTMLElement {
-  setEditing(isEditing: boolean): void;
-  setHeight(height: number): void;
-  setValue(value: Value, option?: SetValueOption): void;
-  updateColumnProperty(
-    apply: (oldProperty: Record<string, unknown>) => Record<string, unknown>
-  ): void;
-}
-
-export type ColumnType =
-  | 'rich-text'
-  | 'select'
-  | 'multi-select'
-  | 'number'
-  | 'checkbox'
-  | 'progress';
+export type ColumnType = string;
 
 export type ColumnTypeIcon = Record<ColumnType, TemplateResult>;
 
-export interface Column extends Record<string, unknown> {
+export interface Column<
+  Data extends Record<string, unknown> = Record<string, unknown>
+> {
   id: string;
   type: ColumnType;
-  width: number; // px
-  hide: boolean;
+  name: string;
+  data: Data;
+  // width: number; // px
+  // hide: boolean;
 }
 
 export type Cell<ValueType = unknown> = {
@@ -73,7 +63,8 @@ export type ColumnActionType =
   | 'insert-right'
   | 'move-left'
   | 'move-right'
-  | 'delete';
+  | 'delete'
+  | 'change-color';
 export type ColumnAction = ActionMenuItem<ColumnActionType> | Divider;
 
 type DatabaseActionType =
@@ -91,7 +82,7 @@ export type Divider = {
 export type TitleColumnActionType = 'rename' | 'insert-right';
 export type TitleColumnAction = ActionMenuItem<TitleColumnActionType>;
 
-export type SelectTagActionType = 'rename' | 'delete';
+export type SelectTagActionType = 'rename' | 'change-color' | 'delete';
 export type SelectTagAction = ActionMenuItem<SelectTagActionType> | Divider;
 
 export type ToolbarAction = ActionMenuItem<ToolbarActionType> | Divider;

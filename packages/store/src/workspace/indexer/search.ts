@@ -3,6 +3,7 @@ import FlexSearch from 'flexsearch';
 import type { Doc, Map as YMap } from 'yjs';
 import { Text as YText } from 'yjs';
 
+import type { BlockSuiteDoc } from '../../yjs/index.js';
 import type { YBlock } from '../page.js';
 
 const DocumentIndexer = FlexSearch.Document;
@@ -55,11 +56,11 @@ export type IndexMeta = Readonly<{
 }>;
 
 export class SearchIndexer {
-  private readonly _doc: Doc;
+  private readonly _doc: BlockSuiteDoc;
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
 
   constructor(
-    doc: Doc,
+    doc: BlockSuiteDoc,
     // locale string based on https://www.w3.org/International/articles/bcp47/
     locale = 'en-US'
   ) {
@@ -76,8 +77,7 @@ export class SearchIndexer {
       context: true,
     });
 
-    Array.from(doc.share.keys())
-      .filter(pageId => pageId !== 'space:meta')
+    Array.from(doc.spaces.keys())
       .map(k => [k, this._getPage(k)] as const)
       .forEach(([pageId, page]) => this._handlePageIndexing(pageId, page));
   }
@@ -108,30 +108,32 @@ export class SearchIndexer {
     }
   }
 
-  private _handlePageIndexing(pageId: string, page?: YMap<YBlock>) {
-    if (page) {
-      page.forEach((_, key) => {
-        this._refreshIndex(pageId, key, 'add', page.get(key));
-      });
-
-      page.observeDeep(events => {
-        const keys = events.flatMap(e => {
-          // eslint-disable-next-line no-bitwise
-          if ((e.path?.length | 0) > 0) {
-            return [[e.path[0], 'update'] as [string, 'update']];
-          }
-          return Array.from(e.changes.keys.entries()).map(
-            ([k, { action }]) => [k, action] as [string, typeof action]
-          );
-        });
-
-        if (keys.length) {
-          keys.forEach(([key, action]) => {
-            this._refreshIndex(pageId, key, action, page.get(key));
-          });
-        }
-      });
+  private _handlePageIndexing(pageId: string, page?: Doc) {
+    if (!page) {
+      return;
     }
+    const yBlocks = page.get('blocks') as YMap<YBlock>;
+    yBlocks.forEach((_, key) => {
+      this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
+    });
+
+    yBlocks.observeDeep(events => {
+      const keys = events.flatMap(e => {
+        // eslint-disable-next-line no-bitwise
+        if ((e.path?.length | 0) > 0) {
+          return [[e.path[0], 'update'] as [string, 'update']];
+        }
+        return Array.from(e.changes.keys.entries()).map(
+          ([k, { action }]) => [k, action] as [string, typeof action]
+        );
+      });
+
+      if (keys.length) {
+        keys.forEach(([key, action]) => {
+          this._refreshIndex(pageId, key, action, yBlocks.get(key));
+        });
+      }
+    });
   }
 
   private _refreshIndex(
@@ -176,12 +178,12 @@ export class SearchIndexer {
     return undefined;
   }
 
-  private _getPage(key: string): YMap<YBlock> | undefined {
+  private _getPage(key: string): Doc | undefined {
     try {
       if (!key.startsWith('space:')) {
         key = `space:${key}`;
       }
-      return this._doc.getMap(key);
+      return this._doc.spaces.get(key);
     } catch (_) {
       return undefined;
     }

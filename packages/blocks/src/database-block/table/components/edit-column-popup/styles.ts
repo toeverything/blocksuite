@@ -33,6 +33,7 @@ export const actionStyles = css`
 
 export const styles = css`
   :host {
+    position: absolute;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-menu-shadow);
     padding: 8px;

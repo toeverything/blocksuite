@@ -4,6 +4,7 @@ import type { DeltaOperation, Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import { richTextHelper } from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
@@ -641,7 +642,7 @@ export class HtmlParser {
           },
         ];
       } else {
-        const storage = await this._page.blobs;
+        const storage = this._page.blobs;
         assertExists(storage);
         const id = await storage.set(imgBlob);
         result = [
@@ -688,23 +689,16 @@ export class HtmlParser {
         rows.push(row);
       });
       const columns: Column[] = titles.slice(1).map((value, index) => {
-        return {
-          name: value,
-          type: 'rich-text',
-          width: 200,
-          hide: false,
-          id: '' + id++,
-        };
+        return richTextHelper.createWithId('' + id++, value);
       });
       if (rows.length > 0) {
-        for (let i = 0; i < rows[0].length - columns.length; i++) {
-          columns.push({
-            name: '',
-            type: 'rich-text',
-            width: 200,
-            hide: false,
-            id: '' + id++,
-          });
+        let maxLen = rows[0].length;
+        for (let i = 1; i < rows.length; i++) {
+          maxLen = Math.max(maxLen, rows[i].length);
+        }
+        const addNum = maxLen - columns.length;
+        for (let i = 0; i < addNum; i++) {
+          columns.push(richTextHelper.createWithId('' + id++, ''));
         }
       }
       const databasePropsId = id++;

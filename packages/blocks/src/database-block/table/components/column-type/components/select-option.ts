@@ -1,11 +1,11 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { setupVirgoScroll } from '../../../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../../../components/virgo-input/virgo-input.js';
-import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { SelectTag } from '../../../types.js';
 
@@ -16,6 +16,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
     }
+
     .select-option-text {
       display: inline-block;
       min-width: 22px;
@@ -27,6 +28,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       overflow: hidden;
       cursor: text;
     }
+
     .select-option-text:focus {
       outline: none;
     }
@@ -40,7 +42,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   `;
 
   @property()
-  databaseModel!: DatabaseBlockModel;
+  page!: Page;
 
   @property()
   select!: SelectTag;
@@ -49,18 +51,19 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
   editing!: boolean;
 
   @property()
-  index!: number;
+  tagId!: string;
 
   @property()
-  saveSelectionName!: (index: number) => void;
+  saveSelectionName!: (id?: string) => void;
 
   @property()
-  setEditingIndex!: (index: number) => void;
+  setEditingId!: (id?: string) => void;
 
   @query('.select-option-text')
   private _container!: HTMLDivElement;
 
   private _vInput!: VirgoInput;
+
   private get _vEditor() {
     return this._vInput.vEditor;
   }
@@ -74,7 +77,6 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       this._vEditor.setReadonly(!this.editing);
       this._vEditor.setText(this.select.value);
     }
-
     if (changedProperties.has('select')) {
       this._vEditor.setText(this.select.value);
     }
@@ -90,21 +92,21 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       rootElement: this._container,
       maxLength: SELECT_TAG_NAME_MAX_LENGTH,
     });
-    setupVirgoScroll(this.databaseModel.page, this._vEditor);
+    setupVirgoScroll(this.page, this._vEditor);
     // When editing the current select, other sibling selects should not be edited
     this._vEditor.setReadonly(!this.editing);
     this._container.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
         if (this._vInput.value.length > 0) {
-          this.saveSelectionName(this.index);
+          this.saveSelectionName(this.tagId);
         }
       }
       if (event.key === 'Escape') {
         event.stopPropagation();
         event.preventDefault();
 
-        this.setEditingIndex(-1);
+        this.setEditingId();
         this._container.blur();
       }
     });
@@ -134,7 +136,7 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
       backgroundColor: this.select.color,
       cursor: this.editing ? 'text' : 'pointer',
     });
-    return html`<div
+    return html` <div
       class="select-option-text virgo-editor"
       style=${style}
     ></div>`;

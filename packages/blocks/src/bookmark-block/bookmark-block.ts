@@ -1,6 +1,7 @@
 import './components/bookmark-toolbar.js';
 import './components/bookmark-edit-modal.js';
 import './components/bookmark-create-modal.js';
+import './components/loader.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { Slot } from '@blocksuite/store';
@@ -78,16 +79,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      margin-left: 8px;
     }
     .affine-bookmark-icon {
       width: 18px;
       height: 18px;
-      margin-right: 4px;
       color: var(--affine-text-secondary-color);
-      flex-shrink: 0;
-    }
-    .affine-bookmark-icon.disable {
-      color: var(--affine-placeholder-color);
       flex-shrink: 0;
     }
     .affine-bookmark-icon img {
@@ -281,8 +278,11 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           class="affine-bookmark-loading ${mode === 'light' ? '' : 'dark'}"
         >
           <div class="affine-bookmark-title">
-            <div class="affine-bookmark-icon disable">${DefaultIcon}</div>
-            <div class="affine-bookmark-title-content">Embedding</div>
+            <bookmark-loader
+              size="15px"
+              color="var(--affine-primary-color)"
+            ></bookmark-loader>
+            <div class="affine-bookmark-title-content">Loading...</div>
           </div>
           <div class="affine-bookmark-banner">
             ${mode === 'light' ? LoadingBanner : DarkLoadingBanner}

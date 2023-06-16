@@ -9,7 +9,7 @@ import type {
   FrameBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -25,6 +25,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import { getZoomLevel } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -45,18 +46,17 @@ import { currentEditorIndex } from './multiple-editor.js';
 import { getStringFromRichText } from './virgo.js';
 
 export const defaultStore: SerializedStore = {
-  'space:meta': {
+  meta: {
     pages: [
       {
         id: 'page0',
-        subpageIds: [],
         title: '',
       },
     ],
-    versions: {
+    blockVersions: {
       'affine:paragraph': 1,
       'affine:page': 2,
-      'affine:database': 1,
+      'affine:database': 2,
       'affine:list': 1,
       'affine:frame': 1,
       'affine:divider': 1,
@@ -65,28 +65,33 @@ export const defaultStore: SerializedStore = {
       'affine:surface': 3,
       'affine:bookmark': 1,
     },
+    workspaceVersion: WORKSPACE_VERSION,
   },
-  'space:page0': {
-    '0': {
-      'prop:title': '',
-      'sys:id': '0',
-      'sys:flavour': 'affine:page',
-      'sys:children': ['1'],
-    },
-    '1': {
-      'sys:flavour': 'affine:frame',
-      'sys:id': '1',
-      'sys:children': ['2'],
-      'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
-      'prop:background': '--affine-background-secondary-color',
-      'prop:index': 'a0',
-    },
-    '2': {
-      'sys:flavour': 'affine:paragraph',
-      'sys:id': '2',
-      'sys:children': [],
-      'prop:text': 'hello',
-      'prop:type': 'text',
+  spaces: {
+    'space:page0': {
+      blocks: {
+        '0': {
+          'prop:title': '',
+          'sys:id': '0',
+          'sys:flavour': 'affine:page',
+          'sys:children': ['1'],
+        },
+        '1': {
+          'sys:flavour': 'affine:frame',
+          'sys:id': '1',
+          'sys:children': ['2'],
+          'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
+          'prop:background': '--affine-background-secondary-color',
+          'prop:index': 'a0',
+        },
+        '2': {
+          'sys:flavour': 'affine:paragraph',
+          'sys:id': '2',
+          'sys:children': [],
+          'prop:text': 'hello',
+          'prop:type': 'text',
+        },
+      },
     },
   },
 };
@@ -306,7 +311,7 @@ export async function assertTextFormats(page: Page, resultObj: unknown[]) {
 export async function assertStore(page: Page, expected: SerializedStore) {
   const actual = (await page.evaluate(() => {
     const json = window.workspace.doc.toJSON();
-    delete json['space:meta'].pages[0].createDate;
+    delete json.meta.pages[0].createDate;
     return json;
   })) as SerializedStore;
   expect(actual).toEqual(expected);
@@ -673,6 +678,13 @@ export function assertRectEqual(a: Rect, b: Rect) {
   expect(a.h).toBeCloseTo(b.h, 0);
 }
 
+export function assertDOMRectEqual(a: DOMRect, b: DOMRect) {
+  expect(a.x).toBeCloseTo(b.x, 0);
+  expect(a.y).toBeCloseTo(b.y, 0);
+  expect(a.width).toBeCloseTo(b.width, 0);
+  expect(a.height).toBeCloseTo(b.height, 0);
+}
+
 export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   const [x, y, w, h] = xywh;
   const editor = getEditorLocator(page);
@@ -733,4 +745,9 @@ export async function assertEdgelessColorSameWithHexColor(
   const edgelessHexColor = toHex(themeColor as string);
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
+}
+
+export async function assertZoomLevel(page: Page, zoom: number) {
+  const z = await getZoomLevel(page);
+  expect(z).toBe(zoom);
 }

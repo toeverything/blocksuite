@@ -3,7 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 
 import { getBlockElementByModel } from '../../__internal__/utils/query.js';
-import { throttle } from '../../__internal__/utils/std.js';
+import { almostEqual, throttle } from '../../__internal__/utils/std.js';
 
 export class FrameResizeObserver {
   private _observer: ResizeObserver;
@@ -14,9 +14,10 @@ export class FrameResizeObserver {
    * So we need to cache observed element.
    */
   private _cachedElements = new Map<string, Element>();
+  private _lastRects = new Map<string, DOMRectReadOnly>();
 
   slots = {
-    resize: new Slot<Map<string, DOMRect>>(),
+    resize: new Slot<Map<string, DOMRectReadOnly>>(),
   };
 
   constructor() {
@@ -30,11 +31,23 @@ export class FrameResizeObserver {
 
   private _onResize = (entries: ResizeObserverEntry[]) => {
     const resizedFrames = new Map<string, DOMRect>();
-
     entries.forEach(entry => {
       const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
       const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
       if (!id) return;
+      if (this._lastRects.has(id)) {
+        const rect = this._lastRects.get(id);
+        if (
+          rect &&
+          almostEqual(rect.x, entry.contentRect.x) &&
+          almostEqual(rect.y, entry.contentRect.y) &&
+          almostEqual(rect.width, entry.contentRect.width) &&
+          almostEqual(rect.height, entry.contentRect.height)
+        ) {
+          return;
+        }
+      }
+      this._lastRects.set(id, entry.contentRect);
       resizedFrames.set(id, entry.contentRect);
     });
 
@@ -45,7 +58,6 @@ export class FrameResizeObserver {
 
   resetListener(page: Page) {
     const unCachedKeys = new Set(this._cachedElements.keys());
-
     page.root?.children.forEach(model => {
       const blockId = model.id;
       unCachedKeys.delete(blockId);
@@ -78,5 +90,7 @@ export class FrameResizeObserver {
   dispose() {
     this._observer.disconnect();
     this.slots.resize.dispose();
+    this._cachedElements.clear();
+    this._lastRects.clear();
   }
 }

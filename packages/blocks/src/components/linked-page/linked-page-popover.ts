@@ -9,6 +9,7 @@ import { html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { createPage } from '../../__internal__/index.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineVEditor } from '../../__internal__/rich-text/virgo/types.js';
 import {
@@ -69,9 +70,9 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const displayPageName =
       pageName.slice(0, DISPLAY_LENGTH) +
       (pageName.length > DISPLAY_LENGTH ? '..' : '');
-    const filteredPageList = this._pageList.filter(({ title }) =>
-      isFuzzyMatch(title, this._query)
-    );
+    const filteredPageList = this._pageList
+      .filter(({ id }) => id !== this._page.id)
+      .filter(({ title }) => isFuzzyMatch(title, this._query));
 
     return [
       ...filteredPageList.map((page, idx) => ({
@@ -81,7 +82,8 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         icon: PageIcon,
         action: () => this._insertLinkedNode('LinkedPage', page.id),
       })),
-      // The active condition is a bit tricky here
+
+      // XXX The active condition is a bit tricky here
       {
         key: 'create-linked-page',
         name: `Create "${displayPageName}" page`,
@@ -99,7 +101,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       {
         key: 'import-linked-page',
         name: `Import`,
-        active: filteredPageList.length === this._activatedItemIndex,
+        active: filteredPageList.length + 1 === this._activatedItemIndex,
         icon: ImportIcon,
         action: () => this._importPage(),
       },
@@ -199,13 +201,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     });
   }
 
-  private _createPage() {
+  private async _createPage() {
     const pageName = this._query;
-    const page = this._page.workspace.createPage({
-      init: {
-        title: pageName,
-      },
-    });
+
+    const page = await createPage(this._page.workspace, { title: pageName });
 
     this._insertLinkedNode('LinkedPage', page.id);
   }
@@ -274,7 +273,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         @click=${action}
         @mousemove=${() => {
           // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
-          this._activatedItemIndex = this._actionList.length - 1 + index;
+          this._activatedItemIndex = this._actionList.length + index;
         }}
         >${icon}</icon-button
       >`

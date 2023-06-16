@@ -24,12 +24,12 @@ import {
 } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { normalizeDelta } from '../../__internal__/clipboard/utils/commons.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
+  createPage,
   getBookmarkInitialProps,
   getCurrentNativeRange,
   getVirgoByModel,
@@ -188,10 +188,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           icon: NewPageIcon,
           showWhen: model =>
             !!model.page.awarenessStore.getFlag('enable_linked_page'),
-          action: ({ page, model }) => {
-            const newPage = page.workspace.createPage({
-              init: true,
-            });
+          action: async ({ page, model }) => {
+            const newPage = await createPage(page.workspace);
             insertContent(model, REFERENCE_NODE, {
               reference: { type: 'LinkedPage', pageId: newPage.id },
             });
@@ -337,7 +335,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
               'affine:database',
               {},
               page.getParent(model),
-              index
+              index + 1
             );
             const service = await getServiceOrRegister('affine:database');
             service.initDatabaseBlock(page, model, id, false);
@@ -406,9 +404,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
               model.flavour,
               {
                 type: model.type,
-                text: page.Text.fromDelta(
-                  normalizeDelta(page, model.text.toDelta())
-                ),
+                text: page.Text.fromDelta(model.text.toDelta()),
                 // @ts-expect-error
                 checked: model.checked,
               },

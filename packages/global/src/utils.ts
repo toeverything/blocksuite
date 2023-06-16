@@ -53,11 +53,13 @@ export function matchFlavours<const Key extends readonly string[]>(
   return expected.includes(model.flavour);
 }
 
+// XXX: nonTextBlock may should be declared in block schema
 export const nonTextBlock: (keyof BlockModels)[] = [
   'affine:database',
   'affine:divider',
   'affine:embed',
   'affine:code',
+  'affine:bookmark',
 ];
 
 export const isNonTextBlock = <

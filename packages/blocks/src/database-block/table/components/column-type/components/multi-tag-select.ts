@@ -7,43 +7,44 @@ import {
   PlusIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
-import { createPopper } from '@popperjs/core';
+import { autoPlacement, computePosition, offset } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { html, literal } from 'lit/static-html.js';
+import { html } from 'lit/static-html.js';
 
 import { getTagColor, onClickOutside } from '../../../../utils.js';
 import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
 } from '../../../consts.js';
-import { DatabaseCellElement, type TableViewCell } from '../../../register.js';
-import {
-  type CellSelectionEnterKeys,
-  selectCellByElement,
-} from '../../../selection-manager/cell.js';
 import type { SelectTag } from '../../../types.js';
 import { SelectMode, type SelectTagActionType } from '../../../types.js';
 import type { SelectOption } from './select-option.js';
+import { SelectOptionColor } from './select-option-color.js';
 import { SelectActionPopup } from './select-option-popup.js';
 
 const KEYS_WHITE_LIST = ['Enter', 'ArrowUp', 'ArrowDown'];
 
 const styles = css`
-  affine-database-select-cell-editing {
+  affine-database-multi-tag-select {
+    position: fixed;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
-    border-radius: 8px;
+    border-radius: 4px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-2);
   }
+
   .affine-database-select-cell-select {
     font-size: var(--affine-font-sm);
   }
+
   .select-input-container {
     display: flex;
     align-items: center;
@@ -53,6 +54,7 @@ const styles = css`
     padding: 10px 8px;
     background: var(--affine-hover-color);
   }
+
   .select-input {
     flex: 1 1 0%;
     height: 24px;
@@ -62,20 +64,26 @@ const styles = css`
     background: transparent;
     line-height: 24px;
   }
+
   .select-input:focus {
     outline: none;
   }
+
   .select-input::placeholder {
     color: var(--affine-placeholder-color);
   }
+
   .select-option-container {
     padding: 8px;
     color: var(--affine-black-90);
+    fill: var(--affine-black-90);
   }
+
   .select-option-container-header {
     padding: 8px 0px;
     color: var(--affine-black-60);
   }
+
   .select-input-container .select-selected {
     display: flex;
     align-items: center;
@@ -90,22 +98,27 @@ const styles = css`
     text-overflow: ellipsis;
     overflow: hidden;
   }
+
   .select-selected-text {
     width: calc(100% - 16px);
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
   }
+
   .select-selected > .close-icon {
     display: flex;
     align-items: center;
   }
+
   .select-selected > .close-icon:hover {
     cursor: pointer;
   }
+
   .select-selected > .close-icon > svg {
     fill: var(--affine-black-90);
   }
+
   .select-option-new {
     display: flex;
     flex-direction: row;
@@ -116,6 +129,7 @@ const styles = css`
     border-radius: 4px;
     background: var(--affine-selected-color);
   }
+
   .select-option-new-text {
     flex: 1;
     overflow: hidden;
@@ -126,6 +140,7 @@ const styles = css`
     border-radius: 4px;
     background: var(--affine-tag-red);
   }
+
   .select-option-new-icon {
     display: flex;
     align-items: center;
@@ -133,11 +148,14 @@ const styles = css`
     height: 28px;
     color: var(--affine-text-primary-color);
   }
+
   .select-option-new-icon svg {
     width: 16px;
     height: 16px;
   }
+
   .select-option {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -147,17 +165,21 @@ const styles = css`
     margin-bottom: 4px;
     cursor: pointer;
   }
+
   .select-option.selected,
   .select-option:hover {
     background: var(--affine-hover-color);
   }
+
   .select-option:hover .select-option-icon {
     display: flex;
   }
+
   .select-option-text-container {
     width: calc(100% - 28px);
     overflow: hidden;
   }
+
   .select-option-icon {
     display: none;
     justify-content: center;
@@ -167,42 +189,65 @@ const styles = css`
     border-radius: 3px;
     cursor: pointer;
   }
+
   .select-option-icon:hover {
     background: var(--affine-hover-color);
   }
+
   .select-option-icon svg {
     width: 16px;
     height: 16px;
     pointer-events: none;
   }
+
   .editing {
     background: var(--affine-hover-color);
   }
+
   .editing .select-option-text [data-virgo-text='true'] {
     display: block;
     white-space: pre !important;
     overflow: unset;
     text-overflow: unset;
   }
+
   .editing .select-option-icon {
     display: flex;
     background: var(--affine-hover-background);
   }
 `;
 
-@customElement('affine-database-select-cell-editing')
-export class SelectCellEditing
-  extends DatabaseCellElement<SelectTag[]>
-  implements TableViewCell
-{
-  value: SelectTag | undefined = undefined;
+@customElement('affine-database-multi-tag-select')
+export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
+  tempValue: string | undefined = undefined;
 
   static override styles = styles;
-  static override tag = literal`affine-database-select-cell-editing`;
-  cellType = 'select' as const;
 
   @property()
   mode: SelectMode = SelectMode.Single;
+
+  @property()
+  options: SelectTag[] = [];
+
+  @property()
+  value: string[] = [];
+  @property()
+  container!: HTMLElement;
+  @property()
+  page!: Page;
+
+  @property()
+  onChange!: (value: string[]) => void;
+
+  @property()
+  editComplete!: () => void;
+
+  @property()
+  newTag!: (tag: SelectTag) => void;
+  @property()
+  deleteTag!: (id: string) => void;
+  @property()
+  changeTag!: (tag: SelectTag) => void;
 
   @query('.select-input')
   private _selectInput!: HTMLInputElement;
@@ -211,7 +256,7 @@ export class SelectCellEditing
   private _inputValue = '';
 
   @state()
-  private _editingIndex = -1;
+  private _editingId?: string;
 
   @state()
   private _selectedOptionIndex = -1;
@@ -219,13 +264,14 @@ export class SelectCellEditing
   @query('.select-option-container')
   private _selectOptionContainer!: HTMLDivElement;
   private _selectColor: string | undefined = undefined;
+  private _optionColor: SelectOptionColor | null = null;
 
   get isSingleMode() {
     return this.mode === SelectMode.Single;
   }
 
   get selectionList() {
-    return this.column.selection as SelectTag[];
+    return this.options;
   }
 
   protected override firstUpdated() {
@@ -242,10 +288,10 @@ export class SelectCellEditing
       this._onSelectOption
     );
 
-    createPopper(
+    computePosition(
       {
         getBoundingClientRect: () => {
-          const rect = this.rowHost.getBoundingClientRect();
+          const rect = this.container.getBoundingClientRect();
           rect.y = rect.y - rect.height - 2;
           rect.x = rect.x - 2;
           return rect;
@@ -254,15 +300,19 @@ export class SelectCellEditing
       this,
       {
         placement: 'bottom-start',
-        strategy: 'fixed',
       }
-    );
+    ).then(({ x, y }) => {
+      Object.assign(this.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
   }
 
   protected override updated(_changedProperties: Map<PropertyKey, unknown>) {
     super.updated(_changedProperties);
 
-    if (_changedProperties.has('cell')) {
+    if (_changedProperties.has('value')) {
       this._selectInput.focus();
     }
   }
@@ -295,31 +345,21 @@ export class SelectCellEditing
         this._selectedOptionIndex = -1;
       }
 
-      const selected = this.cell?.value ?? [];
+      const selected = this.value;
       const currentSelection = this.selectionList[index];
-      this._onSelect(selected, currentSelection);
+      this._onSelect(selected, currentSelection.id);
       const cell =
         this._selectOptionContainer.closest<HTMLElement>('.database-cell');
       assertExists(cell);
-      this._selectCell(cell, 'Escape');
+      if (this.isSingleMode) {
+        this.editComplete();
+      }
     }
   };
 
-  private _selectCell = (
-    element: Element,
-    key: CellSelectionEnterKeys,
-    exitEditing = false
-  ) => {
-    if (this.isSingleMode || exitEditing) this.rowHost.setEditing(false);
-    selectCellByElement(element, this.databaseModel.id, key);
-  };
-
-  private _onDeleteSelected = (
-    selectedValue: SelectTag[],
-    value: SelectTag
-  ) => {
+  private _onDeleteSelected = (selectedValue: string[], value: string) => {
     const filteredValue = selectedValue.filter(item => item !== value);
-    this.rowHost.setValue(filteredValue);
+    this.onChange(filteredValue);
   };
 
   private _onSelectSearchInput = (event: KeyboardEvent) => {
@@ -330,10 +370,7 @@ export class SelectCellEditing
     }
   };
 
-  private _onSelectOrAdd = (
-    event: KeyboardEvent,
-    selectedValue: SelectTag[]
-  ) => {
+  private _onSelectOrAdd = (event: KeyboardEvent, selectedValue: string[]) => {
     const inputValue = this._inputValue.trim();
 
     if (event.key === 'Backspace' && inputValue === '') {
@@ -342,47 +379,45 @@ export class SelectCellEditing
         selectedValue[selectedValue.length - 1]
       );
     } else if (event.key === 'Enter' && inputValue !== '') {
-      if (this._selectedOptionIndex !== -1) return;
-      const selectTag = this.selectionList.find(
+      const selectTag = this.options.find(
         item => item.value === inputValue
-      );
+      )?.id;
       if (selectTag) {
         this._onSelect(selectedValue, selectTag);
       } else {
         this._onAddSelection(selectedValue);
       }
     } else if (event.key === 'Escape') {
-      this._selectCell(event.target as Element, 'Escape', true);
-    } else if (event.key === 'Tab') {
-      event.preventDefault();
-      this._selectCell(event.target as Element, 'Tab', true);
+      this.editComplete();
     }
   };
 
-  private _onSelect = (selectedValue: SelectTag[], select: SelectTag) => {
+  private _onSelect = (selectedValue: string[], select: string) => {
     // when editing, do not select
-    if (this._editingIndex !== -1) return;
+    if (this._editingId != null) return;
 
-    const isExist =
-      selectedValue.findIndex(item => item.value === select.value) > -1;
-    if (isExist) return;
+    const isExist = selectedValue.findIndex(item => item === select) > -1;
+    if (isExist) {
+      // this.editComplete();
+      return;
+    }
 
-    this.value = select;
-    const isSelected = selectedValue.indexOf(this.value) > -1;
+    this.tempValue = select;
+    const isSelected = selectedValue.indexOf(this.tempValue) > -1;
     if (!isSelected) {
       const newValue = this.isSingleMode
-        ? [this.value]
-        : [...selectedValue, this.value];
-      this.rowHost.setValue(newValue);
-      if (this.isSingleMode) this.rowHost.setEditing(false);
-
-      if (!this.isSingleMode && newValue.length > 1) {
-        this._calcRowHostHeight();
+        ? [this.tempValue]
+        : [...selectedValue, this.tempValue];
+      this.onChange(newValue);
+      if (this.isSingleMode) {
+        setTimeout(() => {
+          this.editComplete();
+        }, 4);
       }
     }
   };
 
-  private _onAddSelection = (selectedValue: SelectTag[]) => {
+  private _onAddSelection = (selectedValue: string[]) => {
     let value = this._inputValue.trim();
     if (value === '') return;
     if (value.length > SELECT_TAG_NAME_MAX_LENGTH) {
@@ -392,126 +427,128 @@ export class SelectCellEditing
     const tagColor = this._selectColor ?? getTagColor();
     this._selectColor = undefined;
     const newSelect = { id: nanoid(), value, color: tagColor };
-
-    this.rowHost.updateColumnProperty(property => {
-      const selection = property.selection as SelectTag[];
-      return {
-        ...property,
-        selection:
-          selection.findIndex(select => select.value === value) === -1
-            ? [...selection, newSelect]
-            : selection,
-      };
-    });
-
+    this.newTag(newSelect);
     const newValue = this.isSingleMode
-      ? [newSelect]
-      : [...selectedValue, newSelect];
-    this.rowHost.setValue(newValue);
-    this.rowHost.setEditing(false);
-
-    if (!this.isSingleMode && newValue.length > 1) {
-      this._calcRowHostHeight();
+      ? [newSelect.id]
+      : [...selectedValue, newSelect.id];
+    this.onChange(newValue);
+    this._inputValue = '';
+    if (this.isSingleMode) {
+      this.editComplete();
     }
   };
 
-  private _calcRowHostHeight = () => {
-    setTimeout(() => {
-      const shadowRoot =
-        this.rowHost.shadowRoot?.children[0].shadowRoot?.children[0].shadowRoot;
-      const selectCell = shadowRoot?.querySelector(
-        '.affine-database-select-cell-container'
-      );
-      if (selectCell) {
-        const { height } = selectCell.getBoundingClientRect();
-        this.rowHost.setHeight(height);
-      }
-    });
-  };
-
-  private _onSelectAction = (type: SelectTagActionType, index: number) => {
+  private _onSelectAction = (
+    type: SelectTagActionType,
+    id: string,
+    element: Element,
+    onActionPopupClose: () => void
+  ) => {
     if (type === 'rename') {
-      this._setEditingIndex(index);
+      this._setEditingId(id);
       return;
     }
 
     if (type === 'delete') {
-      this.databaseModel.updateColumn({
-        ...this.column,
-        selection: this.selectionList.filter((_, i) => i !== index),
-      });
-      const select = this.selectionList[index];
-      this.databaseModel.deleteSelectedCellTag(this.column.id, select);
+      this.deleteTag(id);
       return;
+    }
+    if (type === 'change-color') {
+      if (this._optionColor) return;
+
+      const optionColor = new SelectOptionColor();
+      optionColor.onChange = color => {
+        this._onSaveSelectionColor(id, color);
+        onActionPopupClose();
+        onClose();
+      };
+      this._optionColor = optionColor;
+      element.appendChild(optionColor);
+      const onClose = () => optionColor.remove();
+
+      computePosition(element, optionColor, {
+        // placement: 'right-start',
+        middleware: [
+          offset({
+            mainAxis: 4,
+          }),
+          autoPlacement({
+            allowedPlacements: ['right-start', 'left-start'],
+          }),
+        ],
+      }).then(({ x, y }) => {
+        Object.assign(optionColor.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      });
+
+      onClickOutside(
+        optionColor,
+        ele => {
+          this._optionColor = null;
+          ele.remove();
+        },
+        'mousedown'
+      );
     }
   };
 
-  private _showSelectAction = (index: number) => {
-    const selectOption = this.querySelectorAll('.select-option').item(index);
+  private _showSelectAction = (id: string) => {
+    const selectOption = this.querySelector(`[data-select-option-id="${id}"]`)
+      ?.parentElement?.parentElement;
     assertExists(selectOption);
 
     const action = new SelectActionPopup();
-    action.onAction = this._onSelectAction;
-    action.index = index;
+    action.onAction = (type, id) => {
+      const reference = action.shadowRoot?.firstElementChild;
+      assertExists(reference);
+      this._onSelectAction(type, id, reference, onClose);
+    };
+    action.onClosePopup = () => {
+      this._optionColor?.remove();
+      this._optionColor = null;
+    };
+    action.tagId = id;
     selectOption.appendChild(action);
     const onClose = () => action.remove();
-    action.onClose = onClose;
 
-    createPopper(
-      {
-        getBoundingClientRect: () => {
-          const optionIcon = selectOption.querySelector('.select-option-icon');
-          assertExists(optionIcon);
-          const { height } = action.getBoundingClientRect();
-          const rect = optionIcon.getBoundingClientRect();
-          rect.y = rect.y + height + 36;
-          rect.x = rect.x + 33;
-          return rect;
-        },
-      },
-      action,
-      {
-        placement: 'bottom-end',
-      }
-    );
+    computePosition(selectOption, action, {
+      placement: 'bottom-end',
+    }).then(({ x, y }) => {
+      Object.assign(action.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
     onClickOutside(selectOption as HTMLElement, onClose, 'mousedown');
   };
 
-  private _onSaveSelectionName = (index: number) => {
-    const selectOption = this._selectOptionContainer
-      .querySelectorAll('affine-database-select-option')
-      .item(index) as SelectOption;
+  private _onSaveSelectionName = (id: string) => {
+    const selectOption = this._selectOptionContainer.querySelector(
+      `[data-select-option-id="${id}"]`
+    ) as SelectOption;
 
-    const selection = [...this.selectionList];
     const value = selectOption.getSelectionValue();
-    const isExist =
-      selection.findIndex(
-        (select, i) => i !== index && select.value === value
-      ) > -1;
-    if (isExist) return;
-
-    const oldSelect = selection[index];
-    const newSelect = { ...oldSelect, value };
-    selection[index] = newSelect;
-    this.databaseModel.updateColumn({
-      ...this.column,
-      selection,
-    });
-    this.databaseModel.renameSelectedCellTag(
-      this.column.id,
-      oldSelect,
-      newSelect
-    );
-
-    this._setEditingIndex(-1);
+    const selection = this.options.find(tag => tag.id === id);
+    if (selection) {
+      this.changeTag({ ...selection, value });
+    }
+    this._setEditingId();
+  };
+  private _onSaveSelectionColor = (id: string, color: string) => {
+    const selection = this.options.find(tag => tag.id === id);
+    if (selection) {
+      this.changeTag({ ...selection, color });
+    }
   };
 
-  private _setEditingIndex = (index: number) => {
-    this._editingIndex = index;
+  private _setEditingId = (id?: string) => {
+    this._editingId = id;
   };
 
   override render() {
-    const filteredSelection = this.selectionList.filter(item => {
+    const filteredSelection = this.options.filter(item => {
       if (!this._inputValue) {
         return true;
       }
@@ -522,13 +559,13 @@ export class SelectCellEditing
       );
     });
 
-    const selectedTag = this.cell?.value ?? [];
+    const selectedTag = this.value;
     const showCreateTip =
       this._inputValue &&
       filteredSelection.findIndex(item => item.value === this._inputValue) ===
         -1;
     const selectCreateTip = showCreateTip
-      ? html`<div class="select-option-new" @click=${this._onAddSelection}>
+      ? html` <div class="select-option-new" @click="${this._onAddSelection}">
           <div class="select-option-new-icon">Create ${PlusIcon}</div>
           <span
             class="select-option-new-text"
@@ -537,19 +574,23 @@ export class SelectCellEditing
           >
         </div>`
       : null;
-
+    const map = new Map<string, SelectTag>(this.options.map(v => [v.id, v]));
     return html`
       <div class="affine-database-select-cell-select">
         <div class="select-input-container">
-          ${selectedTag.map(item => {
+          ${selectedTag.map(id => {
+            const option = map.get(id);
+            if (!option) {
+              return;
+            }
             const style = styleMap({
-              backgroundColor: item.color,
+              backgroundColor: option.color,
             });
-            return html`<div class="select-selected" style=${style}>
-              <div class="select-selected-text">${item.value}</div>
+            return html` <div class="select-selected" style=${style}>
+              <div class="select-selected-text">${option.value}</div>
               <span
                 class="close-icon"
-                @click=${() => this._onDeleteSelected(selectedTag, item)}
+                @click="${() => this._onDeleteSelected(selectedTag, id)}"
                 >${DatabaseSearchClose}</span
               >
             </div>`;
@@ -557,10 +598,11 @@ export class SelectCellEditing
           <input
             class="select-input"
             placeholder="Type here..."
-            maxlength=${SELECT_TAG_NAME_MAX_LENGTH}
-            @input=${this._onSelectSearchInput}
-            @keydown=${(event: KeyboardEvent) =>
-              this._onSelectOrAdd(event, selectedTag)}
+            maxlength="${SELECT_TAG_NAME_MAX_LENGTH}"
+            .value=${this._inputValue}
+            @input="${this._onSelectSearchInput}"
+            @keydown="${(event: KeyboardEvent) =>
+              this._onSelectOrAdd(event, selectedTag)}"
           />
         </div>
         <div class="select-option-container">
@@ -572,12 +614,11 @@ export class SelectCellEditing
             filteredSelection,
             select => select.id,
             (select, index) => {
-              const isEditing = index === this._editingIndex;
+              const isEditing = select.id === this._editingId;
               const isSelected = index === this._selectedOptionIndex;
               const onOptionIconClick = isEditing
-                ? () => this._onSaveSelectionName(index)
-                : () => this._showSelectAction(index);
-
+                ? () => this._onSaveSelectionName(select.id)
+                : () => this._showSelectAction(select.id);
               const classes = classMap({
                 'select-option': true,
                 selected: isSelected,
@@ -587,21 +628,23 @@ export class SelectCellEditing
                 <div class="${classes}">
                   <div
                     class="select-option-text-container"
-                    @click=${() => this._onSelect(selectedTag, select)}
+                    @click="${() => this._onSelect(selectedTag, select.id)}"
                   >
                     <affine-database-select-option
                       style=${styleMap({
                         cursor: isEditing ? 'text' : 'pointer',
                       })}
-                      .databaseModel=${this.databaseModel}
-                      .select=${select}
-                      .editing=${isEditing}
-                      .index=${index}
-                      .saveSelectionName=${this._onSaveSelectionName}
-                      .setEditingIndex=${this._setEditingIndex}
+                      data-select-option-id="${select.id}"
+                      .page="${this.page}"
+                      .select="${select}"
+                      .editing="${isEditing}"
+                      .index="${index}"
+                      .tagId="${select.id}"
+                      .saveSelectionName="${this._onSaveSelectionName}"
+                      .setEditingId="${this._setEditingId}"
                     ></affine-database-select-option>
                   </div>
-                  <div class="select-option-icon" @click=${onOptionIconClick}>
+                  <div class="select-option-icon" @click="${onOptionIconClick}">
                     ${isEditing ? DatabaseDone : MoreHorizontalIcon}
                   </div>
                 </div>

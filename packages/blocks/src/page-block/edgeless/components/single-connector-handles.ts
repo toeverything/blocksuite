@@ -46,6 +46,8 @@ function capPointerdown(
   const elementX = anchorPoint.x;
   const elementY = anchorPoint.y;
 
+  let routes: Point[] = originControllers;
+
   const pointermove = (mousePointerEvent: PointerEvent) => {
     const { clientX, clientY } = mousePointerEvent;
     const deltaX = clientX - startX;
@@ -71,14 +73,13 @@ function capPointerdown(
     const { point: newPoint, position: attachedPointPosition } =
       getAttachedPoint(modelX, modelY, newRect);
 
-    let routes: Point[];
     if (position === 'start') {
       routes = generateConnectorPath(
         newRect,
         end.rect,
         newPoint,
         end.point,
-        originControllers,
+        routes,
         connectorMode,
         'end'
       );
@@ -88,7 +89,7 @@ function capPointerdown(
         newRect,
         start.point,
         newPoint,
-        originControllers,
+        routes,
         connectorMode,
         'start'
       );

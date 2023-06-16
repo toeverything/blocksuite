@@ -21,7 +21,7 @@ import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { contains, getCommonBound } from './utils/bound.js';
-import { intersects } from './utils/hit-utils.js';
+import { intersects } from './utils/math-utils.js';
 import {
   generateElementId,
   generateKeyBetween,

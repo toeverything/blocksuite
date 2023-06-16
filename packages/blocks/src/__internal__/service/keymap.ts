@@ -11,12 +11,17 @@ import {
 import {
   handleBlockEndEnter,
   handleBlockSplit,
+  handleLineEndForwardDelete,
   handleLineStartBackspace,
+  handleParagraphBlockLeftKey,
   handleSoftEnter,
   handleUnindent,
 } from '../rich-text/rich-text-operations.js';
 import type { AffineVEditor } from '../rich-text/virgo/types.js';
-import { isCollapsedAtBlockStart } from '../utils/index.js';
+import {
+  isCollapsedAtBlockEnd,
+  isCollapsedAtBlockStart,
+} from '../utils/index.js';
 
 export function onSoftEnter(
   model: BaseBlockModel,
@@ -53,7 +58,7 @@ export function hardEnter(
   if (
     isEmptyList &&
     parent &&
-    matchFlavours(parent, ['affine:frame']) &&
+    matchFlavours(parent, ['affine:frame', 'affine:database']) &&
     model.children.length === 0
   ) {
     // TODO use `handleLineStartBackspace` directly is not concise enough,
@@ -177,7 +182,38 @@ export function onBackspace(
   return ALLOW_DEFAULT;
 }
 
-export function onKeyLeft(e: KeyboardEvent, range: VRange) {
+export function onForwardDelete(
+  model: BaseBlockModel,
+  e: KeyboardEvent,
+  vEditor: AffineVEditor
+) {
+  e.stopPropagation();
+  if (isCollapsedAtBlockEnd(vEditor)) {
+    handleLineEndForwardDelete(model.page, model);
+    return PREVENT_DEFAULT;
+  }
+  // handle multiple selection
+  if (vEditor.getVRange()?.length) {
+    const range = vEditor.getVRange();
+    const text = model.text;
+    if (text && range) {
+      text.delete(range.index, range.length);
+      vEditor.setVRange({
+        index: range.index,
+        length: 0,
+      });
+    }
+    return PREVENT_DEFAULT;
+  }
+  return ALLOW_DEFAULT;
+}
+
+export function onKeyLeft(
+  model: BaseBlockModel,
+  e: KeyboardEvent,
+  range: VRange,
+  editableContainer: Element
+) {
   // range.length === 0 means collapsed selection
   if (range.length !== 0) {
     e.stopPropagation();
@@ -188,6 +224,7 @@ export function onKeyLeft(e: KeyboardEvent, range: VRange) {
     e.stopPropagation();
     return ALLOW_DEFAULT;
   }
+  handleParagraphBlockLeftKey(model.page, model);
   // Need jump to previous block
   return PREVENT_DEFAULT;
 }

@@ -29,10 +29,12 @@ export async function reloadBookmarkBlock(
       return;
     }
 
-    model.page.updateBlock(model, {
-      ...metaData,
-      url: model.url,
-      crawled: true,
+    model.page.withoutTransact(() => {
+      model.page.updateBlock(model, {
+        ...metaData,
+        url: model.url,
+        crawled: true,
+      });
     });
 
     bookmarkElement.loading = false;

@@ -14,11 +14,11 @@ import type {
   DatabaseTableViewRowState,
 } from '../std.js';
 import { asyncFocusRichText, type SerializedBlock } from '../std.js';
+import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import {
   clearAllDatabaseCellSelection,
   clearAllDatabaseRowsSelection,
-  setDatabaseCellEditing,
   setDatabaseCellSelection,
   setDatabaseRowsSelection,
 } from './table/components/selection/utils.js';
@@ -32,10 +32,8 @@ type LastTableViewRowSelection = {
   databaseId: string;
   rowIds: string[];
 };
-type LastTableViewCellSelection = Pick<
-  DatabaseTableViewCellSelect,
-  'databaseId' | 'coords'
->;
+type LastTableViewCellSelection = Omit<DatabaseTableViewCellSelect, 'type'>;
+
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   private _lastRowSelection: LastTableViewRowSelection | null = null;
   private _lastCellSelection: LastTableViewCellSelection | null = null;
@@ -69,16 +67,14 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       const { type } = state;
 
       if (type === 'select') {
-        const { databaseId, coords } = state;
+        const { databaseId, coords, isEditing } = state;
         //  select
         this._lastCellSelection = {
           databaseId,
           coords,
+          isEditing,
         };
-        setDatabaseCellSelection(databaseId, coords);
-      } else if (type === 'edit') {
-        const { databaseId, coords } = state;
-        setDatabaseCellEditing(databaseId, coords[0]);
+        setDatabaseCellSelection(databaseId, coords, isEditing);
       } else if (type === 'clear') {
         // clear
         this._lastCellSelection = null;
@@ -114,13 +110,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     // default column
-    blockModel.updateColumn({
-      name: 'Tag',
-      type: 'multi-select',
-      width: 200,
-      hide: false,
-      selection: [],
-    });
+    blockModel.addColumn(
+      multiSelectHelper.create('Tag', {
+        options: [],
+      })
+    );
     blockModel.applyColumnUpdate();
   }
 

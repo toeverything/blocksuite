@@ -98,9 +98,13 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const refAttribute = this.delta.attributes?.reference;
     assertExists(refAttribute, 'Failed to get reference attribute!');
     this._refAttribute = refAttribute;
-    this._refMeta = page.workspace.meta.pageMetas.find(
+    const refMeta = [...page.workspace.meta.pageMetas].find(
       page => page.id === refAttribute.pageId
     );
+    assertExists(refMeta);
+    this._refMeta = {
+      ...refMeta,
+    };
   };
 
   private _onClick(e: MouseEvent) {

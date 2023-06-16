@@ -16,6 +16,8 @@ import { customElement, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
+import { createPage } from '../../__internal__/utils/index.js';
+import { richTextHelper } from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
@@ -159,11 +161,7 @@ export class ImportPage extends WithDisposable(LitElement) {
       },
       async file => {
         const text = await file.text();
-        const page = this.workspace.createPage({
-          init: {
-            title: '',
-          },
-        });
+        const page = await createPage(this.workspace);
         const rootId = page.root?.id;
         const contentParser = new ContentParser(page);
         if (rootId) {
@@ -188,11 +186,7 @@ export class ImportPage extends WithDisposable(LitElement) {
       },
       async file => {
         const text = await file.text();
-        const page = this.workspace.createPage({
-          init: {
-            title: '',
-          },
-        });
+        const page = await createPage(this.workspace);
         const rootId = page.root?.id;
         const contentParser = new ContentParser(page);
         if (rootId) {
@@ -223,9 +217,9 @@ export class ImportPage extends WithDisposable(LitElement) {
         return false;
       },
       async file => {
-        let pageIds: string[] = [];
+        const pageIds: string[] = [];
         const allPageMap: Map<string, Page>[] = [];
-        const dataBaseSubPages: string[] = [];
+        // const dataBaseSubPages = new Set<string>();
         const parseZipFile = async (file: File | Blob) => {
           const zip = new JSZip();
           const zipFile = await zip.loadAsync(file);
@@ -245,11 +239,7 @@ export class ImportPage extends WithDisposable(LitElement) {
 
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
-              const page = this.workspace.createPage({
-                init: {
-                  title: '',
-                },
-              });
+              const page = await createPage(this.workspace);
               pageMap.set(file, page);
             }
             if (fileName.endsWith('.zip')) {
@@ -296,20 +286,23 @@ export class ImportPage extends WithDisposable(LitElement) {
               };
 
               const tableParserHandler = async (element: Element) => {
-                if (element.tagName === 'TABLE') {
-                  const parentElement = element.parentElement;
-                  if (
-                    parentElement?.tagName === 'DIV' &&
-                    parentElement.hasAttribute('id')
-                  ) {
-                    parentElement.id && dataBaseSubPages.push(parentElement.id);
-                    const tbodyElement = element.querySelector('tbody');
-                    tbodyElement?.querySelectorAll('tr').forEach(ele => {
-                      ele.id && dataBaseSubPages.push(ele.id);
-                    });
-                  }
-                }
-                if (element.getAttribute('href')?.endsWith('.csv')) {
+                // if (element.tagName === 'TABLE') {
+                //   const parentElement = element.parentElement;
+                //   if (
+                //     parentElement?.tagName === 'DIV' &&
+                //     parentElement.hasAttribute('id')
+                //   ) {
+                //     parentElement.id && dataBaseSubPages.add(parentElement.id);
+                //   }
+                //   const tbodyElement = element.querySelector('tbody');
+                //   tbodyElement?.querySelectorAll('tr').forEach(ele => {
+                //     ele.id && dataBaseSubPages.add(ele.id);
+                //   });
+                // }
+                if (
+                  element.tagName === 'A' &&
+                  element.getAttribute('href')?.endsWith('.csv')
+                ) {
                   const href = element.getAttribute('href') || '';
                   const fileName = this.joinWebPaths(folder, decodeURI(href));
                   const tableString = await zipFile
@@ -332,23 +325,16 @@ export class ImportPage extends WithDisposable(LitElement) {
                   const columns: Column[] = titles
                     .slice(1)
                     .map((value, index) => {
-                      return {
-                        name: value,
-                        type: 'rich-text',
-                        width: 200,
-                        hide: false,
-                        id: '' + id++,
-                      };
+                      return richTextHelper.createWithId('' + id++, value);
                     });
                   if (rows.length > 0) {
-                    for (let i = 0; i < rows[0].length - columns.length; i++) {
-                      columns.push({
-                        name: '',
-                        type: 'rich-text',
-                        width: 200,
-                        hide: false,
-                        id: '' + id++,
-                      });
+                    let maxLen = rows[0].length;
+                    for (let i = 1; i < rows.length; i++) {
+                      maxLen = Math.max(maxLen, rows[i].length);
+                    }
+                    const addNum = maxLen - columns.length;
+                    for (let i = 0; i < addNum; i++) {
+                      columns.push(richTextHelper.createWithId('' + id++, ''));
                     }
                   }
                   const databasePropsId = id++;
@@ -412,21 +398,21 @@ export class ImportPage extends WithDisposable(LitElement) {
         };
         const allPromises = await parseZipFile(file);
         await Promise.all(allPromises.flat());
-        dataBaseSubPages.forEach(notionId => {
-          const dbSubPageId = notionId.replace(/-/g, '');
-          allPageMap.forEach(pageMap => {
-            for (const [key, value] of pageMap) {
-              if (
-                key.endsWith(` ${dbSubPageId}.html`) ||
-                key.endsWith(` ${dbSubPageId}.md`)
-              ) {
-                pageIds = pageIds.filter(id => id !== value.id);
-                this.workspace.removePage(value.id);
-                break;
-              }
-            }
-          });
-        });
+        // dataBaseSubPages.forEach(notionId => {
+        //   const dbSubPageId = notionId.replace(/-/g, '');
+        //   allPageMap.forEach(pageMap => {
+        //     for (const [key, value] of pageMap) {
+        //       if (
+        //         key.endsWith(` ${dbSubPageId}.html`) ||
+        //         key.endsWith(` ${dbSubPageId}.md`)
+        //       ) {
+        //         pageIds = pageIds.filter(id => id !== value.id);
+        //         this.workspace.removePage(value.id);
+        //         break;
+        //       }
+        //     }
+        //   });
+        // });
         return pageIds;
       }
     );
@@ -455,7 +441,10 @@ export class ImportPage extends WithDisposable(LitElement) {
 
   private _openLearnImportLink(event: MouseEvent) {
     event.stopPropagation();
-    window.open('https://community.affine.pro', '_blank');
+    window.open(
+      'https://affine.pro/blog/import-your-data-from-notion-into-affine',
+      '_blank'
+    );
   }
 
   override render() {
@@ -484,7 +473,9 @@ export class ImportPage extends WithDisposable(LitElement) {
       </header>
       <div>
         AFFiNE will gradually support more and more file types for import.
-        <a href="https://community.affine.pro" target="_blank"
+        <a
+          href="https://community.affine.pro/c/feature-requests/import-export"
+          target="_blank"
           >Provide feedback.</a
         >
       </div>

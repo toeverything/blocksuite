@@ -9,21 +9,20 @@ import {
   PenIcon,
   TextIcon,
 } from '@blocksuite/global/config';
-import { createPopper } from '@popperjs/core';
+import { computePosition, offset } from '@floating-ui/dom';
 import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { isDivider } from '../../../utils.js';
-import type { ColumnRendererHelper } from '../../register.js';
 import type {
   Column,
   ColumnAction,
   ColumnActionType,
+  ColumnInsertPosition,
   ColumnType,
   TitleColumnAction,
 } from '../../types.js';
-import type { ColumnInsertPosition } from '../../types.js';
 import { ColumnTypePopup } from './column-type-popup.js';
 import { styles } from './styles.js';
 import { changeColumnType, isTitleColumn, onActionClick } from './utils.js';
@@ -98,9 +97,6 @@ export class EditColumnPopup extends LitElement {
   targetModel!: DatabaseBlockModel;
 
   @property()
-  columnRenderer!: ColumnRendererHelper;
-
-  @property()
   targetColumn!: Column | string;
 
   /** base on database column index */
@@ -125,24 +121,30 @@ export class EditColumnPopup extends LitElement {
 
   private _onShowColumnType = (columnId: string) => {
     if (this._columnTypePopup) return;
-    this._columnTypePopup = new ColumnTypePopup();
-    this._columnTypePopup.changeColumnType = this._changeColumnType;
-    this._columnTypePopup.columnId = columnId;
+    const columnTypePopup = new ColumnTypePopup();
+
+    columnTypePopup.changeColumnType = this._changeColumnType;
+    columnTypePopup.columnId = columnId;
 
     if (!isTitleColumn(this.targetColumn)) {
-      this._columnTypePopup.columnType = this.targetColumn.type;
+      columnTypePopup.columnType = this.targetColumn.type;
     }
-    this._container.appendChild(this._columnTypePopup);
-    createPopper(this._container, this._columnTypePopup, {
+    this._columnTypePopup = columnTypePopup;
+    this._container.appendChild(columnTypePopup);
+
+    computePosition(this._container, columnTypePopup, {
       placement: 'right-start',
-      modifiers: [
-        {
-          name: 'offset',
-          options: {
-            offset: [-9, 12],
-          },
-        },
+      middleware: [
+        offset({
+          mainAxis: 9,
+          crossAxis: -9,
+        }),
       ],
+    }).then(({ x, y }) => {
+      Object.assign(columnTypePopup.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
     });
   };
 
@@ -154,13 +156,7 @@ export class EditColumnPopup extends LitElement {
   };
 
   private _changeColumnType = (columnId: string, targetType: ColumnType) => {
-    changeColumnType(
-      columnId,
-      targetType,
-      this.targetColumn,
-      this.targetModel,
-      this.columnRenderer
-    );
+    changeColumnType(columnId, targetType, this.targetColumn, this.targetModel);
     this.closePopup();
   };
 

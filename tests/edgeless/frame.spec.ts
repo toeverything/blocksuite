@@ -6,6 +6,7 @@ import {
   addNote,
   assertMouseMode,
   changeEdgelessFrameBackground,
+  countBlock,
   getFrameRect,
   locatorComponentToolbar,
   locatorEdgelessToolButton,
@@ -15,7 +16,9 @@ import {
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  click,
   clickBlockById,
+  copyByKeyboard,
   dragBetweenCoords,
   dragBlockToPoint,
   dragHandleFromBlockToBlockBottomById,
@@ -23,6 +26,7 @@ import {
   focusRichText,
   initEmptyEdgelessState,
   initThreeParagraphs,
+  pasteByKeyboard,
   pressArrowDown,
   pressArrowUp,
   pressEnter,
@@ -429,4 +433,51 @@ test('cursor for active and inactive state', async ({ page }) => {
   await undoByClick(page);
   await waitNextFrame(page);
   await assertNativeSelectionRangeCount(page, 1);
+});
+
+test('continuous undo and redo (frame blcok add operation) should work', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await switchEditorMode(page);
+  await page.pause();
+  await click(page, { x: 60, y: 270 });
+  await copyByKeyboard(page);
+
+  let count = await countBlock(page, 'affine-frame');
+  expect(count).toBe(1);
+
+  await page.mouse.move(100, 100);
+  await pasteByKeyboard(page, false);
+  await waitNextFrame(page, 1000);
+
+  await page.mouse.move(200, 200);
+  await pasteByKeyboard(page, false);
+  await waitNextFrame(page, 1000);
+
+  await page.mouse.move(300, 300);
+  await pasteByKeyboard(page, false);
+  await waitNextFrame(page, 1000);
+
+  count = await countBlock(page, 'affine-frame');
+  expect(count).toBe(4);
+
+  await undoByClick(page);
+  count = await countBlock(page, 'affine-frame');
+  expect(count).toBe(3);
+
+  await undoByClick(page);
+  count = await countBlock(page, 'affine-frame');
+  expect(count).toBe(2);
+
+  await redoByClick(page);
+  count = await countBlock(page, 'affine-frame');
+  expect(count).toBe(3);
+
+  await redoByClick(page);
+  count = await countBlock(page, 'affine-frame');
+  expect(count).toBe(4);
 });

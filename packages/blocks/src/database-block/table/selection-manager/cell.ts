@@ -7,10 +7,14 @@ import type {
 import { DisposableGroup } from '@blocksuite/store';
 
 import { getService } from '../../../__internal__/service.js';
-import { resetNativeSelection } from '../../../std.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { DatabaseBlockService } from '../../database-service.js';
-import { getCellCoord } from '../components/selection/utils.js';
+import {
+  getCellCoord,
+  getRowsContainer,
+  setDatabaseCellEditing,
+} from '../components/selection/utils.js';
+import type { DatabaseCellElement } from '../register.js';
 
 const CELL_SELECTION_MOVE_KEYS = [
   'Tab',
@@ -47,21 +51,20 @@ export class CellSelectionManager {
   private _onCellSelectionMove = (ctx: UIEventStateContext) => {
     const e = ctx.get('keyboardState');
     const event = e.raw;
-    if (CELL_SELECTION_MOVE_KEYS.indexOf(event.key) <= -1) return;
-
     const service = getService('affine:database');
+    if (
+      CELL_SELECTION_MOVE_KEYS.indexOf(event.key) <= -1 ||
+      service.getLastCellSelection()?.isEditing
+    )
+      return;
+    service.clearRowSelection();
     const cellSelection = service.getLastCellSelection();
     if (!cellSelection) return;
     event.preventDefault();
 
     const { databaseId, coords } = cellSelection;
     if (event.key === 'Enter') {
-      // enter editing state
-      service.setCellSelection({
-        type: 'edit',
-        coords,
-        databaseId,
-      });
+      setDatabaseCellEditing(databaseId, coords[0]);
     } else {
       // set cell selection
       const nextCoord = getCellCoord(coords[0], databaseId, event.key);
@@ -69,6 +72,7 @@ export class CellSelectionManager {
         type: 'select',
         coords: [nextCoord],
         databaseId,
+        isEditing: false,
       });
     }
 
@@ -84,8 +88,30 @@ export class CellSelectionManager {
     event.preventDefault();
     event.stopPropagation();
 
-    const element = event.target as HTMLElement;
-    selectCellByElement(element, this._model.id, event.key);
+    const lastCellSelection = this._service?.getLastCellSelection();
+    if (!lastCellSelection) {
+      return;
+    }
+    const cellCoord = lastCellSelection.coords[0];
+    if (lastCellSelection.isEditing) {
+      const ele = findFocusedElement(
+        lastCellSelection.databaseId,
+        cellCoord.rowIndex,
+        cellCoord.cellIndex
+      );
+      if (!ele) {
+        return;
+      }
+      ele?.exitEditMode();
+    }
+    if (event.key === 'Tab') {
+      this._service?.setCellSelection({
+        type: 'select',
+        coords: [getCellCoord(cellCoord, this._model.id, 'Tab')],
+        databaseId: this._model.id,
+        isEditing: false,
+      });
+    }
   };
 
   dispose() {
@@ -106,17 +132,46 @@ export function selectCellByElement(
   const currentCell = element.closest<HTMLElement>('.database-cell');
   if (!rowsContainer) return;
   if (!currentCell) return;
-
-  const editor = currentCell.querySelector<HTMLElement>('.virgo-editor');
-  editor?.blur();
-  resetNativeSelection(null);
-
   const nextCoord = getCellCoord(currentCell, databaseId, key);
-
   const service = getService('affine:database');
+  // TODO
+  // Maybe we can no longer trigger the cell selection logic after selecting the row selection.
+  const hasRowSelection = service.getLastRowSelection() !== null;
+  if (hasRowSelection) return;
+
   service.setCellSelection({
     type: 'select',
     coords: [nextCoord],
     databaseId,
+    isEditing: false,
   });
 }
+
+export function selectCurrentCell(element: Element, isEditing: boolean) {
+  const rowsContainer = element.closest('.affine-database-block-rows');
+  const currentCell = element.closest<HTMLElement>('.database-cell');
+  const databaseId =
+    element.closest<HTMLElement>('affine-database')?.dataset.blockId;
+  if (!rowsContainer || !currentCell || !databaseId) return;
+  const nextCoord = getCellCoord(currentCell, databaseId, 'Escape');
+
+  const service = getService('affine:database');
+
+  service.setCellSelection({
+    type: 'select',
+    coords: [nextCoord],
+    databaseId,
+    isEditing,
+  });
+}
+
+export const findFocusedElement = (
+  databaseId: string,
+  row: number,
+  column: number
+) => {
+  const container = getRowsContainer(databaseId);
+  const rows = container.querySelectorAll('.affine-database-block-row');
+  return rows[row]?.querySelectorAll('affine-database-cell-container')?.[column]
+    ?.firstElementChild as DatabaseCellElement<unknown> | undefined;
+};

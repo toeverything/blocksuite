@@ -1,14 +1,12 @@
-import {
-  EDGELESS_BLOCK_CHILD_PADDING,
-  FRAME_BACKGROUND_COLORS,
-} from '@blocksuite/global/config';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { TemplateResult } from 'lit';
 import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { TopLevelBlockModel } from '../../../index.js';
+import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
+import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
 
 function EdgelessMask() {
   const style = {
@@ -35,18 +33,19 @@ function EdgelessBlockChild(
 
   const style = {
     position: 'absolute',
-    transform: `translate(${modelX}px, ${modelY}px)`,
-    transformOrigin: '0 0',
+    zIndex: `${index}`,
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    background: `var(${background || FRAME_BACKGROUND_COLORS[0]})`,
-    pointerEvents: 'all',
-    zIndex: `${index}`,
-    boxSizing: 'border-box',
+    border: '2px solid var(--affine-black-10)',
     borderRadius: '8px',
-    border: '2px solid var(--affine-white-10)',
+    boxSizing: 'border-box',
+    background: `var(${background ?? DEFAULT_FRAME_COLOR})`,
     boxShadow: 'var(--affine-shadow-3)',
+    pointerEvents: 'all',
+    overflow: 'hidden',
+    transform: `translate(${modelX}px, ${modelY}px)`,
+    transformOrigin: '0 0',
   };
 
   const mask = active ? nothing : EdgelessMask();

@@ -26,9 +26,9 @@ As a pro tip, you can combine multiple providers! For example, feel free to open
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
-export const preset: InitFn = (workspace: Workspace, id: string) => {
+export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-
+  await page.waitForLoaded();
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
@@ -57,7 +57,8 @@ export const preset: InitFn = (workspace: Workspace, id: string) => {
     strokeStyle: StrokeStyle.Solid,
     roughness: 2,
   });
-  contentParser.importMarkdown(presetMarkdown, frameId);
+  await contentParser.importMarkdown(presetMarkdown, frameId);
+  page.resetHistory();
 };
 
 preset.id = 'preset';

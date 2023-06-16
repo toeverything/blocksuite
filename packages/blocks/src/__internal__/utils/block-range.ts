@@ -61,9 +61,12 @@ export function getCurrentBlockRange(page: Page) {
   if (pageBlock) {
     const selectedBlocks = pageBlock.selection.state.selectedBlocks;
     // Add embeds block to fix click image and delete case
-    const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
+    const selectedEmbeds = pageBlock.selection.state.selectedEmbed;
     // Fix order may be wrong
-    const models = [...selectedBlocks, ...selectedEmbeds]
+    const models = [
+      ...selectedBlocks,
+      ...(selectedEmbeds ? [selectedEmbeds] : []),
+    ]
       .map(element => getModelByElement(element))
       .filter(Boolean);
     if (models.length) {
@@ -258,9 +261,11 @@ export function getExtendBlockRange(
 export function getVRangeByNode(node: Node): VRange | null {
   if (!node.parentElement) return null;
 
-  const virgoElement: VEditor['_rootElement'] = node.parentElement.closest(
-    '[data-virgo-root="true"]'
-  );
+  const virgoElement: VEditor['_rootElement'] =
+    node.parentElement.closest('[data-virgo-root="true"]') ||
+    (node instanceof HTMLElement
+      ? node.querySelector('[data-virgo-root="true"]')
+      : null);
   const vEditor = virgoElement?.virgoEditor;
   if (!vEditor) return null;
 

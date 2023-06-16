@@ -7,21 +7,18 @@ import { BlockSchema } from '../base.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
-import {
-  type InlineSuggestionProvider,
-  Store,
-  type StoreOptions,
-} from '../store.js';
+import { Store, type StoreOptions } from '../store.js';
+import { Text } from '../text-adapter.js';
+import { serializeYDoc } from '../utils/jsx.js';
 import { BacklinkIndexer } from './indexer/backlink.js';
 import { BlockIndexer } from './indexer/base.js';
-import { type QueryContent, SearchIndexer } from './indexer/search.js';
+import type { QueryContent } from './indexer/search.js';
+import { SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Schema } from './schema.js';
 
-export type WorkspaceOptions = {
-  experimentalInlineSuggestionProvider?: InlineSuggestionProvider;
-} & StoreOptions;
+export type WorkspaceOptions = StoreOptions;
 
 export class Workspace {
   static Y = Y;
@@ -48,13 +45,7 @@ export class Workspace {
     backlink: BacklinkIndexer;
   };
 
-  readonly inlineSuggestionProvider?: InlineSuggestionProvider;
-
-  constructor({
-    experimentalInlineSuggestionProvider,
-    ...storeOptions
-  }: WorkspaceOptions) {
-    this.inlineSuggestionProvider = experimentalInlineSuggestionProvider;
+  constructor(storeOptions: WorkspaceOptions) {
     this._schema = new Schema(this);
 
     this._store = new Store(storeOptions);
@@ -109,21 +100,14 @@ export class Workspace {
       },
     };
 
-    this.meta = new WorkspaceMeta('space:meta', this.doc, this.awarenessStore);
+    this.meta = new WorkspaceMeta(this.doc);
     this._bindPageMetaEvents();
 
     const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
-    const backlinkIndexer = new BacklinkIndexer(blockIndexer);
     this.indexer = {
       search: new SearchIndexer(this.doc),
-      backlink: backlinkIndexer,
+      backlink: new BacklinkIndexer(blockIndexer),
     };
-
-    // TODO use BlockIndexer
-    this.slots.pageAdded.on(id => {
-      // For potentially batch-added blocks, it's best to build index asynchronously
-      queueMicrotask(() => this.indexer.search.onPageCreated(id));
-    });
   }
 
   get id() {
@@ -149,6 +133,10 @@ export class Workspace {
 
   get providers() {
     return this._store.providers;
+  }
+
+  get subdocProviders() {
+    return this._store.subdocProviders;
   }
 
   get blobs() {
@@ -206,7 +194,10 @@ export class Workspace {
         idGenerator: this._store.idGenerator,
       });
       this._store.addSpace(page);
-      page.trySyncFromExistingDoc();
+
+      page.waitForLoaded().then(() => {
+        page.trySyncFromExistingDoc();
+      });
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
@@ -223,9 +214,7 @@ export class Workspace {
    * If the `init` parameter is passed, a `surface`, `frame`, and `paragraph` block
    * will be created in the page simultaneously.
    */
-  createPage(
-    options: { id?: string; init?: true | { title: string } } | string = {}
-  ) {
+  createPage(options: { id?: string } | string = {}) {
     // Migration guide
     if (typeof options === 'string') {
       options = { id: options };
@@ -238,7 +227,7 @@ export class Workspace {
     }
     // End of migration guide. Remove this in the next major version
 
-    const { id: pageId = this.idGenerator(), init } = options;
+    const { id: pageId = this.idGenerator() } = options;
     if (this._hasPage(pageId)) {
       throw new Error('page already exists');
     }
@@ -247,25 +236,8 @@ export class Workspace {
       id: pageId,
       title: '',
       createDate: +new Date(),
-      subpageIds: [],
     });
-    const page = this.getPage(pageId) as Page;
-
-    let pageBlockId = pageId;
-    if (init) {
-      pageBlockId = page.addBlock(
-        'affine:page',
-        typeof init === 'boolean'
-          ? undefined
-          : {
-              title: new page.Text(init.title),
-            }
-      );
-      page.addBlock('affine:surface', {}, pageBlockId);
-      const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-      page.addBlock('affine:paragraph', {}, frameId);
-    }
-    return page;
+    return this.getPage(pageId) as Page;
   }
 
   /** Update page meta state. Note that this intentionally does not mutate page state. */
@@ -277,36 +249,14 @@ export class Workspace {
     this.meta.setPageMeta(pageId, props);
   }
 
-  /**
-   * @deprecated
-   */
-  shiftPage(pageId: string, newIndex: number) {
-    this.meta.shiftPageMeta(pageId, newIndex);
-  }
-
   removePage(pageId: string) {
     const pageMeta = this.meta.getPageMeta(pageId);
     assertExists(pageMeta);
-
-    if (pageMeta.subpageIds.length) {
-      // remove subpages first
-      pageMeta.subpageIds.forEach((subpageId: string) => {
-        if (subpageId === pageId) {
-          console.error(
-            'Unexpected subpage found when remove page! A page cannot be its own subpage',
-            pageMeta
-          );
-          return;
-        }
-        this.removePage(subpageId);
-      });
-    }
 
     const page = this.getPage(pageId);
     if (!page) return;
 
     page.dispose();
-    this.indexer.backlink.removeSubpageNode(this, pageId);
     this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
   }
@@ -331,11 +281,9 @@ export class Workspace {
     URL.revokeObjectURL(fileUrl);
   }
 
-  /**
-   * @internal Only for testing
-   */
-  importYDoc(): Promise<void> {
-    return new Promise((res, rej) => {
+  /** @internal Only for testing */
+  async importYDoc() {
+    return new Promise<void>((resolve, reject) => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.ydoc';
@@ -343,20 +291,122 @@ export class Workspace {
       input.onchange = async () => {
         const file = input.files?.item(0);
         if (!file) {
-          return rej();
+          return reject();
         }
         const buffer = await file.arrayBuffer();
         Y.applyUpdate(this.doc, new Uint8Array(buffer));
-        res();
+        resolve();
       };
-      input.onerror = rej;
+      input.onerror = reject;
       input.click();
     });
   }
 
   /**
-   * @internal Only for testing
+   * @internal
+   * Import an object expression of a page.
+   * Specify the page you want to update by passing the `pageId` parameter and it will
+   * create a new page if it does not exist.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async importPageSnapshot(json: any, pageId: string) {
+    const unprefix = (str: string) =>
+      str.replace('sys:', '').replace('prop:', '').replace('space:', '');
+    const visited = new Set();
+
+    let page = this.getPage(pageId);
+    if (!page) {
+      page = this.createPage({ id: pageId });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sanitize = async (props: any) => {
+      const result: Record<string, unknown> = {};
+
+      //TODO: https://github.com/toeverything/blocksuite/issues/2939
+      if (props['sys:flavour'] === 'affine:surface' && props['elements']) {
+        for (const [, element] of Object.entries(
+          props['elements']
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ) as any[]) {
+          if (element['type'] === 'text') {
+            const yText = new Y.Text();
+            yText.applyDelta(element['text']);
+            element['text'] = yText;
+          }
+        }
+      }
+
+      // setup embed source
+      if (props['sys:flavour'] === 'affine:embed') {
+        let resp;
+        try {
+          resp = await fetch(props['prop:sourceId'], {
+            cache: 'no-cache',
+            mode: 'cors',
+            headers: {
+              Origin: window.location.origin,
+            },
+          });
+        } catch (error) {
+          throw new Error(`Failed to fetch embed source. error: ${error}`);
+        }
+        const imgBlob = await resp.blob();
+        if (!imgBlob.type.startsWith('image/')) {
+          throw new Error('Embed source is not an image');
+        }
+
+        assertExists(page);
+        const storage = page.blobs;
+        assertExists(storage);
+        const id = await storage.set(imgBlob);
+        props['prop:sourceId'] = id;
+      }
+
+      for (const key of Object.keys(props)) {
+        if (key === 'sys:children' || key === 'sys:flavour') {
+          continue;
+        }
+
+        result[unprefix(key)] = props[key];
+
+        // delta array to Y.Text
+        if (key === 'prop:text' || key === 'prop:title') {
+          const yText = new Y.Text();
+          yText.applyDelta(props[key]);
+          result[unprefix(key)] = new Text(yText);
+        }
+      }
+      return result;
+    };
+
+    const addBlockByProps = async (
+      page: Page,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      props: any,
+      parent: string | null
+    ) => {
+      if (visited.has(props['sys:id'])) return;
+      const sanitizedProps = await sanitize(props);
+      page.addBlock(props['sys:flavour'], sanitizedProps, parent);
+      for (const id of props['sys:children']) {
+        addBlockByProps(page, json[id], props['sys:id']);
+        visited.add(id);
+      }
+    };
+
+    for (const block of Object.values(json)) {
+      assertExists(json);
+      await addBlockByProps(page, block, null);
+    }
+  }
+
+  /** @internal Only for testing */
+  exportSnapshot() {
+    return serializeYDoc(this.doc);
+  }
+
+  /** @internal Only for testing */
   exportJSX(blockId?: string, pageId = this.meta.pageMetas.at(0)?.id) {
     assertExists(pageId);
     return this._store.exportJSX(pageId, blockId);

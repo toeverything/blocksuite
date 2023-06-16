@@ -18,6 +18,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import {
   activeEditorManager,
   COLOR_VARIABLES,
+  createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   getCurrentBlockRange,
@@ -192,14 +193,16 @@ export class DebugMenu extends ShadowlessElement {
   private _toggleConnection() {
     if (this._connected) {
       this.workspace.providers.forEach(provider => {
-        if (!provider || !provider.disconnect) return;
-        provider.disconnect();
+        if ('passive' in provider && provider.connected) {
+          provider.disconnect();
+        }
       });
       this._connected = false;
     } else {
       this.workspace.providers.forEach(provider => {
-        if (!provider || !provider.connect) return;
-        provider.connect();
+        if ('passive' in provider && !provider.connected) {
+          provider.connect();
+        }
       });
       this._connected = true;
     }
@@ -359,7 +362,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
-    this.workspace.slots.pageAdded.on(e => {
+    this.workspace.slots.pageAdded.on(() => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
     this.workspace.slots.pageRemoved.on(() => {
@@ -651,7 +654,7 @@ export class DebugMenu extends ShadowlessElement {
             <sl-button
               size="small"
               content="Add New Page"
-              @click=${() => createPage(this.workspace)}
+              @click=${() => createPageBlock(this.workspace)}
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
             </sl-button>
@@ -670,9 +673,9 @@ export class DebugMenu extends ShadowlessElement {
   }
 }
 
-function createPage(workspace: Workspace) {
+function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator();
-  workspace.createPage({ id, init: true });
+  createPage(workspace, { id });
 }
 
 function getTabGroupTemplate({
@@ -726,19 +729,6 @@ function getTabGroupTemplate({
         >
           <div>
             <div>${page.title || 'Untitled'}</div>
-            <!-- TODO deprecated subpage -->
-            <div>
-              ${page.subpageIds
-                .map(
-                  pageId =>
-                    (
-                      pageList.find(meta => meta.id === pageId) ?? {
-                        title: 'Page Not Found',
-                      }
-                    ).title || 'Untitled'
-                )
-                .join(',')}
-            </div>
           </div>
         </sl-tab>`
     )}
