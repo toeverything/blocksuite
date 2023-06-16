@@ -7,21 +7,6 @@ export type SetValueOption = {
   sync?: boolean;
 };
 
-export interface RowHost<
-  Value = unknown,
-  ColumnData extends Record<string, unknown> = Record<string, unknown>
-> extends HTMLElement {
-  setEditing(isEditing: boolean): void;
-
-  setHeight(height: number): void;
-
-  setValue(value: Value, option?: SetValueOption): void;
-
-  updateColumnProperty(
-    apply: (oldProperty: Column<ColumnData>) => Partial<Column<ColumnData>>
-  ): void;
-}
-
 export type ColumnType = string;
 
 export type ColumnTypeIcon = Record<ColumnType, TemplateResult>;

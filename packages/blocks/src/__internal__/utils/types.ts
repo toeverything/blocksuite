@@ -24,12 +24,14 @@ import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
+
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export interface IPoint {
   x: number;
   y: number;
 }
+
 export interface BlockTransformContext {
   childText?: string;
   begin?: number;
@@ -76,18 +78,13 @@ export type DatabaseTableViewCellSelect = {
   databaseId: string;
   // Currently only supports single cell selection.
   coords: [CellCoord];
-};
-type DatabaseTableViewCellEdit = {
-  type: 'edit';
-  databaseId: string;
-  coords: [CellCoord];
+  isEditing: boolean;
 };
 type DatabaseTableViewCellClear = {
   type: 'clear';
 };
 export type DatabaseTableViewCellState =
   | DatabaseTableViewCellSelect
-  | DatabaseTableViewCellEdit
   | DatabaseTableViewCellClear;
 
 /** Common context interface definition for block models. */
