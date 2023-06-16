@@ -4,16 +4,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import type {
-  BookmarkBlockComponent,
-  BookmarkBlockModel,
-} from '../../bookmark-block/index.js';
 import type { ListType } from '../../list-block/index.js';
-import {
-  asyncGetRichTextByModel,
-  getBlockElementByModel,
-  getVirgoByModel,
-} from './query.js';
+import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
@@ -190,27 +182,6 @@ export function convertToDivider(
     }
   }
   return true;
-}
-
-export function createBookmarkBlock(
-  parentModel: BaseBlockModel,
-  index?: number
-) {
-  const { page } = parentModel;
-  const id = page.addBlock(
-    'affine:bookmark',
-    { url: '' },
-    parentModel.id,
-    index
-  );
-  requestAnimationFrame(() => {
-    const model = page.getBlockById(id);
-    const element = getBlockElementByModel(
-      model as BookmarkBlockModel
-    ) as BookmarkBlockComponent;
-    element.slots.openInitialModal.emit();
-  });
-  return id;
 }
 
 export async function createPage(
