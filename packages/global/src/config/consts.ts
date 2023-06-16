@@ -1,6 +1,7 @@
 import { SHORT_KEY } from './consts/platform.js';
 
 export * from './consts/block-hub.js';
+export * from './consts/event.js';
 export * from './consts/platform.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id';
