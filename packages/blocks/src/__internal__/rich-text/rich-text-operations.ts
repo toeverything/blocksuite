@@ -359,7 +359,7 @@ export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
   let firstParent: BaseBlockModel | null;
   for (let i = 0; i < models.length; i++) {
     firstParent = page.getParent(models[i]);
-    if (firstParent && !matchFlavours(firstParent, ['affine:frame'])) {
+    if (firstParent && !matchFlavours(firstParent, ['affine:note'])) {
       firstUnindentIndex = i;
       break;
     }

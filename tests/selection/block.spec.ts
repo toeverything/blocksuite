@@ -301,7 +301,7 @@ test('should unindent multi-selection block', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -318,7 +318,7 @@ test('should unindent multi-selection block', async ({ page }) => {
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -338,7 +338,7 @@ test('should unindent multi-selection block', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -354,7 +354,7 @@ test('should unindent multi-selection block', async ({ page }) => {
       prop:text="789"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
