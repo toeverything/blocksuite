@@ -13,6 +13,8 @@ const data: IBrush = {
   index: 'a1',
   seed: 0,
   rotate: 0,
+  flipX: 1,
+  flipY: 1,
 
   points: Array(100)
     .fill(0)
