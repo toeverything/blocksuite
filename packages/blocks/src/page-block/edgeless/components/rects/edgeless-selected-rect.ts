@@ -317,14 +317,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           const p = bound.h / element.h;
           bound.w = element.w * p;
           surface.updateElement<'text'>(id, {
-            xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+            xywh: bound.serialize(),
             fontSize: element.fontSize * p,
             flipX: flip.x,
             flipY: flip.y,
           });
         } else {
           surface.updateElement(id, {
-            xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+            xywh: bound.serialize(),
             flipX: flip.x,
             flipY: flip.y,
           });
