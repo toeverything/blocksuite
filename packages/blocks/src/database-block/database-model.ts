@@ -28,12 +28,20 @@ type SerializedCells = {
 export type ColumnDataUpdater<
   Data extends Record<string, unknown> = Record<string, unknown>
 > = (data: Record<string, unknown>) => Partial<Data>;
-export type InsertPosition = string | undefined | 'end';
-export const resolvePosition = <T extends { id: string }>(
+export type InsertPosition =
+  | string
+  | 'end'
+  | 'start'
+  | { id: string; before: boolean };
+export const resolveInsertPosition = <T extends { id: string }>(
   position: InsertPosition,
   arr: T[]
 ): number => {
-  if (position == null) {
+  if (typeof position === 'object') {
+    const index = arr.findIndex(v => v.id === position.id);
+    return index + (position.before ? 0 : 1);
+  }
+  if (position == null || position === 'start') {
     return 0;
   }
   if (position === 'end') {
@@ -151,7 +159,11 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     const id = this.page.generateId();
     this.page.transact(() => {
       const col = { ...column, id };
-      this.columns.splice(resolvePosition(position, this.columns), 0, col);
+      this.columns.splice(
+        resolveInsertPosition(position, this.columns),
+        0,
+        col
+      );
       this.views.forEach(view => {
         ViewOperationMap[view.mode].addColumnAfter(
           this,

@@ -15,10 +15,9 @@ import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type {
-  TableMixColumn,
-  TableViewData,
-} from '../../../common/view-manager.js';
-import type { DatabaseBlockModel } from '../../../database-model.js';
+  ColumnManager,
+  TableViewManager,
+} from '../../table-view-manager.js';
 import type { ColumnType } from '../../types.js';
 import { ColumnTypePopup } from './column-type-popup.js';
 import { styles } from './styles.js';
@@ -49,28 +48,12 @@ type Menu = MenuCommon &
 export class EditColumnPopup extends LitElement {
   static override styles = styles;
   @property()
-  view!: TableViewData;
+  tableViewManager!: TableViewManager;
   @property()
-  column!: TableMixColumn;
-  @property()
-  targetModel!: DatabaseBlockModel;
-
-  /** base on database column index */
-  @property()
-  index!: number;
-  @property()
-  isFirst!: boolean;
-  @property()
-  isLast!: boolean;
+  column!: ColumnManager;
 
   @property()
-  closePopup!: () => void;
-
-  @property()
-  setTitleColumnEditId!: (columnId: string) => void;
-
-  @property()
-  insertColumn!: (position: 'left' | 'right') => void;
+  editTitle!: () => void;
 
   @query('input')
   titleInput!: HTMLInputElement;
@@ -86,7 +69,7 @@ export class EditColumnPopup extends LitElement {
         text: 'Rename',
         icon: PenIcon,
         select: () => {
-          this.setTitleColumnEditId(this.column.id);
+          this.editTitle();
         },
       },
       {
@@ -115,7 +98,9 @@ export class EditColumnPopup extends LitElement {
         text: 'Insert left column',
         icon: DatabaseInsertLeft,
         select: () => {
-          this.view.newColumn(this.view.preColumn(this.column.id)?.id);
+          this.tableViewManager.newColumn(
+            this.tableViewManager.preColumn(this.column.id)?.id
+          );
         },
       },
       {
@@ -123,29 +108,31 @@ export class EditColumnPopup extends LitElement {
         text: 'Insert right column',
         icon: DatabaseInsertRight,
         select: () => {
-          this.view.newColumn(this.column.id);
+          this.tableViewManager.newColumn(this.column.id);
         },
       },
       {
         type: 'action',
         text: 'Move left',
         icon: DatabaseMoveLeft,
-        hide: () => this.isFirst,
+        hide: () => this.column.isFirst,
         select: () => {
-          const preId = this.view.preColumn(this.column.id)?.id;
-          const prepreId = preId ? this.view.preColumn(preId)?.id : undefined;
-          this.view.moveColumn(this.column.id, prepreId);
+          const preId = this.tableViewManager.preColumn(this.column.id)?.id;
+          const prepreId = preId
+            ? this.tableViewManager.preColumn(preId)?.id
+            : undefined;
+          this.tableViewManager.moveColumn(this.column.id, prepreId);
         },
       },
       {
         type: 'action',
         text: 'Move Right',
         icon: DatabaseMoveRight,
-        hide: () => this.isLast,
+        hide: () => this.column.isLast,
         select: () => {
-          this.view.moveColumn(
+          this.tableViewManager.moveColumn(
             this.column.id,
-            this.view.nextColumn(this.column.id)?.id
+            this.tableViewManager.nextColumn(this.column.id)?.id
           );
         },
       },
@@ -198,7 +185,7 @@ export class EditColumnPopup extends LitElement {
 
   private _changeColumnType = (targetType: ColumnType) => {
     this.column.updateType?.(targetType);
-    this.closePopup();
+    this.remove();
   };
 
   private _renderActions = () => {
@@ -223,7 +210,7 @@ export class EditColumnPopup extends LitElement {
             @click="${() => {
               if (action.type === 'action') {
                 action.select();
-                this.closePopup();
+                this.remove();
               }
             }}"
           >

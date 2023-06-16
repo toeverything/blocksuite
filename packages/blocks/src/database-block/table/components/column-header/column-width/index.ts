@@ -1,13 +1,11 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 
-import type {
-  DatabaseViewDataMap,
-  TableMixColumn,
-} from '../../../../common/view-manager.js';
+import type { DatabaseViewDataMap } from '../../../../common/view-manager.js';
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
 } from '../../../consts.js';
+import type { ColumnManager } from '../../../table-view-manager.js';
 
 type ColumnWidthConfig = {
   index: number;
@@ -20,11 +18,83 @@ type ColumnWidthConfig = {
   rowCells: HTMLElement[];
 };
 
+function extracted(
+  rawWidth: number,
+  event: PointerEvent,
+  startClientX: number,
+  rowCells: HTMLElement[],
+  tableContainer: HTMLElement,
+  direction: string,
+  startScrollLeft: number
+) {
+  const onUpdateDOM = () => {
+    const columnWidth =
+      rawWidth + event.clientX - startClientX <= DEFAULT_COLUMN_MIN_WIDTH
+        ? DEFAULT_COLUMN_MIN_WIDTH
+        : rawWidth + event.clientX - startClientX;
+
+    // update column width
+    rowCells.forEach(cell => {
+      cell.style.width = `${columnWidth}px`;
+      const titleText = cell.querySelector<HTMLDivElement>(
+        '.affine-database-column-text-input'
+      );
+      if (titleText) {
+        // 54px is the width of other elements of the column
+        titleText.style.width = `${columnWidth - 54}px`;
+      }
+    });
+
+    // scroll when crossing the right border
+    const parentElement = tableContainer.parentElement;
+    assertExists(parentElement);
+    const { right: boundaryRight, left: boundaryLeft } =
+      parentElement.getBoundingClientRect();
+    // the distance from the drag handle to the right border
+    const dragHandleRight =
+      event.clientX - boundaryRight + DEFAULT_ADD_BUTTON_WIDTH;
+    // x
+    if (dragHandleRight >= 0) {
+      // → | →
+      // the `|` is boundary
+      if (direction === 'right') {
+        // 1. Drag right 100 (scroll distance 100)
+        // 2. Drag left 30 (scroll distance unchanged)
+        // 3. At this point, dragging further to the right should keep the 100
+        parentElement.scrollLeft = Math.max(
+          parentElement.scrollLeft,
+          startScrollLeft + dragHandleRight
+        );
+      } else {
+        // → | ←
+        let scrollLeft = parentElement.scrollLeft;
+        if (dragHandleRight <= DEFAULT_ADD_BUTTON_WIDTH) {
+          scrollLeft += dragHandleRight;
+        }
+        parentElement.scrollLeft = Math.min(
+          scrollLeft,
+          startScrollLeft + dragHandleRight
+        );
+      }
+      return;
+    }
+
+    // scroll when crossing the left border
+    const dragHandleLeft =
+      event.clientX - boundaryLeft - DEFAULT_ADD_BUTTON_WIDTH;
+    // ← | ←
+    if (dragHandleLeft <= 0 && parentElement.scrollLeft > 0) {
+      parentElement.scrollLeft = startScrollLeft + dragHandleLeft;
+    }
+  };
+  return onUpdateDOM;
+}
+
 export function initChangeColumnWidthHandlers(
   view: DatabaseViewDataMap['table'],
   headerContainer: HTMLElement,
   tableContainer: HTMLElement,
-  columns: TableMixColumn[],
+  columns: ColumnManager[],
   changeActiveColumnIndex: (index: number) => void
 ) {
   let changeColumnWidthConfig: ColumnWidthConfig | null = null;
@@ -76,67 +146,15 @@ export function initChangeColumnWidthHandlers(
 
     const direction = event.clientX - lastClientX > 0 ? 'right' : 'left';
     changeColumnWidthConfig.lastClientX = event.clientX;
-
-    const onUpdateDOM = () => {
-      const columnWidth =
-        rawWidth + event.clientX - startClientX <= DEFAULT_COLUMN_MIN_WIDTH
-          ? DEFAULT_COLUMN_MIN_WIDTH
-          : rawWidth + event.clientX - startClientX;
-
-      // update column width
-      rowCells.forEach(cell => {
-        cell.style.width = `${columnWidth}px`;
-        const titleText = cell.querySelector<HTMLDivElement>(
-          '.affine-database-column-text-input'
-        );
-        if (titleText) {
-          // 54px is the width of other elements of the column
-          titleText.style.width = `${columnWidth - 54}px`;
-        }
-      });
-
-      // scroll when crossing the right border
-      const parentElement = tableContainer.parentElement;
-      assertExists(parentElement);
-      const { right: boundaryRight, left: boundaryLeft } =
-        parentElement.getBoundingClientRect();
-      // the distance from the drag handle to the right border
-      const dragHandleRight =
-        event.clientX - boundaryRight + DEFAULT_ADD_BUTTON_WIDTH;
-      // x
-      if (dragHandleRight >= 0) {
-        // → | →
-        // the `|` is boundary
-        if (direction === 'right') {
-          // 1. Drag right 100 (scroll distance 100)
-          // 2. Drag left 30 (scroll distance unchanged)
-          // 3. At this point, dragging further to the right should keep the 100
-          parentElement.scrollLeft = Math.max(
-            parentElement.scrollLeft,
-            startScrollLeft + dragHandleRight
-          );
-        } else {
-          // → | ←
-          let scrollLeft = parentElement.scrollLeft;
-          if (dragHandleRight <= DEFAULT_ADD_BUTTON_WIDTH) {
-            scrollLeft += dragHandleRight;
-          }
-          parentElement.scrollLeft = Math.min(
-            scrollLeft,
-            startScrollLeft + dragHandleRight
-          );
-        }
-        return;
-      }
-
-      // scroll when crossing the left border
-      const dragHandleLeft =
-        event.clientX - boundaryLeft - DEFAULT_ADD_BUTTON_WIDTH;
-      // ← | ←
-      if (dragHandleLeft <= 0 && parentElement.scrollLeft > 0) {
-        parentElement.scrollLeft = startScrollLeft + dragHandleLeft;
-      }
-    };
+    const onUpdateDOM = extracted(
+      rawWidth,
+      event,
+      startClientX,
+      rowCells,
+      tableContainer,
+      direction,
+      startScrollLeft
+    );
     if (rafId) cancelAnimationFrame(rafId);
     changeColumnWidthConfig.rafId = requestAnimationFrame(onUpdateDOM);
   };

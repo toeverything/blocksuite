@@ -1,5 +1,6 @@
 // related component
 import './components/column-header/column-header.js';
+import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/toolbar/toolbar.js';
 import './components/database-title.js';
@@ -11,6 +12,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { asyncFocusRichText } from '../../__internal__/index.js';
@@ -34,7 +36,7 @@ import { changeColumnType } from './components/edit-column-popup/utils.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import { CellSelectionManager } from './selection-manager/cell.js';
 import { RowSelectionManager } from './selection-manager/row.js';
-import type { TableViewManager } from './table-view-manager.js';
+import type { ColumnManager, TableViewManager } from './table-view-manager.js';
 import { DatabaseTableViewManager } from './table-view-manager.js';
 import { SearchState } from './types.js';
 
@@ -470,8 +472,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _tableViewManager(): TableViewManager {
-    return new DatabaseTableViewManager();
+  private _tableViewManager(columns: TableMixColumn[]): TableViewManager {
+    return new DatabaseTableViewManager({ view: this.view, columns });
   }
 
   private _addRow = (index?: number, rows: BaseBlockModel[]) => {
@@ -515,6 +517,21 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     return this.model.children.filter((_, i) => this._filter(i));
   };
 
+  private _renderColumnWidthDragBar = (columns: ColumnManager[]) => {
+    let left = 0;
+    return repeat(
+      columns,
+      v => v.id,
+      column => {
+        left += column.width;
+        return html`<affine-database-column-width-drag-bar
+          .left=${left}
+          .column=${column}
+        ></affine-database-column-width-drag-bar>`;
+      }
+    );
+  };
+
   override render() {
     const mixColumns = this._mixColumns();
     const rows = this._renderRows();
@@ -529,7 +546,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
       this._addRow(index, rows);
     };
     const viewData = this._viewData(mixColumns);
-    const tableViewManager = this._tableViewManager();
+    const tableViewManager = this._tableViewManager(mixColumns);
     return html`
       <div class="affine-database-table">
         <div class="affine-database-block-title-container">
@@ -559,6 +576,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
               .columnRenderer="${this.columnRenderer}"
             ></affine-database-column-header>
             ${rowsTemplate}
+            ${this._renderColumnWidthDragBar(tableViewManager.columns)}
           </div>
         </div>
         ${this.readonly

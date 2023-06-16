@@ -1,6 +1,10 @@
-import type { DatabaseBlockModel, DatabaseBlockModel,InsertPosition } from '../database-model.js';
+import type {
+  DatabaseBlockModel,
+  DatabaseBlockModel,
+  InsertPosition,
+} from '../database-model.js';
 import type { ColumnDataUpdater } from '../database-model.js';
-import { resolvePosition } from '../database-model.js';
+import { resolveInsertPosition } from '../database-model.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column } from '../types.js';
 import type { FilterGroup } from './ast.js';
@@ -121,7 +125,7 @@ export const ViewOperationMap: {
       }
     },
     addColumnAfter(model, view, newColumn, position) {
-      view.columns.splice(resolvePosition(position, view.columns), 0, {
+      view.columns.splice(resolveInsertPosition(position, view.columns), 0, {
         id: newColumn.id,
         width: DEFAULT_COLUMN_WIDTH,
       });
