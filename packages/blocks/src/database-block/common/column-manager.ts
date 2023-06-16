@@ -118,6 +118,12 @@ class ColumnHelper<
 }
 
 export const columnManager = new ColumnManager();
+export const titleHelper = columnManager.register<Text['yText']>('title', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  configRender: () => html``,
+  cellToString: data => data?.toString() ?? '',
+});
 export const richTextHelper = columnManager.register<Text['yText']>(
   'rich-text',
   {
