@@ -6,10 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { DatabaseTableViewCellSelect } from '../../../../std.js';
 import { getCellSelectionRectByCoords, getRowsContainer } from './utils.js';
 
-type SelectionState = Pick<
-  DatabaseTableViewCellSelect,
-  'databaseId' | 'coords'
->;
+type SelectionState = Omit<DatabaseTableViewCellSelect, 'type'>;
 
 @customElement('database-cell-level-selection')
 export class CellLevelSelection extends WithDisposable(LitElement) {
@@ -21,7 +18,7 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
       box-sizing: border-box;
       border: 2px solid var(--affine-primary-color);
       border-radius: 2px;
-      background: var(--affine-primary-color-04);
+      pointer-events: none;
     }
   `;
 
@@ -77,12 +74,13 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
       height: `${scaledHeight}px`,
       width: `${scaledWidth}px`,
       display: 'block',
+      borderColor: this.state.isEditing ? '#90b19c' : undefined,
     });
   };
 
   override render() {
     const styles = this._getStyles();
-    return html`<div
+    return html` <div
       class="database-cell-level-selection"
       style=${styles}
     ></div>`;

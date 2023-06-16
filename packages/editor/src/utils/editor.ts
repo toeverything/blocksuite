@@ -153,12 +153,16 @@ export const createBlockHub: (
         frameId = targetFrameBlock.model.id;
       } else {
         // Creates new frame block on blank area.
-        const result = pageBlock.addNewFrame(models, point);
+        const result = pageBlock.addNewFrame(
+          models,
+          point,
+          isDatabase ? { width: 752 } : undefined
+        );
         frameId = result.frameId;
         focusId = result.ids[0];
         const model = page.getBlockById(focusId);
         assertExists(model);
-        if (model.flavour === 'affine:database') {
+        if (isDatabase) {
           const service = await getServiceOrRegister<'affine:database'>(
             props.flavour
           );

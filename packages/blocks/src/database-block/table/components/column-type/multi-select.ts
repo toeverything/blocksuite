@@ -1,41 +1,32 @@
-import { customElement } from 'lit/decorators.js';
+import './components/multi-tag-view.js';
+import './components/multi-tag-select.js';
+
 import { html, literal } from 'lit/static-html.js';
 
 import type { SelectColumnData } from '../../../common/column-manager.js';
-import {
-  DatabaseCellElement,
-  defineColumnRenderer,
-  type TableViewCell,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 import type { SelectTag } from '../../types.js';
 import { SelectMode } from '../../types.js';
 
-@customElement('affine-database-multi-select-cell')
-class MultiSelectCell
-  extends DatabaseCellElement<string[], SelectColumnData>
-  implements TableViewCell
-{
+class MultiSelectCell extends DatabaseCellElement<string[], SelectColumnData> {
   static override tag = literal`affine-database-multi-select-cell`;
-  cellType = 'multi-select' as const;
 
   override render() {
     return html`
       <affine-database-multi-tag-view
-        .value=${this.value ?? []}
-        .options=${this.columnData.options}
-        .setHeight=${this.setHeight}
+        .value="${this.value ?? []}"
+        .options="${this.columnData.options}"
+        .setHeight="${this.setHeight}"
       ></affine-database-multi-tag-view>
     `;
   }
 }
 
-@customElement('affine-database-multi-select-cell-editing')
-class MultiSelectCellEditing
-  extends DatabaseCellElement<string[], SelectColumnData>
-  implements TableViewCell
-{
+class MultiSelectCellEditing extends DatabaseCellElement<
+  string[],
+  SelectColumnData
+> {
   static override tag = literal`affine-database-multi-select-cell-editing`;
-  cellType = 'multi-select' as const;
 
   get _options(): SelectTag[] {
     return this.columnData.options;
@@ -50,16 +41,14 @@ class MultiSelectCellEditing
   };
 
   _editComplete = () => {
-    this.setEditing(false);
+    this._setEditing(false);
   };
 
   _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.updateColumnProperty(oldProperty => {
+    this.updateColumnData(data => {
       return {
-        data: {
-          ...oldProperty.data,
-          options: update(oldProperty.data.options),
-        },
+        ...data,
+        options: update(data.options),
       };
     });
   };
@@ -94,7 +83,7 @@ class MultiSelectCellEditing
         .newTag="${this._newTag}"
         .deleteTag="${this._deleteTag}"
         .changeTag="${this._changeTag}"
-        .container="${this.container}"
+        .container="${this.parentElement}"
         .page="${this.page}"
       >
       </affine-database-multi-tag-select>

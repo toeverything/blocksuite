@@ -870,9 +870,7 @@ export class EdgelessPageBlockComponent
     const bounds = [];
 
     this.frames.forEach(frame => {
-      const frameXYWH = deserializeXYWH(frame.xywh);
-      const frameBound = new Bound(...frameXYWH);
-      bounds.push(frameBound);
+      bounds.push(Bound.deserialize(frame.xywh));
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();
