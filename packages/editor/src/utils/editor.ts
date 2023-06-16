@@ -91,9 +91,7 @@ export const createBlockHub: (
       }
 
       // In some cases, like cancel bookmark initial modal, there will be no models.
-      if (!models.length) {
-        return;
-      }
+      if (!models.length) return;
 
       let parentId;
       let focusId;

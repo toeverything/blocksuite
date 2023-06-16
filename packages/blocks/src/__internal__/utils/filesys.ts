@@ -62,9 +62,8 @@ export const uploadImageFromLocal = async (
 };
 
 type BookmarkProps = Partial<BookmarkBlockModel>;
-export const getBookmarkInitialProps = async (): Promise<
-  Array<BookmarkProps>
-> => {
+
+export async function getBookmarkInitialProps(): Promise<BookmarkProps[]> {
   const bookmarkCreateModal = document.createElement('bookmark-create-modal');
 
   let resolvePromise: (
@@ -86,7 +85,7 @@ export const getBookmarkInitialProps = async (): Promise<
   document.body.appendChild(bookmarkCreateModal);
 
   return await pending;
-};
+}
 
 function readImageSize(file: File) {
   return new Promise<{ width: number; height: number }>(resolve => {
