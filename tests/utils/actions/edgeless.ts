@@ -69,7 +69,8 @@ type MouseMode =
   | 'pan'
   | 'text'
   | 'connector'
-  | 'note';
+  | 'note'
+  | 'eraser';
 type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -82,11 +83,11 @@ export function locatorEdgelessToolButton(
     default: 'Select',
     shape: 'Shape',
     brush: 'Pen',
+    eraser: 'Eraser',
     pan: 'Hand',
     text: 'Text',
     connector: 'Connector',
     note: 'Note',
-
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
@@ -128,6 +129,7 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
     case 'pan':
     case 'text':
     case 'note':
+    case 'eraser':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();

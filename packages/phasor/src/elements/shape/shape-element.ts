@@ -1,11 +1,14 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
+import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
-
 export class ShapeElement extends SurfaceElement<IShape> {
+  override isIntersectLine(start: IVec, end: IVec): boolean {
+    return ShapeMethodsMap[this.shapeType].isIntersectLine(start, end, this);
+  }
   get shapeType() {
     const shapeType = this.yMap.get('shapeType') as IShape['shapeType'];
     return shapeType;

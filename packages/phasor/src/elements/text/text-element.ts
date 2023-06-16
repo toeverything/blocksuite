@@ -1,3 +1,6 @@
+import { Bound } from '../../utils/bound.js';
+import { linePolygonIntersects } from '../../utils/math-utils.js';
+import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
 import {
@@ -6,8 +9,14 @@ import {
   getTextWidth,
   isRTL,
 } from './utils.js';
-
 export class TextElement extends SurfaceElement<IText> {
+  override isIntersectLine(start: IVec, end: IVec): boolean {
+    return !!linePolygonIntersects(
+      start,
+      end,
+      Bound.deserialize(this.xywh).points
+    );
+  }
   get text() {
     return this.yMap.get('text') as IText['text'];
   }

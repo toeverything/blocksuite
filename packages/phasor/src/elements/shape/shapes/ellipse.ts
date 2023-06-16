@@ -1,7 +1,12 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, StrokeStyle } from '../../../consts.js';
-import { pointInEllipse } from '../../../utils/math-utils.js';
+import { Bound } from '../../../utils/bound.js';
+import {
+  lineEllipseIntersects,
+  pointInEllipse,
+} from '../../../utils/math-utils.js';
+import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
@@ -44,6 +49,20 @@ export const EllipseMethods: ShapeMethods = {
     return pointInEllipse(
       [x, y],
       [bound.x + bound.w / 2, bound.y + bound.h / 2],
+      bound.w / 2,
+      bound.h / 2
+    );
+  },
+  isIntersectLine: function (
+    start: IVec,
+    end: IVec,
+    element: ShapeElement
+  ): boolean {
+    const bound = Bound.deserialize(element.xywh);
+    return !!lineEllipseIntersects(
+      start,
+      end,
+      bound.center,
       bound.w / 2,
       bound.h / 2
     );

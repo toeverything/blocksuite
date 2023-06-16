@@ -270,8 +270,9 @@ export class Renderer implements SurfaceViewport {
       const dy = element.y - viewportBounds.y;
       ctx.save();
       ctx.translate(dx, dy);
-
-      if (intersects(element, viewportBounds) && element.display) {
+      const localRecord = element.localRecord;
+      if (intersects(element, viewportBounds) && localRecord.display) {
+        ctx.globalAlpha = localRecord.opacity;
         element.render(ctx, rc);
       }
 

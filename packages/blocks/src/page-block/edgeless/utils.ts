@@ -160,6 +160,7 @@ export function getCursorMode(mouseMode: MouseMode) {
     case 'pan':
       return mouseMode.panning ? 'grabbing' : 'grab';
     case 'brush':
+    case 'eraser':
     case 'shape':
     case 'connector':
       return 'crosshair';

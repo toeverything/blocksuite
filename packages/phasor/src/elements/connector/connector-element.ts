@@ -6,12 +6,22 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from '../../utils/bound.js';
+import { linePolylineIntersects } from '../../utils/math-utils.js';
+import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IConnector } from './types.js';
 import { ConnectorMode } from './types.js';
 import { getArrowPoints, getConnectorPointsBound } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
+  override isIntersectLine(start: IVec, end: IVec): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return !!linePolylineIntersects(
+      start,
+      end,
+      this.controllers.map(c => [c.x + bound.x, c.y + bound.y])
+    );
+  }
   get mode() {
     return this.yMap.get('mode') as IConnector['mode'];
   }

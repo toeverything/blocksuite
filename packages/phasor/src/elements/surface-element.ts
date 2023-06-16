@@ -1,6 +1,7 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 import type * as Y from 'yjs';
 
+import type { IVec } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { SurfaceManager } from '../surface.js';
 import { isPointIn } from '../utils/math-utils.js';
@@ -21,36 +22,28 @@ export interface HitTestOptions {
 
 export type ComputedValue = (value: string) => string;
 
-export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
+export abstract class SurfaceElement<
+  T extends ISurfaceElement = ISurfaceElement
+> {
+  abstract isIntersectLine(start: IVec, end: IVec): boolean;
   yMap: Y.Map<unknown>;
 
   protected renderer: Renderer | null = null;
-  protected surface: SurfaceManager | null = null;
 
   computedValue: ComputedValue = v => v;
 
-  private _display = true;
-
-  get display() {
-    return this._display;
-  }
-
-  setDisplay(display: boolean) {
-    this._display = display;
-    this.renderer?.removeElement(this);
-    this.renderer?.addElement(this);
-  }
-
-  constructor(yMap: Y.Map<unknown>, surface: SurfaceManager, data?: T) {
+  constructor(
+    yMap: Y.Map<unknown>,
+    protected surface: SurfaceManager,
+    data: Partial<T> = {}
+  ) {
     if (!yMap.doc) {
       throw new Error('yMap must be bound to a Y.Doc');
     }
 
     this.yMap = yMap;
-    if (data) {
-      for (const key in data) {
-        this.yMap.set(key, data[key] as T[keyof T]);
-      }
+    for (const key in data) {
+      this.yMap.set(key, data[key] as T[keyof T]);
     }
 
     this.surface = surface;
@@ -119,7 +112,6 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
   };
-
   mount(renderer: Renderer) {
     this.renderer = renderer;
     this.renderer.addElement(this);
@@ -134,5 +126,9 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
 
   render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     return;
+  }
+
+  get localRecord() {
+    return this.surface.getElementLocalRecord(this.id);
   }
 }

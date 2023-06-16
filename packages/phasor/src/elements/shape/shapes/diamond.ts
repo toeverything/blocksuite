@@ -1,7 +1,12 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, StrokeStyle } from '../../../consts.js';
-import { pointInPolygon } from '../../../utils/math-utils.js';
+import { Bound } from '../../../utils/bound.js';
+import {
+  linePolygonIntersects,
+  pointInPolygon,
+} from '../../../utils/math-utils.js';
+import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
@@ -57,5 +62,20 @@ export const DiamondMethods: ShapeMethods = {
       [bound.x + 0, bound.y + bound.h / 2],
     ];
     return pointInPolygon([x, y], points);
+  },
+  isIntersectLine: function (
+    start: IVec,
+    end: IVec,
+    element: ShapeElement
+  ): boolean {
+    const bound = Bound.deserialize(element.xywh);
+    const { x, y, w, h } = bound;
+
+    return !!linePolygonIntersects(start, end, [
+      [x + w / 2, y],
+      [x + w, h / 2 + y],
+      [x + w / 2, h + y],
+      [x, h / 2 + y],
+    ]);
   },
 };
