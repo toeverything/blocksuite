@@ -91,17 +91,16 @@ export class OutsideDragManager {
   };
 
   get(type: string): ImportHandler | undefined {
+    const handler = this._handlers.get(type);
+
+    // `*`
+    if (handler || type === '*') return handler;
+
+    // `image/*`
+    if (type.endsWith('/*')) return this.get('*');
+
     // `image/png`
-    let handler = this._handlers.get(type);
-    if (!handler) {
-      // `image/*`
-      handler = this._handlers.get(type.replace(/\/(.*)$/, '/*'));
-      if (!handler) {
-        // `*`
-        handler = this._handlers.get('*');
-      }
-    }
-    return handler;
+    return this.get(type.replace(/\/(.*)$/, '/*'));
   }
 
   /**
