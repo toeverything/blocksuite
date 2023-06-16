@@ -349,7 +349,6 @@ function handleShiftTab(
   if (!blockRange) return;
 
   const models = blockRange.models;
-  console.log('models: ', models);
   handleMultiBlockUnindent(page, models);
 
   if (blockRange.type === 'Block') {
