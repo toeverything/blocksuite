@@ -25,6 +25,7 @@ export const bookmarkModalStyles = html`
       top: 0;
       bottom: 0;
       margin: auto;
+      z-index: 1;
     }
     .bookmark-modal-wrapper {
       position: absolute;
@@ -33,6 +34,7 @@ export const bookmarkModalStyles = html`
       top: 0;
       bottom: 0;
       margin: auto;
+      z-index: 1;
 
       width: 360px;
       height: 260px;
