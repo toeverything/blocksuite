@@ -2,7 +2,7 @@ import { Bound, Overlay } from '@blocksuite/phasor';
 
 import { Point } from '../../__internal__/utils/rect.js';
 import type { Alignable } from '../../__internal__/utils/types.js';
-import { type FrameBlockModel } from '../../frame-block/frame-model.js';
+import { type NoteBlockModel } from '../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 
 interface Distance {
@@ -46,11 +46,11 @@ export class EdgelessSnapManager extends Overlay {
     const viewportBounds = Bound.from(viewport.viewportBounds);
     viewport.addOverlay(this);
 
-    const frames = page.getBlockByFlavour('affine:frame') as FrameBlockModel[];
+    const notes = page.getBlockByFlavour('affine:note') as NoteBlockModel[];
     const phasorElements = surface.getElements();
 
     this._alignableBounds = [];
-    (<Alignable[]>[...frames, ...phasorElements]).forEach(alignable => {
+    (<Alignable[]>[...notes, ...phasorElements]).forEach(alignable => {
       const bound = Bound.deserialize(alignable.xywh);
       if (
         viewportBounds.isIntersectWithBound(bound) &&

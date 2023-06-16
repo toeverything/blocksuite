@@ -195,8 +195,8 @@ export async function createPage(
     title: new page.Text(options.title ?? ''),
   });
   page.addBlock('affine:surface', {}, pageBlockId);
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  page.addBlock('affine:paragraph', {}, frameId);
+  const noteId = page.addBlock('affine:note', {}, pageBlockId);
+  page.addBlock('affine:paragraph', {}, noteId);
   // To make sure the content of new page would not be clear
   // By undo operation for the first time
   page.resetHistory();

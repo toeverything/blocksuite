@@ -12,8 +12,8 @@ import {
 } from '@blocksuite/store';
 
 import type { Cell, Column } from '../../database-block/table/types.js';
-import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { PageBlockModel } from '../../models.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type {
   BlockServiceInstanceByKey,
   ServiceFlavour,
@@ -129,9 +129,9 @@ export type DomSelectionType = 'Caret' | 'Range' | 'None';
 export type ExtendedModel = BaseBlockModel & Record<string, any>;
 
 // blocks that would only appear under the edgeless container root
-export type TopLevelBlockModel = FrameBlockModel;
+export type TopLevelBlockModel = NoteBlockModel;
 
-export type Alignable = FrameBlockModel | PhasorElement;
+export type Alignable = NoteBlockModel | PhasorElement;
 
 export type DefaultMouseMode = {
   type: 'default';
@@ -214,7 +214,7 @@ export type SerializedBlock = {
     cells: Record<string, Record<string, Cell>>;
     columns: Column[];
   };
-  // frame block
+  // note block
   xywh?: string;
   // bookmark block
   title?: string;

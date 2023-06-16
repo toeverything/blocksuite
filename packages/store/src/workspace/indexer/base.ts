@@ -153,7 +153,7 @@ export class BlockIndexer {
 
       if (e instanceof YMapEvent) {
         if (e.target !== e.currentTarget) {
-          // add 'elements' to 'affine:surface' or add 'prop:xywh' to 'affine:frame'
+          // add 'elements' to 'affine:surface' or add 'prop:xywh' to 'affine:note'
           if (e.keysChanged.has('prop:text')) {
             // update block text by `page.updateBlock(paragraph, { text: new page.Text() })` API
             const blockId = e.path[0] as string;

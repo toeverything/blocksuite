@@ -7,7 +7,7 @@ import { sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
+import type { NoteBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
@@ -23,16 +23,16 @@ import {
   waitNextFrame,
 } from './misc.js';
 
-export async function getFrameRect(
+export async function getNoteRect(
   page: Page,
-  ids: { pageId: string; frameId: string; paragraphId: string }
+  ids: { pageId: string; noteId: string; paragraphId: string }
 ) {
   const xywh: string | null = await page.evaluate(
     ([id]) => {
       const page = window.workspace.getPage('page0');
-      const block = page?.getBlockById(id.frameId);
-      if (block?.flavour === 'affine:frame') {
-        return (block as FrameBlockModel).xywh;
+      const block = page?.getBlockById(id.noteId);
+      if (block?.flavour === 'affine:note') {
+        return (block as NoteBlockModel).xywh;
       } else {
         return null;
       }
@@ -306,19 +306,19 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
   return pickedColors;
 }
 
-export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
+export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
   const editor = getEditorLocator(page);
-  const frame = editor.locator(`affine-frame[data-block-id="${frameId}"]`);
-  const bound = await frame.boundingBox();
+  const note = editor.locator(`affine-note[data-block-id="${noteId}"]`);
+  const bound = await note.boundingBox();
   if (!bound) {
-    throw new Error(`Missing frame: ${frameId}`);
+    throw new Error(`Missing note: ${noteId}`);
   }
   return bound;
 }
 
-export async function getAllFrames(page: Page) {
+export async function getAllNotes(page: Page) {
   return await page.evaluate(() => {
-    return document.querySelectorAll('affine-frame');
+    return document.querySelectorAll('affine-note');
   });
 }
 
@@ -331,13 +331,13 @@ export async function countBlock(page: Page, flavour: string) {
   );
 }
 
-export async function activeFrameInEdgeless(page: Page, frameId: string) {
-  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+export async function activeNoteInEdgeless(page: Page, noteId: string) {
+  const bound = await getNoteBoundBoxInEdgeless(page, noteId);
   await page.mouse.dblclick(bound.x + 8, bound.y + 8);
 }
 
-export async function selectFrameInEdgeless(page: Page, frameId: string) {
-  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+export async function selectNoteInEdgeless(page: Page, noteId: string) {
+  const bound = await getNoteBoundBoxInEdgeless(page, noteId);
   await page.mouse.click(bound.x, bound.y);
 }
 
@@ -456,7 +456,7 @@ type Action =
   | 'bringForward'
   | 'sendBackward'
   | 'sendToBack'
-  | 'changeFrameColor'
+  | 'changeNoteColor'
   | 'changeShapeFillColor'
   | 'changeShapeStrokeColor'
   | 'changeShapeStrokeStyles'
@@ -516,9 +516,9 @@ export async function triggerComponentToolbarAction(
       await actionButton.click();
       break;
     }
-    case 'changeFrameColor': {
+    case 'changeNoteColor': {
       const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-frame-button'
+        'edgeless-change-note-button'
       );
       await button.click();
       break;
@@ -561,12 +561,12 @@ export async function triggerComponentToolbarAction(
   }
 }
 
-export async function changeEdgelessFrameBackground(
+export async function changeEdgelessNoteBackground(
   page: Page,
   color: CssVariableName
 ) {
   const colorButton = page.locator(
-    `edgeless-change-frame-button .color-unit[aria-label="${color}"]`
+    `edgeless-change-note-button .color-unit[aria-label="${color}"]`
   );
   await colorButton.click();
 }

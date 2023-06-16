@@ -5,14 +5,14 @@ import {
   getBookmarkInitialProps,
   getEdgelessPage,
   getServiceOrRegister,
-  tryUpdateFrameSize,
+  tryUpdateNoteSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
   type BlockComponentElement,
-  getClosestFrameBlockElementById,
+  getClosestNoteBlockElementById,
   getCurrentBlockRange,
-  getHoveringFrame,
+  getHoveringNote,
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
@@ -124,7 +124,7 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         if (focusId) {
           asyncFocusRichText(page, focusId);
-          tryUpdateFrameSize(page, 1);
+          tryUpdateNoteSize(page, 1);
         }
         return;
       }
@@ -133,22 +133,22 @@ export const createBlockHub: (
       const pageBlock = getEdgelessPage(page);
       assertExists(pageBlock);
 
-      let frameId;
+      let noteId;
       if (focusId && parentId) {
-        const targetFrameBlock = getClosestFrameBlockElementById(
+        const targetNoteBlock = getClosestNoteBlockElementById(
           parentId,
           pageBlock
         ) as BlockComponentElement;
-        assertExists(targetFrameBlock);
-        frameId = targetFrameBlock.model.id;
+        assertExists(targetNoteBlock);
+        noteId = targetNoteBlock.model.id;
       } else {
-        // Creates new frame block on blank area.
-        const result = pageBlock.addNewFrame(
+        // Creates new note block on blank area.
+        const result = pageBlock.addNewNote(
           models,
           point,
           isDatabase ? { width: 752 } : undefined
         );
-        frameId = result.frameId;
+        noteId = result.noteId;
         focusId = result.ids[0];
         const model = page.getBlockById(focusId);
         assertExists(model);
@@ -159,7 +159,7 @@ export const createBlockHub: (
           service.initDatabaseBlock(page, model, model.id);
         }
       }
-      pageBlock.setSelection(frameId, true, focusId, point);
+      pageBlock.setSelection(noteId, true, focusId, point);
     },
     onDragStart: () => {
       if (editor.mode === 'page') {
@@ -179,7 +179,7 @@ export const createBlockHub: (
         return getAllowSelectedBlocks(edgelessPageBlock.model);
       }
     },
-    getHoveringFrameState: (point: Point) => {
+    getHoveringNoteState: (point: Point) => {
       const state = {
         scale: 1,
       } as { container?: Element; rect?: Rect; scale: number };
@@ -196,7 +196,7 @@ export const createBlockHub: (
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
         state.scale = edgelessPageBlock.surface.viewport.zoom;
-        const container = getHoveringFrame(point);
+        const container = getHoveringNote(point);
         if (container) {
           state.rect = Rect.fromDOM(container);
           state.container = container;

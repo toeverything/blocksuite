@@ -20,15 +20,15 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
   });
   page.addBlock('affine:surface', {}, pageBlockId);
 
-  // Add frame block inside page block
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  // Add note block inside page block
+  const noteId = page.addBlock('affine:note', {}, pageBlockId);
 
   const selection: SelectTag[] = [
     { id: nanoid(), value: 'Done', color: 'var(--affine-tag-white)' },
     { id: nanoid(), value: 'TODO', color: 'var(--affine-tag-pink)' },
     { id: nanoid(), value: 'WIP', color: 'var(--affine-tag-blue)' },
   ];
-  // Add database block inside frame block
+  // Add database block inside note block
   const databaseId = page.addBlock(
     'affine:database',
     {
@@ -37,7 +37,7 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
       titleColumnName: 'Title',
       titleColumnWidth: 200,
     },
-    frameId
+    noteId
   );
   const database = page.getBlockById(databaseId) as DatabaseBlockModel;
   const col1 = database.updateColumn(numberHelper.create('Number'));
@@ -82,7 +82,7 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
   });
 
   // Add a paragraph after database
-  page.addBlock('affine:paragraph', {}, frameId);
+  page.addBlock('affine:paragraph', {}, noteId);
   database.addView('table');
   page.resetHistory();
 };

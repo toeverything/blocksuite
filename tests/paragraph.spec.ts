@@ -372,7 +372,7 @@ test('update paragraph with children to head type', async ({ page }) => {
 
 test('should indent and unindent works with children', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await pressEnter(page);
   await type(page, '012');
@@ -389,7 +389,7 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -410,8 +410,8 @@ test('should indent and unindent works with children', async ({ page }) => {
       prop:type="text"
     />
   </affine:paragraph>
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 
   // unindent
@@ -421,7 +421,7 @@ test('should indent and unindent works with children', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -443,15 +443,15 @@ test('should indent and unindent works with children', async ({ page }) => {
       prop:type="text"
     />
   </affine:paragraph>
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 
 // https://github.com/toeverything/blocksuite/issues/364
 test('paragraph with child block should work at enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, '123');
   await pressEnter(page);
@@ -462,7 +462,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -475,8 +475,8 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       prop:type="text"
     />
   </affine:paragraph>
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
   await focusRichText(page, 0);
   await pressEnter(page);
@@ -484,7 +484,7 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -501,8 +501,8 @@ test('paragraph with child block should work at enter', async ({ page }) => {
       prop:type="text"
     />
   </affine:paragraph>
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 
@@ -510,7 +510,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, '123');
   await pressEnter(page);
@@ -523,13 +523,13 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await waitNextFrame(page);
   await type(page, 'now');
 
-  // TODO FIXME wait for frame bounding box update
+  // TODO FIXME wait for note bounding box update
   await page.waitForTimeout(20);
 
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -546,8 +546,8 @@ test('should delete paragraph block child can hold cursor in correct position', 
       prop:type="text"
     />
   </affine:paragraph>
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 
@@ -767,20 +767,20 @@ test('press arrow down should move caret to the start of line', async ({
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlock('affine:frame', {}, pageId);
+    const note = page.addBlock('affine:note', {}, pageId);
     page.addBlock(
       'affine:paragraph',
       {
         text: new page.Text('0'.repeat(100)),
       },
-      frame
+      note
     );
     page.addBlock(
       'affine:paragraph',
       {
         text: new page.Text('1'),
       },
-      frame
+      note
     );
   });
 
@@ -802,15 +802,15 @@ test('press arrow up in the second line should move caret to the first line', as
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlock('affine:frame', {}, pageId);
+    const note = page.addBlock('affine:note', {}, pageId);
     const delta = Array.from({ length: 120 }, (v, i) => {
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
     });
     const text = page.Text.fromDelta(delta);
-    page.addBlock('affine:paragraph', { text }, frame);
-    page.addBlock('affine:paragraph', {}, frame);
+    page.addBlock('affine:paragraph', { text }, note);
+    page.addBlock('affine:paragraph', {}, note);
   });
 
   // Focus the empty paragraph
@@ -853,8 +853,8 @@ test('press arrow down in indent line should not move caret to the start of line
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlock('affine:frame', {}, pageId);
-    const p1 = page.addBlock('affine:paragraph', {}, frame);
+    const note = page.addBlock('affine:note', {}, pageId);
+    const p1 = page.addBlock('affine:paragraph', {}, note);
     const p2 = page.addBlock('affine:paragraph', {}, p1);
     page.addBlock('affine:paragraph', {}, p2);
     page.addBlock(
@@ -862,7 +862,7 @@ test('press arrow down in indent line should not move caret to the start of line
       {
         text: new page.Text('0'),
       },
-      frame
+      note
     );
   });
 
@@ -933,20 +933,20 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
       const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
-      const frame = page.addBlock('affine:frame', {}, pageId);
+      const note = page.addBlock('affine:note', {}, pageId);
       page.addBlock(
         'affine:paragraph',
         {
           text: new page.Text('This is the 2nd last block.'),
         },
-        frame
+        note
       );
       page.addBlock(
         'affine:paragraph',
         {
           text: new page.Text('This is the last block.'),
         },
-        frame
+        note
       );
     });
   });

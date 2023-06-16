@@ -3,7 +3,7 @@ import './utils/declare-test-window.js';
 import { expect } from '@playwright/test';
 
 import {
-  addFrameByClick,
+  addNoteByClick,
   captureHistory,
   click,
   disconnectByClick,
@@ -65,10 +65,10 @@ test(scoped`basic init with external text`, async ({ page }) => {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text('hello'),
     });
-    const frame = page.addBlock('affine:frame', {}, pageId);
+    const note = page.addBlock('affine:note', {}, pageId);
 
     const text = new page.Text('world');
-    page.addBlock('affine:paragraph', { text }, frame);
+    page.addBlock('affine:paragraph', { text }, note);
 
     const delta = [
       { insert: 'foo ' },
@@ -79,7 +79,7 @@ test(scoped`basic init with external text`, async ({ page }) => {
       {
         text: page.Text.fromDelta(delta),
       },
-      frame
+      note
     );
   });
 
@@ -377,11 +377,11 @@ test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await assertRichTexts(page, ['hello4']);
 });
 
-test(scoped`undo multi frames`, async ({ page }) => {
+test(scoped`undo multi notes`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await addFrameByClick(page);
+  await addNoteByClick(page);
   await assertRichTexts(page, ['', '']);
 
   await undoByClick(page);
@@ -474,7 +474,7 @@ test(
   }
 );
 
-test('when no frame block, click editing area auto add a new frame block', async ({
+test('when no note block, click editing area auto add a new note block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -484,16 +484,16 @@ test('when no frame block, click editing area auto add a new frame block', async
   await click(page, { x: 100, y: 280 });
   await pressBackspace(page);
   await switchEditorMode(page);
-  let frame = await page.evaluate(() => {
-    return document.querySelector('affine-frame');
+  let note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
   });
-  expect(frame).toBeNull();
+  expect(note).toBeNull();
   await click(page, { x: 100, y: 280 });
 
-  frame = await page.evaluate(() => {
-    return document.querySelector('affine-frame');
+  note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
   });
-  expect(frame).not.toBeNull();
+  expect(note).not.toBeNull();
 });
 
 test(scoped`automatic identify url text`, async ({ page }) => {
@@ -506,7 +506,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -521,7 +521,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
       }
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });

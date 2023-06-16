@@ -14,7 +14,7 @@ import {
 import { assertRichTexts } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('block hub should drag and drop a card into existing frame', async ({
+test('block hub should drag and drop a card into existing note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -46,7 +46,7 @@ test('block hub should drag and drop a card into existing frame', async ({
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
 });
 
-test('block hub should add new frame when dragged to blank area', async ({
+test('block hub should add new note when dragged to blank area', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

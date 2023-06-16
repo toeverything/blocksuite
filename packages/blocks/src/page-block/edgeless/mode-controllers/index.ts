@@ -31,7 +31,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   }
 
   protected get _blocks(): TopLevelBlockModel[] {
-    return this._edgeless.sortedFrames;
+    return this._edgeless.sortedNotes;
   }
 
   public abstract mouseMode: Mode;

@@ -301,13 +301,13 @@ export class DragHandle extends WithDisposable(LitElement) {
     event: PointerEventState,
     modelState: EditingState | null
   ) {
-    const frameBlock = this._container.querySelector(
-      '.affine-frame-block-container'
+    const noteBlock = this._container.querySelector(
+      '.affine-note-block-container'
     );
-    assertExists(frameBlock);
-    const frameBlockRect = frameBlock.getBoundingClientRect();
+    assertExists(noteBlock);
+    const noteBlockRect = noteBlock.getBoundingClientRect();
     // See https://github.com/toeverything/blocksuite/issues/1611
-    if (event.raw.clientY < frameBlockRect.y) {
+    if (event.raw.clientY < noteBlockRect.y) {
       this.hide();
     }
 

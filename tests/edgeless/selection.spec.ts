@@ -1,6 +1,6 @@
 import * as actions from '../utils/actions/edgeless.js';
 import {
-  getFrameBoundBoxInEdgeless,
+  getNoteBoundBoxInEdgeless,
   setMouseMode,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
@@ -21,7 +21,7 @@ import {
 import {
   assertEdgelessHoverRect,
   assertEdgelessSelectedRect,
-  assertSelectionInFrame,
+  assertSelectionInNote,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -181,7 +181,7 @@ test('selection box of shape element sync on fast dragging', async ({
   await assertEdgelessHoverRect(page, [650, 450, 100, 100]);
 });
 
-test('when the selection is always a frame, it should remain in an active state', async ({
+test('when the selection is always a note, it should remain in an active state', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -189,14 +189,14 @@ test('when the selection is always a frame, it should remain in an active state'
   await initThreeParagraphs(page);
 
   await switchEditorMode(page);
-  const bound = await getFrameBoundBoxInEdgeless(page, ids.frameId);
+  const bound = await getNoteBoundBoxInEdgeless(page, ids.noteId);
 
   await setMouseMode(page, 'note');
 
-  const newFrameX = bound.x;
-  const newFrameY = bound.y + bound.height + 100;
+  const newNoteX = bound.x;
+  const newNoteY = bound.y + bound.height + 100;
   // add text
-  await page.mouse.click(newFrameX, newFrameY);
+  await page.mouse.click(newNoteX, newNoteY);
   await waitForVirgoStateUpdated(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
@@ -206,7 +206,7 @@ test('when the selection is always a frame, it should remain in an active state'
   await assertEdgelessSelectedRect(page, [46, 410, 448, 112]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
-  await assertSelectionInFrame(page, ids.frameId);
+  await assertSelectionInNote(page, ids.noteId);
 });
 
 test.describe('resize shapes', () => {

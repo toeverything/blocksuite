@@ -5,7 +5,7 @@ import { Slot } from '@blocksuite/store';
 import { getBlockElementByModel } from '../../__internal__/utils/query.js';
 import { almostEqual, throttle } from '../../__internal__/utils/std.js';
 
-export class FrameResizeObserver {
+export class NoteResizeObserver {
   private _observer: ResizeObserver;
   /**
    * Observation will fire when observation starts if Element is being rendered, and Element’s size is not 0,0.
@@ -30,7 +30,7 @@ export class FrameResizeObserver {
   }
 
   private _onResize = (entries: ResizeObserverEntry[]) => {
-    const resizedFrames = new Map<string, DOMRect>();
+    const resizedNotes = new Map<string, DOMRect>();
     entries.forEach(entry => {
       const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
       const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
@@ -48,11 +48,11 @@ export class FrameResizeObserver {
         }
       }
       this._lastRects.set(id, entry.contentRect);
-      resizedFrames.set(id, entry.contentRect);
+      resizedNotes.set(id, entry.contentRect);
     });
 
-    if (resizedFrames.size) {
-      this.slots.resize.emit(resizedFrames);
+    if (resizedNotes.size) {
+      this.slots.resize.emit(resizedNotes);
     }
   };
 
@@ -63,7 +63,7 @@ export class FrameResizeObserver {
       unCachedKeys.delete(blockId);
       const blockElement = getBlockElementByModel(model);
       const container = blockElement?.querySelector(
-        '.affine-frame-block-container'
+        '.affine-note-block-container'
       );
 
       const cachedElement = this._cachedElements.get(blockId);

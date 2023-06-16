@@ -35,9 +35,9 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   });
   const surfaceBlockId = page.addBlock('affine:surface', {}, pageBlockId);
 
-  // Add frame block inside page block
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  // Import preset markdown content inside frame block
+  // Add note block inside page block
+  const noteId = page.addBlock('affine:note', {}, pageBlockId);
+  // Import preset markdown content inside note block
   const contentParser = new window.ContentParser(page);
 
   addShapeElement(page, surfaceBlockId, {
@@ -57,7 +57,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     strokeStyle: StrokeStyle.Solid,
     roughness: 2,
   });
-  await contentParser.importMarkdown(presetMarkdown, frameId);
+  await contentParser.importMarkdown(presetMarkdown, noteId);
   page.resetHistory();
 };
 

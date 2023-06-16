@@ -119,7 +119,7 @@ test('drag blank line into text area', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -138,7 +138,7 @@ test('drag blank line into text area', async ({ page }) => {
       prop:text="789"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -179,7 +179,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -198,7 +198,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
       prop:text="789"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
   await expect(blockHubTextContainer).toBeHidden();
@@ -238,7 +238,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -258,7 +258,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
       prop:text="789"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
   await expect(blockHubListContainer).toBeHidden();
@@ -329,7 +329,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       description: 'https://github.com/toeverything/AFFiNE/issues/2125',
     });
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
 
     await page.click('.block-hub-menu-container [role="menuitem"]');
     await page.waitForTimeout(200);
@@ -348,7 +348,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     await assertStoreMatchJSX(
       page,
       /*xml*/ `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -358,8 +358,8 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
   <affine:paragraph
     prop:type="text"
   />
-</affine:frame>`,
-      frameId
+</affine:note>`,
+      noteId
     );
   });
 
@@ -367,7 +367,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     page,
   }) => {
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
 
     await page.click('.block-hub-menu-container [role="menuitem"]');
     await page.waitForTimeout(200);
@@ -386,15 +386,15 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     await assertStoreMatchJSX(
       page,
       /*xml*/ `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
   <affine:paragraph
     prop:type="text"
   />
-</affine:frame>`,
-      frameId
+</affine:note>`,
+      noteId
     );
   });
 });

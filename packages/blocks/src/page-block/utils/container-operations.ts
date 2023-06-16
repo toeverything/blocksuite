@@ -573,13 +573,13 @@ export async function onModelElementUpdated(
   }
 }
 
-export function tryUpdateFrameSize(page: Page, zoom: number) {
+export function tryUpdateNoteSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const frames = page.root.children.filter(
-      child => child.flavour === 'affine:frame'
+    const notes = page.root.children.filter(
+      child => child.flavour === 'affine:note'
     ) as TopLevelBlockModel[];
-    frames.forEach(model => {
+    notes.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.
       // if (matchFlavours(model, ['affine:shape'])) return;

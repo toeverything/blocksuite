@@ -258,7 +258,7 @@ test('should clean slash string after soft enter', async ({ page }) => {
 test.describe('slash search', () => {
   test('should slash menu search and keyboard works', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
     await focusRichText(page);
     const slashMenu = page.locator(`.slash-menu`);
     const slashItems = slashMenu.locator('format-bar-button');
@@ -273,7 +273,7 @@ test.describe('slash search', () => {
     await assertStoreMatchJSX(
       page,
       `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -281,8 +281,8 @@ test.describe('slash search', () => {
     prop:checked={false}
     prop:type="todo"
   />
-</affine:frame>`,
-      frameId
+</affine:note>`,
+      noteId
     );
 
     await type(page, '/');

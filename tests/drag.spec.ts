@@ -138,7 +138,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -179,7 +179,7 @@ test('move to the last block of each level in multi-level nesting', async ({
         />
       </affine:list>
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -190,7 +190,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -231,7 +231,7 @@ test('move to the last block of each level in multi-level nesting', async ({
         />
       </affine:list>
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -248,7 +248,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -289,7 +289,7 @@ test('move to the last block of each level in multi-level nesting', async ({
         prop:type="bulleted"
       />
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -307,7 +307,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -348,7 +348,7 @@ test('move to the last block of each level in multi-level nesting', async ({
       prop:text="A"
       prop:type="bulleted"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -430,7 +430,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -471,7 +471,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
         />
       </affine:list>
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -495,7 +495,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -536,7 +536,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
         />
       </affine:list>
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -567,7 +567,7 @@ test('hide drag handle when mouse is hovering over the title', async ({
 
   const rect = await getBoundingClientRect(
     page,
-    '.affine-frame-block-container'
+    '.affine-note-block-container'
   );
   const dragHandle = page.locator('affine-drag-handle');
   // When there is a gap between paragraph blocks, it is the correct behavior for the drag handle to appear
@@ -859,7 +859,7 @@ test('should clear the currently selected block when clicked again', async ({
   expect(editorRect0).toEqual(selectedBlockRect);
 });
 
-test('should support moving blocks from multiple frames', async ({ page }) => {
+test('should support moving blocks from multiple notes', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await page.evaluate(() => {
     const { page } = window;
@@ -870,13 +870,13 @@ test('should support moving blocks from multiple frames', async ({ page }) => {
     page.addBlock('affine:surface', {}, pageId);
 
     ['123', '456', '789', '987', '654', '321'].forEach(text => {
-      const frameId = page.addBlock('affine:frame', {}, pageId);
+      const noteId = page.addBlock('affine:note', {}, pageId);
       page.addBlock(
         'affine:paragraph',
         {
           text: new page.Text(text),
         },
-        frameId
+        noteId
       );
     });
 
