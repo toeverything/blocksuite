@@ -118,8 +118,8 @@ test('should modify the value when the input loses focus', async ({ page }) => {
 
   await clickDatabaseOutside(page);
   const cell = getFirstColumnCell(page, 'number');
-  const text = await cell.inputValue();
-  expect(text).toBe('1');
+  const text = await cell.textContent();
+  expect(text?.trim()).toBe('1');
 });
 
 test('should rich-text column support soft enter', async ({ page }) => {
@@ -274,7 +274,7 @@ test('should database title and rich-text support undo/redo', async ({
   await initDatabaseColumn(page);
   await switchColumnType(page, 'rich-text');
   await initDatabaseDynamicRowWithData(page, '123', true);
-
+  await pressArrowLeft(page);
   await undoByKeyboard(page);
   await assertDatabaseCellRichTexts(page, { text: '' });
   await redoByKeyboard(page);
@@ -441,7 +441,7 @@ test.describe('switch column type', () => {
     });
 
     await initDatabaseDynamicRowWithData(page, '123abc');
-    expect(await cell.inputValue()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
   });
 
   test('switch to rich-text', async ({ page }) => {
@@ -504,6 +504,7 @@ test.describe('switch column type', () => {
     await initDatabaseDynamicRowWithData(page, '123abc', true);
     getFirstColumnCell(page, 'number');
     await pressEnter(page);
+    await clickDatabaseOutside(page);
     await waitNextFrame(page, 100);
     await assertDatabaseCellNumber(page, {
       text: '123',
@@ -528,7 +529,7 @@ test.describe('switch column type', () => {
 
     await initDatabaseDynamicRowWithData(page, '123', true);
     const cell = getFirstColumnCell(page, 'number');
-    expect(await cell.inputValue()).toBe('123');
+    expect((await cell.textContent())?.trim()).toBe('123');
 
     await switchColumnType(page, 'select');
     await initDatabaseDynamicRowWithData(page, 'abc');
@@ -577,7 +578,7 @@ test.describe('switch column type', () => {
       width: progressBgWidth,
     } = await getBoundingBox(progressBg);
     await page.mouse.move(progressBgX, progressBgY);
-
+    await page.mouse.click(progressBgX, progressBgY);
     const dragHandle = page.locator('.affine-database-progress-drag-handle');
     const {
       x: dragX,
@@ -610,7 +611,7 @@ test.describe('select column tag action', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
     await initDatabaseDynamicRowWithData(page, 'abc');
-
+    await pressEscape(page);
     const { cellSelected, selectOption, saveIcon } =
       await performSelectColumnTagAction(page, 'rename');
     await waitNextFrame(page);
@@ -634,7 +635,7 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     const { selectOption } = await performSelectColumnTagAction(page, 'rename');
     await waitNextFrame(page);
     await type(page, '456');
@@ -659,7 +660,7 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     const { cellSelected } = await performSelectColumnTagAction(page, 'delete');
     await clickDatabaseOutside(page);
     expect(await cellSelected.count()).toBe(0);
@@ -671,7 +672,7 @@ test.describe('select column tag action', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     await performSelectColumnTagAction(page, 'change-color', 'hover');
     await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
   });
@@ -991,4 +992,9 @@ test('should save the previous header being edited when editing the next column 
   const { renameIcon } = await getDatabaseHeaderColumn(page, 1);
   await renameIcon.click();
   expect(await textElement.innerText()).toBe('123');
+
+  await titleRenameIcon.click();
+  await type(page, '456');
+  await initDatabaseColumn(page);
+  expect(await textElement.innerText()).toBe('456');
 });

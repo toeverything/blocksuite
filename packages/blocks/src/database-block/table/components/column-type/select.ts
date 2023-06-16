@@ -1,13 +1,26 @@
-import './multi-tag-select.js';
+import './components/multi-tag-select.js';
+import './components/multi-tag-view.js';
 
-import { customElement } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
-import type { SelectColumnData } from '../../../../common/column-manager.js';
-import { DatabaseCellElement } from '../../../register.js';
+import type { SelectColumnData } from '../../../common/column-manager.js';
 import type { SelectTag } from '../../../types.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-@customElement('affine-database-select-cell-editing')
+class SelectCell extends DatabaseCellElement<string[], SelectColumnData> {
+  static override tag = literal`affine-database-select-cell`;
+
+  override render() {
+    const value = this.value ? [this.value] : [];
+    return html`
+      <affine-database-multi-tag-view
+        .value="${value}"
+        .options="${this.columnData.options}"
+      ></affine-database-multi-tag-view>
+    `;
+  }
+}
+
 export class SelectCellEditing extends DatabaseCellElement<
   string,
   SelectColumnData
@@ -28,16 +41,14 @@ export class SelectCellEditing extends DatabaseCellElement<
   };
 
   _editComplete = () => {
-    this.setEditing(false);
+    this._setEditing(false);
   };
 
   _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.updateColumnProperty(oldProperty => {
+    this.updateColumnData(data => {
       return {
-        data: {
-          ...oldProperty.data,
-          options: update(oldProperty.data.options),
-        },
+        ...data,
+        options: update(data.options),
       };
     });
   };
@@ -71,10 +82,21 @@ export class SelectCellEditing extends DatabaseCellElement<
         .newTag="${this._newTag}"
         .deleteTag="${this._deleteTag}"
         .changeTag="${this._changeTag}"
-        .container="${this.container}"
+        .container="${this.parentElement}"
         .page="${this.page}"
       >
       </affine-database-multi-tag-select>
     `;
   }
 }
+
+export const SelectColumnRenderer = defineColumnRenderer(
+  'select',
+  {
+    Cell: SelectCell,
+    CellEditing: SelectCellEditing,
+  },
+  {
+    displayName: 'Select',
+  }
+);

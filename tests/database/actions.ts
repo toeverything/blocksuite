@@ -211,9 +211,9 @@ export async function assertDatabaseCellRichTexts(
       const cell = row?.querySelector(
         `.database-cell:nth-child(${columnIndex + 1})`
       );
-      const richText = cell?.querySelector<RichText>(
-        'affine-database-rich-text-cell'
-      );
+      const richText =
+        cell?.querySelector<RichText>('affine-database-rich-text-cell') ??
+        cell?.querySelector<RichText>('affine-database-rich-text-cell-editing');
       if (!richText) throw new Error('Missing database rich text cell');
       return richText.vEditor.yText.toString();
     },
@@ -241,8 +241,8 @@ export async function assertDatabaseCellNumber(
     .locator('.database-cell')
     .nth(columnIndex)
     .locator('.number')
-    .inputValue();
-  expect(actualText).toEqual(text);
+    .textContent();
+  expect(actualText?.trim()).toEqual(text);
 }
 
 export async function assertDatabaseTitleText(page: Page, text: string) {

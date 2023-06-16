@@ -15,9 +15,9 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
       z-index: 1;
       box-sizing: border-box;
       width: 100%;
-      border: 2px solid var(--affine-primary-color);
       border-radius: 2px;
       background: var(--affine-primary-color-04);
+      pointer-events: none;
     }
   `;
 

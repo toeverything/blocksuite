@@ -1,13 +1,11 @@
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import type { Column, ColumnType, SetValueOption } from './types.js';
-
-export abstract class TableViewCell extends ShadowlessElement {
-  abstract readonly cellType: ColumnType;
-}
+import { onClickOutside } from '../utils.js';
+import type { ColumnType, SetValueOption } from './types.js';
 
 export abstract class DatabaseCellElement<
   Value,
@@ -17,25 +15,64 @@ export abstract class DatabaseCellElement<
 
   @property()
   page!: Page;
+  @property()
+  root!: BlockSuiteRoot;
 
   @property()
-  updateColumnProperty!: (
-    apply: (oldProperty: Column<Data>) => Partial<Column<Data>>
-  ) => void;
-  @property()
   readonly!: boolean;
+  @property()
+  setHeight!: (height: number) => void;
+
+  @property()
+  updateColumnData!: (apply: (oldProperty: Data) => Partial<Data>) => void;
   @property()
   columnData!: Data;
   @property()
   value: Value | null = null;
   @property()
   onChange!: (value: Value | null, ops?: SetValueOption) => void;
+
   @property()
-  setHeight!: (height: number) => void;
+  isEditing!: boolean;
+
   @property()
-  setEditing!: (editing: boolean) => void;
-  @property()
-  container!: HTMLElement;
+  protected setEditing!: (editing: boolean) => void;
+
+  protected _setEditing(editing: boolean) {
+    this.setEditing(editing);
+  }
+
+  public enterEditMode() {
+    this._setEditing(true);
+  }
+
+  public exitEditMode() {
+    this._setEditing(false);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.width = '100%';
+    this.style.height = '100%';
+    this._disposables.addFromEvent(this, 'click', () => {
+      setTimeout(() => {
+        this._setEditing(true);
+      });
+    });
+    const cancelClickOutside = onClickOutside(
+      this,
+      () => {
+        if (this.isEditing) {
+          this._setEditing(false);
+        }
+      },
+      'mousedown',
+      true
+    );
+    this._disposables.add({
+      dispose: cancelClickOutside,
+    });
+  }
 }
 
 export interface ColumnRenderer<
@@ -66,6 +103,16 @@ export function defineColumnRenderer<
     displayName: string;
   }
 ): ColumnRenderer<Type, Property, Value> {
+  customElements.define(
+    components.Cell.tag._$litStatic$,
+    components.Cell as never
+  );
+  if (components.CellEditing) {
+    customElements.define(
+      components.CellEditing.tag._$litStatic$,
+      components.CellEditing as never
+    );
+  }
   return {
     displayName: config.displayName,
     type,

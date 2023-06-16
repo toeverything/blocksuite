@@ -165,14 +165,17 @@ export class RowSelectionManager {
       this._onRowSelectionDelete();
     } else if (key === 'Escape') {
       const service = getService('affine:database');
+      const rowSelection = service.getLastRowSelection();
+      if (rowSelection) {
+        service.clearRowSelection();
+        return;
+      }
       const cellSelection = service.getLastCellSelection();
-      if (cellSelection) {
+      if (cellSelection && !cellSelection.isEditing) {
         const {
           databaseId,
           coords: [coord],
         } = cellSelection;
-        // clear cell selection
-        service.clearCellLevelSelection();
 
         // select row
         const database = getDatabaseById(databaseId);

@@ -1,4 +1,5 @@
 import { dragBetweenCoords } from '../utils/actions/drag.js';
+import { pressEnter, pressEscape, type } from '../utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   getBoundingBox,
@@ -90,10 +91,13 @@ test.describe('row-level selection', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123123', true);
-    await initDatabaseDynamicRowWithData(page, '456456');
-    await initDatabaseDynamicRowWithData(page, 'abcabc');
-    await initDatabaseDynamicRowWithData(page, 'defdef');
-
+    await type(page, '456456');
+    await pressEnter(page);
+    await type(page, 'abcabc');
+    await pressEnter(page);
+    await type(page, 'defdef');
+    await pressEnter(page);
+    await pressEscape(page);
     const titleColumn = getDatabaseBodyCell(page, {
       rowIndex: 0,
       columnIndex: 0,

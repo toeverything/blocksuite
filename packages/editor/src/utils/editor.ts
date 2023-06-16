@@ -153,12 +153,16 @@ export const createBlockHub: (
         noteId = targetNoteBlock.model.id;
       } else {
         // Creates new note block on blank area.
-        const result = pageBlock.addNewNote(models, point);
+        const result = pageBlock.addNewNote(
+          models,
+          point,
+          isDatabase ? { width: 752 } : undefined
+        );
         noteId = result.noteId;
         focusId = result.ids[0];
         const model = page.getBlockById(focusId);
         assertExists(model);
-        if (model.flavour === 'affine:database') {
+        if (isDatabase) {
           const service = await getServiceOrRegister<'affine:database'>(
             props.flavour
           );

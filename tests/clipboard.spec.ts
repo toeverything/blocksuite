@@ -25,6 +25,7 @@ import {
   pasteContent,
   pressBackspace,
   pressEnter,
+  pressEscape,
   pressShiftTab,
   pressSpace,
   pressTab,
@@ -560,7 +561,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   // init database columns and rows
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', true);
-
+  await pressEscape(page);
   await selectAllByKeyboard(page);
   await waitNextFrame(page);
   await selectAllByKeyboard(page);
