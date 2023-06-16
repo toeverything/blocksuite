@@ -226,7 +226,7 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
 
   // Find the first model that can be indented
   let firstIndentIndex = -1;
-  let previousSibling: BaseBlockModel | null;
+  let previousSibling: BaseBlockModel | null = null;
   for (let i = 0; i < models.length; i++) {
     previousSibling = page.getPreviousSibling(models[i]);
     if (previousSibling && supportsChildren(previousSibling)) {
@@ -236,9 +236,7 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
   }
 
   // No model can be indented
-  if (firstIndentIndex === -1) {
-    return;
-  }
+  if (firstIndentIndex === -1) return;
 
   page.captureSync();
   // Models waiting to be indented
@@ -246,9 +244,9 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
   indentModels.forEach(model => {
     const parent = page.getParent(model);
     assertExists(parent);
-    // Only indent the model which parent is not in the indentModels
-    // When parent is in the indentModels, it means the parent has been indented
-    // And the model has be intended with its parent
+    // Only indent the model which parent is not in the `indentModels`
+    // When parent is in the `indentModels`, it means the parent has been indented
+    // And the model should be indented with its parent
     if (!indentModels.includes(parent)) {
       previousSibling = page.getPreviousSibling(model);
       // If previous sibling is not found or does not support children
