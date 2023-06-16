@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import type { BookmarkBlockModel } from '../../bookmark-block/index.js';
 export const createImageInputElement = () => {
   const fileInput: HTMLInputElement = document.createElement('input');
   fileInput.type = 'file';
@@ -59,12 +60,17 @@ export const uploadImageFromLocal = async (
   fileInput.click();
   return await pending;
 };
-export const getBookmarkInitialProps = async (): Promise<Array<Props>> => {
-  const baseProps: Props = { flavour: 'affine:bookmark', url: '' };
+
+type BookmarkProps = Partial<BookmarkBlockModel>;
+export const getBookmarkInitialProps = async (): Promise<
+  Array<BookmarkProps>
+> => {
   const bookmarkCreateModal = document.createElement('bookmark-create-modal');
 
-  let resolvePromise: (value: Array<Props> | PromiseLike<Array<Props>>) => void;
-  const pending = new Promise<Array<Props>>(resolve => {
+  let resolvePromise: (
+    value: Array<BookmarkProps> | PromiseLike<Array<BookmarkProps>>
+  ) => void;
+  const pending = new Promise<Array<BookmarkProps>>(resolve => {
     resolvePromise = resolve;
   });
 
@@ -73,7 +79,7 @@ export const getBookmarkInitialProps = async (): Promise<Array<Props>> => {
     document.body.removeChild(bookmarkCreateModal);
   };
   bookmarkCreateModal.onConfirm = ({ url }) => {
-    resolvePromise([{ ...baseProps, url }]);
+    resolvePromise([{ flavour: 'affine:bookmark', url }]);
     document.body.removeChild(bookmarkCreateModal);
   };
 
