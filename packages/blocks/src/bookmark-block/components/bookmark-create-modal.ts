@@ -16,7 +16,7 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
   onCancel?: () => void;
 
   @property()
-  onConfirm?: ({ url: string }) => void;
+  onConfirm?: (props: { url: string }) => void;
 
   override get id() {
     return 'bookmark-create-modal';
