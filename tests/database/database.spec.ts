@@ -991,4 +991,9 @@ test('should save the previous header being edited when editing the next column 
   const { renameIcon } = await getDatabaseHeaderColumn(page, 1);
   await renameIcon.click();
   expect(await textElement.innerText()).toBe('123');
+
+  await titleRenameIcon.click();
+  await type(page, '456');
+  await initDatabaseColumn(page);
+  expect(await textElement.innerText()).toBe('456');
 });
