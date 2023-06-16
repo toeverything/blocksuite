@@ -156,6 +156,10 @@ const styles = css`
     max-width: 280px;
   }
 
+  .edgeless .new-record > tool-tip {
+    display: none;
+  }
+
   .show-toolbar {
     display: flex;
   }
