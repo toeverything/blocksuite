@@ -30,7 +30,7 @@ import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/ty
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
-  createBookmarkBlock,
+  getBookmarkInitialProps,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
@@ -254,8 +254,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             if (!parent) {
               return;
             }
-            const index = parent.children.indexOf(model);
-            createBookmarkBlock(parent, index + 1);
+            const props = await getBookmarkInitialProps();
+            page.addSiblingBlocks(model, props);
           },
         },
       ],

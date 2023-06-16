@@ -185,24 +185,3 @@ export function convertToDivider(
   }
   return true;
 }
-
-export function createBookmarkBlock(
-  parentModel: BaseBlockModel,
-  index?: number
-) {
-  const { page } = parentModel;
-  const id = page.addBlock(
-    'affine:bookmark',
-    { url: '' },
-    parentModel.id,
-    index
-  );
-  requestAnimationFrame(() => {
-    const model = page.getBlockById(id);
-    const element = getBlockElementByModel(
-      model as BookmarkBlockModel
-    ) as BookmarkBlockComponent;
-    element.slots.openInitialModal.emit();
-  });
-  return id;
-}

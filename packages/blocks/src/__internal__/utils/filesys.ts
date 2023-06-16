@@ -57,6 +57,29 @@ export const uploadImageFromLocal = async (
   fileInput.click();
   return await pending;
 };
+export const getBookmarkInitialProps = async (): Promise<Array<Props>> => {
+  const baseProps: Props = { flavour: 'affine:bookmark', url: '' };
+  const bookmarkCreateModal = document.createElement('bookmark-create-modal');
+
+  let resolvePromise: (value: Array<Props> | PromiseLike<Array<Props>>) => void;
+  const pending = new Promise<Array<Props>>(resolve => {
+    resolvePromise = resolve;
+  });
+
+  bookmarkCreateModal.onCancel = () => {
+    resolvePromise([]);
+    document.body.removeChild(bookmarkCreateModal);
+  };
+  bookmarkCreateModal.onConfirm = ({ url }) => {
+    resolvePromise([{ ...baseProps, url }]);
+    document.body.removeChild(bookmarkCreateModal);
+  };
+
+  document.body.appendChild(bookmarkCreateModal);
+
+  return await pending;
+};
+window.getBookmarkInitialProps = getBookmarkInitialProps;
 
 function readImageSize(file: File) {
   return new Promise<{ width: number; height: number }>(resolve => {
