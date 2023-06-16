@@ -529,7 +529,7 @@ export class HtmlParser {
       )
     ) {
       type = 'todo';
-      checked = checkBoxEl?.classList.contains('checked');
+      checked = checkBoxEl?.classList.contains('checked') ?? false;
     }
     return this._contentParser.getParserHtmlText2Block('commonParser')?.({
       element: element,

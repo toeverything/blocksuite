@@ -129,7 +129,8 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
     },
     {
       flavour: 'affine:list',
-      type: 'bulleted',
+      type: 'todo',
+      checked: false,
       text: [
         { insert: '', attributes: {} },
         { insert: '            ', attributes: {} },
@@ -143,7 +144,8 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
         },
         {
           flavour: 'affine:list',
-          type: 'bulleted',
+          type: 'todo',
+          checked: false,
           text: [
             { insert: '', attributes: {} },
             { insert: '                  ', attributes: {} },
