@@ -33,7 +33,10 @@ export function isEmpty(model: BaseBlockModel): boolean {
     return !found;
   }
   return (
-    !model.text?.length && !model.sourceId && model.flavour !== 'affine:code'
+    !model.text?.length &&
+    !model.sourceId &&
+    model.flavour !== 'affine:code' &&
+    model.flavour !== 'affine:bookmark'
   );
 }
 
