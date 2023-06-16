@@ -58,6 +58,7 @@ const styles = css`
     box-shadow: var(--affine-menu-shadow);
     font-family: var(--affine-font-family);
   }
+
   ${actionStyles}
   .action > svg {
     width: 16px;
@@ -67,19 +68,23 @@ const styles = css`
   .rich-text {
     fill: var(--affine-icon-color);
   }
+
   .column-type {
     padding: 0;
     color: var(--affine-text-secondary-color);
     font-size: 14px;
     cursor: unset;
   }
+
   .column-type:hover {
     background: none;
   }
+
   .selected {
     color: var(--affine-text-emphasis-color);
     background: rgba(0, 0, 0, 0.02);
   }
+
   .selected svg {
     color: var(--affine-text-emphasis-color);
     fill: var(--affine-text-emphasis-color);
@@ -101,10 +106,7 @@ export class ColumnTypePopup extends LitElement {
   columnType: ColumnType | undefined;
 
   @property()
-  columnId!: string;
-
-  @property()
-  changeColumnType!: (columnId: string, type: ColumnType) => void;
+  select!: (type: ColumnType) => void;
 
   override render() {
     return html`
@@ -117,14 +119,14 @@ export class ColumnTypePopup extends LitElement {
           const selected = column.type === this.columnType;
           const onChangeColumnType = () => {
             if (!selected) {
-              this.changeColumnType(this.columnId, column.type);
+              this.select(column.type);
             }
           };
 
           return html`
             <div
               class="action ${column.type} ${selected ? 'selected' : ''}"
-              @click=${onChangeColumnType}
+              @click="${onChangeColumnType}"
             >
               <div class="action-content">
                 ${column.icon}<span>${column.text}</span>

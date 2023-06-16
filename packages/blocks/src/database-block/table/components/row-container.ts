@@ -1,6 +1,7 @@
 import './cell-container.js';
 
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -13,19 +14,10 @@ import type { SearchState } from '../types.js';
 export function DataBaseRowContainer(
   databaseBlock: DatabaseTable,
   columns: TableMixColumn[],
-  filter: (index: number) => boolean,
+  filteredChildren: BaseBlockModel[],
   searchState: SearchState,
   root: BlockSuiteRoot
 ) {
-  const databaseModel = databaseBlock.model;
-  const filteredChildren = databaseModel.children.filter((_, i) => filter(i));
-  const titleColumn: TableMixColumn = {
-    id: 'title',
-    width: databaseModel.titleColumnWidth,
-    name: databaseModel.titleColumnName,
-    type: 'title',
-    data: {},
-  };
   return html`
     <style>
       .affine-database-block-rows {
@@ -68,28 +60,12 @@ export function DataBaseRowContainer(
         filteredChildren,
         child => child.id,
         (child, idx) => {
-          const style = styleMap({
-            width: `${databaseModel.titleColumnWidth}px`,
-          });
           return html`
             <div
               class="affine-database-block-row database-row"
               data-row-index="${idx}"
               data-row-id="${child.id}"
             >
-              <div
-                class="affine-database-block-row-cell database-cell"
-                style=${style}
-              >
-                <affine-database-cell-container
-                  .databaseModel="${databaseModel}"
-                  .rowModel="${child}"
-                  .column="${titleColumn}"
-                  .root="${root}"
-                  .columnRenderer="${databaseBlock.columnRenderer}"
-                >
-                </affine-database-cell-container>
-              </div>
               ${repeat(columns, (column, i) => {
                 return html`
                   <div
@@ -99,7 +75,7 @@ export function DataBaseRowContainer(
                     })}
                   >
                     <affine-database-cell-container
-                      .databaseModel="${databaseModel}"
+                      .databaseModel="${databaseBlock.model}"
                       .rowModel="${child}"
                       .column="${column}"
                       .root="${root}"

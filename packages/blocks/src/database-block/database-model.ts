@@ -25,6 +25,23 @@ type SerializedCells = {
   };
 };
 
+export type ColumnDataUpdater<
+  Data extends Record<string, unknown> = Record<string, unknown>
+> = (data: Record<string, unknown>) => Partial<Data>;
+export type InsertPosition = string | undefined | 'end';
+export const resolvePosition = <T extends { id: string }>(
+  position: InsertPosition,
+  arr: T[]
+): number => {
+  if (position == null) {
+    return 0;
+  }
+  if (position === 'end') {
+    return arr.length;
+  }
+  return arr.findIndex(v => v.id === position) + 1;
+};
+
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
   override onCreated() {
     super.onCreated();
@@ -130,9 +147,26 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return id;
   }
 
+  addColumnAfter(position: InsertPosition, column: Omit<Column, 'id'>): string {
+    const id = this.page.generateId();
+    this.page.transact(() => {
+      const col = { ...column, id };
+      this.columns.splice(resolvePosition(position, this.columns), 0, col);
+      this.views.forEach(view => {
+        ViewOperationMap[view.mode].addColumnAfter(
+          this,
+          view as never,
+          col,
+          position
+        );
+      });
+    });
+    return id;
+  }
+
   updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
     if (!column.id) {
-      return this.addColumn(column);
+      return this.addColumnAfter('end', column);
     }
     const id = column.id;
     const index = this.findColumnIndex(id);
@@ -146,10 +180,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return id;
   }
 
-  updateColumnData(
-    id: string,
-    update: (data: Record<string, unknown>) => Partial<Record<string, unknown>>
-  ) {
+  updateColumnData(id: string, update: ColumnDataUpdater) {
     this.page.transact(() => {
       const i = this.findColumnIndex(id);
       const data = this.columns[i].data;
@@ -157,14 +188,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         ...data,
         ...update(data),
       };
-    });
-  }
-
-  moveColumn(from: number, to: number) {
-    this.page.transact(() => {
-      const column = this.columns[from];
-      this.columns.splice(from, 1);
-      this.columns.splice(to, 0, column);
     });
   }
 

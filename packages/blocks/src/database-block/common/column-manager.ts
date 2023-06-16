@@ -26,6 +26,14 @@ class ColumnManager {
     (columnData: any) => [any, (cell: any) => any]
   >();
 
+  private getColumn(type: string) {
+    const column = this.map.get(type);
+    if (!column) {
+      throw new Error(`${type} is not exist`);
+    }
+    return column;
+  }
+
   register<
     CellData,
     T extends Record<string, unknown> = Record<string, unknown>
@@ -57,11 +65,11 @@ class ColumnManager {
   }
 
   create(targetType: string, name: string, data?: unknown) {
-    const column = this.map.get(targetType);
-    if (!column) {
-      throw new Error(`${targetType} is not exist`);
-    }
-    return column?.create(name, data);
+    return this.getColumn(targetType)?.create(name, data);
+  }
+
+  defaultData(type: string) {
+    return this.getColumn(type)?.defaultData();
   }
 
   typeOf(type: string, data: unknown): TType {
@@ -89,6 +97,10 @@ class ColumnHelper<
       name,
       data: data ?? this.ops.defaultData(),
     };
+  }
+
+  defaultData() {
+    return this.ops.defaultData();
   }
 
   createWithId(
@@ -194,7 +206,7 @@ columnManager.registerConvert(selectHelper, richTextHelper, column => [
 ]);
 columnManager.registerConvert(multiSelectHelper, selectHelper, column => [
   column,
-  cell => cell[0],
+  cell => cell?.[0],
 ]);
 columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
   column,

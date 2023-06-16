@@ -110,7 +110,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     // default column
-    blockModel.addColumn(
+    blockModel.addColumnAfter(
+      'end',
       multiSelectHelper.create('Tag', {
         options: [],
       })

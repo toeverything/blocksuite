@@ -1,7 +1,9 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 
-import type { DatabaseViewDataMap } from '../../../../common/view-manager.js';
-import type { DatabaseBlockModel } from '../../../../database-model.js';
+import type {
+  DatabaseViewDataMap,
+  TableMixColumn,
+} from '../../../../common/view-manager.js';
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
@@ -22,7 +24,7 @@ export function initChangeColumnWidthHandlers(
   view: DatabaseViewDataMap['table'],
   headerContainer: HTMLElement,
   tableContainer: HTMLElement,
-  targetModel: DatabaseBlockModel,
+  columns: TableMixColumn[],
   changeActiveColumnIndex: (index: number) => void
 ) {
   let changeColumnWidthConfig: ColumnWidthConfig | null = null;
@@ -149,22 +151,7 @@ export function initChangeColumnWidthHandlers(
     changeColumnWidthConfig = null;
 
     const columnWidth = rowCells[0].offsetWidth;
-    targetModel.page.captureSync();
-    if (index === 0) {
-      targetModel.page.updateBlock(targetModel, {
-        titleColumnWidth: columnWidth,
-      });
-    } else {
-      const columnId = view.columns[index - 1].id;
-      targetModel.updateView(view.id, 'table', data => {
-        data.columns.forEach(v => {
-          if (v.id === columnId) {
-            v.width = columnWidth;
-          }
-        });
-      });
-      targetModel.applyViewsUpdate();
-    }
+    columns[index].updateWidth(columnWidth);
   };
 
   const disposables = new DisposableGroup();

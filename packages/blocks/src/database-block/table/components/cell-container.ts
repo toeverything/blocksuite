@@ -97,7 +97,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   };
 
   setHeight = (height: number) => {
-    this.style.height = `${height + CELL_PADDING * 2}px`;
+    // this.style.height = `${height + CELL_PADDING * 2}px`;
   };
 
   updateColumnData = (

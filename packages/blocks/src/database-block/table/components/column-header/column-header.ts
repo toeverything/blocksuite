@@ -20,17 +20,16 @@ import { html } from 'lit/static-html.js';
 
 import { getDefaultPage } from '../../../../__internal__/index.js';
 import type {
-  DatabaseViewDataMap,
   TableMixColumn,
+  TableViewData,
 } from '../../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { onClickOutside } from '../../../utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type { Column, ColumnTypeIcon } from '../../types.js';
-import { ColumnInsertPosition } from '../../types.js';
+import type { TableViewManager } from '../../table-view-manager.js';
+import type { ColumnTypeIcon } from '../../types.js';
 import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
 import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';
-import { changeColumnType } from '../edit-column-popup/utils.js';
 import type { ColumnDragIndicator } from './column-move/column-drag-indicator.js';
 import { initMoveColumnHandlers } from './column-move/index.js';
 import { initChangeColumnWidthHandlers } from './column-width/index.js';
@@ -50,10 +49,13 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property()
+  tableViewManager!: TableViewManager;
+
+  @property()
   targetModel!: DatabaseBlockModel;
 
   @property()
-  view!: DatabaseViewDataMap['table'];
+  view!: TableViewData;
 
   @property()
   columns!: TableMixColumn[];
@@ -254,7 +256,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       this.view,
       this._headerContainer,
       this.tableContainer,
-      this.targetModel,
+      this.columns,
       this._setChangingColumnIndex
     );
     this._columnWidthDisposables = disposables;
@@ -276,7 +278,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   private _onShowEditColumnPopup = (
     target: Element,
-    column: Column | string,
+    column: TableMixColumn,
     index: number
   ) => {
     if (this._editingColumnId || this.readonly) return;
@@ -291,17 +293,19 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     assertExists(reference);
 
     const editColumn = new EditColumnPopup();
+    editColumn.view = this.view;
+    editColumn.column = column;
     editColumn.setTitleColumnEditId = this.setEditingColumnId;
     editColumn.targetModel = this.targetModel;
-    editColumn.targetColumn = column;
-    editColumn.columnIndex = index - 1;
+    editColumn.index = index;
+    editColumn.isFirst = index === 0;
+    editColumn.isLast = index === this.columns.length - 1;
     editColumn.closePopup = () => {
       this._editingColumnPopupIndex = -1;
       editColumn.remove();
     };
     editColumn.insertColumn = position => {
-      const insertIdex =
-        position === ColumnInsertPosition.Right ? index : index - 1;
+      const insertIdex = position === 'right' ? index : index - 1;
       this.addColumn(insertIdex);
     };
     document.body.appendChild(editColumn);
@@ -329,7 +333,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _onShowColumnTypePopup = (
     event: MouseEvent,
     columnId: string,
-    column: Column
+    column: TableMixColumn
   ) => {
     if (this._editingColumnId === '' || this.readonly) return;
     if (this._changingColumnTypeId === columnId) {
@@ -340,10 +344,9 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
     this._changingColumnTypeId = columnId;
     const popup = new ColumnTypePopup();
-    popup.columnId = columnId;
     popup.columnType = column.type;
-    popup.changeColumnType = (columnId, type) => {
-      changeColumnType(columnId, type, column, this.targetModel);
+    popup.select = type => {
+      column.updateType?.(type);
       this._changingColumnTypeId = '';
       popup.remove();
     };
@@ -376,11 +379,10 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _onKeydown = (
     event: KeyboardEvent,
     type: 'title' | 'normal',
-    column?: Column
+    column: TableMixColumn
   ) => {
     if (event.key === 'Enter') {
-      this.targetModel.page.captureSync();
-      this._saveColumnTitle(type, column);
+      this._saveColumnTitle(column);
       return;
     }
     if (event.key === 'Escape') {
@@ -389,43 +391,18 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _saveColumnTitle = (type: 'title' | 'normal', column?: Column) => {
+  private _saveColumnTitle = (column: TableMixColumn) => {
     // Prevent triggering again after press enter key
     if (this._editingColumnId === '') return;
 
     const name = this._titleColumnInput.value;
-    if (type === 'title') {
-      // title column
-      this._onUpdateTitleColumn(name);
-    } else {
-      // other columns
-      assertExists(column);
-      this._onUpdateNormalColumn(name, column);
-    }
+    column?.updateName(name);
     // To handle this situation:
     // 1. click the pen icon, edit the title
     // 2. then click the other column's pen icon, edit the title
     if (this._editingColumnId === column?.id) {
       this.setEditingColumnId('');
     }
-  };
-
-  private _onUpdateTitleColumn = (titleColumnName: string) => {
-    this.targetModel.page.captureSync();
-    this.targetModel.page.updateBlock(this.targetModel, {
-      titleColumnName,
-    });
-    this.setEditingColumnId('');
-  };
-
-  private _onUpdateNormalColumn = (name: string, column: Column) => {
-    this.targetModel.page.captureSync();
-    this.targetModel.updateColumn({
-      ...column,
-      name,
-    });
-    this.targetModel.applyColumnUpdate();
-    this.setEditingColumnId('');
   };
 
   private _onEditColumnTitle = (event: MouseEvent, columnId: string) => {
@@ -450,74 +427,14 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         column => column.id === this._editingColumnId
       );
       if (column) {
-        this._saveColumnTitle('normal', column);
-      } else {
-        this._saveColumnTitle('title');
+        this._saveColumnTitle(column);
       }
     }
   };
 
   override render() {
-    const style = styleMap({
-      width: `${this.targetModel.titleColumnWidth}px`,
-    });
-
-    const isTitleEditing = this._editingColumnId === '-1' && !this.readonly;
     return html`
       <div class="affine-database-column-header database-row">
-        <div class="affine-database-column database-cell" style=${style}>
-          <div
-            class="affine-database-column-content ${this._editingColumnId ===
-            '-1'
-              ? 'edit'
-              : ''}"
-            data-column-id="-1"
-            @click="${(event: MouseEvent) =>
-              this._onShowEditColumnPopup(
-                event.target as Element,
-                this.targetModel.titleColumnName,
-                0
-              )}"
-          >
-            <div class="affine-database-column-text">
-              <div class="affine-database-column-type-icon">${TextIcon}</div>
-              ${isTitleEditing
-                ? html`<div class="affine-database-column-text-content">
-                    <input
-                      class="affine-database-column-input"
-                      value=${this.targetModel.titleColumnName}
-                      @keydown=${(event: KeyboardEvent) =>
-                        this._onKeydown(event, 'title')}
-                      @pointerdown=${(event: PointerEvent) =>
-                        event.stopPropagation()}
-                    />
-                    <div
-                      class="affine-database-column-text-save-icon"
-                      @click=${(event: MouseEvent) => {
-                        event.stopPropagation();
-                        this._saveColumnTitle('title');
-                      }}
-                    >
-                      ${DatabaseDone}
-                    </div>
-                  </div>`
-                : html`<div class="affine-database-column-text-content">
-                    <div class="affine-database-column-text-input">
-                      ${this.targetModel.titleColumnName}
-                    </div>
-                    ${this.readonly
-                      ? null
-                      : html` <div
-                          class="affine-database-column-text-icon"
-                          @click="${(e: MouseEvent) =>
-                            this._onEditColumnTitle(e, '-1')}"
-                        >
-                          ${PenIcon}
-                        </div>`}
-                  </div>`}
-            </div>
-          </div>
-        </div>
         ${repeat(
           this.columns,
           column => column.id,
@@ -541,7 +458,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                     this._onShowEditColumnPopup(
                       event.target as Element,
                       column,
-                      index + 1
+                      index
                     )}"
                 >
                   <div class="affine-database-column-text ${column.type}">
@@ -555,26 +472,26 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                       ${columnTypeIconMap[column.type]}
                     </div>
                     ${isEditing
-                      ? html`<div class="affine-database-column-text-content">
+                      ? html` <div class="affine-database-column-text-content">
                           <input
                             class="affine-database-column-input"
-                            value=${column.name}
-                            @keydown=${(event: KeyboardEvent) =>
-                              this._onKeydown(event, 'normal', column)}
-                            @pointerdown=${(event: PointerEvent) =>
-                              event.stopPropagation()}
+                            value="${column.name}"
+                            @keydown="${(event: KeyboardEvent) =>
+                              this._onKeydown(event, 'normal', column)}"
+                            @pointerdown="${(event: PointerEvent) =>
+                              event.stopPropagation()}"
                           />
                           <div
                             class="affine-database-column-text-save-icon"
-                            @click=${(event: MouseEvent) => {
+                            @click="${(event: MouseEvent) => {
                               event.stopPropagation();
-                              this._saveColumnTitle('normal', column);
-                            }}
+                              this._saveColumnTitle(column);
+                            }}"
                           >
                             ${DatabaseDone}
                           </div>
                         </div>`
-                      : html`<div class="affine-database-column-text-content">
+                      : html` <div class="affine-database-column-text-content">
                           <div class="affine-database-column-text-input">
                             ${column.name}
                           </div>
@@ -598,11 +515,13 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
                         ${DatabaseDragIcon}
                       </div>`}
                 </div>
-                ${this.readonly
+                ${this.readonly || index === 0
                   ? null
                   : html` <div
                       class="affine-database-column-drag-handle ${this
-                        ._widthChangingIndex === index
+                        ._widthChangingIndex +
+                        1 ===
+                      index
                         ? 'dragging'
                         : ''}"
                     ></div>`}

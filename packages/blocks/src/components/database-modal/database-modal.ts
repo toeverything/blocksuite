@@ -80,7 +80,10 @@ export class DatabaseModal extends LitElement {
     assertExists(databaseModel);
 
     // default column
-    databaseModel.addColumn(multiSelectHelper.create('Tag', { options: [] }));
+    databaseModel.addColumnAfter(
+      'end',
+      multiSelectHelper.create('Tag', { options: [] })
+    );
     databaseModel.applyColumnUpdate();
 
     this.page.moveBlocks(models, databaseModel);
@@ -100,12 +103,12 @@ export class DatabaseModal extends LitElement {
   }
 
   override render() {
-    return html`<div class="overlay-root">
-      <div class="overlay-mask" @click=${this._hide}></div>
+    return html` <div class="overlay-root">
+      <div class="overlay-mask" @click="${this._hide}"></div>
       <div class="modal-container">
         <div class="modal-header">
           <div class="modal-header-title">Select Database View</div>
-          <div class="modal-header-close-icon" @click=${this._hide}>
+          <div class="modal-header-close-icon" @click="${this._hide}">
             ${DatabaseSearchClose}
           </div>
         </div>
