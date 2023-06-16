@@ -14,6 +14,7 @@ import {
   isDatabaseInput,
   isInsideEdgelessTextEditor,
   isInsidePageTitle,
+  isMiddleButtonPressed,
   isPinchEvent,
   type MouseMode,
   Point,
@@ -246,6 +247,10 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       }
       this._onContainerPointerMove(event);
     });
+    this._add('pointerDown', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerPointerDown(event);
+    });
     this._add('pointerUp', ctx => {
       const event = ctx.get('pointerState');
       this._onContainerPointerUp(event);
@@ -357,6 +362,32 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
         }, 233),
       };
     }
+  };
+
+  private _onContainerPointerDown = (e: PointerEventState) => {
+    if (!isMiddleButtonPressed(e.raw)) return;
+
+    const prevMouseMode = this._mouseMode;
+    const switchToPreMode = (_e: MouseEvent) => {
+      if (!isMiddleButtonPressed(_e)) {
+        this.setMouseMode(prevMouseMode);
+        document.removeEventListener('pointerup', switchToPreMode, false);
+        document.removeEventListener('pointerover', switchToPreMode, false);
+      }
+    };
+
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'pointerover',
+      switchToPreMode
+    );
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'pointerup',
+      switchToPreMode
+    );
+
+    this.setMouseMode({ type: 'pan', panning: true });
   };
 
   private _onContainerPointerUp = (e: PointerEventState) => {

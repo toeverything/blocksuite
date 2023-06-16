@@ -1,8 +1,8 @@
 import {
   asyncFocusRichText,
   BlockHub,
-  createBookmarkBlock,
   getAllowSelectedBlocks,
+  getBookmarkInitialProps,
   getEdgelessPage,
   getServiceOrRegister,
   tryUpdateNoteSize,
@@ -18,7 +18,7 @@ import {
 } from '@blocksuite/blocks/std';
 import { PAGE_BLOCK_PADDING_BOTTOM } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -44,6 +44,8 @@ export const createBlockHub: (
       }
       if (data.flavour === 'affine:embed' && data.type === 'image') {
         models.push(...(await uploadImageFromLocal(page)));
+      } else if (data.flavour === 'affine:bookmark') {
+        models.push(...(await getBookmarkInitialProps()));
       } else {
         models.push(data);
       }
@@ -51,21 +53,10 @@ export const createBlockHub: (
       const range = getCurrentBlockRange(page);
       if (range) {
         const lastModel = range.models[range.models.length - 1];
-        if (data.flavour === 'affine:bookmark') {
-          const parent = page.getParent(lastModel);
-          assertExists(parent);
-          const index = parent.children.indexOf(lastModel);
-          createBookmarkBlock(parent, index + 1);
-          return;
-        }
         const arr = page.addSiblingBlocks(lastModel, models, 'after');
         const lastId = arr[arr.length - 1];
         asyncFocusRichText(page, lastId);
       } else if (last) {
-        if (data.flavour === 'affine:bookmark') {
-          createBookmarkBlock(page.root?.lastItem() as BaseBlockModel);
-          return;
-        }
         // add to end
         let lastId = page.root?.lastItem()?.id;
         models.forEach(model => {
@@ -93,9 +84,14 @@ export const createBlockHub: (
       }
       if (props.flavour === 'affine:embed' && props.type === 'image') {
         models.push(...(await uploadImageFromLocal(page)));
+      } else if (props.flavour === 'affine:bookmark') {
+        models.push(...(await getBookmarkInitialProps()));
       } else {
         models.push(props);
       }
+
+      // In some cases, like cancel bookmark initial modal, there will be no models.
+      if (!models.length) return;
 
       let parentId;
       let focusId;
@@ -108,12 +104,6 @@ export const createBlockHub: (
           const ids = page.addBlocks(models, model);
           focusId = ids[0];
           parentId = model.id;
-        } else if (props.flavour === 'affine:bookmark') {
-          const parent = page.getParent(model);
-          assertExists(parent);
-          const index = parent.children.indexOf(model);
-          focusId = createBookmarkBlock(parent, index + 1);
-          parentId = parent.id;
         } else {
           const parent = page.getParent(model);
           assertExists(parent);
