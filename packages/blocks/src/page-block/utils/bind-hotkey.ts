@@ -18,7 +18,10 @@ import {
   isPageMode,
   isPrintableKeyEvent,
 } from '../../__internal__/index.js';
-import { handleMultiBlockIndent } from '../../__internal__/rich-text/rich-text-operations.js';
+import {
+  handleMultiBlockIndent,
+  handleMultiBlockUnindent,
+} from '../../__internal__/rich-text/rich-text-operations.js';
 import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
@@ -337,6 +340,25 @@ function handleTab(
   }
 }
 
+function handleShiftTab(
+  e: KeyboardEvent,
+  page: Page,
+  selection: DefaultSelectionManager
+) {
+  const blockRange = getCurrentBlockRange(page);
+  if (!blockRange) return;
+
+  const models = blockRange.models;
+  console.log('models: ', models);
+  handleMultiBlockUnindent(page, models);
+
+  if (blockRange.type === 'Block') {
+    requestAnimationFrame(() => {
+      selection.refreshSelectedBlocksRectsByModels(models);
+    });
+  }
+}
+
 function handleEscape(
   e: KeyboardEvent,
   page: Page,
@@ -419,6 +441,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
 
     SHIFT_UP,
     SHIFT_DOWN,
+    SHIFT_TAB,
 
     UP,
     DOWN,
@@ -584,6 +607,11 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     handleEscape(e, page, selection);
   });
 
+  hotkey.addListener(SHIFT_TAB, e => {
+    e.preventDefault();
+    handleShiftTab(e, page, selection);
+  });
+
   // !!!
   // Don't forget to remove hotkeys at `removeHotkeys`
 }
@@ -597,6 +625,7 @@ export function removeHotkeys() {
 
     HOTKEYS.SHIFT_UP,
     HOTKEYS.SHIFT_DOWN,
+    HOTKEYS.SHIFT_TAB,
 
     HOTKEYS.UP,
     HOTKEYS.DOWN,

@@ -353,6 +353,36 @@ export function handleUnindent(
   asyncSetVRange(model, { index: offset, length: 0 });
 }
 
+export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
+  if (!models.length) return;
+
+  // Find the first model that can be unindented
+  let firstUnindentIndex = -1;
+  let firstParent: BaseBlockModel | null;
+  for (let i = 0; i < models.length; i++) {
+    firstParent = page.getParent(models[i]);
+    if (firstParent && !matchFlavours(firstParent, ['affine:frame'])) {
+      firstUnindentIndex = i;
+      break;
+    }
+  }
+
+  // Find all the models that can be unindented
+  const unindentModels = models.slice(firstUnindentIndex);
+  // Form bottom to top
+  // Only unindent the models which parent is not in the unindentModels
+  // When parent is in the unindentModels
+  // It means that children will be unindented with their parent
+  for (let i = unindentModels.length - 1; i >= 0; i--) {
+    const model = unindentModels[i];
+    const parent = page.getParent(model);
+    assertExists(parent);
+    if (!unindentModels.includes(parent)) {
+      handleUnindent(page, model);
+    }
+  }
+}
+
 // When deleting at line start of a code block,
 // select the code block itself
 function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
