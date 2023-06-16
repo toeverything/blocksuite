@@ -22,7 +22,10 @@ const migrations: Migration[] = [
         .get('versions') as Y.Map<number>;
       if (!yVersions) return false;
 
-      return yVersions.get('affine:group') === 1;
+      return (
+        yVersions.get('affine:group') === 1 ||
+        yVersions.get('affine:frame') === 1
+      );
     },
     migrate: doc => {
       // @ts-ignore
@@ -36,7 +39,10 @@ const migrations: Migration[] = [
         const yBlocks = doc.getMap(spaceId);
         // @ts-ignore
         yBlocks.forEach((yBlock: Y.Map<unknown>) => {
-          if (yBlock.get('sys:flavour') === 'affine:group') {
+          if (
+            yBlock.get('sys:flavour') === 'affine:group' ||
+            yBlock.get('sys:flavour') === 'affine:frame'
+          ) {
             yBlock.set('sys:flavour', 'affine:note');
           }
         });
@@ -46,6 +52,7 @@ const migrations: Migration[] = [
         .getMap('space:meta')
         .get('versions') as Y.Map<number>;
       yVersions.delete('affine:group');
+      yVersions.delete('affine:frame');
       yVersions.set('affine:note', 1);
     },
   },
