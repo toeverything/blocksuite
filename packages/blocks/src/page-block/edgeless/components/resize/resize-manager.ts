@@ -2,7 +2,7 @@ import { Bound } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 
 import type { IPoint } from '../../../std.js';
-import { FRAME_MIN_WIDTH } from '../utils.js';
+import { NOTE_MIN_WIDTH } from '../utils.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 // 15deg
@@ -296,8 +296,8 @@ export class HandleResizeManager {
       scale.x = rect.w / original.w;
       flip.x = scale.x < 0 ? -1 : 1;
 
-      if (Math.abs(rect.w) < FRAME_MIN_WIDTH) {
-        rect.w = FRAME_MIN_WIDTH * flip.x;
+      if (Math.abs(rect.w) < NOTE_MIN_WIDTH) {
+        rect.w = NOTE_MIN_WIDTH * flip.x;
         scale.x = rect.w / original.w;
         draggingPoint.x = fixedPoint.x + rect.w * direction.x;
       }
