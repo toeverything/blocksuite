@@ -13,8 +13,8 @@ import type { DatabaseBlockModel } from './database-block/database-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
 import type { DividerBlockModel } from './divider-block/divider-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
-import type { EmbedBlockModel } from './embed-block/embed-model.js';
-import { EmbedBlockSchema } from './embed-block/embed-model.js';
+import type { ImageBlockModel } from './image-block/image-model.js';
+import { ImageBlockSchema } from './image-block/image-model.js';
 import type { ListBlockModel } from './list-block/list-model.js';
 import { ListBlockSchema } from './list-block/list-model.js';
 import type { NoteBlockModel } from './note-block/note-model.js';
@@ -31,7 +31,7 @@ export type {
   CodeBlockModel,
   DatabaseBlockModel,
   DividerBlockModel,
-  EmbedBlockModel,
+  ImageBlockModel,
   ListBlockModel,
   NoteBlockModel,
   PageBlockModel,
@@ -47,7 +47,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   ListBlockSchema,
   NoteBlockSchema,
   DividerBlockSchema,
-  EmbedBlockSchema,
+  ImageBlockSchema,
   SurfaceBlockSchema,
   BookmarkBlockSchema,
   // DatabaseBlockSchema,
@@ -65,7 +65,7 @@ export type BlockSchemas = {
   'affine:list': ListBlockModel;
   'affine:note': NoteBlockModel;
   'affine:divider': DividerBlockModel;
-  'affine:embed': EmbedBlockModel;
+  'affine:image': ImageBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
   'affine:bookmark': BookmarkBlockModel;

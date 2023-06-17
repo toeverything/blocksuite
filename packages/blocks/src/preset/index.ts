@@ -6,7 +6,7 @@ import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
-import { EmbedBlockSchema } from '../embed-block/embed-model.js';
+import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
 import { PageBlockSchema } from '../page-block/page-model.js';
@@ -21,7 +21,7 @@ export const pagePreset = new Map<BlockSchemaType, StaticValue>([
   [DatabaseBlockSchema, literal`affine-database`],
   [DividerBlockSchema, literal`affine-divider`],
   [CodeBlockSchema, literal`affine-code`],
-  [EmbedBlockSchema, literal`affine-embed`],
+  [ImageBlockSchema, literal`affine-image`],
   [ParagraphBlockSchema, literal`affine-paragraph`],
   [BookmarkBlockSchema, literal`affine-bookmark`],
 ]);
@@ -34,7 +34,7 @@ export const edgelessPreset = new Map<BlockSchemaType, StaticValue>([
   [DatabaseBlockSchema, literal`affine-database`],
   [DividerBlockSchema, literal`affine-divider`],
   [CodeBlockSchema, literal`affine-code`],
-  [EmbedBlockSchema, literal`affine-embed`],
+  [ImageBlockSchema, literal`affine-image`],
   [ParagraphBlockSchema, literal`affine-paragraph`],
   [BookmarkBlockSchema, literal`affine-bookmark`],
 ]);

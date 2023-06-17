@@ -23,7 +23,7 @@ export const uploadImageFromLocal = async (
   const storage = page.blobs;
   assertExists(storage);
 
-  const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
+  const baseProps: Props = { flavour: 'affine:image' };
   const fileInput = createImageInputElement();
   document.body.appendChild(fileInput);
 

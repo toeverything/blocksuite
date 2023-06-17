@@ -418,14 +418,14 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     if (
       clickBlockInfo &&
-      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+      matchFlavours(clickBlockInfo.model, ['affine:image', 'affine:divider'])
     ) {
       window.getSelection()?.removeAllRanges();
 
       state.activeComponent = clickBlockInfo.element;
 
       assertExists(this.state.activeComponent);
-      if (clickBlockInfo.model.type === 'image') {
+      if (clickBlockInfo.model.flavour === 'affine:image') {
         state.type = 'embed';
         this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
       } else {
@@ -474,7 +474,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
       if (element) {
         const targetModel = getModelByBlockElement(element);
-        if (matchFlavours(targetModel, ['affine:embed'])) {
+        if (matchFlavours(targetModel, ['affine:image'])) {
           window.dispatchEvent(
             new CustomEvent<EmbedBlockDoubleClickData>(
               'affine.embed-block-db-click',
@@ -553,7 +553,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       const { model, element } = hoverEditingState;
       let shouldClear = true;
 
-      if (model.type === 'image') {
+      if (model.flavour === 'affine:image') {
         const {
           state: {
             viewport: { left, clientWidth },

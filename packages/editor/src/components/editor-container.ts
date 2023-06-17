@@ -4,9 +4,9 @@ import {
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
-  type EmbedBlockModel,
   getPageBlock,
   getServiceOrRegister,
+  type ImageBlockModel,
   type NoteBlockComponent,
   OutsideDragManager,
   type PageBlockModel,
@@ -153,8 +153,8 @@ export class EditorContainer
     let i = 0;
     for (; i < len; i++) {
       const model = models[i];
-      if (model.flavour === 'affine:embed' && model.type === 'image') {
-        const note = pageBlock.addImage(model as EmbedBlockModel, point);
+      if (model.flavour === 'affine:image') {
+        const note = pageBlock.addImage(model as ImageBlockModel, point);
         noteId = note?.noteId;
       }
     }

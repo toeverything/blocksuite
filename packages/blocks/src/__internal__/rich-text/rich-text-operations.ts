@@ -534,7 +534,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     if (
       !previousSibling ||
       !matchFlavours(previousSibling, [
-        'affine:embed',
+        'affine:image',
         'affine:divider',
         'affine:code',
       ] as const)
@@ -711,7 +711,7 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
       if (
         !firstChild ||
         !matchFlavours(firstChild, [
-          'affine:embed',
+          'affine:image',
           'affine:divider',
           'affine:code',
         ])
@@ -724,7 +724,7 @@ function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
       if (
         !nextSibling ||
         !matchFlavours(nextSibling, [
-          'affine:embed',
+          'affine:image',
           'affine:divider',
           'affine:code',
         ])

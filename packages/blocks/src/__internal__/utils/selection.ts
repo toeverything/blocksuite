@@ -165,7 +165,7 @@ export function focusBlockByModel(
   if (
     isPageMode &&
     matchFlavours(model, [
-      'affine:embed',
+      'affine:image',
       'affine:divider',
       'affine:code',
       'affine:database',

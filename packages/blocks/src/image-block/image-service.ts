@@ -3,24 +3,24 @@ import type {
   BlockTransformContext,
   SerializedBlock,
 } from '../__internal__/utils/index.js';
-import type { EmbedBlockModel } from './embed-model.js';
-export class EmbedBlockService extends BaseService<EmbedBlockModel> {
+import type { ImageBlockModel } from './image-model.js';
+export class ImageBlockService extends BaseService<ImageBlockModel> {
   override block2html(
-    block: EmbedBlockModel,
+    block: ImageBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
     return `<figure><img src="${block.sourceId}" alt="${block.caption}"><figcaption>${block.caption}</figcaption></figure>`;
   }
 
   override block2Text(
-    block: EmbedBlockModel,
+    block: ImageBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ): string {
     return block.caption;
   }
 
   override block2Json(
-    block: EmbedBlockModel,
+    block: ImageBlockModel,
     begin?: number,
     end?: number
   ): SerializedBlock {

@@ -57,7 +57,7 @@ import {
 import type {
   BlockHost,
   DragHandle,
-  EmbedBlockModel,
+  ImageBlockModel,
   MouseMode,
   NoteBlockModel,
   PageBlockModel,
@@ -774,7 +774,7 @@ export class EdgelessPageBlockComponent
     focus && this.setSelection(noteId, true, blocks[0].id, point);
   }
 
-  addImage(model: Partial<EmbedBlockModel>, point?: Point) {
+  addImage(model: Partial<ImageBlockModel>, point?: Point) {
     const options = {
       width: model.width ?? 0,
       height: model.height ?? 0,

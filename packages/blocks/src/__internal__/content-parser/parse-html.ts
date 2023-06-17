@@ -672,8 +672,7 @@ export class HtmlParser {
         const id = await storage.set(imgBlob);
         result = [
           {
-            flavour: 'affine:embed',
-            type: 'image',
+            flavour: 'affine:image',
             sourceId: id,
             children: [],
             text: texts,

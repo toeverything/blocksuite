@@ -25,7 +25,7 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
-import type { EmbedBlockModel } from '../../../index.js';
+import type { ImageBlockModel } from '../../../index.js';
 import { DEFAULT_NOTE_COLOR } from '../../../note-block/note-model.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -198,7 +198,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const models = (await uploadImageFromLocal(
       this.edgeless.page,
       true
-    )) as EmbedBlockModel[];
+    )) as ImageBlockModel[];
 
     if (!models.length) {
       this._imageLoading = false;

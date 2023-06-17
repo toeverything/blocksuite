@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { PointerEventState } from '@blocksuite/lit';
 
 import type { IPoint } from '../../../__internal__/index.js';
+import { throttle } from '../../../__internal__/index.js';
 import type { DefaultSelectionSlots } from '../../../index.js';
 import { getModelByElement } from '../../../index.js';
 import type { PageSelectionState } from './selection-state.js';
@@ -77,10 +78,13 @@ export class EmbedResizeManager {
         const activeImg = this.state.activeComponent?.querySelector(
           '.resizable-img'
         ) as HTMLDivElement;
-        if (activeImg) {
-          activeImg.style.width = width + 'px';
-          activeImg.style.height = height + 'px';
-        }
+        const updateImg = throttle(() => {
+          if (activeImg) {
+            activeImg.style.width = width.toFixed(2) + 'px';
+            activeImg.style.height = height.toFixed(2) + 'px';
+          }
+        }, 50);
+        requestAnimationFrame(updateImg);
       }
     }
   }

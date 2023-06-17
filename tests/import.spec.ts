@@ -563,8 +563,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       children: [
         {
           caption: '',
-          flavour: 'affine:embed',
-          type: 'image',
+          flavour: 'affine:image',
           sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
           children: [],
           text: [{ insert: '' }],
@@ -599,8 +598,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       children: [
         {
           caption: '',
-          flavour: 'affine:embed',
-          type: 'image',
+          flavour: 'affine:image',
           sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
           children: [],
           text: [{ insert: '' }],
@@ -712,7 +710,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
 //       ],
 //     },
 //     {
-//       flavour: 'affine:embed',
+//       flavour: 'affine:image',
 //       type: 'image',
 //       sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
 //       children: [],
@@ -733,7 +731,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
 //       ],
 //     },
 //     {
-//       flavour: 'affine:embed',
+//       flavour: 'affine:image',
 //       type: 'image',
 //       sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
 //       children: [],

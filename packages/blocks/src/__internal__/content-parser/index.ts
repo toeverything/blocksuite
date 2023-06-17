@@ -208,8 +208,7 @@ export class ContentParser {
         const id = await storage.set(file);
         return [
           {
-            flavour: 'affine:embed',
-            type: 'image',
+            flavour: 'affine:image',
             sourceId: id,
             children: [],
           },

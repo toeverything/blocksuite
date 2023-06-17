@@ -338,7 +338,7 @@ export class Workspace {
       }
 
       // setup embed source
-      if (props['sys:flavour'] === 'affine:embed') {
+      if (props['sys:flavour'] === 'affine:image') {
         let resp;
         try {
           resp = await fetch(props['prop:sourceId'], {
