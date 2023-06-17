@@ -1359,7 +1359,6 @@ test('click bottom of page and if the last is embed block, editor should insert 
         prop:caption=""
         prop:height={0}
         prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
-        prop:type="image"
         prop:width={0}
       />
       <affine:paragraph
