@@ -33,7 +33,7 @@ import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
-  if (block.flavour === 'affine:image' && block.type === 'image') return true;
+  if (block.flavour === 'affine:image') return true;
   return false;
 }
 

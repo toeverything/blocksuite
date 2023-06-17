@@ -425,7 +425,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       state.activeComponent = clickBlockInfo.element;
 
       assertExists(this.state.activeComponent);
-      if (clickBlockInfo.model.type === 'image') {
+      if (clickBlockInfo.model.flavour === 'affine:image') {
         state.type = 'embed';
         this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
       } else {
@@ -553,7 +553,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       const { model, element } = hoverEditingState;
       let shouldClear = true;
 
-      if (model.type === 'image') {
+      if (model.flavour === 'affine:image') {
         const {
           state: {
             viewport: { left, clientWidth },

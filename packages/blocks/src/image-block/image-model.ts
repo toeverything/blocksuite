@@ -3,7 +3,6 @@ import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 export const ImageBlockSchema = defineBlockSchema({
   flavour: 'affine:image',
   props: () => ({
-    type: 'image',
     caption: '',
     sourceId: '',
     width: 0,
