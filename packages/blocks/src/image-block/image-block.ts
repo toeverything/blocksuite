@@ -1,3 +1,6 @@
+import './image/placeholder/loading-card.js';
+import './image/placeholder/image-not-found.js';
+
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
