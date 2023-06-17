@@ -53,7 +53,7 @@ export enum DefaultModeDragType {
   ContentMoving = 'content-moving',
   /** Expanding the dragging area, select the content covered inside */
   Selecting = 'selecting',
-  /** Native range dragging inside active frame block */
+  /** Native range dragging inside active note block */
   NativeEditing = 'native-editing',
   /** Default void state */
   None = 'none',
@@ -74,7 +74,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lock = false;
-  // Do not select the text, when click again after activating the frame.
+  // Do not select the text, when click again after activating the note.
   private _isDoubleClickedOnMask = false;
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
@@ -131,15 +131,15 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
       return;
     }
 
-    // handle single frame block click
+    // handle single note block click
     if (!e.keys.shift && selected.length === 1 && isTopLevelBlock(element)) {
       if (
         (selected[0] === element && !active) ||
         (active && selected[0] !== element)
       ) {
         // issue #1809
-        // If the previously selected element is a frameBlock and is in an active state,
-        // then the currently clicked frameBlock should also be in an active state when selected.
+        // If the previously selected element is a noteBlock and is in an active state,
+        // then the currently clicked noteBlock should also be in an active state when selected.
         this._setSelectionState([element], true);
         handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
         this._edgeless.slots.selectedBlocksUpdated.emit([]);
@@ -255,7 +255,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private _tryDeleteEmptyBlocks() {
     const emptyBlocks = this._blocks.filter(b => isEmpty(b));
-    // always keep at least one frame block
+    // always keep at least one note block
     if (emptyBlocks.length === this._blocks.length) {
       emptyBlocks.shift();
     }
@@ -270,8 +270,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   private _updateDragHandle(e: PointerEventState) {
     const block = this.state.selected[0];
     if (!block || !isTopLevelBlock(block)) return;
-    const frameBlockElement = getBlockElementByModel(block);
-    assertExists(frameBlockElement);
+    const noteBlockElement = getBlockElementByModel(block);
+    assertExists(noteBlockElement);
 
     const {
       raw: { clientX, clientY },
@@ -280,8 +280,8 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     const element = getClosestBlockElementByPoint(
       point,
       {
-        container: frameBlockElement,
-        rect: Rect.fromDOM(frameBlockElement),
+        container: noteBlockElement,
+        rect: Rect.fromDOM(noteBlockElement),
       },
       this._edgeless.surface.viewport.zoom
     );
@@ -379,18 +379,18 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
 
   private async _cloneSelected(selected: Selectable, surface: SurfaceManager) {
     if (isTopLevelBlock(selected)) {
-      const frameService = this._edgeless.getService('affine:frame');
+      const noteService = this._edgeless.getService('affine:note');
       const id = this._page.addBlock(
-        'affine:frame',
+        'affine:note',
         { xywh: selected.xywh },
         this._page.root?.id
       );
-      const frame = this._page.getBlockById(id);
+      const note = this._page.getBlockById(id);
 
-      assertExists(frame);
-      await frameService.json2Block(
-        frame,
-        frameService.block2Json(selected).children
+      assertExists(note);
+      await noteService.json2Block(
+        note,
+        noteService.block2Json(selected).children
       );
       return this._page.getBlockById(id);
     } else {
@@ -477,7 +477,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
         break;
       }
       case DefaultModeDragType.NativeEditing: {
-        // TODO reset if drag out of frame
+        // TODO reset if drag out of note
         handleNativeRangeDragMove(this._startRange, e);
         break;
       }

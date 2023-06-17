@@ -25,8 +25,8 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
-import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
 import type { EmbedBlockModel } from '../../../index.js';
+import { DEFAULT_NOTE_COLOR } from '../../../note-block/note-model.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -195,22 +195,24 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private async _addImage() {
     this._imageLoading = true;
 
-    const models = await uploadImageFromLocal(this.edgeless.page, true);
-    const len = models.length;
-    let i = 0;
-    let lastFrameId: string;
+    const models = (await uploadImageFromLocal(
+      this.edgeless.page,
+      true
+    )) as EmbedBlockModel[];
 
-    for (; i < len; i++) {
-      const model = models[i];
-      const frame = this.edgeless.addImage(model as EmbedBlockModel);
-      lastFrameId = frame.frameId;
+    if (!models.length) {
+      this._imageLoading = false;
+      return;
     }
 
-    const frame = this.edgeless.frames.find(frame => frame.id === lastFrameId);
-    assertExists(frame);
+    const notes = models.map(model => this.edgeless.addImage(model));
+    const { noteId } = notes[notes.length - 1];
+
+    const note = this.edgeless.notes.find(note => note.id === noteId);
+    assertExists(note);
 
     this.edgeless.selection.switchToDefaultMode({
-      selected: [frame],
+      selected: [note],
       active: false,
     });
 
@@ -305,7 +307,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${() =>
             this.setMouseMode({
               type: 'note',
-              background: DEFAULT_FRAME_COLOR,
+              background: DEFAULT_NOTE_COLOR,
             })}
         >
           ${NoteIcon}

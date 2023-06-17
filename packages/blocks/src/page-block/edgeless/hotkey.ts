@@ -5,7 +5,7 @@ import { activeEditorManager } from '../../__internal__/utils/active-editor-mana
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
 import type { MouseMode } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
-import { DEFAULT_FRAME_COLOR } from '../../frame-block/frame-model.js';
+import { DEFAULT_NOTE_COLOR } from '../../note-block/note-model.js';
 import {
   bindCommonHotkey,
   deleteModelsByRange,
@@ -72,7 +72,7 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
 
 function bindDelete(edgeless: EdgelessPageBlockComponent) {
   function backspace(e: KeyboardEvent) {
-    // TODO: add `selection-state` to handle `block`, `native`, `frame`, `shape`, etc.
+    // TODO: add `selection-state` to handle `block`, `native`, `note`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
     if (edgeless.selection.isActive) return;
@@ -81,7 +81,7 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
     selected.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = edgeless.page.root?.children ?? [];
-        // FIXME: should always keep at least 1 frame
+        // FIXME: should always keep at least 1 note
         if (children.length > 1) {
           edgeless.page.deleteBlock(element);
         }
@@ -156,7 +156,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     hotkey.addListener('n', () =>
       setMouseMode(edgeless, {
         type: 'note',
-        background: DEFAULT_FRAME_COLOR,
+        background: DEFAULT_NOTE_COLOR,
       })
     );
     hotkey.addListener('p', () =>
@@ -186,7 +186,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
 
       keyboardEvent.preventDefault();
       edgeless.slots.selectionUpdated.emit({
-        selected: [...edgeless.frames, ...edgeless.surface.getElements()],
+        selected: [...edgeless.notes, ...edgeless.surface.getElements()],
         active: false,
       });
     });

@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/lit';
 
 import { type NoteMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { addNote, DEFAULT_FRAME_WIDTH } from '../utils.js';
+import { addNote, DEFAULT_NOTE_WIDTH } from '../utils.js';
 import { MouseModeController } from './index.js';
 
 export class NoteModeController extends MouseModeController<NoteMouseMode> {
@@ -12,7 +12,7 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
 
   private _dragStartEvent: PointerEventState | null = null;
 
-  private _addNote(e: PointerEventState, width = DEFAULT_FRAME_WIDTH) {
+  private _addNote(e: PointerEventState, width = DEFAULT_NOTE_WIDTH) {
     addNote(this._edgeless, this._page, e, width);
   }
 
@@ -53,7 +53,7 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
         e.x > this._dragStartEvent.x ? this._dragStartEvent : e;
       const width = Math.max(
         Math.abs(e.x - this._dragStartEvent.x),
-        DEFAULT_FRAME_WIDTH
+        DEFAULT_NOTE_WIDTH
       );
       this._addNote(startEvent, width);
     }

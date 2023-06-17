@@ -35,7 +35,7 @@ export const heavyWhiteboard: InitFn = async (
 
   let i = 0;
 
-  // Add frame block inside page block
+  // Add note block inside page block
   for (; i < count; i++) {
     const x = Math.random() * count * 2;
     const y = Math.random() * count * 2;
@@ -58,24 +58,24 @@ export const heavyWhiteboard: InitFn = async (
     });
   }
 
-  // Add frame block inside page block
+  // Add note block inside page block
   for (i = 0; i < count; i++) {
     const x = Math.random() * -count * 2 - 100;
     const y = Math.random() * count * 2;
-    const frameId = page.addBlock(
-      'affine:frame',
+    const noteId = page.addBlock(
+      'affine:note',
       {
         xywh: serializeXYWH(x, y, 100, 50),
       },
       pageBlockId
     );
-    // Add paragraph block inside frame block
+    // Add paragraph block inside note block
     page.addBlock(
       'affine:paragraph',
       {
-        text: new Text('Frame #' + i),
+        text: new Text('Note #' + i),
       },
-      frameId
+      noteId
     );
   }
 };

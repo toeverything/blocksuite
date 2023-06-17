@@ -4,9 +4,9 @@ import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import { addSerializedBlocks } from '../__internal__/service/json2block.js';
 import type { SerializedBlock } from '../__internal__/utils/index.js';
-import type { FrameBlockModel } from './frame-model.js';
+import type { NoteBlockModel } from './note-model.js';
 
-export class FrameBlockService extends BaseService<FrameBlockModel> {
+export class NoteBlockService extends BaseService<NoteBlockModel> {
   override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[]
@@ -20,7 +20,7 @@ export class FrameBlockService extends BaseService<FrameBlockModel> {
   }
 
   override block2Json(
-    block: FrameBlockModel,
+    block: NoteBlockModel,
     begin?: number,
     end?: number
   ): SerializedBlock {

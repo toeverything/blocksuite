@@ -20,10 +20,10 @@ import type {
   Selectable,
 } from '../selection-manager.js';
 import {
-  FRAME_MIN_HEIGHT,
-  FRAME_MIN_WIDTH,
   handleElementChangedEffectForConnector,
   isTopLevelBlock,
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
   stopPropagation,
 } from '../utils.js';
 import type { EdgelessComponentToolbar } from './component-toolbar/component-toolbar.js';
@@ -211,22 +211,22 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (!element) return;
 
       if (isTopLevelBlock(element)) {
-        let frameX = bound.x;
-        let frameY = bound.y;
-        let frameW = bound.w;
-        let frameH = deserializeXYWH(element.xywh)[3];
-        // Limit the width of the selected frame
-        if (frameW < FRAME_MIN_WIDTH) {
-          frameW = FRAME_MIN_WIDTH;
-          frameX = bound.x;
+        let noteX = bound.x;
+        let noteY = bound.y;
+        let noteW = bound.w;
+        let noteH = deserializeXYWH(element.xywh)[3];
+        // Limit the width of the selected note
+        if (noteW < NOTE_MIN_WIDTH) {
+          noteW = NOTE_MIN_WIDTH;
+          noteX = bound.x;
         }
-        // Limit the height of the selected frame
-        if (frameH < FRAME_MIN_HEIGHT) {
-          frameH = FRAME_MIN_HEIGHT;
-          frameY = bound.y;
+        // Limit the height of the selected note
+        if (noteH < NOTE_MIN_HEIGHT) {
+          noteH = NOTE_MIN_HEIGHT;
+          noteY = bound.y;
         }
         page.updateBlock(element, {
-          xywh: JSON.stringify([frameX, frameY, frameW, frameH]),
+          xywh: JSON.stringify([noteX, noteY, noteW, noteH]),
         });
       } else {
         if (element instanceof TextElement) {

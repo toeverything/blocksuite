@@ -4,23 +4,23 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
-import type { FrameBlockModel } from './frame-model.js';
-import { FrameBlockService } from './frame-service.js';
+import type { NoteBlockModel } from './note-model.js';
+import { NoteBlockService } from './note-service.js';
 
-@customElement('affine-frame')
-export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
+@customElement('affine-note')
+export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
   static override styles = css`
-    .affine-frame-block-container {
+    .affine-note-block-container {
       display: flow-root;
     }
-    .affine-frame-block-container.selected {
+    .affine-note-block-container.selected {
       background-color: var(--affine-hover-color);
     }
   `;
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:frame', FrameBlockService);
+    registerService('affine:note', NoteBlockService);
   }
 
   override firstUpdated() {
@@ -30,7 +30,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
   override render() {
     return html`
-      <div class="affine-frame-block-container">
+      <div class="affine-note-block-container">
         <div class="affine-block-children-container">${this.content}</div>
       </div>
     `;
@@ -39,6 +39,6 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-frame': FrameBlockComponent;
+    'affine-note': NoteBlockComponent;
   }
 }

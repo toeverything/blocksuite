@@ -108,7 +108,7 @@ test.describe('multiple page', () => {
 <affine:page
   prop:title="title0"
 >
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -116,7 +116,7 @@ test.describe('multiple page', () => {
       prop:text="page0"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`;
     await assertStoreMatchJSX(page, page1Snapshot);
 
@@ -135,7 +135,7 @@ test.describe('multiple page', () => {
   prop:title="title1"
 >
   <affine:surface />
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -143,7 +143,7 @@ test.describe('multiple page', () => {
       prop:text="page1"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
 
@@ -348,14 +348,14 @@ test.describe('reference node', () => {
   prop:title="page1"
 >
   <affine:surface />
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
     <affine:paragraph
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
     await focusRichText(page);
@@ -370,7 +370,7 @@ test.describe('reference node', () => {
 <affine:page
   prop:title="page0"
 >
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -390,7 +390,7 @@ test.describe('reference node', () => {
       }
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
   });
@@ -568,7 +568,7 @@ test.describe.skip('linked page with clipboard', () => {
 
   test(' duplicated subpage should paste as linked page', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
     await focusRichText(page);
 
     const { createLinkedPage, createSubpage } = getLinkedPagePopover(page);
@@ -581,7 +581,7 @@ test.describe.skip('linked page with clipboard', () => {
     await assertStoreMatchJSX(
       page,
       `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -635,8 +635,8 @@ test.describe.skip('linked page with clipboard', () => {
     }
     prop:type="text"
   />
-</affine:frame>`,
-      frameId
+</affine:note>`,
+      noteId
     );
   });
 });

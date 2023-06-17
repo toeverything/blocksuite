@@ -15,8 +15,8 @@ import { assertExists } from '@blocksuite/store';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/selection-manager.js';
 import {
-  DEFAULT_FRAME_HEIGHT,
-  DEFAULT_FRAME_WIDTH,
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
@@ -104,7 +104,7 @@ export class EdgelessClipboard implements Clipboard {
     }
     e.preventDefault();
     const { state } = this.selection;
-    // when frame active, handle copy like page mode
+    // when note active, handle copy like page mode
     if (state.active) {
       if (state.selected[0] instanceof TextElement) {
         copySurfaceText(this._edgeless);
@@ -137,7 +137,7 @@ export class EdgelessClipboard implements Clipboard {
     const { state } = this.selection;
     if (state.active) {
       if (!(state.selected[0] instanceof TextElement)) {
-        this._pasteInTextFrame(e);
+        this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element
       return;
@@ -148,10 +148,10 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
 
-    this._pasteShapesAndFrames(elementsRawData);
+    this._pasteShapesAndNotes(elementsRawData);
   };
 
-  private async _pasteInTextFrame(e: ClipboardEvent) {
+  private async _pasteInTextNote(e: ClipboardEvent) {
     const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
     if (!blocks.length) {
       return;
@@ -184,21 +184,21 @@ export class EdgelessClipboard implements Clipboard {
     return phasorElements;
   }
 
-  private async _createFrameBlocks(
-    frames: SerializedBlock[],
+  private async _createNoteBlocks(
+    notes: SerializedBlock[],
     pasteX: number,
     pasteY: number,
     oldCommonBound: Bound
   ) {
-    const frameIds = await Promise.all(
-      frames.map(async ({ xywh, children, background }) => {
+    const noteIds = await Promise.all(
+      notes.map(async ({ xywh, children, background }) => {
         const [oldX, oldY, oldW, oldH] = xywh
           ? deserializeXYWH(xywh)
           : [
               oldCommonBound.x,
               oldCommonBound.y,
-              DEFAULT_FRAME_WIDTH,
-              DEFAULT_FRAME_HEIGHT,
+              DEFAULT_NOTE_WIDTH,
+              DEFAULT_NOTE_HEIGHT,
             ];
         const newXywh = serializeXYWH(
           pasteX + oldX - oldCommonBound.x,
@@ -206,31 +206,31 @@ export class EdgelessClipboard implements Clipboard {
           oldW,
           oldH
         );
-        const frameId = this._page.addBlock(
-          'affine:frame',
+        const noteId = this._page.addBlock(
+          'affine:note',
           {
             xywh: newXywh,
             background,
           },
           this._page.root?.id
         );
-        const frame = this._page.getBlockById(frameId);
-        assertExists(frame);
+        const note = this._page.getBlockById(noteId);
+        assertExists(note);
 
-        await addSerializedBlocks(this._page, children, frame, 0);
-        return frameId;
+        await addSerializedBlocks(this._page, children, note, 0);
+        return noteId;
       })
     );
-    return frameIds;
+    return noteIds;
   }
 
   private _getOldCommonBound(
     phasorElements: PhasorElement[],
-    frames: SerializedBlock[]
+    notes: SerializedBlock[]
   ) {
     const commonBound = getCommonBound([
       ...phasorElements,
-      ...(frames
+      ...(notes
         .map(({ xywh }) => {
           if (!xywh) {
             return;
@@ -251,16 +251,16 @@ export class EdgelessClipboard implements Clipboard {
 
   private _emitSelectionChangeAfterPaste(
     phasorElementIds: string[],
-    frameIds: string[]
+    noteIds: string[]
   ) {
     const newSelected = [
       ...(phasorElementIds
         .map(id => this.surface.pickById(id))
         .filter(e => !!e) as PhasorElement[]),
-      ...(frameIds
+      ...(noteIds
         .map(id => this._page.getBlockById(id))
         .filter(
-          f => !!f && f.flavour === 'affine:frame'
+          f => !!f && f.flavour === 'affine:note'
         ) as TopLevelBlockModel[]),
     ];
 
@@ -270,13 +270,13 @@ export class EdgelessClipboard implements Clipboard {
     });
   }
 
-  private async _pasteShapesAndFrames(
+  private async _pasteShapesAndNotes(
     elementsRawData: Record<string, unknown>[]
   ) {
     const groupedByType = groupBy(elementsRawData, data =>
-      isTopLevelBlock(data as unknown as Selectable) ? 'frames' : 'elements'
+      isTopLevelBlock(data as unknown as Selectable) ? 'notes' : 'elements'
     ) as unknown as {
-      frames?: SerializedBlock[];
+      notes?: SerializedBlock[];
       elements?: { type: PhasorElement['type'] }[];
     };
 
@@ -284,7 +284,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const oldCommonBound = this._getOldCommonBound(
       elements,
-      groupedByType.frames || []
+      groupedByType.notes || []
     );
 
     const { lastMousePos } = this.selection;
@@ -309,8 +309,8 @@ export class EdgelessClipboard implements Clipboard {
       });
     });
     // create and add blocks to page
-    const frameIds = await this._createFrameBlocks(
-      groupedByType.frames || [],
+    const noteIds = await this._createNoteBlocks(
+      groupedByType.notes || [],
       pasteX,
       pasteY,
       oldCommonBound
@@ -318,7 +318,7 @@ export class EdgelessClipboard implements Clipboard {
 
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
-      frameIds
+      noteIds
     );
   }
 }

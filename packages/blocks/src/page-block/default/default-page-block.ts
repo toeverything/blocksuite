@@ -34,7 +34,7 @@ import type { DragHandle } from '../../components/index.js';
 import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
-import { tryUpdateFrameSize } from '../utils/index.js';
+import { tryUpdateNoteSize } from '../utils/index.js';
 import { DraggingArea, EmbedSelectedRectsContainer } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
@@ -225,8 +225,8 @@ export class DefaultPageBlockComponent
     if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
-    const defaultFrame = model.children.find(
-      child => child.flavour === 'affine:frame'
+    const defaultNote = model.children.find(
+      child => child.flavour === 'affine:note'
     );
 
     if (e.key === 'Enter' && hasContent) {
@@ -238,14 +238,14 @@ export class DefaultPageBlockComponent
       const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
-        defaultFrame,
+        defaultNote,
         0
       );
       asyncFocusRichText(page, newFirstParagraphId);
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
-      const firstText = defaultFrame?.children.find(block =>
+      const firstText = defaultNote?.children.find(block =>
         matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
       );
       if (firstText) {
@@ -254,7 +254,7 @@ export class DefaultPageBlockComponent
         const newFirstParagraphId = page.addBlock(
           'affine:paragraph',
           {},
-          defaultFrame,
+          defaultNote,
           0
         );
         asyncFocusRichText(page, newFirstParagraphId);
@@ -442,11 +442,11 @@ export class DefaultPageBlockComponent
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
-  private _initFrameSizeEffect() {
-    tryUpdateFrameSize(this.page, 1);
+  private _initNoteSizeEffect() {
+    tryUpdateNoteSize(this.page, 1);
     this.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-      tryUpdateFrameSize(this.page, 1);
+      tryUpdateNoteSize(this.page, 1);
     });
   }
 
@@ -487,7 +487,7 @@ export class DefaultPageBlockComponent
 
     this._initDragHandle();
     this._initSlotEffects();
-    this._initFrameSizeEffect();
+    this._initNoteSizeEffect();
     this._initResizeEffect();
 
     this.mouseRoot.addEventListener('wheel', this._onWheel);

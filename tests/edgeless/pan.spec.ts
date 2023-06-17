@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
-  activeFrameInEdgeless,
+  activeNoteInEdgeless,
   setMouseMode,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
@@ -86,7 +86,7 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   await switchEditorMode(page);
   await setMouseMode(page, 'default');
 
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');

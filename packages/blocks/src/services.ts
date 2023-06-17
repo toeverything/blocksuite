@@ -6,9 +6,9 @@ import { CodeBlockService } from './code-block/index.js';
 import { DatabaseBlockService } from './database-block/database-service.js';
 import { DividerBlockService } from './divider-block/index.js';
 import { EmbedBlockService } from './embed-block/index.js';
-import { FrameBlockService } from './frame-block/index.js';
 import { ListBlockService } from './list-block/index.js';
 import type { Flavour } from './models.js';
+import { NoteBlockService } from './note-block/index.js';
 import { ParagraphBlockService } from './paragraph-block/index.js';
 
 export const blockService = {
@@ -18,7 +18,7 @@ export const blockService = {
   'affine:list': ListBlockService,
   'affine:embed': EmbedBlockService,
   'affine:divider': DividerBlockService,
-  'affine:frame': FrameBlockService,
+  'affine:note': NoteBlockService,
   'affine:bookmark': BookmarkBlockService,
 } satisfies {
   [key in Flavour]?: { new (): BaseService };

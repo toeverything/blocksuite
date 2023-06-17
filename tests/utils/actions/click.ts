@@ -47,8 +47,8 @@ export async function connectByClick(page: Page) {
   await clickTestOperationsMenuItem(page, 'Connect');
 }
 
-export async function addFrameByClick(page: Page) {
-  await clickTestOperationsMenuItem(page, 'Add Frame');
+export async function addNoteByClick(page: Page) {
+  await clickTestOperationsMenuItem(page, 'Add Note');
 }
 
 export async function addNewPage(page: Page) {

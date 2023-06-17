@@ -1,6 +1,7 @@
 import { SHORT_KEY } from './consts/platform.js';
 
 export * from './consts/block-hub.js';
+export * from './consts/event.js';
 export * from './consts/platform.js';
 
 export const BLOCK_ID_ATTR = 'data-block-id';
@@ -19,6 +20,7 @@ export const HOTKEYS = {
   SELECT_ALL: `${SHORT_KEY}+a`,
   SHIFT_UP: 'shift+up',
   SHIFT_DOWN: 'shift+down',
+  SHIFT_TAB: 'shift+tab',
 
   UP: 'up',
   DOWN: 'down',

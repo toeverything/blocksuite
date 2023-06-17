@@ -37,13 +37,13 @@ import type {
 } from './edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
-export const FRAME_MIN_WIDTH = 200;
-export const FRAME_MIN_HEIGHT = 20;
+export const NOTE_MIN_WIDTH = 200;
+export const NOTE_MIN_HEIGHT = 20;
 
-export const DEFAULT_FRAME_WIDTH = 448;
-export const DEFAULT_FRAME_HEIGHT = 72;
-export const DEFAULT_FRAME_OFFSET_X = 30;
-export const DEFAULT_FRAME_OFFSET_Y = 40;
+export const DEFAULT_NOTE_WIDTH = 448;
+export const DEFAULT_NOTE_HEIGHT = 72;
+export const DEFAULT_NOTE_OFFSET_X = 30;
+export const DEFAULT_NOTE_OFFSET_Y = 40;
 
 const ATTACHED_DISTANCE = 20;
 
@@ -184,7 +184,7 @@ export function pickBy(
     ? selectedShapes[selectedShapes.length - 1]
     : pickTopBlock(
         (page.root?.children as TopLevelBlockModel[]).filter(
-          child => child.flavour === 'affine:frame'
+          child => child.flavour === 'affine:note'
         ) ?? [],
         modelX,
         modelY
@@ -194,7 +194,7 @@ export function pickBy(
 function pickById(surface: SurfaceManager, page: Page, id: string) {
   const blocks =
     (page.root?.children.filter(
-      child => child.flavour === 'affine:frame'
+      child => child.flavour === 'affine:note'
     ) as TopLevelBlockModel[]) ?? [];
   const element = surface.pickById(id) || blocks.find(b => b.id === id);
   return element;
@@ -467,31 +467,31 @@ export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
   event: PointerEventState,
-  width = DEFAULT_FRAME_WIDTH
+  width = DEFAULT_NOTE_WIDTH
 ) {
-  const frameId = edgeless.addFrameWithPoint(
+  const noteId = edgeless.addNoteWithPoint(
     new Point(event.point.x, event.point.y),
     {
       width,
     }
   );
-  page.addBlock('affine:paragraph', {}, frameId);
+  page.addBlock('affine:paragraph', {}, noteId);
   edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
 
   // Wait for mouseMode updated
   requestAnimationFrame(() => {
     const blocks =
       (page.root?.children.filter(
-        child => child.flavour === 'affine:frame'
+        child => child.flavour === 'affine:note'
       ) as TopLevelBlockModel[]) ?? [];
-    const element = blocks.find(b => b.id === frameId);
+    const element = blocks.find(b => b.id === noteId);
     if (element) {
       edgeless.slots.selectionUpdated.emit({
         selected: [element],
         active: true,
       });
 
-      // Waiting dom updated, `frame mask` is removed
+      // Waiting dom updated, `note mask` is removed
       edgeless.updateComplete.then(() => {
         // Cannot reuse `handleNativeRangeClick` directly here,
         // since `retargetClick` will re-target to pervious editor

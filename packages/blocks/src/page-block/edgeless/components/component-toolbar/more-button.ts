@@ -119,20 +119,20 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     null;
 
   private _splitElements(): {
-    frames: TopLevelBlockModel[];
+    notes: TopLevelBlockModel[];
     shapes: SurfaceElement[];
   } {
-    const frames: TopLevelBlockModel[] = [];
+    const notes: TopLevelBlockModel[] = [];
     const shapes: SurfaceElement[] = [];
     this.elements.forEach(element => {
       if (isTopLevelBlock(element)) {
-        frames.push(element);
+        notes.push(element);
       } else {
         shapes.push(element);
       }
     });
     return {
-      frames,
+      notes: notes,
       shapes,
     };
   }
@@ -161,10 +161,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'forward':
       case 'backward':
       case 'back': {
-        const { frames, shapes } = this._splitElements();
-        if (frames.length) {
-          this.slots.reorderingFramesUpdated.emit({
-            elements: frames,
+        const { notes, shapes } = this._splitElements();
+        if (notes.length) {
+          this.slots.reorderingNotesUpdated.emit({
+            elements: notes,
             type,
           });
         }

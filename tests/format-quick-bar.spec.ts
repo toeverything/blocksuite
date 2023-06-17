@@ -179,7 +179,7 @@ test('should format quick bar hide when type text', async ({ page }) => {
 
 test('should format quick bar be able to format text', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
@@ -213,7 +213,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -240,8 +240,8 @@ test('should format quick bar be able to format text', async ({ page }) => {
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
   await boldBtn.click();
   await underlineBtn.click();
@@ -259,7 +259,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -283,8 +283,8 @@ test('should format quick bar be able to format text', async ({ page }) => {
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 
@@ -292,7 +292,7 @@ test('should format quick bar be able to format text when select multiple line',
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
 
@@ -305,7 +305,7 @@ test('should format quick bar be able to format text when select multiple line',
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -342,8 +342,8 @@ test('should format quick bar be able to format text when select multiple line',
     }
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 
   await boldBtn.click();
@@ -351,7 +351,7 @@ test('should format quick bar be able to format text when select multiple line',
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -367,14 +367,14 @@ test('should format quick bar be able to format text when select multiple line',
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 
 test('should format quick bar be able to link text', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
@@ -392,7 +392,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -415,8 +415,8 @@ test('should format quick bar be able to link text', async ({ page }) => {
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 
   await setSelection(page, 3, 0, 3, 3);
@@ -428,7 +428,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -444,8 +444,8 @@ test('should format quick bar be able to link text', async ({ page }) => {
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 
@@ -453,7 +453,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
@@ -469,7 +469,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -485,8 +485,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
   const bulletedBtn = page
     .locator(`.format-quick-bar`)
@@ -496,7 +496,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -513,8 +513,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 
   const textBtn = page
@@ -525,7 +525,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -541,8 +541,8 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
   await page.waitForTimeout(10);
   // The paragraph button should prevent selection after click
@@ -679,9 +679,9 @@ test('should format quick bar position correct at the start of second line', asy
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlock('affine:frame', {}, pageId);
+    const note = page.addBlock('affine:note', {}, pageId);
     const text = new page.Text('a'.repeat(100));
-    const paragraphId = page.addBlock('affine:paragraph', { text }, frame);
+    const paragraphId = page.addBlock('affine:paragraph', { text }, note);
     return paragraphId;
   });
   // await focusRichText(page);
@@ -732,7 +732,7 @@ test('should format quick bar work in single block selection', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
   await dragBetweenIndices(
@@ -769,7 +769,7 @@ test('should format quick bar work in single block selection', async ({
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -793,8 +793,8 @@ test('should format quick bar work in single block selection', async ({
     prop:text="789"
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 
   await page.mouse.click(0, 0);
@@ -805,7 +805,7 @@ test('should format quick bar work in multiple block selection', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
   await dragBetweenIndices(
@@ -839,7 +839,7 @@ test('should format quick bar work in multiple block selection', async ({
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -879,8 +879,8 @@ test('should format quick bar work in multiple block selection', async ({
     }
     prop:type="text"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 
   await page.mouse.click(0, 0);
@@ -891,7 +891,7 @@ test('should format quick bar with block selection works when update block type'
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
   await dragBetweenIndices(
@@ -914,7 +914,7 @@ test('should format quick bar with block selection works when update block type'
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -933,8 +933,8 @@ test('should format quick bar with block selection works when update block type'
     prop:text="789"
     prop:type="bulleted"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 
   await expect(formatBarController.formatQuickBar).toBeVisible();
@@ -942,7 +942,7 @@ test('should format quick bar with block selection works when update block type'
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -958,8 +958,8 @@ test('should format quick bar with block selection works when update block type'
     prop:text="789"
     prop:type="h1"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
   await expect(formatBarController.formatQuickBar).toBeVisible();
   await expect(blockSelections).toHaveCount(3);
@@ -971,7 +971,7 @@ test('should format quick bar show after convert to code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   const formatBarController = getFormatBar(page);
   await dragBetweenIndices(page, [2, 3], [0, 0]);
@@ -987,7 +987,7 @@ test('should format quick bar show after convert to code block', async ({
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
   prop:index="a0"
 >
@@ -995,8 +995,8 @@ test('should format quick bar show after convert to code block', async ({
     prop:language="Plain Text"
     prop:text="123\n456\n789"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 
@@ -1025,14 +1025,14 @@ test('should format bar style active correctly', async ({ page }) => {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlock('affine:frame', {}, pageId);
+    const note = page.addBlock('affine:note', {}, pageId);
     const delta = [
       { insert: '1', attributes: { bold: true, italic: true } },
       { insert: '2', attributes: { bold: true, underline: true } },
       { insert: '3', attributes: { bold: true, code: true } },
     ];
     const text = page.Text.fromDelta(delta);
-    page.addBlock('affine:paragraph', { text }, frame);
+    page.addBlock('affine:paragraph', { text }, note);
   });
 
   const { boldBtn, codeBtn, underlineBtn } = getFormatBar(page);
@@ -1177,14 +1177,14 @@ test('should update the format quick bar state when there is a change in keyboar
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frame = page.addBlock('affine:frame', {}, pageId);
+    const note = page.addBlock('affine:note', {}, pageId);
     const delta = [
       { insert: '1', attributes: { bold: true } },
       { insert: '2', attributes: { bold: true } },
       { insert: '3', attributes: { bold: false } },
     ];
     const text = page.Text.fromDelta(delta);
-    page.addBlock('affine:paragraph', { text }, frame);
+    page.addBlock('affine:paragraph', { text }, note);
   });
   await focusTitle(page);
   await pressArrowDown(page);

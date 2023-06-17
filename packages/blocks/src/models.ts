@@ -15,10 +15,10 @@ import type { DividerBlockModel } from './divider-block/divider-model.js';
 import { DividerBlockSchema } from './divider-block/divider-model.js';
 import type { EmbedBlockModel } from './embed-block/embed-model.js';
 import { EmbedBlockSchema } from './embed-block/embed-model.js';
-import type { FrameBlockModel } from './frame-block/frame-model.js';
-import { FrameBlockSchema } from './frame-block/frame-model.js';
 import type { ListBlockModel } from './list-block/list-model.js';
 import { ListBlockSchema } from './list-block/list-model.js';
+import type { NoteBlockModel } from './note-block/note-model.js';
+import { NoteBlockSchema } from './note-block/note-model.js';
 import type { PageBlockModel } from './page-block/page-model.js';
 import { PageBlockSchema } from './page-block/page-model.js';
 import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
@@ -32,8 +32,8 @@ export type {
   DatabaseBlockModel,
   DividerBlockModel,
   EmbedBlockModel,
-  FrameBlockModel,
   ListBlockModel,
+  NoteBlockModel,
   PageBlockModel,
   ParagraphBlockModel,
   SurfaceBlockModel,
@@ -45,7 +45,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   ParagraphBlockSchema,
   PageBlockSchema,
   ListBlockSchema,
-  FrameBlockSchema,
+  NoteBlockSchema,
   DividerBlockSchema,
   EmbedBlockSchema,
   SurfaceBlockSchema,
@@ -63,7 +63,7 @@ export type BlockSchemas = {
   'affine:paragraph': ParagraphBlockModel;
   'affine:page': PageBlockModel;
   'affine:list': ListBlockModel;
-  'affine:frame': FrameBlockModel;
+  'affine:note': NoteBlockModel;
   'affine:divider': DividerBlockModel;
   'affine:embed': EmbedBlockModel;
   'affine:surface': SurfaceBlockModel;

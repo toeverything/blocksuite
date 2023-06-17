@@ -3,8 +3,8 @@ import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
-  activeFrameInEdgeless,
-  addFrameByClick,
+  activeNoteInEdgeless,
+  addNoteByClick,
   copyByKeyboard,
   dragBetweenCoords,
   dragBetweenIndices,
@@ -307,10 +307,10 @@ test('cursor move down at edge of the last line', async ({ page }) => {
   }
 });
 
-test('cursor move up and down through frame', async ({ page }) => {
+test('cursor move up and down through note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  await addFrameByClick(page);
+  await addNoteByClick(page);
   await focusRichText(page, 0);
   let currentId: string | null = null;
   const [id] = await getCursorBlockIdAndHeight(page);
@@ -412,7 +412,7 @@ test('select text leaving a few words in the last line and delete by forwardDele
   expect(textOne).toBe('abc89');
 });
 
-test('select text in the same line with dragging leftward and move outside the affine-frame', async ({
+test('select text in the same line with dragging leftward and move outside the affine-note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -420,12 +420,12 @@ test('select text in the same line with dragging leftward and move outside the a
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const frameLeft = await page.evaluate(() => {
-    const frame = document.querySelector('affine-frame');
-    if (!frame) {
+  const noteLeft = await page.evaluate(() => {
+    const note = document.querySelector('affine-note');
+    if (!note) {
       throw new Error();
     }
-    return frame.getBoundingClientRect().left;
+    return note.getBoundingClientRect().left;
   });
 
   // `456`
@@ -447,7 +447,7 @@ test('select text in the same line with dragging leftward and move outside the a
       steps: 20,
       async beforeMouseUp() {
         await page.mouse.move(
-          frameLeft - 1,
+          noteLeft - 1,
           blockRect.top + blockRect.height / 2
         );
       },
@@ -458,7 +458,7 @@ test('select text in the same line with dragging leftward and move outside the a
   await assertRichTexts(page, ['123', 'abc', '789']);
 });
 
-test('select text in the same line with dragging leftward and move outside the affine-frame by forwardDelete', async ({
+test('select text in the same line with dragging leftward and move outside the affine-note by forwardDelete', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -466,12 +466,12 @@ test('select text in the same line with dragging leftward and move outside the a
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const frameLeft = await page.evaluate(() => {
-    const frame = document.querySelector('affine-frame');
-    if (!frame) {
+  const noteLeft = await page.evaluate(() => {
+    const note = document.querySelector('affine-note');
+    if (!note) {
       throw new Error();
     }
-    return frame.getBoundingClientRect().left;
+    return note.getBoundingClientRect().left;
   });
 
   // `456`
@@ -493,7 +493,7 @@ test('select text in the same line with dragging leftward and move outside the a
       steps: 20,
       async beforeMouseUp() {
         await page.mouse.move(
-          frameLeft - 1,
+          noteLeft - 1,
           blockRect.top + blockRect.height / 2
         );
       },
@@ -504,7 +504,7 @@ test('select text in the same line with dragging leftward and move outside the a
   await assertRichTexts(page, ['123', 'abc', '789']);
 });
 
-test('select text in the same line with dragging rightward and move outside the affine-frame', async ({
+test('select text in the same line with dragging rightward and move outside the affine-note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -512,12 +512,12 @@ test('select text in the same line with dragging rightward and move outside the 
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const frameRight = await page.evaluate(() => {
-    const frame = document.querySelector('affine-frame');
-    if (!frame) {
+  const noteRight = await page.evaluate(() => {
+    const note = document.querySelector('affine-note');
+    if (!note) {
       throw new Error();
     }
-    return frame.getBoundingClientRect().right;
+    return note.getBoundingClientRect().right;
   });
 
   // `456`
@@ -539,7 +539,7 @@ test('select text in the same line with dragging rightward and move outside the 
       steps: 20,
       async beforeMouseUp() {
         await page.mouse.move(
-          frameRight + 1,
+          noteRight + 1,
           blockRect.top + blockRect.height / 2
         );
       },
@@ -551,7 +551,7 @@ test('select text in the same line with dragging rightward and move outside the 
   expect(textOne).toBe('abc');
 });
 
-test('select text in the same line with dragging rightward and move outside the affine-frame by forwardDelete', async ({
+test('select text in the same line with dragging rightward and move outside the affine-note by forwardDelete', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -559,12 +559,12 @@ test('select text in the same line with dragging rightward and move outside the 
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const frameRight = await page.evaluate(() => {
-    const frame = document.querySelector('affine-frame');
-    if (!frame) {
+  const noteRight = await page.evaluate(() => {
+    const note = document.querySelector('affine-note');
+    if (!note) {
       throw new Error();
     }
-    return frame.getBoundingClientRect().right;
+    return note.getBoundingClientRect().right;
   });
 
   // `456`
@@ -586,7 +586,7 @@ test('select text in the same line with dragging rightward and move outside the 
       steps: 20,
       async beforeMouseUp() {
         await page.mouse.move(
-          frameRight + 1,
+          noteRight + 1,
           blockRect.top + blockRect.height / 2
         );
       },
@@ -835,7 +835,7 @@ test('should not crash when mouse over the left side of the list block prefix', 
   await assertClipItems(page, 'text/plain', '45');
 });
 
-test('should set the last block to end the range after when leaving the affine-frame', async ({
+test('should set the last block to end the range after when leaving the affine-note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -860,7 +860,7 @@ test('should set the last block to end the range after when leaving the affine-f
   await assertClipItems(page, 'text/plain', '3456789');
 });
 
-test('should set the first block to start the range before when leaving the affine-frame-block-container', async ({
+test('should set the first block to start the range before when leaving the affine-note-block-container', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -885,16 +885,16 @@ test('should set the first block to start the range before when leaving the affi
   await assertClipItems(page, 'text/plain', '1234567');
 });
 
-test('should select texts on cross-frame dragging', async ({ page }) => {
+test('should select texts on cross-note dragging', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { pageId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
 
   await initEmptyParagraphState(page, pageId);
 
-  // focus last block in first frame
+  // focus last block in first note
   await focusRichText(page, 2);
-  // goto next frame
+  // goto next note
   await pressArrowDown(page);
   await waitNextFrame(page);
   await type(page, 'ABC');
@@ -916,7 +916,7 @@ test('should select texts on cross-frame dragging', async ({ page }) => {
   await assertClipItems(page, 'text/plain', '3456789ABC');
 });
 
-test('should select full text of the first block when leaving the affine-frame-block-container in edgeless mode', async ({
+test('should select full text of the first block when leaving the affine-note-block-container in edgeless mode', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -925,7 +925,7 @@ test('should select full text of the first block when leaving the affine-frame-b
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await dragBetweenIndices(page, [2, 1], [0, 2], undefined, undefined, {
     click: true,
   });
@@ -933,7 +933,7 @@ test('should select full text of the first block when leaving the affine-frame-b
   await assertClipItems(page, 'text/plain', '34567');
 
   const containerRect = await page.evaluate(() => {
-    const container = document.querySelector('.affine-frame-block-container');
+    const container = document.querySelector('.affine-note-block-container');
     if (!container) {
       throw new Error();
     }
@@ -1053,7 +1053,7 @@ test('should indent native multi-selection block', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -1070,7 +1070,85 @@ test('should indent native multi-selection block', async ({ page }) => {
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:frame>
+  </affine:note>
+</affine:page>`
+  );
+});
+
+test('should unindent native multi-selection block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  let box456 = await getRichTextBoundingBox(page, '3');
+  let inside456 = { x: box456.left + 1, y: box456.top + 1 };
+
+  let box789 = await getRichTextBoundingBox(page, '4');
+  let inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
+
+  // from top to bottom
+  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:note>
+</affine:page>`
+  );
+
+  box456 = await getRichTextBoundingBox(page, '3');
+  inside456 = { x: box456.left + 1, y: box456.top + 1 };
+
+  box789 = await getRichTextBoundingBox(page, '4');
+  inside789 = { x: box789.right - 1, y: box789.bottom - 1 };
+
+  // from top to bottom
+  await dragBetweenCoords(page, inside456, inside789, { steps: 50 });
+
+  await pressShiftTab(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+  </affine:note>
 </affine:page>`
   );
 });
@@ -1160,7 +1238,7 @@ test('should keep native range selection when scrolling backward with the scroll
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -1230,7 +1308,7 @@ test('should keep native range selection when scrolling forward with the scroll 
       throw new Error();
     }
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -1402,7 +1480,7 @@ test('should select when clicking on blank area in edgeless mode', async ({
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
 
   const r1 = await page.locator('[data-block-id="3"]').boundingBox();
   const r2 = await page.locator('[data-block-id="4"]').boundingBox();

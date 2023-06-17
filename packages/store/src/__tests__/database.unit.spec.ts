@@ -9,7 +9,7 @@ import {
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
 import type { Cell, Column } from '../../../blocks/src/database-block/types.js';
-import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
+import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { BaseBlockModel, Page } from '../index.js';
@@ -23,7 +23,7 @@ function createTestOptions() {
 const AffineSchemas = [
   ParagraphBlockSchema,
   PageBlockSchema,
-  FrameBlockSchema,
+  NoteBlockSchema,
   DatabaseBlockSchema,
 ];
 
@@ -41,7 +41,7 @@ describe('DatabaseManager', () => {
   let db: DatabaseBlockModel;
 
   let pageBlockId: BaseBlockModel['id'];
-  let frameBlockId: BaseBlockModel['id'];
+  let noteBlockId: BaseBlockModel['id'];
   let databaseBlockId: BaseBlockModel['id'];
   let p1: BaseBlockModel['id'];
   let p2: BaseBlockModel['id'];
@@ -63,7 +63,7 @@ describe('DatabaseManager', () => {
     pageBlockId = page.addBlock('affine:page', {
       title: new page.Text('database test'),
     });
-    frameBlockId = page.addBlock('affine:frame', {}, pageBlockId);
+    noteBlockId = page.addBlock('affine:note', {}, pageBlockId);
 
     databaseBlockId = page.addBlock(
       'affine:database',
@@ -71,7 +71,7 @@ describe('DatabaseManager', () => {
         columns: [],
         titleColumn: 'Title',
       },
-      frameBlockId
+      noteBlockId
     );
 
     const databaseModel = page.getBlockById(
@@ -152,7 +152,7 @@ describe('DatabaseManager', () => {
       {
         text: new page.Text('paragraph'),
       },
-      frameBlockId
+      noteBlockId
     );
     const column = numberHelper.create('Test Column');
     column.id = 'testColumnId';
@@ -226,7 +226,7 @@ describe('DatabaseManager', () => {
 
     db.convertCellsByColumn(col1, 'rich-text');
     const richTextCell = db.getCell(p1, col1);
-    expect(richTextCell?.value.toString()).toEqual('0.1');
+    expect(richTextCell?.value?.toString()).toEqual('0.1');
   });
 
   test('deleteSelectedCellTag', () => {

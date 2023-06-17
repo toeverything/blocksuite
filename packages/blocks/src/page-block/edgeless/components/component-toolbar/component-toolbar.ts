@@ -2,7 +2,7 @@ import '../tool-icon-button.js';
 import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
-import './change-frame-button.js';
+import './change-note-button.js';
 import './change-text-button.js';
 import './more-button.js';
 
@@ -31,7 +31,7 @@ import { isTopLevelBlock, stopPropagation } from '../../utils.js';
 type CategorizedElements = {
   shape: ShapeElement[];
   brush: BrushElement[];
-  frame: TopLevelBlockModel[];
+  note: TopLevelBlockModel[];
   connector: ConnectorElement[];
   text: TextElement[];
 };
@@ -77,7 +77,7 @@ export class EdgelessComponentToolbar extends LitElement {
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selected, s => {
       if (isTopLevelBlock(s)) {
-        return 'frame';
+        return 'note';
       }
       return s.type;
     });
@@ -124,16 +124,16 @@ export class EdgelessComponentToolbar extends LitElement {
       : null;
   }
 
-  private _getFrameButton(blocks?: TopLevelBlockModel[]) {
+  private _getNoteButton(blocks?: TopLevelBlockModel[]) {
     return blocks?.length
-      ? html`<edgeless-change-frame-button
-          .frames=${blocks}
+      ? html`<edgeless-change-note-button
+          .notes=${blocks}
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
           .selectionState=${this.selectionState}
         >
-        </edgeless-change-frame-button>`
+        </edgeless-change-note-button>`
       : null;
   }
 
@@ -152,7 +152,7 @@ export class EdgelessComponentToolbar extends LitElement {
 
   override render() {
     const groupedSelected = this._groupSelected();
-    const { shape, brush, connector, frame, text } = groupedSelected;
+    const { shape, brush, connector, note: note, text } = groupedSelected;
 
     // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -167,7 +167,7 @@ export class EdgelessComponentToolbar extends LitElement {
           this._getShapeButton(shape),
           this._getBrushButton(brush),
           this._getConnectorButton(connector),
-          this._getFrameButton(frame),
+          this._getNoteButton(note),
           this._getTextButton(text),
         ].filter(b => !!b);
 

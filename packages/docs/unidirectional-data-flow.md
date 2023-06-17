@@ -43,7 +43,7 @@ As an example, suppose the current block tree structure is as follows:
 
 ```
 PageBlock
-  FrameBlock
+  NoteBlock
     ParagraphBlock 0
     ParagraphBlock 1
     ParagraphBlock 2
@@ -58,7 +58,7 @@ page.deleteBlock(blockModel);
 
 At this point, BlockSuite will not directly modify the block tree under `page.root`, but will instead firstly modify the underlying YBlock. After the CRDT state is changed, Yjs will generate the corresponding `Y.Event` data structure, which contains all the incremental state changes in this update (similar to patches in git and virtual DOM). BlockSuite will always use this as the basis to synchronize the block models, then trigger the corresponding slot events for UI updates.
 
-In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated` slot event of `FrameBlock` will be triggered. This will enable the corresponding component in the UI framework component tree to refresh itself. Since each child block has an ID, this is very conducive to combining the common list key optimizations in UI frameworks, achieving on-demand block component updates.
+In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated` slot event of `NoteBlock` will be triggered. This will enable the corresponding component in the UI framework component tree to refresh itself. Since each child block has an ID, this is very conducive to combining the common list key optimizations in UI frameworks, achieving on-demand block component updates.
 
 But the real power lies in the fact that if this block tree is being concurrently edited by multiple people, when user B performs a similar operation, the corresponding update will be encoded by Yjs and distributed by the provider. When User A receives and applies the update from User B, the same state update pipeline as local editing will be triggered. **This makes it unnecessary for the application to make any additional modifications or adaptations for collaboration scenarios, inherently gaining real-time collaboration capabilities**.
 

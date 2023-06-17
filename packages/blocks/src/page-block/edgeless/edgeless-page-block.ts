@@ -58,19 +58,19 @@ import type {
   BlockHost,
   DragHandle,
   EmbedBlockModel,
-  FrameBlockModel,
   MouseMode,
+  NoteBlockModel,
   PageBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
-import { tryUpdateFrameSize } from '../utils/index.js';
+import { tryUpdateNoteSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { EdgelessDraggingArea } from './components/dragging-area.js';
 import { EdgelessHoverRect } from './components/hover-rect.js';
 import { FIT_TO_SCREEN_PADDING } from './consts.js';
 import { createDragHandle } from './create-drag-handle.js';
-import { FrameResizeObserver } from './frame-resize-observer.js';
 import { bindEdgelessHotkeys } from './hotkey.js';
+import { NoteResizeObserver } from './note-resize-observer.js';
 import {
   EdgelessSelectionManager,
   type EdgelessSelectionState,
@@ -82,10 +82,10 @@ import {
   type ZoomAction,
 } from './toolbar/edgeless-toolbar.js';
 import {
-  DEFAULT_FRAME_HEIGHT,
-  DEFAULT_FRAME_OFFSET_X,
-  DEFAULT_FRAME_OFFSET_Y,
-  DEFAULT_FRAME_WIDTH,
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_OFFSET_X,
+  DEFAULT_NOTE_OFFSET_Y,
+  DEFAULT_NOTE_WIDTH,
   getBackgroundGrid,
   getCursorMode,
   xywhArrayToObject,
@@ -97,7 +97,7 @@ export interface EdgelessSelectionSlots {
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
   mouseModeUpdated: Slot<MouseMode>;
-  reorderingFramesUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
 }
@@ -214,7 +214,7 @@ export class EdgelessPageBlockComponent
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     mouseModeUpdated: new Slot<MouseMode>(),
-    reorderingFramesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingNotesUpdated: new Slot<ReorderingAction<Selectable>>(),
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
@@ -234,21 +234,21 @@ export class EdgelessPageBlockComponent
 
   snap!: EdgelessSnapManager;
 
-  // Gets the top level frames.
-  get frames() {
+  // Gets the top level notes.
+  get notes() {
     return this.model.children.filter(
-      child => child.flavour === 'affine:frame'
+      child => child.flavour === 'affine:note'
     ) as TopLevelBlockModel[];
   }
 
-  // Gets the sorted frames.
-  get sortedFrames() {
-    return this.frames.sort(compare);
+  // Gets the sorted notes.
+  get sortedNotes() {
+    return this.notes.sort(compare);
   }
 
   private _resizeObserver: ResizeObserver | null = null;
 
-  private _frameResizeObserver = new FrameResizeObserver();
+  private _noteResizeObserver = new NoteResizeObserver();
 
   private _clearSelection() {
     requestAnimationFrame(() => {
@@ -362,8 +362,8 @@ export class EdgelessPageBlockComponent
 
   private _initSlotEffects() {
     // TODO: listen to new children
-    // this.model.children.forEach(frame => {
-    //   frame.propsUpdated.on(() => this.selection.syncDraggingArea());
+    // this.model.children.forEach(note => {
+    //   note.propsUpdated.on(() => this.selection.syncDraggingArea());
     // });
     const { _disposables, slots } = this;
     _disposables.add(
@@ -420,11 +420,11 @@ export class EdgelessPageBlockComponent
     _disposables.add(this.surface);
     _disposables.add(bindEdgelessHotkeys(this));
 
-    _disposables.add(this._frameResizeObserver);
+    _disposables.add(this._noteResizeObserver);
     _disposables.add(
-      this._frameResizeObserver.slots.resize.on(resizedFrames => {
+      this._noteResizeObserver.slots.resize.on(resizedNotes => {
         const page = this.page;
-        resizedFrames.forEach((domRect, id) => {
+        resizedNotes.forEach((domRect, id) => {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const { index, xywh } = model;
           const [x, y, w, h] = deserializeXYWH(xywh);
@@ -451,7 +451,7 @@ export class EdgelessPageBlockComponent
       })
     );
 
-    _disposables.add(slots.reorderingFramesUpdated.on(this.reorderFrames));
+    _disposables.add(slots.reorderingNotesUpdated.on(this.reorderNotes));
     _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
     _disposables.add(
       slots.zoomUpdated.on((action: ZoomAction) =>
@@ -534,14 +534,14 @@ export class EdgelessPageBlockComponent
   getSortedElementsWithViewportBounds(elements: Selectable[]) {
     const bounds = this.surface.viewport.viewportBounds;
     // TODO: opt filter
-    return this.sortedFrames.filter(element => {
+    return this.sortedNotes.filter(element => {
       if (elements.includes(element)) return true;
       return intersects(bounds, xywhArrayToObject(element));
     });
   }
 
-  // Just update `index`, we don't change the order of the frames in the children.
-  reorderFrames = ({ elements, type }: ReorderingAction<Selectable>) => {
+  // Just update `index`, we don't change the order of the notes in the children.
+  reorderNotes = ({ elements, type }: ReorderingAction<Selectable>) => {
     const updateIndexes = (keys: string[], elements: Selectable[]) => {
       this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
         const min = keys[0];
@@ -667,55 +667,55 @@ export class EdgelessPageBlockComponent
   };
 
   /**
-   * Adds a new frame with the given point on the editor-container.
+   * Adds a new note with the given point on the editor-container.
    *
    * @param: point Point
-   * @returns: The id of new frame
+   * @returns: The id of new note
    */
-  addFrameWithPoint(
+  addNoteWithPoint(
     point: Point,
     options: {
       width?: number;
       height?: number;
       parentId?: string;
-      frameIndex?: number;
+      noteIndex?: number;
       offsetX?: number;
       offsetY?: number;
     } = {}
   ) {
     const {
-      width = DEFAULT_FRAME_WIDTH,
-      height = DEFAULT_FRAME_HEIGHT,
-      offsetX = DEFAULT_FRAME_OFFSET_X,
-      offsetY = DEFAULT_FRAME_OFFSET_Y,
+      width = DEFAULT_NOTE_WIDTH,
+      height = DEFAULT_NOTE_HEIGHT,
+      offsetX = DEFAULT_NOTE_OFFSET_X,
+      offsetY = DEFAULT_NOTE_OFFSET_Y,
       parentId = this.page.root?.id,
-      frameIndex,
+      noteIndex: noteIndex,
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.page.addBlock(
-      'affine:frame',
+      'affine:note',
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
         index: this.indexes.max,
       },
       parentId,
-      frameIndex
+      noteIndex
     );
   }
 
   /**
-   * Adds a new frame with the given blocks and point.
+   * Adds a new note with the given blocks and point.
    * @param blocks Array<Partial<BaseBlockModel>>
    * @param point Point
    */
-  addNewFrame(
+  addNewNote(
     blocks: Array<Partial<BaseBlockModel>>,
     point: Point,
     options?: {
       width?: number;
       height?: number;
       parentId?: string;
-      frameIndex?: number;
+      noteIndex?: number;
       offsetX?: number;
       offsetY?: number;
     }
@@ -724,7 +724,7 @@ export class EdgelessPageBlockComponent
     const { left, top } = this.surface.viewport;
     point.x -= left;
     point.y -= top;
-    const frameId = this.addFrameWithPoint(point, options);
+    const noteId = this.addNoteWithPoint(point, options);
     const ids = this.page.addBlocks(
       blocks.map(({ flavour, ...blockProps }) => {
         assertExists(flavour);
@@ -733,45 +733,45 @@ export class EdgelessPageBlockComponent
           blockProps,
         };
       }),
-      frameId
+      noteId
     );
     return {
-      frameId,
+      noteId,
       ids,
     };
   }
 
-  /** Moves selected blocks into a new frame at the given point. */
-  moveBlocksWithNewFrame(
+  /** Moves selected blocks into a new note at the given point. */
+  moveBlocksWithNewNote(
     blocks: BaseBlockModel[],
     point: Point,
     {
       rect,
       focus,
       parentId,
-      frameIndex,
+      noteIndex,
     }: {
       rect?: DOMRect;
       focus?: boolean;
       parentId?: string;
-      frameIndex?: number;
+      noteIndex?: number;
     } = {}
   ) {
     const { left, top, zoom } = this.surface.viewport;
     const width = rect?.width
       ? rect.width / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2
-      : DEFAULT_FRAME_WIDTH;
+      : DEFAULT_NOTE_WIDTH;
     point.x -= left;
     point.y -= top;
-    const frameId = this.addFrameWithPoint(point, {
+    const noteId = this.addNoteWithPoint(point, {
       width,
       parentId,
-      frameIndex,
+      noteIndex,
     });
-    const frameModel = this.page.getBlockById(frameId) as FrameBlockModel;
-    this.page.moveBlocks(blocks, frameModel);
+    const noteModel = this.page.getBlockById(noteId) as NoteBlockModel;
+    this.page.moveBlocks(blocks, noteModel);
 
-    focus && this.setSelection(frameId, true, blocks[0].id, point);
+    focus && this.setSelection(noteId, true, blocks[0].id, point);
   }
 
   addImage(model: Partial<EmbedBlockModel>, point?: Point) {
@@ -827,24 +827,24 @@ export class EdgelessPageBlockComponent
       y = cy - (options.height * zoom) / 2;
     }
 
-    return this.addNewFrame([model], new Point(x, y), options);
+    return this.addNewNote([model], new Point(x, y), options);
   }
 
   /*
-   * Set selection state by giving frameId & blockId.
+   * Set selection state by giving noteId & blockId.
    * Not supports surface elements.
    */
-  setSelection(frameId: string, active = true, blockId: string, point?: Point) {
-    const frameBlock = this.frames.find(b => b.id === frameId);
-    assertExists(frameBlock);
+  setSelection(noteId: string, active = true, blockId: string, point?: Point) {
+    const noteBlock = this.notes.find(b => b.id === noteId);
+    assertExists(noteBlock);
 
     requestAnimationFrame(() => {
       this.slots.selectedBlocksUpdated.emit([]);
       this.slots.selectionUpdated.emit({
-        selected: [frameBlock as TopLevelBlockModel],
+        selected: [noteBlock as TopLevelBlockModel],
         active,
       });
-      // Waiting dom updated, `frame mask` is removed
+      // Waiting dom updated, `note mask` is removed
       this.updateComplete.then(() => {
         if (blockId) {
           asyncFocusRichText(this.page, blockId);
@@ -869,8 +869,8 @@ export class EdgelessPageBlockComponent
   getElementsBound(): IBound | null {
     const bounds = [];
 
-    this.frames.forEach(frame => {
-      bounds.push(Bound.deserialize(frame.xywh));
+    this.notes.forEach(note => {
+      bounds.push(Bound.deserialize(note.xywh));
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();
@@ -911,13 +911,13 @@ export class EdgelessPageBlockComponent
     this._initDragHandle();
     this._initResizeEffect();
     this.clipboard.init(this.page);
-    tryUpdateFrameSize(this.page, this.surface.viewport.zoom);
+    tryUpdateNoteSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {
       // Should be called in requestAnimationFrame,
       // so as to avoid DOM mutation in SurfaceManager constructor
       this.surface.attach(this._surfaceContainer);
-      this._frameResizeObserver.resetListener(this.page);
+      this._noteResizeObserver.resetListener(this.page);
       if (!this._tryLoadViewportLocalRecord()) {
         this._initViewport();
       }
@@ -932,7 +932,7 @@ export class EdgelessPageBlockComponent
     // should be updated on any frame add and delete
     this.page.root?.childrenUpdated.on(() => {
       requestAnimationFrame(() => {
-        this._frameResizeObserver.resetListener(this.page);
+        this._noteResizeObserver.resetListener(this.page);
       });
     });
   }
@@ -958,8 +958,8 @@ export class EdgelessPageBlockComponent
   public getFitToScreenData() {
     const bounds = [];
 
-    this.frames.forEach(frame => {
-      bounds.push(Bound.deserialize(frame.xywh));
+    this.notes.forEach(note => {
+      bounds.push(Bound.deserialize(note.xywh));
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();
@@ -1029,7 +1029,7 @@ export class EdgelessPageBlockComponent
     const { viewport } = surface;
 
     const childrenContainer = EdgelessBlockChildrenContainer(
-      this.sortedFrames,
+      this.sortedNotes,
       state.active,
       this.root.renderModel
     );
