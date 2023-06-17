@@ -559,7 +559,10 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     const text = model.text;
     const titleElement = document.querySelector(
       '.affine-default-page-block-title'
-    ) as HTMLTextAreaElement;
+    ) as HTMLTextAreaElement | null;
+    // Probably no title, e.g. in edgeless mode
+    if (!titleElement) return false;
+
     const pageModel = getModelByElement(titleElement) as PageBlockModel;
     const title = pageModel.title;
 

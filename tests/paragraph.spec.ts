@@ -136,10 +136,6 @@ for (const { initState, desc } of [
   test(`backspace on line start of the first block (${desc})`, async ({
     page,
   }) => {
-    if (desc === 'with surface') {
-      test.fail();
-    }
-
     await enterPlaygroundRoom(page);
     await initState(page);
     await waitDefaultPageLoaded(page);
@@ -177,10 +173,6 @@ for (const { initState, desc } of [
   test(`backspace on line start of the first empty block (${desc})`, async ({
     page,
   }) => {
-    if (desc === 'with surface') {
-      test.fail();
-    }
-
     await enterPlaygroundRoom(page);
     await initState(page);
     await focusTitle(page);
