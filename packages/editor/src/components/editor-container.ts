@@ -122,7 +122,7 @@ export class EditorContainer
       type = 'after';
     }
 
-    let frameId;
+    let noteId;
     let focusId;
 
     if (type !== 'none' && model) {
@@ -141,7 +141,7 @@ export class EditorContainer
         this._edgelessPageBlock
       ) as BlockComponentElement;
       assertExists(targetFrameBlock);
-      frameId = targetFrameBlock.model.id;
+      noteId = targetFrameBlock.model.id;
     }
 
     if (isPageMode) return;
@@ -150,19 +150,19 @@ export class EditorContainer
     assertExists(pageBlock);
 
     // In edgeless mode
-    // Creates new frames on blank area.
+    // Creates new notes on blank area.
     let i = 0;
     for (; i < len; i++) {
       const model = models[i];
       if (model.flavour === 'affine:embed' && model.type === 'image') {
-        const frame = pageBlock.addImage(model as EmbedBlockModel, point);
-        frameId = frame?.frameId;
+        const note = pageBlock.addImage(model as EmbedBlockModel, point);
+        noteId = note?.noteId;
       }
     }
 
-    if (!frameId || !focusId) return;
+    if (!noteId || !focusId) return;
 
-    pageBlock.setSelection(frameId, true, focusId, point);
+    pageBlock.setSelection(noteId, true, focusId, point);
   }
 
   override connectedCallback() {
