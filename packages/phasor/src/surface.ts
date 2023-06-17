@@ -11,11 +11,11 @@ import {
   type IPhasorElementType,
   type PhasorElement,
   type PhasorElementType,
-  type SurfaceElement,
 } from './elements/index.js';
 import type {
   ComputedValue,
   HitTestOptions,
+  SurfaceElement,
 } from './elements/surface-element.js';
 import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';

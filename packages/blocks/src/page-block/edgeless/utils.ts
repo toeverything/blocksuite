@@ -6,6 +6,8 @@ import {
   Bound,
   type Controller,
   type PhasorElement,
+  type PhasorElementWithText,
+  ShapeElement,
   type SurfaceManager,
   type SurfaceViewport,
   TextElement,
@@ -29,8 +31,9 @@ import {
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
+import { EdgelessShapeEditor } from './components/canvas-text/edgeless-shape-editor.js';
+import { EdgelessTextEditor } from './components/canvas-text/edgeless-text-editor.js';
 import { GET_DEFAULT_LINE_COLOR } from './components/color-panel.js';
-import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
   EdgelessContainer,
   EdgelessPageBlockComponent,
@@ -501,18 +504,40 @@ export function addNote(
   });
 }
 
+export function isPhasorElementWithText(
+  element: Selectable
+): element is PhasorElementWithText {
+  return element instanceof TextElement || element instanceof ShapeElement;
+}
+
 export function mountTextEditor(
   textElement: TextElement,
   edgeless: EdgelessPageBlockComponent
 ) {
-  const textEditor = new SurfaceTextEditor();
+  const textEditor = new EdgelessTextEditor();
   const pageBlockContainer = edgeless.pageBlockContainer;
-
+  console.log(1);
   pageBlockContainer.appendChild(textEditor);
   textEditor.mount(textElement, edgeless);
   textEditor.vEditor?.focusEnd();
   edgeless.selection.switchToDefaultMode({
     selected: [textElement],
+    active: true,
+  });
+}
+
+export function mountShapeEditor(
+  shapeElement: ShapeElement,
+  edgeless: EdgelessPageBlockComponent
+) {
+  const shapeEditor = new EdgelessShapeEditor();
+  const pageBlockContainer = edgeless.pageBlockContainer;
+
+  pageBlockContainer.appendChild(shapeEditor);
+  shapeEditor.mount(shapeElement, edgeless);
+  shapeEditor.vEditor?.focusEnd();
+  edgeless.selection.switchToDefaultMode({
+    selected: [shapeElement],
     active: true,
   });
 }

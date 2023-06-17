@@ -10,6 +10,7 @@ import { getService } from '../../service.js';
 import {
   type BlockRange,
   getCurrentNativeRange,
+  getEdgelessCanvasTextEditor,
   hasNativeSelection,
   resetNativeSelection,
   type SerializedBlock,
@@ -171,10 +172,12 @@ export async function clipboardData2Blocks(
   return contentParser.text2blocks(textClipData);
 }
 
-export function copySurfaceText(edgeless: EdgelessPageBlockComponent) {
-  const surfaceTextEditor = edgeless.querySelector('surface-text-editor');
-  if (surfaceTextEditor) {
-    const vEditor = surfaceTextEditor.vEditor;
+export function copyOnPhasorElementWithText(
+  edgeless: EdgelessPageBlockComponent
+) {
+  const edgelessTextEditor = getEdgelessCanvasTextEditor(edgeless);
+  if (edgelessTextEditor) {
+    const vEditor = edgelessTextEditor.vEditor;
     assertExists(vEditor);
     const vRange = vEditor.getVRange();
     if (vRange) {
@@ -183,10 +186,10 @@ export function copySurfaceText(edgeless: EdgelessPageBlockComponent) {
         .slice(vRange.index, vRange.index + vRange.length);
       const clipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, text);
 
-      surfaceTextEditor.setKeeping(true);
+      edgelessTextEditor.setKeeping(true);
       // this function will make virgo editor lose focus
       performNativeCopy([clipboardItem]);
-      surfaceTextEditor.setKeeping(false);
+      edgelessTextEditor.setKeeping(false);
 
       // restore focus and selection
       vEditor.rootElement.focus();

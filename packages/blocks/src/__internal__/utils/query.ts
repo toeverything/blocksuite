@@ -9,6 +9,7 @@ import { activeEditorManager } from '../../__internal__/utils/active-editor-mana
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/canvas-text/types.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { type Point, Rect } from './rect.js';
@@ -500,7 +501,7 @@ export function isInsidePageTitle(element: unknown): boolean {
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
   const editor = activeEditorManager.getActiveEditor();
-  const textElement = (editor ?? document).querySelector('surface-text-editor');
+  const textElement = getEdgelessCanvasTextEditor(editor ?? document);
   if (!textElement) return false;
 
   return textElement.contains(element as Node);
@@ -1129,4 +1130,10 @@ export function isDragHandle(target: Element) {
  */
 export function hasDatabase(elements: Element[]) {
   return elements.some(isDatabase);
+}
+
+export function getEdgelessCanvasTextEditor(element: Element | Document) {
+  return element.querySelector(
+    '[data-edgeless-canvas-text-editor="true"]'
+  ) as EdgelessCanvasTextEditor | null;
 }

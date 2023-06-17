@@ -8,6 +8,7 @@ import {
   isPointIn,
   type PhasorElement,
   type PhasorElementType,
+  ShapeElement,
   type SurfaceManager,
   TextElement,
 } from '@blocksuite/phasor';
@@ -42,6 +43,7 @@ import {
   isConnectorAndBindingsAllSelected,
   isPhasorElement,
   isTopLevelBlock,
+  mountShapeEditor,
   mountTextEditor,
   pickBlocksByBound,
   pickTopBlock,
@@ -326,6 +328,10 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     } else {
       if (selected instanceof TextElement) {
         mountTextEditor(selected, this._edgeless);
+        return;
+      }
+      if (selected instanceof ShapeElement) {
+        mountShapeEditor(selected, this._edgeless);
         return;
       }
     }

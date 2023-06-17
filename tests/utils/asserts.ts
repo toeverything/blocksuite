@@ -18,6 +18,7 @@ import {
 } from 'pretty-format';
 
 import { toHex } from '../../packages/blocks/src/__internal__/utils/std.js';
+import type { EdgelessCanvasTextEditor } from '../../packages/blocks/src/page-block/edgeless/components/canvas-text/types.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
@@ -133,11 +134,14 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 
 export async function assertEdgelessText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
-    const editor = document.querySelector('surface-text-editor');
+    const editor = document.querySelector(
+      '[data-edgeless-canvas-text-editor="true"]'
+    );
     if (!editor) {
       throw new Error('editor not found');
     }
-    const vEditor = editor.vEditor;
+
+    const vEditor = (editor as EdgelessCanvasTextEditor).vEditor;
     return vEditor?.yText.toString();
   });
   expect(actualTexts).toEqual(text);

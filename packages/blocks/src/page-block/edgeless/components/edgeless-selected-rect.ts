@@ -1,12 +1,8 @@
 import './component-toolbar/component-toolbar.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import type { Bound } from '@blocksuite/phasor';
-import {
-  type ConnectorElement,
-  serializeXYWH,
-  TextElement,
-} from '@blocksuite/phasor';
+import { type Bound, TextElement } from '@blocksuite/phasor';
+import { type ConnectorElement, serializeXYWH } from '@blocksuite/phasor';
 import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
 import { Page } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
@@ -21,6 +17,7 @@ import type {
 } from '../selection-manager.js';
 import {
   handleElementChangedEffectForConnector,
+  isPhasorElementWithText,
   isTopLevelBlock,
   NOTE_MIN_HEIGHT,
   NOTE_MIN_WIDTH,
@@ -303,7 +300,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { active, selected } = state;
     if (
       selected.length === 0 ||
-      (active && selected[0] instanceof TextElement)
+      (active && isPhasorElementWithText(selected[0]))
     ) {
       return nothing;
     }

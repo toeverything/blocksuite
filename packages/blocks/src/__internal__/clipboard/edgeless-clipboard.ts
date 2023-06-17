@@ -2,7 +2,6 @@ import {
   type Bound,
   type PhasorElement,
   type PhasorElementType,
-  TextElement,
 } from '@blocksuite/phasor';
 import {
   deserializeXYWH,
@@ -17,6 +16,7 @@ import type { Selectable } from '../../page-block/edgeless/selection-manager.js'
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
+  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
@@ -30,7 +30,7 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocks,
-  copySurfaceText,
+  copyOnPhasorElementWithText,
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
@@ -106,8 +106,8 @@ export class EdgelessClipboard implements Clipboard {
     const { state } = this.selection;
     // when note active, handle copy like page mode
     if (state.active) {
-      if (state.selected[0] instanceof TextElement) {
-        copySurfaceText(this._edgeless);
+      if (isPhasorElementWithText(state.selected[0])) {
+        copyOnPhasorElementWithText(this._edgeless);
       } else {
         const range = getCurrentBlockRange(this._page);
         assertExists(range);
@@ -136,7 +136,7 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     const { state } = this.selection;
     if (state.active) {
-      if (!(state.selected[0] instanceof TextElement)) {
+      if (!isPhasorElementWithText(state.selected[0])) {
         this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element

@@ -6,12 +6,12 @@ import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isCssVariable } from '../../../__internal__/theme/css-variables.js';
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { getSelectedRect } from './utils.js';
+import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { getSelectedRect } from '../utils.js';
 
-@customElement('surface-text-editor')
-export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
+@customElement('edgeless-text-editor')
+export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
@@ -132,12 +132,16 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
       });
     }
 
-    return html`<div style=${virgoStyle} class="virgo-container"></div>`;
+    return html`<div
+      style=${virgoStyle}
+      data-edgeless-canvas-text-editor="true"
+      class="virgo-container"
+    ></div>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'surface-text-editor': SurfaceTextEditor;
+    'edgeless-text-editor': EdgelessTextEditor;
   }
 }
