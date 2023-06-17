@@ -5,9 +5,9 @@ import {
   type EdgelessPageBlockComponent,
   edgelessPreset,
   type EmbedBlockModel,
-  type FrameBlockComponent,
   getPageBlock,
   getServiceOrRegister,
+  type NoteBlockComponent,
   OutsideDragManager,
   type PageBlockModel,
   pagePreset,
@@ -18,7 +18,8 @@ import {
   asyncFocusRichText,
   type BlockComponentElement,
   type DropResult,
-  getClosestFrameBlockElementById,
+  getClosestNoteBlockElementById,
+  getLastNoteBlockElement,
   type Point,
   readImageSize,
 } from '@blocksuite/blocks/std';
@@ -110,11 +111,9 @@ export class EditorContainer
     if (type === 'none' && isPageMode) {
       type = 'after';
       if (!model) {
-        const lastFrame = document.querySelector(
-          'affine-frame:last-of-type'
-        ) as FrameBlockComponent;
-        assertExists(lastFrame);
-        model = lastFrame.model.lastItem();
+        const note = getLastNoteBlockElement(this) as NoteBlockComponent;
+        assertExists(note);
+        model = note.model.lastItem();
       }
     }
 
@@ -136,7 +135,7 @@ export class EditorContainer
         return;
       }
 
-      const targetFrameBlock = getClosestFrameBlockElementById(
+      const targetFrameBlock = getClosestNoteBlockElementById(
         parent.id,
         this._edgelessPageBlock
       ) as BlockComponentElement;
