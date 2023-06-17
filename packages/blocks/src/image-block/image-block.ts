@@ -1,20 +1,47 @@
-import './placeholder/loading-card.js';
-import './placeholder/image-not-found.js';
-
-import type { Disposable } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { Slot } from '@blocksuite/store';
-import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { Slot } from '@blocksuite/global/utils';
+import { BlockElement } from '@blocksuite/lit';
+import { css, html, type PropertyValues } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getViewportElement } from '../../__internal__/utils/query.js';
-import type { EmbedBlockModel } from '../index.js';
-import { ImageOptionsTemplate } from './image-options.js';
+import { registerService } from '../__internal__/service.js';
+import { getViewportElement } from '../__internal__/utils/query.js';
+import { stopPropagation } from '../page-block/edgeless/utils.js';
+import { ImageOptionsTemplate } from './image/image-options.js';
+import type { ImageBlockModel } from './image-model.js';
+import { ImageBlockService } from './image-service.js';
 
 @customElement('affine-image')
-export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
+export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
+  static maxRetryCount = 3;
+
   static override styles = css`
+    affine-image {
+      display: block;
+    }
+    .affine-embed-wrapper {
+      text-align: center;
+      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+    }
+    .affine-embed-wrapper-caption {
+      width: 100%;
+      font-size: var(--affine-font-sm);
+      outline: none;
+      border: 0;
+      font-family: inherit;
+      text-align: center;
+      color: var(--affine-icon-color);
+      display: none;
+      background: var(--affine-background-primary-color);
+    }
+    .affine-embed-wrapper-caption::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-embed-wrapper .caption-show {
+      display: inline-block;
+    }
+
     .affine-image-wrapper {
       padding: 8px;
       width: 100%;
@@ -117,35 +144,51 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property()
-  model!: EmbedBlockModel;
+  @query('input')
+  _input!: HTMLInputElement;
 
   @query('.resizable-img')
   public readonly resizeImg!: HTMLElement;
 
   @state()
+  private _caption!: string;
+
+  @state()
   private _source!: string;
-
-  private _imageReady: Disposable = {
-    dispose: () => {
-      return;
-    },
-  };
-
-  static maxRetryCount = 3;
 
   @state()
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
     'loading';
 
+  @state()
+  private _optionPosition: { x: number; y: number } | null = null;
+
   private _retryCount = 0;
 
   private hoverState = new Slot<boolean>();
 
-  @state()
-  private _optionPosition: { x: number; y: number } | null = null;
+  override connectedCallback() {
+    super.connectedCallback();
+    registerService('affine:image', ImageBlockService);
+    this._imageState = 'loading';
+    this._fetchImage();
+    this._disposables.add(
+      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
+    );
+    // Wait for DOM to be ready
+    setTimeout(() => this._observePosition());
+  }
 
-  override async firstUpdated() {
+  override disconnectedCallback() {
+    if (this._source) {
+      URL.revokeObjectURL(this._source);
+    }
+    super.disconnectedCallback();
+  }
+
+  override firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
@@ -154,6 +197,46 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     if (width && height) {
       this.resizeImg.style.width = width + 'px';
       this.resizeImg.style.height = height + 'px';
+    }
+
+    this.updateComplete.then(() => {
+      this._caption = this.model?.caption ?? '';
+
+      if (this._caption.length > 0) {
+        // Caption input should be toggled manually.
+        // Otherwise it will be lost if the caption is deleted into empty state.
+        this._input.classList.add('caption-show');
+      }
+    });
+
+    // The embed block can not be focused,
+    // so the active element will be the last activated element.
+    // If the active element is the title textarea,
+    // any event will dispatch from it and be ignored. (Most events will ignore title)
+    // so we need to blur it.
+    // See also https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+    this.addEventListener('click', () => {
+      if (
+        document.activeElement &&
+        document.activeElement instanceof HTMLElement
+      ) {
+        document.activeElement.blur();
+      }
+    });
+
+    this._input.addEventListener('pointerup', (e: Event) => {
+      e.stopPropagation();
+    });
+  }
+
+  private _onInputChange() {
+    this._caption = this._input.value;
+    this.model.page.updateBlock(this.model, { caption: this._caption });
+  }
+
+  private _onInputBlur() {
+    if (!this._caption) {
+      this._input.classList.remove('caption-show');
     }
   }
 
@@ -192,25 +275,6 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       .catch(this._fetchError);
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._imageState = 'loading';
-    this._fetchImage();
-    this._disposables.add(
-      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
-    );
-    // Wait for DOM to be ready
-    setTimeout(() => this._observePosition());
-  }
-
-  override disconnectedCallback() {
-    this._imageReady.dispose();
-    if (this._source) {
-      URL.revokeObjectURL(this._source);
-    }
-    super.disconnectedCallback();
-  }
-
   private _observePosition() {
     // At AFFiNE, avoid the option element to be covered by the header
     // we need to reserve the space for the header
@@ -246,10 +310,10 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
         this._optionPosition = null;
       }, HOVER_DELAY);
     });
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', e =>
+    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () =>
       this.hoverState.emit(true)
     );
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', e =>
+    this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', () =>
       this.hoverState.emit(false)
     );
     this._disposables.add(
@@ -260,7 +324,7 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
     );
     const viewportElement = getViewportElement(this.model.page);
     if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
+      this._disposables.addFromEvent(viewportElement, 'scroll', () => {
         if (!this._optionPosition) return;
         updatePosition();
       });
@@ -300,12 +364,25 @@ export class ImageBlockComponent extends WithDisposable(ShadowlessElement) {
       failed: html`<affine-image-block-not-found-card></affine-image-block-not-found-card>`,
     }[this._imageState];
 
-    // For the first list item, we need to add a margin-top to make it align with the text
-    // const shouldAddMarginTop = index === 0 && deep === 0;
     return html`
-      <div class="affine-image-wrapper">
-        <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
-          ${img} ${this._imageOptionsTemplate()}
+      <div>
+        <div class="affine-image-wrapper">
+          <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
+            ${img} ${this._imageOptionsTemplate()}
+          </div>
+        </div>
+      </div>
+      <div class="affine-embed-block-container">
+        <div class="affine-embed-wrapper">
+          <input
+            .disabled=${this.model.page.readonly}
+            placeholder="Write a caption"
+            class="affine-embed-wrapper-caption"
+            value=${this._caption}
+            @input=${this._onInputChange}
+            @blur=${this._onInputBlur}
+            @click=${stopPropagation}
+          />
         </div>
       </div>
     `;

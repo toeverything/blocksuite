@@ -20,7 +20,7 @@ export const uploadImageFromLocal = async (
   page: Page,
   getSize?: (size: { width: number; height: number }) => void
 ): Promise<Array<Props>> => {
-  const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
+  const baseProps: Props = { flavour: 'affine:image', type: 'image' };
   const fileInput = createImageInputElement();
   document.body.appendChild(fileInput);
 

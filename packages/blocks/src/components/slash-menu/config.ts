@@ -215,7 +215,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           name: 'Image',
           icon: ImageIcon20,
           showWhen: model => {
-            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+            if (!model.page.schema.flavourSchemaMap.has('affine:image')) {
               return false;
             }
             if (insideDatabase(model)) {
@@ -242,7 +242,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             ) {
               return false;
             }
-            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+            if (!model.page.schema.flavourSchemaMap.has('affine:image')) {
               return false;
             }
             return !insideDatabase(model);

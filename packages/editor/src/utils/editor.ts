@@ -42,7 +42,7 @@ export const createBlockHub: (
         console.warn('database block is not enabled');
         return;
       }
-      if (data.flavour === 'affine:embed' && data.type === 'image') {
+      if (data.flavour === 'affine:image' && data.type === 'image') {
         models.push(...(await uploadImageFromLocal(page)));
       } else if (data.flavour === 'affine:bookmark') {
         models.push(...(await getBookmarkInitialProps()));
@@ -82,7 +82,7 @@ export const createBlockHub: (
         console.warn('database block is not enabled');
         return;
       }
-      if (props.flavour === 'affine:embed' && props.type === 'image') {
+      if (props.flavour === 'affine:image' && props.type === 'image') {
         models.push(...(await uploadImageFromLocal(page)));
       } else if (props.flavour === 'affine:bookmark') {
         models.push(...(await getBookmarkInitialProps()));

@@ -11,7 +11,7 @@ import {
   Point,
   resetNativeSelection,
 } from '../../../__internal__/index.js';
-import type { EmbedBlockComponent } from '../../../embed-block/embed-block.js';
+import type { ImageBlockComponent } from '../../../image-block/index.js';
 
 export type PageSelectionType =
   | 'native'
@@ -51,7 +51,7 @@ export class PageSelectionState {
    */
   get selectedEmbed() {
     if (this.type === 'embed') {
-      return this._activeComponent as EmbedBlockComponent;
+      return this._activeComponent as ImageBlockComponent;
     }
     return null;
   }

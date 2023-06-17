@@ -10,7 +10,7 @@ export function supportsChildren(model: BaseBlockModel): boolean {
   if (
     matchFlavours(model, [
       // 'affine:database',
-      'affine:embed',
+      'affine:image',
       'affine:divider',
       'affine:code',
     ])

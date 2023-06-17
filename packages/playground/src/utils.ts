@@ -60,9 +60,7 @@ class IndexedDBProviderWrapper implements PassiveDocProvider {
 
 export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
-export const initParam = providerArgs.includes('indexeddb')
-  ? null
-  : params.get('init');
+export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 
 export const getOptions = (

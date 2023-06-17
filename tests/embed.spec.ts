@@ -229,7 +229,7 @@ async function initMockImage(page: Page) {
     const pageId = page.addBlock('affine:page');
     const noteId = page.addBlock('affine:note', {}, pageId);
     page.addBlock(
-      'affine:embed',
+      'affine:image',
       {
         type: 'image',
         sourceId: '_e2e_test_image_id_',

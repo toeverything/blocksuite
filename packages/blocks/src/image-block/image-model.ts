@@ -1,7 +1,7 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
-export const EmbedBlockSchema = defineBlockSchema({
-  flavour: 'affine:embed',
+export const ImageBlockSchema = defineBlockSchema({
+  flavour: 'affine:image',
   props: () => ({
     type: 'image',
     caption: '',
@@ -15,4 +15,4 @@ export const EmbedBlockSchema = defineBlockSchema({
   },
 });
 
-export type EmbedBlockModel = SchemaToModel<typeof EmbedBlockSchema>;
+export type ImageBlockModel = SchemaToModel<typeof ImageBlockSchema>;

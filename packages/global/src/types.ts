@@ -3,7 +3,7 @@ import type {
   CodeBlockSchema,
   DatabaseBlockSchema,
   DividerBlockSchema,
-  EmbedBlockSchema,
+  ImageBlockSchema,
   ListBlockSchema,
   NoteBlockSchema,
   PageBlockSchema,
@@ -16,7 +16,7 @@ import type {
   CodeBlockModel,
   DatabaseBlockModel,
   DividerBlockModel,
-  EmbedBlockModel,
+  ImageBlockModel,
   ListBlockModel,
   NoteBlockModel,
   PageBlockModel,
@@ -31,7 +31,7 @@ export type BlockSchemas = {
   'affine:note': typeof NoteBlockSchema;
   'affine:code': typeof CodeBlockSchema;
   'affine:divider': typeof DividerBlockSchema;
-  'affine:embed': typeof EmbedBlockSchema;
+  'affine:image': typeof ImageBlockSchema;
   'affine:surface': typeof SurfaceBlockSchema;
   'affine:database': typeof DatabaseBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;
@@ -44,7 +44,7 @@ export type BlockModels = {
   'affine:note': NoteBlockModel;
   'affine:code': CodeBlockModel;
   'affine:divider': DividerBlockModel;
-  'affine:embed': EmbedBlockModel;
+  'affine:image': ImageBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
   'affine:bookmark': BookmarkBlockModel;

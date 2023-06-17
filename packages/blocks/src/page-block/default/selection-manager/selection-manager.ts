@@ -418,7 +418,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     if (
       clickBlockInfo &&
-      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+      matchFlavours(clickBlockInfo.model, ['affine:image', 'affine:divider'])
     ) {
       window.getSelection()?.removeAllRanges();
 
@@ -474,7 +474,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
       if (element) {
         const targetModel = getModelByBlockElement(element);
-        if (matchFlavours(targetModel, ['affine:embed'])) {
+        if (matchFlavours(targetModel, ['affine:image'])) {
           window.dispatchEvent(
             new CustomEvent<EmbedBlockDoubleClickData>(
               'affine.embed-block-db-click',
