@@ -176,7 +176,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           };
         },
         onDrop: ({ insertPosition }) => {
-          this.tableViewManager.moveColumn(this.column.id, insertPosition);
+          if (insertPosition) {
+            this.tableViewManager.moveColumn(this.column.id, insertPosition);
+          }
           cancelScroll();
           dropPreview.remove();
           dragPreview.remove();

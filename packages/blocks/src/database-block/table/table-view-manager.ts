@@ -15,6 +15,7 @@ import type {
   DatabaseBlockModel,
   InsertPosition,
 } from '../database-model.js';
+import { insertPositionToIndex } from '../database-model.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import type { ColumnRenderer } from './register.js';
@@ -37,7 +38,7 @@ export interface TableViewManager {
 
   changeFilter(filter: FilterGroup): void;
 
-  moveColumn(column: string, toAfterOfColumn?: InsertPosition): void;
+  moveColumn(column: string, toAfterOfColumn: InsertPosition): void;
 
   newColumn(toAfterOfColumn: InsertPosition): void;
 
@@ -173,15 +174,16 @@ export class DatabaseTableViewManager implements TableViewManager {
     //
   }
 
-  moveColumn(id: string, toAfterOfColumn?: InsertPosition): void {
-    const columnIndex = this.columns.findIndex(v => v.id === id);
+  moveColumn(id: string, toAfterOfColumn: InsertPosition): void {
     this._model.page.captureSync();
     this._model.updateView(this._view.id, 'table', view => {
+      const columnIndex = view.columns.findIndex(v => v.id === id);
+      if (columnIndex < 0) {
+        return;
+      }
       const [column] = view.columns.splice(columnIndex, 1);
-      const targetColumnIndex = toAfterOfColumn
-        ? view.columns.findIndex(v => v.id === toAfterOfColumn)
-        : 0;
-      view.columns.splice(targetColumnIndex + 1, 0, column);
+      const index = insertPositionToIndex(toAfterOfColumn, view.columns);
+      view.columns.splice(index, 0, column);
     });
     this._model.applyColumnUpdate();
   }
