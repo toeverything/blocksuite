@@ -231,7 +231,6 @@ async function initMockImage(page: Page) {
     page.addBlock(
       'affine:image',
       {
-        type: 'image',
         sourceId: '_e2e_test_image_id_',
         width: 200,
         height: 180,

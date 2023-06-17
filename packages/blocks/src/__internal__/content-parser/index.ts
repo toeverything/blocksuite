@@ -209,7 +209,6 @@ export class ContentParser {
         return [
           {
             flavour: 'affine:image',
-            type: 'image',
             sourceId: id,
             children: [],
           },

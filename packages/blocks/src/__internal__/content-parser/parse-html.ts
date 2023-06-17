@@ -673,7 +673,6 @@ export class HtmlParser {
         result = [
           {
             flavour: 'affine:image',
-            type: 'image',
             sourceId: id,
             children: [],
             text: texts,
