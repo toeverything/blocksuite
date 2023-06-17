@@ -57,7 +57,7 @@ export function matchFlavours<const Key extends readonly string[]>(
 export const nonTextBlock: (keyof BlockModels)[] = [
   'affine:database',
   'affine:divider',
-  'affine:embed',
+  'affine:image',
   'affine:code',
   'affine:bookmark',
 ];

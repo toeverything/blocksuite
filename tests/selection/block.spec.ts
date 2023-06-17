@@ -1355,11 +1355,10 @@ test('click bottom of page and if the last is embed block, editor should insert 
       prop:background="--affine-background-secondary-color"
       prop:index="a0"
     >
-      <affine:embed
+      <affine:image
         prop:caption=""
         prop:height={0}
         prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
-        prop:type="image"
         prop:width={0}
       />
       <affine:paragraph

@@ -16,14 +16,14 @@ import {
   focusCaption,
 } from '../../page-block/default/utils.js';
 import { stopPropagation } from '../../page-block/edgeless/utils.js';
-import type { EmbedBlockModel } from '../embed-model.js';
+import type { ImageBlockModel } from '../image-model.js';
 
 export function ImageOptionsTemplate({
   model,
   position,
   hoverState,
 }: {
-  model: EmbedBlockModel;
+  model: ImageBlockModel;
   position: IPoint;
   hoverState: Slot<boolean>;
 }) {

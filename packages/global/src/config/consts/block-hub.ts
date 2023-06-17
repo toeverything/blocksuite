@@ -246,7 +246,7 @@ export const BLOCKHUB_LIST_ITEMS = [
 
 export const BLOCKHUB_FILE_ITEMS = [
   {
-    flavour: 'affine:embed',
+    flavour: 'affine:image',
     type: 'image',
     name: 'Image',
     description: 'Upload images.',

@@ -60,7 +60,7 @@ export const defaultStore: SerializedStore = {
       'affine:list': 1,
       'affine:note': 1,
       'affine:divider': 1,
-      'affine:embed': 1,
+      'affine:image': 1,
       'affine:code': 1,
       'affine:surface': 3,
       'affine:bookmark': 1,

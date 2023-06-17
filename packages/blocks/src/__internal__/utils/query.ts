@@ -612,10 +612,8 @@ export function isBlock(element: Element) {
 /**
  * Returns `true` if element is image.
  */
-export function isImage({ tagName, firstElementChild }: Element) {
-  return (
-    tagName === 'AFFINE-EMBED' && firstElementChild?.tagName === 'AFFINE-IMAGE'
-  );
+export function isImage({ tagName }: Element) {
+  return tagName === 'AFFINE-IMAGE';
 }
 
 /**
@@ -636,7 +634,7 @@ function isSurface({ tagName }: Element) {
  * Returns `true` if element is embed.
  */
 function isEmbed({ tagName }: Element) {
-  return tagName === 'AFFINE-EMBED';
+  return tagName === 'AFFINE-IMAGE';
 }
 
 /**
