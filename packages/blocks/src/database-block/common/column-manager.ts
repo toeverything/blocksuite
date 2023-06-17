@@ -88,10 +88,7 @@ class ColumnHelper<
     private ops: ColumnOps<T, CellData>
   ) {}
 
-  create(
-    name: string,
-    data?: T
-  ): { type: string; name: string; data: T; id?: string } {
+  create(name: string, data?: T): { type: string; name: string; data: T } {
     return {
       type: this.type,
       name,

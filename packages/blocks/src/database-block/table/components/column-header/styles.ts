@@ -44,29 +44,6 @@ export const styles = css`
   .affine-database-column:last-child .affine-database-column-content {
     border-right: none;
   }
-  .affine-database-column-drag-handle {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: -8px;
-    width: 16px;
-    height: 100%;
-    cursor: col-resize;
-  }
-  .affine-database-column-drag-handle::before {
-    content: ' ';
-    display: none;
-    position: absolute;
-    width: 2px;
-    height: 100%;
-    left: 7px;
-    background: var(--affine-text-emphasis-color);
-    box-shadow: 0px 0px 8px rgba(84, 56, 255, 0.35);
-  }
-  .affine-database-column-drag-handle:hover::before,
-  .affine-database-column-drag-handle.dragging::before {
-    display: block;
-  }
   .affine-database-column-content:hover,
   .affine-database-column-content.edit {
     background: linear-gradient(

@@ -4,7 +4,7 @@ import type {
   InsertPosition,
 } from '../database-model.js';
 import type { ColumnDataUpdater } from '../database-model.js';
-import { resolveInsertPosition } from '../database-model.js';
+import { insertPositionToIndex } from '../database-model.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column } from '../types.js';
 import type { FilterGroup } from './ast.js';
@@ -16,16 +16,7 @@ export type TableViewColumn = {
 };
 export type TableMixColumn<
   Data extends Record<string, unknown> = Record<string, unknown>
-> = TableViewColumn &
-  Column<Data> & {
-    updateWidth(width: number): void;
-    updateData(data: ColumnDataUpdater<Data>): void;
-    updateHide(hide: boolean): void;
-    updateName(name: string): void;
-    updateType?(type: string): void;
-    delete?(): void;
-    duplicate?(): void;
-  };
+> = TableViewColumn & Column<Data>;
 export type KanbanViewColumn = {
   id: string;
   hide?: boolean;
@@ -48,12 +39,7 @@ export type DatabaseViewDataMap = {
   };
 };
 
-export type TableViewData = DatabaseViewDataMap['table'] & {
-  moveColumn(column: string, toAfterOfColumn?: string): void;
-  newColumn(toAfterOfColumn?: string): void;
-  preColumn(id: string): TableMixColumn | undefined;
-  nextColumn(id: string): TableMixColumn | undefined;
-};
+export type TableViewData = DatabaseViewDataMap['table'];
 
 export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
@@ -125,7 +111,7 @@ export const ViewOperationMap: {
       }
     },
     addColumnAfter(model, view, newColumn, position) {
-      view.columns.splice(resolveInsertPosition(position, view.columns), 0, {
+      view.columns.splice(insertPositionToIndex(position, view.columns), 0, {
         id: newColumn.id,
         width: DEFAULT_COLUMN_WIDTH,
       });

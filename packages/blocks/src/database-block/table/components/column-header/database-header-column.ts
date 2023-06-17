@@ -16,8 +16,11 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { InsertPosition } from '../../../database-model.js';
-import { resolveInsertPosition } from '../../../database-model.js';
-import { onClickOutside } from '../../../utils.js';
+import { insertPositionToIndex } from '../../../database-model.js';
+import { startDrag } from '../../../utils/drag.js';
+import { startFrameLoop } from '../../../utils/frame-loop.js';
+import { getResultInRange, onClickOutside } from '../../../utils/utils.js';
+import { getHeaderContainer } from '../../table-view.js';
 import type {
   ColumnManager,
   TableViewManager,
@@ -91,83 +94,95 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       }
       return result;
     };
+    const fixedColumns = columnsArr.map(v => ({ id: v.column.id }));
+    const getInsertOffset = (insertPosition: InsertPosition) => {
+      return offsetArr[insertPositionToIndex(insertPosition, fixedColumns)];
+    };
     return {
-      getInsertPosition,
-      offsetArr,
-      columnsArr: columnsArr.map(v => ({ id: v.column.id })),
+      computeInsertInfo: (offset: number, width: number) => {
+        const insertPosition = getInsertPosition(offset, width);
+        return {
+          insertPosition: insertPosition,
+          insertOffset: insertPosition
+            ? getInsertOffset(insertPosition)
+            : undefined,
+        };
+      },
     };
   };
   private _drag = (evt: MouseEvent) => {
-    const header = this.closest('.affine-database-table-container');
-    const container = header?.parentElement;
-    assertExists(header);
-    assertExists(container);
-    const { getInsertPosition, offsetArr, columnsArr } =
-      this._columnsOffset(header);
-    const rect = this.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    const headerRect = header.getBoundingClientRect();
-    const offsetLeft = evt.x - rect.left;
-    const offsetRight = rect.right - evt.x;
-    const startLeft = rect.left - headerRect.left;
-    const max = headerRect.width - rect.width;
+    const headerContainer = getHeaderContainer(this);
+    const tableContainer = headerContainer?.parentElement;
+    assertExists(headerContainer);
+    assertExists(tableContainer);
+    const columnHeaderRect = this.getBoundingClientRect();
+    const tableContainerRect = tableContainer.getBoundingClientRect();
+    const headerContainerRect = headerContainer.getBoundingClientRect();
+
+    const offsetLeft = evt.x - columnHeaderRect.left;
+    const offsetRight = columnHeaderRect.right - evt.x;
+
+    const startOffset = columnHeaderRect.left - headerContainerRect.left;
+    const max = headerContainerRect.width - columnHeaderRect.width;
+
+    const { computeInsertInfo } = this._columnsOffset(headerContainer);
+
     const dragPreview = createDragPreview(
-      rect.width,
-      headerRect.height,
-      startLeft
+      headerContainer,
+      columnHeaderRect.width,
+      headerContainerRect.height,
+      startOffset
     );
-    const dropPreview = createDropPreview(headerRect.height);
-    dragPreview.load(header);
-    dropPreview.load(header);
-    let checkScroll = 0;
-    let currentMouseX = evt.x;
-    let currentInsertPosition: InsertPosition | undefined = undefined;
-    let preTime = 0;
-    const scrollProcess = (time: number) => {
-      const delta = (time - preTime) * 0.4;
-      if (currentMouseX < containerRect.left + offsetLeft) {
-        container.scrollLeft -= delta;
-        move({ x: currentMouseX });
-      } else if (currentMouseX > containerRect.right - offsetRight) {
-        container.scrollLeft += delta;
-        move({ x: currentMouseX });
+    const dropPreview = createDropPreview(
+      headerContainer,
+      headerContainerRect.height
+    );
+
+    const cancelScroll = startFrameLoop(delta => {
+      const offset = delta * 0.4;
+      if (drag.data.x < tableContainerRect.left + offsetLeft) {
+        tableContainer.scrollLeft -= offset;
+        drag.move({ x: drag.data.x });
+      } else if (drag.data.x > tableContainerRect.right - offsetRight) {
+        tableContainer.scrollLeft += offset;
+        drag.move({ x: drag.data.x });
       }
-      preTime = time;
-      checkScroll = requestAnimationFrame(scrollProcess);
-    };
-    scrollProcess(0);
-    const move = (evt: { x: number }) => {
-      currentMouseX = evt.x;
-      const currentOffset = Math.max(
-        0,
-        Math.min(
-          max,
-          currentMouseX - header.getBoundingClientRect().left - offsetLeft
-        )
-      );
-      currentInsertPosition = getInsertPosition(currentOffset, rect.width);
-      if (currentInsertPosition) {
-        const index = resolveInsertPosition(currentInsertPosition, columnsArr);
-        const offset = offsetArr[index];
-        dropPreview.display(offset);
-      } else {
-        dropPreview.hide();
+    });
+    const drag = startDrag<{ x: number; insertPosition?: InsertPosition }>(
+      evt,
+      {
+        onDrag: evt => ({
+          x: evt.x,
+        }),
+        onMove: ({ x }: { x: number }) => {
+          const currentOffset = getResultInRange(
+            x - headerContainer.getBoundingClientRect().left - offsetLeft,
+            0,
+            max
+          );
+          const insertInfo = computeInsertInfo(
+            currentOffset,
+            columnHeaderRect.width
+          );
+          if (insertInfo.insertOffset != null) {
+            dropPreview.display(insertInfo.insertOffset);
+          } else {
+            dropPreview.hide();
+          }
+          dragPreview.display(currentOffset);
+          return {
+            x,
+            insertPosition: insertInfo.insertPosition,
+          };
+        },
+        onDrop: ({ insertPosition }) => {
+          this.tableViewManager.moveColumn(this.column.id, insertPosition);
+          cancelScroll();
+          dropPreview.remove();
+          dragPreview.remove();
+        },
       }
-      dragPreview.display(currentOffset);
-    };
-    const up = () => {
-      try {
-        this.tableViewManager.moveColumn(this.column.id, currentInsertPosition);
-      } finally {
-        document.body.removeEventListener('mousemove', move);
-        document.body.removeEventListener('mouseup', up);
-        cancelAnimationFrame(checkScroll);
-        dropPreview.remove();
-        dragPreview.remove();
-      }
-    };
-    document.body.addEventListener('mousemove', move);
-    document.body.addEventListener('mouseup', up);
+    );
   };
 
   override firstUpdated() {
@@ -348,6 +363,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 type ColumnOffset = { x: number; ele: DatabaseHeaderColumn };
 
 const createDragPreview = (
+  container: Element,
   width: number,
   height: number,
   startLeft: number
@@ -361,6 +377,7 @@ const createDragPreview = (
   div.style.top = `0px`;
   div.style.zIndex = '9';
   div.style.backgroundColor = 'rgba(0,0,0,0.3)';
+  container.append(div);
   return {
     display(offset: number) {
       div.style.left = `${Math.round(offset)}px`;
@@ -368,13 +385,10 @@ const createDragPreview = (
     remove() {
       div.remove();
     },
-    load(ele: Element) {
-      ele.append(div);
-    },
   };
 };
 
-const createDropPreview = (height: number) => {
+const createDropPreview = (container: Element, height: number) => {
   const width = 4;
   const div = document.createElement('div');
   // div.style.pointerEvents='none';
@@ -385,6 +399,7 @@ const createDropPreview = (height: number) => {
   div.style.top = `0px`;
   div.style.zIndex = '9';
   div.style.backgroundColor = 'blue';
+  container.append(div);
   return {
     display(offset: number) {
       div.style.display = 'block';
@@ -395,9 +410,6 @@ const createDropPreview = (height: number) => {
     },
     remove() {
       div.remove();
-    },
-    load(ele: Element) {
-      ele.append(div);
     },
   };
 };

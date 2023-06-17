@@ -1,21 +1,17 @@
 import './database-header-column.js';
 
 import { DatabaseAddColumn } from '@blocksuite/global/config';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { getDefaultPage } from '../../../../__internal__/index.js';
-import type { TableViewData } from '../../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type {
-  ColumnManager,
-  TableViewManager,
-} from '../../table-view-manager.js';
+import type { TableViewManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
 
 @customElement('affine-database-column-header')
@@ -28,25 +24,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   @property()
   targetModel!: DatabaseBlockModel;
 
-  @property()
-  view!: TableViewData;
-
-  @property()
-  columns!: ColumnManager[];
-
-  @property()
-  addColumn!: (index: number) => string;
-
-  get tableContainer(): HTMLElement {
-    return this.parentElement as HTMLElement;
-  }
-
-  @state()
-  private _editingColumnId = '';
-
-  @query('.affine-database-column-input')
-  private _titleColumnInput!: HTMLInputElement;
-
   @query('.affine-database-column-header')
   private _headerContainer!: HTMLElement;
 
@@ -56,48 +33,21 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   @query('.header-add-column-button')
   private _headerAddColumnButton!: HTMLElement;
 
-  private _columnWidthDisposables: DisposableGroup = new DisposableGroup();
   private _isHeaderHover = false;
 
   private get readonly() {
     return this.tableViewManager.readonly;
   }
 
-  setEditingColumnId = (id: string) => {
-    this._editingColumnId = id;
-  };
-
   override firstUpdated() {
     if (this.readonly) return;
 
-    this._initSetDragHandleHeightEffect();
     this._initHeaderMousemoveHandlers();
 
     const databaseElement = this.closest('affine-database');
     if (databaseElement) {
       this._initResizeEffect(databaseElement);
     }
-  }
-
-  override updated(changedProperties: Map<string, unknown>) {
-    super.updated(changedProperties);
-    if (this.readonly) return;
-
-    if (changedProperties.has('_editingColumnId') && !!this._editingColumnId) {
-      this._titleColumnInput.focus();
-      const length = this._titleColumnInput.value.length;
-      this._titleColumnInput.setSelectionRange(0, length);
-    }
-
-    // When dragging a block or adding a new row to the database, the changedProperties.size is 0
-    if (changedProperties.size === 0 || changedProperties.has('columns')) {
-      this._setDragHandleHeight();
-    }
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._columnWidthDisposables.dispose();
   }
 
   private _initResizeEffect(element: HTMLElement) {
@@ -118,38 +68,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       );
       resizeObserver.observe(viewportElement);
     }
-  }
-
-  private _initSetDragHandleHeightEffect() {
-    const mutationObserver = new MutationObserver(() => {
-      this._setDragHandleHeight();
-    });
-    const tableContainer = this.closest('.affine-database-table-container');
-    assertExists(tableContainer);
-    mutationObserver.observe(tableContainer, {
-      childList: true,
-      subtree: true,
-    });
-    this._disposables.add(() => mutationObserver.disconnect());
-  }
-
-  private _setDragHandleHeight() {
-    const databaseElement = this.closest('affine-database');
-    // When dragging to generate a database preview,
-    // the database may not be rendered to the page in time
-    if (!databaseElement) return;
-    const databaseBody = databaseElement.querySelector(
-      '.affine-database-block-rows'
-    );
-    assertExists(databaseBody);
-    const dragHandleHeight =
-      databaseBody.clientHeight + DEFAULT_COLUMN_TITLE_HEIGHT - 1;
-    const allDragHandle = databaseElement.querySelectorAll<HTMLElement>(
-      '.affine-database-column-drag-handle'
-    );
-    allDragHandle.forEach(handle => {
-      handle.style.height = `${dragHandleHeight}px`;
-    });
   }
 
   private _initHeaderMousemoveHandlers() {
@@ -202,7 +120,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     return html`
       <div class="affine-database-column-header database-row">
         ${repeat(
-          this.columns,
+          this.tableViewManager.columns,
           column => column.id,
           (column, index) => {
             const style = styleMap({

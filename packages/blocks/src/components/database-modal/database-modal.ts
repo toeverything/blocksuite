@@ -80,7 +80,7 @@ export class DatabaseModal extends LitElement {
     assertExists(databaseModel);
 
     // default column
-    databaseModel.addColumnAfter(
+    databaseModel.addColumn(
       'end',
       multiSelectHelper.create('Tag', { options: [] })
     );

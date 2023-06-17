@@ -1,15 +1,10 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { TableMixColumn } from '../../common/view-manager.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
-import type { ColumnRendererHelper } from '../register.js';
 import { selectCurrentCell } from '../selection-manager/cell.js';
-import type { SetValueOption } from '../types.js';
+import type { ColumnManager } from '../table-view-manager.js';
 
 /** affine-database-cell-container padding */
 const CELL_PADDING = 8;
@@ -42,75 +37,29 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   private _isEditing = false;
 
   @property()
-  columnRenderer!: ColumnRendererHelper;
+  rowId!: string;
 
   @property()
-  rowModel!: BaseBlockModel;
-
-  @property()
-  column!: TableMixColumn;
-
-  @property()
-  databaseModel!: DatabaseBlockModel;
-  @property()
-  root!: BlockSuiteRoot;
+  column!: ColumnManager;
 
   private get readonly() {
-    return this.databaseModel.page.readonly;
+    return this.column.readonly;
   }
 
   protected override firstUpdated() {
     this.setAttribute('data-block-is-database-input', 'true');
-    this.setAttribute('data-row-id', this.rowModel.id);
+    this.setAttribute('data-row-id', this.rowId);
     this.setAttribute('data-column-id', this.column.id);
   }
-
-  setValue = (
-    value: unknown,
-    option: SetValueOption = { captureSync: true }
-  ) => {
-    const captureSync = option.captureSync ?? true;
-    const sync = option.sync ?? false;
-    const run = () => {
-      if (captureSync) {
-        this.databaseModel.page.captureSync();
-      }
-      this.databaseModel.updateCell(this.rowModel.id, {
-        columnId: this.column.id,
-        value,
-      });
-      this.databaseModel.applyColumnUpdate();
-      this.requestUpdate();
-    };
-    if (sync) {
-      run();
-    } else {
-      queueMicrotask(() => {
-        run();
-      });
-    }
-  };
 
   setEditing = (isEditing: boolean) => {
     this._isEditing = isEditing;
     selectCurrentCell(this, isEditing);
   };
 
-  setHeight = (height: number) => {
-    // this.style.height = `${height + CELL_PADDING * 2}px`;
-  };
-
-  updateColumnData = (
-    apply: (data: Record<string, unknown>) => Partial<Record<string, unknown>>
-  ): void => {
-    this.databaseModel.page.captureSync();
-    this.databaseModel.updateColumnData(this.column.id, apply);
-  };
-
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
-    const renderer = this.columnRenderer.get(this.column.type);
-    const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
+    const renderer = this.column.renderer;
     const tag =
       !this.readonly &&
       this._isEditing &&
@@ -119,14 +68,8 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
         : renderer.components.Cell.tag;
     return html`
       <${tag}
-        .page='${this.databaseModel.page}'
-        .root='${this.root}'
-        .updateColumnData='${this.updateColumnData}'
-        .readonly='${this.readonly}'
-        .columnData='${this.column.data}'
-        .value='${cell?.value}'
-        .onChange='${this.setValue}'
-        .setHeight='${this.setHeight}'
+        .column='${this.column}'
+        .rowId=${this.rowId}
         .setEditing='${this.setEditing}'
         .isEditing='${this._isEditing}'
       ></${tag}>`;

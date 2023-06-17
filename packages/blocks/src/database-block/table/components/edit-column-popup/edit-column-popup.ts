@@ -98,9 +98,7 @@ export class EditColumnPopup extends LitElement {
         text: 'Insert left column',
         icon: DatabaseInsertLeft,
         select: () => {
-          this.tableViewManager.newColumn(
-            this.tableViewManager.preColumn(this.column.id)?.id
-          );
+          this.tableViewManager.newColumn({ id: this.column.id, before: true });
         },
       },
       {
@@ -108,7 +106,10 @@ export class EditColumnPopup extends LitElement {
         text: 'Insert right column',
         icon: DatabaseInsertRight,
         select: () => {
-          this.tableViewManager.newColumn(this.column.id);
+          this.tableViewManager.newColumn({
+            id: this.column.id,
+            before: false,
+          });
         },
       },
       {
@@ -118,10 +119,13 @@ export class EditColumnPopup extends LitElement {
         hide: () => this.column.isFirst,
         select: () => {
           const preId = this.tableViewManager.preColumn(this.column.id)?.id;
-          const prepreId = preId
-            ? this.tableViewManager.preColumn(preId)?.id
-            : undefined;
-          this.tableViewManager.moveColumn(this.column.id, prepreId);
+          if (!preId) {
+            return;
+          }
+          this.tableViewManager.moveColumn(this.column.id, {
+            id: preId,
+            before: true,
+          });
         },
       },
       {
@@ -130,10 +134,14 @@ export class EditColumnPopup extends LitElement {
         icon: DatabaseMoveRight,
         hide: () => this.column.isLast,
         select: () => {
-          this.tableViewManager.moveColumn(
-            this.column.id,
-            this.tableViewManager.nextColumn(this.column.id)?.id
-          );
+          const nextId = this.tableViewManager.nextColumn(this.column.id)?.id;
+          if (!nextId) {
+            return;
+          }
+          this.tableViewManager.moveColumn(this.column.id, {
+            id: nextId,
+            before: false,
+          });
         },
       },
       {

@@ -7,7 +7,7 @@ import {
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { isDivider } from '../../../../utils.js';
+import { isDivider } from '../../../../utils/utils.js';
 import type { SelectTagAction, SelectTagActionType } from '../../../types.js';
 import { actionStyles } from '../../edit-column-popup/styles.js';
 

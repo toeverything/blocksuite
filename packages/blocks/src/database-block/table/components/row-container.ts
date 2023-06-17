@@ -1,23 +1,13 @@
 import './cell-container.js';
 
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { TableMixColumn } from '../../common/view-manager.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
-import type { DatabaseTable } from '../table-view.js';
-import type { SearchState } from '../types.js';
+import type { TableViewManager } from '../table-view-manager.js';
 
-export function DataBaseRowContainer(
-  databaseBlock: DatabaseTable,
-  columns: TableMixColumn[],
-  filteredChildren: BaseBlockModel[],
-  searchState: SearchState,
-  root: BlockSuiteRoot
-) {
+export function DataBaseRowContainer(view: TableViewManager) {
   return html`
     <style>
       .affine-database-block-rows {
@@ -57,34 +47,35 @@ export function DataBaseRowContainer(
     </style>
     <div class="affine-database-block-rows">
       ${repeat(
-        filteredChildren,
-        child => child.id,
-        (child, idx) => {
+        view.rows,
+        id => id,
+        (id, idx) => {
           return html`
             <div
               class="affine-database-block-row database-row"
               data-row-index="${idx}"
-              data-row-id="${child.id}"
+              data-row-id="${id}"
             >
-              ${repeat(columns, (column, i) => {
-                return html`
-                  <div
-                    class="database-cell"
-                    style=${styleMap({
-                      width: `${column.width}px`,
-                    })}
-                  >
-                    <affine-database-cell-container
-                      .databaseModel="${databaseBlock.model}"
-                      .rowModel="${child}"
-                      .column="${column}"
-                      .root="${root}"
-                      .columnRenderer="${databaseBlock.columnRenderer}"
+              ${repeat(
+                view.columns,
+                v => v.id,
+                column => {
+                  return html`
+                    <div
+                      class="database-cell"
+                      style=${styleMap({
+                        width: `${column.width}px`,
+                      })}
                     >
-                    </affine-database-cell-container>
-                  </div>
-                `;
-              })}
+                      <affine-database-cell-container
+                        .rowId="${id}"
+                        .column="${column}"
+                      >
+                      </affine-database-cell-container>
+                    </div>
+                  `;
+                }
+              )}
               <div class="database-cell add-column-button"></div>
             </div>
           `;

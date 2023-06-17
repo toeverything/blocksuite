@@ -4,7 +4,6 @@ import type { DatabaseMode } from '../types.js';
 
 export type SetValueOption = {
   captureSync?: boolean;
-  sync?: boolean;
 };
 
 export type ColumnType = string;

@@ -49,18 +49,6 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
   @property()
   options: SelectTag[] = [];
 
-  @property()
-  setHeight?: (height: number) => void;
-
-  protected override updated(_changedProperties: Map<string, unknown>) {
-    super.updated(_changedProperties);
-
-    if (this.setHeight && this.value.length > 0) {
-      const { height } = this.selectContainer.getBoundingClientRect();
-      this.setHeight(height);
-    }
-  }
-
   override render() {
     const values = this.value;
     const map = new Map<string, SelectTag>(this.options.map(v => [v.id, v]));

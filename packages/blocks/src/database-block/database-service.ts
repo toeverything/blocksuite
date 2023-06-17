@@ -110,7 +110,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
     // default column
-    blockModel.addColumnAfter(
+    blockModel.addColumn(
       'end',
       multiSelectHelper.create('Tag', {
         options: [],
@@ -161,7 +161,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
     const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
-      return model.updateColumn(nonIdProps);
+      return model.addColumn('end', nonIdProps);
     });
     model.applyColumnUpdate();
 

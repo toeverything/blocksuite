@@ -12,7 +12,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { copyBlocks } from '../../../../__internal__/clipboard/utils/commons.js';
 import { toast } from '../../../../components/toast.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
-import { isDivider } from '../../../utils.js';
+import { isDivider } from '../../../utils/utils.js';
 import type {
   SwitchViewAction,
   SwitchViewActionType,

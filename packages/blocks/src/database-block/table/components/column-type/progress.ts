@@ -179,7 +179,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       boundLeft: left,
       containerWidth: visibleWidth,
     };
-    this.page.captureSync();
+    this.column.captureSync();
     this._onPointerMove(event);
   };
 
@@ -205,7 +205,7 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
 
   private _onPointerUp = () => {
     this._dragConfig = null;
-    this.page.captureSync();
+    this.column.captureSync();
   };
 
   protected override render() {

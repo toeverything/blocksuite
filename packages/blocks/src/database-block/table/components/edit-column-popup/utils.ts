@@ -29,5 +29,5 @@ export function updateColumn(
   const currentSchema = targetModel.getColumn(columnId);
   assertExists(currentSchema);
   const schema = { ...currentSchema, ...schemaProperties };
-  targetModel.updateColumn(schema);
+  targetModel.updateColumn(schema.id, () => schema);
 }

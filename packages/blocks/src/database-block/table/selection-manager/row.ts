@@ -10,14 +10,12 @@ import { getService } from '../../../__internal__/service.js';
 import { DragHandle } from '../../../components/drag-handle.js';
 import {
   handleNativeRangeDragMove,
-  isBlankArea,
   resetNativeSelection,
 } from '../../../std.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { DatabaseBlockService } from '../../database-service.js';
 import { getDatabaseById } from '../components/selection/utils.js';
 import {
-  getClosestDatabase,
   getClosestDatabaseId,
   getSelectedRowIdsByIndexes,
   getSelectedRowIndexes,
@@ -62,20 +60,6 @@ export class RowSelectionManager {
 
     const startRange = caretRangeFromPoint(x, y);
     this._startRange = startRange;
-
-    if (!isBlankArea(e)) {
-      const el = document.elementFromPoint(x, y);
-      this._startCell = el?.closest<HTMLElement>('.database-cell') ?? null;
-
-      const database = getClosestDatabase(this._startCell);
-      this._database = database;
-      this._columnWidthHandles = Array.from(
-        database.querySelectorAll<HTMLElement>(
-          '.affine-database-column-drag-handle'
-        )
-      );
-      this._setColumnWidthHandleDisplay('none');
-    }
     return true;
   };
 

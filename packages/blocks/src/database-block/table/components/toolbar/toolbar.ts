@@ -24,7 +24,7 @@ import type {
   TableMixColumn,
 } from '../../../common/view-manager.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
-import { onClickOutside } from '../../../utils.js';
+import { onClickOutside } from '../../../utils/utils.js';
 import { SearchState } from '../../types.js';
 import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';

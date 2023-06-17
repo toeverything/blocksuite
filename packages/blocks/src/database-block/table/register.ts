@@ -1,10 +1,9 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import { onClickOutside } from '../utils.js';
+import { onClickOutside } from '../utils/utils.js';
+import type { ColumnManager } from './table-view-manager.js';
 import type { ColumnType, SetValueOption } from './types.js';
 
 export abstract class DatabaseCellElement<
@@ -12,31 +11,30 @@ export abstract class DatabaseCellElement<
   Data extends Record<string, unknown> = Record<string, unknown>
 > extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
-
   @property()
-  page!: Page;
+  column!: ColumnManager<Value, Data>;
   @property()
-  root!: BlockSuiteRoot;
-
-  @property()
-  readonly!: boolean;
-  @property()
-  setHeight!: (height: number) => void;
-
-  @property()
-  updateColumnData!: (apply: (oldProperty: Data) => Partial<Data>) => void;
-  @property()
-  columnData!: Data;
-  @property()
-  value: Value | null = null;
-  @property()
-  onChange!: (value: Value | null, ops?: SetValueOption) => void;
-
+  rowId!: string;
   @property()
   isEditing!: boolean;
-
   @property()
   protected setEditing!: (editing: boolean) => void;
+
+  get page() {
+    return this.column.page;
+  }
+
+  get readonly(): boolean {
+    return this.column.readonly;
+  }
+
+  get value() {
+    return this.column.getValue(this.rowId);
+  }
+
+  onChange(value: Value | undefined, ops?: SetValueOption): void {
+    this.column.setValue(this.rowId, value, ops);
+  }
 
   protected _setEditing(editing: boolean) {
     this.setEditing(editing);
