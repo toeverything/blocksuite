@@ -192,19 +192,6 @@ export function onForwardDelete(
     handleLineEndForwardDelete(model.page, model);
     return PREVENT_DEFAULT;
   }
-  // handle multiple selection
-  if (vEditor.getVRange()?.length) {
-    const range = vEditor.getVRange();
-    const text = model.text;
-    if (text && range) {
-      text.delete(range.index, range.length);
-      vEditor.setVRange({
-        index: range.index,
-        length: 0,
-      });
-    }
-    return PREVENT_DEFAULT;
-  }
   return ALLOW_DEFAULT;
 }
 
