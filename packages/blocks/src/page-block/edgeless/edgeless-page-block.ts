@@ -60,6 +60,7 @@ import type {
   MouseMode,
   NoteBlockModel,
   PageBlockModel,
+  SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
@@ -262,16 +263,12 @@ export class EdgelessPageBlockComponent
     const { page, parentElement } = this;
     const surfaceBlock = this.model.children.find(
       child => child.flavour === 'affine:surface'
-    );
+    ) as SurfaceBlockModel | undefined;
     assertExists(parentElement);
     assertExists(surfaceBlock);
-    const yBlock = page.getYBlockById(surfaceBlock.id);
-    assertExists(yBlock);
-    let yContainer = yBlock.get('elements') as InstanceType<typeof page.YMap>;
-    if (!yContainer) {
-      yContainer = new page.YMap();
-      yBlock.set('elements', yContainer);
-    }
+    const yContainer = surfaceBlock.originProp('elements') as InstanceType<
+      typeof page.YMap
+    >;
     this.surface = new SurfaceManager(yContainer, value => {
       if (isCssVariable(value)) {
         const cssValue = getThemePropertyValue(
