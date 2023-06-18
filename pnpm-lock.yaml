@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -150,7 +150,7 @@ importers:
         version: link:../virgo
       '@floating-ui/dom':
         specifier: ^1.2.9
-        version: registry.npmmirror.com/@floating-ui/dom@1.2.9
+        version: 1.2.9
       hotkeys-js:
         specifier: ^3.10.1
         version: 3.10.1(patch_hash=otx73r74oyscqvo3amwccrzngy)
@@ -1274,6 +1274,16 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
+  /@floating-ui/core@1.2.6:
+    resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==}
+    dev: false
+
+  /@floating-ui/dom@1.2.9:
+    resolution: {integrity: sha512-sosQxsqgxMNkV3C+3UqTS6LxP7isRLwX8WMepp843Rb3/b0Wz8+MdUkxJksByip3C2WwLugLHN1b4ibn//zKwQ==}
+    dependencies:
+      '@floating-ui/core': 1.2.6
+    dev: false
+
   /@humanwhocodes/config-array@0.11.8:
     resolution: {integrity: sha512-UybHIJzJnR5Qc/MsD9Kr+RpO2h+/P1GhOwdiLPXK5TWk5sgTdu88bTD9UP+CKbPPh5Rni1u0GjAdYQLemG8g+g==}
     engines: {node: '>=10.10.0'}
@@ -1466,7 +1476,7 @@ packages:
     engines: {node: '>=14.17.0'}
     dependencies:
       '@ctrl/tinycolor': 3.6.0
-      '@floating-ui/dom': registry.npmmirror.com/@floating-ui/dom@1.2.9
+      '@floating-ui/dom': 1.2.9
       '@lit-labs/react': 1.1.1
       '@shoelace-style/animations': 1.1.0
       '@shoelace-style/localize': 3.1.0
@@ -7349,18 +7359,4 @@ packages:
 
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
-    dev: false
-
-  registry.npmmirror.com/@floating-ui/core@1.2.6:
-    resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/@floating-ui/core/-/core-1.2.6.tgz}
-    name: '@floating-ui/core'
-    version: 1.2.6
-    dev: false
-
-  registry.npmmirror.com/@floating-ui/dom@1.2.9:
-    resolution: {integrity: sha512-sosQxsqgxMNkV3C+3UqTS6LxP7isRLwX8WMepp843Rb3/b0Wz8+MdUkxJksByip3C2WwLugLHN1b4ibn//zKwQ==, registry: https://registry.npmjs.org/, tarball: https://registry.npmmirror.com/@floating-ui/dom/-/dom-1.2.9.tgz}
-    name: '@floating-ui/dom'
-    version: 1.2.9
-    dependencies:
-      '@floating-ui/core': registry.npmmirror.com/@floating-ui/core@1.2.6
     dev: false
