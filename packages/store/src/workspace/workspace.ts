@@ -195,10 +195,6 @@ export class Workspace {
       });
       this._store.addSpace(page);
       this.slots.pageAdded.emit(page.id);
-      //
-      // page.waitForLoaded().then(() => {
-      //   page.trySyncFromExistingDoc();
-      // });
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());

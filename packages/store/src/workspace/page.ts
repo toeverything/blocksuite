@@ -964,4 +964,13 @@ export class Page extends Space<FlatBlockMap> {
       this.workspace.meta.validateVersion(this.workspace);
     }
   }
+
+  override async waitForLoaded() {
+    await super.waitForLoaded();
+    if (!this._synced) {
+      this.trySyncFromExistingDoc();
+    }
+
+    return this;
+  }
 }

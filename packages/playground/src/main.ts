@@ -41,7 +41,6 @@ function subscribePage(workspace: Workspace) {
     }
     const page = workspace.getPage(pageId) as Page;
     await page.waitForLoaded();
-    page.trySyncFromExistingDoc();
 
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);

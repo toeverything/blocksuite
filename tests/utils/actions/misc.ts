@@ -286,7 +286,6 @@ export async function enterPlaygroundWithList(
     async ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
       await page.waitForLoaded();
-      page.trySyncFromExistingDoc();
 
       const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
@@ -312,7 +311,6 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
     await page.waitForLoaded();
-    page.trySyncFromExistingDoc();
     page.captureSync();
 
     if (!pageId) {
@@ -333,7 +331,6 @@ export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(async () => {
     const { page } = window;
     await page.waitForLoaded();
-    page.trySyncFromExistingDoc();
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
@@ -352,7 +349,6 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
     await page.waitForLoaded();
-    page.trySyncFromExistingDoc();
 
     page.captureSync();
     if (!pageId) {
@@ -382,7 +378,6 @@ export async function initEmptyDatabaseWithParagraphState(
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
     await page.waitForLoaded();
-    page.trySyncFromExistingDoc();
 
     page.captureSync();
     if (!pageId) {
@@ -460,7 +455,6 @@ export async function initEmptyCodeBlockState(page: Page) {
   const ids = await page.evaluate(async () => {
     const { page } = window;
     await page.waitForLoaded();
-    page.trySyncFromExistingDoc();
 
     page.captureSync();
     const pageId = page.addBlock('affine:page');
