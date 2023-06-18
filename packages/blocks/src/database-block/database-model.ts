@@ -148,7 +148,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         col
       );
       this.views.forEach(view => {
-        ViewOperationMap[view.mode].addColumnAfter(
+        ViewOperationMap[view.mode].addColumn(
           this,
           view as never,
           col,

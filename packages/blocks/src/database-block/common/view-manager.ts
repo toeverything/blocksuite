@@ -1,9 +1,4 @@
-import type {
-  DatabaseBlockModel,
-  DatabaseBlockModel,
-  InsertPosition,
-} from '../database-model.js';
-import type { ColumnDataUpdater } from '../database-model.js';
+import type { DatabaseBlockModel, InsertPosition } from '../database-model.js';
 import { insertPositionToIndex } from '../database-model.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column } from '../types.js';
@@ -49,13 +44,7 @@ type ViewOperation<Data> = {
     model: DatabaseBlockModel,
     view: Data,
     newColumn: Column,
-    index?: number
-  ): void;
-  addColumnAfter(
-    model: DatabaseBlockModel,
-    view: Data,
-    newColumn: Column,
-    position?: InsertPosition
+    position: InsertPosition
   ): void;
   deleteColumn(model: DatabaseBlockModel, view: Data, id: string): void;
 };
@@ -97,20 +86,7 @@ export const ViewOperationMap: {
         },
       };
     },
-    addColumn(model, view, newColumn, index) {
-      if (index != null) {
-        view.columns.splice(index, 0, {
-          id: newColumn.id,
-          width: DEFAULT_COLUMN_WIDTH,
-        });
-      } else {
-        view.columns.push({
-          id: newColumn.id,
-          width: DEFAULT_COLUMN_WIDTH,
-        });
-      }
-    },
-    addColumnAfter(model, view, newColumn, position) {
+    addColumn(model, view, newColumn, position) {
       view.columns.splice(insertPositionToIndex(position, view.columns), 0, {
         id: newColumn.id,
         width: DEFAULT_COLUMN_WIDTH,
