@@ -16,7 +16,7 @@ export async function initDatabaseColumn(page: Page, title = '') {
   const editor = getEditorLocator(page);
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
-  await waitNextFrame(page);
+  await waitNextFrame(page, 100);
 
   if (title) {
     await type(page, title);
@@ -29,14 +29,15 @@ export async function initDatabaseColumn(page: Page, title = '') {
 
 export async function performColumnAction(
   page: Page,
-  columnId: string,
+  name: string,
   action: string
 ) {
-  const titleRow = page.locator('.affine-database-column-header');
-  const columnTitle = titleRow.locator(`[data-column-id="${columnId}"]`);
-  await columnTitle.click();
+  const column = page.locator('affine-database-header-column', {
+    hasText: name,
+  });
+  await column.click();
 
-  const actionMenu = page.locator(`.${action}`);
+  const actionMenu = page.locator(`.action`, { hasText: action });
   await actionMenu.click();
 }
 
@@ -46,8 +47,8 @@ export async function switchColumnType(
   columnIndex = 1,
   isDefault = false
 ) {
-  const { column } = await getDatabaseHeaderColumn(page, columnIndex);
-  await column.click();
+  const { typeIcon } = await getDatabaseHeaderColumn(page, columnIndex);
+  await typeIcon.click();
 
   await waitNextFrame(page);
   const action = page.locator('.column-type');

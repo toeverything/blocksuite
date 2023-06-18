@@ -18,7 +18,7 @@ import { html } from 'lit/static-html.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { DatabaseViewDataMap } from '../common/view-manager.js';
-import type { DatabaseBlockModel } from '../database-model.js';
+import type { DatabaseBlockModel, InsertPosition } from '../database-model.js';
 import { onClickOutside } from '../utils/utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
@@ -275,7 +275,10 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  private _addRow = (index?: number) => {
+  private _addRow = (
+    tableViewManager: TableViewManager,
+    position: InsertPosition
+  ) => {
     if (this.readonly) return;
 
     const currentSearchState = this._searchState;
@@ -284,9 +287,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
     const page = this.model.page;
     page.captureSync();
-
-    // this.model.children;
-    const id = page.addBlock('affine:paragraph', {}, this.model.id, index);
+    const id = tableViewManager.addRow(position);
     asyncFocusRichText(page, id);
     // save the search state
     this._setSearchState(currentSearchState);
@@ -310,19 +311,19 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   override render() {
     const tableViewManager = this._tableViewManager();
     const rowsTemplate = DataBaseRowContainer(tableViewManager);
-    const addRow = (index?: number) => {
-      this._addRow(index);
+    const addRow = (position: InsertPosition) => {
+      this._addRow(tableViewManager, position);
     };
     return html`
       <div class="affine-database-table">
         <div class="affine-database-block-title-container">
           <affine-database-title
-            .addRow="${addRow}"
+            .addRow="${() => addRow('start')}"
             .targetModel="${this.model}"
           ></affine-database-title>
           <affine-database-toolbar
             .view="${tableViewManager}"
-            .addRow="${addRow}"
+            .addRow="${() => addRow('end')}"
             .targetModel="${this.model}"
             .hoverState="${this._hoverState}"
             .searchState="${this._searchState}"
@@ -339,9 +340,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
             ${rowsTemplate}
             ${this._renderColumnWidthDragBar(tableViewManager.columns)}
             <affine-database-selection
-              .databaseId=${this.model.id}
-              .eventDispatcher=${this.root.uiEventDispatcher}
-              .view=${tableViewManager}
+              .databaseId="${this.model.id}"
+              .eventDispatcher="${this.root.uiEventDispatcher}"
+              .view="${tableViewManager}"
             ></affine-database-selection>
           </div>
         </div>
@@ -352,7 +353,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
                 class="affine-database-block-add-row"
                 data-test-id="affine-database-add-row-button"
                 role="button"
-                @click="${addRow}"
+                @click="${() => addRow('end')}"
               >
                 ${PlusIcon}<span>New Record</span>
               </div>

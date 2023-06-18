@@ -35,6 +35,8 @@ export interface TableViewManager {
 
   deleteRow(ids: string[]): void;
 
+  addRow(insertPosition: InsertPosition): string;
+
   updateName(name: string): void;
 
   updateFilter(filter: FilterGroup): void;
@@ -196,7 +198,7 @@ export class DatabaseTableViewManager implements TableViewManager {
     this._model.page.captureSync();
     this._model.addColumn(
       position,
-      multiSelectHelper.create(`Column ${this._columns.length + 1}`)
+      multiSelectHelper.create(`Column ${this._columns.length}`)
     );
     this._model.applyColumnUpdate();
   }
@@ -213,6 +215,16 @@ export class DatabaseTableViewManager implements TableViewManager {
     this._model.page.updateBlock(this._model, {
       children: this._model.children.filter(v => !ids.includes(v.id)),
     });
+  }
+
+  addRow(insertPosition: InsertPosition): string {
+    const index = insertPositionToIndex(insertPosition, this._model.children);
+    return this._model.page.addBlock(
+      'affine:paragraph',
+      {},
+      this._model.id,
+      index
+    );
   }
 }
 

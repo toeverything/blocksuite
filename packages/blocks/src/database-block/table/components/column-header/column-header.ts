@@ -5,7 +5,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { getDefaultPage } from '../../../../__internal__/index.js';
@@ -114,6 +113,16 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _onAddColumn = () => {
     if (this.readonly) return;
     this.tableViewManager.newColumn('end');
+    Promise.resolve().then(() => {
+      this.editLastColumnTitle();
+    });
+  };
+
+  editLastColumnTitle = () => {
+    const columns = this.querySelectorAll('affine-database-header-column');
+    const column = columns.item(columns.length - 1);
+    column.editTitle();
+    column.scrollIntoView();
   };
 
   override render() {
@@ -123,19 +132,12 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
           this.tableViewManager.columns,
           column => column.id,
           (column, index) => {
-            const style = styleMap({
-              width: `${column.width}px`,
-            });
-            return html` <div
+            return html` <affine-database-header-column
               data-column-id="${column.id}"
               class="affine-database-column database-cell"
-              style=${style}
-            >
-              <affine-database-header-column
-                .column=${column}
-                .tableViewManager=${this.tableViewManager}
-              ></affine-database-header-column>
-            </div>`;
+              .column="${column}"
+              .tableViewManager="${this.tableViewManager}"
+            ></affine-database-header-column>`;
           }
         )}
         <div class="affine-database-column database-cell add-column-button">

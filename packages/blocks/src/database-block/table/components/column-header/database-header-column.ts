@@ -13,6 +13,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { computePosition } from '@floating-ui/dom';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { InsertPosition } from '../../../database-model.js';
@@ -28,7 +29,6 @@ import type {
 import type { ColumnTypeIcon } from '../../types.js';
 import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
 import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';
-
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   @property()
@@ -59,12 +59,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         offsetArr.push(-1);
         continue;
       }
-      const parent = v.parentElement;
-      assertExists(parent);
-      curr.push({ x: parent.offsetLeft + parent.offsetWidth / 2, ele: v });
-      offsetArr.push(parent.offsetLeft);
+      curr.push({ x: v.offsetLeft + v.offsetWidth / 2, ele: v });
+      offsetArr.push(v.offsetLeft);
       if (i === columnsArr.length - 1) {
-        offsetArr.push(parent.offsetLeft + parent.offsetWidth);
+        offsetArr.push(v.offsetLeft + v.offsetWidth);
       }
     }
     left.reverse();
@@ -226,6 +224,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     assertExists(reference);
 
     const editColumn = new EditColumnPopup();
+    editColumn.headerColumn = this;
     editColumn.tableViewManager = this.tableViewManager;
     editColumn.column = this.column;
     editColumn.editTitle = this.editTitle;
@@ -309,10 +308,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   override render() {
     const column = this.column;
     const isEditing = this.isEditing;
+    const style = styleMap({
+      width: `${column.width}px`,
+    });
     return html`
       <div
+        style=${style}
         class="affine-database-column-content ${isEditing ? 'edit' : ''}"
-        data-column-id="${column.id}"
         @click="${this._clickColumn}"
       >
         <div class="affine-database-column-text ${column.type}">
@@ -397,6 +399,7 @@ const createDropPreview = (container: Element, height: number) => {
   const width = 4;
   const div = document.createElement('div');
   // div.style.pointerEvents='none';
+  div.className = 'database-move-column-drop-preview';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
   div.style.height = `${height}px`;

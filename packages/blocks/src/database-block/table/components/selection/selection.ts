@@ -68,8 +68,12 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return tableContainer;
   }
 
-  isCurrentDatabase(ele: Element): boolean {
-    return ele.closest('affine-database') === this.closest('affine-database');
+  isCurrentDatabaseTableBody(ele: Element): boolean {
+    console.log(ele.closest('.affine-database-block-rows'));
+    return (
+      ele.closest('affine-database') === this.closest('affine-database') &&
+      !!ele.closest('.affine-database-block-rows')
+    );
   }
 
   override firstUpdated() {
@@ -85,44 +89,62 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         this.updateFocusSelectionStyle(selection?.focus, selection?.isEditing);
       })
     );
-    this.eventDispatcher.add('click', context => {
-      const target = context.get('pointerState').event.target;
-      if (target instanceof Element && this.isCurrentDatabase(target)) {
-        const cell = target.closest('affine-database-cell-container');
-        if (cell) {
-          cell?.cell?.enterEditMode();
+    this._disposables.add({
+      dispose: this.eventDispatcher.add('click', context => {
+        const target = context.get('pointerState').event.target;
+        if (
+          target instanceof Element &&
+          this.isCurrentDatabaseTableBody(target)
+        ) {
+          const cell = target.closest('affine-database-cell-container');
+          if (cell) {
+            cell?.cell?.enterEditMode();
+          }
+        } else {
+          this.selection = undefined;
         }
-      } else {
-        this.service.select(undefined);
-      }
+      }),
     });
-    this.eventDispatcher.add('pointerDown', context => {
-      const event = context.get('pointerState').event;
+    this._disposables.add({
+      dispose: this.eventDispatcher.add('pointerDown', context => {
+        const event = context.get('pointerState').event;
+        const target = event.target;
+        if (
+          event instanceof MouseEvent &&
+          target instanceof Element &&
+          this.isCurrentDatabaseTableBody(target)
+        ) {
+          const cell = target.closest('affine-database-cell-container');
+          if (cell) {
+            this.startDrag(event, cell);
+            return true;
+          }
+        }
+        return false;
+      }),
+    });
+    this._disposables.addFromEvent(window, 'mousedown', event => {
       const target = event.target;
       if (
-        event instanceof MouseEvent &&
-        target instanceof Element &&
-        this.isCurrentDatabase(target)
+        !(target instanceof Element) ||
+        !this.isCurrentDatabaseTableBody(target)
       ) {
-        const cell = target.closest('affine-database-cell-container');
-        if (cell) {
-          this.startDrag(event, cell);
-          return true;
-        }
+        this.selection = undefined;
       }
-      return false;
     });
-    this.eventDispatcher.add('keyDown', context => {
-      const event = context.get('keyboardState').event;
-      const selection = this.selection;
-      if (
-        selection &&
-        selection.databaseId === this.databaseId &&
-        event instanceof KeyboardEvent
-      ) {
-        return this.onKeydown(selection, event);
-      }
-      return false;
+    this._disposables.add({
+      dispose: this.eventDispatcher.add('keyDown', context => {
+        const event = context.get('keyboardState').event;
+        const selection = this.selection;
+        if (
+          selection &&
+          selection.databaseId === this.databaseId &&
+          event instanceof KeyboardEvent
+        ) {
+          return this.onKeydown(selection, event);
+        }
+        return false;
+      }),
     });
   }
 

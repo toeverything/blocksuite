@@ -19,6 +19,7 @@ import type {
   TableViewManager,
 } from '../../table-view-manager.js';
 import type { ColumnType } from '../../types.js';
+import { DatabaseHeaderColumn } from '../column-header/database-header-column.js';
 import { ColumnTypePopup } from './column-type-popup.js';
 import { styles } from './styles.js';
 
@@ -47,6 +48,8 @@ type Menu = MenuCommon &
 @customElement('affine-database-edit-column-popup')
 export class EditColumnPopup extends LitElement {
   static override styles = styles;
+  @property()
+  headerColumn!: DatabaseHeaderColumn;
   @property()
   tableViewManager!: TableViewManager;
   @property()
@@ -99,6 +102,13 @@ export class EditColumnPopup extends LitElement {
         icon: DatabaseInsertLeft,
         select: () => {
           this.tableViewManager.newColumn({ id: this.column.id, before: true });
+          Promise.resolve().then(() => {
+            const pre = this.headerColumn.previousElementSibling;
+            if (pre instanceof DatabaseHeaderColumn) {
+              pre.editTitle();
+              pre.scrollIntoView();
+            }
+          });
         },
       },
       {
@@ -109,6 +119,13 @@ export class EditColumnPopup extends LitElement {
           this.tableViewManager.newColumn({
             id: this.column.id,
             before: false,
+          });
+          Promise.resolve().then(() => {
+            const next = this.headerColumn.nextElementSibling;
+            if (next instanceof DatabaseHeaderColumn) {
+              next.editTitle();
+              next.scrollIntoView();
+            }
           });
         },
       },
@@ -213,12 +230,14 @@ export class EditColumnPopup extends LitElement {
 
         return html`
           <div
-            class="action ${action.type}"
+            class="action"
             @mouseover="${onMouseOver}"
             @click="${() => {
               if (action.type === 'action') {
                 action.select();
-                this.remove();
+                setTimeout(() => {
+                  this.remove();
+                });
               }
             }}"
           >
