@@ -156,18 +156,18 @@ for (const { initState, desc } of [
 
     await pressEnter(page);
     await assertTitle(page, 'hello');
-    await assertRichTexts(page, ['abc']);
+    await assertRichTexts(page, ['abc', '']);
 
     await pressBackspace(page);
     await assertTitle(page, 'helloabc');
-    await assertRichTexts(page, []);
+    await assertRichTexts(page, ['']);
     await undoByClick(page);
     await assertTitle(page, 'hello');
-    await assertRichTexts(page, ['abc']);
+    await assertRichTexts(page, ['abc', '']);
 
     await redoByClick(page);
     await assertTitle(page, 'helloabc');
-    await assertRichTexts(page, []);
+    await assertRichTexts(page, ['']);
   });
 
   test(`backspace on line start of the first empty block (${desc})`, async ({
@@ -179,7 +179,7 @@ for (const { initState, desc } of [
 
     await pressArrowDown(page);
     await pressBackspace(page);
-    await assertBlockCount(page, 'paragraph', 0);
+    await assertBlockCount(page, 'paragraph', 1);
 
     await pressArrowDown(page);
     await assertSelection(page, 0, 0, 0);

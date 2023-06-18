@@ -572,7 +572,13 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
       textLength = text.length;
       title.join(text);
     }
-    page.deleteBlock(model);
+
+    // Preserve at least one block to be able to focus on container click
+    if (page.getNextSibling(model)) {
+      page.deleteBlock(model);
+    } else {
+      text?.clear();
+    }
     focusTitle(page, title.length - textLength);
     return true;
   }
