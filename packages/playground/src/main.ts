@@ -28,7 +28,7 @@ initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
-  workspace.slots.pageAdded.once(async pageId => {
+  workspace.slots.pageAdded.once(pageId => {
     if (typeof globalThis.targetPageId === 'string') {
       if (pageId !== globalThis.targetPageId) {
         // if there's `targetPageId` which not same as the `pageId`
@@ -40,7 +40,6 @@ function subscribePage(workspace: Workspace) {
       return;
     }
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded();
 
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
@@ -114,6 +113,8 @@ async function main() {
   await syncProviders(Array.from(workspace.subdocProviders.values()).flat());
 
   workspace.slots.pageAdded.on(async pageId => {
+    const page = workspace.getPage(pageId) as Page;
+    await page.waitForLoaded();
     const subdocProviders = workspace.subdocProviders.get(`space:${pageId}`);
     if (subdocProviders) {
       await syncProviders(subdocProviders);
