@@ -157,7 +157,8 @@ export class EdgelessComponentToolbar extends LitElement {
 
   override render() {
     const groupedSelected = this._groupSelected();
-    const { shape, brush, connector, note: note, text } = groupedSelected;
+    const { page, selected, slots, surface } = this;
+    const { shape, brush, connector, note, text } = groupedSelected;
 
     // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -179,13 +180,14 @@ export class EdgelessComponentToolbar extends LitElement {
     const divider = !buttons.length
       ? nothing
       : html`<menu-divider .vertical=${true}></menu-divider>`;
+
     return html`<div class="container" @pointerdown=${stopPropagation}>
       ${join(buttons, () => '')} ${divider}
       <edgeless-more-button
-        .elements=${this.selected}
-        .page=${this.page}
-        .surface=${this.surface}
-        .slots=${this.slots}
+        .elements=${selected}
+        .page=${page}
+        .slots=${slots}
+        .surface=${surface}
       >
       </edgeless-more-button>
     </div>`;

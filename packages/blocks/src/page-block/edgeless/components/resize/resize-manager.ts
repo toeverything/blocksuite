@@ -206,7 +206,7 @@ export class HandleResizeManager {
       }
 
       // force adjustment by aspect ratio
-      // shift ||= this.bounds.size > 1;
+      shiftKey ||= this._bounds.size > 1;
 
       const deltaY = (endY - startY) / _zoom;
       const fp = fixedPoint.matrixTransform(m0);
@@ -343,12 +343,12 @@ export class HandleResizeManager {
         };
       } else {
         // TODO: on same rotate
-        process = () => {
+        process = ({ bound: { x, y, w, h }, flip, rotate }, id) => {
           console.log(123);
         };
       }
     } else {
-      // include frames, <---->
+      // include notes, <---->
       const m2 = new DOMMatrix().scaleSelf(
         scale.x,
         scale.y,
@@ -366,7 +366,7 @@ export class HandleResizeManager {
         let newWidth: number;
         let newHeight: number;
 
-        // TODO: determine if it is a frame
+        // TODO: determine if it is a note
         if (rotate) {
           const m = new DOMMatrix()
             .translateSelf(cx, cy)
