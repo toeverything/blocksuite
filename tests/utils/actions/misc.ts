@@ -80,6 +80,7 @@ async function initEmptyEditor(
       const { workspace } = window;
 
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
+        page.waitForLoaded();
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
@@ -283,8 +284,10 @@ export async function enterPlaygroundWithList(
   await initEmptyEditor(page);
 
   await page.evaluate(
-    ({ contents, type }: { contents: string[]; type: ListType }) => {
+    async ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
+      await page.waitForLoaded();
+
       const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
@@ -306,8 +309,9 @@ export async function enterPlaygroundWithList(
 
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
 export async function initEmptyParagraphState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(pageId => {
+  const ids = await page.evaluate(async pageId => {
     const { page } = window;
+    await page.waitForLoaded();
     page.captureSync();
 
     if (!pageId) {
@@ -325,8 +329,9 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 }
 
 export async function initEmptyEdgelessState(page: Page) {
-  const ids = await page.evaluate(() => {
+  const ids = await page.evaluate(async () => {
     const { page } = window;
+    await page.waitForLoaded();
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
@@ -342,8 +347,10 @@ export async function initEmptyEdgelessState(page: Page) {
 }
 
 export async function initEmptyDatabaseState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(pageId => {
+  const ids = await page.evaluate(async pageId => {
     const { page } = window;
+    await page.waitForLoaded();
+
     page.captureSync();
     if (!pageId) {
       pageId = page.addBlock('affine:page', {
@@ -369,8 +376,10 @@ export async function initEmptyDatabaseWithParagraphState(
   page: Page,
   pageId?: string
 ) {
-  const ids = await page.evaluate(pageId => {
+  const ids = await page.evaluate(async pageId => {
     const { page } = window;
+    await page.waitForLoaded();
+
     page.captureSync();
     if (!pageId) {
       pageId = page.addBlock('affine:page', {
@@ -444,8 +453,10 @@ export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
 }
 
 export async function initEmptyCodeBlockState(page: Page) {
-  const ids = await page.evaluate(() => {
+  const ids = await page.evaluate(async () => {
     const { page } = window;
+    await page.waitForLoaded();
+
     page.captureSync();
     const pageId = page.addBlock('affine:page');
     const noteId = page.addBlock('affine:note', {}, pageId);

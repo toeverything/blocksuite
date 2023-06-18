@@ -194,10 +194,7 @@ export class Workspace {
         idGenerator: this._store.idGenerator,
       });
       this._store.addSpace(page);
-
-      page.waitForLoaded().then(() => {
-        page.trySyncFromExistingDoc();
-      });
+      this.slots.pageAdded.emit(page.id);
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
