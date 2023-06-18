@@ -36,7 +36,7 @@ export class Space<
     this.doc = doc;
     this.awarenessStore = awarenessStore;
 
-    this._ySpaceDoc = this._loadSubDoc();
+    this._ySpaceDoc = this._initSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
     this._proxy = createYMapProxy(this._yBlocks as Y.Map<unknown>);
@@ -54,7 +54,7 @@ export class Space<
     return this._ySpaceDoc;
   }
 
-  waitForLoaded = async () => {
+  async waitForLoaded() {
     if (this.loaded) {
       return this;
     }
@@ -68,7 +68,7 @@ export class Space<
     );
 
     return this;
-  };
+  }
 
   destroy() {
     this._ySpaceDoc.destroy();
@@ -76,7 +76,7 @@ export class Space<
     this._loaded = false;
   }
 
-  private _loadSubDoc = () => {
+  private _initSubDoc = () => {
     const prefixedId = this.prefixedId;
 
     let subDoc = this.doc.spaces.get(prefixedId);
