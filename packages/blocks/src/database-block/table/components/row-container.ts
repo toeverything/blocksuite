@@ -68,11 +68,14 @@ export function DataBaseRowContainer(view: TableViewManager) {
                       })}
                     >
                       <affine-database-cell-container
-                        .rowId="${id}"
                         .column="${column}"
+                        .rowId="${id}"
                         data-row-id=${id}
+                        .rowIndex="${idx}"
                         data-row-index=${idx}
+                        .columnId="${column.id}"
                         data-column-id=${column.id}
+                        .columnIndex="${i}"
                         data-column-index=${i}
                       >
                       </affine-database-cell-container>

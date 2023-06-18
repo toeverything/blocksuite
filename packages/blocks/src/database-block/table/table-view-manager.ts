@@ -33,6 +33,8 @@ export interface TableViewManager {
 
   get rows(): string[];
 
+  deleteRow(ids: string[]): void;
+
   updateName(name: string): void;
 
   updateFilter(filter: FilterGroup): void;
@@ -205,6 +207,12 @@ export class DatabaseTableViewManager implements TableViewManager {
 
   preColumn(id: string): TableMixColumn | undefined {
     return this._columns[this._columns.findIndex(v => v.id === id) - 1];
+  }
+
+  deleteRow(ids: string[]): void {
+    this._model.page.updateBlock(this._model, {
+      children: this._model.children.filter(v => !ids.includes(v.id)),
+    });
   }
 }
 

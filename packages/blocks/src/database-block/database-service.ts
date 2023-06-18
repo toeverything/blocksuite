@@ -8,57 +8,21 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
-import type {
-  DatabaseSelection,
-  DatabaseTableViewCellState,
-  DatabaseTableViewRowState,
-} from '../std.js';
+import type { DatabaseSelection, DatabaseSelectionState } from '../std.js';
 import { asyncFocusRichText, type SerializedBlock } from '../std.js';
 import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import {
-  clearAllDatabaseRowsSelection,
-  setDatabaseRowsSelection,
-} from './table/components/selection/utils.js';
-import {
-  getClosestDatabaseId,
-  getClosestRowId,
-} from './table/selection-manager/utils.js';
 import type { Cell, Column } from './table/types.js';
 
-type LastTableViewRowSelection = {
-  databaseId: string;
-  rowIds: string[];
-};
-
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
-  private _lastRowSelection: LastTableViewRowSelection | null = null;
   private _databaseSelection?: DatabaseSelection;
 
   slots = {
-    tableViewRowSelectionUpdated: new Slot<DatabaseTableViewRowState>(),
-    databaseSelectionUpdated: new Slot<DatabaseTableViewCellState>(),
+    databaseSelectionUpdated: new Slot<DatabaseSelectionState>(),
   };
 
   constructor() {
     super();
-
-    this.slots.tableViewRowSelectionUpdated.on(state => {
-      const { type } = state;
-
-      if (type === 'select' || type === 'click') {
-        const { rowIds, databaseId } = state;
-
-        this._lastRowSelection = {
-          databaseId,
-          rowIds,
-        };
-        setDatabaseRowsSelection(databaseId, rowIds);
-      } else if (type === 'clear') {
-        this.clearLastRowSelection();
-        clearAllDatabaseRowsSelection();
-      }
-    });
 
     this.slots.databaseSelectionUpdated.on(selection => {
       this._databaseSelection = selection;
@@ -162,92 +126,12 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
-  clearSelection() {
-    this.clearRowSelection();
-    this.clearCellLevelSelection();
+  select(state: DatabaseSelectionState) {
+    this._databaseSelection = state;
+    this.slots.databaseSelectionUpdated.emit(state);
   }
 
-  // row level selection
-  clearRowSelection() {
-    this.slots.tableViewRowSelectionUpdated.emit({
-      type: 'clear',
-    });
-  }
-
-  setRowSelection(state: DatabaseTableViewRowState) {
-    if (
-      state.type === 'click' &&
-      this._lastRowSelection &&
-      state.rowIds?.[0] === this._lastRowSelection.rowIds?.[0]
-    ) {
-      this.clearRowSelection();
-      return;
-    }
-
-    this.slots.tableViewRowSelectionUpdated.emit(state);
-  }
-
-  setRowSelectionByElement(element: Element) {
-    const rowId = getClosestRowId(element);
-    if (rowId !== '') {
-      const databaseId = getClosestDatabaseId(element);
-      this.setRowSelection({
-        type: 'select',
-        databaseId,
-        rowIds: [rowId],
-      });
-    }
-  }
-
-  clearLastRowSelection() {
-    this._lastRowSelection = null;
-  }
-
-  refreshRowSelection() {
-    if (!this._lastRowSelection) return;
-
-    const { databaseId, rowIds } = this._lastRowSelection;
-
-    this.setRowSelection({
-      type: 'select',
-      databaseId,
-      rowIds,
-    });
-  }
-
-  toggleRowSelection(element: Element) {
-    const rowId = getClosestRowId(element);
-    // click on database's drag handle
-    if (rowId === '') return false;
-
-    const rowIds = this._lastRowSelection?.rowIds ?? [];
-
-    if (rowIds.indexOf(rowId) > -1) {
-      this.clearRowSelection();
-    } else {
-      this.setRowSelection({
-        type: 'click',
-        databaseId: getClosestDatabaseId(element),
-        rowIds: [rowId],
-      });
-    }
-    return true;
-  }
-
-  getLastRowSelection() {
-    return this._lastRowSelection;
-  }
-
-  // cell level selection
-  clearCellLevelSelection() {
-    this.slots.databaseSelectionUpdated.emit(undefined);
-  }
-
-  setCellSelection(cellSelectionState: DatabaseTableViewCellState) {
-    this.slots.databaseSelectionUpdated.emit(cellSelectionState);
-  }
-
-  getLastCellSelection() {
+  getSelection() {
     return this._databaseSelection;
   }
 }

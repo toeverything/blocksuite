@@ -2,7 +2,6 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import { onClickOutside } from '../utils/utils.js';
 import type { ColumnManager } from './table-view-manager.js';
 import type { ColumnType, SetValueOption } from './types.js';
 
@@ -52,24 +51,6 @@ export abstract class DatabaseCellElement<
     super.connectedCallback();
     this.style.width = '100%';
     this.style.height = '100%';
-    this._disposables.addFromEvent(this, 'click', () => {
-      setTimeout(() => {
-        this._setEditing(true);
-      });
-    });
-    const cancelClickOutside = onClickOutside(
-      this,
-      () => {
-        if (this.isEditing) {
-          this._setEditing(false);
-        }
-      },
-      'mousedown',
-      true
-    );
-    this._disposables.add({
-      dispose: cancelClickOutside,
-    });
   }
 }
 

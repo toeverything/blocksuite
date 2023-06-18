@@ -4,6 +4,7 @@ import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/toolbar/toolbar.js';
 import './components/database-title.js';
+import './components/selection/selection.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
@@ -21,8 +22,7 @@ import type { DatabaseBlockModel } from '../database-model.js';
 import { onClickOutside } from '../utils/utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
-import { CellSelectionManager } from './selection-manager/cell.js';
-import type { RowSelectionManager } from './selection-manager/row.js';
+import type { DatabaseSelectionView } from './components/selection/selection.js';
 import type { ColumnManager, TableViewManager } from './table-view-manager.js';
 import { DatabaseTableViewManager } from './table-view-manager.js';
 import { SearchState } from './types.js';
@@ -153,6 +153,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @query('affine-database-column-header')
   private _columnHeaderComponent!: DatabaseColumnHeader;
 
+  @query('affine-database-selection')
+  public selection!: DatabaseSelectionView;
+
   @state()
   private _searchState: SearchState = SearchState.SearchIcon;
 
@@ -162,9 +165,6 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @state()
   private _hoverState = false;
 
-  private _rowSelection!: RowSelectionManager;
-  private _cellSelection!: CellSelectionManager;
-
   private get readonly() {
     return this.model.page.readonly;
   }
@@ -173,18 +173,11 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     this._updateHoverState();
-    this._initRowSelectionEvents();
-    this._initCellSelectionEvents();
 
     const disposables = this._disposables;
     disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
     disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
     disposables.addFromEvent(this, 'click', this._onClick);
-    disposables.addFromEvent(
-      this,
-      'keydown',
-      this._cellSelection.onCellSelectionChange
-    );
   }
 
   override firstUpdated() {
@@ -227,24 +220,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-
-    this._rowSelection.dispose();
-    this._cellSelection.dispose();
   }
-
-  private _initRowSelectionEvents = () => {
-    // this._rowSelection = new RowSelectionManager(
-    //   this.root.uiEventDispatcher,
-    //   this.model
-    // );
-  };
-
-  private _initCellSelectionEvents = () => {
-    this._cellSelection = new CellSelectionManager(
-      this.root.uiEventDispatcher,
-      this.model
-    );
-  };
 
   private _setSearchState = (state: SearchState) => {
     this._searchState = state;
@@ -362,6 +338,11 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
             ></affine-database-column-header>
             ${rowsTemplate}
             ${this._renderColumnWidthDragBar(tableViewManager.columns)}
+            <affine-database-selection
+              .databaseId=${this.model.id}
+              .eventDispatcher=${this.root.uiEventDispatcher}
+              .view=${tableViewManager}
+            ></affine-database-selection>
           </div>
         </div>
         ${this.readonly

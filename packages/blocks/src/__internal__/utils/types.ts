@@ -68,18 +68,19 @@ export type DatabaseTableViewRowState =
   | DatabaseTableViewRowDelete
   | DatabaseTableViewRowClear;
 
-export type CellCoord = {
+export type CellFocus = {
   rowIndex: number;
-  cellIndex: number;
+  columnIndex: number;
 };
+export type MultiSelection = { start: number; end: number };
 export type DatabaseSelection = {
   databaseId: string;
-  rowsSelection?: { start: number; end: number };
-  columnsSelection?: { start: number; end: number };
-  focus: CellCoord;
+  rowsSelection?: MultiSelection;
+  columnsSelection?: MultiSelection;
+  focus: CellFocus;
   isEditing: boolean;
 };
-export type DatabaseTableViewCellState = DatabaseSelection | undefined;
+export type DatabaseSelectionState = DatabaseSelection | undefined;
 
 /** Common context interface definition for block models. */
 

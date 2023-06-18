@@ -1,11 +1,13 @@
+import type { Disposable } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
+import { getService } from '../../../__internal__/service.js';
 import type { DatabaseCellElement } from '../register.js';
-import { selectCurrentCell } from '../selection-manager/cell.js';
 import type { ColumnManager } from '../table-view-manager.js';
 
 /** affine-database-cell-container padding */
@@ -36,10 +38,20 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   `;
 
   @state()
-  private _isEditing = false;
+  private editingDisposable?: Disposable;
+
+  get isEditing() {
+    return this.editingDisposable != null;
+  }
 
   @property()
-  rowId!: string;
+  public readonly rowId!: string;
+  @property()
+  public readonly rowIndex!: number;
+  @property()
+  public readonly columnId!: string;
+  @property()
+  public readonly columnIndex!: number;
 
   @property()
   column!: ColumnManager;
@@ -48,9 +60,37 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this.column.readonly;
   }
 
+  get table() {
+    const table = this.closest('affine-database-table');
+    assertExists(table);
+    return table;
+  }
+
   setEditing = (isEditing: boolean) => {
-    this._isEditing = isEditing;
-    selectCurrentCell(this, isEditing);
+    const service = getService('affine:database');
+    if (isEditing) {
+      this.editingDisposable = service.slots.databaseSelectionUpdated.on(
+        state => {
+          if (
+            !state ||
+            !state.isEditing ||
+            state.focus.rowIndex !== this.rowIndex ||
+            state.focus.columnIndex !== this.columnIndex
+          ) {
+            this.editingDisposable?.dispose();
+            this.editingDisposable = undefined;
+          }
+        }
+      );
+    }
+    const databaseId =
+      this.closest<HTMLElement>('affine-database')?.dataset.blockId;
+    assertExists(databaseId);
+    service.select({
+      databaseId: databaseId,
+      focus: { rowIndex: this.rowIndex, columnIndex: this.columnIndex },
+      isEditing: isEditing,
+    });
   };
 
   private _cell = createRef<DatabaseCellElement<unknown>>();
@@ -64,7 +104,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     const renderer = this.column.renderer;
     const tag =
       !this.readonly &&
-      this._isEditing &&
+      this.isEditing &&
       renderer.components.CellEditing !== null
         ? renderer.components.CellEditing.tag
         : renderer.components.Cell.tag;
@@ -74,7 +114,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
         .column='${this.column}'
         .rowId='${this.rowId}'
         .setEditing='${this.setEditing}'
-        .isEditing='${this._isEditing}'
+        .isEditing='${this.isEditing}'
       ></${tag}>`;
   }
 }
