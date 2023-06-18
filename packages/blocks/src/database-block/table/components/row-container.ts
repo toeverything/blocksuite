@@ -59,7 +59,7 @@ export function DataBaseRowContainer(view: TableViewManager) {
               ${repeat(
                 view.columns,
                 v => v.id,
-                column => {
+                (column, i) => {
                   return html`
                     <div
                       class="database-cell"
@@ -70,6 +70,10 @@ export function DataBaseRowContainer(view: TableViewManager) {
                       <affine-database-cell-container
                         .rowId="${id}"
                         .column="${column}"
+                        data-row-id=${id}
+                        data-row-index=${idx}
+                        data-column-id=${column.id}
+                        data-column-index=${i}
                       >
                       </affine-database-cell-container>
                     </div>

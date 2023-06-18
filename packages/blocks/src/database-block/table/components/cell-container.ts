@@ -1,8 +1,10 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
+import type { DatabaseCellElement } from '../register.js';
 import { selectCurrentCell } from '../selection-manager/cell.js';
 import type { ColumnManager } from '../table-view-manager.js';
 
@@ -46,16 +48,16 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this.column.readonly;
   }
 
-  protected override firstUpdated() {
-    this.setAttribute('data-block-is-database-input', 'true');
-    this.setAttribute('data-row-id', this.rowId);
-    this.setAttribute('data-column-id', this.column.id);
-  }
-
   setEditing = (isEditing: boolean) => {
     this._isEditing = isEditing;
     selectCurrentCell(this, isEditing);
   };
+
+  private _cell = createRef<DatabaseCellElement<unknown>>();
+
+  public get cell() {
+    return this._cell.value;
+  }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
@@ -68,8 +70,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
         : renderer.components.Cell.tag;
     return html`
       <${tag}
+        ${ref(this._cell)}
         .column='${this.column}'
-        .rowId=${this.rowId}
+        .rowId='${this.rowId}'
         .setEditing='${this.setEditing}'
         .isEditing='${this._isEditing}'
       ></${tag}>`;

@@ -12,6 +12,7 @@ export const styles = css`
     flex-direction: row;
     height: 40px;
     border-bottom: 1px solid var(--affine-border-color);
+    box-sizing: border-box;
   }
   .affine-database-column-header > .affine-database-column:first-child {
     background: var(--affine-hover-color);
@@ -39,6 +40,7 @@ export const styles = css`
     width: 100%;
     height: 100%;
     padding: 8px;
+    box-sizing: border-box;
     border-right: 1px solid var(--affine-border-color);
   }
   .affine-database-column:last-child .affine-database-column-content {

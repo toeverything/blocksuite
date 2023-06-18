@@ -1,15 +1,14 @@
-import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { DatabaseSelection } from '../../../../std.js';
+import type { DatabaseBlockService } from '../../../database-service.js';
+import type { TableViewManager } from '../../table-view-manager.js';
 import { getCellSelectionRectByCoords, getRowsContainer } from './utils.js';
 
-type SelectionState = Omit<DatabaseSelection, 'type'>;
-
-@customElement('database-cell-level-selection')
-export class CellLevelSelection extends WithDisposable(LitElement) {
+@customElement('database-selection')
+export class CellLevelSelection extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .database-cell-level-selection {
       position: absolute;
@@ -23,18 +22,18 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
   `;
 
   @property()
-  cell!: HTMLElement;
+  view!: TableViewManager;
+  @property()
+  service!: DatabaseBlockService;
 
-  @state()
-  state: SelectionState | null = null;
-
-  setSelection = (state: SelectionState) => {
-    this.state = state;
-  };
-
-  clearSelection = () => {
-    this.state = null;
-  };
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.service.slots.databaseSelectionUpdated.on(selection => {
+        //
+      })
+    );
+  }
 
   private get _zoom() {
     const edgelessPageBlock = document.querySelector('affine-edgeless-page');
@@ -89,6 +88,6 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'database-cell-level-selection': CellLevelSelection;
+    'database-selection': CellLevelSelection;
   }
 }

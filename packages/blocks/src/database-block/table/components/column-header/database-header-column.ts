@@ -20,7 +20,7 @@ import { insertPositionToIndex } from '../../../database-model.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';
 import { getResultInRange, onClickOutside } from '../../../utils/utils.js';
-import { getHeaderContainer } from '../../table-view.js';
+import { getTableContainer } from '../../table-view.js';
 import type {
   ColumnManager,
   TableViewManager,
@@ -45,7 +45,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     this.editTitle();
   };
 
-  private _columnsOffset = (header: Element) => {
+  private _columnsOffset = (header: Element, scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
     const left: ColumnOffset[] = [];
     const right: ColumnOffset[] = [];
@@ -111,40 +111,42 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     };
   };
   private _drag = (evt: MouseEvent) => {
-    const headerContainer = getHeaderContainer(this);
-    const tableContainer = headerContainer?.parentElement;
-    assertExists(headerContainer);
+    const tableContainer = getTableContainer(this);
+    const scrollContainer = tableContainer?.parentElement;
     assertExists(tableContainer);
+    assertExists(scrollContainer);
     const columnHeaderRect = this.getBoundingClientRect();
-    const tableContainerRect = tableContainer.getBoundingClientRect();
-    const headerContainerRect = headerContainer.getBoundingClientRect();
+    const scale = columnHeaderRect.width / this.column.width;
+    const tableContainerRect = scrollContainer.getBoundingClientRect();
+    const headerContainerRect = tableContainer.getBoundingClientRect();
 
-    const offsetLeft = evt.x - columnHeaderRect.left;
+    const rectOffsetLeft = evt.x - columnHeaderRect.left;
     const offsetRight = columnHeaderRect.right - evt.x;
 
-    const startOffset = columnHeaderRect.left - headerContainerRect.left;
-    const max = headerContainerRect.width - columnHeaderRect.width;
+    const startOffset =
+      (columnHeaderRect.left - headerContainerRect.left) / scale;
+    const max = (headerContainerRect.width - columnHeaderRect.width) / scale;
 
-    const { computeInsertInfo } = this._columnsOffset(headerContainer);
+    const { computeInsertInfo } = this._columnsOffset(tableContainer, scale);
 
     const dragPreview = createDragPreview(
-      headerContainer,
-      columnHeaderRect.width,
-      headerContainerRect.height,
+      tableContainer,
+      columnHeaderRect.width / scale,
+      headerContainerRect.height / scale,
       startOffset
     );
     const dropPreview = createDropPreview(
-      headerContainer,
+      tableContainer,
       headerContainerRect.height
     );
 
     const cancelScroll = startFrameLoop(delta => {
       const offset = delta * 0.4;
-      if (drag.data.x < tableContainerRect.left + offsetLeft) {
-        tableContainer.scrollLeft -= offset;
+      if (drag.data.x < tableContainerRect.left + rectOffsetLeft) {
+        scrollContainer.scrollLeft -= offset;
         drag.move({ x: drag.data.x });
       } else if (drag.data.x > tableContainerRect.right - offsetRight) {
-        tableContainer.scrollLeft += offset;
+        scrollContainer.scrollLeft += offset;
         drag.move({ x: drag.data.x });
       }
     });
@@ -156,13 +158,14 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         }),
         onMove: ({ x }: { x: number }) => {
           const currentOffset = getResultInRange(
-            x - headerContainer.getBoundingClientRect().left - offsetLeft,
+            (x - tableContainer.getBoundingClientRect().left - rectOffsetLeft) /
+              scale,
             0,
             max
           );
           const insertInfo = computeInsertInfo(
             currentOffset,
-            columnHeaderRect.width
+            columnHeaderRect.width / scale
           );
           if (insertInfo.insertOffset != null) {
             dropPreview.display(insertInfo.insertOffset);

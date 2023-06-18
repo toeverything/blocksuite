@@ -44,18 +44,18 @@ export function setDatabaseRowsSelection(databaseId: string, rowIds: string[]) {
 
 export function setDatabaseCellSelection(
   databaseId: string,
-  coords: [CellCoord],
+  focus: CellCoord,
   isEditing: boolean
 ) {
   const container = getRowsContainer(databaseId);
   const cellLevelSelection = getCellLevelSelection(container);
   cellLevelSelection.setSelection({
     databaseId,
-    coords,
+    focus,
     isEditing,
   });
 
-  const currentCell = getCellElementByCoord(coords[0], databaseId);
+  const currentCell = getCellElementByCoord(focus, databaseId);
   currentCell.scrollIntoView({ block: 'nearest' });
 }
 
@@ -100,14 +100,13 @@ export function getCellCoord(
 }
 
 export function getCellSelectionRectByCoords(
-  coords: [CellCoord],
+  start: CellCoord,
   databaseId: string
 ) {
   const rowsContainer = getRowsContainer(databaseId);
   const cellRects = getAllCellsRect(rowsContainer);
 
   // Currently only supports single cell selection.
-  const [start] = coords;
   const cell = cellRects[start.rowIndex][start.cellIndex];
   return {
     left: cell.left,

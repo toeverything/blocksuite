@@ -5,7 +5,6 @@ import { assertExists } from '@blocksuite/store';
 import type { FilterGroup } from '../common/ast.js';
 import { columnManager, multiSelectHelper } from '../common/column-manager.js';
 import type {
-  DatabaseViewDataMap,
   TableMixColumn,
   TableViewColumn,
   TableViewData,
@@ -34,9 +33,9 @@ export interface TableViewManager {
 
   get rows(): string[];
 
-  changeName(name: string): void;
+  updateName(name: string): void;
 
-  changeFilter(filter: FilterGroup): void;
+  updateFilter(filter: FilterGroup): void;
 
   moveColumn(column: string, toAfterOfColumn: InsertPosition): void;
 
@@ -111,7 +110,7 @@ export class DatabaseTableViewManager implements TableViewManager {
 
   constructor(
     private _model: DatabaseBlockModel,
-    private _view: DatabaseViewDataMap['table'],
+    private _view: TableViewData,
     _root: BlockSuiteRoot,
     searchString: string
   ) {
@@ -166,11 +165,14 @@ export class DatabaseTableViewManager implements TableViewManager {
     return false;
   }
 
-  changeFilter(filter: FilterGroup): void {
-    //
+  updateFilter(filter: FilterGroup): void {
+    this._model.updateView(this._view.id, 'table', data => {
+      data.filter = filter;
+    });
+    this._model.applyViewsUpdate();
   }
 
-  changeName(name: string): void {
+  updateName(name: string): void {
     //
   }
 

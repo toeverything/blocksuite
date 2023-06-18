@@ -156,14 +156,11 @@ export class RowSelectionManager {
       }
       const cellSelection = service.getLastCellSelection();
       if (cellSelection && !cellSelection.isEditing) {
-        const {
-          databaseId,
-          coords: [coord],
-        } = cellSelection;
+        const { databaseId, focus } = cellSelection;
 
         // select row
         const database = getDatabaseById(databaseId);
-        const rowIds = getSelectedRowIdsByIndexes(database, [coord.rowIndex]);
+        const rowIds = getSelectedRowIdsByIndexes(database, [focus.rowIndex]);
         service.setRowSelection({
           type: 'select',
           rowIds,

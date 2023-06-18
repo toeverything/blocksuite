@@ -62,16 +62,15 @@ export class CellSelectionManager {
     if (!cellSelection) return;
     event.preventDefault();
 
-    const { databaseId, coords } = cellSelection;
+    const { databaseId, focus } = cellSelection;
     if (event.key === 'Enter') {
-      setDatabaseCellEditing(databaseId, coords[0]);
+      setDatabaseCellEditing(databaseId, focus);
     } else {
       // set cell selection
-      const nextCoord = getCellCoord(coords[0], databaseId, event.key);
+      const nextCoord = getCellCoord(focus, databaseId, event.key);
       service.setCellSelection({
-        type: 'select',
-        coords: [nextCoord],
         databaseId,
+        focus: nextCoord,
         isEditing: false,
       });
     }
@@ -92,7 +91,7 @@ export class CellSelectionManager {
     if (!lastCellSelection) {
       return;
     }
-    const cellCoord = lastCellSelection.coords[0];
+    const cellCoord = lastCellSelection.focus;
     if (lastCellSelection.isEditing) {
       const ele = findFocusedElement(
         lastCellSelection.databaseId,
@@ -106,8 +105,7 @@ export class CellSelectionManager {
     }
     if (event.key === 'Tab') {
       this._service?.setCellSelection({
-        type: 'select',
-        coords: [getCellCoord(cellCoord, this._model.id, 'Tab')],
+        focus: getCellCoord(cellCoord, this._model.id, 'Tab'),
         databaseId: this._model.id,
         isEditing: false,
       });
@@ -140,8 +138,7 @@ export function selectCellByElement(
   if (hasRowSelection) return;
 
   service.setCellSelection({
-    type: 'select',
-    coords: [nextCoord],
+    focus: nextCoord,
     databaseId,
     isEditing: false,
   });
@@ -158,8 +155,7 @@ export function selectCurrentCell(element: Element, isEditing: boolean) {
   const service = getService('affine:database');
 
   service.setCellSelection({
-    type: 'select',
-    coords: [nextCoord],
+    focus: nextCoord,
     databaseId,
     isEditing,
   });

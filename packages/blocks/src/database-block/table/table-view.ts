@@ -22,7 +22,7 @@ import { onClickOutside } from '../utils/utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import { CellSelectionManager } from './selection-manager/cell.js';
-import { RowSelectionManager } from './selection-manager/row.js';
+import type { RowSelectionManager } from './selection-manager/row.js';
 import type { ColumnManager, TableViewManager } from './table-view-manager.js';
 import { DatabaseTableViewManager } from './table-view-manager.js';
 import { SearchState } from './types.js';
@@ -233,10 +233,10 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   }
 
   private _initRowSelectionEvents = () => {
-    this._rowSelection = new RowSelectionManager(
-      this.root.uiEventDispatcher,
-      this.model
-    );
+    // this._rowSelection = new RowSelectionManager(
+    //   this.root.uiEventDispatcher,
+    //   this.model
+    // );
   };
 
   private _initCellSelectionEvents = () => {
@@ -387,8 +387,10 @@ declare global {
   }
 }
 
-export const getHeaderContainer = (ele: HTMLElement) => {
-  const element = ele.closest('.affine-database-table-container');
+export const getTableContainer = (ele: HTMLElement) => {
+  const element = ele.closest(
+    '.affine-database-table-container'
+  ) as HTMLElement;
   assertExists(element);
   return element;
 };

@@ -2,12 +2,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { startDrag } from '../../../utils/drag.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../consts.js';
-import { getHeaderContainer } from '../../table-view.js';
+import { getTableContainer } from '../../table-view.js';
 import type { ColumnManager } from '../../table-view-manager.js';
 
 const dragBarWidth = 16;
@@ -42,20 +43,27 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
   column!: ColumnManager;
   @state()
   dragLeft = 0;
+
+  private _bar = createRef<HTMLElement>();
   private _startDrag = (evt: MouseEvent) => {
-    const headerContainer = getHeaderContainer(this);
-    const tableContainer = headerContainer.parentElement;
+    const tableContainer = getTableContainer(this);
     const database = this.closest('affine-database');
+    const offsetParent = database?.offsetParent;
+    const bar = this._bar.value;
+    assertExists(bar);
     assertExists(database);
-    const rect = this.getBoundingClientRect();
-    assertExists(tableContainer);
+    assertExists(offsetParent);
+    const rect = bar.getBoundingClientRect();
+    const scale = rect.width / dragBarWidth;
     const tableRect = tableContainer.getBoundingClientRect();
-    const left = rect.left + this.left - this.column.width;
+    const left = rect.left + rect.width / 2 - this.column.width * scale - scale;
+
     const preview = createWidthAdjustPreview(
       database,
+      scale,
       this.column.width,
-      tableRect.height,
-      tableRect.top,
+      tableRect.height / scale,
+      tableRect.top - scale,
       left
     );
     tableContainer.style.pointerEvents = 'none';
@@ -63,7 +71,11 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
       onDrag: () => ({ width: this.column.width }),
       onMove: ({ x }) => {
         const width = Math.round(
-          getResultInRange(x - left, DEFAULT_COLUMN_MIN_WIDTH, Infinity)
+          getResultInRange(
+            (x - left) / scale,
+            DEFAULT_COLUMN_MIN_WIDTH,
+            Infinity
+          )
         );
         preview.display(width);
         return {
@@ -89,6 +101,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
     });
     return html`
       <div
+        ${ref(this._bar)}
         style=${style}
         class="column-width-drag-bar"
         @mousedown="${this._startDrag}"
@@ -101,6 +114,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
 
 const createWidthAdjustPreview = (
   container: Element,
+  scale: number,
   width: number,
   height: number,
   top: number,
@@ -117,8 +131,8 @@ const createWidthAdjustPreview = (
   const parent = div.offsetParent;
   assertExists(parent);
   const rect = parent.getBoundingClientRect();
-  const offsetLeft = left - rect.left;
-  const offsetTop = top - rect.top;
+  const offsetLeft = (left - rect.left) / scale;
+  const offsetTop = (top - rect.top) / scale;
   div.style.left = `${offsetLeft}px`;
   div.style.top = `${offsetTop}px`;
   return {
