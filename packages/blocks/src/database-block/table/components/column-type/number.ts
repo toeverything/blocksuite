@@ -77,12 +77,10 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     this._inputEle.setSelectionRange(end, end);
   };
 
-  private _blur = (e: Event) => {
-    if (!this._inputEle.value) {
-      return;
-    }
+  override exitEditMode() {
     this._setValue();
-  };
+    super.exitEditMode();
+  }
 
   private _setValue = (str: string = this._inputEle.value) => {
     const value = Number.parseFloat(str);
@@ -110,7 +108,6 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
   override render() {
     return html`<input
       .value="${this.value ?? ''}"
-      @blur="${this._blur}"
       @keydown="${this._keydown}"
       class="affine-database-number number"
     />`;
