@@ -814,7 +814,6 @@ export class Page extends Space<FlatBlockMap> {
     if (model.role === 'root') {
       this._root = model;
       this.slots.rootAdded.emit(this._root);
-      this.workspace.slots.pageAdded.emit(this.id);
       return;
     }
 
