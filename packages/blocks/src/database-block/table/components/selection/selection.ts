@@ -69,7 +69,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   isCurrentDatabaseTableBody(ele: Element): boolean {
-    console.log(ele.closest('.affine-database-block-rows'));
     return (
       ele.closest('affine-database') === this.closest('affine-database') &&
       !!ele.closest('.affine-database-block-rows')
