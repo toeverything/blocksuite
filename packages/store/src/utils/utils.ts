@@ -71,7 +71,6 @@ export function syncBlockProps(
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // https://github.com/toeverything/blocksuite/issues/2939
     if (value !== undefined) {
       if (Array.isArray(value) || isPureObject(value)) {
         yBlock.set(`prop:${key}`, native2Y(value, true));
