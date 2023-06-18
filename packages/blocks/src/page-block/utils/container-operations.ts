@@ -243,8 +243,8 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
-  const allTextUpdated = savedBlockRange?.models.map(
-    model => new Promise(resolve => onModelTextUpdated(model, resolve))
+  const allTextUpdated = savedBlockRange?.models.map(model =>
+    onModelTextUpdated(model)
   );
   if (allTextUpdated && savedBlockRange) {
     Promise.all(allTextUpdated).then(() => {
@@ -550,11 +550,14 @@ export function handleKeydownAfterSelectBlocks({
 }
 export async function onModelTextUpdated(
   model: BaseBlockModel,
-  callback: (text: RichText) => void
+  callback?: (text: RichText) => void
 ) {
+  console.log('onModelTextUpdated');
   const richText = await asyncGetRichTextByModel(model);
   richText?.vEditor?.slots.updated.once(() => {
-    callback(richText);
+    if (callback) {
+      callback(richText);
+    }
   });
 }
 
