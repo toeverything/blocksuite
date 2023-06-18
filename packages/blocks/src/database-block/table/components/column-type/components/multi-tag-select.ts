@@ -387,8 +387,6 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       } else {
         this._onAddSelection(selectedValue);
       }
-    } else if (event.key === 'Escape') {
-      this.editComplete();
     }
   };
 

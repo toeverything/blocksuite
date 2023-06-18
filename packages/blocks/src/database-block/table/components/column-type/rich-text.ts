@@ -220,8 +220,8 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
       }
       event.stopPropagation();
     } else {
-      this._setEditing(false);
-      this._container.blur();
+      // this._setEditing(false);
+      // this._container.blur();
     }
 
     if (!this.vEditor) return;
