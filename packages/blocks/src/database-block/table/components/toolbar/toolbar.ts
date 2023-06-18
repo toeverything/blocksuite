@@ -19,7 +19,10 @@ import { firstFilterByRef } from '../../../common/ast.js';
 import { columnManager } from '../../../common/column-manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
-import type { DatabaseBlockModel } from '../../../database-model.js';
+import type {
+  DatabaseBlockModel,
+  InsertPosition,
+} from '../../../database-model.js';
 import { onClickOutside } from '../../../utils/utils.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import { SearchState } from '../../types.js';
@@ -176,7 +179,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   view!: TableViewManager;
 
   @property()
-  addRow!: (index?: number) => void;
+  addRow!: (position: InsertPosition) => void;
 
   @property()
   setSearchState!: (state: SearchState) => void;
@@ -338,7 +341,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
-    this.addRow(0);
+    this.addRow('start');
   };
 
   private get _filter() {

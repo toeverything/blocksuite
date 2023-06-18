@@ -323,7 +323,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
           ></affine-database-title>
           <affine-database-toolbar
             .view="${tableViewManager}"
-            .addRow="${() => addRow('end')}"
+            .addRow="${addRow}"
             .targetModel="${this.model}"
             .hoverState="${this._hoverState}"
             .searchState="${this._searchState}"

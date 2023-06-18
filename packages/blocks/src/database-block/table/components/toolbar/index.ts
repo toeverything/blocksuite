@@ -1,12 +1,12 @@
 import { PlusIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { DisposableGroup } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { DragIndicator } from '../../../../components/drag-handle.js';
 import { Point, Rect } from '../../../../std.js';
+import type { InsertPosition } from '../../../database-model.js';
 
 @customElement('affine-database-new-record-preview')
 class NewRecordPreview extends ShadowlessElement {
@@ -46,10 +46,12 @@ class NewRecordPreview extends ShadowlessElement {
           caret-color: transparent;
           z-index: 100;
         }
+
         affine-database-new-record-preview svg {
           width: 16px;
           height: 16px;
         }
+
         affine-database-new-record-preview path {
           fill: var(--affine-brand-color);
         }
@@ -60,14 +62,14 @@ class NewRecordPreview extends ShadowlessElement {
 }
 
 export type ColumnConfig = {
-  index: number;
+  position?: InsertPosition;
   rows: HTMLElement[];
 };
 
 export function initAddNewRecordHandlers(
   element: HTMLElement,
   container: HTMLElement,
-  addRow: (index: number) => void
+  addRow: (position: InsertPosition) => void
 ) {
   let dragConfig: ColumnConfig | null = null;
   let dragPreview: NewRecordPreview | null = null;
@@ -104,7 +106,6 @@ export function initAddNewRecordHandlers(
       rowContainer.querySelectorAll<HTMLElement>('.affine-database-block-row')
     );
     dragConfig = {
-      index: -1,
       rows,
     };
   };
@@ -123,6 +124,7 @@ export function initAddNewRecordHandlers(
 
     const point = new Point(x, y);
     const row = getClosestRow(point, dragConfig.rows);
+    console.log(row);
     assertExists(indicator);
 
     if (row) {
@@ -131,16 +133,16 @@ export function initAddNewRecordHandlers(
       const { width: databaseWidth, left: databaseLeft } =
         database.getBoundingClientRect();
       indicator.rect = Rect.fromLWTH(databaseLeft, databaseWidth, rectTop, 3);
-      dragConfig.index = row.insertRowIndex;
+      dragConfig.position = row.position;
     } else {
       indicator.rect = null;
-      dragConfig.index = -1;
+      dragConfig.position = undefined;
     }
   };
 
   const onDragEnd = () => {
     if (!dragConfig) return;
-    const { index } = dragConfig;
+    const { position } = dragConfig;
     // clear data
     dragConfig = null;
     if (indicator) indicator.rect = null;
@@ -148,8 +150,8 @@ export function initAddNewRecordHandlers(
       dragPreview.remove();
       dragPreview = null;
     }
-    if (index !== -1) {
-      addRow(index);
+    if (position) {
+      addRow(position);
     }
   };
 
@@ -172,7 +174,7 @@ function getClosestRow(
   rows: HTMLElement[]
 ): {
   element: HTMLElement;
-  insertRowIndex: number;
+  position: InsertPosition;
   isLast: boolean;
 } | null {
   const length = rows.length;
@@ -183,7 +185,7 @@ function getClosestRow(
     if (point.y <= top + 20 && point.y >= top - 20) {
       return {
         element: row,
-        insertRowIndex: i,
+        position: { id: row.dataset.rowId ?? '', before: true },
         isLast: false,
       };
     }
@@ -193,7 +195,7 @@ function getClosestRow(
       if (point.y >= bottom - 20 && point.y <= bottom + 20) {
         return {
           element: row,
-          insertRowIndex: i + 1,
+          position: { id: row.dataset.rowId ?? '', before: false },
           isLast: true,
         };
       }

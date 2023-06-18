@@ -3,7 +3,6 @@ import '../declare-test-window.js';
 
 import type {
   CssVariableName,
-  DatabaseBlockModel,
   ListType,
   ThemeObserver,
 } from '@blocksuite/blocks';
