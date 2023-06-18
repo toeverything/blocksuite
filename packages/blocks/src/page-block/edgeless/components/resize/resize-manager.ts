@@ -342,9 +342,36 @@ export class HandleResizeManager {
           });
         };
       } else {
+        const fp = fixedPoint.matrixTransform(m0);
+        const m2 = new DOMMatrix()
+          .translateSelf(fp.x, fp.y)
+          .rotateSelf(_rotate)
+          .translateSelf(-fp.x, -fp.y)
+          .scaleSelf(scale.x, scale.y, 1, fp.x, fp.y, 0)
+          .translateSelf(fp.x, fp.y)
+          .rotateSelf(-_rotate)
+          .translateSelf(-fp.x, -fp.y);
+
         // TODO: on same rotate
         process = ({ bound: { x, y, w, h }, flip, rotate }, id) => {
-          console.log(123);
+          const cx = x + w / 2;
+          const cy = y + h / 2;
+          const center = new DOMPoint(cx, cy).matrixTransform(m2);
+          const newWidth = Math.abs(w * scale.x);
+          const newHeight = Math.abs(h * scale.y);
+
+          newBounds.set(id, {
+            bound: new Bound(
+              center.x - newWidth / 2,
+              center.y - newHeight / 2,
+              newWidth,
+              newHeight
+            ),
+            flip: {
+              x: flipX * flip.x,
+              y: flipY * flip.y,
+            },
+          });
         };
       }
     } else {
