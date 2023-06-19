@@ -21,14 +21,14 @@ export class FormatBarButton extends IconButton {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   override width: string | number = '32px';
 
-  @property()
+  @property({ attribute: false })
   override height: string | number = '32px';
 
   // TODO update color when active
-  @property()
+  @property({ attribute: false })
   active = false;
 
   private readonly _mousedown = (e: MouseEvent) => {

@@ -34,7 +34,18 @@
       "@blocksuite/virgo/*": ["./packages/virgo/src/*"],
       "@blocksuite/connector": ["./packages/connector/src"],
       "@blocksuite/connector/*": ["./packages/connector/src/*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "ts-lit-plugin",
+        "strict": true,
+        "rules": {
+          "no-incompatible-property-type": "error",
+          "no-invalid-css": "warning",
+          "no-incompatible-type-binding": "warning"
+        }
+      }
+    ]
   },
   "files": [],
   "references": [

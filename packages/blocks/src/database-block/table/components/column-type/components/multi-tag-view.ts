@@ -43,13 +43,13 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
   @query('.affine-database-select-cell-container')
   selectContainer!: HTMLElement;
 
-  @property()
+  @property({ attribute: false })
   value: string[] = [];
 
-  @property()
+  @property({ attribute: false })
   options: SelectTag[] = [];
 
-  @property()
+  @property({ attribute: false })
   setHeight?: (height: number) => void;
 
   protected override updated(_changedProperties: Map<string, unknown>) {

@@ -76,19 +76,19 @@ export class IconButton extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   size: string | number | null = null;
 
-  @property()
+  @property({ attribute: false })
   width: string | number = '28px';
 
-  @property()
+  @property({ attribute: false })
   height: string | number = '28px';
 
-  @property()
+  @property({ attribute: false })
   text: string | null = null;
 
-  @property()
+  @property({ attribute: false })
   disabled: false | '' = false;
 
   constructor() {

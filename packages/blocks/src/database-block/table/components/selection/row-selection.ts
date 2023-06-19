@@ -21,7 +21,7 @@ export class RowLevelSelection extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   container!: HTMLElement;
 
   @state()

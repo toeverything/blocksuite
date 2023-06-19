@@ -93,23 +93,23 @@ const titleColumnActions: TitleColumnAction[] = [
 export class EditColumnPopup extends LitElement {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   targetColumn!: Column | string;
 
   /** base on database column index */
-  @property()
+  @property({ attribute: false })
   columnIndex!: number;
 
-  @property()
+  @property({ attribute: false })
   closePopup!: () => void;
 
-  @property()
+  @property({ attribute: false })
   setTitleColumnEditId!: (columnId: string) => void;
 
-  @property()
+  @property({ attribute: false })
   insertColumn!: (position: ColumnInsertPosition) => void;
 
   @query('input')

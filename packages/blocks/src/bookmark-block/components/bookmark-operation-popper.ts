@@ -156,13 +156,13 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   root!: BookmarkBlockComponent;
 
-  @property()
+  @property({ attribute: false })
   onSelected?: MenuActionCallback;
 
   @query('.bookmark-bar')

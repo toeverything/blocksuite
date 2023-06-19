@@ -10,16 +10,16 @@ export abstract class LiteralElement<
   T = unknown,
   Type extends TType = TType
 > extends WithDisposable(ShadowlessElement) {
-  @property()
+  @property({ attribute: false })
   type!: Type;
 
-  @property()
+  @property({ attribute: false })
   value!: T;
 
-  @property()
+  @property({ attribute: false })
   onChange!: (value: T) => void;
 
-  @property()
+  @property({ attribute: false })
   mode: 'show' | 'edit' = 'show';
 
   showValue(): string {

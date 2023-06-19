@@ -108,10 +108,10 @@ export class EdgelessConnectorMenu extends LitElement {
     ${tooltipStyle}
   `;
 
-  @property()
+  @property({ attribute: false })
   mouseMode!: MouseMode;
 
-  @property()
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   private _setConnectorColor = (color: CssVariableName) => {

@@ -15,10 +15,10 @@ import { customElement, property } from 'lit/decorators.js';
  */
 @customElement('affine-portal')
 export class Portal extends LitElement {
-  @property()
+  @property({ attribute: false })
   public container = document.body;
 
-  @property()
+  @property({ attribute: false })
   public template = html``;
 
   private _portalRoot: HTMLElement | null = null;

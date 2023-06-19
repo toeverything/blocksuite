@@ -17,13 +17,13 @@ import { createDatabasePopup } from '../popup.js';
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
   static override styles = css``;
-  @property()
+  @property({ attribute: false })
   data!: SingleFilter;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: SingleFilter) => void;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
   @query('.filter-select')
   filterSelect!: HTMLElement;

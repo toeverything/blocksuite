@@ -97,13 +97,13 @@ const styles = css`
 export class ColumnTypePopup extends LitElement {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   columnType: ColumnType | undefined;
 
-  @property()
+  @property({ attribute: false })
   columnId!: string;
 
-  @property()
+  @property({ attribute: false })
   changeColumnType!: (columnId: string, type: ColumnType) => void;
 
   override render() {
