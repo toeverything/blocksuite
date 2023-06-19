@@ -42,7 +42,7 @@
         "rules": {
           "no-incompatible-property-type": "error",
           "no-invalid-css": "warning",
-          "no-incompatible-type-binding": "warning"
+          "no-incompatible-type-binding": "error"
         }
       }
     ]

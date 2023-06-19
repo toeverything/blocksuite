@@ -27,7 +27,7 @@
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "dev:docs": "pnpm --filter @blocksuite/docs dev",
     "lint": "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
-    "lit-lint": "pnpm lit-analyzer --quiet --strict=false --rules.no-incompatible-property-type=error --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
+    "lit-lint": "pnpm lit-analyzer --strict=false --rules.no-incompatible-property-type=error --rules.no-incompatible-type-binding=off --rules.no-invalid-css=off --rules.no-invalid-tag-name=off \"packages/**/*.ts\"",
     "test": "playwright test",
     "coverage:report": "nyc report -t .nyc_output --report-dir .coverage --reporter=html",
     "circular": "madge --circular ./packages/*/dist/index.js",

@@ -635,13 +635,13 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
                         cursor: isEditing ? 'text' : 'pointer',
                       })}
                       data-select-option-id="${select.id}"
-                      .page="${this.page}"
-                      .select="${select}"
-                      .editing="${isEditing}"
-                      .index="${index}"
-                      .tagId="${select.id}"
-                      .saveSelectionName="${this._onSaveSelectionName}"
-                      .setEditingId="${this._setEditingId}"
+                      .page=${this.page}
+                      .select=${select}
+                      .editing=${isEditing}
+                      .index=${index}
+                      .tagId=${select.id}
+                      .saveSelectionName=${this._onSaveSelectionName}
+                      .setEditingId=${this._setEditingId}
                     ></affine-database-select-option>
                   </div>
                   <div class="select-option-icon" @click="${onOptionIconClick}">
