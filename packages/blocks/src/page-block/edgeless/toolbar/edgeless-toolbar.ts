@@ -2,12 +2,12 @@ import '../components/tool-icon-button.js';
 import './shape-tool/shape-tool-button.js';
 import './brush-tool/brush-tool-button.js';
 import './connector-tool/connector-tool-button.js';
+import './note-tool/note-tool-button.js';
 
 import {
   HandIcon,
   ImageIcon,
   MinusIcon,
-  NoteIcon,
   PlusIcon,
   SelectIcon,
   TextIconLarge,
@@ -49,10 +49,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .edgeless-toolbar-container {
       display: flex;
       align-items: center;
-      height: 48px;
+      flex-direction: row;
+      padding: 0 20px;
+      height: 64px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
+      border-radius: 40px;
       fill: currentcolor;
     }
 
@@ -66,9 +68,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: none;
     }
 
-    .divider {
+    .short-divider {
       width: 1px;
       height: 24px;
+      margin: 0 7px;
+      background-color: var(--affine-border-color);
+    }
+
+    .full-divider {
+      width: 1px;
+      height: 100%;
       margin: 0 7px;
       background-color: var(--affine-border-color);
     }
@@ -299,6 +308,25 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
+          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
+          .active=${type === 'pan'}
+          @click=${() => this.setMouseMode({ type: 'pan', panning: false })}
+        >
+          ${HandIcon}
+        </edgeless-tool-icon-button>
+        <div class="short-divider"></div>
+        <edgeless-note-tool-button
+          .mouseMode=${this.mouseMode}
+          .edgeless=${this.edgeless}
+          .setMouseMode=${this.setMouseMode}
+        ></edgeless-note-tool-button>
+        <div class="full-divider"></div>
+        <edgeless-brush-tool-button
+          .mouseMode=${this.mouseMode}
+          .edgeless=${this.edgeless}
+          .setMouseMode=${this.setMouseMode}
+        ></edgeless-brush-tool-button>
+        <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Text', 'T')}
           .active=${type === 'text'}
           @click=${() => this.setMouseMode({ type: 'text' })}
@@ -322,29 +350,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setMouseMode=${this.setMouseMode}
         ></edgeless-connector-tool-button>
-        <edgeless-brush-tool-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
-        ></edgeless-brush-tool-button>
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
-          .active=${type === 'pan'}
-          @click=${() => this.setMouseMode({ type: 'pan', panning: false })}
-        >
-          ${HandIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Note', 'N')}
-          .active=${type === 'note'}
-          @click=${() =>
-            this.setMouseMode({
-              type: 'note',
-              background: DEFAULT_NOTE_COLOR,
-            })}
-        >
-          ${NoteIcon}
-        </edgeless-tool-icon-button>
         <div class="divider"></div>
         <edgeless-tool-icon-button
           .tooltip=${'Fit to screen'}
