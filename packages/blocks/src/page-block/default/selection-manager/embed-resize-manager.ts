@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 
 import type { IPoint } from '../../../__internal__/index.js';
 import { throttle } from '../../../__internal__/index.js';
