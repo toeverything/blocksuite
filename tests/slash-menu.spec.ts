@@ -559,7 +559,7 @@ test.describe('slash menu with customize menu', () => {
       if (!editor) throw new Error("Can't find editor-container");
       const defaultPage = editor.querySelector('affine-default-page');
       if (!defaultPage) throw new Error("Can't find affine-default-page");
-      const SlashMenu = defaultPage.components.SlashMenu;
+      const SlashMenu = defaultPage.components.slashMenu;
       if (!SlashMenu) throw new Error("Can't find SlashMenu");
       class CustomSlashMenu extends SlashMenu {
         override get menuGroups() {
@@ -569,7 +569,7 @@ test.describe('slash menu with customize menu', () => {
       // Fix `Illegal constructor` error
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('custom-slash-menu', CustomSlashMenu);
-      defaultPage.components.SlashMenu = CustomSlashMenu;
+      defaultPage.components.slashMenu = CustomSlashMenu;
     });
 
     const slashMenu = page.locator(`.slash-menu`);
@@ -590,7 +590,7 @@ test.describe('slash menu with customize menu', () => {
       if (!editor) throw new Error("Can't find editor-container");
       const defaultPage = editor.querySelector('affine-default-page');
       if (!defaultPage) throw new Error("Can't find affine-default-page");
-      const SlashMenu = defaultPage.components.SlashMenu;
+      const SlashMenu = defaultPage.components.slashMenu;
       if (!SlashMenu) throw new Error("Can't find SlashMenu");
       class CustomSlashMenu extends SlashMenu {
         override get menuGroups() {
@@ -616,7 +616,7 @@ test.describe('slash menu with customize menu', () => {
       // Fix `Illegal constructor` error
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
       customElements.define('custom-slash-menu', CustomSlashMenu);
-      defaultPage.components.SlashMenu = CustomSlashMenu;
+      defaultPage.components.slashMenu = CustomSlashMenu;
     });
 
     const slashMenu = page.locator(`.slash-menu`);

@@ -85,11 +85,11 @@ export function showSlashMenu({
   globalAbortController = abortController;
 
   const defaultPage = getPageBlock(model);
-  if (!defaultPage || !defaultPage.components.SlashMenu) {
+  if (!defaultPage || !defaultPage.components.slashMenu) {
     return;
   }
 
-  const slashMenu = new defaultPage.components.SlashMenu();
+  const slashMenu = new defaultPage.components.slashMenu();
   slashMenu.model = model;
   slashMenu.abortController = abortController;
 

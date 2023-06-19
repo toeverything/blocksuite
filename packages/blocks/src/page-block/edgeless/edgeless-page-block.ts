@@ -234,7 +234,7 @@ export class EdgelessPageBlockComponent
     toolbar: <EdgelessToolbar | null>null,
     zoomToolbar: <EdgelessZoomToolbar | null>null,
     zoomBarToggleButton: <ZoomBarToggleButton | null>null,
-    SlashMenu: <typeof SlashMenu | null>SlashMenu,
+    slashMenu: <typeof SlashMenu | null>SlashMenu,
   };
 
   mouseRoot!: HTMLElement;

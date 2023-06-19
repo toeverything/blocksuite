@@ -137,7 +137,7 @@ export class DefaultPageBlockComponent
    */
   components = {
     dragHandle: <DragHandle | null>null,
-    SlashMenu: <typeof SlashMenu | null>SlashMenu,
+    slashMenu: <typeof SlashMenu | null>SlashMenu,
   };
 
   mouseRoot!: HTMLElement;
