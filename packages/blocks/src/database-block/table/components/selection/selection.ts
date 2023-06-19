@@ -144,8 +144,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           selection.databaseId === this.databaseId &&
           event instanceof KeyboardEvent
         ) {
-          const result = this.onKeydown(selection, event);
-          return result;
+          return this.onKeydown(selection, event);
         }
         return false;
       }),
@@ -250,6 +249,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private onKeydown(selection: DatabaseSelection, evt: KeyboardEvent): boolean {
+    //TODO delete this stupid code
+    if (
+      !selection.isEditing &&
+      evt.key === 'a' &&
+      (evt.ctrlKey || evt.metaKey)
+    ) {
+      this.selection = undefined;
+      return false;
+    }
     const rowsSelection = selection.rowsSelection;
     if (evt.key === hotkeys.Backspace) {
       if (rowsSelection && !selection.columnsSelection) {
