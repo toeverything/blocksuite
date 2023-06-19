@@ -358,10 +358,10 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
     const img = {
       waitUploaded: html`<affine-image-block-loading-card
-        content="Delivering content..."
+        .content=${'Delivering content...'}
       ></affine-image-block-loading-card>`,
       loading: html`<affine-image-block-loading-card
-        content="Loading content..."
+        .content=${'Loading content...'}
       ></affine-image-block-loading-card>`,
       ready: html`<img src=${this._source} />`,
       failed: html`<affine-image-block-not-found-card></affine-image-block-not-found-card>`,
