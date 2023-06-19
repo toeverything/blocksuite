@@ -34,6 +34,7 @@ import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
+import { normalizeAngle } from '../utils.js'
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -283,6 +284,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       {
         bound: Bound;
         flip: IPoint;
+        rotate: number;
       }
     >
   ) => {
@@ -293,7 +295,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     let hasNotes = false;
 
-    newBounds.forEach(({ bound, flip }, id) => {
+    newBounds.forEach(({ bound, flip, rotate = 0 }, id) => {
       const element = selectedMap.get(id);
       if (!element) return;
 
@@ -313,6 +315,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
         });
       } else {
+        rotate = normalizeAngle(rotate);
+
         if (element instanceof TextElement) {
           const p = bound.h / element.h;
           bound.w = element.w * p;
@@ -321,12 +325,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             fontSize: element.fontSize * p,
             flipX: flip.x,
             flipY: flip.y,
+            rotate,
           });
         } else {
           surface.updateElement(id, {
             xywh: bound.serialize(),
             flipX: flip.x,
             flipY: flip.y,
+            rotate,
           });
         }
       }
@@ -376,10 +382,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       const c = new DOMPoint(cx, cy).matrixTransform(matrix);
 
-      rotate += delta;
-      // normalize angle to positive value
-      if (rotate < 0) rotate += 360;
-      rotate %= 360;
+      rotate = normalizeAngle(rotate + delta);
 
       surface.updateElement(id, {
         xywh: serializeXYWH(c.x - w / 2, c.y - h / 2, w, h),
@@ -389,9 +392,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
-    let angle = delta + _rotate;
-    if (delta < 0) angle += 360;
-    angle %= 360;
+    const angle = normalizeAngle(delta + _rotate);
 
     this._rotate = angle;
     this._selectedRect.style.setProperty('--rotate', `${angle}deg`);

@@ -134,3 +134,17 @@ export function readImageSize(file: File) {
     reader.readAsDataURL(file);
   });
 }
+
+export function normalizeAngle(angle: number) {
+  // if (angle < 0) {
+  //   return angle + 360;
+  // }
+  // if (angle >= 360) {
+  //   return angle - 360;
+  // }
+  // return angle;
+
+  if (angle < 0) angle += 360;
+  angle %= 360;
+  return angle;
+}

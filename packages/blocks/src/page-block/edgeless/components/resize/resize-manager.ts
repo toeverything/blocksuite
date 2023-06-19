@@ -14,6 +14,7 @@ type ResizeMoveHandler = (
     {
       bound: Bound;
       flip: IPoint;
+      rotate: number;
     }
   >,
   rect?: Bound
@@ -322,6 +323,7 @@ export class HandleResizeManager {
       {
         bound: Bound;
         flip: IPoint;
+        rotate: number;
       }
     >();
 
@@ -332,13 +334,14 @@ export class HandleResizeManager {
 
     if (isCorner) {
       if (this._bounds.size === 1) {
-        process = ({ flip }, id) => {
+        process = ({ flip, rotate = 0 }, id) => {
           newBounds.set(id, {
             bound: new Bound(x, y, width, height),
             flip: {
               x: flipX * flip.x,
               y: flipY * flip.y,
             },
+            rotate,
           });
         };
       } else {
@@ -353,7 +356,7 @@ export class HandleResizeManager {
           .translateSelf(-fp.x, -fp.y);
 
         // TODO: on same rotate
-        process = ({ bound: { x, y, w, h }, flip, rotate }, id) => {
+        process = ({ bound: { x, y, w, h }, flip, rotate = 0 }, id) => {
           const cx = x + w / 2;
           const cy = y + h / 2;
           const center = new DOMPoint(cx, cy).matrixTransform(m2);
@@ -371,6 +374,7 @@ export class HandleResizeManager {
               x: flipX * flip.x,
               y: flipY * flip.y,
             },
+            rotate: rotate * flipX * flipY,
           });
         };
       }
@@ -384,7 +388,7 @@ export class HandleResizeManager {
         fixedPoint.y,
         0
       );
-      process = ({ bound: { x, y, w, h }, flip, rotate }, id) => {
+      process = ({ bound: { x, y, w, h }, flip, rotate = 0 }, id) => {
         const cx = x + w / 2;
         const cy = y + h / 2;
 
@@ -441,6 +445,7 @@ export class HandleResizeManager {
             x: flipX * flip.x,
             y: flipY * flip.y,
           },
+          rotate,
         });
       };
     }
