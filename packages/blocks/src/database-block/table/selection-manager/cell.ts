@@ -3,7 +3,7 @@ import type {
   UIEventDispatcher,
   UIEventHandler,
   UIEventStateContext,
-} from '@blocksuite/lit';
+} from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/store';
 
 import { getService } from '../../../__internal__/service.js';

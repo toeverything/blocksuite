@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import {
   Bound,
   ConnectorElement,

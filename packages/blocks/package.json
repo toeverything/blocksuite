@@ -18,6 +18,7 @@
   "peerDependencies": {
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "yjs": "^13"
   },
   "dependencies": {
@@ -69,7 +70,9 @@
     }
   },
   "devDependencies": {
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.0.8",
     "@types/turndown": "^5.0.1",

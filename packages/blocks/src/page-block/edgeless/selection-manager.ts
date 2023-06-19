@@ -3,7 +3,7 @@ import type {
   PointerEventState,
   UIEventDispatcher,
   UIEventHandler,
-} from '@blocksuite/lit';
+} from '@blocksuite/block-std';
 import type { PhasorElement } from '@blocksuite/phasor';
 import { normalizeWheelDeltaY } from '@blocksuite/phasor';
 

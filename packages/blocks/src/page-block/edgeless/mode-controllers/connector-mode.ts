@@ -1,6 +1,6 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { Rectangle } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import { deserializeXYWH, StrokeStyle } from '@blocksuite/phasor';
 
 import type { ConnectorMouseMode } from '../../../__internal__/index.js';
