@@ -128,7 +128,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   @property({ attribute: false })
   page!: Page;
 
-  @property({ attribute: false })
+  @property()
   left: string | null = null;
 
   @property({ attribute: false })

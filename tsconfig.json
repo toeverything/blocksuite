@@ -38,12 +38,7 @@
     "plugins": [
       {
         "name": "ts-lit-plugin",
-        "strict": true,
-        "rules": {
-          "no-incompatible-property-type": "error",
-          "no-invalid-css": "warning",
-          "no-incompatible-type-binding": "error"
-        }
+        "strict": true
       }
     ]
   },

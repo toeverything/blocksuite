@@ -102,25 +102,25 @@ const isValidLink = (str: string) => {
 export class LinkPopover extends LitElement {
   static override styles = linkPopoverStyle;
 
-  @property({ attribute: false })
+  @property()
   left = '0';
 
-  @property({ attribute: false })
+  @property()
   top = '0';
 
-  @property({ attribute: false })
+  @property()
   type: 'create' | 'edit' = 'create';
 
-  @property({ attribute: false })
+  @property({ type: Boolean })
   showMask = true;
 
-  @property({ attribute: false })
+  @property()
   text = '';
 
-  @property({ attribute: false })
+  @property()
   previewLink = '';
 
-  @property({ attribute: false })
+  @property({ type: Boolean })
   showBookmarkOperation = false;
 
   @state()

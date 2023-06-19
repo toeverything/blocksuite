@@ -32,7 +32,7 @@ export class AffineImageBlockLoadingCard extends ShadowlessElement {
     }
   `;
 
-  @property({ attribute: false })
+  @property()
   content = 'Loading content...';
 
   override render() {
