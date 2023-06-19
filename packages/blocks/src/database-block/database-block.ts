@@ -4,7 +4,7 @@ import './kanban/kanban-view.js';
 import './common/database-view-header.js';
 
 import { BlockElement } from '@blocksuite/lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import { registerService } from '../__internal__/service.js';
@@ -20,6 +20,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.currentView = this.model.getViewList()[0].id;
   }
+
+  @property()
+  modalMode?: boolean;
 
   @state()
   currentView?: string;
@@ -50,6 +53,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           .root='${this.root}'
           .model='${this.model}'
           .view='${current}'
+          .modalMode=${this.modalMode}
           class='affine-block-element'
         ></${databaseTag}>
       </div>

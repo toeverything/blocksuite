@@ -2,11 +2,14 @@ import './toolbar-action-popup.js';
 import '../../../common/filter/filter-group.js';
 
 import {
+  DatabaseCompress,
+  DatabaseExpandWide,
   DatabaseSearchClose,
   DatabaseSearchIcon,
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { computePosition } from '@floating-ui/dom';
@@ -26,6 +29,8 @@ import type {
 import type { DatabaseBlockModel } from '../../../database-model.js';
 import { onClickOutside } from '../../../utils.js';
 import { SearchState } from '../../types.js';
+import { showDatabaseTableViewModal } from '../modal/index.js';
+import type { DatabaseTableViewModal } from '../modal/table-modal.js';
 import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';
 
@@ -167,6 +172,9 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property()
+  root!: BlockSuiteRoot;
+
+  @property()
   targetModel!: DatabaseBlockModel;
 
   @property()
@@ -180,6 +188,9 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   @property()
   view!: DatabaseViewDataMap['table'];
+
+  @property()
+  modalMode?: boolean;
 
   @property()
   addRow!: (index?: number) => void;
@@ -206,6 +217,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _toolbarAction!: ToolbarActionPopup | undefined;
   private _recordAddDisposables = new DisposableGroup();
+  private _tableViewModal: DatabaseTableViewModal | null = null;
 
   private get readonly() {
     return this.targetModel.page.readonly;
@@ -401,6 +413,21 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     popAdvance();
   }
 
+  private _onShowModalView = () => {
+    if (!this.modalMode) {
+      showDatabaseTableViewModal({
+        root: this.root,
+        model: this.targetModel,
+        page: this.targetModel.page,
+      });
+    } else {
+      const tableViewModal = document.querySelector<DatabaseTableViewModal>(
+        'affine-database-table-view-modal'
+      );
+      tableViewModal?.close();
+    }
+  };
+
   override render() {
     const expandSearch =
       this.searchState === SearchState.SearchInput ||
@@ -461,9 +488,15 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>
+      <div
+        class="affine-database-toolbar-item expand"
+        @click=${this._onShowModalView}
+      >
+        ${this.modalMode ? DatabaseCompress : DatabaseExpandWide}
+      </div>
       ${this.readonly
         ? null
-        : html` <div
+        : html`<div
               class="affine-database-toolbar-item more-action ${isActiveMoreAction
                 ? 'active'
                 : ''}"
