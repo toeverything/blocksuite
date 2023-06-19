@@ -72,4 +72,8 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
   onPressShiftKey(_: boolean) {
     noop();
   }
+
+  override afterMouseModeSwitch(): void {
+    noop();
+  }
 }

@@ -184,4 +184,8 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
   onPressShiftKey(_: boolean) {
     noop();
   }
+
+  override afterMouseModeSwitch(mode: ConnectorMouseMode): void {
+    noop();
+  }
 }

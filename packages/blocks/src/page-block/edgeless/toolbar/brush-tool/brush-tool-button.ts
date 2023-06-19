@@ -104,7 +104,7 @@ export class EdgelessBrushToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
+        .tooltip=${getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @click=${() => {
           this.setMouseMode({

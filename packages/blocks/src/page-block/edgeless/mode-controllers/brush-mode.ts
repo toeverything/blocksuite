@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { PointerEventState } from '@blocksuite/lit';
 
 import type { BrushMouseMode } from '../../../__internal__/index.js';
-import { noop } from '../../../__internal__/index.js';
+import { BrushSize, noop } from '../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/color-panel.js';
 import { MouseModeController } from './index.js';
 
@@ -98,5 +98,26 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
   onPressShiftKey(_: boolean) {
     noop();
+  }
+
+  override afterMouseModeSwitch(mode: BrushMouseMode) {
+    this._tryLoadBrushStateLocalRecord();
+  }
+
+  private _tryLoadBrushStateLocalRecord() {
+    const key = 'blocksuite:' + this._edgeless.page.id + ':edgelessBrush';
+    const brushData = sessionStorage.getItem(key);
+    if (brushData) {
+      try {
+        const { color, lineWidth } = JSON.parse(brushData);
+        this._edgeless.slots.mouseModeUpdated.emit({
+          type: 'brush',
+          color: color ?? 'black',
+          lineWidth: lineWidth ?? BrushSize.Thin,
+        });
+      } catch (e) {
+        noop();
+      }
+    }
   }
 }

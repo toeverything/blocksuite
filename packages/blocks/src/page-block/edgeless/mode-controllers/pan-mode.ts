@@ -68,4 +68,8 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
   onPressShiftKey(_: boolean) {
     noop();
   }
+
+  override afterMouseModeSwitch(mode: PanMouseMode): void {
+    noop();
+  }
 }
