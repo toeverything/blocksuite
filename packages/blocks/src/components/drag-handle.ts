@@ -1,10 +1,10 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
   type Disposable,
   isFirefox,
 } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render } from 'lit';

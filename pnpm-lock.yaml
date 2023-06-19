@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -131,6 +131,16 @@ importers:
         specifier: ^0.28.5
         version: 0.28.5(@vitest/ui@0.28.5)(happy-dom@9.20.3)
 
+  packages/block-std:
+    dependencies:
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
+    devDependencies:
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../store
+
   packages/blocks:
     dependencies:
       '@blocksuite/connector':
@@ -139,9 +149,6 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../lit
       '@blocksuite/phasor':
         specifier: workspace:*
         version: link:../phasor
@@ -179,6 +186,12 @@ importers:
         specifier: ^3.21.4
         version: 3.21.4
     devDependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../block-std
+      '@blocksuite/lit':
+        specifier: workspace:*
+        version: link:../lit
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
@@ -269,6 +282,9 @@ importers:
         specifier: ^2.7.3
         version: 2.7.3
     devDependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../block-std
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store

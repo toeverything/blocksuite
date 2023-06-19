@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/lit';
+import type { PointerEventState } from '@blocksuite/block-std';
 
 import type {
   MouseMode,

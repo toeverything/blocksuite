@@ -1,7 +1,7 @@
 {
-  "name": "@blocksuite/lit",
+  "name": "@blocksuite/block-std",
   "version": "0.6.0",
-  "description": "Lit renderer for blocksuite store",
+  "description": "Std for blocksuite blocks",
   "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -13,16 +13,13 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "peerDependencies": {
-    "@blocksuite/store": "workspace:*",
-    "@blocksuite/block-std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
-    "lit": "^2.7.3"
+    "@blocksuite/global": "workspace:*"
   },
   "devDependencies": {
-    "@blocksuite/store": "workspace:*",
-    "@blocksuite/block-std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
   },
   "exports": {
     ".": "./src/index.ts"
