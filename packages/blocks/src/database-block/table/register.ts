@@ -13,29 +13,29 @@ export abstract class DatabaseCellElement<
 > extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
-  @property()
+  @property({ attribute: false })
   root!: BlockSuiteRoot;
 
-  @property()
+  @property({ attribute: false })
   readonly!: boolean;
-  @property()
+  @property({ attribute: false })
   setHeight!: (height: number) => void;
 
-  @property()
+  @property({ attribute: false })
   updateColumnData!: (apply: (oldProperty: Data) => Partial<Data>) => void;
-  @property()
+  @property({ attribute: false })
   columnData!: Data;
-  @property()
+  @property({ attribute: false })
   value: Value | null = null;
-  @property()
+  @property({ attribute: false })
   onChange!: (value: Value | null, ops?: SetValueOption) => void;
 
-  @property()
+  @property({ attribute: false })
   isEditing!: boolean;
 
-  @property()
+  @property({ attribute: false })
   protected setEditing!: (editing: boolean) => void;
 
   protected _setEditing(editing: boolean) {

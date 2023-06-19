@@ -146,19 +146,19 @@ export class EdgelessChangeConnectorButton extends LitElement {
     `,
   ];
 
-  @property()
+  @property({ attribute: false })
   elements: ConnectorElement[] = [];
 
   @property({ type: Object })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @query('.connector-color-button')

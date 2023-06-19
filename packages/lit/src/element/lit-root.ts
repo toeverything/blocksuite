@@ -13,13 +13,13 @@ import { ShadowlessElement } from './shadowless-element.js';
 
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   componentMap!: Map<BlockSchemaType, StaticValue>;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   blockIdAttr = 'data-block-id';
 
   modelSubscribed = new Set<string>();

@@ -19,13 +19,13 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       padding: 0 2px;
     }
   `;
-  @property()
+  @property({ attribute: false })
   data?: VariableOrProperty;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: VariableOrProperty) => void;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
 
   get field() {

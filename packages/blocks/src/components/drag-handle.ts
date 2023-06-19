@@ -47,7 +47,7 @@ export class DragIndicator extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   rect: Rect | null = null;
 
   override render() {
@@ -66,7 +66,7 @@ export class DragIndicator extends LitElement {
 
 @customElement('affine-drag-preview')
 export class DragPreview extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   offset = { x: 0, y: 0 };
 
   override render() {

@@ -223,30 +223,30 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
 
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   mode: SelectMode = SelectMode.Single;
 
-  @property()
+  @property({ attribute: false })
   options: SelectTag[] = [];
 
-  @property()
+  @property({ attribute: false })
   value: string[] = [];
-  @property()
+  @property({ attribute: false })
   container!: HTMLElement;
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   onChange!: (value: string[]) => void;
 
-  @property()
+  @property({ attribute: false })
   editComplete!: () => void;
 
-  @property()
+  @property({ attribute: false })
   newTag!: (tag: SelectTag) => void;
-  @property()
+  @property({ attribute: false })
   deleteTag!: (id: string) => void;
-  @property()
+  @property({ attribute: false })
   changeTag!: (tag: SelectTag) => void;
 
   @query('.select-input')

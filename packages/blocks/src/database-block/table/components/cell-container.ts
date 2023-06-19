@@ -41,18 +41,18 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   @state()
   private _isEditing = false;
 
-  @property()
+  @property({ attribute: false })
   columnRenderer!: ColumnRendererHelper;
 
-  @property()
+  @property({ attribute: false })
   rowModel!: BaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   column!: TableMixColumn;
 
-  @property()
+  @property({ attribute: false })
   databaseModel!: DatabaseBlockModel;
-  @property()
+  @property({ attribute: false })
   root!: BlockSuiteRoot;
 
   private get readonly() {

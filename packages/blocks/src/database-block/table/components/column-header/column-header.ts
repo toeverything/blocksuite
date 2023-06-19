@@ -49,16 +49,16 @@ const columnTypeIconMap: ColumnTypeIcon = {
 export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   view!: DatabaseViewDataMap['table'];
 
-  @property()
+  @property({ attribute: false })
   columns!: TableMixColumn[];
 
-  @property()
+  @property({ attribute: false })
   addColumn!: (index: number) => string;
 
   get tableContainer(): HTMLElement {

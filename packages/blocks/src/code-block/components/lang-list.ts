@@ -110,7 +110,7 @@ export class LangList extends ShadowlessElement {
   @query('#filter-input')
   filterInput!: HTMLInputElement;
 
-  @property()
+  @property({ attribute: false })
   delay = 150;
 
   override async connectedCallback() {

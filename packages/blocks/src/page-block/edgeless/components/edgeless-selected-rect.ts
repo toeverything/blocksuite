@@ -162,7 +162,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @query('.affine-edgeless-selected-rect')
