@@ -19,6 +19,7 @@ import {
   redoByKeyboard,
   type,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertImageOption,
@@ -44,13 +45,16 @@ test('can drag resize image by left menu', async ({ page }) => {
   await assertImageSize(page, { width: 736, height: 552 });
 
   await dragEmbedResizeByTopLeft(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await waitNextFrame(page);
+  await assertImageSize(page, { width: 536, height: 402 });
 
   await undoByKeyboard(page);
+  await waitNextFrame(page);
   await assertImageSize(page, { width: 736, height: 552 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await waitNextFrame(page);
+  await assertImageSize(page, { width: 536, height: 402 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -63,13 +67,13 @@ test('can drag resize image by right menu', async ({ page }) => {
   await assertImageSize(page, { width: 736, height: 552 });
 
   await dragEmbedResizeByTopRight(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await assertImageSize(page, { width: 536, height: 402 });
 
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 736, height: 552 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await assertImageSize(page, { width: 536, height: 402 });
 });
 
 test('can click and delete image', async ({ page }) => {
@@ -227,16 +231,15 @@ async function initMockImage(page: Page) {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock('affine:page');
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
     page.addBlock(
-      'affine:embed',
+      'affine:image',
       {
-        type: 'image',
         sourceId: '_e2e_test_image_id_',
         width: 200,
         height: 180,
       },
-      frameId
+      noteId
     );
     page.captureSync();
   });

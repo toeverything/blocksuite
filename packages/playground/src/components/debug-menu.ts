@@ -258,7 +258,7 @@ export class DebugMenu extends ShadowlessElement {
     this._hasOffset = !this._hasOffset;
   }
 
-  private _addFrame() {
+  private _addNote() {
     const root = this.page.root;
     if (!root) return;
     const pageId = root.id;
@@ -268,8 +268,8 @@ export class DebugMenu extends ShadowlessElement {
     const count = root.children.length;
     const xywh = `[0,${count * 60},${EDITOR_WIDTH},480]`;
 
-    const frameId = this.page.addBlock('affine:frame', { xywh }, pageId);
-    this.page.addBlock('affine:paragraph', {}, frameId);
+    const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
+    this.page.addBlock('affine:paragraph', {}, noteId);
   }
 
   private _exportPdf() {
@@ -581,7 +581,7 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleConnection}>
                 ${this._connected ? 'Disconnect' : 'Connect'}
               </sl-menu-item>
-              <sl-menu-item @click=${this._addFrame}> Add Frame</sl-menu-item>
+              <sl-menu-item @click=${this._addNote}> Add Note</sl-menu-item>
               <sl-menu-item @click=${this._exportMarkDown}>
                 Export Markdown
               </sl-menu-item>

@@ -430,12 +430,31 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   private _onEditColumnTitle = (event: MouseEvent, columnId: string) => {
     event.stopPropagation();
+    // If the last clicked column header is being edited, save it first.
+    this._saveCurrentEditedTitle();
+
     this.setEditingColumnId(columnId);
   };
 
   private _onAddColumn = () => {
     if (this.readonly) return;
     this.addColumn(this.targetModel.columns.length);
+
+    // If the last clicked column header is being edited, save it first.
+    this._saveCurrentEditedTitle();
+  };
+
+  private _saveCurrentEditedTitle = () => {
+    if (this._editingColumnId !== '') {
+      const column = this.columns.find(
+        column => column.id === this._editingColumnId
+      );
+      if (column) {
+        this._saveColumnTitle('normal', column);
+      } else {
+        this._saveColumnTitle('title');
+      }
+    }
   };
 
   override render() {

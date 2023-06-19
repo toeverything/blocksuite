@@ -9,7 +9,7 @@ import type { PointerEventState } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
-import type { FrameBlockComponent } from '../../frame-block/index.js';
+import type { NoteBlockComponent } from '../../note-block/index.js';
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
@@ -153,8 +153,8 @@ export function focusBlockByModel(
   position: SelectionPosition = 'end',
   zoom = 1
 ) {
-  if (matchFlavours(model, ['affine:frame', 'affine:page'])) {
-    throw new Error("Can't focus frame or page!");
+  if (matchFlavours(model, ['affine:note', 'affine:page'])) {
+    throw new Error("Can't focus note or page!");
   }
 
   const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
@@ -165,7 +165,7 @@ export function focusBlockByModel(
   if (
     isPageMode &&
     matchFlavours(model, [
-      'affine:embed',
+      'affine:image',
       'affine:divider',
       'affine:code',
       'affine:database',
@@ -344,7 +344,7 @@ export function getCurrentNativeRange(selection = window.getSelection()) {
   return selection.getRangeAt(0);
 }
 
-function handleInFrameDragMove(
+function handleInNoteDragMove(
   startContainer: Node,
   startOffset: number,
   endContainer: Node,
@@ -378,28 +378,28 @@ export function handleNativeRangeDragMove(
       ? startContainer.parentElement
       : startContainer
   ) as HTMLElement;
-  const startFrame = _startContainer.closest('affine-frame');
-  if (!startFrame) return;
+  const startNote = _startContainer.closest('affine-note');
+  if (!startNote) return;
 
-  let currentFrame: FrameBlockComponent | null | undefined = null;
+  let currentNote: NoteBlockComponent | null | undefined = null;
   let shouldUpdateCurrentRange = false;
 
   if (isEdgelessMode) {
-    currentFrame = startFrame;
+    currentNote = startNote;
     shouldUpdateCurrentRange = true;
   } else {
     const el = document.elementFromPoint(x, y);
     if (el?.classList.contains('virgo-editor')) {
       return;
     }
-    currentFrame = el?.closest('affine-frame');
+    currentNote = el?.closest('affine-note');
     const currentEditor = el?.closest('.virgo-editor');
     // if we are not pointing at an editor, we should update the current range
-    // if we are not even pointing at a frame, we should find one and update the current range
-    shouldUpdateCurrentRange = !currentFrame || !currentEditor;
-    currentFrame ??= getClosestFrame(y);
+    // if we are not even pointing at a note, we should find one and update the current range
+    shouldUpdateCurrentRange = !currentNote || !currentEditor;
+    currentNote ??= getClosestNote(y);
   }
-  if (!currentFrame) return;
+  if (!currentNote) return;
 
   if (shouldUpdateCurrentRange) {
     let closestEditor: Element | null = null;
@@ -408,7 +408,7 @@ export function handleNativeRangeDragMove(
       closestEditor = (target as HTMLElement).closest('.virgo-editor');
     }
     if (!closestEditor) {
-      closestEditor = getClosestEditor(y, currentFrame);
+      closestEditor = getClosestEditor(y, currentNote);
     }
     if (!closestEditor) return;
 
@@ -416,12 +416,12 @@ export function handleNativeRangeDragMove(
     currentRange = caretRangeFromPoint(newPoint.x, newPoint.y);
     if (!currentRange) return;
     if (currentRange.endContainer.nodeType !== Node.TEXT_NODE) return;
-    if (!currentFrame.contains(currentRange.endContainer)) return;
+    if (!currentNote.contains(currentRange.endContainer)) return;
   }
 
   // Forward: ↓ →, Backward: ← ↑
   const isBackward = currentRange.comparePoint(endContainer, endOffset) === 1;
-  handleInFrameDragMove(
+  handleInNoteDragMove(
     startContainer,
     startOffset,
     endContainer,
@@ -466,7 +466,7 @@ export function isBlankArea(e: PointerEventState) {
 }
 
 // Retarget selection back to the nearest block
-// when user clicks on the edge of page (page mode) or frame (edgeless mode).
+// when user clicks on the edge of page (page mode) or note (edgeless mode).
 // See https://github.com/toeverything/blocksuite/pull/878
 function retargetClick(
   page: Page,
@@ -482,7 +482,7 @@ function retargetClick(
   if (!parentModel) return;
 
   const shouldRetarget = matchFlavours(parentModel, [
-    'affine:frame',
+    'affine:note',
     'affine:page',
   ]);
   if (!shouldRetarget) return;
@@ -928,10 +928,10 @@ export function getClosestBlock(clientY: number, container = document.body) {
 }
 
 /**
- * Get the closest frame element in the horizontal position
+ * Get the closest note element in the horizontal position
  */
-export function getClosestFrame(clientY: number) {
-  return getHorizontalClosestElement(clientY, 'affine-frame');
+export function getClosestNote(clientY: number) {
+  return getHorizontalClosestElement(clientY, 'affine-note');
 }
 
 /**

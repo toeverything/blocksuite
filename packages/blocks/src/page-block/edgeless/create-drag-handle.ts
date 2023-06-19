@@ -8,8 +8,8 @@ import {
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
-  getClosestFrameBlockElementById,
-  getHoveringFrame,
+  getClosestNoteBlockElementById,
+  getHoveringNote,
   getModelByBlockElement,
   getRectByBlockElement,
   isInSamePath,
@@ -42,16 +42,16 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         if (models.length === 1 && isInSamePath(page, model, models[0])) return;
 
         const focusId = models[0].id;
-        const targetFrameBlock = getClosestFrameBlockElementById(
+        const targetNoteBlock = getClosestNoteBlockElementById(
           model.id,
           pageBlock
         ) as BlockComponentElement;
-        assertExists(targetFrameBlock);
-        const frameBlock = getClosestFrameBlockElementById(
+        assertExists(targetNoteBlock);
+        const noteBlock = getClosestNoteBlockElementById(
           focusId,
           pageBlock
         ) as BlockComponentElement;
-        assertExists(frameBlock);
+        assertExists(noteBlock);
 
         page.captureSync();
 
@@ -63,7 +63,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
           page.moveBlocks(models, parent, model, type === 'before');
         }
 
-        pageBlock.setSelection(targetFrameBlock.model.id, true, focusId, point);
+        pageBlock.setSelection(targetNoteBlock.model.id, true, focusId, point);
         return;
       }
       // blank area
@@ -79,10 +79,10 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
         m => m.id === models[models.length - 1].id
       );
 
-      pageBlock.moveBlocksWithNewFrame(models, point, {
+      pageBlock.moveBlocksWithNewNote(models, point, {
         rect: getRectByBlockElement(blockElementsExcludeSubtrees[0]),
         focus: true,
-        frameIndex: firstModelIndex === 0 ? 0 : undefined,
+        noteIndex: firstModelIndex === 0 ? 0 : undefined,
       });
 
       if (
@@ -95,7 +95,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
 
         assertExists(nextFirstBlockElement);
         const nextFirstBlockRect = getRectByBlockElement(nextFirstBlockElement);
-        pageBlock.moveBlocksWithNewFrame(
+        pageBlock.moveBlocksWithNewNote(
           parent?.children.slice(lastModelIndex),
           new Point(nextFirstBlockRect.x, nextFirstBlockRect.y),
           { rect: nextFirstBlockRect }
@@ -124,11 +124,11 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     },
     getClosestBlockElement(point: Point) {
       if (pageBlock.mouseMode.type !== 'default') return null;
-      const hoveringFrame = getHoveringFrame(point);
-      if (!hoveringFrame) return null;
+      const hoveringNote = getHoveringNote(point);
+      if (!hoveringNote) return null;
       return getClosestBlockElementByPoint(
         point,
-        { container: hoveringFrame, rect: Rect.fromDOM(hoveringFrame) },
+        { container: hoveringNote, rect: Rect.fromDOM(hoveringNote) },
         pageBlock.surface.viewport.zoom
       );
     },

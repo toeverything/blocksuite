@@ -4,12 +4,11 @@
 import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it } from 'vitest';
-import { ac } from 'vitest/dist/types-0373403c';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
-import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
+import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { BaseBlockModel, Page } from '../index.js';
@@ -26,7 +25,7 @@ export const BlockSchemas = [
   ParagraphBlockSchema,
   PageBlockSchema,
   ListBlockSchema,
-  FrameBlockSchema,
+  NoteBlockSchema,
   DividerBlockSchema,
 ];
 
@@ -139,14 +138,14 @@ describe('addBlock', () => {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    page.addBlock('affine:paragraph', {}, frameId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    page.addBlock('affine:paragraph', {}, noteId);
     page.addBlocks(
       [
         { flavour: 'affine:paragraph', blockProps: { type: 'h1' } },
         { flavour: 'affine:paragraph', blockProps: { type: 'h2' } },
       ],
-      frameId
+      noteId
     );
 
     assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
@@ -158,7 +157,7 @@ describe('addBlock', () => {
       },
       '1': {
         'sys:children': ['2', '3', '4'],
-        'sys:flavour': 'affine:frame',
+        'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
@@ -203,11 +202,11 @@ describe('addBlock', () => {
   it('can add block to root', async () => {
     const page = await createTestPage();
 
-    let frameId: string;
+    let noteId: string;
 
     queueMicrotask(() => {
       const pageId = page.addBlock('affine:page');
-      frameId = page.addBlock('affine:frame', {}, pageId);
+      noteId = page.addBlock('affine:note', {}, pageId);
     });
     await waitOnce(page.slots.rootAdded);
     const { root } = page;
@@ -215,8 +214,9 @@ describe('addBlock', () => {
 
     assert.equal(root.flavour, 'affine:page');
 
-    page.addBlock('affine:paragraph', {}, frameId);
-    assert.equal(root.children[0].flavour, 'affine:frame');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    page.addBlock('affine:paragraph', {}, noteId!);
+    assert.equal(root.children[0].flavour, 'affine:note');
     assert.equal(root.children[0].children[0].flavour, 'affine:paragraph');
     assert.equal(root.childMap.get('1'), 0);
 
@@ -276,8 +276,10 @@ describe('addBlock', () => {
       called = true;
     });
 
+    // @ts-ignore
     workspace.setPageMeta('page0', { favorite: true });
     assert.deepEqual(
+      // @ts-ignore
       workspace.meta.pageMetas.map(({ id, title, favorite }) => ({
         id,
         title,
@@ -331,9 +333,9 @@ describe('deleteBlock', () => {
   it('can delete model with parent', async () => {
     const page = await createTestPage();
     const root = createRoot(page);
-    const frameId = page.addBlock('affine:frame', {}, root.id);
+    const noteId = page.addBlock('affine:note', {}, root.id);
 
-    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, noteId);
 
     // before delete
     assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
@@ -345,7 +347,7 @@ describe('deleteBlock', () => {
       },
       '1': {
         'sys:children': ['2'],
-        'sys:flavour': 'affine:frame',
+        'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
@@ -372,7 +374,7 @@ describe('deleteBlock', () => {
       },
       '1': {
         'sys:children': [],
-        'sys:flavour': 'affine:frame',
+        'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
@@ -387,10 +389,10 @@ describe('getBlock', () => {
   it('can get block by id', async () => {
     const page = await createTestPage();
     const root = createRoot(page);
-    const frameId = page.addBlock('affine:frame', {}, root.id);
+    const noteId = page.addBlock('affine:note', {}, root.id);
 
-    page.addBlock('affine:paragraph', {}, frameId);
-    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, noteId);
 
     const text = page.getBlockById('3') as BaseBlockModel;
     assert.equal(text.flavour, 'affine:paragraph');
@@ -403,10 +405,10 @@ describe('getBlock', () => {
   it('can get parent', async () => {
     const page = await createTestPage();
     const root = createRoot(page);
-    const frameId = page.addBlock('affine:frame', {}, root.id);
+    const noteId = page.addBlock('affine:note', {}, root.id);
 
-    page.addBlock('affine:paragraph', {}, frameId);
-    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, noteId);
 
     const result = page.getParent(
       root.children[0].children[1]
@@ -420,10 +422,10 @@ describe('getBlock', () => {
   it('can get previous sibling', async () => {
     const page = await createTestPage();
     const root = createRoot(page);
-    const frameId = page.addBlock('affine:frame', {}, root.id);
+    const noteId = page.addBlock('affine:note', {}, root.id);
 
-    page.addBlock('affine:paragraph', {}, frameId);
-    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, noteId);
 
     const result = page.getPreviousSibling(
       root.children[0].children[1]
@@ -468,13 +470,13 @@ describe('workspace.exportJSX works', () => {
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    page.addBlock('affine:paragraph', {}, frameId);
-    page.addBlock('affine:paragraph', {}, frameId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, noteId);
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
-        <affine:frame
+        <affine:note
           prop:background="--affine-background-secondary-color"
           prop:index="a0"
         >
@@ -484,7 +486,7 @@ describe('workspace.exportJSX works', () => {
           <affine:paragraph
             prop:type="text"
           />
-        </affine:frame>
+        </affine:note>
       </affine:page>
     `);
   });

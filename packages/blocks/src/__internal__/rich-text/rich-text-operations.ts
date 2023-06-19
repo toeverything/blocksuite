@@ -223,61 +223,52 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
   if (!models.length) return;
-  const previousSibling = page.getPreviousSibling(models[0]);
-  const nextSibling = page.getNextSibling(models.at(-1) as BaseBlockModel);
 
-  if (!previousSibling || !supportsChildren(previousSibling)) {
-    // Bottom, can not indent, do nothing
-    return;
-  }
-  if (
-    !models.every((model, idx, array) => {
-      const previousModel = array.at(idx - 1);
-      if (!previousModel) {
-        return false;
-      }
-      const p1 = page.getParent(model);
-      const p2 = page.getParent(previousModel);
-      return p1 && p2 && p1.id === p2.id;
-    })
-  ) {
-    return;
-  }
-  page.captureSync();
-  const parent = page.getParent(models[0]);
-  assertExists(parent);
-  models.forEach(model => {
-    // 1. backup target block children and remove them from target block
-    const children = model.children;
-    page.updateBlock(model, {
-      children: [],
-    });
-
-    // 2. remove target block from parent block
-    page.updateBlock(parent, {
-      children: parent.children.filter(child => child.id !== model.id),
-    });
-
-    // 3. append target block and children to previous sibling block
-    page.updateBlock(previousSibling, {
-      children: [...previousSibling.children, model, ...children],
-    });
-
-    // 4. If the target block is a numbered list, update the prefix of next siblings
-    if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
-      let next = nextSibling;
-      while (
-        next &&
-        matchFlavours(next, ['affine:list']) &&
-        model.type === 'numbered'
-      ) {
-        page.updateBlock(next, {});
-        next = page.getNextSibling(next);
-      }
+  // Find the first model that can be indented
+  let firstIndentIndex = -1;
+  let previousSibling: BaseBlockModel | null = null;
+  for (let i = 0; i < models.length; i++) {
+    previousSibling = page.getPreviousSibling(models[i]);
+    if (previousSibling && supportsChildren(previousSibling)) {
+      firstIndentIndex = i;
+      break;
     }
+  }
 
-    assertExists(model);
-    asyncSetVRange(model, { index: 0, length: 0 });
+  // No model can be indented
+  if (firstIndentIndex === -1) return;
+
+  page.captureSync();
+  // Models waiting to be indented
+  const indentModels = models.slice(firstIndentIndex);
+  indentModels.forEach(model => {
+    const parent = page.getParent(model);
+    assertExists(parent);
+    // Only indent the model which parent is not in the `indentModels`
+    // When parent is in the `indentModels`, it means the parent has been indented
+    // And the model should be indented with its parent
+    if (!indentModels.includes(parent)) {
+      previousSibling = page.getPreviousSibling(model);
+      // If previous sibling is not found or does not support children
+      // Handle next model
+      if (!previousSibling || !supportsChildren(previousSibling)) {
+        return;
+      }
+      // If previous sibling is found and supports children, indent the model by following steps
+      // 1. Remove model from parent
+      const remainingChildren = parent.children.filter(
+        child => child.id !== model.id
+      );
+      page.updateBlock(parent, {
+        children: remainingChildren,
+      });
+      // 2. Add model to previous sibling
+      page.updateBlock(previousSibling as BaseBlockModel, {
+        children: [...(previousSibling as BaseBlockModel).children, model],
+      });
+
+      asyncSetVRange(model, { index: 0, length: 0 });
+    }
   });
 }
 
@@ -306,7 +297,7 @@ export function handleUnindent(
   capture = true
 ) {
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:frame'])) {
+  if (!parent || matchFlavours(parent, ['affine:note'])) {
     // Topmost, do nothing
     return;
   }
@@ -360,6 +351,36 @@ export function handleUnindent(
   asyncSetVRange(model, { index: offset, length: 0 });
 }
 
+export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
+  if (!models.length) return;
+
+  // Find the first model that can be unindented
+  let firstUnindentIndex = -1;
+  let firstParent: BaseBlockModel | null;
+  for (let i = 0; i < models.length; i++) {
+    firstParent = page.getParent(models[i]);
+    if (firstParent && !matchFlavours(firstParent, ['affine:note'])) {
+      firstUnindentIndex = i;
+      break;
+    }
+  }
+
+  // Find all the models that can be unindented
+  const unindentModels = models.slice(firstUnindentIndex);
+  // Form bottom to top
+  // Only unindent the models which parent is not in the unindentModels
+  // When parent is in the unindentModels
+  // It means that children will be unindented with their parent
+  for (let i = unindentModels.length - 1; i >= 0; i--) {
+    const model = unindentModels[i];
+    const parent = page.getParent(model);
+    assertExists(parent);
+    if (!unindentModels.includes(parent)) {
+      handleUnindent(page, model);
+    }
+  }
+}
+
 // When deleting at line start of a code block,
 // select the code block itself
 function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
@@ -369,7 +390,21 @@ function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
   return true;
 }
 
+// When deleting at line end of a code block,
+// do nothing
+function handleCodeBlockForwardDelete(page: Page, model: ExtendedModel) {
+  if (!matchFlavours(model, ['affine:code'])) return false;
+  return true;
+}
+
 function handleDatabaseBlockBackspace(page: Page, model: ExtendedModel) {
+  if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
+    return false;
+
+  return true;
+}
+
+function handleDatabaseBlockForwardDelete(page: Page, model: ExtendedModel) {
   if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
     return false;
 
@@ -397,6 +432,73 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
   return true;
 }
 
+// When deleting at line end of a list block,
+// check current block's children and siblings
+/**
+ * Example:
+- Line1  <-(cursor here)
+    - Line2
+        - Line3
+        - Line4
+    - Line5
+        - Line6
+- Line7
+    - Line8
+- Line9
+ */
+function handleListBlockForwardDelete(page: Page, model: ExtendedModel) {
+  if (!matchFlavours(model, ['affine:list'])) return false;
+  const firstChild = model.firstChild();
+  if (firstChild) {
+    model.text?.join(firstChild.text as Text);
+    const grandChildren = firstChild.children;
+    if (grandChildren) {
+      page.moveBlocks(grandChildren, model);
+      page.deleteBlock(firstChild);
+      return true;
+    } else {
+      page.deleteBlock(firstChild);
+      return true;
+    }
+  } else {
+    const nextSibling = page.getNextSibling(model);
+    if (nextSibling) {
+      model.text?.join(nextSibling.text as Text);
+      if (nextSibling.children) {
+        const parent = page.getParent(nextSibling);
+        if (!parent) return false;
+        page.moveBlocks(nextSibling.children, parent, model, false);
+        page.deleteBlock(nextSibling);
+        return true;
+      } else {
+        page.deleteBlock(nextSibling);
+        return true;
+      }
+    } else {
+      const nextBlock = getNextBlock(model);
+      if (!nextBlock) {
+        // do nothing
+        return true;
+      }
+      model.text?.join(nextBlock.text as Text);
+      if (nextBlock.children) {
+        const parent = page.getParent(nextBlock);
+        if (!parent) return false;
+        page.moveBlocks(
+          nextBlock.children,
+          parent,
+          page.getParent(model),
+          false
+        );
+        page.deleteBlock(nextBlock);
+        return true;
+      } else {
+        page.deleteBlock(nextBlock);
+        return true;
+      }
+    }
+  }
+}
 function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   function handleParagraphOrListSibling(
     page: Page,
@@ -432,7 +534,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     if (
       !previousSibling ||
       !matchFlavours(previousSibling, [
-        'affine:embed',
+        'affine:image',
         'affine:divider',
         'affine:code',
       ] as const)
@@ -484,7 +586,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     } else {
       return handleNoPreviousSibling(page, model, previousSibling);
     }
-  } else if (matchFlavours(parent, ['affine:frame'])) {
+  } else if (matchFlavours(parent, ['affine:note'])) {
     return (
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
       handleEmbedDividerCodeSibling(page, model, previousSibling) ||
@@ -523,9 +625,147 @@ function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
   return true;
 }
 
+function handleParagraphBlockForwardDelete(page: Page, model: ExtendedModel) {
+  function handleParagraphOrList(
+    page: Page,
+    model: ExtendedModel,
+    nextSibling: ExtendedModel | null,
+    firstChild: ExtendedModel | null
+  ) {
+    function handleParagraphOrListSibling(
+      page: Page,
+      model: ExtendedModel,
+      nextSibling: ExtendedModel | null
+    ) {
+      if (
+        nextSibling &&
+        matchFlavours(nextSibling, ['affine:paragraph', 'affine:list'])
+      ) {
+        model.text?.join(nextSibling.text as Text);
+        if (nextSibling.children) {
+          const parent = page.getParent(nextSibling);
+          if (!parent) return false;
+          page.moveBlocks(nextSibling.children, parent, model, false);
+          page.deleteBlock(nextSibling);
+          return true;
+        } else {
+          page.deleteBlock(nextSibling);
+          return true;
+        }
+      } else {
+        const nextBlock = getNextBlock(model);
+        if (
+          !nextBlock ||
+          !matchFlavours(nextBlock, ['affine:paragraph', 'affine:list'])
+        )
+          return false;
+        model.text?.join(nextBlock.text as Text);
+        if (nextBlock.children) {
+          const parent = page.getParent(nextBlock);
+          if (!parent) return false;
+          page.moveBlocks(
+            nextBlock.children,
+            parent,
+            page.getParent(model),
+            false
+          );
+          page.deleteBlock(nextBlock);
+          return true;
+        } else {
+          page.deleteBlock(nextBlock);
+          return true;
+        }
+      }
+    }
+    function handleParagraphOrListChild(
+      page: Page,
+      model: ExtendedModel,
+      firstChild: ExtendedModel | null
+    ) {
+      if (
+        !firstChild ||
+        !matchFlavours(firstChild, ['affine:paragraph', 'affine:list'])
+      ) {
+        return false;
+      }
+      const grandChildren = firstChild.children;
+      model.text?.join(firstChild.text as Text);
+      if (grandChildren) {
+        page.moveBlocks(grandChildren, model);
+      }
+      page.deleteBlock(firstChild);
+      return true;
+    }
+    const nextBlock = getNextBlock(model);
+    if (!firstChild && !nextBlock) return true;
+    return (
+      handleParagraphOrListChild(page, model, firstChild) ||
+      handleParagraphOrListSibling(page, model, nextSibling)
+    );
+  }
+  function handleEmbedDividerCode(
+    nextSibling: ExtendedModel | null,
+    firstChild: ExtendedModel | null
+  ) {
+    function handleEmbedDividerCodeChild(firstChild: ExtendedModel | null) {
+      if (
+        !firstChild ||
+        !matchFlavours(firstChild, [
+          'affine:image',
+          'affine:divider',
+          'affine:code',
+        ])
+      )
+        return false;
+      focusBlockByModel(firstChild);
+      return true;
+    }
+    function handleEmbedDividerCodeSibling(nextSibling: ExtendedModel | null) {
+      if (
+        !nextSibling ||
+        !matchFlavours(nextSibling, [
+          'affine:image',
+          'affine:divider',
+          'affine:code',
+        ])
+      )
+        return false;
+      focusBlockByModel(nextSibling);
+      return true;
+    }
+    return (
+      handleEmbedDividerCodeChild(firstChild) ||
+      handleEmbedDividerCodeSibling(nextSibling)
+    );
+  }
+
+  if (!matchFlavours(model, ['affine:paragraph'])) return false;
+
+  const parent = page.getParent(model);
+  if (!parent) return false;
+  const nextSibling = page.getNextSibling(model);
+  const firstChild = model.firstChild();
+  if (matchFlavours(parent, ['affine:database'])) {
+    // TODO
+    return false;
+  } else {
+    return (
+      handleParagraphOrList(page, model, nextSibling, firstChild) ||
+      handleEmbedDividerCode(nextSibling, firstChild)
+    );
+  }
+}
+
 function handleUnknownBlockBackspace(model: ExtendedModel) {
   throw new Error(
     'Failed to handle backspace! Unknown block flavours! flavour:' +
+      model.flavour
+  );
+}
+
+function handleUnknownBlockForwardDelete(model: ExtendedModel) {
+  throw new Error(
+    'Failed to handle forwarddelete! Unknown block flavours! flavour:' +
       model.flavour
   );
 }
@@ -543,6 +783,18 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   handleUnknownBlockBackspace(model);
 }
 
+export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
+  if (
+    handleCodeBlockForwardDelete(page, model) ||
+    handleListBlockForwardDelete(page, model) ||
+    handleParagraphBlockForwardDelete(page, model)
+  ) {
+    handleDatabaseBlockForwardDelete(page, model);
+    return;
+  }
+  handleUnknownBlockForwardDelete(model);
+}
+
 export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:paragraph'])) return;
   const pageElement = getDefaultPage(page);
@@ -552,16 +804,16 @@ export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   }
   const titleVEditor = pageElement.titleVEditor;
   const parent = page.getParent(model);
-  if (parent && matchFlavours(parent, ['affine:frame'])) {
+  if (parent && matchFlavours(parent, ['affine:note'])) {
     const paragraphIndex = parent.children.indexOf(model);
     if (paragraphIndex === 0) {
-      const frameParent = page.getParent(parent);
-      if (frameParent && matchFlavours(frameParent, ['affine:page'])) {
-        const frameIndex = frameParent.children
+      const noteParent = page.getParent(parent);
+      if (noteParent && matchFlavours(noteParent, ['affine:page'])) {
+        const noteIndex = noteParent.children
           // page block may contain other blocks like surface
-          .filter(block => matchFlavours(block, ['affine:frame']))
+          .filter(block => matchFlavours(block, ['affine:note']))
           .indexOf(parent);
-        if (frameIndex === 0) {
+        if (noteIndex === 0) {
           titleVEditor.focusEnd();
           return;
         }

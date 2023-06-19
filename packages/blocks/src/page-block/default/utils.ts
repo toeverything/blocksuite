@@ -28,12 +28,12 @@ import {
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
-import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import type { ImageBlockModel } from '../../image-block/image-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
-  if (block.flavour === 'affine:embed' && block.type === 'image') return true;
+  if (block.flavour === 'affine:image') return true;
   return false;
 }
 
@@ -50,7 +50,7 @@ function getBlockWithOptionBarRect(
     ) as HTMLElement;
     assertExists(codeBlockDom);
     return codeBlockDom;
-  } else if (block.flavour === 'affine:embed' && block.type === 'image') {
+  } else if (block.flavour === 'affine:image' && block.type === 'image') {
     const imgElement = hoverDom.querySelector(
       '.resizable-img'
     ) as HTMLDivElement;
@@ -65,7 +65,7 @@ function getDetectRect(block: BaseBlockModel, blockRect: DOMRect): DOMRect {
   // there is a optionBar on the right side
   if (block.flavour === 'affine:code') {
     detectRect.width += 52;
-  } else if (block.flavour === 'affine:embed' && block.type === 'image') {
+  } else if (block.flavour === 'affine:image') {
     detectRect.width += 50;
   }
   return detectRect;
@@ -380,7 +380,7 @@ export async function downloadImage(model: BaseBlockModel) {
   URL.revokeObjectURL(downloadUrl);
 }
 
-export async function copyImage(model: EmbedBlockModel) {
+export async function copyImage(model: ImageBlockModel) {
   copyBlocks({
     type: 'Block',
     models: [model],
@@ -489,7 +489,7 @@ export function getAllowSelectedBlocks(
 
   const dfs = (blocks: BaseBlockModel[]) => {
     for (const block of blocks) {
-      if (block.flavour !== 'affine:frame') {
+      if (block.flavour !== 'affine:note') {
         result.push(block);
       }
       block.children.length && dfs(block.children);

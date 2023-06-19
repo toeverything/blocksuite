@@ -3,7 +3,7 @@ import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
 import type { CssVariableName } from '../__internal__/theme/css-variables.js';
 
-export const FRAME_COLORS: CssVariableName[] = [
+export const NOTE_COLORS: CssVariableName[] = [
   '--affine-background-secondary-color',
   '--affine-tag-yellow',
   '--affine-tag-red',
@@ -12,13 +12,13 @@ export const FRAME_COLORS: CssVariableName[] = [
   '--affine-tag-purple',
 ];
 
-export const DEFAULT_FRAME_COLOR = FRAME_COLORS[0];
+export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 
-export const FrameBlockSchema = defineBlockSchema({
-  flavour: 'affine:frame',
+export const NoteBlockSchema = defineBlockSchema({
+  flavour: 'affine:note',
   props: () => ({
     xywh: `[0,0,${EDITOR_WIDTH},480]`,
-    background: DEFAULT_FRAME_COLOR,
+    background: DEFAULT_NOTE_COLOR,
     index: 'a0',
   }),
   metadata: {
@@ -31,11 +31,11 @@ export const FrameBlockSchema = defineBlockSchema({
       'affine:code',
       'affine:divider',
       'affine:database',
-      'affine:embed',
-      'affine:frame-block-*',
+      'affine:image',
+      'affine:note-block-*',
       'affine:bookmark',
     ],
   },
 });
 
-export type FrameBlockModel = SchemaToModel<typeof FrameBlockSchema>;
+export type NoteBlockModel = SchemaToModel<typeof NoteBlockSchema>;

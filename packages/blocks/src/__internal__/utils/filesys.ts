@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import type { BookmarkBlockModel } from '../../bookmark-block/index.js';
 export const createImageInputElement = () => {
   const fileInput: HTMLInputElement = document.createElement('input');
   fileInput.type = 'file';
@@ -19,7 +20,7 @@ export const uploadImageFromLocal = async (
   page: Page,
   getSize?: (size: { width: number; height: number }) => void
 ): Promise<Array<Props>> => {
-  const baseProps: Props = { flavour: 'affine:embed', type: 'image' };
+  const baseProps: Props = { flavour: 'affine:image' };
   const fileInput = createImageInputElement();
   document.body.appendChild(fileInput);
 
@@ -59,6 +60,32 @@ export const uploadImageFromLocal = async (
   fileInput.click();
   return await pending;
 };
+
+type BookmarkProps = Partial<BookmarkBlockModel>;
+
+export async function getBookmarkInitialProps(): Promise<BookmarkProps[]> {
+  const bookmarkCreateModal = document.createElement('bookmark-create-modal');
+
+  let resolvePromise: (
+    value: Array<BookmarkProps> | PromiseLike<Array<BookmarkProps>>
+  ) => void;
+  const pending = new Promise<Array<BookmarkProps>>(resolve => {
+    resolvePromise = resolve;
+  });
+
+  bookmarkCreateModal.onCancel = () => {
+    resolvePromise([]);
+    document.body.removeChild(bookmarkCreateModal);
+  };
+  bookmarkCreateModal.onConfirm = ({ url }) => {
+    resolvePromise([{ flavour: 'affine:bookmark', url }]);
+    document.body.removeChild(bookmarkCreateModal);
+  };
+
+  document.body.appendChild(bookmarkCreateModal);
+
+  return await pending;
+}
 
 function readImageSize(file: File) {
   return new Promise<{ width: number; height: number }>(resolve => {

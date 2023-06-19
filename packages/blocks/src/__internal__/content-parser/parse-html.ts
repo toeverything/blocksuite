@@ -487,6 +487,9 @@ export class HtmlParser {
       }
       return summary;
     }
+    if (element.parentElement?.classList?.contains('toggle')) {
+      type = 'toggle';
+    }
     let checked;
     let inputEl;
     if (
@@ -514,6 +517,19 @@ export class HtmlParser {
         type = 'todo';
         checked = true;
       }
+    }
+    let checkBoxEl;
+    if (
+      (checkBoxEl = element.firstElementChild)?.classList.contains(
+        'checkbox'
+      ) ||
+      (checkBoxEl =
+        element.firstElementChild?.firstElementChild)?.classList.contains(
+        'checkbox'
+      )
+    ) {
+      type = 'todo';
+      checked = checkBoxEl?.classList.contains('checked') ?? false;
     }
     return this._contentParser.getParserHtmlText2Block('commonParser')?.({
       element: element,
@@ -621,8 +637,17 @@ export class HtmlParser {
       imgElement = element;
       texts.push({ insert: '' });
     }
+    let caption = '';
     if (imgElement) {
-      const imgUrl = imgElement.getAttribute('src') || '';
+      // TODO: use the real bookmark instead.
+      if (imgElement.classList.contains('bookmark-icon')) {
+        const linkElement = element.querySelector('a');
+        if (linkElement) {
+          caption = linkElement.getAttribute('href') || '';
+        }
+        imgElement = element.querySelector('.bookmark-image');
+      }
+      const imgUrl = imgElement?.getAttribute('src') || '';
       const imgBlob = await this._fetchFileHandler(imgUrl);
       if (!imgBlob || imgBlob.size === 0) {
         const texts = [
@@ -647,11 +672,11 @@ export class HtmlParser {
         const id = await storage.set(imgBlob);
         result = [
           {
-            flavour: 'affine:embed',
-            type: 'image',
+            flavour: 'affine:image',
             sourceId: id,
             children: [],
             text: texts,
+            caption,
           },
         ];
       }

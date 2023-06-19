@@ -14,6 +14,7 @@ import {
   isDatabaseInput,
   isInsideEdgelessTextEditor,
   isInsidePageTitle,
+  isMiddleButtonPressed,
   isPinchEvent,
   type MouseMode,
   Point,
@@ -62,7 +63,7 @@ export interface EdgelessHoverState {
 }
 
 export interface EdgelessSelectionState {
-  /* The selected frame or surface element */
+  /* The selected note or phasor element */
   selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
@@ -246,6 +247,10 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       }
       this._onContainerPointerMove(event);
     });
+    this._add('pointerDown', ctx => {
+      const event = ctx.get('pointerState');
+      this._onContainerPointerDown(event);
+    });
     this._add('pointerUp', ctx => {
       const event = ctx.get('pointerState');
       this._onContainerPointerUp(event);
@@ -359,6 +364,32 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     }
   };
 
+  private _onContainerPointerDown = (e: PointerEventState) => {
+    if (!isMiddleButtonPressed(e.raw)) return;
+
+    const prevMouseMode = this._mouseMode;
+    const switchToPreMode = (_e: MouseEvent) => {
+      if (!isMiddleButtonPressed(_e)) {
+        this.setMouseMode(prevMouseMode);
+        document.removeEventListener('pointerup', switchToPreMode, false);
+        document.removeEventListener('pointerover', switchToPreMode, false);
+      }
+    };
+
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'pointerover',
+      switchToPreMode
+    );
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'pointerup',
+      switchToPreMode
+    );
+
+    this.setMouseMode({ type: 'pan', panning: true });
+  };
+
   private _onContainerPointerUp = (e: PointerEventState) => {
     if (e.button === 2 && this._rightClickTimer) {
       const { timer, timeStamp, mouseMode } = this._rightClickTimer;
@@ -387,18 +418,18 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       return null;
     }
     const { surface } = this.container;
-    const frames = (this.page.root?.children ?? []).filter(
-      child => child.flavour === 'affine:frame'
+    const notes = (this.page.root?.children ?? []).filter(
+      child => child.flavour === 'affine:note'
     ) as TopLevelBlockModel[];
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
 
     const hovered: Selectable | null =
-      surface.pickTop(modelX, modelY) || pickTopBlock(frames, modelX, modelY);
+      surface.pickTop(modelX, modelY) || pickTopBlock(notes, modelX, modelY);
 
     // See https://github.com/toeverything/blocksuite/issues/1812
     if (
-      // if not frame block
+      // if not note block
       !isTopLevelBlock(hovered) ||
       // if in other mouse mode
       this.mouseMode.type !== 'default' ||

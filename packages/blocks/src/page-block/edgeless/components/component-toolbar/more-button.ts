@@ -3,7 +3,7 @@ import '../../toolbar/shape-tool/shape-menu.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { SurfaceElement, SurfaceManager } from '@blocksuite/phasor';
+import type { PhasorElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -119,20 +119,20 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     null;
 
   private _splitElements(): {
-    frames: TopLevelBlockModel[];
-    shapes: SurfaceElement[];
+    notes: TopLevelBlockModel[];
+    shapes: PhasorElement[];
   } {
-    const frames: TopLevelBlockModel[] = [];
-    const shapes: SurfaceElement[] = [];
+    const notes: TopLevelBlockModel[] = [];
+    const shapes: PhasorElement[] = [];
     this.elements.forEach(element => {
       if (isTopLevelBlock(element)) {
-        frames.push(element);
+        notes.push(element);
       } else {
         shapes.push(element);
       }
     });
     return {
-      frames,
+      notes: notes,
       shapes,
     };
   }
@@ -161,10 +161,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'forward':
       case 'backward':
       case 'back': {
-        const { frames, shapes } = this._splitElements();
-        if (frames.length) {
-          this.slots.reorderingFramesUpdated.emit({
-            elements: frames,
+        const { notes, shapes } = this._splitElements();
+        if (notes.length) {
+          this.slots.reorderingNotesUpdated.emit({
+            elements: notes,
             type,
           });
         }

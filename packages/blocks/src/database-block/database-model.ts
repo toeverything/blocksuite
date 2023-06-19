@@ -146,6 +146,20 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return id;
   }
 
+  updateColumnData(
+    id: string,
+    update: (data: Record<string, unknown>) => Partial<Record<string, unknown>>
+  ) {
+    this.page.transact(() => {
+      const i = this.findColumnIndex(id);
+      const data = this.columns[i].data;
+      this.columns[i].data = {
+        ...data,
+        ...update(data),
+      };
+    });
+  }
+
   moveColumn(from: number, to: number) {
     this.page.transact(() => {
       const column = this.columns[from];
@@ -167,6 +181,9 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   getCell(rowId: BaseBlockModel['id'], columnId: Column['id']): Cell | null {
+    if (columnId === 'title') {
+      return { columnId: 'title', value: rowId };
+    }
     const yRow = this.cells[rowId];
     const yCell = yRow?.[columnId] ?? null;
     if (!yCell) return null;
@@ -289,7 +306,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   metadata: {
     role: 'hub',
     version: 2,
-    parent: ['affine:frame'],
+    parent: ['affine:note'],
     children: ['affine:paragraph', 'affine:list'],
   },
   toModel: () => {

@@ -83,7 +83,7 @@ test('basic link', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -98,7 +98,7 @@ test('basic link', async ({ page }) => {
       }
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -110,7 +110,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       const pageId = page.addBlock('affine:page', {
         title: new page.Text('title'),
       });
-      const frameId = page.addBlock('affine:frame', {}, pageId);
+      const noteId = page.addBlock('affine:note', {}, pageId);
 
       const text = page.Text.fromDelta([
         { insert: 'Hello' },
@@ -119,7 +119,7 @@ async function createLinkBlock(page: Page, str: string, link: string) {
       const id = page.addBlock(
         'affine:paragraph',
         { type: 'text', text: text },
-        frameId
+        noteId
       );
       return id;
     },

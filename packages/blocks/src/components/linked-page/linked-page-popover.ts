@@ -70,9 +70,9 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const displayPageName =
       pageName.slice(0, DISPLAY_LENGTH) +
       (pageName.length > DISPLAY_LENGTH ? '..' : '');
-    const filteredPageList = this._pageList.filter(({ title }) =>
-      isFuzzyMatch(title, this._query)
-    );
+    const filteredPageList = this._pageList
+      .filter(({ id }) => id !== this._page.id)
+      .filter(({ title }) => isFuzzyMatch(title, this._query));
 
     return [
       ...filteredPageList.map((page, idx) => ({

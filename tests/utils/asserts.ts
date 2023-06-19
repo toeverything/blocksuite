@@ -6,7 +6,7 @@ import './declare-test-window.js';
 
 import type {
   CssVariableName,
-  FrameBlockModel,
+  NoteBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
 import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
@@ -25,6 +25,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import { getZoomLevel } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -57,9 +58,9 @@ export const defaultStore: SerializedStore = {
       'affine:page': 2,
       'affine:database': 2,
       'affine:list': 1,
-      'affine:frame': 1,
+      'affine:note': 1,
       'affine:divider': 1,
-      'affine:embed': 1,
+      'affine:image': 1,
       'affine:code': 1,
       'affine:surface': 3,
       'affine:bookmark': 1,
@@ -76,7 +77,7 @@ export const defaultStore: SerializedStore = {
           'sys:children': ['1'],
         },
         '1': {
-          'sys:flavour': 'affine:frame',
+          'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
           'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
@@ -237,16 +238,16 @@ export async function assertNativeSelectionRangeCount(
   expect(actual).toEqual(count);
 }
 
-export async function assertFrameXYWH(
+export async function assertNoteXYWH(
   page: Page,
   expected: [number, number, number, number]
 ) {
   const actual = await page.evaluate(() => {
     const root = window.page.root as PageBlockModel;
-    const frame = root.children.find(
-      x => x.flavour === 'affine:frame'
-    ) as FrameBlockModel;
-    return JSON.parse(frame.xywh) as number[];
+    const note = root.children.find(
+      x => x.flavour === 'affine:note'
+    ) as NoteBlockModel;
+    return JSON.parse(note.xywh) as number[];
   });
   expect(actual[0]).toBeCloseTo(expected[0]);
   expect(actual[1]).toBeCloseTo(expected[1]);
@@ -704,31 +705,31 @@ export async function assertEdgelessNonSelectedRect(page: Page) {
   await expect(rect).toBeHidden();
 }
 
-export async function assertSelectionInFrame(page: Page, frameId: string) {
-  const closestFrameId = await page.evaluate(() => {
+export async function assertSelectionInNote(page: Page, noteId: string) {
+  const closestNoteId = await page.evaluate(() => {
     const selection = window.getSelection();
-    const frame = selection?.anchorNode?.parentElement?.closest('affine-frame');
-    return frame?.getAttribute('data-block-id');
+    const note = selection?.anchorNode?.parentElement?.closest('affine-note');
+    return note?.getAttribute('data-block-id');
   });
-  expect(closestFrameId).toEqual(frameId);
+  expect(closestNoteId).toEqual(noteId);
 }
 
-export async function assertEdgelessFrameBackground(
+export async function assertEdgelessNoteBackground(
   page: Page,
-  frameId: string,
+  noteId: string,
   color: CssVariableName
 ) {
   const editor = getEditorLocator(page);
   const backgroundColor = await editor
-    .locator(`affine-frame[data-block-id="${frameId}"]`)
+    .locator(`affine-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
-      const frameWrapper = ele.closest<HTMLDivElement>(
+      const noteWrapper = ele.closest<HTMLDivElement>(
         '.affine-edgeless-block-child'
       );
-      if (!frameWrapper) {
-        throw new Error(`Could not find frame: ${frameId}`);
+      if (!noteWrapper) {
+        throw new Error(`Could not find note: ${noteId}`);
       }
-      return frameWrapper.style.background;
+      return noteWrapper.style.background;
     });
 
   expect(backgroundColor).toEqual(`var(${color})`);
@@ -744,4 +745,9 @@ export async function assertEdgelessColorSameWithHexColor(
   const edgelessHexColor = toHex(themeColor as string);
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
+}
+
+export async function assertZoomLevel(page: Page, zoom: number) {
+  const z = await getZoomLevel(page);
+  expect(z).toBe(zoom);
 }

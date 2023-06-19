@@ -35,7 +35,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `<affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -51,7 +51,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
       prop:title=""
       prop:url="https://google.com"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -77,7 +77,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `<affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -93,7 +93,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
       prop:title=""
       prop:url="https://google.com"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -106,7 +106,7 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     /*xml*/ `<affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
   >
@@ -124,7 +124,7 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
       }
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });

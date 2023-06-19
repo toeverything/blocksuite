@@ -1,7 +1,8 @@
 import { expect } from '@playwright/test';
 
-import { switchEditorMode } from '../utils/actions/edgeless.js';
+import { deleteAll, switchEditorMode } from '../utils/actions/edgeless.js';
 import {
+  click,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getCenterPosition,
@@ -13,7 +14,7 @@ import {
 import { assertRichTexts } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('block hub should drag and drop a card into existing frame', async ({
+test('block hub should drag and drop a card into existing note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -45,7 +46,7 @@ test('block hub should drag and drop a card into existing frame', async ({
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
 });
 
-test('block hub should add new frame when dragged to blank area', async ({
+test('block hub should add new note when dragged to blank area', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -74,4 +75,35 @@ test('block hub should add new frame when dragged to blank area', async ({
   await assertRichTexts(page, ['123', '456', '789', '000']);
 
   await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+});
+
+test('click blank area do not remvoe database in edgeless', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const databaseMenu = '.block-hub-icon-container:nth-child(5)';
+
+  const databaseRect = await getCenterPosition(page, databaseMenu);
+
+  await dragBetweenCoords(
+    page,
+    { x: databaseRect.x, y: databaseRect.y },
+    { x: 100, y: 100 },
+    { steps: 50 }
+  );
+
+  await click(page, { x: 50, y: 50 });
+
+  const database = page.locator('affine-database');
+  expect(database).toBeVisible();
+  const tagColumn = page.locator('.affine-database-column').nth(1);
+  expect(await tagColumn.innerText()).toBe('Tag');
+  const defaultRows = page.locator('.affine-database-block-row');
+  expect(await defaultRows.count()).toBe(3);
 });

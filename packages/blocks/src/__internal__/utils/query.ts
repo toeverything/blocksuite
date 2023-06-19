@@ -57,15 +57,15 @@ export function getParentBlockById<T extends ElementTagName>(
  * @example
  * ```md
  * page
- * - frame
+ * - note
  *  - paragraph <- when invoked here, the traverse order will be following
  *    - child <- 1
  *  - sibling <- 2
- * - frame <- 3 (will be skipped)
+ * - note <- 3 (will be skipped)
  *   - paragraph <- 4
  * ```
  *
- * NOTE: this method will skip the `affine:frame` block
+ * NOTE: this method will skip the `affine:note` block
  */
 export function getNextBlock(
   model: BaseBlockModel,
@@ -85,7 +85,7 @@ export function getNextBlock(
     const nextSibling = page.getNextSibling(currentBlock);
     if (nextSibling) {
       // Assert nextSibling is not possible to be `affine:page`
-      if (matchFlavours(nextSibling, ['affine:frame'])) {
+      if (matchFlavours(nextSibling, ['affine:note'])) {
         return getNextBlock(nextSibling);
       }
       return nextSibling;
@@ -100,16 +100,16 @@ export function getNextBlock(
  * @example
  * ```md
  * page
- * - frame
+ * - note
  *   - paragraph <- 5
- * - frame <- 4 (will be skipped)
+ * - note <- 4 (will be skipped)
  *  - paragraph <- 3
  *    - child <- 2
  *      - child <- 1
  *  - paragraph <- when invoked here, the traverse order will be above
  * ```
  *
- * NOTE: this method will skip the `affine:frame` and `affine:page` block
+ * NOTE: this method will skip the `affine:note` and `affine:page` block
  */
 export function getPreviousBlock(
   model: BaseBlockModel,
@@ -131,7 +131,7 @@ export function getPreviousBlock(
   if (!previousBlock) {
     if (
       matchFlavours(parentBlock, [
-        'affine:frame',
+        'affine:note',
         'affine:page',
         'affine:database',
       ])
@@ -145,7 +145,7 @@ export function getPreviousBlock(
     while (lastChild.children.length) {
       lastChild = lastChild.children[lastChild.children.length - 1];
     }
-    // Assume children is not possible to be `affine:frame` or `affine:page`
+    // Assume children is not possible to be `affine:note` or `affine:page`
     return lastChild;
   }
   return previousBlock;
@@ -331,7 +331,7 @@ export function getStartModelBySelection(range = getCurrentNativeRange()) {
     return null;
   }
   const startModel = startComponent.model as BaseBlockModel;
-  if (matchFlavours(startModel, ['affine:frame', 'affine:page'])) {
+  if (matchFlavours(startModel, ['affine:note', 'affine:page'])) {
     return null;
   }
   return startModel;
@@ -427,7 +427,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (
         mainElement &&
         range.intersectsNode(mainElement) &&
-        !matchFlavours(block.model, ['affine:frame', 'affine:page'])
+        !matchFlavours(block.model, ['affine:note', 'affine:page'])
       ) {
         intersectedModels.push(block.model);
       }
@@ -591,38 +591,36 @@ export function isEdgelessPage({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is default/edgeless page or frame.
+ * Returns `true` if element is default/edgeless page or note.
  */
-export function isPageOrFrameOrSurface(element: Element) {
+export function isPageOrNoteOrSurface(element: Element) {
   return (
     isDefaultPage(element) ||
     isEdgelessPage(element) ||
-    isFrame(element) ||
+    isNote(element) ||
     isSurface(element)
   );
 }
 
 /**
- * Returns `true` if element is not page or frame.
+ * Returns `true` if element is not page or note.
  */
 export function isBlock(element: Element) {
-  return !isPageOrFrameOrSurface(element);
+  return !isPageOrNoteOrSurface(element);
 }
 
 /**
  * Returns `true` if element is image.
  */
-export function isImage({ tagName, firstElementChild }: Element) {
-  return (
-    tagName === 'AFFINE-EMBED' && firstElementChild?.tagName === 'AFFINE-IMAGE'
-  );
+export function isImage({ tagName }: Element) {
+  return tagName === 'AFFINE-IMAGE';
 }
 
 /**
- * Returns `true` if element is frame.
+ * Returns `true` if element is note.
  */
-function isFrame({ tagName }: Element) {
-  return tagName === 'AFFINE-FRAME';
+function isNote({ tagName }: Element) {
+  return tagName === 'AFFINE-NOTE';
 }
 
 /**
@@ -636,7 +634,7 @@ function isSurface({ tagName }: Element) {
  * Returns `true` if element is embed.
  */
 function isEmbed({ tagName }: Element) {
-  return tagName === 'AFFINE-EMBED';
+  return tagName === 'AFFINE-IMAGE';
 }
 
 /**
@@ -787,7 +785,7 @@ export function getClosestBlockElementByPoint(
 }
 
 /**
- * Returns the closest block element by element that does not contain the page element and frame element.
+ * Returns the closest block element by element that does not contain the page element and note element.
  */
 export function getClosestBlockElementByElement(element: Element | null) {
   if (!element) return null;
@@ -841,16 +839,16 @@ export function getBlockElementById(
 }
 
 /**
- * Returns the closest frame block element by id with the parent.
+ * Returns the closest note block element by id with the parent.
  */
-export function getClosestFrameBlockElementById(
+export function getClosestNoteBlockElementById(
   id: string,
   parent: BlockComponentElement | Document | Element = document
 ) {
   const element = getBlockElementById(id, parent);
   if (!element) return null;
-  if (isFrame(element)) return element;
-  return element.closest('affine-frame');
+  if (isNote(element)) return element;
+  return element.closest('affine-note');
 }
 
 /**
@@ -960,9 +958,9 @@ export function queryCurrentMode(): 'light' | 'dark' {
 }
 
 /**
- * Get hovering frame with given a point in edgeless mode.
+ * Get hovering note with given a point in edgeless mode.
  */
-export function getHoveringFrame(point: Point) {
+export function getHoveringNote(point: Point) {
   return (
     document.elementsFromPoint(point.x, point.y).find(isEdgelessBlockChild) ||
     null

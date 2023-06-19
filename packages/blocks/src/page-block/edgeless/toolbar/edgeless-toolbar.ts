@@ -15,13 +15,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  Bound,
-  getCommonBound,
-  ZOOM_MAX,
-  ZOOM_MIN,
-  ZOOM_STEP,
-} from '@blocksuite/phasor';
+import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -31,12 +25,10 @@ import {
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
-import { DEFAULT_FRAME_COLOR } from '../../../frame-block/frame-model.js';
+import { DEFAULT_NOTE_COLOR } from '../../../note-block/note-model.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
-
-const FIT_TO_SCREEN_PADDING = 100;
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
@@ -159,35 +151,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _zoomToFit() {
-    const bounds = [];
-
-    this.edgeless.frames.forEach(frame => {
-      bounds.push(Bound.deserialize(frame.xywh));
-    });
-
-    const surfaceElementsBound = this.edgeless.surface.getElementsBound();
-    if (surfaceElementsBound) {
-      bounds.push(surfaceElementsBound);
-    }
-
+    const { centerX, centerY, zoom } = this.edgeless.getFitToScreenData();
     const { viewport } = this.edgeless.surface;
-    let { centerX, centerY, zoom } = viewport;
-
-    if (bounds.length) {
-      const { width, height } = viewport;
-      const bound = getCommonBound(bounds);
-      assertExists(bound);
-
-      zoom = Math.min(
-        (width - FIT_TO_SCREEN_PADDING) / bound.w,
-        (height - FIT_TO_SCREEN_PADDING) / bound.h
-      );
-
-      centerX = bound.x + bound.w / 2;
-      centerY = bound.y + bound.h / 2;
-    } else {
-      zoom = 1;
-    }
     const preZoom = this.zoom;
     const newZoom = zoom;
     const cofficient = preZoom / newZoom;
@@ -271,16 +236,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       y = centerY - (options.height * zoom) / 2;
     }
 
-    const { frameId } = this.edgeless.addNewFrame(
+    const { noteId } = this.edgeless.addNewNote(
       models,
       new Point(x, y),
       options
     );
-    const frame = this.edgeless.frames.find(frame => frame.id === frameId);
-    assertExists(frame);
+    const note = this.edgeless.notes.find(note => note.id === noteId);
+    assertExists(note);
 
     this.edgeless.selection.switchToDefaultMode({
-      selected: [frame],
+      selected: [note],
       active: false,
     });
 
@@ -375,7 +340,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           @click=${() =>
             this.setMouseMode({
               type: 'note',
-              background: DEFAULT_FRAME_COLOR,
+              background: DEFAULT_NOTE_COLOR,
             })}
         >
           ${NoteIcon}

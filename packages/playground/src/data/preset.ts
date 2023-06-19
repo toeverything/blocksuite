@@ -5,7 +5,7 @@ import {
 import { StrokeStyle } from '@blocksuite/phasor';
 import { Text, type Workspace } from '@blocksuite/store';
 
-import { addShapeElement, type InitFn } from './utils';
+import { type InitFn } from './utils';
 
 const presetMarkdown = `This playground is designed to:
 
@@ -33,31 +33,38 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
   });
-  const surfaceBlockId = page.addBlock('affine:surface', {}, pageBlockId);
+  page.addBlock(
+    'affine:surface',
+    {
+      elements: {
+        0: {
+          id: '0',
+          index: 'a0',
+          type: 'shape',
+          xywh: '[0,-100,100,100]',
+          seed: Math.floor(Math.random() * 2 ** 31),
 
-  // Add frame block inside page block
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  // Import preset markdown content inside frame block
+          shapeType: 'rect',
+
+          radius: 0,
+          filled: false,
+          fillColor: DEFAULT_SHAPE_FILL_COLOR,
+          strokeWidth: 4,
+          strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+          strokeStyle: StrokeStyle.Solid,
+          roughness: 2,
+        },
+      },
+    },
+    pageBlockId
+  );
+
+  // Add note block inside page block
+  const noteId = page.addBlock('affine:note', {}, pageBlockId);
+  // Import preset markdown content inside note block
   const contentParser = new window.ContentParser(page);
 
-  addShapeElement(page, surfaceBlockId, {
-    id: '0',
-    index: 'a0',
-    type: 'shape',
-    xywh: '[0,-100,100,100]',
-    seed: Math.floor(Math.random() * 2 ** 31),
-
-    shapeType: 'rect',
-
-    radius: 0,
-    filled: false,
-    fillColor: DEFAULT_SHAPE_FILL_COLOR,
-    strokeWidth: 4,
-    strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    strokeStyle: StrokeStyle.Solid,
-    roughness: 2,
-  });
-  await contentParser.importMarkdown(presetMarkdown, frameId);
+  await contentParser.importMarkdown(presetMarkdown, noteId);
   page.resetHistory();
 };
 

@@ -29,8 +29,8 @@ import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/ty
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
-  createBookmarkBlock,
   createPage,
+  getBookmarkInitialProps,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
@@ -215,7 +215,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           name: 'Image',
           icon: ImageIcon20,
           showWhen: model => {
-            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+            if (!model.page.schema.flavourSchemaMap.has('affine:image')) {
               return false;
             }
             if (insideDatabase(model)) {
@@ -242,7 +242,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             ) {
               return false;
             }
-            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+            if (!model.page.schema.flavourSchemaMap.has('affine:image')) {
               return false;
             }
             return !insideDatabase(model);
@@ -252,8 +252,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             if (!parent) {
               return;
             }
-            const index = parent.children.indexOf(model);
-            createBookmarkBlock(parent, index + 1);
+            const props = await getBookmarkInitialProps();
+            page.addSiblingBlocks(model, props);
           },
         },
       ],

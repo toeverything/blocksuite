@@ -25,8 +25,8 @@ export class SimpleAffineEditor extends LitElement {
     this.page = this.workspace.createPage({ id: 'page0' });
 
     const pageBlockId = this.page.addBlock('affine:page');
-    const frameId = this.page.addBlock('affine:frame', {}, pageBlockId);
-    this.page.addBlock('affine:paragraph', {}, frameId);
+    const noteId = this.page.addBlock('affine:note', {}, pageBlockId);
+    this.page.addBlock('affine:paragraph', {}, noteId);
   }
 
   override connectedCallback() {

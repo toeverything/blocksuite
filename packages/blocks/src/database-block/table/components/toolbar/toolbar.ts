@@ -16,10 +16,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
-import {
-  columnManager,
-  richTextHelper,
-} from '../../../common/column-manager.js';
+import { columnManager, titleHelper } from '../../../common/column-manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type {
@@ -154,6 +151,10 @@ const styles = css`
 
   .new-record > tool-tip {
     max-width: 280px;
+  }
+
+  .edgeless .new-record > tool-tip {
+    display: none;
   }
 
   .show-toolbar {
@@ -362,7 +363,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       {
         name: this.targetModel.titleColumnName,
         id: this.targetModel.id,
-        type: richTextHelper.dataType({}),
+        type: titleHelper.dataType({}),
       },
       ...this.columns.map(v => ({
         id: v.id,

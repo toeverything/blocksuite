@@ -15,26 +15,26 @@ import type {
   TopLevelBlockModel,
 } from '../../../../__internal__/utils/types.js';
 import {
-  DEFAULT_FRAME_COLOR,
-  FRAME_COLORS,
-} from '../../../../frame-block/frame-model.js';
+  DEFAULT_NOTE_COLOR,
+  NOTE_COLORS,
+} from '../../../../note-block/note-model.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
 import type { ColorEvent } from '../color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonBackground(
-  frames: TopLevelBlockModel[]
+  notes: TopLevelBlockModel[]
 ): NoteMouseMode['background'] {
-  const shapeTypes = countBy(frames, (frame: TopLevelBlockModel) => {
-    return frame.background;
+  const shapeTypes = countBy(notes, (note: TopLevelBlockModel) => {
+    return note.background;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as NoteMouseMode['background']) : DEFAULT_FRAME_COLOR;
+  return max ? (max[0] as NoteMouseMode['background']) : DEFAULT_NOTE_COLOR;
 }
 
-@customElement('edgeless-change-frame-button')
-export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
+@customElement('edgeless-change-note-button')
+export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
@@ -72,7 +72,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   `;
 
   @property()
-  frames: TopLevelBlockModel[] = [];
+  notes: TopLevelBlockModel[] = [];
 
   @property()
   page!: Page;
@@ -101,8 +101,8 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   }
 
   private _setBlockBackground(color: CssVariableName) {
-    this.frames.forEach(frame => {
-      this.page.updateBlock(frame, { background: color });
+    this.notes.forEach(note => {
+      this.page.updateBlock(note, { background: color });
     });
     // FIXME: force update selection, because connector mode changed
     this.slots.selectionUpdated.emit({ ...this.selectionState });
@@ -123,7 +123,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedBackground = getMostCommonBackground(this.frames);
+    const selectedBackground = getMostCommonBackground(this.notes);
 
     return html`
       <edgeless-tool-icon-button
@@ -135,7 +135,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-color-panel
         .value=${selectedBackground}
-        .options=${FRAME_COLORS}
+        .options=${NOTE_COLORS}
         .showLetterMark=${true}
         @select=${(event: ColorEvent) => {
           this._setBlockBackground(event.detail);
@@ -147,6 +147,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-change-frame-button': EdgelessChangeFrameButton;
+    'edgeless-change-note-button': EdgelessChangeNoteButton;
   }
 }
