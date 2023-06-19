@@ -124,7 +124,6 @@ export function initAddNewRecordHandlers(
 
     const point = new Point(x, y);
     const row = getClosestRow(point, dragConfig.rows);
-    console.log(row);
     assertExists(indicator);
 
     if (row) {

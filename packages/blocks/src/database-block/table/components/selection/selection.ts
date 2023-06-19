@@ -68,12 +68,18 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return tableContainer;
   }
 
-  isCurrentDatabaseTableBody(ele: Element): boolean {
-    return (
-      ele.closest('affine-database') === this.closest('affine-database') &&
-      !!ele.closest('.affine-database-block-rows')
-    );
+  isCurrentDatabase(ele: Element): boolean {
+    return ele.closest('affine-database') === this.closest('affine-database');
   }
+
+  isInTableBody(ele: Element) {
+    return !!ele.closest('.affine-database-block-rows');
+  }
+
+  /**
+   * @deprecated
+   */
+  isStartInDatabase = false;
 
   override firstUpdated() {
     this._disposables.add(
@@ -91,33 +97,31 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     this._disposables.add({
       dispose: this.eventDispatcher.add('click', context => {
         const target = context.get('pointerState').event.target;
-        if (
-          target instanceof Element &&
-          this.isCurrentDatabaseTableBody(target)
-        ) {
+        if (target instanceof Element && this.isCurrentDatabase(target)) {
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
             cell?.cell?.enterEditMode();
+            return true;
           }
-        } else {
-          this.selection = undefined;
         }
+        this.selection = undefined;
+        return false;
       }),
     });
     this._disposables.add({
-      dispose: this.eventDispatcher.add('pointerDown', context => {
+      dispose: this.eventDispatcher.add('dragStart', context => {
         const event = context.get('pointerState').event;
         const target = event.target;
         if (
           event instanceof MouseEvent &&
           target instanceof Element &&
-          this.isCurrentDatabaseTableBody(target)
+          this.isCurrentDatabase(target)
         ) {
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
             this.startDrag(event, cell);
-            return true;
           }
+          return true;
         }
         return false;
       }),
@@ -126,7 +130,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       const target = event.target;
       if (
         !(target instanceof Element) ||
-        !this.isCurrentDatabaseTableBody(target)
+        !(this.isCurrentDatabase(target) && this.isInTableBody(target))
       ) {
         this.selection = undefined;
       }
@@ -140,7 +144,8 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           selection.databaseId === this.databaseId &&
           event instanceof KeyboardEvent
         ) {
-          return this.onKeydown(selection, event);
+          const result = this.onKeydown(selection, event);
+          return result;
         }
         return false;
       }),
