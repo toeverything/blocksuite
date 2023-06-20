@@ -76,23 +76,59 @@ export class ContentParser {
     );
   }
 
+  async _checkReady() {
+    const promise = new Promise(resolve => {
+      let count = 0;
+      const checkReactRender = setInterval(async () => {
+        const root = this._page.root;
+        const pageBlock = root ? getPageBlock(root) : null;
+        const imageLoadingComponent = document.querySelector(
+          'affine-image-block-loading-card'
+        );
+        if (pageBlock && !imageLoadingComponent) {
+          clearInterval(checkReactRender);
+          resolve(true);
+        }
+        count++;
+        if (count > 10 * 60) {
+          clearInterval(checkReactRender);
+          resolve(false);
+        }
+      }, 100);
+    });
+    return await promise;
+  }
+
   public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
+    await this._checkReady();
+
     const root = this._page.root;
     if (!root) return;
     const html2canvas = (await import('html2canvas')).default;
     if (!(html2canvas instanceof Function)) return;
 
+    const html2canvasOption = {
+      ignoreElements: function (element: Element) {
+        if (
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+    };
+
     const editorContainer = getEditorContainer(this._page);
     if (isPageMode(this._page)) {
-      const styleElement = document.createElement('style');
-      styleElement.textContent =
-        'editor-container,.affine-editor-container {height: auto;}';
-      editorContainer.appendChild(styleElement);
+      const pageContainer = document.querySelector(
+        '.affine-default-page-block-container'
+      );
+      if (!pageContainer) return;
 
-      // todo check render and image
-
-      const data = await html2canvas(editorContainer);
-      editorContainer.removeChild(styleElement);
+      const data = await html2canvas(pageContainer, html2canvasOption);
       return data;
     } else {
       const styleElement = document.createElement('style');
@@ -101,7 +137,6 @@ export class ContentParser {
       assertExists(bound);
       const { x, y, w, h } = bound;
       styleElement.textContent = `
-        edgeless-toolbar {display: none;}
         editor-container,.affine-editor-container {height: ${
           h + 100
         }px; width: ${w + 100}px}
@@ -116,16 +151,22 @@ export class ContentParser {
       );
       edgeless.surface.onResize();
 
-      // todo check render and image
+      const pageContainer = document.querySelector('affine-edgeless-page');
+      if (!pageContainer) return;
 
       const promise = new Promise(resolve => {
         setTimeout(async () => {
-          const canvasData = await html2canvas(editorContainer);
+          const canvasData = await html2canvas(
+            pageContainer,
+            html2canvasOption
+          );
           resolve(canvasData);
         }, 0);
       });
       const data = (await promise) as HTMLCanvasElement;
       editorContainer.removeChild(styleElement);
+      // edgeless.surface.viewport.setCenter(width, height);
+      // edgeless.surface.onResize();
       return data;
     }
   }
@@ -163,7 +204,9 @@ export class ContentParser {
       0,
       0,
       canvasImage.width,
-      canvasImage.height
+      canvasImage.height,
+      '',
+      'FAST'
     );
     FileExporter.exportFile(
       (root as PageBlockModel).title.toString() + '.pdf',
