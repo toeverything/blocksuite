@@ -40,11 +40,12 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
     noteId
   );
   const database = page.getBlockById(databaseId) as DatabaseBlockModel;
-  const col1 = database.updateColumn(numberHelper.create('Number'));
-  const col2 = database.updateColumn(
+  const col1 = database.addColumn('end', numberHelper.create('Number'));
+  const col2 = database.addColumn(
+    'end',
     selectHelper.create('Single Select', { options: selection })
   );
-  const col3 = database.updateColumn(richTextHelper.create('Rich Text'));
+  const col3 = database.addColumn('end', richTextHelper.create('Rich Text'));
 
   database.applyColumnUpdate();
 

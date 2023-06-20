@@ -19,15 +19,15 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
-import { columnManager, titleHelper } from '../../../common/column-manager.js';
+import { columnManager } from '../../../common/column-manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type {
-  DatabaseViewDataMap,
-  TableMixColumn,
-} from '../../../common/view-manager.js';
-import type { DatabaseBlockModel } from '../../../database-model.js';
-import { onClickOutside } from '../../../utils.js';
+  DatabaseBlockModel,
+  InsertPosition,
+} from '../../../database-model.js';
+import { onClickOutside } from '../../../utils/utils.js';
+import type { TableViewManager } from '../../table-view-manager.js';
 import { SearchState } from '../../types.js';
 import { showDatabaseTableViewModal } from '../modal/index.js';
 import type { DatabaseTableViewModal } from '../modal/table-modal.js';
@@ -171,36 +171,33 @@ const styles = css`
 export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   root!: BlockSuiteRoot;
 
-  @property()
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   hoverState!: boolean;
 
-  @property()
+  @property({ attribute: false })
   searchState!: SearchState;
 
-  @property()
-  columns!: TableMixColumn[];
+  @property({ attribute: false })
+  view!: TableViewManager;
 
-  @property()
-  view!: DatabaseViewDataMap['table'];
+  @property({ attribute: false })
+  addRow!: (position: InsertPosition) => void;
 
-  @property()
+  @property({ attribute: false })
   modalMode?: boolean;
 
-  @property()
-  addRow!: (index?: number) => void;
-
-  @property()
+  @property({ attribute: false })
   setSearchState!: (state: SearchState) => void;
 
-  @property()
+  @property({ attribute: false })
   setSearchString!: (search: string) => void;
-  @property()
+  @property({ attribute: false })
   setFilteredRowIds!: (rowIds: string[]) => void;
 
   @query('.affine-database-search-input')
@@ -356,7 +353,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
-    this.addRow(0);
+    this.addRow('start');
   };
 
   private get _filter() {
@@ -364,25 +361,15 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   }
 
   private set _filter(filter: FilterGroup) {
-    this.targetModel.updateView(this.view.id, 'table', data => {
-      data.filter = filter;
-    });
-    this.targetModel.applyViewsUpdate();
+    this.view.updateFilter(filter);
   }
 
   private get _vars() {
-    return [
-      {
-        name: this.targetModel.titleColumnName,
-        id: this.targetModel.id,
-        type: titleHelper.dataType({}),
-      },
-      ...this.columns.map(v => ({
-        id: v.id,
-        name: v.name,
-        type: columnManager.typeOf(v.type, v.data),
-      })),
-    ];
+    return this.targetModel.columns.map(v => ({
+      id: v.id,
+      name: v.name,
+      type: columnManager.typeOf(v.type, v.data),
+    }));
   }
 
   private _showFilter(event: MouseEvent) {

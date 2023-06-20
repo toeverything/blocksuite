@@ -45,7 +45,6 @@ export interface EditingState {
   rect: DOMRect;
 }
 
-export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
 export type DatabaseTableViewRowSelect = {
   type: 'select';
   databaseId: string;
@@ -70,23 +69,19 @@ export type DatabaseTableViewRowState =
   | DatabaseTableViewRowDelete
   | DatabaseTableViewRowClear;
 
-export type CellCoord = {
+export type CellFocus = {
   rowIndex: number;
-  cellIndex: number;
+  columnIndex: number;
 };
-export type DatabaseTableViewCellSelect = {
-  type: 'select';
+export type MultiSelection = { start: number; end: number };
+export type DatabaseSelection = {
   databaseId: string;
-  // Currently only supports single cell selection.
-  coords: [CellCoord];
+  rowsSelection?: MultiSelection;
+  columnsSelection?: MultiSelection;
+  focus: CellFocus;
   isEditing: boolean;
 };
-type DatabaseTableViewCellClear = {
-  type: 'clear';
-};
-export type DatabaseTableViewCellState =
-  | DatabaseTableViewCellSelect
-  | DatabaseTableViewCellClear;
+export type DatabaseSelectionState = DatabaseSelection | undefined;
 
 /** Common context interface definition for block models. */
 

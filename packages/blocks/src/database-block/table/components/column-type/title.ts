@@ -1,9 +1,10 @@
+import type { TemplateResult } from 'lit';
 import { css } from 'lit';
 import { html, literal } from 'lit/static-html.js';
 
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-export class TitleCell extends DatabaseCellElement<string> {
+export class TitleCell extends DatabaseCellElement<TemplateResult> {
   static override tag = literal`affine-database-title-cell`;
 
   static override styles = css`
@@ -33,36 +34,8 @@ export class TitleCell extends DatabaseCellElement<string> {
   `;
 
   override render() {
-    if (!this.value) {
-      return;
-    }
-    const model = this.page.getBlockById(this.value);
-    if (!model) {
-      return;
-    }
     return html`
-      <div class="affine-database-block-row-cell-content">
-        ${this.root.renderModel(model)}
-      </div>
-    `;
-  }
-}
-
-export class TitleCellEditing extends DatabaseCellElement<string> {
-  static override tag = literal`affine-database-title-cell-editing`;
-
-  override render() {
-    if (!this.value) {
-      return;
-    }
-    const model = this.page.getBlockById(this.value);
-    if (!model) {
-      return;
-    }
-    return html`
-      <div class="affine-database-block-row-cell-content">
-        ${this.root.renderModel(model)}
-      </div>
+      <div class="affine-database-block-row-cell-content">${this.value}</div>
     `;
   }
 }

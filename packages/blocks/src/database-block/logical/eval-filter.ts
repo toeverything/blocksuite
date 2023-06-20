@@ -32,8 +32,8 @@ const evalValue = (value: Value, row: Record<string, unknown>): unknown => {
 export const evalFilter = (
   filterGroup: Filter,
   row: Record<string, unknown>
-) => {
-  const evalF = (filter: Filter): unknown => {
+): boolean => {
+  const evalF = (filter: Filter): boolean => {
     if (filter.type === 'filter') {
       const value = evalRef(filter.left, row);
       const func = filterMatcher.findData(v => v.name === filter.function);
@@ -44,10 +44,10 @@ export const evalFilter = (
           return true;
         }
         const impl = func?.impl(value, ...args);
-        return impl;
+        return impl ?? true;
       } catch (e) {
         console.error(e);
-        return;
+        return true;
       }
     } else if (filter.type === 'group') {
       if (filter.op === 'and') {
@@ -56,7 +56,7 @@ export const evalFilter = (
         return filter.conditions.some(f => evalF(f));
       }
     }
-    return;
+    return true;
   };
   // console.log(evalF(filterGroup))
   return evalF(filterGroup);

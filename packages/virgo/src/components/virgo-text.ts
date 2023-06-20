@@ -7,10 +7,10 @@ import { ZERO_WIDTH_SPACE } from '../consts.js';
 
 @customElement('v-text')
 export class VText extends LitElement {
-  @property()
+  @property({ attribute: false })
   str: string = ZERO_WIDTH_SPACE;
 
-  @property()
+  @property({ attribute: false })
   styles: DirectiveResult<typeof StyleMapDirective> = styleMap({
     'word-wrap': 'break-word',
     'white-space': 'break-spaces',

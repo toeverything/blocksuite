@@ -47,22 +47,22 @@ export class EdgelessToolIconButton extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   disabled = false;
 
-  @property()
+  @property({ attribute: false })
   coming = false;
 
-  @property()
+  @property({ attribute: false })
   tooltip!: string | TemplateResult<1>;
 
-  @property()
+  @property({ attribute: false })
   tipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
 
-  @property()
+  @property({ attribute: false })
   active = false;
 
-  @property()
+  @property({ attribute: false })
   activeMode: 'color' | 'background' = 'color';
 
   constructor() {

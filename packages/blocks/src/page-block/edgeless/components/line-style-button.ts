@@ -65,7 +65,7 @@ export function LineStyleButton({
     tooltipFromProps !== undefined ? tooltipFromProps : getModeTooltip(mode);
 
   return html`<edgeless-tool-icon-button
-    class=${className}
+    class=${className ?? ''}
     .active=${active}
     .activeMode=${'background'}
     .tooltip=${tooltip}
