@@ -547,3 +547,19 @@ export const AlignRightIcon = html`<svg
     </clipPath>
   </defs>
 </svg>`;
+
+export const HiddenIcon = html`<svg
+  width="17"
+  height="17"
+  viewBox="0 0 17 17"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M6.90665 6.87741C5.87002 7.44261 5.16667 8.54216 5.16667 9.80599C5.16667 11.6469 6.65905 13.1393 8.5 13.1393C9.76442 13.1393 10.8644 12.4353 11.4294 11.3979M14.5 9.80599C14.5 6.49228 11.8137 3.80599 8.5 3.80599C8.20546 3.80599 7.91587 3.82721 7.63268 3.86822M2.5 9.80599C2.5 7.81062 3.47403 6.04275 4.97256 4.9519M2.5 2.47266L14.5 14.4727"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>`;

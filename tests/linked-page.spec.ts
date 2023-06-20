@@ -110,6 +110,7 @@ test.describe('multiple page', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -137,6 +138,7 @@ test.describe('multiple page', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -350,6 +352,7 @@ test.describe('reference node', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -372,6 +375,7 @@ test.describe('reference node', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -583,6 +587,7 @@ test.describe.skip('linked page with clipboard', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
