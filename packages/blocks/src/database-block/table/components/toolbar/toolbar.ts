@@ -166,27 +166,27 @@ const styles = css`
 export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   hoverState!: boolean;
 
-  @property()
+  @property({ attribute: false })
   searchState!: SearchState;
 
-  @property()
+  @property({ attribute: false })
   view!: TableViewManager;
 
   @property()
   addRow!: (position: InsertPosition) => void;
 
-  @property()
+  @property({ attribute: false })
   setSearchState!: (state: SearchState) => void;
 
-  @property()
+  @property({ attribute: false })
   setSearchString!: (search: string) => void;
-  @property()
+  @property({ attribute: false })
   setFilteredRowIds!: (rowIds: string[]) => void;
 
   @query('.affine-database-search-input')

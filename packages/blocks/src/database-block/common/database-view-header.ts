@@ -40,13 +40,13 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
       background-color: #e0e0e0;
     }
   `;
-  @property()
+  @property({ attribute: false })
   model!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   currentView?: string;
 
-  @property()
+  @property({ attribute: false })
   setViewId!: (id: string) => void;
 
   @query('.database-view-header')

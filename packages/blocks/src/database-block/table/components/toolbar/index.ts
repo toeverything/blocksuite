@@ -10,7 +10,7 @@ import type { InsertPosition } from '../../../database-model.js';
 
 @customElement('affine-database-new-record-preview')
 class NewRecordPreview extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   offset = { x: 0, y: 0 };
 
   override render() {

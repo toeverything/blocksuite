@@ -16,7 +16,7 @@ export abstract class DatabaseCellElement<
   rowId!: string;
   @property()
   isEditing!: boolean;
-  @property()
+  @property({ attribute: false })
   protected setEditing!: (editing: boolean) => void;
 
   get page() {

@@ -2,13 +2,14 @@ import './component-toolbar/component-toolbar.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { Bound } from '@blocksuite/phasor';
+import type { SurfaceManager } from '@blocksuite/phasor';
 import {
   type ConnectorElement,
+  deserializeXYWH,
   serializeXYWH,
   TextElement,
 } from '@blocksuite/phasor';
-import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
-import { Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -153,16 +154,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ type: Page })
+  @property({ attribute: false })
   page!: Page;
 
-  @property({ type: SurfaceManager })
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @query('.affine-edgeless-selected-rect')

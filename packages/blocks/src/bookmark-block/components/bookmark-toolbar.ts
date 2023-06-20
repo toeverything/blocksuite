@@ -106,10 +106,10 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   onSelected?: ToolbarActionCallback & MenuActionCallback;
 
   @query('.bookmark-bar')

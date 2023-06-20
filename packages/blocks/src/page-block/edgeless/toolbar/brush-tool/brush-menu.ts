@@ -112,10 +112,10 @@ export class EdgelessBrushMenu extends LitElement {
     ${tooltipStyle}
   `;
 
-  @property()
+  @property({ attribute: false })
   mouseMode!: MouseMode;
 
-  @property()
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   private _setBrushColor = (color: CssVariableName) => {

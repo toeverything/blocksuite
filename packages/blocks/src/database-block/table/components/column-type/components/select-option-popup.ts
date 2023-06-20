@@ -74,13 +74,13 @@ export class SelectActionPopup extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   tagId!: string;
 
-  @property()
+  @property({ attribute: false })
   onAction!: (type: SelectTagActionType, id: string) => void;
 
-  @property()
+  @property({ attribute: false })
   onClosePopup!: () => void;
 
   private _onAction = (e: Event, type: SelectTagActionType) => {

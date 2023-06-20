@@ -53,6 +53,9 @@ jobs:
         # Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
         run: pnpm lint
 
+      - name: Run lit-lint
+        run: pnpm lit-lint
+
       - name: Run prettier
         run: npx prettier --cache --check packages tests
 

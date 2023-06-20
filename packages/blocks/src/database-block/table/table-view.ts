@@ -138,13 +138,13 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   model!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   view!: DatabaseViewDataMap['table'];
 
-  @property()
+  @property({ attribute: false })
   root!: BlockSuiteRoot;
 
   @query('.affine-database-table-container')

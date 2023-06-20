@@ -44,16 +44,16 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this.editingDisposable != null;
   }
 
-  @property()
+  @property({ attribute: false })
   public readonly rowId!: string;
-  @property()
+  @property({ attribute: false })
   public readonly rowIndex!: number;
-  @property()
+  @property({ attribute: false })
   public readonly columnId!: string;
-  @property()
+  @property({ attribute: false })
   public readonly columnIndex!: number;
 
-  @property()
+  @property({ attribute: false })
   column!: ColumnManager;
 
   private get readonly() {

@@ -118,10 +118,10 @@ export class RichText extends ShadowlessElement {
     return this._virgoContainer;
   }
 
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   textSchema?: AffineTextSchema;
 
   private _vEditor: AffineVEditor | null = null;

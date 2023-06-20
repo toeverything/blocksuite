@@ -26,7 +26,7 @@ export class AffineLink extends ShadowlessElement {
     return link;
   }
 
-  @property()
+  @property({ attribute: false })
   popoverHoverOpenDelay = 150;
 
   @state()

@@ -20,7 +20,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   @property()
   tableViewManager!: TableViewManager;
 
-  @property()
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
   @query('.affine-database-column-header')
