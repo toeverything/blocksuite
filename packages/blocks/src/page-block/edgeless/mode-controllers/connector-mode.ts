@@ -185,7 +185,11 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     noop();
   }
 
-  override beforeModeSwitch() {
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
     noop();
   }
 }

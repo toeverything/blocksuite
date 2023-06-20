@@ -194,7 +194,7 @@ export class EditorContainer
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;
-      localStorage.setItem(
+      sessionStorage.setItem(
         'blocksuite:' + this.page.id + ':edgelessViewport',
         JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
       );

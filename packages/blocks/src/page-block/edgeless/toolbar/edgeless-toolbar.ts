@@ -276,9 +276,27 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       _disposables,
       edgeless: { slots },
     } = this;
-    _disposables.add(slots.mouseModeUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.mouseModeUpdated.on(() => {
+        this._trySaveBrushStateLocalRecord();
+        this.requestUpdate();
+      })
+    );
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
   }
+
+  private _trySaveBrushStateLocalRecord = () => {
+    const mouseMode = this.edgeless.selection.mouseMode;
+    if (mouseMode.type === 'brush') {
+      sessionStorage.setItem(
+        'blocksuite:' + this.edgeless.page.id + ':edgelessBrush',
+        JSON.stringify({
+          color: mouseMode.color,
+          lineWidth: mouseMode.lineWidth,
+        })
+      );
+    }
+  };
 
   override render() {
     const { type } = this.mouseMode;

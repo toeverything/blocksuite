@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 
 import {
   assertMouseMode,
+  deleteAll,
   pickColorAtPoints,
   selectBrushColor,
   selectBrushSize,
@@ -11,6 +12,7 @@ import {
 } from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
+  click,
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
@@ -86,6 +88,31 @@ test('add brush element with color', async ({ page }) => {
 
   const [pickedColor] = await pickColorAtPoints(page, [[110, 110]]);
 
+  await assertEdgelessColorSameWithHexColor(page, color, pickedColor);
+});
+
+test('keep same color when mouse mode switched back to brush', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+
+  await setMouseMode(page, 'brush');
+  const color = '--affine-palette-line-blue';
+  await selectBrushColor(page, color);
+  const start = { x: 200, y: 200 };
+  const end = { x: 300, y: 300 };
+  await dragBetweenCoords(page, start, end, { steps: 100 });
+
+  await setMouseMode(page, 'default');
+  await click(page, { x: 50, y: 50 });
+
+  await setMouseMode(page, 'brush');
+  const origin = { x: 100, y: 100 };
+  await dragBetweenCoords(page, origin, start, { steps: 100 });
+  const [pickedColor] = await pickColorAtPoints(page, [[110, 110]]);
   await assertEdgelessColorSameWithHexColor(page, color, pickedColor);
 });
 

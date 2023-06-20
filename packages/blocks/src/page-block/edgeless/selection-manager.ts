@@ -476,6 +476,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
     this.container.slots.mouseModeUpdated.emit(mouseMode);
     this.container.slots.selectionUpdated.emit(state);
+    this._controllers[mouseMode.type].afterModeSwitch(mouseMode);
   };
 
   switchToDefaultMode(state: EdgelessSelectionState) {
