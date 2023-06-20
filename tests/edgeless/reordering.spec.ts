@@ -1,8 +1,8 @@
 import { type Page } from '@playwright/test';
 
 import {
-  initThreeNotes,
-  initThreeShapes,
+  initThreeOverlapNotes,
+  initThreeOverlapShapes,
   switchEditorMode,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -19,7 +19,7 @@ test.describe('reordering shapes', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
-    await initThreeShapes(page);
+    await initThreeOverlapShapes(page);
     await page.mouse.click(0, 0);
   }
 
@@ -122,7 +122,7 @@ test.describe('reordering notes', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
-    await initThreeNotes(page);
+    await initThreeOverlapNotes(page);
     await waitNextFrame(page);
     await page.mouse.click(0, 0);
   }

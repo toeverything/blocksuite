@@ -678,7 +678,7 @@ export async function changeConnectorStrokeStyle(
   await button.click();
 }
 
-export async function initThreeShapes(page: Page) {
+export async function initThreeOverlapShapes(page: Page) {
   const rect0 = {
     start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
@@ -698,8 +698,14 @@ export async function initThreeShapes(page: Page) {
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
 }
 
-export async function initThreeNotes(page: Page) {
+export async function initThreeOverlapNotes(page: Page) {
   await addNote(page, 'abc', 30 + 100, 40 + 100);
   await addNote(page, 'efg', 30 + 130, 40 + 100);
   await addNote(page, 'hij', 30 + 160, 40 + 100);
+}
+
+export async function initThreeNotes(page: Page) {
+  await addNote(page, 'abc', 30 + 100, 40 + 100);
+  await addNote(page, 'efg', 30 + 130, 40 + 200);
+  await addNote(page, 'hij', 30 + 160, 40 + 300);
 }
