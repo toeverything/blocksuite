@@ -28,7 +28,7 @@ export class FormatBarButton extends IconButton {
   override height: string | number = '32px';
 
   // TODO update color when active
-  @property()
+  @property({ type: Boolean })
   active = false;
 
   private readonly _mousedown = (e: MouseEvent) => {

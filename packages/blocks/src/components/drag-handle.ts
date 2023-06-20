@@ -1,10 +1,10 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
   type Disposable,
   isFirefox,
 } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render } from 'lit';
@@ -47,7 +47,7 @@ export class DragIndicator extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   rect: Rect | null = null;
 
   override render() {
@@ -66,7 +66,7 @@ export class DragIndicator extends LitElement {
 
 @customElement('affine-drag-preview')
 export class DragPreview extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   offset = { x: 0, y: 0 };
 
   override render() {

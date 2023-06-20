@@ -5,6 +5,7 @@ import {
   getBoundingBox,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseState,
+  waitNextFrame,
 } from '../utils/actions/misc.js';
 import { test } from '../utils/playwright.js';
 import {
@@ -16,7 +17,7 @@ import {
 } from './actions.js';
 
 test.describe('row-level selection', () => {
-  test('should support drag the mouse across cells to trigger row selection', async ({
+  test('should support pressing esc to trigger row selection', async ({
     page,
   }) => {
     await enterPlaygroundRoom(page);
@@ -24,7 +25,7 @@ test.describe('row-level selection', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
-
+    await pressEscape(page);
     const titleColumn = getDatabaseBodyCell(page, {
       rowIndex: 0,
       columnIndex: 0,
@@ -41,10 +42,11 @@ test.describe('row-level selection', () => {
 
     await dragBetweenCoords(
       page,
-      { x: startX, y: startY },
-      { x: endX, y: endY }
+      { x: endX, y: endY },
+      { x: startX, y: startY }
     );
-
+    await waitNextFrame(page, 100);
+    await pressEscape(page);
     await assertRowsSelection(page, [0, 0]);
   });
 

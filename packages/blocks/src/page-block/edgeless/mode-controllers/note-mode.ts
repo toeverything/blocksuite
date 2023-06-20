@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/lit';
+import type { PointerEventState } from '@blocksuite/block-std';
 
 import { type NoteMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
@@ -73,7 +73,11 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
     noop();
   }
 
-  override afterModeSwitch(): void {
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
     noop();
   }
 }

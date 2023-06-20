@@ -1,7 +1,7 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 
-import type { BrushMouseMode } from '../../../__internal__/index.js';
+import type { BrushMouseMode, MouseMode } from '../../../__internal__/index.js';
 import { BrushSize, noop } from '../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/color-panel.js';
 import { MouseModeController } from './index.js';
@@ -102,6 +102,10 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
   override afterModeSwitch(mode: BrushMouseMode) {
     this._tryLoadBrushStateLocalRecord();
+  }
+
+  override beforeModeSwitch(mode: MouseMode) {
+    noop();
   }
 
   private _tryLoadBrushStateLocalRecord() {

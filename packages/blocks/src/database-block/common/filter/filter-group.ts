@@ -18,16 +18,16 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       background-color: white;
     }
   `;
-  @property()
+  @property({ attribute: false })
   data!: FilterGroup;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
 
   @query('.add-new')
   addNew!: HTMLElement;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: FilterGroup) => void;
 
   private opMap = {

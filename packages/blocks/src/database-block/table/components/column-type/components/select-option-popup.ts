@@ -7,7 +7,7 @@ import {
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { isDivider } from '../../../../utils.js';
+import { isDivider } from '../../../../utils/utils.js';
 import type { SelectTagAction, SelectTagActionType } from '../../../types.js';
 import { actionStyles } from '../../edit-column-popup/styles.js';
 
@@ -74,13 +74,13 @@ export class SelectActionPopup extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   tagId!: string;
 
-  @property()
+  @property({ attribute: false })
   onAction!: (type: SelectTagActionType, id: string) => void;
 
-  @property()
+  @property({ attribute: false })
   onClosePopup!: () => void;
 
   private _onAction = (e: Event, type: SelectTagActionType) => {

@@ -569,7 +569,7 @@ export class DefaultPageBlockComponent
           }}"
           .offset="${viewportOffset}"
         ></affine-selected-blocks>
-        ${draggingArea} ${selectedEmbedContainer}
+        ${this.widgets} ${draggingArea} ${selectedEmbedContainer}
       </div>
     `;
   }

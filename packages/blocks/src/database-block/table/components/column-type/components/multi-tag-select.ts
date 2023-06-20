@@ -18,7 +18,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getTagColor, onClickOutside } from '../../../../utils.js';
+import { getTagColor, onClickOutside } from '../../../../utils/utils.js';
 import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
@@ -223,30 +223,30 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
 
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   mode: SelectMode = SelectMode.Single;
 
-  @property()
+  @property({ attribute: false })
   options: SelectTag[] = [];
 
-  @property()
+  @property({ attribute: false })
   value: string[] = [];
-  @property()
+  @property({ attribute: false })
   container!: HTMLElement;
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   onChange!: (value: string[]) => void;
 
-  @property()
+  @property({ attribute: false })
   editComplete!: () => void;
 
-  @property()
+  @property({ attribute: false })
   newTag!: (tag: SelectTag) => void;
-  @property()
+  @property({ attribute: false })
   deleteTag!: (id: string) => void;
-  @property()
+  @property({ attribute: false })
   changeTag!: (tag: SelectTag) => void;
 
   @query('.select-input')
@@ -387,8 +387,6 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       } else {
         this._onAddSelection(selectedValue);
       }
-    } else if (event.key === 'Escape') {
-      this.editComplete();
     }
   };
 
@@ -635,13 +633,13 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
                         cursor: isEditing ? 'text' : 'pointer',
                       })}
                       data-select-option-id="${select.id}"
-                      .page="${this.page}"
-                      .select="${select}"
-                      .editing="${isEditing}"
-                      .index="${index}"
-                      .tagId="${select.id}"
-                      .saveSelectionName="${this._onSaveSelectionName}"
-                      .setEditingId="${this._setEditingId}"
+                      .page=${this.page}
+                      .select=${select}
+                      .editing=${isEditing}
+                      .index=${index}
+                      .tagId=${select.id}
+                      .saveSelectionName=${this._onSaveSelectionName}
+                      .setEditingId=${this._setEditingId}
                     ></affine-database-select-option>
                   </div>
                   <div class="select-option-icon" @click="${onOptionIconClick}">

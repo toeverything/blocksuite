@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/lit';
+import type { PointerEventState } from '@blocksuite/block-std';
 
 import type { PanMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
@@ -69,7 +69,11 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     noop();
   }
 
-  override afterModeSwitch(mode: PanMouseMode): void {
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
     noop();
   }
 }

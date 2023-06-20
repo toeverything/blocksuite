@@ -43,13 +43,13 @@ export class EditorContainer
   extends WithDisposable(ShadowlessElement)
   implements AbstractEditor
 {
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   mode: 'page' | 'edgeless' = 'page';
 
-  @property()
+  @property({ attribute: false })
   override autofocus = false;
 
   @query('affine-default-page')
@@ -212,7 +212,7 @@ export class EditorContainer
       this.model.id,
       html`<block-suite-root
         .page=${this.page}
-        .componentMap=${this.mode === 'page' ? pagePreset : edgelessPreset}
+        .blocks=${this.mode === 'page' ? pagePreset : edgelessPreset}
       ></block-suite-root>`
     );
 

@@ -125,23 +125,23 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
   static override styles = formatQuickBarStyle;
   static customElements: CustomElementCreator[] = [];
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
   @property()
   left: string | null = null;
 
-  @property()
+  @property({ attribute: false })
   top: string | null = null;
 
-  @property()
+  @property({ attribute: false })
   abortController = new AbortController();
 
   // Sometimes the quick bar need to update position
-  @property()
+  @property({ attribute: false })
   positionUpdated = new Slot();
 
-  @property()
+  @property({ attribute: false })
   models: BaseBlockModel[] = [];
 
   @state()

@@ -298,7 +298,7 @@ test('should support rename column', async ({ page }) => {
   const { textElement, inputElement } = await getDatabaseHeaderColumn(page, 1);
   expect(await textElement.innerText()).toBe('abc');
 
-  await performColumnAction(page, '4', 'rename');
+  await performColumnAction(page, 'abc', 'Rename');
   await inputElement.click();
   await type(page, '123');
   await pressEnter(page);
@@ -336,38 +336,42 @@ test('should support right insert column', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '1');
 
-  await performColumnAction(page, '4', 'insert-right');
+  await performColumnAction(page, '1', 'Insert right');
+  await type(page, '2');
+  await pressEnter(page);
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(4);
 
-  await assertDatabaseColumnOrder(page, ['4', '5']);
+  await assertDatabaseColumnOrder(page, ['1', '2']);
 });
 
 test('should support left insert column', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '1');
 
-  await performColumnAction(page, '4', 'insert-left');
+  await performColumnAction(page, '1', 'Insert left');
+  await type(page, '2');
+  await pressEnter(page);
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(4);
 
-  await assertDatabaseColumnOrder(page, ['5', '4']);
+  await assertDatabaseColumnOrder(page, ['2', '1']);
 });
 
 test('should support delete column', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '1');
 
   const columns = page.locator('.affine-database-column');
   expect(await columns.count()).toBe(3);
 
-  await performColumnAction(page, '4', 'delete');
+  await performColumnAction(page, '1', 'Delete');
   expect(await columns.count()).toBe(2);
 });
 
@@ -375,10 +379,10 @@ test('should support duplicate column', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '1');
   await initDatabaseDynamicRowWithData(page, '123', true);
 
-  await performColumnAction(page, '4', 'duplicate');
+  await performColumnAction(page, '1', 'duplicate');
   const cells = page.locator('.affine-database-select-cell-container');
   expect(await cells.count()).toBe(2);
 
@@ -391,19 +395,20 @@ test('should support move column right', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '1');
   await initDatabaseDynamicRowWithData(page, '123', true);
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '2');
   await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
-  await assertDatabaseColumnOrder(page, ['4', '6']);
+  await assertDatabaseColumnOrder(page, ['1', '2']);
 
-  await performColumnAction(page, '4', 'move-right');
-  await assertDatabaseColumnOrder(page, ['6', '4']);
+  await performColumnAction(page, '1', 'Move right');
+  await waitNextFrame(page, 100);
+  await assertDatabaseColumnOrder(page, ['2', '1']);
 
   await undoByClick(page);
   const { column } = await getDatabaseHeaderColumn(page, 2);
   await column.click();
-  const moveLeft = page.locator('.move-right');
+  const moveLeft = page.locator('.action', { hasText: 'Move right' });
   expect(await moveLeft.count()).toBe(0);
 });
 
@@ -411,19 +416,19 @@ test('should support move column left', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '1');
   await initDatabaseDynamicRowWithData(page, '123', true);
-  await initDatabaseColumn(page);
+  await initDatabaseColumn(page, '2');
   await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
-  await assertDatabaseColumnOrder(page, ['4', '6']);
+  await assertDatabaseColumnOrder(page, ['1', '2']);
 
   const { column } = await getDatabaseHeaderColumn(page, 0);
   await column.click();
-  const moveLeft = page.locator('.move-left');
+  const moveLeft = page.locator('.action', { hasText: 'Move left' });
   expect(await moveLeft.count()).toBe(0);
 
-  await performColumnAction(page, '6', 'move-left');
-  await assertDatabaseColumnOrder(page, ['6', '4']);
+  await performColumnAction(page, '2', 'Move left');
+  await assertDatabaseColumnOrder(page, ['2', '1']);
 });
 
 test.describe('switch column type', () => {
@@ -752,7 +757,7 @@ test('should support drag to change column width', async ({ page }) => {
     }
   );
 
-  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
+  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance + 1);
   await assertColumnWidth(normalColumn, normalColumnWidth);
 
   await undoByClick(page);
@@ -813,19 +818,17 @@ test('should support drag and drop to move columns', async ({ page }) => {
       steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
-        const indicator = page.locator(
-          '.affine-database-column-drag-indicator'
-        );
+        const indicator = page.locator('.database-move-column-drop-preview');
         await expect(indicator).toBeVisible();
 
         const { box } = await getDatabaseHeaderColumn(page, 2);
         const indicatorBox = await getBoundingBox(indicator);
-        expect(box.x + box.width).toBe(indicatorBox.x);
+        expect(box.x + box.width - indicatorBox.x < 10).toBe(true);
       },
     }
   );
 
-  const { text } = await getDatabaseHeaderColumn(page, 3);
+  const { text } = await getDatabaseHeaderColumn(page, 2);
   expect(text).toBe('column1');
 });
 

@@ -41,22 +41,22 @@ export class SelectOption extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   select!: SelectTag;
 
-  @property()
+  @property({ attribute: false })
   editing!: boolean;
 
-  @property()
+  @property({ attribute: false })
   tagId!: string;
 
-  @property()
+  @property({ attribute: false })
   saveSelectionName!: (id?: string) => void;
 
-  @property()
+  @property({ attribute: false })
   setEditingId!: (id?: string) => void;
 
   @query('.select-option-text')

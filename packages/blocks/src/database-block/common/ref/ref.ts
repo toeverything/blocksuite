@@ -19,13 +19,13 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       padding: 0 2px;
     }
   `;
-  @property()
+  @property({ attribute: false })
   data?: VariableOrProperty;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: VariableOrProperty) => void;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
 
   get field() {
@@ -105,11 +105,11 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
         <div style="display:flex;align-items:center;">
           ${this.property &&
           html`<span style="margin-right: 4px;">${`'s`}</span>`}
-          <PlainSelect
+          <!-- <PlainSelect
             :value="propertyName"
             @update:value="setPropertyName"
             :options="propertyOptions"
-          ></PlainSelect>
+          ></PlainSelect> -->
         </div>
       </div>
     `;
