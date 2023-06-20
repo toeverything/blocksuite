@@ -518,7 +518,7 @@ export async function triggerComponentToolbarAction(
     }
     case 'changeNoteColor': {
       const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-note-button'
+        'edgeless-change-note-button edgeless-tool-icon-button'
       );
       await button.click();
       break;
