@@ -72,6 +72,14 @@ class ColumnManager {
     return this.getColumn(type)?.defaultData();
   }
 
+  getHelper(targetType: string) {
+    const column = this.map.get(targetType);
+    if (!column) {
+      throw new Error(`${targetType} is not exist`);
+    }
+    return column;
+  }
+
   typeOf(type: string, data: unknown): TType {
     const dataType = this.map.get(type)?.dataType(data);
     assertExists(dataType);

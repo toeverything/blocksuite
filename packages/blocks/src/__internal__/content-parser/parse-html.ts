@@ -1,10 +1,14 @@
 import type { BlockSchemas } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
-import type { DeltaOperation, Page } from '@blocksuite/store';
+import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
-import { richTextHelper } from '../../database-block/common/column-manager.js';
+import {
+  columnManager,
+  richTextHelper,
+} from '../../database-block/common/column-manager.js';
+import { getTagColor } from '../../database-block/utils.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
@@ -21,6 +25,12 @@ export type TextStyleHandler = (
 export type TableParserHandler = (
   element: Element
 ) => Promise<SerializedBlock[] | null>;
+
+export type ColumnMeta = {
+  type: string;
+  title: string;
+  optionsMap: Map<string, string>;
+};
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -701,20 +711,64 @@ export class HtmlParser {
       const tbodyElement = element.querySelector('tbody');
       const titleTrEle = theadElement?.querySelector('tr');
       let id = 1;
-      const titles: string[] = [];
+      const columnMeta: ColumnMeta[] = [];
       titleTrEle?.querySelectorAll('th').forEach(ele => {
-        titles.push(ele.textContent || '');
+        columnMeta.push({
+          title: ele.textContent || '',
+          type: getCorrespondingTableColumnType(
+            ele.querySelector('svg') ?? undefined
+          ),
+          optionsMap: new Map<string, string>(),
+        });
       });
-      const rows: string[][] = [];
+      const rows: (string | string[])[][] = [];
       tbodyElement?.querySelectorAll('tr').forEach(ele => {
-        const row: string[] = [];
-        ele.querySelectorAll('td').forEach(ele => {
-          row.push(ele.textContent || '');
+        const row: (string | string[])[] = [];
+        ele.querySelectorAll('td').forEach((ele, index) => {
+          const cellContent: string[] = [];
+          if (ele.children.length === 0) {
+            cellContent.push(ele.textContent || '');
+          }
+          Array.from(ele.children).map(child => {
+            if (child.classList.contains('checkbox-on')) {
+              cellContent.push('on');
+            } else {
+              cellContent.push(child.textContent || '');
+            }
+          });
+          row.push(
+            columnMeta[index].type !== 'multi-select'
+              ? cellContent.join('')
+              : cellContent
+          );
         });
         rows.push(row);
       });
-      const columns: Column[] = titles.slice(1).map((value, index) => {
-        return richTextHelper.createWithId('' + id++, value);
+      const columns: Column[] = columnMeta.slice(1).map((value, index) => {
+        if (['select', 'multi-select'].includes(value.type)) {
+          const options = rows
+            .map(row => row[index + 1])
+            .flat()
+            .filter((value, index, array) => array.indexOf(value) === index)
+            .map(uniqueValue => {
+              return {
+                id: nanoid(),
+                value: uniqueValue,
+                color: getTagColor(),
+              };
+            });
+          options.map(option =>
+            columnMeta[index + 1].optionsMap.set(option.value, option.id)
+          );
+          return columnManager
+            .getHelper(value.type)
+            .createWithId('' + id++, value.title, {
+              options,
+            });
+        }
+        return columnManager
+          .getHelper(value.type)
+          .createWithId('' + id++, value.title);
       });
       if (rows.length > 0) {
         let maxLen = rows[0].length;
@@ -733,12 +787,34 @@ export class HtmlParser {
         children.push({
           flavour: 'affine:paragraph',
           type: 'text',
-          text: [{ insert: row[0] }],
+          text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
           children: [],
         });
         const rowId = '' + id++;
         cells[rowId] = {};
         row.slice(1).forEach((value, index) => {
+          if (
+            columnMeta[index + 1].type === 'multi-select' &&
+            Array.isArray(value)
+          ) {
+            cells[rowId][columns[index].id] = {
+              columnId: columns[index].id,
+              value: value.map(
+                v => columnMeta[index + 1].optionsMap.get(v) || ''
+              ),
+            };
+            return;
+          }
+          if (
+            columnMeta[index + 1].type === 'select' &&
+            !Array.isArray(value)
+          ) {
+            cells[rowId][columns[index].id] = {
+              columnId: columns[index].id,
+              value: columnMeta[index + 1].optionsMap.get(value) || '',
+            };
+            return;
+          }
           cells[rowId][columns[index].id] = {
             columnId: columns[index].id,
             value,
@@ -752,7 +828,7 @@ export class HtmlParser {
           databaseProps: {
             id: '' + databasePropsId,
             title: 'Database',
-            titleColumnName: titles[0],
+            titleColumnName: columnMeta[0].title,
             titleColumnWidth: 432,
             rowIds: Object.keys(cells),
             cells: cells,
@@ -784,6 +860,23 @@ export class HtmlParser {
     return result;
   };
 }
+
+interface ColumnClassMap {
+  [key: string]: string;
+}
+
+const getCorrespondingTableColumnType = (htmlElement?: SVGSVGElement) => {
+  const ColumnClassMap: ColumnClassMap = {
+    typesSelect: 'select',
+    typesMultipleSelect: 'multi-select',
+    typesNumber: 'number',
+    typesCheckbox: 'checkbox',
+    typesText: 'rich-text',
+  };
+
+  const className = htmlElement?.classList[0] ?? 'typesText';
+  return ColumnClassMap[className] || 'rich-text';
+};
 
 const getIsLink = (htmlElement: HTMLElement) => {
   return ['A'].includes(htmlElement.tagName);
