@@ -20,5 +20,8 @@ export class BlockElement<Model extends BaseBlockModel> extends WithDisposable(
   content!: TemplateResult;
 
   @property({ attribute: false })
+  widgets!: TemplateResult;
+
+  @property({ attribute: false })
   page!: Page;
 }
