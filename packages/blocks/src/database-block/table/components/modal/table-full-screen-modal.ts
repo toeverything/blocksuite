@@ -9,11 +9,11 @@ import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from '../../../database-model.js';
-import { fullModelStyles } from './styles.js';
+import { fullScreenStyles } from './styles.js';
 
-@customElement('affine-database-table-view-full-modal')
-export class DatabaseTableViewFullModal extends BlockElement<DatabaseBlockModel> {
-  static override styles = fullModelStyles;
+@customElement('affine-database-table-view-full-screen')
+export class DatabaseTableViewFullScreen extends BlockElement<DatabaseBlockModel> {
+  static override styles = fullScreenStyles;
 
   @property({ attribute: false })
   abortController!: AbortController;
@@ -57,6 +57,6 @@ export class DatabaseTableViewFullModal extends BlockElement<DatabaseBlockModel>
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-table-view-full-modal': DatabaseTableViewFullModal;
+    'affine-database-table-view-full-screen': DatabaseTableViewFullScreen;
   }
 }

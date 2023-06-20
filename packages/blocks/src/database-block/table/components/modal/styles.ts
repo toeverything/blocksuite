@@ -60,7 +60,7 @@ export const modelStyles = css`
   }
 `;
 
-export const fullModelStyles = css`
+export const fullScreenStyles = css`
   .table-view-full-modal-overlay {
     position: fixed;
     z-index: var(--affine-z-index-modal);

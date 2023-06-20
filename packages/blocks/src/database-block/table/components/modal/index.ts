@@ -3,7 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../../database-model.js';
-import { DatabaseTableViewFullModal } from './table-full-modal.js';
+import { DatabaseTableViewFullScreen } from './table-full-screen-modal.js';
 import { DatabaseTableViewModal } from './table-modal.js';
 
 export function showDatabaseTableViewModal({
@@ -50,7 +50,7 @@ export function showDatabaseTableViewFullModal({
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
-  const modal = new DatabaseTableViewFullModal();
+  const modal = new DatabaseTableViewFullScreen();
   modal.page = page;
   modal.root = root;
   modal.model = model;
