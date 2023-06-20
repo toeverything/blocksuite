@@ -737,7 +737,7 @@ export class HtmlParser {
             }
           });
           row.push(
-            columnMeta[index].type !== 'multi-select'
+            columnMeta[index]?.type !== 'multi-select'
               ? cellContent.join('')
               : cellContent
           );
@@ -794,24 +794,24 @@ export class HtmlParser {
         cells[rowId] = {};
         row.slice(1).forEach((value, index) => {
           if (
-            columnMeta[index + 1].type === 'multi-select' &&
+            columnMeta[index + 1]?.type === 'multi-select' &&
             Array.isArray(value)
           ) {
             cells[rowId][columns[index].id] = {
               columnId: columns[index].id,
               value: value.map(
-                v => columnMeta[index + 1].optionsMap.get(v) || ''
+                v => columnMeta[index + 1]?.optionsMap.get(v) || ''
               ),
             };
             return;
           }
           if (
-            columnMeta[index + 1].type === 'select' &&
+            columnMeta[index + 1]?.type === 'select' &&
             !Array.isArray(value)
           ) {
             cells[rowId][columns[index].id] = {
               columnId: columns[index].id,
-              value: columnMeta[index + 1].optionsMap.get(value) || '',
+              value: columnMeta[index + 1]?.optionsMap.get(value) || '',
             };
             return;
           }
@@ -828,7 +828,7 @@ export class HtmlParser {
           databaseProps: {
             id: '' + databasePropsId,
             title: 'Database',
-            titleColumnName: columnMeta[0].title,
+            titleColumnName: columnMeta[0]?.title,
             titleColumnWidth: 432,
             rowIds: Object.keys(cells),
             cells: cells,
