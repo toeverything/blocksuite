@@ -355,7 +355,7 @@ export class HandleResizeManager {
           .rotateSelf(-_rotate)
           .translateSelf(-fp.x, -fp.y);
 
-        // See https://ww2.mathworks.cn/help/images/matrix-representation-of-geometric-transformations.html
+        // see https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html
         const flipXY = flipX * flipY;
         const flipAngle = flipXY < 0 ? _rotate * 2 : 0;
 
