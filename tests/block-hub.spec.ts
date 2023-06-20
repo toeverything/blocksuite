@@ -121,8 +121,8 @@ test('drag blank line into text area', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -182,8 +182,8 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -242,8 +242,8 @@ test('drag numbered list block from list menu into text area and blockHub list c
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -353,8 +353,8 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       /*xml*/ `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:index="a0"
   prop:hidden={false}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:type="text"
@@ -392,8 +392,8 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       /*xml*/ `
 <affine:note
   prop:background="--affine-background-secondary-color"
-  prop:index="a0"
   prop:hidden={false}
+  prop:index="a0"
 >
   <affine:paragraph
     prop:type="text"

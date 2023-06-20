@@ -37,8 +37,8 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:type="text"
@@ -80,8 +80,8 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:type="text"
@@ -110,8 +110,8 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:type="text"

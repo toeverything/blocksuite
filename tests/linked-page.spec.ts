@@ -110,8 +110,8 @@ test.describe('multiple page', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="page0"
@@ -138,8 +138,8 @@ test.describe('multiple page', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="page1"
@@ -352,8 +352,8 @@ test.describe('reference node', () => {
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:type="text"
@@ -375,8 +375,8 @@ test.describe('reference node', () => {
 >
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text={

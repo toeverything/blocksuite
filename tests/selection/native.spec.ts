@@ -1055,8 +1055,8 @@ test('should indent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -1099,8 +1099,8 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"
@@ -1136,8 +1136,8 @@ test('should unindent native multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="123"

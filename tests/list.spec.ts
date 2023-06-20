@@ -187,8 +187,8 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -220,8 +220,8 @@ test('nested list blocks', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:list
       prop:checked={false}
@@ -283,8 +283,8 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -305,8 +305,8 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
@@ -329,8 +329,8 @@ test('basic indent and unindent', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
-    prop:index="a0"
     prop:hidden={false}
+    prop:index="a0"
   >
     <affine:paragraph
       prop:text="text1"
