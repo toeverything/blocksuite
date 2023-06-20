@@ -8,6 +8,9 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
   static override tag = literal`affine-database-title-cell`;
 
   static override styles = css`
+    affine-database-title-cell {
+      background-color: var(--affine-hover-color);
+    }
     .affine-database-block-row-cell-content {
       display: flex;
       align-items: center;

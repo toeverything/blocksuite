@@ -4,6 +4,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { getService } from '../../../__internal__/service.js';
@@ -21,7 +22,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       align-items: center;
       width: 100%;
       height: 100%;
-      padding: 0 ${CELL_PADDING}px;
       border-right: 1px solid var(--affine-border-color);
     }
 
@@ -108,9 +108,13 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       renderer.components.CellEditing !== null
         ? renderer.components.CellEditing.tag
         : renderer.components.Cell.tag;
+    const style = styleMap({
+      padding: `0 ${CELL_PADDING}px`,
+    });
     return html`
       <${tag}
         ${ref(this._cell)}
+        style=${style}
         .column='${this.column}'
         .rowId='${this.rowId}'
         .setEditing='${this.setEditing}'

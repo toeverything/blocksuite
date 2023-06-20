@@ -121,7 +121,7 @@ const createWidthAdjustPreview = (
   left: number
 ) => {
   const div = document.createElement('div');
-  // div.style.pointerEvents='none';
+  div.style.pointerEvents = 'none';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
   div.style.height = `${height}px`;

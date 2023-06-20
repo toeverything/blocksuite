@@ -119,6 +119,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         ) {
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
+            const selection = this.selection;
+            if (
+              selection &&
+              selection.isEditing &&
+              selection.focus.rowIndex === cell.rowIndex &&
+              selection.focus.columnIndex === cell.columnIndex
+            ) {
+              return false;
+            }
             this.startDrag(event, cell);
           }
           return true;
