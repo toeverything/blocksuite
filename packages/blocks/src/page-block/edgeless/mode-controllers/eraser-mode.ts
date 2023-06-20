@@ -182,4 +182,8 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
   override onPressShiftKey(pressed: boolean): void {
     noop();
   }
+
+  override afterModeSwitch(newMode: EraserMouseMode): void {
+    noop();
+  }
 }
