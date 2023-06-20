@@ -17,10 +17,9 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       position: absolute;
       z-index: 3;
       bottom: 28px;
-      left: 10px;
+      left: 28px;
       display: flex;
       justify-content: center;
-      transform: translateX(-50%);
       user-select: none;
     }
 
@@ -28,9 +27,11 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       flex-direction: row;
-      padding: 0 20px;
-      height: 64px;
+      padding: 4px;
+      height: 28px;
       background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
+      border-radius: 8px;
       fill: currentcolor;
     }
 
@@ -42,13 +43,6 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
 
     .edgeless-zoom-toolbar-container[hidden] {
       display: none;
-    }
-
-    .short-divider {
-      width: 1px;
-      height: 24px;
-      margin: 0 7px;
-      background-color: var(--affine-border-color);
     }
 
     .zoom-percent {

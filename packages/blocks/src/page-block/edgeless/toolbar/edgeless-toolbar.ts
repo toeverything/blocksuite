@@ -6,18 +6,15 @@ import './note-tool/note-tool-button.js';
 import './image-tool-button.js';
 import './eraser-tool-button.js';
 
-import { HandIcon, NewTextIcon, SelectIcon } from '@blocksuite/global/config';
+import { HandIcon, SelectIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { clamp, type MouseMode, Point } from '../../../__internal__/index.js';
+import { type MouseMode } from '../../../__internal__/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
-
-export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
@@ -101,108 +98,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     return this.edgeless.mouseMode;
   }
 
-  get zoom() {
-    return this.edgeless.surface.viewport.zoom;
-  }
-
-  private _rafId: number | null = null;
-
-  private _setCenter(x: number, y: number) {
-    this.edgeless.surface.viewport.setCenter(x, y);
-    this.edgeless.slots.viewportUpdated.emit();
-  }
-
-  private _setZoom(zoom: number, focusPoint?: Point) {
-    this.edgeless.surface.viewport.setZoom(zoom, focusPoint);
-    this.edgeless.slots.viewportUpdated.emit();
-  }
-
-  private _setZoomByStep(step: number) {
-    this._smoothZoom(clamp(this.zoom + step, ZOOM_MIN, ZOOM_MAX));
-  }
-
-  private _smoothZoom(zoom: number, focusPoint?: Point) {
-    const delta = zoom - this.zoom;
-
-    const innerSmoothZoom = () => {
-      if (this._rafId) cancelAnimationFrame(this._rafId);
-      this._rafId = requestAnimationFrame(() => {
-        const sign = delta > 0 ? 1 : -1;
-        const total = 10;
-        const step = delta / total;
-        const nextZoom = this._cutoff(this.zoom + step, zoom, sign);
-
-        this._setZoom(nextZoom, focusPoint);
-        if (nextZoom != zoom) innerSmoothZoom();
-      });
-    };
-    innerSmoothZoom();
-  }
-
-  private _cutoff(value: number, ref: number, sign: number) {
-    if (sign > 0 && value > ref) return ref;
-    if (sign < 0 && value < ref) return ref;
-    return value;
-  }
-
-  private _zoomToFit() {
-    const { centerX, centerY, zoom } = this.edgeless.getFitToScreenData();
-    const { viewport } = this.edgeless.surface;
-    const preZoom = this.zoom;
-    const newZoom = zoom;
-    const cofficient = preZoom / newZoom;
-    if (cofficient === 1) {
-      this._smoothTranslate(centerX, centerY);
-    } else {
-      const center = new Point(viewport.centerX, viewport.centerY);
-      const newCenter = new Point(centerX, centerY);
-      const focusPoint = newCenter
-        .subtract(center.scale(cofficient))
-        .scale(1 / (1 - cofficient));
-      this._smoothZoom(zoom, focusPoint);
-    }
-  }
-
-  private _smoothTranslate(x: number, y: number) {
-    const { viewport } = this.edgeless.surface;
-    const delta = { x: x - viewport.centerX, y: y - viewport.centerY };
-    const innerSmoothTranslate = () => {
-      if (this._rafId) cancelAnimationFrame(this._rafId);
-      this._rafId = requestAnimationFrame(() => {
-        const rate = 10;
-        const step = { x: delta.x / rate, y: delta.y / rate };
-        const nextCenter = {
-          x: viewport.centerX + step.x,
-          y: viewport.centerY + step.y,
-        };
-        const signX = delta.x > 0 ? 1 : -1;
-        const signY = delta.y > 0 ? 1 : -1;
-        nextCenter.x = this._cutoff(nextCenter.x, x, signX);
-        nextCenter.y = this._cutoff(nextCenter.y, y, signY);
-        this._setCenter(nextCenter.x, nextCenter.y);
-        if (nextCenter.x != x || nextCenter.y != y) innerSmoothTranslate();
-      });
-    };
-    innerSmoothTranslate();
-  }
-
   setMouseMode = (mouseMode: MouseMode) => {
     this.edgeless.selection.setMouseMode(mouseMode);
   };
-
-  setZoomByAction(action: ZoomAction) {
-    switch (action) {
-      case 'fit':
-        this._zoomToFit();
-        break;
-      case 'reset':
-        this._smoothZoom(1.0);
-        break;
-      case 'in':
-      case 'out':
-        this._setZoomByStep(ZOOM_STEP * (action === 'in' ? 1 : -1));
-    }
-  }
 
   private iconButtonStyles = `
     --hover-color: var(--affine-hover-color);
