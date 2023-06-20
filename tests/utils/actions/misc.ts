@@ -3,7 +3,6 @@ import '../declare-test-window.js';
 
 import type {
   CssVariableName,
-  DatabaseBlockModel,
   ListType,
   ThemeObserver,
 } from '@blocksuite/blocks';
@@ -445,11 +444,13 @@ export async function focusDatabaseTitle(page: Page) {
 }
 
 export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
-  const columns = await page.evaluate(async () => {
-    const database = window.page?.getBlockById('2') as DatabaseBlockModel;
-    return database.columns.map(col => col.id);
-  });
-  expect(columns).toEqual(order);
+  const columns = await page
+    .locator('affine-database-column-header')
+    .locator('affine-database-header-column')
+    .all();
+  expect(await Promise.all(columns.slice(1).map(v => v.innerText()))).toEqual(
+    order
+  );
 }
 
 export async function initEmptyCodeBlockState(page: Page) {

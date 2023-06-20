@@ -1,4 +1,5 @@
 import type { ColumnType } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import { expect, type Locator, type Page } from '@playwright/test';
 
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
@@ -10,13 +11,12 @@ import {
   waitNextFrame,
 } from '../utils/actions/misc.js';
 import { assertClassName } from '../utils/asserts.js';
-
 export async function initDatabaseColumn(page: Page, title = '') {
   await focusDatabaseHeader(page);
   const editor = getEditorLocator(page);
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
-  await waitNextFrame(page);
+  await waitNextFrame(page, 100);
 
   if (title) {
     await type(page, title);
@@ -29,14 +29,15 @@ export async function initDatabaseColumn(page: Page, title = '') {
 
 export async function performColumnAction(
   page: Page,
-  columnId: string,
+  name: string,
   action: string
 ) {
-  const titleRow = page.locator('.affine-database-column-header');
-  const columnTitle = titleRow.locator(`[data-column-id="${columnId}"]`);
-  await columnTitle.click();
+  const column = page.locator('affine-database-header-column', {
+    hasText: name,
+  });
+  await column.click();
 
-  const actionMenu = page.locator(`.${action}`);
+  const actionMenu = page.locator(`.action`, { hasText: action });
   await actionMenu.click();
 }
 
@@ -46,8 +47,8 @@ export async function switchColumnType(
   columnIndex = 1,
   isDefault = false
 ) {
-  const { column } = await getDatabaseHeaderColumn(page, columnIndex);
-  await column.click();
+  const { typeIcon } = await getDatabaseHeaderColumn(page, columnIndex);
+  await typeIcon.click();
 
   await waitNextFrame(page);
   const action = page.locator('.column-type');
@@ -334,7 +335,7 @@ export async function assertRowsSelection(
   page: Page,
   rowIndexes: [start: number, end: number]
 ) {
-  const selection = page.locator('.database-row-level-selection');
+  const selection = page.locator('.database-selection');
   const selectionBox = await getBoundingBox(selection);
 
   const startIndex = rowIndexes[0];
@@ -344,7 +345,17 @@ export async function assertRowsSelection(
     // single row
     const row = getDatabaseBodyRow(page, startIndex);
     const rowBox = await getBoundingBox(row);
-    expect(selectionBox).toEqual(rowBox);
+    const lastCell = await row
+      .locator('affine-database-cell-container')
+      .last()
+      .boundingBox();
+    assertExists(lastCell);
+    expect(selectionBox).toEqual({
+      x: rowBox.x,
+      y: rowBox.y,
+      height: rowBox.height,
+      width: lastCell.x + lastCell.width - rowBox.x,
+    });
   } else {
     // multiple rows
     // Only test at most two lines when testing.
@@ -352,10 +363,15 @@ export async function assertRowsSelection(
     const endRow = getDatabaseBodyRow(page, endIndex);
     const startRowBox = await getBoundingBox(startRow);
     const endRowBox = await getBoundingBox(endRow);
+    const lastCell = await startRow
+      .locator('affine-database-cell-container')
+      .last()
+      .boundingBox();
+    assertExists(lastCell);
     expect(selectionBox).toEqual({
       x: startRowBox.x,
       y: startRowBox.y,
-      width: startRowBox.width,
+      width: lastCell.x + lastCell.width - startRowBox.x,
       height: startRowBox.height + endRowBox.height,
     });
   }

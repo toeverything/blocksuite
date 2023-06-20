@@ -15,7 +15,7 @@ class SelectCell extends DatabaseCellElement<string[], SelectColumnData> {
     return html`
       <affine-database-multi-tag-view
         .value="${value}"
-        .options="${this.columnData.options}"
+        .options="${this.column.data.options}"
       ></affine-database-multi-tag-view>
     `;
   }
@@ -28,7 +28,7 @@ export class SelectCellEditing extends DatabaseCellElement<
   static override tag = literal`affine-database-select-cell-editing`;
 
   get _options(): SelectTag[] {
-    return this.columnData.options;
+    return this.column.data.options;
   }
 
   get _value() {
@@ -45,7 +45,7 @@ export class SelectCellEditing extends DatabaseCellElement<
   };
 
   _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.updateColumnData(data => {
+    this.column.updateData(data => {
       return {
         ...data,
         options: update(data.options),
