@@ -355,6 +355,9 @@ export class HandleResizeManager {
           .rotateSelf(-_rotate)
           .translateSelf(-fp.x, -fp.y);
 
+        const flipXY = flipX * flipY;
+        const flipAngle = flipXY < 0 ? _rotate * 2 : 0;
+
         // TODO: on same rotate
         process = ({ bound: { x, y, w, h }, flip, rotate = 0 }, id) => {
           const cx = x + w / 2;
@@ -364,9 +367,8 @@ export class HandleResizeManager {
           const newHeight = Math.abs(h * scale.y);
 
           // adjust angle
-          if ((flipX < 0 && flipY > 0) || (flipX > 0 && flipY < 0)) {
-            rotate -= _rotate * 2;
-          }
+          rotate -= flipAngle;
+          rotate *= flipXY;
 
           newBounds.set(id, {
             bound: new Bound(
@@ -379,7 +381,7 @@ export class HandleResizeManager {
               x: flipX * flip.x,
               y: flipY * flip.y,
             },
-            rotate: rotate * flipX * flipY,
+            rotate,
           });
         };
       }
