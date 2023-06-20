@@ -54,6 +54,13 @@ export class EdgelessNoteMenu extends LitElement {
       text-align: center;
       color: var(--affine-text-disable-color);
     }
+    .button-group-container > :is(edgeless-tool-icon-button) > svg {
+      fill: currentColor;
+    }
+  `;
+  private iconButtonStyles = `
+    --hover-color: var(--affine-hover-color);
+    --active-color: var(--affine-primary-color);
   `;
 
   @property()
@@ -69,30 +76,34 @@ export class EdgelessNoteMenu extends LitElement {
       <div class="note-memu-container">
         <div class="button-group-container">
           <div class="button-group-label">Blocks</div>
-          <edgeless-tool-icon-button>
-            ${Heading1BlockIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
             ${TextBlockIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${Heading1BlockIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
             ${Heading2BlockIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
             ${Heading3BlockIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
             ${Heading4BlockIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
             ${Heading5BlockIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
             ${Heading6BlockIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button> ${CodeIcon} </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button> ${ListIcon} </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${CodeIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${ListIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
             ${DividerBlockIcon}
           </edgeless-tool-icon-button>
         </div>

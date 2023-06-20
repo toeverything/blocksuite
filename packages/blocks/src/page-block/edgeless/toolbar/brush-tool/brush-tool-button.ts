@@ -1,7 +1,7 @@
 import '../../components/tool-icon-button.js';
 import './brush-menu.js';
 
-import { PenIcon } from '@blocksuite/global/config';
+import { NewPenIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
@@ -51,6 +51,10 @@ export class EdgelessBrushToolButton extends LitElement {
     :host {
       display: flex;
     }
+
+    edgeless-tool-icon-button svg:hover {
+      transform: translateY(-8px);
+    }
   `;
 
   @property()
@@ -61,6 +65,11 @@ export class EdgelessBrushToolButton extends LitElement {
 
   @property()
   setMouseMode!: (mouseMode: MouseMode) => void;
+
+  private iconButtonStyles = `
+    --hover-color: transparent;
+    --active-color: var(--affine-primary-color);
+  `;
 
   @state()
   private _popperShow = false;
@@ -104,6 +113,7 @@ export class EdgelessBrushToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
+        style=${this.iconButtonStyles}
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @click=${() => {
@@ -115,7 +125,7 @@ export class EdgelessBrushToolButton extends LitElement {
           this._toggleBrushMenu();
         }}
       >
-        ${PenIcon}
+        ${NewPenIcon}
       </edgeless-tool-icon-button>
     `;
   }

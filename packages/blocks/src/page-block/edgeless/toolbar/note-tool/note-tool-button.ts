@@ -35,7 +35,7 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
   reference.shadowRoot.appendChild(noteMenu);
 
   computePosition(reference, noteMenu, {
-    placement: 'top',
+    placement: 'top-start',
     middleware: [
       offset({
         mainAxis: -20,
@@ -61,6 +61,10 @@ export class EdgelessNoteToolButton extends LitElement {
   static override styles = css`
     :host {
       display: flex;
+    }
+
+    edgeless-tool-icon-button svg + svg {
+      margin-left: 8px;
     }
   `;
 
@@ -91,11 +95,17 @@ export class EdgelessNoteToolButton extends LitElement {
     }
   }
 
+  private iconButtonStyles = `
+    --hover-color: var(--affine-hover-color);
+    --active-color: var(--affine-primary-color);
+  `;
+
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('mouseMode')) {
       if (this.mouseMode.type !== 'note') {
         this._noteMenu?.dispose();
         this._noteMenu = null;
+        this._popperShow = false;
       }
       if (this._noteMenu) {
         this._noteMenu.element.mouseMode = this.mouseMode;
@@ -107,6 +117,7 @@ export class EdgelessNoteToolButton extends LitElement {
   override disconnectedCallback() {
     this._noteMenu?.dispose();
     this._noteMenu = null;
+    this._popperShow = false;
     super.disconnectedCallback();
   }
 
@@ -115,6 +126,7 @@ export class EdgelessNoteToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
+        style=${this.iconButtonStyles}
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Note', 'N')}
         .active=${type === 'note'}
         @click=${() => {

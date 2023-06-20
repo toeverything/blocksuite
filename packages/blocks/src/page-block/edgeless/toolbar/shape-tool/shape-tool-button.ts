@@ -1,7 +1,7 @@
 import '../../components/tool-icon-button.js';
 import './shape-menu.js';
 
-import { ShapeIcon } from '@blocksuite/global/config';
+import { NewShapeIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -21,6 +21,10 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
+    }
+
+    edgeless-tool-icon-button svg:hover {
+      scale: 1.2;
     }
 
     edgeless-shape-menu {
@@ -52,6 +56,11 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   private _toggleShapeMenu() {
     this._shapeMenuPopper?.toggle();
   }
+
+  private iconButtonStyles = `
+    --hover-color: transparent;
+    --active-color: var(--affine-primary-color);
+  `;
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
@@ -88,6 +97,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
 
     return html`
       <edgeless-tool-icon-button
+        style=${this.iconButtonStyles}
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
         @click=${() => {
@@ -100,7 +110,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._toggleShapeMenu();
         }}
       >
-        ${ShapeIcon}
+        ${NewShapeIcon}
       </edgeless-tool-icon-button>
       <edgeless-shape-menu .selectedShape=${selectedShape}>
       </edgeless-shape-menu>

@@ -1,70 +1,52 @@
-import '../components/tool-icon-button.js';
-import './shape-tool/shape-tool-button.js';
-import './brush-tool/brush-tool-button.js';
-import './connector-tool/connector-tool-button.js';
-import './note-tool/note-tool-button.js';
-import './image-tool-button.js';
-import './eraser-tool-button.js';
-
-import { HandIcon, NewTextIcon, SelectIcon } from '@blocksuite/global/config';
+import { MinusIcon, PlusIcon, ViewBarIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { clamp, type MouseMode, Point } from '../../../__internal__/index.js';
-import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
-@customElement('edgeless-toolbar')
-export class EdgelessToolbar extends WithDisposable(LitElement) {
+@customElement('edgeless-zoom-toolbar')
+export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
       z-index: 3;
       bottom: 28px;
-      left: calc(50%);
+      left: 10px;
       display: flex;
       justify-content: center;
       transform: translateX(-50%);
       user-select: none;
     }
 
-    .edgeless-toolbar-container {
+    .edgeless-zoom-toolbar-container {
       display: flex;
       align-items: center;
       flex-direction: row;
       padding: 0 20px;
       height: 64px;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 40px;
       fill: currentcolor;
     }
 
-    .edgeless-toolbar-container[level='second'] {
+    .edgeless-zoom-toolbar-container[level='second'] {
       position: absolute;
       bottom: 8px;
       transform: translateY(-100%);
     }
 
-    .edgeless-toolbar-container[hidden] {
+    .edgeless-zoom-toolbar-container[hidden] {
       display: none;
     }
 
     .short-divider {
       width: 1px;
       height: 24px;
-      margin: 0 7px;
-      background-color: var(--affine-border-color);
-    }
-
-    .full-divider {
-      width: 1px;
-      height: 100%;
       margin: 0 7px;
       background-color: var(--affine-border-color);
     }
@@ -219,11 +201,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { type } = this.mouseMode;
+    const formattedZoom = `${Math.round(this.zoom * 100)}%`;
 
     return html`
       <div
-        class="edgeless-toolbar-container"
+        class="edgeless-zoom-toolbar-container"
         @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
         @mouseup=${stopPropagation}
@@ -231,59 +213,28 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       >
         <edgeless-tool-icon-button
           style=${this.iconButtonStyles}
-          .tooltip=${getTooltipWithShortcut('Select', 'V')}
-          .active=${type === 'default'}
-          @click=${() => this.setMouseMode({ type: 'default' })}
+          .tooltip=${'Fit to screen'}
+          @click=${() => this._zoomToFit()}
         >
-          ${SelectIcon}
+          ${ViewBarIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           style=${this.iconButtonStyles}
-          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
-          .active=${type === 'pan'}
-          @click=${() => this.setMouseMode({ type: 'pan', panning: false })}
+          .tooltip=${'Zoom out'}
+          @click=${() => this._setZoomByStep(-ZOOM_STEP)}
         >
-          ${HandIcon}
+          ${MinusIcon}
         </edgeless-tool-icon-button>
-        <div class="short-divider"></div>
-        <edgeless-note-tool-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
-        ></edgeless-note-tool-button>
-        <div class="full-divider"></div>
-        <edgeless-brush-tool-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
-        ></edgeless-brush-tool-button>
-        <edgeless-eraser-tool-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+        <span class="zoom-percent" @click=${() => this._smoothZoom(1)}>
+          ${formattedZoom}
+        </span>
+        <edgeless-tool-icon-button
+          style=${this.iconButtonStyles}
+          .tooltip=${'Zoom in'}
+          @click=${() => this._setZoomByStep(ZOOM_STEP)}
         >
-        </edgeless-eraser-tool-button>
-        <edgeless-text-icon-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
-        ></edgeless-text-icon-button>
-        <edgeless-shape-tool-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
-        ></edgeless-shape-tool-button>
-        <edgeless-image-tool-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
-        >
-        </edgeless-image-tool-button>
-        <edgeless-connector-tool-button
-          .mouseMode=${this.mouseMode}
-          .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
-        ></edgeless-connector-tool-button>
+          ${PlusIcon}
+        </edgeless-tool-icon-button>
       </div>
     `;
   }
@@ -291,6 +242,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-toolbar': EdgelessToolbar;
+    'edgeless-zoom-toolbar': EdgelessZoomToolbar;
   }
 }
