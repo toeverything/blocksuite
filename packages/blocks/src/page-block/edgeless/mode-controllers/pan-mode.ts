@@ -69,7 +69,7 @@ export class PanModeController extends MouseModeController<PanMouseMode> {
     noop();
   }
 
-  override afterMouseModeSwitch(mode: PanMouseMode): void {
+  override afterModeSwitch(mode: PanMouseMode): void {
     noop();
   }
 }

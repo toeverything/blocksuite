@@ -45,5 +45,5 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerMouseOut(e: PointerEventState): void;
   abstract onContainerContextMenu(e: PointerEventState): void;
   abstract onPressShiftKey(pressed: boolean): void;
-  abstract afterMouseModeSwitch(mode: Mode): void;
+  abstract afterModeSwitch(newMode: Mode): void;
 }

@@ -100,7 +100,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     noop();
   }
 
-  override afterMouseModeSwitch(mode: BrushMouseMode) {
+  override afterModeSwitch(mode: BrushMouseMode) {
     this._tryLoadBrushStateLocalRecord();
   }
 

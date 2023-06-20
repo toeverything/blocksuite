@@ -532,7 +532,7 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     noop();
   }
 
-  override afterMouseModeSwitch(): void {
+  override afterModeSwitch(): void {
     noop();
   }
 }

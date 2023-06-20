@@ -73,7 +73,7 @@ export class NoteModeController extends MouseModeController<NoteMouseMode> {
     noop();
   }
 
-  override afterMouseModeSwitch(): void {
+  override afterModeSwitch(): void {
     noop();
   }
 }

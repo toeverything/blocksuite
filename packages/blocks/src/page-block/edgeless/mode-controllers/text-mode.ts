@@ -50,7 +50,7 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
     noop();
   }
 
-  override afterMouseModeSwitch(): void {
+  override afterModeSwitch(): void {
     noop();
   }
 }

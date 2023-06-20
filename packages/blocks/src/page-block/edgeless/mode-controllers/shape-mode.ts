@@ -150,7 +150,7 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
     noop();
   }
 
-  override afterMouseModeSwitch(): void {
+  override afterModeSwitch(): void {
     noop();
   }
 }
