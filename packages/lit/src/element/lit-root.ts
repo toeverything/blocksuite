@@ -1,8 +1,9 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import { UIEventDispatcher } from '@blocksuite/block-std';
-import type { BaseBlockModel, BlockSchemaType, Page } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
+import type { BlockSpec } from '@blocksuite/block-std';
+import { BlockStore, UIEventDispatcher } from '@blocksuite/block-std';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -11,10 +12,12 @@ import { html, unsafeStatic } from 'lit/static-html.js';
 
 import { ShadowlessElement } from './shadowless-element.js';
 
+export type LitBlockSpec = BlockSpec<StaticValue>;
+
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
   @property({ attribute: false })
-  componentMap!: Map<BlockSchemaType, StaticValue>;
+  blocks!: LitBlockSpec[];
 
   @property({ attribute: false })
   page!: Page;
@@ -26,13 +29,28 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   uiEventDispatcher = new UIEventDispatcher(this);
 
+  blockStore!: BlockStore<StaticValue>;
+
+  override updated(changedProperties: PropertyValues) {
+    super.updated(changedProperties);
+    if (changedProperties.has('blocks')) {
+      this.blockStore.applySpecs(this.blocks);
+      this.requestUpdate();
+    }
+  }
+
   override connectedCallback() {
     super.connectedCallback();
+    this.blockStore = new BlockStore<StaticValue>({
+      uiEventDispatcher: this.uiEventDispatcher,
+    });
     this.uiEventDispatcher.mount();
+    this.blockStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+    this.blockStore.dispose();
     this.uiEventDispatcher.unmount();
   }
 
@@ -53,12 +71,13 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
-    const tag = this.componentMap.get(schema);
-    if (!tag) {
-      console.warn(`Cannot find tag for ${flavour}.`);
+    const view = this.blockStore.getView(flavour);
+    if (!view) {
+      console.warn(`Cannot find view for ${flavour}.`);
       return html`${nothing}`;
     }
 
+    const tag = view.component;
     this._onLoadModel(model);
 
     return html`<${tag}
