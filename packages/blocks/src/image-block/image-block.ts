@@ -2,7 +2,7 @@ import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
 
 import { Slot } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, type FocusContext } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -11,6 +11,7 @@ import { registerService } from '../__internal__/service.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
 import { stopPropagation } from '../page-block/edgeless/utils.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
+import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
 import { ImageBlockService } from './image-service.js';
 
@@ -63,72 +64,9 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       width: 100%;
     }
 
-    .resizable {
-      max-width: 100%;
-    }
-
-    .active .resizable {
-      border: 1px solid var(--affine-primary-color) !important;
-    }
-    .resizable .image-option-container {
-      display: none;
-      position: absolute;
-      top: 4px;
-      right: -52px;
-      margin: 0;
-      padding-left: 12px;
-    }
-
-    .resizable .resizes {
-      /* width: 100%; */
-      height: 100%;
-      box-sizing: border-box;
-      line-height: 0;
-    }
-
-    .resizable .resizes .resize {
-      /* display: none; */
-      width: 10px;
-      height: 10px;
-      border-radius: 50%; /*magic to turn square into circle*/
-      background: white;
-      border: 2px solid var(--affine-primary-color);
-      position: absolute;
-    }
-
-    .resizable:hover .resize {
-      display: block;
-    }
-    .active .resize {
-      display: block !important;
-    }
-    .resizable .resizes .resize.top-left {
-      left: -5px;
-      top: -5px;
-      cursor: nwse-resize; /*resizer cursor*/
-    }
-    .resizable .resizes .resize.top-right {
-      right: -5px;
-      top: -5px;
-      cursor: nesw-resize;
-    }
-    .resizable .resizes .resize.bottom-left {
-      left: -5px;
-      bottom: -5px;
-      cursor: nesw-resize;
-    }
-    .resizable .resizes .resize.bottom-right {
-      right: -5px;
-      bottom: -5px;
-      cursor: nwse-resize;
-    }
-
     .resizable-img {
       position: relative;
       border: 1px solid var(--affine-white-90);
-    }
-    .resizable-img:hover {
-      border: 1px solid var(--affine-primary-color);
     }
 
     .resizable-img img {
@@ -232,6 +170,20 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     });
   }
 
+  override focusBlock(ctx: FocusContext) {
+    super.focusBlock(ctx);
+    if (ctx.multi) {
+      return true;
+    }
+    // show selection rect
+    return false;
+  }
+
+  override blurBlock(ctx: FocusContext) {
+    super.blurBlock(ctx);
+    return true;
+  }
+
   private _onInputChange() {
     this._caption = this._input.value;
     this.model.page.updateBlock(this.model, { caption: this._caption });
@@ -297,7 +249,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         // when image size is too large, the option popup should show inside
         x: rect.width > 680 ? rect.right - 50 : rect.right + 12,
         y: Math.min(
-          Math.max(rect.top, HEADER_HEIGHT + 12),
+          Math.max(rect.top + 10, HEADER_HEIGHT + 12),
           rect.bottom - OPTION_ELEMENT_HEIGHT
         ),
       };
@@ -345,6 +297,11 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     ></affine-portal>`;
   }
 
+  private _imageResizeBoardTemplate() {
+    if (!this.focused) return null;
+    return ImageSelectedRectsContainer();
+  }
+
   override render() {
     const resizeImgStyle = {
       width: 'unset',
@@ -372,6 +329,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         <div class="affine-image-wrapper">
           <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
             ${img} ${this._imageOptionsTemplate()}
+            ${this._imageResizeBoardTemplate()}
           </div>
         </div>
       </div>
