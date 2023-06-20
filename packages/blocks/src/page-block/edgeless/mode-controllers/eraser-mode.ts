@@ -37,36 +37,39 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
   };
 
   private _overlay = new EraserOverlay();
-  private timestamp = 0;
-  private interval = 0;
-  private eraserPoints: Array<IVec> = [];
-  private prevPoint: IVec = [];
-  private prevEraserPoint: IVec = [];
-  private canBeErasedElements: Set<Erasable> = new Set();
+  private _timestamp = 0;
+  private _interval = 0;
+  private _eraserPoints: IVec[] = [];
+  private _prevPoint: IVec = [];
+  private _prevEraserPoint: IVec = [];
+  private erasableElements: Set<Erasable> = new Set();
   private toBeErasedElements: Set<Erasable> = new Set();
 
-  private loop = () => {
+  private _loop() {
     const now = Date.now();
-    const elapsed = now - this.timestamp;
+    const elapsed = now - this._timestamp;
 
     let didUpdate = false;
 
-    if (this.prevEraserPoint !== this.prevPoint) {
+    if (this._prevEraserPoint !== this._prevPoint) {
       didUpdate = true;
-      this.eraserPoints.push(this.prevPoint);
-      this.prevEraserPoint = this.prevPoint;
+      this._eraserPoints.push(this._prevPoint);
+      this._prevEraserPoint = this._prevPoint;
     }
     if (elapsed > 32) {
-      if (this.eraserPoints.length > 1) {
+      if (this._eraserPoints.length > 1) {
         didUpdate = true;
-        this.eraserPoints.splice(0, Math.ceil(this.eraserPoints.length * 0.1));
-        this.timestamp = now;
+        this._eraserPoints.splice(
+          0,
+          Math.ceil(this._eraserPoints.length * 0.1)
+        );
+        this._timestamp = now;
       }
     }
     if (didUpdate) {
       const zoom = this._surface.viewport.zoom;
       const d = getSvgPathFromStroke(
-        getStroke(this.eraserPoints, {
+        getStroke(this._eraserPoints, {
           size: 16 / zoom,
           start: { taper: true },
         })
@@ -74,8 +77,8 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
       this._overlay.d = d;
       this._edgeless.surface.refresh();
     }
-    this.interval = requestAnimationFrame(this.loop);
-  };
+    this._interval = requestAnimationFrame(this._loop);
+  }
 
   private toModelCoord(p: IPoint): IVec {
     return this._surface.viewport.toModelCoord(p.x, p.y);
@@ -86,39 +89,41 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
 
     const { point } = e;
     const [x, y] = this.toModelCoord(point);
-    this.eraserPoints = [[x, y]];
-    this.prevPoint = [x, y];
-    this.canBeErasedElements = new Set([
+    this._eraserPoints = [[x, y]];
+    this._prevPoint = [x, y];
+    this.erasableElements = new Set([
       ...this._surface.getElements(),
       ...(<TopLevelBlockModel[]>this._page.getBlockByFlavour('affine:frame')),
     ]);
-    this.loop();
+    this._loop();
     this._edgeless.surface.viewport.addOverlay(this._overlay);
   }
   override onContainerDragMove(e: PointerEventState): void {
     const currentPoint = this.toModelCoord(e.point);
     const surface = this._surface;
-    this.canBeErasedElements.forEach(element => {
+    this.erasableElements.forEach(element => {
       if (this.toBeErasedElements.has(element)) return;
       if (isTopLevelBlock(element)) {
         const bound = Bound.deserialize(element.xywh);
-        if (linePolygonIntersects(this.prevPoint, currentPoint, bound.points)) {
+        if (
+          linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
+        ) {
           this.toBeErasedElements.add(element);
           const ele = getBlockElementById(element.id);
           ele && ((<HTMLElement>ele).style.opacity = '0.3');
         }
       } else {
-        if (element.isIntersectLine(this.prevPoint, currentPoint)) {
+        if (element.isIntersectLine(this._prevPoint, currentPoint)) {
           this.toBeErasedElements.add(element);
           surface.updateElementLocalRecord(element.id, { opacity: 0.3 });
         }
       }
     });
 
-    this.prevPoint = currentPoint;
+    this._prevPoint = currentPoint;
   }
 
-  override beforeModeSwitch(moe: MouseMode) {
+  override beforeModeSwitch(mode: MouseMode) {
     this.toBeErasedElements.forEach(element => {
       if (isTopLevelBlock(element)) {
         const ele = getBlockElementById(element.id);
@@ -127,13 +132,13 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
         this._surface.updateElementLocalRecord(element.id, { opacity: 1 });
       }
     });
-    this.reset();
+    this._reset();
   }
 
-  private reset() {
-    cancelAnimationFrame(this.interval);
+  private _reset() {
+    cancelAnimationFrame(this._interval);
     this._edgeless.surface.viewport.removeOverlay(this._overlay);
-    this.canBeErasedElements.clear();
+    this.erasableElements.clear();
     this.toBeErasedElements.clear();
   }
 
@@ -145,27 +150,34 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
         this._surface.removeElement(element.id);
       }
     });
-    this.reset();
+    this._reset();
     this._page.captureSync();
   }
+
   override onContainerClick(e: PointerEventState): void {
     noop();
   }
+
   override onContainerDblClick(e: PointerEventState): void {
     noop();
   }
+
   override onContainerTripleClick(e: PointerEventState): void {
     noop();
   }
+
   override onContainerMouseMove(e: PointerEventState): void {
     noop();
   }
+
   override onContainerMouseOut(e: PointerEventState): void {
     noop();
   }
+
   override onContainerContextMenu(e: PointerEventState): void {
     noop();
   }
+
   override onPressShiftKey(pressed: boolean): void {
     noop();
   }
