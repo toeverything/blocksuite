@@ -127,6 +127,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   @state()
   private _popperShow = false;
 
+  @query('edgeless-tool-icon-button')
+  private _colorSelectorButton!: HTMLDivElement;
   @query('edgeless-color-panel')
   private _colorSelector!: HTMLDivElement;
 
@@ -169,7 +171,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (this._colorSelector) {
       this._colorSelectorPopper = createButtonPopper(
-        this,
+        this._colorSelectorButton,
         this._colorSelector,
         ({ display }) => {
           this._popperShow = display === 'show';
