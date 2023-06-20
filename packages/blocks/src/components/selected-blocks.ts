@@ -28,6 +28,8 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
 
     :host > div {
       position: absolute;
+      top: 0;
+      left: 0;
       border-radius: 5px;
       background: var(--affine-hover-color);
     }
@@ -67,8 +69,8 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
     } = this.state;
     if (firstRect) {
       const { x, y } = this.offset;
-      this.style.top = `${firstRect.top + y}px`;
-      this.style.left = `${firstRect.left + x}px`;
+      const { left, top } = firstRect;
+      this.style.transform = `translate(${left + x}px, ${top + y}px)`;
     }
     this.toggleAttribute('data-grab', Boolean(firstRect && grab));
   }
@@ -76,19 +78,22 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
   override render() {
     const { rects } = this.state;
     const firstRect = rects[0];
-    return firstRect
-      ? repeat(
-          rects,
-          rect => html`<div
-            style=${styleMap({
-              width: `${rect.width}px`,
-              height: `${rect.height}px`,
-              top: `${rect.top - firstRect.top}px`,
-              left: `${rect.left - firstRect.left}px`,
-            })}
-          ></div>`
-        )
-      : nothing;
+
+    if (firstRect) {
+      const { x, y } = firstRect;
+      return repeat(
+        rects,
+        ({ width, height, left, top }) => html`<div
+          style=${styleMap({
+            width: `${width}px`,
+            height: `${height}px`,
+            transform: `translate(${left - x}px, ${top - y}px)`,
+          })}
+        ></div>`
+      );
+    }
+
+    return nothing;
   }
 }
 
