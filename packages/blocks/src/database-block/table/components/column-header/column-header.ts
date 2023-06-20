@@ -17,7 +17,7 @@ import { styles } from './styles.js';
 export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   tableViewManager!: TableViewManager;
 
   @property({ attribute: false })

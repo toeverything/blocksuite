@@ -105,7 +105,7 @@ export class ColumnTypePopup extends LitElement {
   @property({ attribute: false })
   columnType: ColumnType | undefined;
 
-  @property()
+  @property({ attribute: false })
   select!: (type: ColumnType) => void;
 
   override render() {

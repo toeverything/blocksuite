@@ -178,7 +178,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   view!: TableViewManager;
 
-  @property()
+  @property({ attribute: false })
   addRow!: (position: InsertPosition) => void;
 
   @property({ attribute: false })

@@ -31,10 +31,10 @@ import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
 import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
-  @property()
+  @property({ attribute: false })
   tableViewManager!: TableViewManager;
 
-  @property()
+  @property({ attribute: false })
   column!: ColumnManager;
 
   @query('.affine-database-column-input')

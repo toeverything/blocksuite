@@ -10,11 +10,11 @@ export abstract class DatabaseCellElement<
   Data extends Record<string, unknown> = Record<string, unknown>
 > extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
-  @property()
+  @property({ attribute: false })
   column!: ColumnManager<Value, Data>;
   @property()
   rowId!: string;
-  @property()
+  @property({ attribute: false })
   isEditing!: boolean;
   @property({ attribute: false })
   protected setEditing!: (editing: boolean) => void;

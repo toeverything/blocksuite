@@ -52,9 +52,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   @property()
   databaseId!: string;
-  @property()
+  @property({ attribute: false })
   view!: TableViewManager;
-  @property()
+  @property({ attribute: false })
   eventDispatcher!: UIEventDispatcher;
 
   private service = getService('affine:database');

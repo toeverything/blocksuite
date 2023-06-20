@@ -48,14 +48,14 @@ type Menu = MenuCommon &
 @customElement('affine-database-edit-column-popup')
 export class EditColumnPopup extends LitElement {
   static override styles = styles;
-  @property()
+  @property({ attribute: false })
   headerColumn!: DatabaseHeaderColumn;
-  @property()
+  @property({ attribute: false })
   tableViewManager!: TableViewManager;
-  @property()
+  @property({ attribute: false })
   column!: ColumnManager;
 
-  @property()
+  @property({ attribute: false })
   editTitle!: () => void;
 
   @query('input')

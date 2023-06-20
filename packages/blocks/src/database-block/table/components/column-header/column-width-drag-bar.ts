@@ -37,9 +37,9 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
       opacity: 1;
     }
   `;
-  @property()
+  @property({ attribute: false })
   left!: number;
-  @property()
+  @property({ attribute: false })
   column!: ColumnManager;
   @state()
   dragLeft = 0;
