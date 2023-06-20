@@ -27,7 +27,9 @@ export class EmbedResizeManager {
   onStart(e: PointerEventState) {
     this._originPosition.x = e.raw.pageX;
     this._originPosition.y = e.raw.pageY;
-    this._dropContainer = (e.raw.target as HTMLElement).closest('.resizes');
+    this._dropContainer = (e.raw.target as HTMLElement).closest(
+      '.resizable-img'
+    );
     const rect = this._dropContainer?.getBoundingClientRect() as DOMRect;
     this._dropContainerSize.w = rect.width;
     this._dropContainerSize.h = rect.height;
@@ -43,10 +45,12 @@ export class EmbedResizeManager {
     const activeComponent =
       this.state.activeComponent || this.state.selectedEmbed;
     if (!activeComponent) return;
+    const activeImgContainer = this._dropContainer;
+    assertExists(activeImgContainer);
+    const activeImg = activeComponent.querySelector('img');
+    assertExists(activeImg);
 
     let width = 0;
-    let height = 0;
-    let left = 0;
     if (this._dragMoveTarget === 'right') {
       width =
         this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x);
@@ -54,39 +58,25 @@ export class EmbedResizeManager {
       width =
         this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
     }
-    if (width < activeComponent.getBoundingClientRect().width && width >= 50) {
-      if (this._dragMoveTarget === 'right') {
-        left =
-          this._dropContainerSize.left -
-          (e.raw.pageX - this._originPosition.x) / 2;
-      } else {
-        left =
-          this._dropContainerSize.left +
-          (e.raw.pageX - this._originPosition.x) / 2;
-      }
 
-      height = width * (this._dropContainerSize.h / this._dropContainerSize.w);
-      if (this._dropContainer) {
-        this.slots.embedRectsUpdated.emit([
-          new DOMRect(
-            left,
-            this._dropContainer.getBoundingClientRect().top,
-            width,
-            height
-          ),
-        ]);
-        const activeImg = this.state.activeComponent?.querySelector(
-          '.resizable-img'
-        ) as HTMLDivElement;
-        const updateImg = throttle(() => {
-          if (activeImg) {
-            activeImg.style.width = width.toFixed(2) + 'px';
-            activeImg.style.height = height.toFixed(2) + 'px';
-          }
-        }, 50);
-        requestAnimationFrame(updateImg);
-      }
+    const MIN_WIDTH = 50;
+    if (width < MIN_WIDTH) {
+      width = MIN_WIDTH;
     }
+    if (width > activeComponent.getBoundingClientRect().width) {
+      width = activeComponent.getBoundingClientRect().width;
+    }
+
+    const height = width * (activeImg.naturalHeight / activeImg.naturalWidth);
+
+    const containerRect = activeImgContainer.getBoundingClientRect();
+    if (containerRect.width === width && containerRect.height === height)
+      return;
+    const updateImg = throttle(() => {
+      activeImgContainer.style.width = width.toFixed(2) + 'px';
+      activeImgContainer.style.height = height.toFixed(2) + 'px';
+    }, 50);
+    requestAnimationFrame(updateImg);
   }
 
   onEnd() {
