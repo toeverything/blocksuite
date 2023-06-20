@@ -6,6 +6,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeParagraphs,
   pressArrowDown,
@@ -28,6 +29,7 @@ import {
 import {
   assertBlockChildrenFlavours,
   assertBlockChildrenIds,
+  assertBlockCount,
   assertBlockType,
   assertClassName,
   assertPageTitleFocus,
@@ -121,52 +123,68 @@ test('backspace and arrow on title', async ({ page }) => {
   await assertTitle(page, 'hll');
 });
 
-test('backspace on line start of the first block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await waitDefaultPageLoaded(page);
-  await focusTitle(page);
-  await type(page, 'hello');
-  await assertTitle(page, 'hello');
-  await resetHistory(page);
+for (const { initState, desc } of [
+  {
+    initState: initEmptyParagraphState,
+    desc: 'without surface',
+  },
+  {
+    initState: initEmptyEdgelessState,
+    desc: 'with surface',
+  },
+]) {
+  test(`backspace on line start of the first block (${desc})`, async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initState(page);
+    await waitDefaultPageLoaded(page);
+    await focusTitle(page);
+    await type(page, 'hello');
+    await assertTitle(page, 'hello');
+    await resetHistory(page);
 
-  await focusRichText(page, 0);
-  await type(page, 'abc');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await assertSelection(page, 0, 0, 0);
+    await focusRichText(page, 0);
+    await type(page, 'abc');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await assertSelection(page, 0, 0, 0);
 
-  await pressBackspace(page);
-  await assertTitle(page, 'helloabc');
+    await pressBackspace(page);
+    await assertTitle(page, 'helloabc');
 
-  await pressEnter(page);
-  await assertTitle(page, 'hello');
-  await assertRichTexts(page, ['abc']);
+    await pressEnter(page);
+    await assertTitle(page, 'hello');
+    await assertRichTexts(page, ['abc', '']);
 
-  await pressBackspace(page);
-  await assertTitle(page, 'helloabc');
-  await assertRichTexts(page, []);
-  await undoByClick(page);
-  await assertTitle(page, 'hello');
-  await assertRichTexts(page, ['abc']);
+    await pressBackspace(page);
+    await assertTitle(page, 'helloabc');
+    await assertRichTexts(page, ['']);
+    await undoByClick(page);
+    await assertTitle(page, 'hello');
+    await assertRichTexts(page, ['abc', '']);
 
-  await redoByClick(page);
-  await assertTitle(page, 'helloabc');
-  await assertRichTexts(page, []);
-});
+    await redoByClick(page);
+    await assertTitle(page, 'helloabc');
+    await assertRichTexts(page, ['']);
+  });
 
-test('backspace on line start of the first empty block', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusTitle(page);
+  test(`backspace on line start of the first empty block (${desc})`, async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initState(page);
+    await focusTitle(page);
 
-  await pressArrowDown(page);
-  await pressBackspace(page);
+    await pressArrowDown(page);
+    await pressBackspace(page);
+    await assertBlockCount(page, 'paragraph', 1);
 
-  await pressArrowDown(page);
-  await assertSelection(page, 0, 0, 0);
-});
+    await pressArrowDown(page);
+    await assertSelection(page, 0, 0, 0);
+  });
+}
 
 test('append new paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);

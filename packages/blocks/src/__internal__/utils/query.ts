@@ -148,6 +148,11 @@ export function getPreviousBlock(
     // Assume children is not possible to be `affine:note` or `affine:page`
     return lastChild;
   }
+
+  if (matchFlavours(previousBlock, ['affine:surface'])) {
+    return getPreviousBlock(previousBlock);
+  }
+
   return previousBlock;
 }
 

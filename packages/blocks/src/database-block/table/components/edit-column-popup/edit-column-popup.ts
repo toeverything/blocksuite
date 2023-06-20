@@ -10,107 +10,53 @@ import {
   TextIcon,
 } from '@blocksuite/global/config';
 import { computePosition, offset } from '@floating-ui/dom';
+import type { TemplateResult } from 'lit';
 import { html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { DatabaseBlockModel } from '../../../database-model.js';
-import { isDivider } from '../../../utils.js';
 import type {
-  Column,
-  ColumnAction,
-  ColumnActionType,
-  ColumnInsertPosition,
-  ColumnType,
-  TitleColumnAction,
-} from '../../types.js';
+  ColumnManager,
+  TableViewManager,
+} from '../../table-view-manager.js';
+import type { ColumnType } from '../../types.js';
+import { DatabaseHeaderColumn } from '../column-header/database-header-column.js';
 import { ColumnTypePopup } from './column-type-popup.js';
 import { styles } from './styles.js';
-import { changeColumnType, isTitleColumn, onActionClick } from './utils.js';
 
-const columnActions: ColumnAction[] = [
-  {
-    type: 'rename',
-    text: 'Rename',
-    icon: PenIcon,
-  },
-  {
-    type: 'divider',
-  },
-  {
-    type: 'column-type',
-    text: 'Column type',
-    icon: TextIcon,
-  },
-  {
-    type: 'duplicate',
-    text: 'Duplicate column',
-    icon: DatabaseDuplicate,
-  },
-  {
-    type: 'insert-left',
-    text: 'Insert left column',
-    icon: DatabaseInsertLeft,
-  },
-  {
-    type: 'insert-right',
-    text: 'Insert right column',
-    icon: DatabaseInsertRight,
-  },
-  {
-    type: 'move-left',
-    text: 'Move left',
-    icon: DatabaseMoveLeft,
-  },
-  {
-    type: 'move-right',
-    text: 'Move Right',
-    icon: DatabaseMoveRight,
-  },
-  {
-    type: 'divider',
-  },
-  {
-    type: 'delete',
-    text: 'Delete column',
-    icon: DeleteIcon,
-  },
-];
-
-const titleColumnActions: TitleColumnAction[] = [
-  {
-    type: 'rename',
-    text: 'Rename',
-    icon: PenIcon,
-  },
-  {
-    type: 'insert-right',
-    text: 'Insert right column',
-    icon: DatabaseInsertRight,
-  },
-];
+type MenuCommon = {
+  hide?: () => boolean;
+};
+type Menu = MenuCommon &
+  (
+    | {
+        type: 'action';
+        text: string;
+        icon: TemplateResult;
+        select: () => void;
+      }
+    | {
+        type: 'divider';
+      }
+    | {
+        type: 'group';
+        text: string;
+        icon: TemplateResult;
+        children: () => Menu[];
+      }
+  );
 
 @customElement('affine-database-edit-column-popup')
 export class EditColumnPopup extends LitElement {
   static override styles = styles;
+  @property({ attribute: false })
+  headerColumn!: DatabaseHeaderColumn;
+  @property({ attribute: false })
+  tableViewManager!: TableViewManager;
+  @property({ attribute: false })
+  column!: ColumnManager;
 
   @property({ attribute: false })
-  targetModel!: DatabaseBlockModel;
-
-  @property({ attribute: false })
-  targetColumn!: Column | string;
-
-  /** base on database column index */
-  @property({ attribute: false })
-  columnIndex!: number;
-
-  @property({ attribute: false })
-  closePopup!: () => void;
-
-  @property({ attribute: false })
-  setTitleColumnEditId!: (columnId: string) => void;
-
-  @property({ attribute: false })
-  insertColumn!: (position: ColumnInsertPosition) => void;
+  editTitle!: () => void;
 
   @query('input')
   titleInput!: HTMLInputElement;
@@ -119,16 +65,123 @@ export class EditColumnPopup extends LitElement {
   private _container!: HTMLDivElement;
   private _columnTypePopup!: ColumnTypePopup | null;
 
-  private _onShowColumnType = (columnId: string) => {
+  private _options(): Menu[] {
+    return [
+      {
+        type: 'action',
+        text: 'Rename',
+        icon: PenIcon,
+        select: () => {
+          this.editTitle();
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'group',
+        text: 'Column type',
+        icon: TextIcon,
+        hide: () => !this.column.updateType,
+        children: () => {
+          return [];
+        },
+      },
+      {
+        type: 'action',
+        text: 'Duplicate column',
+        icon: DatabaseDuplicate,
+        hide: () => !this.column.duplicate,
+        select: () => {
+          this.column.duplicate?.();
+        },
+      },
+      {
+        type: 'action',
+        text: 'Insert left column',
+        icon: DatabaseInsertLeft,
+        select: () => {
+          this.tableViewManager.newColumn({ id: this.column.id, before: true });
+          Promise.resolve().then(() => {
+            const pre = this.headerColumn.previousElementSibling;
+            if (pre instanceof DatabaseHeaderColumn) {
+              pre.editTitle();
+              pre.scrollIntoView();
+            }
+          });
+        },
+      },
+      {
+        type: 'action',
+        text: 'Insert right column',
+        icon: DatabaseInsertRight,
+        select: () => {
+          this.tableViewManager.newColumn({
+            id: this.column.id,
+            before: false,
+          });
+          Promise.resolve().then(() => {
+            const next = this.headerColumn.nextElementSibling;
+            if (next instanceof DatabaseHeaderColumn) {
+              next.editTitle();
+              next.scrollIntoView();
+            }
+          });
+        },
+      },
+      {
+        type: 'action',
+        text: 'Move left',
+        icon: DatabaseMoveLeft,
+        hide: () => this.column.isFirst,
+        select: () => {
+          const preId = this.tableViewManager.preColumn(this.column.id)?.id;
+          if (!preId) {
+            return;
+          }
+          this.tableViewManager.moveColumn(this.column.id, {
+            id: preId,
+            before: true,
+          });
+        },
+      },
+      {
+        type: 'action',
+        text: 'Move Right',
+        icon: DatabaseMoveRight,
+        hide: () => this.column.isLast,
+        select: () => {
+          const nextId = this.tableViewManager.nextColumn(this.column.id)?.id;
+          if (!nextId) {
+            return;
+          }
+          this.tableViewManager.moveColumn(this.column.id, {
+            id: nextId,
+            before: false,
+          });
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'action',
+        text: 'Delete column',
+        icon: DeleteIcon,
+        hide: () => !this.column.delete,
+        select: () => {
+          this.column.delete?.();
+        },
+      },
+    ];
+  }
+
+  private _onShowColumnType = () => {
     if (this._columnTypePopup) return;
     const columnTypePopup = new ColumnTypePopup();
 
-    columnTypePopup.changeColumnType = this._changeColumnType;
-    columnTypePopup.columnId = columnId;
-
-    if (!isTitleColumn(this.targetColumn)) {
-      columnTypePopup.columnType = this.targetColumn.type;
-    }
+    columnTypePopup.select = this._changeColumnType;
+    columnTypePopup.columnType = this.column.type;
     this._columnTypePopup = columnTypePopup;
     this._container.appendChild(columnTypePopup);
 
@@ -155,63 +208,43 @@ export class EditColumnPopup extends LitElement {
     }
   };
 
-  private _changeColumnType = (columnId: string, targetType: ColumnType) => {
-    changeColumnType(columnId, targetType, this.targetColumn, this.targetModel);
-    this.closePopup();
-  };
-
-  private _onActionClick = (actionType: ColumnActionType, columnId: string) => {
-    onActionClick(
-      actionType,
-      columnId,
-      this.targetModel,
-      this.columnIndex,
-      this.setTitleColumnEditId,
-      this.insertColumn
-    );
-    this.closePopup();
+  private _changeColumnType = (targetType: ColumnType) => {
+    this.column.updateType?.(targetType);
+    this.remove();
   };
 
   private _renderActions = () => {
-    const actions = isTitleColumn(this.targetColumn)
-      ? titleColumnActions
-      : columnActions;
-
     return html`
-      ${actions.map(action => {
-        if (isDivider(action)) {
-          return html`<div class="action-divider"></div>`;
-        }
-
-        // boundary
-        if (
-          (this.columnIndex === 0 && action.type === 'move-left') ||
-          (this.columnIndex === this.targetModel.columns.length - 1 &&
-            action.type === 'move-right')
-        ) {
+      ${this._options().map(action => {
+        if (action.hide?.()) {
           return null;
         }
+        if (action.type === 'divider') {
+          return html` <div class="action-divider"></div>`;
+        }
 
-        const columnId = isTitleColumn(this.targetColumn)
-          ? '-1'
-          : this.targetColumn.id;
-
-        const onMouseOver = isTitleColumn(this.targetColumn)
-          ? undefined
-          : action.type === 'column-type'
-          ? () => this._onShowColumnType(columnId)
-          : this._onHideColumnType;
+        const onMouseOver =
+          action.type === 'group'
+            ? this._onShowColumnType
+            : this._onHideColumnType;
 
         return html`
           <div
-            class="action ${action.type}"
-            @mouseover=${onMouseOver}
-            @click=${() => this._onActionClick(action.type, columnId)}
+            class="action"
+            @mouseover="${onMouseOver}"
+            @click="${() => {
+              if (action.type === 'action') {
+                action.select();
+                setTimeout(() => {
+                  this.remove();
+                });
+              }
+            }}"
           >
             <div class="action-content">
               ${action.icon}<span>${action.text}</span>
             </div>
-            ${action.type === 'column-type' ? ArrowDownIcon : html``}
+            ${action.type === 'group' ? ArrowDownIcon : html``}
           </div>
         `;
       })}

@@ -18,7 +18,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getTagColor, onClickOutside } from '../../../../utils.js';
+import { getTagColor, onClickOutside } from '../../../../utils/utils.js';
 import {
   SELECT_EDIT_POPUP_WIDTH,
   SELECT_TAG_NAME_MAX_LENGTH,
@@ -387,8 +387,6 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
       } else {
         this._onAddSelection(selectedValue);
       }
-    } else if (event.key === 'Escape') {
-      this.editComplete();
     }
   };
 

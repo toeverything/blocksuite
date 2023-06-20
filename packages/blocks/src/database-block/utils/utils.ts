@@ -1,6 +1,6 @@
 import { Text } from 'yjs';
 
-import type { DatabaseAction, Divider } from './table/types.js';
+import type { DatabaseAction, Divider } from '../table/types.js';
 
 // source (2018-03-11): https://github.com/jquery/jquery/blob/master/src/css/hiddenVisibleSelectors.js
 function isVisible(elem: HTMLElement) {
@@ -109,4 +109,8 @@ export function isDivider(action: DatabaseAction): action is Divider {
 
 export const isText = (value: unknown): value is Text => {
   return value instanceof Text;
+};
+
+export const getResultInRange = (value: number, min: number, max: number) => {
+  return Math.max(min, Math.min(max, value));
 };
