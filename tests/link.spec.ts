@@ -86,6 +86,7 @@ test('basic link', async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text={

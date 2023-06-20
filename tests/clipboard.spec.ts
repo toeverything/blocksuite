@@ -352,6 +352,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -394,6 +395,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -507,6 +509,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -527,6 +530,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -579,6 +583,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:database
       prop:columns="Array [1]"
@@ -617,6 +622,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:database
       prop:columns="Array [1]"
@@ -769,6 +775,7 @@ test(
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text="123"
@@ -794,6 +801,7 @@ test(
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text="123"
@@ -902,6 +910,7 @@ test(scoped`auto identify url`, async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text={

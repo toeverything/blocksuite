@@ -38,6 +38,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:type="text"
@@ -80,6 +81,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:type="text"
@@ -109,6 +111,7 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:type="text"

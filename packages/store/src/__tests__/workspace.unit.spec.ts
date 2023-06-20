@@ -479,6 +479,7 @@ describe('workspace.exportJSX works', () => {
         <affine:note
           prop:background="--affine-background-secondary-color"
           prop:index="a0"
+          prop:hidden={false}
         >
           <affine:paragraph
             prop:type="text"

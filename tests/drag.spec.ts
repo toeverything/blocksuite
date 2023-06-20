@@ -141,6 +141,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -193,6 +194,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -251,6 +253,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -310,6 +313,7 @@ test('move to the last block of each level in multi-level nesting', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -433,6 +437,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}
@@ -498,6 +503,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:list
       prop:checked={false}

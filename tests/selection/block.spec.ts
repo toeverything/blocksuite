@@ -261,6 +261,7 @@ test('should indent multi-selection block', async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text="123"
@@ -304,6 +305,7 @@ test('should unindent multi-selection block', async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text="123"
@@ -341,6 +343,7 @@ test('should unindent multi-selection block', async ({ page }) => {
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text="123"
@@ -1154,6 +1157,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:text="123"
@@ -1345,6 +1349,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:paragraph
       prop:type="text"

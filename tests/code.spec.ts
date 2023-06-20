@@ -299,6 +299,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:code
       prop:language="Plain Text"
@@ -346,6 +347,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:index="a0"
+    prop:hidden={false}
   >
     <affine:code
       prop:language="Plain Text"
