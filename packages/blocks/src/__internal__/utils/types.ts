@@ -129,7 +129,7 @@ export type TopLevelBlockModel = NoteBlockModel;
 
 export type Alignable = NoteBlockModel | PhasorElement;
 
-export type Erasable = FrameBlockModel | PhasorElement;
+export type Erasable = NoteBlockModel | PhasorElement;
 
 export type DefaultMouseMode = {
   type: 'default';

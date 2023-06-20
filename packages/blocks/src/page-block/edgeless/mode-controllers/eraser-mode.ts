@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/lit';
+import type { PointerEventState } from '@blocksuite/block-std';
 import {
   Bound,
   getStroke,
@@ -77,7 +77,7 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
       this._overlay.d = d;
       this._edgeless.surface.refresh();
     }
-    this._interval = requestAnimationFrame(this._loop);
+    this._interval = requestAnimationFrame(this._loop.bind(this));
   }
 
   private toModelCoord(p: IPoint): IVec {
@@ -93,7 +93,7 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
     this._prevPoint = [x, y];
     this.erasableElements = new Set([
       ...this._surface.getElements(),
-      ...(<TopLevelBlockModel[]>this._page.getBlockByFlavour('affine:frame')),
+      ...(<TopLevelBlockModel[]>this._page.getBlockByFlavour('affine:note')),
     ]);
     this._loop();
     this._edgeless.surface.viewport.addOverlay(this._overlay);

@@ -6,7 +6,7 @@ import {
   addBasicRectShapeElement,
   countBlock,
   deleteAll,
-  getFrameBoundBoxInEdgeless,
+  getNoteBoundBoxInEdgeless,
   setMouseMode,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
@@ -34,11 +34,11 @@ test('earse shape', async ({ page }) => {
 
 test('earse note', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
   await setMouseMode(page, 'eraser');
-  const box = await getFrameBoundBoxInEdgeless(page, frameId);
+  const box = await getNoteBoundBoxInEdgeless(page, noteId);
   await dragBetweenCoords(
     page,
     { x: 0, y: 0 },
