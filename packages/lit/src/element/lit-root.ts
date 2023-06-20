@@ -31,12 +31,11 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   blockStore!: BlockStore<StaticValue>;
 
-  override updated(changedProperties: PropertyValues) {
-    super.updated(changedProperties);
+  override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
       this.blockStore.applySpecs(this.blocks);
-      this.requestUpdate();
     }
+    super.willUpdate(changedProperties);
   }
 
   override connectedCallback() {
@@ -78,6 +77,12 @@ export class BlockSuiteRoot extends ShadowlessElement {
     }
 
     const tag = view.component;
+    const widgets = view.widgets
+      ? html`${repeat(view.widgets, widget => {
+          return html`<${widget} .root=${this} .model=${model}></${widget}>`;
+        })}`
+      : html`${nothing}`;
+
     this._onLoadModel(model);
 
     return html`<${tag}
@@ -85,6 +90,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .root=${this}
       .page=${this.page}
       .model=${model}
+      .widgets=${widgets}
       .content=${html`${repeat(
         children,
         child => child.id,
