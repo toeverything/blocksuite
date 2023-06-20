@@ -59,19 +59,19 @@ export class EdgelessComponentToolbar extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   selected: Selectable[] = [];
 
   @property({ type: Object })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   private _groupSelected(): CategorizedElements {

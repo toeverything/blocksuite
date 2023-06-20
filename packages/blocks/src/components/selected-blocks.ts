@@ -47,13 +47,13 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
     );
   }
 
-  @property()
+  @property({ attribute: false })
   mouseRoot!: HTMLElement;
 
-  @property()
+  @property({ attribute: false })
   offset: IPoint = { x: 0, y: 0 };
 
-  @property()
+  @property({ attribute: false })
   state: { rects: DOMRect[]; grab: boolean } = { rects: [], grab: false };
 
   override connectedCallback() {

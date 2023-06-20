@@ -19,10 +19,10 @@ export class ColumnDragIndicator extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   targetRect: DOMRect | null = null;
 
-  @property()
+  @property({ attribute: false })
   scale = 1;
 
   override render() {

@@ -45,13 +45,13 @@ const databaseViews: DatabaseView[] = [
 export class DatabaseModal extends LitElement {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
   @state()
   private _selectedView: DatabaseViewName = 'table';
 
-  @property()
+  @property({ attribute: false })
   abortController!: AbortController;
 
   private _convertToDatabase(viewType: DatabaseViewName) {

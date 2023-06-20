@@ -55,7 +55,7 @@ export class SelectOptionColor extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   onChange!: (color: string) => void;
 
   protected override render() {

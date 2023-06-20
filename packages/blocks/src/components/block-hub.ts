@@ -459,10 +459,10 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   /**
    * A function that returns all blocks that are allowed to be moved to
    */
-  @property()
+  @property({ attribute: false })
   public getAllowedBlocks: () => BaseBlockModel[];
 
-  @property()
+  @property({ attribute: false })
   public getHoveringNoteState: (point: Point) => {
     container?: Element;
     rect?: Rect;
