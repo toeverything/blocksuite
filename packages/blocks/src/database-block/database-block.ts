@@ -21,7 +21,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     this.currentView = this.model.getViewList()[0].id;
   }
 
-  @property()
+  @property({ attribute: false })
   modalMode?: boolean;
 
   @state()

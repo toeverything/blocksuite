@@ -3,6 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
 import type { DatabaseBlockModel } from '../../../database-model.js';
+import { DatabaseTableViewFullModal } from './table-full-modal.js';
 import { DatabaseTableViewModal } from './table-modal.js';
 
 export function showDatabaseTableViewModal({
@@ -21,14 +22,42 @@ export function showDatabaseTableViewModal({
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
-  const databaseModal = new DatabaseTableViewModal();
-  databaseModal.page = page;
-  databaseModal.root = root;
-  databaseModal.model = model;
-  databaseModal.abortController = abortController;
+  const modal = new DatabaseTableViewModal();
+  modal.page = page;
+  modal.root = root;
+  modal.model = model;
+  modal.abortController = abortController;
   // Mount
-  container.appendChild(databaseModal);
-  disposables.add(() => databaseModal.remove());
+  container.appendChild(modal);
+  disposables.add(() => modal.remove());
 
-  return databaseModal;
+  return modal;
+}
+
+export function showDatabaseTableViewFullModal({
+  page,
+  root,
+  model,
+  container = document.body,
+  abortController = new AbortController(),
+}: {
+  page: Page;
+  root: BlockSuiteRoot;
+  model: DatabaseBlockModel;
+  container?: HTMLElement;
+  abortController?: AbortController;
+}) {
+  const disposables = new DisposableGroup();
+  abortController.signal.addEventListener('abort', () => disposables.dispose());
+
+  const modal = new DatabaseTableViewFullModal();
+  modal.page = page;
+  modal.root = root;
+  modal.model = model;
+  modal.abortController = abortController;
+  // Mount
+  container.appendChild(modal);
+  disposables.add(() => modal.remove());
+
+  return modal;
 }

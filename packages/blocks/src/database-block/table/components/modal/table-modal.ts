@@ -9,20 +9,31 @@ import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { DatabaseBlockModel } from '../../../database-model.js';
-import { styles } from './styles.js';
+import { showDatabaseTableViewFullModal } from './index.js';
+import { modelStyles } from './styles.js';
 
 @customElement('affine-database-table-view-modal')
 export class DatabaseTableViewModal extends BlockElement<DatabaseBlockModel> {
-  static override styles = styles;
+  static override styles = modelStyles;
 
-  @property()
+  @property({ attribute: false })
   abortController!: AbortController;
 
   close = () => {
     this.abortController.abort();
   };
 
-  _renderView = () => {
+  private _onFullWidth = () => {
+    showDatabaseTableViewFullModal({
+      page: this.page,
+      root: this.root,
+      model: this.model,
+    });
+
+    this.close();
+  };
+
+  private _renderView = () => {
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
       <affine-database
@@ -43,7 +54,9 @@ export class DatabaseTableViewModal extends BlockElement<DatabaseBlockModel> {
           <icon-button class="action-button" @click=${this.close}
             >${DatabaseTableViewClose}</icon-button
           >
-          <icon-button class="action-button">${DatabaseExpand}</icon-button>
+          <icon-button class="action-button" @click=${this._onFullWidth}
+            >${DatabaseExpand}</icon-button
+          >
         </div>
       </div>
     </div>`;

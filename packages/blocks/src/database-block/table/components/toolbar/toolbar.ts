@@ -2,7 +2,6 @@ import './toolbar-action-popup.js';
 import '../../../common/filter/filter-group.js';
 
 import {
-  DatabaseCompress,
   DatabaseExpandWide,
   DatabaseSearchClose,
   DatabaseSearchIcon,
@@ -30,7 +29,6 @@ import { onClickOutside } from '../../../utils/utils.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import { SearchState } from '../../types.js';
 import { showDatabaseTableViewModal } from '../modal/index.js';
-import type { DatabaseTableViewModal } from '../modal/table-modal.js';
 import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';
 
@@ -214,7 +212,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _toolbarAction!: ToolbarActionPopup | undefined;
   private _recordAddDisposables = new DisposableGroup();
-  private _tableViewModal: DatabaseTableViewModal | null = null;
 
   private get readonly() {
     return this.targetModel.page.readonly;
@@ -407,11 +404,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
         model: this.targetModel,
         page: this.targetModel.page,
       });
-    } else {
-      const tableViewModal = document.querySelector<DatabaseTableViewModal>(
-        'affine-database-table-view-modal'
-      );
-      tableViewModal?.close();
     }
   };
 
@@ -475,12 +467,14 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>
-      <div
-        class="affine-database-toolbar-item expand"
-        @click=${this._onShowModalView}
-      >
-        ${this.modalMode ? DatabaseCompress : DatabaseExpandWide}
-      </div>
+      ${this.modalMode
+        ? null
+        : html`<div
+            class="affine-database-toolbar-item expand"
+            @click=${this._onShowModalView}
+          >
+            ${DatabaseExpandWide}
+          </div>`}
       ${this.readonly
         ? null
         : html`<div
