@@ -129,6 +129,8 @@ export type TopLevelBlockModel = NoteBlockModel;
 
 export type Alignable = NoteBlockModel | PhasorElement;
 
+export type Erasable = NoteBlockModel | PhasorElement;
+
 export type DefaultMouseMode = {
   type: 'default';
 };
@@ -155,6 +157,10 @@ export type BrushMouseMode = {
   lineWidth: BrushSize;
 };
 
+export type EraserMouseMode = {
+  type: 'eraser';
+};
+
 export type PanMouseMode = {
   type: 'pan';
   panning: boolean;
@@ -178,7 +184,8 @@ export type MouseMode =
   | BrushMouseMode
   | PanMouseMode
   | NoteMouseMode
-  | ConnectorMouseMode;
+  | ConnectorMouseMode
+  | EraserMouseMode;
 
 export type SerializedBlock = {
   flavour: string;

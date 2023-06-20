@@ -19,7 +19,12 @@ export type { SurfaceViewport } from './renderer.js';
 export { Overlay, Renderer } from './renderer.js';
 export * from './surface.js';
 export * from './utils/bound.js';
-export { intersects, isPointIn, lineIntersects } from './utils/math-utils.js';
+export {
+  intersects,
+  isPointIn,
+  lineIntersects,
+  linePolygonIntersects,
+} from './utils/math-utils.js';
 export { getSvgPathFromStroke } from './utils/math-utils.js';
 export * from './utils/std.js';
 export { type IVec, Vec } from './utils/vec.js';
