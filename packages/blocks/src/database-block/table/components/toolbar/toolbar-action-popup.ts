@@ -105,7 +105,7 @@ class DatabaseTypePopup extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   dbType!: SwitchViewActionType;
 
   override render() {
@@ -172,7 +172,7 @@ export class ToolbarActionPopup extends LitElement {
 
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   close!: () => void;
 
   @query('.affine-database-toolbar-action-popup')

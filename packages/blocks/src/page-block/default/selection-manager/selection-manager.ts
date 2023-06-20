@@ -1,13 +1,13 @@
 import '../../../components/drag-handle.js';
 
-import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type {
   EventName,
   UIEventDispatcher,
   UIEventHandler,
   UIEventStateContext,
-} from '@blocksuite/lit';
+} from '@blocksuite/block-std';
+import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import {

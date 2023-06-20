@@ -66,19 +66,19 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   texts: TextElement[] = [];
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()

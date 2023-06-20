@@ -1,7 +1,7 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import type { Point as ConnectorPoint } from '@blocksuite/connector';
 import type { Direction } from '@blocksuite/connector';
 import { Rectangle, route, simplifyPath } from '@blocksuite/connector';
-import type { PointerEventState } from '@blocksuite/lit';
 import {
   Bound,
   type Controller,

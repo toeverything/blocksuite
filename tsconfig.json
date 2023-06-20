@@ -34,7 +34,13 @@
       "@blocksuite/virgo/*": ["./packages/virgo/src/*"],
       "@blocksuite/connector": ["./packages/connector/src"],
       "@blocksuite/connector/*": ["./packages/connector/src/*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "ts-lit-plugin",
+        "strict": true
+      }
+    ]
   },
   "files": [],
   "references": [

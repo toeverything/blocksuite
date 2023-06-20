@@ -28,10 +28,10 @@ test('basic input', async ({ page }) => {
 
   await page.waitForTimeout(100);
 
-  await type(page, 'abcdefg');
+  await type(page, 'abcd😃efg👨‍👨‍👧‍👦hj');
 
-  expect(await editorA.innerText()).toBe('abcdefg');
-  expect(await editorB.innerText()).toBe('abcdefg');
+  expect(await editorA.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
+  expect(await editorB.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
 
   await editorAUndo.click();
 
@@ -40,38 +40,53 @@ test('basic input', async ({ page }) => {
 
   await editorARedo.click();
 
-  expect(await editorA.innerText()).toBe('abcdefg');
-  expect(await editorB.innerText()).toBe('abcdefg');
+  expect(await editorA.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
+  expect(await editorB.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
 
   await focusVirgoRichText(page);
-  await press(page, 'Delete');
-  expect(await editorA.innerText()).toBe('abcdefg');
-  expect(await editorB.innerText()).toBe('abcdefg');
-  await press(page, 'ArrowLeft');
-  await press(page, 'ArrowLeft');
-  await press(page, 'Delete');
-  await press(page, 'Delete');
-  expect(await editorA.innerText()).toBe('abcde');
-  expect(await editorB.innerText()).toBe('abcde');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
+  await press(page, 'Backspace');
+
+  expect(await editorA.innerText()).toBe('abcd😃efg');
+  expect(await editorB.innerText()).toBe('abcd😃efg');
 
   await editorAUndo.click();
-  expect(await editorA.innerText()).toBe('abcdefg');
-  expect(await editorB.innerText()).toBe('abcdefg');
+
+  expect(await editorA.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
+  expect(await editorB.innerText()).toBe('abcd😃efg👨‍👨‍👧‍👦hj');
+
+  await editorARedo.click();
+
+  expect(await editorA.innerText()).toBe('abcd😃efg');
+  expect(await editorB.innerText()).toBe('abcd😃efg');
 
   await focusVirgoRichText(page);
-  await page.waitForTimeout(100);
-  await press(page, 'Backspace');
-  await press(page, 'Backspace');
-  await press(page, 'Backspace');
-  await press(page, 'Backspace');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'Delete');
+  await press(page, 'Delete');
+
+  await type(page, '🥰👨‍👨‍👧‍👦');
+  expect(await editorA.innerText()).toBe('abc🥰👨‍👨‍👧‍👦efg');
+  expect(await editorB.innerText()).toBe('abc🥰👨‍👨‍👧‍👦efg');
+
+  await setVirgoRichTextRange(page, {
+    index: 3,
+    length: 16,
+  });
+  await press(page, 'Delete');
 
   expect(await editorA.innerText()).toBe('abc');
-  expect(await editorB.innerText()).toBe('abc');
+  expect(await editorA.innerText()).toBe('abc');
 
   await editorAUndo.click();
 
-  expect(await editorA.innerText()).toBe('abcdefg');
-  expect(await editorB.innerText()).toBe('abcdefg');
+  expect(await editorA.innerText()).toBe('abcd😃efg');
+  expect(await editorB.innerText()).toBe('abcd😃efg');
 
   await editorARedo.click();
 

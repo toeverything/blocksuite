@@ -1,4 +1,5 @@
-import type { BlockElement, UIEventDispatcher } from '@blocksuite/lit';
+import type { UIEventDispatcher } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 import type {
   ConnectorMode,
   PhasorElement,

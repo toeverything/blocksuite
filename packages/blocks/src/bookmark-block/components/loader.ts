@@ -42,10 +42,10 @@ export class Loader extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   size: string | number = '50px';
 
-  @property()
+  @property({ attribute: false })
   color = 'blue';
 
   override firstUpdated() {

@@ -201,19 +201,19 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     `,
   ];
 
-  @property()
+  @property({ attribute: false })
   elements: ShapeElement[] = [];
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()

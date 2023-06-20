@@ -39,7 +39,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       ? html`<database-view-header
           .currentView="${current.id}"
           .setViewId="${this._setViewId}"
-          .model="${this.model}"
+          .model=${this.model}
         ></database-view-header>`
       : '';
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */

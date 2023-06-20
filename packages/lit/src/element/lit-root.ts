@@ -1,5 +1,6 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
+import { UIEventDispatcher } from '@blocksuite/block-std';
 import type { BaseBlockModel, BlockSchemaType, Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { nothing } from 'lit';
@@ -8,18 +9,17 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
-import { UIEventDispatcher } from '../event/index.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   componentMap!: Map<BlockSchemaType, StaticValue>;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   blockIdAttr = 'data-block-id';
 
   modelSubscribed = new Set<string>();

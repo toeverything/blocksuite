@@ -22,7 +22,7 @@ export class CellLevelSelection extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   cell!: HTMLElement;
 
   @state()

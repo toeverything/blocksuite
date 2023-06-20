@@ -1,7 +1,14 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
+type SurfaceBlockProps = {
+  elements: Record<string, unknown>;
+};
+
 export const SurfaceBlockSchema = defineBlockSchema({
   flavour: 'affine:surface',
+  props: (): SurfaceBlockProps => ({
+    elements: {},
+  }),
   metadata: {
     version: 3,
     role: 'hub',

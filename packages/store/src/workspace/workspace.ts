@@ -194,10 +194,7 @@ export class Workspace {
         idGenerator: this._store.idGenerator,
       });
       this._store.addSpace(page);
-
-      page.waitForLoaded().then(() => {
-        page.trySyncFromExistingDoc();
-      });
+      this.slots.pageAdded.emit(page.id);
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
@@ -322,20 +319,6 @@ export class Workspace {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sanitize = async (props: any) => {
       const result: Record<string, unknown> = {};
-
-      //TODO: https://github.com/toeverything/blocksuite/issues/2939
-      if (props['sys:flavour'] === 'affine:surface' && props['elements']) {
-        for (const [, element] of Object.entries(
-          props['elements']
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ) as any[]) {
-          if (element['type'] === 'text') {
-            const yText = new Y.Text();
-            yText.applyDelta(element['text']);
-            element['text'] = yText;
-          }
-        }
-      }
 
       // setup embed source
       if (props['sys:flavour'] === 'affine:image') {

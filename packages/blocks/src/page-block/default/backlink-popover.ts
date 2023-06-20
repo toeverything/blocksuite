@@ -95,10 +95,10 @@ export type BackLink = {
 export class BacklinkButton extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   page?: Page;
 
-  @property()
+  @property({ attribute: false })
   host!: BlockHost;
 
   @state()
