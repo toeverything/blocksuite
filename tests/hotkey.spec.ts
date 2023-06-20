@@ -140,6 +140,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -192,6 +193,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -217,6 +219,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -307,6 +310,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -348,6 +352,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -393,6 +398,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -438,6 +444,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -498,6 +505,7 @@ test('should single line format hotkey work', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -540,6 +548,7 @@ test('should single line format hotkey work', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -575,6 +584,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -645,6 +655,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -679,6 +690,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -694,6 +706,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -710,6 +723,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list
@@ -727,6 +741,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list
@@ -743,6 +758,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -759,6 +775,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -804,6 +821,7 @@ test('should cut work single line', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -821,6 +839,7 @@ test('should cut work single line', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -847,6 +866,7 @@ test.skip('should cut work multiple line', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -864,6 +884,7 @@ test.skip('should cut work multiple line', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph

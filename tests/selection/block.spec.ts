@@ -1358,6 +1358,7 @@ test('click bottom of page and if the last is embed block, editor should insert 
   <affine:page>
     <affine:note
       prop:background="--affine-background-secondary-color"
+      prop:hidden={false}
       prop:index="a0"
     >
       <affine:image

@@ -362,6 +362,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -383,6 +384,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph

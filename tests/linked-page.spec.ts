@@ -587,6 +587,7 @@ test.describe.skip('linked page with clipboard', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
