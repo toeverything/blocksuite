@@ -8,7 +8,7 @@ import {
   columnManager,
   richTextHelper,
 } from '../../database-block/common/column-manager.js';
-import { getTagColor } from '../../database-block/utils.js';
+import { getTagColor } from '../../database-block/utils/utils.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
