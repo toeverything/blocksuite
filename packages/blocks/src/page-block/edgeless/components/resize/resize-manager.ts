@@ -363,6 +363,11 @@ export class HandleResizeManager {
           const newWidth = Math.abs(w * scale.x);
           const newHeight = Math.abs(h * scale.y);
 
+          // adjust angle
+          if ((flipX < 0 && flipY > 0) || (flipX > 0 && flipY < 0)) {
+            rotate -= _rotate * 2;
+          }
+
           newBounds.set(id, {
             bound: new Bound(
               center.x - newWidth / 2,
