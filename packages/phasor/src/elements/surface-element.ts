@@ -25,7 +25,8 @@ export type ComputedValue = (value: string) => string;
 export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement
 > {
-  abstract isIntersectLine(start: IVec, end: IVec): boolean;
+  abstract intersectWithLine(start: IVec, end: IVec): boolean;
+
   yMap: Y.Map<unknown>;
 
   protected renderer: Renderer | null = null;
@@ -94,6 +95,10 @@ export abstract class SurfaceElement<
     return seed;
   }
 
+  get localRecord() {
+    return this.surface.getElementLocalRecord(this.id);
+  }
+
   applyUpdate(updates: Partial<T>) {
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
@@ -112,6 +117,7 @@ export abstract class SurfaceElement<
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
   };
+
   mount(renderer: Renderer) {
     this.renderer = renderer;
     this.renderer.addElement(this);
@@ -126,9 +132,5 @@ export abstract class SurfaceElement<
 
   render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     return;
-  }
-
-  get localRecord() {
-    return this.surface.getElementLocalRecord(this.id);
   }
 }

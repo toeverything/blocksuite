@@ -20,12 +20,13 @@ export const DebugElementDefaultProps: IElementDefaultProps<'debug'> = {
 };
 
 export class DebugElement extends SurfaceElement<IDebug> {
-  override isIntersectLine(start: IVec, end: IVec): boolean {
-    throw new Error('Method not implemented.');
-  }
   get color() {
     const color = this.yMap.get('color') as IDebug['color'];
     return color;
+  }
+
+  override intersectWithLine(start: IVec, end: IVec): boolean {
+    throw new Error('Method not implemented.');
   }
 
   override render(ctx: CanvasRenderingContext2D): void {

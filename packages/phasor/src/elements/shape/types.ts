@@ -32,5 +32,5 @@ export interface ShapeMethods {
     bound: IBound,
     options?: HitTestOptions
   ) => boolean;
-  isIntersectLine: (start: IVec, end: IVec, element: ShapeElement) => boolean;
+  intersectWithLine: (start: IVec, end: IVec, element: ShapeElement) => boolean;
 }

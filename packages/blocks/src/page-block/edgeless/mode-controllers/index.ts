@@ -34,7 +34,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
     return this._edgeless.sortedNotes;
   }
 
-  public abstract mouseMode: Mode;
+  abstract mouseMode: Mode;
   abstract onContainerDragStart(e: PointerEventState): void;
   abstract onContainerDragMove(e: PointerEventState): void;
   abstract onContainerDragEnd(e: PointerEventState): void;
@@ -45,5 +45,5 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerMouseOut(e: PointerEventState): void;
   abstract onContainerContextMenu(e: PointerEventState): void;
   abstract onPressShiftKey(pressed: boolean): void;
-  abstract beforeModeSwitch(curMode: MouseMode): void;
+  abstract beforeModeSwitch(currentMode: MouseMode): void;
 }

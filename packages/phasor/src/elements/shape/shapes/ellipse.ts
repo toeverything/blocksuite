@@ -53,11 +53,8 @@ export const EllipseMethods: ShapeMethods = {
       bound.h / 2
     );
   },
-  isIntersectLine: function (
-    start: IVec,
-    end: IVec,
-    element: ShapeElement
-  ): boolean {
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
     const bound = Bound.deserialize(element.xywh);
     return !!lineEllipseIntersects(
       start,

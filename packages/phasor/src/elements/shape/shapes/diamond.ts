@@ -63,11 +63,8 @@ export const DiamondMethods: ShapeMethods = {
     ];
     return pointInPolygon([x, y], points);
   },
-  isIntersectLine: function (
-    start: IVec,
-    end: IVec,
-    element: ShapeElement
-  ): boolean {
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
     const bound = Bound.deserialize(element.xywh);
     const { x, y, w, h } = bound;
 

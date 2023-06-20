@@ -70,11 +70,8 @@ export const RectMethods: ShapeMethods = {
   hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
     return isPointIn(bound, x, y);
   },
-  isIntersectLine: function (
-    start: IVec,
-    end: IVec,
-    element: ShapeElement
-  ): boolean {
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
     return !!linePolygonIntersects(
       start,
       end,

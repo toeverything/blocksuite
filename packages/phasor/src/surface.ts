@@ -331,10 +331,7 @@ export class SurfaceManager {
     return [...this._elements.values()];
   }
 
-  public updateElementLocalRecord(
-    id: id,
-    records: Partial<ElementLocalRecords>
-  ) {
+  updateElementLocalRecord(id: id, records: Partial<ElementLocalRecords>) {
     const elementLocalRecord = this._elementLocalRecords.get(id) ?? {
       display: true,
       opacity: 1,
@@ -343,11 +340,11 @@ export class SurfaceManager {
     this.refresh();
   }
 
-  public getElementLocalRecord(id: id) {
+  getElementLocalRecord(id: id) {
     return this._elementLocalRecords.get(id) ?? { display: true, opacity: 1 };
   }
 
-  public deleteElementLocalRecord(id: id) {
+  deleteElementLocalRecord(id: id) {
     this._elementLocalRecords.delete(id);
   }
 }

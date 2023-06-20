@@ -38,14 +38,14 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
 
   private _overlay = new EraserOverlay();
   private _timestamp = 0;
-  private _interval = 0;
+  private _timer = 0;
   private _eraserPoints: IVec[] = [];
   private _prevPoint: IVec = [];
   private _prevEraserPoint: IVec = [];
-  private erasableElements: Set<Erasable> = new Set();
-  private toBeErasedElements: Set<Erasable> = new Set();
+  private _erasables: Set<Erasable> = new Set();
+  private _eraseTargets: Set<Erasable> = new Set();
 
-  private _loop() {
+  private _loop = () => {
     const now = Date.now();
     const elapsed = now - this._timestamp;
 
@@ -77,8 +77,8 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
       this._overlay.d = d;
       this._edgeless.surface.refresh();
     }
-    this._interval = requestAnimationFrame(this._loop.bind(this));
-  }
+    this._timer = requestAnimationFrame(this._loop);
+  };
 
   private toModelCoord(p: IPoint): IVec {
     return this._surface.viewport.toModelCoord(p.x, p.y);
@@ -91,31 +91,32 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
     const [x, y] = this.toModelCoord(point);
     this._eraserPoints = [[x, y]];
     this._prevPoint = [x, y];
-    this.erasableElements = new Set([
+    this._erasables = new Set([
       ...this._surface.getElements(),
       ...(<TopLevelBlockModel[]>this._page.getBlockByFlavour('affine:note')),
     ]);
     this._loop();
     this._edgeless.surface.viewport.addOverlay(this._overlay);
   }
+
   override onContainerDragMove(e: PointerEventState): void {
     const currentPoint = this.toModelCoord(e.point);
     const surface = this._surface;
-    this.erasableElements.forEach(element => {
-      if (this.toBeErasedElements.has(element)) return;
-      if (isTopLevelBlock(element)) {
-        const bound = Bound.deserialize(element.xywh);
+    this._erasables.forEach(erasable => {
+      if (this._eraseTargets.has(erasable)) return;
+      if (isTopLevelBlock(erasable)) {
+        const bound = Bound.deserialize(erasable.xywh);
         if (
           linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
         ) {
-          this.toBeErasedElements.add(element);
-          const ele = getBlockElementById(element.id);
+          this._eraseTargets.add(erasable);
+          const ele = getBlockElementById(erasable.id);
           ele && ((<HTMLElement>ele).style.opacity = '0.3');
         }
       } else {
-        if (element.isIntersectLine(this._prevPoint, currentPoint)) {
-          this.toBeErasedElements.add(element);
-          surface.updateElementLocalRecord(element.id, { opacity: 0.3 });
+        if (erasable.intersectWithLine(this._prevPoint, currentPoint)) {
+          this._eraseTargets.add(erasable);
+          surface.updateElementLocalRecord(erasable.id, { opacity: 0.3 });
         }
       }
     });
@@ -124,30 +125,30 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
   }
 
   override beforeModeSwitch(mode: MouseMode) {
-    this.toBeErasedElements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const ele = getBlockElementById(element.id);
+    this._eraseTargets.forEach(erasable => {
+      if (isTopLevelBlock(erasable)) {
+        const ele = getBlockElementById(erasable.id);
         ele && ((<HTMLElement>ele).style.opacity = '1');
       } else {
-        this._surface.updateElementLocalRecord(element.id, { opacity: 1 });
+        this._surface.updateElementLocalRecord(erasable.id, { opacity: 1 });
       }
     });
     this._reset();
   }
 
   private _reset() {
-    cancelAnimationFrame(this._interval);
+    cancelAnimationFrame(this._timer);
     this._edgeless.surface.viewport.removeOverlay(this._overlay);
-    this.erasableElements.clear();
-    this.toBeErasedElements.clear();
+    this._erasables.clear();
+    this._eraseTargets.clear();
   }
 
   override onContainerDragEnd(e: PointerEventState): void {
-    this.toBeErasedElements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        this._page.deleteBlock(element);
+    this._eraseTargets.forEach(erasable => {
+      if (isTopLevelBlock(erasable)) {
+        this._page.deleteBlock(erasable);
       } else {
-        this._surface.removeElement(element.id);
+        this._surface.removeElement(erasable.id);
       }
     });
     this._reset();

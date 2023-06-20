@@ -9,14 +9,8 @@ import {
   getTextWidth,
   isRTL,
 } from './utils.js';
+
 export class TextElement extends SurfaceElement<IText> {
-  override isIntersectLine(start: IVec, end: IVec): boolean {
-    return !!linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(this.xywh).points
-    );
-  }
   get text() {
     return this.yMap.get('text') as IText['text'];
   }
@@ -35,6 +29,14 @@ export class TextElement extends SurfaceElement<IText> {
 
   get textAlign() {
     return this.yMap.get('textAlign') as IText['textAlign'];
+  }
+
+  override intersectWithLine(start: IVec, end: IVec): boolean {
+    return !!linePolygonIntersects(
+      start,
+      end,
+      Bound.deserialize(this.xywh).points
+    );
   }
 
   override render(ctx: CanvasRenderingContext2D) {

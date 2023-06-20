@@ -41,7 +41,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return lineWidth;
   }
 
-  public isIntersectLine(pa: IVec, pb: IVec) {
+  intersectWithLine(pa: IVec, pb: IVec) {
     const { points } = this;
 
     const box = Bound.deserialize(this.xywh);

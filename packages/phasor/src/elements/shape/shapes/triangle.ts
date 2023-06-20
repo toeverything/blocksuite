@@ -10,6 +10,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+
 export const TriangleMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
@@ -60,11 +61,8 @@ export const TriangleMethods: ShapeMethods = {
     ];
     return pointInPolygon([x, y], points);
   },
-  isIntersectLine: function (
-    start: IVec,
-    end: IVec,
-    element: ShapeElement
-  ): boolean {
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
     const bound = Bound.deserialize(element.xywh);
     const { x, y, w, h } = bound;
 
