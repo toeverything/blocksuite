@@ -12,6 +12,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { computePosition } from '@floating-ui/dom';
+import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -29,8 +30,14 @@ import type {
 import type { ColumnTypeIcon } from '../../types.js';
 import { ColumnTypePopup } from '../edit-column-popup/column-type-popup.js';
 import { EditColumnPopup } from '../edit-column-popup/edit-column-popup.js';
+
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
+  static override styles = css`
+    .affine-database-header-column-grabbing * {
+      cursor: grabbing;
+    }
+  `;
   @property({ attribute: false })
   tableViewManager!: TableViewManager;
 
@@ -148,6 +155,8 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         drag.move({ x: drag.data.x });
       }
     });
+    const html = document.querySelector('html');
+    html?.classList.toggle('affine-database-header-column-grabbing', true);
     const drag = startDrag<{ x: number; insertPosition?: InsertPosition }>(
       evt,
       {
@@ -181,6 +190,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             this.tableViewManager.moveColumn(this.column.id, insertPosition);
           }
           cancelScroll();
+          html?.classList.toggle(
+            'affine-database-header-column-grabbing',
+            false
+          );
           dropPreview.remove();
           dragPreview.remove();
         },
