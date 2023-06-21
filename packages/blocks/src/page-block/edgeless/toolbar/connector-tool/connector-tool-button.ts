@@ -1,7 +1,7 @@
 import '../../components/tool-icon-button.js';
 import './connector-menu.js';
 
-import { ConnectorIcon, NewConnectorIcon } from '@blocksuite/global/config';
+import { EdgelessConnectorIcon } from '@blocksuite/global/config';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
@@ -115,7 +115,7 @@ export class EdgelessConnectorToolButton extends LitElement {
           this._toggleMenu();
         }}
       >
-        ${NewConnectorIcon}
+        ${EdgelessConnectorIcon}
       </edgeless-tool-icon-button>
     `;
   }

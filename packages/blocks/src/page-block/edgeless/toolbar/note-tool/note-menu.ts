@@ -1,14 +1,20 @@
 import {
-  CodeIcon,
-  DividerBlockIcon,
-  Heading1BlockIcon,
-  Heading2BlockIcon,
-  Heading3BlockIcon,
-  Heading4BlockIcon,
-  Heading5BlockIcon,
-  Heading6BlockIcon,
-  ListIcon,
-  TextBlockIcon,
+  BookmarkIcon,
+  BulletedListIcon,
+  CodeBlockIcon,
+  DatabaseTableViewIcon,
+  DividerIcon,
+  H1Icon,
+  H2Icon,
+  H3Icon,
+  H4Icon,
+  H5Icon,
+  H6Icon,
+  ImageIcon,
+  NumberedListIcon,
+  QuoteIcon,
+  TextIcon,
+  TodoIcon,
 } from '@blocksuite/global/config';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -21,7 +27,7 @@ export class EdgelessNoteMenu extends LitElement {
   static override styles = css`
     :host {
       position: absolute;
-      height: 68px;
+      height: 70px;
       display: flex;
       z-index: -1;
     }
@@ -77,34 +83,52 @@ export class EdgelessNoteMenu extends LitElement {
         <div class="button-group-container">
           <div class="button-group-label">Blocks</div>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${TextBlockIcon}
+            ${TextIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${Heading1BlockIcon}
+            ${H1Icon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${Heading2BlockIcon}
+            ${H2Icon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${Heading3BlockIcon}
+            ${H3Icon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${Heading4BlockIcon}
+            ${H4Icon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${Heading5BlockIcon}
+            ${H5Icon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${Heading6BlockIcon}
+            ${H6Icon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${CodeIcon}
+            ${CodeBlockIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${ListIcon}
+            ${QuoteIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button style=${this.iconButtonStyles}>
-            ${DividerBlockIcon}
+            ${DividerIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${BulletedListIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${NumberedListIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${TodoIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${ImageIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${BookmarkIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+            ${DatabaseTableViewIcon}
           </edgeless-tool-icon-button>
         </div>
       </div>

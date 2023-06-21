@@ -1,7 +1,7 @@
 import '../../components/tool-icon-button.js';
 import './brush-menu.js';
 
-import { NewPenIcon } from '@blocksuite/global/config';
+import { EdgelessPenIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
@@ -120,7 +120,7 @@ export class EdgelessBrushToolButton extends LitElement {
           this._toggleBrushMenu();
         }}
       >
-        ${NewPenIcon}
+        ${EdgelessPenIcon}
       </edgeless-tool-icon-button>
     `;
   }

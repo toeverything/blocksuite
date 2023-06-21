@@ -1,6 +1,6 @@
 import '../components/tool-icon-button.js';
 
-import { NewEraserIcon } from '@blocksuite/global/config';
+import { EdgelessEraserIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -50,7 +50,7 @@ export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
         .active=${type === 'eraser'}
         @click=${() => this.setMouseMode({ type: 'eraser' })}
       >
-        ${NewEraserIcon}
+        ${EdgelessEraserIcon}
       </edgeless-tool-icon-button>
     `;
   }

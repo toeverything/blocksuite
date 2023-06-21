@@ -1,7 +1,7 @@
 import '../../components/tool-icon-button.js';
 import './shape-menu.js';
 
-import { NewShapeIcon } from '@blocksuite/global/config';
+import { EdgelessShapeIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -110,7 +110,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._toggleShapeMenu();
         }}
       >
-        ${NewShapeIcon}
+        ${EdgelessShapeIcon}
       </edgeless-tool-icon-button>
       <edgeless-shape-menu .selectedShape=${selectedShape}>
       </edgeless-shape-menu>

@@ -14,10 +14,10 @@ export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      position: absolute;
-      z-index: 3;
-      bottom: 28px;
-      left: 28px;
+      position: fixed;
+      z-index: var(--affine-z-index-popover);
+      bottom: 30px;
+      left: 30px;
       display: flex;
       justify-content: center;
       user-select: none;
@@ -28,7 +28,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       align-items: center;
       flex-direction: row;
       padding: 4px;
-      height: 28px;
+      height: 20px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;

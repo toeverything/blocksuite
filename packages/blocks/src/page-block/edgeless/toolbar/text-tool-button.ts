@@ -1,6 +1,6 @@
 import '../components/tool-icon-button.js';
 
-import { NewTextIcon } from '@blocksuite/global/config';
+import { EdgelessTextIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -50,7 +50,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
         .active=${type === 'text'}
         @click=${() => this.setMouseMode({ type: 'text' })}
       >
-        ${NewTextIcon}
+        ${EdgelessTextIcon}
       </edgeless-tool-icon-button>
     `;
   }

@@ -1,6 +1,6 @@
 import '../components/tool-icon-button.js';
 
-import { NewImageIcon } from '@blocksuite/global/config';
+import { EdgelessImageIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
@@ -112,7 +112,7 @@ export class EdgelessImageToolButton extends WithDisposable(LitElement) {
         .tooltip=${'Image'}
         @click=${() => this._addImage()}
       >
-        ${NewImageIcon}
+        ${EdgelessImageIcon}
       </edgeless-tool-icon-button>
     `;
   }
