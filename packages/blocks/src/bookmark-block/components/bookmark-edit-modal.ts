@@ -105,11 +105,11 @@ export const bookmarkModalStyles = html`
 `;
 @customElement('bookmark-edit-modal')
 export class BookmarkEditModal extends WithDisposable(LitElement) {
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel<BookmarkBlockModel>;
-  @property()
+  @property({ attribute: false })
   onCancel?: () => void;
-  @property()
+  @property({ attribute: false })
   onConfirm?: () => void;
 
   override get id() {

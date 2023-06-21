@@ -166,6 +166,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
         lineWidth: BrushSize.Thin,
       })
     );
+    hotkey.addListener('e', () => setMouseMode(edgeless, { type: 'eraser' }));
     hotkey.addListener('s', () =>
       setMouseMode(edgeless, {
         type: 'shape',

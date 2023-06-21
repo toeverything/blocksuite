@@ -1,4 +1,4 @@
-import type { PointerEventState } from '@blocksuite/lit';
+import type { PointerEventState } from '@blocksuite/block-std';
 
 import type { TextMouseMode } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
@@ -47,6 +47,14 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
   }
 
   onPressShiftKey(_: boolean) {
+    noop();
+  }
+
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
     noop();
   }
 }

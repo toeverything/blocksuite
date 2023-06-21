@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import {
   Bound,
   ConnectorElement,
@@ -529,6 +529,14 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onPressShiftKey(_: boolean) {
+    noop();
+  }
+
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
     noop();
   }
 }

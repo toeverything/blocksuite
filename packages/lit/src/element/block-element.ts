@@ -10,15 +10,18 @@ import { ShadowlessElement } from './shadowless-element.js';
 export class BlockElement<Model extends BaseBlockModel> extends WithDisposable(
   ShadowlessElement
 ) {
-  @property()
+  @property({ attribute: false })
   root!: BlockSuiteRoot;
 
-  @property()
+  @property({ attribute: false })
   model!: Model;
 
-  @property()
+  @property({ attribute: false })
   content!: TemplateResult;
 
-  @property()
+  @property({ attribute: false })
+  widgets!: TemplateResult;
+
+  @property({ attribute: false })
   page!: Page;
 }

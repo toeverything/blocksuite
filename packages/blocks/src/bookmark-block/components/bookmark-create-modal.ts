@@ -12,10 +12,10 @@ import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 
 @customElement('bookmark-create-modal')
 export class BookmarkCreateModal extends WithDisposable(LitElement) {
-  @property()
+  @property({ attribute: false })
   onCancel?: () => void;
 
-  @property()
+  @property({ attribute: false })
   onConfirm?: (props: { url: string }) => void;
 
   override get id() {

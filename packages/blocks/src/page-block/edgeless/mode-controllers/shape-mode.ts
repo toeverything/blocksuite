@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import { Bound, StrokeStyle } from '@blocksuite/phasor';
 
 import type { ShapeMouseMode } from '../../../__internal__/index.js';
@@ -147,6 +147,14 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   }
 
   onContainerMouseOut(e: PointerEventState) {
+    noop();
+  }
+
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
     noop();
   }
 }

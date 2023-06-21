@@ -351,6 +351,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -393,6 +394,7 @@ test.skip('should keep first line format when pasted into a new line', async ({
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -506,6 +508,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -526,6 +529,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -578,6 +582,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:database
@@ -616,6 +621,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:database
@@ -768,6 +774,7 @@ test(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -793,6 +800,7 @@ test(
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -901,6 +909,7 @@ test(scoped`auto identify url`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph

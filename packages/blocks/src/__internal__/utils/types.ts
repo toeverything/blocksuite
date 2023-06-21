@@ -1,4 +1,5 @@
-import type { BlockElement, UIEventDispatcher } from '@blocksuite/lit';
+import type { UIEventDispatcher } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 import type {
   ConnectorMode,
   PhasorElement,
@@ -44,7 +45,6 @@ export interface EditingState {
   rect: DOMRect;
 }
 
-export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
 export type DatabaseTableViewRowSelect = {
   type: 'select';
   databaseId: string;
@@ -69,23 +69,19 @@ export type DatabaseTableViewRowState =
   | DatabaseTableViewRowDelete
   | DatabaseTableViewRowClear;
 
-export type CellCoord = {
+export type CellFocus = {
   rowIndex: number;
-  cellIndex: number;
+  columnIndex: number;
 };
-export type DatabaseTableViewCellSelect = {
-  type: 'select';
+export type MultiSelection = { start: number; end: number };
+export type DatabaseSelection = {
   databaseId: string;
-  // Currently only supports single cell selection.
-  coords: [CellCoord];
+  rowsSelection?: MultiSelection;
+  columnsSelection?: MultiSelection;
+  focus: CellFocus;
   isEditing: boolean;
 };
-type DatabaseTableViewCellClear = {
-  type: 'clear';
-};
-export type DatabaseTableViewCellState =
-  | DatabaseTableViewCellSelect
-  | DatabaseTableViewCellClear;
+export type DatabaseSelectionState = DatabaseSelection | undefined;
 
 /** Common context interface definition for block models. */
 
@@ -133,6 +129,8 @@ export type TopLevelBlockModel = NoteBlockModel;
 
 export type Alignable = NoteBlockModel | PhasorElement;
 
+export type Erasable = NoteBlockModel | PhasorElement;
+
 export type DefaultMouseMode = {
   type: 'default';
 };
@@ -159,6 +157,10 @@ export type BrushMouseMode = {
   lineWidth: BrushSize;
 };
 
+export type EraserMouseMode = {
+  type: 'eraser';
+};
+
 export type PanMouseMode = {
   type: 'pan';
   panning: boolean;
@@ -182,7 +184,8 @@ export type MouseMode =
   | BrushMouseMode
   | PanMouseMode
   | NoteMouseMode
-  | ConnectorMouseMode;
+  | ConnectorMouseMode
+  | EraserMouseMode;
 
 export type SerializedBlock = {
   flavour: string;

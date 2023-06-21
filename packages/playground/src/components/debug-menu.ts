@@ -132,13 +132,13 @@ export class DebugMenu extends ShadowlessElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   workspace!: Workspace;
 
-  @property()
+  @property({ attribute: false })
   editor!: EditorContainer;
 
-  @property()
+  @property({ attribute: false })
   contentParser!: ContentParser;
 
   @state()
@@ -150,10 +150,10 @@ export class DebugMenu extends ShadowlessElement {
   @state()
   private _canRedo = false;
 
-  @property()
+  @property({ attribute: false })
   mode: 'page' | 'edgeless' = 'page';
 
-  @property()
+  @property({ attribute: false })
   readonly = false;
 
   @state()
@@ -362,6 +362,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
+    this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     this.workspace.slots.pageAdded.on(() => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });

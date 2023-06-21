@@ -5,7 +5,7 @@ import { NewPenIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { MouseMode } from '../../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../components/color-panel.js';
@@ -57,13 +57,13 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   mouseMode!: MouseMode;
 
-  @property()
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property()
+  @property({ attribute: false })
   setMouseMode!: (mouseMode: MouseMode) => void;
 
   private iconButtonStyles = `
@@ -80,12 +80,10 @@ export class EdgelessBrushToolButton extends LitElement {
     if (this._brushMenu) {
       this._brushMenu.dispose();
       this._brushMenu = null;
-      this._popperShow = false;
     } else {
       this._brushMenu = createBrushMenuPopper(this);
       this._brushMenu.element.mouseMode = this.mouseMode;
       this._brushMenu.element.edgeless = this.edgeless;
-      this._popperShow = true;
     }
   }
 

@@ -887,7 +887,7 @@ export class EdgelessPageBlockComponent
   private _tryLoadViewportLocalRecord() {
     const { viewport } = this.surface;
     const key = 'blocksuite:' + this.page.id + ':edgelessViewport';
-    const viewportData = localStorage.getItem(key);
+    const viewportData = sessionStorage.getItem(key);
     if (viewportData) {
       try {
         const { x, y, zoom } = JSON.parse(viewportData);
