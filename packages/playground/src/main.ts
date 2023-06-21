@@ -8,7 +8,6 @@ import '@blocksuite/editor/themes/affine.css';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
-import { sub } from '@blocksuite/phasor/perfect-freehand/vec';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 import type { SubdocEvent } from '@blocksuite/store/yjs';
