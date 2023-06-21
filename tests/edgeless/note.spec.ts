@@ -509,7 +509,7 @@ test('manage note index and hidden status', async ({ page }) => {
 
   // hide note-3
   await page.locator('.note-status-button').click();
-  expect(await page.locator('.note-status').count()).toBe(0);
+  expect(await page.locator('.note-status.hidden').count()).toBe(1);
   // reappear note-3
   await page.locator('.note-status-button').click();
   // index of note-3 still be 3
@@ -518,7 +518,7 @@ test('manage note index and hidden status', async ({ page }) => {
   // select note-2 and hide
   await selectNoteInEdgeless(page, '6');
   await page.locator('.note-status-button').click();
-  expect(await page.locator('.note-status').count()).toBe(0);
+  expect(await page.locator('.note-status.hidden').count()).toBe(1);
 
   // index of note-1 still 1
   await selectNoteInEdgeless(page, '4');

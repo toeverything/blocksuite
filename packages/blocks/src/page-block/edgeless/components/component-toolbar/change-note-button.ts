@@ -208,7 +208,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (note.hidden) {
       return html`
-        <div class="note-status">${HiddenIcon}</div>
+        <div class="note-status hidden">${HiddenIcon}</div>
         <div
           @click=${() => this._setNoteHidden(note, !note.hidden)}
           class="note-status-button"
