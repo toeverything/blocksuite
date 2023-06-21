@@ -71,9 +71,6 @@ export class EdgelessBrushToolButton extends LitElement {
     --active-color: var(--affine-primary-color);
   `;
 
-  @state()
-  private _popperShow = false;
-
   private _brushMenu: BrushMenuPopper | null = null;
 
   private _toggleBrushMenu() {
@@ -112,7 +109,7 @@ export class EdgelessBrushToolButton extends LitElement {
     return html`
       <edgeless-tool-icon-button
         style=${this.iconButtonStyles}
-        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Pen', 'P')}
+        .tooltip=${getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @click=${() => {
           this.setMouseMode({

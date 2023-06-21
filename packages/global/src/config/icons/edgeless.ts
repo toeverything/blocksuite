@@ -878,7 +878,7 @@ export const NewPenIcon = html`<svg
   </defs>
 </svg>`;
 
-export const EraserIcon = html`<svg
+export const NewEraserIcon = html`<svg
   width="30"
   height="60"
   viewBox="0 0 30 60"
@@ -1865,4 +1865,3 @@ export const LassoIcon = html`<svg
     </clipPath>
   </defs>
 </svg>`;
-

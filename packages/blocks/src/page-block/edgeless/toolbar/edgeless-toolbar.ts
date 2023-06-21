@@ -177,7 +177,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}
           .setMouseMode=${this.setMouseMode}
-        </edgeless-eraser-tool-button>
+        ></edgeless-eraser-tool-button>
         <edgeless-text-icon-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}

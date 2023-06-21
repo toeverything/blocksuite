@@ -25,10 +25,10 @@ export class EdgelessImageToolButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   mouseMode!: MouseMode;
 
-  @property()
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
