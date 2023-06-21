@@ -162,6 +162,7 @@ describe('addBlock', () => {
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
         'prop:index': 'a0',
+        'prop:hidden': false,
       },
       '2': {
         'sys:children': [],
@@ -352,6 +353,7 @@ describe('deleteBlock', () => {
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
         'prop:index': 'a0',
+        'prop:hidden': false,
       },
       '2': {
         'sys:children': [],
@@ -379,6 +381,7 @@ describe('deleteBlock', () => {
         'prop:background': '--affine-background-secondary-color',
         'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
         'prop:index': 'a0',
+        'prop:hidden': false,
       },
     });
     assert.equal(root.children.length, 1);
@@ -478,6 +481,7 @@ describe('workspace.exportJSX works', () => {
       <affine:page>
         <affine:note
           prop:background="--affine-background-secondary-color"
+          prop:hidden={false}
           prop:index="a0"
         >
           <affine:paragraph

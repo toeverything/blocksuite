@@ -275,6 +275,7 @@ test.describe('slash search', () => {
       `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list

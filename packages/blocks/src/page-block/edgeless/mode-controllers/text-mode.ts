@@ -49,4 +49,12 @@ export class TextModeController extends MouseModeController<TextMouseMode> {
   onPressShiftKey(_: boolean) {
     noop();
   }
+
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
+    noop();
+  }
 }

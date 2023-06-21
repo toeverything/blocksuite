@@ -15,6 +15,7 @@ import {
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import type {
@@ -544,6 +545,14 @@ export class DefaultPageBlockComponent
     const isEmpty =
       (!this.model.title || !this.model.title.length) && !this._isComposing;
 
+    const content = html`${repeat(
+      this.model?.children.filter(
+        child => !(matchFlavours(child, ['affine:note']) && child.hidden)
+      ),
+      child => child.id,
+      child => this.root.renderModel(child)
+    )}`;
+
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
@@ -559,15 +568,15 @@ export class DefaultPageBlockComponent
               .page="${this.page}"
             ></backlink-button>
           </div>
-          ${this.content}
+          ${content}
         </div>
         <affine-selected-blocks
-          .mouseRoot="${this.mouseRoot}"
-          .state="${{
+          .mouseRoot=${this.mouseRoot}
+          .state=${{
             rects: this._selectedRects,
             grab: !draggingArea,
-          }}"
-          .offset="${viewportOffset}"
+          }}
+          .offset=${viewportOffset}
         ></affine-selected-blocks>
         ${this.widgets} ${draggingArea} ${selectedEmbedContainer}
       </div>

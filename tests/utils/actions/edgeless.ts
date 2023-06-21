@@ -69,7 +69,8 @@ type MouseMode =
   | 'pan'
   | 'text'
   | 'connector'
-  | 'note';
+  | 'note'
+  | 'eraser';
 type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
@@ -82,11 +83,11 @@ export function locatorEdgelessToolButton(
     default: 'Select',
     shape: 'Shape',
     brush: 'Pen',
+    eraser: 'Eraser',
     pan: 'Hand',
     text: 'Text',
     connector: 'Connector',
     note: 'Note',
-
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
@@ -128,6 +129,7 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
     case 'pan':
     case 'text':
     case 'note':
+    case 'eraser':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
@@ -518,7 +520,7 @@ export async function triggerComponentToolbarAction(
     }
     case 'changeNoteColor': {
       const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-note-button'
+        'edgeless-change-note-button edgeless-tool-icon-button'
       );
       await button.click();
       break;
@@ -678,7 +680,7 @@ export async function changeConnectorStrokeStyle(
   await button.click();
 }
 
-export async function initThreeShapes(page: Page) {
+export async function initThreeOverlapShapes(page: Page) {
   const rect0 = {
     start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
@@ -698,8 +700,14 @@ export async function initThreeShapes(page: Page) {
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
 }
 
-export async function initThreeNotes(page: Page) {
+export async function initThreeOverlapNotes(page: Page) {
   await addNote(page, 'abc', 30 + 100, 40 + 100);
   await addNote(page, 'efg', 30 + 130, 40 + 100);
   await addNote(page, 'hij', 30 + 160, 40 + 100);
+}
+
+export async function initThreeNotes(page: Page) {
+  await addNote(page, 'abc', 30 + 100, 40 + 100);
+  await addNote(page, 'efg', 30 + 130, 40 + 200);
+  await addNote(page, 'hij', 30 + 160, 40 + 300);
 }

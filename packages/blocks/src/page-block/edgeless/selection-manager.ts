@@ -26,6 +26,7 @@ import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { BrushModeController } from './mode-controllers/brush-mode.js';
 import { ConnectorModeController } from './mode-controllers/connector-mode.js';
 import { DefaultModeController } from './mode-controllers/default-mode.js';
+import { EraserModeController } from './mode-controllers/eraser-mode.js';
 import type { MouseModeController } from './mode-controllers/index.js';
 import { NoteModeController } from './mode-controllers/note-mode.js';
 import { PanModeController } from './mode-controllers/pan-mode.js';
@@ -161,6 +162,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       pan: new PanModeController(this.container),
       note: new NoteModeController(this.container),
       connector: new ConnectorModeController(this.container),
+      eraser: new EraserModeController(this.container),
     };
 
     this._initMouseAndWheelEvents();
@@ -460,6 +462,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     }
   ) => {
     if (this.mouseMode === mouseMode) return;
+    this._controllers[this.mouseMode.type].beforeModeSwitch(mouseMode);
     if (mouseMode.type === 'default') {
       if (!state.selected.length && this.lastState) {
         state = this.lastState;
@@ -473,6 +476,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
     this.container.slots.mouseModeUpdated.emit(mouseMode);
     this.container.slots.selectionUpdated.emit(state);
+    this._controllers[mouseMode.type].afterModeSwitch(mouseMode);
   };
 
   switchToDefaultMode(state: EdgelessSelectionState) {

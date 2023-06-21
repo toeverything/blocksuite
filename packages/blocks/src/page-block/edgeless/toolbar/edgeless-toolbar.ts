@@ -4,6 +4,7 @@ import './brush-tool/brush-tool-button.js';
 import './connector-tool/connector-tool-button.js';
 
 import {
+  EraserIcon,
   HandIcon,
   ImageIcon,
   MinusIcon,
@@ -275,9 +276,27 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       _disposables,
       edgeless: { slots },
     } = this;
-    _disposables.add(slots.mouseModeUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      slots.mouseModeUpdated.on(() => {
+        this._trySaveBrushStateLocalRecord();
+        this.requestUpdate();
+      })
+    );
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
   }
+
+  private _trySaveBrushStateLocalRecord = () => {
+    const mouseMode = this.edgeless.selection.mouseMode;
+    if (mouseMode.type === 'brush') {
+      sessionStorage.setItem(
+        'blocksuite:' + this.edgeless.page.id + ':edgelessBrush',
+        JSON.stringify({
+          color: mouseMode.color,
+          lineWidth: mouseMode.lineWidth,
+        })
+      );
+    }
+  };
 
   override render() {
     const { type } = this.mouseMode;
@@ -327,6 +346,14 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setMouseMode=${this.setMouseMode}
         ></edgeless-brush-tool-button>
+
+        <edgeless-tool-icon-button
+          .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
+          .active=${type === 'eraser'}
+          @click=${() => this.setMouseMode({ type: 'eraser' })}
+        >
+          ${EraserIcon}
+        </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
@@ -345,6 +372,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${NoteIcon}
         </edgeless-tool-icon-button>
+
         <div class="divider"></div>
         <edgeless-tool-icon-button
           .tooltip=${'Fit to screen'}

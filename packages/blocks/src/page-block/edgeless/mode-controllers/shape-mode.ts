@@ -149,4 +149,12 @@ export class ShapeModeController extends MouseModeController<ShapeMouseMode> {
   onContainerMouseOut(e: PointerEventState) {
     noop();
   }
+
+  beforeModeSwitch() {
+    noop();
+  }
+
+  afterModeSwitch() {
+    noop();
+  }
 }
