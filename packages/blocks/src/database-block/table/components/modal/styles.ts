@@ -81,6 +81,12 @@ export const fullScreenStyles = css`
     font-weight: 400;
   }
 
+  .table-view-full-modal-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .table-view-full-header {
     display: flex;
     justify-content: space-between;
@@ -121,5 +127,10 @@ export const fullScreenStyles = css`
     width: 14px;
     height: 14px;
     fill: var(--affine-icon-color);
+  }
+
+  .table-view-full-content {
+    flex: 1;
+    overflow-y: scroll;
   }
 `;
