@@ -14,7 +14,7 @@ import {
 
 import {
   type BlockComponentElement,
-  type DefaultMouseMode,
+  type DefaultTool,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
@@ -46,7 +46,7 @@ import {
   pickBlocksByBound,
   pickTopBlock,
 } from '../utils.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
   /** Moving selected contents */
@@ -63,8 +63,8 @@ export enum DefaultModeDragType {
   AltCloning = 'alt-cloning',
 }
 
-export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
-  readonly mouseMode = <DefaultMouseMode>{
+export class DefaultToolController extends EdgelessToolController<DefaultTool> {
+  readonly tool = <DefaultTool>{
     type: 'default',
   };
   override enableHover = true;

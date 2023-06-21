@@ -19,9 +19,9 @@ import {
 import { DragHandle } from '../../components/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import {
-  type DefaultModeController,
   DefaultModeDragType,
-} from './mode-controllers/default-mode.js';
+  type DefaultToolController,
+} from './tool-controllers/default-tool.js';
 
 export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
@@ -104,9 +104,9 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     },
     setDragType(dragging: boolean) {
       const { selection } = pageBlock;
-      if (selection.mouseMode.type === 'default') {
+      if (selection.edgelessTool.type === 'default') {
         const currentController =
-          selection.currentController as DefaultModeController;
+          selection.currentController as DefaultToolController;
         currentController.dragType = dragging
           ? DefaultModeDragType.PreviewDragging
           : DefaultModeDragType.None;
@@ -123,7 +123,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       return pageBlock.selection.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {
-      if (pageBlock.mouseMode.type !== 'default') return null;
+      if (pageBlock.edgelessTool.type !== 'default') return null;
       const hoveringNote = getHoveringNote(point);
       if (!hoveringNote) return null;
       return getClosestBlockElementByPoint(

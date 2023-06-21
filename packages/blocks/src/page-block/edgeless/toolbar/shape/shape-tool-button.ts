@@ -6,7 +6,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../__internal__/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -33,13 +33,13 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  mouseMode!: MouseMode;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  setMouseMode!: (mouseMode: MouseMode) => void;
+  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   @state()
   private _popperShow = false;
@@ -66,7 +66,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     _disposables.add(this._shapeMenuPopper);
     _disposables.add(
       this._shapeMenu.slots.select.on(shape => {
-        this.setMouseMode({
+        this.setEdgelessTool({
           type: 'shape',
           shape,
           fillColor: DEFAULT_SHAPE_FILL_COLOR,
@@ -83,15 +83,16 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const type = this.mouseMode?.type;
-    const selectedShape = type === 'shape' ? this.mouseMode.shape : undefined;
+    const type = this.edgelessTool?.type;
+    const selectedShape =
+      type === 'shape' ? this.edgelessTool.shape : undefined;
 
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
         @click=${() => {
-          this.setMouseMode({
+          this.setEdgelessTool({
             type: 'shape',
             shape: 'rect',
             fillColor: DEFAULT_SHAPE_FILL_COLOR,

@@ -62,7 +62,7 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type MouseMode =
+type EdgelessTool =
   | 'default'
   | 'shape'
   | 'brush'
@@ -71,7 +71,7 @@ type MouseMode =
   | 'connector'
   | 'note'
   | 'eraser';
-type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ToolType = EdgelessTool | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
@@ -122,7 +122,7 @@ export function locatorEdgelessComponentToolButton(
   return innerContainer ? button.locator('.icon-container') : button;
 }
 
-export async function setMouseMode(page: Page, mode: MouseMode) {
+export async function setEdgelessTool(page: Page, mode: EdgelessTool) {
   switch (mode) {
     case 'default':
     case 'brush':
@@ -148,13 +148,13 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
   }
 }
 
-export async function assertMouseMode(page: Page, mode: MouseMode) {
+export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
   const type = await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.mouseMode.type;
+    return container.edgelessTool.type;
   });
   expect(type).toEqual(mode);
 }
@@ -216,9 +216,9 @@ export async function addBasicBrushElement(
   end: { x: number; y: number },
   auto = true
 ) {
-  await setMouseMode(page, 'brush');
+  await setEdgelessTool(page, 'brush');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  auto && (await setMouseMode(page, 'default'));
+  auto && (await setEdgelessTool(page, 'default'));
 }
 
 export async function addBasicRectShapeElement(
@@ -226,7 +226,7 @@ export async function addBasicRectShapeElement(
   start: { x: number; y: number },
   end: { x: number; y: number }
 ) {
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, start, end, { steps: 20 });
 }
 
@@ -235,12 +235,12 @@ export async function addBasicConnectorElement(
   start: { x: number; y: number },
   end: { x: number; y: number }
 ) {
-  await setMouseMode(page, 'connector');
+  await setEdgelessTool(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
 }
 
 export async function addNote(page: Page, text: string, x: number, y: number) {
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
   await waitForVirgoStateUpdated(page);
   await type(page, text);

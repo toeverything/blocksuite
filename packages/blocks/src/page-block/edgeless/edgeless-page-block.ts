@@ -57,7 +57,7 @@ import {
 import type {
   BlockHost,
   DragHandle,
-  MouseMode,
+  EdgelessTool,
   NoteBlockModel,
   PageBlockModel,
   SurfaceBlockModel,
@@ -96,7 +96,7 @@ export interface EdgelessSelectionSlots {
   viewportUpdated: Slot;
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
-  mouseModeUpdated: Slot<MouseMode>;
+  edgelessToolUpdated: Slot<EdgelessTool>;
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
@@ -192,7 +192,7 @@ export class EdgelessPageBlockComponent
   showGrid = true;
 
   @state()
-  mouseMode: MouseMode = {
+  edgelessTool: EdgelessTool = {
     type: 'default',
   };
 
@@ -213,7 +213,7 @@ export class EdgelessPageBlockComponent
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
-    mouseModeUpdated: new Slot<MouseMode>(),
+    edgelessToolUpdated: new Slot<EdgelessTool>(),
     reorderingNotesUpdated: new Slot<ReorderingAction<Selectable>>(),
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
@@ -399,11 +399,11 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
     _disposables.add(
-      slots.mouseModeUpdated.on(mouseMode => {
-        if (mouseMode.type !== 'default') {
+      slots.edgelessToolUpdated.on(edgelessTool => {
+        if (edgelessTool.type !== 'default') {
           this.components.dragHandle?.hide();
         }
-        this.mouseMode = mouseMode;
+        this.edgelessTool = edgelessTool;
       })
     );
     _disposables.add(
@@ -830,8 +830,8 @@ export class EdgelessPageBlockComponent
       );
       this.snap = new EdgelessSnapManager(this);
     }
-    if (changedProperties.has('mouseMode')) {
-      this.selection.mouseMode = this.mouseMode;
+    if (changedProperties.has('edgelessTool')) {
+      this.selection.edgelessTool = this.edgelessTool;
     }
     super.update(changedProperties);
   }
@@ -963,7 +963,7 @@ export class EdgelessPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const { mouseMode, page, selection, surface, _rectsOfSelectedBlocks } =
+    const { edgelessTool, page, selection, surface, _rectsOfSelectedBlocks } =
       this;
     const { state, draggingArea } = selection;
     const { viewport } = surface;
@@ -988,7 +988,7 @@ export class EdgelessPageBlockComponent
     );
 
     const blockContainerStyle = {
-      cursor: getCursorMode(mouseMode),
+      cursor: getCursorMode(edgelessTool),
       '--affine-edgeless-gap': `${gap}px`,
       '--affine-edgeless-grid': grid,
       '--affine-edgeless-x': `${translateX}px`,
@@ -1021,7 +1021,7 @@ export class EdgelessPageBlockComponent
         ${state.selected.length
           ? html`
               <edgeless-selected-rect
-                disabled=${mouseMode.type === 'pan'}
+                disabled=${edgelessTool.type === 'pan'}
                 .page=${page}
                 .state=${state}
                 .slots=${this.slots}
