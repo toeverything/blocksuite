@@ -68,13 +68,13 @@ export class EdgelessNoteToolButton extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   mouseMode!: MouseMode;
 
-  @property()
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property()
+  @property({ attribute: false })
   setMouseMode!: (mouseMode: MouseMode) => void;
 
   @state()

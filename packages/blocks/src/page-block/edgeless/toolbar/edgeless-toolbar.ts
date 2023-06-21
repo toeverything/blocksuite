@@ -5,6 +5,7 @@ import './connector-tool/connector-tool-button.js';
 import './note-tool/note-tool-button.js';
 import './image-tool-button.js';
 import './eraser-tool-button.js';
+import './text-tool-button.js';
 
 import { HandIcon, SelectIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -178,11 +179,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setMouseMode=${this.setMouseMode}
         ></edgeless-eraser-tool-button>
-        <edgeless-text-icon-button
+        <edgeless-text-tool-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}
           .setMouseMode=${this.setMouseMode}
-        ></edgeless-text-icon-button>
+        ></edgeless-text-tool-button>
         <edgeless-shape-tool-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}
@@ -192,8 +193,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}
           .setMouseMode=${this.setMouseMode}
-        >
-        </edgeless-image-tool-button>
+        ></edgeless-image-tool-button>
         <edgeless-connector-tool-button
           .mouseMode=${this.mouseMode}
           .edgeless=${this.edgeless}

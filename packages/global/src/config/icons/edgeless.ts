@@ -776,7 +776,7 @@ export const DividerBlockIcon = html`<svg
 
 export const NewPenIcon = html`<svg
   width="40"
-  height="68"
+  height="60"
   viewBox="0 0 30 60"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
