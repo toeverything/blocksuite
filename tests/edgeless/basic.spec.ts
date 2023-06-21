@@ -14,7 +14,7 @@ import {
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
-  setMouseMode,
+  setEdgelessTool,
   shiftClick,
   switchEditorMode,
   zoomByMouseWheel,
@@ -170,9 +170,9 @@ test.skip('shape element should have the correct selected shape when clicking on
   }
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'pan');
+  await setEdgelessTool(page, 'pan');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 150, y: 150 });
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
   const blockBox = await getEdgelessBlockChild(page);
   const selectedBox = await getEdgelessSelectedRect(page);

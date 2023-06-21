@@ -19,7 +19,7 @@ import {
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-note-menu')
@@ -64,70 +64,66 @@ export class EdgelessNoteMenu extends LitElement {
       fill: currentColor;
     }
   `;
-  private iconButtonStyles = `
-    --hover-color: var(--affine-hover-color);
-    --active-color: var(--affine-primary-color);
-  `;
 
   @property()
-  mouseMode!: MouseMode;
+  edgelessTool!: EdgelessTool;
 
   @property()
   edgeless!: EdgelessPageBlockComponent;
 
   override render() {
-    if (this.mouseMode.type !== 'note') return nothing;
+    if (this.edgelessTool.type !== 'note') return nothing;
 
     return html`
       <div class="note-memu-container">
         <div class="button-group-container">
           <div class="button-group-label">Blocks</div>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${TextIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${H1Icon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${H2Icon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${H3Icon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${H4Icon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${H5Icon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${H6Icon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${CodeBlockIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${QuoteIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${DividerIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${BulletedListIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${NumberedListIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${TodoIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${ImageIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${BookmarkIcon}
           </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button style=${this.iconButtonStyles}>
+          <edgeless-tool-icon-button>
             ${DatabaseTableViewIcon}
           </edgeless-tool-icon-button>
         </div>

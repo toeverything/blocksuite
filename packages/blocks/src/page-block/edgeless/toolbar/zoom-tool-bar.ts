@@ -4,7 +4,7 @@ import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { clamp, type MouseMode, Point } from '../../../__internal__/index.js';
+import { clamp, type EdgelessTool, Point } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
 
@@ -27,7 +27,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       flex-direction: row;
-      padding: 4px;
+      padding: 8px;
       height: 20px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
@@ -73,8 +73,8 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     this.edgeless = edgeless;
   }
 
-  get mouseMode() {
-    return this.edgeless.mouseMode;
+  get edgelessTool() {
+    return this.edgeless.edgelessTool;
   }
 
   get zoom() {
@@ -162,8 +162,8 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     innerSmoothTranslate();
   }
 
-  setMouseMode = (mouseMode: MouseMode) => {
-    this.edgeless.selection.setMouseMode(mouseMode);
+  setEdgelessTool = (edgelessTool: EdgelessTool) => {
+    this.edgeless.selection.setEdgelessTool(edgelessTool);
   };
 
   setZoomByAction(action: ZoomAction) {
@@ -180,17 +180,12 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     }
   }
 
-  private iconButtonStyles = `
-    --hover-color: var(--affine-hover-color);
-    --active-color: var(--affine-primary-color);
-  `;
-
   override firstUpdated() {
     const {
       _disposables,
       edgeless: { slots },
     } = this;
-    _disposables.add(slots.mouseModeUpdated.on(() => this.requestUpdate()));
+    _disposables.add(slots.edgelessToolUpdated.on(() => this.requestUpdate()));
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
   }
 
@@ -206,14 +201,12 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         @pointerdown=${stopPropagation}
       >
         <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
           .tooltip=${'Fit to screen'}
           @click=${() => this._zoomToFit()}
         >
           ${ViewBarIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
           .tooltip=${'Zoom out'}
           @click=${() => this._setZoomByStep(-ZOOM_STEP)}
         >
@@ -223,7 +216,6 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           ${formattedZoom}
         </span>
         <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
           .tooltip=${'Zoom in'}
           @click=${() => this._setZoomByStep(ZOOM_STEP)}
         >

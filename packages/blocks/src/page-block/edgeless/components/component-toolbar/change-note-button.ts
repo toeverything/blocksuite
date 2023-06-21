@@ -1,5 +1,5 @@
 import '../tool-icon-button.js';
-import '../../toolbar/shape-tool/shape-menu.js';
+import '../../toolbar/shape/shape-menu.js';
 import '../color-panel.js';
 
 import { HiddenIcon, NoteIcon } from '@blocksuite/global/config';

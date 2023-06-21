@@ -1,13 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
 import type {
-  MouseMode,
+  EdgelessTool as EdgelessTool,
   TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { SelectionArea } from '../selection-manager.js';
 
-export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
+export abstract class EdgelessToolController<
+  Tool extends EdgelessTool = EdgelessTool
+> {
   protected readonly _edgeless: EdgelessPageBlockComponent;
 
   protected _draggingArea: SelectionArea | null = null;
@@ -34,7 +36,7 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
     return this._edgeless.sortedNotes;
   }
 
-  abstract mouseMode: Mode;
+  abstract tool: Tool;
   abstract onContainerDragStart(e: PointerEventState): void;
   abstract onContainerDragMove(e: PointerEventState): void;
   abstract onContainerDragEnd(e: PointerEventState): void;
@@ -45,6 +47,6 @@ export abstract class MouseModeController<Mode extends MouseMode = MouseMode> {
   abstract onContainerMouseOut(e: PointerEventState): void;
   abstract onContainerContextMenu(e: PointerEventState): void;
   abstract onPressShiftKey(pressed: boolean): void;
-  abstract beforeModeSwitch(prevMode: Mode): void;
-  abstract afterModeSwitch(newMode: Mode): void;
+  abstract beforeModeSwitch(prevMode: Tool): void;
+  abstract afterModeSwitch(newMode: Tool): void;
 }

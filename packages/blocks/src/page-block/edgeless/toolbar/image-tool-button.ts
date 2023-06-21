@@ -7,7 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  type MouseMode,
+  type EdgelessTool,
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
@@ -26,7 +26,7 @@ export class EdgelessImageToolButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  mouseMode!: MouseMode;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;

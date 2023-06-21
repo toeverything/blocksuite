@@ -1,8 +1,8 @@
 import '../components/tool-icon-button.js';
-import './shape-tool/shape-tool-button.js';
-import './brush-tool/brush-tool-button.js';
-import './connector-tool/connector-tool-button.js';
-import './note-tool/note-tool-button.js';
+import './shape/shape-tool-button.js';
+import './brush/brush-tool-button.js';
+import './connector/connector-tool-button.js';
+import './note/note-tool-button.js';
 import './image-tool-button.js';
 import './eraser-tool-button.js';
 import './text-tool-button.js';
@@ -12,7 +12,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { type MouseMode } from '../../../__internal__/index.js';
+import { type EdgelessTool } from '../../../__internal__/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { stopPropagation } from '../utils.js';
@@ -95,12 +95,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this.edgeless = edgeless;
   }
 
-  get mouseMode() {
-    return this.edgeless.mouseMode;
+  get edgelessTool() {
+    return this.edgeless.edgelessTool;
   }
 
-  setMouseMode = (mouseMode: MouseMode) => {
-    this.edgeless.selection.setMouseMode(mouseMode);
+  setEdgelessTool = (edgelessTool: EdgelessTool) => {
+    this.edgeless.selection.setEdgelessTool(edgelessTool);
   };
 
   private iconButtonStyles = `
@@ -114,7 +114,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       edgeless: { slots },
     } = this;
     _disposables.add(
-      slots.mouseModeUpdated.on(() => {
+      slots.edgelessToolUpdated.on(() => {
         this._trySaveBrushStateLocalRecord();
         this.requestUpdate();
       })
@@ -123,20 +123,20 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _trySaveBrushStateLocalRecord = () => {
-    const mouseMode = this.edgeless.selection.mouseMode;
-    if (mouseMode.type === 'brush') {
+    const edgelessTool = this.edgeless.selection.edgelessTool;
+    if (edgelessTool.type === 'brush') {
       sessionStorage.setItem(
         'blocksuite:' + this.edgeless.page.id + ':edgelessBrush',
         JSON.stringify({
-          color: mouseMode.color,
-          lineWidth: mouseMode.lineWidth,
+          color: edgelessTool.color,
+          lineWidth: edgelessTool.lineWidth,
         })
       );
     }
   };
 
   override render() {
-    const { type } = this.mouseMode;
+    const { type } = this.edgelessTool;
 
     return html`
       <div
@@ -150,7 +150,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           style=${this.iconButtonStyles}
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
-          @click=${() => this.setMouseMode({ type: 'default' })}
+          @click=${() => this.setEdgelessTool({ type: 'default' })}
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
@@ -158,46 +158,46 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           style=${this.iconButtonStyles}
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
-          @click=${() => this.setMouseMode({ type: 'pan', panning: false })}
+          @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
         <div class="short-divider"></div>
         <edgeless-note-tool-button
-          .mouseMode=${this.mouseMode}
+          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+          .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-note-tool-button>
         <div class="full-divider"></div>
         <edgeless-brush-tool-button
-          .mouseMode=${this.mouseMode}
+          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+          .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-brush-tool-button>
         <edgeless-eraser-tool-button
-          .mouseMode=${this.mouseMode}
+          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+          .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-eraser-tool-button>
         <edgeless-text-tool-button
-          .mouseMode=${this.mouseMode}
+          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+          .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-text-tool-button>
         <edgeless-shape-tool-button
-          .mouseMode=${this.mouseMode}
+          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+          .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-shape-tool-button>
         <edgeless-image-tool-button
-          .mouseMode=${this.mouseMode}
+          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+          .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-image-tool-button>
         <edgeless-connector-tool-button
-          .mouseMode=${this.mouseMode}
+          .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}
-          .setMouseMode=${this.setMouseMode}
+          .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-connector-tool-button>
       </div>
     `;

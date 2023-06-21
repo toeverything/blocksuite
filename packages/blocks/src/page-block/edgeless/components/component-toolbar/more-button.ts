@@ -1,5 +1,5 @@
 import '../tool-icon-button.js';
-import '../../toolbar/shape-tool/shape-menu.js';
+import '../../toolbar/shape/shape-menu.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';

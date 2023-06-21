@@ -4,7 +4,7 @@ import { expect } from '@playwright/test';
 import {
   activeNoteInEdgeless,
   addNote,
-  assertMouseMode,
+  assertEdgelessTool,
   changeEdgelessNoteBackground,
   countBlock,
   getNoteRect,
@@ -12,7 +12,7 @@ import {
   locatorComponentToolbar,
   locatorEdgelessToolButton,
   selectNoteInEdgeless,
-  setMouseMode,
+  setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -117,11 +117,11 @@ test('add Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   await addNote(page, 'hello', 30, 40);
 
-  await assertMouseMode(page, 'default');
+  await assertEdgelessTool(page, 'default');
   await assertRichTexts(page, ['', 'hello']);
   await assertEdgelessSelectedRect(page, [0, 0, 448, 80]);
 });
@@ -131,7 +131,7 @@ test('add empty Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   // add note at 30,40
   await page.mouse.click(30, 40);
@@ -157,7 +157,7 @@ test('always keep at least 1 note block', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
   // clicking in default mode will try to remove empty note block
   await page.mouse.click(0, 0);
@@ -262,12 +262,12 @@ test('drag handle should be shown when a note is actived in default mode or hidd
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 
   await page.mouse.move(0, 0);
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
 
   await page.mouse.move(0, 0);
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
   await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 });
@@ -294,7 +294,7 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   await page.mouse.click(30, 40);
   await waitForVirgoStateUpdated(page);

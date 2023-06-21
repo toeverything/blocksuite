@@ -5,7 +5,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type MouseMode } from '../../../__internal__/index.js';
+import { type EdgelessTool } from '../../../__internal__/index.js';
 import { getTooltipWithShortcut } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
@@ -22,13 +22,13 @@ export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  mouseMode!: MouseMode;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  setMouseMode!: (mouseMode: MouseMode) => void;
+  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
@@ -41,14 +41,14 @@ export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
     `;
 
   override render() {
-    const type = this.mouseMode?.type;
+    const type = this.edgelessTool?.type;
 
     return html`
       <edgeless-tool-icon-button
         style=${this.iconButtonStyles}
         .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
         .active=${type === 'eraser'}
-        @click=${() => this.setMouseMode({ type: 'eraser' })}
+        @click=${() => this.setEdgelessTool({ type: 'eraser' })}
       >
         ${EdgelessEraserIcon}
       </edgeless-tool-icon-button>
