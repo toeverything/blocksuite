@@ -17,42 +17,59 @@ export function ImageSelectedRectsContainer() {
       }
 
       .affine-page-selected-embed-rects-container .resize {
-        /* display: none; */
-        width: 10px;
-        height: 10px;
-        border-radius: 50%; /*magic to turn square into circle*/
-        background: white;
-        border: 2px solid var(--affine-primary-color);
         position: absolute;
+        padding: 5px;
         pointer-events: auto;
+        z-index: 1;
       }
 
-      .resizable .resize.top-left {
-        left: -5px;
-        top: -5px;
+      .affine-page-selected-embed-rects-container .resize-inner {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid var(--affine-primary-color);
+        pointer-events: none;
+      }
+
+      .affine-page-selected-embed-rects-container .resize.top-left {
+        left: 0;
+        top: 0;
+        transform: translate(-50%, -50%);
         cursor: nwse-resize; /*resizer cursor*/
       }
-      .resizable .resize.top-right {
-        right: -5px;
-        top: -5px;
+      .affine-page-selected-embed-rects-container .resize.top-right {
+        right: 0;
+        top: 0;
+        transform: translate(50%, -50%);
         cursor: nesw-resize;
       }
-      .resizable .resize.bottom-left {
-        left: -5px;
-        bottom: -5px;
+      .affine-page-selected-embed-rects-container .resize.bottom-left {
+        left: 0;
+        bottom: 0;
+        transform: translate(-50%, 50%);
         cursor: nesw-resize;
       }
-      .resizable .resize.bottom-right {
-        right: -5px;
-        bottom: -5px;
+      .affine-page-selected-embed-rects-container .resize.bottom-right {
+        right: 0;
+        bottom: 0;
+        transform: translate(50%, 50%);
         cursor: nwse-resize;
       }
     </style>
     <div class="affine-page-selected-embed-rects-container resizable resizes">
-      <div class="resize top-left"></div>
-      <div class="resize top-right"></div>
-      <div class="resize bottom-left"></div>
-      <div class="resize bottom-right"></div>
+      <div class="resize top-left">
+        <div class="resize-inner"></div>
+      </div>
+      <div class="resize top-right">
+        <div class="resize-inner"></div>
+      </div>
+      <div class="resize bottom-left">
+        <div class="resize-inner"></div>
+      </div>
+      <div class="resize bottom-right">
+        <div class="resize-inner"></div>
+      </div>
     </div>
   `;
 }
