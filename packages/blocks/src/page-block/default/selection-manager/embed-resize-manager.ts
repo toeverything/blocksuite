@@ -1,38 +1,33 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { IPoint } from '../../../__internal__/index.js';
-import { throttle } from '../../../__internal__/index.js';
-import type { DefaultSelectionSlots } from '../../../index.js';
-import { getModelByElement } from '../../../index.js';
+import {
+  type BlockComponentElement,
+  getModelByElement,
+} from '../../../__internal__/utils/query.js';
+import { throttle } from '../../../__internal__/utils/std.js';
 import type { PageSelectionState } from './selection-state.js';
 
 export class EmbedResizeManager {
-  readonly state: PageSelectionState;
-  readonly slots: DefaultSelectionSlots;
-  private _originPosition: IPoint = { x: 0, y: 0 };
-  private _dropContainer: HTMLElement | null = null;
-  private _dropContainerSize = {
-    w: 0,
-    h: 0,
-  };
+  private readonly pageSelectionState: PageSelectionState;
+  private _imageContainer: HTMLElement | null = null;
+  private _imageCenterX = 0;
   private _dragMoveTarget = 'right';
+  private _activeComponent: BlockComponentElement | null = null;
 
-  constructor(state: PageSelectionState, slots: DefaultSelectionSlots) {
-    this.state = state;
-    this.slots = slots;
+  constructor(state: PageSelectionState) {
+    this.pageSelectionState = state;
   }
 
   onStart(e: PointerEventState) {
-    this._originPosition.x = e.raw.pageX;
-    this._originPosition.y = e.raw.pageY;
-    this._dropContainer = (e.raw.target as HTMLElement).closest(
-      '.resizable-img'
-    );
-    const rect = this._dropContainer?.getBoundingClientRect() as DOMRect;
-    this._dropContainerSize.w = rect.width;
-    this._dropContainerSize.h = rect.height;
-    if ((e.raw.target as HTMLElement).className.includes('right')) {
+    assertExists(this.pageSelectionState.activeComponent);
+    this._activeComponent = this.pageSelectionState.activeComponent;
+    const eventTarget = e.raw.target as HTMLElement;
+    this._imageContainer = eventTarget.closest('.resizable-img');
+    assertExists(this._imageContainer);
+    const rect = this._imageContainer.getBoundingClientRect() as DOMRect;
+    this._imageCenterX = rect.left + rect.width / 2;
+    if (eventTarget.className.includes('right')) {
       this._dragMoveTarget = 'right';
     } else {
       this._dragMoveTarget = 'left';
@@ -40,21 +35,18 @@ export class EmbedResizeManager {
   }
 
   onMove(e: PointerEventState) {
-    const activeComponent =
-      this.state.activeComponent || this.state.selectedEmbed;
-    if (!activeComponent) return;
-    const activeImgContainer = this._dropContainer;
+    assertExists(this._activeComponent);
+    const activeComponent = this._activeComponent;
+    const activeImgContainer = this._imageContainer;
     assertExists(activeImgContainer);
     const activeImg = activeComponent.querySelector('img');
     assertExists(activeImg);
 
     let width = 0;
     if (this._dragMoveTarget === 'right') {
-      width =
-        this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x) * 2;
+      width = (e.raw.pageX - this._imageCenterX) * 2;
     } else {
-      width =
-        this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x) * 2;
+      width = (this._imageCenterX - e.raw.pageX) * 2;
     }
 
     const MIN_WIDTH = 50;
@@ -78,11 +70,11 @@ export class EmbedResizeManager {
   }
 
   onEnd() {
-    assertExists(this.state.activeComponent);
-    const dragModel = getModelByElement(this.state.activeComponent);
+    assertExists(this._activeComponent);
+    assertExists(this._imageContainer);
+    const dragModel = getModelByElement(this._activeComponent);
     dragModel.page.captureSync();
-    assertExists(this._dropContainer);
-    const { width, height } = this._dropContainer.getBoundingClientRect();
+    const { width, height } = this._imageContainer.getBoundingClientRect();
     dragModel.page.updateBlock(dragModel, { width: width, height: height });
   }
 }

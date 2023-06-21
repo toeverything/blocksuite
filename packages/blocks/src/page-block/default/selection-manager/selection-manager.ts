@@ -101,7 +101,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     this.slots = slots;
 
-    this._embedResizeManager = new EmbedResizeManager(this.state, slots);
+    this._embedResizeManager = new EmbedResizeManager(this.state);
 
     let isDragging = false;
     this._add('dragStart', ctx => {
