@@ -10,6 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { registerService } from '../__internal__/service.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
 import { stopPropagation } from '../page-block/edgeless/utils.js';
+import { clamp } from '../std.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
@@ -236,39 +237,61 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     const HEADER_HEIGHT = 64;
     // The height of the option element
     // You need to change this value manually if you change the style of the option element
+    const OPTION_ELEMENT_WEIGHT = 50;
     const OPTION_ELEMENT_HEIGHT = 136;
     const HOVER_DELAY = 300;
+    const TOP_EDGE = 10;
+    const LEFT_EDGE = 12;
     const ANCHOR_EL: HTMLElement = this.resizeImg;
 
-    let hover = false;
-    let clicked = false;
+    let isHover = false;
+    let isClickHold = false;
     let timer: number;
-    const updatePosition = () => {
+
+    const updateOptionsPosition = () => {
+      if (isClickHold) {
+        this._optionPosition = null;
+        return;
+      }
+      clearTimeout(timer);
+      if (!isHover) {
+        // delay hiding the option element
+        timer = window.setTimeout(
+          () => (this._optionPosition = null),
+          HOVER_DELAY
+        );
+        if (!this._optionPosition) return;
+      }
       // Update option position when scrolling
       const rect = ANCHOR_EL.getBoundingClientRect();
+      const showInside =
+        rect.width > 680 ||
+        rect.right + LEFT_EDGE + OPTION_ELEMENT_WEIGHT > window.innerWidth;
       this._optionPosition = {
-        // when image size is too large, the option popup should show inside
-        x: rect.width > 680 ? rect.right - 50 : rect.right + 12,
-        y: Math.min(
-          Math.max(rect.top + 10, HEADER_HEIGHT + 12),
-          rect.bottom - OPTION_ELEMENT_HEIGHT
-        ),
+        x: showInside
+          ? // when image size is too large, the option popup should show inside
+            rect.right - OPTION_ELEMENT_WEIGHT
+          : rect.right + LEFT_EDGE,
+        y:
+          rect.height < OPTION_ELEMENT_HEIGHT
+            ? // when image size is too small,
+              // the option popup should always show align with the top edge
+              rect.top
+            : clamp(
+                rect.top + TOP_EDGE,
+                Math.min(
+                  HEADER_HEIGHT + LEFT_EDGE,
+                  rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
+                ),
+                rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
+              ),
       };
     };
+
     this.hoverState.on(newHover => {
-      hover = newHover;
-      clearTimeout(timer);
-      if (clicked) {
-        this._optionPosition = null;
-        return;
-      }
-      if (hover) {
-        updatePosition();
-        return;
-      }
-      timer = window.setTimeout(() => {
-        this._optionPosition = null;
-      }, HOVER_DELAY);
+      if (isHover === newHover) return;
+      isHover = newHover;
+      updateOptionsPosition();
     });
     this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () =>
       this.hoverState.emit(true)
@@ -276,28 +299,25 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', () =>
       this.hoverState.emit(false)
     );
+
+    // When the resize handler is clicked, the image option should be hidden
     this._disposables.addFromEvent(this, 'pointerdown', () => {
-      clicked = true;
-      this.hoverState.emit(false);
+      isClickHold = true;
+      updateOptionsPosition();
     });
-    this._disposables.addFromEvent(
-      window,
-      'pointerup',
-      () => (clicked = false)
-    );
+    this._disposables.addFromEvent(window, 'pointerup', () => {
+      isClickHold = false;
+      updateOptionsPosition();
+    });
 
     this._disposables.add(
-      this.model.propsUpdated.on(() => {
-        if (!hover) return;
-        updatePosition();
-      })
+      this.model.propsUpdated.on(() => updateOptionsPosition())
     );
     const viewportElement = getViewportElement(this.model.page);
     if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', () => {
-        if (!this._optionPosition) return;
-        updatePosition();
-      });
+      this._disposables.addFromEvent(viewportElement, 'scroll', () =>
+        updateOptionsPosition()
+      );
     }
   }
 
