@@ -337,11 +337,6 @@ export class DefaultPageBlockComponent
       return;
     }
 
-    // if (type === 'embed') {
-    //   selection.refreshEmbedRects(this._embedEditingState);
-    //   return;
-    // }
-
     let point;
 
     if (type === 'native') {
