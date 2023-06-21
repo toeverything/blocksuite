@@ -978,7 +978,7 @@ export class EdgelessPageBlockComponent
     const draggingAreaTpl = EdgelessDraggingArea(draggingArea);
 
     const hoverState = selection.getHoverState();
-    const hoverRectTpl = EdgelessHoverRect(hoverState, zoom);
+    const hoverRectTpl = EdgelessHoverRect(hoverState);
 
     const { grid, gap, translateX, translateY } = getBackgroundGrid(
       viewportX,

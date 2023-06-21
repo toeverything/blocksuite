@@ -7,21 +7,6 @@ import { html } from 'lit';
 import type { Selectable } from '../selection-manager.js';
 import { getSelectionBoxBound, getXYWH, isTopLevelBlock } from '../utils.js';
 
-export function getCommonRectStyle(
-  rect: DOMRect,
-  active = false,
-  selected = false
-) {
-  return {
-    '--affine-border-width': `${active ? 2 : 1}px`,
-    left: rect.x + 'px',
-    top: rect.y + 'px',
-    width: rect.width + 'px',
-    height: rect.height + 'px',
-    backgroundColor: !active && selected ? 'var(--affine-hover-color)' : '',
-  };
-}
-
 export function getSelectedRect(
   selected: Selectable[],
   viewport: SurfaceViewport
