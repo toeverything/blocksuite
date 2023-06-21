@@ -12,10 +12,9 @@ export class EmbedResizeManager {
   readonly slots: DefaultSelectionSlots;
   private _originPosition: IPoint = { x: 0, y: 0 };
   private _dropContainer: HTMLElement | null = null;
-  private _dropContainerSize: { w: number; h: number; left: number } = {
+  private _dropContainerSize = {
     w: 0,
     h: 0,
-    left: 0,
   };
   private _dragMoveTarget = 'right';
 
@@ -33,7 +32,6 @@ export class EmbedResizeManager {
     const rect = this._dropContainer?.getBoundingClientRect() as DOMRect;
     this._dropContainerSize.w = rect.width;
     this._dropContainerSize.h = rect.height;
-    this._dropContainerSize.left = rect.left;
     if ((e.raw.target as HTMLElement).className.includes('right')) {
       this._dragMoveTarget = 'right';
     } else {
@@ -53,10 +51,10 @@ export class EmbedResizeManager {
     let width = 0;
     if (this._dragMoveTarget === 'right') {
       width =
-        this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x);
+        this._dropContainerSize.w + (e.raw.pageX - this._originPosition.x) * 2;
     } else {
       width =
-        this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x);
+        this._dropContainerSize.w - (e.raw.pageX - this._originPosition.x) * 2;
     }
 
     const MIN_WIDTH = 50;
