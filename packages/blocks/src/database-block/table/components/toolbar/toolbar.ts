@@ -2,11 +2,13 @@ import './toolbar-action-popup.js';
 import '../../../common/filter/filter-group.js';
 
 import {
+  DatabaseExpandWide,
   DatabaseSearchClose,
   DatabaseSearchIcon,
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { computePosition } from '@floating-ui/dom';
@@ -26,6 +28,7 @@ import type {
 import { onClickOutside } from '../../../utils/utils.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import { SearchState } from '../../types.js';
+import { showDatabaseTableViewModal } from '../modal/index.js';
 import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';
 
@@ -167,6 +170,9 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  root!: BlockSuiteRoot;
+
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
   @property({ attribute: false })
@@ -180,6 +186,9 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   addRow!: (position: InsertPosition) => void;
+
+  @property({ attribute: false })
+  modalMode?: boolean;
 
   @property({ attribute: false })
   setSearchState!: (state: SearchState) => void;
@@ -388,6 +397,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     popAdvance();
   }
 
+  private _onShowModalView = () => {
+    if (!this.modalMode) {
+      showDatabaseTableViewModal({
+        root: this.root,
+        model: this.targetModel,
+        page: this.targetModel.page,
+      });
+    }
+  };
+
   override render() {
     const expandSearch =
       this.searchState === SearchState.SearchInput ||
@@ -448,9 +467,17 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>
+      ${this.modalMode
+        ? null
+        : html`<div
+            class="affine-database-toolbar-item expand"
+            @click=${this._onShowModalView}
+          >
+            ${DatabaseExpandWide}
+          </div>`}
       ${this.readonly
         ? null
-        : html` <div
+        : html`<div
               class="affine-database-toolbar-item more-action ${isActiveMoreAction
                 ? 'active'
                 : ''}"
