@@ -33,7 +33,7 @@ const createToastContainer = () => {
     flex-direction: column-reverse;
     align-items: center;
   `;
-  const template = html`<div .style=${styles}></div>`;
+  const template = html`<div style="${styles}"></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
   document.body.appendChild(element);
   return element;
@@ -65,7 +65,7 @@ export const toast = (message: string, duration = 2500) => {
     opacity: 0;
   `;
 
-  const template = html`<div .style=${styles}></div>`;
+  const template = html`<div style="${styles}"></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
   // message is not trusted
   element.textContent = message;
