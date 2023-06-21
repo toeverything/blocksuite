@@ -241,6 +241,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     const ANCHOR_EL: HTMLElement = this.resizeImg;
 
     let hover = false;
+    let clicked = false;
     let timer: number;
     const updatePosition = () => {
       // Update option position when scrolling
@@ -257,6 +258,10 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this.hoverState.on(newHover => {
       hover = newHover;
       clearTimeout(timer);
+      if (clicked) {
+        this._optionPosition = null;
+        return;
+      }
       if (hover) {
         updatePosition();
         return;
@@ -271,6 +276,16 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', () =>
       this.hoverState.emit(false)
     );
+    this._disposables.addFromEvent(this, 'pointerdown', () => {
+      clicked = true;
+      this.hoverState.emit(false);
+    });
+    this._disposables.addFromEvent(
+      window,
+      'pointerup',
+      () => (clicked = false)
+    );
+
     this._disposables.add(
       this.model.propsUpdated.on(() => {
         if (!hover) return;
@@ -298,7 +313,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _imageResizeBoardTemplate() {
-    if (!this.focused) return null;
+    if (!this.focused || this._imageState !== 'ready') return null;
     return ImageSelectedRectsContainer();
   }
 
