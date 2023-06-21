@@ -114,7 +114,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     if (brushData) {
       try {
         const { color, lineWidth } = JSON.parse(brushData);
-        this._edgeless.slots.mouseModeUpdated.emit({
+        this._edgeless.slots.edgelessToolUpdated.emit({
           type: 'brush',
           color: color ?? 'black',
           lineWidth: lineWidth ?? BrushSize.Thin,

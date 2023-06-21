@@ -14,12 +14,12 @@ import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 function ConnectorModeButtonGroup(
-  mouseMode: EdgelessTool,
+  edgelessTool: EdgelessTool,
   setConnectorMode: (mode: ConnectorMode) => void
 ) {
-  if (mouseMode.type !== 'connector') return nothing;
+  if (edgelessTool.type !== 'connector') return nothing;
 
-  const { mode } = mouseMode;
+  const { mode } = edgelessTool;
   const straightLineTooltip = getTooltipWithShortcut('Straight line', 'L');
   const orthogonalTooltip = getTooltipWithShortcut('Connector', 'X');
   /**
@@ -109,16 +109,16 @@ export class EdgelessConnectorMenu extends LitElement {
   `;
 
   @property({ attribute: false })
-  mouseMode!: EdgelessTool;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   private _setConnectorColor = (color: CssVariableName) => {
-    if (this.mouseMode.type !== 'connector') return;
+    if (this.edgelessTool.type !== 'connector') return;
 
-    const { mode } = this.mouseMode;
-    this.edgeless.slots.mouseModeUpdated.emit({
+    const { mode } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'connector',
       color,
       mode,
@@ -126,10 +126,10 @@ export class EdgelessConnectorMenu extends LitElement {
   };
 
   private _setConnectorMode = (mode: ConnectorMode) => {
-    if (this.mouseMode.type !== 'connector') return;
+    if (this.edgelessTool.type !== 'connector') return;
 
-    const { color } = this.mouseMode;
-    this.edgeless.slots.mouseModeUpdated.emit({
+    const { color } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'connector',
       color,
       mode,
@@ -137,11 +137,11 @@ export class EdgelessConnectorMenu extends LitElement {
   };
 
   override render() {
-    if (this.mouseMode.type !== 'connector') return nothing;
+    if (this.edgelessTool.type !== 'connector') return nothing;
 
-    const { color } = this.mouseMode;
+    const { color } = this.edgelessTool;
     const brushSizeButtonGroup = ConnectorModeButtonGroup(
-      this.mouseMode,
+      this.edgelessTool,
       this._setConnectorMode
     );
 

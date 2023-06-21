@@ -112,7 +112,7 @@ export class EditorContainer
     //   window,
     //   'affine.switch-mouse-mode',
     //   ({ detail }) => {
-    //     this.mouseMode = detail;
+    //     this.edgelessTool = detail;
     //   }
     // );
 

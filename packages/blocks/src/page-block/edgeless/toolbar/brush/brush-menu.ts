@@ -12,12 +12,12 @@ import type { ColorEvent } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 function BrushSizeButtonGroup(
-  mouseMode: EdgelessTool,
+  edgelessTool: EdgelessTool,
   setBrushWidth: (size: BrushSize) => void
 ) {
-  if (mouseMode.type !== 'brush') return nothing;
+  if (edgelessTool.type !== 'brush') return nothing;
 
-  const { lineWidth } = mouseMode;
+  const { lineWidth } = edgelessTool;
   /**
    * There is little hacky on rendering tooltip.
    * We don't want either tooltip overlap the top button or tooltip on left.
@@ -113,16 +113,16 @@ export class EdgelessBrushMenu extends LitElement {
   `;
 
   @property({ attribute: false })
-  mouseMode!: EdgelessTool;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   private _setBrushColor = (color: CssVariableName) => {
-    if (this.mouseMode.type !== 'brush') return;
+    if (this.edgelessTool.type !== 'brush') return;
 
-    const { lineWidth } = this.mouseMode;
-    this.edgeless.slots.mouseModeUpdated.emit({
+    const { lineWidth } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'brush',
       color,
       lineWidth,
@@ -130,10 +130,10 @@ export class EdgelessBrushMenu extends LitElement {
   };
 
   private _setBrushWidth = (lineWidth: BrushSize) => {
-    if (this.mouseMode.type !== 'brush') return;
+    if (this.edgelessTool.type !== 'brush') return;
 
-    const { color } = this.mouseMode;
-    this.edgeless.slots.mouseModeUpdated.emit({
+    const { color } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'brush',
       color,
       lineWidth,
@@ -141,11 +141,11 @@ export class EdgelessBrushMenu extends LitElement {
   };
 
   override render() {
-    if (this.mouseMode.type !== 'brush') return nothing;
+    if (this.edgelessTool.type !== 'brush') return nothing;
 
-    const { color } = this.mouseMode;
+    const { color } = this.edgelessTool;
     const brushSizeButtonGroup = BrushSizeButtonGroup(
-      this.mouseMode,
+      this.edgelessTool,
       this._setBrushWidth
     );
 

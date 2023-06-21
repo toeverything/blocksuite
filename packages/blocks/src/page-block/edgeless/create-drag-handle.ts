@@ -104,7 +104,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
     },
     setDragType(dragging: boolean) {
       const { selection } = pageBlock;
-      if (selection.mouseMode.type === 'default') {
+      if (selection.edgelessTool.type === 'default') {
         const currentController =
           selection.currentController as DefaultToolController;
         currentController.dragType = dragging
@@ -123,7 +123,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       return pageBlock.selection.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {
-      if (pageBlock.mouseMode.type !== 'default') return null;
+      if (pageBlock.edgelessTool.type !== 'default') return null;
       const hoveringNote = getHoveringNote(point);
       if (!hoveringNote) return null;
       return getClosestBlockElementByPoint(

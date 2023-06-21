@@ -54,13 +54,13 @@ export class EdgelessBrushToolButton extends LitElement {
   `;
 
   @property({ attribute: false })
-  mouseMode!: EdgelessTool;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  setMouseMode!: (mouseMode: EdgelessTool) => void;
+  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   private _brushMenu: BrushMenuPopper | null = null;
 
@@ -70,19 +70,19 @@ export class EdgelessBrushToolButton extends LitElement {
       this._brushMenu = null;
     } else {
       this._brushMenu = createBrushMenuPopper(this);
-      this._brushMenu.element.mouseMode = this.mouseMode;
+      this._brushMenu.element.edgelessTool = this.edgelessTool;
       this._brushMenu.element.edgeless = this.edgeless;
     }
   }
 
   override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseMode')) {
-      if (this.mouseMode.type !== 'brush') {
+    if (changedProperties.has('edgelessTool')) {
+      if (this.edgelessTool.type !== 'brush') {
         this._brushMenu?.dispose();
         this._brushMenu = null;
       }
       if (this._brushMenu) {
-        this._brushMenu.element.mouseMode = this.mouseMode;
+        this._brushMenu.element.edgelessTool = this.edgelessTool;
         this._brushMenu.element.edgeless = this.edgeless;
       }
     }
@@ -95,14 +95,14 @@ export class EdgelessBrushToolButton extends LitElement {
   }
 
   override render() {
-    const type = this.mouseMode?.type;
+    const type = this.edgelessTool?.type;
 
     return html`
       <edgeless-tool-icon-button
         .tooltip=${getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
         @click=${() => {
-          this.setMouseMode({
+          this.setEdgelessTool({
             type: 'brush',
             lineWidth: 4,
             color: GET_DEFAULT_LINE_COLOR(),

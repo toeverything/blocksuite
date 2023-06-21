@@ -31,7 +31,10 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
     this._lastPoint = [e.x, e.y];
-    this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: true });
+    this._edgeless.slots.edgelessToolUpdated.emit({
+      type: 'pan',
+      panning: true,
+    });
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -54,7 +57,10 @@ export class PanToolController extends EdgelessToolController<PanTool> {
 
   onContainerDragEnd() {
     this._lastPoint = null;
-    this._edgeless.slots.mouseModeUpdated.emit({ type: 'pan', panning: false });
+    this._edgeless.slots.edgelessToolUpdated.emit({
+      type: 'pan',
+      panning: false,
+    });
   }
 
   onContainerMouseMove(e: PointerEventState) {

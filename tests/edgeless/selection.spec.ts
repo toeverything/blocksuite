@@ -1,7 +1,7 @@
 import * as actions from '../utils/actions/edgeless.js';
 import {
   getNoteBoundBoxInEdgeless,
-  setMouseMode,
+  setEdgelessTool,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
@@ -157,9 +157,9 @@ test('selection box of shape element sync on fast dragging', async ({
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
   await dragBetweenCoords(
     page,
     { x: 150, y: 150 },
@@ -180,7 +180,7 @@ test('when the selection is always a note, it should remain in an active state',
   await switchEditorMode(page);
   const bound = await getNoteBoundBoxInEdgeless(page, ids.noteId);
 
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   const newNoteX = bound.x;
   const newNoteY = bound.y + bound.height + 100;

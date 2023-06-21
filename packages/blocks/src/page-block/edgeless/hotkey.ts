@@ -20,16 +20,16 @@ import {
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils.js';
 
-function setMouseMode(
+function setEdgelessTool(
   edgeless: EdgelessPageBlockComponent,
-  mouseMode: EdgelessTool,
+  edgelessTool: EdgelessTool,
   ignoreActiveState = false
 ) {
   // when editing, should not update mouse mode by shortcut
   if (!ignoreActiveState && edgeless.selection.isActive) {
     return;
   }
-  edgeless.selection.setMouseMode(mouseMode);
+  edgeless.selection.setEdgelessTool(edgelessTool);
 }
 
 function bindSpace(edgeless: EdgelessPageBlockComponent) {
@@ -40,25 +40,25 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(
     HOTKEYS.SPACE,
     (event: KeyboardEvent) => {
-      const { mouseMode, state } = edgeless.selection;
+      const { edgelessTool: edgelessTool, state } = edgeless.selection;
       if (event.type === 'keydown') {
-        if (mouseMode.type === 'pan') {
+        if (edgelessTool.type === 'pan') {
           return;
         }
 
         // when user is editing, shouldn't enter pan mode
-        if (mouseMode.type === 'default' && state.active) {
+        if (edgelessTool.type === 'default' && state.active) {
           return;
         }
 
         shouldRevertMode = true;
-        lastMode = mouseMode;
-        setMouseMode(edgeless, { type: 'pan', panning: false });
+        lastMode = edgelessTool;
+        setEdgelessTool(edgeless, { type: 'pan', panning: false });
         return;
       }
       if (event.type === 'keyup') {
-        if (mouseMode.type === 'pan' && shouldRevertMode && lastMode) {
-          setMouseMode(edgeless, lastMode);
+        if (edgelessTool.type === 'pan' && shouldRevertMode && lastMode) {
+          setEdgelessTool(edgeless, lastMode);
         }
         shouldRevertMode = false;
       }
@@ -134,41 +134,45 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
       handleDown(e, edgeless.page, { zoom: edgeless.surface.viewport.zoom })
     );
 
-    hotkey.addListener('v', () => setMouseMode(edgeless, { type: 'default' }));
-    hotkey.addListener('t', () => setMouseMode(edgeless, { type: 'text' }));
+    hotkey.addListener('v', () =>
+      setEdgelessTool(edgeless, { type: 'default' })
+    );
+    hotkey.addListener('t', () => setEdgelessTool(edgeless, { type: 'text' }));
     hotkey.addListener('l', () =>
-      setMouseMode(edgeless, {
+      setEdgelessTool(edgeless, {
         type: 'connector',
         mode: ConnectorMode.Straight,
         color: GET_DEFAULT_LINE_COLOR(),
       })
     );
     hotkey.addListener('x', () =>
-      setMouseMode(edgeless, {
+      setEdgelessTool(edgeless, {
         type: 'connector',
         mode: ConnectorMode.Orthogonal,
         color: GET_DEFAULT_LINE_COLOR(),
       })
     );
     hotkey.addListener('h', () =>
-      setMouseMode(edgeless, { type: 'pan', panning: false })
+      setEdgelessTool(edgeless, { type: 'pan', panning: false })
     );
     hotkey.addListener('n', () =>
-      setMouseMode(edgeless, {
+      setEdgelessTool(edgeless, {
         type: 'note',
         background: DEFAULT_NOTE_COLOR,
       })
     );
     hotkey.addListener('p', () =>
-      setMouseMode(edgeless, {
+      setEdgelessTool(edgeless, {
         type: 'brush',
         color: GET_DEFAULT_LINE_COLOR(),
         lineWidth: BrushSize.Thin,
       })
     );
-    hotkey.addListener('e', () => setMouseMode(edgeless, { type: 'eraser' }));
+    hotkey.addListener('e', () =>
+      setEdgelessTool(edgeless, { type: 'eraser' })
+    );
     hotkey.addListener('s', () =>
-      setMouseMode(edgeless, {
+      setEdgelessTool(edgeless, {
         type: 'shape',
         shape: 'rect',
         fillColor: DEFAULT_SHAPE_FILL_COLOR,
@@ -179,7 +183,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     // issue #1814
     hotkey.addListener(HOTKEYS.ESC, () => {
       edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
-      setMouseMode(edgeless, { type: 'default' }, true);
+      setEdgelessTool(edgeless, { type: 'default' }, true);
     });
 
     hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {

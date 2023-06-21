@@ -55,13 +55,13 @@ export class EdgelessConnectorToolButton extends LitElement {
   `;
 
   @property({ attribute: false })
-  mouseMode!: EdgelessTool;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  setMouseMode!: (mouseMode: EdgelessTool) => void;
+  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   private _menu: ConnectorMenuPopper | null = null;
 
@@ -71,19 +71,19 @@ export class EdgelessConnectorToolButton extends LitElement {
       this._menu = null;
     } else {
       this._menu = createConnectorMenuPopper(this);
-      this._menu.element.mouseMode = this.mouseMode;
+      this._menu.element.edgelessTool = this.edgelessTool;
       this._menu.element.edgeless = this.edgeless;
     }
   }
 
   override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mouseMode')) {
-      if (this.mouseMode.type !== 'connector') {
+    if (changedProperties.has('edgelessTool')) {
+      if (this.edgelessTool.type !== 'connector') {
         this._menu?.dispose();
         this._menu = null;
       }
       if (this._menu) {
-        this._menu.element.mouseMode = this.mouseMode;
+        this._menu.element.edgelessTool = this.edgelessTool;
         this._menu.element.edgeless = this.edgeless;
       }
     }
@@ -96,14 +96,14 @@ export class EdgelessConnectorToolButton extends LitElement {
   }
 
   override render() {
-    const type = this.mouseMode?.type;
+    const type = this.edgelessTool?.type;
 
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Connector'}
         .active=${type === 'connector'}
         @click=${() => {
-          this.setMouseMode({
+          this.setEdgelessTool({
             type: 'connector',
             mode: ConnectorMode.Orthogonal,
             color: GET_DEFAULT_LINE_COLOR(),
