@@ -1,4 +1,4 @@
-import { matchFlavours } from '@blocksuite/store/index.js';
+import { matchFlavours } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
