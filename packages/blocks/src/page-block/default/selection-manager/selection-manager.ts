@@ -117,6 +117,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       this._onContainerDragStart(ctx);
     });
     this._add('dragMove', ctx => {
+      if (!isDragging) return;
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -128,6 +129,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       this._onContainerDragMove(ctx);
     });
     this._dispatcher.add('dragEnd', ctx => {
+      if (!isDragging) return;
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&

@@ -355,7 +355,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       loading: html`<affine-image-block-loading-card
         content="Loading content..."
       ></affine-image-block-loading-card>`,
-      ready: html`<img src=${this._source} />`,
+      ready: html`<img src=${this._source} draggable="false" />`,
       failed: html`<affine-image-block-not-found-card></affine-image-block-not-found-card>`,
     }[this._imageState];
 
