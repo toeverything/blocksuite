@@ -1,6 +1,11 @@
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
-import type { BlockSchema, Page, Workspace } from '@blocksuite/store';
+import type {
+  BlockSchema,
+  DocProvider,
+  Page,
+  Workspace,
+} from '@blocksuite/store';
 import type { z } from 'zod';
 
 declare global {
@@ -12,5 +17,8 @@ declare global {
     ContentParser: typeof ContentParser;
     Y: typeof Workspace.Y;
     std: typeof std;
+
+    // TODO: remove this when provider support subdocument
+    subdocProviders: Map<string, DocProvider[]>;
   }
 }

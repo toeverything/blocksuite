@@ -86,9 +86,7 @@ export class Space<
       subDoc = new Y.Doc();
       this.doc.spaces.set(prefixedId, subDoc);
       this._loaded = true;
-      setImmediate(() => {
-        this._onLoadSlot.emit();
-      });
+      this._onLoadSlot.emit();
     } else {
       this._loaded = false;
       this.doc.on('subdocs', this._onSubdocEvent);
