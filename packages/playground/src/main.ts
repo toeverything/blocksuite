@@ -8,6 +8,7 @@ import '@blocksuite/editor/themes/affine.css';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
+import { sub } from '@blocksuite/phasor/perfect-freehand/vec';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 import type { SubdocEvent } from '@blocksuite/store/yjs';
@@ -89,6 +90,13 @@ export async function initPageContentByParam(
 
 export function storeSubdocProviders(workspace: Workspace) {
   const subdocProvidersMap = new Map<string, DocProvider[]>();
+  const params = new URLSearchParams(location.search);
+  const providerArgs = params.get('providers');
+
+  // indexeddb provider has already supported subdoc
+  if (providerArgs === 'indexeddb') {
+    return subdocProvidersMap;
+  }
   workspace.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
     const findSpaceByDoc = (doc: Y.Doc) => {
       return Array.from(workspace.pages.values()).find(space => {
