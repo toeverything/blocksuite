@@ -1,11 +1,11 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import type { PanMouseMode } from '../../../__internal__/index.js';
+import type { PanTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
-export class PanModeController extends MouseModeController<PanMouseMode> {
-  readonly mouseMode = <PanMouseMode>{
+export class PanToolController extends EdgelessToolController<PanTool> {
+  readonly tool = <PanTool>{
     type: 'pan',
   };
 

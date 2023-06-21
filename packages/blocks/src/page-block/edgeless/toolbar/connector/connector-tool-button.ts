@@ -8,7 +8,7 @@ import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../components/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';
@@ -55,13 +55,13 @@ export class EdgelessConnectorToolButton extends LitElement {
   `;
 
   @property({ attribute: false })
-  mouseMode!: MouseMode;
+  mouseMode!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  setMouseMode!: (mouseMode: MouseMode) => void;
+  setMouseMode!: (mouseMode: EdgelessTool) => void;
 
   private _menu: ConnectorMenuPopper | null = null;
 

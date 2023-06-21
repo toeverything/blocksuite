@@ -1,13 +1,13 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BrushMouseMode } from '../../../__internal__/index.js';
+import type { BrushTool } from '../../../__internal__/index.js';
 import { BrushSize, noop } from '../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/color-panel.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
-export class BrushModeController extends MouseModeController<BrushMouseMode> {
-  readonly mouseMode = <BrushMouseMode>{
+export class BrushToolController extends EdgelessToolController<BrushTool> {
+  readonly tool = <BrushTool>{
     type: 'brush',
     color: GET_DEFAULT_LINE_COLOR(),
     lineWidth: 4,
@@ -40,7 +40,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
-    const { color, lineWidth } = this.mouseMode;
+    const { color, lineWidth } = this.tool;
     const points = [[modelX, modelY]];
 
     const id = this._surface.addElement('brush', {
@@ -62,7 +62,7 @@ export class BrushModeController extends MouseModeController<BrushMouseMode> {
     assertExists(this._draggingElementId);
     assertExists(this._draggingPathPoints);
 
-    const { lineWidth } = this.mouseMode;
+    const { lineWidth } = this.tool;
 
     const [modelX, modelY] = this._edgeless.surface.toModelCoord(
       e.point.x,

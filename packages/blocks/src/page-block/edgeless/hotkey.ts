@@ -3,7 +3,7 @@ import { ConnectorMode } from '@blocksuite/phasor';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { hotkey, HOTKEY_SCOPE_TYPE } from '../../__internal__/utils/hotkey.js';
-import type { MouseMode } from '../../__internal__/utils/types.js';
+import type { EdgelessTool } from '../../__internal__/utils/types.js';
 import { BrushSize } from '../../__internal__/utils/types.js';
 import { DEFAULT_NOTE_COLOR } from '../../note-block/note-model.js';
 import {
@@ -22,7 +22,7 @@ import { isTopLevelBlock } from './utils.js';
 
 function setMouseMode(
   edgeless: EdgelessPageBlockComponent,
-  mouseMode: MouseMode,
+  mouseMode: EdgelessTool,
   ignoreActiveState = false
 ) {
   // when editing, should not update mouse mode by shortcut
@@ -36,7 +36,7 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   // When user enters pan mode by pressing space,
   // we should revert to the last mouse mode once user releases the key.
   let shouldRevertMode = false;
-  let lastMode: MouseMode | null = null;
+  let lastMode: EdgelessTool | null = null;
   hotkey.addListener(
     HOTKEYS.SPACE,
     (event: KeyboardEvent) => {

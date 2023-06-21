@@ -6,7 +6,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../__internal__/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -33,13 +33,13 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  mouseMode!: MouseMode;
+  mouseMode!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  setMouseMode!: (mouseMode: MouseMode) => void;
+  setMouseMode!: (mouseMode: EdgelessTool) => void;
 
   @state()
   private _popperShow = false;

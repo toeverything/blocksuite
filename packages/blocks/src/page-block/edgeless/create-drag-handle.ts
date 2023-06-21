@@ -19,9 +19,9 @@ import {
 import { DragHandle } from '../../components/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import {
-  type DefaultModeController,
   DefaultModeDragType,
-} from './mode-controllers/default-mode.js';
+  type DefaultToolController,
+} from './tool-controllers/default-tool.js';
 
 export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
   return new DragHandle({
@@ -106,7 +106,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       const { selection } = pageBlock;
       if (selection.mouseMode.type === 'default') {
         const currentController =
-          selection.currentController as DefaultModeController;
+          selection.currentController as DefaultToolController;
         currentController.dragType = dragging
           ? DefaultModeDragType.PreviewDragging
           : DefaultModeDragType.None;

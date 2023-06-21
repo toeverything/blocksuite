@@ -1,7 +1,7 @@
 import '../components/tool-icon-button.js';
-import './shape-tool/shape-tool-button.js';
-import './brush-tool/brush-tool-button.js';
-import './connector-tool/connector-tool-button.js';
+import './shape/shape-tool-button.js';
+import './brush/brush-tool-button.js';
+import './connector/connector-tool-button.js';
 
 import {
   EraserIcon,
@@ -22,7 +22,7 @@ import { customElement } from 'lit/decorators.js';
 
 import {
   clamp,
-  type MouseMode,
+  type EdgelessTool,
   Point,
   uploadImageFromLocal,
 } from '../../../__internal__/index.js';
@@ -253,7 +253,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this._imageLoading = false;
   }
 
-  setMouseMode = (mouseMode: MouseMode) => {
+  setMouseMode = (mouseMode: EdgelessTool) => {
     this.edgeless.selection.setMouseMode(mouseMode);
   };
 

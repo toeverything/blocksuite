@@ -10,28 +10,28 @@ import { normalizeWheelDeltaY } from '@blocksuite/phasor';
 import {
   AbstractSelectionManager,
   type BlockComponentElement,
+  type EdgelessTool,
   getEditorContainerByElement,
   isDatabaseInput,
   isInsideEdgelessTextEditor,
   isInsidePageTitle,
   isMiddleButtonPressed,
   isPinchEvent,
-  type MouseMode,
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { BrushModeController } from './mode-controllers/brush-mode.js';
-import { ConnectorModeController } from './mode-controllers/connector-mode.js';
-import { DefaultModeController } from './mode-controllers/default-mode.js';
-import { EraserModeController } from './mode-controllers/eraser-mode.js';
-import type { MouseModeController } from './mode-controllers/index.js';
-import { NoteModeController } from './mode-controllers/note-mode.js';
-import { PanModeController } from './mode-controllers/pan-mode.js';
-import { ShapeModeController } from './mode-controllers/shape-mode.js';
-import { TextModeController } from './mode-controllers/text-mode.js';
+import { BrushToolController } from './tool-controllers/brush-tool.js';
+import { ConnectorToolController } from './tool-controllers/connector-tool.js';
+import { DefaultToolController } from './tool-controllers/default-tool.js';
+import { EraserToolController } from './tool-controllers/eraser-tool.js';
+import type { EdgelessToolController } from './tool-controllers/index.js';
+import { NoteToolController } from './tool-controllers/note-tool.js';
+import { PanToolController } from './tool-controllers/pan-tool.js';
+import { ShapeTooolController } from './tool-controllers/shape-tool.js';
+import { TextToolController } from './tool-controllers/text-tool.js';
 import {
   getSelectionBoxBound,
   getXYWH,
@@ -76,17 +76,17 @@ export interface SelectionArea {
 }
 
 export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
-  private _mouseMode: MouseMode = {
+  private _mouseMode: EdgelessTool = {
     type: 'default',
   };
 
-  private _controllers: Record<MouseMode['type'], MouseModeController>;
+  private _controllers: Record<EdgelessTool['type'], EdgelessToolController>;
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
   private _rightClickTimer: {
-    mouseMode: MouseMode;
+    mouseMode: EdgelessTool;
     timer: number;
     timeStamp: number;
   } | null = null;
@@ -118,10 +118,10 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     return this._mouseMode;
   }
 
-  set mouseMode(mode: MouseMode) {
+  set mouseMode(mode: EdgelessTool) {
     this._mouseMode = mode;
     // sync mouse mode
-    this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
+    this._controllers[this._mouseMode.type].tool = this._mouseMode;
   }
 
   get currentController() {
@@ -155,14 +155,14 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     super(container, dispacher);
 
     this._controllers = {
-      default: new DefaultModeController(this.container),
-      text: new TextModeController(this.container),
-      shape: new ShapeModeController(this.container),
-      brush: new BrushModeController(this.container),
-      pan: new PanModeController(this.container),
-      note: new NoteModeController(this.container),
-      connector: new ConnectorModeController(this.container),
-      eraser: new EraserModeController(this.container),
+      default: new DefaultToolController(this.container),
+      text: new TextToolController(this.container),
+      shape: new ShapeTooolController(this.container),
+      brush: new BrushToolController(this.container),
+      pan: new PanToolController(this.container),
+      note: new NoteToolController(this.container),
+      connector: new ConnectorToolController(this.container),
+      eraser: new EraserToolController(this.container),
     };
 
     this._initMouseAndWheelEvents();
@@ -455,7 +455,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   }
 
   setMouseMode = (
-    mouseMode: MouseMode,
+    mouseMode: EdgelessTool,
     state: EdgelessSelectionState = {
       selected: [],
       active: false,

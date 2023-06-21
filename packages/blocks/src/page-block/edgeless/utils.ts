@@ -23,8 +23,8 @@ import { assertExists, type Page } from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import {
+  type EdgelessTool,
   handleNativeRangeAtPoint,
-  type MouseMode,
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -153,7 +153,7 @@ export function stopPropagation(event: Event) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
-export function getCursorMode(mouseMode: MouseMode) {
+export function getCursorMode(mouseMode: EdgelessTool) {
   switch (mouseMode.type) {
     case 'default':
       return 'default';

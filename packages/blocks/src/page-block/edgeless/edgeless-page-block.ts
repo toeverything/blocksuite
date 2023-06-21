@@ -57,7 +57,7 @@ import {
 import type {
   BlockHost,
   DragHandle,
-  MouseMode,
+  EdgelessTool,
   NoteBlockModel,
   PageBlockModel,
   SurfaceBlockModel,
@@ -96,7 +96,7 @@ export interface EdgelessSelectionSlots {
   viewportUpdated: Slot;
   selectionUpdated: Slot<EdgelessSelectionState>;
   surfaceUpdated: Slot;
-  mouseModeUpdated: Slot<MouseMode>;
+  mouseModeUpdated: Slot<EdgelessTool>;
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
@@ -192,7 +192,7 @@ export class EdgelessPageBlockComponent
   showGrid = true;
 
   @state()
-  mouseMode: MouseMode = {
+  mouseMode: EdgelessTool = {
     type: 'default',
   };
 
@@ -213,7 +213,7 @@ export class EdgelessPageBlockComponent
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
-    mouseModeUpdated: new Slot<MouseMode>(),
+    mouseModeUpdated: new Slot<EdgelessTool>(),
     reorderingNotesUpdated: new Slot<ReorderingAction<Selectable>>(),
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
