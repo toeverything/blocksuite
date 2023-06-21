@@ -59,13 +59,6 @@ export class BlockIndexer {
       return;
     }
     // lazy init
-    if ('requestIdleCallback' in globalThis) {
-      requestIdleCallback(() => {
-        this._initIndex();
-      });
-      return;
-    }
-    // fallback to setTimeout
     setTimeout(() => {
       this._initIndex();
     }, 0);

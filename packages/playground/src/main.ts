@@ -10,6 +10,8 @@ import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
+import type { SubdocEvent } from '@blocksuite/store/yjs';
+import type * as Y from 'yjs';
 
 import { DebugMenu } from './components/debug-menu.js';
 import type { InitFn } from './data';
@@ -85,6 +87,40 @@ export async function initPageContentByParam(
   await tryInitExternalContent(workspace, param, pageId);
 }
 
+export function storeSubdocProviders(workspace: Workspace) {
+  const subdocProvidersMap = new Map<string, DocProvider[]>();
+  const params = new URLSearchParams(location.search);
+  const providerArgs = params.get('providers');
+
+  // indexeddb provider has already supported subdoc
+  if (providerArgs === 'indexeddb') {
+    return subdocProvidersMap;
+  }
+  workspace.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
+    const findSpaceByDoc = (doc: Y.Doc) => {
+      return Array.from(workspace.pages.values()).find(space => {
+        return space.spaceDoc.guid === doc.guid;
+      });
+    };
+
+    loaded.forEach(subdoc => {
+      const space = findSpaceByDoc(subdoc);
+      if (!space) {
+        return;
+      }
+
+      const subdocProviders = (options.providerCreators || []).map(creator => {
+        return creator(subdoc.guid, subdoc, {
+          awareness: workspace.awarenessStore.awareness,
+        });
+      });
+
+      subdocProvidersMap.set(space.prefixedId, subdocProviders);
+    });
+  });
+  return subdocProvidersMap;
+}
+
 async function main() {
   if (window.workspace) {
     return;
@@ -97,6 +133,7 @@ async function main() {
   window.Y = Workspace.Y;
   window.std = std;
   window.ContentParser = ContentParser;
+  window.subdocProviders = storeSubdocProviders(workspace);
 
   const syncProviders = async (providers: DocProvider[]) => {
     for (const provider of providers) {
@@ -110,12 +147,12 @@ async function main() {
   };
 
   await syncProviders(workspace.providers);
-  await syncProviders(Array.from(workspace.subdocProviders.values()).flat());
+  await syncProviders(Array.from(window.subdocProviders.values()).flat());
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
     await page.waitForLoaded();
-    const subdocProviders = workspace.subdocProviders.get(`space:${pageId}`);
+    const subdocProviders = window.subdocProviders.get(`space:${pageId}`);
     if (subdocProviders) {
       await syncProviders(subdocProviders);
     }
