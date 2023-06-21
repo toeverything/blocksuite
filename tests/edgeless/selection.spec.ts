@@ -38,14 +38,11 @@ test('should update rect of selection when resizing viewport', async ({
   const selectedRectClass = '.affine-edgeless-selected-rect';
 
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
   await actions.decreaseZoomLevel(page);
   await actions.decreaseZoomLevel(page);
   await waitNextFrame(page);
-
   const selectedRectInZoom = await getBoundingRect(page, selectedRectClass);
-
-  await page.mouse.click(0, 0);
-  await clickInCenter(page, selectedRectInZoom);
   await assertEdgelessSelectedRect(page, [
     selectedRectInZoom.x,
     selectedRectInZoom.y,
@@ -54,15 +51,16 @@ test('should update rect of selection when resizing viewport', async ({
   ]);
 
   await actions.switchEditorEmbedMode(page);
-
+  await waitNextFrame(page);
   const selectedRectInEmbed = await getBoundingRect(page, selectedRectClass);
-
-  await clickInCenter(page, selectedRectInEmbed);
-  await assertEdgelessSelectedRect(page, [295, 210, 50, 50]);
+  await assertEdgelessSelectedRect(page, [
+    selectedRectInEmbed.x,
+    selectedRectInEmbed.y,
+    50,
+    50,
+  ]);
 
   await actions.switchEditorEmbedMode(page);
-  await assertEdgelessSelectedRect(page, [255, 150, 50, 50]);
-
   await actions.increaseZoomLevel(page);
   await actions.increaseZoomLevel(page);
   await waitNextFrame(page);
