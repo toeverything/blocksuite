@@ -9,18 +9,18 @@ import {
 import { linePolygonIntersects } from '@blocksuite/phasor';
 
 import type {
+  EdgelessTool,
   Erasable,
   IPoint,
-  MouseMode,
   TopLevelBlockModel,
 } from '../../../__internal__/utils/index.js';
 import {
-  type EraserMouseMode,
+  type EraserTool,
   getBlockElementById,
   noop,
 } from '../../../__internal__/utils/index.js';
 import { isTopLevelBlock } from '../utils.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
 class EraserOverlay extends Overlay {
   d = '';
@@ -31,8 +31,9 @@ class EraserOverlay extends Overlay {
     ctx.fill(path);
   }
 }
-export class EraserModeController extends MouseModeController<EraserMouseMode> {
-  public override readonly mouseMode: EraserMouseMode = {
+
+export class EraserToolController extends EdgelessToolController<EraserTool> {
+  public override readonly tool: EraserTool = {
     type: 'eraser',
   };
 
@@ -124,7 +125,7 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
     this._prevPoint = currentPoint;
   }
 
-  override beforeModeSwitch(mode: MouseMode) {
+  override beforeModeSwitch(mode: EdgelessTool) {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
         const ele = getBlockElementById(erasable.id);
@@ -183,7 +184,7 @@ export class EraserModeController extends MouseModeController<EraserMouseMode> {
     noop();
   }
 
-  override afterModeSwitch(newMode: EraserMouseMode): void {
+  override afterModeSwitch(newMode: EraserTool): void {
     noop();
   }
 }

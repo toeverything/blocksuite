@@ -3,7 +3,7 @@ import { Rectangle } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
 import { deserializeXYWH, StrokeStyle } from '@blocksuite/phasor';
 
-import type { ConnectorMouseMode } from '../../../__internal__/index.js';
+import type { ConnectorTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import type { Selectable, SelectionArea } from '../selection-manager.js';
 import {
@@ -12,10 +12,10 @@ import {
   getXYWH,
   pickBy,
 } from '../utils.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
-export class ConnectorModeController extends MouseModeController<ConnectorMouseMode> {
-  readonly mouseMode = <ConnectorMouseMode>{
+export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
+  readonly tool = <ConnectorTool>{
     type: 'connector',
   };
 
@@ -57,7 +57,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
 
     this._page.captureSync();
     const { viewport } = this._edgeless.surface;
-    const { mode, color } = this.mouseMode;
+    const { mode, color } = this.tool;
 
     // create a block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
@@ -113,7 +113,7 @@ export class ConnectorModeController extends MouseModeController<ConnectorMouseM
     assertExists(this._draggingArea);
 
     const { viewport } = this._edgeless.surface;
-    const { mode } = this.mouseMode;
+    const { mode } = this.tool;
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 

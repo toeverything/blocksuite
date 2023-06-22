@@ -1,12 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import type { TextMouseMode } from '../../../__internal__/index.js';
+import type { TextTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { addText } from '../utils.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
-export class TextModeController extends MouseModeController<TextMouseMode> {
-  readonly mouseMode = <TextMouseMode>{
+export class TextToolController extends EdgelessToolController<TextTool> {
+  readonly tool = <TextTool>{
     type: 'text',
   };
 

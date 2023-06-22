@@ -7,7 +7,7 @@ import {
   countBlock,
   deleteAll,
   getNoteBoundBoxInEdgeless,
-  setMouseMode,
+  setEdgelessTool,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
@@ -25,7 +25,7 @@ test('earse shape', async ({ page }) => {
   await deleteAll(page);
 
   await addBasicRectShapeElement(page, { x: 0, y: 0 }, { x: 100, y: 100 });
-  await setMouseMode(page, 'eraser');
+  await setEdgelessTool(page, 'eraser');
 
   await dragBetweenCoords(page, { x: 50, y: 150 }, { x: 50, y: 50 });
   await click(page, { x: 50, y: 50 });
@@ -37,7 +37,7 @@ test('earse note', async ({ page }) => {
   const { noteId } = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'eraser');
+  await setEdgelessTool(page, 'eraser');
   const box = await getNoteBoundBoxInEdgeless(page, noteId);
   await dragBetweenCoords(
     page,

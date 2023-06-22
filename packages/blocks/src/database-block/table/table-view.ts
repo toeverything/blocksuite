@@ -147,6 +147,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   root!: BlockSuiteRoot;
 
+  @property({ attribute: false })
+  modalMode?: boolean;
+
   @query('.affine-database-table-container')
   private _tableContainer!: HTMLDivElement;
 
@@ -322,6 +325,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
             .targetModel="${this.model}"
           ></affine-database-title>
           <affine-database-toolbar
+            .root=${this.root}
+            .modalMode=${this.modalMode}
             .view="${tableViewManager}"
             .addRow="${addRow}"
             .targetModel="${this.model}"

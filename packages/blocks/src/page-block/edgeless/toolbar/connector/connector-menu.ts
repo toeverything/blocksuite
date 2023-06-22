@@ -1,57 +1,63 @@
 import '../../components/color-panel.js';
 import '../../components/tool-icon-button.js';
 
+import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
+import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { MouseMode } from '../../../../__internal__/index.js';
-import { BrushSize } from '../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import type { ColorEvent } from '../../components/color-panel.js';
+import { getTooltipWithShortcut } from '../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
-function BrushSizeButtonGroup(
-  mouseMode: MouseMode,
-  setBrushWidth: (size: BrushSize) => void
+function ConnectorModeButtonGroup(
+  edgelessTool: EdgelessTool,
+  setConnectorMode: (mode: ConnectorMode) => void
 ) {
-  if (mouseMode.type !== 'brush') return nothing;
+  if (edgelessTool.type !== 'connector') return nothing;
 
-  const { lineWidth } = mouseMode;
+  const { mode } = edgelessTool;
+  const straightLineTooltip = getTooltipWithShortcut('Straight line', 'L');
+  const orthogonalTooltip = getTooltipWithShortcut('Connector', 'X');
   /**
    * There is little hacky on rendering tooltip.
    * We don't want either tooltip overlap the top button or tooltip on left.
    * So we put the lower button's tooltip as the first element of the button group container
    */
   return html`
-    <div class="brush-size-button-group has-tool-tip">
+    <div class="connector-mode-button-group has-tool-tip">
       <!-- This tooltip is for the last button(Thick) -->
-      <tool-tip inert role="tooltip" tip-position="top" arrow>Thick</tool-tip>
+      <tool-tip inert role="tooltip" tip-position="top" arrow>
+        ${orthogonalTooltip}
+      </tool-tip>
 
       <div
-        class="brush-size-button has-tool-tip"
-        ?active=${lineWidth === BrushSize.Thin}
-        @click=${() => setBrushWidth(BrushSize.Thin)}
+        class="connector-mode-button has-tool-tip"
+        ?active=${mode === ConnectorMode.Straight}
+        @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
-        <div class="thin"></div>
+        ${ConnectorLIcon}
         <tool-tip inert role="tooltip" tip-position="top" arrow>
-          Thin
+          ${straightLineTooltip}
         </tool-tip>
       </div>
 
       <div
-        class="brush-size-button"
-        ?active=${lineWidth === BrushSize.Thick}
-        @click=${() => setBrushWidth(BrushSize.Thick)}
+        class="connector-mode-button"
+        ?active=${mode === ConnectorMode.Orthogonal}
+        @click=${() => setConnectorMode(ConnectorMode.Orthogonal)}
       >
-        <div class="thick"></div>
+        ${ConnectorXIcon}
       </div>
     </div>
   `;
 }
 
-@customElement('edgeless-brush-menu')
-export class EdgelessBrushMenu extends LitElement {
+@customElement('edgeless-connector-menu')
+export class EdgelessConnectorMenu extends LitElement {
   static override styles = css`
     :host {
       position: absolute;
@@ -69,12 +75,12 @@ export class EdgelessBrushMenu extends LitElement {
       border-radius: 8px;
     }
 
-    .brush-size-button-group {
+    .connector-mode-button-group {
       display: flex;
       flex-direction: column;
     }
 
-    .brush-size-button {
+    .connector-mode-button {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -85,24 +91,14 @@ export class EdgelessBrushMenu extends LitElement {
       cursor: pointer;
     }
 
-    .brush-size-button[active],
-    .brush-size-button:hover {
+    .connector-mode-button[active],
+    .connector-mode-button:hover {
       background-color: var(--affine-hover-color);
     }
 
-    .brush-size-button div {
+    .connector-mode-button div {
       border-radius: 50%;
       background-color: var(--affine-icon-color);
-    }
-
-    .brush-size-button .thin {
-      width: 4px;
-      height: 4px;
-    }
-
-    .brush-size-button .thick {
-      width: 10px;
-      height: 10px;
     }
 
     menu-divider {
@@ -113,40 +109,40 @@ export class EdgelessBrushMenu extends LitElement {
   `;
 
   @property({ attribute: false })
-  mouseMode!: MouseMode;
+  edgelessTool!: EdgelessTool;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private _setBrushColor = (color: CssVariableName) => {
-    if (this.mouseMode.type !== 'brush') return;
+  private _setConnectorColor = (color: CssVariableName) => {
+    if (this.edgelessTool.type !== 'connector') return;
 
-    const { lineWidth } = this.mouseMode;
-    this.edgeless.slots.mouseModeUpdated.emit({
-      type: 'brush',
+    const { mode } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
+      type: 'connector',
       color,
-      lineWidth,
+      mode,
     });
   };
 
-  private _setBrushWidth = (lineWidth: BrushSize) => {
-    if (this.mouseMode.type !== 'brush') return;
+  private _setConnectorMode = (mode: ConnectorMode) => {
+    if (this.edgelessTool.type !== 'connector') return;
 
-    const { color } = this.mouseMode;
-    this.edgeless.slots.mouseModeUpdated.emit({
-      type: 'brush',
+    const { color } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
+      type: 'connector',
       color,
-      lineWidth,
+      mode,
     });
   };
 
   override render() {
-    if (this.mouseMode.type !== 'brush') return nothing;
+    if (this.edgelessTool.type !== 'connector') return nothing;
 
-    const { color } = this.mouseMode;
-    const brushSizeButtonGroup = BrushSizeButtonGroup(
-      this.mouseMode,
-      this._setBrushWidth
+    const { color } = this.edgelessTool;
+    const brushSizeButtonGroup = ConnectorModeButtonGroup(
+      this.edgelessTool,
+      this._setConnectorMode
     );
 
     return html`
@@ -155,7 +151,7 @@ export class EdgelessBrushMenu extends LitElement {
         <menu-divider .vertical=${true}></menu-divider>
         <edgeless-color-panel
           .value=${color}
-          @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
+          @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
         ></edgeless-color-panel>
       </div>
     `;
@@ -164,6 +160,6 @@ export class EdgelessBrushMenu extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-brush-menu': EdgelessBrushMenu;
+    'edgeless-connector-menu': EdgelessConnectorMenu;
   }
 }
