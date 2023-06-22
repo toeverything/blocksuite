@@ -5,8 +5,11 @@ import { REFERENCE_NODE } from '../reference-node.js';
 import type { AffineTextSchema } from './types.js';
 
 export const attributeRenderer: AffineTextSchema['textRenderer'] =
-  () => delta => {
-    const defaultTemplate = html`<affine-text .delta=${delta}></affine-text>`;
+  config => delta => {
+    const defaultTemplate = html`<affine-text
+      .delta=${delta}
+      .config=${config?.link}
+    ></affine-text>`;
     if (!delta.attributes) {
       return defaultTemplate;
     }
@@ -19,7 +22,10 @@ export const attributeRenderer: AffineTextSchema['textRenderer'] =
           delta
         );
       }
-      return html`<affine-link .delta=${delta}></affine-link>`;
+      return html`<affine-link
+        .delta=${delta}
+        .config=${config?.link}
+      ></affine-link>`;
     }
     if (attributes.reference) {
       // https://github.com/toeverything/blocksuite/issues/2136

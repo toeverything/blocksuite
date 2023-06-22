@@ -96,11 +96,12 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     );
     this._disposables.add({
       dispose: this.eventDispatcher.add('click', context => {
-        const target = context.get('pointerState').event.target;
+        const event = context.get('pointerState').event;
+        const target = event.target;
         if (target instanceof Element && this.isCurrentDatabase(target)) {
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
-            cell?.cell?.enterEditMode();
+            cell?.cell?.enterEditMode(event);
             return true;
           }
         }
@@ -282,7 +283,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         this.getCellContainer(
           selection.focus.rowIndex,
           selection.focus.columnIndex
-        ).cell?.exitEditMode();
+        ).cell?.exitEditMode(evt);
         return true;
       } else {
         if (rowsSelection && !selection.columnsSelection) {
@@ -312,7 +313,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       this.getCellContainer(
         selection.focus.rowIndex,
         selection.focus.columnIndex
-      ).cell?.enterEditMode();
+      ).cell?.enterEditMode(evt);
       return true;
     }
     if (evt.shiftKey) {

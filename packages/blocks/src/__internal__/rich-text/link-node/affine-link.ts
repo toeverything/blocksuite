@@ -11,6 +11,8 @@ import { getModelByElement } from '../../utils/index.js';
 import { affineTextStyles } from '../virgo/affine-text.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
 
+export type Config = { showPopover: boolean };
+
 @customElement('affine-link')
 export class AffineLink extends ShadowlessElement {
   @property({ type: Object })
@@ -18,12 +20,19 @@ export class AffineLink extends ShadowlessElement {
     insert: ZERO_WIDTH_SPACE,
   };
 
+  @property({ type: Object })
+  config?: Config;
+
   get link() {
     const link = this.delta.attributes?.link;
     if (!link) {
       return '';
     }
     return link;
+  }
+
+  get _config() {
+    return this.config ?? { showPopover: true };
   }
 
   @property({ attribute: false })
@@ -60,7 +69,7 @@ export class AffineLink extends ShadowlessElement {
   }
 
   onHover(e: MouseEvent) {
-    if (this._isHovering) {
+    if (this._isHovering || !this._config.showPopover) {
       return;
     } else {
       this._isHovering = true;

@@ -192,6 +192,12 @@ export const progressHelper = columnManager.register<number>('progress', {
   configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
+export const linkHelper = columnManager.register<Text['yText']>('link', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  configRender: () => html``,
+  cellToString: data => data?.toString() ?? '',
+});
 
 columnManager.registerConvert(selectHelper, multiSelectHelper, column => [
   column,
