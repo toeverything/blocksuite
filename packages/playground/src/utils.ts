@@ -27,13 +27,14 @@ import {
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import { createBroadCastChannelProvider } from '@blocksuite/store/providers/broadcast-channel';
 import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
 import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
-const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+const providerArgs = (params.get('providers') ?? 'broadcast').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
@@ -202,6 +203,10 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   if (providerArgs.includes('indexeddb')) {
     providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
     idGenerator = Generator.UUIDv4; // works in production
+  }
+
+  if (providerArgs.includes('broadcast')) {
+    providerCreators.push(createBroadCastChannelProvider);
   }
 
   if (blobStorageArgs.includes('memory')) {

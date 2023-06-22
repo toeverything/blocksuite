@@ -21,6 +21,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.3",
+    "async-call-rpc": "^6.3.1",
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.0",
@@ -42,7 +43,8 @@
   },
   "exports": {
     "./src/*": "./src/*.ts",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./providers/broadcast-channel": "./src/providers/broadcast-channel.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -54,7 +56,8 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
-      "./shim.d.ts": "./shim.d.ts"
+      "./shim.d.ts": "./shim.d.ts",
+      "./providers/broadcast-channel": "./dist/providers/broadcast-channel.js"
     }
   }
 }
