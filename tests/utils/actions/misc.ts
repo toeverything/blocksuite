@@ -240,7 +240,7 @@ export async function waitForRemoteUpdateSlot(page: Page) {
   return page.evaluate(() => {
     return new Promise<void>(resolve => {
       const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
-      const providers = window.workspace.subdocProviders;
+      const providers = window.subdocProviders;
       const debugProvider = Array.from(providers.values())
         .flat()
         .find(provider => provider instanceof DebugDocProvider) as InstanceType<

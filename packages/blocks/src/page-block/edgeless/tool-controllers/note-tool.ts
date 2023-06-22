@@ -1,12 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { type NoteMouseMode } from '../../../__internal__/index.js';
+import { type NoteTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { addNote, DEFAULT_NOTE_WIDTH } from '../utils.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
-export class NoteModeController extends MouseModeController<NoteMouseMode> {
-  readonly mouseMode = <NoteMouseMode>{
+export class NoteToolController extends EdgelessToolController<NoteTool> {
+  readonly tool = <NoteTool>{
     type: 'note',
   };
 

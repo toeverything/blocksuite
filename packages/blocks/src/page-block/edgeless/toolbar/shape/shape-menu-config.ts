@@ -7,10 +7,10 @@ import {
 } from '@blocksuite/global/config';
 import type { TemplateResult } from 'lit';
 
-import type { ShapeMouseMode } from '../../../../__internal__/index.js';
+import type { ShapeTool } from '../../../../__internal__/index.js';
 
 type Config = {
-  name: ShapeMouseMode['shape'];
+  name: ShapeTool['shape'];
   icon: TemplateResult<1>;
   tooltip: string;
   disabled: boolean;

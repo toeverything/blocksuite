@@ -131,11 +131,11 @@ export type Alignable = NoteBlockModel | PhasorElement;
 
 export type Erasable = NoteBlockModel | PhasorElement;
 
-export type DefaultMouseMode = {
+export type DefaultTool = {
   type: 'default';
 };
 
-export type ShapeMouseMode = {
+export type ShapeTool = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
   fillColor: CssVariableName;
@@ -147,45 +147,45 @@ export enum BrushSize {
   Thick = 10,
 }
 
-export type TextMouseMode = {
+export type TextTool = {
   type: 'text';
 };
 
-export type BrushMouseMode = {
+export type BrushTool = {
   type: 'brush';
   color: CssVariableName;
   lineWidth: BrushSize;
 };
 
-export type EraserMouseMode = {
+export type EraserTool = {
   type: 'eraser';
 };
 
-export type PanMouseMode = {
+export type PanTool = {
   type: 'pan';
   panning: boolean;
 };
 
-export type NoteMouseMode = {
+export type NoteTool = {
   type: 'note';
   background: CssVariableName;
 };
 
-export type ConnectorMouseMode = {
+export type ConnectorTool = {
   type: 'connector';
   mode: ConnectorMode;
   color: CssVariableName;
 };
 
-export type MouseMode =
-  | DefaultMouseMode
-  | TextMouseMode
-  | ShapeMouseMode
-  | BrushMouseMode
-  | PanMouseMode
-  | NoteMouseMode
-  | ConnectorMouseMode
-  | EraserMouseMode;
+export type EdgelessTool =
+  | DefaultTool
+  | TextTool
+  | ShapeTool
+  | BrushTool
+  | PanTool
+  | NoteTool
+  | ConnectorTool
+  | EraserTool;
 
 export type SerializedBlock = {
   flavour: string;
@@ -236,7 +236,7 @@ export type EmbedBlockDoubleClickData = {
 declare global {
   interface WindowEventMap {
     'affine.embed-block-db-click': CustomEvent<EmbedBlockDoubleClickData>;
-    'affine.switch-mouse-mode': CustomEvent<MouseMode>;
+    'affine.switch-mouse-mode': CustomEvent<EdgelessTool>;
     'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
   }
 }

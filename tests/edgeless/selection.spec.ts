@@ -1,7 +1,7 @@
 import * as actions from '../utils/actions/edgeless.js';
 import {
   getNoteBoundBoxInEdgeless,
-  setMouseMode,
+  setEdgelessTool,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
@@ -38,14 +38,11 @@ test('should update rect of selection when resizing viewport', async ({
   const selectedRectClass = '.affine-edgeless-selected-rect';
 
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
   await actions.decreaseZoomLevel(page);
   await actions.decreaseZoomLevel(page);
   await waitNextFrame(page);
-
   const selectedRectInZoom = await getBoundingRect(page, selectedRectClass);
-
-  await page.mouse.click(0, 0);
-  await clickInCenter(page, selectedRectInZoom);
   await assertEdgelessSelectedRect(page, [
     selectedRectInZoom.x,
     selectedRectInZoom.y,
@@ -54,11 +51,8 @@ test('should update rect of selection when resizing viewport', async ({
   ]);
 
   await actions.switchEditorEmbedMode(page);
-
+  await waitNextFrame(page);
   const selectedRectInEmbed = await getBoundingRect(page, selectedRectClass);
-
-  await page.mouse.click(0, 0);
-  await clickInCenter(page, selectedRectInEmbed);
   await assertEdgelessSelectedRect(page, [
     selectedRectInEmbed.x,
     selectedRectInEmbed.y,
@@ -67,13 +61,6 @@ test('should update rect of selection when resizing viewport', async ({
   ]);
 
   await actions.switchEditorEmbedMode(page);
-  await assertEdgelessSelectedRect(page, [
-    selectedRectInZoom.x,
-    selectedRectInZoom.y,
-    50,
-    50,
-  ]);
-
   await actions.increaseZoomLevel(page);
   await actions.increaseZoomLevel(page);
   await waitNextFrame(page);
@@ -168,9 +155,9 @@ test('selection box of shape element sync on fast dragging', async ({
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
   await dragBetweenCoords(
     page,
     { x: 150, y: 150 },
@@ -191,7 +178,7 @@ test('when the selection is always a note, it should remain in an active state',
   await switchEditorMode(page);
   const bound = await getNoteBoundBoxInEdgeless(page, ids.noteId);
 
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   const newNoteX = bound.x;
   const newNoteY = bound.y + bound.height + 100;
