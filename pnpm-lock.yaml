@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -398,6 +398,9 @@ importers:
       '@types/flexsearch':
         specifier: ^0.7.3
         version: 0.7.3
+      async-call-rpc:
+        specifier: ^6.3.1
+        version: 6.3.1
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -2494,6 +2497,10 @@ packages:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
     dev: true
+
+  /async-call-rpc@6.3.1:
+    resolution: {integrity: sha512-i9R46goYZIi0WPkd5X12O6rOsA1GFUiZ/71GOafdQaZtbytXjQ6VevODXDu5hAI5vn2/BQqbC6NznHV+TAC1QA==}
+    dev: false
 
   /atob@2.1.2:
     resolution: {integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==}
