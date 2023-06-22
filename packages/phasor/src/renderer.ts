@@ -32,6 +32,8 @@ export interface SurfaceViewport {
 
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
+
+  getCanvasRenderByBound(bound: IBound): HTMLCanvasElement | null;
 }
 
 /**
@@ -256,7 +258,7 @@ export class Renderer implements SurfaceViewport {
   }
 
   private _render() {
-    const { ctx, gridManager, viewportBounds, width, height, rc, zoom } = this;
+    const { ctx, viewportBounds, width, height, rc, zoom } = this;
     const dpr = window.devicePixelRatio;
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
@@ -264,14 +266,25 @@ export class Renderer implements SurfaceViewport {
 
     ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, 0, 0);
 
-    const elements = gridManager.search(viewportBounds);
+    this._renderByBound(ctx, rc, viewportBounds);
+  }
+
+  private _renderByBound(
+    ctx: CanvasRenderingContext2D | null,
+    rc: RoughCanvas,
+    bound: IBound
+  ) {
+    if (!ctx) return;
+
+    const { gridManager } = this;
+    const elements = gridManager.search(bound);
     for (const element of elements) {
-      const dx = element.x - viewportBounds.x;
-      const dy = element.y - viewportBounds.y;
+      const dx = element.x - bound.x;
+      const dy = element.y - bound.y;
       ctx.save();
       ctx.translate(dx, dy);
 
-      if (intersects(element, viewportBounds) && element.display) {
+      if (intersects(element, bound) && element.display) {
         element.render(ctx, rc);
       }
 
@@ -280,12 +293,24 @@ export class Renderer implements SurfaceViewport {
 
     for (const overlay of this._overlays) {
       ctx.save();
-      ctx.translate(-viewportBounds.x, -viewportBounds.y);
+      ctx.translate(-bound.x, -bound.y);
       overlay.render(ctx);
       ctx.restore();
     }
 
     ctx.restore();
+  }
+
+  public getCanvasRenderByBound(bound: IBound): HTMLCanvasElement | null {
+    const canvas = document.createElement('canvas');
+    canvas.width = bound.w;
+    canvas.height = bound.h;
+
+    const ctx = canvas.getContext('2d');
+    const rc = new RoughCanvas(canvas);
+    this._renderByBound(ctx, rc, bound);
+
+    return canvas;
   }
 
   public addOverlay(overlay: Overlay) {

@@ -3,10 +3,12 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
+import { xywhArrayToObject } from '../..//page-block/edgeless/utils.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import {
+  getBlockElementById,
   getEditorContainer,
   getPageBlock,
   isPageMode,
@@ -123,7 +125,7 @@ export class ContentParser {
 
     const editorContainer = getEditorContainer(this._page);
     if (isPageMode(this._page)) {
-      const pageContainer = document.querySelector(
+      const pageContainer = editorContainer.querySelector(
         '.affine-default-page-block-container'
       );
       if (!pageContainer) return;
@@ -131,42 +133,43 @@ export class ContentParser {
       const data = await html2canvas(pageContainer, html2canvasOption);
       return data;
     } else {
-      const styleElement = document.createElement('style');
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      const { x, y, w, h } = bound;
-      styleElement.textContent = `
-        editor-container,.affine-editor-container {height: ${
-          h + 100
-        }px; width: ${w + 100}px}
-      `;
-      editorContainer.appendChild(styleElement);
-
-      const width = edgeless.surface.viewport.width;
-      const height = edgeless.surface.viewport.height;
-      edgeless.surface.viewport.setCenter(
-        x + width / 2 - 50,
-        y + height / 2 - 50
-      );
-      edgeless.surface.onResize();
-
-      const pageContainer = document.querySelector('affine-edgeless-page');
-      if (!pageContainer) return;
 
       const promise = new Promise(resolve => {
         setTimeout(async () => {
-          const canvasData = await html2canvas(
-            pageContainer,
-            html2canvasOption
-          );
-          resolve(canvasData);
+          const canvas = document.createElement('canvas');
+          canvas.width = bound.w;
+          canvas.height = bound.h;
+          const context = canvas.getContext('2d');
+
+          const nodeElements = edgeless.getSortedElementsByBound(bound);
+          for (const nodeElement of nodeElements) {
+            const blockElement = getBlockElementById(nodeElement.id);
+            const blockBound = xywhArrayToObject(nodeElement);
+            const canvasData = await html2canvas(
+              blockElement,
+              html2canvasOption
+            );
+            context?.drawImage(
+              canvasData,
+              blockBound.x - bound.x,
+              blockBound.y - bound.y,
+              blockBound.w,
+              blockBound.h
+            );
+          }
+
+          const surfaceCanvas =
+            edgeless.surface.viewport.getCanvasRenderByBound(bound);
+          surfaceCanvas &&
+            context?.drawImage(surfaceCanvas, 0, 0, bound.w, bound.h);
+
+          resolve(canvas);
         }, 0);
       });
       const data = (await promise) as HTMLCanvasElement;
-      editorContainer.removeChild(styleElement);
-      // edgeless.surface.viewport.setCenter(width, height);
-      // edgeless.surface.onResize();
       return data;
     }
   }
