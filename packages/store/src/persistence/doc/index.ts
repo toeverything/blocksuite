@@ -51,5 +51,5 @@ export type DocProvider = PassiveDocProvider | ActiveDocProvider;
 export type DocProviderCreator = (
   id: string,
   doc: Y.Doc,
-  options?: { awareness?: Awareness }
+  options: { awareness: Awareness }
 ) => DocProvider;
