@@ -13,7 +13,6 @@ packages=(
   "virgo"
   "connector"
   "lit"
-  "block-std"
 )
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
