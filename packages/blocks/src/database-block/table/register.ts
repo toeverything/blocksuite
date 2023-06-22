@@ -35,16 +35,16 @@ export abstract class DatabaseCellElement<
     this.column.setValue(this.rowId, value, ops);
   }
 
-  protected _setEditing(event: Event, editing: boolean) {
+  protected _setEditing(editing: boolean, event?: Event) {
     this.setEditing(editing);
   }
 
   public enterEditMode(event: Event) {
-    this._setEditing(event, true);
+    this._setEditing(true, event);
   }
 
   public exitEditMode(event: Event) {
-    this._setEditing(event, false);
+    this._setEditing(false, event);
   }
 
   override connectedCallback() {

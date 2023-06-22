@@ -117,7 +117,7 @@ export class LinkCell extends DatabaseCellElement<Y.Text> {
     );
   }
 
-  override _setEditing(event: Event) {
+  override _setEditing(_: boolean, event: Event) {
     const value = this.vEditor?.yText.toString();
     if (!value || !isValidLink(value)) {
       this.setEditing(true);
