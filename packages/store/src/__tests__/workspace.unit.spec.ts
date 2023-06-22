@@ -5,6 +5,7 @@ import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
+import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
@@ -16,6 +17,7 @@ import type { BaseBlockModel, Page, PassiveDocProvider } from '../index.js';
 import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
 import type { BlockSuiteDoc } from '../yjs';
+import { assertExists } from './test-utils-dom';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
@@ -127,6 +129,64 @@ describe('basic', () => {
         }),
       ],
     });
+  });
+
+  it('workspace pages with yjs applyUpdate', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace2 = new Workspace(options).register(BlockSchemas);
+    const page = workspace.createPage({
+      id: '0',
+    });
+    await page.waitForLoaded();
+    page.addBlock('affine:page', {
+      title: new page.Text(),
+    });
+    {
+      const fn = vi.fn(({ added }) => {
+        expect(added.size).toBe(1);
+      });
+      // only apply root update
+      workspace2.doc.once('subdocs', fn);
+      expect(fn).toBeCalledTimes(0);
+      expect(workspace2.pages.size).toBe(0);
+      const update = encodeStateAsUpdate(workspace.doc);
+      applyUpdate(workspace2.doc, update);
+      expect(workspace2.doc.toJSON()['spaces']).toEqual({
+        'space:0': {
+          blocks: {},
+        },
+      });
+      expect(workspace2.pages.size).toBe(1);
+      expect(fn).toBeCalledTimes(1);
+    }
+    {
+      // apply page update
+      const update = encodeStateAsUpdate(page.spaceDoc);
+      expect(workspace2.pages.size).toBe(1);
+      const page2 = workspace2.getPage('0');
+      assertExists(page2);
+      applyUpdate(page2.spaceDoc, update);
+      expect(workspace2.doc.toJSON()['spaces']).toEqual({
+        'space:0': {
+          blocks: {
+            '0': {
+              'prop:title': '',
+              'sys:children': [],
+              'sys:flavour': 'affine:page',
+              'sys:id': '0',
+            },
+          },
+        },
+      });
+      const fn = vi.fn(({ loaded }) => {
+        expect(loaded.size).toBe(1);
+      });
+      workspace2.doc.once('subdocs', fn);
+      expect(fn).toBeCalledTimes(0);
+      await page2.waitForLoaded();
+      expect(fn).toBeCalledTimes(1);
+    }
   });
 });
 
