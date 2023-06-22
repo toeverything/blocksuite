@@ -161,6 +161,7 @@ describe('basic', () => {
       expect(fn).toBeCalledTimes(1);
     }
     {
+      // apply page update
       const update = encodeStateAsUpdate(page.spaceDoc);
       expect(workspace2.pages.size).toBe(1);
       const page2 = workspace2.getPage('0');
