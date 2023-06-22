@@ -10,7 +10,7 @@ import {
   type SurfaceManager,
   TextElement,
 } from '@blocksuite/phasor';
-import { type Page } from '@blocksuite/store';
+import { matchFlavours, type Page } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -48,6 +48,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       --top: 0px;
       --left: 0px;
       --rotate: 0deg;
+      --border-style: solid;
       position: absolute;
       top: 0;
       left: 0;
@@ -56,7 +57,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       pointer-events: none;
       box-sizing: border-box;
       z-index: 1;
-      border: var(--affine-border-width) solid var(--affine-blue);
+      border-color: var(--affine-blue);
+      border-width: var(--affine-border-width);
+      border-style: var(--border-style);
       border-radius: 8px;
       transform: translate(var(--left), var(--top)) rotate(var(--rotate));
     }
@@ -455,9 +458,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._rotate = rotate;
 
+    const isSingleHiddenNote =
+      selected.length === 1 &&
+      isTopLevelBlock(selected[0]) &&
+      matchFlavours(selected[0], ['affine:note']) &&
+      selected[0].hidden;
+
     _selectedRect.style.setProperty('--rotate', `${rotate}deg`);
     _selectedRect.style.setProperty('--top', `${top}px`);
     _selectedRect.style.setProperty('--left', `${left}px`);
+    _selectedRect.style.setProperty(
+      '--border-style',
+      isSingleHiddenNote ? 'dashed' : 'solid'
+    );
 
     _selectedRect.style.setProperty(
       '--affine-border-width',
