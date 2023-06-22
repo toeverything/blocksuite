@@ -3,7 +3,8 @@
 
 import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
-import { assert, describe, expect, it } from 'vitest';
+import { assert, describe, expect, it, vi } from 'vitest';
+import { Awareness } from 'y-protocols/awareness.js';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
@@ -11,7 +12,7 @@ import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import type { BaseBlockModel, Page } from '../index.js';
+import type { BaseBlockModel, Page, PassiveDocProvider } from '../index.js';
 import { Generator, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
 import type { BlockSuiteDoc } from '../yjs';
@@ -98,6 +99,33 @@ describe('basic', () => {
           blocks: {},
         },
       },
+    });
+  });
+
+  it('init with provider', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace({
+      ...options,
+      providerCreators: [
+        vi.fn((id, doc, config): PassiveDocProvider => {
+          expect(id).toBe(options.id);
+          expect(doc.guid).toBe(options.id);
+          expect(config.awareness).toBeInstanceOf(Awareness);
+          return {
+            flavour: '',
+            passive: true,
+            connect() {
+              // do nothing
+            },
+            get connected() {
+              return false;
+            },
+            disconnect() {
+              // do nothing
+            },
+          };
+        }),
+      ],
     });
   });
 });
