@@ -39,11 +39,11 @@ export abstract class DatabaseCellElement<
     this.setEditing(editing);
   }
 
-  public enterEditMode(event: Event) {
+  public enterEditMode(event?: Event) {
     this._setEditing(true, event);
   }
 
-  public exitEditMode(event: Event) {
+  public exitEditMode(event?: Event) {
     this._setEditing(false, event);
   }
 
