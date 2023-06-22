@@ -243,12 +243,11 @@ export class LinkCellEditing extends DatabaseCellElement<Y.Text> {
       if (!this.vEditor) return;
 
       const value = this.vEditor.yText.toString();
-      if (value && isValidLink(value)) {
-        this.page.captureSync();
-        const vRange = { index: 0, length: value.length };
-        this.vEditor.formatText(vRange, { link: value });
-        this.vEditor.setVRange(vRange);
-      }
+      const linkValue = isValidLink(value) ? value : null;
+      this.page.captureSync();
+      const vRange = { index: 0, length: value.length };
+      this.vEditor.formatText(vRange, { link: linkValue });
+      this.vEditor.setVRange(vRange);
 
       this.setEditing(false);
       return;
