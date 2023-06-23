@@ -192,7 +192,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
-  if (providerArgs.includes('indexeddb')) {
+  if (providerArgs.includes('idb')) {
     providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
     idGenerator = Generator.NanoID; // works in production
   }
@@ -206,7 +206,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     blobStorages.push(createMemoryStorage);
   }
 
-  if (blobStorageArgs.includes('indexeddb')) {
+  if (blobStorageArgs.includes('idb')) {
     blobStorages.push(createIndexeddbStorage);
   }
 

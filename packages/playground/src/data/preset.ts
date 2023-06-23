@@ -20,9 +20,9 @@ To test real-time collaboration, you can specify the room to join by adding the 
 
 > Note that the second and subsequent users should not open the page with the \`?init\` param in this case.
 
-If you are the only user in the room, your content will be lost after refresh. This is great for local debugging. But if you want local persistence, you can open this page with the \`?providers=indexeddb&room=foo\` config, then click the init button in the bottom-left corner to initialize this default content.
+If you are the only user in the room, your content will be lost after refresh. This is great for local debugging. But if you want local persistence, you can open this page with the \`?providers=idb&room=foo\` config, then click the init button in the bottom-left corner to initialize this default content.
 
-As a pro tip, you can combine multiple providers! For example, feel free to open this page with \`?providers=indexeddb,bc&room=hello\` params (IndexedDB + BroadcastChannel), and see if everything works as expected. Have fun!
+As a pro tip, you can combine multiple providers! For example, feel free to open this page with \`?providers=idb,bc&room=hello\` params (IndexedDB + BroadcastChannel), and see if everything works as expected. Have fun!
 
 For any feedback, please visit [BlockSuite issues](https://github.com/toeverything/blocksuite/issues) 📍`;
 
