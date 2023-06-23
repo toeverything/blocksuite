@@ -57,7 +57,7 @@ export const createBroadcastChannelProvider: DocProviderCreator = (
         setTimeout(() => impl.sendUpdateDoc(guid, update), 100);
         return;
       }
-      Y.applyUpdate(doc, update);
+      Y.applyUpdate(doc, update, broadcastChannel);
     },
     queryAwareness: async () => {
       return encodeAwarenessUpdate(awareness, [awareness.clientID]);
@@ -96,10 +96,6 @@ export const createBroadcastChannelProvider: DocProviderCreator = (
         // not self update, ignore
         return;
       }
-
-      doc.subdocs.forEach(doc => {
-        docMap.set(doc.guid, doc);
-      });
 
       rpc.sendUpdateDoc(doc.guid, update).catch(console.error);
     };
