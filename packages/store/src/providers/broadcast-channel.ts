@@ -11,6 +11,7 @@ import type {
   PassiveDocProvider,
 } from '../persistence/doc/index.js';
 import { Workspace } from '../workspace/index.js';
+import type { SubdocEvent } from '../yjs/index.js';
 
 const Y = Workspace.Y;
 
@@ -79,6 +80,9 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
       if (!doc) {
         throw new Error(`cannot find doc ${guid}`);
       }
+      doc.once('subdocs', (event: SubdocEvent) => {
+        event.added.forEach(doc => docMap.set(doc.guid, doc));
+      });
       Y.applyUpdate(doc, update);
     },
     queryAwareness: async () => {
@@ -128,9 +132,8 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     }
 
     const handler: SubdocsHandler = event => {
-      console.log('subdocs', event);
       event.added.forEach(doc => {
-        initDocMap(doc);
+        docMap.set(doc.guid, doc);
         rpc.diffUpdateDoc(doc.guid).then(update => {
           if (!update) {
             console.error('cannot get update for doc', doc.guid);
@@ -159,8 +162,6 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     rpc.sendAwareness(update).catch(console.error);
   };
 
-  initDocMap(doc);
-
   let connected = false;
   return {
     flavour: 'broadcast-channel',
@@ -169,7 +170,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
       connected = true;
 
       async function registerDoc(doc: Doc) {
-        docMap.set(doc.guid, doc);
+        initDocMap(doc);
         // register subdocs
         doc.on('subdocs', createOrGetSubdocsHandler(doc));
         doc.subdocs.forEach(registerDoc);

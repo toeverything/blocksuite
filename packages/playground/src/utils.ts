@@ -202,11 +202,12 @@ export function createWorkspaceOptions(): WorkspaceOptions {
 
   if (providerArgs.includes('indexeddb')) {
     providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
-    idGenerator = Generator.UUIDv4; // works in production
+    idGenerator = Generator.NanoID; // works in production
   }
 
   if (providerArgs.includes('broadcast')) {
     providerCreators.push(createBroadCastChannelProvider);
+    idGenerator = Generator.NanoID; // works in production
   }
 
   if (blobStorageArgs.includes('memory')) {
