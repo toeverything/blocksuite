@@ -31,7 +31,7 @@ type Impl = {
   sendAwareness: (awarenessUpdate: Uint8Array) => Promise<void>;
 };
 
-export const createBroadCastChannelProvider: DocProviderCreator = (
+export const createBroadcastChannelProvider: DocProviderCreator = (
   id,
   doc,
   config

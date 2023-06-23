@@ -26,14 +26,14 @@ import {
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
-import { createBroadCastChannelProvider } from '@blocksuite/store/providers/broadcast-channel';
+import { createBroadcastChannelProvider } from '@blocksuite/store/providers/broadcast-channel';
 import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
 import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
-const providerArgs = (params.get('providers') ?? 'broadcast').split(',');
+const providerArgs = (params.get('providers') ?? 'bc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
@@ -197,8 +197,8 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     idGenerator = Generator.NanoID; // works in production
   }
 
-  if (providerArgs.includes('broadcast')) {
-    providerCreators.push(createBroadCastChannelProvider);
+  if (providerArgs.includes('bc')) {
+    providerCreators.push(createBroadcastChannelProvider);
     idGenerator = Generator.NanoID; // works in production
   }
 
