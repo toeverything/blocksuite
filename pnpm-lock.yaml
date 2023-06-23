@@ -208,8 +208,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1
       yjs:
-        specifier: ^13.6.0
-        version: 13.6.0
+        specifier: ^13.6.5
+        version: 13.6.5
 
   packages/connector: {}
 
@@ -308,8 +308,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       yjs:
-        specifier: ^13.6.0
-        version: 13.6.0
+        specifier: ^13.6.5
+        version: 13.6.5
 
   packages/playground:
     dependencies:
@@ -351,7 +351,7 @@ importers:
         version: 2.0.0
       '@toeverything/y-indexeddb':
         specifier: 0.7.0-canary.16
-        version: 0.7.0-canary.16(yjs@13.6.0)
+        version: 0.7.0-canary.16(yjs@13.6.5)
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
@@ -368,8 +368,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
       yjs:
-        specifier: ^13.6.0
-        version: 13.6.0
+        specifier: ^13.6.5
+        version: 13.6.5
     devDependencies:
       '@types/dat.gui':
         specifier: ^0.7.7
@@ -433,8 +433,8 @@ importers:
         specifier: ^2.7.3
         version: 2.7.3
       yjs:
-        specifier: ^13.6.0
-        version: 13.6.0
+        specifier: ^13.6.5
+        version: 13.6.5
 
   packages/virgo:
     dependencies:
@@ -449,8 +449,8 @@ importers:
         specifier: ^2.7.3
         version: 2.7.3
       yjs:
-        specifier: ^13.6.0
-        version: 13.6.0
+        specifier: ^13.6.5
+        version: 13.6.5
 
 packages:
 
@@ -1537,13 +1537,13 @@ packages:
     resolution: {integrity: sha512-bIg4TVn7os/60u+TAorFLBZ2EOD8yfxNoedrqkXKTgtVoDOpkn3O5lToVIhX1qxGkNOf/U/s9pAKoLbz/oSjIg==}
     dev: false
 
-  /@toeverything/y-indexeddb@0.7.0-canary.16(yjs@13.6.0):
+  /@toeverything/y-indexeddb@0.7.0-canary.16(yjs@13.6.5):
     resolution: {integrity: sha512-ECiauEkmiSh1TtXhT7ARYI85suGg4ohl+XeJ+wk4n2978WSEn2l4k4k3NVMgpBNjax9qcHPRIwaFBP5ErmG5cw==}
     peerDependencies:
       yjs: ^13.5.51
     dependencies:
       idb: 7.1.1
-      yjs: 13.6.0
+      yjs: 13.6.5
     dev: false
 
   /@tsconfig/node10@1.0.9:
@@ -7986,8 +7986,8 @@ packages:
       yargs-parser: 21.1.1
     dev: true
 
-  /yjs@13.6.0:
-    resolution: {integrity: sha512-tFZtuQV6XamtDa9SfZhUsxchUcTBWe7fzpo1UWZDLXGejTZ5t9MCswGYzyvq7+BDzfEc9oX54QEbzI/4NyS6+g==}
+  /yjs@13.6.5:
+    resolution: {integrity: sha512-5JdxEzrGpDJxMK99Cf1ICTAaplJf4xIW74ZPvXRzLJJd4PIxVX5ZYjhBsW8cXBPweSghPz95sPIVvyYtS9fHFQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     dependencies:
       lib0: 0.2.74
