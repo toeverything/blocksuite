@@ -20,10 +20,9 @@
   },
   "packageManager": "pnpm@8.6.1",
   "scripts": {
-    "serve": "pnpm --filter @blocksuite/store serve",
-    "preview": "run-p serve preview:playground",
+    "preview": "run-p preview:playground",
     "preview:playground": "pnpm --filter @blocksuite/playground preview",
-    "dev": "run-p serve dev:playground",
+    "dev": "run-p dev:playground",
     "dev:playground": "pnpm --filter @blocksuite/playground dev",
     "dev:docs": "pnpm --filter @blocksuite/docs dev",
     "lint": "eslint --cache --cache-location=node_modules/.cache/.eslintcache/ ./ --max-warnings=0",
