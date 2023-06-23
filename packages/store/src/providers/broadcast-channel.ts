@@ -92,7 +92,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
   const broadcastChannel = new BroadcastMessageChannel(id);
   const rpc = AsyncCall<Impl>(impl, {
     channel: broadcastChannel,
-    log: false,
+    log: true,
   });
 
   type UpdateHandler = (update: Uint8Array, origin: any) => void;
