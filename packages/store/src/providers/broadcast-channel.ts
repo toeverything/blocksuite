@@ -31,14 +31,13 @@ type Impl = {
   sendAwareness: (awarenessUpdate: Uint8Array) => Promise<void>;
 };
 
-const docMap = new Map<string, Doc>();
-
 export const createBroadCastChannelProvider: DocProviderCreator = (
   id,
   doc,
   config
 ): PassiveDocProvider => {
   const awareness = config.awareness;
+  const docMap = new Map<string, Doc>();
   function initDocMap(doc: Doc) {
     // register all doc into map
     docMap.set(doc.guid, doc);
@@ -149,7 +148,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
   };
 
   let connected = false;
-  return {
+  const apis = {
     flavour: 'broadcast-channel',
     passive: true,
     connect() {
@@ -196,7 +195,9 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
       return connected;
     },
     cleanup: () => {
+      apis.disconnect();
       broadcastChannel.close();
     },
-  };
+  } as const;
+  return apis;
 };
