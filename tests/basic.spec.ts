@@ -31,7 +31,6 @@ import {
   undoByClick,
   undoByKeyboard,
   waitDefaultPageLoaded,
-  waitForRemoteUpdateSlot,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {

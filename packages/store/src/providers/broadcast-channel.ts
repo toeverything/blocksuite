@@ -6,12 +6,9 @@ import {
 } from 'y-protocols/awareness';
 import type { Doc } from 'yjs';
 
-import type {
-  DocProviderCreator,
-  PassiveDocProvider,
-} from '../persistence/doc/index.js';
 import { Workspace } from '../workspace/index.js';
 import type { SubdocEvent } from '../yjs/index.js';
+import type { DocProviderCreator, PassiveDocProvider } from './type.js';
 
 const Y = Workspace.Y;
 

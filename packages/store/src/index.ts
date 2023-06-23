@@ -11,7 +11,7 @@ export type {
   BlobStorage,
   BlobStorageCRUD,
 } from './persistence/blob/types.js';
-export * from './persistence/doc/index.js';
+export * from './providers/type.js';
 export * from './space.js';
 export * from './store.js';
 export * from './text-adapter.js';

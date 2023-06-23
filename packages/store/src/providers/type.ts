@@ -1,10 +1,8 @@
 import type { Awareness } from 'y-protocols/awareness';
 import type * as Y from 'yjs';
 
-export { DebugDocProvider } from './debug-provider.js';
-
 /**
- * Different examples of providers could include webrtc sync,
+ * Different examples of providers could include broadcast sync,
  * database sync like SQLite, LevelDB or IndexedDB.
  * Usually a provider will also implement {@link DocProviderCreator}.
  */

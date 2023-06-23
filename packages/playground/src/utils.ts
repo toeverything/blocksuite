@@ -21,7 +21,6 @@ import {
   createIndexeddbStorage,
   createMemoryStorage,
   createSimpleServerStorage,
-  DebugDocProvider,
   Generator,
   Utils,
   Workspace,
@@ -185,20 +184,13 @@ export async function tryInitExternalContent(
 }
 
 /**
- * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
- * We use webrtcDocProvider by default if the `providers` param is missing.
+ * Provider configuration is specified by `?providers=broadcast` or `?providers=indexeddb,broadcast` in URL params.
+ * We use BroadcastChannelProvider by default if the `providers` param is missing.
  */
 export function createWorkspaceOptions(): WorkspaceOptions {
   const providerCreators: DocProviderCreator[] = [];
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
-
-  if (providerArgs.includes('webrtc')) {
-    providerCreators.push(
-      (id, doc, options) => new DebugDocProvider(id, doc, options)
-    );
-    idGenerator = Generator.AutoIncrementByClientId; // works in multi-user mode
-  }
 
   if (providerArgs.includes('indexeddb')) {
     providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
