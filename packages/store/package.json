@@ -43,7 +43,7 @@
   "exports": {
     "./src/*": "./src/*.ts",
     ".": "./src/index.ts",
-    "./providers/broadcast-channel": "./src/providers/broadcast-channel.ts"
+    "./providers/*": "./src/providers/*.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -56,7 +56,7 @@
         "import": "./dist/index.js"
       },
       "./shim.d.ts": "./shim.d.ts",
-      "./providers/broadcast-channel": "./dist/providers/broadcast-channel.js"
+      "./providers/*": "./dist/providers/*.js"
     }
   }
 }
