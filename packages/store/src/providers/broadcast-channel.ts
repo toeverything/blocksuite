@@ -50,12 +50,13 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     sendUpdateDoc: async (guid, update) => {
       const doc = docMap.get(guid);
       if (!doc) {
-        throw new Error(`cannot find doc ${guid}`);
+        // fixme: use batch update
+        //  this might because the father doc is not updated yet,
+        //  so that the subdoc is not created yet.
+        //
+        setTimeout(() => impl.sendUpdateDoc(guid, update), 100);
+        return;
       }
-      // listen once for new subdocs, and add them to docMap
-      doc.once('subdocs', (event: SubdocEvent) => {
-        event.added.forEach(doc => docMap.set(doc.guid, doc));
-      });
       Y.applyUpdate(doc, update);
     },
     queryAwareness: async () => {
@@ -112,11 +113,10 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     }
 
     const handler: SubdocsHandler = event => {
+      event.added.forEach(doc => docMap.set(doc.guid, doc));
       event.added.forEach(doc => {
-        docMap.set(doc.guid, doc);
         rpc.diffUpdateDoc(doc.guid).then(update => {
           if (!update) {
-            console.error('cannot get update for doc', doc.guid);
             return;
           }
           Y.applyUpdate(doc, update, broadcastChannel);
