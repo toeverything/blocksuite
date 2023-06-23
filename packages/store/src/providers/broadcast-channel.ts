@@ -84,9 +84,11 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
   type UpdateHandler = (update: Uint8Array, origin: unknown) => void;
 
   type SubdocsHandler = (event: SubdocEvent) => void;
+  type DestroyHandler = () => void;
 
   const updateHandlerWeakMap = new WeakMap<Doc, UpdateHandler>();
   const subdocsHandlerWeakMap = new WeakMap<Doc, SubdocsHandler>();
+  const destroyHandlerWeakMap = new WeakMap<Doc, DestroyHandler>();
 
   const createOrGetUpdateHandler = (doc: Doc): UpdateHandler => {
     if (updateHandlerWeakMap.has(doc)) {
@@ -126,9 +128,24 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
         });
         doc.on('update', createOrGetUpdateHandler(doc));
       });
+
+      event.removed.forEach(unregisterDoc);
     };
 
     subdocsHandlerWeakMap.set(doc, handler);
+    return handler;
+  };
+
+  const createOrGetDestroyHandler = (doc: Doc): DestroyHandler => {
+    if (destroyHandlerWeakMap.has(doc)) {
+      return destroyHandlerWeakMap.get(doc) as DestroyHandler;
+    }
+
+    const handler: DestroyHandler = () => {
+      unregisterDoc(doc);
+    };
+
+    destroyHandlerWeakMap.set(doc, handler);
     return handler;
   };
 
@@ -147,30 +164,39 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     rpc.sendAwareness(update).catch(console.error);
   };
 
+  async function registerDoc(doc: Doc) {
+    initDocMap(doc);
+    // register subdocs
+    doc.on('subdocs', createOrGetSubdocsHandler(doc));
+    doc.subdocs.forEach(registerDoc);
+    // register update
+    doc.on('update', createOrGetUpdateHandler(doc));
+    doc.on('destroy', createOrGetDestroyHandler(doc));
+
+    // query diff update
+    const update = await rpc.diffUpdateDoc(doc.guid);
+    if (!connected) {
+      return;
+    }
+    if (update !== false) {
+      Y.applyUpdate(doc, update, broadcastChannel);
+    }
+  }
+
+  function unregisterDoc(doc: Doc) {
+    docMap.delete(doc.guid);
+    doc.subdocs.forEach(unregisterDoc);
+    doc.off('update', createOrGetUpdateHandler(doc));
+    doc.off('subdocs', createOrGetSubdocsHandler(doc));
+    doc.off('destroy', createOrGetDestroyHandler(doc));
+  }
+
   let connected = false;
   const apis = {
     flavour: 'broadcast-channel',
     passive: true,
     connect() {
       connected = true;
-
-      async function registerDoc(doc: Doc) {
-        initDocMap(doc);
-        // register subdocs
-        doc.on('subdocs', createOrGetSubdocsHandler(doc));
-        doc.subdocs.forEach(registerDoc);
-        // register update
-        doc.on('update', createOrGetUpdateHandler(doc));
-
-        // query diff update
-        const update = await rpc.diffUpdateDoc(doc.guid);
-        if (!connected) {
-          return;
-        }
-        if (update !== false) {
-          Y.applyUpdate(doc, update, broadcastChannel);
-        }
-      }
       registerDoc(doc).catch(console.error);
       rpc
         .queryAwareness()
@@ -181,12 +207,6 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
       awareness.on('update', awarenessUpdateHandler);
     },
     disconnect() {
-      function unregisterDoc(doc: Doc) {
-        docMap.delete(doc.guid);
-        doc.subdocs.forEach(unregisterDoc);
-        doc.off('update', createOrGetUpdateHandler(doc));
-        doc.off('subdocs', createOrGetSubdocsHandler(doc));
-      }
       unregisterDoc(doc);
       awareness.off('update', awarenessUpdateHandler);
       connected = false;
