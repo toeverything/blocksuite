@@ -120,6 +120,10 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
         return;
       }
 
+      doc.subdocs.forEach(doc => {
+        docMap.set(doc.guid, doc);
+      });
+
       rpc.sendUpdateDoc(doc.guid, update).catch(console.error);
     };
     updateHandlerWeakMap.set(doc, handler);
