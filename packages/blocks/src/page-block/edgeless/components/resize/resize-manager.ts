@@ -8,6 +8,9 @@ import { HandleDirection, type ResizeMode } from './resize-handles.js';
 // 15deg
 const SHIFT_LOCKING_ANGLE = Math.PI / 12;
 
+type DragStartHandler = () => void;
+type DragEndHandler = () => void;
+
 type ResizeMoveHandler = (
   bounds: Map<
     string,
@@ -22,15 +25,11 @@ type ResizeMoveHandler = (
 
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
 
-type DragStartHandler = () => void;
-type DragEndHandler = () => void;
-
 export class HandleResizeManager {
   private _onDragStart: DragStartHandler;
   private _onResizeMove: ResizeMoveHandler;
   private _onRotateMove: RotateMoveHandler;
   private _onDragEnd: DragEndHandler;
-
   private _dragDirection: HandleDirection = HandleDirection.Left;
   private _dragPos: {
     start: { x: number; y: number };
@@ -516,8 +515,6 @@ export class HandleResizeManager {
     // Prevent selection action from being triggered
     e.stopPropagation();
 
-    this._onDragStart();
-
     this._locked = false;
     this._target = e.target as HTMLElement;
     this._dragDirection = direction;
@@ -526,9 +523,8 @@ export class HandleResizeManager {
     this._rotation = this._target.classList.contains('rotate');
 
     if (this._rotation) {
-      const rect = document
-        .querySelector('edgeless-selected-rect')
-        ?.shadowRoot?.querySelector('.affine-edgeless-selected-rect')
+      const rect = this._target
+        .closest('.affine-edgeless-selected-rect')
         ?.getBoundingClientRect();
       assertExists(rect);
       const x = rect.left + rect.width / 2;
@@ -536,6 +532,8 @@ export class HandleResizeManager {
       // center of `selected-rect` in viewport
       this._origin = { x, y };
     }
+
+    this._onDragStart();
 
     const _onPointerMove = ({ x, y, shiftKey }: PointerEvent) => {
       if (this._resizeMode === 'none') return;
@@ -568,6 +566,7 @@ export class HandleResizeManager {
       document.removeEventListener('pointermove', _onPointerMove);
       document.removeEventListener('pointerup', _onPointerUp);
     };
+
     document.addEventListener('pointermove', _onPointerMove);
     document.addEventListener('pointerup', _onPointerUp);
   };

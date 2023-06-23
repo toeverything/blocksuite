@@ -115,7 +115,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       width: 12px;
       height: 12px;
       box-sizing: border-box;
-      background: red;
+      background: transparent;
       pointer-events: auto;
     }
 
@@ -249,6 +249,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _resizeManager: HandleResizeManager;
 
   private _rotate = 0;
+  private _cursorRotate = 0;
 
   constructor() {
     super();
@@ -399,6 +400,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._rotate = angle;
     this._selectedRect.style.setProperty('--rotate', `${angle}deg`);
+
+    this._updateCursor(delta, true);
   };
 
   private _onDragEnd = () => {
@@ -409,7 +412,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._resizeManager.updateBounds(getSelectableBounds(this.state.selected));
 
+    this._updateCursor(0, false);
+
     this._showToolbar();
+  };
+
+  private _updateCursor = (angle = 0, rotating = true) => {
+    let cursor = 'default';
+    if (rotating) {
+      this._cursorRotate += angle;
+      cursor = generateCursorUrl(this._cursorRotate).toString();
+    } else {
+      this._cursorRotate = 0;
+    }
+    this.slots.cursorUpdated.emit(cursor);
   };
 
   private _computeComponentToolbarPosition() {
@@ -596,14 +612,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       return nothing;
     }
 
-    const { page, resizeMode, _resizeManager, slots, surface } = this;
+    const { page, resizeMode, slots, surface, _resizeManager, _updateCursor } =
+      this;
 
     const hasResizeHandles = !active && !page.readonly;
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) =>
-            _resizeManager.onPointerDown(e, direction)
+            _resizeManager.onPointerDown(e, direction),
+          _updateCursor
         )
       : nothing;
 

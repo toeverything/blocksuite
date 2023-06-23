@@ -45,6 +45,7 @@ import {
   reorderTo,
   resetNativeSelection,
   sendBackward,
+  throttle,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
@@ -113,6 +114,7 @@ export interface EdgelessSelectionSlots {
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
+  cursorUpdated: Slot<string>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -258,6 +260,7 @@ export class EdgelessPageBlockComponent
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
+    cursorUpdated: new Slot<string>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -448,6 +451,8 @@ export class EdgelessPageBlockComponent
           this.components.dragHandle?.hide();
         }
         this.edgelessTool = edgelessTool;
+
+        slots.cursorUpdated.emit(getCursorMode(edgelessTool));
       })
     );
     _disposables.add(
@@ -502,6 +507,13 @@ export class EdgelessPageBlockComponent
         this.selection.shiftKey = pressed;
         this.requestUpdate();
       })
+    );
+    _disposables.add(
+      slots.cursorUpdated.on(
+        throttle((cursor: string) => {
+          this.pageBlockContainer.style.cursor = cursor;
+        }, 144)
+      )
     );
   }
 
@@ -1044,7 +1056,6 @@ export class EdgelessPageBlockComponent
     );
 
     const blockContainerStyle = {
-      cursor: getCursorMode(edgelessTool),
       '--affine-edgeless-gap': `${gap}px`,
       '--affine-edgeless-grid': grid,
       '--affine-edgeless-x': `${translateX}px`,
