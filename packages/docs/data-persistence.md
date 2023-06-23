@@ -12,7 +12,7 @@ However, the more powerful aspect of the Git model is that you only need to conn
 
 ## Provider-Based Persistence
 
-Different providers can handle the asynchronous IO over different network protocols (such as WebSocket and WebRTC) and storages (such as IndexedDB and SQLite). As long as the BlockSuite workspace is connected to the provider, you can reliably synchronize blocks through it.
+Different providers can handle the asynchronous IO over different network protocols (such as WebSocket and BroadcastChannel) and storages (such as IndexedDB and SQLite). As long as the BlockSuite workspace is connected to the provider, you can reliably synchronize blocks through it.
 
 ![pluggable-providers](./images/pluggable-providers.png)
 
