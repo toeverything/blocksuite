@@ -101,11 +101,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
 
   type UpdateHandler = (update: Uint8Array, origin: any) => void;
 
-  type SubdocsHandler = (event: {
-    added: Set<Doc>;
-    loaded: Set<Doc>;
-    removed: Set<Doc>;
-  }) => void;
+  type SubdocsHandler = (event: SubdocEvent) => void;
 
   const updateHandlerWeakMap = new WeakMap<Doc, UpdateHandler>();
   const subdocsHandlerWeakMap = new WeakMap<Doc, SubdocsHandler>();
