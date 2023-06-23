@@ -8,13 +8,13 @@ import type {
 } from '@blocksuite/block-std';
 import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import type { FocusContext } from '@blocksuite/lit';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import {
   AbstractSelectionManager,
   type BlockComponentElement,
   debounce,
-  type EditingState,
   type EmbedBlockDoubleClickData,
   getBlockElementByModel,
   getBlockElementsByElement,
@@ -34,7 +34,6 @@ import {
   isDragHandle,
   isElement,
   isEmbed,
-  isImage,
   isInsidePageTitle,
   isSelectedBlocks,
   Point,
@@ -102,7 +101,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     this.slots = slots;
 
-    this._embedResizeManager = new EmbedResizeManager(this.state, slots);
+    this._embedResizeManager = new EmbedResizeManager(this.state);
 
     let isDragging = false;
     this._add('dragStart', ctx => {
@@ -118,6 +117,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       this._onContainerDragStart(ctx);
     });
     this._add('dragMove', ctx => {
+      if (!isDragging) return;
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -129,6 +129,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       this._onContainerDragMove(ctx);
     });
     this._dispatcher.add('dragEnd', ctx => {
+      if (!isDragging) return;
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
@@ -425,9 +426,11 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       state.activeComponent = clickBlockInfo.element;
 
       assertExists(this.state.activeComponent);
-      if (clickBlockInfo.model.flavour === 'affine:image') {
+      const clickModel = clickBlockInfo.model;
+      const clickEle = clickBlockInfo.element;
+      if (matchFlavours(clickModel, ['affine:image'])) {
         state.type = 'embed';
-        this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
+        this.setFocusedBlock(clickEle, { type: 'pointer', event: e.raw });
       } else {
         state.type = 'block';
         state.selectedBlocks.push(state.activeComponent);
@@ -664,8 +667,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     const { type } = this.state;
     if (type === 'block') {
       this.refreshSelectedBlocksRects();
-    } else if (type === 'embed') {
-      this.refreshEmbedRects();
     }
   }
 
@@ -708,28 +709,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       .map(getBlockElementByModel)
       .filter((block): block is BlockComponentElement => block !== null);
     this.refreshSelectedBlocksRects();
-  }
-
-  refreshEmbedRects(hoverEditingState: EditingState | null = null) {
-    const { activeComponent, viewport } = this.state;
-    if (activeComponent) {
-      const rect = getSelectedStateRectByBlockElement(activeComponent);
-      const embedRects = [
-        new DOMRect(rect.left, rect.top, rect.width, rect.height),
-      ];
-
-      // updates editing
-      if (hoverEditingState && isImage(activeComponent)) {
-        const isOutside =
-          rect.right + 60 < viewport.left + viewport.clientWidth;
-
-        // when image size is too large, the option popup should show inside
-        rect.x = rect.right + (isOutside ? 10 : -50);
-        hoverEditingState.rect = rect;
-      }
-
-      this.slots.embedRectsUpdated.emit(embedRects);
-    }
   }
 
   refreshRemoteSelection() {
@@ -915,8 +894,29 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
   }
 
-  setFocusedBlock(blockElement: Element) {
-    this.state.focusedBlock = blockElement as BlockComponentElement;
+  blurFocusedBlock(ctx: FocusContext, blockElement = this.state.focusedBlock) {
+    if (!blockElement) return;
+    const blurState = blockElement.blurBlock(ctx);
+    if (blurState === false) return;
+    this.state.activeComponent = null;
+    this.state.focusedBlock = null;
+  }
+
+  setFocusedBlock(
+    blockElement: BlockComponentElement,
+    ctx: FocusContext,
+    blurPrev = true
+  ) {
+    const focusedBlock = this.state.focusedBlock;
+    if (blurPrev && focusedBlock && blockElement !== focusedBlock) {
+      this.blurFocusedBlock(ctx, focusedBlock);
+    }
+
+    const focusState = blockElement.focusBlock(ctx);
+    if (focusState === false) return;
+
+    this.state.activeComponent = blockElement;
+    this.state.focusedBlock = blockElement;
   }
 
   // clear selection: `block`, `block:drag`, `embed`, `native`
@@ -940,9 +940,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       // clear `format quick bar`
       this.container.querySelector('format-quick-bar')?.remove();
     } else if (type === 'embed') {
-      state.clearEmbedSelection();
-      slots.embedRectsUpdated.emit([]);
-      slots.embedEditingStateUpdated.emit(null);
+      this.blurFocusedBlock({ type: 'UNKNOWN' });
     } else if (type === 'native') {
       state.clearNativeSelection();
     }
