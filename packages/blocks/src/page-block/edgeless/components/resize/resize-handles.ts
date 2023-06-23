@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/store/index.js';
+import { assertExists } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 
 import { normalizeAngle } from './utils.js';
