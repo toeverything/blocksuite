@@ -4,6 +4,16 @@ import type { ProxyConfig } from './config.js';
 import type { UnRecord } from './utils.js';
 import { isPureObject, native2Y } from './utils.js';
 
+const arraySideEffectPrototypeKeys = [
+  'push',
+  'splice',
+  'unshift',
+  'pop',
+  'shift',
+  'reverse',
+  'sort',
+];
+
 function subscribeYMap(
   object: UnRecord,
   yMap: YMap<unknown>,
@@ -114,7 +124,7 @@ export function createYProxy<Data>(
     return createYMapProxy(yAbstract, config) as Data;
   }
 
-  throw new TypeError();
+  return yAbstract;
 }
 
 export function createYMapProxy<Data extends Record<string, unknown>>(
@@ -216,8 +226,61 @@ export function createYArrayProxy<T = unknown>(
       apply(value);
       return Reflect.set(target, p, value, receiver);
     },
-    get: (target, p, receiver) => {
-      return Reflect.get(target, p, receiver);
+    get: (originalTarget, p, receiver) => {
+      if (typeof p === 'string' && arraySideEffectPrototypeKeys.includes(p)) {
+        return new Proxy(Reflect.get(originalTarget, p, receiver), {
+          apply(target, thisArg, argArray) {
+            const result = Reflect.apply(target, thisArg, argArray);
+            if (p === 'push') {
+              const index = originalTarget.length - 1;
+              const value = originalTarget[index];
+              const y = native2Y(
+                value as Record<string, unknown> | unknown[],
+                deep
+              );
+              const _value = createYProxy(y, config);
+              yArray.insert(index, [y]);
+              return _value;
+            } else if (p === 'pop') {
+              const index = originalTarget.length;
+              yArray.delete(index - 1, 1);
+            } else if (p === 'unshift') {
+              const index = 0;
+              const value = originalTarget[index];
+              const y = native2Y(
+                value as Record<string, unknown> | unknown[],
+                deep
+              );
+              const _value = createYProxy(y, config);
+              yArray.insert(index, [y]);
+              return _value;
+            } else if (p === 'shift') {
+              const index = 0;
+              yArray.delete(index, 1);
+            } else if (p === 'splice') {
+              const index = argArray[0];
+              const deleteCount = argArray[1];
+              const value = argArray[2];
+              if (deleteCount > 0) {
+                yArray.delete(index, deleteCount);
+              }
+              if (value) {
+                const y = native2Y(
+                  value as Record<string, unknown> | unknown[],
+                  deep
+                );
+                const _value = createYProxy(y, config);
+                yArray.insert(index, [y]);
+                return _value;
+              }
+            } else {
+              throw new Error('unsupported yet');
+            }
+            return result;
+          },
+        });
+      }
+      return Reflect.get(originalTarget, p, receiver);
     },
     deleteProperty(target: T[], p: string | symbol): boolean {
       if (readonly) {

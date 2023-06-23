@@ -5,6 +5,7 @@ import {
   BlockSuiteDoc,
   createYArrayProxy,
   createYMapProxy,
+  createYProxy,
 } from '../yjs/index.js';
 
 describe('blocksuite yjs', () => {
@@ -46,6 +47,27 @@ describe('blocksuite yjs', () => {
       expect(arr.get(0)).toBe(0);
 
       expect(() => proxy.push(1)).toThrowError('Modify data is not allowed');
+    });
+
+    test('push/pop', () => {
+      const ydoc = new Y.Doc();
+      const arr = ydoc.getArray('arr');
+      const proxy = createYArrayProxy(arr, { readonly: false });
+
+      proxy.push(0);
+      expect(proxy).toEqual([0]);
+
+      proxy.pop();
+      expect(proxy).toEqual([]);
+
+      proxy.unshift(1, 2);
+      expect(proxy).toEqual([1, 2]);
+
+      proxy.shift();
+      expect(proxy).toEqual([2]);
+
+      proxy.splice(0, 1, 3);
+      expect(proxy).toEqual([3]);
     });
   });
 
