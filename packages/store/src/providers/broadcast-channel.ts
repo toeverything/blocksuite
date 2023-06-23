@@ -1,5 +1,5 @@
-import type { EventBasedChannel } from 'async-call-rpc';
 import { AsyncCall } from 'async-call-rpc';
+import { BroadcastMessageChannel } from 'async-call-rpc/utils/web/broadcast.channel.js';
 import {
   applyAwarenessUpdate,
   encodeAwarenessUpdate,
@@ -30,25 +30,6 @@ type Impl = {
   // send awareness to other clients
   sendAwareness: (awarenessUpdate: Uint8Array) => Promise<void>;
 };
-
-/**
- * BroadcastChannel support for AsyncCall.
- * Please make sure your serializer can convert JSON RPC payload into one of the following data types:
- * - Data that can be [structure cloned](http://mdn.io/structure-clone)
- */
-export class BroadcastMessageChannel
-  extends BroadcastChannel
-  implements EventBasedChannel
-{
-  on(eventListener: (data: unknown) => void) {
-    const f = (e: MessageEvent): void => eventListener(e.data);
-    this.addEventListener('message', f);
-    return () => this.removeEventListener('message', f);
-  }
-  send(data: any) {
-    super.postMessage(data);
-  }
-}
 
 const docMap = new Map<string, Doc>();
 
@@ -101,7 +82,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     },
   });
 
-  type UpdateHandler = (update: Uint8Array, origin: any) => void;
+  type UpdateHandler = (update: Uint8Array, origin: unknown) => void;
 
   type SubdocsHandler = (event: SubdocEvent) => void;
 
@@ -152,7 +133,10 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     return handler;
   };
 
-  const awarenessUpdateHandler = (changes: AwarenessChanges, origin: any) => {
+  const awarenessUpdateHandler = (
+    changes: AwarenessChanges,
+    origin: unknown
+  ) => {
     if (origin === broadcastChannel) {
       return;
     }
