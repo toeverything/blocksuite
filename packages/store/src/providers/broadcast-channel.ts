@@ -38,11 +38,6 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
 ): PassiveDocProvider => {
   const awareness = config.awareness;
   const docMap = new Map<string, Doc>();
-  function initDocMap(doc: Doc) {
-    // register all doc into map
-    docMap.set(doc.guid, doc);
-    doc.subdocs.forEach(initDocMap);
-  }
 
   const impl = {
     diffUpdateDoc: async guid => {
@@ -57,6 +52,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
       if (!doc) {
         throw new Error(`cannot find doc ${guid}`);
       }
+      // listen once for new subdocs, and add them to docMap
       doc.once('subdocs', (event: SubdocEvent) => {
         event.added.forEach(doc => docMap.set(doc.guid, doc));
       });
@@ -189,6 +185,13 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     doc.off('update', createOrGetUpdateHandler(doc));
     doc.off('subdocs', createOrGetSubdocsHandler(doc));
     doc.off('destroy', createOrGetDestroyHandler(doc));
+  }
+
+  // recursively register all doc into map
+  function initDocMap(doc: Doc) {
+    // register all doc into map
+    docMap.set(doc.guid, doc);
+    doc.subdocs.forEach(initDocMap);
   }
 
   let connected = false;
