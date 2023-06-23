@@ -6,7 +6,6 @@
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
-    "serve": "PORT=4444 node node_modules/y-webrtc/bin/server.js",
     "build": "tsc",
     "test:unit": "vitest --run",
     "test:unit:coverage": "vitest run --coverage",
@@ -30,19 +29,21 @@
     "minimatch": "^9.0.0",
     "nanoid": "^4.0.1",
     "y-protocols": "^1.0.5",
-    "y-webrtc": "^10.2.5",
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "async-call-rpc": "^6.3.1",
     "lit": "^2.7.3",
-    "yjs": "^13.6.0"
+    "yjs": "^13.6.5"
   },
   "peerDependencies": {
+    "async-call-rpc": "^6",
     "yjs": "^13"
   },
   "exports": {
     "./src/*": "./src/*.ts",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./providers/broadcast-channel": "./src/providers/broadcast-channel.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -54,7 +55,8 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
-      "./shim.d.ts": "./shim.d.ts"
+      "./shim.d.ts": "./shim.d.ts",
+      "./providers/broadcast-channel": "./dist/providers/broadcast-channel.js"
     }
   }
 }
