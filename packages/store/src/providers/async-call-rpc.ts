@@ -26,7 +26,7 @@ type Impl = {
   sendUpdateDoc: (guid: string, update: Uint8Array) => Promise<void>;
 
   // request awareness from other clients
-  queryAwareness: () => Promise<Uint8Array | false>;
+  queryAwareness: () => Promise<Uint8Array>;
 
   // send awareness to other clients
   sendAwareness: (awarenessUpdate: Uint8Array) => Promise<void>;
@@ -218,9 +218,7 @@ export const createAsyncCallRPCProviderCreator = (
         registerDoc(doc).catch(console.error);
         rpc
           .queryAwareness()
-          .then(
-            update => update && applyAwarenessUpdate(awareness, update, channel)
-          );
+          .then(update => applyAwarenessUpdate(awareness, update, channel));
         awareness.on('update', awarenessUpdateHandler);
       },
       disconnect() {
