@@ -18,6 +18,8 @@ You might initially enter this page with the \`?init\` URL param. This is the de
 
 To test real-time collaboration, you can specify the room to join by adding the \`?room=foo\` config - Try opening this page with \`?room=foo\` in two different tabs and see what happens!
 
+> Note that the second and subsequent users should not open the page with the \`?init\` param in this case.
+
 If you are the only user in the room, your content will be lost after refresh. This is great for local debugging. But if you want local persistence, you can open this page with the \`?providers=indexeddb&room=foo\` config, then click the init button in the bottom-left corner to initialize this default content.
 
 As a pro tip, you can combine multiple providers! For example, feel free to open this page with \`?providers=indexeddb,bc&room=hello\` params (IndexedDB + BroadcastChannel), and see if everything works as expected. Have fun!
