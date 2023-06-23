@@ -76,6 +76,6 @@
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.0.8",
     "@types/turndown": "^5.0.1",
-    "yjs": "^13.6.0"
+    "yjs": "^13.6.5"
   }
 }

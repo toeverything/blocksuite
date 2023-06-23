@@ -160,7 +160,7 @@ export async function enterPlaygroundRoom(
   ops?: {
     flags?: Partial<BlockSuiteFlags>;
     room?: string;
-    blobStorage?: ('memory' | 'indexeddb' | 'mock')[];
+    blobStorage?: ('memory' | 'idb' | 'mock')[];
     noInit?: boolean;
   }
 ) {
@@ -171,7 +171,7 @@ export async function enterPlaygroundRoom(
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
-  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
   const readyPromise = waitForPageReady(page);
 
