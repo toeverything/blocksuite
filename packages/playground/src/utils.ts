@@ -34,7 +34,7 @@ import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
-const providerArgs = (params.get('providers') ?? 'broadcast,webrtc').split(',');
+const providerArgs = (params.get('providers') ?? 'broadcast').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 

@@ -21,26 +21,16 @@ export type AwarenessChanges = Record<
 
 type Impl = {
   // request diff update from other clients
-  diffUpdateDoc: (
-    guid: string,
-    clientId: number
-  ) => Promise<Uint8Array | false>;
+  diffUpdateDoc: (guid: string) => Promise<Uint8Array | false>;
 
   // send update to other clients
-  sendUpdateDoc: (
-    guid: string,
-    update: Uint8Array,
-    clientId: number
-  ) => Promise<void>;
+  sendUpdateDoc: (guid: string, update: Uint8Array) => Promise<void>;
 
   // request awareness from other clients
-  queryAwareness: (clientId: number) => Promise<Uint8Array | false>;
+  queryAwareness: () => Promise<Uint8Array | false>;
 
   // send awareness to other clients
-  sendAwareness: (
-    awarenessUpdate: Uint8Array,
-    clientId: number
-  ) => Promise<void>;
+  sendAwareness: (awarenessUpdate: Uint8Array) => Promise<void>;
 };
 
 /**
@@ -70,7 +60,6 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
   config
 ): PassiveDocProvider => {
   const awareness = config.awareness;
-  const currentClientId = awareness.clientID;
   function initDocMap(doc: Doc) {
     // register all doc into map
     docMap.set(doc.guid, doc);
@@ -78,28 +67,24 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
   }
 
   const impl = {
-    diffUpdateDoc: async (guid, clientId) => {
-      if (clientId === currentClientId) return false;
+    diffUpdateDoc: async guid => {
       const doc = docMap.get(guid);
       if (!doc) {
         return false;
       }
       return Y.encodeStateAsUpdate(doc);
     },
-    sendUpdateDoc: async (guid, update, clientId) => {
+    sendUpdateDoc: async (guid, update) => {
       const doc = docMap.get(guid);
-      if (clientId === currentClientId) return;
       if (!doc) {
         throw new Error(`cannot find doc ${guid}`);
       }
       Y.applyUpdate(doc, update);
     },
-    queryAwareness: async clientId => {
-      if (clientId === currentClientId) return false;
+    queryAwareness: async () => {
       return encodeAwarenessUpdate(awareness, [awareness.clientID]);
     },
-    sendAwareness: async (awarenessUpdate, clientId) => {
-      if (clientId === currentClientId) return;
+    sendAwareness: async awarenessUpdate => {
       applyAwarenessUpdate(awareness, awarenessUpdate, broadcastChannel);
     },
   } satisfies Impl;
@@ -107,6 +92,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
   const broadcastChannel = new BroadcastMessageChannel(id);
   const rpc = AsyncCall<Impl>(impl, {
     channel: broadcastChannel,
+    log: false,
   });
 
   type UpdateHandler = (update: Uint8Array, origin: any) => void;
@@ -130,7 +116,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
         return;
       }
 
-      rpc.sendUpdateDoc(doc.guid, update, currentClientId).catch(console.error);
+      rpc.sendUpdateDoc(doc.guid, update).catch(console.error);
     };
     updateHandlerWeakMap.set(doc, handler);
     return handler;
@@ -142,14 +128,16 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
     }
 
     const handler: SubdocsHandler = event => {
+      console.log('subdocs', event);
       event.added.forEach(doc => {
         initDocMap(doc);
-        rpc.diffUpdateDoc(doc.guid, currentClientId).then(update => {
+        rpc.diffUpdateDoc(doc.guid).then(update => {
           if (!update) {
             console.error('cannot get update for doc', doc.guid);
             return;
           }
           Y.applyUpdate(doc, update, broadcastChannel);
+          doc.emit('load', []);
         });
         doc.on('update', createOrGetUpdateHandler(doc));
       });
@@ -168,7 +156,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
       ...cur,
     ]);
     const update = encodeAwarenessUpdate(awareness, changedClients);
-    rpc.sendAwareness(update, currentClientId).catch(console.error);
+    rpc.sendAwareness(update).catch(console.error);
   };
 
   initDocMap(doc);
@@ -189,7 +177,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
         doc.on('update', createOrGetUpdateHandler(doc));
 
         // query diff update
-        const update = await rpc.diffUpdateDoc(doc.guid, currentClientId);
+        const update = await rpc.diffUpdateDoc(doc.guid);
         if (!connected) {
           return;
         }
@@ -199,7 +187,7 @@ export const createBroadCastChannelProvider: DocProviderCreator = (
       }
       registerDoc(doc).catch(console.error);
       rpc
-        .queryAwareness(currentClientId)
+        .queryAwareness()
         .then(
           update =>
             update && applyAwarenessUpdate(awareness, update, broadcastChannel)
