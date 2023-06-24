@@ -90,17 +90,13 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  updateView<Type extends keyof DatabaseViewDataMap>(
-    id: string,
-    type: Type,
-    update: (data: DatabaseViewDataMap[Type]) => void
-  ) {
+  updateView(id: string, update: (data: DatabaseViewData) => void) {
     this.page.transact(() => {
       this.views.map(v => {
-        if (v.id !== id || v.mode !== type) {
+        if (v.id !== id) {
           return v;
         }
-        return update(v as DatabaseViewDataMap[Type]);
+        return update(v);
       });
     });
   }

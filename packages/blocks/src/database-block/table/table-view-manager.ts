@@ -170,7 +170,7 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   updateFilter(filter: FilterGroup): void {
-    this._model.updateView(this._view.id, 'table', data => {
+    this._model.updateView(this._view.id, data => {
       data.filter = filter;
     });
     this._model.applyViewsUpdate();
@@ -182,7 +182,7 @@ export class DatabaseTableViewManager implements TableViewManager {
 
   moveColumn(id: string, toAfterOfColumn: InsertPosition): void {
     this._model.page.captureSync();
-    this._model.updateView(this._view.id, 'table', view => {
+    this._model.updateView(this._view.id, view => {
       const columnIndex = view.columns.findIndex(v => v.id === id);
       if (columnIndex < 0) {
         return;
@@ -315,12 +315,14 @@ export class DatabaseColumnManager implements ColumnManager {
 
   updateWidth(width: number): void {
     this._model.page.captureSync();
-    this._model.updateView(this._view.id, 'table', data => {
-      data.columns.forEach(v => {
-        if (v.id === this.id) {
-          v.width = width;
-        }
-      });
+    this._model.updateView(this._view.id, data => {
+      if (data.mode === 'table') {
+        data.columns.forEach(v => {
+          if (v.id === this.id) {
+            v.width = width;
+          }
+        });
+      }
     });
     this._model.applyViewsUpdate();
   }

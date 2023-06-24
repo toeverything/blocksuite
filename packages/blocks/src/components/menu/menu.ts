@@ -76,7 +76,11 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-menu-header input {
-      padding: 4px 8px;
+      padding: 8px 8px;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid var(--affine-secondary-color);
+      outline: none;
     }
 
     .affine-menu-divider {
@@ -96,6 +100,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       color: var(--affine-icon-color);
       fill: var(--affine-icon-color);
     }
+
     .affine-menu-action .icon {
       margin-right: 8px;
       display: flex;
@@ -302,7 +307,16 @@ export const createPopup = (
   const modal = createModal();
   modal.append(content);
   computePosition(target, content, {
-    middleware: [autoPlacement()],
+    middleware: [
+      autoPlacement({
+        allowedPlacements: [
+          'left-start',
+          'right-start',
+          'top-start',
+          'bottom-start',
+        ],
+      }),
+    ],
   }).then(({ x, y }) => {
     Object.assign(content.style, {
       left: `${x}px`,
