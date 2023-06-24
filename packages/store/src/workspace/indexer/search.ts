@@ -1,7 +1,7 @@
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
-import type { Doc, Map as YMap } from 'yjs';
-import { Text as YText } from 'yjs';
+import type { Doc } from 'yjs';
+import { Map as YMap, Text as YText } from 'yjs';
 
 import type { BlockSuiteDoc } from '../../yjs/index.js';
 import type { YBlock } from '../page.js';
@@ -111,7 +111,10 @@ export class SearchIndexer {
     if (!page) {
       return;
     }
-    const yBlocks = page.get('blocks') as YMap<YBlock>;
+    const yBlocks = page.get('blocks');
+    if (!(yBlocks instanceof YMap<YBlock>)) {
+      return;
+    }
     yBlocks.forEach((_, key) => {
       this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
     });
