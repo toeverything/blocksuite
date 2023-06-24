@@ -1,3 +1,4 @@
+import { ArrowDownIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { autoPlacement, computePosition } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
@@ -5,8 +6,6 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
-
-import { onClickOutside } from '../../database-block/utils/utils.js';
 
 type MenuCommon = {
   hide?: () => boolean;
@@ -30,7 +29,7 @@ type NormalMenu = MenuCommon &
         name: string;
         label?: TemplateResult;
         icon?: TemplateResult;
-        children: <T>() => MenuOptions<T>;
+        children: () => MenuOptions;
       }
   );
 type Menu = GroupMenu | NormalMenu;
@@ -41,6 +40,7 @@ type MenuRenderData<T> = {
 };
 type MenuListConfig = {
   input?: {
+    search?: boolean;
     placeholder?: string;
     initValue?: string;
     onComplete?: (text: string) => void;
@@ -52,6 +52,7 @@ type MenuListConfig = {
 type MenuOptions<T = unknown> = {
   init: T;
   onComplete?: (value: T) => void;
+  onClose?: () => void;
   render: (data: MenuRenderData<T>) => MenuListConfig;
 };
 
@@ -65,27 +66,27 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
       border-radius: 4px;
       background-color: white;
-      padding: 4px 0;
+      padding: 2px 0;
       position: absolute;
       z-index: 999;
     }
 
     .affine-menu-header {
-      padding: 4px 8px;
+      padding: 4px 4px;
     }
 
-    affine-menu-header input {
+    .affine-menu-header input {
+      padding: 4px 8px;
     }
 
     .affine-menu-divider {
       height: 0.5px;
       background: var(--affine-divider-color);
-      margin: 8px 0;
+      margin: 2px 0;
     }
 
     .affine-menu-action {
-      height: 32px;
-      padding: 4px 8px;
+      padding: 2px 4px;
       cursor: pointer;
     }
 
@@ -95,14 +96,20 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       color: var(--affine-icon-color);
       fill: var(--affine-icon-color);
     }
+    .affine-menu-action .icon {
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     .affine-menu-action .content {
-      padding: 2px 4px;
+      padding: 8px;
       border-radius: 4px;
       cursor: pointer;
       white-space: nowrap;
-      display: flex;
       justify-content: space-between;
+      display: flex;
       align-items: center;
     }
 
@@ -128,6 +135,11 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     this._text = value;
   }
 
+  private close() {
+    this.options.onClose?.();
+    this.parentElement?.remove();
+  }
+
   private _inputText = (e: InputEvent) => {
     const target = e.target as HTMLInputElement;
     this.text = target.value;
@@ -144,7 +156,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       this._disposables.addFromEvent(input, 'keydown', e => {
         e.stopPropagation();
         if (e.key === 'Escape') {
-          this.remove();
+          this.close();
           return;
         }
         if (e.key === 'Enter') {
@@ -156,25 +168,34 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     }
   }
 
+  show(item: Menu): boolean {
+    if (this.config.input?.search) {
+      if (!item.name.toLowerCase().includes(this.text.toLowerCase())) {
+        return false;
+      }
+    }
+    return !item.hide?.();
+  }
+
   flat = (items: Menu[]) => {
     const result: Array<NormalMenu | { type: 'divider' }> = [];
     items.forEach(item => {
       if (item.type === 'group') {
-        if (item.hide?.()) {
+        if (!this.show(item)) {
           return;
         }
         const list = item.children().filter(item => !item.hide?.());
         if (list.length) {
-          if (result[result.length - 1].type !== 'divider') {
+          if (result[result.length - 1]?.type !== 'divider') {
             result.push({ type: 'divider' });
           }
           result.push(...list, { type: 'divider' });
         }
-      } else {
+      } else if (this.show(item)) {
         result.push(item);
       }
     });
-    if (result[result.length - 1].type === 'divider') {
+    if (result[result.length - 1]?.type === 'divider') {
       result.pop();
     }
     return result;
@@ -182,7 +203,11 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
 
   private _complete = () => {
     this.options.onComplete?.(this.value ?? this.options.init);
-    this.remove();
+    this.close();
+  };
+  private _clickContainer = (e: MouseEvent) => {
+    e.stopPropagation();
+    this.inputRef.value?.focus();
   };
 
   override render() {
@@ -195,7 +220,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     });
 
     return html`
-      <div class="affine-menu">
+      <div class="affine-menu" @click="${this._clickContainer}">
         <div class="affine-menu-header">
           <input
             ${ref(this.inputRef)}
@@ -205,6 +230,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
             @input="${this._inputText}"
           />
         </div>
+        <div class="affine-menu-divider"></div>
         ${repeat(this.flat(this.config.items), menu => {
           if (menu.type === 'divider') {
             return html` <div class="affine-menu-divider"></div>`;
@@ -218,12 +244,28 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
               class="affine-menu-action affine-menu-action"
               @click="${click}"
             >
-              <div class="content">${menu.icon} ${menu.label ?? menu.name}</div>
+              <div class="content">
+                <div style="display: flex;align-items:center;">
+                  <div class="icon">${menu.icon}</div>
+                  ${menu.label ?? menu.name}
+                </div>
+              </div>
             </div>`;
           }
           if (menu.type === 'sub-menu') {
             return html` <div class="affine-menu-sub-menu affine-menu-action">
-              <div class="content">${menu.icon} ${menu.label ?? menu.name}</div>
+              <div class="content">
+                <div style="display:flex;align-items:center;">
+                  <div class="icon">${menu.icon}</div>
+                  ${menu.label ?? menu.name}
+                </div>
+                <div
+                  class=""
+                  style="display:flex;align-items:center;transform: rotate(-90deg)"
+                >
+                  ${ArrowDownIcon}
+                </div>
+              </div>
             </div>`;
           }
           return '';
@@ -238,15 +280,27 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-
+const createModal = () => {
+  const div = document.createElement('div');
+  div.style.position = 'fixed';
+  div.style.left = '0';
+  div.style.top = '0';
+  div.style.width = '100vw';
+  div.style.height = '100vh';
+  div.style.zIndex = '10';
+  document.body.append(div);
+  return div;
+};
 export const createPopup = (
   target: HTMLElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
+    container?: Element;
   }
 ) => {
-  target.parentElement?.append(content);
+  const modal = createModal();
+  modal.append(content);
   computePosition(target, content, {
     middleware: [autoPlacement()],
   }).then(({ x, y }) => {
@@ -255,25 +309,25 @@ export const createPopup = (
       top: `${y}px`,
     });
   });
-  onClickOutside(
-    content,
-    () => {
-      content.remove();
-      options?.onClose?.();
-    },
-    'mousedown'
-  );
+  modal.onclick = () => {
+    modal.remove();
+    options?.onClose?.();
+  };
 };
 
 export const popMenu = <T>(
   target: HTMLElement,
   props: {
     options: MenuOptions<T>;
+    container?: Element;
   }
 ) => {
   const menu = new MenuComponent<T>();
   menu.options = props.options;
-  createPopup(target, menu);
+  createPopup(target, menu, {
+    onClose: props.options.onClose,
+    container: props.container,
+  });
 };
 export const popFilterableSimpleMenu = (
   target: HTMLElement,
@@ -285,7 +339,8 @@ export const popFilterableSimpleMenu = (
       render: () => {
         return {
           input: {
-            placeholder: '',
+            placeholder: 'Search',
+            search: true,
           },
           items: options,
         };

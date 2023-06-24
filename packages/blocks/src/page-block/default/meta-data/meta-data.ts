@@ -1,3 +1,6 @@
+import '../../../components/tags/multi-tag-select.js';
+import '../../../components/tags/multi-tag-view.js';
+
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -5,7 +8,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import type { BlockHost } from '../../../__internal__/index.js';
 import type { SelectTag } from '../../../database-block/index.js';
-import { SelectMode } from '../../../database-block/table/types.js';
 import { onClickOutside } from '../../../database-block/utils/utils.js';
 
 @customElement('affine-page-meta-data')
@@ -45,22 +47,15 @@ export class PageMetaData extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  _addTag = (tag: SelectTag) => {
-    this.tags = [...this.tags, tag];
-  };
-  _changeTag = (tag: SelectTag) => {
-    console.log(tag);
-  };
-
-  _deleteTag = (id: string) => {
-    console.log(id);
+  _onOptionsChange = (options: SelectTag[]) => {
+    this.tags = options;
   };
   @state()
   showSelect = false;
   _selectTags = () => {
     this.showSelect = true;
     onClickOutside(
-      this.querySelector('affine-database-multi-tag-select'),
+      this.querySelector('affine-multi-tag-select') ?? this,
       () => {
         this.showSelect = false;
       },
@@ -71,28 +66,25 @@ export class PageMetaData extends WithDisposable(ShadowlessElement) {
   override render() {
     const tags = this.page.meta.tags ?? [];
     return html` <div
-      @mousedown=${e => e.stopPropagation()}
+      @mousedown="${e => e.stopPropagation()}"
       style="display:flex;align-items:center;padding: 8px 0px;"
     >
       <div style="margin-right: 4px;">Tags:</div>
       <div @click="${this._selectTags}" style="position: relative;flex: 1;">
         ${tags.length
-          ? html` <affine-database-multi-tag-view
+          ? html` <affine-multi-tag-view
               .value="${tags}"
               .options="${this.meta.allPagesMeta.tags.options}"
-            ></affine-database-multi-tag-view>`
+            ></affine-multi-tag-view>`
           : html`No Tag`}
         ${this.showSelect
-          ? html` <affine-database-multi-tag-select
+          ? html` <affine-multi-tag-select
               style="position: absolute;left: -4px;top: -6px;width: 100%;"
               .value="${this.page.meta.tags ?? []}"
               .options="${this.page.workspace.meta.allPagesMeta.tags.options}"
+              .onOptionsChange="${this._onOptionsChange}"
               .onChange="${tags => (this.page.meta.tags = tags)}"
-              .mode="${SelectMode.Multi}"
-              .newTag="${this._addTag}"
-              .changeTag="${this._changeTag}"
-              .deleteTag="${this._deleteTag}"
-            ></affine-database-multi-tag-select>`
+            ></affine-multi-tag-select>`
           : null}
       </div>
     </div>`;

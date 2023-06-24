@@ -5,12 +5,12 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { SelectTag } from '../../../types.js';
+import type { SelectTag } from './multi-tag-select.js';
 
-@customElement('affine-database-multi-tag-view')
+@customElement('affine-multi-tag-view')
 export class MultiTagView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    affine-database-multi-tag-view {
+    affine-multi-tag-view {
       display: flex;
       align-items: center;
       width: 100%;
@@ -18,11 +18,11 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       padding: 2px 0;
     }
 
-    .affine-database-select-cell-container * {
+    .affine-select-cell-container * {
       box-sizing: border-box;
     }
 
-    .affine-database-select-cell-container {
+    .affine-select-cell-container {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
@@ -31,7 +31,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       font-size: var(--affine-font-sm);
     }
 
-    .affine-database-select-cell-container .select-selected {
+    .affine-select-cell-container .select-selected {
       height: 28px;
       padding: 2px 10px;
       border-radius: 4px;
@@ -40,7 +40,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @query('.affine-database-select-cell-container')
+  @query('.affine-select-cell-container')
   selectContainer!: HTMLElement;
 
   @property({ attribute: false })
@@ -53,7 +53,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     const values = this.value;
     const map = new Map<string, SelectTag>(this.options.map(v => [v.id, v]));
     return html`
-      <div class="affine-database-select-cell-container">
+      <div class="affine-select-cell-container">
         ${repeat(values, id => {
           const option = map.get(id);
           if (!option) {
@@ -68,5 +68,11 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
         })}
       </div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-multi-tag-view': MultiTagView;
   }
 }
