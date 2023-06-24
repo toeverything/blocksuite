@@ -45,10 +45,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     .affine-edgeless-selected-rect {
-      --top: 0px;
-      --left: 0px;
-      --rotate: 0deg;
-      --border-style: solid;
       position: absolute;
       top: 0;
       left: 0;
@@ -59,9 +55,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       z-index: 1;
       border-color: var(--affine-blue);
       border-width: var(--affine-border-width);
-      border-style: var(--border-style);
+      border-style: solid;
       border-radius: 8px;
-      transform: translate(var(--left), var(--top)) rotate(var(--rotate));
+      transform: translate(0, 0) rotate(0);
     }
 
     .affine-edgeless-selected-rect .handle {
@@ -335,20 +331,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const { currentRect } = _resizeManager;
     const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
-    const { left, top, width, height } = new DOMRect(
-      x,
-      y,
-      currentRect.width * zoom,
-      currentRect.height * zoom
-    );
+
     // notes resize observer
     if (!hasNotes) {
-      this._selectedRect.style.height = `${height}px`;
+      this._selectedRect.style.height = `${currentRect.height * zoom}px`;
     }
-    this._selectedRect.style.width = `${width}px`;
-    this._selectedRect.style.setProperty('--rotate', `${_rotate}deg`);
-    this._selectedRect.style.setProperty('--top', `${top}px`);
-    this._selectedRect.style.setProperty('--left', `${left}px`);
+    this._selectedRect.style.width = `${currentRect.width * zoom}px`;
+    this._selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
   };
 
   private _onDragRotate = (center: IPoint, delta: number) => {
@@ -357,6 +346,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       surface,
       state: { selected },
       _rotate,
+      _resizeManager,
     } = this;
     const matrix = new DOMMatrix()
       .translateSelf(center.x, center.y)
@@ -387,9 +377,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     });
 
     const angle = normalizeAngle(delta + _rotate);
+    const { currentRect } = _resizeManager;
+    const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
 
     this._rotate = angle;
     this._selectedRect.style.setProperty('--rotate', `${angle}deg`);
+    this._selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
 
     this._updateCursor(delta, true, 'rotate');
   };
@@ -490,22 +483,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       matchFlavours(selected[0], ['affine:note']) &&
       selected[0].hidden;
 
-    _selectedRect.style.setProperty('--rotate', `${rotate}deg`);
-    _selectedRect.style.setProperty('--top', `${top}px`);
-    _selectedRect.style.setProperty('--left', `${left}px`);
-    _selectedRect.style.setProperty(
-      '--border-style',
-      isSingleHiddenNote ? 'dashed' : 'solid'
-    );
-
-    _selectedRect.style.setProperty(
-      '--affine-border-width',
-      `${active ? 2 : 1}px`
-    );
     _selectedRect.style.backgroundColor =
       !active && selected ? 'var(--affine-hover-color)' : '';
+    _selectedRect.style.borderWidth = `${active ? 2 : 1}px`;
+    _selectedRect.style.borderStyle = isSingleHiddenNote ? 'dashed' : 'solid';
     _selectedRect.style.width = `${width}px`;
     _selectedRect.style.height = `${height}px`;
+    _selectedRect.style.transform = `translate(${left}px, ${top}px) rotate(${rotate}deg)`;
   }
 
   private _showToolbar() {
@@ -545,9 +529,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             const { left, top } = _resizeManager.updateRect(delta);
             const [x, y] = surface.toViewCoord(left, top);
 
-            _selectedRect.style.setProperty('--rotate', `${_rotate}deg`);
-            _selectedRect.style.setProperty('--left', `${x}px`);
-            _selectedRect.style.setProperty('--top', `${y}px`);
+            _selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
 
             if (dragging) {
               this._computeComponentToolbarPosition();
