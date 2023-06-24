@@ -52,11 +52,16 @@
     "exports": {
       "./src/*": "./dist/*.js",
       ".": {
+        "types": "./dist/index.d.ts",
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       },
       "./shim.d.ts": "./shim.d.ts",
-      "./providers/*": "./dist/providers/*.js"
+      "./providers/*": {
+        "types": "./dist/provider/*.d.ts",
+        "module": "./dist/providers/*.js",
+        "import": "./dist/providers/*.js"
+      }
     }
   }
 }
