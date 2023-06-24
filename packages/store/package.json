@@ -58,7 +58,7 @@
       },
       "./shim.d.ts": "./shim.d.ts",
       "./providers/*": {
-        "types": "./dist/provider/*.d.ts",
+        "types": "./dist/providers/*.d.ts",
         "module": "./dist/providers/*.js",
         "import": "./dist/providers/*.js"
       }
