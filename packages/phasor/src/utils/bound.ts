@@ -20,6 +20,10 @@ export class Bound implements IBound {
     return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
   }
 
+  static fromDOMRect({ left, top, width, height }: DOMRect) {
+    return new Bound(left, top, width, height);
+  }
+
   get points(): IVec[] {
     return [
       [this.x, this.y],

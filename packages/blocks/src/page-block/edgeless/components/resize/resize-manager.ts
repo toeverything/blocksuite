@@ -84,7 +84,7 @@ export class HandleResizeManager {
   set originalRect(rect: DOMRect) {
     this._originalRect = rect;
     this._aspectRatio = rect.width / rect.height;
-    this._currentRect = new DOMRect(rect.x, rect.y, rect.width, rect.height);
+    this._currentRect = DOMRect.fromRect(rect);
   }
 
   updateState(

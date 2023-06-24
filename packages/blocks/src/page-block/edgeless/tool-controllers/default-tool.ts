@@ -175,8 +175,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _handleSurfaceDragMove(
     selected: PhasorElement,
     initialBound: Bound,
-    e: PointerEventState,
-    align: { dx: number; dy: number }
+    delta: { x: number; y: number }
   ) {
     if (!this._lock) {
       this._lock = true;
@@ -184,10 +183,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     const { surface } = this._edgeless;
-    const { zoom } = surface.viewport;
     const bound = initialBound.clone();
-    bound.x += (e.x - this._dragStartPos.x) / zoom + align.dx;
-    bound.y += (e.y - this._dragStartPos.y) / zoom + align.dy;
+    bound.x += delta.x;
+    bound.y += delta.y;
 
     if (
       selected.type !== 'connector' ||
@@ -203,14 +201,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _handleBlockDragMove(
     block: TopLevelBlockModel,
     initialBound: Bound,
-    e: PointerEventState,
-    align: { dx: number; dy: number }
+    delta: { x: number; y: number }
   ) {
-    const { surface } = this._edgeless;
-    const { zoom } = surface.viewport;
     const bound = initialBound.clone();
-    bound.x += (e.x - this._dragStartPos.x) / zoom + align.dx;
-    bound.y += (e.y - this._dragStartPos.y) / zoom + align.dy;
+    bound.x += delta.x;
+    bound.y += delta.y;
 
     this._page.updateBlock(block, { xywh: bound.serialize() });
     this._handleDragMoveEffect(block);
@@ -251,7 +246,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     dragging = false
   ) {
     this._edgeless.slots.selectedRectUpdated.emit({
-      type: 'drag',
+      type: 'move',
       delta,
       dragging,
     });
@@ -401,21 +396,22 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       await this._cloneContent(e);
     }
 
-    // Set up drag stvate
+    // Set up drag state
     this.initializeDragState(e, dragType);
   }
 
   initializeDragState(e: PointerEventState, dragType: DefaultModeDragType) {
+    const { x, y } = e;
     this.dragType = dragType;
-    this._startRange = caretRangeFromPoint(e.x, e.y);
-    this._dragStartPos = { x: e.x, y: e.y };
-    this._dragLastPos = { x: e.x, y: e.y };
+    this._startRange = caretRangeFromPoint(x, y);
+    this._dragStartPos = { x, y };
+    this._dragLastPos = { x, y };
 
     this._alignBound = this._edgeless.snap.setupAlignables(this.state.selected);
 
-    this._selectedBounds = this.state.selected.map(element => {
-      return Bound.deserialize(element.xywh);
-    });
+    this._selectedBounds = this.state.selected.map(element =>
+      Bound.deserialize(element.xywh)
+    );
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -440,29 +436,35 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
+        const dx = (e.x - this._dragStartPos.x) / zoom;
+        const dy = (e.y - this._dragStartPos.y) / zoom;
         const curBound = this._alignBound.clone();
+        curBound.x += dx;
+        curBound.y += dy;
 
-        curBound.x += (e.x - this._dragStartPos.x) / zoom;
-        curBound.y += (e.y - this._dragStartPos.y) / zoom;
         const alignRst = this._edgeless.snap.align(curBound);
+        const delta = {
+          x: dx + alignRst.dx,
+          y: dy + alignRst.dy,
+        };
+
         this.state.selected.forEach((element, index) => {
           if (isPhasorElement(element)) {
             this._handleSurfaceDragMove(
               element,
               this._selectedBounds[index],
-              e,
-              alignRst
+              delta
             );
           } else {
             this._handleBlockDragMove(
               element,
               this._selectedBounds[index],
-              e,
-              alignRst
+              delta
             );
           }
         });
-        this._forceUpdateSelection(e.delta, true);
+
+        this._forceUpdateSelection(delta, true);
         break;
       }
       case DefaultModeDragType.NativeEditing: {
@@ -500,12 +502,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         },
       });
     }
+
     this.dragType = DefaultModeDragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
     this._edgeless.snap.cleanupAlignables();
-    this._forceUpdateSelection(e.delta);
+    this._forceUpdateSelection(e.delta, false);
   }
 
   onContainerMouseMove(e: PointerEventState) {

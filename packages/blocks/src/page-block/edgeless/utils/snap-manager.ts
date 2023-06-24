@@ -51,7 +51,7 @@ export class EdgelessSnapManager extends Overlay {
 
     this._alignableBounds = [];
     (<Alignable[]>[...notes, ...phasorElements]).forEach(alignable => {
-      const bound = Bound.deserialize(alignable.xywh);
+      const bound = Bound.fromDOMRect(getElementQuadBounds(alignable));
       if (
         viewportBounds.isIntersectWithBound(bound) &&
         !alignables.includes(alignable)
@@ -61,7 +61,7 @@ export class EdgelessSnapManager extends Overlay {
     });
 
     return alignables.reduce((prev, element) => {
-      return prev.unite(Bound.deserialize(element.xywh));
+      return prev.unite(Bound.fromDOMRect(getElementQuadBounds(element)));
     }, Bound.deserialize(alignables[0].xywh));
   }
 

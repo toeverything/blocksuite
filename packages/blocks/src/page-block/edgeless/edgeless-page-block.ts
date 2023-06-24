@@ -98,12 +98,12 @@ export interface EdgelessSelectionSlots {
   selectionUpdated: Slot<EdgelessSelectionState>;
   selectedRectUpdated: Slot<
     | {
-        type: 'drag';
+        type: 'move';
         delta: {
           x: number;
           y: number;
         };
-        dragging?: boolean;
+        dragging: boolean;
       }
     | {
         type: 'resize';
@@ -242,12 +242,12 @@ export class EdgelessPageBlockComponent
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     selectedRectUpdated: new Slot<
       | {
-          type: 'drag';
+          type: 'move';
           delta: {
             x: number;
             y: number;
           };
-          dragging?: boolean;
+          dragging: boolean;
         }
       | {
           type: 'resize';
