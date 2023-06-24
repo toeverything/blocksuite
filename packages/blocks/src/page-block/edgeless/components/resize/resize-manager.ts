@@ -410,14 +410,13 @@ export class HandleResizeManager {
             .translateSelf(cx, cy)
             .rotateSelf(rotate)
             .translateSelf(-cx, -cy);
-          const a = new DOMPoint(x, y).matrixTransform(m);
-          const b = new DOMPoint(x + w, y).matrixTransform(m);
-          const c = new DOMPoint(x + w, y + h).matrixTransform(m);
-          const d = new DOMPoint(x, y + h).matrixTransform(m);
 
-          const minX = Math.min(a.x, b.x, c.x, d.x);
-          const maxX = Math.max(a.x, b.x, c.x, d.x);
-          const rw = Math.abs(maxX - minX);
+          const { width: rw } = new DOMQuad(
+            new DOMPoint(x, y).matrixTransform(m),
+            new DOMPoint(x + w, y).matrixTransform(m),
+            new DOMPoint(x + w, y + h).matrixTransform(m),
+            new DOMPoint(x, y + h).matrixTransform(m)
+          ).getBounds();
           const hrw = rw / 2;
 
           center.y = cy;
@@ -527,8 +526,9 @@ export class HandleResizeManager {
         .closest('.affine-edgeless-selected-rect')
         ?.getBoundingClientRect();
       assertExists(rect);
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
+      const { left, top, right, bottom } = rect;
+      const x = (left + right) / 2;
+      const y = (top + bottom) / 2;
       // center of `selected-rect` in viewport
       this._origin = { x, y };
     }

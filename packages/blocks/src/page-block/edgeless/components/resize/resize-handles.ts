@@ -1,3 +1,4 @@
+import { Vec } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 
@@ -27,15 +28,9 @@ function ResizeHandle(
     if (e.buttons === 1) return;
 
     if (updateCursor) {
-      const rect = (e.target as HTMLElement)
-        .closest('.affine-edgeless-selected-rect')
-        ?.getBoundingClientRect();
-      assertExists(rect);
       const { clientX, clientY } = e;
-      const cx = (rect.left + rect.right) / 2;
-      const cy = (rect.top + rect.bottom) / 2;
-      const angle =
-        (Math.atan2(clientY - cy, clientX - cx) * 180) / Math.PI + 45;
+      const target = e.target as HTMLElement;
+      const angle = calcAngle(target, [clientX, clientY], 45);
 
       updateCursor(angle, true);
     }
@@ -51,18 +46,9 @@ function ResizeHandle(
     e.stopPropagation();
     if (e.buttons === 1) return;
 
-    const target = e.target as HTMLElement;
-
-    const rect = target
-      .closest('.affine-edgeless-selected-rect')
-      ?.getBoundingClientRect();
-    assertExists(rect);
     const { clientX, clientY } = e;
-    const cx = (rect.left + rect.right) / 2;
-    const cy = (rect.top + rect.bottom) / 2;
-    const angle = normalizeAngle(
-      (Math.atan2(clientY - cy, clientX - cx) * 180) / Math.PI
-    );
+    const target = e.target as HTMLElement;
+    const angle = calcAngle(target, [clientX, clientY]);
 
     // TODO: optimized cursor
     if ((angle >= 0 && angle < 90) || (angle >= 180 && angle < 270)) {
@@ -72,10 +58,6 @@ function ResizeHandle(
       target.classList.remove('nwse');
       target.classList.add('nesw');
     }
-  };
-  const resizePointerLeave = (e: PointerEvent) => {
-    e.stopPropagation();
-    if (e.buttons === 1) return;
   };
 
   const children =
@@ -87,11 +69,7 @@ function ResizeHandle(
             @pointerenter=${rotatePointerEnter}
             @pointerleave=${rotatePointerLeave}
           ></div>
-          <div
-            class="resize"
-            @pointerenter=${resizePointerEnter}
-            @pointerleave=${resizePointerLeave}
-          ></div>`;
+          <div class="resize" @pointerenter=${resizePointerEnter}></div>`;
 
   return html`<div
     class="handle"
@@ -149,4 +127,14 @@ export function ResizeHandles(
       return nothing;
     }
   }
+}
+
+function calcAngle(target: HTMLElement, point: number[], offset = 0) {
+  const rect = target
+    .closest('.affine-edgeless-selected-rect')
+    ?.getBoundingClientRect();
+  assertExists(rect);
+  const { left, top, right, bottom } = rect;
+  const center = Vec.med([left, top], [right, bottom]);
+  return (normalizeAngle(Vec.angle(center, point) + offset) * 180) / Math.PI;
 }
