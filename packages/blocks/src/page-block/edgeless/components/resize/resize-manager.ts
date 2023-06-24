@@ -411,18 +411,18 @@ export class HandleResizeManager {
             .rotateSelf(rotate)
             .translateSelf(-cx, -cy);
 
-          const { width: rw } = new DOMQuad(
+          const { width } = new DOMQuad(
             new DOMPoint(x, y).matrixTransform(m),
             new DOMPoint(x + w, y).matrixTransform(m),
             new DOMPoint(x + w, y + h).matrixTransform(m),
             new DOMPoint(x, y + h).matrixTransform(m)
           ).getBounds();
-          const hrw = rw / 2;
+          const hrw = width / 2;
 
           center.y = cy;
 
-          if (_currentRect.width <= rw) {
-            newWidth = w * (_currentRect.width / rw);
+          if (_currentRect.width <= width) {
+            newWidth = w * (_currentRect.width / width);
             newHeight = newWidth / (w / h);
             center.x = _currentRect.left + _currentRect.width / 2;
           } else {
