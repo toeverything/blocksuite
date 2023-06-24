@@ -5,7 +5,6 @@ import {
   applyAwarenessUpdate,
   encodeAwarenessUpdate,
 } from 'y-protocols/awareness';
-import type { Awareness } from 'y-protocols/awareness.js';
 import type { Doc } from 'yjs';
 
 import { Workspace } from '../workspace/index.js';
@@ -33,15 +32,11 @@ type Impl = {
   sendAwareness: (awarenessUpdate: Uint8Array) => Promise<void>;
 };
 
-export const createAsyncCallRPCProviderCreator = <SerializationData>(
+export const createAsyncCallRPCProviderCreator = (
   flavour: string,
   channel: AsyncCallOptions['channel'],
   options: {
     cleanup: () => void;
-    awarenessSerializer?: {
-      serialization: (awareness: Awareness) => SerializationData;
-      deserialization: (data: SerializationData) => Awareness;
-    };
     asyncCallOptions?: Omit<AsyncCallOptions, 'channel'>;
   }
 ): DocProviderCreator => {
