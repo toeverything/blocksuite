@@ -583,3 +583,23 @@ describe('workspace.exportJSX works', () => {
     `);
   });
 });
+
+describe('workspace search', () => {
+  it('search page meta title', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+    const page = workspace.createPage({ id: 'page0' });
+    await page.waitForLoaded();
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text('test123'),
+    });
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    page.addBlock('affine:paragraph', {}, noteId);
+    const result = workspace.search('test');
+    expect(result).toMatchInlineSnapshot(`
+      Map {
+        "0" => "space:page0",
+      }
+    `);
+  });
+});

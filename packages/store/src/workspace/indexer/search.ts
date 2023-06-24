@@ -77,14 +77,13 @@ export class SearchIndexer {
       context: true,
     });
 
-    Array.from(doc.spaces.keys())
-      .map(k => [k, this._getPage(k)] as const)
-      .forEach(([pageId, page]) => this._handlePageIndexing(pageId, page));
-  }
-
-  // TODO: remove this method, observe page meta instead
-  onPageCreated(pageId: string) {
-    this._handlePageIndexing(pageId, this._getPage(pageId));
+    // fixme(Mirone): use better way to listen to page changes
+    doc.spaces.observe(event => {
+      event.keysChanged.forEach(pageId => {
+        const page = this._getPage(pageId);
+        this._handlePageIndexing(pageId, page);
+      });
+    });
   }
 
   search(query: QueryContent) {
