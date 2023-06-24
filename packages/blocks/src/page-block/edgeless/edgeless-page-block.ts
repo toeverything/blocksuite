@@ -511,7 +511,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       slots.cursorUpdated.on(
         throttle((cursor: string) => {
-          this.pageBlockContainer.style.cursor = cursor;
+          this.style.cursor = cursor;
         }, 144)
       )
     );

@@ -16,67 +16,58 @@ export enum HandleDirection {
 function ResizeHandle(
   handleDirection: HandleDirection,
   onPointerDown?: (e: PointerEvent, direction: HandleDirection) => void,
-  updateCursor?: (angle: number, rotating: boolean) => void
+  updateCursor?: (
+    angle: number,
+    dragging: boolean,
+    type?: 'resize' | 'rotate'
+  ) => void
 ) {
   const handlerPointerDown = (e: PointerEvent) => {
     e.stopPropagation();
     onPointerDown && onPointerDown(e, handleDirection);
   };
 
-  const rotatePointerEnter = (e: PointerEvent) => {
+  const pointerEnter = (type: 'resize' | 'rotate') => (e: PointerEvent) => {
     e.stopPropagation();
-    if (e.buttons === 1) return;
+    if (type === 'rotate' && e.buttons === 1) return;
 
     if (updateCursor) {
       const { clientX, clientY } = e;
       const target = e.target as HTMLElement;
       const angle = calcAngle(target, [clientX, clientY], 45);
 
-      updateCursor(angle, true);
+      updateCursor(angle, true, type);
     }
   };
-  const rotatePointerLeave = (e: PointerEvent) => {
+
+  const pointerLeave = (e: PointerEvent) => {
     e.stopPropagation();
     if (e.buttons === 1) return;
 
     updateCursor && updateCursor(0, false);
   };
 
-  const resizePointerEnter = (e: PointerEvent) => {
-    e.stopPropagation();
-    if (e.buttons === 1) return;
-
-    const { clientX, clientY } = e;
-    const target = e.target as HTMLElement;
-    const angle = calcAngle(target, [clientX, clientY]);
-
-    // TODO: optimized cursor
-    if ((angle >= 0 && angle < 90) || (angle >= 180 && angle < 270)) {
-      target.classList.remove('nesw');
-      target.classList.add('nwse');
-    } else {
-      target.classList.remove('nwse');
-      target.classList.add('nesw');
-    }
-  };
-
-  const children =
+  const rotationTpl =
     handleDirection === HandleDirection.Left ||
     handleDirection === HandleDirection.Right
-      ? html`<div class="resize ew"></div>`
+      ? nothing
       : html`<div
-            class="rotate"
-            @pointerenter=${rotatePointerEnter}
-            @pointerleave=${rotatePointerLeave}
-          ></div>
-          <div class="resize" @pointerenter=${resizePointerEnter}></div>`;
+          class="rotate"
+          @pointerenter=${pointerEnter('rotate')}
+          @pointerleave=${pointerLeave}
+        ></div>`;
 
   return html`<div
     class="handle"
     aria-label=${handleDirection}
     @pointerdown=${handlerPointerDown}
   >
-    ${children}
+    ${rotationTpl}
+    <div
+      class="resize"
+      @pointerenter=${pointerEnter('resize')}
+      @pointerleave=${pointerLeave}
+    ></div>
   </div>`;
 }
 
@@ -84,7 +75,11 @@ export type ResizeMode = 'corner' | 'edge' | 'none';
 export function ResizeHandles(
   resizeMode: ResizeMode,
   onPointerDown: (e: PointerEvent, direction: HandleDirection) => void,
-  updateCursor: (angle: number, rotating: boolean) => void
+  updateCursor: (
+    angle: number,
+    dragging: boolean,
+    type?: 'resize' | 'rotate'
+  ) => void
 ) {
   switch (resizeMode) {
     case 'corner': {
@@ -118,8 +113,16 @@ export function ResizeHandles(
       `;
     }
     case 'edge': {
-      const handleLeft = ResizeHandle(HandleDirection.Left, onPointerDown);
-      const handleRight = ResizeHandle(HandleDirection.Right, onPointerDown);
+      const handleLeft = ResizeHandle(
+        HandleDirection.Left,
+        onPointerDown,
+        updateCursor
+      );
+      const handleRight = ResizeHandle(
+        HandleDirection.Right,
+        onPointerDown,
+        updateCursor
+      );
 
       return html`${handleLeft} ${handleRight}`;
     }
@@ -136,5 +139,5 @@ function calcAngle(target: HTMLElement, point: number[], offset = 0) {
   assertExists(rect);
   const { left, top, right, bottom } = rect;
   const center = Vec.med([left, top], [right, bottom]);
-  return (normalizeAngle(Vec.angle(center, point) + offset) * 180) / Math.PI;
+  return normalizeAngle(((Vec.angle(center, point) + offset) * 180) / Math.PI);
 }

@@ -99,15 +99,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       background: white;
       pointer-events: auto;
     }
-    .affine-edgeless-selected-rect .handle .resize.nwse {
-      cursor: nwse-resize;
-    }
-    .affine-edgeless-selected-rect .handle .resize.nesw {
-      cursor: nesw-resize;
-    }
-    .affine-edgeless-selected-rect .handle .resize.ew {
-      cursor: ew-resize;
-    }
 
     .affine-edgeless-selected-rect .handle[aria-label^='top-'] .rotate,
     .affine-edgeless-selected-rect .handle[aria-label^='bottom-'] .rotate {
@@ -213,12 +204,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       background: white;
     }
 
-    /* calc((6px - 12px) / 2) = -3px */
     .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after {
-      left: -3px;
+      left: -0.5px;
     }
     .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
-      right: -3px;
+      right: -0.5px;
     }
 
     edgeless-component-toolbar {
@@ -401,7 +391,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._rotate = angle;
     this._selectedRect.style.setProperty('--rotate', `${angle}deg`);
 
-    this._updateCursor(delta, true);
+    this._updateCursor(delta, true, 'rotate');
   };
 
   private _onDragEnd = () => {
@@ -417,14 +407,34 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._showToolbar();
   };
 
-  private _updateCursor = (angle = 0, rotating = true) => {
+  private _updateCursor = (
+    angle = 0,
+    dragging = true,
+    type?: 'rotate' | 'resize'
+  ) => {
     let cursor = 'default';
-    if (rotating) {
-      this._cursorRotate += angle;
-      cursor = generateCursorUrl(this._cursorRotate).toString();
+
+    if (dragging) {
+      if (type === 'rotate') {
+        this._cursorRotate += angle;
+        cursor = generateCursorUrl(this._cursorRotate).toString();
+      } else {
+        // TODO: optimized cursor
+        if (this.resizeMode === 'edge') {
+          cursor = 'ew';
+        } else {
+          if ((angle >= 0 && angle < 90) || (angle >= 180 && angle < 270)) {
+            cursor = 'nesw';
+          } else {
+            cursor = 'nwse';
+          }
+        }
+        cursor += '-resize';
+      }
     } else {
       this._cursorRotate = 0;
     }
+
     this.slots.cursorUpdated.emit(cursor);
   };
 
