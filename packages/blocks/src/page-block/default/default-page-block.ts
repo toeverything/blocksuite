@@ -38,14 +38,20 @@ import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
-import { DraggingArea, EmbedSelectedRectsContainer } from './components.js';
+import { DraggingArea } from './components.js';
 import { DefaultSelectionManager } from './selection-manager/index.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
   selectedRectsUpdated: Slot<DOMRect[]>;
+  /**
+   * @deprecated
+   */
   embedRectsUpdated: Slot<DOMRect[]>;
+  /**
+   * @deprecated
+   */
   embedEditingStateUpdated: Slot<EditingState | null>;
 }
 
@@ -140,12 +146,6 @@ export class DefaultPageBlockComponent
 
   @state()
   private _selectedRects: DOMRect[] = [];
-
-  @state()
-  private _selectedEmbedRects: DOMRect[] = [];
-
-  @state()
-  private _embedEditingState!: EditingState | null;
 
   @state()
   private _isComposing = false;
@@ -339,11 +339,6 @@ export class DefaultPageBlockComponent
       return;
     }
 
-    if (type === 'embed') {
-      selection.refreshEmbedRects(this._embedEditingState);
-      return;
-    }
-
     let point;
 
     if (type === 'native') {
@@ -432,16 +427,6 @@ export class DefaultPageBlockComponent
     slots.selectedRectsUpdated.on(rects => {
       this._selectedRects = rects;
     });
-    slots.embedRectsUpdated.on(rects => {
-      this._selectedEmbedRects = rects;
-      if (rects.length === 0) {
-        this._embedEditingState = null;
-      }
-    });
-    slots.embedEditingStateUpdated.on(embedEditingState => {
-      this._embedEditingState = embedEditingState;
-    });
-
     this.model.childrenUpdated.on(() => this.requestUpdate());
   }
 
@@ -540,10 +525,6 @@ export class DefaultPageBlockComponent
     const { viewportOffset } = selection.state;
 
     const draggingArea = DraggingArea(this._draggingArea);
-    const selectedEmbedContainer = EmbedSelectedRectsContainer(
-      this._selectedEmbedRects,
-      viewportOffset
-    );
     const isEmpty =
       (!this.model.title || !this.model.title.length) && !this._isComposing;
 
@@ -584,7 +565,7 @@ export class DefaultPageBlockComponent
           }}
           .offset=${viewportOffset}
         ></affine-selected-blocks>
-        ${this.widgets} ${draggingArea} ${selectedEmbedContainer}
+        ${this.widgets} ${draggingArea}
       </div>
     `;
   }

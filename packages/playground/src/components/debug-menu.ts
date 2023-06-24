@@ -676,7 +676,7 @@ export class DebugMenu extends ShadowlessElement {
 
 function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator();
-  createPage(workspace, { id });
+  createPage(workspace, { id }).catch(console.error);
 }
 
 function getTabGroupTemplate({
@@ -688,7 +688,7 @@ function getTabGroupTemplate({
   editor: EditorContainer;
   requestUpdate: () => void;
 }) {
-  workspace.slots.pagesUpdated.on(requestUpdate);
+  workspace.meta.pageMetasUpdated.on(requestUpdate);
   const pageList = workspace.meta.pageMetas;
   editor.slots.pageLinkClicked.on(({ pageId }) => {
     const tabGroup = document.querySelector<SlTabGroup>('.tabs-closable');

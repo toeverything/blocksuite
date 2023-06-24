@@ -114,6 +114,8 @@ export class WorkspaceMeta {
       } else {
         pages.splice(index, 0, page);
       }
+
+      this._proxy.pages = pages;
     });
   }
 
