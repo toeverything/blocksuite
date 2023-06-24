@@ -13,9 +13,9 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     affine-database-multi-tag-view {
       display: flex;
       align-items: center;
-      width: calc(100% + 8px);
+      width: 100%;
       height: 100%;
-      margin: -2px -4px;
+      padding: 2px 0;
     }
 
     .affine-database-select-cell-container * {

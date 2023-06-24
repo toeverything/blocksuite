@@ -75,6 +75,7 @@ export class SelectCellEditing extends DatabaseCellElement<
   override render() {
     return html`
       <affine-database-multi-tag-select
+        style="width: 400px;"
         .options="${this._options}"
         .value="${this._value}"
         .onChange="${this._onChange}"

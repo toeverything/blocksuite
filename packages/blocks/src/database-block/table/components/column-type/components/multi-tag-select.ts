@@ -1,16 +1,11 @@
-import './select-option.js';
-
 import {
-  DatabaseDone,
   DatabaseSearchClose,
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
-import { autoPlacement, computePosition, offset } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -18,22 +13,16 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getTagColor, onClickOutside } from '../../../../utils/utils.js';
-import {
-  SELECT_EDIT_POPUP_WIDTH,
-  SELECT_TAG_NAME_MAX_LENGTH,
-} from '../../../consts.js';
+import { popMenu } from '../../../../../components/menu/menu.js';
+import { getTagColor, selectOptionColors } from '../../../../utils/utils.js';
+import { SELECT_TAG_NAME_MAX_LENGTH } from '../../../consts.js';
 import type { SelectTag } from '../../../types.js';
-import { SelectMode, type SelectTagActionType } from '../../../types.js';
-import type { SelectOption } from './select-option.js';
-import { SelectOptionColor } from './select-option-color.js';
-import { SelectActionPopup } from './select-option-popup.js';
-
-const KEYS_WHITE_LIST = ['Enter', 'ArrowUp', 'ArrowDown'];
+import { SelectMode } from '../../../types.js';
 
 const styles = css`
   affine-database-multi-tag-select {
     position: fixed;
+    width: 100%;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
     border-radius: 4px;
@@ -56,7 +45,7 @@ const styles = css`
   }
 
   .select-input {
-    flex: 1 1 0%;
+    flex: 1 1 0;
     height: 24px;
     border: none;
     font-family: var(--affine-font-family);
@@ -131,7 +120,6 @@ const styles = css`
   }
 
   .select-option-new-text {
-    flex: 1;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -171,23 +159,33 @@ const styles = css`
     background: var(--affine-hover-color);
   }
 
-  .select-option:hover .select-option-icon {
+  .select-option-text-container {
+    width: 100%;
+    overflow: hidden;
     display: flex;
   }
 
-  .select-option-text-container {
-    width: calc(100% - 28px);
+  .select-option-name {
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     overflow: hidden;
   }
 
   .select-option-icon {
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     width: 28px;
     height: 28px;
     border-radius: 3px;
     cursor: pointer;
+    opacity: 0;
+  }
+
+  .select-option:hover .select-option-icon {
+    opacity: 1;
   }
 
   .select-option-icon:hover {
@@ -199,26 +197,10 @@ const styles = css`
     height: 16px;
     pointer-events: none;
   }
-
-  .editing {
-    background: var(--affine-hover-color);
-  }
-
-  .editing .select-option-text [data-virgo-text='true'] {
-    display: block;
-    white-space: pre !important;
-    overflow: unset;
-    text-overflow: unset;
-  }
-
-  .editing .select-option-icon {
-    display: flex;
-    background: var(--affine-hover-background);
-  }
 `;
 
 @customElement('affine-database-multi-tag-select')
-export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
+export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   tempValue: string | undefined = undefined;
 
   static override styles = styles;
@@ -261,10 +243,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   @state()
   private _selectedOptionIndex = -1;
 
-  @query('.select-option-container')
-  private _selectOptionContainer!: HTMLDivElement;
   private _selectColor: string | undefined = undefined;
-  private _optionColor: SelectOptionColor | null = null;
 
   get isSingleMode() {
     return this.mode === SelectMode.Single;
@@ -275,38 +254,7 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
   }
 
   protected override firstUpdated() {
-    this.style.width = `${SELECT_EDIT_POPUP_WIDTH}px`;
     this._selectInput.focus();
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._disposables.addFromEvent(
-      document.body,
-      'keydown',
-      this._onSelectOption
-    );
-
-    computePosition(
-      {
-        getBoundingClientRect: () => {
-          const rect = this.container.getBoundingClientRect();
-          rect.y = rect.y - rect.height - 2;
-          rect.x = rect.x - 2;
-          return rect;
-        },
-      },
-      this,
-      {
-        placement: 'bottom-start',
-      }
-    ).then(({ x, y }) => {
-      Object.assign(this.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
   }
 
   protected override updated(_changedProperties: Map<PropertyKey, unknown>) {
@@ -317,52 +265,12 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  private _onSelectOption = (event: KeyboardEvent) => {
-    const key = event.key;
-
-    if (KEYS_WHITE_LIST.indexOf(key) <= -1) return;
-    event.preventDefault();
-    event.stopPropagation();
-
-    const maxIndex = this.selectionList.length - 1;
-    if (this._selectedOptionIndex === maxIndex && key === 'ArrowDown') {
-      this._selectedOptionIndex = 0;
-      return;
-    }
-    if (this._selectedOptionIndex <= 0 && key === 'ArrowUp') {
-      this._selectedOptionIndex = maxIndex;
-      return;
-    }
-
-    if (key === 'ArrowDown') {
-      this._selectedOptionIndex++;
-    } else if (key === 'ArrowUp') {
-      this._selectedOptionIndex--;
-    } else if (key === 'Enter') {
-      const index = this._selectedOptionIndex;
-      if (index === -1) return;
-      if (this.isSingleMode) {
-        this._selectedOptionIndex = -1;
-      }
-
-      const selected = this.value;
-      const currentSelection = this.selectionList[index];
-      this._onSelect(selected, currentSelection.id);
-      const cell =
-        this._selectOptionContainer.closest<HTMLElement>('.database-cell');
-      assertExists(cell);
-      if (this.isSingleMode) {
-        this.editComplete();
-      }
-    }
-  };
-
   private _onDeleteSelected = (selectedValue: string[], value: string) => {
     const filteredValue = selectedValue.filter(item => item !== value);
     this.onChange(filteredValue);
   };
 
-  private _onSelectSearchInput = (event: KeyboardEvent) => {
+  private _onInput = (event: KeyboardEvent) => {
     const value = (event.target as HTMLInputElement).value;
     this._inputValue = value;
     if (!this._selectColor) {
@@ -436,113 +344,60 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onSelectAction = (
-    type: SelectTagActionType,
-    id: string,
-    element: Element,
-    onActionPopupClose: () => void
-  ) => {
-    if (type === 'rename') {
-      this._setEditingId(id);
+  private _clickItemOption = (e: MouseEvent, id: string) => {
+    const option = this.options.find(v => v.id === id);
+    if (!option) {
       return;
     }
-
-    if (type === 'delete') {
-      this.deleteTag(id);
-      return;
-    }
-    if (type === 'change-color') {
-      if (this._optionColor) return;
-
-      const optionColor = new SelectOptionColor();
-      optionColor.onChange = color => {
-        this._onSaveSelectionColor(id, color);
-        onActionPopupClose();
-        onClose();
-      };
-      this._optionColor = optionColor;
-      element.appendChild(optionColor);
-      const onClose = () => optionColor.remove();
-
-      computePosition(element, optionColor, {
-        // placement: 'right-start',
-        middleware: [
-          offset({
-            mainAxis: 4,
-          }),
-          autoPlacement({
-            allowedPlacements: ['right-start', 'left-start'],
-          }),
-        ],
-      }).then(({ x, y }) => {
-        Object.assign(optionColor.style, {
-          left: `${x}px`,
-          top: `${y}px`,
-        });
-      });
-
-      onClickOutside(
-        optionColor,
-        ele => {
-          this._optionColor = null;
-          ele.remove();
+    popMenu(e.target as HTMLElement, {
+      options: {
+        init: {},
+        render: () => {
+          return {
+            input: {
+              initValue: option.value,
+              onComplete: text => {
+                this.changeTag({ ...option, value: text });
+              },
+            },
+            items: [
+              {
+                type: 'action',
+                name: 'Delete',
+                select: () => {
+                  this.deleteTag(id);
+                },
+              },
+              {
+                type: 'group',
+                name: 'color',
+                children: () =>
+                  selectOptionColors.map(item => {
+                    const styles = styleMap({
+                      backgroundColor: item.color,
+                      borderRadius: '50%',
+                      width: '20px',
+                      height: '20px',
+                      marginRight: '8px',
+                    });
+                    return {
+                      type: 'action',
+                      name: item.name,
+                      icon: html` <div style=${styles}></div>`,
+                      select: () => {
+                        this.changeTag({
+                          ...option,
+                          color: item.color,
+                        });
+                      },
+                    };
+                  }),
+              },
+            ],
+          };
         },
-        'mousedown'
-      );
-    }
-  };
-
-  private _showSelectAction = (id: string) => {
-    const selectOption = this.querySelector(`[data-select-option-id="${id}"]`)
-      ?.parentElement?.parentElement;
-    assertExists(selectOption);
-
-    const action = new SelectActionPopup();
-    action.onAction = (type, id) => {
-      const reference = action.shadowRoot?.firstElementChild;
-      assertExists(reference);
-      this._onSelectAction(type, id, reference, onClose);
-    };
-    action.onClosePopup = () => {
-      this._optionColor?.remove();
-      this._optionColor = null;
-    };
-    action.tagId = id;
-    selectOption.appendChild(action);
-    const onClose = () => action.remove();
-
-    computePosition(selectOption, action, {
-      placement: 'bottom-end',
-    }).then(({ x, y }) => {
-      Object.assign(action.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
+      },
     });
-    onClickOutside(selectOption as HTMLElement, onClose, 'mousedown');
-  };
-
-  private _onSaveSelectionName = (id: string) => {
-    const selectOption = this._selectOptionContainer.querySelector(
-      `[data-select-option-id="${id}"]`
-    ) as SelectOption;
-
-    const value = selectOption.getSelectionValue();
-    const selection = this.options.find(tag => tag.id === id);
-    if (selection) {
-      this.changeTag({ ...selection, value });
-    }
-    this._setEditingId();
-  };
-  private _onSaveSelectionColor = (id: string, color: string) => {
-    const selection = this.options.find(tag => tag.id === id);
-    if (selection) {
-      this.changeTag({ ...selection, color });
-    }
-  };
-
-  private _setEditingId = (id?: string) => {
-    this._editingId = id;
   };
 
   override render() {
@@ -597,8 +452,8 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
             class="select-input"
             placeholder="Type here..."
             maxlength="${SELECT_TAG_NAME_MAX_LENGTH}"
-            .value=${this._inputValue}
-            @input="${this._onSelectSearchInput}"
+            .value="${this._inputValue}"
+            @input="${this._onInput}"
             @keydown="${(event: KeyboardEvent) =>
               this._onSelectOrAdd(event, selectedTag)}"
           />
@@ -612,38 +467,28 @@ export class SelectCellEditing extends WithDisposable(ShadowlessElement) {
             filteredSelection,
             select => select.id,
             (select, index) => {
-              const isEditing = select.id === this._editingId;
               const isSelected = index === this._selectedOptionIndex;
-              const onOptionIconClick = isEditing
-                ? () => this._onSaveSelectionName(select.id)
-                : () => this._showSelectAction(select.id);
               const classes = classMap({
                 'select-option': true,
                 selected: isSelected,
-                editing: isEditing,
               });
+              const style = styleMap({
+                backgroundColor: select.color,
+              });
+              const clickOption = (e: MouseEvent) =>
+                this._clickItemOption(e, select.id);
               return html`
                 <div class="${classes}">
                   <div
                     class="select-option-text-container"
                     @click="${() => this._onSelect(selectedTag, select.id)}"
                   >
-                    <affine-database-select-option
-                      style=${styleMap({
-                        cursor: isEditing ? 'text' : 'pointer',
-                      })}
-                      data-select-option-id="${select.id}"
-                      .page=${this.page}
-                      .select=${select}
-                      .editing=${isEditing}
-                      .index=${index}
-                      .tagId=${select.id}
-                      .saveSelectionName=${this._onSaveSelectionName}
-                      .setEditingId=${this._setEditingId}
-                    ></affine-database-select-option>
+                    <span class="select-option-name" style=${style}
+                      >${select.value}</span
+                    >
                   </div>
-                  <div class="select-option-icon" @click="${onOptionIconClick}">
-                    ${isEditing ? DatabaseDone : MoreHorizontalIcon}
+                  <div class="select-option-icon" @click="${clickOption}">
+                    ${MoreHorizontalIcon}
                   </div>
                 </div>
               `;

@@ -75,6 +75,7 @@ class MultiSelectCellEditing extends DatabaseCellElement<
     return html`
       <affine-database-multi-tag-select
         .mode="${SelectMode.Multi}"
+        style="width: 400px;"
         .options="${this._options}"
         .value="${this._value}"
         .onChange="${this._onChange}"

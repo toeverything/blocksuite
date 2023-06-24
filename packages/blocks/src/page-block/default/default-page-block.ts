@@ -1,4 +1,6 @@
 /// <reference types="vite/client" />
+import './meta-data/meta-data.js';
+
 import {
   BLOCK_ID_ATTR,
   PAGE_BLOCK_CHILD_PADDING,
@@ -563,6 +565,10 @@ export class DefaultPageBlockComponent
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
+            <affine-page-meta-data
+              .host="${this}"
+              .page=${this.page}
+            ></affine-page-meta-data>
             <backlink-button
               .host="${this}"
               .page="${this.page}"
