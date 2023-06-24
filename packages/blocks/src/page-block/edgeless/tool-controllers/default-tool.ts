@@ -464,7 +464,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           }
         });
 
-        this._forceUpdateSelection(delta, true);
+        // FIXME: we need to add align offset
+        this._forceUpdateSelection(e.delta, true);
         break;
       }
       case DefaultModeDragType.NativeEditing: {

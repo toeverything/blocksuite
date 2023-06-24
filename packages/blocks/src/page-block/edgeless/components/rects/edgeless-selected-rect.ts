@@ -533,26 +533,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           _resizeManager,
           _selectedRect,
           _rotate,
-          resizeMode,
           zoom,
           surface,
           state: { selected },
         } = this;
-        const rect = getSelectedRect(selected);
 
         switch (action.type) {
           case 'move': {
-            const { dragging } = action;
+            const { delta, dragging } = action;
+
+            const { left, top } = _resizeManager.updateRect(delta);
+            const [x, y] = surface.toViewCoord(left, top);
+
+            _selectedRect.style.setProperty('--rotate', `${_rotate}deg`);
+            _selectedRect.style.setProperty('--left', `${x}px`);
+            _selectedRect.style.setProperty('--top', `${y}px`);
 
             if (dragging) {
-              _resizeManager.updateState(resizeMode, _rotate, zoom, rect);
-
-              // _resizeManager.updateRect(action.delta, dragging);
-
-              const [x, y] = surface.toViewCoord(rect.x, rect.y);
-              _selectedRect.style.setProperty('--rotate', `${_rotate}deg`);
-              _selectedRect.style.setProperty('--left', `${x}px`);
-              _selectedRect.style.setProperty('--top', `${y}px`);
               this._computeComponentToolbarPosition();
             } else {
               _resizeManager.updateBounds(getSelectableBounds(selected));
@@ -561,6 +558,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           }
           case 'resize': {
             // frame resize
+            const rect = getSelectedRect(selected);
             const width = rect.width * zoom;
             const height = rect.height * zoom;
             this._selectedRect.style.width = `${width}px`;
