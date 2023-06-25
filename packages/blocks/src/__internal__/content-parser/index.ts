@@ -134,7 +134,10 @@ export class ContentParser {
       );
       if (!pageContainer) return;
 
-      const data = await html2canvas(pageContainer, html2canvasOption);
+      const data = await html2canvas(
+        pageContainer as HTMLElement,
+        html2canvasOption
+      );
       return data;
     } else {
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
@@ -162,7 +165,7 @@ export class ContentParser {
               );
               const blockBound = xywhArrayToObject(nodeElement);
               const canvasData = await html2canvas(
-                blockElement,
+                blockElement as HTMLElement,
                 html2canvasOption
               );
               context.drawImage(
