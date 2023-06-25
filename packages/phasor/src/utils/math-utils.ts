@@ -326,80 +326,82 @@ export function linePolylineIntersects(
   return result.length ? result : null;
 }
 
-// https://stackoverflow.com/questions/16359246/how-to-extract-position-rotation-and-scale-from-matrix-svg
-export function decomposeMatrix(matrix: number[]) {
+/**
+ * Decompose the current matrix into simple transforms using either
+ * QR (default) or LU decomposition.
+ *
+ * @param {number[]} [matrix] - set to true to use LU rather than QR decomposition
+ * @param {boolean} [useLU=false] - set to true to use LU rather than QR decomposition
+ * @returns {*} - an object containing current decomposed values (translate, rotation, scale, skew)
+ * @see {@link https://en.wikipedia.org/wiki/QR_decomposition|More on QR decomposition}
+ * @see {@link https://en.wikipedia.org/wiki/LU_decomposition|More on LU decomposition}
+ *
+ * @see {@link https://github.com/leanklass/transformation-matrix-js|MIT}
+ * @see {@link https://stackoverflow.com/questions/16359246/how-to-extract-position-rotation-and-scale-from-matrix-svg}
+ */
+export function decomposeMatrix(matrix: number[], useLU = false) {
   if (matrix.length < 6) {
     throw new Error('It is not a matrix array.');
   }
-
-  let a = matrix[0];
-  let b = matrix[1];
-  let c = matrix[2];
-  let d = matrix[3];
-  const e = matrix[4];
-  const f = matrix[5];
-
-  let scaleX = Math.sqrt(a * a + b * b);
-  let scaleY = Math.sqrt(c * c + d * d);
+  const [a, b, c, d, e, f] = matrix;
 
   // If determinant is negative, one axis was flipped.
   const determinant = a * d - b * c;
-  if (determinant < 0)
-    if (a < d)
-      // Flip axis with minimum unit vector dot product.
-      scaleX = -scaleX;
-    else scaleY = -scaleY;
 
-  // Renormalize matrix to remove scale.
-  if (scaleX) {
-    a *= 1 / scaleX;
-    b *= 1 / scaleX;
+  let skewX = 0;
+  let skewY = 0;
+  let scaleX = 1;
+  let scaleY = 1;
+  let rotate = 0;
+
+  if (useLU) {
+    if (a) {
+      skewX = Math.atan(c / a);
+      skewY = Math.atan(b / a);
+      scaleX = a;
+      scaleY = determinant / a;
+    } else if (b) {
+      rotate = Math.PI / 2;
+      scaleX = b;
+      scaleY = determinant / b;
+      skewX = Math.atan(d / b);
+    } else {
+      // a = b = 0
+      scaleX = c;
+      scaleY = d;
+      skewX = Math.PI / 2;
+    }
+  } else {
+    // Apply the QR-like decomposition.
+    if (a || b) {
+      const r = Math.hypot(a, b);
+      rotate = b > 0 ? Math.acos(a / r) : -Math.acos(a / r);
+      scaleX = r;
+      scaleY = determinant / r;
+      skewX = Math.atan((a * c + b * d) / (r * r));
+    } else if (c || d) {
+      const s = Math.hypot(c, d);
+      rotate = Math.PI / 2 - (d > 0 ? Math.acos(-c / s) : -Math.acos(c / s));
+      scaleX = determinant / s;
+      scaleY = s;
+      skewY = Math.atan((a * c + b * d) / (s * s));
+    }
   }
 
-  if (scaleY) {
-    c *= 1 / scaleY;
-    d *= 1 / scaleY;
-  }
+  // normalize angle
+  if (rotate < 0) rotate += Math.PI * 2;
+  rotate %= Math.PI * 2;
+  rotate = rotate * (180 / Math.PI);
 
-  // Compute rotation and renormalize matrix.
-  let angle = Math.atan2(b, a);
-
-  // if (angle) {
-  //   // Rotate(-angle) = [cos(angle), sin(angle), -sin(angle), cos(angle)]
-  //   //                = [a, -b, b, a]
-  //   // Thanks to the normalization above.
-  //   const sn = -b
-  //   const cs = a
-  //   const m11 = a
-  //   const m12 = b
-  //   const m21 = c
-  //   const m22 = d
-  //   a = cs * m11 + sn * m21
-  //   b = cs * m12 + sn * m22
-  //   c = -sn * m11 + cs * m21
-  //   d = -sn * m12 + cs * m22
-  // }
-  //
-  // m11 = a
-  // m12 = b
-  // m21 = c
-  // m22 = d
-
-  if (angle < 0) angle += Math.PI * 2;
-  angle %= Math.PI * 2;
-
-  // Convert into degrees because our rotation functions expect it.
-  angle = angle * (180 / Math.PI);
-  // The requested parameters are then theta,
-  // sx, sy, phi,
   return {
+    scaleX,
+    scaleY,
+    skewX,
+    skewY,
+    rotate,
     translateX: e,
     translateY: f,
-    rotate: angle,
-    scaleX: scaleX,
-    scaleY: scaleY,
     flipX: scaleX < 0 ? -1 : 1,
     flipY: scaleY < 0 ? -1 : 1,
-    // matrix: [m11, m12, m21, m22, 0, 0]
   };
 }
