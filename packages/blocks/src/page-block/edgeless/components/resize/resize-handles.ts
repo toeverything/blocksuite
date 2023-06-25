@@ -29,7 +29,7 @@ function ResizeHandle(
 
   const pointerEnter = (type: 'resize' | 'rotate') => (e: PointerEvent) => {
     e.stopPropagation();
-    if (e.buttons === 1) return;
+    if (type === 'rotate' && e.buttons === 1) return;
 
     if (updateCursor) {
       const { clientX, clientY } = e;
