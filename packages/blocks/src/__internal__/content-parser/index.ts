@@ -147,13 +147,13 @@ export class ContentParser {
             '.affine-block-children-container'
           );
           const canvas = document.createElement('canvas');
-          canvas.width = bound.w;
-          canvas.height = bound.h;
+          canvas.width = bound.w + 100;
+          canvas.height = bound.h + 100;
           const context = canvas.getContext('2d');
           if (context && blockContain) {
             context.fillStyle =
               window.getComputedStyle(blockContain).backgroundColor;
-            context.fillRect(0, 0, bound.w, bound.h);
+            context.fillRect(0, 0, canvas.width, canvas.height);
 
             const nodeElements = edgeless.getSortedElementsByBound(bound);
             for (const nodeElement of nodeElements) {
@@ -167,8 +167,8 @@ export class ContentParser {
               );
               context.drawImage(
                 canvasData,
-                blockBound.x - bound.x,
-                blockBound.y - bound.y,
+                blockBound.x - bound.x + 50,
+                blockBound.y - bound.y + 50,
                 blockBound.w,
                 blockBound.h
               );
@@ -177,7 +177,7 @@ export class ContentParser {
             const surfaceCanvas =
               edgeless.surface.viewport.getCanvasRenderByBound(bound);
             surfaceCanvas &&
-              context.drawImage(surfaceCanvas, 0, 0, bound.w, bound.h);
+              context.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 
             resolve(canvas);
           } else {
