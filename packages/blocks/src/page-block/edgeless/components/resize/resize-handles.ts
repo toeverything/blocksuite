@@ -29,12 +29,13 @@ function ResizeHandle(
 
   const pointerEnter = (type: 'resize' | 'rotate') => (e: PointerEvent) => {
     e.stopPropagation();
-    if (type === 'rotate' && e.buttons === 1) return;
+    if (e.buttons === 1) return;
 
     if (updateCursor) {
       const { clientX, clientY } = e;
       const target = e.target as HTMLElement;
-      const angle = calcAngle(target, [clientX, clientY], 45);
+      const point = [clientX, clientY];
+      const angle = calcAngle(target, point, type === 'rotate' ? 45 : 0);
 
       updateCursor(angle, true, type);
     }

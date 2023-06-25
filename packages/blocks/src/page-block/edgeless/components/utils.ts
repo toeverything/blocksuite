@@ -136,15 +136,14 @@ export function readImageSize(file: File) {
 }
 
 export function normalizeAngle(angle: number) {
-  // if (angle < 0) {
-  //   return angle + 360;
-  // }
-  // if (angle >= 360) {
-  //   return angle - 360;
-  // }
-  // return angle;
-
   if (angle < 0) angle += 360;
   angle %= 360;
   return angle;
+}
+
+const RESIZE_CURSORS = ['ew', 'nwse', 'ns', 'nesw'];
+export function rotateResizeCursor(angle: number) {
+  const a = Math.round(angle / (Math.PI / 4));
+  const cursor = RESIZE_CURSORS[a % RESIZE_CURSORS.length];
+  return cursor;
 }
