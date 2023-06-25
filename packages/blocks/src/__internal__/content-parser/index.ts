@@ -121,6 +121,10 @@ export class ContentParser {
           return false;
         }
       },
+      onclone: function (documentClone: Document, element: HTMLElement) {
+        // html2canvas can't support transform feature
+        element.style.setProperty('transform', 'none');
+      },
     };
 
     const editorContainer = getEditorContainer(this._page);
@@ -137,36 +141,48 @@ export class ContentParser {
       const bound = edgeless.getElementsBound();
       assertExists(bound);
 
-      const promise = new Promise(resolve => {
+      const promise = new Promise((resolve, reject) => {
         setTimeout(async () => {
+          const blockContain = document.querySelector(
+            '.affine-block-children-container'
+          );
           const canvas = document.createElement('canvas');
           canvas.width = bound.w;
           canvas.height = bound.h;
           const context = canvas.getContext('2d');
+          if (context && blockContain) {
+            context.fillStyle =
+              window.getComputedStyle(blockContain).backgroundColor;
+            context.fillRect(0, 0, bound.w, bound.h);
 
-          const nodeElements = edgeless.getSortedElementsByBound(bound);
-          for (const nodeElement of nodeElements) {
-            const blockElement = getBlockElementById(nodeElement.id);
-            const blockBound = xywhArrayToObject(nodeElement);
-            const canvasData = await html2canvas(
-              blockElement,
-              html2canvasOption
-            );
-            context?.drawImage(
-              canvasData,
-              blockBound.x - bound.x,
-              blockBound.y - bound.y,
-              blockBound.w,
-              blockBound.h
-            );
+            const nodeElements = edgeless.getSortedElementsByBound(bound);
+            for (const nodeElement of nodeElements) {
+              const blockElement = getBlockElementById(nodeElement.id)?.closest(
+                '.affine-edgeless-block-child'
+              );
+              const blockBound = xywhArrayToObject(nodeElement);
+              const canvasData = await html2canvas(
+                blockElement,
+                html2canvasOption
+              );
+              context.drawImage(
+                canvasData,
+                blockBound.x - bound.x,
+                blockBound.y - bound.y,
+                blockBound.w,
+                blockBound.h
+              );
+            }
+
+            const surfaceCanvas =
+              edgeless.surface.viewport.getCanvasRenderByBound(bound);
+            surfaceCanvas &&
+              context.drawImage(surfaceCanvas, 0, 0, bound.w, bound.h);
+
+            resolve(canvas);
+          } else {
+            reject();
           }
-
-          const surfaceCanvas =
-            edgeless.surface.viewport.getCanvasRenderByBound(bound);
-          surfaceCanvas &&
-            context?.drawImage(surfaceCanvas, 0, 0, bound.w, bound.h);
-
-          resolve(canvas);
         }, 0);
       });
       const data = (await promise) as HTMLCanvasElement;
