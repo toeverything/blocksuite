@@ -1,7 +1,7 @@
 import { css } from 'lit';
 export const styles = css`
   affine-multi-tag-select {
-    position: fixed;
+    position: absolute;
     width: 100%;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
@@ -49,8 +49,10 @@ export const styles = css`
   }
 
   .select-option-container-header {
-    padding: 8px 0px;
+    padding: 0px 4px 8px 4px;
     color: var(--affine-black-60);
+    font-size: 12px;
+    user-select: none;
   }
 
   .select-input-container .select-selected {
@@ -115,6 +117,7 @@ export const styles = css`
     gap: 6px;
     height: 28px;
     color: var(--affine-text-primary-color);
+    margin-right: 8px;
   }
 
   .select-option-new-icon svg {
@@ -127,15 +130,13 @@ export const styles = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 36px;
     padding: 4px;
     border-radius: 4px;
     margin-bottom: 4px;
     cursor: pointer;
   }
 
-  .select-option.selected,
-  .select-option:hover {
+  .select-option.selected {
     background: var(--affine-hover-color);
   }
 
@@ -143,6 +144,13 @@ export const styles = css`
     width: 100%;
     overflow: hidden;
     display: flex;
+  }
+
+  .select-option-group-name {
+    font-size: 12px;
+    padding: 0 4px;
+    border-radius: 4px;
+    opacity: 0.5;
   }
 
   .select-option-name {
@@ -164,7 +172,7 @@ export const styles = css`
     opacity: 0;
   }
 
-  .select-option:hover .select-option-icon {
+  .select-option.selected .select-option-icon {
     opacity: 1;
   }
 

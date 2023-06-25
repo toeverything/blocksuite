@@ -1,4 +1,4 @@
-import type { Column, SelectTag } from '@blocksuite/blocks';
+import type { Column } from '@blocksuite/blocks';
 import { MigrationError } from '@blocksuite/global/error';
 import * as Y from 'yjs';
 
@@ -398,3 +398,9 @@ export function tryMigrate(doc: Y.Doc) {
     }
   }
 }
+
+export type SelectTag = {
+  id: string;
+  color: string;
+  value: string;
+};

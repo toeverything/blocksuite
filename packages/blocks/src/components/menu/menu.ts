@@ -1,5 +1,6 @@
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Middleware } from '@floating-ui/dom';
 import { autoPlacement, computePosition } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
@@ -183,7 +184,12 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
   }
 
   flat = (items: Menu[]) => {
-    const result: Array<NormalMenu | { type: 'divider' }> = [];
+    const result: Array<
+      | NormalMenu
+      | {
+          type: 'divider';
+        }
+    > = [];
     items.forEach(item => {
       if (item.type === 'group') {
         if (!this.show(item)) {
@@ -285,7 +291,7 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-const createModal = () => {
+export const createModal = () => {
   const div = document.createElement('div');
   div.style.position = 'fixed';
   div.style.left = '0';
@@ -293,7 +299,7 @@ const createModal = () => {
   div.style.width = '100vw';
   div.style.height = '100vh';
   div.style.zIndex = '10';
-  document.body.append(div);
+  document.body.querySelector('editor-container')?.append(div);
   return div;
 };
 export const createPopup = (
@@ -301,13 +307,13 @@ export const createPopup = (
   content: HTMLElement,
   options?: {
     onClose?: () => void;
-    container?: Element;
+    middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
   const modal = createModal();
   modal.append(content);
   computePosition(target, content, {
-    middleware: [
+    middleware: options?.middleware ?? [
       autoPlacement({
         allowedPlacements: [
           'left-start',
@@ -323,9 +329,14 @@ export const createPopup = (
       top: `${y}px`,
     });
   });
-  modal.onclick = () => {
+  modal.onclick = ev => {
+    if (ev.target === modal) {
+      modal.remove();
+      options?.onClose?.();
+    }
+  };
+  return () => {
     modal.remove();
-    options?.onClose?.();
   };
 };
 
@@ -340,7 +351,6 @@ export const popMenu = <T>(
   menu.options = props.options;
   createPopup(target, menu, {
     onClose: props.options.onClose,
-    container: props.container,
   });
 };
 export const popFilterableSimpleMenu = (

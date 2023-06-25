@@ -7,12 +7,34 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { BlockHost } from '../../../__internal__/index.js';
-import type { SelectTag } from '../../../database-block/index.js';
-import { onClickOutside } from '../../../database-block/utils/utils.js';
+import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
+import { popTagSelect } from '../../../components/tags/multi-tag-select.js';
 
 @customElement('affine-page-meta-data')
 export class PageMetaData extends WithDisposable(ShadowlessElement) {
-  static override styles = css``;
+  static override styles = css`
+    affine-page-meta-data .meta-hover:hover {
+      background-color: var(--affine-hover-color);
+      cursor: pointer;
+    }
+
+    affine-page-meta-data .meta-data {
+      width: 100%;
+      display: flex;
+    }
+
+    affine-page-meta-data .meta-data .meta-data-type {
+      width: 200px;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    affine-page-meta-data .meta-data .meta-data-value {
+      flex: 1;
+      padding: 4px;
+      border-radius: 4px;
+    }
+  `;
 
   @property({ attribute: false })
   page!: Page;
@@ -24,11 +46,11 @@ export class PageMetaData extends WithDisposable(ShadowlessElement) {
     return this.page.workspace.meta;
   }
 
-  get tags() {
+  get options() {
     return this.meta.allPagesMeta.tags.options;
   }
 
-  set tags(tags: SelectTag[]) {
+  set options(tags: SelectTag[]) {
     this.page.workspace.meta.setAllPagesMeta({
       ...this.meta.allPagesMeta,
       tags: {
@@ -36,6 +58,14 @@ export class PageMetaData extends WithDisposable(ShadowlessElement) {
         options: tags,
       },
     });
+  }
+
+  get tags() {
+    return this.page.meta.tags ?? [];
+  }
+
+  set tags(tags: string[]) {
+    this.page.meta.tags = tags;
   }
 
   override connectedCallback() {
@@ -47,45 +77,31 @@ export class PageMetaData extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  _onOptionsChange = (options: SelectTag[]) => {
-    this.tags = options;
-  };
   @state()
   showSelect = false;
-  _selectTags = () => {
-    this.showSelect = true;
-    onClickOutside(
-      this.querySelector('affine-multi-tag-select') ?? this,
-      () => {
-        this.showSelect = false;
-      },
-      'mousedown'
-    );
+  _selectTags = (evt: MouseEvent) => {
+    popTagSelect(evt.currentTarget as HTMLElement, {
+      value: this.tags,
+      onChange: tags => (this.tags = tags),
+      options: this.options,
+      onOptionsChange: options => (this.options = options),
+    });
   };
 
   override render() {
     const tags = this.page.meta.tags ?? [];
     return html` <div
       @mousedown="${e => e.stopPropagation()}"
-      style="display:flex;align-items:center;padding: 8px 0px;"
+      class="meta-data"
     >
-      <div style="margin-right: 4px;">Tags:</div>
-      <div @click="${this._selectTags}" style="position: relative;flex: 1;">
+      <div class="meta-data-type meta-hover">Tags</div>
+      <div class="meta-data-value meta-hover" @click="${this._selectTags}">
         ${tags.length
           ? html` <affine-multi-tag-view
-              .value="${tags}"
-              .options="${this.meta.allPagesMeta.tags.options}"
+              .value="${this.tags}"
+              .options="${this.options}"
             ></affine-multi-tag-view>`
-          : html`No Tag`}
-        ${this.showSelect
-          ? html` <affine-multi-tag-select
-              style="position: absolute;left: -4px;top: -6px;width: 100%;"
-              .value="${this.page.meta.tags ?? []}"
-              .options="${this.page.workspace.meta.allPagesMeta.tags.options}"
-              .onOptionsChange="${this._onOptionsChange}"
-              .onChange="${tags => (this.page.meta.tags = tags)}"
-            ></affine-multi-tag-select>`
-          : null}
+          : html`Empty`}
       </div>
     </div>`;
   }

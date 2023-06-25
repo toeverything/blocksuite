@@ -89,7 +89,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           }
           break;
         } else {
-          result = ele.column.id;
+          result = {
+            before: false,
+            id: ele.column.id,
+          };
         }
       }
       return result;
@@ -206,7 +209,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   private _clickColumn = () => {
     popMenu(this, {
-      container: this.closest('affine-database') ?? this,
       options: {
         init: {},
         render: () => {
@@ -357,7 +359,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   private _clickTypeIcon = (event: MouseEvent) => {
     event.stopPropagation();
     popMenu(this, {
-      container: this.closest('affine-database') ?? this,
       options: {
         init: {},
         render: () => {

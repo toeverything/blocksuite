@@ -343,7 +343,7 @@ export class DatabaseColumnManager implements ColumnManager {
       assertExists(currentSchema);
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
-      const id = this._model.addColumn(this.id, schema);
+      const id = this._model.addColumn({ before: false, id: this.id }, schema);
       this._model.applyColumnUpdate();
       this._model.copyCellsByColumn(copyId, id);
     };
