@@ -236,7 +236,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
           <input
             ${ref(this.inputRef)}
             type="text"
-            placeholder="${this.config.input?.placeholder}"
+            placeholder="${this.config.input?.placeholder ?? ''}"
             value="${this.text ?? this.config.input?.initValue ?? ''}"
             @input="${this._inputText}"
           />
