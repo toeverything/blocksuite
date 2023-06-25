@@ -64,9 +64,9 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       display: flex;
       flex-direction: column;
       user-select: none;
-      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--affine-shadow-2);
       border-radius: 4px;
-      background-color: white;
+      background-color: var(--affine-background-primary-color);
       padding: 2px 0;
       position: absolute;
       z-index: 999;

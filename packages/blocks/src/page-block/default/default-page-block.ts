@@ -163,7 +163,10 @@ export class DefaultPageBlockComponent
     selectedRectsUpdated: new Slot<DOMRect[]>(),
     embedRectsUpdated: new Slot<DOMRect[]>(),
     embedEditingStateUpdated: new Slot<EditingState | null>(),
-    pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
+    pageLinkClicked: new Slot<{
+      pageId: string;
+      blockId?: string;
+    }>(),
   };
 
   @query('.affine-default-page-block-title')
@@ -536,6 +539,15 @@ export class DefaultPageBlockComponent
       child => this.root.renderModel(child)
     )}`;
 
+    const renderMetaData = this.page.workspace.awarenessStore.getFlag(
+      'enable_page_tags'
+    )
+      ? html` <affine-page-meta-data
+          .host="${this}"
+          .page="${this.page}"
+        ></affine-page-meta-data>`
+      : null;
+
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
@@ -546,10 +558,7 @@ export class DefaultPageBlockComponent
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
-            <affine-page-meta-data
-              .host="${this}"
-              .page=${this.page}
-            ></affine-page-meta-data>
+            ${renderMetaData}
             <backlink-button
               .host="${this}"
               .page="${this.page}"
@@ -558,12 +567,12 @@ export class DefaultPageBlockComponent
           ${content}
         </div>
         <affine-selected-blocks
-          .mouseRoot=${this.mouseRoot}
-          .state=${{
+          .mouseRoot="${this.mouseRoot}"
+          .state="${{
             rects: this._selectedRects,
             grab: !draggingArea,
-          }}
-          .offset=${viewportOffset}
+          }}"
+          .offset="${viewportOffset}"
         ></affine-selected-blocks>
         ${this.widgets} ${draggingArea}
       </div>

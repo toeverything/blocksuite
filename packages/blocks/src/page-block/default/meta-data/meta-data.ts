@@ -5,6 +5,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import type { BlockHost } from '../../../__internal__/index.js';
 import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
@@ -19,6 +20,14 @@ export class PageMetaData extends WithDisposable(ShadowlessElement) {
     }
 
     affine-page-meta-data .meta-data {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px solid var(--affine-divider-color);
+      padding: 8px 0;
+      margin-bottom: 8px;
+    }
+
+    affine-page-meta-data .meta-data-item {
       width: 100%;
       display: flex;
     }
@@ -88,21 +97,32 @@ export class PageMetaData extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  override render() {
-    const tags = this.page.meta.tags ?? [];
-    return html` <div
-      @mousedown="${e => e.stopPropagation()}"
-      class="meta-data"
-    >
-      <div class="meta-data-type meta-hover">Tags</div>
-      <div class="meta-data-value meta-hover" @click="${this._selectTags}">
-        ${tags.length
+  items() {
+    return [
+      {
+        type: html`Tags`,
+        clickValue: this._selectTags,
+        value: this.tags.length
           ? html` <affine-multi-tag-view
               .value="${this.tags}"
               .options="${this.options}"
             ></affine-multi-tag-view>`
-          : html`Empty`}
-      </div>
+          : html`Empty`,
+      },
+    ];
+  }
+
+  override render() {
+    const items = this.items();
+    return html` <div class="meta-data">
+      ${repeat(items, item => {
+        return html` <div class="meta-data-item">
+          <div class="meta-data-type meta-hover">${item.type}</div>
+          <div class="meta-data-value meta-hover" @click="${item.clickValue}">
+            ${item.value}
+          </div>
+        </div>`;
+      })}
     </div>`;
   }
 }

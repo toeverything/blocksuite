@@ -409,7 +409,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                       : ''}
                     <div style="display:flex;flex-direction: column">
                       <div
-                        style="display:flex;align-items:center;margin-bottom: 2px;"
+                        style="display:flex;align-items:center;margin-bottom: 2px;opacity: 0.5;"
                       >
                         ${select.group.map((v, i) => {
                           const style = styleMap({

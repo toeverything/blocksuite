@@ -147,10 +147,9 @@ export const styles = css`
   }
 
   .select-option-group-name {
-    font-size: 12px;
-    padding: 0 4px;
-    border-radius: 4px;
-    opacity: 0.5;
+    font-size: 9px;
+    padding: 0 2px;
+    border-radius: 2px;
   }
 
   .select-option-name {
