@@ -325,3 +325,81 @@ export function linePolylineIntersects(
 
   return result.length ? result : null;
 }
+
+// https://stackoverflow.com/questions/16359246/how-to-extract-position-rotation-and-scale-from-matrix-svg
+export function decomposeMatrix(matrix: number[]) {
+  if (matrix.length < 6) {
+    throw new Error('It is not a matrix array.');
+  }
+
+  let a = matrix[0];
+  let b = matrix[1];
+  let c = matrix[2];
+  let d = matrix[3];
+  const e = matrix[4];
+  const f = matrix[5];
+
+  let scaleX = Math.sqrt(a * a + b * b);
+  let scaleY = Math.sqrt(c * c + d * d);
+
+  // If determinant is negative, one axis was flipped.
+  const determinant = a * d - b * c;
+  if (determinant < 0)
+    if (a < d)
+      // Flip axis with minimum unit vector dot product.
+      scaleX = -scaleX;
+    else scaleY = -scaleY;
+
+  // Renormalize matrix to remove scale.
+  if (scaleX) {
+    a *= 1 / scaleX;
+    b *= 1 / scaleX;
+  }
+
+  if (scaleY) {
+    c *= 1 / scaleY;
+    d *= 1 / scaleY;
+  }
+
+  // Compute rotation and renormalize matrix.
+  let angle = Math.atan2(b, a);
+
+  // if (angle) {
+  //   // Rotate(-angle) = [cos(angle), sin(angle), -sin(angle), cos(angle)]
+  //   //                = [a, -b, b, a]
+  //   // Thanks to the normalization above.
+  //   const sn = -b
+  //   const cs = a
+  //   const m11 = a
+  //   const m12 = b
+  //   const m21 = c
+  //   const m22 = d
+  //   a = cs * m11 + sn * m21
+  //   b = cs * m12 + sn * m22
+  //   c = -sn * m11 + cs * m21
+  //   d = -sn * m12 + cs * m22
+  // }
+  //
+  // m11 = a
+  // m12 = b
+  // m21 = c
+  // m22 = d
+
+  if (angle < 0) angle += Math.PI * 2;
+  angle %= Math.PI * 2;
+
+  // Convert into degrees because our rotation functions expect it.
+  angle = angle * (180 / Math.PI);
+  // The requested parameters are then theta,
+  // sx, sy, phi,
+  return {
+    translateX: e,
+    translateY: f,
+    rotate: angle,
+    scaleX: scaleX,
+    scaleY: scaleY,
+    flipX: scaleX < 0 ? -1 : 1,
+    flipY: scaleY < 0 ? -1 : 1,
+    // matrix: [m11, m12, m21, m22, 0, 0]
+  };
+}

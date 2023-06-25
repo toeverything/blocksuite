@@ -273,8 +273,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       string,
       {
         bound: Bound;
-        flip: IPoint;
-        rotate: number;
+        matrix: DOMMatrix;
       }
     >
   ) => {
@@ -285,7 +284,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     let hasNotes = false;
 
-    newBounds.forEach(({ bound, flip, rotate = 0 }, id) => {
+    newBounds.forEach(({ bound, matrix }, id) => {
       const element = selectedMap.get(id);
       if (!element) return;
 
@@ -305,7 +304,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
         });
       } else {
-        rotate = normalizeAngle(rotate);
+        const { a, b, c, d, e, f } = matrix;
 
         if (element instanceof TextElement) {
           const p = bound.h / element.h;
@@ -313,16 +312,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           surface.updateElement<'text'>(id, {
             xywh: bound.serialize(),
             fontSize: element.fontSize * p,
-            flipX: flip.x < 0 ? -1 : 1,
-            flipY: flip.y < 0 ? -1 : 1,
-            rotate,
+            matrix: [a, b, c, d, e, f],
           });
         } else {
           surface.updateElement(id, {
             xywh: bound.serialize(),
-            flipX: flip.x < 0 ? -1 : 1,
-            flipY: flip.y < 0 ? -1 : 1,
-            rotate,
+            matrix: [a, b, c, d, e, f],
           });
         }
       }
@@ -348,7 +343,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       _rotate,
       _resizeManager,
     } = this;
-    const matrix = new DOMMatrix()
+    const m = new DOMMatrix()
       .translateSelf(center.x, center.y)
       .rotateSelf(delta)
       .translateSelf(-center.x, -center.y);
@@ -359,18 +354,17 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     elements.forEach(element => {
       const { id } = element;
-      let { rotate = 0 } = element;
+      const { rotate = 0, flipX = 1, flipY = 1 } = element;
       const [x, y, w, h] = element.deserializeXYWH();
-      const cx = x + w / 2;
-      const cy = y + h / 2;
+      const center = new DOMPoint(x + w / 2, y + h / 2).matrixTransform(m);
 
-      const c = new DOMPoint(cx, cy).matrixTransform(matrix);
-
-      rotate = normalizeAngle(rotate + delta);
+      const { a, b, c, d, e, f } = new DOMMatrix()
+        .rotateSelf(normalizeAngle(rotate + delta))
+        .scaleSelf(flipX, flipY);
 
       surface.updateElement(id, {
-        xywh: serializeXYWH(c.x - w / 2, c.y - h / 2, w, h),
-        rotate,
+        xywh: serializeXYWH(center.x - w / 2, center.y - h / 2, w, h),
+        matrix: [a, b, c, d, e, f],
       });
 
       handleElementChangedEffectForConnector(element, [element], surface, page);

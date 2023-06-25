@@ -6,9 +6,8 @@ export interface IBrush {
   xywh: SerializedXYWH;
   index: string;
   seed: number;
-  rotate: number;
-  flipX: 1 | -1;
-  flipY: 1 | -1;
+
+  matrix: number[];
 
   // [[x0,y0],[x1,y1]...]
   points: number[][];

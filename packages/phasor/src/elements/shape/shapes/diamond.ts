@@ -26,9 +26,7 @@ export const DiamondMethods: ShapeMethods = {
       realStrokeColor,
       strokeStyle,
       roughness,
-      rotate,
-      flipX,
-      flipY,
+      matrix: localMatrix,
       widthAndHeight: [w, h],
     } = element;
 
@@ -38,12 +36,12 @@ export const DiamondMethods: ShapeMethods = {
     const cx = w / 2;
     const cy = h / 2;
 
-    matrix
-      .translateSelf(cx, cy)
-      .rotateSelf(rotate)
-      .scaleSelf(flipX, flipY)
-      .translateSelf(-cx, -cy);
-    ctx.setTransform(matrix);
+    ctx.setTransform(
+      matrix
+        .translateSelf(cx, cy)
+        .multiplySelf(new DOMMatrix(localMatrix))
+        .translateSelf(-cx, -cy)
+    );
 
     rc.polygon(
       [

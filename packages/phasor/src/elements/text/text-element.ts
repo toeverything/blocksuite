@@ -46,22 +46,18 @@ export class TextElement extends SurfaceElement<IText> {
       fontSize,
       fontFamily,
       textAlign,
-      rotate,
-      flipX,
-      flipY,
+      matrix: localMatrix,
       widthAndHeight: [w, h],
     } = this;
     const cx = w / 2;
     const cy = h / 2;
 
-    matrix = matrix.translate(cx, cy).rotate(rotate);
-    if (flipX < 0) {
-      matrix = matrix.flipX();
-    }
-    if (flipY < 0) {
-      matrix = matrix.flipY();
-    }
-    ctx.setTransform(matrix.translate(-cx, -cy));
+    ctx.setTransform(
+      matrix
+        .translateSelf(cx, cy)
+        .multiplySelf(new DOMMatrix(localMatrix))
+        .translateSelf(-cx, -cy)
+    );
 
     const yText = text;
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];

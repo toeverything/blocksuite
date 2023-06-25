@@ -3,9 +3,8 @@ import type { IElementDefaultProps } from '../index.js';
 export const BrushElementDefaultProps: IElementDefaultProps<'brush'> = {
   type: 'brush',
   xywh: '[0,0,0,0]',
-  rotate: 0,
-  flipX: 1,
-  flipY: 1,
+
+  matrix: [1, 0, 0, 1, 0, 0],
 
   points: [],
   color: '#000000',

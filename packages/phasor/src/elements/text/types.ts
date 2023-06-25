@@ -8,9 +8,8 @@ export interface IText {
   type: 'text';
   xywh: SerializedXYWH;
   seed: number;
-  rotate: number;
-  flipX: 1 | -1;
-  flipY: 1 | -1;
+
+  matrix: number[];
 
   text: Y.Text;
   color: string;

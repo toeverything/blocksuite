@@ -70,20 +70,18 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       lineWidth,
       controllers,
       mode,
-      rotate,
-      flipX,
-      flipY,
+      matrix: localMatrix,
       widthAndHeight: [w, h],
     } = this;
     const cx = w / 2;
     const cy = h / 2;
 
-    matrix
-      .translateSelf(cx, cy)
-      .rotateSelf(rotate)
-      .scaleSelf(flipX, flipY)
-      .translateSelf(-cx, -cy);
-    ctx.setTransform(matrix);
+    ctx.setTransform(
+      matrix
+        .translateSelf(cx, cy)
+        .multiplySelf(new DOMMatrix(localMatrix))
+        .translateSelf(-cx, -cy)
+    );
 
     const realStrokeColor = this.computedValue(color);
 

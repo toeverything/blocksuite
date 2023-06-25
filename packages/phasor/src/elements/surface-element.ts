@@ -4,7 +4,7 @@ import type { IVec } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
-import { isPointIn } from '../utils/math-utils.js';
+import { decomposeMatrix, isPointIn } from '../utils/math-utils.js';
 import {
   deserializeXYWH,
   type SerializedXYWH,
@@ -17,9 +17,8 @@ export interface ISurfaceElement {
   xywh: SerializedXYWH;
   index: string;
   seed: number;
-  rotate: number;
-  flipX: 1 | -1;
-  flipY: 1 | -1;
+
+  matrix: number[];
 }
 
 export interface HitTestOptions {
@@ -81,19 +80,24 @@ export abstract class SurfaceElement<
     return seed;
   }
 
+  get matrix() {
+    const matrix = this.yMap.get('matrix') as T['matrix'];
+    return matrix;
+  }
+
   get rotate() {
-    const rotate = this.yMap.get('rotate') as T['rotate'];
-    return rotate;
+    const { matrix } = this;
+    return matrix ? decomposeMatrix(matrix).rotate : 0;
   }
 
   get flipX() {
-    const flipX = this.yMap.get('flipX') as T['flipX'];
-    return flipX;
+    const { matrix } = this;
+    return matrix ? decomposeMatrix(matrix).flipX : 1;
   }
 
   get flipY() {
-    const flipY = this.yMap.get('flipY') as T['flipY'];
-    return flipY;
+    const { matrix } = this;
+    return matrix ? decomposeMatrix(matrix).flipY : 1;
   }
 
   get x() {

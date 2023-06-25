@@ -16,11 +16,9 @@ type ResizeMoveHandler = (
     string,
     {
       bound: Bound;
-      flip: IPoint;
-      rotate: number;
+      matrix: DOMMatrix;
     }
-  >,
-  rect?: Bound
+  >
 ) => void;
 
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
@@ -321,8 +319,7 @@ export class HandleResizeManager {
       string,
       {
         bound: Bound;
-        flip: IPoint;
-        rotate: number;
+        matrix: DOMMatrix;
       }
     >();
 
@@ -336,11 +333,9 @@ export class HandleResizeManager {
         process = ({ flip, rotate = 0 }, id) => {
           newBounds.set(id, {
             bound: new Bound(x, y, width, height),
-            flip: {
-              x: flipX * flip.x,
-              y: flipY * flip.y,
-            },
-            rotate,
+            matrix: new DOMMatrix()
+              .rotateSelf(rotate)
+              .scaleSelf(flipX * flip.x, flipY * flip.y),
           });
         };
       } else {
@@ -377,11 +372,9 @@ export class HandleResizeManager {
               newWidth,
               newHeight
             ),
-            flip: {
-              x: flipX * flip.x,
-              y: flipY * flip.y,
-            },
-            rotate,
+            matrix: new DOMMatrix()
+              .rotateSelf(rotate)
+              .scaleSelf(flipX * flip.x, flipY * flip.y),
           });
         };
       }
@@ -447,11 +440,9 @@ export class HandleResizeManager {
             newWidth,
             newHeight
           ),
-          flip: {
-            x: flipX * flip.x,
-            y: flipY * flip.y,
-          },
-          rotate,
+          matrix: new DOMMatrix()
+            .rotateSelf(rotate)
+            .scaleSelf(flipX * flip.x, flipY * flip.y),
         });
       };
     }
