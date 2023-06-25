@@ -2,13 +2,14 @@ import './component-toolbar/component-toolbar.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { Bound } from '@blocksuite/phasor';
+import type { SurfaceManager } from '@blocksuite/phasor';
 import {
   type ConnectorElement,
+  deserializeXYWH,
   serializeXYWH,
   TextElement,
 } from '@blocksuite/phasor';
-import { deserializeXYWH, SurfaceManager } from '@blocksuite/phasor';
-import { Page } from '@blocksuite/store';
+import { matchFlavours, type Page } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -31,11 +32,7 @@ import type { HandleDirection } from './resize-handles.js';
 import { ResizeHandles, type ResizeMode } from './resize-handles.js';
 import { HandleResizeManager } from './resize-manager.js';
 import { SingleConnectorHandles } from './single-connector-handles.js';
-import {
-  getCommonRectStyle,
-  getSelectableBounds,
-  getSelectedRect,
-} from './utils.js';
+import { getSelectableBounds, getSelectedRect } from './utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -52,6 +49,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       box-sizing: border-box;
       z-index: 1;
       border: var(--affine-border-width) solid var(--affine-blue);
+      border-radius: 8px;
     }
 
     .affine-edgeless-selected-rect > [aria-label^='handle'] {
@@ -128,8 +126,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect > [aria-label='handle-left']:after,
     .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: 7px;
+      height: 7px;
       box-sizing: border-box;
       border-radius: 6px;
       z-index: 10;
@@ -140,11 +138,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
 
     .affine-edgeless-selected-rect > [aria-label='handle-left']:after {
-      left: -3px;
+      left: -1px;
     }
 
     .affine-edgeless-selected-rect > [aria-label='handle-right']:after {
-      right: -3px;
+      right: -1px;
     }
 
     edgeless-component-toolbar {
@@ -153,16 +151,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ type: Page })
+  @property({ attribute: false })
   page!: Page;
 
-  @property({ type: SurfaceManager })
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
   @property({ type: Object })
   state!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @query('.affine-edgeless-selected-rect')
@@ -308,10 +306,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       return nothing;
     }
 
+    const isSingleHiddenNote =
+      selected.length === 1 &&
+      isTopLevelBlock(selected[0]) &&
+      matchFlavours(selected[0], ['affine:note']) &&
+      selected[0].hidden;
+
     const { page, surface, resizeMode, _resizeManager } = this;
     const selectedRect = getSelectedRect(selected, surface.viewport);
 
-    const style = getCommonRectStyle(selectedRect, active, true);
+    const style = {
+      '--affine-border-width': `${active ? 2 : 1}px`,
+      left: selectedRect.x + 'px',
+      top: selectedRect.y + 'px',
+      width: selectedRect.width + 'px',
+      height: selectedRect.height + 'px',
+      borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
+    };
 
     const hasResizeHandles = !active && !page.readonly;
     const resizeHandles = hasResizeHandles

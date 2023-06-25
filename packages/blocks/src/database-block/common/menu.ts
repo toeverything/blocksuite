@@ -43,7 +43,7 @@ export class DatabaseMenuComponent extends WithDisposable(ShadowlessElement) {
       background-color: rgba(0, 0, 0, 0.1);
     }
   `;
-  @property()
+  @property({ attribute: false })
   menuGroup!: MenuGroup;
 
   override render() {

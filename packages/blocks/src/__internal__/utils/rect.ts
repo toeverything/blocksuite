@@ -10,6 +10,16 @@ export class Point {
     this.y = y;
   }
 
+  static from(point: IPoint | number[] | number, y?: number) {
+    if (Array.isArray(point)) {
+      return new Point(point[0], point[1]);
+    }
+    if (typeof point === 'number') {
+      return new Point(point, y ?? point);
+    }
+    return new Point(point.x, point.y);
+  }
+
   set(x: number, y: number) {
     this.x = x;
     this.y = y;
@@ -36,6 +46,21 @@ export class Point {
    */
   clone() {
     return new Point(this.x, this.y);
+  }
+
+  cross(point: IPoint): number {
+    return this.x * point.y - this.y * point.x;
+  }
+
+  lerp(point: IPoint, t: number): Point {
+    return new Point(
+      this.x + (point.x - this.x) * t,
+      this.y + (point.y - this.y) * t
+    );
+  }
+
+  toArray() {
+    return [this.x, this.y];
   }
 
   /**

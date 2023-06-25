@@ -37,10 +37,10 @@ export class DatabaseKanban
     return this.host.getService;
   }
 
-  @property()
+  @property({ attribute: false })
   model!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   host!: BlockHost;
 
   override connectedCallback() {

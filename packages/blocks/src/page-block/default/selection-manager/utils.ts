@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import type { PointerEventState } from '@blocksuite/lit';
 import { matchFlavours, type Page, type UserRange } from '@blocksuite/store';
 
 import type {
@@ -150,6 +150,9 @@ export function setSelectedBlocks(
 }
 
 export interface AutoScrollHooks {
+  /**
+   * @deprecated This hook is meaningless.
+   */
   init(): void;
   onMove(): void;
   onScroll(val: number): void;

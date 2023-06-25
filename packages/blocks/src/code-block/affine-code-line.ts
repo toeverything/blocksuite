@@ -21,7 +21,7 @@ export class AffineCodeLine extends ShadowlessElement {
     insert: ZERO_WIDTH_SPACE,
   };
 
-  @property()
+  @property({ attribute: false })
   highlightOptionsGetter:
     | (() => {
         lang: Lang;

@@ -1,5 +1,6 @@
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { deserializeXYWH } from '@blocksuite/phasor';
+import { matchFlavours } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
@@ -30,6 +31,8 @@ function EdgelessBlockChild(
 ) {
   const { xywh, background } = model;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
+  const isNote = matchFlavours(model, ['affine:note']);
+  const isHiddenNote = isNote && model.hidden;
 
   const style = {
     position: 'absolute',
@@ -37,10 +40,12 @@ function EdgelessBlockChild(
     width: modelW + 'px',
     height: modelH + 'px',
     padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    border: '2px solid var(--affine-black-10)',
+    border: `2px ${isHiddenNote ? 'dashed' : 'solid'} var(--affine-black-10)`,
     borderRadius: '8px',
     boxSizing: 'border-box',
-    background: `var(${background ?? DEFAULT_NOTE_COLOR})`,
+    background: isHiddenNote
+      ? 'transparent'
+      : `var(${background ?? DEFAULT_NOTE_COLOR})`,
     boxShadow: 'var(--affine-shadow-3)',
     pointerEvents: 'all',
     overflow: 'hidden',

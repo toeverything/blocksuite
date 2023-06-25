@@ -59,13 +59,15 @@ export class Space<
       return this;
     }
 
-    this._ySpaceDoc.load();
-
-    await new Promise(resolve =>
+    const promise = new Promise(resolve => {
       this._onLoadSlot.once(() => {
         resolve(undefined);
-      })
-    );
+      });
+    });
+
+    this._ySpaceDoc.load();
+
+    await promise;
 
     return this;
   }
@@ -84,9 +86,7 @@ export class Space<
       subDoc = new Y.Doc();
       this.doc.spaces.set(prefixedId, subDoc);
       this._loaded = true;
-      setImmediate(() => {
-        this._onLoadSlot.emit();
-      });
+      this._onLoadSlot.emit();
     } else {
       this._loaded = false;
       this.doc.on('subdocs', this._onSubdocEvent);

@@ -26,7 +26,7 @@ export class MenuDivider extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   vertical = false;
 
   override render() {

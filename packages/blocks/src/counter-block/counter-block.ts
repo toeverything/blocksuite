@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 @customElement('counter-block')
 export class CounterBlock extends LitElement {
-  @property()
+  @property({ attribute: false })
   count: number;
 
   constructor() {

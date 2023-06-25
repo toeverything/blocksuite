@@ -1,6 +1,6 @@
 import '../tool-icon-button.js';
 import '../color-panel.js';
-import '../../toolbar/shape-tool/shape-menu.js';
+import '../../toolbar/shape/shape-menu.js';
 
 import { LineStyleIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -15,11 +15,11 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
-import type { ShapeMouseMode } from '../../../../__internal__/utils/types.js';
+import type { ShapeTool } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { EdgelessShapeMenu } from '../../toolbar/shape-tool/shape-menu.js';
-import { ShapeComponentConfigMap } from '../../toolbar/shape-tool/shape-menu-config.js';
+import type { EdgelessShapeMenu } from '../../toolbar/shape/shape-menu.js';
+import { ShapeComponentConfigMap } from '../../toolbar/shape/shape-menu-config.js';
 import type { ColorEvent } from '../color-panel.js';
 import { isTransparent } from '../color-panel.js';
 import { ColorUnit } from '../color-panel.js';
@@ -36,34 +36,34 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonShape(
   elements: ShapeElement[]
-): ShapeMouseMode['shape'] | null {
+): ShapeTool['shape'] | null {
   const shapeTypes = countBy(elements, (ele: ShapeElement) => {
     return ele.shapeType === 'rect' && ele.radius
       ? 'roundedRect'
       : ele.shapeType;
   });
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['shape']) : null;
+  return max ? (max[0] as ShapeTool['shape']) : null;
 }
 
 function getMostCommonFillColor(
   elements: ShapeElement[]
-): ShapeMouseMode['fillColor'] | null {
+): ShapeTool['fillColor'] | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.filled ? ele.fillColor : '--affine-palette-transparent';
   });
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
+  return max ? (max[0] as ShapeTool['fillColor']) : null;
 }
 
 function getMostCommonStrokeColor(
   elements: ShapeElement[]
-): ShapeMouseMode['fillColor'] | null {
+): ShapeTool['fillColor'] | null {
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.strokeColor;
   });
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
-  return max ? (max[0] as ShapeMouseMode['fillColor']) : null;
+  return max ? (max[0] as ShapeTool['fillColor']) : null;
 }
 
 function getMostCommonLineSize(
@@ -201,19 +201,19 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     `,
   ];
 
-  @property()
+  @property({ attribute: false })
   elements: ShapeElement[] = [];
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()

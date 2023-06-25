@@ -5,7 +5,11 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from '../../utils/bound.js';
-import { getSvgPathFromStroke } from '../../utils/math-utils.js';
+import {
+  getSvgPathFromStroke,
+  lineIntersects,
+} from '../../utils/math-utils.js';
+import { type IVec, Vec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 
@@ -35,6 +39,33 @@ export class BrushElement extends SurfaceElement<IBrush> {
   get lineWidth() {
     const lineWidth = this.yMap.get('lineWidth') as IBrush['lineWidth'];
     return lineWidth;
+  }
+
+  intersectWithLine(pa: IVec, pb: IVec) {
+    const { points } = this;
+
+    const box = Bound.deserialize(this.xywh);
+    const tl = box.tl;
+
+    if (box.w < 8 && box.h < 8) {
+      return Vec.distanceToLineSegment(pa, pb, box.center) < 5;
+    }
+
+    if (box.intersectLine(pa, pb, true)) {
+      for (let i = 1; i < points.length; i++) {
+        if (
+          lineIntersects(
+            Vec.add(points[i - 1], tl),
+            Vec.add(points[i], tl),
+            pa,
+            pb
+          )
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   override render(ctx: CanvasRenderingContext2D) {

@@ -57,7 +57,7 @@ export function LineSizeButton({
     tooltipFromProps !== undefined ? tooltipFromProps : getTooltip(size);
 
   return html`<edgeless-tool-icon-button
-    class=${className}
+    class=${className ?? ''}
     .active=${active}
     .activeMode=${'background'}
     .tooltip=${tooltip}

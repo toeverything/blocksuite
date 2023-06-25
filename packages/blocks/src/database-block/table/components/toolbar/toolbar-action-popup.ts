@@ -12,7 +12,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { copyBlocks } from '../../../../__internal__/clipboard/utils/commons.js';
 import { toast } from '../../../../components/toast.js';
 import type { DatabaseBlockModel } from '../../../database-model.js';
-import { isDivider } from '../../../utils.js';
+import { isDivider } from '../../../utils/utils.js';
 import type {
   SwitchViewAction,
   SwitchViewActionType,
@@ -105,7 +105,7 @@ class DatabaseTypePopup extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   dbType!: SwitchViewActionType;
 
   override render() {
@@ -172,7 +172,7 @@ export class ToolbarActionPopup extends LitElement {
 
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   close!: () => void;
 
   @query('.affine-database-toolbar-action-popup')

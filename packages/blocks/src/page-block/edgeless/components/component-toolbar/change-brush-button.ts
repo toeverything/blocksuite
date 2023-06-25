@@ -93,19 +93,19 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   elements: BrushElement[] = [];
 
   @property({ type: Object })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()

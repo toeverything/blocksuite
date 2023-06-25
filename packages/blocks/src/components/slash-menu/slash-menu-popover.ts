@@ -26,7 +26,7 @@ function collectGroupNames(menuItem: SlashItem[]) {
 export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel;
 
   @query('.slash-menu')
