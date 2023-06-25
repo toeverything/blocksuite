@@ -563,6 +563,7 @@ export class HandleResizeManager {
   };
 
   onPressShiftKey(pressed: boolean) {
+    if (!this._target) return;
     if (this._locked) return;
 
     if (this._shiftKey === pressed) return;
