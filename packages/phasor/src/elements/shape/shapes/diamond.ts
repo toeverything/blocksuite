@@ -38,14 +38,12 @@ export const DiamondMethods: ShapeMethods = {
     const cx = w / 2;
     const cy = h / 2;
 
-    matrix = matrix.translate(cx, cy).rotate(rotate);
-    if (flipX < 0) {
-      matrix = matrix.flipX();
-    }
-    if (flipY < 0) {
-      matrix = matrix.flipY();
-    }
-    ctx.setTransform(matrix.translate(-cx, -cy));
+    matrix
+      .translateSelf(cx, cy)
+      .rotateSelf(rotate)
+      .scaleSelf(flipX, flipY)
+      .translateSelf(-cx, -cy);
+    ctx.setTransform(matrix);
 
     rc.polygon(
       [

@@ -10,8 +10,8 @@ export interface IDebug {
   index: string;
   seed: number;
   rotate: number;
-  flipX: number;
-  flipY: number;
+  flipX: 1 | -1;
+  flipY: 1 | -1;
 
   color: string;
 }
@@ -48,14 +48,12 @@ export class DebugElement extends SurfaceElement<IDebug> {
     const cx = w / 2;
     const cy = h / 2;
 
-    matrix = matrix.translate(cx, cy).rotate(rotate);
-    if (flipX < 0) {
-      matrix = matrix.flipX();
-    }
-    if (flipY < 0) {
-      matrix = matrix.flipY();
-    }
-    ctx.setTransform(matrix.translate(-cx, -cy));
+    matrix
+      .translateSelf(cx, cy)
+      .rotateSelf(rotate)
+      .scaleSelf(flipX, flipY)
+      .translateSelf(-cx, -cy);
+    ctx.setTransform(matrix);
 
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, w, h);

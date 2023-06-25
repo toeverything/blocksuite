@@ -41,7 +41,7 @@ export const TriangleMethods: ShapeMethods = {
     matrix
       .translateSelf(cx, cy)
       .rotateSelf(rotate)
-      .scaleSelf(flipX < 0 ? -1 : 1, flipY < 0 ? -1 : 1)
+      .scaleSelf(flipX, flipY)
       .translateSelf(-cx, -cy);
     ctx.setTransform(matrix);
 

@@ -313,15 +313,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           surface.updateElement<'text'>(id, {
             xywh: bound.serialize(),
             fontSize: element.fontSize * p,
-            flipX: flip.x,
-            flipY: flip.y,
+            flipX: flip.x < 0 ? -1 : 1,
+            flipY: flip.y < 0 ? -1 : 1,
             rotate,
           });
         } else {
           surface.updateElement(id, {
             xywh: bound.serialize(),
-            flipX: flip.x,
-            flipY: flip.y,
+            flipX: flip.x < 0 ? -1 : 1,
+            flipY: flip.y < 0 ? -1 : 1,
             rotate,
           });
         }

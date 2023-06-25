@@ -18,8 +18,8 @@ export interface ISurfaceElement {
   index: string;
   seed: number;
   rotate: number;
-  flipX: number;
-  flipY: number;
+  flipX: 1 | -1;
+  flipY: 1 | -1;
 }
 
 export interface HitTestOptions {
