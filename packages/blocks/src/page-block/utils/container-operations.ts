@@ -552,7 +552,6 @@ export async function onModelTextUpdated(
   model: BaseBlockModel,
   callback?: (text: RichText) => void
 ) {
-  console.log('onModelTextUpdated');
   const richText = await asyncGetRichTextByModel(model);
   richText?.vEditor?.slots.updated.once(() => {
     if (callback) {

@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type {
-  CssVariableName,
-  DatabaseBlockModel,
-  ListType,
-  ThemeObserver,
+import {
+  type CssVariableName,
+  type DatabaseBlockModel,
+  type ListType,
+  type PageBlockModel,
+  type ThemeObserver,
+  updateBlockType,
 } from '@blocksuite/blocks';
+import type { BlockSchemas } from '@blocksuite/blocks/models';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -954,6 +957,23 @@ export async function transformHtml(page: Page, data: string) {
       return contentParser.htmlText2Block(data);
     },
     { data }
+  );
+  return promiseResult;
+}
+
+export async function updateBlock(
+  page: Page,
+  blockId: string,
+  flavour: keyof BlockSchemas,
+  type: string
+) {
+  const promiseResult = await page.evaluate(
+    ({ blockId, flavour, type }) => {
+      const { page } = window;
+      const blockModel = page.getBlockById(blockId) as PageBlockModel;
+      updateBlockType([blockModel], flavour, type);
+    },
+    { blockId, flavour, type }
   );
   return promiseResult;
 }
