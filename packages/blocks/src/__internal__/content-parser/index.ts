@@ -79,7 +79,7 @@ export class ContentParser {
     );
   }
 
-  async _checkReady() {
+  private async _checkReady() {
     const promise = new Promise(resolve => {
       let count = 0;
       const checkReactRender = setInterval(async () => {
@@ -102,7 +102,7 @@ export class ContentParser {
     return await promise;
   }
 
-  public async transEdgelessToCanvas(
+  private async _edgelessToCanvas(
     edgeless: EdgelessPageBlockComponent,
     bound: IBound
   ): Promise<HTMLCanvasElement | undefined> {
@@ -112,21 +112,21 @@ export class ContentParser {
     const html2canvas = (await import('html2canvas')).default;
     if (!(html2canvas instanceof Function)) return;
 
-    const blockContain = document.querySelector(
+    const container = document.querySelector(
       '.affine-block-children-container'
     );
-    if (!blockContain) return;
+    if (!container) return;
 
     const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
     canvas.width = (bound.w + 100) * dpr;
     canvas.height = (bound.h + 100) * dpr;
-    const context = canvas.getContext('2d');
-    if (!context) return;
-    context.scale(dpr, dpr);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
 
-    context.fillStyle = window.getComputedStyle(blockContain).backgroundColor;
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
@@ -156,7 +156,7 @@ export class ContentParser {
         blockElement as HTMLElement,
         html2canvasOption
       );
-      context.drawImage(
+      ctx.drawImage(
         canvasData,
         blockBound.x - bound.x + 50,
         blockBound.y - bound.y + 50,
@@ -167,12 +167,12 @@ export class ContentParser {
 
     const surfaceCanvas =
       edgeless.surface.viewport.getCanvasRenderByBound(bound);
-    surfaceCanvas && context.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+    surfaceCanvas && ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 
     return canvas;
   }
 
-  public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
+  private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
     const editorContainer = getEditorContainer(this._page);
     const pageContainer = editorContainer.querySelector(
       '.affine-default-page-block-container'
@@ -203,11 +203,11 @@ export class ContentParser {
     return data;
   }
 
-  public async transToCanvas(): Promise<HTMLCanvasElement | undefined> {
+  private async _toCanvas(): Promise<HTMLCanvasElement | void> {
     await this._checkReady();
 
     if (isPageMode(this._page)) {
-      return await this.transPageToCanvas();
+      return await this._docToCanvas();
     } else {
       const root = this._page.root;
       if (!root) return;
@@ -215,14 +215,14 @@ export class ContentParser {
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      return await this.transEdgelessToCanvas(edgeless, bound);
+      return await this._edgelessToCanvas(edgeless, bound);
     }
   }
 
   public async exportPng() {
     const root = this._page.root;
     if (!root) return;
-    const canvasImage = await this.transToCanvas();
+    const canvasImage = await this._toCanvas();
     if (!canvasImage) {
       return;
     }
@@ -236,7 +236,7 @@ export class ContentParser {
   public async exportPdf() {
     const root = this._page.root;
     if (!root) return;
-    const canvasImage = await this.transToCanvas();
+    const canvasImage = await this._toCanvas();
     if (!canvasImage) {
       return;
     }
