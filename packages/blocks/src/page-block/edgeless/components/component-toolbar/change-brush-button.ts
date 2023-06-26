@@ -107,10 +107,10 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _popperShow = false;
 
   @state()
-  private selectedColor: string | null = null;
+  private _selectedColor: string | null = null;
 
   @state()
-  private selectedSize: BrushSize | null = BrushSize.LINE_WIDTH_FOUR;
+  private _selectedSize: BrushSize | null = BrushSize.LINE_WIDTH_FOUR;
 
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
@@ -136,8 +136,8 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
         this.surface.updateElement<'brush'>(element.id, { color });
       }
     });
-    if (color && this.selectedColor !== color) {
-      this.selectedColor = color;
+    if (color && this._selectedColor !== color) {
+      this._selectedColor = color;
     }
   }
 
@@ -156,16 +156,16 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    this.selectedColor = getMostCommonColor(this.elements);
+    this._selectedColor = getMostCommonColor(this.elements);
     const style = {
-      backgroundColor: `var(${this.selectedColor})`,
+      backgroundColor: `var(${this._selectedColor})`,
     };
 
-    this.selectedSize = getMostCommonSize(this.elements);
+    this._selectedSize = getMostCommonSize(this.elements);
 
     return html`
       <edgeless-line-width-panel
-        .selectedSize=${this.selectedSize}
+        .selectedSize=${this._selectedSize}
         @select=${(e: LineWidthEvent) => this._setBrushSize(e.detail)}
       >
       </edgeless-line-width-panel>
@@ -181,7 +181,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <div class="color-panel-container">
         <edgeless-color-panel
-          .value=${this.selectedColor}
+          .value=${this._selectedColor}
           @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
         >
         </edgeless-color-panel>
