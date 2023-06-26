@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  assertDatabaseColumnOrder,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getBoundingBox,
@@ -8,6 +9,7 @@ import {
   initEmptyDatabaseState,
   pressEnter,
   pressEscape,
+  redoByClick,
   selectAllByKeyboard,
   type,
   undoByClick,
@@ -20,11 +22,160 @@ import {
   assertDatabaseCellRichTexts,
   assertSelectedStyle,
   clickDatabaseOutside,
+  getDatabaseHeaderColumn,
   getFirstColumnCell,
   initDatabaseColumn,
+  performColumnAction,
   performSelectColumnTagAction,
   switchColumnType,
 } from './actions.js';
+
+test.describe('column operations', () => {
+  test('should support rename column', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page, 'abc');
+
+    const { textElement, inputElement } = await getDatabaseHeaderColumn(
+      page,
+      1
+    );
+    expect(await textElement.innerText()).toBe('abc');
+
+    await performColumnAction(page, 'abc', 'Rename');
+    await inputElement.click();
+    await type(page, '123');
+    await pressEnter(page);
+    expect(await textElement.innerText()).toBe('abc123');
+
+    await undoByClick(page);
+    expect(await textElement.innerText()).toBe('abc');
+    await redoByClick(page);
+    expect(await textElement.innerText()).toBe('abc123');
+  });
+
+  test('should support add new column', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+
+    const { text: title1 } = await getDatabaseHeaderColumn(page, 1);
+    expect(title1).toBe('Column 1');
+
+    const selected = getFirstColumnCell(page, 'select-selected');
+    expect(await selected.innerText()).toBe('123');
+
+    await initDatabaseColumn(page, 'abc');
+    const { text: title2 } = await getDatabaseHeaderColumn(page, 2);
+    expect(title2).toBe('abc');
+
+    await initDatabaseColumn(page);
+    const { text: title3 } = await getDatabaseHeaderColumn(page, 3);
+    expect(title3).toBe('Column 3');
+  });
+
+  test('should support right insert column', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page, '1');
+
+    await performColumnAction(page, '1', 'Insert right');
+    await type(page, '2');
+    await pressEnter(page);
+    const columns = page.locator('.affine-database-column');
+    expect(await columns.count()).toBe(4);
+
+    await assertDatabaseColumnOrder(page, ['1', '2']);
+  });
+
+  test('should support left insert column', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page, '1');
+
+    await performColumnAction(page, '1', 'Insert left');
+    await type(page, '2');
+    await pressEnter(page);
+    const columns = page.locator('.affine-database-column');
+    expect(await columns.count()).toBe(4);
+
+    await assertDatabaseColumnOrder(page, ['2', '1']);
+  });
+
+  test('should support delete column', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page, '1');
+
+    const columns = page.locator('.affine-database-column');
+    expect(await columns.count()).toBe(3);
+
+    await performColumnAction(page, '1', 'Delete');
+    expect(await columns.count()).toBe(2);
+  });
+
+  test('should support duplicate column', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page, '1');
+    await initDatabaseDynamicRowWithData(page, '123', true);
+
+    await performColumnAction(page, '1', 'duplicate');
+    const cells = page.locator('.affine-database-select-cell-container');
+    expect(await cells.count()).toBe(2);
+
+    const secondCell = cells.nth(1);
+    const selected = secondCell.locator('.select-selected');
+    expect(await selected.innerText()).toBe('123');
+  });
+
+  test('should support move column right', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page, '1');
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    await initDatabaseColumn(page, '2');
+    await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
+    await assertDatabaseColumnOrder(page, ['1', '2']);
+
+    await performColumnAction(page, '1', 'Move right');
+    await waitNextFrame(page, 100);
+    await assertDatabaseColumnOrder(page, ['2', '1']);
+
+    await undoByClick(page);
+    const { column } = await getDatabaseHeaderColumn(page, 2);
+    await column.click();
+    const moveLeft = page.locator('.action', { hasText: 'Move right' });
+    expect(await moveLeft.count()).toBe(0);
+  });
+
+  test('should support move column left', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page, '1');
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    await initDatabaseColumn(page, '2');
+    await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
+    await assertDatabaseColumnOrder(page, ['1', '2']);
+
+    const { column } = await getDatabaseHeaderColumn(page, 0);
+    await column.click();
+    const moveLeft = page.locator('.action', { hasText: 'Move left' });
+    expect(await moveLeft.count()).toBe(0);
+
+    await performColumnAction(page, '2', 'Move left');
+    await assertDatabaseColumnOrder(page, ['2', '1']);
+  });
+});
 
 test.describe('switch column type', () => {
   test('switch to number', async ({ page }) => {
