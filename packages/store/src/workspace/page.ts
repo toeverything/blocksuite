@@ -16,7 +16,6 @@ import {
   toBlockProps,
 } from '../utils/utils.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { createYProxy } from '../yjs/index.js';
 import type { PageMeta } from './meta.js';
 import type { Workspace } from './workspace.js';
 
@@ -786,7 +785,7 @@ export class Page extends Space<FlatBlockMap> {
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
 
-    const props = toBlockProps(yBlock);
+    const props = toBlockProps(yBlock, this.doc);
     const model = this._createBlockModel({ ...props, id }, yBlock);
     this._blockMap.set(id, model);
 
@@ -867,7 +866,7 @@ export class Page extends Space<FlatBlockMap> {
       const value = event.target.get(key);
       hasPropsUpdate = true;
       if (value instanceof Y.Map || value instanceof Y.Array) {
-        props[key.replace('prop:', '')] = createYProxy(value, {
+        props[key.replace('prop:', '')] = this.doc.proxy.createYProxy(value, {
           deep: true,
         });
       } else {
