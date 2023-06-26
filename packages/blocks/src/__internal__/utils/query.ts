@@ -582,7 +582,7 @@ export function isContainedIn(elements: Element[], node: Element) {
 /**
  * Returns `true` if element has `data-block-id` attribute.
  */
-export function hasBlockId(element: Element) {
+function hasBlockId(element: Element): element is BlockComponentElement {
   return element.hasAttribute(ATTR);
 }
 
@@ -603,7 +603,7 @@ export function isEdgelessPage({ tagName }: Element) {
 /**
  * Returns `true` if element is default/edgeless page or note.
  */
-export function isPageOrNoteOrSurface(element: Element) {
+function isPageOrNoteOrSurface(element: Element) {
   return (
     isDefaultPage(element) ||
     isEdgelessPage(element) ||
@@ -615,7 +615,7 @@ export function isPageOrNoteOrSurface(element: Element) {
 /**
  * Returns `true` if element is not page or note.
  */
-export function isBlock(element: Element): element is BlockComponentElement {
+function isBlock(element: BlockComponentElement) {
   return !isPageOrNoteOrSurface(element);
 }
 
@@ -642,6 +642,7 @@ function isSurface({ tagName }: Element) {
 
 /**
  * Returns `true` if element is embed.
+ * @deprecated Use {@link isImage} instead.
  */
 function isEmbed({ tagName }: Element) {
   return tagName === 'AFFINE-IMAGE';
@@ -804,9 +805,9 @@ export function getClosestBlockElementByElement(
   if (hasBlockId(element) && isBlock(element)) {
     return element;
   }
-  element = element.closest(ATTR_SELECTOR);
-  if (element && isBlock(element)) {
-    return element;
+  const blockElement = element.closest<BlockComponentElement>(ATTR_SELECTOR);
+  if (blockElement && isBlock(blockElement)) {
+    return blockElement;
   }
   return null;
 }
@@ -834,7 +835,9 @@ export function getModelByBlockElement(element: Element) {
 export function getBlockElementsByElement(
   element: BlockComponentElement | Document | Element = document
 ) {
-  return Array.from(element.querySelectorAll(ATTR_SELECTOR)).filter(isBlock);
+  return Array.from(
+    element.querySelectorAll<BlockComponentElement>(ATTR_SELECTOR)
+  ).filter(isBlock);
 }
 
 /**
@@ -945,7 +948,8 @@ function findBlockElement(elements: Element[], parent?: Element) {
     if (parent && !contains(parent, element)) continue;
     if (hasBlockId(element) && isBlock(element)) return element;
     if (isEmbed(element)) {
-      if (i < len && hasBlockId(elements[i]) && isBlock(elements[i])) {
+      const element = elements[i];
+      if (i < len && hasBlockId(element) && isBlock(element)) {
         return elements[i];
       }
       return getClosestBlockElementByElement(element);
