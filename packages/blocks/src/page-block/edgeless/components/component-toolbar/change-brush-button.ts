@@ -1,6 +1,6 @@
 import '../tool-icon-button.js';
 import '../color-panel.js';
-import '../line-weight-panel.js';
+import '../line-width-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
@@ -19,7 +19,7 @@ import {
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
 } from '../color-panel.js';
-import type { LineWidthEvent } from '../line-weight-panel.js';
+import type { LineWidthEvent } from '../line-width-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
@@ -110,7 +110,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private selectedColor: string | null = null;
 
   @state()
-  private selectedSize: BrushSize | null = BrushSize.LINE_WEIGHT_FOUR;
+  private selectedSize: BrushSize | null = BrushSize.LINE_WIDTH_FOUR;
 
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
@@ -164,11 +164,11 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.selectedSize = getMostCommonSize(this.elements);
 
     return html`
-      <edgeless-line-weight-panel
+      <edgeless-line-width-panel
         .selectedSize=${this.selectedSize}
         @select=${(e: LineWidthEvent) => this._setBrushSize(e.detail)}
       >
-      </edgeless-line-weight-panel>
+      </edgeless-line-width-panel>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'Color'}
