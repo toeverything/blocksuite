@@ -6,7 +6,11 @@ import {
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { copyBlocks } from '../../__internal__/clipboard/index.js';
+import {
+  ClipboardItem,
+  copyBlocks,
+  performNativeCopy,
+} from '../../__internal__/clipboard/index.js';
 import {
   type BlockComponentElement,
   type EditingState,
@@ -376,14 +380,14 @@ export async function downloadImage(model: BaseBlockModel) {
 }
 
 export async function copyImage(model: ImageBlockModel) {
-  copyBlocks({
-    type: 'Block',
-    models: [model],
-    startOffset: 0,
-    endOffset: 0,
-  });
-
-  toast('Copied image to clipboard');
+  const storage = model.page.blobs;
+  const blob = await storage.get(model.sourceId);
+  if (blob) {
+    performNativeCopy([
+      new ClipboardItem(blob.type, URL.createObjectURL(blob)),
+    ]);
+    toast('Copied image to clipboard');
+  }
 }
 
 function getTextDelta(model: BaseBlockModel) {
@@ -409,44 +413,10 @@ export async function copyBlock(model: BaseBlockModel) {
     ],
   };
   const copySuccess = performNativeCopy([
-    { mimeType: copyType, data: JSON.stringify(copyData) },
-    { mimeType: 'text/plain', data: model.text?.toString() || '' },
+    new ClipboardItem(copyType, JSON.stringify(copyData)),
+    new ClipboardItem('text/plain', model.text?.toString() || ''),
   ]);
   return copySuccess;
-}
-
-interface ClipboardItem {
-  mimeType: string;
-  data: string;
-}
-
-function performNativeCopy(items: ClipboardItem[]): boolean {
-  let success = false;
-  const tempElem = document.createElement('textarea');
-  tempElem.value = 'temp';
-  document.body.appendChild(tempElem);
-  tempElem.select();
-  tempElem.setSelectionRange(0, tempElem.value.length);
-
-  const listener = (e: ClipboardEvent) => {
-    const clipboardData = e.clipboardData;
-    if (clipboardData) {
-      items.forEach(item => clipboardData.setData(item.mimeType, item.data));
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-    tempElem.removeEventListener('copy', listener);
-  };
-
-  tempElem.addEventListener('copy', listener);
-  try {
-    success = document.execCommand('copy');
-  } finally {
-    tempElem.removeEventListener('copy', listener);
-    document.body.removeChild(tempElem);
-  }
-  return success;
 }
 
 export function focusCaption(model: BaseBlockModel) {

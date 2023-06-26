@@ -72,6 +72,10 @@ export function getFileFromClipboard(clipboardData: DataTransfer) {
 }
 
 export function performNativeCopy(items: ClipboardItem[]): boolean {
+  if (items.length === 1 && items[0].mimeType.startsWith('image/')) {
+    return _copyImage(items[0].data);
+  }
+
   let success = false;
   const tempElem = document.createElement('textarea');
   tempElem.value = 'temp';
@@ -100,6 +104,25 @@ export function performNativeCopy(items: ClipboardItem[]): boolean {
     document.body.removeChild(tempElem);
   }
   return success;
+}
+
+function _copyImage(imageSrc: string): boolean {
+  const tempImageElem = document.createElement('img');
+  tempImageElem.src = imageSrc;
+  tempImageElem.onload = () => {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNode(tempImageElem);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    try {
+      document.execCommand('copy');
+    } finally {
+      document.body.removeChild(tempImageElem);
+    }
+  };
+  document.body.appendChild(tempImageElem);
+  return true;
 }
 
 export function createSurfaceClipboardItems(data: unknown) {
