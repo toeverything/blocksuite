@@ -1,11 +1,9 @@
 import type { Awareness } from 'y-protocols/awareness';
 import type * as Y from 'yjs';
 
-export { DebugDocProvider } from './debug-provider.js';
-
 /**
- * Different examples of providers could include webrtc sync,
- * database sync like SQLite, LevelDB or IndexedDB.
+ * Different examples of providers could include broadcast channel,
+ * database like SQLite, LevelDB or IndexedDB.
  * Usually a provider will also implement {@link DocProviderCreator}.
  */
 export interface BaseDocProvider {
@@ -13,7 +11,7 @@ export interface BaseDocProvider {
 
   /**
    * @description
-   *  Cleanup data when doc is removed.
+   * Cleanup data when doc is removed.
    */
   cleanup?: () => void;
 }
@@ -41,7 +39,7 @@ export interface ActiveDocProvider extends BaseDocProvider {
 
   /**
    * @description
-   *  Each time you call `sync`, it will return a new promise instance.
+   * Each time you call `sync`, it will return a new promise instance.
    */
   get whenReady(): Promise<void>;
 }

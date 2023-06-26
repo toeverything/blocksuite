@@ -12,6 +12,7 @@ packages=(
   "virgo"
   "connector"
   "lit"
+  "block-std"
 )
 
 replace() {

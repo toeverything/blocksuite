@@ -160,7 +160,7 @@ export async function enterPlaygroundRoom(
   ops?: {
     flags?: Partial<BlockSuiteFlags>;
     room?: string;
-    blobStorage?: ('memory' | 'indexeddb' | 'mock')[];
+    blobStorage?: ('memory' | 'idb' | 'mock')[];
     noInit?: boolean;
   }
 ) {
@@ -171,7 +171,7 @@ export async function enterPlaygroundRoom(
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
-  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
   const readyPromise = waitForPageReady(page);
 
@@ -234,25 +234,6 @@ export async function waitForPageReady(page: Page) {
         });
       })
   );
-}
-
-export async function waitForRemoteUpdateSlot(page: Page) {
-  return page.evaluate(() => {
-    return new Promise<void>(resolve => {
-      const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
-      const providers = window.subdocProviders;
-      const debugProvider = Array.from(providers.values())
-        .flat()
-        .find(provider => provider instanceof DebugDocProvider) as InstanceType<
-        typeof DebugDocProvider
-      >;
-      const callback = window.$blocksuite.blocks.debounce(() => {
-        disposable.dispose();
-        resolve();
-      }, 500);
-      const disposable = debugProvider.remoteUpdateSlot.on(callback);
-    });
-  });
 }
 
 export async function clearLog(page: Page) {
