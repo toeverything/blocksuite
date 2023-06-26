@@ -25,6 +25,7 @@ import * as Y from 'yjs';
 import {
   type EdgelessTool,
   handleNativeRangeAtPoint,
+  isEmpty,
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -497,6 +498,17 @@ export function addNote(
         // Cannot reuse `handleNativeRangeClick` directly here,
         // since `retargetClick` will re-target to pervious editor
         handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
+
+        // Waiting dom updated, remove note if it is empty
+        requestAnimationFrame(() => {
+          edgeless.slots.selectionUpdated.once(({ active }) => {
+            const block = page.getBlockById(noteId);
+            assertExists(block);
+            if (!active && isEmpty(block)) {
+              page.deleteBlock(element);
+            }
+          });
+        });
       });
     }
   });
