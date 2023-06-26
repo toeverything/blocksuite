@@ -93,17 +93,14 @@ export class BrushElement extends SurfaceElement<IBrush> {
       points,
       lineWidth,
       color,
-      matrix: localMatrix,
+      rotate,
       widthAndHeight: [w, h],
     } = this;
     const cx = w / 2;
     const cy = h / 2;
 
     ctx.setTransform(
-      matrix
-        .translateSelf(cx, cy)
-        .multiplySelf(new DOMMatrix(localMatrix))
-        .translateSelf(-cx, -cy)
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
     );
 
     const stroke = getSolidStrokePoints(points, lineWidth);

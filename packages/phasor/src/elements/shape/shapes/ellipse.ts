@@ -26,7 +26,7 @@ export const EllipseMethods: ShapeMethods = {
       realStrokeColor,
       strokeStyle,
       roughness,
-      matrix: localMatrix,
+      rotate,
       widthAndHeight: [w, h],
     } = element;
 
@@ -37,10 +37,7 @@ export const EllipseMethods: ShapeMethods = {
     const cy = h / 2;
 
     ctx.setTransform(
-      matrix
-        .translateSelf(cx, cy)
-        .multiplySelf(new DOMMatrix(localMatrix))
-        .translateSelf(-cx, -cy)
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
     );
 
     rc.ellipse(renderWidth / 2, renderHeight / 2, renderWidth, renderHeight, {

@@ -16,7 +16,6 @@ type ResizeMoveHandler = (
     string,
     {
       bound: Bound;
-      matrix: DOMMatrix;
     }
   >
 ) => void;
@@ -48,7 +47,6 @@ export class HandleResizeManager {
     string,
     {
       bound: Bound;
-      flip: IPoint;
       rotate: number;
     }
   >();
@@ -113,7 +111,6 @@ export class HandleResizeManager {
       string,
       {
         bound: Bound;
-        flip: IPoint;
         rotate: number;
       }
     >
@@ -303,7 +300,7 @@ export class HandleResizeManager {
       rect.cx = (draggingPoint.x + fixedPoint.x) / 2;
     }
 
-    const { x: flipX, y: flipY } = flip;
+    // const { x: flipX, y: flipY } = flip;
 
     const width = Math.abs(rect.w);
     const height = Math.abs(rect.h);
@@ -319,23 +316,16 @@ export class HandleResizeManager {
       string,
       {
         bound: Bound;
-        matrix: DOMMatrix;
       }
     >();
 
-    let process: (
-      value: { bound: Bound; flip: IPoint; rotate: number },
-      key: string
-    ) => void;
+    let process: (value: { bound: Bound; rotate: number }, key: string) => void;
 
     if (isCorner) {
       if (this._bounds.size === 1) {
-        process = ({ flip, rotate = 0 }, id) => {
+        process = (_, id) => {
           newBounds.set(id, {
             bound: new Bound(x, y, width, height),
-            matrix: new DOMMatrix()
-              .rotateSelf(rotate)
-              .scaleSelf(flipX * flip.x, flipY * flip.y),
           });
         };
       } else {
@@ -349,21 +339,13 @@ export class HandleResizeManager {
           .rotateSelf(-_rotate)
           .translateSelf(-fp.x, -fp.y);
 
-        // see https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html
-        const flipXY = flipX * flipY;
-        const flipAngle = flipXY < 0 ? _rotate * 2 : 0;
-
         // TODO: on same rotate
-        process = ({ bound: { x, y, w, h }, flip, rotate = 0 }, id) => {
+        process = ({ bound: { x, y, w, h } }, id) => {
           const cx = x + w / 2;
           const cy = y + h / 2;
           const center = new DOMPoint(cx, cy).matrixTransform(m2);
           const newWidth = Math.abs(w * scale.x);
           const newHeight = Math.abs(h * scale.y);
-
-          // adjust angle
-          rotate -= flipAngle;
-          rotate *= flipXY;
 
           newBounds.set(id, {
             bound: new Bound(
@@ -372,9 +354,6 @@ export class HandleResizeManager {
               newWidth,
               newHeight
             ),
-            matrix: new DOMMatrix()
-              .rotateSelf(rotate)
-              .scaleSelf(flipX * flip.x, flipY * flip.y),
           });
         };
       }
@@ -388,7 +367,7 @@ export class HandleResizeManager {
         fixedPoint.y,
         0
       );
-      process = ({ bound: { x, y, w, h }, flip, rotate = 0 }, id) => {
+      process = ({ bound: { x, y, w, h }, rotate = 0 }, id) => {
         const cx = x + w / 2;
         const cy = y + h / 2;
 
@@ -440,9 +419,6 @@ export class HandleResizeManager {
             newWidth,
             newHeight
           ),
-          matrix: new DOMMatrix()
-            .rotateSelf(rotate)
-            .scaleSelf(flipX * flip.x, flipY * flip.y),
         });
       };
     }

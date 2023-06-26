@@ -273,7 +273,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       string,
       {
         bound: Bound;
-        matrix: DOMMatrix;
       }
     >
   ) => {
@@ -284,7 +283,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     let hasNotes = false;
 
-    newBounds.forEach(({ bound, matrix }, id) => {
+    newBounds.forEach(({ bound }, id) => {
       const element = selectedMap.get(id);
       if (!element) return;
 
@@ -304,20 +303,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
         });
       } else {
-        const { a, b, c, d, e, f } = matrix;
-
         if (element instanceof TextElement) {
           const p = bound.h / element.h;
           bound.w = element.w * p;
           surface.updateElement<'text'>(id, {
             xywh: bound.serialize(),
             fontSize: element.fontSize * p,
-            matrix: [a, b, c, d, e, f],
           });
         } else {
           surface.updateElement(id, {
             xywh: bound.serialize(),
-            matrix: [a, b, c, d, e, f],
           });
         }
       }
@@ -353,18 +348,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     ) as PhasorElement[];
 
     elements.forEach(element => {
-      const { id } = element;
-      const { rotate = 0, flipX = 1, flipY = 1 } = element;
+      const { id, rotate } = element;
       const [x, y, w, h] = element.deserializeXYWH();
       const center = new DOMPoint(x + w / 2, y + h / 2).matrixTransform(m);
 
-      const { a, b, c, d, e, f } = new DOMMatrix()
-        .rotateSelf(normalizeAngle(rotate + delta))
-        .scaleSelf(flipX, flipY);
-
       surface.updateElement(id, {
         xywh: serializeXYWH(center.x - w / 2, center.y - h / 2, w, h),
-        matrix: [a, b, c, d, e, f],
+        rotate: normalizeAngle(rotate + delta),
       });
 
       handleElementChangedEffectForConnector(element, [element], surface, page);
@@ -375,7 +365,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
 
     this._rotate = angle;
-    this._selectedRect.style.setProperty('--rotate', `${angle}deg`);
     this._selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
 
     this._updateCursor(delta, true, 'rotate');

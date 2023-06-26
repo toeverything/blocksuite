@@ -13,7 +13,7 @@ const dataWithoutXywh: Omit<IShape, 'xywh'> = {
   index: 'a0',
   seed: 0,
 
-  matrix: [1, 0, 0, 1, 0, 0],
+  rotate: 0,
 
   shapeType: 'rect',
 

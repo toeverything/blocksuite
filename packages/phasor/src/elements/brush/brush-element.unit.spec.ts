@@ -13,7 +13,7 @@ const data: IBrush = {
   index: 'a1',
   seed: 0,
 
-  matrix: [1, 0, 0, 1, 0, 0],
+  rotate: 0,
 
   points: Array(100)
     .fill(0)

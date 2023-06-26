@@ -10,7 +10,7 @@ export interface IDebug {
   index: string;
   seed: number;
 
-  matrix: number[];
+  rotate: number;
 
   color: string;
 }
@@ -19,7 +19,7 @@ export const DebugElementDefaultProps: IElementDefaultProps<'debug'> = {
   type: 'debug',
   xywh: '[0,0,0,0]',
 
-  matrix: [1, 0, 0, 1, 0, 0],
+  rotate: 0,
 
   color: '#000000',
 };
@@ -37,17 +37,14 @@ export class DebugElement extends SurfaceElement<IDebug> {
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix): void {
     const {
       color,
-      matrix: localMatrix,
+      rotate,
       widthAndHeight: [w, h],
     } = this;
     const cx = w / 2;
     const cy = h / 2;
 
     ctx.setTransform(
-      matrix
-        .translateSelf(cx, cy)
-        .multiplySelf(new DOMMatrix(localMatrix))
-        .translateSelf(-cx, -cy)
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
     );
 
     ctx.fillStyle = color;

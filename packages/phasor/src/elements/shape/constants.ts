@@ -5,7 +5,7 @@ export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
   type: 'shape',
   xywh: '[0,0,0,0]',
 
-  matrix: [1, 0, 0, 1, 0, 0],
+  rotate: 0,
 
   shapeType: 'rect',
   radius: 0,

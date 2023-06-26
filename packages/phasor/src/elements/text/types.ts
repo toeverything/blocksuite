@@ -9,7 +9,7 @@ export interface IText {
   xywh: SerializedXYWH;
   seed: number;
 
-  matrix: number[];
+  rotate: number;
 
   text: Y.Text;
   color: string;
