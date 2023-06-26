@@ -553,3 +553,19 @@ test('manage note index and hidden status', async ({ page }) => {
   await selectNoteInEdgeless(page, '8');
   expect(await page.locator('.note-status').innerText()).toBe('3');
 });
+
+test('add new note if all notes is empty', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  assertBlockCount(page, 'note', 1);
+
+  // select note
+  await selectNoteInEdgeless(page, '2');
+  expect(await page.locator('.note-status').innerText()).toBe('1');
+  expect(await page.locator('affine-note').count()).toBe(1);
+  // hide note
+  await page.locator('.note-status-button').click();
+  expect(await page.locator('affine-note').count()).toBe(2);
+});
