@@ -175,6 +175,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
   };
 
   override firstUpdated() {
+    this.initTime = Date.now();
     const input = this.inputRef.value;
     if (input) {
       this.focusInput();
@@ -324,12 +325,20 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
   }
 
   private _mouseEnter = (index: number) => {
+    if (this._isConsciousChoice()) {
+      return;
+    }
     if (index !== this.selectedIndex) {
       this.selectedIndex = index;
       this.clearSubMenu();
       this.selectedItem.mouseEnter?.();
     }
   };
+
+  private initTime = 0;
+  private _isConsciousChoice() {
+    return Date.now() < this.initTime + 100;
+  }
 
   private clearSubMenu() {
     this.subMenu?.remove();
