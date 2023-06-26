@@ -70,6 +70,10 @@ export class LinkCell extends DatabaseCellElement<string> {
     }
   }
 
+  private _onEdit = () => {
+    this.setEditing(true);
+  };
+
   override render() {
     const linkText = this.value ?? '';
 
@@ -78,7 +82,9 @@ export class LinkCell extends DatabaseCellElement<string> {
         <affine-database-link-node
           .link=${linkText}
         ></affine-database-link-node>
-        <div class="affine-database-link-icon">${PenIcon}</div>
+        <div class="affine-database-link-icon" @click=${this._onEdit}>
+          ${PenIcon}
+        </div>
       </div>
     `;
   }

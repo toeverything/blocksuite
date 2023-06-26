@@ -364,17 +364,10 @@ test.describe('switch column type', () => {
     const linkText = 'http://';
     const cell = getFirstColumnCell(page, 'affine-database-link');
     await initDatabaseDynamicRowWithData(page, linkText);
-    const link = cell.locator('affine-link > a');
+    const link = cell.locator('affine-database-link-node > a');
+    const linkContent = link.locator('.link-node-text');
     await expect(link).toHaveAttribute('href', linkText);
-    await assertDatabaseCellLink(page, { text: linkText });
-
-    // Hover link
-    const linkPopoverLocator = page.locator('.affine-link-popover');
-    await expect(linkPopoverLocator).not.toBeVisible();
-    await link.hover();
-    // wait for popover delay open
-    await page.waitForTimeout(200);
-    await expect(linkPopoverLocator).not.toBeVisible();
+    expect(await linkContent.textContent()).toBe(linkText);
 
     // not link text
     await cell.hover();

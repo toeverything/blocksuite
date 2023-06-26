@@ -34,7 +34,7 @@ export class LinkNode extends ShadowlessElement {
       href=${this.link}
       rel="noopener noreferrer"
       target="_blank"
-      >${FontLinkIcon}<span>${this.link}</span></a
+      >${FontLinkIcon}<span class="link-node-text">${this.link}</span></a
     >`;
   }
 }
