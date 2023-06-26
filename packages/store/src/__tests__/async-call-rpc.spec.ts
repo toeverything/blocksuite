@@ -27,6 +27,7 @@ export class TestEventBasedChannel implements EventBasedChannel {
 
 describe('async-call-rpc provider', () => {
   test('basic', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const channel1 = new TestEventBasedChannel(undefined!);
     const channel2 = new TestEventBasedChannel(channel1);
     channel1.otherSide = channel2;
