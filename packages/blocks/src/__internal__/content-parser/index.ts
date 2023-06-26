@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/phasor/consts.js';
+import type { IBound } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
