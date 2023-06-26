@@ -73,7 +73,7 @@ export function getFileFromClipboard(clipboardData: DataTransfer) {
 
 export function performNativeCopy(items: ClipboardItem[]): boolean {
   if (items.length === 1 && items[0].mimeType.startsWith('image/')) {
-    return _copyImage(items[0].data);
+    return copyImage(items[0].data);
   }
 
   let success = false;
@@ -106,7 +106,7 @@ export function performNativeCopy(items: ClipboardItem[]): boolean {
   return success;
 }
 
-function _copyImage(imageSrc: string): boolean {
+function copyImage(imageSrc: string): boolean {
   const tempImageElem = document.createElement('img');
   tempImageElem.src = imageSrc;
   tempImageElem.onload = () => {
