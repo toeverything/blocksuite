@@ -265,7 +265,9 @@ export class SurfaceManager {
   pickByPoint(
     x: number,
     y: number,
-    options?: HitTestOptions
+    options: HitTestOptions = {
+      expand: 10,
+    }
   ): SurfaceElement[] {
     const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
     const candidates = this._renderer.gridManager.search(bound);
