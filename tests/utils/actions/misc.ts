@@ -3,7 +3,6 @@ import '../declare-test-window.js';
 
 import type {
   CssVariableName,
-  DatabaseBlockModel,
   ListType,
   ThemeObserver,
 } from '@blocksuite/blocks';
@@ -161,7 +160,7 @@ export async function enterPlaygroundRoom(
   ops?: {
     flags?: Partial<BlockSuiteFlags>;
     room?: string;
-    blobStorage?: ('memory' | 'indexeddb' | 'mock')[];
+    blobStorage?: ('memory' | 'idb' | 'mock')[];
     noInit?: boolean;
   }
 ) {
@@ -172,7 +171,7 @@ export async function enterPlaygroundRoom(
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
-  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
   const readyPromise = waitForPageReady(page);
 
@@ -235,25 +234,6 @@ export async function waitForPageReady(page: Page) {
         });
       })
   );
-}
-
-export async function waitForRemoteUpdateSlot(page: Page) {
-  return page.evaluate(() => {
-    return new Promise<void>(resolve => {
-      const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
-      const providers = window.workspace.subdocProviders;
-      const debugProvider = Array.from(providers.values())
-        .flat()
-        .find(provider => provider instanceof DebugDocProvider) as InstanceType<
-        typeof DebugDocProvider
-      >;
-      const callback = window.$blocksuite.blocks.debounce(() => {
-        disposable.dispose();
-        resolve();
-      }, 500);
-      const disposable = debugProvider.remoteUpdateSlot.on(callback);
-    });
-  });
 }
 
 export async function clearLog(page: Page) {
@@ -445,11 +425,13 @@ export async function focusDatabaseTitle(page: Page) {
 }
 
 export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
-  const columns = await page.evaluate(async () => {
-    const database = window.page?.getBlockById('2') as DatabaseBlockModel;
-    return database.columns.map(col => col.id);
-  });
-  expect(columns).toEqual(order);
+  const columns = await page
+    .locator('affine-database-column-header')
+    .locator('affine-database-header-column')
+    .all();
+  expect(await Promise.all(columns.slice(1).map(v => v.innerText()))).toEqual(
+    order
+  );
 }
 
 export async function initEmptyCodeBlockState(page: Page) {

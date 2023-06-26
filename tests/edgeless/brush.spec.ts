@@ -1,16 +1,18 @@
 import { expect } from '@playwright/test';
 
 import {
-  assertMouseMode,
+  assertEdgelessTool,
+  deleteAll,
   pickColorAtPoints,
   selectBrushColor,
   selectBrushSize,
-  setMouseMode,
+  setEdgelessTool,
   switchEditorMode,
   updateExistedBrushElementSize,
 } from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
+  click,
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
@@ -30,7 +32,7 @@ test('change editor mode when brush color palette opening', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-  await setMouseMode(page, 'brush');
+  await setEdgelessTool(page, 'brush');
 
   const brushMenu = page.locator('edgeless-brush-menu');
   await expect(brushMenu).toBeVisible();
@@ -48,7 +50,7 @@ test('add brush element', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicBrushElement(page, start, end, false);
 
-  await assertMouseMode(page, 'brush');
+  await assertEdgelessTool(page, 'brush');
 });
 
 test('resize brush element', async ({ page }) => {
@@ -76,7 +78,7 @@ test('add brush element with color', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'brush');
+  await setEdgelessTool(page, 'brush');
   const color = '--affine-palette-line-blue';
   await selectBrushColor(page, color);
 
@@ -89,12 +91,37 @@ test('add brush element with color', async ({ page }) => {
   await assertEdgelessColorSameWithHexColor(page, color, pickedColor);
 });
 
+test('keep same color when mouse mode switched back to brush', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+
+  await setEdgelessTool(page, 'brush');
+  const color = '--affine-palette-line-blue';
+  await selectBrushColor(page, color);
+  const start = { x: 200, y: 200 };
+  const end = { x: 300, y: 300 };
+  await dragBetweenCoords(page, start, end, { steps: 100 });
+
+  await setEdgelessTool(page, 'default');
+  await click(page, { x: 50, y: 50 });
+
+  await setEdgelessTool(page, 'brush');
+  const origin = { x: 100, y: 100 };
+  await dragBetweenCoords(page, origin, start, { steps: 100 });
+  const [pickedColor] = await pickColorAtPoints(page, [[110, 110]]);
+  await assertEdgelessColorSameWithHexColor(page, color, pickedColor);
+});
+
 test('add brush element with different size', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'brush');
+  await setEdgelessTool(page, 'brush');
   await selectBrushSize(page, 10);
   const color = '--affine-palette-line-blue';
   await selectBrushColor(page, color);

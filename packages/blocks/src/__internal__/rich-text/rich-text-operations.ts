@@ -559,7 +559,10 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     const text = model.text;
     const titleElement = document.querySelector(
       '.affine-default-page-block-title'
-    ) as HTMLTextAreaElement;
+    ) as HTMLTextAreaElement | null;
+    // Probably no title, e.g. in edgeless mode
+    if (!titleElement) return false;
+
     const pageModel = getModelByElement(titleElement) as PageBlockModel;
     const title = pageModel.title;
 
@@ -569,7 +572,13 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
       textLength = text.length;
       title.join(text);
     }
-    page.deleteBlock(model);
+
+    // Preserve at least one block to be able to focus on container click
+    if (page.getNextSibling(model)) {
+      page.deleteBlock(model);
+    } else {
+      text?.clear();
+    }
     focusTitle(page, title.length - textLength);
     return true;
   }

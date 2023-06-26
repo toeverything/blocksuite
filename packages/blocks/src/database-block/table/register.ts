@@ -1,10 +1,8 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import { onClickOutside } from '../utils.js';
+import type { ColumnManager } from './table-view-manager.js';
 import type { ColumnType, SetValueOption } from './types.js';
 
 export abstract class DatabaseCellElement<
@@ -12,31 +10,30 @@ export abstract class DatabaseCellElement<
   Data extends Record<string, unknown> = Record<string, unknown>
 > extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
-
   @property({ attribute: false })
-  page!: Page;
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
-  @property({ attribute: false })
-  readonly!: boolean;
-  @property({ attribute: false })
-  setHeight!: (height: number) => void;
-
-  @property({ attribute: false })
-  updateColumnData!: (apply: (oldProperty: Data) => Partial<Data>) => void;
-  @property({ attribute: false })
-  columnData!: Data;
-  @property({ attribute: false })
-  value: Value | null = null;
-  @property({ attribute: false })
-  onChange!: (value: Value | null, ops?: SetValueOption) => void;
-
+  column!: ColumnManager<Value, Data>;
+  @property()
+  rowId!: string;
   @property({ attribute: false })
   isEditing!: boolean;
-
   @property({ attribute: false })
   protected setEditing!: (editing: boolean) => void;
+
+  get page() {
+    return this.column.page;
+  }
+
+  get readonly(): boolean {
+    return this.column.readonly;
+  }
+
+  get value() {
+    return this.column.getValue(this.rowId);
+  }
+
+  onChange(value: Value | undefined, ops?: SetValueOption): void {
+    this.column.setValue(this.rowId, value, ops);
+  }
 
   protected _setEditing(editing: boolean) {
     this.setEditing(editing);
@@ -54,24 +51,6 @@ export abstract class DatabaseCellElement<
     super.connectedCallback();
     this.style.width = '100%';
     this.style.height = '100%';
-    this._disposables.addFromEvent(this, 'click', () => {
-      setTimeout(() => {
-        this._setEditing(true);
-      });
-    });
-    const cancelClickOutside = onClickOutside(
-      this,
-      () => {
-        if (this.isEditing) {
-          this._setEditing(false);
-        }
-      },
-      'mousedown',
-      true
-    );
-    this._disposables.add({
-      dispose: cancelClickOutside,
-    });
   }
 }
 

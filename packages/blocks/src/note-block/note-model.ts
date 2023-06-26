@@ -20,6 +20,7 @@ export const NoteBlockSchema = defineBlockSchema({
     xywh: `[0,0,${EDITOR_WIDTH},480]`,
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
+    hidden: false,
   }),
   metadata: {
     version: 1,

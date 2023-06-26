@@ -1,6 +1,7 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
+import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { ITextDelta } from '../text/types.js';
 import {
@@ -12,7 +13,6 @@ import {
 import { SHAPE_TEXT_FONT_SIZE } from './constants.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
-
 export class ShapeElement extends SurfaceElement<IShape> {
   get shapeType() {
     const shapeType = this.yMap.get('shapeType') as IShape['shapeType'];
@@ -105,6 +105,10 @@ export class ShapeElement extends SurfaceElement<IShape> {
   override hitTest(x: number, y: number, options?: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
     return hitTest(x, y, this, options);
+  }
+
+  override intersectWithLine(start: IVec, end: IVec): boolean {
+    return ShapeMethodsMap[this.shapeType].intersectWithLine(start, end, this);
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {

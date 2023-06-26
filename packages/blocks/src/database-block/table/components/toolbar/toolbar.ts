@@ -2,11 +2,13 @@ import './toolbar-action-popup.js';
 import '../../../common/filter/filter-group.js';
 
 import {
+  DatabaseExpandWide,
   DatabaseSearchClose,
   DatabaseSearchIcon,
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { computePosition } from '@floating-ui/dom';
@@ -16,16 +18,17 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
-import { columnManager, titleHelper } from '../../../common/column-manager.js';
+import { columnManager } from '../../../common/column-manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type {
-  DatabaseViewDataMap,
-  TableMixColumn,
-} from '../../../common/view-manager.js';
-import type { DatabaseBlockModel } from '../../../database-model.js';
-import { onClickOutside } from '../../../utils.js';
+  DatabaseBlockModel,
+  InsertPosition,
+} from '../../../database-model.js';
+import { onClickOutside } from '../../../utils/utils.js';
+import type { TableViewManager } from '../../table-view-manager.js';
 import { SearchState } from '../../types.js';
+import { showDatabaseTableViewModal } from '../modal/index.js';
 import { initAddNewRecordHandlers } from './index.js';
 import { ToolbarActionPopup } from './toolbar-action-popup.js';
 
@@ -167,6 +170,9 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  root!: BlockSuiteRoot;
+
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
   @property({ attribute: false })
@@ -176,13 +182,13 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   searchState!: SearchState;
 
   @property({ attribute: false })
-  columns!: TableMixColumn[];
+  view!: TableViewManager;
 
   @property({ attribute: false })
-  view!: DatabaseViewDataMap['table'];
+  addRow!: (position: InsertPosition) => void;
 
   @property({ attribute: false })
-  addRow!: (index?: number) => void;
+  modalMode?: boolean;
 
   @property({ attribute: false })
   setSearchState!: (state: SearchState) => void;
@@ -344,7 +350,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
-    this.addRow(0);
+    this.addRow('start');
   };
 
   private get _filter() {
@@ -352,25 +358,15 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   }
 
   private set _filter(filter: FilterGroup) {
-    this.targetModel.updateView(this.view.id, 'table', data => {
-      data.filter = filter;
-    });
-    this.targetModel.applyViewsUpdate();
+    this.view.updateFilter(filter);
   }
 
   private get _vars() {
-    return [
-      {
-        name: this.targetModel.titleColumnName,
-        id: this.targetModel.id,
-        type: titleHelper.dataType({}),
-      },
-      ...this.columns.map(v => ({
-        id: v.id,
-        name: v.name,
-        type: columnManager.typeOf(v.type, v.data),
-      })),
-    ];
+    return this.targetModel.columns.map(v => ({
+      id: v.id,
+      name: v.name,
+      type: columnManager.typeOf(v.type, v.data),
+    }));
   }
 
   private _showFilter(event: MouseEvent) {
@@ -400,6 +396,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     }
     popAdvance();
   }
+
+  private _onShowModalView = () => {
+    if (!this.modalMode) {
+      showDatabaseTableViewModal({
+        root: this.root,
+        model: this.targetModel,
+        page: this.targetModel.page,
+      });
+    }
+  };
 
   override render() {
     const expandSearch =
@@ -461,9 +467,17 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>
+      ${this.modalMode
+        ? null
+        : html`<div
+            class="affine-database-toolbar-item expand"
+            @click=${this._onShowModalView}
+          >
+            ${DatabaseExpandWide}
+          </div>`}
       ${this.readonly
         ? null
-        : html` <div
+        : html`<div
               class="affine-database-toolbar-item more-action ${isActiveMoreAction
                 ? 'active'
                 : ''}"

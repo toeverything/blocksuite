@@ -1,5 +1,3 @@
-import { expect } from '@playwright/test';
-
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
   addBasicRectShapeElement,

@@ -10,27 +10,28 @@ import { normalizeWheelDeltaY } from '@blocksuite/phasor';
 import {
   AbstractSelectionManager,
   type BlockComponentElement,
+  type EdgelessTool,
   getEditorContainerByElement,
   isDatabaseInput,
   isInsideEdgelessTextEditor,
   isInsidePageTitle,
   isMiddleButtonPressed,
   isPinchEvent,
-  type MouseMode,
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { updateLocalSelectionRange } from '../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { BrushModeController } from './mode-controllers/brush-mode.js';
-import { ConnectorModeController } from './mode-controllers/connector-mode.js';
-import { DefaultModeController } from './mode-controllers/default-mode.js';
-import type { MouseModeController } from './mode-controllers/index.js';
-import { NoteModeController } from './mode-controllers/note-mode.js';
-import { PanModeController } from './mode-controllers/pan-mode.js';
-import { ShapeModeController } from './mode-controllers/shape-mode.js';
-import { TextModeController } from './mode-controllers/text-mode.js';
+import { BrushToolController } from './tool-controllers/brush-tool.js';
+import { ConnectorToolController } from './tool-controllers/connector-tool.js';
+import { DefaultToolController } from './tool-controllers/default-tool.js';
+import { EraserToolController } from './tool-controllers/eraser-tool.js';
+import type { EdgelessToolController } from './tool-controllers/index.js';
+import { NoteToolController } from './tool-controllers/note-tool.js';
+import { PanToolController } from './tool-controllers/pan-tool.js';
+import { ShapeTooolController } from './tool-controllers/shape-tool.js';
+import { TextToolController } from './tool-controllers/text-tool.js';
 import {
   getSelectionBoxBound,
   getXYWH,
@@ -75,17 +76,17 @@ export interface SelectionArea {
 }
 
 export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
-  private _mouseMode: MouseMode = {
+  private _edgelessTool: EdgelessTool = {
     type: 'default',
   };
 
-  private _controllers: Record<MouseMode['type'], MouseModeController>;
+  private _controllers: Record<EdgelessTool['type'], EdgelessToolController>;
 
   /** Latest mouse position in view coords */
   private _lastMousePos: { x: number; y: number } = { x: 0, y: 0 };
 
   private _rightClickTimer: {
-    mouseMode: MouseMode;
+    edgelessTool: EdgelessTool;
     timer: number;
     timeStamp: number;
   } | null = null;
@@ -113,18 +114,18 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     return this._lastMousePos;
   }
 
-  get mouseMode() {
-    return this._mouseMode;
+  get edgelessTool() {
+    return this._edgelessTool;
   }
 
-  set mouseMode(mode: MouseMode) {
-    this._mouseMode = mode;
+  set edgelessTool(mode: EdgelessTool) {
+    this._edgelessTool = mode;
     // sync mouse mode
-    this._controllers[this._mouseMode.type].mouseMode = this._mouseMode;
+    this._controllers[this._edgelessTool.type].tool = this._edgelessTool;
   }
 
   get currentController() {
-    return this._controllers[this.mouseMode.type];
+    return this._controllers[this.edgelessTool.type];
   }
 
   get draggingArea() {
@@ -154,13 +155,14 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     super(container, dispacher);
 
     this._controllers = {
-      default: new DefaultModeController(this.container),
-      text: new TextModeController(this.container),
-      shape: new ShapeModeController(this.container),
-      brush: new BrushModeController(this.container),
-      pan: new PanModeController(this.container),
-      note: new NoteModeController(this.container),
-      connector: new ConnectorModeController(this.container),
+      default: new DefaultToolController(this.container),
+      text: new TextToolController(this.container),
+      shape: new ShapeTooolController(this.container),
+      brush: new BrushToolController(this.container),
+      pan: new PanToolController(this.container),
+      note: new NoteToolController(this.container),
+      connector: new ConnectorToolController(this.container),
+      eraser: new EraserToolController(this.container),
     };
 
     this._initMouseAndWheelEvents();
@@ -305,7 +307,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   private _onContainerDragStart = (e: PointerEventState) => {
     if (this.page.readonly) return;
     // do nothing when holding right-key and not in pan mode
-    if (e.button === 2 && this.mouseMode.type !== 'pan') return;
+    if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
 
     return this.currentController.onContainerDragStart(e);
   };
@@ -313,7 +315,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   private _onContainerDragMove = (e: PointerEventState) => {
     if (this.page.readonly) return;
     // do nothing when holding right-key and not in pan mode
-    if (e.button === 2 && this.mouseMode.type !== 'pan') return;
+    if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
 
     return this.currentController.onContainerDragMove(e);
   };
@@ -321,7 +323,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   private _onContainerDragEnd = (e: PointerEventState) => {
     if (this.page.readonly) return;
     // do nothing when holding right-key and not in pan mode
-    if (e.button === 2 && this.mouseMode.type !== 'pan') return;
+    if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
 
     return this.currentController.onContainerDragEnd(e);
   };
@@ -343,19 +345,19 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   private _onContainerPointerMove = (e: PointerEventState) => {
     this._updateLastMousePos(e);
     this.container.slots.hoverUpdated.emit();
-    return this._controllers[this.mouseMode.type].onContainerMouseMove(e);
+    return this._controllers[this.edgelessTool.type].onContainerMouseMove(e);
   };
 
   private _onContainerPointerOut = (e: PointerEventState) => {
-    return this._controllers[this.mouseMode.type].onContainerMouseOut(e);
+    return this._controllers[this.edgelessTool.type].onContainerMouseOut(e);
   };
 
   private _onContainerContextMenu = (e: PointerEventState) => {
     e.raw.preventDefault();
-    const mouseMode = this.mouseMode;
-    if (mouseMode.type !== 'pan' && !this._rightClickTimer) {
+    const edgelessTool = this.edgelessTool;
+    if (edgelessTool.type !== 'pan' && !this._rightClickTimer) {
       this._rightClickTimer = {
-        mouseMode,
+        edgelessTool: edgelessTool,
         timeStamp: e.raw.timeStamp,
         timer: window.setTimeout(() => {
           this._controllers['pan'].onContainerDragStart(e);
@@ -367,10 +369,10 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   private _onContainerPointerDown = (e: PointerEventState) => {
     if (!isMiddleButtonPressed(e.raw)) return;
 
-    const prevMouseMode = this._mouseMode;
+    const prevEdgelessTool = this._edgelessTool;
     const switchToPreMode = (_e: MouseEvent) => {
       if (!isMiddleButtonPressed(_e)) {
-        this.setMouseMode(prevMouseMode);
+        this.setEdgelessTool(prevEdgelessTool);
         document.removeEventListener('pointerup', switchToPreMode, false);
         document.removeEventListener('pointerover', switchToPreMode, false);
       }
@@ -387,14 +389,18 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       switchToPreMode
     );
 
-    this.setMouseMode({ type: 'pan', panning: true });
+    this.setEdgelessTool({ type: 'pan', panning: true });
   };
 
   private _onContainerPointerUp = (e: PointerEventState) => {
     if (e.button === 2 && this._rightClickTimer) {
-      const { timer, timeStamp, mouseMode } = this._rightClickTimer;
+      const {
+        timer,
+        timeStamp,
+        edgelessTool: edgelessTool,
+      } = this._rightClickTimer;
       if (e.raw.timeStamp - timeStamp > 233) {
-        this.container.slots.mouseModeUpdated.emit(mouseMode);
+        this.container.slots.edgelessToolUpdated.emit(edgelessTool);
       } else {
         clearTimeout(timer);
       }
@@ -432,7 +438,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       // if not note block
       !isTopLevelBlock(hovered) ||
       // if in other mouse mode
-      this.mouseMode.type !== 'default' ||
+      this.edgelessTool.type !== 'default' ||
       // if current selection is not active
       !this.state.active ||
       // if current selected block is not the hovered block
@@ -452,15 +458,16 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     };
   }
 
-  setMouseMode = (
-    mouseMode: MouseMode,
+  setEdgelessTool = (
+    edgelessTool: EdgelessTool,
     state: EdgelessSelectionState = {
       selected: [],
       active: false,
     }
   ) => {
-    if (this.mouseMode === mouseMode) return;
-    if (mouseMode.type === 'default') {
+    if (this.edgelessTool === edgelessTool) return;
+    this._controllers[this.edgelessTool.type].beforeModeSwitch(edgelessTool);
+    if (edgelessTool.type === 'default') {
       if (!state.selected.length && this.lastState) {
         state = this.lastState;
         this.lastState = null;
@@ -471,12 +478,13 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       this.lastState = this.state;
     }
 
-    this.container.slots.mouseModeUpdated.emit(mouseMode);
+    this.container.slots.edgelessToolUpdated.emit(edgelessTool);
     this.container.slots.selectionUpdated.emit(state);
+    this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
 
   switchToDefaultMode(state: EdgelessSelectionState) {
-    this.setMouseMode({ type: 'default' }, state);
+    this.setEdgelessTool({ type: 'default' }, state);
   }
 
   clear() {

@@ -1,10 +1,10 @@
 import { expect } from '@playwright/test';
 
 import {
-  assertMouseMode,
+  assertEdgelessTool,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
-  setMouseMode,
+  setEdgelessTool,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -19,14 +19,14 @@ test('add text element in default mode', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
   await page.mouse.dblclick(130, 140);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
   await assertEdgelessText(page, 'hello');
-  await assertMouseMode(page, 'default');
+  await assertEdgelessTool(page, 'default');
 
   await page.mouse.click(120, 140);
 
@@ -51,14 +51,14 @@ test('add text element in text mode', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'text');
+  await setEdgelessTool(page, 'text');
 
   await page.mouse.click(130, 140);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
   await assertEdgelessText(page, 'hello');
-  await assertMouseMode(page, 'default');
+  await assertEdgelessTool(page, 'default');
 
   await page.mouse.click(120, 140);
 
@@ -83,14 +83,14 @@ test('copy and paste', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
   await page.mouse.dblclick(130, 140);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
   await assertEdgelessText(page, 'hello');
-  await assertMouseMode(page, 'default');
+  await assertEdgelessTool(page, 'default');
 
   await page.mouse.move(145, 155);
   await page.mouse.down();
