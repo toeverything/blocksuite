@@ -230,7 +230,7 @@ export class EditColumnPopup extends LitElement {
 
         return html`
           <div
-            class="action"
+            class="action column-type"
             @mouseover="${onMouseOver}"
             @click="${() => {
               if (action.type === 'action') {

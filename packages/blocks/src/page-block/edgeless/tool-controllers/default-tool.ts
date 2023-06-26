@@ -21,7 +21,6 @@ import {
   getRectByBlockElement,
   handleNativeRangeAtPoint,
   handleNativeRangeDragMove,
-  isEmpty,
   noop,
   Point,
   Rect,
@@ -253,19 +252,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _tryDeleteEmptyBlocks() {
-    const emptyBlocks = this._blocks.filter(b => isEmpty(b));
-    // always keep at least one note block
-    if (emptyBlocks.length === this._blocks.length) {
-      emptyBlocks.shift();
-    }
-
-    if (emptyBlocks.length) {
-      this._page.captureSync();
-      emptyBlocks.forEach(b => this._page.deleteBlock(b));
-    }
-  }
-
   /** Update drag handle by closest block elements */
   private _updateDragHandle(e: PointerEventState) {
     const block = this.state.selected[0];
@@ -300,8 +286,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerClick(e: PointerEventState) {
-    this._tryDeleteEmptyBlocks();
-
     const selected = this._pick(e.x, e.y);
 
     if (selected) {

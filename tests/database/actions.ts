@@ -246,6 +246,38 @@ export async function assertDatabaseCellNumber(
   expect(actualText?.trim()).toEqual(text);
 }
 
+export async function assertDatabaseCellLink(
+  page: Page,
+  {
+    rowIndex = 0,
+    columnIndex = 1,
+    text,
+  }: {
+    rowIndex?: number;
+    columnIndex?: number;
+    text: string;
+  }
+) {
+  const actualTexts = await page.evaluate(
+    ({ rowIndex, columnIndex }) => {
+      const rows = document.querySelector('.affine-database-block-rows');
+      const row = rows?.querySelector(
+        `.database-row:nth-child(${rowIndex + 1})`
+      );
+      const cell = row?.querySelector(
+        `.database-cell:nth-child(${columnIndex + 1})`
+      );
+      const richText =
+        cell?.querySelector<RichText>('affine-database-link-cell') ??
+        cell?.querySelector<RichText>('affine-database-link-cell-editing');
+      if (!richText) throw new Error('Missing database rich text cell');
+      return richText.vEditor.yText.toString();
+    },
+    { rowIndex, columnIndex }
+  );
+  expect(actualTexts).toEqual(text);
+}
+
 export async function assertDatabaseTitleText(page: Page, text: string) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
   expect(await dbTitle.textContent()).toEqual(text);

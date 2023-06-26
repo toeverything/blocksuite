@@ -116,7 +116,7 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
     if (!this.value) {
       value = this._initYText();
     } else {
-      // When copying the database, the type of the value is `string`.s
+      // When copying the database, the type of the value is `string`.
       if (typeof this.value === 'string') {
         value = this._initYText(this.value);
       } else {
@@ -192,7 +192,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     if (!this.value) {
       value = this._initYText();
     } else {
-      // When copying the database, the type of the value is `string`.s
+      // When copying the database, the type of the value is `string`.
       if (typeof this.value === 'string') {
         value = this._initYText(this.value);
       } else {

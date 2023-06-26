@@ -1,5 +1,5 @@
-import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
+import './image/placeholder/loading-card.js';
 
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement, type FocusContext } from '@blocksuite/lit';
@@ -105,6 +105,9 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   @state()
   private _optionPosition: { x: number; y: number } | null = null;
 
+  @state()
+  _focused = false;
+
   private _retryCount = 0;
 
   private hoverState = new Slot<boolean>();
@@ -176,11 +179,13 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     if (ctx.multi) {
       return true;
     }
+    this._focused = true;
     // show selection rect
     return false;
   }
 
   override blurBlock(ctx: FocusContext) {
+    this._focused = false;
     super.blurBlock(ctx);
     return true;
   }
@@ -333,7 +338,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _imageResizeBoardTemplate() {
-    if (!this.focused || this._imageState !== 'ready') return null;
+    const isFocused = this._focused;
+    if (!isFocused || this._imageState !== 'ready') return null;
     return ImageSelectedRectsContainer();
   }
 

@@ -86,7 +86,7 @@ function normalizeUrl(url: string) {
 /**
  * For more detail see https://www.ietf.org/rfc/rfc1738.txt
  */
-const isValidLink = (str: string) => {
+export const isValidLink = (str: string) => {
   if (!str) {
     return false;
   }
