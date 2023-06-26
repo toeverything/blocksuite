@@ -33,7 +33,7 @@ export interface SurfaceViewport {
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
 
-  getCanvasRenderByBound(bound: IBound): HTMLCanvasElement | null;
+  getCanvasByBound(bound: IBound): HTMLCanvasElement;
 }
 
 /**
@@ -302,14 +302,13 @@ export class Renderer implements SurfaceViewport {
     ctx.restore();
   }
 
-  public getCanvasRenderByBound(bound: IBound): HTMLCanvasElement | null {
+  public getCanvasByBound(bound: IBound): HTMLCanvasElement {
     const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
     canvas.width = bound.w * dpr;
     canvas.height = bound.h * dpr;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     ctx.scale(dpr, dpr);
 
     const rc = new RoughCanvas(canvas);

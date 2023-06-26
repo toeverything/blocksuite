@@ -165,9 +165,8 @@ export class ContentParser {
       );
     }
 
-    const surfaceCanvas =
-      edgeless.surface.viewport.getCanvasRenderByBound(bound);
-    surfaceCanvas && ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(bound);
+    ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 
     return canvas;
   }
