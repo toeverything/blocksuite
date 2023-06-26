@@ -303,11 +303,15 @@ export class Renderer implements SurfaceViewport {
   }
 
   public getCanvasRenderByBound(bound: IBound): HTMLCanvasElement | null {
+    const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
-    canvas.width = bound.w;
-    canvas.height = bound.h;
+    canvas.width = bound.w * dpr;
+    canvas.height = bound.h * dpr;
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.scale(dpr, dpr);
+
     const rc = new RoughCanvas(canvas);
     this._renderByBound(ctx, rc, bound);
 

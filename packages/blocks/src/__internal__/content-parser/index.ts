@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/phasor/consts.js';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
@@ -101,13 +102,31 @@ export class ContentParser {
     return await promise;
   }
 
-  public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
-    await this._checkReady();
-
+  public async transEdgelessToCanvas(
+    edgeless: EdgelessPageBlockComponent,
+    bound: IBound
+  ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
+
     const html2canvas = (await import('html2canvas')).default;
     if (!(html2canvas instanceof Function)) return;
+
+    const blockContain = document.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!blockContain) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const canvas = document.createElement('canvas');
+    canvas.width = (bound.w + 100) * dpr;
+    canvas.height = (bound.h + 100) * dpr;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.scale(dpr, dpr);
+
+    context.fillStyle = window.getComputedStyle(blockContain).backgroundColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
@@ -127,76 +146,83 @@ export class ContentParser {
       },
     };
 
-    const editorContainer = getEditorContainer(this._page);
-    if (isPageMode(this._page)) {
-      const pageContainer = editorContainer.querySelector(
-        '.affine-default-page-block-container'
+    const nodeElements = edgeless.getSortedElementsByBound(bound);
+    for (const nodeElement of nodeElements) {
+      const blockElement = getBlockElementById(nodeElement.id)?.closest(
+        '.affine-edgeless-block-child'
       );
-      if (!pageContainer) return;
-
-      const data = await html2canvas(
-        pageContainer as HTMLElement,
+      const blockBound = xywhArrayToObject(nodeElement);
+      const canvasData = await html2canvas(
+        blockElement as HTMLElement,
         html2canvasOption
       );
-      return data;
+      context.drawImage(
+        canvasData,
+        blockBound.x - bound.x + 50,
+        blockBound.y - bound.y + 50,
+        blockBound.w,
+        blockBound.h
+      );
+    }
+
+    const surfaceCanvas =
+      edgeless.surface.viewport.getCanvasRenderByBound(bound);
+    surfaceCanvas && context.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+
+    return canvas;
+  }
+
+  public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
+    const editorContainer = getEditorContainer(this._page);
+    const pageContainer = editorContainer.querySelector(
+      '.affine-default-page-block-container'
+    );
+    if (!pageContainer) return;
+
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    const html2canvasOption = {
+      ignoreElements: function (element: Element) {
+        if (
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+    };
+
+    const data = await html2canvas(
+      pageContainer as HTMLElement,
+      html2canvasOption
+    );
+    return data;
+  }
+
+  public async transToCanvas(): Promise<HTMLCanvasElement | undefined> {
+    await this._checkReady();
+
+    if (isPageMode(this._page)) {
+      return await this.transPageToCanvas();
     } else {
+      const root = this._page.root;
+      if (!root) return;
+
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-
-      const promise = new Promise((resolve, reject) => {
-        setTimeout(async () => {
-          const blockContain = document.querySelector(
-            '.affine-block-children-container'
-          );
-          const canvas = document.createElement('canvas');
-          canvas.width = bound.w + 100;
-          canvas.height = bound.h + 100;
-          const context = canvas.getContext('2d');
-          if (context && blockContain) {
-            context.fillStyle =
-              window.getComputedStyle(blockContain).backgroundColor;
-            context.fillRect(0, 0, canvas.width, canvas.height);
-
-            const nodeElements = edgeless.getSortedElementsByBound(bound);
-            for (const nodeElement of nodeElements) {
-              const blockElement = getBlockElementById(nodeElement.id)?.closest(
-                '.affine-edgeless-block-child'
-              );
-              const blockBound = xywhArrayToObject(nodeElement);
-              const canvasData = await html2canvas(
-                blockElement as HTMLElement,
-                html2canvasOption
-              );
-              context.drawImage(
-                canvasData,
-                blockBound.x - bound.x + 50,
-                blockBound.y - bound.y + 50,
-                blockBound.w,
-                blockBound.h
-              );
-            }
-
-            const surfaceCanvas =
-              edgeless.surface.viewport.getCanvasRenderByBound(bound);
-            surfaceCanvas &&
-              context.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
-
-            resolve(canvas);
-          } else {
-            reject();
-          }
-        }, 0);
-      });
-      const data = (await promise) as HTMLCanvasElement;
-      return data;
+      return await this.transEdgelessToCanvas(edgeless, bound);
     }
   }
 
   public async exportPng() {
     const root = this._page.root;
     if (!root) return;
-    const canvasImage = await this.transPageToCanvas();
+    const canvasImage = await this.transToCanvas();
     if (!canvasImage) {
       return;
     }
@@ -210,7 +236,7 @@ export class ContentParser {
   public async exportPdf() {
     const root = this._page.root;
     if (!root) return;
-    const canvasImage = await this.transPageToCanvas();
+    const canvasImage = await this.transToCanvas();
     if (!canvasImage) {
       return;
     }
