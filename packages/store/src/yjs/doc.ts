@@ -3,7 +3,7 @@ import type { Transaction } from 'yjs';
 import * as Y from 'yjs';
 
 import type { ProxyConfig } from './config.js';
-import { createYArrayProxy, createYMapProxy } from './proxy.js';
+import { ProxyManager } from './proxy.js';
 
 export type BlockSuiteDocAllowedValue =
   | Record<string, unknown>
@@ -12,6 +12,7 @@ export type BlockSuiteDocAllowedValue =
 export type BlockSuiteDocData = Record<string, BlockSuiteDocAllowedValue>;
 
 export class BlockSuiteDoc extends Y.Doc {
+  proxy = new ProxyManager();
   private _spaces: Y.Map<Y.Doc> = this.getMap('spaces');
 
   get spaces() {
@@ -42,7 +43,7 @@ export class BlockSuiteDoc extends Y.Doc {
       : never
   >(key: Key, config: ProxyConfig = {}): Value {
     const map = super.getMap(key);
-    return createYMapProxy(map, config);
+    return this.proxy.createYMapProxy(map, config);
   }
 
   getArrayProxy<
@@ -52,7 +53,7 @@ export class BlockSuiteDoc extends Y.Doc {
       : never
   >(key: Key, config: ProxyConfig = {}): Value {
     const array = super.getArray(key);
-    return createYArrayProxy(array, config) as Value;
+    return this.proxy.createYArrayProxy(array, config) as Value;
   }
 
   @debug('transact')
