@@ -73,16 +73,10 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return false;
   }
 
-  override hitTest(
-    x: number,
-    y: number,
-    options?: HitTestOptions | undefined
-  ): boolean {
-    const insideBoundBox = super.hitTest(x, y, options);
+  override hitTest(x: number, y: number, options?: HitTestOptions): boolean {
+    const insideBoundingBox = super.hitTest(x, y, options);
 
-    if (!insideBoundBox) {
-      return insideBoundBox;
-    }
+    if (!insideBoundingBox) return false;
 
     const command = getSvgPathFromStroke(
       getSolidStrokePoints(this.points, this.lineWidth)
