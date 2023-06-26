@@ -15,8 +15,8 @@ import {
   getBoundingRect,
   initEmptyEdgelessState,
   initThreeNotes,
+  initThreeOverlapShapes,
   initThreeParagraphs,
-  initThreeShapes,
   pressEnter,
   resizeElementByTopLeftHandle,
   selectAllByKeyboard,
@@ -282,7 +282,7 @@ test.fixme('copy to clipboard as PNG', async ({ page, context }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-  await initThreeShapes(page);
+  await initThreeOverlapShapes(page);
   await initThreeNotes(page);
   await waitNextFrame(page);
 
