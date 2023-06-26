@@ -101,7 +101,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         if (target instanceof Element && this.isCurrentDatabase(target)) {
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
-            cell?.cell?.enterEditMode(event);
+            cell?.cell?.enterEditMode();
             return true;
           }
         }
@@ -283,7 +283,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         this.getCellContainer(
           selection.focus.rowIndex,
           selection.focus.columnIndex
-        ).cell?.exitEditMode(evt);
+        ).cell?.exitEditMode();
         return true;
       } else {
         if (rowsSelection && !selection.columnsSelection) {
@@ -313,7 +313,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       this.getCellContainer(
         selection.focus.rowIndex,
         selection.focus.columnIndex
-      ).cell?.enterEditMode(evt);
+      ).cell?.enterEditMode();
       return true;
     }
     if (evt.shiftKey) {
