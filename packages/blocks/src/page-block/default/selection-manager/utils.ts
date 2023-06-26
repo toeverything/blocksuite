@@ -150,6 +150,9 @@ export function setSelectedBlocks(
 }
 
 export interface AutoScrollHooks {
+  /**
+   * @deprecated This hook is meaningless.
+   */
   init(): void;
   onMove(): void;
   onScroll(val: number): void;

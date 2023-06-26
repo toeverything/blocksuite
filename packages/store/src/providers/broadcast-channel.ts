@@ -1,18 +1,28 @@
-import { BroadcastMessageChannel } from 'async-call-rpc/utils/web/broadcast.channel.js';
+import type { EventBasedChannel } from 'async-call-rpc';
 
 import { createAsyncCallRPCProviderCreator } from './async-call-rpc.js';
 import type { DocProviderCreator } from './type.js';
 
+class BroadcastMessageChannel
+  extends BroadcastChannel
+  implements EventBasedChannel
+{
+  on(eventListener: (data: unknown) => void) {
+    const f = (e: MessageEvent): void => eventListener(e.data);
+    this.addEventListener('message', f);
+    return () => this.removeEventListener('message', f);
+  }
+  send(data: unknown) {
+    super.postMessage(data);
+  }
+}
+
 export const createBroadcastChannelProvider: DocProviderCreator = (...args) => {
   const id: string = args[0];
-  const broadcastMessageChannel = new BroadcastMessageChannel(id);
-  return createAsyncCallRPCProviderCreator(
-    'broadcast-channel',
-    broadcastMessageChannel,
-    {
-      cleanup: () => {
-        broadcastMessageChannel.close();
-      },
-    }
-  )(...args);
+  const channel = new BroadcastMessageChannel(id);
+  return createAsyncCallRPCProviderCreator('broadcast-channel', channel, {
+    cleanup: () => {
+      channel.close();
+    },
+  })(...args);
 };

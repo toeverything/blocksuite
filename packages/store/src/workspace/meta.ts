@@ -102,8 +102,6 @@ export class WorkspaceMeta {
       } else {
         pages.splice(index, 0, page);
       }
-
-      this._proxy.pages = pages;
     });
   }
 
@@ -208,10 +206,6 @@ export class WorkspaceMeta {
     const { pageMetas, _prevPages } = this;
 
     pageMetas.forEach(pageMeta => {
-      // newly added space can't be found
-      // unless explicitly getMap after meta updated
-      // this.doc.getMap('space:' + pageMeta.id);
-
       if (!_prevPages.has(pageMeta.id)) {
         this.pageMetaAdded.emit(pageMeta.id);
       }
