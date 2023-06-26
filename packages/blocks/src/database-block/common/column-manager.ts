@@ -222,9 +222,9 @@ columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
 ]);
 columnManager.registerConvert(numberHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);
 columnManager.registerConvert(progressHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);

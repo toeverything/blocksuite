@@ -77,30 +77,25 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
     }
     popMenu(event.target as HTMLElement, {
       options: {
-        init: {},
-        render: () => {
-          return {
-            input: {
-              initValue: view.name,
-              onComplete: text => {
-                this.model.updateView(view.id, data => {
-                  data.name = text;
-                });
-                this.model.applyViewsUpdate();
-              },
-            },
-            items: [
-              {
-                type: 'action',
-                name: 'Delete',
-                select: () => {
-                  this.model.deleteView(view.id);
-                  this.model.applyViewsUpdate();
-                },
-              },
-            ],
-          };
+        input: {
+          initValue: view.name,
+          onComplete: text => {
+            this.model.updateView(view.id, data => {
+              data.name = text;
+            });
+            this.model.applyViewsUpdate();
+          },
         },
+        items: [
+          {
+            type: 'action',
+            name: 'Delete',
+            select: () => {
+              this.model.deleteView(view.id);
+              this.model.applyViewsUpdate();
+            },
+          },
+        ],
       },
     });
   }

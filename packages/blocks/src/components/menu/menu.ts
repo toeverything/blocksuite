@@ -5,8 +5,11 @@ import { autoPlacement, computePosition } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
+
+import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
 
 type MenuCommon = {
   hide?: () => boolean;
@@ -30,16 +33,18 @@ type NormalMenu = MenuCommon &
         name: string;
         label?: TemplateResult;
         icon?: TemplateResult;
-        children: () => MenuOptions;
+        options: MenuOptions;
       }
   );
 type Menu = GroupMenu | NormalMenu;
-type MenuRenderData<T> = {
-  value: T;
-  change: (value: T) => void;
-  complete: () => void;
-};
-type MenuListConfig = {
+type GetMenuByType<T extends Menu['type'], M extends Menu = Menu> = M extends {
+  type: T;
+}
+  ? M
+  : never;
+type MenuOptions = {
+  onComplete?: () => void;
+  onClose?: () => void;
   input?: {
     search?: boolean;
     placeholder?: string;
@@ -50,11 +55,13 @@ type MenuListConfig = {
   };
   items: Menu[];
 };
-type MenuOptions<T = unknown> = {
-  init: T;
-  onComplete?: (value: T) => void;
-  onClose?: () => void;
-  render: (data: MenuRenderData<T>) => MenuListConfig;
+
+type Item = {
+  select: () => void;
+  label: TemplateResult;
+  upDivider?: boolean;
+  downDivider?: boolean;
+  mouseEnter?: () => void;
 };
 
 @customElement('affine-menu')
@@ -64,6 +71,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       display: flex;
       flex-direction: column;
       user-select: none;
+      min-width: 160px;
       box-shadow: var(--affine-shadow-2);
       border-radius: 4px;
       background-color: var(--affine-background-primary-color);
@@ -119,7 +127,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       align-items: center;
     }
 
-    .affine-menu-action:hover .content {
+    .affine-menu-action.selected .content {
       background-color: var(--affine-hover-color);
     }
 
@@ -128,35 +136,48 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  options!: MenuOptions<T>;
+  options!: MenuOptions;
   @state()
-  value?: T;
+  private _text?: string;
   @state()
-  _text?: string;
-  get text() {
-    return this._text ?? this.config.input?.initValue ?? '';
+  private _selectedIndex = -1;
+  private subMenu?: HTMLElement;
+  private inputRef = createRef<HTMLInputElement>();
+  private items!: Array<Item>;
+
+  private get selectedIndex() {
+    return this._selectedIndex;
   }
 
-  set text(value: string) {
+  private set selectedIndex(index: number) {
+    this._selectedIndex = regularizationNumberInRange(
+      index,
+      -1,
+      this.items.length
+    );
+  }
+
+  private get text() {
+    return this._text ?? this.options.input?.initValue ?? '';
+  }
+
+  private set text(value: string) {
     this._text = value;
   }
 
   private close() {
     this.options.onClose?.();
-    this.parentElement?.remove();
   }
 
   private _inputText = (e: InputEvent) => {
     const target = e.target as HTMLInputElement;
     this.text = target.value;
   };
-  private inputRef = createRef<HTMLInputElement>();
-  private config!: MenuListConfig;
 
   override firstUpdated() {
     const input = this.inputRef.value;
     if (input) {
-      input.focus();
+      this.focusInput();
       const length = input.value.length;
       input.setSelectionRange(length, length);
       this._disposables.addFromEvent(input, 'keydown', e => {
@@ -166,16 +187,31 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
           return;
         }
         if (e.key === 'Enter') {
-          this.config.input?.onComplete?.(this.text);
-          this._complete();
+          const selectedItem = this.selectedItem;
+          if (selectedItem) {
+            selectedItem.select();
+          } else {
+            this.options.input?.onComplete?.(this.text);
+            this._complete();
+          }
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          this.selectedIndex = this.selectedIndex - 1;
+          return;
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          this.selectedIndex = this.selectedIndex + 1;
           return;
         }
       });
     }
   }
 
-  show(item: Menu): boolean {
-    if (this.config.input?.search) {
+  private show(item: Menu): boolean {
+    if (this.options.input?.search) {
       if (!item.name.toLowerCase().includes(this.text.toLowerCase())) {
         return false;
       }
@@ -183,103 +219,160 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     return !item.hide?.();
   }
 
-  flat = (items: Menu[]) => {
-    const result: Array<
-      | NormalMenu
-      | {
-          type: 'divider';
-        }
-    > = [];
-    items.forEach(item => {
-      if (item.type === 'group') {
-        if (!this.show(item)) {
-          return;
-        }
-        const list = item.children().filter(item => !item.hide?.());
-        if (list.length) {
-          if (result[result.length - 1]?.type !== 'divider') {
-            result.push({ type: 'divider' });
-          }
-          result.push(...list, { type: 'divider' });
-        }
-      } else if (this.show(item)) {
-        result.push(item);
+  private processMap: {
+    [K in Menu['type']]: (menu: GetMenuByType<K>) => Item[];
+  } = {
+    action: menu => {
+      return [
+        {
+          label: html` <div style="display: flex;align-items:center;">
+            <div class="icon">${menu.icon}</div>
+            ${menu.label ?? menu.name}
+          </div>`,
+          select: () => {
+            menu.select();
+            this._complete();
+          },
+        },
+      ];
+    },
+    group: menu => {
+      const items = menu.children().flatMap(menu => this.process(menu));
+      if (items[0]) {
+        items[0].upDivider = true;
       }
-    });
-    if (result[result.length - 1]?.type === 'divider') {
-      result.pop();
-    }
-    return result;
+      if (items[items.length - 1]) {
+        items[items.length - 1].downDivider = true;
+      }
+      return items;
+    },
+    'sub-menu': menu => {
+      const select = () => {
+        this.subMenu?.remove();
+        setTimeout(() => {
+          const subMenu = new MenuComponent();
+          const options = menu.options;
+          subMenu.options = {
+            ...options,
+            onClose: () => {
+              options.onClose?.();
+              this.clearSubMenu();
+            },
+            onComplete: () => {
+              this._complete();
+            },
+          };
+          this.append(subMenu);
+          computePosition(this, subMenu, {
+            middleware: [
+              autoPlacement({
+                allowedPlacements: ['left-start', 'right-start'],
+              }),
+            ],
+          }).then(({ x, y }) => {
+            Object.assign(subMenu.style, {
+              left: `${x}px`,
+              top: `${y}px`,
+            });
+          });
+          this.subMenu = subMenu;
+        });
+      };
+      return [
+        {
+          label: html` <div style="display:flex;align-items:center;">
+              <div class="icon">${menu.icon}</div>
+              ${menu.label ?? menu.name}
+            </div>
+            <div
+              class=""
+              style="display:flex;align-items:center;transform: rotate(-90deg)"
+            >
+              ${ArrowDownIcon}
+            </div>`,
+          mouseEnter: select,
+          select,
+        },
+      ];
+    },
   };
+
+  private process(menu: Menu): Item[] {
+    if (this.show(menu)) {
+      return this.processMap[menu.type](menu as never);
+    } else {
+      return [];
+    }
+  }
 
   private _complete = () => {
-    this.options.onComplete?.(this.value ?? this.options.init);
+    this.options.onComplete?.();
     this.close();
   };
+
+  private focusInput() {
+    this.inputRef.value?.focus();
+  }
+
   private _clickContainer = (e: MouseEvent) => {
     e.stopPropagation();
-    this.inputRef.value?.focus();
+    this.focusInput();
   };
 
-  override render() {
-    this.config = this.options.render({
-      value: this.value ?? this.options.init,
-      change: (value: T) => {
-        this.value = value;
-      },
-      complete: this._complete,
-    });
+  private get selectedItem() {
+    return this.items[this.selectedIndex];
+  }
 
+  private _mouseEnter = (index: number) => {
+    if (index !== this.selectedIndex) {
+      this.selectedIndex = index;
+      this.clearSubMenu();
+      this.selectedItem.mouseEnter?.();
+    }
+  };
+
+  private clearSubMenu() {
+    this.subMenu?.remove();
+    this.subMenu = undefined;
+    this.focusInput();
+  }
+
+  override render() {
+    this.items = this.options.items.flatMap(item => this.process(item));
+    this.selectedIndex = this._selectedIndex;
     return html`
       <div class="affine-menu" @click="${this._clickContainer}">
-        <div class="affine-menu-header">
-          <input
-            ${ref(this.inputRef)}
-            type="text"
-            placeholder="${this.config.input?.placeholder ?? ''}"
-            value="${this.text ?? this.config.input?.initValue ?? ''}"
-            @input="${this._inputText}"
-          />
-        </div>
-        <div class="affine-menu-divider"></div>
-        ${repeat(this.flat(this.config.items), menu => {
-          if (menu.type === 'divider') {
-            return html` <div class="affine-menu-divider"></div>`;
-          }
-          if (menu.type === 'action') {
-            const click = () => {
-              menu.select();
-              this._complete();
-            };
-            return html` <div
-              class="affine-menu-action affine-menu-action"
-              @click="${click}"
+        ${this.options.input
+          ? html` <div class="affine-menu-header">
+                <input
+                  ${ref(this.inputRef)}
+                  type="text"
+                  placeholder="${this.options.input?.placeholder ?? ''}"
+                  value="${this.text ?? this.options.input?.initValue ?? ''}"
+                  @input="${this._inputText}"
+                />
+              </div>
+              <div class="affine-menu-divider"></div>`
+          : null}
+        ${repeat(this.items, (menu, i) => {
+          const divider = menu.upDivider || this.items[i - 1]?.downDivider;
+          const mouseEnter = () => {
+            this._mouseEnter(i);
+          };
+          const classes = classMap({
+            'affine-menu-action': true,
+            selected: this._selectedIndex === i,
+          });
+          return html`
+            ${divider ? html` <div class="affine-menu-divider"></div>` : null}
+            <div
+              class="${classes}"
+              @click="${menu.select}"
+              @mouseenter="${mouseEnter}"
             >
-              <div class="content">
-                <div style="display: flex;align-items:center;">
-                  <div class="icon">${menu.icon}</div>
-                  ${menu.label ?? menu.name}
-                </div>
-              </div>
-            </div>`;
-          }
-          if (menu.type === 'sub-menu') {
-            return html` <div class="affine-menu-sub-menu affine-menu-action">
-              <div class="content">
-                <div style="display:flex;align-items:center;">
-                  <div class="icon">${menu.icon}</div>
-                  ${menu.label ?? menu.name}
-                </div>
-                <div
-                  class=""
-                  style="display:flex;align-items:center;transform: rotate(-90deg)"
-                >
-                  ${ArrowDownIcon}
-                </div>
-              </div>
-            </div>`;
-          }
-          return '';
+              <div class="content">${menu.label}</div>
+            </div>
+          `;
         })}
       </div>
     `;
@@ -343,13 +436,19 @@ export const createPopup = (
 export const popMenu = <T>(
   target: HTMLElement,
   props: {
-    options: MenuOptions<T>;
+    options: MenuOptions;
     container?: Element;
   }
 ) => {
   const menu = new MenuComponent<T>();
-  menu.options = props.options;
-  createPopup(target, menu, {
+  menu.options = {
+    ...props.options,
+    onClose: () => {
+      props.options.onClose?.();
+      close();
+    },
+  };
+  const close = createPopup(target, menu, {
     onClose: props.options.onClose,
   });
 };
@@ -359,16 +458,11 @@ export const popFilterableSimpleMenu = (
 ) => {
   popMenu(target, {
     options: {
-      init: {},
-      render: () => {
-        return {
-          input: {
-            placeholder: 'Search',
-            search: true,
-          },
-          items: options,
-        };
+      input: {
+        placeholder: 'Search',
+        search: true,
       },
+      items: options,
     },
   });
 };

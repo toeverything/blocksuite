@@ -62,7 +62,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         offsetArr.push(-1);
         continue;
       }
-      curr.push({ x: v.offsetLeft + v.offsetWidth / 2, ele: v });
+      curr.push({
+        x: v.offsetLeft + v.offsetWidth / 2,
+        ele: v,
+      });
       offsetArr.push(v.offsetLeft);
       if (i === columnsArr.length - 1) {
         offsetArr.push(v.offsetLeft + v.offsetWidth);
@@ -79,7 +82,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           }
           break;
         } else {
-          result = { before: true, id: ele.column.id };
+          result = {
+            before: true,
+            id: ele.column.id,
+          };
         }
       }
       const offsetRight = offset + width;
@@ -156,48 +162,45 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     });
     const html = document.querySelector('html');
     html?.classList.toggle('affine-database-header-column-grabbing', true);
-    const drag = startDrag<{ x: number; insertPosition?: InsertPosition }>(
-      evt,
-      {
-        onDrag: evt => ({
-          x: evt.x,
-        }),
-        onMove: ({ x }: { x: number }) => {
-          const currentOffset = getResultInRange(
-            (x - tableContainer.getBoundingClientRect().left - rectOffsetLeft) /
-              scale,
-            0,
-            max
-          );
-          const insertInfo = computeInsertInfo(
-            currentOffset,
-            columnHeaderRect.width / scale
-          );
-          if (insertInfo.insertOffset != null) {
-            dropPreview.display(insertInfo.insertOffset);
-          } else {
-            dropPreview.hide();
-          }
-          dragPreview.display(currentOffset);
-          return {
-            x,
-            insertPosition: insertInfo.insertPosition,
-          };
-        },
-        onDrop: ({ insertPosition }) => {
-          if (insertPosition) {
-            this.tableViewManager.moveColumn(this.column.id, insertPosition);
-          }
-          cancelScroll();
-          html?.classList.toggle(
-            'affine-database-header-column-grabbing',
-            false
-          );
-          dropPreview.remove();
-          dragPreview.remove();
-        },
-      }
-    );
+    const drag = startDrag<{
+      x: number;
+      insertPosition?: InsertPosition;
+    }>(evt, {
+      onDrag: evt => ({
+        x: evt.x,
+      }),
+      onMove: ({ x }: { x: number }) => {
+        const currentOffset = getResultInRange(
+          (x - tableContainer.getBoundingClientRect().left - rectOffsetLeft) /
+            scale,
+          0,
+          max
+        );
+        const insertInfo = computeInsertInfo(
+          currentOffset,
+          columnHeaderRect.width / scale
+        );
+        if (insertInfo.insertOffset != null) {
+          dropPreview.display(insertInfo.insertOffset);
+        } else {
+          dropPreview.hide();
+        }
+        dragPreview.display(currentOffset);
+        return {
+          x,
+          insertPosition: insertInfo.insertPosition,
+        };
+      },
+      onDrop: ({ insertPosition }) => {
+        if (insertPosition) {
+          this.tableViewManager.moveColumn(this.column.id, insertPosition);
+        }
+        cancelScroll();
+        html?.classList.toggle('affine-database-header-column-grabbing', false);
+        dropPreview.remove();
+        dragPreview.remove();
+      },
+    });
   };
 
   private get readonly() {
@@ -211,148 +214,136 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   private _clickColumn = () => {
     popMenu(this, {
       options: {
-        init: {},
-        render: () => {
-          return {
-            input: {
-              initValue: this.column.name,
-              onComplete: text => {
-                this.column.updateName(text);
+        input: {
+          initValue: this.column.name,
+          onComplete: text => {
+            this.column.updateName(text);
+          },
+        },
+        items: [
+          {
+            type: 'sub-menu',
+            name: 'Column type',
+            icon: TextIcon,
+            hide: () => !this.column.updateType,
+            options: {
+              input: {
+                search: true,
               },
-            },
-            items: [
-              {
-                type: 'sub-menu',
-                name: 'Column type',
-                icon: TextIcon,
-                hide: () => !this.column.updateType,
-                children: () => {
-                  return {
-                    init: {},
-                    render: () => {
-                      return {
-                        input: {},
-                        items: columnTypes.map(type => {
-                          return {
-                            type: 'action',
-                            name: type.text,
-                            icon: type.icon,
-                            select: () => {
-                              this.column.updateType?.(type.type);
-                            },
-                          };
-                        }),
-                      };
-                    },
-                  };
-                },
-              },
-              {
-                type: 'action',
-                name: 'Duplicate column',
-                icon: DatabaseDuplicate,
-                hide: () => !this.column.duplicate,
-                select: () => {
-                  this.column.duplicate?.();
-                  Promise.resolve().then(() => {
-                    const next = this.nextElementSibling;
-                    if (next instanceof DatabaseHeaderColumn) {
-                      next.editTitle();
-                      next.scrollIntoView();
-                    }
-                  });
-                },
-              },
-              {
-                type: 'action',
-                name: 'Insert left column',
-                icon: DatabaseInsertLeft,
-                select: () => {
-                  this.tableViewManager.newColumn({
-                    id: this.column.id,
-                    before: true,
-                  });
-                  Promise.resolve().then(() => {
-                    const pre = this.previousElementSibling;
-                    if (pre instanceof DatabaseHeaderColumn) {
-                      pre.editTitle();
-                      pre.scrollIntoView();
-                    }
-                  });
-                },
-              },
-              {
-                type: 'action',
-                name: 'Insert right column',
-                icon: DatabaseInsertRight,
-                select: () => {
-                  this.tableViewManager.newColumn({
-                    id: this.column.id,
-                    before: false,
-                  });
-                  Promise.resolve().then(() => {
-                    const next = this.nextElementSibling;
-                    if (next instanceof DatabaseHeaderColumn) {
-                      next.editTitle();
-                      next.scrollIntoView();
-                    }
-                  });
-                },
-              },
-              {
-                type: 'action',
-                name: 'Move left',
-                icon: DatabaseMoveLeft,
-                hide: () => this.column.isFirst,
-                select: () => {
-                  const preId = this.tableViewManager.preColumn(
-                    this.column.id
-                  )?.id;
-                  if (!preId) {
-                    return;
-                  }
-                  this.tableViewManager.moveColumn(this.column.id, {
-                    id: preId,
-                    before: true,
-                  });
-                },
-              },
-              {
-                type: 'action',
-                name: 'Move Right',
-                icon: DatabaseMoveRight,
-                hide: () => this.column.isLast,
-                select: () => {
-                  const nextId = this.tableViewManager.nextColumn(
-                    this.column.id
-                  )?.id;
-                  if (!nextId) {
-                    return;
-                  }
-                  this.tableViewManager.moveColumn(this.column.id, {
-                    id: nextId,
-                    before: false,
-                  });
-                },
-              },
-              {
-                type: 'group',
-                name: 'operation',
-                children: () => [
-                  {
-                    type: 'action',
-                    name: 'Delete column',
-                    icon: DeleteIcon,
-                    hide: () => !this.column.delete,
-                    select: () => {
-                      this.column.delete?.();
-                    },
+              items: columnTypes.map(type => {
+                return {
+                  type: 'action',
+                  name: type.text,
+                  icon: type.icon,
+                  select: () => {
+                    this.column.updateType?.(type.type);
                   },
-                ],
+                };
+              }),
+            },
+          },
+          {
+            type: 'action',
+            name: 'Duplicate column',
+            icon: DatabaseDuplicate,
+            hide: () => !this.column.duplicate,
+            select: () => {
+              this.column.duplicate?.();
+              Promise.resolve().then(() => {
+                const next = this.nextElementSibling;
+                if (next instanceof DatabaseHeaderColumn) {
+                  next.editTitle();
+                  next.scrollIntoView();
+                }
+              });
+            },
+          },
+          {
+            type: 'action',
+            name: 'Insert left column',
+            icon: DatabaseInsertLeft,
+            select: () => {
+              this.tableViewManager.newColumn({
+                id: this.column.id,
+                before: true,
+              });
+              Promise.resolve().then(() => {
+                const pre = this.previousElementSibling;
+                if (pre instanceof DatabaseHeaderColumn) {
+                  pre.editTitle();
+                  pre.scrollIntoView();
+                }
+              });
+            },
+          },
+          {
+            type: 'action',
+            name: 'Insert right column',
+            icon: DatabaseInsertRight,
+            select: () => {
+              this.tableViewManager.newColumn({
+                id: this.column.id,
+                before: false,
+              });
+              Promise.resolve().then(() => {
+                const next = this.nextElementSibling;
+                if (next instanceof DatabaseHeaderColumn) {
+                  next.editTitle();
+                  next.scrollIntoView();
+                }
+              });
+            },
+          },
+          {
+            type: 'action',
+            name: 'Move left',
+            icon: DatabaseMoveLeft,
+            hide: () => this.column.isFirst,
+            select: () => {
+              const preId = this.tableViewManager.preColumn(this.column.id)?.id;
+              if (!preId) {
+                return;
+              }
+              this.tableViewManager.moveColumn(this.column.id, {
+                id: preId,
+                before: true,
+              });
+            },
+          },
+          {
+            type: 'action',
+            name: 'Move Right',
+            icon: DatabaseMoveRight,
+            hide: () => this.column.isLast,
+            select: () => {
+              const nextId = this.tableViewManager.nextColumn(
+                this.column.id
+              )?.id;
+              if (!nextId) {
+                return;
+              }
+              this.tableViewManager.moveColumn(this.column.id, {
+                id: nextId,
+                before: false,
+              });
+            },
+          },
+          {
+            type: 'group',
+            name: 'operation',
+            children: () => [
+              {
+                type: 'action',
+                name: 'Delete column',
+                icon: DeleteIcon,
+                hide: () => !this.column.delete,
+                select: () => {
+                  this.column.delete?.();
+                },
               },
             ],
-          };
-        },
+          },
+        ],
       },
     });
   };
@@ -361,25 +352,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     event.stopPropagation();
     popMenu(this, {
       options: {
-        init: {},
-        render: () => {
-          return {
-            input: {
-              search: true,
-              placeholder: 'Search',
-            },
-            items: columnTypes.map(type => {
-              return {
-                type: 'action',
-                name: type.text,
-                icon: type.icon,
-                select: () => {
-                  this.column.updateType?.(type.type);
-                },
-              };
-            }),
-          };
+        input: {
+          search: true,
+          placeholder: 'Search',
         },
+        items: columnTypes.map(type => {
+          return {
+            type: 'action',
+            name: type.text,
+            icon: type.icon,
+            select: () => {
+              this.column.updateType?.(type.type);
+            },
+          };
+        }),
       },
     });
   };
@@ -419,7 +405,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   }
 }
 
-type ColumnOffset = { x: number; ele: DatabaseHeaderColumn };
+type ColumnOffset = {
+  x: number;
+  ele: DatabaseHeaderColumn;
+};
 
 const createDragPreview = (
   container: Element,
@@ -519,5 +508,10 @@ const columnTypes: ColumnHeader[] = [
     type: 'progress',
     text: 'Progress',
     icon: DatabaseProgress,
+  },
+  {
+    type: 'link',
+    text: 'Link',
+    icon: LinkIcon,
   },
 ];

@@ -12,6 +12,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
 import { createPopup, popMenu } from '../menu/menu.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
@@ -158,16 +159,12 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private regularizationOptionIndex(index: number) {
-    const number =
-      (index + this.filteredOptions.length) % this.filteredOptions.length;
-    return Number.isNaN(number) ? 0 : number;
-  }
-
   private setSelectedOption(index: number) {
-    index = this.regularizationOptionIndex(index);
-    const max = this.filteredOptions.length - 1;
-    this.selectedIndex = Math.min(max, Math.max(0, index));
+    this.selectedIndex = regularizationNumberInRange(
+      index,
+      0,
+      this.filteredOptions.length
+    );
   }
 
   private _onSelect = (id: string) => {
@@ -224,55 +221,49 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     }
     popMenu(e.target as HTMLElement, {
       options: {
-        onClose: () => this._selectInput.focus(),
-        init: {},
-        render: () => {
-          return {
-            input: {
-              initValue: option.value,
-              onComplete: text => {
-                this.changeTag({
-                  ...option,
-                  value: text,
-                });
-              },
-            },
-            items: [
-              {
-                type: 'action',
-                name: 'Delete',
-                select: () => {
-                  this.deleteTag(id);
-                },
-              },
-              {
-                type: 'group',
-                name: 'color',
-                children: () =>
-                  selectOptionColors.map(item => {
-                    const styles = styleMap({
-                      backgroundColor: item.color,
-                      borderRadius: '50%',
-                      width: '20px',
-                      height: '20px',
-                      marginRight: '8px',
-                    });
-                    return {
-                      type: 'action',
-                      name: item.name,
-                      icon: html` <div style=${styles}></div>`,
-                      select: () => {
-                        this.changeTag({
-                          ...option,
-                          color: item.color,
-                        });
-                      },
-                    };
-                  }),
-              },
-            ],
-          };
+        input: {
+          initValue: option.value,
+          onComplete: text => {
+            this.changeTag({
+              ...option,
+              value: text,
+            });
+          },
         },
+        items: [
+          {
+            type: 'action',
+            name: 'Delete',
+            select: () => {
+              this.deleteTag(id);
+            },
+          },
+          {
+            type: 'group',
+            name: 'color',
+            children: () =>
+              selectOptionColors.map(item => {
+                const styles = styleMap({
+                  backgroundColor: item.color,
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  marginRight: '8px',
+                });
+                return {
+                  type: 'action',
+                  name: item.name,
+                  icon: html` <div style=${styles}></div>`,
+                  select: () => {
+                    this.changeTag({
+                      ...option,
+                      color: item.color,
+                    });
+                  },
+                };
+              }),
+          },
+        ],
       },
     });
   };
