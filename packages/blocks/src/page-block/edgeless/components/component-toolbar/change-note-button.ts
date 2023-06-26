@@ -163,14 +163,28 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
     this.page.updateBlock(note, { hidden });
+
+    const noteParent = this.page.getParent(note);
+    assertExists(noteParent);
+    const noteParentChildNotes = noteParent.children.filter(block =>
+      matchFlavours(block, ['affine:note'])
+    ) as NoteBlockModel[];
+    const noteParentLastNote =
+      noteParentChildNotes[noteParentChildNotes.length - 1];
+
     if (!hidden) {
-      const noteParent = this.page.getParent(note);
-      assertExists(noteParent);
-      const noteParentLastChild =
-        noteParent.children[noteParent.children.length - 1];
-      if (note !== noteParentLastChild) {
+      if (note !== noteParentLastNote) {
         // move to the end
-        this.page.moveBlocks([note], noteParent, noteParentLastChild, false);
+        this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
+      }
+    } else {
+      // if all notes are hidden, add a new note
+      if (noteParentChildNotes.every(block => block.hidden)) {
+        const newNoteId = this.page.addBlock('affine:note', {}, noteParent.id);
+        this.page.addBlock('affine:paragraph', {}, newNoteId);
+        const newNote = this.page.getBlockById(newNoteId);
+        assertExists(newNote);
+        this.page.moveBlocks([newNote], noteParent, noteParentLastNote, true);
       }
     }
     this.requestUpdate();
