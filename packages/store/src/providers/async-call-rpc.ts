@@ -19,17 +19,24 @@ export type AwarenessChanges = Record<
 >;
 
 type Impl = {
+  //#region Doc
   // request diff update from other clients
-  diffUpdateDoc: (guid: string) => Promise<Uint8Array | false>;
+  queryDocState: (
+    guid: string,
+    targetClientId?: number
+  ) => Promise<Uint8Array | false>;
 
   // send update to other clients
-  sendUpdateDoc: (guid: string, update: Uint8Array) => Promise<void>;
+  sendDocUpdate: (guid: string, update: Uint8Array) => Promise<void>;
+  //#endregion
 
+  //#region Awareness
   // request awareness from other clients
   queryAwareness: () => Promise<Uint8Array>;
 
   // send awareness to other clients
   sendAwareness: (awarenessUpdate: Uint8Array) => Promise<void>;
+  //#endregion
 };
 
 export const createAsyncCallRPCProviderCreator = (
@@ -46,14 +53,17 @@ export const createAsyncCallRPCProviderCreator = (
     const cache = new Map<string, Uint8Array[]>();
 
     const impl = {
-      diffUpdateDoc: async guid => {
+      queryDocState: async (guid, targetClientId) => {
         const doc = docMap.get(guid);
         if (!doc) {
           return false;
         }
+        if (targetClientId && targetClientId !== doc.clientID) {
+          return false;
+        }
         return Y.encodeStateAsUpdate(doc);
       },
-      sendUpdateDoc: async (guid, update) => {
+      sendDocUpdate: async (guid, update) => {
         const doc = docMap.get(guid);
         if (!doc) {
           // This case happens when the father doc is not yet updated,
@@ -72,6 +82,14 @@ export const createAsyncCallRPCProviderCreator = (
           cache.delete(guid);
         }
         Y.applyUpdate(doc, update, channel);
+        if (doc.store.pendingStructs) {
+          for (const clientId of doc.store.pendingStructs.missing.keys()) {
+            const update = await rpc.queryDocState(doc.guid, clientId);
+            if (update) {
+              Y.applyUpdate(doc, update, channel);
+            }
+          }
+        }
       },
       queryAwareness: async () => {
         return encodeAwarenessUpdate(awareness, [awareness.clientID]);
@@ -116,7 +134,7 @@ export const createAsyncCallRPCProviderCreator = (
           return;
         }
 
-        rpc.sendUpdateDoc(doc.guid, update).catch(console.error);
+        rpc.sendDocUpdate(doc.guid, update).catch(console.error);
       };
       updateHandlerWeakMap.set(doc, handler);
       return handler;
@@ -130,7 +148,7 @@ export const createAsyncCallRPCProviderCreator = (
       const handler: SubdocsHandler = event => {
         event.added.forEach(doc => docMap.set(doc.guid, doc));
         event.added.forEach(doc => {
-          rpc.diffUpdateDoc(doc.guid).then(update => {
+          rpc.queryDocState(doc.guid).then(update => {
             if (!update) {
               return;
             }
@@ -175,7 +193,7 @@ export const createAsyncCallRPCProviderCreator = (
       rpc.sendAwareness(update).catch(console.error);
     };
 
-    async function registerDoc(doc: Doc) {
+    function registerDoc(doc: Doc) {
       initDocMap(doc);
       // register subdocs
       doc.on('subdocs', createOrGetSubdocsHandler(doc));
@@ -183,15 +201,18 @@ export const createAsyncCallRPCProviderCreator = (
       // register update
       doc.on('update', createOrGetUpdateHandler(doc));
       doc.on('destroy', createOrGetDestroyHandler(doc));
+    }
 
+    async function initDoc(doc: Doc) {
       // query diff update
-      const update = await rpc.diffUpdateDoc(doc.guid);
+      const update = await rpc.queryDocState(doc.guid);
       if (!connected) {
         return;
       }
       if (update !== false) {
         Y.applyUpdate(doc, update, channel);
       }
+      doc.subdocs.forEach(initDoc);
     }
 
     function unregisterDoc(doc: Doc) {
@@ -211,11 +232,12 @@ export const createAsyncCallRPCProviderCreator = (
 
     let connected = false;
     const apis = {
-      flavour: 'broadcast-channel',
+      flavour,
       passive: true,
       connect() {
         connected = true;
-        registerDoc(doc).catch(console.error);
+        registerDoc(doc);
+        initDoc(doc).catch(console.error);
         rpc
           .queryAwareness()
           .then(update => applyAwarenessUpdate(awareness, update, channel));
