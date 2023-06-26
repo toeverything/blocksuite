@@ -1,8 +1,12 @@
+import { assertExists } from '@blocksuite/global/utils';
+import type { Transaction, YArrayEvent, YMapEvent } from 'yjs';
 import { Array as YArray, Map as YMap } from 'yjs';
 
 import type { ProxyConfig } from './config.js';
 import type { UnRecord } from './utils.js';
 import { isPureObject, native2Y } from './utils.js';
+
+type ProxyTransaction = Transaction & { isLocalProxy?: boolean };
 
 export class ProxyManager {
   private _proxies: WeakMap<YArray<unknown> | YMap<unknown>, unknown> =
@@ -48,7 +52,12 @@ export class ProxyManager {
     config: ProxyConfig
   ) {
     const { deep = false } = config;
-    yArray.observe(event => {
+    const observer = (
+      event: YArrayEvent<unknown> & { transaction: ProxyTransaction }
+    ) => {
+      if (event.transaction.isLocalProxy) {
+        return;
+      }
       let retain = 0;
       event.changes.delta.forEach(change => {
         if (change.retain) {
@@ -78,7 +87,9 @@ export class ProxyManager {
           retain += change.insert.length;
         }
       });
-    });
+    };
+
+    yArray.observe(observer);
   }
 
   private _subscribeYMap(
@@ -87,7 +98,12 @@ export class ProxyManager {
     config: ProxyConfig
   ) {
     const { deep = false } = config;
-    yMap.observe(event => {
+    const observer = (
+      event: YMapEvent<unknown> & { transaction: ProxyTransaction }
+    ) => {
+      if (event.transaction.isLocalProxy) {
+        return;
+      }
       event.keysChanged.forEach(key => {
         const type = event.changes.keys.get(key);
         if (!type) {
@@ -108,8 +124,23 @@ export class ProxyManager {
           }
         }
       });
-    });
+    };
+    yMap.observe(observer);
   }
+
+  private _applyYChanges = <T = unknown>(
+    yData: YArray<unknown> | YMap<unknown>,
+    changes: () => T
+  ): T => {
+    const data = this._proxies.get(yData);
+    assertExists(data, 'YData is not subscribed before changes');
+    const doc = yData.doc;
+    assertExists(doc, 'YData is not attached to a document');
+    doc.once('beforeObserverCalls', (transaction: ProxyTransaction) => {
+      transaction.isLocalProxy = true;
+    });
+    return changes();
+  };
 
   createYProxy<Data>(
     yAbstract: YArray<unknown> | YMap<unknown>,
@@ -119,12 +150,12 @@ export class ProxyManager {
       return this._proxies.get(yAbstract) as Data;
     }
     if (yAbstract instanceof YArray) {
-      const data = this.createYArrayProxy(yAbstract, config) as Data;
+      const data = this._createYArrayProxy(yAbstract, config) as Data;
       this._proxies.set(yAbstract, data);
       return data;
     }
     if (yAbstract instanceof YMap) {
-      const data = this.createYMapProxy(yAbstract, config) as Data;
+      const data = this._createYMapProxy(yAbstract, config) as Data;
       this._proxies.set(yAbstract, data);
       return data;
     }
@@ -132,7 +163,7 @@ export class ProxyManager {
     throw new TypeError();
   }
 
-  createYArrayProxy<T = unknown>(
+  private _createYArrayProxy<T = unknown>(
     yArray: YArray<unknown>,
     config: ProxyConfig = {}
   ): T[] {
@@ -156,35 +187,37 @@ export class ProxyManager {
           throw new Error('key cannot be a symbol');
         }
 
-        const index = Number(p);
-        if (Number.isNaN(index)) {
-          return Reflect.set(target, p, value, receiver);
-        }
-
-        const apply = (value: unknown) => {
-          if (index < yArray.length) {
-            yArray.delete(index, 1);
+        return this._applyYChanges(yArray, () => {
+          const index = Number(p);
+          if (Number.isNaN(index)) {
+            return Reflect.set(target, p, value, receiver);
           }
-          yArray.insert(index, [value]);
-        };
 
-        if (deep && (isPureObject(value) || Array.isArray(value))) {
-          const y = native2Y(
-            value as Record<string, unknown> | unknown[],
-            deep
-          );
-          apply(y);
-          const _value = this.createYProxy(y, config);
-          return Reflect.set(target, p, _value, receiver);
-        }
+          const apply = (value: unknown) => {
+            if (index < yArray.length) {
+              yArray.delete(index, 1);
+            }
+            yArray.insert(index, [value]);
+          };
 
-        apply(value);
-        return Reflect.set(target, p, value, receiver);
+          if (deep && (isPureObject(value) || Array.isArray(value))) {
+            const y = native2Y(
+              value as Record<string, unknown> | unknown[],
+              deep
+            );
+            apply(y);
+            const _value = this.createYProxy(y, config);
+            return Reflect.set(target, p, _value, receiver);
+          }
+
+          apply(value);
+          return Reflect.set(target, p, value, receiver);
+        });
       },
       get: (target, p, receiver) => {
         return Reflect.get(target, p, receiver);
       },
-      deleteProperty(target: T[], p: string | symbol): boolean {
+      deleteProperty: (target: T[], p: string | symbol): boolean => {
         if (readonly) {
           throw new Error('Modify data is not allowed');
         }
@@ -193,16 +226,18 @@ export class ProxyManager {
           throw new Error('key cannot be a symbol');
         }
 
-        const index = Number(p);
-        if (!Number.isNaN(index)) {
-          yArray.delete(index, 1);
-        }
-        return Reflect.deleteProperty(target, p);
+        return this._applyYChanges(yArray, () => {
+          const index = Number(p);
+          if (!Number.isNaN(index)) {
+            yArray.delete(index, 1);
+          }
+          return Reflect.deleteProperty(target, p);
+        });
       },
     });
   }
 
-  createYMapProxy<Data extends Record<string, unknown>>(
+  private _createYMapProxy<Data extends Record<string, unknown>>(
     yMap: YMap<unknown>,
     config: ProxyConfig = {}
   ): Data {
@@ -226,24 +261,26 @@ export class ProxyManager {
           throw new Error('key cannot be a symbol');
         }
 
-        if (deep && (isPureObject(value) || Array.isArray(value))) {
-          const _y = native2Y(
-            value as Record<string, unknown> | unknown[],
-            deep
-          );
-          yMap.set(p, _y);
-          const _value = this.createYProxy(_y, config);
+        return this._applyYChanges(yMap, () => {
+          if (deep && (isPureObject(value) || Array.isArray(value))) {
+            const _y = native2Y(
+              value as Record<string, unknown> | unknown[],
+              deep
+            );
+            yMap.set(p, _y);
+            const _value = this.createYProxy(_y, config);
 
-          return Reflect.set(target, p, _value, receiver);
-        }
+            return Reflect.set(target, p, _value, receiver);
+          }
 
-        yMap.set(p, value);
-        return Reflect.set(target, p, value, receiver);
+          yMap.set(p, value);
+          return Reflect.set(target, p, value, receiver);
+        });
       },
       get: (target, p, receiver) => {
         return Reflect.get(target, p, receiver);
       },
-      deleteProperty(target: Data, p: string | symbol): boolean {
+      deleteProperty: (target: Data, p: string | symbol): boolean => {
         if (readonly) {
           throw new Error('Modify data is not allowed');
         }
@@ -252,8 +289,10 @@ export class ProxyManager {
           throw new Error('key cannot be a symbol');
         }
 
-        yMap.delete(p);
-        return Reflect.deleteProperty(target, p);
+        return this._applyYChanges(yMap, () => {
+          yMap.delete(p);
+          return Reflect.deleteProperty(target, p);
+        });
       },
     });
   }

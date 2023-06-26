@@ -21,7 +21,7 @@ describe('blocksuite yjs', () => {
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = proxyManager.createYArrayProxy(arr);
+      const proxy = proxyManager.createYProxy(arr) as unknown[];
       expect(arr.get(0)).toBe(0);
 
       proxy.push(1);
@@ -40,7 +40,9 @@ describe('blocksuite yjs', () => {
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = proxyManager.createYArrayProxy(arr, { readonly: true });
+      const proxy = proxyManager.createYProxy(arr, {
+        readonly: true,
+      }) as unknown[];
       expect(arr.get(0)).toBe(0);
 
       expect(() => proxy.push(1)).toThrowError('Modify data is not allowed');
@@ -60,7 +62,7 @@ describe('blocksuite yjs', () => {
       map2.set('foo', 40);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const proxy = proxyManager.createYMapProxy<Record<string, any>>(map, {
+      const proxy = proxyManager.createYProxy<Record<string, any>>(map, {
         deep: true,
       });
 
@@ -106,7 +108,7 @@ describe('blocksuite yjs', () => {
       const text = new Y.Text('hello');
       inner.set('text', text);
 
-      const proxy = proxyManager.createYMapProxy<{ inner: { text: Y.Text } }>(
+      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(
         map,
         {
           deep: true,

@@ -38,9 +38,7 @@ export class Space<
     this._ySpaceDoc = this._initSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
-    this._proxy = this.doc.proxy.createYMapProxy(
-      this._yBlocks as Y.Map<unknown>
-    );
+    this._proxy = this.doc.proxy.createYProxy(this._yBlocks as Y.Map<unknown>);
   }
 
   get prefixedId() {
