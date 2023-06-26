@@ -233,9 +233,9 @@ export class EdgelessLineWidthPanel extends LitElement {
       </div>
       <div class="bottom-line"></div>
       <div class="line-width-overlay"></div>
-      <tool-tip inert role="tooltip" tip-position="top" arrow
-        >Thickness</tool-tip
-      >
+      <tool-tip inert role="tooltip" tip-position="top" arrow>
+        Thickness
+      </tool-tip>
     </div>`;
   }
 }
