@@ -58,10 +58,10 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   addRow!: (rowIndex?: number) => void;
 
   @query('.database-title')

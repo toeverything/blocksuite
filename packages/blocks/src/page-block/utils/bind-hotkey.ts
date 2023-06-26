@@ -526,7 +526,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     const parent = page.getParent(blockRange.models[0]);
     if (parent && matchFlavours(parent, ['affine:database'])) {
       const service = getService('affine:database');
-      if (service.getLastCellSelection()) return;
+      if (service.getSelection()) return;
     }
     handleUp(e, page, { selection });
   });
@@ -537,7 +537,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     const parent = page.getParent(blockRange.models[0]);
     if (parent && matchFlavours(parent, ['affine:database'])) {
       const service = getService('affine:database');
-      if (service.getLastCellSelection()) return;
+      if (service.getSelection()) return;
     }
     handleDown(e, page, { selection });
   });
@@ -567,7 +567,7 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
 
     if (matchFlavours(blockRange.models[0], ['affine:database'])) {
       const service = getService('affine:database');
-      if (service.getLastCellSelection()) return;
+      if (service.getSelection()) return;
     }
     // Do nothing
     if (blockRange.type === 'Block') return;

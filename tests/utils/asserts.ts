@@ -83,6 +83,7 @@ export const defaultStore: SerializedStore = {
           'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
+          'prop:hidden': false,
         },
         '2': {
           'sys:flavour': 'affine:paragraph',

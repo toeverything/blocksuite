@@ -25,7 +25,7 @@ export class EdgelessAlignPanel extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   value: 'left' | 'center' | 'right' = 'left';
 
   private _onSelect(value: EdgelessAlignPanel['value']) {
@@ -34,7 +34,7 @@ export class EdgelessAlignPanel extends LitElement {
       this.onSelect(value);
     }
   }
-  @property()
+  @property({ attribute: false })
   onSelect?: (value: EdgelessAlignPanel['value']) => void;
 
   override render() {

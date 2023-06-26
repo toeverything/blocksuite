@@ -4,14 +4,15 @@ import { expect } from '@playwright/test';
 import {
   activeNoteInEdgeless,
   addNote,
-  assertMouseMode,
+  assertEdgelessTool,
   changeEdgelessNoteBackground,
   countBlock,
   getNoteRect,
+  initThreeNotes,
   locatorComponentToolbar,
   locatorEdgelessToolButton,
   selectNoteInEdgeless,
-  setMouseMode,
+  setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -37,6 +38,7 @@ import {
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
+  assertBlockCount,
   assertEdgelessHoverRect,
   assertEdgelessNonSelectedRect,
   assertEdgelessNoteBackground,
@@ -115,11 +117,11 @@ test('add Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   await addNote(page, 'hello', 30, 40);
 
-  await assertMouseMode(page, 'default');
+  await assertEdgelessTool(page, 'default');
   await assertRichTexts(page, ['', 'hello']);
   await assertEdgelessSelectedRect(page, [0, 0, 448, 80]);
 });
@@ -129,7 +131,7 @@ test('add empty Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   // add note at 30,40
   await page.mouse.click(30, 40);
@@ -155,7 +157,7 @@ test('always keep at least 1 note block', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
   // clicking in default mode will try to remove empty note block
   await page.mouse.click(0, 0);
@@ -260,12 +262,12 @@ test('drag handle should be shown when a note is actived in default mode or hidd
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 
   await page.mouse.move(0, 0);
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
 
   await page.mouse.move(0, 0);
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
   await page.mouse.move(x, y);
   await expect(page.locator('affine-drag-handle')).toBeVisible();
 });
@@ -292,7 +294,7 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
   await page.mouse.click(30, 40);
   await waitForVirgoStateUpdated(page);
@@ -480,4 +482,74 @@ test('continuous undo and redo (note blcok add operation) should work', async ({
   await redoByClick(page);
   count = await countBlock(page, 'affine-note');
   expect(count).toBe(4);
+});
+
+test('manage note index and hidden status', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await initThreeNotes(page);
+
+  // unset select state and remove empty note from `initEmptyEdgelessState`
+  await page.mouse.click(10, 100);
+  assertBlockCount(page, 'note', 3);
+  await waitNextFrame(page);
+
+  // select note-1
+  await selectNoteInEdgeless(page, '4');
+  expect(await page.locator('.note-status').innerText()).toBe('1');
+
+  // select note-2
+  await selectNoteInEdgeless(page, '6');
+  expect(await page.locator('.note-status').innerText()).toBe('2');
+
+  // select note-3
+  await selectNoteInEdgeless(page, '8');
+  expect(await page.locator('.note-status').innerText()).toBe('3');
+
+  // hide note-3
+  await page.locator('.note-status-button').click();
+  expect(await page.locator('.note-status.hidden').count()).toBe(1);
+  // reappear note-3
+  await page.locator('.note-status-button').click();
+  // index of note-3 still be 3
+  expect(await page.locator('.note-status').innerText()).toBe('3');
+
+  // select note-2 and hide
+  await selectNoteInEdgeless(page, '6');
+  await page.locator('.note-status-button').click();
+  expect(await page.locator('.note-status.hidden').count()).toBe(1);
+
+  // index of note-1 still 1
+  await selectNoteInEdgeless(page, '4');
+  expect(await page.locator('.note-status').innerText()).toBe('1');
+
+  // index of note-3 will be 2
+  await selectNoteInEdgeless(page, '8');
+  expect(await page.locator('.note-status').innerText()).toBe('2');
+
+  // switch to editor mode, note-2 will be hidden
+  await switchEditorMode(page);
+  expect(await page.locator('affine-note[data-block-id="6"]').count()).toBe(0);
+
+  // switch to edgeless mode, note-2 will be visible
+  await switchEditorMode(page);
+  expect(await page.locator('affine-note[data-block-id="6"]').count()).toBe(1);
+
+  // select note-2 and reappear
+  await selectNoteInEdgeless(page, '6');
+  await waitNextFrame(page);
+  await page.locator('.note-status-button').click();
+
+  // index of note-1 still 1
+  await selectNoteInEdgeless(page, '4');
+  expect(await page.locator('.note-status').innerText()).toBe('1');
+
+  // index of note-2 will be 3
+  await selectNoteInEdgeless(page, '6');
+  expect(await page.locator('.note-status').innerText()).toBe('3');
+
+  // index of note-3 will be 2
+  await selectNoteInEdgeless(page, '8');
+  expect(await page.locator('.note-status').innerText()).toBe('2');
 });

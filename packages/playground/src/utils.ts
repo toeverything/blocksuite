@@ -21,19 +21,19 @@ import {
   createIndexeddbStorage,
   createMemoryStorage,
   createSimpleServerStorage,
-  DebugDocProvider,
   Generator,
   Utils,
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import { createBroadcastChannelProvider } from '@blocksuite/store/providers/broadcast-channel';
 import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
 import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
-const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+const providerArgs = (params.get('providers') ?? 'bc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
@@ -184,31 +184,29 @@ export async function tryInitExternalContent(
 }
 
 /**
- * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
- * We use webrtcDocProvider by default if the `providers` param is missing.
+ * Provider configuration is specified by `?providers=broadcast` or `?providers=indexeddb,broadcast` in URL params.
+ * We use BroadcastChannelProvider by default if the `providers` param is missing.
  */
 export function createWorkspaceOptions(): WorkspaceOptions {
   const providerCreators: DocProviderCreator[] = [];
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
-  if (providerArgs.includes('webrtc')) {
-    providerCreators.push(
-      (id, doc, options) => new DebugDocProvider(id, doc, options)
-    );
-    idGenerator = Generator.AutoIncrementByClientId; // works in multi-user mode
+  if (providerArgs.includes('idb')) {
+    providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
+    idGenerator = Generator.NanoID; // works in production
   }
 
-  if (providerArgs.includes('indexeddb')) {
-    providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
-    idGenerator = Generator.UUIDv4; // works in production
+  if (providerArgs.includes('bc')) {
+    providerCreators.push(createBroadcastChannelProvider);
+    idGenerator = Generator.NanoID; // works in production
   }
 
   if (blobStorageArgs.includes('memory')) {
     blobStorages.push(createMemoryStorage);
   }
 
-  if (blobStorageArgs.includes('indexeddb')) {
+  if (blobStorageArgs.includes('idb')) {
     blobStorages.push(createIndexeddbStorage);
   }
 

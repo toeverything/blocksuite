@@ -42,7 +42,7 @@ export function ImageOptionsTemplate({
 
       .embed-editing-state {
         box-shadow: var(--affine-shadow-2);
-        border-radius: 10px;
+        border-radius: 8px;
         list-style: none;
         padding: 4px;
         width: 40px;

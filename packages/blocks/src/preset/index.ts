@@ -1,5 +1,4 @@
-import type { BlockSchemaType } from '@blocksuite/store';
-import type { StaticValue } from 'lit/static-html.js';
+import type { LitBlockSpec } from '@blocksuite/lit';
 import { literal } from 'lit/static-html.js';
 
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
@@ -13,28 +12,128 @@ import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 
-export const pagePreset = new Map<BlockSchemaType, StaticValue>([
-  [PageBlockSchema, literal`affine-default-page`],
-  [SurfaceBlockSchema, literal`affine-surface`],
-  [ListBlockSchema, literal`affine-list`],
-  [NoteBlockSchema, literal`affine-note`],
-  [DatabaseBlockSchema, literal`affine-database`],
-  [DividerBlockSchema, literal`affine-divider`],
-  [CodeBlockSchema, literal`affine-code`],
-  [ImageBlockSchema, literal`affine-image`],
-  [ParagraphBlockSchema, literal`affine-paragraph`],
-  [BookmarkBlockSchema, literal`affine-bookmark`],
-]);
+export const pagePreset: LitBlockSpec[] = [
+  {
+    schema: PageBlockSchema,
+    view: {
+      component: literal`affine-default-page`,
+    },
+  },
+  {
+    schema: SurfaceBlockSchema,
+    view: {
+      component: literal`affine-surface`,
+    },
+  },
+  {
+    schema: ListBlockSchema,
+    view: {
+      component: literal`affine-list`,
+    },
+  },
+  {
+    schema: NoteBlockSchema,
+    view: {
+      component: literal`affine-note`,
+    },
+  },
+  {
+    schema: DatabaseBlockSchema,
+    view: {
+      component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DividerBlockSchema,
+    view: {
+      component: literal`affine-divider`,
+    },
+  },
+  {
+    schema: CodeBlockSchema,
+    view: {
+      component: literal`affine-code`,
+    },
+  },
+  {
+    schema: ImageBlockSchema,
+    view: {
+      component: literal`affine-image`,
+    },
+  },
+  {
+    schema: ParagraphBlockSchema,
+    view: {
+      component: literal`affine-paragraph`,
+    },
+  },
+  {
+    schema: BookmarkBlockSchema,
+    view: {
+      component: literal`affine-bookmark`,
+    },
+  },
+];
 
-export const edgelessPreset = new Map<BlockSchemaType, StaticValue>([
-  [PageBlockSchema, literal`affine-edgeless-page`],
-  [SurfaceBlockSchema, literal`affine-surface`],
-  [ListBlockSchema, literal`affine-list`],
-  [NoteBlockSchema, literal`affine-note`],
-  [DatabaseBlockSchema, literal`affine-database`],
-  [DividerBlockSchema, literal`affine-divider`],
-  [CodeBlockSchema, literal`affine-code`],
-  [ImageBlockSchema, literal`affine-image`],
-  [ParagraphBlockSchema, literal`affine-paragraph`],
-  [BookmarkBlockSchema, literal`affine-bookmark`],
-]);
+export const edgelessPreset: LitBlockSpec[] = [
+  {
+    schema: PageBlockSchema,
+    view: {
+      component: literal`affine-edgeless-page`,
+    },
+  },
+  {
+    schema: SurfaceBlockSchema,
+    view: {
+      component: literal`affine-surface`,
+    },
+  },
+  {
+    schema: ListBlockSchema,
+    view: {
+      component: literal`affine-list`,
+    },
+  },
+  {
+    schema: NoteBlockSchema,
+    view: {
+      component: literal`affine-note`,
+    },
+  },
+  {
+    schema: DatabaseBlockSchema,
+    view: {
+      component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DividerBlockSchema,
+    view: {
+      component: literal`affine-divider`,
+    },
+  },
+  {
+    schema: CodeBlockSchema,
+    view: {
+      component: literal`affine-code`,
+    },
+  },
+  {
+    schema: ImageBlockSchema,
+    view: {
+      component: literal`affine-image`,
+    },
+  },
+  {
+    schema: ParagraphBlockSchema,
+    view: {
+      component: literal`affine-paragraph`,
+    },
+  },
+  {
+    schema: BookmarkBlockSchema,
+    view: {
+      component: literal`affine-bookmark`,
+    },
+  },
+];

@@ -111,7 +111,7 @@ export class LinkPopover extends LitElement {
   @property()
   type: 'create' | 'edit' = 'create';
 
-  @property()
+  @property({ type: Boolean })
   showMask = true;
 
   @property()
@@ -120,7 +120,7 @@ export class LinkPopover extends LitElement {
   @property()
   previewLink = '';
 
-  @property()
+  @property({ type: Boolean })
   showBookmarkOperation = false;
 
   @state()

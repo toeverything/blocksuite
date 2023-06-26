@@ -1,5 +1,5 @@
 import type { StrokeStyle } from '../../consts.js';
-import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { ISurfaceElement } from '../surface-element.js';
 
 export enum ConnectorMode {
   Straight,
@@ -26,12 +26,8 @@ export interface Controller {
   customized?: boolean;
 }
 
-export interface IConnector {
-  id: string;
+export interface IConnector extends ISurfaceElement {
   type: 'connector';
-  xywh: SerializedXYWH;
-  index: string;
-  seed: number;
 
   mode: ConnectorMode;
   lineWidth: number;

@@ -43,13 +43,13 @@ export class EditorContainer
   extends WithDisposable(ShadowlessElement)
   implements AbstractEditor
 {
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   mode: 'page' | 'edgeless' = 'page';
 
-  @property()
+  @property({ attribute: false })
   override autofocus = false;
 
   @query('affine-default-page')
@@ -112,7 +112,7 @@ export class EditorContainer
     //   window,
     //   'affine.switch-mouse-mode',
     //   ({ detail }) => {
-    //     this.mouseMode = detail;
+    //     this.edgelessTool = detail;
     //   }
     // );
 
@@ -194,7 +194,7 @@ export class EditorContainer
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;
-      localStorage.setItem(
+      sessionStorage.setItem(
         'blocksuite:' + this.page.id + ':edgelessViewport',
         JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
       );
@@ -212,7 +212,7 @@ export class EditorContainer
       this.model.id,
       html`<block-suite-root
         .page=${this.page}
-        .componentMap=${this.mode === 'page' ? pagePreset : edgelessPreset}
+        .blocks=${this.mode === 'page' ? pagePreset : edgelessPreset}
       ></block-suite-root>`
     );
 

@@ -65,7 +65,7 @@ export class RemoteSelection extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   page: Page | null = null;
 
   private _ranges: Array<{

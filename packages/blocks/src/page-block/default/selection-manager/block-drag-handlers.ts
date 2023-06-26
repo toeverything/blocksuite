@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 
 import type { DefaultSelectionManager } from './selection-manager.js';
 import { autoScroll } from './utils.js';

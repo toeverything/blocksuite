@@ -3,6 +3,7 @@ import {
   BLOCK_ID_ATTR as ATTR,
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
@@ -24,7 +25,11 @@ const STEPS = MAX_SPACE / 2 / 2;
 
 type ElementTagName = keyof HTMLElementTagNameMap;
 
-export type BlockComponentElement =
+// Fix use unknown type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BlockComponentElement = BlockElement<any>;
+
+export type BlockCustomElement =
   HTMLElementTagNameMap[keyof HTMLElementTagNameMap] extends infer U
     ? U extends { model: infer M }
       ? M extends BaseBlockModel
@@ -148,6 +153,11 @@ export function getPreviousBlock(
     // Assume children is not possible to be `affine:note` or `affine:page`
     return lastChild;
   }
+
+  if (matchFlavours(previousBlock, ['affine:surface'])) {
+    return getPreviousBlock(previousBlock);
+  }
+
   return previousBlock;
 }
 

@@ -78,6 +78,7 @@ test('basic input', async ({ page }) => {
     index: 3,
     length: 16,
   });
+  await page.waitForTimeout(100);
   await press(page, 'Delete');
 
   expect(await editorA.innerText()).toBe('abc');

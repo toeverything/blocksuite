@@ -1,3 +1,4 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import {
   assertExists,
@@ -5,7 +6,6 @@ import {
   matchFlavours,
   nonTextBlock,
 } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
@@ -192,11 +192,12 @@ export function focusBlockByModel(
     return;
   }
   const element = getBlockElementByModel(model);
+  assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
     if (isPageMode) {
       pageBlock.selection.state.clearSelection();
-      pageBlock.selection.setFocusedBlock(element as Element);
+      pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
     }
     focusRichText(editableContainer, position, zoom);
   }
