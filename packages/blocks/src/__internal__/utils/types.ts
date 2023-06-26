@@ -13,7 +13,7 @@ import {
 } from '@blocksuite/store';
 
 import type { Cell, Column } from '../../database-block/table/types.js';
-import type { PageBlockModel } from '../../models.js';
+import type { Flavour, PageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type {
   BlockServiceInstanceByKey,
@@ -169,6 +169,8 @@ export type PanTool = {
 export type NoteTool = {
   type: 'note';
   background: CssVariableName;
+  flavour: Flavour;
+  blockType: string;
 };
 
 export type ConnectorTool = {

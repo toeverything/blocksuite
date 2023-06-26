@@ -16,7 +16,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
       display: flex;
     }
 
-    edgeless-tool-icon-button svg:hover {
+    edgeless-tool-icon-button:hover svg {
       transform: translateY(-8px);
     }
   `;

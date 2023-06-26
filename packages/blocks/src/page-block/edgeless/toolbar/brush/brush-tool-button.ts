@@ -52,7 +52,11 @@ export class EdgelessBrushToolButton extends LitElement {
       display: flex;
     }
 
-    edgeless-tool-icon-button svg:hover {
+    edgeless-tool-icon-button svg {
+      transition: 0.2s ease-in-out;
+    }
+
+    edgeless-tool-icon-button:hover svg {
       transform: translateY(-8px);
     }
   `;

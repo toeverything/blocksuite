@@ -35,7 +35,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       flex-direction: row;
-      padding: 0 20px;
+      padding: 4px 20px;
       height: 64px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
@@ -66,26 +66,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       margin: 0 7px;
       background-color: var(--affine-border-color);
     }
-
-    .zoom-percent {
-      display: block;
-      box-sizing: border-box;
-      width: 48px;
-      height: 32px;
-      line-height: 22px;
-      padding: 5px;
-      border-radius: 5px;
-      font-size: 14px;
-      font-weight: 500;
-      text-align: center;
-      cursor: pointer;
-      color: var(--affine-icon-color);
-    }
-
-    .zoom-percent:hover {
-      color: var(--affine-primary-color);
-      background-color: var(--affine-hover-color);
-    }
   `;
 
   edgeless: EdgelessPageBlockComponent;
@@ -102,11 +82,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
     this.edgeless.selection.setEdgelessTool(edgelessTool);
   };
-
-  private iconButtonStyles = `
-    --hover-color: var(--affine-hover-color);
-    --active-color: var(--affine-primary-color);
-  `;
 
   override firstUpdated() {
     const {
@@ -147,7 +122,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         @pointerdown=${stopPropagation}
       >
         <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
           @click=${() => this.setEdgelessTool({ type: 'default' })}
@@ -155,7 +129,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
           @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}

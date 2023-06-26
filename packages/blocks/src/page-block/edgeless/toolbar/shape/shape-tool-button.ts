@@ -23,7 +23,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
       display: flex;
     }
 
-    edgeless-tool-icon-button svg:hover {
+    edgeless-tool-icon-button:hover svg {
       scale: 1.2;
     }
 

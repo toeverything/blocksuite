@@ -86,12 +86,10 @@ export class EdgelessNoteToolButton extends LitElement {
     if (this._noteMenu) {
       this._noteMenu.dispose();
       this._noteMenu = null;
-      this._popperShow = false;
     } else {
       this._noteMenu = createNoteMenuPopper(this);
       this._noteMenu.element.edgelessTool = this.edgelessTool;
       this._noteMenu.element.edgeless = this.edgeless;
-      this._popperShow = true;
     }
   }
 
@@ -100,7 +98,6 @@ export class EdgelessNoteToolButton extends LitElement {
       if (this.edgelessTool.type !== 'note') {
         this._noteMenu?.dispose();
         this._noteMenu = null;
-        this._popperShow = false;
       }
       if (this._noteMenu) {
         this._noteMenu.element.edgelessTool = this.edgelessTool;
@@ -112,7 +109,6 @@ export class EdgelessNoteToolButton extends LitElement {
   override disconnectedCallback() {
     this._noteMenu?.dispose();
     this._noteMenu = null;
-    this._popperShow = false;
     super.disconnectedCallback();
   }
 
@@ -127,6 +123,8 @@ export class EdgelessNoteToolButton extends LitElement {
           this.setEdgelessTool({
             type: 'note',
             background: DEFAULT_NOTE_COLOR,
+            flavour: 'affine:paragraph',
+            blockType: 'text',
           });
           this._toggleNoteMenu();
         }}

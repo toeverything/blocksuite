@@ -673,7 +673,7 @@ export const EdgelessPenIcon = html`<svg
 export const EdgelessEraserIcon = html`<svg
   width="30"
   height="60"
-  viewBox="0 0 30 60"
+  viewBox="8 0 22 60"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
@@ -909,9 +909,9 @@ export const EdgelessTextIcon = html`<svg
 </svg> `;
 
 export const EdgelessShapeIcon = html`<svg
-  width="79"
-  height="71"
-  viewBox="0 0 79 71"
+  width="70"
+  height="50"
+  viewBox="0 10 70 50"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
@@ -1061,8 +1061,8 @@ export const EdgelessShapeIcon = html`<svg
 
 export const EdgelessImageIcon = html`<svg
   width="66"
-  height="55"
-  viewBox="0 0 66 55"
+  height="50"
+  viewBox="0 0 66 50"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
@@ -1598,4 +1598,39 @@ export const EdgelessConnectorIcon = html`<svg
       <stop offset="1" stop-color="#B1A5FF" />
     </linearGradient>
   </defs>
+</svg> `;
+
+export const nextItemIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="8 4 18 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g>
+    <rect
+      x="25"
+      y="19"
+      width="16"
+      height="16"
+      rx="8"
+      transform="rotate(-180 25 19)"
+      fill="white"
+    />
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M15.313 14.6869C15.1177 14.4916 15.1177 14.175 15.313 13.9798L18.057 11.2357C18.1872 11.1055 18.1872 10.8945 18.057 10.7643L15.313 8.02022C15.1177 7.82495 15.1177 7.50837 15.313 7.31311C15.5082 7.11785 15.8248 7.11785 16.0201 7.31311L18.7641 10.0572C19.2848 10.5779 19.2848 11.4221 18.7641 11.9428L16.0201 14.6869C15.8248 14.8821 15.5082 14.8821 15.313 14.6869Z"
+      fill="#77757D"
+    />
+    <rect
+      x="24.5"
+      y="18.5"
+      width="15"
+      height="15"
+      rx="7.5"
+      transform="rotate(-180 24.5 18.5)"
+      stroke="#E3E2E4"
+    />
+  </g>
 </svg> `;

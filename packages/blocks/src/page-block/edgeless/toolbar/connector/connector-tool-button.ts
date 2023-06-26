@@ -53,8 +53,8 @@ export class EdgelessConnectorToolButton extends LitElement {
       display: flex;
     }
 
-    edgeless-tool-icon-button svg:hover {
-      transform: translate(0, -8px);
+    edgeless-tool-icon-button:hover svg {
+      transform: translateY(-8px);
     }
   `;
 
