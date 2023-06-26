@@ -33,7 +33,6 @@ import {
   isDatabaseInput,
   isDragHandle,
   isElement,
-  isEmbed,
   isInsidePageTitle,
   isSelectedBlocks,
   Point,
@@ -52,7 +51,6 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
-import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState } from './selection-state.js';
@@ -82,7 +80,6 @@ function shouldFilterMouseEvent(event: Event): boolean {
 export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPageBlockComponent> {
   readonly state = new PageSelectionState('none');
   readonly slots: DefaultSelectionSlots;
-  private readonly _embedResizeManager: EmbedResizeManager;
 
   constructor({
     container,
@@ -100,8 +97,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     super(container, dispatcher);
 
     this.slots = slots;
-
-    this._embedResizeManager = new EmbedResizeManager(this.state);
 
     let isDragging = false;
     this._add('dragStart', ctx => {
@@ -224,12 +219,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       return;
     }
 
-    if (isEmbed(e)) {
-      this.state.type = 'embed';
-      this._embedResizeManager.onStart(e);
-      return;
-    }
-
     // disable dragHandle button
     this.container.components.dragHandle?.setPointerEvents('none');
 
@@ -261,10 +250,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       BlockDragHandlers.onMove(this, e);
       return;
     }
-
-    if (this.state.type === 'embed') {
-      return this._embedResizeManager.onMove(e);
-    }
   };
 
   private _onContainerDragEnd = (ctx: UIEventStateContext) => {
@@ -279,8 +264,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       NativeDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'block') {
       BlockDragHandlers.onEnd(this, e);
-    } else if (this.state.type === 'embed') {
-      this._embedResizeManager.onEnd();
     }
 
     if (this.page.readonly) return;

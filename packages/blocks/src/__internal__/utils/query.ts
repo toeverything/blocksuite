@@ -615,7 +615,7 @@ export function isPageOrNoteOrSurface(element: Element) {
 /**
  * Returns `true` if element is not page or note.
  */
-export function isBlock(element: Element) {
+export function isBlock(element: Element): element is BlockComponentElement {
   return !isPageOrNoteOrSurface(element);
 }
 
@@ -797,7 +797,9 @@ export function getClosestBlockElementByPoint(
 /**
  * Returns the closest block element by element that does not contain the page element and note element.
  */
-export function getClosestBlockElementByElement(element: Element | null) {
+export function getClosestBlockElementByElement(
+  element: Element | null
+): BlockComponentElement | null {
   if (!element) return null;
   if (hasBlockId(element) && isBlock(element)) {
     return element;
