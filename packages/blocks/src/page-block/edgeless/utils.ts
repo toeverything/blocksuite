@@ -23,8 +23,9 @@ import { assertExists, type Page } from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import {
+  type EdgelessTool,
   handleNativeRangeAtPoint,
-  type MouseMode,
+  isEmpty,
   Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -153,12 +154,12 @@ export function stopPropagation(event: Event) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
-export function getCursorMode(mouseMode: MouseMode) {
-  switch (mouseMode.type) {
+export function getCursorMode(edgelessTool: EdgelessTool) {
+  switch (edgelessTool.type) {
     case 'default':
       return 'default';
     case 'pan':
-      return mouseMode.panning ? 'grabbing' : 'grab';
+      return edgelessTool.panning ? 'grabbing' : 'grab';
     case 'brush':
     case 'eraser':
     case 'shape':
@@ -477,9 +478,9 @@ export function addNote(
     }
   );
   page.addBlock('affine:paragraph', {}, noteId);
-  edgeless.slots.mouseModeUpdated.emit({ type: 'default' });
+  edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
 
-  // Wait for mouseMode updated
+  // Wait for edgelessTool updated
   requestAnimationFrame(() => {
     const blocks =
       (page.root?.children.filter(
@@ -497,6 +498,17 @@ export function addNote(
         // Cannot reuse `handleNativeRangeClick` directly here,
         // since `retargetClick` will re-target to pervious editor
         handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
+
+        // Waiting dom updated, remove note if it is empty
+        requestAnimationFrame(() => {
+          edgeless.slots.selectionUpdated.once(({ active }) => {
+            const block = page.getBlockById(noteId);
+            assertExists(block);
+            if (!active && isEmpty(block)) {
+              page.deleteBlock(element);
+            }
+          });
+        });
       });
     }
   });

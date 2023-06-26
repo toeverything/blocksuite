@@ -135,21 +135,17 @@ export class Workspace {
     return this._store.providers;
   }
 
-  get subdocProviders() {
-    return this._store.subdocProviders;
-  }
-
   get blobs() {
     return this._blobStorage;
+  }
+
+  get pages() {
+    return this._pages;
   }
 
   private get _pages() {
     // the meta space is not included
     return this._store.spaces as Map<`space:${string}`, Page>;
-  }
-
-  public getPageNameList() {
-    return [...this._pages.keys()];
   }
 
   get doc() {

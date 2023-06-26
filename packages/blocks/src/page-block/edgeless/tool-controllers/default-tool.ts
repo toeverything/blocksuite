@@ -14,14 +14,13 @@ import {
 
 import {
   type BlockComponentElement,
-  type DefaultMouseMode,
+  type DefaultTool,
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
   handleNativeRangeDragMove,
-  isEmpty,
   noop,
   Point,
   Rect,
@@ -46,7 +45,7 @@ import {
   pickBlocksByBound,
   pickTopBlock,
 } from '../utils.js';
-import { MouseModeController } from './index.js';
+import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
   /** Moving selected contents */
@@ -63,8 +62,8 @@ export enum DefaultModeDragType {
   AltCloning = 'alt-cloning',
 }
 
-export class DefaultModeController extends MouseModeController<DefaultMouseMode> {
-  readonly mouseMode = <DefaultMouseMode>{
+export class DefaultToolController extends EdgelessToolController<DefaultTool> {
+  readonly tool = <DefaultTool>{
     type: 'default',
   };
   override enableHover = true;
@@ -253,19 +252,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
     });
   }
 
-  private _tryDeleteEmptyBlocks() {
-    const emptyBlocks = this._blocks.filter(b => isEmpty(b));
-    // always keep at least one note block
-    if (emptyBlocks.length === this._blocks.length) {
-      emptyBlocks.shift();
-    }
-
-    if (emptyBlocks.length) {
-      this._page.captureSync();
-      emptyBlocks.forEach(b => this._page.deleteBlock(b));
-    }
-  }
-
   /** Update drag handle by closest block elements */
   private _updateDragHandle(e: PointerEventState) {
     const block = this.state.selected[0];
@@ -300,8 +286,6 @@ export class DefaultModeController extends MouseModeController<DefaultMouseMode>
   }
 
   onContainerClick(e: PointerEventState) {
-    this._tryDeleteEmptyBlocks();
-
     const selected = this._pick(e.x, e.y);
 
     if (selected) {

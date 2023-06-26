@@ -3,6 +3,7 @@
 # ALL_PACKAGES
 packages=(
   "blocks"
+  "block-std"
   # "docs" # NOT PUBLISHED
   "editor"
   "global"

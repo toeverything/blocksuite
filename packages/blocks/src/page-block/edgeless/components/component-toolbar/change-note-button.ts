@@ -1,5 +1,5 @@
 import '../tool-icon-button.js';
-import '../../toolbar/shape-tool/shape-menu.js';
+import '../../toolbar/shape/shape-menu.js';
 import '../color-panel.js';
 
 import { HiddenIcon, NoteIcon } from '@blocksuite/global/config';
@@ -87,15 +87,25 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      padding: 4px 4px;
       gap: 2px;
       color: var(--affine-text-secondary-color);
+      padding: 0 4px;
       height: 24px;
     }
 
     .note-status-button:hover {
       background: var(--affine-hover-color);
       border-radius: 8px;
+    }
+
+    .note-status-button .hover {
+      display: none;
+    }
+    .note-status-button:hover .hover {
+      display: flex;
+    }
+    .note-status-button:hover .unhover {
+      display: none;
     }
 
     .note-status-button svg {
@@ -147,26 +157,42 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       this.page.updateBlock(note, { background: color });
     });
-    // FIXME: force update selection, because connector mode changed
+    // force update selection, because connector mode changed
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
     this.page.updateBlock(note, { hidden });
+
+    const noteParent = this.page.getParent(note);
+    assertExists(noteParent);
+    const noteParentChildNotes = noteParent.children.filter(block =>
+      matchFlavours(block, ['affine:note'])
+    ) as NoteBlockModel[];
+    const noteParentLastNote =
+      noteParentChildNotes[noteParentChildNotes.length - 1];
+
     if (!hidden) {
-      const noteParent = this.page.getParent(note);
-      assertExists(noteParent);
-      const noteParentLastChild =
-        noteParent.children[noteParent.children.length - 1];
-      if (note !== noteParentLastChild) {
+      if (note !== noteParentLastNote) {
         // move to the end
-        this.page.moveBlocks([note], noteParent, noteParentLastChild, false);
+        this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
+      }
+    } else {
+      // if all notes are hidden, add a new note
+      if (noteParentChildNotes.every(block => block.hidden)) {
+        const newNoteId = this.page.addBlock('affine:note', {}, noteParent.id);
+        this.page.addBlock('affine:paragraph', {}, newNoteId);
+        const newNote = this.page.getBlockById(newNoteId);
+        assertExists(newNote);
+        this.page.moveBlocks([newNote], noteParent, noteParentLastNote, true);
       }
     }
     this.requestUpdate();
+    // force update selection, because connector mode changed
+    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  override firstUpdated(changedProperties: Map<string, unknown>) {
+  override updated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
     if (this._colorSelector) {
@@ -179,7 +205,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       );
       _disposables.add(this._colorSelectorPopper);
     }
-    super.firstUpdated(changedProperties);
+    super.updated(changedProperties);
   }
 
   override render() {
@@ -196,12 +222,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (note.hidden) {
       return html`
+        <div class="note-status hidden">${HiddenIcon}</div>
         <div
           @click=${() => this._setNoteHidden(note, !note.hidden)}
           class="note-status-button"
         >
-          ${HiddenIcon}
-          <span>${'Hidden on page mode'}</span>
+          <span class="unhover">${'Hidden on page mode'}</span>
+          <span class="hover">${NoteIcon}</span>
+          <span class="hover">${'Show on page'}</span>
         </div>
       `;
     } else {
@@ -211,10 +239,12 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
         </div>
         <div
           @click=${() => this._setNoteHidden(note, !note.hidden)}
-          class="note-status-button"
+          class="note-status-button unhover"
         >
-          ${NoteIcon}
-          <span>${'On Page'}</span>
+          <span class="unhover">${NoteIcon}</span>
+          <span class="unhover">${'On Page'}</span>
+          <span class="hover">${HiddenIcon}</span>
+          <span class="hover">${'Hidden'}</span>
         </div>
         <edgeless-tool-icon-button
           .tooltip=${this._popperShow ? '' : 'Color'}

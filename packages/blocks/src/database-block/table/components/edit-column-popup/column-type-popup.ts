@@ -4,6 +4,7 @@ import {
   DatabaseNumber,
   DatabaseProgress,
   DatabaseSelect,
+  LinkIcon,
   TextIcon,
   TodoIcon,
 } from '@blocksuite/global/config';
@@ -43,6 +44,11 @@ const columnTypes: ColumnHeader[] = [
     type: 'progress',
     text: 'Progress',
     icon: DatabaseProgress,
+  },
+  {
+    type: 'link',
+    text: 'Link',
+    icon: LinkIcon,
   },
 ];
 

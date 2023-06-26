@@ -38,7 +38,10 @@
     "plugins": [
       {
         "name": "ts-lit-plugin",
-        "strict": true
+        "strict": true,
+        "rules": {
+          "no-incompatible-type-binding": "off"
+        }
       }
     ]
   },

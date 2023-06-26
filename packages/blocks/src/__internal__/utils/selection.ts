@@ -192,11 +192,12 @@ export function focusBlockByModel(
     return;
   }
   const element = getBlockElementByModel(model);
+  assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
     if (isPageMode) {
       pageBlock.selection.state.clearSelection();
-      pageBlock.selection.setFocusedBlock(element as Element);
+      pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
     }
     focusRichText(editableContainer, position, zoom);
   }

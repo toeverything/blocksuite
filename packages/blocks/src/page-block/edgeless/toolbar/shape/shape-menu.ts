@@ -4,7 +4,7 @@ import { Slot } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ShapeMouseMode } from '../../../../__internal__/index.js';
+import type { ShapeTool } from '../../../../__internal__/index.js';
 import { ShapeComponentConfig } from './shape-menu-config.js';
 
 @customElement('edgeless-shape-menu')
@@ -28,13 +28,13 @@ export class EdgelessShapeMenu extends LitElement {
   `;
 
   @property({ attribute: false })
-  selectedShape?: ShapeMouseMode['shape'] | null;
+  selectedShape?: ShapeTool['shape'] | null;
 
   slots = {
-    select: new Slot<ShapeMouseMode['shape']>(),
+    select: new Slot<ShapeTool['shape']>(),
   };
 
-  private _onSelect(value: ShapeMouseMode['shape']) {
+  private _onSelect(value: ShapeTool['shape']) {
     this.selectedShape = value;
     this.slots.select.emit(value);
   }

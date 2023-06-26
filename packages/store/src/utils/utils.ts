@@ -15,7 +15,8 @@ import type {
   YBlocks,
 } from '../workspace/page.js';
 import type { Page } from '../workspace/page.js';
-import { createYProxy, isPureObject } from '../yjs/index.js';
+import type { BlockSuiteDoc } from '../yjs/index.js';
+import { isPureObject } from '../yjs/index.js';
 import { native2Y } from '../yjs/utils.js';
 
 export function assertValidChildren(
@@ -94,7 +95,10 @@ export function syncBlockProps(
   });
 }
 
-export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
+export function toBlockProps(
+  yBlock: YBlock,
+  doc: BlockSuiteDoc
+): Partial<BlockProps> {
   const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
   Object.keys(prefixedProps).forEach(key => {
@@ -109,12 +113,12 @@ export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
     const key = prefixedKey.replace('prop:', '');
     const realValue = yBlock.get(prefixedKey);
     if (realValue instanceof Y.Map) {
-      const value = createYProxy(realValue, {
+      const value = doc.proxy.createYProxy(realValue, {
         deep: true,
       });
       props[key] = value;
     } else if (realValue instanceof Y.Array) {
-      const value = createYProxy(realValue, {
+      const value = doc.proxy.createYProxy(realValue, {
         deep: true,
       });
       props[key] = value;
