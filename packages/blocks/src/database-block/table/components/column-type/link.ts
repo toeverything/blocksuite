@@ -51,7 +51,13 @@ export class LinkCell extends DatabaseCellElement<string> {
     }
   `;
 
-  override _setEditing(_: boolean, event: Event) {
+  override _setEditing(_: boolean) {
+    // override
+  }
+
+  private _onClick = (event: Event) => {
+    event.stopPropagation();
+
     const value = this.value ?? '';
 
     if (!value || !isValidLink(value)) {
@@ -59,7 +65,7 @@ export class LinkCell extends DatabaseCellElement<string> {
       return;
     }
 
-    if (isValidLink(value) && event) {
+    if (isValidLink(value)) {
       const target = event.target as HTMLElement;
       const link = target.querySelector<HTMLAnchorElement>('.link-node');
       if (link) {
@@ -68,9 +74,10 @@ export class LinkCell extends DatabaseCellElement<string> {
       }
       return;
     }
-  }
+  };
 
-  private _onEdit = () => {
+  private _onEdit = (e: Event) => {
+    e.stopPropagation();
     this.setEditing(true);
   };
 
@@ -78,7 +85,7 @@ export class LinkCell extends DatabaseCellElement<string> {
     const linkText = this.value ?? '';
 
     return html`
-      <div class="affine-database-link">
+      <div class="affine-database-link" @click=${this._onClick}>
         <affine-database-link-node
           .link=${linkText}
         ></affine-database-link-node>

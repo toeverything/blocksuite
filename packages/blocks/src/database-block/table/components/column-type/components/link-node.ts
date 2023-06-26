@@ -13,11 +13,10 @@ export class LinkNode extends ShadowlessElement {
       word-break: break-word;
       color: var(--affine-link-color);
       fill: var(--affine-link-color);
-      text-decoration: none;
       cursor: pointer;
       font-weight: normal;
       font-style: normal;
-      text-decoration: none;
+      text-decoration: underline;
     }
   `;
 
