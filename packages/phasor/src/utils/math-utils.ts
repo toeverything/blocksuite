@@ -17,8 +17,12 @@ interface TLBounds {
   rotation?: number;
 }
 
+function square(num: number) {
+  return num * num;
+}
+
 function sumSqr(v: number[], w: number[]) {
-  return Math.pow(v[0] - w[0], 2) + Math.pow(v[1] - w[1], 2);
+  return square(v[0] - w[0]) + square(v[1] - w[1]);
 }
 
 function distToSegmentSquared(p: number[], v: number[], w: number[]) {
@@ -90,8 +94,6 @@ export function pointInPolygon(p: number[], points: number[][]): boolean {
 
   return wn !== 0;
 }
-
-const square = (num: number) => num * num;
 
 export function pointOnEllipse(
   point: number[],
