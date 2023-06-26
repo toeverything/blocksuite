@@ -12,7 +12,7 @@ import {
 import { assertExists, type Page } from '@blocksuite/store';
 import { render } from 'lit';
 
-import type { FrameBlockModel } from '../../models.js';
+import type { NoteBlockModel } from '../../models.js';
 import { getSelectedRect } from '../../page-block/edgeless/components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import {
@@ -330,14 +330,14 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(frames: FrameBlockModel[], shapes: PhasorElement[]) {
-    const framesLen = frames.length;
+  async copyAsPng(notes: NoteBlockModel[], shapes: PhasorElement[]) {
+    const notesLen = notes.length;
     const shapesLen = shapes.length;
 
-    if (framesLen + shapesLen === 0) return;
+    if (notesLen + shapesLen === 0) return;
 
     // sort by `index`
-    frames.sort(compare);
+    notes.sort(compare);
     shapes.sort(compare);
 
     const html2canvas = (await import('html2canvas')).default;
@@ -348,7 +348,7 @@ export class EdgelessClipboard implements Clipboard {
     const { viewport } = surface;
     const { zoom } = viewport;
     const { left, top, right, bottom, width, height } = getSelectedRect(
-      [...frames, ...shapes],
+      [...notes, ...shapes],
       viewport
     );
     const min = surface.toModelCoord(left, top);
@@ -364,17 +364,17 @@ export class EdgelessClipboard implements Clipboard {
     container.style.height = `${height}px`;
     _edgeless.appendChild(container);
 
-    if (framesLen) {
+    if (notesLen) {
       const fragment = document.createDocumentFragment();
       const layer = document.createElement('div');
       layer.style.position = 'absolute';
       layer.style.zIndex = '-1';
       layer.style.transform = `scale(${zoom})`;
-      for (let i = 0; i < framesLen; i++) {
-        const element = frames[i];
-        const frame = getBlockElementById(element.id) as BlockComponentElement;
-        assertExists(frame);
-        const parent = frame.parentElement;
+      for (let i = 0; i < notesLen; i++) {
+        const element = notes[i];
+        const note = getBlockElementById(element.id) as BlockComponentElement;
+        assertExists(note);
+        const parent = note.parentElement;
         assertExists(parent);
 
         const [x, y] = deserializeXYWH(element.xywh);
@@ -382,7 +382,7 @@ export class EdgelessClipboard implements Clipboard {
         div.className = parent.className;
         div.setAttribute('style', parent.getAttribute('style') || '');
         div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
-        render(frame.render(), div);
+        render(note.render(), div);
         layer.appendChild(div);
       }
       fragment.appendChild(layer);
