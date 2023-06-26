@@ -78,9 +78,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
 
     if (!insideBoundingBox) return false;
 
-    const command = getSvgPathFromStroke(
-      getSolidStrokePoints(this.points, this.lineWidth)
-    );
+    const command = getSvgPathFromStroke(getSolidStrokePoints(this.points, 3));
     const path = new Path2D(command);
 
     if (this._testCtx.lineWidth !== (options?.expand ?? 1)) {

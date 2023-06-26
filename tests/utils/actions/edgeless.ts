@@ -680,24 +680,33 @@ export async function changeConnectorStrokeStyle(
   await button.click();
 }
 
-export async function initThreeOverlapShapes(page: Page) {
+export async function initThreeOverlapFilledShapes(page: Page) {
   const rect0 = {
     start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
   };
   await addBasicRectShapeElement(page, rect0.start, rect0.end);
+  await page.mouse.click(rect0.start.x + 5, rect0.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-navy');
 
   const rect1 = {
     start: { x: 130, y: 130 },
     end: { x: 230, y: 230 },
   };
   await addBasicRectShapeElement(page, rect1.start, rect1.end);
+  await page.mouse.click(rect1.start.x + 5, rect1.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-black');
 
   const rect2 = {
     start: { x: 160, y: 160 },
     end: { x: 260, y: 260 },
   };
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
+  await page.mouse.click(rect1.start.x + 5, rect1.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-white');
 }
 
 export async function initThreeOverlapNotes(page: Page) {

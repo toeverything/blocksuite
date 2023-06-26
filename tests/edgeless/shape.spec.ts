@@ -252,7 +252,7 @@ test('hovering on shape should not have effect on underlying block', async ({
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
   await setMouseMode(page, 'default');
 
-  await page.mouse.move(x + 50, y + 50);
+  await page.mouse.move(x + 10, y + 10);
   await assertEdgelessHoverRect(page, [x, y, 100, 100]);
 });
 
@@ -269,7 +269,7 @@ test('shape element should not move when the selected state is inactive', async 
   await dragBetweenCoords(
     page,
     { x: 50, y: 50 },
-    { x: 150, y: 150 },
+    { x: 110, y: 110 },
     { steps: 2 }
   );
 

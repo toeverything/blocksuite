@@ -117,16 +117,16 @@ test('option/alt mouse drag duplicate a new element', async ({ page }) => {
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 200 };
   await addBasicRectShapeElement(page, start, end);
-  await optionMouseDrag(page, { x: 150, y: 150 }, { x: 250, y: 150 });
+  await optionMouseDrag(page, { x: 150, y: 110 }, { x: 250, y: 150 });
 
-  await assertEdgelessSelectedRect(page, [200, 100, 100, 100]);
+  await assertEdgelessSelectedRect(page, [200, 140, 100, 100]);
 
   await undoByClick(page);
   await assertEdgelessNonSelectedRect(page);
 
   await redoByClick(page);
   await click(page, { x: 250, y: 150 });
-  await assertEdgelessSelectedRect(page, [200, 100, 100, 100]);
+  await assertEdgelessSelectedRect(page, [200, 140, 100, 100]);
 });
 
 test('should cancel select when the selected point is outside the current selected element', async ({
@@ -145,7 +145,7 @@ test('should cancel select when the selected point is outside the current select
   await addBasicRectShapeElement(page, secondStart, secondEnd);
 
   // select the first rect
-  await page.mouse.click(150, 150);
+  await page.mouse.click(110, 150);
 
   await dragBetweenCoords(
     page,
@@ -154,7 +154,7 @@ test('should cancel select when the selected point is outside the current select
     { steps: 0 }
   );
 
-  await page.mouse.move(150, 150);
+  await page.mouse.move(110, 150);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 });
 
@@ -227,13 +227,13 @@ test('shift click multi select and de-select', async ({ page }) => {
   end.x = 200;
   await addBasicRectShapeElement(page, start, end);
 
-  await click(page, { x: 50, y: 50 });
+  await click(page, { x: 90, y: 90 });
   await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
 
-  shiftClick(page, { x: 150, y: 50 });
+  shiftClick(page, { x: 110, y: 50 });
   await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
 
-  shiftClick(page, { x: 150, y: 50 });
+  shiftClick(page, { x: 110, y: 50 });
   await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
 });
 
