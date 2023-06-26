@@ -29,7 +29,7 @@ export interface ShapeMethods {
   hitTest: (
     x: number,
     y: number,
-    bound: IBound,
+    element: ShapeElement,
     options?: HitTestOptions
   ) => boolean;
   intersectWithLine: (start: IVec, end: IVec, element: ShapeElement) => boolean;

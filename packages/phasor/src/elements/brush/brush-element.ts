@@ -10,7 +10,7 @@ import {
   lineIntersects,
 } from '../../utils/math-utils.js';
 import { type IVec, Vec } from '../../utils/vec.js';
-import { SurfaceElement } from '../surface-element.js';
+import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
@@ -25,6 +25,11 @@ function getSolidStrokePoints(points: number[][], lineWidth: number) {
 }
 
 export class BrushElement extends SurfaceElement<IBrush> {
+  private _testCanvas = document.createElement('canvas');
+  private _testCtx = this._testCanvas.getContext(
+    '2d'
+  ) as CanvasRenderingContext2D;
+
   /* Brush mouse coords relative to left-top corner */
   get points() {
     const points = this.yMap.get('points') as IBrush['points'];
@@ -66,6 +71,29 @@ export class BrushElement extends SurfaceElement<IBrush> {
       }
     }
     return false;
+  }
+
+  override hitTest(
+    x: number,
+    y: number,
+    options?: HitTestOptions | undefined
+  ): boolean {
+    const insideBoundBox = super.hitTest(x, y, options);
+
+    if (!insideBoundBox) {
+      return insideBoundBox;
+    }
+
+    const command = getSvgPathFromStroke(
+      getSolidStrokePoints(this.points, this.lineWidth)
+    );
+    const path = new Path2D(command);
+
+    if (this._testCtx.lineWidth !== (options?.expand ?? 1)) {
+      this._testCtx.lineWidth = options?.expand ?? 1;
+    }
+
+    return this._testCtx.isPointInStroke(path, x - this.x, y - this.y);
   }
 
   override render(ctx: CanvasRenderingContext2D) {
