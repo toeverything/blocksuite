@@ -10,6 +10,7 @@ import {
   DatabaseProgress,
   DatabaseSelect,
   DeleteIcon,
+  LinkIcon,
   TextIcon,
   TodoIcon,
 } from '@blocksuite/global/config';
@@ -480,6 +481,7 @@ const columnTypeIconMap: ColumnTypeIcon = {
   progress: DatabaseProgress,
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,
+  link: LinkIcon,
 };
 
 declare global {

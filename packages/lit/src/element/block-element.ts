@@ -59,20 +59,12 @@ export class BlockElement<Model extends BaseBlockModel> extends WithDisposable(
 
   @property({ attribute: false })
   page!: Page;
-
-  /**
-   * This is different from `element.focus()`
-   */
-  @property({ attribute: false })
-  focused = false;
-
-  focusBlock(focusContext: FocusContext): void | boolean {
-    this.focused = true;
+  focusBlock(focusContext: FocusContext): boolean {
     // Return false to prevent default focus behavior
+    return true;
   }
 
   blurBlock(focusContext: FocusContext): boolean {
-    this.focused = false;
     // Return false to prevent default focus behavior
     return true;
   }

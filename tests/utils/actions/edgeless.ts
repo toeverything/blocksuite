@@ -345,18 +345,12 @@ export async function selectNoteInEdgeless(page: Page, noteId: string) {
 
 export async function updateExistedBrushElementSize(
   page: Page,
-  size: 'thin' | 'thick'
+  nthSizeButton: 1 | 2 | 3 | 4 | 5 | 6
 ) {
-  const text = {
-    thin: 'Thin',
-    thick: 'Thick',
-  }[size];
-
-  const btn = page
-    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
-    .filter({
-      hasText: text,
-    });
+  // get the nth brush size button
+  const btn = page.locator(
+    `.line-width-panel > div:nth-child(${nthSizeButton})`
+  );
 
   await btn.click();
 }
