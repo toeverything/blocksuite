@@ -180,8 +180,8 @@ importers:
         specifier: ^4.2.12
         version: 4.2.12
       shiki:
-        specifier: ^0.14.1
-        version: 0.14.1
+        specifier: ^0.14.3
+        version: 0.14.3
       turndown:
         specifier: ^7.1.1
         version: 7.1.1
@@ -6740,8 +6740,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /shiki@0.14.1:
-    resolution: {integrity: sha512-+Jz4nBkCBe0mEDqo1eKRcCdjRtrCjozmcbTUjbPTX7OOJfEbTZzlUWlZtGe3Gb5oV1/jnojhG//YZc3rs9zSEw==}
+  /shiki@0.14.3:
+    resolution: {integrity: sha512-U3S/a+b0KS+UkTyMjoNojvTgrBHjgp7L6ovhFVZsXmBGnVdQ4K4U9oK0z63w538S91ATngv1vXigHCSWOwnr+g==}
     dependencies:
       ansi-sequence-parser: 1.1.0
       jsonc-parser: 3.2.0
@@ -7631,7 +7631,7 @@ packages:
       body-scroll-lock: 4.0.0-beta.0
       mark.js: 8.11.1
       minisearch: 6.1.0
-      shiki: 0.14.1
+      shiki: 0.14.3
       vite: 4.3.3(@types/node@18.15.3)
       vue: 3.3.4
     transitivePeerDependencies:
