@@ -117,12 +117,12 @@ const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
     length: 0,
   });
 
-  const v1Range = {
+  const vRange = {
     index: match[0].length,
     length: 0,
   };
 
-  editor.insertText(v1Range, REFERENCE_NODE, {
+  editor.insertText(vRange, REFERENCE_NODE, {
     reference: { type: 'Subpage', pageId },
   });
 };
