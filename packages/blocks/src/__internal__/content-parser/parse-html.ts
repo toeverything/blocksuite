@@ -4,11 +4,11 @@ import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import { getTagColor } from '../../components/tags/colors.js';
 import {
   columnManager,
   richTextHelper,
 } from '../../database-block/common/column-manager.js';
-import { getTagColor } from '../../database-block/utils/utils.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
