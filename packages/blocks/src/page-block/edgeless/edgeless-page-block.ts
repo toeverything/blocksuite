@@ -181,7 +181,7 @@ export class EdgelessPageBlockComponent
       position: fixed;
       bottom: 28px;
       left: 30px;
-      z-index: 2;
+      z-index: var(--affine-z-index-popover);
     }
   `;
 

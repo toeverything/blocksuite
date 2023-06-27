@@ -225,7 +225,7 @@ export async function increaseZoomLevel(page: Page) {
 }
 
 export async function autoFit(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'fitToScreen', false);
+  const btn = locatorEdgelessZoomToolButton(page, 'fitToScreen', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
