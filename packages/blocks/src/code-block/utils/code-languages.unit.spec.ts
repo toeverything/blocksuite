@@ -16,6 +16,11 @@ describe('getStandardLanguage', () => {
     expect(getStandardLanguage('Python')).not.toBeNull();
   });
 
+  it('case insensitive', () => {
+    expect(getStandardLanguage('JavAScRiPt')).not.toBeNull();
+    expect(getStandardLanguage('jS')).not.toBeNull();
+  });
+
   it('strict mode', () => {
     // the default is loose mode
     expect(getStandardLanguage('js')).not.toBeNull();
