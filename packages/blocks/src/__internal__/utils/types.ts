@@ -23,6 +23,7 @@ import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { CssVariableName } from '../theme/css-variables.js';
+import { type Flavour } from './../../models.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
@@ -166,9 +167,39 @@ export type PanTool = {
   panning: boolean;
 };
 
+export type NoteChildrenFlavour =
+  | 'affine:code'
+  | 'affine:paragraph'
+  | 'affine:list'
+  | 'affine:divider'
+  | 'affine:image'
+  | 'affine:database'
+  | 'affine:bookmark';
+
+export type NoteChildrenType =
+  | 'text'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6'
+  | 'code'
+  | 'quote'
+  | 'divider'
+  | 'image'
+  | 'database'
+  | 'bookmark'
+  | 'bulleted'
+  | 'numbered'
+  | 'todo'
+  | null;
+
 export type NoteTool = {
   type: 'note';
   background: CssVariableName;
+  childFlavour: NoteChildrenFlavour;
+  childType: NoteChildrenType;
 };
 
 export type ConnectorTool = {

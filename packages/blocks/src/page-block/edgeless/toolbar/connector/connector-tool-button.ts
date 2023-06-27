@@ -1,7 +1,7 @@
 import '../../components/tool-icon-button.js';
 import './connector-menu.js';
 
-import { ConnectorIcon } from '@blocksuite/global/config';
+import { EdgelessConnectorIcon } from '@blocksuite/global/config';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
@@ -52,6 +52,14 @@ export class EdgelessConnectorToolButton extends LitElement {
     :host {
       display: flex;
     }
+
+    edgeless-tool-icon-button svg {
+      transition: 0.2s ease-in-out;
+    }
+
+    edgeless-tool-icon-button:hover svg {
+      transform: translateY(-8px);
+    }
   `;
 
   @property({ attribute: false })
@@ -64,6 +72,10 @@ export class EdgelessConnectorToolButton extends LitElement {
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   private _menu: ConnectorMenuPopper | null = null;
+
+  private iconButtonStyles = `
+    --hover-color: transparent;
+  `;
 
   private _toggleMenu() {
     if (this._menu) {
@@ -100,8 +112,10 @@ export class EdgelessConnectorToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
+        style=${this.iconButtonStyles}
         .tooltip=${'Connector'}
         .active=${type === 'connector'}
+        .activeMode=${'background'}
         @click=${() => {
           this.setEdgelessTool({
             type: 'connector',
@@ -111,7 +125,7 @@ export class EdgelessConnectorToolButton extends LitElement {
           this._toggleMenu();
         }}
       >
-        ${ConnectorIcon}
+        ${EdgelessConnectorIcon}
       </edgeless-tool-icon-button>
     `;
   }

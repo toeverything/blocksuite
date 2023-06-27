@@ -30,6 +30,10 @@ import {
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
+import type {
+  NoteChildrenFlavour,
+  NoteChildrenType,
+} from './../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from './components/color-panel.js';
 import { SurfaceTextEditor } from './components/surface-text-editor.js';
 import type {
@@ -45,6 +49,14 @@ export const DEFAULT_NOTE_WIDTH = 448;
 export const DEFAULT_NOTE_HEIGHT = 72;
 export const DEFAULT_NOTE_OFFSET_X = 30;
 export const DEFAULT_NOTE_OFFSET_Y = 40;
+
+export const DEFAULT_NOTE_CHILD_FLAVOUR = 'affine:paragraph';
+export const DEFAULT_NOTE_CHILD_TYPE = 'text';
+
+export type NoteOptions = {
+  childFlavour: NoteChildrenFlavour;
+  childType: NoteChildrenType;
+};
 
 const ATTACHED_DISTANCE = 20;
 
@@ -469,7 +481,8 @@ export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
   event: PointerEventState,
-  width = DEFAULT_NOTE_WIDTH
+  width = DEFAULT_NOTE_WIDTH,
+  options: NoteOptions
 ) {
   const noteId = edgeless.addNoteWithPoint(
     new Point(event.point.x, event.point.y),
@@ -477,7 +490,7 @@ export function addNote(
       width,
     }
   );
-  page.addBlock('affine:paragraph', {}, noteId);
+  page.addBlock(options.childFlavour, { type: options.childType }, noteId);
   edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
 
   // Wait for edgelessTool updated
