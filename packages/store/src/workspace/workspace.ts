@@ -284,27 +284,27 @@ export class Workspace {
 
       // setup embed source
       if (props['sys:flavour'] === 'affine:image') {
-        let resp;
         try {
-          resp = await fetch(props['prop:sourceId'], {
+          const resp = await fetch(props['prop:sourceId'], {
             cache: 'no-cache',
             mode: 'cors',
             headers: {
               Origin: window.location.origin,
             },
           });
-        } catch (error) {
-          throw new Error(`Failed to fetch embed source. error: ${error}`);
-        }
-        const imgBlob = await resp.blob();
-        if (!imgBlob.type.startsWith('image/')) {
-          throw new Error('Embed source is not an image');
-        }
+          const imgBlob = await resp.blob();
+          if (!imgBlob.type.startsWith('image/')) {
+            throw new Error('Embed source is not an image');
+          }
 
-        assertExists(page);
-        const storage = page.blobs;
-        assertExists(storage);
-        props['prop:sourceId'] = (await storage.set(imgBlob)) as never;
+          assertExists(page);
+          const storage = page.blobs;
+          assertExists(storage);
+          props['prop:sourceId'] = (await storage.set(imgBlob)) as never;
+        } catch (e) {
+          console.error('Failed to fetch embed source');
+          console.error(e);
+        }
       }
 
       Object.keys(props).forEach(key => {
