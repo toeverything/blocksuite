@@ -23,7 +23,6 @@ import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { CssVariableName } from '../theme/css-variables.js';
-import { type Flavour } from './../../models.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 

@@ -18,7 +18,11 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './components/component-toolbar/change-shape-button.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { isTopLevelBlock } from './utils.js';
+import {
+  DEFAULT_NOTE_CHILD_FLAVOUR,
+  DEFAULT_NOTE_CHILD_TYPE,
+  isTopLevelBlock,
+} from './utils.js';
 
 function setEdgelessTool(
   edgeless: EdgelessPageBlockComponent,
@@ -159,6 +163,8 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
       setEdgelessTool(edgeless, {
         type: 'note',
         background: DEFAULT_NOTE_COLOR,
+        childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
+        childType: DEFAULT_NOTE_CHILD_TYPE,
       })
     );
     hotkey.addListener('p', () =>
