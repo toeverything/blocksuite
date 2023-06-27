@@ -1,61 +1,6 @@
-import type { SurfaceViewport } from '@blocksuite/phasor';
-import { Bound, getCommonBound } from '@blocksuite/phasor';
 import type { Disposable } from '@blocksuite/store';
 import { computePosition, flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
-
-import {
-  getSelectionBoxBound,
-  getXYWH,
-  isTopLevelBlock,
-} from '../utils/query.js';
-import type { Selectable } from '../utils/selection-manager.js';
-
-export function getSelectedRect(
-  selected: Selectable[],
-  viewport: SurfaceViewport
-): DOMRect {
-  if (selected.length === 0) {
-    return new DOMRect(0, 0, 0, 0);
-  }
-  const rects = selected.map(selectable => {
-    const { x, y, width, height } = getSelectionBoxBound(
-      viewport,
-      getXYWH(selectable)
-    );
-
-    return {
-      x,
-      y,
-      w: width,
-      h: height,
-    };
-  });
-
-  const commonBound = getCommonBound(rects);
-  return new DOMRect(
-    commonBound?.x,
-    commonBound?.y,
-    commonBound?.w,
-    commonBound?.h
-  );
-}
-
-export function getSelectableBounds(
-  selected: Selectable[]
-): Map<string, Bound> {
-  const bounds = new Map<string, Bound>();
-  for (const s of selected) {
-    let bound: Bound;
-    if (isTopLevelBlock(s)) {
-      bound = Bound.deserialize(getXYWH(s));
-    } else {
-      bound = new Bound(s.x, s.y, s.w, s.h);
-    }
-    bounds.set(s.id, bound);
-  }
-  return bounds;
-}
 
 export function listenClickAway(
   element: HTMLElement,

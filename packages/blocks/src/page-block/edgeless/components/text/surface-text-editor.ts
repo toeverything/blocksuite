@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getSelectedRect } from '../utils.js';
+import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('surface-text-editor')
 export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {

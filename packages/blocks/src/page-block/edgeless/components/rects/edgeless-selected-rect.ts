@@ -18,7 +18,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
-import { isTopLevelBlock } from '../../utils/query.js';
+import {
+  getSelectableBounds,
+  getSelectedRect,
+  isTopLevelBlock,
+} from '../../utils/query.js';
 import type {
   EdgelessSelectionState,
   Selectable,
@@ -29,7 +33,6 @@ import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
-import { getSelectableBounds, getSelectedRect } from '../utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
