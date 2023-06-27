@@ -82,6 +82,10 @@ export class Space<
     this._loaded = false;
   }
 
+  clear() {
+    this._yBlocks.clear();
+  }
+
   private _initSubDoc = () => {
     const prefixedId = this.prefixedId;
 

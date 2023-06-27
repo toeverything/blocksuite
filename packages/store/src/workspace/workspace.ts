@@ -266,13 +266,18 @@ export class Workspace {
    * Specify the page you want to update by passing the `pageId` parameter and it will
    * create a new page if it does not exist.
    */
-  async importPageSnapshot(json: never, pageId: string) {
+  async importPageSnapshot(json: unknown, pageId: string) {
     const unprefix = (str: string) =>
       str.replace('sys:', '').replace('prop:', '').replace('space:', '');
     const visited = new Set();
-
-    const page = this.getPage(pageId) ?? this.createPage({ id: pageId });
-    await page.waitForLoaded();
+    let page = this.getPage(pageId);
+    if (page) {
+      await page.waitForLoaded();
+      page.clear();
+    } else {
+      page = this.createPage({ id: pageId });
+      await page.waitForLoaded();
+    }
 
     const sanitize = async (props: Record<string, never>) => {
       const result: Record<string, unknown> = {};
@@ -317,22 +322,27 @@ export class Workspace {
       return result;
     };
 
-    const { blocks } = json;
+    const { blocks } = json as Record<string, never>;
     assertExists(blocks, 'Snapshot structure is invalid');
 
     const addBlockByProps = async (
       page: Page,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       props: any,
-      parent: string | null
+      parent?: string
     ) => {
-      if (visited.has(props['sys:id'])) return;
+      const id = props['sys:id'] as string;
+      if (visited.has(id)) return;
       const sanitizedProps = await sanitize(props);
       page.addBlock(props['sys:flavour'], sanitizedProps, parent);
-      props['sys:children'].forEach((id: string) => {
-        addBlockByProps(page, blocks[id], props['sys:id']);
-        visited.add(id);
-      });
+      await props['sys:children'].reduce(
+        async (prev: Promise<unknown>, childId: string) => {
+          await prev;
+          await addBlockByProps(page, blocks[childId], id);
+          visited.add(childId);
+        },
+        Promise.resolve()
+      );
     };
 
     const root = Object.values(blocks).find(block => {
@@ -341,7 +351,7 @@ export class Workspace {
       const schema = this.schema.flavourSchemaMap.get(flavour);
       return schema?.model?.role === 'root';
     });
-    await addBlockByProps(page, root, null);
+    await addBlockByProps(page, root);
   }
 
   exportPageSnapshot(pageId: string) {

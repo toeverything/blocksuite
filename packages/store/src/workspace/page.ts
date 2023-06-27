@@ -359,14 +359,13 @@ export class Page extends Space<FlatBlockMap> {
       assertValidChildren(this._yBlocks, clonedProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-      initInternalProps(yBlock, clonedProps);
 
+      initInternalProps(yBlock, clonedProps);
       syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
-      const parentModel =
-        typeof parent === 'string' ? this._blockMap.get(parent) : parent;
-
-      const parentId = parentModel?.id ?? this._root?.id;
+      const parentId =
+        parentModel?.id ??
+        (schema.model.role === 'root' ? undefined : this._root?.id);
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
