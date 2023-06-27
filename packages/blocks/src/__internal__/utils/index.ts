@@ -15,5 +15,5 @@ export * from './rect.js';
 export * from './reordering.js';
 export * from './selection.js';
 // Compat with SSR
-export * from './std.js';
+export * from './common.js';
 export * from './types.js';

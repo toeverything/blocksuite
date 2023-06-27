@@ -4,8 +4,8 @@ import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { Point, Rect } from '../../../../__internal__/utils/rect.js';
 import type { DragIndicator } from '../../../../components/drag-handle.js';
-import { Point, Rect } from '../../../../std.js';
 import type { InsertPosition } from '../../../database-model.js';
 
 @customElement('affine-database-new-record-preview')

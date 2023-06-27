@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 
 import type { TextTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { addText } from '../utils.js';
+import { addText } from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export class TextToolController extends EdgelessToolController<TextTool> {

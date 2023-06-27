@@ -12,11 +12,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { createPage } from '../../__internal__/index.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import type { AffineVEditor } from '../../__internal__/rich-text/virgo/types.js';
+import { isFuzzyMatch } from '../../__internal__/utils/common.js';
 import {
   getRichTextByModel,
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
-import { isFuzzyMatch } from '../../__internal__/utils/std.js';
 import { showImportModal } from '../import-page/index.js';
 import { createKeydownObserver } from '../utils.js';
 import { styles } from './styles.js';

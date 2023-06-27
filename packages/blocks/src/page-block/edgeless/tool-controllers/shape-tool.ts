@@ -4,12 +4,12 @@ import { Bound, StrokeStyle } from '@blocksuite/phasor';
 
 import type { ShapeTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { isTransparent } from '../components/color-panel.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../components/component-toolbar/change-shape-button.js';
-import type { SelectionArea } from '../selection-manager.js';
+import { isTransparent } from '../components/panel/color-panel.js';
+import type { SelectionArea } from '../utils/selection-manager.js';
 import { EdgelessToolController } from './index.js';
 
 export class ShapeTooolController extends EdgelessToolController<ShapeTool> {

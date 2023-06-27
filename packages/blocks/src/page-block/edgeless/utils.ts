@@ -24,9 +24,6 @@ import * as Y from 'yjs';
 
 import {
   type EdgelessTool,
-  handleNativeRangeAtPoint,
-  isEmpty,
-  Point,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { isPinchEvent } from '../../__internal__/utils/index.js';
@@ -34,13 +31,13 @@ import type {
   NoteChildrenFlavour,
   NoteChildrenType,
 } from './../../__internal__/index.js';
-import { GET_DEFAULT_LINE_COLOR } from './components/color-panel.js';
-import { SurfaceTextEditor } from './components/surface-text-editor.js';
+import { GET_DEFAULT_LINE_COLOR } from './components/panel/color-panel.js';
+import { SurfaceTextEditor } from './components/text/surface-text-editor.js';
 import type {
   EdgelessContainer,
   EdgelessPageBlockComponent,
 } from './edgeless-page-block.js';
-import type { Selectable } from './selection-manager.js';
+import type { Selectable } from './utils/selection-manager.js';
 
 export const NOTE_MIN_WIDTH = 200;
 export const NOTE_MIN_HEIGHT = 20;
@@ -475,56 +472,6 @@ export function getBackgroundGrid(
       ? 'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)'
       : 'unset',
   };
-}
-
-export function addNote(
-  edgeless: EdgelessPageBlockComponent,
-  page: Page,
-  event: PointerEventState,
-  width = DEFAULT_NOTE_WIDTH,
-  options: NoteOptions
-) {
-  const noteId = edgeless.addNoteWithPoint(
-    new Point(event.point.x, event.point.y),
-    {
-      width,
-    }
-  );
-  page.addBlock(options.childFlavour, { type: options.childType }, noteId);
-  edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
-
-  // Wait for edgelessTool updated
-  requestAnimationFrame(() => {
-    const blocks =
-      (page.root?.children.filter(
-        child => child.flavour === 'affine:note'
-      ) as TopLevelBlockModel[]) ?? [];
-    const element = blocks.find(b => b.id === noteId);
-    if (element) {
-      edgeless.slots.selectionUpdated.emit({
-        selected: [element],
-        active: true,
-      });
-
-      // Waiting dom updated, `note mask` is removed
-      edgeless.updateComplete.then(() => {
-        // Cannot reuse `handleNativeRangeClick` directly here,
-        // since `retargetClick` will re-target to pervious editor
-        handleNativeRangeAtPoint(event.raw.clientX, event.raw.clientY);
-
-        // Waiting dom updated, remove note if it is empty
-        requestAnimationFrame(() => {
-          edgeless.slots.selectionUpdated.once(({ active }) => {
-            const block = page.getBlockById(noteId);
-            assertExists(block);
-            if (!active && isEmpty(block)) {
-              page.deleteBlock(element);
-            }
-          });
-        });
-      });
-    }
-  });
 }
 
 export function mountTextEditor(

@@ -1,6 +1,6 @@
-import '../tool-icon-button.js';
-import '../../toolbar/shape/shape-menu.js';
-import '../color-panel.js';
+import '../buttons/tool-icon-button.js';
+import '../toolbar/shape/shape-menu.js';
+import '../panel/color-panel.js';
 
 import { HiddenIcon, NoteIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -16,8 +16,8 @@ import {
   type NoteBlockModel,
 } from '../../../../note-block/note-model.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { ColorEvent } from '../color-panel.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { ColorEvent } from '../panel/color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 @customElement('edgeless-change-note-button')

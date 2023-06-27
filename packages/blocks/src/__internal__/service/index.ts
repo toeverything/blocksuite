@@ -11,12 +11,12 @@ import {
 } from '../rich-text/rich-text-operations.js';
 import type { AffineVEditor } from '../rich-text/virgo/types.js';
 import { getService } from '../service.js';
+import { supportsChildren } from '../utils/common.js';
 import type {
   BlockRange,
   BlockTransformContext,
   SerializedBlock,
 } from '../utils/index.js';
-import { supportsChildren } from '../utils/std.js';
 import { json2block } from './json2block.js';
 import {
   enterMarkdownMatch,
