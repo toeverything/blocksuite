@@ -198,6 +198,7 @@ export class Workspace {
     this.meta.pageMetaRemoved.on(id => {
       const page = this.getPage(id) as Page;
       this._store.removeSpace(page);
+      page.remove();
       this.slots.pageRemoved.emit(id);
     });
   }

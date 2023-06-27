@@ -124,10 +124,6 @@ export class Page extends Space<FlatBlockMap> {
     return this._root;
   }
 
-  getYBlockById(id: string) {
-    return this._yBlocks.get(id);
-  }
-
   get isEmpty() {
     return this._yBlocks.size === 0;
   }
