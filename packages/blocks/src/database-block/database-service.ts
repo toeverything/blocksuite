@@ -8,8 +8,12 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
-import type { DatabaseSelection, DatabaseSelectionState } from '../std.js';
-import { asyncFocusRichText, type SerializedBlock } from '../std.js';
+import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
+import type {
+  DatabaseSelection,
+  DatabaseSelectionState,
+  SerializedBlock,
+} from '../__internal__/utils/types.js';
 import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';

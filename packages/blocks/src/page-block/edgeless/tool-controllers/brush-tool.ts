@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import type { BrushTool } from '../../../__internal__/index.js';
 import { BrushSize, noop } from '../../../__internal__/index.js';
-import { GET_DEFAULT_LINE_COLOR } from '../components/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessToolController } from './index.js';
 
 export class BrushToolController extends EdgelessToolController<BrushTool> {

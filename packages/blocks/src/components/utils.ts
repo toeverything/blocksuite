@@ -1,8 +1,8 @@
 import { assertExists, sleep } from '@blocksuite/global/utils';
 
 import type { RichText } from '../__internal__/rich-text/rich-text.js';
-import { isControlledKeyboardEvent } from '../__internal__/utils/std.js';
-import { getCurrentNativeRange } from '../std.js';
+import { isControlledKeyboardEvent } from '../__internal__/utils/common.js';
+import { getCurrentNativeRange } from '../__internal__/utils/selection.js';
 
 export const createKeydownObserver = ({
   target,

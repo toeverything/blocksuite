@@ -4,8 +4,12 @@ import type { Disposable } from '@blocksuite/store';
 import { computePosition, flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 
-import type { Selectable } from '../selection-manager.js';
-import { getSelectionBoxBound, getXYWH, isTopLevelBlock } from '../utils.js';
+import {
+  getSelectionBoxBound,
+  getXYWH,
+  isTopLevelBlock,
+} from '../utils/query.js';
+import type { Selectable } from '../utils/selection-manager.js';
 
 export function getSelectedRect(
   selected: Selectable[],

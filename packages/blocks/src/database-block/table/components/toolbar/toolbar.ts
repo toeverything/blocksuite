@@ -16,9 +16,9 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { copyBlocks } from '../../../../__internal__/clipboard/index.js';
+import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { popFilterableSimpleMenu } from '../../../../components/menu/menu.js';
 import { toast } from '../../../../components/toast.js';
-import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
 import { columnManager } from '../../../common/column-manager.js';
@@ -442,7 +442,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
             @input="${this._onSearch}"
             @click="${(event: MouseEvent) => event.stopPropagation()}"
             @keydown="${this._onSearchKeydown}"
-            @pointerdown="${stopPropagation}"
+            @pointerdown=${stopPropagation}
           />
           <div class="has-tool-tip close-icon" @click="${this._clearSearch}">
             ${closeIcon}
