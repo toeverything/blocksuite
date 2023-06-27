@@ -68,7 +68,6 @@ export function pointInEllipse(
   ry: number,
   rotation = 0
 ): boolean {
-  rotation = rotation || 0;
   const cos = Math.cos(rotation);
   const sin = Math.sin(rotation);
   const delta = Vec.sub(A, C);
@@ -78,7 +77,7 @@ export function pointInEllipse(
   return (tdx * tdx) / (rx * rx) + (tdy * tdy) / (ry * ry) <= 1;
 }
 
-export function pointInPolygon(p: number[], points: number[][]): boolean {
+export function pointInPolygon(p: number[], points: IVec[]): boolean {
   let wn = 0; // winding number
 
   points.forEach((a, i) => {
@@ -118,7 +117,7 @@ export function pointOnEllipse(
 
 export function pointOnPolygonStoke(
   p: number[],
-  points: number[][],
+  points: IVec[],
   threshold: number
 ): boolean {
   for (let i = 0; i < points.length; ++i) {
@@ -131,10 +130,7 @@ export function pointOnPolygonStoke(
   return false;
 }
 
-export function getBoundsFromPoints(
-  points: number[][],
-  rotation = 0
-): TLBounds {
+export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -172,10 +168,7 @@ export function getBoundsFromPoints(
   };
 }
 
-export function getSvgPathFromStroke(
-  points: number[][],
-  closed = true
-): string {
+export function getSvgPathFromStroke(points: IVec[], closed = true): string {
   const len = points.length;
 
   if (len < 4) {
@@ -324,4 +317,89 @@ export function linePolylineIntersects(
   }
 
   return result.length ? result : null;
+}
+
+export function getPointFromBoundsWithRotation(
+  bounds: IBound,
+  point: IVec
+): IVec {
+  const { x, y, w, h, rotate } = bounds;
+  let [px, py] = point;
+
+  if (rotate) {
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+
+    const m = new DOMMatrix()
+      .translateSelf(cx, cy)
+      .rotateSelf(rotate)
+      .translateSelf(-cx, -cy);
+
+    const p = new DOMPoint(px, py).matrixTransform(m);
+    px = p.x;
+    py = p.y;
+  }
+
+  return [px, py];
+}
+
+export function getPointsFromBoundsWithRotation(
+  bounds: IBound,
+  getPoints: (bounds: IBound) => DOMPoint[] = ({ x, y, w, h }: IBound) => [
+    new DOMPoint(x, y),
+    new DOMPoint(x + w, y),
+    new DOMPoint(x + w, y + h),
+    new DOMPoint(x, y + h),
+  ]
+): IVec[] {
+  const { rotate } = bounds;
+  let points = getPoints(bounds);
+
+  if (rotate) {
+    const { x, y, w, h } = bounds;
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+
+    const m = new DOMMatrix()
+      .translateSelf(cx, cy)
+      .rotateSelf(rotate)
+      .translateSelf(-cx, -cy);
+
+    points = points.map(point => m.transformPoint(point));
+  }
+
+  return points.map(({ x, y }) => [x, y]);
+}
+
+export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
+  const { x, y, w, h, rotate } = bounds;
+  const rect = new DOMRect(x, y, w, h);
+
+  if (!rotate) return rect;
+
+  const cx = (rect.left + rect.right) / 2;
+  const cy = (rect.top + rect.bottom) / 2;
+
+  const m = new DOMMatrix()
+    .translateSelf(cx, cy)
+    .rotateSelf(rotate)
+    .translateSelf(-cx, -cy);
+
+  return new DOMQuad(
+    new DOMPoint(rect.left, rect.top).matrixTransform(m),
+    new DOMPoint(rect.right, rect.top).matrixTransform(m),
+    new DOMPoint(rect.right, rect.bottom).matrixTransform(m),
+    new DOMPoint(rect.left, rect.bottom).matrixTransform(m)
+  ).getBounds();
+}
+
+export function getBoundsWithRotation(bounds: IBound): IBound {
+  const { x, y, width: w, height: h } = getQuadBoundsWithRotation(bounds);
+
+  return {
+    x,
+    y,
+    w,
+    h,
+  };
 }

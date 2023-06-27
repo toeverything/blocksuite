@@ -1,9 +1,15 @@
-import { Bound, Overlay } from '@blocksuite/phasor';
+import {
+  Bound,
+  deserializeXYWH,
+  getQuadBoundsWithRotation,
+  Overlay,
+} from '@blocksuite/phasor';
 
 import { Point } from '../../../__internal__/utils/rect.js';
 import type { Alignable } from '../../../__internal__/utils/types.js';
 import { type NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { isTopLevelBlock } from '../utils/query.js';
 
 interface Distance {
   absXDistance: number;
@@ -51,7 +57,18 @@ export class EdgelessSnapManager extends Overlay {
 
     this._alignableBounds = [];
     (<Alignable[]>[...notes, ...phasorElements]).forEach(alignable => {
-      const bound = Bound.fromDOMRect(getElementQuadBounds(alignable));
+      const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
+      const [x, y, w, h] = deserializeXYWH(alignable.xywh);
+      const bound = Bound.fromDOMRect(
+        getQuadBoundsWithRotation({
+          x,
+          y,
+          w,
+          h,
+          rotate,
+        })
+      );
+
       if (
         viewportBounds.isIntersectWithBound(bound) &&
         !alignables.includes(alignable)
@@ -61,7 +78,19 @@ export class EdgelessSnapManager extends Overlay {
     });
 
     return alignables.reduce((prev, element) => {
-      return prev.unite(Bound.fromDOMRect(getElementQuadBounds(element)));
+      const rotate = isTopLevelBlock(element) ? 0 : element.rotate;
+      const [x, y, w, h] = deserializeXYWH(element.xywh);
+      return prev.unite(
+        Bound.fromDOMRect(
+          getQuadBoundsWithRotation({
+            x,
+            y,
+            w,
+            h,
+            rotate,
+          })
+        )
+      );
     }, Bound.deserialize(alignables[0].xywh));
   }
 

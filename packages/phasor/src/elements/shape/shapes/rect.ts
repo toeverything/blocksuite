@@ -2,8 +2,9 @@ import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
-  isPointIn,
+  getPointsFromBoundsWithRotation,
   linePolygonIntersects,
+  pointInPolygon,
   pointOnPolygonStoke,
 } from '../../../utils/math-utils.js';
 import type { IVec } from '../../../utils/vec.js';
@@ -37,11 +38,15 @@ export const RectMethods: ShapeMethods = {
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
     const r = Math.min(renderWidth * radius, renderHeight * radius);
-    const cx = w / 2;
-    const cy = h / 2;
+    const cx = renderWidth / 2;
+    const cy = renderHeight / 2;
 
     ctx.setTransform(
-      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+      matrix
+        .translate(renderOffset, renderOffset)
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
     );
 
     rc.path(
@@ -81,18 +86,15 @@ export const RectMethods: ShapeMethods = {
     element: ShapeElement,
     options?: HitTestOptions
   ) {
-    return element.filled
-      ? isPointIn(element, x, y)
-      : pointOnPolygonStoke(
-          [x, y],
-          [
-            [element.x, element.y],
-            [element.x + element.w, element.y],
-            [element.x + element.w, element.y + element.h],
-            [element.x, element.y + element.h],
-          ],
-          options?.expand ?? 1
-        );
+    const points = getPointsFromBoundsWithRotation(element);
+
+    let hited = pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
+
+    if (element.filled && !hited) {
+      hited = pointInPolygon([x, y], points);
+    }
+
+    return hited;
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {

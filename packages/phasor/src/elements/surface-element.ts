@@ -18,7 +18,7 @@ export interface ISurfaceElement {
   index: string;
   seed: number;
 
-  // degree
+  // degree: [0, 360]
   rotate: number;
 }
 

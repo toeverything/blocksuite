@@ -2,6 +2,7 @@ import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
+  getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
@@ -33,11 +34,15 @@ export const DiamondMethods: ShapeMethods = {
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
-    const cx = w / 2;
-    const cy = h / 2;
+    const cx = renderWidth / 2;
+    const cy = renderHeight / 2;
 
     ctx.setTransform(
-      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+      matrix
+        .translate(renderOffset, renderOffset)
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
     );
 
     rc.polygon(
@@ -65,16 +70,23 @@ export const DiamondMethods: ShapeMethods = {
     element: ShapeElement,
     options?: HitTestOptions
   ) {
-    const points = [
-      [element.x + element.w / 2, element.y + 0],
-      [element.x + element.w, element.y + element.h / 2],
-      [element.x + element.w / 2, element.y + element.h],
-      [element.x + 0, element.y + element.h / 2],
-    ];
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        new DOMPoint(x, y + h / 2),
+        new DOMPoint(x + w / 2, y),
+        new DOMPoint(x + w, y + h / 2),
+        new DOMPoint(x + w / 2, y + h),
+      ]
+    );
 
-    return element.filled
-      ? pointInPolygon([x, y], points)
-      : pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
+    let hited = pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
+
+    if (element.filled && !hited) {
+      hited = pointInPolygon([x, y], points);
+    }
+
+    return hited;
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
