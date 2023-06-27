@@ -31,6 +31,9 @@ export type ColumnMeta = {
   title: string;
   optionsMap: Map<string, string>;
 };
+export type TableTitleColumnHandler = (
+  element: Element
+) => Promise<string[] | null>;
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -62,19 +65,22 @@ export class HtmlParser {
   private _customFetchFileHandler?: FetchFileHandler;
   private _customTextStyleHandler?: TextStyleHandler;
   private _customTableParserHandler?: TableParserHandler;
+  private _customTableTitleColumnHandler?: TableTitleColumnHandler;
 
   constructor(
     contentParser: ContentParser,
     page: Page,
     fetchFileHandler?: FetchFileHandler,
     textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler
+    tableParserHandler?: TableParserHandler,
+    tableTitleColumnHandler?: TableTitleColumnHandler
   ) {
     this._contentParser = contentParser;
     this._page = page;
     this._customFetchFileHandler = fetchFileHandler;
     this._customTextStyleHandler = textStyleHandler;
     this._customTableParserHandler = tableParserHandler;
+    this._customTableTitleColumnHandler = tableTitleColumnHandler;
   }
 
   private _fetchFileHandler = async (
@@ -744,6 +750,15 @@ export class HtmlParser {
         });
         rows.push(row);
       });
+      if (this._customTableTitleColumnHandler) {
+        const titleColumn = await this._customTableTitleColumnHandler(element);
+        if (titleColumn) {
+          for (let i = 1; i < rows.length; i++) {
+            const originalContent = rows[i].shift();
+            rows[i].unshift(titleColumn[i] || originalContent || '');
+          }
+        }
+      }
       const columns: Column[] = columnMeta.slice(1).map((value, index) => {
         if (['select', 'multi-select'].includes(value.type)) {
           const options = rows

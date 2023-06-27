@@ -19,6 +19,7 @@ import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,
   TableParserHandler,
+  TableTitleColumnHandler,
   TextStyleHandler,
 } from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
@@ -42,7 +43,8 @@ export class ContentParser {
     page: Page,
     fetchFileHandler?: FetchFileHandler,
     textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler
+    tableParserHandler?: TableParserHandler,
+    tableTitleColumnHandler?: TableTitleColumnHandler
   ) {
     this._page = page;
     this._htmlParser = new HtmlParser(
@@ -50,7 +52,8 @@ export class ContentParser {
       page,
       fetchFileHandler,
       textStyleHandler,
-      tableParserHandler
+      tableParserHandler,
+      tableTitleColumnHandler
     );
     this._htmlParser.registerParsers();
   }

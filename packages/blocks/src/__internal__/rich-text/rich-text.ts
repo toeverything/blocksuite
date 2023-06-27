@@ -97,10 +97,7 @@ const autoIdentifyLink = (
   };
 };
 
-const autoIdentifyReference = (
-  editor: AffineVEditor,
-  context: VHandlerContext<BaseTextAttributes, InputEvent | CompositionEvent>
-) => {
+const autoIdentifyReference = (editor: AffineVEditor) => {
   const vRange = editor.getVRange();
   if (!vRange) return;
 
@@ -108,8 +105,7 @@ const autoIdentifyReference = (
   const referencePattern = /@AffineReference:\((.*)\)/g;
 
   const [line] = editor.getLine(vRange.index);
-  const prefixText = line.textContent.slice(0, vRange.index);
-  const match = referencePattern.exec(prefixText + context.data);
+  const match = referencePattern.exec(line.textContent);
   if (!match) {
     return;
   }
@@ -227,7 +223,7 @@ export class RichText extends ShadowlessElement {
             ctx.attributes = attributes ?? null;
           }
         }
-        autoIdentifyReference(vEditor, ctx);
+        autoIdentifyReference(vEditor);
         autoIdentifyLink(vEditor, ctx);
 
         return ctx;
