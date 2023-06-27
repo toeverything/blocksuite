@@ -338,12 +338,6 @@ export class Page extends Space<FlatBlockMap> {
     if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
-    if (
-      !this.awarenessStore.getFlag('enable_database') &&
-      flavour === 'affine:database'
-    ) {
-      throw new Error('database is not enabled');
-    }
     const parentModel =
       typeof parent === 'string' ? this.getBlockById(parent) : parent;
 
