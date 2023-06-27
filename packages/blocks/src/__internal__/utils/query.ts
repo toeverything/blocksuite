@@ -12,9 +12,9 @@ import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { RichText } from '../rich-text/rich-text.js';
+import { clamp } from './common.js';
 import { type Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
-import { clamp } from './std.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 

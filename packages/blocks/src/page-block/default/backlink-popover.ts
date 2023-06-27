@@ -10,7 +10,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { type BlockHost } from '../../std.js';
+import type { BlockHost } from '../../__internal__/utils/types.js';
 
 const styles = css`
   :host {

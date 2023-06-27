@@ -33,18 +33,19 @@ import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
 } from '../../utils/position.js';
-import type { Selectable } from '../selection-manager.js';
 import {
-  addText,
-  getXYWH,
   handleElementChangedEffectForConnector,
   isConnectorAndBindingsAllSelected,
+} from '../components/connector/utils.js';
+import {
+  getXYWH,
   isPhasorElement,
   isTopLevelBlock,
-  mountTextEditor,
   pickBlocksByBound,
   pickTopBlock,
-} from '../utils.js';
+} from '../utils/query.js';
+import type { Selectable } from '../utils/selection-manager.js';
+import { addText, mountTextEditor } from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {

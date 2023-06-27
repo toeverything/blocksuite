@@ -9,9 +9,9 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { registerService } from '../__internal__/service.js';
+import { clamp } from '../__internal__/utils/common.js';
+import { stopPropagation } from '../__internal__/utils/event.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
-import { stopPropagation } from '../page-block/edgeless/utils.js';
-import { clamp } from '../std.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';

@@ -1,5 +1,5 @@
-import '../tool-icon-button.js';
-import '../../toolbar/shape/shape-menu.js';
+import '../buttons/tool-icon-button.js';
+import '../toolbar/shape/shape-menu.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -14,8 +14,8 @@ import {
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { Selectable } from '../../selection-manager.js';
-import { isTopLevelBlock } from '../../utils.js';
+import { isTopLevelBlock } from '../../utils/query.js';
+import type { Selectable } from '../../utils/selection-manager.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action = {

@@ -1,12 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
+import { throttle } from '../../__internal__/utils/common.js';
 import {
   type BlockComponentElement,
   getClosestBlockElementByElement,
   getModelByElement,
 } from '../../__internal__/utils/query.js';
-import { throttle } from '../../__internal__/utils/std.js';
 
 export class ImageResizeManager {
   private _activeComponent: BlockComponentElement | null = null;
