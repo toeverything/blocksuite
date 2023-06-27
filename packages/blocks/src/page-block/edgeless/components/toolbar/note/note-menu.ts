@@ -6,8 +6,8 @@ import type {
   EdgelessTool,
   NoteChildrenFlavour,
   NoteChildrenType,
-} from '../../../../__internal__/index.js';
-import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+} from '../../../../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { BUTTON_GROUP_LENGTH, ButtonConfigs } from './note-memu-config.js';
 @customElement('edgeless-note-menu')
 export class EdgelessNoteMenu extends LitElement {
