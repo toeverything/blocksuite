@@ -8,13 +8,15 @@ import {
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type { NoteOptions } from '../utils.js';
 import { DEFAULT_NOTE_WIDTH } from './consts.js';
 
 export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
   event: PointerEventState,
-  width = DEFAULT_NOTE_WIDTH
+  width = DEFAULT_NOTE_WIDTH,
+  options: NoteOptions
 ) {
   const noteId = edgeless.addNoteWithPoint(
     new Point(event.point.x, event.point.y),
@@ -22,7 +24,8 @@ export function addNote(
       width,
     }
   );
-  page.addBlock('affine:paragraph', {}, noteId);
+
+  page.addBlock(options.childFlavour, { type: options.childType }, noteId);
   edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
 
   // Wait for edgelessTool updated

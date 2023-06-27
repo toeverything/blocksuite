@@ -68,10 +68,11 @@ import { EdgelessBlockChildrenContainer } from './components/block-children-cont
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
+import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import {
-  EdgelessToolbar,
+  EdgelessZoomToolbar,
   type ZoomAction,
-} from './components/toolbar/edgeless-toolbar.js';
+} from './components/toolbar/zoom-tool-bar.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -174,6 +175,13 @@ export class EdgelessPageBlockComponent
       z-index: 1;
       border: var(--affine-border-width) solid var(--affine-blue);
     }
+
+    edgeless-zoom-toolbar {
+      position: fixed;
+      bottom: 28px;
+      left: 30px;
+      z-index: var(--affine-z-index-popover);
+    }
   `;
 
   flavour = 'edgeless' as const;
@@ -184,6 +192,7 @@ export class EdgelessPageBlockComponent
   components = {
     dragHandle: <DragHandle | null>null,
     toolbar: <EdgelessToolbar | null>null,
+    zoomToolbar: <EdgelessZoomToolbar | null>null,
   };
 
   mouseRoot!: HTMLElement;
@@ -295,13 +304,17 @@ export class EdgelessPageBlockComponent
   private _handleToolbarFlag() {
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
+      const zoomToolBar = new EdgelessZoomToolbar(this);
       this.appendChild(toolbar);
+      this.appendChild(zoomToolBar);
       this.components.toolbar = toolbar;
+      this.components.zoomToolbar = zoomToolBar;
     };
 
     if (
       this.page.awarenessStore.getFlag('enable_edgeless_toolbar') &&
-      !this.components.toolbar
+      !this.components.toolbar &&
+      !this.components.zoomToolbar
     ) {
       createToolbar();
     }
@@ -317,7 +330,9 @@ export class EdgelessPageBlockComponent
           }
 
           this.components.toolbar?.remove();
+          this.components.zoomToolbar?.remove();
           this.components.toolbar = null;
+          this.components.zoomToolbar = null;
         },
         {
           filter: msg => msg.id === this.page.doc.clientID,
@@ -450,7 +465,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
     _disposables.add(
       slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.toolbar?.setZoomByAction(action)
+        this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(

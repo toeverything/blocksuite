@@ -172,9 +172,39 @@ export type PanTool = {
   panning: boolean;
 };
 
+export type NoteChildrenFlavour =
+  | 'affine:code'
+  | 'affine:paragraph'
+  | 'affine:list'
+  | 'affine:divider'
+  | 'affine:image'
+  | 'affine:database'
+  | 'affine:bookmark';
+
+export type NoteChildrenType =
+  | 'text'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6'
+  | 'code'
+  | 'quote'
+  | 'divider'
+  | 'image'
+  | 'database'
+  | 'bookmark'
+  | 'bulleted'
+  | 'numbered'
+  | 'todo'
+  | null;
+
 export type NoteTool = {
   type: 'note';
   background: CssVariableName;
+  childFlavour: NoteChildrenFlavour;
+  childType: NoteChildrenType;
 };
 
 export type ConnectorTool = {
