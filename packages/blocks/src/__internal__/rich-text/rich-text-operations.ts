@@ -8,6 +8,7 @@ import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
+import { supportsChildren } from '../utils/common.js';
 import {
   asyncFocusRichText,
   asyncSetVRange,
@@ -24,7 +25,6 @@ import {
   focusTitle,
   getCurrentNativeRange,
 } from '../utils/selection.js';
-import { supportsChildren } from '../utils/std.js';
 import type { ExtendedModel } from '../utils/types.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {

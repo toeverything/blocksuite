@@ -1,6 +1,6 @@
-import '../tool-icon-button.js';
-import '../color-panel.js';
-import '../line-width-panel.js';
+import '../buttons/tool-icon-button.js';
+import '../panel/color-panel.js';
+import '../panel/line-width-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
@@ -10,16 +10,16 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
+import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
-} from '../color-panel.js';
-import type { LineWidthEvent } from '../line-width-panel.js';
+} from '../panel/color-panel.js';
+import type { LineWidthEvent } from '../panel/line-width-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {

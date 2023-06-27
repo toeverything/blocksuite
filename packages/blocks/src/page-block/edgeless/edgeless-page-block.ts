@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
-import './components/edgeless-selected-rect.js';
-import './toolbar/edgeless-toolbar.js';
+import './components/rects/edgeless-selected-rect.js';
+import './components/toolbar/edgeless-toolbar.js';
 
 import {
   BLOCK_ID_ATTR,
@@ -65,31 +65,30 @@ import type {
 import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
-import { EdgelessDraggingArea } from './components/dragging-area.js';
-import { EdgelessHoverRect } from './components/hover-rect.js';
-import { FIT_TO_SCREEN_PADDING } from './consts.js';
-import { createDragHandle } from './create-drag-handle.js';
-import { bindEdgelessHotkeys } from './hotkey.js';
-import { NoteResizeObserver } from './note-resize-observer.js';
-import {
-  EdgelessSelectionManager,
-  type EdgelessSelectionState,
-  type Selectable,
-} from './selection-manager.js';
-import { EdgelessSnapManager } from './snap-manager.js';
+import { createDragHandle } from './components/create-drag-handle.js';
+import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
+import { EdgelessHoverRect } from './components/rects/hover-rect.js';
 import {
   EdgelessToolbar,
   type ZoomAction,
-} from './toolbar/edgeless-toolbar.js';
+} from './components/toolbar/edgeless-toolbar.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
   DEFAULT_NOTE_OFFSET_Y,
   DEFAULT_NOTE_WIDTH,
-  getBackgroundGrid,
-  getCursorMode,
-  xywhArrayToObject,
-} from './utils.js';
+  FIT_TO_SCREEN_PADDING,
+} from './utils/consts.js';
+import { xywhArrayToObject } from './utils/convert.js';
+import { bindEdgelessHotkeys } from './utils/hotkey.js';
+import { NoteResizeObserver } from './utils/note-resize-observer.js';
+import { getBackgroundGrid, getCursorMode } from './utils/query.js';
+import {
+  EdgelessSelectionManager,
+  type EdgelessSelectionState,
+  type Selectable,
+} from './utils/selection-manager.js';
+import { EdgelessSnapManager } from './utils/snap-manager.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -975,7 +974,7 @@ export class EdgelessPageBlockComponent
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
-    const draggingAreaTpl = EdgelessDraggingArea(draggingArea);
+    const draggingAreaTpl = EdgelessDraggingAreaRect(draggingArea);
 
     const hoverState = selection.getHoverState();
     const hoverRectTpl = EdgelessHoverRect(hoverState);

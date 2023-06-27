@@ -19,7 +19,7 @@ import {
   getBlockElementById,
   noop,
 } from '../../../__internal__/utils/index.js';
-import { isTopLevelBlock } from '../utils.js';
+import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './index.js';
 
 class EraserOverlay extends Overlay {

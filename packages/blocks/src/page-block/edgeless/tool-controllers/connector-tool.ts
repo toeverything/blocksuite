@@ -5,13 +5,12 @@ import { deserializeXYWH, StrokeStyle } from '@blocksuite/phasor';
 
 import type { ConnectorTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import type { Selectable, SelectionArea } from '../selection-manager.js';
 import {
   generateConnectorPath,
   getAttachedPoint,
-  getXYWH,
-  pickBy,
-} from '../utils.js';
+} from '../components/connector/utils.js';
+import { getXYWH, pickBy } from '../utils/query.js';
+import type { Selectable, SelectionArea } from '../utils/selection-manager.js';
 import { EdgelessToolController } from './index.js';
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {

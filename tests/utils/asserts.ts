@@ -17,7 +17,7 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
-import { toHex } from '../../packages/blocks/src/__internal__/utils/std.js';
+import { toHex } from '../../packages/blocks/src/__internal__/utils/common.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,

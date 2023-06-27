@@ -31,3 +31,7 @@ export function createDragEvent(type: string, event?: MouseEvent) {
 export function isMiddleButtonPressed(e: MouseEvent) {
   return (MOUSE_BUTTONS.AUXILIARY & e.buttons) === MOUSE_BUTTONS.AUXILIARY;
 }
+
+export function stopPropagation(event: Event) {
+  event.stopPropagation();
+}
