@@ -8,6 +8,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
+import { REFERENCE_NODE } from './reference-node.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 
 const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
@@ -94,6 +95,41 @@ const autoIdentifyLink = (
     ...context.attributes,
     link: linkText,
   };
+};
+
+const autoIdentifyReference = (
+  editor: AffineVEditor,
+  context: VHandlerContext<BaseTextAttributes, InputEvent | CompositionEvent>
+) => {
+  const vRange = editor.getVRange();
+  if (!vRange) return;
+
+  // @AffineReference:(id)
+  const referencePattern = /@AffineReference:\((.*)\)/g;
+
+  const [line] = editor.getLine(vRange.index);
+  const prefixText = line.textContent.slice(0, vRange.index);
+  const match = referencePattern.exec(prefixText + context.data);
+  if (!match) {
+    return;
+  }
+
+  const pageId = match[1];
+
+  const idx = vRange.index - match[0].length;
+
+  editor.deleteText({
+    index: idx,
+    length: match[0].length,
+  });
+  editor.setVRange({
+    index: idx,
+    length: 0,
+  });
+
+  editor.insertText(vRange, REFERENCE_NODE, {
+    reference: { type: 'Subpage', pageId },
+  });
 };
 
 @customElement('rich-text')
@@ -191,6 +227,7 @@ export class RichText extends ShadowlessElement {
             ctx.attributes = attributes ?? null;
           }
         }
+        autoIdentifyReference(vEditor, ctx);
         autoIdentifyLink(vEditor, ctx);
 
         return ctx;
