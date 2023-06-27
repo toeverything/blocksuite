@@ -43,6 +43,7 @@ export const EllipseMethods: ShapeMethods = {
       stroke: realStrokeColor,
       strokeWidth,
       fill: filled ? realFillColor : undefined,
+      curveFitting: 1,
     });
   },
 
