@@ -1,12 +1,13 @@
 import { BaseBlockModel, defineBlockSchema, Text } from '@blocksuite/store';
 
+import type { SelectTag } from '../components/tags/multi-tag-select.js';
 import type {
   DatabaseViewData,
   DatabaseViewDataMap,
 } from './common/view-manager.js';
 import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
-import type { Cell, Column, SelectTag } from './table/types.js';
+import type { Cell, Column } from './table/types.js';
 
 export type Props = {
   views: DatabaseViewData[];
@@ -28,11 +29,7 @@ export type ColumnUpdater<T extends Column = Column> = (data: T) => Partial<T>;
 export type ColumnDataUpdater<
   Data extends Record<string, unknown> = Record<string, unknown>
 > = (data: Data) => Partial<Data>;
-export type InsertPosition =
-  | string
-  | 'end'
-  | 'start'
-  | { id: string; before: boolean };
+export type InsertPosition = 'end' | 'start' | { id: string; before: boolean };
 export const insertPositionToIndex = <T extends { id: string }>(
   position: InsertPosition,
   arr: T[]
@@ -90,17 +87,13 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  updateView<Type extends keyof DatabaseViewDataMap>(
-    id: string,
-    type: Type,
-    update: (data: DatabaseViewDataMap[Type]) => void
-  ) {
+  updateView(id: string, update: (data: DatabaseViewData) => void) {
     this.page.transact(() => {
       this.views.map(v => {
-        if (v.id !== id || v.mode !== type) {
+        if (v.id !== id) {
           return v;
         }
-        return update(v as DatabaseViewDataMap[Type]);
+        return update(v);
       });
     });
   }

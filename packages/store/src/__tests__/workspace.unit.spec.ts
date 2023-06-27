@@ -91,6 +91,7 @@ describe('basic', () => {
           {
             id: 'page0',
             title: '',
+            tags: [],
           },
         ],
         workspaceVersion: WORKSPACE_VERSION,

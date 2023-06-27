@@ -21,6 +21,7 @@ import {
   pressEscape,
   pressShiftEnter,
   redoByKeyboard,
+  selectAllByKeyboard,
   type,
   undoByClick,
   undoByKeyboard,
@@ -107,7 +108,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page);
-  await switchColumnType(page, 'number');
+  await switchColumnType(page, 'Number');
   await initDatabaseDynamicRowWithData(page, '1', true);
 
   await clickDatabaseOutside(page);
@@ -121,7 +122,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page);
-  await switchColumnType(page, 'rich-text');
+  await switchColumnType(page, 'Text');
   await initDatabaseDynamicRowWithData(page, '123', true);
 
   const cell = getFirstColumnCell(page, 'affine-database-rich-text');
@@ -143,6 +144,7 @@ test('should the multi-select mode work correctly', async ({ page }) => {
 
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, '1', true);
+  await pressEscape(page);
   await initDatabaseDynamicRowWithData(page, '2');
 
   const cell = getFirstColumnCell(page, 'select-selected');
@@ -199,11 +201,13 @@ test('should database search work', async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseRowWithData(page, 'text1');
   await initDatabaseDynamicRowWithData(page, '123', false);
+  await pressEscape(page);
   await initDatabaseRowWithData(page, 'text2');
   await initDatabaseDynamicRowWithData(page, 'a', false);
+  await pressEscape(page);
   await initDatabaseRowWithData(page, 'text3');
   await initDatabaseDynamicRowWithData(page, '26', false);
-
+  await pressEscape(page);
   // search for '2'
   await focusDatabaseSearch(page);
   await type(page, '2');
@@ -266,7 +270,7 @@ test('should database title and rich-text support undo/redo', async ({
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page);
-  await switchColumnType(page, 'rich-text');
+  await switchColumnType(page, 'Text');
   await initDatabaseDynamicRowWithData(page, '123', true);
   await pressArrowLeft(page);
   await undoByKeyboard(page);
@@ -290,10 +294,10 @@ test('should support delete database through action menu', async ({ page }) => {
   await focusDatabaseSearch(page);
   const moreAction = page.locator('.more-action');
   await moreAction.click();
-  const actionPopup = page.locator('affine-database-toolbar-action-popup');
-  expect(actionPopup).toBeVisible();
 
-  const deleteDb = page.locator('.delete-database');
+  const deleteDb = page.locator('.affine-menu-action', {
+    hasText: 'Delete Database',
+  });
   await deleteDb.click();
   const db = page.locator('affine-database');
   expect(await db.count()).toBe(0);
@@ -308,17 +312,15 @@ test('should support copy database through action menu', async ({ page }) => {
 
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, '123', true);
+  await pressEscape(page);
   await initDatabaseDynamicRowWithData(page, 'abc');
-
+  await pressEscape(page);
   await focusDatabaseSearch(page);
   const moreAction = page.locator('.more-action');
   await moreAction.click();
-  const actionPopup = page.locator('affine-database-toolbar-action-popup');
-  await assertLocatorVisible(page, actionPopup);
 
-  const copyDb = page.locator('.copy');
+  const copyDb = page.locator('.affine-menu-action', { hasText: 'Copy' });
   await copyDb.click();
-  expect(await actionPopup.count()).toBe(0);
 
   await focusRichText(page, 1);
   await pasteByKeyboard(page);
@@ -438,8 +440,9 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
 
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'a', true);
+  await pressEscape(page);
   await initDatabaseDynamicRowWithData(page, 'b', true);
-
+  await pressEscape(page);
   await focusDatabaseHeader(page);
   const newRecord = page.locator('.new-record');
   const box = await getBoundingBox(newRecord);
@@ -492,7 +495,9 @@ test('should the indicator display correctly when resize the window', async ({
 
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'a', true);
+  await pressEscape(page);
   await initDatabaseDynamicRowWithData(page, 'b', true);
+  await pressEscape(page);
 
   const size = page.viewportSize();
   if (!size) throw new Error('Missing page size');
@@ -539,21 +544,21 @@ test('should title column support quick renaming', async ({ page }) => {
 
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'a', true);
+  await pressEscape(page);
   await focusDatabaseHeader(page, 1);
-  const { textElement, renameIcon, saveIcon } = await getDatabaseHeaderColumn(
-    page,
-    1
-  );
-  await renameIcon.click();
+  const { textElement } = await getDatabaseHeaderColumn(page, 1);
+  await textElement.click();
   await waitNextFrame(page);
+  await selectAllByKeyboard(page);
   await type(page, '123');
-  await saveIcon.click();
+  await pressEnter(page);
   expect(await textElement.innerText()).toBe('123');
 
   await undoByClick(page);
   expect(await textElement.innerText()).toBe('Column 1');
-  await renameIcon.click();
+  await textElement.click();
   await waitNextFrame(page);
+  await selectAllByKeyboard(page);
   await type(page, '123');
   await pressEnter(page);
   expect(await textElement.innerText()).toBe('123');
@@ -567,37 +572,14 @@ test('should title column support quick changing of column type', async ({
 
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'a', true);
+  await pressEscape(page);
   await initDatabaseDynamicRowWithData(page, 'b');
+  await pressEscape(page);
   await focusDatabaseHeader(page, 1);
-  const { typeIcon, renameIcon } = await getDatabaseHeaderColumn(page, 1);
-  await renameIcon.click();
+  const { typeIcon } = await getDatabaseHeaderColumn(page, 1);
   await typeIcon.click();
   await waitNextFrame(page);
-  await clickColumnType(page, 'select');
+  await clickColumnType(page, 'Select');
   const cell = getFirstColumnCell(page, 'select-selected');
   expect(await cell.count()).toBe(1);
-});
-
-test('should save the previous header being edited when editing the next column header', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyDatabaseState(page);
-
-  await initDatabaseColumn(page);
-  await initDatabaseDynamicRowWithData(page, 'a', true);
-  await focusDatabaseHeader(page, 0);
-  const { textElement, renameIcon: titleRenameIcon } =
-    await getDatabaseHeaderColumn(page, 0);
-  await titleRenameIcon.click();
-  await type(page, '123');
-
-  const { renameIcon } = await getDatabaseHeaderColumn(page, 1);
-  await renameIcon.click();
-  expect(await textElement.innerText()).toBe('123');
-
-  await titleRenameIcon.click();
-  await type(page, '456');
-  await initDatabaseColumn(page);
-  expect(await textElement.innerText()).toBe('456');
 });

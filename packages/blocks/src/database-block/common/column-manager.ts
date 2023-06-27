@@ -2,10 +2,10 @@ import { assertExists, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
+import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
-import type { SelectTag } from '../types.js';
 
 type ColumnOps<
   ColumnData extends Record<string, unknown> = Record<string, never>,
@@ -222,9 +222,9 @@ columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
 ]);
 columnManager.registerConvert(numberHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);
 columnManager.registerConvert(progressHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);

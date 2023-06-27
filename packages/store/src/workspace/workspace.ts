@@ -230,6 +230,7 @@ export class Workspace {
       id: pageId,
       title: '',
       createDate: +new Date(),
+      tags: [],
     });
     return this.getPage(pageId) as Page;
   }

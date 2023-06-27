@@ -51,6 +51,7 @@ export const defaultStore: SerializedStore = {
       {
         id: 'page0',
         title: '',
+        tags: [],
       },
     ],
     blockVersions: {

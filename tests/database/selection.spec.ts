@@ -56,7 +56,8 @@ test.describe('row-level selection', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '', true);
-    await switchColumnType(page, 'number');
+    await pressEscape(page);
+    await switchColumnType(page, 'Number');
     await initDatabaseDynamicRowWithData(page, '123', true);
 
     const titleColumn = getDatabaseBodyCell(page, {
