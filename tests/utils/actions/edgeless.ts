@@ -71,7 +71,8 @@ type EdgelessTool =
   | 'connector'
   | 'note'
   | 'eraser';
-type ToolType = EdgelessTool | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ToolType = EdgelessTool | ZoomToolType;
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
@@ -94,6 +95,25 @@ export function locatorEdgelessToolButton(
   }[type];
   const button = page
     .locator('edgeless-toolbar edgeless-tool-icon-button')
+    .filter({
+      hasText: text,
+    });
+
+  return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export function locatorEdgelessZoomToolButton(
+  page: Page,
+  type: ZoomToolType,
+  innerContainer = true
+) {
+  const text = {
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fitToScreen: 'Fit to screen',
+  }[type];
+  const button = page
+    .locator('edgeless-zoom-toolbar edgeless-tool-icon-button')
     .filter({
       hasText: text,
     });
@@ -193,13 +213,13 @@ export async function getEdgelessSelectedRect(page: Page) {
 const AWAIT_TIMEOUT = 160;
 
 export async function decreaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
+  const btn = locatorEdgelessZoomToolButton(page, 'zoomOut', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
 
 export async function increaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
+  const btn = locatorEdgelessZoomToolButton(page, 'zoomIn', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }

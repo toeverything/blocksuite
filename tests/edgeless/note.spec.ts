@@ -11,6 +11,7 @@ import {
   initThreeNotes,
   locatorComponentToolbar,
   locatorEdgelessToolButton,
+  locatorEdgelessZoomToolButton,
   selectNoteInEdgeless,
   setEdgelessTool,
   switchEditorMode,
@@ -386,7 +387,7 @@ test('double click toolbar zoom button, should not add text', async ({
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const zoomOutButton = locatorEdgelessToolButton(page, 'zoomOut', false);
+  const zoomOutButton = locatorEdgelessZoomToolButton(page, 'zoomOut', false);
   await zoomOutButton.dblclick();
   await assertEdgelessNonSelectedRect(page);
 });
