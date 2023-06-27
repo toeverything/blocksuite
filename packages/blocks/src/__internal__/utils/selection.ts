@@ -825,13 +825,6 @@ export function getSplicedTitle(title: HTMLTextAreaElement) {
   return text.join('');
 }
 
-export function isEmbed(e: PointerEventState) {
-  if ((e.raw.target as HTMLElement).classList.contains('resize')) {
-    return true;
-  }
-  return false;
-}
-
 export function isDatabase(e: PointerEventState) {
   const target = e.raw.target;
   if (!(target instanceof HTMLElement)) {

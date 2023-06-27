@@ -124,10 +124,6 @@ export class Page extends Space<FlatBlockMap> {
     return this._root;
   }
 
-  getYBlockById(id: string) {
-    return this._yBlocks.get(id);
-  }
-
   get isEmpty() {
     return this._yBlocks.size === 0;
   }
@@ -342,12 +338,6 @@ export class Page extends Space<FlatBlockMap> {
     if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
-    if (
-      !this.awarenessStore.getFlag('enable_database') &&
-      flavour === 'affine:database'
-    ) {
-      throw new Error('database is not enabled');
-    }
     const parentModel =
       typeof parent === 'string' ? this.getBlockById(parent) : parent;
 
@@ -369,14 +359,13 @@ export class Page extends Space<FlatBlockMap> {
       assertValidChildren(this._yBlocks, clonedProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-      initInternalProps(yBlock, clonedProps);
 
+      initInternalProps(yBlock, clonedProps);
       syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
-      const parentModel =
-        typeof parent === 'string' ? this._blockMap.get(parent) : parent;
-
-      const parentId = parentModel?.id ?? this._root?.id;
+      const parentId =
+        parentModel?.id ??
+        (schema.model.role === 'root' ? undefined : this._root?.id);
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;

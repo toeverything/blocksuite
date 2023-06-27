@@ -104,6 +104,11 @@ test('use markdown syntax with trailing characters can create code block', async
 });
 
 test('support ```[lang] to add code block with language', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1314',
+  });
+
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -128,7 +133,7 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   const languageButton = codeBlockController.languageButton;
   await expect(languageButton).toBeVisible();
   const languageText = await languageButton.innerText();
-  expect(languageText).toEqual('Typescript');
+  expect(languageText).toEqual('TypeScript');
 });
 
 test('use more than three backticks can not create code block', async ({

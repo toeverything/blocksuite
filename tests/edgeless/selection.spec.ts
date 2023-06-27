@@ -7,7 +7,7 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
-  clickInCenter,
+  clickInEdge,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getBoundingRect,
@@ -144,7 +144,7 @@ test('select multiple shapes and translate', async ({ page }) => {
   await page.mouse.move(160, 160);
   await assertEdgelessHoverRect(page, [128, 128, 104, 104]);
 
-  await page.mouse.move(260, 160);
+  await page.mouse.move(250, 150);
   await assertEdgelessHoverRect(page, [240, 140, 100, 100]);
 });
 
@@ -160,8 +160,8 @@ test('selection box of shape element sync on fast dragging', async ({
   await setEdgelessTool(page, 'default');
   await dragBetweenCoords(
     page,
-    { x: 150, y: 150 },
-    { x: 700, y: 500 },
+    { x: 110, y: 110 },
+    { x: 660, y: 460 },
     { click: true }
   );
 

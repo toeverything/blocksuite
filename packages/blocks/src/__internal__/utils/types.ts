@@ -144,6 +144,12 @@ export type ShapeTool = {
 };
 
 export enum BrushSize {
+  LINE_WIDTH_FOUR = 4,
+  LINE_WIDTH_SIX = 6,
+  LINE_WIDTH_EIGHT = 8,
+  LINE_WIDTH_TEN = 10,
+  LINE_WIDTH_TWELVE = 12,
+  LINE_WIDTH_FOURTEEN = 14,
   Thin = 4,
   Thick = 10,
 }

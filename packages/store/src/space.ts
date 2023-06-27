@@ -71,10 +71,19 @@ export class Space<
     return this;
   }
 
+  remove() {
+    this.destroy();
+    this.doc.spaces.delete(this.prefixedId);
+  }
+
   destroy() {
     this._ySpaceDoc.destroy();
     this._onLoadSlot.dispose();
     this._loaded = false;
+  }
+
+  clear() {
+    this._yBlocks.clear();
   }
 
   private _initSubDoc = () => {

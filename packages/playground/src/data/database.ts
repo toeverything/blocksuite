@@ -1,4 +1,4 @@
-import { type SelectTag } from '@blocksuite/blocks';
+import type { SelectTag } from '@blocksuite/blocks/components/tags/multi-tag-select';
 import {
   numberHelper,
   richTextHelper,

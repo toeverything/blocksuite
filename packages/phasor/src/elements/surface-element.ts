@@ -16,8 +16,7 @@ export interface ISurfaceElement {
 }
 
 export interface HitTestOptions {
-  expandStroke: boolean;
-  fillHollow: boolean;
+  expand: number;
 }
 
 export type ComputedValue = (value: string) => string;

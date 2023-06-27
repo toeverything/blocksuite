@@ -1,4 +1,4 @@
-import type { SelectTag } from '../table/types.js';
+import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import { typesystem } from './typesystem.js';
 
 export const tNumber = typesystem.defineData<{ value: number }>({
