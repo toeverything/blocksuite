@@ -282,6 +282,18 @@ export class Workspace {
     const sanitize = async (props: Record<string, never>) => {
       const result: Record<string, unknown> = {};
 
+      //TODO: https://github.com/toeverything/blocksuite/issues/2939
+      if (props['sys:flavour'] === 'affine:surface' && props['prop:elements']) {
+        Object.values(props['prop:elements']).forEach(element => {
+          const _element = element as Record<string, unknown>;
+          if (_element['type'] === 'text') {
+            const yText = new Y.Text();
+            yText.applyDelta(_element['text']);
+            _element['text'] = yText;
+          }
+        });
+      }
+
       // setup embed source
       if (props['sys:flavour'] === 'affine:image') {
         let resp;
