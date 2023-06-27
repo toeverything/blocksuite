@@ -97,33 +97,32 @@ const autoIdentifyLink = (
   };
 };
 
-const autoIdentifyReference = (editor: AffineVEditor) => {
-  const vRange = editor.getVRange();
-  if (!vRange) return;
-
+const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
   // @AffineReference:(id)
   const referencePattern = /@AffineReference:\((.*)\)/g;
 
-  const [line] = editor.getLine(vRange.index);
-  const match = referencePattern.exec(line.textContent);
+  const match = referencePattern.exec(text);
   if (!match) {
     return;
   }
 
   const pageId = match[1];
 
-  const idx = vRange.index - match[0].length;
-
   editor.deleteText({
-    index: idx,
+    index: 0,
     length: match[0].length,
   });
   editor.setVRange({
-    index: idx,
+    index: 0,
     length: 0,
   });
 
-  editor.insertText(vRange, REFERENCE_NODE, {
+  const v1Range = {
+    index: match[0].length,
+    length: 0,
+  };
+
+  editor.insertText(v1Range, REFERENCE_NODE, {
     reference: { type: 'Subpage', pageId },
   });
 };
@@ -174,6 +173,7 @@ export class RichText extends ShadowlessElement {
     );
     this._vEditor.setAttributeSchema(textSchema.attributesSchema);
     this._vEditor.setAttributeRenderer(textSchema.textRenderer());
+    autoIdentifyReference(this._vEditor, this.model.text.yText.toString());
 
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(
@@ -223,7 +223,6 @@ export class RichText extends ShadowlessElement {
             ctx.attributes = attributes ?? null;
           }
         }
-        autoIdentifyReference(vEditor);
         autoIdentifyLink(vEditor, ctx);
 
         return ctx;
