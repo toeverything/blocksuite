@@ -3,26 +3,22 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import {
   type BlockComponentElement,
+  getClosestBlockElementByElement,
   getModelByElement,
-} from '../../../__internal__/utils/query.js';
-import { throttle } from '../../../__internal__/utils/std.js';
-import type { PageSelectionState } from './selection-state.js';
+} from '../../__internal__/utils/query.js';
+import { throttle } from '../../__internal__/utils/std.js';
 
-export class EmbedResizeManager {
-  private readonly pageSelectionState: PageSelectionState;
+export class ImageResizeManager {
+  private _activeComponent: BlockComponentElement | null = null;
   private _imageContainer: HTMLElement | null = null;
   private _imageCenterX = 0;
   private _dragMoveTarget = 'right';
-  private _activeComponent: BlockComponentElement | null = null;
-
-  constructor(state: PageSelectionState) {
-    this.pageSelectionState = state;
-  }
 
   onStart(e: PointerEventState) {
-    assertExists(this.pageSelectionState.activeComponent);
-    this._activeComponent = this.pageSelectionState.activeComponent;
     const eventTarget = e.raw.target as HTMLElement;
+    this._activeComponent = getClosestBlockElementByElement(
+      eventTarget
+    ) as BlockComponentElement;
     this._imageContainer = eventTarget.closest('.resizable-img');
     assertExists(this._imageContainer);
     const rect = this._imageContainer.getBoundingClientRect() as DOMRect;
@@ -72,6 +68,7 @@ export class EmbedResizeManager {
   onEnd() {
     assertExists(this._activeComponent);
     assertExists(this._imageContainer);
+
     const dragModel = getModelByElement(this._activeComponent);
     dragModel.page.captureSync();
     const { width, height } = this._imageContainer.getBoundingClientRect();

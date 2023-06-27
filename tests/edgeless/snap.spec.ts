@@ -9,7 +9,10 @@ import {
   initEmptyEdgelessState,
 } from '../utils/actions/misc.js';
 import { waitNextFrame } from '../utils/actions/misc.js';
-import { assertEdgelessHoverRect } from '../utils/asserts.js';
+import {
+  assertEdgelessHoverRect,
+  assertEdgelessSelectedRect,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test('snap', async ({ page }) => {
@@ -25,13 +28,20 @@ test('snap', async ({ page }) => {
     { x: 200, y: 6 },
     { x: 200 + 100, y: 6 + 100 }
   );
-  const center = { x: 250, y: (6 + 106) / 2 };
-  const to = { x: center.x, y: center.y };
-  to.y -= 3;
 
-  assertEdgelessHoverRect(page, [200, 6, 100, 100]);
-  await dragBetweenCoords(page, center, to);
-  assertEdgelessHoverRect(page, [200, 0, 100, 100]);
+  await assertEdgelessHoverRect(page, [200, 6, 100, 100]);
+  await dragBetweenCoords(
+    page,
+    {
+      x: 291,
+      y: 97,
+    },
+    {
+      x: 291,
+      y: 91,
+    }
+  );
+  await assertEdgelessHoverRect(page, [200, 0, 100, 100]);
   await waitNextFrame(page);
 });
 
@@ -54,13 +64,15 @@ test('snapDistribute', async ({ page }) => {
     { x: 144 + 100, y: 100 }
   );
 
-  const center = { x: (144 + 144 + 100) / 2, y: 100 / 2 };
-  const to = { x: center.x, y: center.y };
-  to.x += 3;
-
-  assertEdgelessHoverRect(page, [144, 0, 100, 100]);
-  await dragBetweenCoords(page, center, to);
-
-  assertEdgelessHoverRect(page, [150, 0, 100, 100]);
+  await assertEdgelessHoverRect(page, [144, 0, 100, 100]);
+  await dragBetweenCoords(
+    page,
+    { x: 144 + 100 - 9, y: 100 - 9 },
+    {
+      x: 144 + 100 - 9 + 3,
+      y: 100 - 9,
+    }
+  );
+  await assertEdgelessHoverRect(page, [150, 0, 100, 100]);
   await waitNextFrame(page);
 });

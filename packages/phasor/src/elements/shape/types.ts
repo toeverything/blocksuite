@@ -1,6 +1,6 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import type { IBound, StrokeStyle } from '../../consts.js';
+import type { StrokeStyle } from '../../consts.js';
 import type { IVec } from '../../utils/vec.js';
 import type { HitTestOptions, ISurfaceElement } from '../surface-element.js';
 import type { ShapeElement } from './shape-element.js';
@@ -29,7 +29,7 @@ export interface ShapeMethods {
   hitTest: (
     x: number,
     y: number,
-    bound: IBound,
+    element: ShapeElement,
     options?: HitTestOptions
   ) => boolean;
   intersectWithLine: (start: IVec, end: IVec, element: ShapeElement) => boolean;

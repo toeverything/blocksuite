@@ -5,6 +5,7 @@ import {
   DatabaseNumber,
   DatabaseProgress,
   DatabaseSelect,
+  LinkIcon,
   PenIcon,
   TextIcon,
   TodoIcon,
@@ -442,6 +443,7 @@ const columnTypeIconMap: ColumnTypeIcon = {
   progress: DatabaseProgress,
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,
+  link: LinkIcon,
 };
 
 declare global {

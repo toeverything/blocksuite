@@ -1,6 +1,7 @@
 import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
 
+import type { PointerEventState } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement, type FocusContext } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
@@ -12,9 +13,17 @@ import { getViewportElement } from '../__internal__/utils/query.js';
 import { stopPropagation } from '../page-block/edgeless/utils.js';
 import { clamp } from '../std.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
+import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
 import { ImageBlockService } from './image-service.js';
+
+export function isImageResizeEvent(e: PointerEventState) {
+  if ((e.raw.target as HTMLElement).classList.contains('resize')) {
+    return true;
+  }
+  return false;
+}
 
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
@@ -105,6 +114,9 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   @state()
   private _optionPosition: { x: number; y: number } | null = null;
 
+  @state()
+  _focused = false;
+
   private _retryCount = 0;
 
   private hoverState = new Slot<boolean>();
@@ -117,6 +129,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._disposables.add(
       this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
     );
+
+    this._observeDrag();
     // Wait for DOM to be ready
     setTimeout(() => this._observePosition());
   }
@@ -176,11 +190,13 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     if (ctx.multi) {
       return true;
     }
+    this._focused = true;
     // show selection rect
     return false;
   }
 
   override blurBlock(ctx: FocusContext) {
+    this._focused = false;
     super.blurBlock(ctx);
     return true;
   }
@@ -230,6 +246,49 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       })
       .catch(this._fetchError);
   };
+
+  static embedResizeManager: ImageResizeManager | null = null;
+  private _observeDrag() {
+    if (ImageBlockComponent.embedResizeManager) {
+      return;
+    }
+
+    ImageBlockComponent.embedResizeManager = new ImageResizeManager();
+    const embedResizeManager = ImageBlockComponent.embedResizeManager;
+
+    let dragging = false;
+    this._disposables.add(
+      this.root.uiEventDispatcher.add('dragStart', ctx => {
+        const pointerState = ctx.get('pointerState');
+        if (isImageResizeEvent(pointerState)) {
+          dragging = true;
+          embedResizeManager.onStart(pointerState);
+          return true;
+        }
+        return false;
+      })
+    );
+    this._disposables.add(
+      this.root.uiEventDispatcher.add('dragMove', ctx => {
+        const pointerState = ctx.get('pointerState');
+        if (dragging) {
+          embedResizeManager.onMove(pointerState);
+          return true;
+        }
+        return false;
+      })
+    );
+    this._disposables.add(
+      this.root.uiEventDispatcher.add('dragEnd', ctx => {
+        if (dragging) {
+          dragging = false;
+          embedResizeManager.onEnd();
+          return true;
+        }
+        return false;
+      })
+    );
+  }
 
   private _observePosition() {
     // At AFFiNE, avoid the option element to be covered by the header
@@ -333,7 +392,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _imageResizeBoardTemplate() {
-    if (!this.focused || this._imageState !== 'ready') return null;
+    const isFocused = this._focused;
+    if (!isFocused || this._imageState !== 'ready') return null;
     return ImageSelectedRectsContainer();
   }
 

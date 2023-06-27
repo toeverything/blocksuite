@@ -148,10 +148,6 @@ export class Workspace {
     return this._store.spaces as Map<`space:${string}`, Page>;
   }
 
-  public getPageNameList() {
-    return [...this._pages.keys()];
-  }
-
   get doc() {
     return this._store.doc;
   }
@@ -202,6 +198,7 @@ export class Workspace {
     this.meta.pageMetaRemoved.on(id => {
       const page = this.getPage(id) as Page;
       this._store.removeSpace(page);
+      page.remove();
       this.slots.pageRemoved.emit(id);
     });
   }

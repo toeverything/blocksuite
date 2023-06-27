@@ -3,7 +3,6 @@ import * as Y from 'yjs';
 
 import type { AwarenessStore, UserRange } from './awareness.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
-import { createYMapProxy } from './yjs/index.js';
 
 export interface StackItem {
   meta: Map<'cursor-location', UserRange | undefined>;
@@ -39,7 +38,7 @@ export class Space<
     this._ySpaceDoc = this._initSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
-    this._proxy = createYMapProxy(this._yBlocks as Y.Map<unknown>);
+    this._proxy = this.doc.proxy.createYProxy(this._yBlocks as Y.Map<unknown>);
   }
 
   get prefixedId() {
@@ -70,6 +69,11 @@ export class Space<
     await promise;
 
     return this;
+  }
+
+  remove() {
+    this.destroy();
+    this.doc.spaces.delete(this.prefixedId);
   }
 
   destroy() {
