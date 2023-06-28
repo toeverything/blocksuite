@@ -256,14 +256,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     if (!componentToolbar) return;
 
     computePosition(this._selectedRect, componentToolbar, {
-      placement: 'top',
+      placement: 'top-start',
       middleware: [
         offset({
-          mainAxis: 12,
+          mainAxis: 8,
         }),
-        flip({
-          fallbackPlacements: ['bottom'],
-        }),
+        flip(),
       ],
     }).then(({ x, y }) => {
       Object.assign(componentToolbar.style, {
