@@ -428,13 +428,19 @@ export class DefaultPageBlockComponent
   private _initSlotEffects() {
     const { slots } = this;
 
-    slots.draggingAreaUpdated.on(rect => {
-      this._draggingArea = rect;
-    });
-    slots.selectedRectsUpdated.on(rects => {
-      this._selectedRects = rects;
-    });
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._disposables.add(
+      slots.draggingAreaUpdated.on(rect => {
+        this._draggingArea = rect;
+      })
+    );
+    this._disposables.add(
+      slots.selectedRectsUpdated.on(rects => {
+        this._selectedRects = rects;
+      })
+    );
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
   }
 
   private _initNoteSizeEffect() {
@@ -514,11 +520,12 @@ export class DefaultPageBlockComponent
     }
     this.mouseRoot.removeEventListener('wheel', this._onWheel);
     this.viewportElement.removeEventListener('scroll', this._onScroll);
+    this._disposables.dispose();
   }
 
   override render() {
     requestAnimationFrame(() => {
-      this.selection.refreshRemoteSelection();
+      this.service.selection?.refreshRemoteSelection();
     });
 
     const { selection } = this;
