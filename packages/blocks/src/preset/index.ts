@@ -8,17 +8,12 @@ import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
-import { PageBlockSchema } from '../page-block/page-model.js';
+import { edgelessBlockSpec, pageBlockSpec } from '../page-block/index.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 
 export const pagePreset: LitBlockSpec[] = [
-  {
-    schema: PageBlockSchema,
-    view: {
-      component: literal`affine-default-page`,
-    },
-  },
+  pageBlockSpec,
   {
     schema: SurfaceBlockSchema,
     view: {
@@ -76,12 +71,7 @@ export const pagePreset: LitBlockSpec[] = [
 ];
 
 export const edgelessPreset: LitBlockSpec[] = [
-  {
-    schema: PageBlockSchema,
-    view: {
-      component: literal`affine-edgeless-page`,
-    },
-  },
+  edgelessBlockSpec,
   {
     schema: SurfaceBlockSchema,
     view: {

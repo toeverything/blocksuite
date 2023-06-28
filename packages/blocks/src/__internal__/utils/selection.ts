@@ -172,6 +172,7 @@ export function focusBlockByModel(
       'affine:bookmark',
     ])
   ) {
+    assertExists(pageBlock.selection);
     pageBlock.selection.state.clearSelection();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && pageBlock.slots.selectedRectsUpdated.emit([rect]);
@@ -196,6 +197,7 @@ export function focusBlockByModel(
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
     if (isPageMode) {
+      assertExists(pageBlock.selection);
       pageBlock.selection.state.clearSelection();
       pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
     }
@@ -258,7 +260,7 @@ export function resetNativeSelection(range: Range | null) {
 
 export function clearSelection(page: Page) {
   if (!page.root) return;
-  getPageBlock(page.root)?.selection.clear();
+  getPageBlock(page.root)?.selection?.clear();
 }
 
 /**

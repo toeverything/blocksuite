@@ -534,14 +534,14 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
         }
 
         if (parent && matchFlavours(parent, ['affine:database'])) {
-          pageBlock.selection.clear();
+          pageBlock.selection?.clear();
           return;
         }
 
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
-          pageBlock.selection.setSelectedBlocks(
+          pageBlock.selection?.setSelectedBlocks(
             blockElements
               .map(b => getBlockElementById(b.model.id))
               .filter((b): b is BlockComponentElement => !!b)
@@ -550,6 +550,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       });
     },
     setDragType(dragging: boolean) {
+      assertExists(pageBlock.selection);
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
     setSelectedBlock(modelState: EditingState | null, element) {
@@ -572,9 +573,13 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
           return;
         }
       }
-      pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
+      pageBlock.selection?.selectOneBlock(
+        modelState?.element,
+        modelState?.rect
+      );
     },
     getSelectedBlocks() {
+      assertExists(pageBlock.selection);
       return pageBlock.selection.state.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {

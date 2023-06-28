@@ -318,7 +318,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     if (
       e.raw.target &&
       e.raw.target instanceof HTMLElement &&
-      e.raw.target.classList.contains('affine-edgeless-mask')
+      e.raw.target.classList.contains('affine-note-mask')
     ) {
       this.onContainerClick(e);
       this._isDoubleClickedOnMask = true;

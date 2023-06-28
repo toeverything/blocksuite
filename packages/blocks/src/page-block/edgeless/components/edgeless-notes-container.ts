@@ -1,15 +1,17 @@
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { deserializeXYWH } from '@blocksuite/phasor';
-import { matchFlavours } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
-import { DEFAULT_NOTE_COLOR } from '../../../note-block/note-model.js';
+import {
+  DEFAULT_NOTE_COLOR,
+  type NoteBlockModel,
+} from '../../../note-block/note-model.js';
 
-function EdgelessMask() {
+function NoteMask() {
   const style = {
     position: 'absolute',
     top: '0',
@@ -18,21 +20,18 @@ function EdgelessMask() {
     right: '0',
     zIndex: '1',
   };
-  return html`
-    <div class="affine-edgeless-mask" style=${styleMap(style)}></div>
-  `;
+  return html` <div class="affine-note-mask" style=${styleMap(style)}></div> `;
 }
 
-function EdgelessBlockChild(
+function EdgelessChildNote(
   index: number,
-  model: TopLevelBlockModel,
+  model: NoteBlockModel,
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
 ) {
   const { xywh, background } = model;
   const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
-  const isNote = matchFlavours(model, ['affine:note']);
-  const isHiddenNote = isNote && model.hidden;
+  const isHiddenNote = model.hidden;
 
   const style = {
     position: 'absolute',
@@ -53,16 +52,16 @@ function EdgelessBlockChild(
     transformOrigin: '0 0',
   };
 
-  const mask = active ? nothing : EdgelessMask();
+  const mask = active ? nothing : NoteMask();
 
   return html`
-    <div class="affine-edgeless-block-child" style=${styleMap(style)}>
+    <div class="affine-edgeless-child-note" style=${styleMap(style)}>
       ${renderer(model)} ${mask}
     </div>
   `;
 }
 
-export function EdgelessBlockChildrenContainer(
+export function EdgelessNotesContainer(
   notes: TopLevelBlockModel[],
   active: boolean,
   renderer: (model: TopLevelBlockModel) => TemplateResult
@@ -71,7 +70,7 @@ export function EdgelessBlockChildrenContainer(
     ${repeat(
       notes,
       child => child.id,
-      (child, index) => EdgelessBlockChild(index, child, active, renderer)
+      (child, index) => EdgelessChildNote(index, child, active, renderer)
     )}
   `;
 }
