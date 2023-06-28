@@ -207,7 +207,7 @@ test('dragging un-selected note', async ({ page }) => {
   await switchEditorMode(page);
 
   const noteBox = await page
-    .locator('.affine-edgeless-block-child')
+    .locator('.affine-edgeless-child-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -247,7 +247,7 @@ test('drag handle should be shown when a note is actived in default mode or hidd
 
   await switchEditorMode(page);
   const noteBox = await page
-    .locator('.affine-edgeless-block-child')
+    .locator('.affine-edgeless-child-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -327,7 +327,7 @@ test('drag handle should add new note when dragged outside note', async ({
 
   await switchEditorMode(page);
 
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
 
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragBlockToPoint(page, '3', { x: 30, y: 40 });
@@ -335,7 +335,7 @@ test('drag handle should add new note when dragged outside note', async ({
   await expect(page.locator('affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });
 
