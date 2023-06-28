@@ -2,9 +2,8 @@ import type { PointerEventState } from '@blocksuite/block-std';
 
 import { type NoteTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { type NoteOptions } from '../utils.js';
 import { DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
-import { addNote } from '../utils/note.js';
+import { addNote, type NoteOptions } from '../utils/note.js';
 import { EdgelessToolController } from './index.js';
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {
