@@ -656,10 +656,10 @@ function isDatabase({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is edgeless block child.
+ * Returns `true` if element is edgeless child note.
  */
-export function isEdgelessBlockChild({ classList }: Element) {
-  return classList.contains('affine-edgeless-block-child');
+export function isEdgelessChildNote({ classList }: Element) {
+  return classList.contains('affine-edgeless-child-note');
 }
 
 /**
@@ -978,7 +978,7 @@ export function queryCurrentMode(): 'light' | 'dark' {
  */
 export function getHoveringNote(point: Point) {
   return (
-    document.elementsFromPoint(point.x, point.y).find(isEdgelessBlockChild) ||
+    document.elementsFromPoint(point.x, point.y).find(isEdgelessChildNote) ||
     null
   );
 }

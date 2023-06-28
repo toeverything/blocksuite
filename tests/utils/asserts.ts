@@ -726,7 +726,7 @@ export async function assertEdgelessNoteBackground(
     .locator(`affine-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
       const noteWrapper = ele.closest<HTMLDivElement>(
-        '.affine-edgeless-block-child'
+        '.affine-edgeless-child-note'
       );
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);

@@ -64,8 +64,8 @@ import type {
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
-import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
 import { createDragHandle } from './components/create-drag-handle.js';
+import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
 import {
@@ -967,7 +967,7 @@ export class EdgelessPageBlockComponent
     const { state, draggingArea } = selection;
     const { viewport } = surface;
 
-    const childrenContainer = EdgelessBlockChildrenContainer(
+    const notesContainer = EdgelessNotesContainer(
       this.sortedNotes,
       state.active,
       this.root.renderModel
@@ -1003,7 +1003,7 @@ export class EdgelessPageBlockComponent
         style=${styleMap(blockContainerStyle)}
       >
         <div class="affine-block-children-container edgeless">
-          <div class="affine-edgeless-layer">${childrenContainer}</div>
+          <div class="affine-edgeless-layer">${notesContainer}</div>
         </div>
         <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}

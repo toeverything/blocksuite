@@ -171,7 +171,7 @@ export async function getEdgelessHoverRect(page: Page) {
 }
 
 export async function getEdgelessBlockChild(page: Page) {
-  const block = page.locator('.affine-edgeless-block-child');
+  const block = page.locator('.affine-edgeless-child-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Missing edgeless block child rect');
   return blockBox;
