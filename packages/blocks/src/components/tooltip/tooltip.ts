@@ -127,10 +127,10 @@ export const tooltipStyle = css`
   }
 
   /* work for tip-position='top-right' */
-  tool-tip:is([arrow]):is([tip-position='top-right']) {
+  tool-tip:is([arrow]):is([tip-position='top-end']) {
     transform: translate(-15%, calc(-100% - 16px));
   }
-  tool-tip:is([arrow]):is([tip-position='top-right'])::before {
+  tool-tip:is([arrow]):is([tip-position='top-end'])::before {
     position: absolute;
     content: '';
     left: 30%;

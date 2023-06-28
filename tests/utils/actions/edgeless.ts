@@ -3,7 +3,7 @@ import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocksuite/blocks';
 import type { IPoint } from '@blocksuite/blocks/std';
-import { sleep } from '@blocksuite/global/utils';
+import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -22,6 +22,8 @@ import {
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
+
+const AWAIT_TIMEOUT = 160;
 
 export async function getNoteRect(
   page: Page,
@@ -108,7 +110,7 @@ export function locatorEdgelessToolButton(
   return innerContainer ? button.locator('.icon-container') : button;
 }
 
-export function locatorEdgelessZoomToolButton(
+export async function locatorEdgelessZoomToolButton(
   page: Page,
   type: ZoomToolType,
   innerContainer = true
@@ -118,6 +120,15 @@ export function locatorEdgelessZoomToolButton(
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
   }[type];
+  const screenWidth = page.viewportSize()?.width;
+  assertExists(screenWidth);
+  if (screenWidth < 1048) {
+    const toggleZoomBarButton = page.locator(
+      'zoom-bar-toggle-button edgeless-tool-icon-button'
+    );
+    await toggleZoomBarButton.click();
+    await sleep(AWAIT_TIMEOUT);
+  }
   const button = page
     .locator('edgeless-zoom-toolbar edgeless-tool-icon-button')
     .filter({
@@ -216,22 +227,20 @@ export async function getEdgelessSelectedRect(page: Page) {
   return selectedBox;
 }
 
-const AWAIT_TIMEOUT = 160;
-
 export async function decreaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessZoomToolButton(page, 'zoomOut', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'zoomOut', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
 
 export async function increaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessZoomToolButton(page, 'zoomIn', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'zoomIn', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
 
 export async function autoFit(page: Page) {
-  const btn = locatorEdgelessZoomToolButton(page, 'fitToScreen', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'fitToScreen', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }

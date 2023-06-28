@@ -70,10 +70,11 @@ import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
+import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
 import {
   EdgelessZoomToolbar,
   type ZoomAction,
-} from './components/toolbar/zoom-tool-bar.js';
+} from './components/zoom/zoom-tool-bar.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -177,11 +178,24 @@ export class EdgelessPageBlockComponent
       border: var(--affine-border-width) solid var(--affine-blue);
     }
 
-    edgeless-zoom-toolbar {
+    edgeless-zoom-toolbar.horizontal,
+    zoom-bar-toggle-button {
       position: fixed;
-      bottom: 2px;
+      bottom: 20px;
       left: 12px;
       z-index: var(--affine-z-index-popover);
+    }
+
+    @media screen and (max-width: 1048px) {
+      edgeless-zoom-toolbar.horizontal {
+        display: none;
+      }
+    }
+
+    @media screen and (min-width: 1048px) {
+      zoom-bar-toggle-button {
+        display: none;
+      }
     }
   `;
 
@@ -194,6 +208,7 @@ export class EdgelessPageBlockComponent
     dragHandle: <DragHandle | null>null,
     toolbar: <EdgelessToolbar | null>null,
     zoomToolbar: <EdgelessZoomToolbar | null>null,
+    zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
   mouseRoot!: HTMLElement;
@@ -310,16 +325,21 @@ export class EdgelessPageBlockComponent
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
       const zoomToolBar = new EdgelessZoomToolbar(this);
+      zoomToolBar.classList.add('horizontal');
+      const zoomBarToggleButton = new ZoomBarToggleButton(this);
       this.appendChild(toolbar);
       this.appendChild(zoomToolBar);
+      this.appendChild(zoomBarToggleButton);
       this.components.toolbar = toolbar;
       this.components.zoomToolbar = zoomToolBar;
+      this.components.zoomBarToggleButton = zoomBarToggleButton;
     };
 
     if (
       this.page.awarenessStore.getFlag('enable_edgeless_toolbar') &&
       !this.components.toolbar &&
-      !this.components.zoomToolbar
+      !this.components.zoomToolbar &&
+      !this.components.zoomBarToggleButton
     ) {
       createToolbar();
     }
@@ -336,8 +356,10 @@ export class EdgelessPageBlockComponent
 
           this.components.toolbar?.remove();
           this.components.zoomToolbar?.remove();
+          this.components.zoomBarToggleButton?.remove();
           this.components.toolbar = null;
           this.components.zoomToolbar = null;
+          this.components.zoomBarToggleButton = null;
         },
         {
           filter: msg => msg.id === this.page.doc.clientID,
