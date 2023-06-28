@@ -316,6 +316,8 @@ export class Renderer implements SurfaceViewport {
     const matrix = new DOMMatrix().scaleSelf(dpr);
     const rc = new RoughCanvas(canvas);
 
+    ctx.setTransform(matrix);
+
     this._renderByBound(ctx, matrix, rc, bound);
 
     return canvas;
