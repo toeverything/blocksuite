@@ -58,9 +58,11 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       font-size: 14px;
       line-height: var(--affine-line-height);
       user-select: none;
+      position: relative;
     }
     .affine-list-block__todo-prefix {
       cursor: pointer;
+      margin-right: 0px;
     }
     .affine-list-block__todo {
       width: 16px;
@@ -74,6 +76,40 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
     .affine-list--checked {
       color: var(--affine-icon-color);
+    }
+    .affine-list-block__todo-checked-prefix {
+      width: 20px;
+      height: 20px;
+      position: absolute;
+      left: 0px;
+      border-radius: 50%;
+    }
+    .affine-list--checked .affine-list-block__todo-checked-prefix {
+      animation: sparking 0.6s ease forwards;
+    }
+    @keyframes sparking {
+      0% {
+        width: 14px;
+        height: 14px;
+        left: 3px;
+      }
+      40% {
+        width: 20px;
+        height: 20px;
+        left: 0px;
+        box-shadow: 0 -18px 0 -8px #1e96eb, 16px -8px 0 -8px #1e96eb,
+          16px 8px 0 -8px #1e96eb, 0 18px 0 -8px #1e96eb,
+          -16px 8px 0 -8px #1e96eb, -16px -8px 0 -8px #1e96eb;
+      }
+
+      100% {
+        width: 20px;
+        height: 20px;
+        left: 0px;
+        box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent,
+          32px 16px 0 -10px transparent, 0 36px 0 -10px transparent,
+          -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
+      }
     }
   `;
 
