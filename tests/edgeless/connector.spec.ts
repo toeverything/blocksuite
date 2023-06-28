@@ -5,6 +5,7 @@ import {
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
+  deleteAll,
   deleteAllConnectors,
   getConnectorPath,
   locatorConnectorStrokeStyleButton,
@@ -32,7 +33,7 @@ test('elbow connector without node and width greater than height', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-
+  await deleteAll(page);
   const start = await toViewCoord(page, [0, 0]);
   const end = await toViewCoord(page, [200, 100]);
   await addBasicConnectorElement(
@@ -56,6 +57,7 @@ test('elbow connector without node and width less than height', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await deleteAll(page);
 
   const start = await toViewCoord(page, [0, 0]);
   const end = await toViewCoord(page, [100, 200]);
@@ -80,6 +82,7 @@ test('elbow connector one side attached element another side free', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await deleteAll(page);
 
   let start = await toViewCoord(page, [0, 0]);
   let end = await toViewCoord(page, [100, 100]);
@@ -126,6 +129,7 @@ test('elbow connector both side attatched element', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await deleteAll(page);
 
   let start = await toViewCoord(page, [0, 0]);
   let end = await toViewCoord(page, [100, 100]);
@@ -248,6 +252,7 @@ test('elbow connector both side attached element with one attach element and oth
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await deleteAll(page);
 
   let start = await toViewCoord(page, [0, 0]);
   let end = await toViewCoord(page, [100, 100]);
@@ -337,6 +342,7 @@ test('elbow connector both side attached element with all fixed', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await deleteAll(page);
 
   let start = await toViewCoord(page, [0, 0]);
   let end = await toViewCoord(page, [100, 100]);

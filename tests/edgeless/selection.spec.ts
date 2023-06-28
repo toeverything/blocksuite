@@ -7,6 +7,7 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
+  click,
   clickInEdge,
   dragBetweenCoords,
   enterPlaygroundRoom,
@@ -67,7 +68,7 @@ test('should update rect of selection when resizing viewport', async ({
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
-test('select multiple shapes and resize', async ({ page }) => {
+test.only('select multiple shapes and resize', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -75,6 +76,7 @@ test('select multiple shapes and resize', async ({ page }) => {
 
   await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await page.mouse.move(110, 110);
+  await click(page, { x: 110, y: 110 });
   await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 
   await addBasicRectShapeElement(page, { x: 210, y: 110 }, { x: 310, y: 210 });

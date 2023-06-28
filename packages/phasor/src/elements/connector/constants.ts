@@ -14,4 +14,6 @@ export const ConnectorElementDefaultProps: IElementDefaultProps<'connector'> = {
   controllers: [],
   source: {},
   target: {},
+  path: [],
+  absolutePath: [],
 };

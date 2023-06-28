@@ -24,10 +24,6 @@ import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import {
-  generateConnectorPath,
-  getConnectorAttachedInfo,
-} from '../connector/utils.js';
-import {
   type ColorEvent,
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
