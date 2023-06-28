@@ -297,12 +297,7 @@ export class SurfaceManager {
           bound,
           Bound.fromDOMRect(getQuadBoundsWithRotation(element))
         ) ||
-        [
-          [bound.x, bound.y],
-          [bound.x + bound.w, bound.y],
-          [bound.x + bound.w, bound.y + bound.h],
-          [bound.x, bound.y + bound.h],
-        ].some((point, i, points) =>
+        Bound.from(bound).points.some((point, i, points) =>
           element.intersectWithLine(point, points[(i + 1) % points.length])
         )
       );

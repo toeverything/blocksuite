@@ -6,6 +6,8 @@ import {
   transformPointsToNewBound,
 } from '../../utils/bound.js';
 import {
+  getPointsFromBoundsWithRotation,
+  getQuadBoundsWithRotation,
   getSvgPathFromStroke,
   lineIntersects,
 } from '../../utils/math-utils.js';
@@ -47,25 +49,21 @@ export class BrushElement extends SurfaceElement<IBrush> {
   }
 
   intersectWithLine(start: IVec, end: IVec) {
-    const { points } = this;
+    const tl = [this.x, this.y];
+    const points = getPointsFromBoundsWithRotation(this, _ =>
+      this.points.map(point => Vec.add(point, tl))
+    );
 
-    const box = Bound.deserialize(this.xywh);
-    const tl = box.tl;
+    const box = Bound.fromDOMRect(getQuadBoundsWithRotation(this));
 
     if (box.w < 8 && box.h < 8) {
       return Vec.distanceToLineSegment(start, end, box.center) < 5;
     }
 
     if (box.intersectLine(start, end, true)) {
-      for (let i = 1; i < points.length; i++) {
-        if (
-          lineIntersects(
-            Vec.add(points[i - 1], tl),
-            Vec.add(points[i], tl),
-            start,
-            end
-          )
-        ) {
+      const len = points.length;
+      for (let i = 1; i < len; i++) {
+        if (lineIntersects(start, end, points[i - 1], points[i])) {
           return true;
         }
       }
@@ -73,19 +71,37 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return false;
   }
 
-  override hitTest(x: number, y: number, options?: HitTestOptions): boolean {
-    const insideBoundingBox = super.hitTest(x, y, options);
+  override hitTest(px: number, py: number, options?: HitTestOptions): boolean {
+    // const insideBoundingBox = super.hitTest(x, y, options);
+    // if (!insideBoundingBox) return false;
 
-    if (!insideBoundingBox) return false;
+    const {
+      x,
+      y,
+      rotate,
+      widthAndHeight: [w, h],
+      points,
+      _testCtx,
+    } = this;
 
-    const command = getSvgPathFromStroke(getSolidStrokePoints(this.points, 3));
+    const command = getSvgPathFromStroke(getSolidStrokePoints(points, 3));
     const path = new Path2D(command);
 
-    if (this._testCtx.lineWidth !== (options?.expand ?? 1)) {
-      this._testCtx.lineWidth = options?.expand ?? 1;
+    if (_testCtx.lineWidth !== (options?.expand ?? 1)) {
+      _testCtx.lineWidth = options?.expand ?? 1;
     }
 
-    return this._testCtx.isPointInStroke(path, x - this.x, y - this.y);
+    const cx = w / 2;
+    const cy = h / 2;
+
+    _testCtx.setTransform(
+      new DOMMatrix()
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
+    );
+
+    return _testCtx.isPointInStroke(path, px - x, py - y);
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
