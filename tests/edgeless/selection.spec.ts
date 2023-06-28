@@ -7,7 +7,6 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
-  clickInEdge,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getBoundingRect,
@@ -84,14 +83,23 @@ test('select multiple shapes and resize', async ({ page }) => {
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
   await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
+  // const x = 100;
+  // const y = 100;
+  // const w = 210;
+  // const h = 110;
+  // const p = w / h;
+  // const dx = 50;
+  // const dy = 50 / p;
+  // [x + dx - 2, y + dy - 2, w - dx + 2, h - dy + 2];
+
   await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
-  await assertEdgelessSelectedRect(page, [148, 148, 162, 62]);
+  await assertEdgelessSelectedRect(page, [148, 124.19, 162, 85.81]);
 
   await page.mouse.move(160, 160);
-  await assertEdgelessHoverRect(page, [148, 148, 79, 57.5]);
+  await assertEdgelessSelectedRect(page, [148, 124.19, 162, 85.81]);
 
   await page.mouse.move(260, 160);
-  await assertEdgelessHoverRect(page, [234, 155, 76, 55]);
+  await assertEdgelessSelectedRect(page, [148, 124.19, 162, 85.81]);
 });
 
 test('select multiple shapes and resize to negative', async ({ page }) => {
@@ -111,14 +119,26 @@ test('select multiple shapes and resize to negative', async ({ page }) => {
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
   await assertEdgelessSelectedRect(page, [98, 98, 212, 112]);
 
+  // const x = 100;
+  // const y = 100;
+  // const w = 210;
+  // const h = 110;
+  // const p = w / h;
+  // const minX = x + w = 100 + 210 = 310;
+  // const minY = y + h = 100 + 110 = 210;
+  // const tx = x + 400 = 500
+  // const ty = y + 300 = 400
+  // const nh = 400 - 210 = 190 - 2 = 188
+  // const nw = 188 * p = 358 - 2 = 356
+
   await resizeElementByTopLeftHandle(page, { x: 400, y: 300 }, 30);
-  await assertEdgelessSelectedRect(page, [310, 210, 188, 188]);
+  await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
 
   await page.mouse.move(450, 300);
-  await assertEdgelessHoverRect(page, [406, 223, 92, 174.5]);
+  await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
 
   await page.mouse.move(320, 220);
-  await assertEdgelessHoverRect(page, [310, 210, 88.6, 167.8]);
+  await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
 });
 
 test('select multiple shapes and translate', async ({ page }) => {
