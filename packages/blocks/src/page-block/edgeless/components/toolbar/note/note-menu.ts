@@ -20,6 +20,7 @@ export class EdgelessNoteMenu extends LitElement {
       height: 76px;
       display: flex;
       padding: 0;
+      box-shadow: var(--affine-shadow-2);
       z-index: -1;
     }
     .note-menu-container {

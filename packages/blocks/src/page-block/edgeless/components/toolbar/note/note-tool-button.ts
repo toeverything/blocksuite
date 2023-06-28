@@ -39,6 +39,7 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
     middleware: [
       offset({
         mainAxis: -20,
+        crossAxis: -20,
       }),
     ],
   }).then(({ x, y }) => {
