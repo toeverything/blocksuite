@@ -30,13 +30,13 @@ import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
   createPage,
-  getBookmarkInitialProps,
   getCurrentNativeRange,
   getVirgoByModel,
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
@@ -254,8 +254,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             if (!parent) {
               return;
             }
-            const props = await getBookmarkInitialProps();
-            page.addSiblingBlocks(model, props);
+            const url = await getBookmarkInitialProps();
+            if (!url) return;
+            const props = {
+              flavour: 'affine:bookmark',
+              url,
+            } as const;
+            page.addSiblingBlocks(model, [props]);
           },
         },
       ],

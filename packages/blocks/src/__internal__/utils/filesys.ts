@@ -1,7 +1,5 @@
 import type { BlobManager } from '@blocksuite/store';
 
-import type { BookmarkBlockModel } from '../../bookmark-block/index.js';
-
 // Polyfill for `showOpenFilePicker` API
 // See https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wicg-file-system-access/index.d.ts
 // See also https://caniuse.com/?search=showOpenFilePicker
@@ -194,29 +192,3 @@ export const uploadImageFromLocal = async (storage: BlobManager) => {
   }
   return res;
 };
-
-type BookmarkProps = Partial<BookmarkBlockModel>;
-
-export async function getBookmarkInitialProps(): Promise<BookmarkProps[]> {
-  const bookmarkCreateModal = document.createElement('bookmark-create-modal');
-
-  let resolvePromise: (
-    value: Array<BookmarkProps> | PromiseLike<Array<BookmarkProps>>
-  ) => void;
-  const pending = new Promise<Array<BookmarkProps>>(resolve => {
-    resolvePromise = resolve;
-  });
-
-  bookmarkCreateModal.onCancel = () => {
-    resolvePromise([]);
-    document.body.removeChild(bookmarkCreateModal);
-  };
-  bookmarkCreateModal.onConfirm = ({ url }) => {
-    resolvePromise([{ flavour: 'affine:bookmark', url }]);
-    document.body.removeChild(bookmarkCreateModal);
-  };
-
-  document.body.appendChild(bookmarkCreateModal);
-
-  return await pending;
-}
