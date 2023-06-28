@@ -391,3 +391,9 @@ export function getBoundsWithRotation(bounds: IBound): IBound {
   const { x, y, width: w, height: h } = getQuadBoundsWithRotation(bounds);
   return { x, y, w, h };
 }
+
+export function normalizeDegAngle(angle: number) {
+  if (angle < 0) angle += 360;
+  angle %= 360;
+  return angle;
+}

@@ -1,4 +1,4 @@
-import { Bound } from '@blocksuite/phasor';
+import { Bound, getQuadBoundsWithRotation } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 
 import type { IPoint } from '../../../../__internal__/utils/types.js';
@@ -270,7 +270,7 @@ export class HandleResizeManager {
         rect.cy = (fp.y + dp.y) / 2;
       }
     } else {
-      // handle frames
+      // handle notes
       switch (_dragDirection) {
         case HandleDirection.Left: {
           direction.x = -1;
@@ -378,17 +378,7 @@ export class HandleResizeManager {
 
         // TODO: determine if it is a note
         if (rotate) {
-          const m = new DOMMatrix()
-            .translateSelf(cx, cy)
-            .rotateSelf(rotate)
-            .translateSelf(-cx, -cy);
-
-          const { width } = new DOMQuad(
-            new DOMPoint(x, y).matrixTransform(m),
-            new DOMPoint(x + w, y).matrixTransform(m),
-            new DOMPoint(x + w, y + h).matrixTransform(m),
-            new DOMPoint(x, y + h).matrixTransform(m)
-          ).getBounds();
+          const { width } = getQuadBoundsWithRotation({ x, y, w, h, rotate });
           const hrw = width / 2;
 
           center.y = cy;

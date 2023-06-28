@@ -26,6 +26,7 @@ export {
   isPointIn,
   lineIntersects,
   linePolygonIntersects,
+  normalizeDegAngle,
 } from './utils/math-utils.js';
 export { getSvgPathFromStroke } from './utils/math-utils.js';
 export * from './utils/std.js';

@@ -1,8 +1,6 @@
-import { Vec } from '@blocksuite/phasor';
+import { normalizeDegAngle, Vec } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { html, nothing } from 'lit';
-
-import { normalizeAngle } from './../utils.js';
 
 export enum HandleDirection {
   Left = 'left',
@@ -140,5 +138,7 @@ function calcAngle(target: HTMLElement, point: number[], offset = 0) {
   assertExists(rect);
   const { left, top, right, bottom } = rect;
   const center = Vec.med([left, top], [right, bottom]);
-  return normalizeAngle(((Vec.angle(center, point) + offset) * 180) / Math.PI);
+  return normalizeDegAngle(
+    ((Vec.angle(center, point) + offset) * 180) / Math.PI
+  );
 }

@@ -5,6 +5,7 @@ import {
   type Bound,
   type ConnectorElement,
   deserializeXYWH,
+  normalizeDegAngle,
   type PhasorElement,
   serializeXYWH,
   type SurfaceManager,
@@ -34,11 +35,7 @@ import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
-import {
-  generateCursorUrl,
-  normalizeAngle,
-  rotateResizeCursor,
-} from '../utils.js';
+import { generateCursorUrl, rotateResizeCursor } from '../utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -358,18 +355,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
       surface.updateElement(id, {
         xywh: serializeXYWH(center.x - w / 2, center.y - h / 2, w, h),
-        rotate: normalizeAngle(rotate + delta),
+        rotate: normalizeDegAngle(rotate + delta),
       });
 
       handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
-    const angle = normalizeAngle(delta + _rotate);
+    const angle = normalizeDegAngle(delta + _rotate);
     const { currentRect } = _resizeManager;
     const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
 
     this._rotate = angle;
-    this._selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
+    this._selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
 
     this._updateCursor(delta, true, 'rotate');
   };
