@@ -1453,8 +1453,8 @@ export const EdgelessImageIcon = html`<svg
 
 export const EdgelessConnectorIcon = html`<svg
   width="48"
-  height="45"
-  viewBox="0 0 48 45"
+  height="52"
+  viewBox="0 0 48 52"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >

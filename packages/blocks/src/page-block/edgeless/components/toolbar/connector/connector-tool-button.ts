@@ -52,12 +52,10 @@ export class EdgelessConnectorToolButton extends LitElement {
     :host {
       display: flex;
     }
-
-    edgeless-tool-icon-button svg {
+    edgeless-toolbar-button svg {
       transition: 0.3s ease-in-out;
     }
-
-    edgeless-tool-icon-button:hover svg {
+    edgeless-toolbar-button:hover svg {
       transform: translateY(-8px);
     }
   `;
