@@ -178,8 +178,8 @@ export class EdgelessPageBlockComponent
 
     edgeless-zoom-toolbar {
       position: fixed;
-      bottom: 28px;
-      left: 30px;
+      bottom: 12px;
+      left: 12px;
       z-index: var(--affine-z-index-popover);
     }
   `;
