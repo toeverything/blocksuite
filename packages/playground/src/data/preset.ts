@@ -1,7 +1,4 @@
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '@blocksuite/blocks';
+import { DEFAULT_SHAPE_STROKE_COLOR } from '@blocksuite/blocks';
 import { serializeXYWH, StrokeStyle } from '@blocksuite/phasor';
 import { Text, type Workspace } from '@blocksuite/store';
 

@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { assert } from 'console';
 
 import {
   addBasicConnectorElement,
@@ -328,7 +329,7 @@ test('elbow connector both side attached element with one attach element and oth
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
     [150, -50],
@@ -373,6 +374,45 @@ test('elbow connector both side attached element with all fixed', async ({
     [320, -20],
     [320, 50],
     [300, 50],
+  ]);
+});
+
+test('path #1', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+
+  let start = await toViewCoord(page, [0, 0]);
+  let end = await toViewCoord(page, [100, 100]);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+
+  start = await toViewCoord(page, [300, -100]);
+  end = await toViewCoord(page, [400, 0]);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+
+  start = await toViewCoord(page, [50, 0]);
+  end = await toViewCoord(page, [350, 0]);
+  await addBasicConnectorElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+  assertConnectorPath(page, [
+    [50, 0],
+    [50, -20],
+    [200, -20],
+    [200, 20],
+    [350, 20],
+    [350, 0],
   ]);
 });
 

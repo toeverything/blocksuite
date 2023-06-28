@@ -103,33 +103,34 @@ export class EdgelessConnectorManager {
   private _algorithm: AStarAlgorithm | undefined;
   private _overlay = new OrthogonalOverlay();
   private _connectionOverlay = new ConnectionOverlay();
+  private _connector!: ConnectorElement;
   constructor(private _edgeless: EdgelessPageBlockComponent) {
     this._edgeless.surface.viewport.addOverlay(this._connectionOverlay);
     this._connectionOverlay.surface = this._edgeless.surface;
     // for debug
-    // window.addEventListener('keydown', e => {
-    //   if (e.key === 'ArrowRight') {
-    //     this._algorithm?.step();
-    //     this.updatePath(
-    //       this._connector as ConnectorElement,
-    //       this._algorithm?.path
-    //     );
-    //   }
-    //   if (e.key === 'ArrowLeft') {
-    //     this._algorithm?.run();
-    //     this.updatePath(
-    //       this._connector as ConnectorElement,
-    //       this._algorithm?.path
-    //     );
-    //   }
-    //   if (e.key === 'ArrowDown') {
-    //     this._algorithm?.reset();
-    //     this.updatePath(
-    //       this._connector as ConnectorElement,
-    //       this._algorithm?.path
-    //     );
-    //   }
-    // });
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') {
+        this._algorithm?.step();
+        this.updatePath(
+          this._connector as ConnectorElement,
+          this._algorithm?.path
+        );
+      }
+      if (e.key === 'ArrowLeft') {
+        this._algorithm?.run();
+        this.updatePath(
+          this._connector as ConnectorElement,
+          this._algorithm?.path
+        );
+      }
+      if (e.key === 'ArrowDown') {
+        this._algorithm?.reset();
+        this.updatePath(
+          this._connector as ConnectorElement,
+          this._algorithm?.path
+        );
+      }
+    });
   }
 
   debug(v: boolean) {
@@ -259,6 +260,7 @@ export class EdgelessConnectorManager {
 
   generateConnectorPath(connector: ConnectorElement) {
     const { mode } = connector;
+    this._connector = connector;
     if (mode === ConnectorMode.Straight) {
       return this.generateStraightConnectorPath(connector);
     } else {
@@ -548,6 +550,40 @@ export class EdgelessConnectorManager {
       ]);
     }
 
+    function pushBoundMidPoint(b1: Bound, b2: Bound, eb1: Bound, eb2: Bound) {
+      // find middle
+      if (b1.maxX < b2.x) {
+        const midX = (b1.maxX + b2.x) / 2;
+        [eb1.upperLine, eb1.lowerLine, eb2.upperLine, eb2.lowerLine].forEach(
+          line => {
+            pushLineIntersectsToPoints(
+              line,
+              [
+                [midX, 0],
+                [midX, 1],
+              ],
+              2
+            );
+          }
+        );
+      }
+      if (b1.maxY < b2.y) {
+        const midY = (b1.maxY + b2.y) / 2;
+        [eb1.leftLine, eb1.rightLine, eb2.leftLine, eb2.rightLine].forEach(
+          line => {
+            pushLineIntersectsToPoints(
+              line,
+              [
+                [0, midY],
+                [1, midY],
+              ],
+              2
+            );
+          }
+        );
+      }
+    }
+
     function pushGapMidPoint(
       point: IVec,
       bound: Bound,
@@ -555,6 +591,7 @@ export class EdgelessConnectorManager {
       expandBound: Bound,
       expandBound2: Bound
     ) {
+      /** on top or on bottom */
       if (
         almostEqual(point[1], bound.y, 0.02) ||
         almostEqual(point[1], bound.maxY, 0.02)
@@ -623,6 +660,8 @@ export class EdgelessConnectorManager {
     if (sb && eb && esb && eeb) {
       pushGapMidPoint(osp, sb, eb, esb, eeb);
       pushGapMidPoint(oep, eb, sb, eeb, esb);
+      pushBoundMidPoint(sb, eb, esb, eeb);
+      pushBoundMidPoint(eb, sb, eeb, esb);
     }
 
     if (esb) {
