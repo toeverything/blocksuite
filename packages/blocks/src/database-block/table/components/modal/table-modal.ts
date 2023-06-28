@@ -38,6 +38,7 @@ export class DatabaseTableViewModal extends BlockElement<DatabaseBlockModel> {
     return html`
       <affine-database
         class="affine-block-element"
+        data-block-id=${this.model.id}
         .modalMode=${true}
         .root=${this.root}
         .model=${this.model}

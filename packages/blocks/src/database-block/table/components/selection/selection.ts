@@ -69,11 +69,36 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   isCurrentDatabase(ele: Element): boolean {
-    return ele.closest('affine-database') === this.closest('affine-database');
+    if (!this.isModalMode) {
+      return ele.closest('affine-database') === this.closest('affine-database');
+    }
+
+    return (
+      ele.closest('affine-database') === this.closest('affine-database') &&
+      this.isInModal(ele)
+    );
   }
 
   isInTableBody(ele: Element) {
-    return !!ele.closest('.affine-database-block-rows');
+    if (!this.isModalMode) {
+      return !!ele.closest('.affine-database-block-rows');
+    }
+
+    return !!ele.closest('.affine-database-block-rows') && this.isInModal(ele);
+  }
+
+  get isModalMode() {
+    return (
+      !!document.querySelector('affine-database-table-view-modal') ||
+      !!document.querySelector('affine-database-table-view-full-screen')
+    );
+  }
+
+  isInModal(ele: Element) {
+    return (
+      !!ele.closest('affine-database-table-view-modal') ||
+      !!ele.closest('affine-database-table-view-full-screen')
+    );
   }
 
   /**
@@ -84,6 +109,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   override firstUpdated() {
     this._disposables.add(
       this.service.slots.databaseSelectionUpdated.on(selection => {
+        if (this.isModalMode && !this.isInModal(this)) {
+          return;
+        }
+
         if (selection?.databaseId !== this.databaseId) {
           selection = undefined;
         }
@@ -138,6 +167,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     });
     this._disposables.addFromEvent(window, 'mousedown', event => {
       const target = event.target;
+      if (this.isModalMode && !this.isInModal(this)) {
+        return;
+      }
+
       if (
         !(target instanceof Element) ||
         !(this.isCurrentDatabase(target) && this.isInTableBody(target))

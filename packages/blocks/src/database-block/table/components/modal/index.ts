@@ -28,7 +28,7 @@ export function showDatabaseTableViewModal({
   modal.model = model;
   modal.abortController = abortController;
   // Mount
-  container.appendChild(modal);
+  root.appendChild(modal);
   disposables.add(() => modal.remove());
 
   return modal;
@@ -56,7 +56,7 @@ export function showDatabaseTableViewFullModal({
   modal.model = model;
   modal.abortController = abortController;
   // Mount
-  container.appendChild(modal);
+  root.appendChild(modal);
   disposables.add(() => modal.remove());
 
   return modal;
