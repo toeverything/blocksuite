@@ -5,7 +5,6 @@ import {
   handleNativeRangeAtPoint,
   isEmpty,
   type NoteChildrenFlavour,
-  type NoteChildrenType,
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
@@ -14,7 +13,7 @@ import { DEFAULT_NOTE_WIDTH } from './consts.js';
 
 export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;
-  childType: NoteChildrenType;
+  childType: string | null;
 };
 
 export function addNote(
