@@ -14,7 +14,7 @@ import {
 
 import type { Cell, Column } from '../../database-block/table/types.js';
 import type { PageBlockModel } from '../../models.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
+import { type NoteBlockModel } from '../../note-block/index.js';
 import type {
   BlockServiceInstanceByKey,
   ServiceFlavour,
@@ -172,39 +172,13 @@ export type PanTool = {
   panning: boolean;
 };
 
-export type NoteChildrenFlavour =
-  | 'affine:code'
-  | 'affine:paragraph'
-  | 'affine:list'
-  | 'affine:divider'
-  | 'affine:image'
-  | 'affine:database'
-  | 'affine:bookmark';
-
-export type NoteChildrenType =
-  | 'text'
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'h4'
-  | 'h5'
-  | 'h6'
-  | 'code'
-  | 'quote'
-  | 'divider'
-  | 'image'
-  | 'database'
-  | 'bookmark'
-  | 'bulleted'
-  | 'numbered'
-  | 'todo'
-  | null;
+export type NoteChildrenFlavour = ServiceFlavour;
 
 export type NoteTool = {
   type: 'note';
   background: CssVariableName;
   childFlavour: NoteChildrenFlavour;
-  childType: NoteChildrenType;
+  childType: string | null;
 };
 
 export type ConnectorTool = {

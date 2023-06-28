@@ -1,123 +1,22 @@
 import {
-  BulletedListIcon,
-  CodeBlockIcon,
-  H1Icon,
-  H2Icon,
-  H3Icon,
-  H4Icon,
-  H5Icon,
-  H6Icon,
-  NumberedListIcon,
-  QuoteIcon,
-  TextIcon,
-  TodoIcon,
+  BLOCKHUB_LIST_ITEMS,
+  BLOCKHUB_TEXT_ITEMS,
 } from '@blocksuite/global/config';
-import { type TemplateResult } from 'lit';
 
-import {
-  type NoteChildrenFlavour,
-  type NoteChildrenType,
-} from '../../../../../__internal__/index.js';
+import type { NoteChildrenFlavour } from '../../../../../__internal__/index.js';
 
 export const BUTTON_GROUP_LENGTH = 10;
 
-type ButtonConfig = {
-  icon: TemplateResult<1>;
-  tooltip: string;
-  childFlavour: NoteChildrenFlavour;
-  childType: NoteChildrenType;
-};
+// TODO: add image, bookmark, database blocks
+export const NOTE_MENU_ITEMS = BLOCKHUB_TEXT_ITEMS.concat(BLOCKHUB_LIST_ITEMS)
+  .filter(item => item.name !== 'Divider')
+  .map(item => {
+    return {
+      icon: item.icon,
+      tooltip: item.tooltip.replace('Drag/Click to insert ', ''),
+      childFlavour: item.flavour as NoteChildrenFlavour,
+      childType: item.type,
+    };
+  });
 
-export const ButtonConfigs: ButtonConfig[] = [
-  {
-    icon: TextIcon,
-    tooltip: 'Text Block',
-    childFlavour: 'affine:paragraph',
-    childType: 'text',
-  },
-  {
-    icon: H1Icon,
-    tooltip: 'Heading 1',
-    childFlavour: 'affine:paragraph',
-    childType: 'h1',
-  },
-  {
-    icon: H2Icon,
-    tooltip: 'Heading 2',
-    childFlavour: 'affine:paragraph',
-    childType: 'h2',
-  },
-  {
-    icon: H3Icon,
-    tooltip: 'Heading 3',
-    childFlavour: 'affine:paragraph',
-    childType: 'h3',
-  },
-  {
-    icon: H4Icon,
-    tooltip: 'Heading 4',
-    childFlavour: 'affine:paragraph',
-    childType: 'h4',
-  },
-  {
-    icon: H5Icon,
-    tooltip: 'Heading 5',
-    childFlavour: 'affine:paragraph',
-    childType: 'h5',
-  },
-  {
-    icon: H6Icon,
-    tooltip: 'Heading 6',
-    childFlavour: 'affine:paragraph',
-    childType: 'h6',
-  },
-  {
-    icon: CodeBlockIcon,
-    tooltip: 'Code Block',
-    childFlavour: 'affine:code',
-    childType: null,
-  },
-  {
-    icon: QuoteIcon,
-    tooltip: 'Quote',
-    childFlavour: 'affine:paragraph',
-    childType: 'quote',
-  },
-  {
-    icon: BulletedListIcon,
-    tooltip: 'Bulleted List',
-    childFlavour: 'affine:list',
-    childType: 'bulleted',
-  },
-  {
-    icon: NumberedListIcon,
-    tooltip: 'Numbered List',
-    childFlavour: 'affine:list',
-    childType: 'numbered',
-  },
-  {
-    icon: TodoIcon,
-    tooltip: 'Todo List',
-    childFlavour: 'affine:list',
-    childType: 'todo',
-  },
-  // TODO: Add these blocks later
-  // {
-  //   icon: ImageIcon,
-  //   tooltip: 'Image',
-  //   childFlavour: 'affine:image',
-  //   childType: 'image',
-  // },
-  // {
-  //   icon: BookmarkIcon,
-  //   tooltip: 'Bookmark',
-  //   childFlavour: 'affine:bookmark',
-  //   childType: 'bookmark',
-  // },
-  // {
-  //   icon: DatabaseTableViewIcon,
-  //   tooltip: 'Database',
-  //   childFlavour: 'affine:database',
-  //   childType: 'database',
-  // },
-];
+export const NOTE_MENU_ITEM_LENGTH = NOTE_MENU_ITEMS.length;

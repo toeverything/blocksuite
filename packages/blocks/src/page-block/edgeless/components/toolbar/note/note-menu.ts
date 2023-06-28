@@ -5,10 +5,13 @@ import { customElement, property } from 'lit/decorators.js';
 import type {
   EdgelessTool,
   NoteChildrenFlavour,
-  NoteChildrenType,
 } from '../../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { BUTTON_GROUP_LENGTH, ButtonConfigs } from './note-memu-config.js';
+import {
+  BUTTON_GROUP_LENGTH,
+  NOTE_MENU_ITEM_LENGTH,
+  NOTE_MENU_ITEMS,
+} from './note-memu-config.js';
 @customElement('edgeless-note-menu')
 export class EdgelessNoteMenu extends LitElement {
   static override styles = css`
@@ -109,7 +112,7 @@ export class EdgelessNoteMenu extends LitElement {
 
   private _updateNoteTool(
     childFlavour: NoteChildrenFlavour,
-    childType: NoteChildrenType
+    childType: string | null
   ) {
     if (this.edgelessTool.type !== 'note') return;
 
@@ -125,14 +128,14 @@ export class EdgelessNoteMenu extends LitElement {
   private _setNoteBlockType(
     index: number,
     childFlavour: NoteChildrenFlavour,
-    childType: NoteChildrenType
+    childType: string | null
   ) {
     this._activeIndex = index;
     this._updateNoteTool(childFlavour, childType);
   }
 
   private _activeNextItem() {
-    if (this._activeIndex >= ButtonConfigs.length - 1) return;
+    if (this._activeIndex >= NOTE_MENU_ITEMS.length - 1) return;
 
     this._activeIndex += 1;
     if (this._activeIndex >= this._endIndex) {
@@ -140,8 +143,8 @@ export class EdgelessNoteMenu extends LitElement {
       this._endIndex += 1;
     }
 
-    const childFlavour = ButtonConfigs[this._activeIndex].childFlavour;
-    const childType = ButtonConfigs[this._activeIndex].childType;
+    const childFlavour = NOTE_MENU_ITEMS[this._activeIndex].childFlavour;
+    const childType = NOTE_MENU_ITEMS[this._activeIndex].childType;
     this._updateNoteTool(childFlavour, childType);
   }
 
@@ -150,13 +153,13 @@ export class EdgelessNoteMenu extends LitElement {
     // prevent edgeless page block from scrolling
     e.stopPropagation();
     // prevent scrolling when the menu is at the end (right edge)
-    if (this._activeIndex >= ButtonConfigs.length - 1 && e.deltaY > 0) return;
+    if (this._activeIndex >= NOTE_MENU_ITEM_LENGTH - 1 && e.deltaY > 0) return;
     // prevent scrolling when the menu is at the start (left edge)
     if (this._activeIndex <= 0 && e.deltaY < 0) return;
     // when scrolling down, increase the active index
     if (e.deltaY > 0) {
       this._activeIndex++;
-    } else {
+    } else if (e.deltaY < 0) {
       // when scrolling up, decrease the active index
       this._activeIndex--;
     }
@@ -172,8 +175,10 @@ export class EdgelessNoteMenu extends LitElement {
       this._endIndex = this._startIndex + BUTTON_GROUP_LENGTH;
     }
 
-    const childFlavour = ButtonConfigs[this._activeIndex].childFlavour;
-    const childType = ButtonConfigs[this._activeIndex].childType;
+    if (this._activeIndex < 0 || this._activeIndex >= NOTE_MENU_ITEM_LENGTH)
+      return;
+    const childFlavour = NOTE_MENU_ITEMS[this._activeIndex].childFlavour;
+    const childType = NOTE_MENU_ITEMS[this._activeIndex].childType;
 
     // debounce the update of the note tool
     this._wheelTimer && clearTimeout(this._wheelTimer);
@@ -184,21 +189,21 @@ export class EdgelessNoteMenu extends LitElement {
 
   // get currnet visible button group
   private _getMenuButtons(start: number, end: number) {
-    return ButtonConfigs.slice(start, end).map((button, index) => {
+    return NOTE_MENU_ITEMS.slice(start, end).map((item, index) => {
       return html`
         <div class="menu-button">
           <edgeless-tool-icon-button
             .active=${this._activeIndex === start + index}
             .activeMode=${'background'}
-            .tooltip=${button.tooltip}
+            .tooltip=${item.tooltip}
             @click=${() =>
               this._setNoteBlockType(
                 start + index,
-                button.childFlavour,
-                button.childType
+                item.childFlavour,
+                item.childType
               )}
           >
-            ${button.icon}
+            ${item.icon}
           </edgeless-tool-icon-button>
           ${this._activeIndex === start + index
             ? html`<div class="active-item-rect"></div>`
