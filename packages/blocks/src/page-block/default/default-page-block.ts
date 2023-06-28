@@ -39,7 +39,7 @@ import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { DraggingArea } from './components.js';
-import { DefaultSelectionManager } from './selection-manager/index.js';
+import type { DefaultPageService } from './default-page-service.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
 export interface DefaultSelectionSlots {
@@ -57,7 +57,7 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends BlockElement<PageBlockModel>
+  extends BlockElement<PageBlockModel, DefaultPageService>
   implements BlockHost
 {
   static override styles = css`
@@ -126,8 +126,6 @@ export class DefaultPageBlockComponent
 
   clipboard = new PageClipboard(this);
 
-  selection!: DefaultSelectionManager;
-
   getService = getService;
 
   lastSelectionPosition: SelectionPosition = 'start';
@@ -140,6 +138,10 @@ export class DefaultPageBlockComponent
   };
 
   mouseRoot!: HTMLElement;
+
+  get selection() {
+    return this.service?.selection;
+  }
 
   @state()
   private _draggingArea: DOMRect | null = null;
@@ -180,6 +182,7 @@ export class DefaultPageBlockComponent
 
   get innerRect() {
     const { left, width } = this.pageBlockContainer.getBoundingClientRect();
+    assertExists(this.selection);
     const { clientHeight, top } = this.selection.state.viewport;
     return Rect.fromLWTH(
       left,
@@ -290,6 +293,7 @@ export class DefaultPageBlockComponent
 
   // TODO: disable it on scroll's threshold
   private _onWheel = (e: WheelEvent) => {
+    assertExists(this.selection);
     const { selection } = this;
     const { state } = selection;
     const { type, viewport } = state;
@@ -331,6 +335,7 @@ export class DefaultPageBlockComponent
   };
 
   private _onScroll = (e: Event) => {
+    assertExists(this.selection);
     const { selection } = this;
     const { type, viewport } = selection.state;
     const { scrollLeft, scrollTop } = e.target as Element;
@@ -424,13 +429,19 @@ export class DefaultPageBlockComponent
   private _initSlotEffects() {
     const { slots } = this;
 
-    slots.draggingAreaUpdated.on(rect => {
-      this._draggingArea = rect;
-    });
-    slots.selectedRectsUpdated.on(rects => {
-      this._selectedRects = rects;
-    });
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._disposables.add(
+      slots.draggingAreaUpdated.on(rect => {
+        this._draggingArea = rect;
+      })
+    );
+    this._disposables.add(
+      slots.selectedRectsUpdated.on(rects => {
+        this._selectedRects = rects;
+      })
+    );
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
   }
 
   private _initNoteSizeEffect() {
@@ -446,8 +457,8 @@ export class DefaultPageBlockComponent
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
           if (target === this.viewportElement) {
-            this.selection.updateViewport();
-            this.selection.updateRects();
+            this.selection?.updateViewport();
+            this.selection?.updateRects();
             break;
           }
         }
@@ -472,6 +483,7 @@ export class DefaultPageBlockComponent
     );
     this._disposables.add(() => hotkey.deleteScope(scope));
     hotkey.withScope(scope, () => {
+      assertExists(selection);
       bindHotkeys(page, selection);
     });
     hotkey.enableHotkey();
@@ -493,13 +505,7 @@ export class DefaultPageBlockComponent
     this.clipboard.init(this.page);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
-    this.selection = new DefaultSelectionManager({
-      page: this.page,
-      mouseRoot: this.mouseRoot,
-      slots: this.slots,
-      container: this,
-      dispatcher: this.root.uiEventDispatcher,
-    });
+    this.service?.mountSelectionManager(this, this.slots);
   }
 
   override disconnectedCallback() {
@@ -509,23 +515,23 @@ export class DefaultPageBlockComponent
     this.components.dragHandle?.remove();
 
     removeHotkeys();
-    this.selection.clear();
-    this.selection.dispose();
+    this.service?.unmountSelectionManager();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
     this.mouseRoot.removeEventListener('wheel', this._onWheel);
     this.viewportElement.removeEventListener('scroll', this._onScroll);
+    this._disposables.dispose();
   }
 
   override render() {
     requestAnimationFrame(() => {
-      this.selection.refreshRemoteSelection();
+      this.service?.selection?.refreshRemoteSelection();
     });
 
     const { selection } = this;
-    const { viewportOffset } = selection.state;
+    const viewportOffset = selection?.state.viewportOffset;
 
     const draggingArea = DraggingArea(this._draggingArea);
     const isEmpty =

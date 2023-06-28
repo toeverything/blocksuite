@@ -89,7 +89,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     const pageBlock = getPageBlock(this.model);
     assertExists(pageBlock);
     if (pageBlock instanceof DefaultPageBlockComponent) {
-      pageBlock.selection.selectOneBlock(this);
+      pageBlock.selection?.selectOneBlock(this);
     }
   }
 

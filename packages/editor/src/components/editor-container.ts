@@ -86,7 +86,7 @@ export class EditorContainer
       if (!pageModel) return;
 
       if (this.mode === 'page') {
-        getPageBlock(pageModel)?.selection.clear();
+        getPageBlock(pageModel)?.selection?.clear();
       }
 
       const selection = getSelection();
