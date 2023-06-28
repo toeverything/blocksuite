@@ -242,11 +242,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _forceUpdateSelection(
-    delta: { x: number; y: number },
-    dragging = false
+    type: DefaultModeDragType,
+    dragging = false,
+    delta = { x: 0, y: 0 }
   ) {
     this._edgeless.slots.selectedRectUpdated.emit({
-      type: 'move',
+      type: type === DefaultModeDragType.Selecting ? 'select' : 'move',
       delta,
       dragging,
     });
@@ -432,6 +433,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const blocks = pickBlocksByBound(this._blocks, bound);
         const elements = this._surface.pickByBound(bound);
         this._setSelectionState([...blocks, ...elements], false);
+
+        this._forceUpdateSelection(this.dragType, true);
         break;
       }
       case DefaultModeDragType.AltCloning:
@@ -465,13 +468,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         });
 
         // FIXME: we need to add align offset
-        this._forceUpdateSelection(
-          {
-            x: e.delta.x / zoom,
-            y: e.delta.y / zoom,
-          },
-          true
-        );
+        this._forceUpdateSelection(this.dragType, true, {
+          x: e.delta.x / zoom,
+          y: e.delta.y / zoom,
+        });
         break;
       }
       case DefaultModeDragType.NativeEditing: {
@@ -510,12 +510,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       });
     }
 
+    this._forceUpdateSelection(this.dragType);
     this.dragType = DefaultModeDragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
     this._edgeless.snap.cleanupAlignables();
-    this._forceUpdateSelection({ x: 0, y: 0 }, false);
   }
 
   onContainerMouseMove(e: PointerEventState) {

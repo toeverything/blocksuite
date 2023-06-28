@@ -96,19 +96,14 @@ export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
   selectionUpdated: Slot<EdgelessSelectionState>;
-  selectedRectUpdated: Slot<
-    | {
-        type: 'move';
-        delta: {
-          x: number;
-          y: number;
-        };
-        dragging: boolean;
-      }
-    | {
-        type: 'resize';
-      }
-  >;
+  selectedRectUpdated: Slot<{
+    type: 'move' | 'select' | 'resize';
+    delta?: {
+      x: number;
+      y: number;
+    };
+    dragging?: boolean;
+  }>;
   surfaceUpdated: Slot;
   edgelessToolUpdated: Slot<EdgelessTool>;
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
@@ -240,19 +235,14 @@ export class EdgelessPageBlockComponent
     viewportUpdated: new Slot(),
     selectedBlocksUpdated: new Slot<BlockComponentElement[]>(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
-    selectedRectUpdated: new Slot<
-      | {
-          type: 'move';
-          delta: {
-            x: number;
-            y: number;
-          };
-          dragging: boolean;
-        }
-      | {
-          type: 'resize';
-        }
-    >(),
+    selectedRectUpdated: new Slot<{
+      type: 'move' | 'select' | 'resize';
+      delta?: {
+        x: number;
+        y: number;
+      };
+      dragging?: boolean;
+    }>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),

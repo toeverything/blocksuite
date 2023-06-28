@@ -20,8 +20,8 @@ import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
-import { contains, getCommonBound } from './utils/bound.js';
-import { intersects } from './utils/math-utils.js';
+import { Bound, contains, getCommonBound } from './utils/bound.js';
+import { getQuadBoundsWithRotation } from './utils/math-utils.js';
 import {
   generateElementId,
   generateKeyBetween,
@@ -292,7 +292,20 @@ export class SurfaceManager {
   pickByBound(bound: IBound): SurfaceElement[] {
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: SurfaceElement) => {
-      return contains(bound, element) || intersects(bound, element);
+      return (
+        contains(
+          bound,
+          Bound.fromDOMRect(getQuadBoundsWithRotation(element))
+        ) ||
+        [
+          [bound.x, bound.y],
+          [bound.x + bound.w, bound.y],
+          [bound.x + bound.w, bound.y + bound.h],
+          [bound.x, bound.y + bound.h],
+        ].some((point, i, points) =>
+          element.intersectWithLine(point, points[(i + 1) % points.length])
+        )
+      );
     });
 
     return picked;

@@ -1,5 +1,7 @@
-import { Bound } from '../../utils/bound.js';
-import { linePolygonIntersects } from '../../utils/math-utils.js';
+import {
+  getPointsFromBoundsWithRotation,
+  linePolygonIntersects,
+} from '../../utils/math-utils.js';
 import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
@@ -32,11 +34,8 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override intersectWithLine(start: IVec, end: IVec): boolean {
-    return !!linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(this.xywh).points
-    );
+    const points = getPointsFromBoundsWithRotation(this);
+    return !!linePolygonIntersects(start, end, points);
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {

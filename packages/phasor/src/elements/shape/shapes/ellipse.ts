@@ -79,13 +79,15 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
+    const rad = (element.rotate * Math.PI) / 180;
     const bound = Bound.deserialize(element.xywh);
     return !!lineEllipseIntersects(
       start,
       end,
       bound.center,
       bound.w / 2,
-      bound.h / 2
+      bound.h / 2,
+      rad
     );
   },
 };

@@ -82,7 +82,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height: 18px;
       box-sizing: border-box;
       z-index: 10;
-      pointer-events: none;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label^='top-'] .resize,
@@ -94,7 +93,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       border-radius: 50%;
       border: 2px var(--affine-blue) solid;
       background: white;
-      pointer-events: auto;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label^='top-'] .rotate,
@@ -104,7 +102,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height: 12px;
       box-sizing: border-box;
       background: transparent;
-      pointer-events: auto;
     }
 
     :host([disabled='true']) .affine-edgeless-selected-rect .handle {
@@ -505,13 +502,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         } = this;
 
         switch (action.type) {
+          case 'select': {
+            const { dragging } = action;
+            this.setAttribute('disabled', dragging ? 'true' : 'false');
+            break;
+          }
           case 'move': {
             const { delta, dragging } = action;
+            this.setAttribute('disabled', dragging ? 'true' : 'false');
 
-            const { left, top } = _resizeManager.updateRect(delta);
-            const [x, y] = surface.toViewCoord(left, top);
-
-            _selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
+            if (delta) {
+              const { left, top } = _resizeManager.updateRect(delta);
+              const [x, y] = surface.toViewCoord(left, top);
+              _selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
+            }
 
             if (dragging) {
               this._computeComponentToolbarPosition();

@@ -1,6 +1,5 @@
 import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { Bound } from '../../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
@@ -98,10 +97,7 @@ export const RectMethods: ShapeMethods = {
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
-    return !!linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(element.xywh).points
-    );
+    const points = getPointsFromBoundsWithRotation(element);
+    return !!linePolygonIntersects(start, end, points);
   },
 };

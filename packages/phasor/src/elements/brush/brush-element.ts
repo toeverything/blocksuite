@@ -46,24 +46,24 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return lineWidth;
   }
 
-  intersectWithLine(pa: IVec, pb: IVec) {
+  intersectWithLine(start: IVec, end: IVec) {
     const { points } = this;
 
     const box = Bound.deserialize(this.xywh);
     const tl = box.tl;
 
     if (box.w < 8 && box.h < 8) {
-      return Vec.distanceToLineSegment(pa, pb, box.center) < 5;
+      return Vec.distanceToLineSegment(start, end, box.center) < 5;
     }
 
-    if (box.intersectLine(pa, pb, true)) {
+    if (box.intersectLine(start, end, true)) {
       for (let i = 1; i < points.length; i++) {
         if (
           lineIntersects(
             Vec.add(points[i - 1], tl),
             Vec.add(points[i], tl),
-            pa,
-            pb
+            start,
+            end
           )
         ) {
           return true;
