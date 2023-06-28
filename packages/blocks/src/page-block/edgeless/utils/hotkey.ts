@@ -24,7 +24,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
-} from '../utils.js';
+} from './consts.js';
 import { isTopLevelBlock } from './query.js';
 
 function setEdgelessTool(

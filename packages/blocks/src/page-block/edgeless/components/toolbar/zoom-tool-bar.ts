@@ -8,9 +8,9 @@ import {
   clamp,
   type EdgelessTool,
   Point,
+  stopPropagation,
 } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { stopPropagation } from '../../utils.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 

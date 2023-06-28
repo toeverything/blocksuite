@@ -4,12 +4,18 @@ import { assertExists, type Page } from '@blocksuite/store';
 import {
   handleNativeRangeAtPoint,
   isEmpty,
+  type NoteChildrenFlavour,
+  type NoteChildrenType,
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { NoteOptions } from '../utils.js';
 import { DEFAULT_NOTE_WIDTH } from './consts.js';
+
+export type NoteOptions = {
+  childFlavour: NoteChildrenFlavour;
+  childType: NoteChildrenType;
+};
 
 export function addNote(
   edgeless: EdgelessPageBlockComponent,
