@@ -1,4 +1,5 @@
 import '../buttons/tool-icon-button.js';
+import '../buttons/toolbar-button.js';
 import './shape/shape-tool-button.js';
 import './brush/brush-tool-button.js';
 import './connector/connector-tool-button.js';
@@ -14,7 +15,7 @@ import {
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
@@ -67,19 +68,35 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       margin: 0 7px;
       background-color: var(--affine-border-color);
     }
-    .eraser-button svg {
-      transform: translateY(3px);
+    .eraser-button {
+      position: relative;
+      height: 72px;
+      width: 40px;
+      overflow-y: hidden;
+    }
+    #edgeless-eraser-icon {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: top 0.3s ease-in-out;
+    }
+    #edgeless-eraser-icon:hover {
+      top: 6px;
+    }
+    .edgeless-right-part {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 8px;
     }
     .transform-button svg {
-      transition: 0.2s ease-in-out;
+      transition: 0.3s ease-in-out;
     }
     .transform-button:hover svg {
       transform: translateY(-8px);
     }
   `;
-
-  @query('.edgeless-eraser-icon')
-  private _eraserIcon!: SVGElement;
 
   edgeless: EdgelessPageBlockComponent;
 
@@ -186,49 +203,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   };
 
-  private _handleMouseEnter() {
-    this._eraserIcon.setAttribute('viewBox', '0 0 38 60');
-  }
-
-  private _handleMouseLeave() {
-    this._eraserIcon.setAttribute('viewBox', '0 0 38 52');
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    const observer = new MutationObserver(() => {
-      // add mouse hover event to pen icon
-      this._eraserIcon.addEventListener(
-        'mouseenter',
-        this._handleMouseEnter.bind(this)
-      );
-      this._eraserIcon.addEventListener(
-        'mouseleave',
-        this._handleMouseLeave.bind(this)
-      );
-      observer.disconnect();
-    });
-
-    if (!this.shadowRoot) return;
-    observer.observe(this.shadowRoot, { childList: true });
-  }
-
-  override disconnectedCallback() {
-    this._eraserIcon.removeEventListener(
-      'mouseenter',
-      this._handleMouseEnter.bind(this)
-    );
-    this._eraserIcon.removeEventListener(
-      'mouseleave',
-      this._handleMouseLeave.bind(this)
-    );
-    super.disconnectedCallback();
-  }
-
-  private iconButtonStyles = `
-    --hover-color: transparent;
-  `;
-
   override render() {
     const { type } = this.edgelessTool;
 
@@ -266,46 +240,44 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-brush-tool-button>
-        <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
-          class="eraser-button"
+        <edgeless-toolbar-button
           .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
           .active=${type === 'eraser'}
           .activeMode=${'background'}
           @click=${() => this.setEdgelessTool({ type: 'eraser' })}
         >
-          ${EdgelessEraserIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
-          class="transform-button"
-          .tooltip=${getTooltipWithShortcut('Text', 'T')}
-          .active=${type === 'text'}
-          .activeMode=${'background'}
-          @click=${() => this.setEdgelessTool({ type: 'text' })}
-        >
-          ${EdgelessTextIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-shape-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-shape-tool-button>
-        <edgeless-tool-icon-button
-          style=${this.iconButtonStyles}
-          class="transform-button"
-          .disabled=${this._imageLoading}
-          .activeMode=${'background'}
-          .tooltip=${'Image'}
-          @click=${() => this._addImage()}
-        >
-          ${EdgelessImageIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-connector-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-connector-tool-button>
+          <div class="eraser-button">${EdgelessEraserIcon}</div>
+        </edgeless-toolbar-button>
+        <div class="edgeless-right-part">
+          <edgeless-toolbar-button
+            class="transform-button"
+            .tooltip=${getTooltipWithShortcut('Text', 'T')}
+            .active=${type === 'text'}
+            .activeMode=${'background'}
+            @click=${() => this.setEdgelessTool({ type: 'text' })}
+          >
+            ${EdgelessTextIcon}
+          </edgeless-toolbar-button>
+          <edgeless-shape-tool-button
+            .edgelessTool=${this.edgelessTool}
+            .edgeless=${this.edgeless}
+            .setEdgelessTool=${this.setEdgelessTool}
+          ></edgeless-shape-tool-button>
+          <edgeless-toolbar-button
+            class="transform-button"
+            .disabled=${this._imageLoading}
+            .activeMode=${'background'}
+            .tooltip=${'Image'}
+            @click=${() => this._addImage()}
+          >
+            ${EdgelessImageIcon}
+          </edgeless-toolbar-button>
+          <edgeless-connector-tool-button
+            .edgelessTool=${this.edgelessTool}
+            .edgeless=${this.edgeless}
+            .setEdgelessTool=${this.setEdgelessTool}
+          ></edgeless-connector-tool-button>
+        </div>
       </div>
     `;
   }

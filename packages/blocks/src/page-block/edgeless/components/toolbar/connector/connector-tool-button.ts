@@ -1,4 +1,4 @@
-import '../../buttons/tool-icon-button.js';
+import '../../buttons/toolbar-button.js';
 import './connector-menu.js';
 
 import { EdgelessConnectorIcon } from '@blocksuite/global/config';
@@ -54,7 +54,7 @@ export class EdgelessConnectorToolButton extends LitElement {
     }
 
     edgeless-tool-icon-button svg {
-      transition: 0.2s ease-in-out;
+      transition: 0.3s ease-in-out;
     }
 
     edgeless-tool-icon-button:hover svg {
@@ -72,10 +72,6 @@ export class EdgelessConnectorToolButton extends LitElement {
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   private _menu: ConnectorMenuPopper | null = null;
-
-  private iconButtonStyles = `
-    --hover-color: transparent;
-  `;
 
   private _toggleMenu() {
     if (this._menu) {
@@ -111,8 +107,7 @@ export class EdgelessConnectorToolButton extends LitElement {
     const type = this.edgelessTool?.type;
 
     return html`
-      <edgeless-tool-icon-button
-        style=${this.iconButtonStyles}
+      <edgeless-toolbar-button
         .tooltip=${'Connector'}
         .active=${type === 'connector'}
         .activeMode=${'background'}
@@ -126,7 +121,7 @@ export class EdgelessConnectorToolButton extends LitElement {
         }}
       >
         ${EdgelessConnectorIcon}
-      </edgeless-tool-icon-button>
+      </edgeless-toolbar-button>
     `;
   }
 }

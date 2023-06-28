@@ -19,7 +19,7 @@ export class EdgelessToolIconButton extends LitElement {
     }
 
     .icon-container:hover {
-      background: var(--hover-color, var(--affine-hover-color));
+      background: var(--affine-hover-color);
     }
 
     .icon-container.active-mode-color[active] {

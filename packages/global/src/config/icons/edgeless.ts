@@ -582,10 +582,10 @@ export const ArrowUpIcon = html`<svg
 export const EdgelessPenIcon = html`<svg
   width="22"
   height="66"
-  viewBox="0 4 22 50"
+  viewBox="0 0 22 66"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
-  class="edgeless-pen-icon"
+  id="edgeless-pen-icon"
 >
   <rect y="50" width="22" height="53" fill="url(#paint0_linear_5690_125889)" />
   <path
@@ -670,10 +670,10 @@ export const EdgelessPenIcon = html`<svg
 export const EdgelessEraserIcon = html`<svg
   width="38"
   height="66"
-  viewBox="0 0 38 52"
+  viewBox="0 0 38 66"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
-  class="edgeless-eraser-icon"
+  id="edgeless-eraser-icon"
 >
   <g filter="url(#filter0_dd_5690_125897)">
     <g filter="url(#filter1_i_5690_125897)">
