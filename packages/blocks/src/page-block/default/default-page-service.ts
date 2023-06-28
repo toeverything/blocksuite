@@ -15,7 +15,7 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     slots: DefaultSelectionSlots
   ) {
     if (this.selection) {
-      console.error('selection manager already exists');
+      this.unmountSelectionManager();
       return;
     }
     this.selection = new DefaultSelectionManager({
@@ -27,7 +27,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
 
   unmountSelectionManager() {
     if (!this.selection) {
-      console.error('selection manager does not exist');
       return;
     }
 

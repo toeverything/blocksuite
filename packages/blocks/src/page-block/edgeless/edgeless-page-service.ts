@@ -27,4 +27,9 @@ export class EdgelessPageService extends BlockService<PageBlockModel> {
     this.selection.dispose();
     this.selection = null;
   }
+
+  override unmounted() {
+    super.unmounted();
+    this.unmountSelectionManager();
+  }
 }
