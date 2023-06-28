@@ -101,16 +101,15 @@ function simplifyDouglasPeucker(points: Point[], sqTolerance: number) {
 
 // both algorithms combined for awesome performance
 export function simplifyPath(
-  points: Point[],
+  vecs: number[][],
   tolerance = 0,
   highestQuality?: boolean
 ) {
-  if (points.length <= 2) return points;
-
+  if (vecs.length <= 2) return vecs;
+  let points = vecs.map(p => ({ x: p[0], y: p[1] }));
   const sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;
 
   points = highestQuality ? points : simplifyRadialDist(points, sqTolerance);
   points = simplifyDouglasPeucker(points, sqTolerance);
-
-  return points;
+  return points.map(p => [p.x, p.y]);
 }

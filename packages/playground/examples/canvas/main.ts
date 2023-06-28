@@ -93,8 +93,8 @@ function addConnectorElements(surface: SurfaceManager) {
     surface.addElement('connector', {
       controllers,
       strokeStyle: StrokeStyle.Solid,
-      lineWidth: 4,
-      color: '#000',
+      strokeWidth: 4,
+      stroke: '#000',
       mode: ConnectorMode.Orthogonal,
     });
   }

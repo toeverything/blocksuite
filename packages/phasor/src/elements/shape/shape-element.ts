@@ -4,7 +4,15 @@ import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
+
 export class ShapeElement extends SurfaceElement<IShape> {
+  override getNearestPoint(point: IVec): IVec {
+    return ShapeMethodsMap[this.shapeType].getNearestPoint(point, this);
+  }
+
+  override intersectWithLine(p1: IVec, p2: IVec) {
+    return ShapeMethodsMap[this.shapeType].intersectWithLine(p1, p2, this);
+  }
   get shapeType() {
     const shapeType = this.yMap.get('shapeType') as IShape['shapeType'];
     return shapeType;
@@ -57,10 +65,6 @@ export class ShapeElement extends SurfaceElement<IShape> {
   override hitTest(x: number, y: number, options?: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
     return hitTest(x, y, this, options);
-  }
-
-  override intersectWithLine(start: IVec, end: IVec): boolean {
-    return ShapeMethodsMap[this.shapeType].intersectWithLine(start, end, this);
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {

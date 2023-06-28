@@ -10,6 +10,7 @@ import { BlockElement } from '@blocksuite/lit';
 import {
   Bound,
   compare,
+  ConnectorElement,
   deserializeXYWH,
   generateKeyBetween,
   generateNKeysBetween,
@@ -75,6 +76,7 @@ import {
   type ZoomAction,
 } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
+import { EdgelessConnectorManager } from './connector-manager.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -220,6 +222,7 @@ export class EdgelessPageBlockComponent
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
+    elementDimensionsUpdated: new Slot<string>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -239,6 +242,8 @@ export class EdgelessPageBlockComponent
   }
 
   snap!: EdgelessSnapManager;
+
+  connector!: EdgelessConnectorManager;
 
   // Gets the top level notes.
   get notes() {
@@ -292,6 +297,34 @@ export class EdgelessPageBlockComponent
       }
       return value;
     });
+
+    this._disposables.add(
+      this.surface.slots.elementAdded.on(id => {
+        const element = this.surface.pickById(id);
+        if (element && element instanceof ConnectorElement) {
+          this.connector.updatePath(element);
+        }
+      })
+    );
+
+    this._disposables.add(
+      this.surface.slots.elementPropertyUpdated.on(({ id, properties }) => {
+        if ('xywh' in properties) {
+          this.slots.elementDimensionsUpdated.emit(id);
+        }
+        const element = this.surface.pickById(id);
+        if (element instanceof ConnectorElement) {
+          if (
+            'target' in properties ||
+            'source' in properties ||
+            'mode' in properties
+          ) {
+            this.connector.updatePath(element as ConnectorElement);
+          }
+        }
+      })
+    );
+
     this._disposables.add(
       listenToThemeChange(this, () => {
         this.surface.refresh();
@@ -367,7 +400,29 @@ export class EdgelessPageBlockComponent
     // this.model.children.forEach(note => {
     //   note.propsUpdated.on(() => this.selection.syncDraggingArea());
     // });
-    const { _disposables, slots } = this;
+    const { _disposables, slots, page } = this;
+    _disposables.add(
+      page.slots.blockUpdated.on(e => {
+        if (e.type === 'update') {
+          const block = page.getBlockById(e.id);
+          if (block && block.flavour === 'affine:note' && 'xywh' in e.props) {
+            this.slots.elementDimensionsUpdated.emit(e.id);
+          }
+        }
+      })
+    );
+
+    _disposables.add(
+      slots.elementDimensionsUpdated.on(id => {
+        const element =
+          this.surface.pickById(id) ??
+          <TopLevelBlockModel>page.getBlockById(id);
+        if (element) {
+          this.connector.syncConnectorPos([element]);
+        }
+      })
+    );
+
     _disposables.add(
       slots.viewportUpdated.on(() => {
         const prevZoom = this.style.getPropertyValue('--affine-zoom');
@@ -929,6 +984,7 @@ export class EdgelessPageBlockComponent
       this._initSurface();
       this.service?.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
+      this.connector = new EdgelessConnectorManager(this);
     }
     if (changedProperties.has('edgelessTool')) {
       this.selection.edgelessTool = this.edgelessTool;
@@ -947,6 +1003,10 @@ export class EdgelessPageBlockComponent
   }
 
   override firstUpdated() {
+    // for debug
+    this.page.getBlockByFlavour('affine:note').forEach(note => {
+      this.page.deleteBlock(note);
+    });
     this._initSlotEffects();
     this._initDragHandle();
     this._initResizeEffect();
@@ -1127,6 +1187,7 @@ export class EdgelessPageBlockComponent
                 .state=${state}
                 .slots=${this.slots}
                 .surface=${surface}
+                .edgeless=${this}
               ></edgeless-selected-rect>
             `
           : nothing}

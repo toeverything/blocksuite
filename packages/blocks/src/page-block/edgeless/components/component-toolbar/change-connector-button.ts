@@ -41,8 +41,8 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
   elements: ConnectorElement[]
-): CssVariableName | null {
-  const colors = countBy(elements, (ele: ConnectorElement) => ele.color);
+): CssVariableName | undefined {
+  const colors = countBy(elements, (ele: ConnectorElement) => ele.stroke);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
@@ -57,7 +57,7 @@ function getMostCommonLineWidth(
   elements: ConnectorElement[]
 ): LineSizeButtonProps['size'] | null {
   const sizes = countBy(elements, (ele: ConnectorElement) => {
-    return ele.lineWidth === 4 ? 's' : 'l';
+    return ele.strokeWidth === 4 ? 's' : 'l';
   });
   const max = maxBy(Object.entries(sizes), ([k, count]) => count);
   return max ? (max[0] as LineSizeButtonProps['size']) : null;
@@ -188,59 +188,27 @@ export class EdgelessChangeConnectorButton extends LitElement {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.mode !== mode) {
-        if (element.mode === ConnectorMode.Orthogonal) {
-          const controllers = [
-            element.controllers[0],
-            element.controllers[element.controllers.length - 1],
-          ].map(c => {
-            return {
-              ...c,
-              x: c.x + element.x,
-              y: c.y + element.y,
-            };
-          });
-
-          this.surface.updateElement<'connector'>(element.id, {
-            controllers,
-            mode,
-          });
-        } else {
-          const { start, end } = getConnectorAttachedInfo(
-            element,
-            this.surface,
-            this.page
-          );
-          const route = generateConnectorPath(
-            start.rect,
-            end.rect,
-            start.point,
-            end.point,
-            []
-          );
-
-          this.surface.updateElement<'connector'>(element.id, {
-            controllers: route,
-            mode,
-          });
-        }
+        this.surface.updateElement<'connector'>(element.id, {
+          mode,
+        });
       }
     });
     this._forceUpdateSelection();
   }
 
-  private _setConnectorColor(color: CssVariableName) {
+  private _setConnectorColor(stroke: CssVariableName) {
     this.page.captureSync();
     this.elements.forEach(element => {
-      if (element.color !== color) {
-        this.surface.updateElement<'connector'>(element.id, { color });
+      if (element.stroke !== stroke) {
+        this.surface.updateElement<'connector'>(element.id, { stroke });
       }
     });
   }
 
-  private _setShapeStrokeWidth(lineWidth: number) {
+  private _setShapeStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
       this.surface.updateElement<'connector'>(ele.id, {
-        lineWidth,
+        strokeWidth,
       });
     });
     this._forceUpdateSelection();

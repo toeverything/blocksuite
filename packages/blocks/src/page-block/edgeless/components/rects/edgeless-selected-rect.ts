@@ -16,7 +16,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type {
+  EdgelessPageBlockComponent,
+  EdgelessSelectionSlots,
+} from '../../edgeless-page-block.js';
 import { NOTE_MIN_HEIGHT, NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import {
   getSelectableBounds,
@@ -163,6 +166,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
   @query('.affine-edgeless-selected-rect')
   private _selectedRect!: HTMLDivElement;
 
@@ -238,7 +244,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           surface.setElementBound(element.id, bound);
         }
       }
-      handleElementChangedEffectForConnector(element, [element], surface, page);
+      // handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
     this.requestUpdate();
@@ -343,8 +349,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       selected.length === 1 && selected[0].type === 'connector'
         ? SingleConnectorHandles(
             selected[0] as ConnectorElement,
-            this.surface,
-            this.page,
+            this.edgeless,
             () => {
               this.slots.selectionUpdated.emit({ ...state });
             }

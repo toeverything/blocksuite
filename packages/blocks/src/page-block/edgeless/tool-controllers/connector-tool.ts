@@ -1,16 +1,10 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { Rectangle } from '@blocksuite/connector';
 import { assertExists } from '@blocksuite/global/utils';
-import { deserializeXYWH, StrokeStyle } from '@blocksuite/phasor';
+import type { Connection, ConnectorElement, IVec } from '@blocksuite/phasor';
+import { StrokeStyle } from '@blocksuite/phasor';
 
 import type { ConnectorTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import {
-  generateConnectorPath,
-  getAttachedPoint,
-} from '../components/connector/utils.js';
-import { getXYWH, pickBy } from '../utils/query.js';
-import type { Selectable, SelectionArea } from '../utils/selection-manager.js';
 import { EdgelessToolController } from './index.js';
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
@@ -18,22 +12,9 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     type: 'connector',
   };
 
-  private _draggingElementId: string | null = null;
-
-  protected override _draggingArea: SelectionArea | null = null;
-  private _draggingStartElement: Selectable | null = null;
-  private _draggingStartRect: Rectangle | null = null;
-  // must assign value when dragging start
-  private _draggingStartPoint!: { x: number; y: number };
-
-  private _pickBy(
-    x: number,
-    y: number,
-    filter: (element: Selectable) => boolean
-  ) {
-    const { surface } = this._edgeless;
-    return pickBy(surface, this._page, x, y, filter);
-  }
+  private _connector: ConnectorElement | undefined = undefined;
+  private _source: Connection | undefined = undefined;
+  private _startPoint: IVec | undefined = undefined;
 
   onContainerClick(e: PointerEventState): void {
     noop();
@@ -51,129 +32,62 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     noop();
   }
 
+  onContainerPointerDown(e: PointerEventState): void {
+    this._startPoint = this._surface.viewport.toModelCoord(e.x, e.y);
+    this._source = this._edgeless.connector.searchConnection(this._startPoint);
+  }
+
   onContainerDragStart(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
-
+    assertExists(this._source);
+    assertExists(this._startPoint);
     this._page.captureSync();
-    const { viewport } = this._edgeless.surface;
     const { mode, color } = this.tool;
-
-    // create a block when drag start
-    const [modelX, modelY] = viewport.toModelCoord(e.x, e.y);
-
-    this._draggingStartElement = this._pickBy(
-      e.x,
-      e.y,
-      ele => ele.type !== 'connector'
-    );
-    this._draggingStartRect = this._draggingStartElement
-      ? new Rectangle(...deserializeXYWH(getXYWH(this._draggingStartElement)))
-      : null;
-
-    const { point: startPoint, position: startPosition } = getAttachedPoint(
-      modelX,
-      modelY,
-      this._draggingStartRect
-    );
-
-    this._draggingStartPoint = startPoint;
-
-    const id = this._surface.addElement('connector', {
-      color,
+    const { _surface } = this;
+    const id = _surface.addElement('connector', {
+      stroke: color,
       mode,
-      controllers: [
-        { x: modelX, y: modelY },
-        { x: modelX + 1, y: modelY + 1 },
-      ],
-      lineWidth: 4,
+      controllers: [],
+      strokeWidth: 2,
       strokeStyle: StrokeStyle.Solid,
-      startElement:
-        this._draggingStartElement && startPosition
-          ? {
-              id: this._draggingStartElement.id,
-              position: startPosition,
-            }
-          : undefined,
+      source: this._source,
+      target: { position: this._startPoint },
     });
-    this._draggingElementId = id;
-
-    this._draggingArea = {
-      start: new DOMPoint(e.x, e.y),
-      end: new DOMPoint(e.x, e.y),
-    };
-
+    this._connector = _surface.pickById(id) as unknown as ConnectorElement;
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: PointerEventState) {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
 
-    assertExists(this._draggingElementId);
-    assertExists(this._draggingArea);
-
-    const { viewport } = this._edgeless.surface;
-    const { mode } = this.tool;
-
-    this._draggingArea.end = new DOMPoint(e.x, e.y);
-
-    const id = this._draggingElementId;
-
-    const startX = this._draggingStartPoint.x;
-    const startY = this._draggingStartPoint.y;
-
-    const [endModelX, endModelY] = viewport.toModelCoord(e.x, e.y);
-    const end = this._pickBy(
-      e.x,
-      e.y,
-      ele => ele.id !== id && ele.type !== 'connector'
-    );
-    const endRect =
-      end && end.id !== id
-        ? new Rectangle(...deserializeXYWH(getXYWH(end)))
-        : null;
-
-    const {
-      point: { x: endX, y: endY },
-      position: endPosition,
-    } = getAttachedPoint(endModelX, endModelY, endRect);
-
-    const routes = generateConnectorPath(
-      this._draggingStartRect,
-      endRect,
-      { x: startX, y: startY },
-      { x: endX, y: endY },
-      [],
-      mode
-    );
-
-    this._surface.updateElement<'connector'>(id, {
-      controllers: routes,
-      endElement:
-        end && endPosition ? { id: end.id, position: endPosition } : undefined,
-    });
-
+    assertExists(this._connector);
+    const { connector } = this._edgeless;
+    const { viewport } = this._surface;
+    const point = viewport.toModelCoord(e.x, e.y);
+    const target = connector.searchConnection(
+      point,
+      this._connector.source.id ? [this._connector.source.id] : []
+    ) as Connection;
+    this._surface.updateElement<'connector'>(this._connector.id, { target });
     this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragEnd(e: PointerEventState) {
-    const id = this._draggingElementId;
-    assertExists(id);
-
-    this._draggingElementId = null;
-    this._draggingArea = null;
-
+    assertExists(this._connector);
+    this._edgeless.connector.clear();
     this._page.captureSync();
-
-    const element = this._surface.pickById(id);
-    assertExists(element);
     this._edgeless.selection.switchToDefaultMode({
-      selected: [element],
+      selected: [this._connector],
       active: false,
     });
+    this._connector = undefined;
   }
 
   onContainerMouseMove(e: PointerEventState) {
-    noop();
+    const { connector, surface } = this._edgeless;
+    const { viewport } = surface;
+    const point = viewport.toModelCoord(e.x, e.y);
+    connector.searchConnection(point);
   }
 
   onContainerMouseOut(e: PointerEventState) {
@@ -189,6 +103,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   }
 
   afterModeSwitch() {
-    noop();
+    this._edgeless.connector.clear();
   }
 }

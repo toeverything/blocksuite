@@ -16,6 +16,10 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   private _draggingElementId: string | null = null;
   protected _draggingPathPoints: number[][] | null = null;
 
+  onContainerPointerDown(e: PointerEventState): void {
+    noop();
+  }
+
   onContainerClick(e: PointerEventState): void {
     noop();
   }

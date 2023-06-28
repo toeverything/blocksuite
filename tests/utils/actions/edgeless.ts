@@ -437,6 +437,16 @@ export async function deleteAll(page: Page) {
   await pressBackspace(page);
 }
 
+export async function deleteAllConnectors(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    container.surface.getElementsByType('connector').forEach(c => {
+      container.surface.removeElement(c.id);
+    });
+  });
+}
+
 export function locatorComponentToolbar(page: Page) {
   return page.locator('edgeless-component-toolbar');
 }
@@ -713,4 +723,37 @@ export async function initThreeNotes(page: Page) {
   await addNote(page, 'abc', 30 + 100, 40 + 100);
   await addNote(page, 'efg', 30 + 130, 40 + 200);
   await addNote(page, 'hij', 30 + 160, 40 + 300);
+}
+
+export async function toViewCoord(page: Page, point: number[]) {
+  return await page.evaluate(point => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.viewport.toViewCoord(point[0], point[1]);
+  }, point);
+}
+
+export async function toModelCoord(page: Page, point: number[]) {
+  return await page.evaluate(point => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.viewport.toModelCoord(point[0], point[1]);
+  }, point);
+}
+
+export async function getConnectorSourceConnection(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElementsByType('connector')[0].source;
+  });
+}
+
+export async function getConnectorPath(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    const connectors = container.surface.getElementsByType('connector');
+    return connectors[0].absolutePath;
+  });
 }

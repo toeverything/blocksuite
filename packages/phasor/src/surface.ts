@@ -1,12 +1,12 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import {
-  ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
   type IElementCreateProps,
+  type IElementUpdateProps,
   type IPhasorElementType,
   type PhasorElement,
   type PhasorElementType,
@@ -40,12 +40,23 @@ export class SurfaceManager {
   private _renderer: Renderer;
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
-  private _bindings = new Map<id, Set<id>>();
   private _elementLocalRecords = new Map<id, ElementLocalRecords>();
 
   private _computedValue: ComputedValue;
 
   indexes = { min: 'a0', max: 'a0' };
+  slots = {
+    elementPropertyUpdated: new Slot<{
+      id: id;
+      properties:
+        | IElementUpdateProps<'shape'>
+        | IElementUpdateProps<'connector'>
+        | IElementUpdateProps<'brush'>
+        | IElementUpdateProps<'shape'>;
+    }>(),
+    elementAdded: new Slot<id>(),
+    elementRemoved: new Slot<id>(),
+  };
 
   constructor(
     yContainer: Y.Map<unknown>,
@@ -61,26 +72,6 @@ export class SurfaceManager {
 
   get viewport(): SurfaceViewport {
     return this._renderer;
-  }
-
-  private _addBinding(id0: string, id1: string) {
-    if (!this._bindings.has(id0)) {
-      this._bindings.set(id0, new Set());
-    }
-    this._bindings.get(id0)?.add(id1);
-  }
-
-  private _updateBindings(element: SurfaceElement) {
-    if (element instanceof ConnectorElement) {
-      if (element.startElement) {
-        this._addBinding(element.startElement.id, element.id);
-        this._addBinding(element.id, element.startElement.id);
-      }
-      if (element.endElement) {
-        this._addBinding(element.endElement.id, element.id);
-        this._addBinding(element.id, element.endElement.id);
-      }
-    }
   }
 
   private _syncFromExistingContainer() {
@@ -101,8 +92,6 @@ export class SurfaceManager {
         } else if (element.index < this.indexes.min) {
           this.indexes.min = element.index;
         }
-
-        this._updateBindings(element);
       });
     });
   }
@@ -132,13 +121,13 @@ export class SurfaceManager {
         if (element.index > this.indexes.max) {
           this.indexes.max = element.index;
         }
-
-        this._updateBindings(element);
+        this.slots.elementAdded.emit(id);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
       } else if (type.action === 'delete') {
         const element = this._elements.get(id);
         assertExists(element);
+        element.xywh;
         element.unmount();
         this._elements.delete(id);
         this.deleteElementLocalRecord(id);
@@ -146,6 +135,7 @@ export class SurfaceManager {
         if (element.index === this.indexes.min) {
           this.indexes.min = generateKeyBetween(element.index, null);
         }
+        this.slots.elementRemoved.emit(id);
       }
     });
   };
@@ -225,7 +215,7 @@ export class SurfaceManager {
 
   updateElement<T extends keyof IPhasorElementType>(
     id: string,
-    properties: IElementCreateProps<T>
+    properties: IElementUpdateProps<T>
   ) {
     this._transact(() => {
       const element = this._elements.get(id);
@@ -302,16 +292,6 @@ export class SurfaceManager {
     return this.pickByBound(this.viewport.viewportBounds).sort(compare);
   }
 
-  getBindingElements(id: string) {
-    const bindingIds = this._bindings.get(id);
-    if (!bindingIds?.size) {
-      return [];
-    }
-    return [...bindingIds.values()]
-      .map(bindingId => this.pickById(bindingId))
-      .filter(e => !!e) as SurfaceElement[];
-  }
-
   dispose() {
     this._yContainer.unobserve(this._onYContainer);
   }
@@ -337,6 +317,14 @@ export class SurfaceManager {
 
   getElements() {
     return [...this._elements.values()];
+  }
+
+  getElementsByType<T extends keyof IPhasorElementType>(
+    type: T
+  ): IPhasorElementType[T][] {
+    return this.getElements().filter(
+      element => element.type === type
+    ) as unknown as IPhasorElementType[T][];
   }
 
   updateElementLocalRecord(id: id, records: Partial<ElementLocalRecords>) {

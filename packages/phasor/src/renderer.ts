@@ -4,11 +4,11 @@ import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { RoughCanvas } from './rough/canvas.js';
+import { Bound } from './index.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
-import { Vec } from './utils/vec.js';
-
+import { type IVec, Vec } from './utils/vec.js';
 export interface SurfaceViewport {
   readonly left: number;
   readonly top: number;
@@ -26,10 +26,12 @@ export interface SurfaceViewport {
 
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
+  clientToModelCoord(vec: Vec): IVec;
 
   setCenter(centerX: number, centerY: number): void;
   setZoom(zoom: number, focusPoint?: IPoint): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
+  isInViewport(bound: Bound): boolean;
 
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
@@ -68,6 +70,10 @@ export class Renderer implements SurfaceViewport {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.rc = new RoughCanvas(canvas);
+  }
+  clientToModelCoord(vec: IVec): IVec {
+    const rect = this._container.getBoundingClientRect();
+    return this.toModelCoord(vec[0] - rect.left, vec[1] - rect.top);
   }
 
   get left() {
@@ -135,6 +141,14 @@ export class Renderer implements SurfaceViewport {
       w: viewportMaxXY.x - viewportMinXY.x,
       h: viewportMaxXY.y - viewportMinXY.y,
     };
+  }
+
+  isInViewport(bound: Bound) {
+    const viewportBounds = Bound.from(this.viewportBounds);
+    return (
+      viewportBounds.contains(bound) ||
+      viewportBounds.isIntersectWithBound(bound)
+    );
   }
 
   toModelCoord(viewX: number, viewY: number): [number, number] {

@@ -72,14 +72,18 @@ export const EllipseMethods: ShapeMethods = {
         );
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
     const bound = Bound.deserialize(element.xywh);
-    return !!lineEllipseIntersects(
+    return lineEllipseIntersects(
       start,
       end,
       bound.center,
       bound.w / 2,
       bound.h / 2
     );
+  },
+
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    return point;
   },
 };

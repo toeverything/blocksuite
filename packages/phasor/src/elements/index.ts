@@ -70,6 +70,10 @@ export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
   Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
 >;
 
+export type IElementUpdateProps<T extends keyof IPhasorElementType> = Partial<
+  Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'type'>
+>;
+
 export type IElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
   IPhasorElementType[T],
   'id' | 'index' | 'seed'

@@ -22,7 +22,6 @@
     "yjs": "^13"
   },
   "dependencies": {
-    "@blocksuite/connector": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
