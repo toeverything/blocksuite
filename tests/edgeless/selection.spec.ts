@@ -68,7 +68,7 @@ test('should update rect of selection when resizing viewport', async ({
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 });
 
-test.only('select multiple shapes and resize', async ({ page }) => {
+test('select multiple shapes and resize', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 

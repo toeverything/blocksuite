@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BrushTool } from '../../../__internal__/index.js';
+import type { BrushTool, EdgelessTool } from '../../../__internal__/index.js';
 import { BrushSize, noop } from '../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessToolController } from './index.js';
@@ -108,11 +108,12 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     noop();
   }
 
-  afterModeSwitch() {
-    this._tryLoadBrushStateLocalRecord();
+  afterModeSwitch(newTool: EdgelessTool) {
+    this._tryLoadBrushStateLocalRecord(newTool);
   }
 
-  private _tryLoadBrushStateLocalRecord() {
+  private _tryLoadBrushStateLocalRecord(tool: EdgelessTool) {
+    if (tool.type !== 'brush') return;
     const key = 'blocksuite:' + this._edgeless.page.id + ':edgelessBrush';
     const brushData = sessionStorage.getItem(key);
     if (brushData) {
