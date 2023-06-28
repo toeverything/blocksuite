@@ -26,7 +26,7 @@ class ColumnManager {
     (columnData: any) => [any, (cell: any) => any]
   >();
 
-  private getColumn(type: string) {
+  getColumn(type: string) {
     const column = this.map.get(type);
     if (!column) {
       throw new Error(`${type} is not exist`);
@@ -70,14 +70,6 @@ class ColumnManager {
 
   defaultData(type: string) {
     return this.getColumn(type)?.defaultData();
-  }
-
-  getHelper(targetType: string) {
-    const column = this.map.get(targetType);
-    if (!column) {
-      throw new Error(`${targetType} is not exist`);
-    }
-    return column;
   }
 
   typeOf(type: string, data: unknown): TType {

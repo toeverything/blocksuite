@@ -776,13 +776,13 @@ export class HtmlParser {
             columnMeta[index + 1].optionsMap.set(option.value, option.id)
           );
           return columnManager
-            .getHelper(value.type)
+            .getColumn(value.type)
             .createWithId('' + id++, value.title, {
               options,
             });
         }
         return columnManager
-          .getHelper(value.type)
+          .getColumn(value.type)
           .createWithId('' + id++, value.title);
       });
       if (rows.length > 0) {
