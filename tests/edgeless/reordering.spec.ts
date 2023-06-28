@@ -38,7 +38,7 @@ test.describe('reordering shapes', () => {
     await assertEdgelessSelectedRect(page, [130, 130, 100, 100]);
 
     // should be rect0
-    await page.mouse.click(120, 120);
+    await page.mouse.click(110, 130);
     await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
     // bring rect0 to front
