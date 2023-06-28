@@ -17,6 +17,7 @@ import {
   moveToImage,
   pressEnter,
   redoByKeyboard,
+  switchEditorMode,
   type,
   undoByKeyboard,
   waitNextFrame,
@@ -61,6 +62,10 @@ test('can drag resize image by right menu', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
   await assertRichImage(page, 1);
+
+  // can drag resize after switch editor mode
+  await switchEditorMode(page);
+  await switchEditorMode(page);
 
   await activeEmbed(page);
   await assertRichDragButton(page);
