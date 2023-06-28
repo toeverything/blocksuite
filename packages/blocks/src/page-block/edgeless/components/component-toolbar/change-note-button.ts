@@ -72,14 +72,22 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       background: var(--affine-blue-600);
       border-radius: 4px;
       color: var(--affine-white);
+      font-size: 12px;
+      font-family: Avenir Next;
+      font-weight: 600;
+      line-height: 16px;
     }
 
     .note-status > span {
-      width: 12px;
-      height: 16px;
-      font-weight: 600;
-      font-size: 12px;
-      line-height: 16px;
+      display: flex;
+      padding: 4px 6px;
+      width: 24px;
+      flex-direction: column;
+    }
+
+    .note-status.hidden > span {
+      display: flex;
+      padding: 4px;
     }
 
     .note-status-button {
@@ -222,7 +230,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (note.hidden) {
       return html`
-        <div class="note-status hidden">${HiddenIcon}</div>
+        <div class="note-status hidden"><span>${HiddenIcon}</span></div>
         <div
           @click=${() => this._setNoteHidden(note, !note.hidden)}
           class="note-status-button"
