@@ -67,8 +67,11 @@ export class BlockElement<
   @property({ attribute: false })
   page!: Page;
 
-  @property({ attribute: false })
-  service!: Service;
+  get service(): Service | undefined {
+    return this.root.blockStore.getService(this.model.flavour) as
+      | Service
+      | undefined;
+  }
 
   // TODO: remove this
   focusBlock(focusContext: FocusCtx): boolean {

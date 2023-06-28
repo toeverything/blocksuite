@@ -140,9 +140,7 @@ export class DefaultPageBlockComponent
   mouseRoot!: HTMLElement;
 
   get selection() {
-    const selection = this.service.selection;
-    assertExists(selection, 'Selection should be initialized before used');
-    return selection;
+    return this.service?.selection;
   }
 
   @state()
@@ -184,6 +182,7 @@ export class DefaultPageBlockComponent
 
   get innerRect() {
     const { left, width } = this.pageBlockContainer.getBoundingClientRect();
+    assertExists(this.selection);
     const { clientHeight, top } = this.selection.state.viewport;
     return Rect.fromLWTH(
       left,
@@ -294,6 +293,7 @@ export class DefaultPageBlockComponent
 
   // TODO: disable it on scroll's threshold
   private _onWheel = (e: WheelEvent) => {
+    assertExists(this.selection);
     const { selection } = this;
     const { state } = selection;
     const { type, viewport } = state;
@@ -335,6 +335,7 @@ export class DefaultPageBlockComponent
   };
 
   private _onScroll = (e: Event) => {
+    assertExists(this.selection);
     const { selection } = this;
     const { type, viewport } = selection.state;
     const { scrollLeft, scrollTop } = e.target as Element;
@@ -456,8 +457,8 @@ export class DefaultPageBlockComponent
       (entries: ResizeObserverEntry[]) => {
         for (const { target } of entries) {
           if (target === this.viewportElement) {
-            this.selection.updateViewport();
-            this.selection.updateRects();
+            this.selection?.updateViewport();
+            this.selection?.updateRects();
             break;
           }
         }
@@ -482,6 +483,7 @@ export class DefaultPageBlockComponent
     );
     this._disposables.add(() => hotkey.deleteScope(scope));
     hotkey.withScope(scope, () => {
+      assertExists(selection);
       bindHotkeys(page, selection);
     });
     hotkey.enableHotkey();
@@ -503,7 +505,7 @@ export class DefaultPageBlockComponent
     this.clipboard.init(this.page);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
-    this.service.mountSelectionManager(this, this.slots);
+    this.service?.mountSelectionManager(this, this.slots);
   }
 
   override disconnectedCallback() {
@@ -513,7 +515,7 @@ export class DefaultPageBlockComponent
     this.components.dragHandle?.remove();
 
     removeHotkeys();
-    this.service.unmountSelectionManager();
+    this.service?.unmountSelectionManager();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
@@ -525,11 +527,11 @@ export class DefaultPageBlockComponent
 
   override render() {
     requestAnimationFrame(() => {
-      this.service.selection?.refreshRemoteSelection();
+      this.service?.selection?.refreshRemoteSelection();
     });
 
     const { selection } = this;
-    const { viewportOffset } = selection.state;
+    const viewportOffset = selection?.state.viewportOffset;
 
     const draggingArea = DraggingArea(this._draggingArea);
     const isEmpty =
