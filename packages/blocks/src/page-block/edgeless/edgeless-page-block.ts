@@ -230,7 +230,7 @@ export class EdgelessPageBlockComponent
   getService = getService;
 
   get selection() {
-    const selection = this.service.selection;
+    const selection = this.service?.selection;
     assertExists(selection, 'Selection should be initialized before used');
     return selection;
   }
@@ -827,7 +827,7 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
-      this.service.mountSelectionManager(this);
+      this.service?.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
     }
     if (changedProperties.has('edgelessTool')) {
@@ -954,7 +954,7 @@ export class EdgelessPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
-    this.service.unmountSelectionManager();
+    this.service?.unmountSelectionManager();
   }
 
   override render() {
