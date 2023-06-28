@@ -1,7 +1,7 @@
 import {
   Bound,
   deserializeXYWH,
-  getQuadBoundsWithRotation,
+  getBoundsWithRotation,
   Overlay,
 } from '@blocksuite/phasor';
 
@@ -45,6 +45,12 @@ export class EdgelessSnapManager extends Overlay {
    */
   private _distributedAlignLines: [Point, Point][] = [];
 
+  private _getBoundsWithRotationByAlignable(alignable: Alignable) {
+    const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
+    const [x, y, w, h] = deserializeXYWH(alignable.xywh);
+    return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
+  }
+
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
     const { page, surface } = this.container;
@@ -57,40 +63,18 @@ export class EdgelessSnapManager extends Overlay {
 
     this._alignableBounds = [];
     (<Alignable[]>[...notes, ...phasorElements]).forEach(alignable => {
-      const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
-      const [x, y, w, h] = deserializeXYWH(alignable.xywh);
-      const bound = Bound.fromDOMRect(
-        getQuadBoundsWithRotation({
-          x,
-          y,
-          w,
-          h,
-          rotate,
-        })
-      );
-
+      const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
-        viewportBounds.isIntersectWithBound(bound) &&
+        viewportBounds.isIntersectWithBound(bounds) &&
         !alignables.includes(alignable)
       ) {
-        this._alignableBounds.push(bound);
+        this._alignableBounds.push(bounds);
       }
     });
 
     return alignables.reduce((prev, element) => {
-      const rotate = isTopLevelBlock(element) ? 0 : element.rotate;
-      const [x, y, w, h] = deserializeXYWH(element.xywh);
-      return prev.unite(
-        Bound.fromDOMRect(
-          getQuadBoundsWithRotation({
-            x,
-            y,
-            w,
-            h,
-            rotate,
-          })
-        )
-      );
+      const bounds = this._getBoundsWithRotationByAlignable(element);
+      return prev.unite(bounds);
     }, Bound.deserialize(alignables[0].xywh));
   }
 

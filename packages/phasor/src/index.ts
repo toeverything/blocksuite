@@ -20,6 +20,7 @@ export { Overlay, Renderer } from './renderer.js';
 export * from './surface.js';
 export * from './utils/bound.js';
 export {
+  getBoundsWithRotation,
   getQuadBoundsWithRotation,
   intersects,
   isPointIn,
