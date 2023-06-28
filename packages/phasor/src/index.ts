@@ -6,11 +6,7 @@ export {
   ZOOM_MIN,
   ZOOM_STEP,
 } from './consts.js';
-export type {
-  // AttachedElement,
-  // AttachedElementPosition,
-  Controller,
-} from './elements/connector/types.js';
+export type { Controller } from './elements/connector/types.js';
 export { type Connection, ConnectorMode } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';
 export * from './elements/index.js';

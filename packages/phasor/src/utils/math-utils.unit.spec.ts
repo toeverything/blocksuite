@@ -19,11 +19,6 @@ describe('Line', () => {
     expect(rst).toMatchObject([10, 5]);
   });
 
-  it.only('test', () => {
-    const rst = lineIntersects([0, 0], [1, 0], [0.5, 0], [0.5, 1]);
-    console.log(rst);
-  });
-
   it('should not intersect', () => {
     const rst = lineIntersects([0, 0], [1, 0], [0, 1], [1, 1]);
     expect(rst).toBeNull();

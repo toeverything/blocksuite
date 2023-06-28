@@ -23,12 +23,8 @@ import {
   type TopLevelBlockModel,
 } from '../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import type { Selectable } from './selection-manager.js';
-import { isTopLevelBlock } from './utils.js';
-
-const randomColor = () => {
-  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-};
+import { isTopLevelBlock } from './utils/query.js';
+import type { Selectable } from './utils/selection-manager.js';
 class OrthogonalOverlay extends Overlay {
   points: IVec[] = [];
   bounds: Bound[] = [];
@@ -53,16 +49,13 @@ class OrthogonalOverlay extends Overlay {
       ctx.beginPath();
       ctx.rect(b.x, b.y, b.w, b.h);
       ctx.setLineDash([1, 1]);
-      ctx.strokeStyle = randomColor();
+      ctx.strokeStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
       ctx.lineWidth = 4;
       ctx.stroke();
     });
   }
 }
 
-function clone(a: IVec[]) {
-  return a.map(p => [...p]);
-}
 export class ConnectionOverlay extends Overlay {
   surface!: SurfaceManager;
   points: IVec[] = [];
@@ -107,51 +100,51 @@ export class ConnectionOverlay extends Overlay {
 }
 
 export class EdgelessConnectorManager {
-  algorithm: AStarAlgorithm | undefined;
-  connector: ConnectorElement | undefined;
-  _overlay = new OrthogonalOverlay();
-  _connectionOverlay = new ConnectionOverlay();
+  private _algorithm: AStarAlgorithm | undefined;
+  private _overlay = new OrthogonalOverlay();
+  private _connectionOverlay = new ConnectionOverlay();
   constructor(private _edgeless: EdgelessPageBlockComponent) {
     this._edgeless.surface.viewport.addOverlay(this._connectionOverlay);
     this._connectionOverlay.surface = this._edgeless.surface;
-    window.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight') {
-        this.algorithm?.step();
-        this.updatePath(
-          this.connector as ConnectorElement,
-          this.algorithm?.path
-        );
-      }
-      if (e.key === 'ArrowLeft') {
-        this.algorithm?.run();
-        this.updatePath(
-          this.connector as ConnectorElement,
-          this.algorithm?.path
-        );
-      }
-      if (e.key === 'ArrowDown') {
-        this.algorithm?.reset();
-        this.updatePath(
-          this.connector as ConnectorElement,
-          this.algorithm?.path
-        );
-      }
-    });
+    // for debug
+    // window.addEventListener('keydown', e => {
+    //   if (e.key === 'ArrowRight') {
+    //     this._algorithm?.step();
+    //     this.updatePath(
+    //       this._connector as ConnectorElement,
+    //       this._algorithm?.path
+    //     );
+    //   }
+    //   if (e.key === 'ArrowLeft') {
+    //     this._algorithm?.run();
+    //     this.updatePath(
+    //       this._connector as ConnectorElement,
+    //       this._algorithm?.path
+    //     );
+    //   }
+    //   if (e.key === 'ArrowDown') {
+    //     this._algorithm?.reset();
+    //     this.updatePath(
+    //       this._connector as ConnectorElement,
+    //       this._algorithm?.path
+    //     );
+    //   }
+    // });
   }
 
   debug(v: boolean) {
     if (v) {
       this._edgeless.surface.viewport.addOverlay(this._overlay);
-      this.algorithm?.overlay &&
-        this._edgeless.surface.viewport.addOverlay(this.algorithm?.overlay);
+      this._algorithm?.overlay &&
+        this._edgeless.surface.viewport.addOverlay(this._algorithm?.overlay);
     } else {
       this._edgeless.surface.viewport.removeOverlay(this._overlay);
-      this.algorithm?.overlay &&
-        this._edgeless.surface.viewport.removeOverlay(this.algorithm?.overlay);
+      this._algorithm?.overlay &&
+        this._edgeless.surface.viewport.removeOverlay(this._algorithm?.overlay);
     }
   }
 
-  public searchConnection(point: IVec, excludedIds: string[] = []) {
+  searchConnection(point: IVec, excludedIds: string[] = []) {
     const { _connectionOverlay } = this;
     const { surface, page } = this._edgeless;
     const { viewport } = surface;
@@ -205,7 +198,7 @@ export class EdgelessConnectorManager {
     };
   }
 
-  public clear() {
+  clear() {
     this._connectionOverlay.points = [];
     this._connectionOverlay.highlightPoint = undefined;
     this._connectionOverlay.rect = undefined;
@@ -223,7 +216,7 @@ export class EdgelessConnectorManager {
     }
   }
 
-  public updateConnection(
+  updateConnection(
     connector: ConnectorElement,
     point: IVec,
     connection: 'source' | 'target'
@@ -238,7 +231,7 @@ export class EdgelessConnectorManager {
     });
   }
 
-  public updatePath(connector: ConnectorElement, path?: IVec[]) {
+  updatePath(connector: ConnectorElement, path?: IVec[]) {
     const { surface } = this._edgeless;
     const points = path ?? this.generateConnectorPath(connector) ?? [];
     const bound = getBoundFromPoints(points);
@@ -248,7 +241,7 @@ export class EdgelessConnectorManager {
     surface.refresh();
   }
 
-  public updateXYWH(connector: ConnectorElement, bound: Bound) {
+  updateXYWH(connector: ConnectorElement, bound: Bound) {
     const { surface } = this._edgeless;
 
     const oldBound = Bound.deserialize(connector.xywh);
@@ -264,7 +257,7 @@ export class EdgelessConnectorManager {
     surface.updateElement<'connector'>(connector.id, updates);
   }
 
-  public generateConnectorPath(connector: ConnectorElement) {
+  generateConnectorPath(connector: ConnectorElement) {
     const { mode } = connector;
     if (mode === ConnectorMode.Straight) {
       return this.generateStraightConnectorPath(connector);
@@ -273,7 +266,7 @@ export class EdgelessConnectorManager {
     }
   }
 
-  public generateStraightConnectorPath(connector: ConnectorElement) {
+  generateStraightConnectorPath(connector: ConnectorElement) {
     const { source, target } = connector;
     if (source.id && !source.position && target.id && !target.position) {
       const start = this._getConnectorEndElement(
@@ -313,7 +306,7 @@ export class EdgelessConnectorManager {
     return rst;
   }
 
-  public generateOrthogonalConnector(connector: ConnectorElement) {
+  generateOrthogonalConnector(connector: ConnectorElement) {
     const start = this._getConnectorEndElement(
       connector,
       'source'
@@ -434,7 +427,7 @@ export class EdgelessConnectorManager {
       eb
     );
     this._overlay.points = finalPoints;
-    this.connector = connector;
+
     if (!end) {
       if (
         Math.abs(endPoint[0] - startPoint[0]) >
@@ -455,7 +448,7 @@ export class EdgelessConnectorManager {
         startPoint[1] -= sign(endPoint[1] - startPoint[1]);
       }
     }
-    this.algorithm = new AStarAlgorithm(
+    this._algorithm = new AStarAlgorithm(
       finalPoints,
       nextStartPoint,
       lastEndPoint,
@@ -464,8 +457,8 @@ export class EdgelessConnectorManager {
       blocks,
       expandBlocks
     );
-    this.algorithm.run();
-    let path = this.algorithm.path;
+    this._algorithm.run();
+    let path = this._algorithm.path;
     if (!end) path.pop();
     if (!start) path.shift();
 
@@ -503,8 +496,8 @@ export class EdgelessConnectorManager {
           true
         );
       } catch (e) {
-        console.log(clone(points));
-        console.log(clone(rst));
+        console.log(points);
+        console.log(rst);
       }
     }
     return rst;
@@ -790,7 +783,7 @@ export class EdgelessConnectorManager {
     return point;
   }
 
-  public getAnchors(ele: Connectable) {
+  getAnchors(ele: Connectable) {
     const b = Bound.deserialize(ele.xywh);
     const offset = 10;
     const anchors: { point: IVec; coord: IVec }[] = [];
@@ -812,7 +805,7 @@ export class EdgelessConnectorManager {
     return anchors;
   }
 
-  public getNearestAnchor(ele: Connectable, point: IVec) {
+  getNearestAnchor(ele: Connectable, point: IVec) {
     const anchors = this.getAnchors(ele);
     return this.closestPoint(
       anchors.map(a => a.point),
@@ -838,7 +831,7 @@ export class EdgelessConnectorManager {
     }
   }
 
-  public isConnectorAndBindingsAllSelected(
+  isConnectorAndBindingsAllSelected(
     connector: ConnectorElement,
     selected: Selectable[]
   ) {
@@ -864,14 +857,14 @@ export class EdgelessConnectorManager {
     return false;
   }
 
-  public syncConnectorPos(selected: Connectable[]) {
+  syncConnectorPos(selected: Connectable[]) {
     const connectors = this.getConnecttedConnectors(selected);
     connectors.forEach(connector => {
       this.updatePath(connector);
     });
   }
 
-  public getConnecttedConnectors(elements: Connectable[]) {
+  getConnecttedConnectors(elements: Connectable[]) {
     const { surface } = this._edgeless;
     const ids = new Set(elements.map(e => e.id));
     const connectors = surface

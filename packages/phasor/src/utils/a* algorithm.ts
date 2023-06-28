@@ -72,8 +72,8 @@ export class AStarAlgorithm {
   private _current: IVec | undefined;
   private _complete = false;
   //for debug
-  private _reached: IVec[] = [];
-  private _edges: IVec[][] = [];
+  // private _reached: IVec[] = [];
+  // private _edges: IVec[][] = [];
   overlay = overlay;
   constructor(
     points: IVec[],
@@ -139,8 +139,6 @@ export class AStarAlgorithm {
     }
     if (Vec.isEqual(current, this._ep)) {
       this._complete = true;
-      // console.log('diag count', diagonalCount.get(current))
-      // console.log('point priority', pointPriority.get(current))
       return;
     }
     const neighbors = this._graph.neighbors(current);
@@ -171,15 +169,6 @@ export class AStarAlgorithm {
         next,
         current
       );
-
-      // if (Vec.isEqual(next, this._ep)) {
-
-      //   newDiagonalCount += this._getDiagonalCount(
-      //     this._originalEp,
-      //     this._ep,
-      //     current
-      //   );
-      // }
       assertExists(next[2]);
       const newPointPriority = this._pointPriority.get(current)! + next[2];
       let canUpdate = false;
@@ -214,33 +203,33 @@ export class AStarAlgorithm {
     }
 
     // for debug
-    this._reached.push(current);
-    overlay.reached = this._reached;
-    overlay.frontier = this._frontier.heap.map(item => {
-      return [
-        ...item.value,
-        item.priority[0],
-        item.priority[1],
-        item.priority[2],
-      ];
-    });
-    this._edges = [];
-    overlay.next = this._frontier.heap[0]?.value;
-    this._frontier.heap.forEach(item => {
-      let current = item.value;
-      while (current) {
-        const from = this._cameFrom.get(current);
-        if (from) {
-          this._edges.push([from, current]);
-        }
-        current = from as IVec;
-      }
-    });
-    overlay.edges = this._edges;
+    // this._reached.push(current);
+    // overlay.reached = this._reached;
+    // overlay.frontier = this._frontier.heap.map(item => {
+    //   return [
+    //     ...item.value,
+    //     item.priority[0],
+    //     item.priority[1],
+    //     item.priority[2],
+    //   ];
+    // });
+    // this._edges = [];
+    // overlay.next = this._frontier.heap[0]?.value;
+    // this._frontier.heap.forEach(item => {
+    //   let current = item.value;
+    //   while (current) {
+    //     const from = this._cameFrom.get(current);
+    //     if (from) {
+    //       this._edges.push([from, current]);
+    //     }
+    //     current = from as IVec;
+    //   }
+    // });
+    // overlay.edges = this._edges;
   }
 
   public reset() {
-    this._reached = [];
+    // this._reached = [];
     this._cameFrom.clear();
     this._costSoFar.clear();
     this._diagonalCount.clear();

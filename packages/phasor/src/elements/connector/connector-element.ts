@@ -110,8 +110,6 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     const last = points[points.length - 1];
     const secondToLast = points[points.length - 2];
 
-    // TODO: Adjust arrow direction
-
     if (last && secondToLast) {
       const { sides, end } = getArrowPoints(secondToLast, last, 15);
       rc.linearPath(

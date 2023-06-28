@@ -32,7 +32,6 @@ import type {
 } from '../../utils/selection-manager.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import { SingleConnectorHandles } from '../connector/single-connector-handles.js';
-import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
@@ -244,7 +243,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           surface.setElementBound(element.id, bound);
         }
       }
-      // handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
     this.requestUpdate();

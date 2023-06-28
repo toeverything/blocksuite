@@ -1003,10 +1003,6 @@ export class EdgelessPageBlockComponent
   }
 
   override firstUpdated() {
-    // for debug
-    this.page.getBlockByFlavour('affine:note').forEach(note => {
-      this.page.deleteBlock(note);
-    });
     this._initSlotEffects();
     this._initDragHandle();
     this._initResizeEffect();
