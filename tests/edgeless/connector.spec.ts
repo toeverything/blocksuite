@@ -156,7 +156,7 @@ test('elbow connector both side attatched element', async ({ page }) => {
     { x: end[0], y: end[1] }
   );
 
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [100, 50],
     [200, 50],
   ]);
@@ -174,7 +174,7 @@ test('elbow connector both side attatched element', async ({ page }) => {
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [100, 50],
     [150, 50],
     [150, 0],
@@ -188,7 +188,7 @@ test('elbow connector both side attatched element', async ({ page }) => {
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
     [100, -50],
@@ -200,7 +200,7 @@ test('elbow connector both side attatched element', async ({ page }) => {
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
     [150, -50],
@@ -208,38 +208,38 @@ test('elbow connector both side attatched element', async ({ page }) => {
   ]);
 
   await undoByClick(page);
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
     [100, -50],
   ]);
   await undoByClick(page);
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [100, 50],
     [150, 50],
     [150, 0],
     [200, 0],
   ]);
   await undoByClick(page);
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [100, 50],
     [200, 50],
   ]);
   await redoByClick(page);
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [100, 50],
     [150, 50],
     [150, 0],
     [200, 0],
   ]);
   await redoByClick(page);
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
     [100, -50],
   ]);
   await redoByClick(page);
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
     [150, -50],
@@ -279,7 +279,7 @@ test('elbow connector both side attached element with one attach element and oth
     { x: end[0], y: end[1] }
   );
 
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -20],
     [150, -20],
@@ -301,7 +301,7 @@ test('elbow connector both side attached element with one attach element and oth
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -20],
     [150, -20],
@@ -316,7 +316,7 @@ test('elbow connector both side attached element with one attach element and oth
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
     [50, -20],
     [200, -20],
@@ -406,12 +406,12 @@ test('path #1', async ({ page }) => {
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
-  assertConnectorPath(page, [
+  await assertConnectorPath(page, [
     [50, 0],
-    [50, -20],
-    [200, -20],
-    [200, 20],
-    [350, 20],
+    [50, -60],
+    [200, -60],
+    [200, 60],
+    [350, 60],
     [350, 0],
   ]);
 });

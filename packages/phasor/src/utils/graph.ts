@@ -8,7 +8,7 @@ export class Graph {
   constructor(
     private points: IVec[],
     private blocks: Bound[] = [],
-    private expandBlocks: Bound[] = []
+    private excludedPoints: IVec[] = []
   ) {
     const xMap = this._xMap;
     const yMap = this._yMap;
@@ -21,15 +21,55 @@ export class Graph {
     });
   }
   private _isBlock(sp: IVec, ep: IVec) {
-    return (
-      this.expandBlocks.some(block => {
-        const rst = linePolygonIntersects(sp, ep, block.points);
-        return block.isPointInBound(Vec.lrp(sp, ep, 0.5)) || rst?.length === 2;
-      }) ||
-      this.blocks.some(block => {
-        return !!linePolygonIntersects(sp, ep, block.points);
-      })
-    );
+    return this.blocks.some(block => {
+      const rst = linePolygonIntersects(sp, ep, block.points);
+      return (
+        rst?.length === 2 ||
+        block.isPointInBound(sp, 0) ||
+        block.isPointInBound(ep, 0) ||
+        [
+          block.leftLine,
+          block.upperLine,
+          block.rightLine,
+          block.lowerLine,
+        ].some(line => {
+          return this._isOverlap(line, [sp, ep]);
+        })
+      );
+    });
+  }
+
+  private _isOverlap(line: IVec[], line2: IVec[]) {
+    if (
+      [line[0][1], line[1][1], line2[0][1], line2[1][1]].every(
+        y => y === line[0][1]
+      )
+    ) {
+      if (
+        !(
+          Math.max(line[0][0], line[1][0]) <
+            Math.min(line2[0][0], line2[1][0]) ||
+          Math.min(line[0][0], line[1][0]) > Math.max(line2[0][0], line2[1][0])
+        )
+      ) {
+        return true;
+      }
+    } else if (
+      [line[0][0], line[1][0], line2[0][0], line2[1][0]].every(
+        x => x === line[0][0]
+      )
+    ) {
+      if (
+        !(
+          Math.max(line[0][1], line[1][1]) <
+            Math.min(line2[0][1], line2[1][1]) ||
+          Math.min(line[0][1], line[1][1]) > Math.max(line2[0][1], line2[1][1])
+        )
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   neighbors(curPoint: IVec): IVec[] {
@@ -37,8 +77,6 @@ export class Graph {
     const neighbors = new Set<IVec>();
     const xPoints = this._xMap.get(x);
     const yPoints = this._yMap.get(y);
-    const xOffset = [0, 5];
-    const yOffset = [5, 0];
     if (xPoints) {
       let plusMin = Infinity;
       let minusMin = Infinity;
@@ -58,13 +96,13 @@ export class Graph {
       });
       if (
         plusPoint &&
-        !this._isBlock(Vec.sub(curPoint, xOffset), Vec.add(plusPoint, xOffset))
+        (this._canSkipBlock(plusPoint) || !this._isBlock(curPoint, plusPoint))
       ) {
         neighbors.add(plusPoint);
       }
       if (
         minusPoint &&
-        !this._isBlock(Vec.add(curPoint, xOffset), Vec.sub(minusPoint, xOffset))
+        (this._canSkipBlock(minusPoint) || !this._isBlock(curPoint, minusPoint))
       )
         neighbors.add(minusPoint);
     }
@@ -87,17 +125,23 @@ export class Graph {
       });
       if (
         plusPoint &&
-        !this._isBlock(Vec.sub(curPoint, yOffset), Vec.add(plusPoint, yOffset))
+        (this._canSkipBlock(plusPoint) || !this._isBlock(curPoint, plusPoint))
       )
         neighbors.add(plusPoint);
       if (
         minusPoint &&
-        !this._isBlock(Vec.add(curPoint, yOffset), Vec.sub(minusPoint, yOffset))
+        (this._canSkipBlock(minusPoint) || !this._isBlock(curPoint, minusPoint))
       )
         neighbors.add(minusPoint);
     }
 
     return Array.from(neighbors);
+  }
+
+  private _canSkipBlock(point: IVec) {
+    return this.excludedPoints.some(excludedPoint => {
+      return Vec.isEqual(point, excludedPoint);
+    });
   }
 
   cost(point: IVec, point2: IVec) {

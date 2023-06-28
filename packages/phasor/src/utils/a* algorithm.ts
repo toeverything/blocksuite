@@ -21,6 +21,7 @@ class AStarOverlay extends Overlay {
       ctx.stroke();
     });
     this.edges.forEach(edge => {
+      // return
       const sp = edge[0];
       const ep = edge[1];
       ctx.beginPath();
@@ -72,8 +73,8 @@ export class AStarAlgorithm {
   private _current: IVec | undefined;
   private _complete = false;
   //for debug
-  private _reached: IVec[] = [];
-  private _edges: IVec[][] = [];
+  // private _reached: IVec[] = [];
+  // private _edges: IVec[][] = [];
   overlay = overlay;
   constructor(
     points: IVec[],
@@ -84,9 +85,6 @@ export class AStarAlgorithm {
     blocks: Bound[] = [],
     expandBlocks: Bound[] = []
   ) {
-    if (this._sp === this._ep) this._ep = [...this._sp];
-    if (this._ep === this._originalEp) this._originalEp = [...this._ep];
-    if (this._sp === this._originalSp) this._originalSp = [...this._sp];
     this._sp[2] = 0;
     this._ep[2] = 0;
     this._originalEp[2] = 0;
@@ -179,10 +177,10 @@ export class AStarAlgorithm {
       if (!lastCost || newCost - lastCost! < -0.01) {
         canUpdate = true;
       } else if (almostEqual(newCost, lastCost)) {
-        if (newDiagonalCount < lastDiagonalCount!) {
+        if (newPointPriority > lastPointPriority!) {
           canUpdate = true;
-        } else if (newDiagonalCount === lastDiagonalCount) {
-          if (newPointPriority > lastPointPriority!) {
+        } else if (newPointPriority === lastPointPriority) {
+          if (newDiagonalCount < lastDiagonalCount!) {
             canUpdate = true;
           }
         }
@@ -203,33 +201,33 @@ export class AStarAlgorithm {
     }
 
     // for debug
-    this._reached.push(current);
-    overlay.reached = this._reached;
-    overlay.frontier = this._frontier.heap.map(item => {
-      return [
-        ...item.value,
-        item.priority[0],
-        item.priority[1],
-        item.priority[2],
-      ];
-    });
-    this._edges = [];
-    overlay.next = this._frontier.heap[0]?.value;
-    this._frontier.heap.forEach(item => {
-      let current = item.value;
-      while (current) {
-        const from = this._cameFrom.get(current);
-        if (from) {
-          this._edges.push([from, current]);
-        }
-        current = from as IVec;
-      }
-    });
-    overlay.edges = this._edges;
+    // this._reached.push(current);
+    // overlay.reached = this._reached;
+    // overlay.frontier = this._frontier.heap.map(item => {
+    //   return [
+    //     ...item.value,
+    //     item.priority[0],
+    //     item.priority[1],
+    //     item.priority[2],
+    //   ];
+    // });
+    // this._edges = [];
+    // overlay.next = this._frontier.heap[0]?.value;
+    // this._frontier.heap.forEach(item => {
+    //   let current = item.value;
+    //   while (current) {
+    //     const from = this._cameFrom.get(current);
+    //     if (from) {
+    //       this._edges.push([from, current]);
+    //     }
+    //     current = from as IVec;
+    //   }
+    // });
+    // overlay.edges = this._edges;
   }
 
   public reset() {
-    this._reached = [];
+    // this._reached = [];
     this._cameFrom.clear();
     this._costSoFar.clear();
     this._diagonalCount.clear();
