@@ -229,7 +229,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
               return;
             }
             parent.children.indexOf(model);
-            const props = await uploadImageFromLocal(page);
+            const props = (await uploadImageFromLocal(page.blobs)).map(
+              ({ sourceId }) => ({ flavour: 'affine:image', sourceId })
+            );
             page.addSiblingBlocks(model, props);
           },
         },

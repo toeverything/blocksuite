@@ -100,3 +100,17 @@ export function getTooltipWithShortcut(tip: string, shortcut: string) {
   return html`<span>${tip}</span
     ><span style="margin-left: 10px;">(${shortcut})</span>`;
 }
+
+export function readImageSize(file: File) {
+  return new Promise<{ width: number; height: number }>(resolve => {
+    const reader = new FileReader();
+    reader.addEventListener('load', _ => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.width, height: img.height });
+      img.onerror = () => resolve({ width: 0, height: 0 });
+      img.src = reader.result as string;
+    });
+    reader.addEventListener('error', () => resolve({ width: 0, height: 0 }));
+    reader.readAsDataURL(file);
+  });
+}
