@@ -72,6 +72,7 @@ import {
   EdgelessToolbar,
   type ZoomAction,
 } from './components/toolbar/edgeless-toolbar.js';
+import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -84,7 +85,6 @@ import { bindEdgelessHotkeys } from './utils/hotkey.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid, getCursorMode } from './utils/query.js';
 import {
-  EdgelessSelectionManager,
   type EdgelessSelectionState,
   type Selectable,
 } from './utils/selection-manager.js';
@@ -109,7 +109,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends BlockElement<PageBlockModel>
+  extends BlockElement<PageBlockModel, EdgelessPageService>
   implements EdgelessContainer, BlockHost
 {
   static override styles = css`
@@ -229,7 +229,11 @@ export class EdgelessPageBlockComponent
 
   getService = getService;
 
-  selection!: EdgelessSelectionManager;
+  get selection() {
+    const selection = this.service.selection;
+    assertExists(selection, 'Selection should be initialized before used');
+    return selection;
+  }
 
   snap!: EdgelessSnapManager;
 
@@ -823,10 +827,7 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
-      this.selection = new EdgelessSelectionManager(
-        this,
-        this.root.uiEventDispatcher
-      );
+      this.service.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
     }
     if (changedProperties.has('edgelessTool')) {
@@ -953,6 +954,7 @@ export class EdgelessPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
+    this.service.unmountSelectionManager();
   }
 
   override render() {

@@ -9,7 +9,7 @@ import type {
 import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { FocusContext } from '@blocksuite/lit';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 
 import {
   AbstractSelectionManager,
@@ -84,14 +84,10 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
   constructor({
     container,
     dispatcher,
-    page,
-    mouseRoot,
     slots,
   }: {
     container: DefaultPageBlockComponent;
     dispatcher: UIEventDispatcher;
-    page: Page;
-    mouseRoot: HTMLElement;
     slots: DefaultSelectionSlots;
   }) {
     super(container, dispatcher);

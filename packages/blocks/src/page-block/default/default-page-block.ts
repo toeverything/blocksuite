@@ -39,7 +39,7 @@ import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { DraggingArea } from './components.js';
-import { DefaultSelectionManager } from './selection-manager/index.js';
+import type { DefaultPageService } from './default-page-service.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
 export interface DefaultSelectionSlots {
@@ -57,7 +57,7 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends BlockElement<PageBlockModel>
+  extends BlockElement<PageBlockModel, DefaultPageService>
   implements BlockHost
 {
   static override styles = css`
@@ -126,8 +126,6 @@ export class DefaultPageBlockComponent
 
   clipboard = new PageClipboard(this);
 
-  selection!: DefaultSelectionManager;
-
   getService = getService;
 
   lastSelectionPosition: SelectionPosition = 'start';
@@ -140,6 +138,12 @@ export class DefaultPageBlockComponent
   };
 
   mouseRoot!: HTMLElement;
+
+  get selection() {
+    const selection = this.service.selection;
+    assertExists(selection, 'Selection should be initialized before used');
+    return selection;
+  }
 
   @state()
   private _draggingArea: DOMRect | null = null;
@@ -493,13 +497,7 @@ export class DefaultPageBlockComponent
     this.clipboard.init(this.page);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
-    this.selection = new DefaultSelectionManager({
-      page: this.page,
-      mouseRoot: this.mouseRoot,
-      slots: this.slots,
-      container: this,
-      dispatcher: this.root.uiEventDispatcher,
-    });
+    this.service.mountSelectionManager(this, this.slots);
   }
 
   override disconnectedCallback() {
@@ -509,8 +507,7 @@ export class DefaultPageBlockComponent
     this.components.dragHandle?.remove();
 
     removeHotkeys();
-    this.selection.clear();
-    this.selection.dispose();
+    this.service.unmountSelectionManager();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;

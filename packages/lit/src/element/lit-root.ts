@@ -82,6 +82,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
           return html`<${widget} .root=${this} .model=${model}></${widget}>`;
         })}`
       : html`${nothing}`;
+    const service = this.blockStore.getService(flavour);
 
     this._onLoadModel(model);
 
@@ -90,6 +91,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .root=${this}
       .page=${this.page}
       .model=${model}
+      .service=${service}
       .widgets=${widgets}
       .content=${html`${repeat(
         children,
