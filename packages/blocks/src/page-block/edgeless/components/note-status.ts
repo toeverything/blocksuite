@@ -45,8 +45,6 @@ export function EdgelessNotesStatus(
           noteStatusElement.style.top = y + 'px';
           noteStatusElement.style.left = x + 'px';
         });
-      } else {
-        throw new Error('Note status element not found or not HTMLElement');
       }
     }
   });
