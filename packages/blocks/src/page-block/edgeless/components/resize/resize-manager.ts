@@ -1,8 +1,8 @@
 import { Bound } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 
-import type { IPoint } from '../../../std.js';
-import { NOTE_MIN_WIDTH } from '../utils.js';
+import type { IPoint } from '../../../../__internal__/utils/types.js';
+import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
 // 15deg

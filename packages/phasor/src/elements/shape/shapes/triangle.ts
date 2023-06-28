@@ -72,9 +72,9 @@ export const TriangleMethods: ShapeMethods = {
     const points = getPointsFromBoundsWithRotation(
       element,
       ({ x, y, w, h }) => [
-        new DOMPoint(x, y + h),
-        new DOMPoint(x + w / 2, y),
-        new DOMPoint(x + w, y + h),
+        [x, y + h],
+        [x + w / 2, y],
+        [x + w, y + h],
       ]
     );
 

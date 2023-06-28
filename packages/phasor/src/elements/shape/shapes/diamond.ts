@@ -73,10 +73,10 @@ export const DiamondMethods: ShapeMethods = {
     const points = getPointsFromBoundsWithRotation(
       element,
       ({ x, y, w, h }) => [
-        new DOMPoint(x, y + h / 2),
-        new DOMPoint(x + w / 2, y),
-        new DOMPoint(x + w, y + h / 2),
-        new DOMPoint(x + w / 2, y + h),
+        [x, y + h / 2],
+        [x + w / 2, y],
+        [x + w, y + h / 2],
+        [x + w / 2, y + h],
       ]
     );
 

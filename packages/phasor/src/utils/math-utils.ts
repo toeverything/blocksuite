@@ -324,32 +324,32 @@ export function getPointFromBoundsWithRotation(
   point: IVec
 ): IVec {
   const { x, y, w, h, rotate } = bounds;
-  let [px, py] = point;
 
-  if (rotate) {
-    const cx = x + w / 2;
-    const cy = y + h / 2;
+  if (!rotate) return point;
 
-    const m = new DOMMatrix()
-      .translateSelf(cx, cy)
-      .rotateSelf(rotate)
-      .translateSelf(-cx, -cy);
+  const cx = x + w / 2;
+  const cy = y + h / 2;
 
-    const p = new DOMPoint(px, py).matrixTransform(m);
-    px = p.x;
-    py = p.y;
-  }
+  const m = new DOMMatrix()
+    .translateSelf(cx, cy)
+    .rotateSelf(rotate)
+    .translateSelf(-cx, -cy);
 
-  return [px, py];
+  const p = new DOMPoint(...point).matrixTransform(m);
+  return [p.x, p.y];
 }
 
 export function getPointsFromBoundsWithRotation(
   bounds: IBound,
-  getPoints: (bounds: IBound) => DOMPoint[] = ({ x, y, w, h }: IBound) => [
-    new DOMPoint(x, y),
-    new DOMPoint(x + w, y),
-    new DOMPoint(x + w, y + h),
-    new DOMPoint(x, y + h),
+  getPoints: (bounds: IBound) => IVec[] = ({ x, y, w, h }: IBound) => [
+    // left-top
+    [x, y],
+    // right-top
+    [x + w, y],
+    // right-bottom
+    [x + w, y + h],
+    // left-bottom
+    [x, y + h],
   ]
 ): IVec[] {
   const { rotate } = bounds;
@@ -365,10 +365,13 @@ export function getPointsFromBoundsWithRotation(
       .rotateSelf(rotate)
       .translateSelf(-cx, -cy);
 
-    points = points.map(point => m.transformPoint(point));
+    points = points.map(point => {
+      const { x, y } = new DOMPoint(...point).matrixTransform(m);
+      return [x, y];
+    });
   }
 
-  return points.map(({ x, y }) => [x, y]);
+  return points;
 }
 
 export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
@@ -377,29 +380,14 @@ export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
 
   if (!rotate) return rect;
 
-  const cx = (rect.left + rect.right) / 2;
-  const cy = (rect.top + rect.bottom) / 2;
-
-  const m = new DOMMatrix()
-    .translateSelf(cx, cy)
-    .rotateSelf(rotate)
-    .translateSelf(-cx, -cy);
-
   return new DOMQuad(
-    new DOMPoint(rect.left, rect.top).matrixTransform(m),
-    new DOMPoint(rect.right, rect.top).matrixTransform(m),
-    new DOMPoint(rect.right, rect.bottom).matrixTransform(m),
-    new DOMPoint(rect.left, rect.bottom).matrixTransform(m)
+    ...getPointsFromBoundsWithRotation(bounds).map(
+      ([x, y]) => new DOMPoint(x, y)
+    )
   ).getBounds();
 }
 
 export function getBoundsWithRotation(bounds: IBound): IBound {
   const { x, y, width: w, height: h } = getQuadBoundsWithRotation(bounds);
-
-  return {
-    x,
-    y,
-    w,
-    h,
-  };
+  return { x, y, w, h };
 }

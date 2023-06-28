@@ -34,7 +34,11 @@ import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
-import { normalizeAngle, rotateResizeCursor } from '../utils.js';
+import {
+  generateCursorUrl,
+  normalizeAngle,
+  rotateResizeCursor,
+} from '../utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {

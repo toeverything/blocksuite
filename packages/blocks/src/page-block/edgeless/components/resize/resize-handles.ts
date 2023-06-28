@@ -2,7 +2,7 @@ import { Vec } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 
-import { normalizeAngle } from './utils.js';
+import { normalizeAngle } from './../utils.js';
 
 export enum HandleDirection {
   Left = 'left',
