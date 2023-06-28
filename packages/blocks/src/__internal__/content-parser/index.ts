@@ -4,9 +4,9 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
-import { xywhArrayToObject } from '../..//page-block/edgeless/utils.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import {
   getBlockElementById,
