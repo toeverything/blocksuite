@@ -539,6 +539,12 @@ export class EdgelessPageBlockComponent
     });
   }
 
+  getSortedElementsByBound(bound: IBound) {
+    return this.sortedNotes.filter(element => {
+      return intersects(bound, xywhArrayToObject(element));
+    });
+  }
+
   // Just update `index`, we don't change the order of the notes in the children.
   reorderNotes = ({ elements, type }: ReorderingAction<Selectable>) => {
     const updateIndexes = (keys: string[], elements: Selectable[]) => {
