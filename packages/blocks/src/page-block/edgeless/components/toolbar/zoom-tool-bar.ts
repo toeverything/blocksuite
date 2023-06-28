@@ -203,6 +203,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       >
         <edgeless-tool-icon-button
           .tooltip=${'Fit to screen'}
+          .tipPosition=${'top-right'}
           @click=${() => this._zoomToFit()}
         >
           ${ViewBarIcon}

@@ -29,7 +29,7 @@ export const tooltipStyle = css`
     /* Default is top-start */
     left: 0;
     top: 0;
-    border-radius: 10px 10px 10px 0;
+    border-radius: 10px;
     transform: translate(0, calc(-100% - 8px));
   }
 
@@ -124,6 +124,23 @@ export const tooltipStyle = css`
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 6px solid var(--affine-tooltip);
+  }
+
+  /* work for tip-position='top-right' */
+  tool-tip:is([arrow]):is([tip-position='top-right']) {
+    transform: translate(-15%, calc(-100% - 16px));
+  }
+  tool-tip:is([arrow]):is([tip-position='top-right'])::before {
+    position: absolute;
+    content: '';
+    left: 30%;
+    bottom: 0;
+    transform: translate(-50%, 100%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--affine-tooltip);
   }
 
   .has-tool-tip {
