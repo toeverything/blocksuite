@@ -89,7 +89,7 @@ test('resize note in edgeless mode', async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   const initRect = await getNoteRect(page, ids);
-  const leftHandle = page.locator('[aria-label="handle-left"]');
+  const leftHandle = page.locator('.handle[aria-label="left"] .resize');
   const box = await leftHandle.boundingBox();
   if (box === null) throw new Error();
 

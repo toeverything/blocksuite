@@ -382,7 +382,7 @@ export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
 
   return new DOMQuad(
     ...getPointsFromBoundsWithRotation(bounds).map(
-      ([x, y]) => new DOMPoint(x, y)
+      point => new DOMPoint(...point)
     )
   ).getBounds();
 }

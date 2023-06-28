@@ -251,7 +251,7 @@ export async function resizeElementByTopLeftHandle(
   delta: { x: number; y: number },
   steps = 1
 ) {
-  const topLeftHandle = page.locator('[aria-label="handle-top-left"]');
+  const topLeftHandle = page.locator('.handle[aria-label="top-left"] .resize');
   const box = await topLeftHandle.boundingBox();
   if (box === null) throw new Error();
   const offset = 5;
