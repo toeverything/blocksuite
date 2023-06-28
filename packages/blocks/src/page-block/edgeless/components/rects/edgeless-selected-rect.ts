@@ -432,6 +432,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _updateSelectedRect() {
     const { _selectedRect } = this;
+    if (!_selectedRect) return;
 
     const {
       state: { selected, active },
@@ -492,9 +493,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
     _disposables.add(
       slots.selectedRectUpdated.on(action => {
+        const { _selectedRect } = this;
+        if (!_selectedRect) return;
+
         const {
           _resizeManager,
-          _selectedRect,
           _rotate,
           zoom,
           surface,
