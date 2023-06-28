@@ -62,15 +62,10 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type EdgelessTool =
-  | 'default'
-  | 'shape'
-  | 'brush'
-  | 'pan'
-  | 'text'
-  | 'connector'
-  | 'note'
-  | 'eraser';
+type BasicEdgelessTool = 'default' | 'pan' | 'note';
+type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
+
+type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ToolType = EdgelessTool | ZoomToolType;
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
@@ -93,11 +88,22 @@ export function locatorEdgelessToolButton(
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
   }[type];
-  const button = page
-    .locator('edgeless-toolbar edgeless-tool-icon-button')
-    .filter({
-      hasText: text,
-    });
+
+  let buttonType;
+  switch (type) {
+    case 'brush':
+    case 'text':
+    case 'eraser':
+    case 'connector':
+    case 'shape':
+      buttonType = 'edgeless-toolbar-button';
+      break;
+    default:
+      buttonType = 'edgeless-tool-icon-button';
+  }
+  const button = page.locator(`edgeless-toolbar ${buttonType}`).filter({
+    hasText: text,
+  });
 
   return innerContainer ? button.locator('.icon-container') : button;
 }
