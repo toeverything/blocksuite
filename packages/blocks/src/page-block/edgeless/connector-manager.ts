@@ -24,38 +24,6 @@ import {
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils/query.js';
 import type { Selectable } from './utils/selection-manager.js';
-class OrthogonalOverlay extends Overlay {
-  points: IVec[] = [];
-  bounds: Bound[] = [];
-  render(ctx: CanvasRenderingContext2D): void {
-    this.points.forEach((p, i) => {
-      ctx.beginPath();
-      ctx.arc(p[0], p[1], 3, 0, Math.PI * 2);
-      if (p[2] === 1) {
-        ctx.fillStyle = 'green';
-      } else if (p[2] === 2) {
-        ctx.fillStyle = 'orange';
-      } else if (p[2] === 3) {
-        ctx.fillStyle = 'purple';
-      } else if (p[2] === 6) {
-        ctx.fillStyle = 'red';
-      } else {
-        ctx.fillStyle = 'blue';
-      }
-      ctx.fill();
-    });
-    this.bounds.forEach(b => {
-      return;
-      ctx.beginPath();
-      ctx.rect(b.x, b.y, b.w, b.h);
-      ctx.setLineDash([1, 1]);
-      ctx.strokeStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-      ctx.lineWidth = 4;
-      ctx.stroke();
-    });
-  }
-}
-
 export class ConnectionOverlay extends Overlay {
   surface!: SurfaceManager;
   points: IVec[] = [];
@@ -101,48 +69,10 @@ export class ConnectionOverlay extends Overlay {
 
 export class EdgelessConnectorManager {
   private _algorithm: AStarAlgorithm | undefined;
-  private _overlay = new OrthogonalOverlay();
   private _connectionOverlay = new ConnectionOverlay();
-  private _connector!: ConnectorElement;
   constructor(private _edgeless: EdgelessPageBlockComponent) {
     this._edgeless.surface.viewport.addOverlay(this._connectionOverlay);
     this._connectionOverlay.surface = this._edgeless.surface;
-    // for debug
-    // window.addEventListener('keydown', e => {
-    //   if (e.key === 'ArrowRight') {
-    //     this._algorithm?.step();
-    //     this.updatePath(
-    //       this._connector as ConnectorElement,
-    //       this._algorithm?.path
-    //     );
-    //   }
-    //   if (e.key === 'ArrowLeft') {
-    //     this._algorithm?.run();
-    //     this.updatePath(
-    //       this._connector as ConnectorElement,
-    //       this._algorithm?.path
-    //     );
-    //   }
-    //   if (e.key === 'ArrowDown') {
-    //     this._algorithm?.reset();
-    //     this.updatePath(
-    //       this._connector as ConnectorElement,
-    //       this._algorithm?.path
-    //     );
-    //   }
-    // });
-  }
-
-  debug(v: boolean) {
-    if (v) {
-      this._edgeless.surface.viewport.addOverlay(this._overlay);
-      this._algorithm?.overlay &&
-        this._edgeless.surface.viewport.addOverlay(this._algorithm?.overlay);
-    } else {
-      this._edgeless.surface.viewport.removeOverlay(this._overlay);
-      this._algorithm?.overlay &&
-        this._edgeless.surface.viewport.removeOverlay(this._algorithm?.overlay);
-    }
   }
 
   searchConnection(point: IVec, excludedIds: string[] = []) {
@@ -260,7 +190,6 @@ export class EdgelessConnectorManager {
 
   generateConnectorPath(connector: ConnectorElement) {
     const { mode } = connector;
-    this._connector = connector;
     if (mode === ConnectorMode.Straight) {
       return this.generateStraightConnectorPath(connector);
     } else {
@@ -292,7 +221,6 @@ export class EdgelessConnectorManager {
   }
 
   private _computeOffset(bound: Bound, bound2: Bound) {
-    // const dist = polygonPointDistance(bound2.points, point);
     const rst: IVec = [20, 20, 20, 20];
     // left, top, right, bottom
     let dist = Vec.distanceToLineSegment(
@@ -462,7 +390,6 @@ export class EdgelessConnectorManager {
       this.filterConnectablePoints(points, sb),
       eb
     );
-    this._overlay.points = finalPoints;
 
     if (!end) {
       if (
@@ -565,7 +492,7 @@ export class EdgelessConnectorManager {
     eeb?: Bound
   ) {
     const bounds: Bound[] = [];
-    this._overlay.bounds = bounds;
+
     const lineBound = Bound.fromPoints([osp, oep]);
     // bounds.push(lineBound);
     const outerBound = esb && eeb && esb.unite(eeb);
