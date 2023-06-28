@@ -120,7 +120,7 @@ export abstract class SurfaceElement<
   }
 
   private _onMap = <T extends keyof IPhasorElementType>(
-    events: Y.YEvent<any>[]
+    events: Y.YEvent<Y.Map<unknown>>[]
   ) => {
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);

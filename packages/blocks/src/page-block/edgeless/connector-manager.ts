@@ -313,9 +313,9 @@ export class EdgelessConnectorManager {
       startOffset[2] = endOffset[0] = Math.min(startOffset[2], endOffset[0]);
       startOffset[3] = endOffset[1] = Math.min(startOffset[3], endOffset[1]);
     }
-    if (start) {
+    if (sb) {
       nextStartPoint = this._getNextPoint(
-        sb!,
+        sb,
         startPoint,
         startOffset[0],
         startOffset[1],
@@ -325,9 +325,9 @@ export class EdgelessConnectorManager {
     } else {
       nextStartPoint = startPoint;
     }
-    if (end) {
+    if (eb) {
       lastEndPoint = this._getNextPoint(
-        eb!,
+        eb,
         endPoint,
         endOffset[0],
         endOffset[1],
@@ -501,8 +501,10 @@ export class EdgelessConnectorManager {
       ep,
       ...lineBound.points.map(point => [...point, 0]),
       ...lineBound.midPoints.map(point => [...point, 0]),
-      // [...lineBound.center, 2],
     ];
+    if (!sb && !eb) {
+      points.push([...lineBound.center, 2]);
+    }
     if (esb && eeb && outerBound) {
       // bounds.push(outerBound);
       points.push(...outerBound.points.map(point => [...point, 0]));
@@ -765,10 +767,11 @@ export class EdgelessConnectorManager {
     type: 'source' | 'target'
   ) {
     const { surface, page } = this._edgeless;
-    return (
-      surface.pickById(connector[type].id!) ??
-      <TopLevelBlockModel>page.getBlockById(connector[type].id!)
-    );
+    const id = connector[type].id;
+    if (id) {
+      return surface.pickById(id) ?? <TopLevelBlockModel>page.getBlockById(id);
+    }
+    return null;
   }
 
   private _getConnectionPoint(
@@ -783,7 +786,7 @@ export class EdgelessConnectorManager {
       assertExists(ele);
       if (!connection.position) {
         const otherPoint = this._getConnectionPoint(connector, anotherType);
-        const rst = this.getNearestAnchor(ele, otherPoint!);
+        const rst = this.getNearestAnchor(ele, otherPoint);
         return rst;
       } else {
         point = Bound.deserialize(ele.xywh).getRelativePoint(
