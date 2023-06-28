@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { randomSeed } from 'roughjs/bin/math.js';
+import { randomSeed } from 'roughjs';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';

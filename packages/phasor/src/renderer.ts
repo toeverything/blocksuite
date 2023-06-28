@@ -1,5 +1,5 @@
 import { assertNotExists } from '@blocksuite/global/utils';
-import { RoughCanvas } from 'roughjs/bin/canvas.js';
+import { RoughCanvas } from 'roughjs';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';

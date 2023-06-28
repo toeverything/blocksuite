@@ -1,4 +1,4 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+import type { RoughCanvas } from 'roughjs';
 
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import {

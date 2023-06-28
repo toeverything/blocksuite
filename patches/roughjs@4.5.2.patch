@@ -1,0 +1,351 @@
+diff --git a/bin/canvas.d.ts b/bin/canvas.d.ts
+deleted file mode 100644
+index 6221c6c..0000000
+diff --git a/bin/canvas.js b/bin/canvas.js
+deleted file mode 100644
+index 471a9cf..0000000
+diff --git a/bin/core.d.ts b/bin/core.d.ts
+deleted file mode 100644
+index 9d7f6fb..0000000
+diff --git a/bin/core.js b/bin/core.js
+deleted file mode 100644
+index 0d14519..0000000
+diff --git a/bin/fillers/dashed-filler.d.ts b/bin/fillers/dashed-filler.d.ts
+deleted file mode 100644
+index 586bb19..0000000
+diff --git a/bin/fillers/dashed-filler.js b/bin/fillers/dashed-filler.js
+deleted file mode 100644
+index 714f54e..0000000
+diff --git a/bin/fillers/dot-filler.d.ts b/bin/fillers/dot-filler.d.ts
+deleted file mode 100644
+index 0a2ae29..0000000
+diff --git a/bin/fillers/dot-filler.js b/bin/fillers/dot-filler.js
+deleted file mode 100644
+index eb174e2..0000000
+diff --git a/bin/fillers/filler-interface.d.ts b/bin/fillers/filler-interface.d.ts
+deleted file mode 100644
+index 8b885f2..0000000
+diff --git a/bin/fillers/filler-interface.js b/bin/fillers/filler-interface.js
+deleted file mode 100644
+index cb0ff5c..0000000
+diff --git a/bin/fillers/filler.d.ts b/bin/fillers/filler.d.ts
+deleted file mode 100644
+index 5df5ab3..0000000
+diff --git a/bin/fillers/filler.js b/bin/fillers/filler.js
+deleted file mode 100644
+index 3b7dd75..0000000
+diff --git a/bin/fillers/hachure-filler.d.ts b/bin/fillers/hachure-filler.d.ts
+deleted file mode 100644
+index e1b5b6f..0000000
+diff --git a/bin/fillers/hachure-filler.js b/bin/fillers/hachure-filler.js
+deleted file mode 100644
+index 79efc3e..0000000
+diff --git a/bin/fillers/hatch-filler.d.ts b/bin/fillers/hatch-filler.d.ts
+deleted file mode 100644
+index f37823a..0000000
+diff --git a/bin/fillers/hatch-filler.js b/bin/fillers/hatch-filler.js
+deleted file mode 100644
+index e48f5c5..0000000
+diff --git a/bin/fillers/scan-line-hachure.d.ts b/bin/fillers/scan-line-hachure.d.ts
+deleted file mode 100644
+index 0ea5928..0000000
+diff --git a/bin/fillers/scan-line-hachure.js b/bin/fillers/scan-line-hachure.js
+deleted file mode 100644
+index 8abaedf..0000000
+diff --git a/bin/fillers/zigzag-filler.d.ts b/bin/fillers/zigzag-filler.d.ts
+deleted file mode 100644
+index ede77d9..0000000
+diff --git a/bin/fillers/zigzag-filler.js b/bin/fillers/zigzag-filler.js
+deleted file mode 100644
+index 7119c02..0000000
+diff --git a/bin/fillers/zigzag-line-filler.d.ts b/bin/fillers/zigzag-line-filler.d.ts
+deleted file mode 100644
+index 3050239..0000000
+diff --git a/bin/fillers/zigzag-line-filler.js b/bin/fillers/zigzag-line-filler.js
+deleted file mode 100644
+index 986f068..0000000
+diff --git a/bin/generator.d.ts b/bin/generator.d.ts
+deleted file mode 100644
+index 6ad42c4..0000000
+diff --git a/bin/generator.js b/bin/generator.js
+deleted file mode 100644
+index e28cc61..0000000
+diff --git a/bin/geometry.d.ts b/bin/geometry.d.ts
+deleted file mode 100644
+index 87e71d6..0000000
+diff --git a/bin/geometry.js b/bin/geometry.js
+deleted file mode 100644
+index aecc82f..0000000
+diff --git a/bin/math.d.ts b/bin/math.d.ts
+deleted file mode 100644
+index 5d745a7..0000000
+diff --git a/bin/math.js b/bin/math.js
+deleted file mode 100644
+index b2bac33..0000000
+diff --git a/bin/renderer.d.ts b/bin/renderer.d.ts
+deleted file mode 100644
+index 22a910d..0000000
+diff --git a/bin/renderer.js b/bin/renderer.js
+deleted file mode 100644
+index 5740838..0000000
+diff --git a/bin/rough.d.ts b/bin/rough.d.ts
+deleted file mode 100644
+index e8e33b2..0000000
+diff --git a/bin/rough.js b/bin/rough.js
+deleted file mode 100644
+index 19c0f05..0000000
+diff --git a/bin/svg.d.ts b/bin/svg.d.ts
+deleted file mode 100644
+index a6815a3..0000000
+diff --git a/bin/svg.js b/bin/svg.js
+deleted file mode 100644
+index f47774a..0000000
+diff --git a/bundled/rough.cjs b/bundled/rough.cjs
+new file mode 100644
+index 0000000..1aa5eea
+--- /dev/null
++++ b/bundled/rough.cjs
+@@ -0,0 +1 @@
++"use strict";function t(t,e,s){if(t&&t.length){const[n,a]=e,o=Math.PI/180*s,r=Math.cos(o),h=Math.sin(o);t.forEach((t=>{const[e,s]=t;t[0]=(e-n)*r-(s-a)*h+n,t[1]=(e-n)*h+(s-a)*r+a}))}}function e(e,s,n){const a=[];e.forEach((t=>a.push(...t))),t(a,s,n)}function s(t){const e=t[0],s=t[1];return Math.sqrt(Math.pow(e[0]-s[0],2)+Math.pow(e[1]-s[1],2))}function n(s,n){const a=n.hachureAngle+90;let o=n.hachureGap;o<0&&(o=4*n.strokeWidth),o=Math.max(o,.1);const r=[0,0];if(a)for(const e of s)t(e,r,a);const h=function(t,e){const s=[];for(const e of t){const t=[...e];t[0].join(",")!==t[t.length-1].join(",")&&t.push([t[0][0],t[0][1]]),t.length>2&&s.push(t)}const n=[];e=Math.max(e,.1);const a=[];for(const t of s)for(let e=0;e<t.length-1;e++){const s=t[e],n=t[e+1];if(s[1]!==n[1]){const t=Math.min(s[1],n[1]);a.push({ymin:t,ymax:Math.max(s[1],n[1]),x:t===s[1]?s[0]:n[0],islope:(n[0]-s[0])/(n[1]-s[1])})}}if(a.sort(((t,e)=>t.ymin<e.ymin?-1:t.ymin>e.ymin?1:t.x<e.x?-1:t.x>e.x?1:t.ymax===e.ymax?0:(t.ymax-e.ymax)/Math.abs(t.ymax-e.ymax))),!a.length)return n;let o=[],r=a[0].ymin;for(;o.length||a.length;){if(a.length){let t=-1;for(let e=0;e<a.length&&!(a[e].ymin>r);e++)t=e;a.splice(0,t+1).forEach((t=>{o.push({s:r,edge:t})}))}if(o=o.filter((t=>!(t.edge.ymax<=r))),o.sort(((t,e)=>t.edge.x===e.edge.x?0:(t.edge.x-e.edge.x)/Math.abs(t.edge.x-e.edge.x))),o.length>1)for(let t=0;t<o.length;t+=2){const e=t+1;if(e>=o.length)break;const s=o[t].edge,a=o[e].edge;n.push([[Math.round(s.x),r],[Math.round(a.x),r]])}r+=e,o.forEach((t=>{t.edge.x=t.edge.x+e*t.edge.islope}))}return n}(s,o);if(a){for(const e of s)t(e,r,-a);e(h,r,-a)}return h}Object.defineProperty(exports,"__esModule",{value:!0});class a{constructor(t){this.helper=t}fillPolygons(t,e){return this._fillPolygons(t,e)}_fillPolygons(t,e){const s=n(t,e);return{type:"fillSketch",ops:this.renderLines(s,e)}}renderLines(t,e){const s=[];for(const n of t)s.push(...this.helper.doubleLineOps(n[0][0],n[0][1],n[1][0],n[1][1],e));return s}}class o extends a{fillPolygons(t,e){let a=e.hachureGap;a<0&&(a=4*e.strokeWidth),a=Math.max(a,.1);const o=n(t,Object.assign({},e,{hachureGap:a})),r=Math.PI/180*e.hachureAngle,h=[],i=.5*a*Math.cos(r),c=.5*a*Math.sin(r);for(const[t,e]of o)s([t,e])&&h.push([[t[0]-i,t[1]+c],[...e]],[[t[0]+i,t[1]-c],[...e]]);return{type:"fillSketch",ops:this.renderLines(h,e)}}}class r extends a{fillPolygons(t,e){const s=this._fillPolygons(t,e),n=Object.assign({},e,{hachureAngle:e.hachureAngle+90}),a=this._fillPolygons(t,n);return s.ops=s.ops.concat(a.ops),s}}class h{constructor(t){this.helper=t}fillPolygons(t,e){const s=n(t,e=Object.assign({},e,{hachureAngle:0}));return this.dotsOnLines(s,e)}dotsOnLines(t,e){const n=[];let a=e.hachureGap;a<0&&(a=4*e.strokeWidth),a=Math.max(a,.1);let o=e.fillWeight;o<0&&(o=e.strokeWidth/2);const r=a/4;for(const h of t){const t=s(h),i=t/a,c=Math.ceil(i)-1,l=t-c*a,u=(h[0][0]+h[1][0])/2-a/4,p=Math.min(h[0][1],h[1][1]);for(let t=0;t<c;t++){const s=p+l+t*a,h=u-r+2*Math.random()*r,i=s-r+2*Math.random()*r,c=this.helper.ellipse(h,i,o,o,e);n.push(...c.ops)}}return{type:"fillSketch",ops:n}}}class i{constructor(t){this.helper=t}fillPolygons(t,e){const s=n(t,e);return{type:"fillSketch",ops:this.dashedLine(s,e)}}dashedLine(t,e){const n=e.dashOffset<0?e.hachureGap<0?4*e.strokeWidth:e.hachureGap:e.dashOffset,a=e.dashGap<0?e.hachureGap<0?4*e.strokeWidth:e.hachureGap:e.dashGap,o=[];return t.forEach((t=>{const r=s(t),h=Math.floor(r/(n+a)),i=(r+a-h*(n+a))/2;let c=t[0],l=t[1];c[0]>l[0]&&(c=t[1],l=t[0]);const u=Math.atan((l[1]-c[1])/(l[0]-c[0]));for(let t=0;t<h;t++){const s=t*(n+a),r=s+n,h=[c[0]+s*Math.cos(u)+i*Math.cos(u),c[1]+s*Math.sin(u)+i*Math.sin(u)],l=[c[0]+r*Math.cos(u)+i*Math.cos(u),c[1]+r*Math.sin(u)+i*Math.sin(u)];o.push(...this.helper.doubleLineOps(h[0],h[1],l[0],l[1],e))}})),o}}class c{constructor(t){this.helper=t}fillPolygons(t,e){const s=e.hachureGap<0?4*e.strokeWidth:e.hachureGap,a=e.zigzagOffset<0?s:e.zigzagOffset,o=n(t,e=Object.assign({},e,{hachureGap:s+a}));return{type:"fillSketch",ops:this.zigzagLines(o,a,e)}}zigzagLines(t,e,n){const a=[];return t.forEach((t=>{const o=s(t),r=Math.round(o/(2*e));let h=t[0],i=t[1];h[0]>i[0]&&(h=t[1],i=t[0]);const c=Math.atan((i[1]-h[1])/(i[0]-h[0]));for(let t=0;t<r;t++){const s=2*t*e,o=2*(t+1)*e,r=Math.sqrt(2*Math.pow(e,2)),i=[h[0]+s*Math.cos(c),h[1]+s*Math.sin(c)],l=[h[0]+o*Math.cos(c),h[1]+o*Math.sin(c)],u=[i[0]+r*Math.cos(c+Math.PI/4),i[1]+r*Math.sin(c+Math.PI/4)];a.push(...this.helper.doubleLineOps(i[0],i[1],u[0],u[1],n),...this.helper.doubleLineOps(u[0],u[1],l[0],l[1],n))}})),a}}const l={};function u(){return Math.floor(Math.random()*2**31)}class p{constructor(t){this.seed=t}next(){return this.seed?(2**31-1&(this.seed=Math.imul(48271,this.seed)))/2**31:Math.random()}}const f={A:7,a:7,C:6,c:6,H:1,h:1,L:2,l:2,M:2,m:2,Q:4,q:4,S:4,s:4,T:2,t:2,V:1,v:1,Z:0,z:0};function d(t,e){return t.type===e}function g(t){const e=[],s=function(t){const e=new Array;for(;""!==t;)if(t.match(/^([ \t\r\n,]+)/))t=t.substr(RegExp.$1.length);else if(t.match(/^([aAcChHlLmMqQsStTvVzZ])/))e[e.length]={type:0,text:RegExp.$1},t=t.substr(RegExp.$1.length);else{if(!t.match(/^(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)/))return[];e[e.length]={type:1,text:`${parseFloat(RegExp.$1)}`},t=t.substr(RegExp.$1.length)}return e[e.length]={type:2,text:""},e}(t);let n="BOD",a=0,o=s[a];for(;!d(o,2);){let r=0;const h=[];if("BOD"===n){if("M"!==o.text&&"m"!==o.text)return g("M0,0"+t);a++,r=f[o.text],n=o.text}else d(o,1)?r=f[n]:(a++,r=f[o.text],n=o.text);if(!(a+r<s.length))throw new Error("Path data ended short");for(let t=a;t<a+r;t++){const e=s[t];if(!d(e,1))throw new Error("Param not a number: "+n+","+e.text);h[h.length]=+e.text}if("number"!=typeof f[n])throw new Error("Bad segment: "+n);{const t={key:n,data:h};e.push(t),a+=r,o=s[a],"M"===n&&(n="L"),"m"===n&&(n="l")}}return e}function M(t){let e=0,s=0,n=0,a=0;const o=[];for(const{key:r,data:h}of t)switch(r){case"M":o.push({key:"M",data:[...h]}),[e,s]=h,[n,a]=h;break;case"m":e+=h[0],s+=h[1],o.push({key:"M",data:[e,s]}),n=e,a=s;break;case"L":o.push({key:"L",data:[...h]}),[e,s]=h;break;case"l":e+=h[0],s+=h[1],o.push({key:"L",data:[e,s]});break;case"C":o.push({key:"C",data:[...h]}),e=h[4],s=h[5];break;case"c":{const t=h.map(((t,n)=>n%2?t+s:t+e));o.push({key:"C",data:t}),e=t[4],s=t[5];break}case"Q":o.push({key:"Q",data:[...h]}),e=h[2],s=h[3];break;case"q":{const t=h.map(((t,n)=>n%2?t+s:t+e));o.push({key:"Q",data:t}),e=t[2],s=t[3];break}case"A":o.push({key:"A",data:[...h]}),e=h[5],s=h[6];break;case"a":e+=h[5],s+=h[6],o.push({key:"A",data:[h[0],h[1],h[2],h[3],h[4],e,s]});break;case"H":o.push({key:"H",data:[...h]}),e=h[0];break;case"h":e+=h[0],o.push({key:"H",data:[e]});break;case"V":o.push({key:"V",data:[...h]}),s=h[0];break;case"v":s+=h[0],o.push({key:"V",data:[s]});break;case"S":o.push({key:"S",data:[...h]}),e=h[2],s=h[3];break;case"s":{const t=h.map(((t,n)=>n%2?t+s:t+e));o.push({key:"S",data:t}),e=t[2],s=t[3];break}case"T":o.push({key:"T",data:[...h]}),e=h[0],s=h[1];break;case"t":e+=h[0],s+=h[1],o.push({key:"T",data:[e,s]});break;case"Z":case"z":o.push({key:"Z",data:[]}),e=n,s=a}return o}function k(t){const e=[];let s="",n=0,a=0,o=0,r=0,h=0,i=0;for(const{key:c,data:l}of t){switch(c){case"M":e.push({key:"M",data:[...l]}),[n,a]=l,[o,r]=l;break;case"C":e.push({key:"C",data:[...l]}),n=l[4],a=l[5],h=l[2],i=l[3];break;case"L":e.push({key:"L",data:[...l]}),[n,a]=l;break;case"H":n=l[0],e.push({key:"L",data:[n,a]});break;case"V":a=l[0],e.push({key:"L",data:[n,a]});break;case"S":{let t=0,o=0;"C"===s||"S"===s?(t=n+(n-h),o=a+(a-i)):(t=n,o=a),e.push({key:"C",data:[t,o,...l]}),h=l[0],i=l[1],n=l[2],a=l[3];break}case"T":{const[t,o]=l;let r=0,c=0;"Q"===s||"T"===s?(r=n+(n-h),c=a+(a-i)):(r=n,c=a);const u=n+2*(r-n)/3,p=a+2*(c-a)/3,f=t+2*(r-t)/3,d=o+2*(c-o)/3;e.push({key:"C",data:[u,p,f,d,t,o]}),h=r,i=c,n=t,a=o;break}case"Q":{const[t,s,o,r]=l,c=n+2*(t-n)/3,u=a+2*(s-a)/3,p=o+2*(t-o)/3,f=r+2*(s-r)/3;e.push({key:"C",data:[c,u,p,f,o,r]}),h=t,i=s,n=o,a=r;break}case"A":{const t=Math.abs(l[0]),s=Math.abs(l[1]),o=l[2],r=l[3],h=l[4],i=l[5],c=l[6];if(0===t||0===s)e.push({key:"C",data:[n,a,i,c,i,c]}),n=i,a=c;else if(n!==i||a!==c){y(n,a,i,c,t,s,o,r,h).forEach((function(t){e.push({key:"C",data:t})})),n=i,a=c}break}case"Z":e.push({key:"Z",data:[]}),n=o,a=r}s=c}return e}function b(t,e,s){return[t*Math.cos(s)-e*Math.sin(s),t*Math.sin(s)+e*Math.cos(s)]}function y(t,e,s,n,a,o,r,h,i,c){const l=(u=r,Math.PI*u/180);var u;let p=[],f=0,d=0,g=0,M=0;if(c)[f,d,g,M]=c;else{[t,e]=b(t,e,-l),[s,n]=b(s,n,-l);const r=(t-s)/2,c=(e-n)/2;let u=r*r/(a*a)+c*c/(o*o);u>1&&(u=Math.sqrt(u),a*=u,o*=u);const p=a*a,k=o*o,y=p*k-p*c*c-k*r*r,m=p*c*c+k*r*r,x=(h===i?-1:1)*Math.sqrt(Math.abs(y/m));g=x*a*c/o+(t+s)/2,M=x*-o*r/a+(e+n)/2,f=Math.asin(parseFloat(((e-M)/o).toFixed(9))),d=Math.asin(parseFloat(((n-M)/o).toFixed(9))),t<g&&(f=Math.PI-f),s<g&&(d=Math.PI-d),f<0&&(f=2*Math.PI+f),d<0&&(d=2*Math.PI+d),i&&f>d&&(f-=2*Math.PI),!i&&d>f&&(d-=2*Math.PI)}let k=d-f;if(Math.abs(k)>120*Math.PI/180){const t=d,e=s,h=n;d=i&&d>f?f+120*Math.PI/180*1:f+120*Math.PI/180*-1,p=y(s=g+a*Math.cos(d),n=M+o*Math.sin(d),e,h,a,o,r,0,i,[d,t,g,M])}k=d-f;const m=Math.cos(f),x=Math.sin(f),P=Math.cos(d),w=Math.sin(d),v=Math.tan(k/4),O=4/3*a*v,S=4/3*o*v,L=[t,e],T=[t+O*x,e-S*m],D=[s+O*w,n-S*P],A=[s,n];if(T[0]=2*L[0]-T[0],T[1]=2*L[1]-T[1],c)return[T,D,A].concat(p);{p=[T,D,A].concat(p);const t=[];for(let e=0;e<p.length;e+=3){const s=b(p[e][0],p[e][1],l),n=b(p[e+1][0],p[e+1][1],l),a=b(p[e+2][0],p[e+2][1],l);t.push([s[0],s[1],n[0],n[1],a[0],a[1]])}return t}}const m={randOffset:W,randOffsetWithRange:z,ellipse:S,doubleLineOps:E};function x(t,e,s,n,a){return{type:"path",ops:F(t,e,s,n,a)}}function P(t,e,s){const n=(t||[]).length;if(n>2){const a=[];for(let e=0;e<n-1;e++)a.push(...F(t[e][0],t[e][1],t[e+1][0],t[e+1][1],s));return e&&a.push(...F(t[n-1][0],t[n-1][1],t[0][0],t[0][1],s)),{type:"path",ops:a}}return 2===n?x(t[0][0],t[0][1],t[1][0],t[1][1],s):{type:"path",ops:[]}}function w(t,e){return P(t,!0,e)}function v(t,e,s,n,a){return w([[t,e],[t+s,e],[t+s,e+n],[t,e+n]],a)}function O(t,e){let s=j(t,1*(1+.2*e.roughness),e);if(!e.disableMultiStroke){const n=j(t,1.5*(1+.22*e.roughness),function(t){const e=Object.assign({},t);e.randomizer=void 0,t.seed&&(e.seed=t.seed+1);return e}(e));s=s.concat(n)}return{type:"path",ops:s}}function S(t,e,s,n,a){return T(t,e,a,L(s,n,a)).opset}function L(t,e,s){const n=Math.sqrt(2*Math.PI*Math.sqrt((Math.pow(t/2,2)+Math.pow(e/2,2))/2)),a=Math.ceil(Math.max(s.curveStepCount,s.curveStepCount/Math.sqrt(200)*n)),o=2*Math.PI/a;let r=Math.abs(t/2),h=Math.abs(e/2);const i=1-s.curveFitting;return r+=$(r*i,s),h+=$(h*i,s),{increment:o,rx:r,ry:h}}function T(t,e,s,n){const[a,o]=Z(n.increment,t,e,n.rx,n.ry,1,n.increment*G(.1,G(.4,1,s),s),s);let r=V(a,null,s);if(!s.disableMultiStroke&&0!==s.roughness){const[a]=Z(n.increment,t,e,n.rx,n.ry,1.5,0,s),o=V(a,null,s);r=r.concat(o)}return{estimatedPoints:o,opset:{type:"path",ops:r}}}function D(t,e,s,n,a,o,r,h,i){const c=t,l=e;let u=Math.abs(s/2),p=Math.abs(n/2);u+=$(.01*u,i),p+=$(.01*p,i);let f=a,d=o;for(;f<0;)f+=2*Math.PI,d+=2*Math.PI;d-f>2*Math.PI&&(f=0,d=2*Math.PI);const g=2*Math.PI/i.curveStepCount,M=Math.min(g/2,(d-f)/2),k=Q(M,c,l,u,p,f,d,1,i);if(!i.disableMultiStroke){const t=Q(M,c,l,u,p,f,d,1.5,i);k.push(...t)}return r&&(h?k.push(...F(c,l,c+u*Math.cos(f),l+p*Math.sin(f),i),...F(c,l,c+u*Math.cos(d),l+p*Math.sin(d),i)):k.push({op:"lineTo",data:[c,l]},{op:"lineTo",data:[c+u*Math.cos(f),l+p*Math.sin(f)]})),{type:"path",ops:k}}function A(t,e){const s=k(M(g(t))),n=[];let a=[0,0],o=[0,0];for(const{key:t,data:r}of s)switch(t){case"M":{const t=1*(e.maxRandomnessOffset||0),s=e.preserveVertices;n.push({op:"move",data:r.map((n=>n+(s?0:$(t,e))))}),o=[r[0],r[1]],a=[r[0],r[1]];break}case"L":n.push(...F(o[0],o[1],r[0],r[1],e)),o=[r[0],r[1]];break;case"C":{const[t,s,a,h,i,c]=r;n.push(...H(t,s,a,h,i,c,o,e)),o=[i,c];break}case"Z":n.push(...F(o[0],o[1],a[0],a[1],e)),o=[a[0],a[1]]}return{type:"path",ops:n}}function I(t,e){const s=[];for(const n of t)if(n.length){const t=e.maxRandomnessOffset||0,a=n.length;if(a>2){s.push({op:"move",data:[n[0][0]+$(t,e),n[0][1]+$(t,e)]});for(let o=1;o<a;o++)s.push({op:"lineTo",data:[n[o][0]+$(t,e),n[o][1]+$(t,e)]})}}return{type:"fillPath",ops:s}}function _(t,e){return function(t,e){let s=t.fillStyle||"hachure";if(!l[s])switch(s){case"zigzag":l[s]||(l[s]=new o(e));break;case"cross-hatch":l[s]||(l[s]=new r(e));break;case"dots":l[s]||(l[s]=new h(e));break;case"dashed":l[s]||(l[s]=new i(e));break;case"zigzag-line":l[s]||(l[s]=new c(e));break;case"hachure":default:s="hachure",l[s]||(l[s]=new a(e))}return l[s]}(e,m).fillPolygons(t,e)}function C(t,e,s,n,a,o,r){const h=t,i=e;let c=Math.abs(s/2),l=Math.abs(n/2);c+=$(.01*c,r),l+=$(.01*l,r);let u=a,p=o;for(;u<0;)u+=2*Math.PI,p+=2*Math.PI;p-u>2*Math.PI&&(u=0,p=2*Math.PI);const f=(p-u)/r.curveStepCount,d=[];for(let t=u;t<=p;t+=f)d.push([h+c*Math.cos(t),i+l*Math.sin(t)]);return d.push([h+c*Math.cos(p),i+l*Math.sin(p)]),d.push([h,i]),_([d],r)}function W(t,e){return $(t,e)}function z(t,e,s){return G(t,e,s)}function E(t,e,s,n,a){return F(t,e,s,n,a,!0)}function R(t){return t.randomizer||(t.randomizer=new p(t.seed||0)),t.randomizer.next()}function G(t,e,s,n=1){return s.roughness*n*(R(s)*(e-t)+t)}function $(t,e,s=1){return G(-t,t,e,s)}function F(t,e,s,n,a,o=!1){const r=o?a.disableMultiStrokeFill:a.disableMultiStroke,h=q(t,e,s,n,a,!0,!1);if(r)return h;const i=q(t,e,s,n,a,!0,!0);return h.concat(i)}function q(t,e,s,n,a,o,r){const h=Math.pow(t-s,2)+Math.pow(e-n,2),i=Math.sqrt(h);let c=1;c=i<200?1:i>500?.4:-.0016668*i+1.233334;let l=a.maxRandomnessOffset||0;l*l*100>h&&(l=i/10);const u=l/2,p=.2+.2*R(a);let f=a.bowing*a.maxRandomnessOffset*(n-e)/200,d=a.bowing*a.maxRandomnessOffset*(t-s)/200;f=$(f,a,c),d=$(d,a,c);const g=[],M=()=>$(u,a,c),k=()=>$(l,a,c),b=a.preserveVertices;return o&&(r?g.push({op:"move",data:[t+(b?0:M()),e+(b?0:M())]}):g.push({op:"move",data:[t+(b?0:$(l,a,c)),e+(b?0:$(l,a,c))]})),r?g.push({op:"bcurveTo",data:[f+t+(s-t)*p+M(),d+e+(n-e)*p+M(),f+t+2*(s-t)*p+M(),d+e+2*(n-e)*p+M(),s+(b?0:M()),n+(b?0:M())]}):g.push({op:"bcurveTo",data:[f+t+(s-t)*p+k(),d+e+(n-e)*p+k(),f+t+2*(s-t)*p+k(),d+e+2*(n-e)*p+k(),s+(b?0:k()),n+(b?0:k())]}),g}function j(t,e,s){const n=[];n.push([t[0][0]+$(e,s),t[0][1]+$(e,s)]),n.push([t[0][0]+$(e,s),t[0][1]+$(e,s)]);for(let a=1;a<t.length;a++)n.push([t[a][0]+$(e,s),t[a][1]+$(e,s)]),a===t.length-1&&n.push([t[a][0]+$(e,s),t[a][1]+$(e,s)]);return V(n,null,s)}function V(t,e,s){const n=t.length,a=[];if(n>3){const o=[],r=1-s.curveTightness;a.push({op:"move",data:[t[1][0],t[1][1]]});for(let e=1;e+2<n;e++){const s=t[e];o[0]=[s[0],s[1]],o[1]=[s[0]+(r*t[e+1][0]-r*t[e-1][0])/6,s[1]+(r*t[e+1][1]-r*t[e-1][1])/6],o[2]=[t[e+1][0]+(r*t[e][0]-r*t[e+2][0])/6,t[e+1][1]+(r*t[e][1]-r*t[e+2][1])/6],o[3]=[t[e+1][0],t[e+1][1]],a.push({op:"bcurveTo",data:[o[1][0],o[1][1],o[2][0],o[2][1],o[3][0],o[3][1]]})}if(e&&2===e.length){const t=s.maxRandomnessOffset;a.push({op:"lineTo",data:[e[0]+$(t,s),e[1]+$(t,s)]})}}else 3===n?(a.push({op:"move",data:[t[1][0],t[1][1]]}),a.push({op:"bcurveTo",data:[t[1][0],t[1][1],t[2][0],t[2][1],t[2][0],t[2][1]]})):2===n&&a.push(...F(t[0][0],t[0][1],t[1][0],t[1][1],s));return a}function Z(t,e,s,n,a,o,r,h){const i=[],c=[];if(0===h.roughness){t/=4,c.push([e+n*Math.cos(-t),s+a*Math.sin(-t)]);for(let o=0;o<=2*Math.PI;o+=t){const t=[e+n*Math.cos(o),s+a*Math.sin(o)];i.push(t),c.push(t)}c.push([e+n*Math.cos(0),s+a*Math.sin(0)]),c.push([e+n*Math.cos(t),s+a*Math.sin(t)])}else{const l=$(.5,h)-Math.PI/2;c.push([$(o,h)+e+.9*n*Math.cos(l-t),$(o,h)+s+.9*a*Math.sin(l-t)]);const u=2*Math.PI+l-.01;for(let r=l;r<u;r+=t){const t=[$(o,h)+e+n*Math.cos(r),$(o,h)+s+a*Math.sin(r)];i.push(t),c.push(t)}c.push([$(o,h)+e+n*Math.cos(l+2*Math.PI+.5*r),$(o,h)+s+a*Math.sin(l+2*Math.PI+.5*r)]),c.push([$(o,h)+e+.98*n*Math.cos(l+r),$(o,h)+s+.98*a*Math.sin(l+r)]),c.push([$(o,h)+e+.9*n*Math.cos(l+.5*r),$(o,h)+s+.9*a*Math.sin(l+.5*r)])}return[c,i]}function Q(t,e,s,n,a,o,r,h,i){const c=o+$(.1,i),l=[];l.push([$(h,i)+e+.9*n*Math.cos(c-t),$(h,i)+s+.9*a*Math.sin(c-t)]);for(let o=c;o<=r;o+=t)l.push([$(h,i)+e+n*Math.cos(o),$(h,i)+s+a*Math.sin(o)]);return l.push([e+n*Math.cos(r),s+a*Math.sin(r)]),l.push([e+n*Math.cos(r),s+a*Math.sin(r)]),V(l,null,i)}function H(t,e,s,n,a,o,r,h){const i=[],c=[h.maxRandomnessOffset||1,(h.maxRandomnessOffset||1)+.3];let l=[0,0];const u=h.disableMultiStroke?1:2,p=h.preserveVertices;for(let f=0;f<u;f++)0===f?i.push({op:"move",data:[r[0],r[1]]}):i.push({op:"move",data:[r[0]+(p?0:$(c[0],h)),r[1]+(p?0:$(c[0],h))]}),l=p?[a,o]:[a+$(c[f],h),o+$(c[f],h)],i.push({op:"bcurveTo",data:[t+$(c[f],h),e+$(c[f],h),s+$(c[f],h),n+$(c[f],h),l[0],l[1]]});return i}function N(t){return[...t]}function B(t,e){return Math.pow(t[0]-e[0],2)+Math.pow(t[1]-e[1],2)}function J(t,e,s){const n=B(e,s);if(0===n)return B(t,e);let a=((t[0]-e[0])*(s[0]-e[0])+(t[1]-e[1])*(s[1]-e[1]))/n;return a=Math.max(0,Math.min(1,a)),B(t,K(e,s,a))}function K(t,e,s){return[t[0]+(e[0]-t[0])*s,t[1]+(e[1]-t[1])*s]}function U(t,e,s,n){const a=n||[];if(function(t,e){const s=t[e+0],n=t[e+1],a=t[e+2],o=t[e+3];let r=3*n[0]-2*s[0]-o[0];r*=r;let h=3*n[1]-2*s[1]-o[1];h*=h;let i=3*a[0]-2*o[0]-s[0];i*=i;let c=3*a[1]-2*o[1]-s[1];return c*=c,r<i&&(r=i),h<c&&(h=c),r+h}(t,e)<s){const s=t[e+0];if(a.length){(o=a[a.length-1],r=s,Math.sqrt(B(o,r)))>1&&a.push(s)}else a.push(s);a.push(t[e+3])}else{const n=.5,o=t[e+0],r=t[e+1],h=t[e+2],i=t[e+3],c=K(o,r,n),l=K(r,h,n),u=K(h,i,n),p=K(c,l,n),f=K(l,u,n),d=K(p,f,n);U([o,c,p,d],0,s,a),U([d,f,u,i],0,s,a)}var o,r;return a}function X(t,e){return Y(t,0,t.length,e)}function Y(t,e,s,n,a){const o=a||[],r=t[e],h=t[s-1];let i=0,c=1;for(let n=e+1;n<s-1;++n){const e=J(t[n],r,h);e>i&&(i=e,c=n)}return Math.sqrt(i)>n?(Y(t,e,c+1,n,o),Y(t,c,s,n,o)):(o.length||o.push(r),o.push(h)),o}function tt(t,e=.15,s){const n=[],a=(t.length-1)/3;for(let s=0;s<a;s++){U(t,3*s,e,n)}return s&&s>0?Y(n,0,n.length,s):n}const et="none";class st{constructor(t){this.defaultOptions={maxRandomnessOffset:2,roughness:1,bowing:1,stroke:"#000",strokeWidth:1,curveTightness:0,curveFitting:.95,curveStepCount:9,fillStyle:"hachure",fillWeight:-1,hachureAngle:-41,hachureGap:-1,dashOffset:-1,dashGap:-1,zigzagOffset:-1,seed:0,disableMultiStroke:!1,disableMultiStrokeFill:!1,preserveVertices:!1},this.config=t||{},this.config.options&&(this.defaultOptions=this._o(this.config.options))}static newSeed(){return u()}_o(t){return t?Object.assign({},this.defaultOptions,t):this.defaultOptions}_d(t,e,s){return{shape:t,sets:e||[],options:s||this.defaultOptions}}line(t,e,s,n,a){const o=this._o(a);return this._d("line",[x(t,e,s,n,o)],o)}rectangle(t,e,s,n,a){const o=this._o(a),r=[],h=v(t,e,s,n,o);if(o.fill){const a=[[t,e],[t+s,e],[t+s,e+n],[t,e+n]];"solid"===o.fillStyle?r.push(I([a],o)):r.push(_([a],o))}return o.stroke!==et&&r.push(h),this._d("rectangle",r,o)}ellipse(t,e,s,n,a){const o=this._o(a),r=[],h=L(s,n,o),i=T(t,e,o,h);if(o.fill)if("solid"===o.fillStyle){const s=T(t,e,o,h).opset;s.type="fillPath",r.push(s)}else r.push(_([i.estimatedPoints],o));return o.stroke!==et&&r.push(i.opset),this._d("ellipse",r,o)}circle(t,e,s,n){const a=this.ellipse(t,e,s,s,n);return a.shape="circle",a}linearPath(t,e){const s=this._o(e);return this._d("linearPath",[P(t,!1,s)],s)}arc(t,e,s,n,a,o,r=!1,h){const i=this._o(h),c=[],l=D(t,e,s,n,a,o,r,!0,i);if(r&&i.fill)if("solid"===i.fillStyle){const r=Object.assign({},i);r.disableMultiStroke=!0;const h=D(t,e,s,n,a,o,!0,!1,r);h.type="fillPath",c.push(h)}else c.push(C(t,e,s,n,a,o,i));return i.stroke!==et&&c.push(l),this._d("arc",c,i)}curve(t,e){const s=this._o(e),n=[],a=O(t,s);if(s.fill&&s.fill!==et&&t.length>=3){const e=tt(function(t,e=0){const s=t.length;if(s<3)throw new Error("A curve must have at least three points.");const n=[];if(3===s)n.push(N(t[0]),N(t[1]),N(t[2]),N(t[2]));else{const s=[];s.push(t[0],t[0]);for(let e=1;e<t.length;e++)s.push(t[e]),e===t.length-1&&s.push(t[e]);const a=[],o=1-e;n.push(N(s[0]));for(let t=1;t+2<s.length;t++){const e=s[t];a[0]=[e[0],e[1]],a[1]=[e[0]+(o*s[t+1][0]-o*s[t-1][0])/6,e[1]+(o*s[t+1][1]-o*s[t-1][1])/6],a[2]=[s[t+1][0]+(o*s[t][0]-o*s[t+2][0])/6,s[t+1][1]+(o*s[t][1]-o*s[t+2][1])/6],a[3]=[s[t+1][0],s[t+1][1]],n.push(a[1],a[2],a[3])}}return n}(t),10,(1+s.roughness)/2);"solid"===s.fillStyle?n.push(I([e],s)):n.push(_([e],s))}return s.stroke!==et&&n.push(a),this._d("curve",n,s)}polygon(t,e){const s=this._o(e),n=[],a=P(t,!0,s);return s.fill&&("solid"===s.fillStyle?n.push(I([t],s)):n.push(_([t],s))),s.stroke!==et&&n.push(a),this._d("polygon",n,s)}path(t,e){const s=this._o(e),n=[];if(!t)return this._d("path",n,s);t=(t||"").replace(/\n/g," ").replace(/(-\s)/g,"-").replace("/(ss)/g"," ");const a=s.fill&&"transparent"!==s.fill&&s.fill!==et,o=s.stroke!==et,r=!!(s.simplification&&s.simplification<1),h=function(t,e,s){const n=k(M(g(t))),a=[];let o=[],r=[0,0],h=[];const i=()=>{h.length>=4&&o.push(...tt(h,e)),h=[]},c=()=>{i(),o.length&&(a.push(o),o=[])};for(const{key:t,data:e}of n)switch(t){case"M":c(),r=[e[0],e[1]],o.push(r);break;case"L":i(),o.push([e[0],e[1]]);break;case"C":if(!h.length){const t=o.length?o[o.length-1]:r;h.push([t[0],t[1]])}h.push([e[0],e[1]]),h.push([e[2],e[3]]),h.push([e[4],e[5]]);break;case"Z":i(),o.push([r[0],r[1]])}if(c(),!s)return a;const l=[];for(const t of a){const e=X(t,s);e.length&&l.push(e)}return l}(t,1,r?4-4*s.simplification:(1+s.roughness)/2);return a&&("solid"===s.fillStyle?n.push(I(h,s)):n.push(_(h,s))),o&&(r?h.forEach((t=>{n.push(P(t,!1,s))})):n.push(A(t,s))),this._d("path",n,s)}opsToPath(t,e){let s="";for(const n of t.ops){const t="number"==typeof e&&e>=0?n.data.map((t=>+t.toFixed(e))):n.data;switch(n.op){case"move":s+=`M${t[0]} ${t[1]} `;break;case"bcurveTo":s+=`C${t[0]} ${t[1]}, ${t[2]} ${t[3]}, ${t[4]} ${t[5]} `;break;case"lineTo":s+=`L${t[0]} ${t[1]} `}}return s.trim()}toPaths(t){const e=t.sets||[],s=t.options||this.defaultOptions,n=[];for(const t of e){let e=null;switch(t.type){case"path":e={d:this.opsToPath(t),stroke:s.stroke,strokeWidth:s.strokeWidth,fill:et};break;case"fillPath":e={d:this.opsToPath(t),stroke:et,strokeWidth:0,fill:s.fill||et};break;case"fillSketch":e=this.fillSketch(t,s)}e&&n.push(e)}return n}fillSketch(t,e){let s=e.fillWeight;return s<0&&(s=e.strokeWidth/2),{d:this.opsToPath(t),stroke:e.fill||et,strokeWidth:s,fill:et}}}const nt="http://www.w3.org/2000/svg";exports.Random=p,exports.RoughCanvas=class{constructor(t,e){this.canvas=t,this.ctx=this.canvas.getContext("2d"),this.gen=new st(e)}draw(t){const e=t.sets||[],s=t.options||this.getDefaultOptions(),n=this.ctx,a=t.options.fixedDecimalPlaceDigits;for(const o of e)switch(o.type){case"path":n.save(),n.strokeStyle="none"===s.stroke?"transparent":s.stroke,n.lineWidth=s.strokeWidth,s.strokeLineDash&&n.setLineDash(s.strokeLineDash),s.strokeLineDashOffset&&(n.lineDashOffset=s.strokeLineDashOffset),this._drawToContext(n,o,a),n.restore();break;case"fillPath":{n.save(),n.fillStyle=s.fill||"";const e="curve"===t.shape||"polygon"===t.shape||"path"===t.shape?"evenodd":"nonzero";this._drawToContext(n,o,a,e),n.restore();break}case"fillSketch":this.fillSketch(n,o,s)}}fillSketch(t,e,s){let n=s.fillWeight;n<0&&(n=s.strokeWidth/2),t.save(),s.fillLineDash&&t.setLineDash(s.fillLineDash),s.fillLineDashOffset&&(t.lineDashOffset=s.fillLineDashOffset),t.strokeStyle=s.fill||"",t.lineWidth=n,this._drawToContext(t,e,s.fixedDecimalPlaceDigits),t.restore()}_drawToContext(t,e,s,n="nonzero"){t.beginPath();for(const n of e.ops){const e="number"==typeof s&&s>=0?n.data.map((t=>+t.toFixed(s))):n.data;switch(n.op){case"move":t.moveTo(e[0],e[1]);break;case"bcurveTo":t.bezierCurveTo(e[0],e[1],e[2],e[3],e[4],e[5]);break;case"lineTo":t.lineTo(e[0],e[1])}}"fillPath"===e.type?t.fill(n):t.stroke()}get generator(){return this.gen}getDefaultOptions(){return this.gen.defaultOptions}line(t,e,s,n,a){const o=this.gen.line(t,e,s,n,a);return this.draw(o),o}rectangle(t,e,s,n,a){const o=this.gen.rectangle(t,e,s,n,a);return this.draw(o),o}ellipse(t,e,s,n,a){const o=this.gen.ellipse(t,e,s,n,a);return this.draw(o),o}circle(t,e,s,n){const a=this.gen.circle(t,e,s,n);return this.draw(a),a}linearPath(t,e){const s=this.gen.linearPath(t,e);return this.draw(s),s}polygon(t,e){const s=this.gen.polygon(t,e);return this.draw(s),s}arc(t,e,s,n,a,o,r=!1,h){const i=this.gen.arc(t,e,s,n,a,o,r,h);return this.draw(i),i}curve(t,e){const s=this.gen.curve(t,e);return this.draw(s),s}path(t,e){const s=this.gen.path(t,e);return this.draw(s),s}},exports.RoughGenerator=st,exports.RoughSVG=class{constructor(t,e){this.svg=t,this.gen=new st(e)}draw(t){const e=t.sets||[],s=t.options||this.getDefaultOptions(),n=this.svg.ownerDocument||window.document,a=n.createElementNS(nt,"g"),o=t.options.fixedDecimalPlaceDigits;for(const r of e){let e=null;switch(r.type){case"path":e=n.createElementNS(nt,"path"),e.setAttribute("d",this.opsToPath(r,o)),e.setAttribute("stroke",s.stroke),e.setAttribute("stroke-width",s.strokeWidth+""),e.setAttribute("fill","none"),s.strokeLineDash&&e.setAttribute("stroke-dasharray",s.strokeLineDash.join(" ").trim()),s.strokeLineDashOffset&&e.setAttribute("stroke-dashoffset",`${s.strokeLineDashOffset}`);break;case"fillPath":e=n.createElementNS(nt,"path"),e.setAttribute("d",this.opsToPath(r,o)),e.setAttribute("stroke","none"),e.setAttribute("stroke-width","0"),e.setAttribute("fill",s.fill||""),"curve"!==t.shape&&"polygon"!==t.shape||e.setAttribute("fill-rule","evenodd");break;case"fillSketch":e=this.fillSketch(n,r,s)}e&&a.appendChild(e)}return a}fillSketch(t,e,s){let n=s.fillWeight;n<0&&(n=s.strokeWidth/2);const a=t.createElementNS(nt,"path");return a.setAttribute("d",this.opsToPath(e,s.fixedDecimalPlaceDigits)),a.setAttribute("stroke",s.fill||""),a.setAttribute("stroke-width",n+""),a.setAttribute("fill","none"),s.fillLineDash&&a.setAttribute("stroke-dasharray",s.fillLineDash.join(" ").trim()),s.fillLineDashOffset&&a.setAttribute("stroke-dashoffset",`${s.fillLineDashOffset}`),a}get generator(){return this.gen}getDefaultOptions(){return this.gen.defaultOptions}opsToPath(t,e){return this.gen.opsToPath(t,e)}line(t,e,s,n,a){const o=this.gen.line(t,e,s,n,a);return this.draw(o)}rectangle(t,e,s,n,a){const o=this.gen.rectangle(t,e,s,n,a);return this.draw(o)}ellipse(t,e,s,n,a){const o=this.gen.ellipse(t,e,s,n,a);return this.draw(o)}circle(t,e,s,n){const a=this.gen.circle(t,e,s,n);return this.draw(a)}linearPath(t,e){const s=this.gen.linearPath(t,e);return this.draw(s)}polygon(t,e){const s=this.gen.polygon(t,e);return this.draw(s)}arc(t,e,s,n,a,o,r=!1,h){const i=this.gen.arc(t,e,s,n,a,o,r,h);return this.draw(i)}curve(t,e){const s=this.gen.curve(t,e);return this.draw(s)}path(t,e){const s=this.gen.path(t,e);return this.draw(s)}},exports.SVGNS=nt,exports.arc=D,exports.curve=O,exports.doubleLineFillOps=E,exports.ellipse=S,exports.ellipseWithParams=T,exports.generateEllipseParams=L,exports.line=x,exports.lineLength=s,exports.linearPath=P,exports.patternFillArc=C,exports.patternFillPolygons=_,exports.polygon=w,exports.randOffset=W,exports.randOffsetWithRange=z,exports.randomSeed=u,exports.rectangle=v,exports.rotateLines=e,exports.rotatePoints=t,exports.solidFillPolygon=I,exports.svgPath=A;
+diff --git a/bundled/rough.cjs.js b/bundled/rough.cjs.js
+deleted file mode 100644
+index fb05534..0000000
+diff --git a/bundled/rough.d.ts b/bundled/rough.d.ts
+new file mode 100644
+index 0000000..4426820
+--- /dev/null
++++ b/bundled/rough.d.ts
+@@ -0,0 +1,190 @@
++declare type Point = [number, number];
++declare type Line = [Point, Point];
++interface Rectangle {
++    x: number;
++    y: number;
++    width: number;
++    height: number;
++}
++declare function rotatePoints(points: Point[], center: Point, degrees: number): void;
++declare function rotateLines(lines: Line[], center: Point, degrees: number): void;
++declare function lineLength(line: Line): number;
++
++declare function randomSeed(): number;
++declare class Random {
++    private seed;
++    constructor(seed: number);
++    next(): number;
++}
++
++declare const SVGNS = "http://www.w3.org/2000/svg";
++interface Config {
++    options?: Options;
++}
++interface DrawingSurface {
++    width: number | SVGAnimatedLength;
++    height: number | SVGAnimatedLength;
++}
++interface Options {
++    maxRandomnessOffset?: number;
++    roughness?: number;
++    bowing?: number;
++    stroke?: string;
++    strokeWidth?: number;
++    curveFitting?: number;
++    curveTightness?: number;
++    curveStepCount?: number;
++    fill?: string;
++    fillStyle?: string;
++    fillWeight?: number;
++    hachureAngle?: number;
++    hachureGap?: number;
++    simplification?: number;
++    dashOffset?: number;
++    dashGap?: number;
++    zigzagOffset?: number;
++    seed?: number;
++    strokeLineDash?: number[];
++    strokeLineDashOffset?: number;
++    fillLineDash?: number[];
++    fillLineDashOffset?: number;
++    disableMultiStroke?: boolean;
++    disableMultiStrokeFill?: boolean;
++    preserveVertices?: boolean;
++    fixedDecimalPlaceDigits?: number;
++}
++interface ResolvedOptions extends Options {
++    maxRandomnessOffset: number;
++    roughness: number;
++    bowing: number;
++    stroke: string;
++    strokeWidth: number;
++    curveFitting: number;
++    curveTightness: number;
++    curveStepCount: number;
++    fillStyle: string;
++    fillWeight: number;
++    hachureAngle: number;
++    hachureGap: number;
++    dashOffset: number;
++    dashGap: number;
++    zigzagOffset: number;
++    seed: number;
++    randomizer?: Random;
++    disableMultiStroke: boolean;
++    disableMultiStrokeFill: boolean;
++    preserveVertices: boolean;
++}
++declare type OpType = 'move' | 'bcurveTo' | 'lineTo';
++declare type OpSetType = 'path' | 'fillPath' | 'fillSketch';
++interface Op {
++    op: OpType;
++    data: number[];
++}
++interface OpSet {
++    type: OpSetType;
++    ops: Op[];
++    size?: Point;
++    path?: string;
++}
++interface Drawable {
++    shape: string;
++    options: ResolvedOptions;
++    sets: OpSet[];
++}
++interface PathInfo {
++    d: string;
++    stroke: string;
++    strokeWidth: number;
++    fill?: string;
++}
++
++declare class RoughGenerator {
++    private config;
++    defaultOptions: ResolvedOptions;
++    constructor(config?: Config);
++    static newSeed(): number;
++    private _o;
++    private _d;
++    line(x1: number, y1: number, x2: number, y2: number, options?: Options): Drawable;
++    rectangle(x: number, y: number, width: number, height: number, options?: Options): Drawable;
++    ellipse(x: number, y: number, width: number, height: number, options?: Options): Drawable;
++    circle(x: number, y: number, diameter: number, options?: Options): Drawable;
++    linearPath(points: Point[], options?: Options): Drawable;
++    arc(x: number, y: number, width: number, height: number, start: number, stop: number, closed?: boolean, options?: Options): Drawable;
++    curve(points: Point[], options?: Options): Drawable;
++    polygon(points: Point[], options?: Options): Drawable;
++    path(d: string, options?: Options): Drawable;
++    opsToPath(drawing: OpSet, fixedDecimals?: number): string;
++    toPaths(drawable: Drawable): PathInfo[];
++    private fillSketch;
++}
++
++declare class RoughCanvas {
++    private gen;
++    private canvas;
++    private ctx;
++    constructor(canvas: HTMLCanvasElement, config?: Config);
++    draw(drawable: Drawable): void;
++    private fillSketch;
++    private _drawToContext;
++    get generator(): RoughGenerator;
++    getDefaultOptions(): ResolvedOptions;
++    line(x1: number, y1: number, x2: number, y2: number, options?: Options): Drawable;
++    rectangle(x: number, y: number, width: number, height: number, options?: Options): Drawable;
++    ellipse(x: number, y: number, width: number, height: number, options?: Options): Drawable;
++    circle(x: number, y: number, diameter: number, options?: Options): Drawable;
++    linearPath(points: Point[], options?: Options): Drawable;
++    polygon(points: Point[], options?: Options): Drawable;
++    arc(x: number, y: number, width: number, height: number, start: number, stop: number, closed?: boolean, options?: Options): Drawable;
++    curve(points: Point[], options?: Options): Drawable;
++    path(d: string, options?: Options): Drawable;
++}
++
++interface EllipseParams {
++    rx: number;
++    ry: number;
++    increment: number;
++}
++declare function line(x1: number, y1: number, x2: number, y2: number, o: ResolvedOptions): OpSet;
++declare function linearPath(points: Point[], close: boolean, o: ResolvedOptions): OpSet;
++declare function polygon(points: Point[], o: ResolvedOptions): OpSet;
++declare function rectangle(x: number, y: number, width: number, height: number, o: ResolvedOptions): OpSet;
++declare function curve(points: Point[], o: ResolvedOptions): OpSet;
++interface EllipseResult {
++    opset: OpSet;
++    estimatedPoints: Point[];
++}
++declare function ellipse(x: number, y: number, width: number, height: number, o: ResolvedOptions): OpSet;
++declare function generateEllipseParams(width: number, height: number, o: ResolvedOptions): EllipseParams;
++declare function ellipseWithParams(x: number, y: number, o: ResolvedOptions, ellipseParams: EllipseParams): EllipseResult;
++declare function arc(x: number, y: number, width: number, height: number, start: number, stop: number, closed: boolean, roughClosure: boolean, o: ResolvedOptions): OpSet;
++declare function svgPath(path: string, o: ResolvedOptions): OpSet;
++declare function solidFillPolygon(polygonList: Point[][], o: ResolvedOptions): OpSet;
++declare function patternFillPolygons(polygonList: Point[][], o: ResolvedOptions): OpSet;
++declare function patternFillArc(x: number, y: number, width: number, height: number, start: number, stop: number, o: ResolvedOptions): OpSet;
++declare function randOffset(x: number, o: ResolvedOptions): number;
++declare function randOffsetWithRange(min: number, max: number, o: ResolvedOptions): number;
++declare function doubleLineFillOps(x1: number, y1: number, x2: number, y2: number, o: ResolvedOptions): Op[];
++
++declare class RoughSVG {
++    private gen;
++    private svg;
++    constructor(svg: SVGSVGElement, config?: Config);
++    draw(drawable: Drawable): SVGGElement;
++    private fillSketch;
++    get generator(): RoughGenerator;
++    getDefaultOptions(): ResolvedOptions;
++    opsToPath(drawing: OpSet, fixedDecimalPlaceDigits?: number): string;
++    line(x1: number, y1: number, x2: number, y2: number, options?: Options): SVGGElement;
++    rectangle(x: number, y: number, width: number, height: number, options?: Options): SVGGElement;
++    ellipse(x: number, y: number, width: number, height: number, options?: Options): SVGGElement;
++    circle(x: number, y: number, diameter: number, options?: Options): SVGGElement;
++    linearPath(points: Point[], options?: Options): SVGGElement;
++    polygon(points: Point[], options?: Options): SVGGElement;
++    arc(x: number, y: number, width: number, height: number, start: number, stop: number, closed?: boolean, options?: Options): SVGGElement;
++    curve(points: Point[], options?: Options): SVGGElement;
++    path(d: string, options?: Options): SVGGElement;
++}
++
++export { Config, Drawable, DrawingSurface, EllipseResult, Line, Op, OpSet, OpSetType, OpType, Options, PathInfo, Point, Random, Rectangle, ResolvedOptions, RoughCanvas, RoughGenerator, RoughSVG, SVGNS, arc, curve, doubleLineFillOps, ellipse, ellipseWithParams, generateEllipseParams, line, lineLength, linearPath, patternFillArc, patternFillPolygons, polygon, randOffset, randOffsetWithRange, randomSeed, rectangle, rotateLines, rotatePoints, solidFillPolygon, svgPath };
+diff --git a/bundled/rough.esm.js b/bundled/rough.esm.js
+deleted file mode 100644
+index 261fead..0000000
+diff --git a/bundled/rough.js b/bundled/rough.js
+deleted file mode 100644
+index 9cec4e5..0000000
+diff --git a/bundled/rough.mjs b/bundled/rough.mjs
+new file mode 100644
+index 0000000..2abdfbb
+--- /dev/null
++++ b/bundled/rough.mjs
+@@ -0,0 +1 @@
++function t(t,e,s){if(t&&t.length){const[n,a]=e,o=Math.PI/180*s,h=Math.cos(o),r=Math.sin(o);t.forEach((t=>{const[e,s]=t;t[0]=(e-n)*h-(s-a)*r+n,t[1]=(e-n)*r+(s-a)*h+a}))}}function e(e,s,n){const a=[];e.forEach((t=>a.push(...t))),t(a,s,n)}function s(t){const e=t[0],s=t[1];return Math.sqrt(Math.pow(e[0]-s[0],2)+Math.pow(e[1]-s[1],2))}function n(s,n){const a=n.hachureAngle+90;let o=n.hachureGap;o<0&&(o=4*n.strokeWidth),o=Math.max(o,.1);const h=[0,0];if(a)for(const e of s)t(e,h,a);const r=function(t,e){const s=[];for(const e of t){const t=[...e];t[0].join(",")!==t[t.length-1].join(",")&&t.push([t[0][0],t[0][1]]),t.length>2&&s.push(t)}const n=[];e=Math.max(e,.1);const a=[];for(const t of s)for(let e=0;e<t.length-1;e++){const s=t[e],n=t[e+1];if(s[1]!==n[1]){const t=Math.min(s[1],n[1]);a.push({ymin:t,ymax:Math.max(s[1],n[1]),x:t===s[1]?s[0]:n[0],islope:(n[0]-s[0])/(n[1]-s[1])})}}if(a.sort(((t,e)=>t.ymin<e.ymin?-1:t.ymin>e.ymin?1:t.x<e.x?-1:t.x>e.x?1:t.ymax===e.ymax?0:(t.ymax-e.ymax)/Math.abs(t.ymax-e.ymax))),!a.length)return n;let o=[],h=a[0].ymin;for(;o.length||a.length;){if(a.length){let t=-1;for(let e=0;e<a.length&&!(a[e].ymin>h);e++)t=e;a.splice(0,t+1).forEach((t=>{o.push({s:h,edge:t})}))}if(o=o.filter((t=>!(t.edge.ymax<=h))),o.sort(((t,e)=>t.edge.x===e.edge.x?0:(t.edge.x-e.edge.x)/Math.abs(t.edge.x-e.edge.x))),o.length>1)for(let t=0;t<o.length;t+=2){const e=t+1;if(e>=o.length)break;const s=o[t].edge,a=o[e].edge;n.push([[Math.round(s.x),h],[Math.round(a.x),h]])}h+=e,o.forEach((t=>{t.edge.x=t.edge.x+e*t.edge.islope}))}return n}(s,o);if(a){for(const e of s)t(e,h,-a);e(r,h,-a)}return r}class a{constructor(t){this.helper=t}fillPolygons(t,e){return this._fillPolygons(t,e)}_fillPolygons(t,e){const s=n(t,e);return{type:"fillSketch",ops:this.renderLines(s,e)}}renderLines(t,e){const s=[];for(const n of t)s.push(...this.helper.doubleLineOps(n[0][0],n[0][1],n[1][0],n[1][1],e));return s}}class o extends a{fillPolygons(t,e){let a=e.hachureGap;a<0&&(a=4*e.strokeWidth),a=Math.max(a,.1);const o=n(t,Object.assign({},e,{hachureGap:a})),h=Math.PI/180*e.hachureAngle,r=[],i=.5*a*Math.cos(h),c=.5*a*Math.sin(h);for(const[t,e]of o)s([t,e])&&r.push([[t[0]-i,t[1]+c],[...e]],[[t[0]+i,t[1]-c],[...e]]);return{type:"fillSketch",ops:this.renderLines(r,e)}}}class h extends a{fillPolygons(t,e){const s=this._fillPolygons(t,e),n=Object.assign({},e,{hachureAngle:e.hachureAngle+90}),a=this._fillPolygons(t,n);return s.ops=s.ops.concat(a.ops),s}}class r{constructor(t){this.helper=t}fillPolygons(t,e){const s=n(t,e=Object.assign({},e,{hachureAngle:0}));return this.dotsOnLines(s,e)}dotsOnLines(t,e){const n=[];let a=e.hachureGap;a<0&&(a=4*e.strokeWidth),a=Math.max(a,.1);let o=e.fillWeight;o<0&&(o=e.strokeWidth/2);const h=a/4;for(const r of t){const t=s(r),i=t/a,c=Math.ceil(i)-1,l=t-c*a,u=(r[0][0]+r[1][0])/2-a/4,p=Math.min(r[0][1],r[1][1]);for(let t=0;t<c;t++){const s=p+l+t*a,r=u-h+2*Math.random()*h,i=s-h+2*Math.random()*h,c=this.helper.ellipse(r,i,o,o,e);n.push(...c.ops)}}return{type:"fillSketch",ops:n}}}class i{constructor(t){this.helper=t}fillPolygons(t,e){const s=n(t,e);return{type:"fillSketch",ops:this.dashedLine(s,e)}}dashedLine(t,e){const n=e.dashOffset<0?e.hachureGap<0?4*e.strokeWidth:e.hachureGap:e.dashOffset,a=e.dashGap<0?e.hachureGap<0?4*e.strokeWidth:e.hachureGap:e.dashGap,o=[];return t.forEach((t=>{const h=s(t),r=Math.floor(h/(n+a)),i=(h+a-r*(n+a))/2;let c=t[0],l=t[1];c[0]>l[0]&&(c=t[1],l=t[0]);const u=Math.atan((l[1]-c[1])/(l[0]-c[0]));for(let t=0;t<r;t++){const s=t*(n+a),h=s+n,r=[c[0]+s*Math.cos(u)+i*Math.cos(u),c[1]+s*Math.sin(u)+i*Math.sin(u)],l=[c[0]+h*Math.cos(u)+i*Math.cos(u),c[1]+h*Math.sin(u)+i*Math.sin(u)];o.push(...this.helper.doubleLineOps(r[0],r[1],l[0],l[1],e))}})),o}}class c{constructor(t){this.helper=t}fillPolygons(t,e){const s=e.hachureGap<0?4*e.strokeWidth:e.hachureGap,a=e.zigzagOffset<0?s:e.zigzagOffset,o=n(t,e=Object.assign({},e,{hachureGap:s+a}));return{type:"fillSketch",ops:this.zigzagLines(o,a,e)}}zigzagLines(t,e,n){const a=[];return t.forEach((t=>{const o=s(t),h=Math.round(o/(2*e));let r=t[0],i=t[1];r[0]>i[0]&&(r=t[1],i=t[0]);const c=Math.atan((i[1]-r[1])/(i[0]-r[0]));for(let t=0;t<h;t++){const s=2*t*e,o=2*(t+1)*e,h=Math.sqrt(2*Math.pow(e,2)),i=[r[0]+s*Math.cos(c),r[1]+s*Math.sin(c)],l=[r[0]+o*Math.cos(c),r[1]+o*Math.sin(c)],u=[i[0]+h*Math.cos(c+Math.PI/4),i[1]+h*Math.sin(c+Math.PI/4)];a.push(...this.helper.doubleLineOps(i[0],i[1],u[0],u[1],n),...this.helper.doubleLineOps(u[0],u[1],l[0],l[1],n))}})),a}}const l={};function u(){return Math.floor(Math.random()*2**31)}class p{constructor(t){this.seed=t}next(){return this.seed?(2**31-1&(this.seed=Math.imul(48271,this.seed)))/2**31:Math.random()}}const f={A:7,a:7,C:6,c:6,H:1,h:1,L:2,l:2,M:2,m:2,Q:4,q:4,S:4,s:4,T:2,t:2,V:1,v:1,Z:0,z:0};function d(t,e){return t.type===e}function g(t){const e=[],s=function(t){const e=new Array;for(;""!==t;)if(t.match(/^([ \t\r\n,]+)/))t=t.substr(RegExp.$1.length);else if(t.match(/^([aAcChHlLmMqQsStTvVzZ])/))e[e.length]={type:0,text:RegExp.$1},t=t.substr(RegExp.$1.length);else{if(!t.match(/^(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)/))return[];e[e.length]={type:1,text:`${parseFloat(RegExp.$1)}`},t=t.substr(RegExp.$1.length)}return e[e.length]={type:2,text:""},e}(t);let n="BOD",a=0,o=s[a];for(;!d(o,2);){let h=0;const r=[];if("BOD"===n){if("M"!==o.text&&"m"!==o.text)return g("M0,0"+t);a++,h=f[o.text],n=o.text}else d(o,1)?h=f[n]:(a++,h=f[o.text],n=o.text);if(!(a+h<s.length))throw new Error("Path data ended short");for(let t=a;t<a+h;t++){const e=s[t];if(!d(e,1))throw new Error("Param not a number: "+n+","+e.text);r[r.length]=+e.text}if("number"!=typeof f[n])throw new Error("Bad segment: "+n);{const t={key:n,data:r};e.push(t),a+=h,o=s[a],"M"===n&&(n="L"),"m"===n&&(n="l")}}return e}function M(t){let e=0,s=0,n=0,a=0;const o=[];for(const{key:h,data:r}of t)switch(h){case"M":o.push({key:"M",data:[...r]}),[e,s]=r,[n,a]=r;break;case"m":e+=r[0],s+=r[1],o.push({key:"M",data:[e,s]}),n=e,a=s;break;case"L":o.push({key:"L",data:[...r]}),[e,s]=r;break;case"l":e+=r[0],s+=r[1],o.push({key:"L",data:[e,s]});break;case"C":o.push({key:"C",data:[...r]}),e=r[4],s=r[5];break;case"c":{const t=r.map(((t,n)=>n%2?t+s:t+e));o.push({key:"C",data:t}),e=t[4],s=t[5];break}case"Q":o.push({key:"Q",data:[...r]}),e=r[2],s=r[3];break;case"q":{const t=r.map(((t,n)=>n%2?t+s:t+e));o.push({key:"Q",data:t}),e=t[2],s=t[3];break}case"A":o.push({key:"A",data:[...r]}),e=r[5],s=r[6];break;case"a":e+=r[5],s+=r[6],o.push({key:"A",data:[r[0],r[1],r[2],r[3],r[4],e,s]});break;case"H":o.push({key:"H",data:[...r]}),e=r[0];break;case"h":e+=r[0],o.push({key:"H",data:[e]});break;case"V":o.push({key:"V",data:[...r]}),s=r[0];break;case"v":s+=r[0],o.push({key:"V",data:[s]});break;case"S":o.push({key:"S",data:[...r]}),e=r[2],s=r[3];break;case"s":{const t=r.map(((t,n)=>n%2?t+s:t+e));o.push({key:"S",data:t}),e=t[2],s=t[3];break}case"T":o.push({key:"T",data:[...r]}),e=r[0],s=r[1];break;case"t":e+=r[0],s+=r[1],o.push({key:"T",data:[e,s]});break;case"Z":case"z":o.push({key:"Z",data:[]}),e=n,s=a}return o}function k(t){const e=[];let s="",n=0,a=0,o=0,h=0,r=0,i=0;for(const{key:c,data:l}of t){switch(c){case"M":e.push({key:"M",data:[...l]}),[n,a]=l,[o,h]=l;break;case"C":e.push({key:"C",data:[...l]}),n=l[4],a=l[5],r=l[2],i=l[3];break;case"L":e.push({key:"L",data:[...l]}),[n,a]=l;break;case"H":n=l[0],e.push({key:"L",data:[n,a]});break;case"V":a=l[0],e.push({key:"L",data:[n,a]});break;case"S":{let t=0,o=0;"C"===s||"S"===s?(t=n+(n-r),o=a+(a-i)):(t=n,o=a),e.push({key:"C",data:[t,o,...l]}),r=l[0],i=l[1],n=l[2],a=l[3];break}case"T":{const[t,o]=l;let h=0,c=0;"Q"===s||"T"===s?(h=n+(n-r),c=a+(a-i)):(h=n,c=a);const u=n+2*(h-n)/3,p=a+2*(c-a)/3,f=t+2*(h-t)/3,d=o+2*(c-o)/3;e.push({key:"C",data:[u,p,f,d,t,o]}),r=h,i=c,n=t,a=o;break}case"Q":{const[t,s,o,h]=l,c=n+2*(t-n)/3,u=a+2*(s-a)/3,p=o+2*(t-o)/3,f=h+2*(s-h)/3;e.push({key:"C",data:[c,u,p,f,o,h]}),r=t,i=s,n=o,a=h;break}case"A":{const t=Math.abs(l[0]),s=Math.abs(l[1]),o=l[2],h=l[3],r=l[4],i=l[5],c=l[6];if(0===t||0===s)e.push({key:"C",data:[n,a,i,c,i,c]}),n=i,a=c;else if(n!==i||a!==c){y(n,a,i,c,t,s,o,h,r).forEach((function(t){e.push({key:"C",data:t})})),n=i,a=c}break}case"Z":e.push({key:"Z",data:[]}),n=o,a=h}s=c}return e}function b(t,e,s){return[t*Math.cos(s)-e*Math.sin(s),t*Math.sin(s)+e*Math.cos(s)]}function y(t,e,s,n,a,o,h,r,i,c){const l=(u=h,Math.PI*u/180);var u;let p=[],f=0,d=0,g=0,M=0;if(c)[f,d,g,M]=c;else{[t,e]=b(t,e,-l),[s,n]=b(s,n,-l);const h=(t-s)/2,c=(e-n)/2;let u=h*h/(a*a)+c*c/(o*o);u>1&&(u=Math.sqrt(u),a*=u,o*=u);const p=a*a,k=o*o,y=p*k-p*c*c-k*h*h,m=p*c*c+k*h*h,x=(r===i?-1:1)*Math.sqrt(Math.abs(y/m));g=x*a*c/o+(t+s)/2,M=x*-o*h/a+(e+n)/2,f=Math.asin(parseFloat(((e-M)/o).toFixed(9))),d=Math.asin(parseFloat(((n-M)/o).toFixed(9))),t<g&&(f=Math.PI-f),s<g&&(d=Math.PI-d),f<0&&(f=2*Math.PI+f),d<0&&(d=2*Math.PI+d),i&&f>d&&(f-=2*Math.PI),!i&&d>f&&(d-=2*Math.PI)}let k=d-f;if(Math.abs(k)>120*Math.PI/180){const t=d,e=s,r=n;d=i&&d>f?f+120*Math.PI/180*1:f+120*Math.PI/180*-1,p=y(s=g+a*Math.cos(d),n=M+o*Math.sin(d),e,r,a,o,h,0,i,[d,t,g,M])}k=d-f;const m=Math.cos(f),x=Math.sin(f),w=Math.cos(d),P=Math.sin(d),v=Math.tan(k/4),O=4/3*a*v,S=4/3*o*v,L=[t,e],T=[t+O*x,e-S*m],D=[s+O*P,n-S*w],A=[s,n];if(T[0]=2*L[0]-T[0],T[1]=2*L[1]-T[1],c)return[T,D,A].concat(p);{p=[T,D,A].concat(p);const t=[];for(let e=0;e<p.length;e+=3){const s=b(p[e][0],p[e][1],l),n=b(p[e+1][0],p[e+1][1],l),a=b(p[e+2][0],p[e+2][1],l);t.push([s[0],s[1],n[0],n[1],a[0],a[1]])}return t}}const m={randOffset:W,randOffsetWithRange:z,ellipse:S,doubleLineOps:E};function x(t,e,s,n,a){return{type:"path",ops:q(t,e,s,n,a)}}function w(t,e,s){const n=(t||[]).length;if(n>2){const a=[];for(let e=0;e<n-1;e++)a.push(...q(t[e][0],t[e][1],t[e+1][0],t[e+1][1],s));return e&&a.push(...q(t[n-1][0],t[n-1][1],t[0][0],t[0][1],s)),{type:"path",ops:a}}return 2===n?x(t[0][0],t[0][1],t[1][0],t[1][1],s):{type:"path",ops:[]}}function P(t,e){return w(t,!0,e)}function v(t,e,s,n,a){return P([[t,e],[t+s,e],[t+s,e+n],[t,e+n]],a)}function O(t,e){let s=F(t,1*(1+.2*e.roughness),e);if(!e.disableMultiStroke){const n=F(t,1.5*(1+.22*e.roughness),function(t){const e=Object.assign({},t);e.randomizer=void 0,t.seed&&(e.seed=t.seed+1);return e}(e));s=s.concat(n)}return{type:"path",ops:s}}function S(t,e,s,n,a){return T(t,e,a,L(s,n,a)).opset}function L(t,e,s){const n=Math.sqrt(2*Math.PI*Math.sqrt((Math.pow(t/2,2)+Math.pow(e/2,2))/2)),a=Math.ceil(Math.max(s.curveStepCount,s.curveStepCount/Math.sqrt(200)*n)),o=2*Math.PI/a;let h=Math.abs(t/2),r=Math.abs(e/2);const i=1-s.curveFitting;return h+=R(h*i,s),r+=R(r*i,s),{increment:o,rx:h,ry:r}}function T(t,e,s,n){const[a,o]=Z(n.increment,t,e,n.rx,n.ry,1,n.increment*G(.1,G(.4,1,s),s),s);let h=V(a,null,s);if(!s.disableMultiStroke&&0!==s.roughness){const[a]=Z(n.increment,t,e,n.rx,n.ry,1.5,0,s),o=V(a,null,s);h=h.concat(o)}return{estimatedPoints:o,opset:{type:"path",ops:h}}}function D(t,e,s,n,a,o,h,r,i){const c=t,l=e;let u=Math.abs(s/2),p=Math.abs(n/2);u+=R(.01*u,i),p+=R(.01*p,i);let f=a,d=o;for(;f<0;)f+=2*Math.PI,d+=2*Math.PI;d-f>2*Math.PI&&(f=0,d=2*Math.PI);const g=2*Math.PI/i.curveStepCount,M=Math.min(g/2,(d-f)/2),k=Q(M,c,l,u,p,f,d,1,i);if(!i.disableMultiStroke){const t=Q(M,c,l,u,p,f,d,1.5,i);k.push(...t)}return h&&(r?k.push(...q(c,l,c+u*Math.cos(f),l+p*Math.sin(f),i),...q(c,l,c+u*Math.cos(d),l+p*Math.sin(d),i)):k.push({op:"lineTo",data:[c,l]},{op:"lineTo",data:[c+u*Math.cos(f),l+p*Math.sin(f)]})),{type:"path",ops:k}}function A(t,e){const s=k(M(g(t))),n=[];let a=[0,0],o=[0,0];for(const{key:t,data:h}of s)switch(t){case"M":{const t=1*(e.maxRandomnessOffset||0),s=e.preserveVertices;n.push({op:"move",data:h.map((n=>n+(s?0:R(t,e))))}),o=[h[0],h[1]],a=[h[0],h[1]];break}case"L":n.push(...q(o[0],o[1],h[0],h[1],e)),o=[h[0],h[1]];break;case"C":{const[t,s,a,r,i,c]=h;n.push(...H(t,s,a,r,i,c,o,e)),o=[i,c];break}case"Z":n.push(...q(o[0],o[1],a[0],a[1],e)),o=[a[0],a[1]]}return{type:"path",ops:n}}function I(t,e){const s=[];for(const n of t)if(n.length){const t=e.maxRandomnessOffset||0,a=n.length;if(a>2){s.push({op:"move",data:[n[0][0]+R(t,e),n[0][1]+R(t,e)]});for(let o=1;o<a;o++)s.push({op:"lineTo",data:[n[o][0]+R(t,e),n[o][1]+R(t,e)]})}}return{type:"fillPath",ops:s}}function C(t,e){return function(t,e){let s=t.fillStyle||"hachure";if(!l[s])switch(s){case"zigzag":l[s]||(l[s]=new o(e));break;case"cross-hatch":l[s]||(l[s]=new h(e));break;case"dots":l[s]||(l[s]=new r(e));break;case"dashed":l[s]||(l[s]=new i(e));break;case"zigzag-line":l[s]||(l[s]=new c(e));break;case"hachure":default:s="hachure",l[s]||(l[s]=new a(e))}return l[s]}(e,m).fillPolygons(t,e)}function _(t,e,s,n,a,o,h){const r=t,i=e;let c=Math.abs(s/2),l=Math.abs(n/2);c+=R(.01*c,h),l+=R(.01*l,h);let u=a,p=o;for(;u<0;)u+=2*Math.PI,p+=2*Math.PI;p-u>2*Math.PI&&(u=0,p=2*Math.PI);const f=(p-u)/h.curveStepCount,d=[];for(let t=u;t<=p;t+=f)d.push([r+c*Math.cos(t),i+l*Math.sin(t)]);return d.push([r+c*Math.cos(p),i+l*Math.sin(p)]),d.push([r,i]),C([d],h)}function W(t,e){return R(t,e)}function z(t,e,s){return G(t,e,s)}function E(t,e,s,n,a){return q(t,e,s,n,a,!0)}function $(t){return t.randomizer||(t.randomizer=new p(t.seed||0)),t.randomizer.next()}function G(t,e,s,n=1){return s.roughness*n*($(s)*(e-t)+t)}function R(t,e,s=1){return G(-t,t,e,s)}function q(t,e,s,n,a,o=!1){const h=o?a.disableMultiStrokeFill:a.disableMultiStroke,r=j(t,e,s,n,a,!0,!1);if(h)return r;const i=j(t,e,s,n,a,!0,!0);return r.concat(i)}function j(t,e,s,n,a,o,h){const r=Math.pow(t-s,2)+Math.pow(e-n,2),i=Math.sqrt(r);let c=1;c=i<200?1:i>500?.4:-.0016668*i+1.233334;let l=a.maxRandomnessOffset||0;l*l*100>r&&(l=i/10);const u=l/2,p=.2+.2*$(a);let f=a.bowing*a.maxRandomnessOffset*(n-e)/200,d=a.bowing*a.maxRandomnessOffset*(t-s)/200;f=R(f,a,c),d=R(d,a,c);const g=[],M=()=>R(u,a,c),k=()=>R(l,a,c),b=a.preserveVertices;return o&&(h?g.push({op:"move",data:[t+(b?0:M()),e+(b?0:M())]}):g.push({op:"move",data:[t+(b?0:R(l,a,c)),e+(b?0:R(l,a,c))]})),h?g.push({op:"bcurveTo",data:[f+t+(s-t)*p+M(),d+e+(n-e)*p+M(),f+t+2*(s-t)*p+M(),d+e+2*(n-e)*p+M(),s+(b?0:M()),n+(b?0:M())]}):g.push({op:"bcurveTo",data:[f+t+(s-t)*p+k(),d+e+(n-e)*p+k(),f+t+2*(s-t)*p+k(),d+e+2*(n-e)*p+k(),s+(b?0:k()),n+(b?0:k())]}),g}function F(t,e,s){const n=[];n.push([t[0][0]+R(e,s),t[0][1]+R(e,s)]),n.push([t[0][0]+R(e,s),t[0][1]+R(e,s)]);for(let a=1;a<t.length;a++)n.push([t[a][0]+R(e,s),t[a][1]+R(e,s)]),a===t.length-1&&n.push([t[a][0]+R(e,s),t[a][1]+R(e,s)]);return V(n,null,s)}function V(t,e,s){const n=t.length,a=[];if(n>3){const o=[],h=1-s.curveTightness;a.push({op:"move",data:[t[1][0],t[1][1]]});for(let e=1;e+2<n;e++){const s=t[e];o[0]=[s[0],s[1]],o[1]=[s[0]+(h*t[e+1][0]-h*t[e-1][0])/6,s[1]+(h*t[e+1][1]-h*t[e-1][1])/6],o[2]=[t[e+1][0]+(h*t[e][0]-h*t[e+2][0])/6,t[e+1][1]+(h*t[e][1]-h*t[e+2][1])/6],o[3]=[t[e+1][0],t[e+1][1]],a.push({op:"bcurveTo",data:[o[1][0],o[1][1],o[2][0],o[2][1],o[3][0],o[3][1]]})}if(e&&2===e.length){const t=s.maxRandomnessOffset;a.push({op:"lineTo",data:[e[0]+R(t,s),e[1]+R(t,s)]})}}else 3===n?(a.push({op:"move",data:[t[1][0],t[1][1]]}),a.push({op:"bcurveTo",data:[t[1][0],t[1][1],t[2][0],t[2][1],t[2][0],t[2][1]]})):2===n&&a.push(...q(t[0][0],t[0][1],t[1][0],t[1][1],s));return a}function Z(t,e,s,n,a,o,h,r){const i=[],c=[];if(0===r.roughness){t/=4,c.push([e+n*Math.cos(-t),s+a*Math.sin(-t)]);for(let o=0;o<=2*Math.PI;o+=t){const t=[e+n*Math.cos(o),s+a*Math.sin(o)];i.push(t),c.push(t)}c.push([e+n*Math.cos(0),s+a*Math.sin(0)]),c.push([e+n*Math.cos(t),s+a*Math.sin(t)])}else{const l=R(.5,r)-Math.PI/2;c.push([R(o,r)+e+.9*n*Math.cos(l-t),R(o,r)+s+.9*a*Math.sin(l-t)]);const u=2*Math.PI+l-.01;for(let h=l;h<u;h+=t){const t=[R(o,r)+e+n*Math.cos(h),R(o,r)+s+a*Math.sin(h)];i.push(t),c.push(t)}c.push([R(o,r)+e+n*Math.cos(l+2*Math.PI+.5*h),R(o,r)+s+a*Math.sin(l+2*Math.PI+.5*h)]),c.push([R(o,r)+e+.98*n*Math.cos(l+h),R(o,r)+s+.98*a*Math.sin(l+h)]),c.push([R(o,r)+e+.9*n*Math.cos(l+.5*h),R(o,r)+s+.9*a*Math.sin(l+.5*h)])}return[c,i]}function Q(t,e,s,n,a,o,h,r,i){const c=o+R(.1,i),l=[];l.push([R(r,i)+e+.9*n*Math.cos(c-t),R(r,i)+s+.9*a*Math.sin(c-t)]);for(let o=c;o<=h;o+=t)l.push([R(r,i)+e+n*Math.cos(o),R(r,i)+s+a*Math.sin(o)]);return l.push([e+n*Math.cos(h),s+a*Math.sin(h)]),l.push([e+n*Math.cos(h),s+a*Math.sin(h)]),V(l,null,i)}function H(t,e,s,n,a,o,h,r){const i=[],c=[r.maxRandomnessOffset||1,(r.maxRandomnessOffset||1)+.3];let l=[0,0];const u=r.disableMultiStroke?1:2,p=r.preserveVertices;for(let f=0;f<u;f++)0===f?i.push({op:"move",data:[h[0],h[1]]}):i.push({op:"move",data:[h[0]+(p?0:R(c[0],r)),h[1]+(p?0:R(c[0],r))]}),l=p?[a,o]:[a+R(c[f],r),o+R(c[f],r)],i.push({op:"bcurveTo",data:[t+R(c[f],r),e+R(c[f],r),s+R(c[f],r),n+R(c[f],r),l[0],l[1]]});return i}function N(t){return[...t]}function B(t,e){return Math.pow(t[0]-e[0],2)+Math.pow(t[1]-e[1],2)}function J(t,e,s){const n=B(e,s);if(0===n)return B(t,e);let a=((t[0]-e[0])*(s[0]-e[0])+(t[1]-e[1])*(s[1]-e[1]))/n;return a=Math.max(0,Math.min(1,a)),B(t,K(e,s,a))}function K(t,e,s){return[t[0]+(e[0]-t[0])*s,t[1]+(e[1]-t[1])*s]}function U(t,e,s,n){const a=n||[];if(function(t,e){const s=t[e+0],n=t[e+1],a=t[e+2],o=t[e+3];let h=3*n[0]-2*s[0]-o[0];h*=h;let r=3*n[1]-2*s[1]-o[1];r*=r;let i=3*a[0]-2*o[0]-s[0];i*=i;let c=3*a[1]-2*o[1]-s[1];return c*=c,h<i&&(h=i),r<c&&(r=c),h+r}(t,e)<s){const s=t[e+0];if(a.length){(o=a[a.length-1],h=s,Math.sqrt(B(o,h)))>1&&a.push(s)}else a.push(s);a.push(t[e+3])}else{const n=.5,o=t[e+0],h=t[e+1],r=t[e+2],i=t[e+3],c=K(o,h,n),l=K(h,r,n),u=K(r,i,n),p=K(c,l,n),f=K(l,u,n),d=K(p,f,n);U([o,c,p,d],0,s,a),U([d,f,u,i],0,s,a)}var o,h;return a}function X(t,e){return Y(t,0,t.length,e)}function Y(t,e,s,n,a){const o=a||[],h=t[e],r=t[s-1];let i=0,c=1;for(let n=e+1;n<s-1;++n){const e=J(t[n],h,r);e>i&&(i=e,c=n)}return Math.sqrt(i)>n?(Y(t,e,c+1,n,o),Y(t,c,s,n,o)):(o.length||o.push(h),o.push(r)),o}function tt(t,e=.15,s){const n=[],a=(t.length-1)/3;for(let s=0;s<a;s++){U(t,3*s,e,n)}return s&&s>0?Y(n,0,n.length,s):n}const et="none";class st{constructor(t){this.defaultOptions={maxRandomnessOffset:2,roughness:1,bowing:1,stroke:"#000",strokeWidth:1,curveTightness:0,curveFitting:.95,curveStepCount:9,fillStyle:"hachure",fillWeight:-1,hachureAngle:-41,hachureGap:-1,dashOffset:-1,dashGap:-1,zigzagOffset:-1,seed:0,disableMultiStroke:!1,disableMultiStrokeFill:!1,preserveVertices:!1},this.config=t||{},this.config.options&&(this.defaultOptions=this._o(this.config.options))}static newSeed(){return u()}_o(t){return t?Object.assign({},this.defaultOptions,t):this.defaultOptions}_d(t,e,s){return{shape:t,sets:e||[],options:s||this.defaultOptions}}line(t,e,s,n,a){const o=this._o(a);return this._d("line",[x(t,e,s,n,o)],o)}rectangle(t,e,s,n,a){const o=this._o(a),h=[],r=v(t,e,s,n,o);if(o.fill){const a=[[t,e],[t+s,e],[t+s,e+n],[t,e+n]];"solid"===o.fillStyle?h.push(I([a],o)):h.push(C([a],o))}return o.stroke!==et&&h.push(r),this._d("rectangle",h,o)}ellipse(t,e,s,n,a){const o=this._o(a),h=[],r=L(s,n,o),i=T(t,e,o,r);if(o.fill)if("solid"===o.fillStyle){const s=T(t,e,o,r).opset;s.type="fillPath",h.push(s)}else h.push(C([i.estimatedPoints],o));return o.stroke!==et&&h.push(i.opset),this._d("ellipse",h,o)}circle(t,e,s,n){const a=this.ellipse(t,e,s,s,n);return a.shape="circle",a}linearPath(t,e){const s=this._o(e);return this._d("linearPath",[w(t,!1,s)],s)}arc(t,e,s,n,a,o,h=!1,r){const i=this._o(r),c=[],l=D(t,e,s,n,a,o,h,!0,i);if(h&&i.fill)if("solid"===i.fillStyle){const h=Object.assign({},i);h.disableMultiStroke=!0;const r=D(t,e,s,n,a,o,!0,!1,h);r.type="fillPath",c.push(r)}else c.push(_(t,e,s,n,a,o,i));return i.stroke!==et&&c.push(l),this._d("arc",c,i)}curve(t,e){const s=this._o(e),n=[],a=O(t,s);if(s.fill&&s.fill!==et&&t.length>=3){const e=tt(function(t,e=0){const s=t.length;if(s<3)throw new Error("A curve must have at least three points.");const n=[];if(3===s)n.push(N(t[0]),N(t[1]),N(t[2]),N(t[2]));else{const s=[];s.push(t[0],t[0]);for(let e=1;e<t.length;e++)s.push(t[e]),e===t.length-1&&s.push(t[e]);const a=[],o=1-e;n.push(N(s[0]));for(let t=1;t+2<s.length;t++){const e=s[t];a[0]=[e[0],e[1]],a[1]=[e[0]+(o*s[t+1][0]-o*s[t-1][0])/6,e[1]+(o*s[t+1][1]-o*s[t-1][1])/6],a[2]=[s[t+1][0]+(o*s[t][0]-o*s[t+2][0])/6,s[t+1][1]+(o*s[t][1]-o*s[t+2][1])/6],a[3]=[s[t+1][0],s[t+1][1]],n.push(a[1],a[2],a[3])}}return n}(t),10,(1+s.roughness)/2);"solid"===s.fillStyle?n.push(I([e],s)):n.push(C([e],s))}return s.stroke!==et&&n.push(a),this._d("curve",n,s)}polygon(t,e){const s=this._o(e),n=[],a=w(t,!0,s);return s.fill&&("solid"===s.fillStyle?n.push(I([t],s)):n.push(C([t],s))),s.stroke!==et&&n.push(a),this._d("polygon",n,s)}path(t,e){const s=this._o(e),n=[];if(!t)return this._d("path",n,s);t=(t||"").replace(/\n/g," ").replace(/(-\s)/g,"-").replace("/(ss)/g"," ");const a=s.fill&&"transparent"!==s.fill&&s.fill!==et,o=s.stroke!==et,h=!!(s.simplification&&s.simplification<1),r=function(t,e,s){const n=k(M(g(t))),a=[];let o=[],h=[0,0],r=[];const i=()=>{r.length>=4&&o.push(...tt(r,e)),r=[]},c=()=>{i(),o.length&&(a.push(o),o=[])};for(const{key:t,data:e}of n)switch(t){case"M":c(),h=[e[0],e[1]],o.push(h);break;case"L":i(),o.push([e[0],e[1]]);break;case"C":if(!r.length){const t=o.length?o[o.length-1]:h;r.push([t[0],t[1]])}r.push([e[0],e[1]]),r.push([e[2],e[3]]),r.push([e[4],e[5]]);break;case"Z":i(),o.push([h[0],h[1]])}if(c(),!s)return a;const l=[];for(const t of a){const e=X(t,s);e.length&&l.push(e)}return l}(t,1,h?4-4*s.simplification:(1+s.roughness)/2);return a&&("solid"===s.fillStyle?n.push(I(r,s)):n.push(C(r,s))),o&&(h?r.forEach((t=>{n.push(w(t,!1,s))})):n.push(A(t,s))),this._d("path",n,s)}opsToPath(t,e){let s="";for(const n of t.ops){const t="number"==typeof e&&e>=0?n.data.map((t=>+t.toFixed(e))):n.data;switch(n.op){case"move":s+=`M${t[0]} ${t[1]} `;break;case"bcurveTo":s+=`C${t[0]} ${t[1]}, ${t[2]} ${t[3]}, ${t[4]} ${t[5]} `;break;case"lineTo":s+=`L${t[0]} ${t[1]} `}}return s.trim()}toPaths(t){const e=t.sets||[],s=t.options||this.defaultOptions,n=[];for(const t of e){let e=null;switch(t.type){case"path":e={d:this.opsToPath(t),stroke:s.stroke,strokeWidth:s.strokeWidth,fill:et};break;case"fillPath":e={d:this.opsToPath(t),stroke:et,strokeWidth:0,fill:s.fill||et};break;case"fillSketch":e=this.fillSketch(t,s)}e&&n.push(e)}return n}fillSketch(t,e){let s=e.fillWeight;return s<0&&(s=e.strokeWidth/2),{d:this.opsToPath(t),stroke:e.fill||et,strokeWidth:s,fill:et}}}class nt{constructor(t,e){this.canvas=t,this.ctx=this.canvas.getContext("2d"),this.gen=new st(e)}draw(t){const e=t.sets||[],s=t.options||this.getDefaultOptions(),n=this.ctx,a=t.options.fixedDecimalPlaceDigits;for(const o of e)switch(o.type){case"path":n.save(),n.strokeStyle="none"===s.stroke?"transparent":s.stroke,n.lineWidth=s.strokeWidth,s.strokeLineDash&&n.setLineDash(s.strokeLineDash),s.strokeLineDashOffset&&(n.lineDashOffset=s.strokeLineDashOffset),this._drawToContext(n,o,a),n.restore();break;case"fillPath":{n.save(),n.fillStyle=s.fill||"";const e="curve"===t.shape||"polygon"===t.shape||"path"===t.shape?"evenodd":"nonzero";this._drawToContext(n,o,a,e),n.restore();break}case"fillSketch":this.fillSketch(n,o,s)}}fillSketch(t,e,s){let n=s.fillWeight;n<0&&(n=s.strokeWidth/2),t.save(),s.fillLineDash&&t.setLineDash(s.fillLineDash),s.fillLineDashOffset&&(t.lineDashOffset=s.fillLineDashOffset),t.strokeStyle=s.fill||"",t.lineWidth=n,this._drawToContext(t,e,s.fixedDecimalPlaceDigits),t.restore()}_drawToContext(t,e,s,n="nonzero"){t.beginPath();for(const n of e.ops){const e="number"==typeof s&&s>=0?n.data.map((t=>+t.toFixed(s))):n.data;switch(n.op){case"move":t.moveTo(e[0],e[1]);break;case"bcurveTo":t.bezierCurveTo(e[0],e[1],e[2],e[3],e[4],e[5]);break;case"lineTo":t.lineTo(e[0],e[1])}}"fillPath"===e.type?t.fill(n):t.stroke()}get generator(){return this.gen}getDefaultOptions(){return this.gen.defaultOptions}line(t,e,s,n,a){const o=this.gen.line(t,e,s,n,a);return this.draw(o),o}rectangle(t,e,s,n,a){const o=this.gen.rectangle(t,e,s,n,a);return this.draw(o),o}ellipse(t,e,s,n,a){const o=this.gen.ellipse(t,e,s,n,a);return this.draw(o),o}circle(t,e,s,n){const a=this.gen.circle(t,e,s,n);return this.draw(a),a}linearPath(t,e){const s=this.gen.linearPath(t,e);return this.draw(s),s}polygon(t,e){const s=this.gen.polygon(t,e);return this.draw(s),s}arc(t,e,s,n,a,o,h=!1,r){const i=this.gen.arc(t,e,s,n,a,o,h,r);return this.draw(i),i}curve(t,e){const s=this.gen.curve(t,e);return this.draw(s),s}path(t,e){const s=this.gen.path(t,e);return this.draw(s),s}}const at="http://www.w3.org/2000/svg";class ot{constructor(t,e){this.svg=t,this.gen=new st(e)}draw(t){const e=t.sets||[],s=t.options||this.getDefaultOptions(),n=this.svg.ownerDocument||window.document,a=n.createElementNS(at,"g"),o=t.options.fixedDecimalPlaceDigits;for(const h of e){let e=null;switch(h.type){case"path":e=n.createElementNS(at,"path"),e.setAttribute("d",this.opsToPath(h,o)),e.setAttribute("stroke",s.stroke),e.setAttribute("stroke-width",s.strokeWidth+""),e.setAttribute("fill","none"),s.strokeLineDash&&e.setAttribute("stroke-dasharray",s.strokeLineDash.join(" ").trim()),s.strokeLineDashOffset&&e.setAttribute("stroke-dashoffset",`${s.strokeLineDashOffset}`);break;case"fillPath":e=n.createElementNS(at,"path"),e.setAttribute("d",this.opsToPath(h,o)),e.setAttribute("stroke","none"),e.setAttribute("stroke-width","0"),e.setAttribute("fill",s.fill||""),"curve"!==t.shape&&"polygon"!==t.shape||e.setAttribute("fill-rule","evenodd");break;case"fillSketch":e=this.fillSketch(n,h,s)}e&&a.appendChild(e)}return a}fillSketch(t,e,s){let n=s.fillWeight;n<0&&(n=s.strokeWidth/2);const a=t.createElementNS(at,"path");return a.setAttribute("d",this.opsToPath(e,s.fixedDecimalPlaceDigits)),a.setAttribute("stroke",s.fill||""),a.setAttribute("stroke-width",n+""),a.setAttribute("fill","none"),s.fillLineDash&&a.setAttribute("stroke-dasharray",s.fillLineDash.join(" ").trim()),s.fillLineDashOffset&&a.setAttribute("stroke-dashoffset",`${s.fillLineDashOffset}`),a}get generator(){return this.gen}getDefaultOptions(){return this.gen.defaultOptions}opsToPath(t,e){return this.gen.opsToPath(t,e)}line(t,e,s,n,a){const o=this.gen.line(t,e,s,n,a);return this.draw(o)}rectangle(t,e,s,n,a){const o=this.gen.rectangle(t,e,s,n,a);return this.draw(o)}ellipse(t,e,s,n,a){const o=this.gen.ellipse(t,e,s,n,a);return this.draw(o)}circle(t,e,s,n){const a=this.gen.circle(t,e,s,n);return this.draw(a)}linearPath(t,e){const s=this.gen.linearPath(t,e);return this.draw(s)}polygon(t,e){const s=this.gen.polygon(t,e);return this.draw(s)}arc(t,e,s,n,a,o,h=!1,r){const i=this.gen.arc(t,e,s,n,a,o,h,r);return this.draw(i)}curve(t,e){const s=this.gen.curve(t,e);return this.draw(s)}path(t,e){const s=this.gen.path(t,e);return this.draw(s)}}export{p as Random,nt as RoughCanvas,st as RoughGenerator,ot as RoughSVG,at as SVGNS,D as arc,O as curve,E as doubleLineFillOps,S as ellipse,T as ellipseWithParams,L as generateEllipseParams,x as line,s as lineLength,w as linearPath,_ as patternFillArc,C as patternFillPolygons,P as polygon,W as randOffset,z as randOffsetWithRange,u as randomSeed,v as rectangle,e as rotateLines,t as rotatePoints,I as solidFillPolygon,A as svgPath};
+diff --git a/package.json b/package.json
+index 2c77c28..783dab0 100644
+--- a/package.json
++++ b/package.json
+@@ -2,10 +2,13 @@
+   "name": "roughjs",
+   "version": "4.5.2",
+   "description": "Create graphics using HTML Canvas or SVG with a hand-drawn, sketchy, appearance.",
+-  "main": "bundled/rough.cjs.js",
+-  "module": "bundled/rough.esm.js",
+-  "browser": "bundled/rough.js",
+-  "types": "bin/rough.d.ts",
++  "main": "bundled/rough.cjs",
++  "exports": {
++    "types": "./bundled/rough.d.ts",
++    "import": "./bundled/rough.mjs",
++    "require": "./bundled/rough.cjs"
++  },
++  "types": "bundled/rough.d.ts",
+   "scripts": {
+     "build": "rm -rf bin && tsc && rollup -c",
+     "lint": "eslint --ext ts src",
+@@ -36,6 +39,7 @@
+     "@typescript-eslint/parser": "^4.33.0",
+     "eslint": "^7.32.0",
+     "rollup": "^2.61.0",
++    "rollup-plugin-dts": "^5.3.0",
+     "rollup-plugin-terser": "^7.0.2",
+     "tslib": "^2.3.1",
+     "typescript": "^4.5.3"

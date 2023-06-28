@@ -1,4 +1,4 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+import type { RoughCanvas } from 'roughjs';
 import type * as Y from 'yjs';
 
 import type { IVec } from '../index.js';

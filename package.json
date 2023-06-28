@@ -92,7 +92,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "hotkeys-js@3.10.1": "patches/hotkeys-js@3.10.1.patch"
+      "hotkeys-js@3.10.1": "patches/hotkeys-js@3.10.1.patch",
+      "roughjs@4.5.2": "patches/roughjs@4.5.2.patch"
     },
     "peerDependencyRules": {
       "ignoreMissing": [

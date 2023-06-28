@@ -8,6 +8,9 @@ patchedDependencies:
   hotkeys-js@3.10.1:
     hash: otx73r74oyscqvo3amwccrzngy
     path: patches/hotkeys-js@3.10.1.patch
+  roughjs@4.5.2:
+    hash: 3jlip4sub3emolaemkix7kiul4
+    path: patches/roughjs@4.5.2.patch
 
 importers:
 
@@ -302,7 +305,7 @@ importers:
         version: 3.2.0
       roughjs:
         specifier: ^4.5.2
-        version: 4.5.2
+        version: 4.5.2(patch_hash=3jlip4sub3emolaemkix7kiul4)
     devDependencies:
       nanoid:
         specifier: ^4.0.1
@@ -6612,13 +6615,14 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /roughjs@4.5.2:
+  /roughjs@4.5.2(patch_hash=3jlip4sub3emolaemkix7kiul4):
     resolution: {integrity: sha512-2xSlLDKdsWyFxrveYWk9YQ/Y9UfK38EAMRNkYkMqYBJvPX8abCa9PN0x3w02H8Oa6/0bcZICJU+U95VumPqseg==}
     dependencies:
       path-data-parser: 0.1.0
       points-on-curve: 0.2.0
       points-on-path: 0.2.1
     dev: false
+    patched: true
 
   /run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}

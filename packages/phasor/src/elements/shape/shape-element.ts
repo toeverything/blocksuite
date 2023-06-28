@@ -1,4 +1,4 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
+import type { RoughCanvas } from 'roughjs';
 
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
 import type { IVec } from '../../utils/vec.js';
