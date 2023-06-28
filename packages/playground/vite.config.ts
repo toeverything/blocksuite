@@ -33,7 +33,6 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
         'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
-        'examples/canvas/connector': resolve(__dirname),
         'examples/counter': resolve(__dirname, 'examples/counter/index.html'),
         'examples/workspace': resolve(
           __dirname,
