@@ -101,11 +101,14 @@ export class AStarAlgorithm {
         !this._almostEqual(next, this._originalEp)
       )
         continue;
-      const newCost =
-        this._costSoFar.get(current) ?? 0 + this._graph.cost(current, next);
+      const curCost = this._costSoFar.get(current);
+      const curDiagoalCount = this._diagonalCount.get(current);
+      const curPointPriority = this._pointPriority.get(current);
+      assertExists(curCost);
+      const newCost = curCost + this._graph.cost(current, next);
+      assertExists(curDiagoalCount);
       let newDiagonalCount =
-        this._diagonalCount.get(current) ??
-        0 + this._getDiagonalCount(next, current);
+        curDiagoalCount + this._getDiagonalCount(next, current);
       if (current !== this._sp) {
         newDiagonalCount -= this._getDiagonalCount(this._originalEp, current);
       }
@@ -115,7 +118,8 @@ export class AStarAlgorithm {
         current
       );
       assertExists(next[2]);
-      const newPointPriority = this._pointPriority.get(current) ?? 0 + next[2];
+      assertExists(curPointPriority);
+      const newPointPriority = curPointPriority + next[2];
       let canUpdate = false;
 
       const lastCost = this._costSoFar.get(next);
@@ -124,10 +128,12 @@ export class AStarAlgorithm {
       if (!lastCost || newCost - lastCost < -0.01) {
         canUpdate = true;
       } else if (almostEqual(newCost, lastCost)) {
-        if (lastPointPriority && newPointPriority > lastPointPriority) {
+        assertExists(lastPointPriority);
+        if (newPointPriority > lastPointPriority) {
           canUpdate = true;
         } else if (newPointPriority === lastPointPriority) {
-          if (lastDiagonalCount && newDiagonalCount < lastDiagonalCount) {
+          assertExists(lastDiagonalCount);
+          if (newDiagonalCount < lastDiagonalCount) {
             canUpdate = true;
           }
         }
