@@ -48,7 +48,11 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return lineWidth;
   }
 
-  intersectWithLine(start: IVec, end: IVec) {
+  override containedByBounds(bounds: Bound) {
+    return false;
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
     const tl = [this.x, this.y];
     const points = getPointsFromBoundsWithRotation(this, _ =>
       this.points.map(point => Vec.add(point, tl))

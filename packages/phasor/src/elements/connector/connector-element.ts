@@ -48,6 +48,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.yMap.get('controllers') as IConnector['controllers'];
   }
 
+  override containedByBounds(bounds: Bound) {
+    return false;
+  }
+
   override intersectWithLine(start: IVec, end: IVec): boolean {
     const bound = Bound.deserialize(this.xywh);
     return !!linePolylineIntersects(

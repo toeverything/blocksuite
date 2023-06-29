@@ -1,3 +1,4 @@
+import { type Bound } from '../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
@@ -31,6 +32,11 @@ export class TextElement extends SurfaceElement<IText> {
 
   get textAlign() {
     return this.yMap.get('textAlign') as IText['textAlign'];
+  }
+
+  override containedByBounds(bounds: Bound): boolean {
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
   }
 
   override intersectWithLine(start: IVec, end: IVec): boolean {

@@ -297,6 +297,7 @@ export class SurfaceManager {
           bound,
           Bound.fromDOMRect(getQuadBoundsWithRotation(element))
         ) ||
+        element.containedByBounds(Bound.from(bound)) ||
         Bound.from(bound).points.some((point, i, points) =>
           element.intersectWithLine(point, points[(i + 1) % points.length])
         )

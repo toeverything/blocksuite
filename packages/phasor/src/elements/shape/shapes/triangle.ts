@@ -1,5 +1,6 @@
 import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
+import { type Bound } from '../../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
@@ -84,6 +85,18 @@ export const TriangleMethods: ShapeMethods = {
     }
 
     return hited;
+  },
+
+  containedByBounds(bounds: Bound, element: ShapeElement): boolean {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h],
+        [x + w / 2, y],
+        [x + w, y + h],
+      ]
+    );
+    return points.some(point => bounds.containsPoint(point));
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {

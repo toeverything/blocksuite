@@ -2,6 +2,7 @@ import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
+  getPointsFromBoundsWithRotation,
   lineEllipseIntersects,
   pointInEllipse,
 } from '../../../utils/math-utils.js';
@@ -76,6 +77,19 @@ export const EllipseMethods: ShapeMethods = {
     }
 
     return hited;
+  },
+
+  containedByBounds(bounds: Bound, element: ShapeElement): boolean {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h / 2],
+        [x + w / 2, y],
+        [x + w, y + h / 2],
+        [x + w / 2, y + h],
+      ]
+    );
+    return points.some(point => bounds.containsPoint(point));
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {

@@ -1,5 +1,6 @@
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
+import type { Bound } from '../../utils/bound.js';
 import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
@@ -57,6 +58,10 @@ export class ShapeElement extends SurfaceElement<IShape> {
   override hitTest(x: number, y: number, options?: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
     return hitTest(x, y, this, options);
+  }
+
+  override containedByBounds(bounds: Bound): boolean {
+    return ShapeMethodsMap[this.shapeType].containedByBounds(bounds, this);
   }
 
   override intersectWithLine(start: IVec, end: IVec): boolean {

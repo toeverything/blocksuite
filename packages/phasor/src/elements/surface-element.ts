@@ -1,6 +1,6 @@
 import type * as Y from 'yjs';
 
-import type { IVec } from '../index.js';
+import type { Bound, IVec } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
@@ -31,6 +31,8 @@ export type ComputedValue = (value: string) => string;
 export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement
 > {
+  abstract containedByBounds(bounds: Bound): boolean;
+
   abstract intersectWithLine(start: IVec, end: IVec): boolean;
 
   yMap: Y.Map<unknown>;

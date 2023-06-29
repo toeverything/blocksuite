@@ -69,6 +69,15 @@ export class Bound implements IBound {
     return [this.x + this.w, this.y + this.h];
   }
 
+  containsPoint(p: IVec) {
+    return (
+      this.minX <= p[0] &&
+      p[0] <= this.maxX &&
+      this.minY <= p[1] &&
+      p[1] <= this.maxY
+    );
+  }
+
   intersectLine(sp: IVec, ep: IVec, infinite = false) {
     const rst: IVec[] = [];
     [
