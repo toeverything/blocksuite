@@ -63,7 +63,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     .affine-edgeless-selected-rect .handle {
       position: absolute;
-      pointer-events: auto;
+      pointer-events: none;
       user-select: none;
       outline: none;
 
@@ -74,6 +74,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
        * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
        */
       touchaction: none;
+    }
+
+    .affine-edgeless-selected-rect[disabled='false'] .handle {
+      pointer-events: auto;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label^='top-'],
@@ -102,10 +106,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height: 12px;
       box-sizing: border-box;
       background: transparent;
-    }
-
-    :host([disabled='true']) .affine-edgeless-selected-rect .handle {
-      pointer-events: none;
     }
 
     /* -18 + 6.5 */
@@ -504,12 +504,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         switch (action.type) {
           case 'select': {
             const { dragging } = action;
-            this.setAttribute('disabled', dragging ? 'true' : 'false');
+            _selectedRect.setAttribute('disabled', dragging ? 'true' : 'false');
             break;
           }
           case 'move': {
             const { delta, dragging } = action;
-            this.setAttribute('disabled', dragging ? 'true' : 'false');
+            _selectedRect.setAttribute('disabled', dragging ? 'true' : 'false');
 
             if (delta) {
               const { left, top } = _resizeManager.updateRect(delta);
@@ -611,7 +611,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     return html`
-      <div class="affine-edgeless-selected-rect">
+      <div class="affine-edgeless-selected-rect" disabled="true">
         ${resizeHandles} ${connectorHandles}
       </div>
       <edgeless-component-toolbar
