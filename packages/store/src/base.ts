@@ -44,6 +44,9 @@ export type PropsSetter<Props> = (props: Props) => Partial<Props>;
 export type PropsGetter<Props> = (
   internalPrimitives: InternalPrimitives
 ) => Props;
+export type PropsFromGetter<T> = T extends PropsGetter<infer Props>
+  ? Props
+  : never;
 
 export type SchemaToModel<
   Schema extends {
@@ -52,7 +55,7 @@ export type SchemaToModel<
       flavour: string;
     };
   }
-> = BaseBlockModel &
+> = BaseBlockModel<PropsFromGetter<Schema['model']['props']>> &
   ReturnType<Schema['model']['props']> & {
     flavour: Schema['model']['flavour'];
   };
@@ -153,6 +156,11 @@ export class BaseBlockModel<
   type?: string;
   text?: Text;
   sourceId?: string;
+
+  // TODO: infer return type
+  originProp(prop: string & keyof Props) {
+    return this.yBlock.get(`prop:${prop}`);
+  }
 
   isEmpty() {
     return this.children.length === 0;

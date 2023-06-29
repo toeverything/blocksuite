@@ -18,6 +18,7 @@
   "peerDependencies": {
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "yjs": "^13"
   },
   "dependencies": {
@@ -32,7 +33,7 @@
     "jszip": "^3.10.1",
     "lit": "^2.7.3",
     "marked": "^4.2.12",
-    "shiki": "^0.14.1",
+    "shiki": "^0.14.3",
     "turndown": "^7.1.1",
     "zod": "^3.21.4"
   },
@@ -69,10 +70,12 @@
     }
   },
   "devDependencies": {
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.0.8",
     "@types/turndown": "^5.0.1",
-    "yjs": "^13.6.0"
+    "yjs": "^13.6.5"
   }
 }

@@ -13,19 +13,19 @@ import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import type { Selectable } from '../../page-block/edgeless/selection-manager.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
-  isTopLevelBlock,
-} from '../../page-block/edgeless/utils.js';
+} from '../../page-block/edgeless/utils/consts.js';
+import { isTopLevelBlock } from '../../page-block/edgeless/utils/query.js';
+import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
 import type { SerializedBlock, TopLevelBlockModel } from '../index.js';
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/block-range.js';
-import { groupBy } from '../utils/std.js';
+import { groupBy } from '../utils/common.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,

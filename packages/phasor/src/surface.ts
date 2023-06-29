@@ -11,11 +11,11 @@ import {
   type IPhasorElementType,
   type PhasorElement,
   type PhasorElementType,
-  type SurfaceElement,
 } from './elements/index.js';
 import type {
   ComputedValue,
   HitTestOptions,
+  SurfaceElement,
 } from './elements/surface-element.js';
 import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
@@ -29,11 +29,19 @@ import {
 } from './utils/std.js';
 import { serializeXYWH } from './utils/xywh.js';
 
+type id = string;
+
+export interface ElementLocalRecords {
+  display: boolean;
+  opacity: number;
+}
+
 export class SurfaceManager {
   private _renderer: Renderer;
   private _yContainer: Y.Map<Y.Map<unknown>>;
-  private _elements = new Map<string, SurfaceElement>();
-  private _bindings = new Map<string, Set<string>>();
+  private _elements = new Map<id, SurfaceElement>();
+  private _bindings = new Map<id, Set<id>>();
+  private _elementLocalRecords = new Map<id, ElementLocalRecords>();
 
   private _computedValue: ComputedValue;
 
@@ -133,6 +141,7 @@ export class SurfaceManager {
         assertExists(element);
         element.unmount();
         this._elements.delete(id);
+        this.deleteElementLocalRecord(id);
 
         if (element.index === this.indexes.min) {
           this.indexes.min = generateKeyBetween(element.index, null);
@@ -256,9 +265,17 @@ export class SurfaceManager {
   pickByPoint(
     x: number,
     y: number,
-    options?: HitTestOptions
+    options: HitTestOptions = {
+      expand: 10,
+    }
   ): SurfaceElement[] {
-    const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
+    const size = options.expand;
+    const bound: IBound = {
+      x: x - size / 2,
+      y: y - size / 2,
+      w: size,
+      h: size,
+    };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter(element => {
       return element.hitTest(x, y, options);
@@ -320,5 +337,22 @@ export class SurfaceManager {
 
   getElements() {
     return [...this._elements.values()];
+  }
+
+  updateElementLocalRecord(id: id, records: Partial<ElementLocalRecords>) {
+    const elementLocalRecord = this._elementLocalRecords.get(id) ?? {
+      display: true,
+      opacity: 1,
+    };
+    this._elementLocalRecords.set(id, { ...elementLocalRecord, ...records });
+    this.refresh();
+  }
+
+  getElementLocalRecord(id: id) {
+    return this._elementLocalRecords.get(id) ?? { display: true, opacity: 1 };
+  }
+
+  deleteElementLocalRecord(id: id) {
+    this._elementLocalRecords.delete(id);
   }
 }

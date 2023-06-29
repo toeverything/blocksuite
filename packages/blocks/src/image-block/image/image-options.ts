@@ -8,6 +8,7 @@ import type { Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { stopPropagation } from '../../__internal__/utils/event.js';
 import type { IPoint } from '../../__internal__/utils/types.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
@@ -15,7 +16,6 @@ import {
   downloadImage,
   focusCaption,
 } from '../../page-block/default/utils.js';
-import { stopPropagation } from '../../page-block/edgeless/utils.js';
 import type { ImageBlockModel } from '../image-model.js';
 
 export function ImageOptionsTemplate({
@@ -42,7 +42,7 @@ export function ImageOptionsTemplate({
 
       .embed-editing-state {
         box-shadow: var(--affine-shadow-2);
-        border-radius: 10px;
+        border-radius: 8px;
         list-style: none;
         padding: 4px;
         width: 40px;

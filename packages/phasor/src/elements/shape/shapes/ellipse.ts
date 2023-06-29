@@ -1,7 +1,13 @@
 import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 
-import { type IBound, StrokeStyle } from '../../../consts.js';
-import { pointInEllipse } from '../../../utils/math-utils.js';
+import { StrokeStyle } from '../../../consts.js';
+import { Bound } from '../../../utils/bound.js';
+import {
+  lineEllipseIntersects,
+  pointInEllipse,
+  pointOnEllipse,
+} from '../../../utils/math-utils.js';
+import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
@@ -37,13 +43,42 @@ export const EllipseMethods: ShapeMethods = {
       stroke: realStrokeColor,
       strokeWidth,
       fill: filled ? realFillColor : undefined,
+      curveFitting: 1,
     });
   },
 
-  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
-    return pointInEllipse(
-      [x, y],
-      [bound.x + bound.w / 2, bound.y + bound.h / 2],
+  hitTest(
+    x: number,
+    y: number,
+    element: ShapeElement,
+    options?: HitTestOptions
+  ) {
+    const renderOffset = Math.max(element.strokeWidth, 0) / 2;
+
+    return element.filled
+      ? pointInEllipse(
+          [x, y],
+          [element.x + element.w / 2, element.y + element.h / 2],
+          element.w / 2,
+          element.h / 2
+        )
+      : pointOnEllipse(
+          [
+            x - (element.x + (element.w - renderOffset) / 2),
+            y - (element.y + (element.h - renderOffset) / 2),
+          ],
+          (element.w - renderOffset * 2) / 2,
+          (element.h - renderOffset * 2) / 2,
+          options?.expand ?? 1
+        );
+  },
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
+    const bound = Bound.deserialize(element.xywh);
+    return !!lineEllipseIntersects(
+      start,
+      end,
+      bound.center,
       bound.w / 2,
       bound.h / 2
     );

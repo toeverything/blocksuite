@@ -1,6 +1,6 @@
 import { autoPlacement, computePosition } from '@floating-ui/dom';
 
-import { onClickOutside } from '../utils.js';
+import { onClickOutside } from '../utils/utils.js';
 
 export const createDatabasePopup = (
   target: HTMLElement,

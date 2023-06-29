@@ -17,7 +17,7 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
-import { toHex } from '../../packages/blocks/src/__internal__/utils/std.js';
+import { toHex } from '../../packages/blocks/src/__internal__/utils/common.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
@@ -51,6 +51,7 @@ export const defaultStore: SerializedStore = {
       {
         id: 'page0',
         title: '',
+        tags: [],
       },
     ],
     blockVersions: {
@@ -83,6 +84,7 @@ export const defaultStore: SerializedStore = {
           'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
+          'prop:hidden': false,
         },
         '2': {
           'sys:flavour': 'affine:paragraph',
@@ -724,7 +726,7 @@ export async function assertEdgelessNoteBackground(
     .locator(`affine-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
       const noteWrapper = ele.closest<HTMLDivElement>(
-        '.affine-edgeless-block-child'
+        '.affine-edgeless-child-note'
       );
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);

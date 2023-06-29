@@ -1,5 +1,6 @@
-import '../tool-icon-button.js';
-import '../color-panel.js';
+import '../buttons/tool-icon-button.js';
+import '../panel/color-panel.js';
+import '../panel/line-width-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
@@ -9,15 +10,16 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
+import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
-} from '../color-panel.js';
+} from '../panel/color-panel.js';
+import type { LineWidthEvent } from '../panel/line-width-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
@@ -62,7 +64,8 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       display: block;
     }
 
-    .brush-size-button {
+    .brush-size-button,
+    .brush-color-button {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -73,43 +76,41 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       cursor: pointer;
     }
 
-    .brush-size-button div {
+    .brush-size-button div,
+    .brush-color-button div {
       border-radius: 50%;
       background-color: var(--affine-icon-color);
     }
 
-    .brush-size-button[active] div {
-      background-color: var(--affine-blue);
-    }
-
-    .brush-size-button .thin {
-      width: 4px;
-      height: 4px;
-    }
-
-    .brush-size-button .thick {
-      width: 10px;
-      height: 10px;
+    .brush-color-button div {
+      width: 16px;
+      height: 16px;
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   elements: BrushElement[] = [];
 
   @property({ type: Object })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()
   private _popperShow = false;
+
+  @state()
+  private _selectedColor: string | null = null;
+
+  @state()
+  private _selectedSize: BrushSize | null = BrushSize.LINE_WIDTH_FOUR;
 
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
@@ -135,6 +136,9 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
         this.surface.updateElement<'brush'>(element.id, { color });
       }
     });
+    if (color && this._selectedColor !== color) {
+      this._selectedColor = color;
+    }
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
@@ -152,49 +156,32 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const selectedColor = getMostCommonColor(this.elements);
+    this._selectedColor = getMostCommonColor(this.elements);
     const style = {
-      backgroundColor: `var(${selectedColor})`,
+      backgroundColor: `var(${this._selectedColor})`,
     };
 
-    const selectedSize = getMostCommonSize(this.elements);
+    this._selectedSize = getMostCommonSize(this.elements);
 
     return html`
-      <edgeless-tool-icon-button
-        .tooltip=${'Thin'}
-        @click=${() => this._setBrushSize(BrushSize.Thin)}
+      <edgeless-line-width-panel
+        .selectedSize=${this._selectedSize}
+        @select=${(e: LineWidthEvent) => this._setBrushSize(e.detail)}
       >
-        <div
-          class="brush-size-button"
-          ?active=${selectedSize === BrushSize.Thin}
-        >
-          <div class="thin"></div>
-        </div>
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .tooltip=${'Thick'}
-        @click=${() => this._setBrushSize(BrushSize.Thick)}
-      >
-        <div
-          class="brush-size-button"
-          ?active=${selectedSize === BrushSize.Thick}
-        >
-          <div class="thick"></div>
-        </div>
-      </edgeless-tool-icon-button>
+      </edgeless-line-width-panel>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
         @click=${() => this._colorPanelPopper?.toggle()}
       >
-        <div class="brush-size-button">
-          <div class="thick" style=${styleMap(style)}></div>
+        <div class="brush-color-button">
+          <div style=${styleMap(style)}></div>
         </div>
       </edgeless-tool-icon-button>
       <div class="color-panel-container">
         <edgeless-color-panel
-          .value=${selectedColor}
+          .value=${this._selectedColor}
           @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
         >
         </edgeless-color-panel>

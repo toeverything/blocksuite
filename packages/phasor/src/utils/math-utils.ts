@@ -17,6 +17,28 @@ interface TLBounds {
   rotation?: number;
 }
 
+function square(num: number) {
+  return num * num;
+}
+
+function sumSqr(v: number[], w: number[]) {
+  return square(v[0] - w[0]) + square(v[1] - w[1]);
+}
+
+function distToSegmentSquared(p: number[], v: number[], w: number[]) {
+  const l2 = sumSqr(v, w);
+  if (l2 == 0) return sumSqr(p, v);
+  let t = ((p[0] - v[0]) * (w[0] - v[0]) + (p[1] - v[1]) * (w[1] - v[1])) / l2;
+
+  t = Math.max(0, Math.min(1, t));
+
+  return sumSqr(p, [v[0] + t * (w[0] - v[0]), v[1] + t * (w[1] - v[1])]);
+}
+
+function distToSegment(p: number[], v: number[], w: number[]) {
+  return Math.sqrt(distToSegmentSquared(p, v, w));
+}
+
 export function isPointIn(a: IBound, x: number, y: number): boolean {
   return a.x <= x && x <= a.x + a.w && a.y <= y && y <= a.y + a.h;
 }
@@ -71,6 +93,42 @@ export function pointInPolygon(p: number[], points: number[][]): boolean {
   });
 
   return wn !== 0;
+}
+
+export function pointOnEllipse(
+  point: number[],
+  rx: number,
+  ry: number,
+  threshold: number
+): boolean {
+  // slope of point
+  const t = point[1] / point[0];
+  const squaredX =
+    (square(rx) * square(ry)) / (square(rx) * square(t) + square(ry));
+  const squaredY =
+    (square(rx) * square(ry) - square(ry) * squaredX) / square(rx);
+
+  return (
+    Math.abs(
+      Math.sqrt(square(point[1]) + square(point[0])) -
+        Math.sqrt(squaredX + squaredY)
+    ) < threshold
+  );
+}
+
+export function pointOnPolygonStoke(
+  p: number[],
+  points: number[][],
+  threshold: number
+): boolean {
+  for (let i = 0; i < points.length; ++i) {
+    const next = i + 1 === points.length ? 0 : i + 1;
+    if (distToSegment(p, points[i], points[next]) <= threshold) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export function getBoundsFromPoints(

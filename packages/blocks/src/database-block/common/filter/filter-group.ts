@@ -6,9 +6,9 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import { firstFilter, firstFilterInGroup } from '../ast.js';
-import { DatabaseMenuComponent, popMenu } from '../menu.js';
 import { createDatabasePopup } from '../popup.js';
 
 @customElement('filter-group-view')
@@ -18,16 +18,16 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       background-color: white;
     }
   `;
-  @property()
+  @property({ attribute: false })
   data!: FilterGroup;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
 
   @query('.add-new')
   addNew!: HTMLElement;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: FilterGroup) => void;
 
   private opMap = {
@@ -52,12 +52,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     });
   };
   private _selectOp = (event: MouseEvent) => {
-    const menu = new DatabaseMenuComponent();
-    menu.menuGroup = [
+    popFilterableSimpleMenu(event.target as HTMLElement, [
       {
         type: 'action',
-        label: 'And',
-        click: () => {
+        name: 'And',
+        select: () => {
           this.setData({
             ...this.data,
             op: 'and',
@@ -66,16 +65,15 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       },
       {
         type: 'action',
-        label: 'Or',
-        click: () => {
+        name: 'Or',
+        select: () => {
           this.setData({
             ...this.data,
             op: 'or',
           });
         },
       },
-    ];
-    createDatabasePopup(event.target as HTMLElement, menu);
+    ]);
   };
 
   private _deleteCondition(i: number) {
@@ -174,31 +172,29 @@ export const popAddNewFilter = (
     vars: Variable[];
   }
 ) => {
-  popMenu(target, {
-    options: [
-      {
-        type: 'action',
-        label: 'filter',
-        click: () => {
-          props.onChange({
-            ...props.value,
-            conditions: [...props.value.conditions, firstFilter(props.vars)],
-          });
-        },
+  popFilterableSimpleMenu(target, [
+    {
+      type: 'action',
+      name: 'filter',
+      select: () => {
+        props.onChange({
+          ...props.value,
+          conditions: [...props.value.conditions, firstFilter(props.vars)],
+        });
       },
-      {
-        type: 'action',
-        label: 'filter group',
-        click: () => {
-          props.onChange({
-            ...props.value,
-            conditions: [
-              ...props.value.conditions,
-              firstFilterInGroup(props.vars),
-            ],
-          });
-        },
+    },
+    {
+      type: 'action',
+      name: 'filter group',
+      select: () => {
+        props.onChange({
+          ...props.value,
+          conditions: [
+            ...props.value.conditions,
+            firstFilterInGroup(props.vars),
+          ],
+        });
       },
-    ],
-  });
+    },
+  ]);
 };

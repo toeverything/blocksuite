@@ -4,8 +4,8 @@ import {
   DisposableGroup,
 } from '@blocksuite/store';
 
+import { throttle } from '../../__internal__/utils/common.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
-import { throttle } from '../../__internal__/utils/std.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
 import { LinkedPagePopover } from './linked-page-popover.js';
 

@@ -132,13 +132,13 @@ export class DebugMenu extends ShadowlessElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   workspace!: Workspace;
 
-  @property()
+  @property({ attribute: false })
   editor!: EditorContainer;
 
-  @property()
+  @property({ attribute: false })
   contentParser!: ContentParser;
 
   @state()
@@ -150,10 +150,10 @@ export class DebugMenu extends ShadowlessElement {
   @state()
   private _canRedo = false;
 
-  @property()
+  @property({ attribute: false })
   mode: 'page' | 'edgeless' = 'page';
 
-  @property()
+  @property({ attribute: false })
   readonly = false;
 
   @state()
@@ -288,13 +288,40 @@ export class DebugMenu extends ShadowlessElement {
     this.contentParser.exportPng();
   }
 
-  private _exportYDoc() {
-    this.workspace.exportYDoc();
+  private _exportSnapshot() {
+    const json = this.workspace.exportPageSnapshot(this.page.id);
+    const data =
+      'data:text/json;charset=utf-8,' +
+      encodeURIComponent(JSON.stringify(json, null, 2));
+    const a = document.createElement('a');
+    a.setAttribute('href', data);
+    a.setAttribute('download', `${this.page.id}-snapshot.json`);
+    a.click();
+    a.remove();
   }
 
-  private async _importYDoc() {
-    await this.workspace.importYDoc();
-    this.requestUpdate();
+  private _importSnapshot() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', '.json');
+    input.multiple = false;
+    input.onchange = async () => {
+      const file = input.files?.item(0);
+      if (!file) {
+        return;
+      }
+      try {
+        const json = await file.text();
+        await this.workspace.importPageSnapshot(JSON.parse(json), this.page.id);
+        this.requestUpdate();
+      } catch (e) {
+        console.error('Invalid snapshot.');
+        console.error(e);
+      } finally {
+        input.remove();
+      }
+    };
+    input.click();
   }
 
   private async _inspect() {
@@ -362,6 +389,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
+    this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     this.workspace.slots.pageAdded.on(() => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     });
@@ -594,11 +622,11 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._exportPng}>
                 Export PNG
               </sl-menu-item>
-              <sl-menu-item @click=${this._exportYDoc}>
-                Export YDoc
+              <sl-menu-item @click=${this._exportSnapshot}>
+                Export Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._importYDoc}>
-                Import YDoc
+              <sl-menu-item @click=${this._importSnapshot}>
+                Import Snapshot
               </sl-menu-item>
               <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
@@ -675,7 +703,7 @@ export class DebugMenu extends ShadowlessElement {
 
 function createPageBlock(workspace: Workspace) {
   const id = workspace.idGenerator();
-  createPage(workspace, { id });
+  createPage(workspace, { id }).catch(console.error);
 }
 
 function getTabGroupTemplate({
@@ -687,7 +715,7 @@ function getTabGroupTemplate({
   editor: EditorContainer;
   requestUpdate: () => void;
 }) {
-  workspace.slots.pagesUpdated.on(requestUpdate);
+  workspace.meta.pageMetasUpdated.on(requestUpdate);
   const pageList = workspace.meta.pageMetas;
   editor.slots.pageLinkClicked.on(({ pageId }) => {
     const tabGroup = document.querySelector<SlTabGroup>('.tabs-closable');
@@ -700,8 +728,9 @@ function getTabGroupTemplate({
     style="display: flex; overflow: hidden;"
     @sl-tab-show=${(e: CustomEvent<{ name: string }>) => {
       const otherPage = workspace.getPage(e.detail.name);
-      if (!otherPage) throw new Error('page not found');
-      editor.page = otherPage;
+      if (otherPage) {
+        editor.page = otherPage;
+      }
     }}
   >
     ${pageList.map(

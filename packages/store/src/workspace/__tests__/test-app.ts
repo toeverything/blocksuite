@@ -14,7 +14,7 @@ declare module '../../workspace/meta.js' {
 export class TestApp extends LitElement {
   workspace!: Workspace;
 
-  @property()
+  @property({ attribute: false })
   pages: Pick<PageMeta, 'title' | 'favorite'>[] = [];
 
   @query('input[name="page"]')

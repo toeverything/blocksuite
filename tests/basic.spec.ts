@@ -31,7 +31,6 @@ import {
   undoByClick,
   undoByKeyboard,
   waitDefaultPageLoaded,
-  waitForRemoteUpdateSlot,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
@@ -88,7 +87,7 @@ test(scoped`basic init with external text`, async ({ page }) => {
   await focusRichText(page);
 });
 
-test(scoped`basic multi user state`, async ({ browser, page: pageA }) => {
+test(scoped`basic multi user state`, async ({ context, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
   await waitNextFrame(pageA);
@@ -96,7 +95,7 @@ test(scoped`basic multi user state`, async ({ browser, page: pageA }) => {
   await focusTitle(pageA);
   await type(pageA, 'hello');
 
-  const pageB = await browser.newPage();
+  const pageB = await context.newPage();
   await enterPlaygroundRoom(pageB, {
     flags: {},
     room,
@@ -113,14 +112,14 @@ test(scoped`basic multi user state`, async ({ browser, page: pageA }) => {
 
 test(
   scoped`A open and edit, then joins B`,
-  async ({ browser, page: pageA }) => {
+  async ({ context, page: pageA }) => {
     const room = await enterPlaygroundRoom(pageA);
     await initEmptyParagraphState(pageA);
     await waitNextFrame(pageA);
     await focusRichText(pageA);
     await type(pageA, 'hello');
 
-    const pageB = await browser.newPage();
+    const pageB = await context.newPage();
     await enterPlaygroundRoom(pageB, {
       flags: {},
       room,
@@ -140,13 +139,13 @@ test(
   }
 );
 
-test(scoped`A first open, B first edit`, async ({ browser, page: pageA }) => {
+test(scoped`A first open, B first edit`, async ({ context, page: pageA }) => {
   const room = await enterPlaygroundRoom(pageA);
   await initEmptyParagraphState(pageA);
   await waitNextFrame(pageA);
   await focusRichText(pageA);
 
-  const pageB = await browser.newPage();
+  const pageB = await context.newPage();
   await enterPlaygroundRoom(pageB, {
     flags: {},
     room,
@@ -155,11 +154,11 @@ test(scoped`A first open, B first edit`, async ({ browser, page: pageA }) => {
   });
   await focusRichText(pageB);
 
-  const slot = waitForRemoteUpdateSlot(pageA);
   await waitNextFrame(pageA);
   await waitNextFrame(pageB);
   await type(pageB, 'hello');
-  await slot;
+  await pageA.waitForTimeout(500);
+
   // wait until pageA content updated
   await assertText(pageA, 'hello');
   await assertText(pageB, 'hello');
@@ -508,6 +507,7 @@ test(scoped`automatic identify url text`, async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph

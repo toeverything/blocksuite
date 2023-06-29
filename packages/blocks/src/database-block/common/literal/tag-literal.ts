@@ -1,6 +1,6 @@
+import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
 import type { tTag } from '../../logical/data-type.js';
 import type { TypeOfData } from '../../logical/typesystem.js';
-import { popMenu } from '../menu.js';
 import { LiteralElement } from './literal-element.js';
 
 export class TagLiteral extends LiteralElement<
@@ -20,16 +20,17 @@ export class TagLiteral extends LiteralElement<
   }
 
   override _popEdit(target: HTMLElement = this) {
-    popMenu(target, {
-      options: this.tags().map(v => {
+    popFilterableSimpleMenu(
+      target,
+      this.tags().map(v => {
         return {
           type: 'action',
-          label: v.value,
-          click: () => {
+          name: v.value,
+          select: () => {
             this.onChange(v.id);
           },
         };
-      }),
-    });
+      })
+    );
   }
 }

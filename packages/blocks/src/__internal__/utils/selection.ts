@@ -1,3 +1,4 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
 import {
   assertExists,
@@ -5,7 +6,6 @@ import {
   matchFlavours,
   nonTextBlock,
 } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
@@ -172,6 +172,7 @@ export function focusBlockByModel(
       'affine:bookmark',
     ])
   ) {
+    assertExists(pageBlock.selection);
     pageBlock.selection.state.clearSelection();
     const rect = getBlockElementByModel(model)?.getBoundingClientRect();
     rect && pageBlock.slots.selectedRectsUpdated.emit([rect]);
@@ -192,11 +193,13 @@ export function focusBlockByModel(
     return;
   }
   const element = getBlockElementByModel(model);
+  assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
     if (isPageMode) {
+      assertExists(pageBlock.selection);
       pageBlock.selection.state.clearSelection();
-      pageBlock.selection.setFocusedBlock(element as Element);
+      pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
     }
     focusRichText(editableContainer, position, zoom);
   }
@@ -257,7 +260,7 @@ export function resetNativeSelection(range: Range | null) {
 
 export function clearSelection(page: Page) {
   if (!page.root) return;
-  getPageBlock(page.root)?.selection.clear();
+  getPageBlock(page.root)?.selection?.clear();
 }
 
 /**
@@ -822,13 +825,6 @@ export function getSplicedTitle(title: HTMLTextAreaElement) {
   assertExists(title.selectionEnd);
   text.splice(title.selectionStart, title.selectionEnd - title.selectionStart);
   return text.join('');
-}
-
-export function isEmbed(e: PointerEventState) {
-  if ((e.raw.target as HTMLElement).classList.contains('resize')) {
-    return true;
-  }
-  return false;
 }
 
 export function isDatabase(e: PointerEventState) {

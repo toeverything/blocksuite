@@ -59,13 +59,6 @@ export class BlockIndexer {
       return;
     }
     // lazy init
-    if ('requestIdleCallback' in globalThis) {
-      requestIdleCallback(() => {
-        this._initIndex();
-      });
-      return;
-    }
-    // fallback to setTimeout
     setTimeout(() => {
       this._initIndex();
     }, 0);
@@ -212,7 +205,7 @@ export class BlockIndexer {
 
   private _getPage(pageId: PageId): Y.Doc | undefined {
     if (pageId.startsWith('space:')) {
-      console.warn('Unexpected page prefix', pageId);
+      throw new Error(`Unexpected 'space:' prefix for: ${pageId}`);
     }
     pageId = `space:${pageId}`;
     return this._doc.spaces.get(pageId) as Y.Doc | undefined;

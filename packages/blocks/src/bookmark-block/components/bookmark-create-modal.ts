@@ -6,16 +6,16 @@ import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { toast } from '../..//components/toast.js';
+import { toast } from '../../components/toast.js';
 import { CloseIcon } from '../images/icons.js';
 import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 
 @customElement('bookmark-create-modal')
 export class BookmarkCreateModal extends WithDisposable(LitElement) {
-  @property()
+  @property({ attribute: false })
   onCancel?: () => void;
 
-  @property()
+  @property({ attribute: false })
   onConfirm?: (props: { url: string }) => void;
 
   override get id() {

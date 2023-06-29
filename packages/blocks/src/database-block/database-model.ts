@@ -1,12 +1,13 @@
 import { BaseBlockModel, defineBlockSchema, Text } from '@blocksuite/store';
 
+import type { SelectTag } from '../components/tags/multi-tag-select.js';
 import type {
   DatabaseViewData,
   DatabaseViewDataMap,
 } from './common/view-manager.js';
 import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
-import type { Cell, Column, SelectTag } from './table/types.js';
+import type { Cell, Column } from './table/types.js';
 
 export type Props = {
   views: DatabaseViewData[];
@@ -23,6 +24,27 @@ type SerializedCells = {
     // column
     [key: string]: Cell;
   };
+};
+export type ColumnUpdater<T extends Column = Column> = (data: T) => Partial<T>;
+export type ColumnDataUpdater<
+  Data extends Record<string, unknown> = Record<string, unknown>
+> = (data: Data) => Partial<Data>;
+export type InsertPosition = 'end' | 'start' | { id: string; before: boolean };
+export const insertPositionToIndex = <T extends { id: string }>(
+  position: InsertPosition,
+  arr: T[]
+): number => {
+  if (typeof position === 'object') {
+    const index = arr.findIndex(v => v.id === position.id);
+    return index + (position.before ? 0 : 1);
+  }
+  if (position == null || position === 'start') {
+    return 0;
+  }
+  if (position === 'end') {
+    return arr.length;
+  }
+  return arr.findIndex(v => v.id === position) + 1;
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
@@ -65,17 +87,13 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  updateView<Type extends keyof DatabaseViewDataMap>(
-    id: string,
-    type: Type,
-    update: (data: DatabaseViewDataMap[Type]) => void
-  ) {
+  updateView(id: string, update: (data: DatabaseViewData) => void) {
     this.page.transact(() => {
       this.views.map(v => {
-        if (v.id !== id || v.mode !== type) {
+        if (v.id !== id) {
           return v;
         }
-        return update(v as DatabaseViewDataMap[Type]);
+        return update(v);
       });
     });
   }
@@ -99,11 +117,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   findColumnIndex(id: Column['id']) {
-    let result = -1;
-    this.columns.forEach((col, index) => {
-      if (col.id === id) result = index;
-    });
-    return result;
+    return this.columns.findIndex(v => v.id === id);
   }
 
   getColumn(id: Column['id']): Column | null {
@@ -114,42 +128,43 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return this.columns[index];
   }
 
-  addColumn(column: Omit<Column, 'id'>, index?: number): string {
-    const id = this.page.generateId();
+  addColumn(
+    position: InsertPosition,
+    column: Omit<Column, 'id'> & { id?: string }
+  ): string {
+    const id = column.id ?? this.page.generateId();
     this.page.transact(() => {
       const col = { ...column, id };
-      if (index === undefined) {
-        this.columns.push(col);
-      } else {
-        this.columns.splice(index, 0, col);
-      }
+      this.columns.splice(
+        insertPositionToIndex(position, this.columns),
+        0,
+        col
+      );
       this.views.forEach(view => {
-        ViewOperationMap[view.mode].addColumn(this, view as never, col, index);
+        ViewOperationMap[view.mode].addColumn(
+          this,
+          view as never,
+          col,
+          position
+        );
       });
     });
     return id;
   }
 
-  updateColumn(column: Omit<Column, 'id'> & { id?: Column['id'] }): string {
-    if (!column.id) {
-      return this.addColumn(column);
+  updateColumn(id: string, updater: ColumnUpdater) {
+    const index = this.columns.findIndex(v => v.id === id);
+    if (index == null) {
+      return;
     }
-    const id = column.id;
-    const index = this.findColumnIndex(id);
     this.page.transact(() => {
-      if (index < 0) {
-        this.columns.push({ ...column, id } as Column);
-      } else {
-        this.columns[index] = { ...column, id } as Column;
-      }
+      const column = this.columns[index];
+      this.columns[index] = { ...column, ...updater(column) };
     });
     return id;
   }
 
-  updateColumnData(
-    id: string,
-    update: (data: Record<string, unknown>) => Partial<Record<string, unknown>>
-  ) {
+  updateColumnData(id: string, update: ColumnDataUpdater) {
     this.page.transact(() => {
       const i = this.findColumnIndex(id);
       const data = this.columns[i].data;
@@ -157,14 +172,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         ...data,
         ...update(data),
       };
-    });
-  }
-
-  moveColumn(from: number, to: number) {
-    this.page.transact(() => {
-      const column = this.columns[from];
-      this.columns.splice(from, 1);
-      this.columns.splice(to, 0, column);
     });
   }
 

@@ -101,13 +101,13 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
 
   protected override firstUpdated() {
     this._onInitVEditor();
-    this.page.captureSync();
+    this.column.captureSync();
   }
 
   private _initYText = (text?: string) => {
-    const yText = new this.page.YText(text);
+    const yText = new this.column.page.YText(text);
 
-    this.onChange(yText, { sync: true });
+    this.onChange(yText);
     return yText;
   };
 
@@ -116,7 +116,7 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
     if (!this.value) {
       value = this._initYText();
     } else {
-      // When copying the database, the type of the value is `string`.s
+      // When copying the database, the type of the value is `string`.
       if (typeof this.value === 'string') {
         value = this._initYText(this.value);
       } else {
@@ -127,7 +127,7 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
     this.vEditor = new VEditor(value, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.page, this.vEditor);
+    setupVirgoScroll(this.column.page, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.setReadonly(true);
   }
@@ -177,13 +177,13 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
 
   protected override firstUpdated() {
     this._onInitVEditor();
-    this.page.captureSync();
+    this.column.captureSync();
   }
 
   private _initYText = (text?: string) => {
     const yText = new this.page.YText(text);
 
-    this.onChange(yText, { sync: true });
+    this.onChange(yText);
     return yText;
   };
 
@@ -192,7 +192,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     if (!this.value) {
       value = this._initYText();
     } else {
-      // When copying the database, the type of the value is `string`.s
+      // When copying the database, the type of the value is `string`.
       if (typeof this.value === 'string') {
         value = this._initYText(this.value);
       } else {
@@ -203,7 +203,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     this.vEditor = new VEditor(value, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.page, this.vEditor);
+    setupVirgoScroll(this.column.page, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
@@ -220,8 +220,8 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
       }
       event.stopPropagation();
     } else {
-      this._setEditing(false);
-      this._container.blur();
+      // this._setEditing(false);
+      // this._container.blur();
     }
 
     if (!this.vEditor) return;
@@ -291,7 +291,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
       const vRange = this.vEditor.getVRange();
       assertExists(vRange);
 
-      this.page.captureSync();
+      this.column.captureSync();
       const text = new Text(this.vEditor.yText);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({

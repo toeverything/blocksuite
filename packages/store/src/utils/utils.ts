@@ -15,7 +15,8 @@ import type {
   YBlocks,
 } from '../workspace/page.js';
 import type { Page } from '../workspace/page.js';
-import { createYProxy, isPureObject } from '../yjs/index.js';
+import type { BlockSuiteDoc } from '../yjs/index.js';
+import { isPureObject } from '../yjs/index.js';
 import { native2Y } from '../yjs/utils.js';
 
 export function assertValidChildren(
@@ -71,20 +72,9 @@ export function syncBlockProps(
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // https://github.com/toeverything/blocksuite/issues/2939
-    //TODO: elements property should not be handled differently
-    const isSurface = schema.model.flavour === 'affine:surface';
     if (value !== undefined) {
       if (Array.isArray(value) || isPureObject(value)) {
-        if (isSurface && key === 'elements') {
-          const elementsMap = new Y.Map();
-          for (const element of Object.values(value)) {
-            elementsMap.set(element.id, native2Y(element, false));
-          }
-          yBlock.set(key, elementsMap);
-        } else {
-          yBlock.set(`prop:${key}`, native2Y(value, true));
-        }
+        yBlock.set(`prop:${key}`, native2Y(value, true));
       } else {
         yBlock.set(`prop:${key}`, value);
       }
@@ -105,7 +95,10 @@ export function syncBlockProps(
   });
 }
 
-export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
+export function toBlockProps(
+  yBlock: YBlock,
+  doc: BlockSuiteDoc
+): Partial<BlockProps> {
   const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
   Object.keys(prefixedProps).forEach(key => {
@@ -120,12 +113,12 @@ export function toBlockProps(yBlock: YBlock): Partial<BlockProps> {
     const key = prefixedKey.replace('prop:', '');
     const realValue = yBlock.get(prefixedKey);
     if (realValue instanceof Y.Map) {
-      const value = createYProxy(realValue, {
+      const value = doc.proxy.createYProxy(realValue, {
         deep: true,
       });
       props[key] = value;
     } else if (realValue instanceof Y.Array) {
-      const value = createYProxy(realValue, {
+      const value = doc.proxy.createYProxy(realValue, {
         deep: true,
       });
       props[key] = value;

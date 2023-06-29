@@ -260,6 +260,7 @@ test('should indent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -303,6 +304,7 @@ test('should unindent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -340,6 +342,7 @@ test('should unindent multi-selection block', async ({ page }) => {
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1153,6 +1156,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1320,7 +1324,6 @@ test('click bottom of page and if the last is embed block, editor should insert 
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
   await initImageState(page);
 
   await page.evaluate(async () => {
@@ -1344,28 +1347,19 @@ test('click bottom of page and if the last is embed block, editor should insert 
     `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
+    <affine:image
+      prop:caption=""
+      prop:height={0}
+      prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
+      prop:width={0}
+    />
     <affine:paragraph
       prop:type="text"
     />
   </affine:note>
-  <affine:page>
-    <affine:note
-      prop:background="--affine-background-secondary-color"
-      prop:index="a0"
-    >
-      <affine:image
-        prop:caption=""
-        prop:height={0}
-        prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
-        prop:width={0}
-      />
-      <affine:paragraph
-        prop:type="text"
-      />
-    </affine:note>
-  </affine:page>
 </affine:page>`
   );
 });

@@ -5,25 +5,24 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
 import { tBoolean } from '../../logical/data-type.js';
 import { filterMatcher } from '../../logical/filter-matcher.js';
 import { typesystem } from '../../logical/typesystem.js';
 import type { SingleFilter, Variable, VariableOrProperty } from '../ast.js';
 import { firstFilterByRef, getRefType } from '../ast.js';
 import { renderLiteral } from '../literal/index.js';
-import { DatabaseMenuComponent } from '../menu.js';
-import { createDatabasePopup } from '../popup.js';
 
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
   static override styles = css``;
-  @property()
+  @property({ attribute: false })
   data!: SingleFilter;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: SingleFilter) => void;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
   @query('.filter-select')
   filterSelect!: HTMLElement;
@@ -46,18 +45,19 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
 
   private _selectFilter() {
     const list = this._filterList();
-    const menu = new DatabaseMenuComponent();
-    menu.menuGroup = list.map(v => ({
-      type: 'action',
-      label: v.name,
-      click: () => {
-        this.setData({
-          ...this.data,
-          function: v.name,
-        });
-      },
-    }));
-    createDatabasePopup(this.filterSelect, menu);
+    popFilterableSimpleMenu(
+      this.filterSelect,
+      list.map(v => ({
+        type: 'action',
+        name: v.name,
+        select: () => {
+          this.setData({
+            ...this.data,
+            function: v.name,
+          });
+        },
+      }))
+    );
   }
 
   private _args() {

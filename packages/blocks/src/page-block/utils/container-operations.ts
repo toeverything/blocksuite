@@ -1,3 +1,4 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
@@ -5,7 +6,6 @@ import {
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -72,7 +72,7 @@ export function handleBlockSelectionBatchDelete(
     // In the edgeless mode
     return null;
   }
-  defaultPageBlock.selection.clear();
+  defaultPageBlock.selection?.clear();
   asyncFocusRichText(page, id);
   return newBlock;
 }
@@ -536,7 +536,7 @@ export function handleKeydownAfterSelectBlocks({
   requestAnimationFrame(() => {
     const defaultPage = getDefaultPage(page);
     const newBlock = page.getBlockById(id) as BaseBlockModel;
-    defaultPage?.selection.clear();
+    defaultPage?.selection?.clear();
     focusBlockByModel(newBlock, 'end');
 
     // XXX: slash menu trigger probably shouldn't be here

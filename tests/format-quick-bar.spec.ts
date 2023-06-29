@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -9,6 +10,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  getSelectionRect,
   initEmptyParagraphState,
   initThreeParagraphs,
   pasteByKeyboard,
@@ -94,8 +96,9 @@ test('should format quick bar show when select text', async ({ page }) => {
   if (!box) {
     throw new Error("formatQuickBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 20, 5);
-  assertAlmostEqual(box.y, 230, 10);
+  const rect = await getSelectionRect(page);
+  assertAlmostEqual(box.x - rect.left, -54, 10);
+  assertAlmostEqual(box.y - rect.bottom, 5, 10);
 
   // Click the edge of the format quick bar
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
@@ -127,8 +130,9 @@ test('should format quick bar show when select text by keyboard', async ({
   if (!leftBox) {
     throw new Error("formatQuickBar doesn't exist");
   }
-  assertAlmostEqual(leftBox.x, 20, 3);
-  assertAlmostEqual(leftBox.y, 100, 10);
+  let rect = await getSelectionRect(page);
+  assertAlmostEqual(leftBox.x - rect.x, -60, 10);
+  assertAlmostEqual(leftBox.y + leftBox.height - rect.top, -5, 10);
 
   await page.keyboard.press('ArrowLeft');
   await expect(formatQuickBar).not.toBeVisible();
@@ -148,8 +152,9 @@ test('should format quick bar show when select text by keyboard', async ({
   }
   // The x position of the format quick bar depends on the font size
   // so there are slight differences in different environments
-  assertAlmostEqual(rightBox.x, 22, 10);
-  assertAlmostEqual(rightBox.y, 165, 10);
+  rect = await getSelectionRect(page);
+  assertAlmostEqual(leftBox.x - rect.x, -60, 10);
+  assertAlmostEqual(leftBox.y + leftBox.height - rect.top, -5, 10);
 });
 
 test('should format quick bar can only display one at a time', async ({
@@ -215,6 +220,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -261,6 +267,7 @@ test('should format quick bar be able to format text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -307,6 +314,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -353,6 +361,7 @@ test('should format quick bar be able to format text when select multiple line',
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -394,6 +403,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -430,6 +440,7 @@ test('should format quick bar be able to link text', async ({ page }) => {
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -471,6 +482,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -498,6 +510,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -527,6 +540,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -705,8 +719,9 @@ test('should format quick bar position correct at the start of second line', asy
   if (!formatBox) {
     throw new Error("formatQuickBar doesn't exist");
   }
-  assertAlmostEqual(formatBox.x, 20, 5);
-  assertAlmostEqual(formatBox.y, 123, 9);
+  const rect = await getSelectionRect(page);
+  assertAlmostEqual(formatBox.x - rect.x, -60, 10);
+  assertAlmostEqual(formatBox.y + formatBox.height - rect.top, -5, 10);
 });
 
 test('should format quick bar action status updated while undo', async ({
@@ -752,8 +767,11 @@ test('should format quick bar work in single block selection', async ({
   if (!box) {
     throw new Error("formatQuickBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 267, 5);
-  assertAlmostEqual(box.y, 200, 8);
+  const rect = await blockSelections.boundingBox();
+  assertExists(rect);
+  // const rect = await getSelectionRect(page);
+  assertAlmostEqual(box.x - rect.x, 191, 10);
+  assertAlmostEqual(box.y - rect.y, 29, 10);
 
   const boldBtn = formatQuickBar.getByTestId('bold');
   await boldBtn.click();
@@ -771,6 +789,7 @@ test('should format quick bar work in single block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -825,8 +844,10 @@ test('should format quick bar work in multiple block selection', async ({
   if (!box) {
     throw new Error("formatQuickBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 285, 5);
-  assertAlmostEqual(box.y, 100, 10);
+  const rect = await blockSelections.first().boundingBox();
+  assertExists(rect);
+  assertAlmostEqual(box.x - rect.x, 210, 10);
+  assertAlmostEqual(box.y - rect.y, -45, 10);
 
   await formatBarController.boldBtn.click();
   await formatBarController.italicBtn.click();
@@ -841,6 +862,7 @@ test('should format quick bar work in multiple block selection', async ({
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -916,6 +938,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list
@@ -944,6 +967,7 @@ test('should format quick bar with block selection works when update block type'
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -976,19 +1000,21 @@ test('should format quick bar show after convert to code block', async ({
   const formatBarController = getFormatBar(page);
   await dragBetweenIndices(page, [2, 3], [0, 0]);
   await expect(formatBarController.formatQuickBar).toBeVisible();
-  await formatBarController.assertBoundingBox(20, 92);
+  const rect = await getSelectionRect(page);
+  await formatBarController.assertBoundingBox(rect.x - 50, rect.y - 50);
 
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
   await expect(formatBarController.formatQuickBar).toBeVisible();
   const rects = page.locator('affine-selected-blocks > *');
   await expect(rects).toHaveCount(1);
-  await formatBarController.assertBoundingBox(377, 99);
+  await formatBarController.assertBoundingBox(rect.x + 300, rect.y - 40);
   await assertStoreMatchJSX(
     page,
     `
 <affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:code

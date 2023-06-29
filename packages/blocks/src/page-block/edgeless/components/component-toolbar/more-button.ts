@@ -1,9 +1,9 @@
-import '../tool-icon-button.js';
-import '../../toolbar/shape-tool/shape-menu.js';
+import '../buttons/tool-icon-button.js';
+import '../toolbar/shape/shape-menu.js';
 
 import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { SurfaceElement, SurfaceManager } from '@blocksuite/phasor';
+import type { PhasorElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -14,8 +14,8 @@ import {
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { Selectable } from '../../selection-manager.js';
-import { isTopLevelBlock } from '../../utils.js';
+import { isTopLevelBlock } from '../../utils/query.js';
+import type { Selectable } from '../../utils/selection-manager.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action = {
@@ -97,16 +97,16 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   elements: Selectable[] = [];
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()
@@ -120,10 +120,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _splitElements(): {
     notes: TopLevelBlockModel[];
-    shapes: SurfaceElement[];
+    shapes: PhasorElement[];
   } {
     const notes: TopLevelBlockModel[] = [];
-    const shapes: SurfaceElement[] = [];
+    const shapes: PhasorElement[] = [];
     this.elements.forEach(element => {
       if (isTopLevelBlock(element)) {
         notes.push(element);

@@ -1,5 +1,5 @@
-import '../tool-icon-button.js';
-import '../color-panel.js';
+import '../buttons/tool-icon-button.js';
+import '../panel/color-panel.js';
 
 import {
   ConnectorLIcon,
@@ -16,27 +16,27 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
+import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { LineSizeButtonProps } from '../buttons/line-size-button.js';
+import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
+import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
+import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import {
   generateConnectorPath,
   getConnectorAttachedInfo,
-} from '../../utils.js';
+} from '../connector/utils.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
-} from '../color-panel.js';
-import type { LineSizeButtonProps } from '../line-size-button.js';
-import { lineSizeButtonStyles } from '../line-size-button.js';
-import type { LineStyleButtonProps } from '../line-style-button.js';
+} from '../panel/color-panel.js';
 import {
   LineStylesPanel,
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
-} from '../line-styles-panel.js';
-import type { EdgelessToolIconButton } from '../tool-icon-button.js';
+} from '../panel/line-styles-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
@@ -146,19 +146,19 @@ export class EdgelessChangeConnectorButton extends LitElement {
     `,
   ];
 
-  @property()
+  @property({ attribute: false })
   elements: ConnectorElement[] = [];
 
   @property({ type: Object })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @query('.connector-color-button')

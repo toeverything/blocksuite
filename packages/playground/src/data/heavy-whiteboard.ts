@@ -6,7 +6,7 @@ import { serializeXYWH, type ShapeType, StrokeStyle } from '@blocksuite/phasor';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
 import { getOptions } from '../utils';
-import { addShapeElement, type InitFn } from './utils';
+import { type InitFn } from './utils';
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 
@@ -31,7 +31,7 @@ export const heavyWhiteboard: InitFn = async (
     title: new Text(),
   });
 
-  const surfaceBlockId = page.addBlock('affine:surface', {}, pageBlockId);
+  const surfaceBlockElements: Record<string, unknown> = {};
 
   let i = 0;
 
@@ -39,8 +39,9 @@ export const heavyWhiteboard: InitFn = async (
   for (; i < count; i++) {
     const x = Math.random() * count * 2;
     const y = Math.random() * count * 2;
-    addShapeElement(page, surfaceBlockId, {
-      id: nanoid(),
+    const id = nanoid();
+    surfaceBlockElements[id] = {
+      id,
       index: 'a0',
       type: 'shape',
       xywh: `[${x},${y},100,100]`,
@@ -55,8 +56,14 @@ export const heavyWhiteboard: InitFn = async (
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
       strokeStyle: StrokeStyle.Solid,
       roughness: 2,
-    });
+    };
   }
+
+  page.addBlock(
+    'affine:surface',
+    { elements: surfaceBlockElements },
+    pageBlockId
+  );
 
   // Add note block inside page block
   for (i = 0; i < count; i++) {
