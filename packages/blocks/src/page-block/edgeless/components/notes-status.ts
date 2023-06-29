@@ -1,5 +1,5 @@
 import { HiddenIcon } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, matchFlavours } from '@blocksuite/store';
 import { computePosition, flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -7,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { getBlockElementById } from '../../../__internal__/utils/query.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { isTopLevelBlock } from '../utils/query.js';
 
 export function EdgelessNotesStatus(
   edgeless: EdgelessPageBlockComponent,
@@ -16,7 +17,14 @@ export function EdgelessNotesStatus(
   const isSelectOne = state.selected.length === 1;
   const singleSelected = state.selected[0];
 
-  if (!isSelectOne) return nothing;
+  if (
+    !isSelectOne ||
+    !(
+      isTopLevelBlock(singleSelected) &&
+      matchFlavours(singleSelected, ['affine:note'])
+    )
+  )
+    return nothing;
 
   const notesWithoutSelected = notes.filter(
     note => note.id !== singleSelected.id
