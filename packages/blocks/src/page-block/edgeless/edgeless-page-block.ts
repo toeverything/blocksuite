@@ -178,7 +178,7 @@ export class EdgelessPageBlockComponent
       border: var(--affine-border-width) solid var(--affine-blue);
     }
 
-    edgeless-zoom-toolbar.horizontal,
+    edgeless-zoom-toolbar,
     zoom-bar-toggle-button {
       position: fixed;
       bottom: 20px;
@@ -187,7 +187,7 @@ export class EdgelessPageBlockComponent
     }
 
     @media screen and (max-width: 1048px) {
-      edgeless-zoom-toolbar.horizontal {
+      edgeless-zoom-toolbar {
         display: none;
       }
     }
@@ -325,8 +325,8 @@ export class EdgelessPageBlockComponent
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
       const zoomToolBar = new EdgelessZoomToolbar(this);
-      zoomToolBar.classList.add('horizontal');
       const zoomBarToggleButton = new ZoomBarToggleButton(this);
+
       this.appendChild(toolbar);
       this.appendChild(zoomToolBar);
       this.appendChild(zoomBarToggleButton);

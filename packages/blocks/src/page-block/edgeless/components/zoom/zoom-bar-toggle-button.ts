@@ -6,15 +6,18 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { EdgelessZoomToolbar } from './zoom-tool-bar.js';
+import { EdgelessZoomToolbar } from './zoom-tool-bar.js';
 
 interface ZoomBarPopper {
   element: EdgelessZoomToolbar;
   dispose: () => void;
 }
 
-function createNoteMenuPopper(reference: HTMLElement): ZoomBarPopper {
-  const zoomBar = document.createElement('edgeless-zoom-toolbar');
+function createNoteMenuPopper(
+  reference: HTMLElement,
+  edgeless: EdgelessPageBlockComponent
+): ZoomBarPopper {
+  const zoomBar = new EdgelessZoomToolbar(edgeless);
   assertExists(reference.shadowRoot);
   zoomBar.layout = 'vertical';
   reference.shadowRoot.appendChild(zoomBar);
@@ -39,6 +42,9 @@ function createNoteMenuPopper(reference: HTMLElement): ZoomBarPopper {
 @customElement('zoom-bar-toggle-button')
 export class ZoomBarToggleButton extends LitElement {
   static override styles = css`
+    :host {
+      display: flex;
+    }
     .toggle-button {
       display: flex;
       position: relative;
@@ -62,7 +68,7 @@ export class ZoomBarToggleButton extends LitElement {
       this._zoomBar = null;
       this._popperShow = false;
     } else {
-      this._zoomBar = createNoteMenuPopper(this);
+      this._zoomBar = createNoteMenuPopper(this, this.edgeless);
       this._zoomBar.element.edgeless = this.edgeless;
       this._zoomBar.element.edgeless = this.edgeless;
       this._popperShow = true;
