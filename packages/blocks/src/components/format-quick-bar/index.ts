@@ -14,9 +14,11 @@ import {
 } from '../../page-block/utils/position.js';
 import { FormatQuickBar } from './format-bar-node.js';
 
+export { FormatQuickBar };
+
 let formatQuickBarInstance: FormatQuickBar | null = null;
 
-export const showFormatQuickBar = async ({
+export const showFormatQuickBar = ({
   page,
   anchorEl,
   direction = 'right-bottom',
