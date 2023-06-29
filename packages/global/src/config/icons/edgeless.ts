@@ -665,9 +665,9 @@ export const EdgelessPenIcon = html`<svg
 </svg>`;
 
 export const EdgelessEraserIcon = html`<svg
-  width="38"
+  width="24"
   height="66"
-  viewBox="0 0 38 66"
+  viewBox="7 0 24 66"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
   id="edgeless-eraser-icon"

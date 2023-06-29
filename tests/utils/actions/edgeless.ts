@@ -24,6 +24,7 @@ import {
 } from './misc.js';
 
 const AWAIT_TIMEOUT = 160;
+const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1048;
 
 export async function getNoteRect(
   page: Page,
@@ -110,6 +111,17 @@ export function locatorEdgelessToolButton(
   return innerContainer ? button.locator('.icon-container') : button;
 }
 
+export async function toggleZoomBarWhenSmallScreenWidth(page: Page) {
+  const toggleZoomBarButton = page.locator(
+    '.toggle-button edgeless-tool-icon-button.non-actived'
+  );
+  const isClosed = (await toggleZoomBarButton.count()) === 1;
+  if (isClosed) {
+    await toggleZoomBarButton.click();
+    await page.waitForTimeout(200);
+  }
+}
+
 export async function locatorEdgelessZoomToolButton(
   page: Page,
   type: ZoomToolType,
@@ -120,17 +132,19 @@ export async function locatorEdgelessZoomToolButton(
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
   }[type];
+
   const screenWidth = page.viewportSize()?.width;
   assertExists(screenWidth);
-  if (screenWidth < 1048) {
-    const toggleZoomBarButton = page.locator(
-      'zoom-bar-toggle-button edgeless-tool-icon-button'
-    );
-    await toggleZoomBarButton.click();
-    await sleep(AWAIT_TIMEOUT);
+  let zoomBarClass = 'horizontal';
+  if (screenWidth < ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH) {
+    await toggleZoomBarWhenSmallScreenWidth(page);
+    zoomBarClass = 'vertical';
   }
+
   const button = page
-    .locator('edgeless-zoom-toolbar edgeless-tool-icon-button')
+    .locator(
+      `.edgeless-zoom-toolbar-container.${zoomBarClass} edgeless-tool-icon-button`
+    )
     .filter({
       hasText: text,
     });
@@ -445,8 +459,18 @@ export async function zoomInByKeyboard(page: Page) {
 }
 
 export async function getZoomLevel(page: Page) {
-  const span = page.locator('.zoom-percent');
+  const screenWidth = page.viewportSize()?.width;
+  assertExists(screenWidth);
+  let zoomBarClass = 'horizontal';
+  if (screenWidth < ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH) {
+    await toggleZoomBarWhenSmallScreenWidth(page);
+    zoomBarClass = 'vertical';
+  }
+  const span = page.locator(
+    `.edgeless-zoom-toolbar-container.${zoomBarClass} .zoom-percent`
+  );
   // fixme
+  console.log(span);
   await waitNextFrame(page, 60 / 0.25);
   const text = await span.textContent();
   if (!text) {

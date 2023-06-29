@@ -84,6 +84,7 @@ export class ZoomBarToggleButton extends LitElement {
     return html`
       <div class="toggle-button">
         <edgeless-tool-icon-button
+          class=${this._popperShow ? 'actived' : 'non-actived'}
           .tooltip=${'Toggle Zoom Tool Bar'}
           .tipPosition=${'right'}
           .active=${this._popperShow}

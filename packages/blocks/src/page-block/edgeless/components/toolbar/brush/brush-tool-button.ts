@@ -57,7 +57,7 @@ export class EdgelessBrushToolButton extends LitElement {
     .edgeless-brush-button {
       position: relative;
       height: 72px;
-      width: 40px;
+      width: 30px;
       overflow-y: hidden;
     }
     #edgeless-pen-icon {

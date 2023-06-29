@@ -71,7 +71,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .eraser-button {
       position: relative;
       height: 72px;
-      width: 40px;
+      width: 30px;
       overflow-y: hidden;
     }
     #edgeless-eraser-icon {
