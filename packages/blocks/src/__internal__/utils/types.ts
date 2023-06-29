@@ -14,7 +14,7 @@ import {
 
 import type { Cell, Column } from '../../database-block/table/types.js';
 import type { PageBlockModel } from '../../models.js';
-import { type NoteBlockModel } from '../../note-block/index.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type {
   BlockServiceInstanceByKey,
   ServiceFlavour,
