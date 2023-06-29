@@ -502,11 +502,10 @@ export class EdgelessConnectorManager {
       ...lineBound.points.map(point => [...point, 0]),
       ...lineBound.midPoints.map(point => [...point, 0]),
     ];
-    if (!sb && !eb) {
-      points.push([...lineBound.center, 2]);
+    if (!sb || !eb) {
+      points.push([...lineBound.center, 6]);
     }
     if (esb && eeb && outerBound) {
-      // bounds.push(outerBound);
       points.push(...outerBound.points.map(point => [...point, 0]));
       points.push(...outerBound.midPoints.map(point => [...point, 0]));
       points.push([...outerBound.center, 2]);
@@ -538,40 +537,42 @@ export class EdgelessConnectorManager {
       if (b1.maxX < b2.x) {
         const midX = (b1.maxX + b2.x) / 2;
         [
-          eb1.upperLine,
           eb1.horizontalLine,
+          eb2.horizontalLine,
+          eb1.upperLine,
+
           eb1.lowerLine,
           eb2.upperLine,
-          eb2.horizontalLine,
+
           eb2.lowerLine,
-        ].forEach(line => {
+        ].forEach((line, index) => {
           pushLineIntersectsToPoints(
             line,
             [
               [midX, 0],
               [midX, 1],
             ],
-            3
+            index === 0 || index === 1 ? 6 : 3
           );
         });
       }
       if (b1.maxY < b2.y) {
         const midY = (b1.maxY + b2.y) / 2;
         [
-          eb1.leftLine,
           eb1.verticalLine,
+          eb2.verticalLine,
+          eb1.leftLine,
           eb1.rightLine,
           eb2.leftLine,
-          eb2.verticalLine,
           eb2.rightLine,
-        ].forEach(line => {
+        ].forEach((line, index) => {
           pushLineIntersectsToPoints(
             line,
             [
               [0, midY],
               [1, midY],
             ],
-            3
+            index === 0 || index === 1 ? 6 : 3
           );
         });
       }
@@ -604,7 +605,7 @@ export class EdgelessConnectorManager {
           );
         }) as number[][];
         rst.sort((a, b) => a[1] - b[1]);
-        const midPoint = [...Vec.lrp(rst[1], rst[2], 0.5), 3];
+        const midPoint = [...Vec.lrp(rst[1], rst[2], 0.5), 6];
         points.push(midPoint);
         [
           expandBound.leftLine,
@@ -634,7 +635,7 @@ export class EdgelessConnectorManager {
           );
         }) as number[][];
         rst.sort((a, b) => a[0] - b[0]);
-        const midPoint = [...Vec.lrp(rst[1], rst[2], 0.5), 3];
+        const midPoint = [...Vec.lrp(rst[1], rst[2], 0.5), 6];
         points.push(midPoint);
         [
           expandBound.upperLine,

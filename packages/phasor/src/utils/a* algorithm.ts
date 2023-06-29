@@ -110,11 +110,15 @@ export class AStarAlgorithm {
       let newDiagonalCount =
         curDiagoalCount + this._getDiagonalCount(next, current);
       if (current !== this._sp) {
-        newDiagonalCount -= this._getDiagonalCount(this._originalEp, current);
+        newDiagonalCount -= this._getDiagonalCount(
+          this._originalEp,
+          this._ep,
+          current
+        );
       }
       newDiagonalCount += this._getDiagonalCount(
         this._originalEp,
-        next,
+        this._ep,
         current
       );
       assertExists(next[2]);
@@ -129,10 +133,11 @@ export class AStarAlgorithm {
         canUpdate = true;
       } else if (almostEqual(newCost, lastCost)) {
         assertExists(lastPointPriority);
-        if (newPointPriority > lastPointPriority) {
+        assertExists(lastDiagonalCount);
+        const compensation = (newDiagonalCount - lastDiagonalCount) * 3;
+        if (newPointPriority >= lastPointPriority + compensation) {
           canUpdate = true;
-        } else if (newPointPriority === lastPointPriority) {
-          assertExists(lastDiagonalCount);
+        } else if (newPointPriority === lastPointPriority + compensation) {
           if (newDiagonalCount < lastDiagonalCount) {
             canUpdate = true;
           }
