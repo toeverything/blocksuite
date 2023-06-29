@@ -1,7 +1,7 @@
 import '../buttons/tool-icon-button.js';
-import './shape/shape-tool-button.js';
 import './brush/brush-tool-button.js';
 import './connector/connector-tool-button.js';
+import './shape/shape-tool-button.js';
 
 import {
   EraserIcon,
@@ -27,7 +27,7 @@ import { Point } from '../../../../__internal__/utils/rect.js';
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getTooltipWithShortcut } from '../utils.js';
+import { getTooltipWithShortcut, readImageSize } from '../utils.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
@@ -199,9 +199,19 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       offsetY: 0,
     };
 
-    const models = await uploadImageFromLocal(this.edgeless.page, realSize =>
-      Object.assign(options, realSize)
-    );
+    const fileInfos = await uploadImageFromLocal(this.edgeless.page.blobs);
+
+    for (let index = 0; index < fileInfos.length; index++) {
+      const file = fileInfos[index].file;
+      const size = await readImageSize(file);
+      options.width = Math.max(options.width, size.width);
+      options.height = Math.max(options.height, size.height);
+    }
+
+    const models = fileInfos.map(({ sourceId }) => ({
+      flavour: 'affine:image',
+      sourceId,
+    }));
 
     const { left, width, top, height } =
       this.edgeless.pageBlockContainer.getBoundingClientRect();
