@@ -1,5 +1,4 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { randomSeed } from 'roughjs/bin/math.js';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
@@ -20,6 +19,7 @@ import type {
 import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
+import { randomSeed } from './rough/math.js';
 import { contains, getCommonBound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import {

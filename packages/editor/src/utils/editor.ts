@@ -43,9 +43,15 @@ export const createBlockHub: (
         return;
       }
       if (data.flavour === 'affine:image' && data.type === 'image') {
-        models.push(...(await uploadImageFromLocal(page)));
+        models.push(
+          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+            flavour: 'affine:image',
+            sourceId,
+          }))
+        );
       } else if (data.flavour === 'affine:bookmark') {
-        models.push(...(await getBookmarkInitialProps()));
+        const url = await getBookmarkInitialProps();
+        url && models.push({ flavour: 'affine:bookmark', url });
       } else {
         models.push(data);
       }
@@ -83,9 +89,15 @@ export const createBlockHub: (
         return;
       }
       if (props.flavour === 'affine:image' && props.type === 'image') {
-        models.push(...(await uploadImageFromLocal(page)));
+        models.push(
+          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+            flavour: 'affine:image',
+            sourceId,
+          }))
+        );
       } else if (props.flavour === 'affine:bookmark') {
-        models.push(...(await getBookmarkInitialProps()));
+        const url = await getBookmarkInitialProps();
+        url && models.push({ flavour: 'affine:bookmark', url });
       } else {
         models.push(props);
       }

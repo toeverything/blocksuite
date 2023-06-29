@@ -1,7 +1,7 @@
 import '../buttons/tool-icon-button.js';
-import './shape/shape-tool-button.js';
 import './brush/brush-tool-button.js';
 import './connector/connector-tool-button.js';
+import './shape/shape-tool-button.js';
 
 import {
   EraserIcon,
@@ -25,7 +25,6 @@ import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
 import { Point } from '../../../../__internal__/utils/rect.js';
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
-import type { ImageBlockModel } from '../../../../image-block/image-model.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getTooltipWithShortcut } from '../utils.js';
@@ -194,10 +193,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private async _addImage() {
     this._imageLoading = true;
 
-    const models = (await uploadImageFromLocal(
-      this.edgeless.page,
-      true
-    )) as ImageBlockModel[];
+    const models = await uploadImageFromLocal(this.edgeless.page.blobs);
 
     if (!models.length) {
       this._imageLoading = false;
