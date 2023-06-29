@@ -1,6 +1,6 @@
 import type { Bound } from './bound.js';
-import { linePolygonIntersects } from './math-utils.js';
-import { type IVec, Vec } from './vec.js';
+import { almostEqual, linePolygonIntersects } from './math-utils.js';
+import { type IVec } from './vec.js';
 
 export class Graph {
   private _xMap = new Map<number, IVec[]>();
@@ -83,7 +83,7 @@ export class Graph {
       let plusPoint: IVec | undefined;
       let minusPoint: IVec | undefined;
       xPoints.forEach(point => {
-        if (Vec.isEqual(point, curPoint)) return;
+        if (this._almostEqual(point, curPoint)) return;
         const dif = point[1] - curPoint[1];
         if (dif > 0 && dif < plusMin) {
           plusMin = dif;
@@ -112,7 +112,7 @@ export class Graph {
       let plusPoint: IVec | undefined;
       let minusPoint: IVec | undefined;
       yPoints.forEach(point => {
-        if (Vec.isEqual(point, curPoint)) return;
+        if (this._almostEqual(point, curPoint)) return;
         const dif = point[0] - curPoint[0];
         if (dif > 0 && dif < plusMin) {
           plusMin = dif;
@@ -138,9 +138,13 @@ export class Graph {
     return Array.from(neighbors);
   }
 
+  private _almostEqual(point: IVec, point2: IVec) {
+    return almostEqual(point[0], point2[0]) && almostEqual(point[1], point2[1]);
+  }
+
   private _canSkipBlock(point: IVec) {
     return this.excludedPoints.some(excludedPoint => {
-      return Vec.isEqual(point, excludedPoint);
+      return this._almostEqual(point, excludedPoint);
     });
   }
 

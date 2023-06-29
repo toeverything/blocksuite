@@ -4,7 +4,7 @@ import type { Bound } from './bound.js';
 import { Graph } from './graph.js';
 import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
-import { type IVec, Vec } from './vec.js';
+import { type IVec } from './vec.js';
 export class AStarAlgorithm {
   private _cameFrom = new Map<IVec, IVec | null>();
   private _frontier!: PriorityQueue<
@@ -70,6 +70,10 @@ export class AStarAlgorithm {
     return 1;
   }
 
+  private _almostEqual(a: IVec, b: IVec): boolean {
+    return almostEqual(a[0], b[0]) && almostEqual(a[1], b[1]);
+  }
+
   public step() {
     if (this._complete) return;
     this._current = this._frontier.dequeue();
@@ -78,13 +82,13 @@ export class AStarAlgorithm {
       this._complete = true;
       return;
     }
-    if (Vec.isEqual(current, this._ep)) {
+    if (this._almostEqual(current, this._ep)) {
       this._complete = true;
       return;
     }
     const neighbors = this._graph.neighbors(current);
     const index = neighbors.findIndex(n =>
-      Vec.isEqual(n, this._cameFrom.get(current) ?? [])
+      this._almostEqual(n, this._cameFrom.get(current) ?? [])
     );
     if (index !== -1) {
       neighbors.splice(index, 1);
@@ -93,8 +97,8 @@ export class AStarAlgorithm {
     for (let i = 0; i < neighbors.length; i++) {
       const next = neighbors[i];
       if (
-        Vec.isEqual(current, this._ep) &&
-        !Vec.isEqual(next, this._originalEp)
+        this._almostEqual(current, this._ep) &&
+        !this._almostEqual(next, this._originalEp)
       )
         continue;
       const newCost =
