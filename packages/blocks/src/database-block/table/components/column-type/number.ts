@@ -101,6 +101,10 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     }
   };
 
+  private _onBlur = () => {
+    this._setValue();
+  };
+
   override firstUpdated() {
     this.focusEnd();
   }
@@ -109,6 +113,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     return html`<input
       .value="${this.value ?? ''}"
       @keydown="${this._keydown}"
+      @blur="${this._onBlur}"
       class="affine-database-number number"
     />`;
   }
