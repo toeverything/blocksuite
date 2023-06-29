@@ -21,6 +21,7 @@ import {
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
+import type { FormatQuickBar } from '../../components/format-quick-bar/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
@@ -498,9 +499,13 @@ export function getAllowSelectedBlocks(
 }
 
 export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
+  let formatBar: FormatQuickBar | undefined;
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: pageBlock.mouseRoot as HTMLElement,
+    onDragStartCallback() {
+      formatBar?.abortController.abort();
+    },
     onDropCallback(_point, blockElements, editingState, type): void {
       if (!editingState || type === 'none') return;
       const { model } = editingState;
@@ -578,7 +583,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       }
       pageBlock.selection.selectOneBlock(modelState.element, modelState.rect);
 
-      showFormatQuickBar({
+      formatBar = showFormatQuickBar({
         container: pageBlock.selection.container,
         page: pageBlock.page,
         direction: 'center-bottom',
