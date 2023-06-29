@@ -33,6 +33,7 @@ import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
 } from '../../utils/position.js';
+import { isConnectorAndBindingsAllSelected } from '../utils/connector.js';
 import {
   getXYWH,
   isPhasorElement,
@@ -400,10 +401,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private canBeDragged(element: Selectable) {
     return !(
       element instanceof ConnectorElement &&
-      !this._edgeless.connector.isConnectorAndBindingsAllSelected(
-        element,
-        this.state.selected
-      )
+      !isConnectorAndBindingsAllSelected(element, this.state.selected)
     );
   }
 

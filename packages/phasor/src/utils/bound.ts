@@ -230,6 +230,10 @@ export class Bound implements IBound {
     );
   }
 
+  getVerticesAndMidpoints() {
+    return [...this.points, ...this.midPoints];
+  }
+
   static deserialize(s: string) {
     const [x, y, w, h] = deserializeXYWH(s);
     return new Bound(x, y, w, h);

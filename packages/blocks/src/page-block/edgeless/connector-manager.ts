@@ -12,8 +12,6 @@ import {
   getBoundFromPoints,
   type IConnector,
   type IVec,
-  lineIntersects,
-  linePolygonIntersects,
   Overlay,
   polygonNearestPoint,
   sign,
@@ -26,299 +24,24 @@ import {
   type TopLevelBlockModel,
 } from '../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import {
+  computePoints,
+  getAnchors,
+  getConnectableNearestAnchor,
+} from './utils/connector.js';
 import { isTopLevelBlock } from './utils/query.js';
-import type { Selectable } from './utils/selection-manager.js';
 
-function getConnectablePoints(
-  osp: IVec,
-  oep: IVec,
-  sp: IVec,
-  ep: IVec,
-  sb: Bound | null,
-  eb: Bound | null,
-  esb: Bound | null,
-  eeb: Bound | null
-) {
-  const bounds: Bound[] = [];
-
-  const lineBound = Bound.fromPoints([osp, oep]);
-  // bounds.push(lineBound);
-  const outerBound = esb && eeb && esb.unite(eeb);
-  let points: IVec[] = [
-    sp,
-    ep,
-    ...lineBound.points.map(point => [...point, 0]),
-    ...lineBound.midPoints.map(point => [...point, 0]),
-  ];
-  if (!sb || !eb) {
-    points.push([...lineBound.center, 6]);
-  }
-  if (esb && eeb && outerBound) {
-    points.push(...outerBound.points.map(point => [...point, 0]));
-    points.push(...outerBound.midPoints.map(point => [...point, 0]));
-    points.push([...outerBound.center, 2]);
-    [
-      esb.upperLine,
-      esb.horizontalLine,
-      esb.lowerLine,
-      eeb.upperLine,
-      eeb.horizontalLine,
-      eeb.lowerLine,
-    ].forEach(line => {
-      pushLineIntersectsToPoints(line, outerBound.leftLine, 0);
-      pushLineIntersectsToPoints(line, outerBound.rightLine, 0);
-    });
-    [
-      esb.leftLine,
-      esb.verticalLine,
-      esb.rightLine,
-      eeb.leftLine,
-      eeb.verticalLine,
-      eeb.rightLine,
-    ].forEach(line => {
-      pushLineIntersectsToPoints(line, outerBound.upperLine, 0);
-      pushLineIntersectsToPoints(line, outerBound.lowerLine, 0);
-    });
-  }
-
-  function pushBoundMidPoint(b1: Bound, b2: Bound, eb1: Bound, eb2: Bound) {
-    if (b1.maxX < b2.x) {
-      const midX = (b1.maxX + b2.x) / 2;
-      [
-        eb1.horizontalLine,
-        eb2.horizontalLine,
-        eb1.upperLine,
-
-        eb1.lowerLine,
-        eb2.upperLine,
-
-        eb2.lowerLine,
-      ].forEach((line, index) => {
-        pushLineIntersectsToPoints(
-          line,
-          [
-            [midX, 0],
-            [midX, 1],
-          ],
-          index === 0 || index === 1 ? 6 : 3
-        );
-      });
-    }
-    if (b1.maxY < b2.y) {
-      const midY = (b1.maxY + b2.y) / 2;
-      [
-        eb1.verticalLine,
-        eb2.verticalLine,
-        eb1.leftLine,
-        eb1.rightLine,
-        eb2.leftLine,
-        eb2.rightLine,
-      ].forEach((line, index) => {
-        pushLineIntersectsToPoints(
-          line,
-          [
-            [0, midY],
-            [1, midY],
-          ],
-          index === 0 || index === 1 ? 6 : 3
-        );
-      });
-    }
-  }
-
-  function pushGapMidPoint(
-    point: IVec,
-    bound: Bound,
-    bound2: Bound,
-    expandBound: Bound,
-    expandBound2: Bound
+function getDirectPath(startPoint: IVec, endPoint: IVec) {
+  if (
+    almostEqual(startPoint[0], endPoint[0], 0.02) ||
+    almostEqual(startPoint[1], endPoint[1], 0.02)
   ) {
-    /** on top or on bottom */
-    if (
-      almostEqual(point[1], bound.y, 0.02) ||
-      almostEqual(point[1], bound.maxY, 0.02)
-    ) {
-      const result = [
-        bound.upperLine,
-        bound.lowerLine,
-        bound2.upperLine,
-        bound2.lowerLine,
-      ].map(line => {
-        return lineIntersects(
-          point,
-          [point[0], point[1] + 1],
-          line[0],
-          line[1],
-          true
-        );
-      }) as number[][];
-      result.sort((a, b) => a[1] - b[1]);
-      const midPoint = [...Vec.lrp(result[1], result[2], 0.5), 6];
-      points.push(midPoint);
-      [
-        expandBound.leftLine,
-        expandBound.rightLine,
-        expandBound2.leftLine,
-        expandBound2.rightLine,
-      ].forEach(line => {
-        pushLineIntersectsToPoints(
-          [midPoint, [midPoint[0] + 1, midPoint[1]]],
-          line,
-          0
-        );
-      });
-    } else {
-      const result = [
-        bound.leftLine,
-        bound.rightLine,
-        bound2.leftLine,
-        bound2.rightLine,
-      ].map(line => {
-        return lineIntersects(
-          point,
-          [point[0] + 1, point[1]],
-          line[0],
-          line[1],
-          true
-        );
-      }) as number[][];
-      result.sort((a, b) => a[0] - b[0]);
-      const midPoint = [...Vec.lrp(result[1], result[2], 0.5), 6];
-      points.push(midPoint);
-      [
-        expandBound.upperLine,
-        expandBound.lowerLine,
-        expandBound2.upperLine,
-        expandBound2.lowerLine,
-      ].forEach(line => {
-        pushLineIntersectsToPoints(
-          [midPoint, [midPoint[0], midPoint[1] + 1]],
-          line,
-          0
-        );
-      });
-    }
-  }
-  if (sb && eb && esb && eeb) {
-    pushGapMidPoint(osp, sb, eb, esb, eeb);
-    pushGapMidPoint(oep, eb, sb, eeb, esb);
-    pushBoundMidPoint(sb, eb, esb, eeb);
-    pushBoundMidPoint(eb, sb, eeb, esb);
-  }
-
-  if (esb) {
-    points.push(
-      ...esb.points.map(point => [...point, 0]),
-      ...esb.midPoints.map(point => [...point, 0])
-    );
-    points.push(...esb.include(ep).points.map(point => [...point, 0]));
-    points.push(...esb.include(ep).midPoints.map(point => [...point, 0]));
-    bounds.push(esb);
-  }
-  function pushLineIntersectsToPoints(
-    aLine: IVec[],
-    bLine: IVec[],
-    priority = 0
-  ) {
-    const result = lineIntersects(aLine[0], aLine[1], bLine[0], bLine[1], true);
-    if (result) {
-      points.push([...result, priority]);
-    }
-  }
-  if (eeb) {
-    points.push(
-      ...eeb.points.map(point => [...point, 0]),
-      ...eeb.midPoints.map(point => [...point, 0])
-    );
-    points.push(...eeb.include(sp).points.map(point => [...point, 0]));
-    points.push(...eeb.include(sp).midPoints.map(point => [...point, 0]));
-    bounds.push(eeb);
-  }
-  points = points.map(point => [
-    parseFloat(point[0].toFixed(2)),
-    parseFloat(point[1].toFixed(2)),
-    point[2] ?? 0,
-  ]);
-  points.sort((a, b) => a[0] - b[0]);
-  for (let i = 1; i < points.length - 1; i++) {
-    const cur = points[i];
-    const last = points[i - 1];
-    if (almostEqual(cur[0], last[0], 0.02)) {
-      cur[0] = last[0];
-    }
-  }
-  points.sort((a, b) => a[1] - b[1]);
-  for (let i = 1; i < points.length - 1; i++) {
-    const cur = points[i];
-    const last = points[i - 1];
-    if (almostEqual(cur[1], last[1], 0.02)) {
-      cur[1] = last[1];
-    }
-  }
-  points.sort((a, b) => {
-    if (a[0] < b[0]) return -1;
-    if (a[0] > b[0]) return 1;
-    if (a[1] < b[1]) return -1;
-    if (a[1] > b[1]) return 1;
-    return 0;
-  });
-  for (let i = 1; i < points.length; i++) {
-    const cur = points[i];
-    const last = points[i - 1];
-    if (
-      almostEqual(cur[0], last[0], 0.02) &&
-      almostEqual(cur[1], last[1], 0.02)
-    ) {
-      if (cur[2] <= last[2]) points.splice(i, 1);
-      else points.splice(i - 1, 1);
-      i--;
-      continue;
-    }
-  }
-
-  const sorted = points.map(point => point[0] + ',' + point[1]).sort();
-  sorted.forEach((cur, index) => {
-    if (index === 0) return;
-    if (cur === sorted[index - 1]) {
-      throw new Error('duplicate point');
-    }
-  });
-  const startEnds = [sp, ep].map(point => {
-    return points.find(
-      item =>
-        almostEqual(item[0], point[0], 0.02) &&
-        almostEqual(item[1], point[1], 0.02)
-    );
-  }) as IVec[];
-  assertExists(startEnds[0]);
-  assertExists(startEnds[1]);
-  return { points, sp: startEnds[0], ep: startEnds[1] };
-}
-
-function closestPoint(points: IVec[], point: IVec) {
-  const result = points.map(p => ({ p, d: Vec.dist(p, point) }));
-  result.sort((a, b) => a.d - b.d);
-  return result[0].p;
-}
-
-function intersectLine(ele: Connectable, line: IVec[]) {
-  if (isTopLevelBlock(ele)) {
-    return linePolygonIntersects(
-      line[0],
-      line[1],
-      Bound.deserialize(ele.xywh).points
-    );
+    return [startPoint, endPoint];
   } else {
-    return ele.intersectWithLine(line[0], line[1]);
+    const vec = Vec.sub(endPoint, startPoint);
+    const mid = [startPoint[0], startPoint[1] + vec[1]];
+    return [startPoint, mid, endPoint];
   }
-}
-
-function downscalePrecision(point: IVec) {
-  return [
-    Number(point[0].toFixed(2)),
-    Number(point[1].toFixed(2)),
-    point[2] ?? 0,
-  ];
 }
 
 function mergePath(points: IVec[]) {
@@ -358,46 +81,48 @@ function mergePath(points: IVec[]) {
   return result;
 }
 
-function computeOffset(bound: Bound, bound2: Bound) {
-  const result: IVec = [20, 20, 20, 20];
+function computeOffset(startBound: Bound | null, endBound: Bound | null) {
+  const startOffset = [20, 20, 20, 20];
+  const endOffset = [20, 20, 20, 20];
+  if (!(startBound && endBound)) {
+    return [startOffset, endOffset];
+  }
   // left, top, right, bottom
   let dist = Vec.distanceToLineSegment(
-    bound.leftLine[0],
-    bound.leftLine[1],
-    bound2.rightLine[0],
+    startBound.leftLine[0],
+    startBound.leftLine[1],
+    endBound.rightLine[0],
     false
   );
-  result[0] = Math.max(Math.min(dist / 2, result[0]), 0);
+  startOffset[0] = Math.max(Math.min(dist / 2, startOffset[0]), 0);
   dist = Vec.distanceToLineSegment(
-    bound.upperLine[0],
-    bound.upperLine[1],
-    bound2.lowerLine[0],
+    startBound.upperLine[0],
+    startBound.upperLine[1],
+    endBound.lowerLine[0],
     false
   );
-  result[1] = Math.max(Math.min(dist / 2, result[1]), 0);
+  startOffset[1] = Math.max(Math.min(dist / 2, startOffset[1]), 0);
   dist = Vec.distanceToLineSegment(
-    bound.rightLine[0],
-    bound.rightLine[1],
-    bound2.leftLine[0],
+    startBound.rightLine[0],
+    startBound.rightLine[1],
+    endBound.leftLine[0],
     false
   );
-  result[2] = Math.max(Math.min(dist / 2, result[2]), 0);
+  startOffset[2] = Math.max(Math.min(dist / 2, startOffset[2]), 0);
   dist = Vec.distanceToLineSegment(
-    bound.lowerLine[0],
-    bound.lowerLine[1],
-    bound2.upperLine[0],
+    startBound.lowerLine[0],
+    startBound.lowerLine[1],
+    endBound.upperLine[0],
     false
   );
-  result[3] = Math.max(Math.min(dist / 2, result[3]), 0);
+  startOffset[3] = Math.max(Math.min(dist / 2, startOffset[3]), 0);
 
-  return result;
-}
+  startOffset[0] = endOffset[2] = Math.min(startOffset[0], endOffset[2]);
+  startOffset[1] = endOffset[3] = Math.min(startOffset[1], endOffset[3]);
+  startOffset[2] = endOffset[0] = Math.min(startOffset[2], endOffset[0]);
+  startOffset[3] = endOffset[1] = Math.min(startOffset[3], endOffset[1]);
 
-function filterConnectablePoints(points: IVec[], bound: Bound | null) {
-  return points.filter(point => {
-    if (!bound) return true;
-    return !bound.isPointInBound(point);
-  });
+  return [startOffset, endOffset];
 }
 
 function getNextPoint(
@@ -500,7 +225,7 @@ export class EdgelessConnectorManager {
       _connectionOverlay.bound = bound;
 
       // then check if closes to anchors
-      const anchors = this._getAnchors(connectable);
+      const anchors = getAnchors(connectable);
       _connectionOverlay.points = anchors.map(a => a.point);
       for (let j = 0; j < anchors.length; j++) {
         const anchor = anchors[j];
@@ -607,7 +332,7 @@ export class EdgelessConnectorManager {
     if (mode === ConnectorMode.Straight) {
       return this._generateStraightConnectorPath(connector);
     } else {
-      return this._generateOrthogonalConnector(connector);
+      return this._generateOrthogonalConnectorPath(connector);
     }
   }
 
@@ -624,8 +349,8 @@ export class EdgelessConnectorManager {
       ) as Connectable;
       const sb = Bound.deserialize(start.xywh);
       const eb = Bound.deserialize(end.xywh);
-      const startPoint = this._getNearestAnchor(start, eb.center);
-      const endPoint = this._getNearestAnchor(end, sb.center);
+      const startPoint = getConnectableNearestAnchor(start, eb.center);
+      const endPoint = getConnectableNearestAnchor(end, sb.center);
       return [startPoint, endPoint];
     } else {
       const endPoint = this._getConnectionPoint(connector, 'target');
@@ -634,7 +359,18 @@ export class EdgelessConnectorManager {
     }
   }
 
-  private _generateOrthogonalConnector(connector: ConnectorElement) {
+  private _prepareOrthogonalConnectorInfo(
+    connector: ConnectorElement
+  ): [
+    IVec,
+    IVec,
+    IVec,
+    IVec,
+    Bound | null,
+    Bound | null,
+    Bound | null,
+    Bound | null
+  ] {
     const start = this._getConnectorEndElement(
       connector,
       'source'
@@ -643,26 +379,55 @@ export class EdgelessConnectorManager {
       connector,
       'target'
     ) as Connectable;
+    const [startPoint, endPoint] = this._computeStartEndPoint(connector);
+    const startBound = start ? Bound.deserialize(start.xywh) : null;
+    const endBound = end ? Bound.deserialize(end.xywh) : null;
+    const [startOffset, endOffset] = computeOffset(startBound, endBound);
+    const [nextStartPoint, lastEndPoint] = this._computeNextStartEndPoint(
+      startPoint,
+      endPoint,
+      startBound,
+      endBound,
+      startOffset,
+      endOffset
+    );
+    const expandStartBound = startBound
+      ? startBound.expand(
+          startOffset[0],
+          startOffset[1],
+          startOffset[2],
+          startOffset[3]
+        )
+      : null;
+    const expandEndBound = endBound
+      ? endBound.expand(endOffset[0], endOffset[1], endOffset[2], endOffset[3])
+      : null;
+    return [
+      startPoint,
+      endPoint,
+      nextStartPoint,
+      lastEndPoint,
+      startBound,
+      endBound,
+      expandStartBound,
+      expandEndBound,
+    ];
+  }
 
-    let startPoint: IVec;
-    let endPoint: IVec;
-    let startBound: Bound | null = null;
-    let endBound: Bound | null = null;
-    const blocks = [];
-    const expandBlocks = [];
-    if (start) {
-      startBound = Bound.deserialize(start.xywh);
-    }
-    if (end) {
-      endBound = Bound.deserialize(end.xywh);
-    }
-
-    let nextStartPoint: IVec;
-    let lastEndPoint: IVec;
+  private _computeStartEndPoint(connector: ConnectorElement) {
     const { source, target } = connector;
+    const start = this._getConnectorEndElement(
+      connector,
+      'source'
+    ) as Connectable;
+    const end = this._getConnectorEndElement(
+      connector,
+      'target'
+    ) as Connectable;
+    let startPoint: IVec, endPoint: IVec;
     if (source.id && !source.position && target.id && !target.position) {
-      const startAnchors = this._getAnchors(start);
-      const endAnchors = this._getAnchors(end);
+      const startAnchors = getAnchors(start);
+      const endAnchors = getAnchors(end);
       let minDist = Infinity;
       let minStartAnchor: IVec = [0, 0];
       let minEndAnchor: IVec = [0, 0];
@@ -682,100 +447,49 @@ export class EdgelessConnectorManager {
       startPoint = this._getConnectionPoint(connector, 'source');
       endPoint = this._getConnectionPoint(connector, 'target');
     }
-    let startOffset = [20, 20, 20, 20];
-    const endOffset = [20, 20, 20, 20];
-    if (startBound && endBound) {
-      startOffset = computeOffset(startBound, endBound);
-      // endOffset = this._computeOffset(, eb, sb);
-      startOffset[0] = endOffset[2] = Math.min(startOffset[0], endOffset[2]);
-      startOffset[1] = endOffset[3] = Math.min(startOffset[1], endOffset[3]);
-      startOffset[2] = endOffset[0] = Math.min(startOffset[2], endOffset[0]);
-      startOffset[3] = endOffset[1] = Math.min(startOffset[3], endOffset[1]);
-    }
-    if (startBound) {
-      nextStartPoint = getNextPoint(
-        startBound,
-        startPoint,
-        startOffset[0],
-        startOffset[1],
-        startOffset[2],
-        startOffset[3]
-      );
-    } else {
-      nextStartPoint = startPoint;
-    }
-    if (endBound) {
-      lastEndPoint = getNextPoint(
-        endBound,
-        endPoint,
-        endOffset[0],
-        endOffset[1],
-        endOffset[2],
-        endOffset[3]
-      );
-    } else {
-      lastEndPoint = endPoint;
-    }
-    let expandedStartBound: Bound | null = null;
-    let expandedEndBound: Bound | null = null;
-    if (
-      (startBound && startBound.isPointInBound(endPoint)) ||
-      (endBound && endBound.isPointInBound(startPoint))
-    ) {
-      if (
-        almostEqual(startPoint[0], endPoint[0], 0.02) ||
-        almostEqual(startPoint[1], endPoint[1], 0.02)
-      ) {
-        return [startPoint, endPoint];
-      } else {
-        const vec = Vec.sub(endPoint, startPoint);
-        const mid = [startPoint[0], startPoint[1] + vec[1]];
-        return [startPoint, mid, endPoint];
-      }
-    }
-    if (startBound) {
-      blocks.push(startBound.clone());
-      expandedStartBound = startBound.expand(
-        startOffset[0],
-        startOffset[1],
-        startOffset[2],
-        startOffset[3]
-      );
-      expandBlocks.push(expandedStartBound);
-    }
-    if (endBound) {
-      blocks.push(endBound.clone());
-      expandedEndBound = endBound.expand(
-        endOffset[0],
-        endOffset[1],
-        endOffset[2],
-        endOffset[3]
-      );
-      expandBlocks.push(expandedEndBound.clone());
-    }
-    startPoint = downscalePrecision(startPoint);
-    endPoint = downscalePrecision(endPoint);
-    nextStartPoint = downscalePrecision(nextStartPoint);
-    lastEndPoint = downscalePrecision(lastEndPoint);
-    const result = getConnectablePoints(
-      startPoint,
-      endPoint,
-      nextStartPoint,
-      lastEndPoint,
-      startBound,
-      endBound,
-      expandedStartBound,
-      expandedEndBound
-    );
-    const points = result.points;
-    nextStartPoint = result.sp;
-    lastEndPoint = result.ep;
-    const finalPoints = filterConnectablePoints(
-      filterConnectablePoints(points, startBound),
-      endBound
-    );
+    return [startPoint, endPoint];
+  }
 
-    if (!end) {
+  private _computeNextStartEndPoint(
+    startPoint: IVec,
+    endPoint: IVec,
+    startBound: Bound | null,
+    endBound: Bound | null,
+    startOffset: IVec | null,
+    endOffset: IVec | null
+  ) {
+    const nextStartPoint =
+      startBound && startOffset
+        ? getNextPoint(
+            startBound,
+            startPoint,
+            startOffset[0],
+            startOffset[1],
+            startOffset[2],
+            startOffset[3]
+          )
+        : startPoint;
+    const lastEndPoint =
+      endBound && endOffset
+        ? getNextPoint(
+            endBound,
+            endPoint,
+            endOffset[0],
+            endOffset[1],
+            endOffset[2],
+            endOffset[3]
+          )
+        : endPoint;
+    return [nextStartPoint, lastEndPoint];
+  }
+
+  private _adjustStartEndPoint(
+    startPoint: IVec,
+    endPoint: IVec,
+    startBound: Bound | null,
+    endBound: Bound | null
+  ) {
+    if (!endBound) {
       if (
         Math.abs(endPoint[0] - startPoint[0]) >
         Math.abs(endPoint[1] - startPoint[1])
@@ -785,7 +499,7 @@ export class EdgelessConnectorManager {
         endPoint[1] += sign(endPoint[1] - startPoint[1]);
       }
     }
-    if (!start) {
+    if (!startBound) {
       if (
         Math.abs(endPoint[0] - startPoint[0]) >
         Math.abs(endPoint[1] - startPoint[1])
@@ -795,6 +509,40 @@ export class EdgelessConnectorManager {
         startPoint[1] -= sign(endPoint[1] - startPoint[1]);
       }
     }
+  }
+
+  _generateOrthogonalConnectorPath(connector: ConnectorElement) {
+    const info = this._prepareOrthogonalConnectorInfo(connector);
+    let [startPoint, endPoint, nextStartPoint, lastEndPoint] = info;
+    const [, , , , startBound, endBound, expandStartBound, expandEndBound] =
+      info;
+    const blocks = [];
+    const expandBlocks = [];
+    startBound && blocks.push(startBound.clone());
+    endBound && blocks.push(endBound.clone());
+    expandStartBound && expandBlocks.push(expandStartBound.clone());
+    expandEndBound && expandBlocks.push(expandEndBound.clone());
+
+    if (
+      (startBound && startBound.isPointInBound(endPoint)) ||
+      (endBound && endBound.isPointInBound(startPoint))
+    ) {
+      return getDirectPath(startPoint, endPoint);
+    }
+
+    const points = computePoints(
+      startPoint,
+      endPoint,
+      nextStartPoint,
+      lastEndPoint,
+      startBound,
+      endBound,
+      expandStartBound,
+      expandEndBound
+    );
+    const finalPoints = points[0];
+    [, startPoint, endPoint, nextStartPoint, lastEndPoint] = points;
+    this._adjustStartEndPoint(startPoint, endPoint, startBound, endBound);
     this._aStarRunner = new AStarRunner(
       finalPoints,
       nextStartPoint,
@@ -806,8 +554,8 @@ export class EdgelessConnectorManager {
     );
     this._aStarRunner.run();
     let path = this._aStarRunner.path;
-    if (!end) path.pop();
-    if (!start) path.shift();
+    if (!endBound) path.pop();
+    if (!startBound) path.shift();
 
     path = mergePath(path);
     return path;
@@ -837,8 +585,8 @@ export class EdgelessConnectorManager {
       assertExists(ele);
       if (!connection.position) {
         const otherPoint = this._getConnectionPoint(connector, anotherType);
-        const result = this._getNearestAnchor(ele, otherPoint);
-        return result;
+        const rst = getConnectableNearestAnchor(ele, otherPoint);
+        return rst;
       } else {
         point = Bound.deserialize(ele.xywh).getRelativePoint(
           connection.position
@@ -848,55 +596,6 @@ export class EdgelessConnectorManager {
       point = connection.position as IVec;
     }
     return point;
-  }
-
-  private _getAnchors(ele: Connectable) {
-    const b = Bound.deserialize(ele.xywh);
-    const offset = 10;
-    const anchors: { point: IVec; coord: IVec }[] = [];
-    const coords = [
-      [0.5, 0],
-      [0.5, 1],
-      [0, 0.5],
-      [1, 0.5],
-    ];
-    [
-      [b.center[0], b.y - offset],
-      [b.center[0], b.maxY + offset],
-      [b.x - offset, b.center[1]],
-      [b.maxX + offset, b.center[1]],
-    ].forEach((vec, index) => {
-      const result = intersectLine(ele, [b.center, vec]);
-      if (result) anchors.push({ point: result[0], coord: coords[index] });
-    });
-    return anchors;
-  }
-
-  private _getNearestAnchor(ele: Connectable, point: IVec) {
-    const anchors = this._getAnchors(ele);
-    return closestPoint(
-      anchors.map(a => a.point),
-      point
-    );
-  }
-
-  isConnectorAndBindingsAllSelected(
-    connector: ConnectorElement,
-    selected: Selectable[]
-  ) {
-    const connectorSelected = selected.find(s => s.id === connector.id);
-    if (!connectorSelected) {
-      return false;
-    }
-    const { source, target } = connector;
-    const startSelected = selected.find(s => s.id === source?.id);
-    const endSelected = selected.find(s => s.id === target?.id);
-
-    if (!source.id && !target.id) return true;
-    if (!source.id && endSelected) return true;
-    if (!target.id && startSelected) return true;
-    if (startSelected && endSelected) return true;
-    return false;
   }
 
   syncConnectorPos(connected: Connectable[]) {
