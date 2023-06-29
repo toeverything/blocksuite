@@ -416,7 +416,7 @@ test('path #1', async ({ page }) => {
   ]);
 });
 
-test.only('path #2', async ({ page }) => {
+test('path #2', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
