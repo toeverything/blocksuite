@@ -65,9 +65,11 @@ export class SurfaceManager {
     this._renderer = new Renderer();
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
     this._computedValue = computedValue;
-
-    this._syncFromExistingContainer();
     this._yContainer.observe(this._onYContainer);
+  }
+
+  init() {
+    this._syncFromExistingContainer();
   }
 
   get viewport(): SurfaceViewport {
@@ -78,7 +80,7 @@ export class SurfaceManager {
     this._transact(() => {
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as keyof PhasorElementType;
-
+        const id = yElement.get('id') as id;
         const ElementCtor = ElementCtors[type];
         assertExists(ElementCtor);
         const element = new ElementCtor(yElement, this);
@@ -92,6 +94,7 @@ export class SurfaceManager {
         } else if (element.index < this.indexes.min) {
           this.indexes.min = element.index;
         }
+        this.slots.elementAdded.emit(id);
       });
     });
   }

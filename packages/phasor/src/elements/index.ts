@@ -74,9 +74,18 @@ export type IElementUpdateProps<T extends keyof IPhasorElementType> = Partial<
   Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'type'>
 >;
 
-export type IElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
-  IPhasorElementType[T],
-  'id' | 'index' | 'seed'
->;
+export type IElementDefaultProps<T extends keyof IPhasorElementType> =
+  T extends 'connector'
+    ? Omit<
+        IPhasorElementType['connector'],
+        | 'xywh'
+        | 'id'
+        | 'index'
+        | 'seed'
+        | 'path'
+        | 'absolutePath'
+        | 'controllers'
+      >
+    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>;
 
 export type { IBrush, IConnector, IDebug, IShape, IText };

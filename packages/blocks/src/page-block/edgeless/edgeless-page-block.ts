@@ -297,7 +297,6 @@ export class EdgelessPageBlockComponent
       }
       return value;
     });
-
     this._disposables.add(
       this.surface.slots.elementAdded.on(id => {
         const element = this.surface.pickById(id);
@@ -982,9 +981,10 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
+      this.connector = new EdgelessConnectorManager(this);
       this.service?.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
-      this.connector = new EdgelessConnectorManager(this);
+      this.surface.init();
     }
     if (changedProperties.has('edgelessTool')) {
       this.selection.edgelessTool = this.edgelessTool;
