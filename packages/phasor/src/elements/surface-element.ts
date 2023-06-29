@@ -131,9 +131,9 @@ export abstract class SurfaceElement<
         key
       ) as IPhasorElementType[T][keyof IElementUpdateProps<T>];
     });
-    this.surface.slots.elementPropertyUpdated.emit({
+    this.surface.slots.elementUpdated.emit({
       id: this.id,
-      properties: props,
+      props: props,
     });
   };
 

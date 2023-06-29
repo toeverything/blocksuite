@@ -46,9 +46,9 @@ export class SurfaceManager {
 
   indexes = { min: 'a0', max: 'a0' };
   slots = {
-    elementPropertyUpdated: new Slot<{
+    elementUpdated: new Slot<{
       id: id;
-      properties:
+      props:
         | IElementUpdateProps<'shape'>
         | IElementUpdateProps<'connector'>
         | IElementUpdateProps<'brush'>

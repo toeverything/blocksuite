@@ -307,17 +307,13 @@ export class EdgelessPageBlockComponent
     );
 
     this._disposables.add(
-      this.surface.slots.elementPropertyUpdated.on(({ id, properties }) => {
-        if ('xywh' in properties) {
+      this.surface.slots.elementUpdated.on(({ id, props }) => {
+        if ('xywh' in props) {
           this.slots.elementDimensionsUpdated.emit(id);
         }
         const element = this.surface.pickById(id);
         if (element instanceof ConnectorElement) {
-          if (
-            'target' in properties ||
-            'source' in properties ||
-            'mode' in properties
-          ) {
+          if ('target' in props || 'source' in props || 'mode' in props) {
             this.connector.updatePath(element as ConnectorElement);
           }
         }

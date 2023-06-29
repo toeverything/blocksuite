@@ -8,7 +8,7 @@ import { Bound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
-import { type IVec, Vec } from './utils/vec.js';
+import { Vec } from './utils/vec.js';
 
 export interface SurfaceViewport {
   readonly left: number;
