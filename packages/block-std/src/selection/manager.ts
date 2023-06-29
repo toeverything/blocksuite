@@ -36,12 +36,12 @@ export class SelectionManager {
   getInstance<T extends BlockSuiteSelectionType>(
     type: T,
     ...args: ConstructorParameters<BlockSuiteSelection[T]>
-  ) {
+  ): BlockSuiteSelectionInstance[T] {
     const ctor = this._selectionConstructors[type];
     if (!ctor) {
       throw new Error(`Unknown selection type: ${type}`);
     }
-    return new ctor(...args);
+    return new ctor(...args) as BlockSuiteSelectionInstance[T];
   }
 
   get selections() {
