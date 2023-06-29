@@ -13,14 +13,14 @@ export class PriorityQueue<T, K> {
     this.bubbleUp();
   }
 
-  dequeue(): T | undefined {
+  dequeue(): T | null {
     const min = this.heap[0];
     const end = this.heap.pop();
     if (this.heap.length > 0 && end) {
       this.heap[0] = end;
       this.bubbleDown();
     }
-    return min?.value;
+    return min?.value ?? null;
   }
 
   empty(): boolean {

@@ -6,7 +6,7 @@ import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
 import { type IVec } from './vec.js';
 
-export class AStarAlgorithm {
+export class AStarRunner {
   private _cameFrom = new Map<IVec, IVec | null>();
   private _frontier!: PriorityQueue<
     IVec,
@@ -17,7 +17,7 @@ export class AStarAlgorithm {
   private _costSoFar = new Map<IVec, number>();
   private _diagonalCount = new Map<IVec, number>();
   private _pointPriority = new Map<IVec, number>();
-  private _current: IVec | undefined;
+  private _current: IVec | null = null;
   private _complete = false;
 
   constructor(
@@ -174,14 +174,14 @@ export class AStarAlgorithm {
   }
 
   get path() {
-    const rst: IVec[] = [];
+    const result: IVec[] = [];
     let current: null | undefined | IVec = this._complete
       ? this._originalEp
       : this._current;
     while (current) {
-      rst.unshift(current);
+      result.unshift(current);
       current = this._cameFrom.get(current);
     }
-    return rst;
+    return result;
   }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { AStarAlgorithm } from './a-star.js';
+import { AStarRunner } from './a-star.js';
 import { almostEqual } from './math-utils.js';
 import type { IVec } from './vec.js';
 
@@ -50,7 +50,7 @@ describe('a* algorithm', () => {
       [0, 100, 0],
       [100, 100, 0],
     ];
-    const aStar = new AStarAlgorithm(points, sp, ep, osp, oep);
+    const aStar = new AStarRunner(points, sp, ep, osp, oep);
     aStar.run();
     let path = aStar.path;
     path.pop();
@@ -94,7 +94,7 @@ describe('a* algorithm', () => {
       [50, 200, 0],
       ep,
     ];
-    const aStar = new AStarAlgorithm(points, sp, ep, osp, oep);
+    const aStar = new AStarRunner(points, sp, ep, osp, oep);
     aStar.run();
     let path = aStar.path;
     path.pop();

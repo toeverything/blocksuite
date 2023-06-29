@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/phasor';
 import {
   almostEqual,
-  AStarAlgorithm,
+  AStarRunner,
   Bound,
   clamp,
   ConnectorMode,
@@ -28,11 +28,12 @@ import {
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils/query.js';
 import type { Selectable } from './utils/selection-manager.js';
+
 export class ConnectionOverlay extends Overlay {
   surface!: SurfaceManager;
   points: IVec[] = [];
-  highlightPoint: IVec | undefined = undefined;
-  bound: Bound | undefined = undefined;
+  highlightPoint: IVec | null = null;
+  bound: Bound | null = null;
   override render(ctx: CanvasRenderingContext2D): void {
     const zoom = this.surface.viewport.zoom;
     this.points.forEach(p => {
@@ -66,13 +67,13 @@ export class ConnectionOverlay extends Overlay {
   }
   clear() {
     this.points = [];
-    this.highlightPoint = undefined;
-    this.bound = undefined;
+    this.highlightPoint = null;
+    this.bound = null;
   }
 }
 
 export class EdgelessConnectorManager {
-  private _algorithm: AStarAlgorithm | undefined;
+  private _aStarRunner: AStarRunner | null = null;
   private _connectionOverlay = new ConnectionOverlay();
   constructor(private _edgeless: EdgelessPageBlockComponent) {
     this._edgeless.surface.viewport.addOverlay(this._connectionOverlay);
@@ -97,7 +98,7 @@ export class EdgelessConnectorManager {
     const connectables = this._findConnectablesInViewport();
 
     _connectionOverlay.clear();
-    let rst: Connection | undefined = undefined;
+    let result: Connection | null = null;
     for (let i = 0; i < connectables.length; i++) {
       const connectable = connectables[i];
       // first check if in excluedIds
@@ -116,20 +117,20 @@ export class EdgelessConnectorManager {
         const anchor = anchors[j];
         if (Vec.dist(anchor.point, point) < 4) {
           _connectionOverlay.highlightPoint = anchor.point;
-          rst = {
+          result = {
             id: connectable.id,
             position: anchor.coord,
           };
         }
       }
-      if (rst) break;
+      if (result) break;
 
       // if not, check if closes to bound
       const nearestPoint = this._getConnectableNearestPoint(connectable, point);
       if (Vec.dist(nearestPoint, point) < 8) {
         _connectionOverlay.highlightPoint = nearestPoint;
         surface.refresh();
-        rst = {
+        result = {
           id: connectable.id,
           position: bound.toRelative(nearestPoint).map(n => clamp(n, 0, 1)),
         };
@@ -137,26 +138,26 @@ export class EdgelessConnectorManager {
 
       // if not, check if in original bound
       if (bound.isPointInBound(point)) {
-        rst = {
+        result = {
           id: connectable.id,
         };
       }
     }
 
     // at last, if not, just return the point
-    if (!rst)
-      rst = {
+    if (!result)
+      result = {
         position: point,
       };
 
     surface.refresh();
-    return rst;
+    return result;
   }
 
   clear() {
     this._connectionOverlay.points = [];
-    this._connectionOverlay.highlightPoint = undefined;
-    this._connectionOverlay.bound = undefined;
+    this._connectionOverlay.highlightPoint = null;
+    this._connectionOverlay.bound = null;
     this._edgeless.surface.refresh();
   }
 
@@ -291,8 +292,8 @@ export class EdgelessConnectorManager {
 
     let startPoint: IVec;
     let endPoint: IVec;
-    let sb: Bound | undefined = undefined;
-    let eb: Bound | undefined = undefined;
+    let sb: Bound | null = null;
+    let eb: Bound | null = null;
     const blocks = [];
     const expandBlocks = [];
     if (start) {
@@ -361,8 +362,8 @@ export class EdgelessConnectorManager {
     } else {
       lastEndPoint = endPoint;
     }
-    let esb: Bound | undefined = undefined;
-    let eeb: Bound | undefined = undefined;
+    let esb: Bound | null = null;
+    let eeb: Bound | null = null;
     if (
       (sb && sb.isPointInBound(endPoint)) ||
       (eb && eb.isPointInBound(startPoint))
@@ -397,7 +398,7 @@ export class EdgelessConnectorManager {
     endPoint = this._conversion(endPoint);
     nextStartPoint = this._conversion(nextStartPoint);
     lastEndPoint = this._conversion(lastEndPoint);
-    const rst = this.getConnectablePoints(
+    const result = this.getConnectablePoints(
       startPoint,
       endPoint,
       nextStartPoint,
@@ -407,9 +408,9 @@ export class EdgelessConnectorManager {
       esb,
       eeb
     );
-    const points = rst.points;
-    nextStartPoint = rst.sp;
-    lastEndPoint = rst.ep;
+    const points = result.points;
+    nextStartPoint = result.sp;
+    lastEndPoint = result.ep;
     const finalPoints = this.filterConnectablePoints(
       this.filterConnectablePoints(points, sb),
       eb
@@ -435,7 +436,7 @@ export class EdgelessConnectorManager {
         startPoint[1] -= sign(endPoint[1] - startPoint[1]);
       }
     }
-    this._algorithm = new AStarAlgorithm(
+    this._aStarRunner = new AStarRunner(
       finalPoints,
       nextStartPoint,
       lastEndPoint,
@@ -444,8 +445,8 @@ export class EdgelessConnectorManager {
       blocks,
       expandBlocks
     );
-    this._algorithm.run();
-    let path = this._algorithm.path;
+    this._aStarRunner.run();
+    let path = this._aStarRunner.path;
     if (!end) path.pop();
     if (!start) path.shift();
 
@@ -498,7 +499,7 @@ export class EdgelessConnectorManager {
     ];
   }
 
-  private filterConnectablePoints(points: IVec[], bound?: Bound) {
+  private filterConnectablePoints(points: IVec[], bound: Bound | null) {
     return points.filter(point => {
       if (!bound) return true;
       return !bound.isPointInBound(point);
@@ -510,10 +511,10 @@ export class EdgelessConnectorManager {
     oep: IVec,
     sp: IVec,
     ep: IVec,
-    sb?: Bound,
-    eb?: Bound,
-    esb?: Bound,
-    eeb?: Bound
+    sb: Bound | null,
+    eb: Bound | null,
+    esb: Bound | null,
+    eeb: Bound | null
   ) {
     const bounds: Bound[] = [];
 
