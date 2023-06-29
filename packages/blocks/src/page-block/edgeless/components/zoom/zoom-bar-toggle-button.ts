@@ -90,7 +90,7 @@ export class ZoomBarToggleButton extends LitElement {
           .tipPosition=${'right'}
           .active=${this._popperShow}
           .activeMode=${'background'}
-          @click=${(e: Event) => this._toggleNoteMenu()}
+          @click=${() => this._toggleNoteMenu()}
         >
           ${MoreIcon}
         </edgeless-tool-icon-button>
