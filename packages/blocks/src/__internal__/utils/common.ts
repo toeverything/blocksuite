@@ -50,7 +50,7 @@ export function createEvent<
   return new CustomEvent<Detail<T>>(type, { detail });
 }
 
-export function noop() {
+export function noop(_: unknown) {
   return;
 }
 

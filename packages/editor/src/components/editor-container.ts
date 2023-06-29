@@ -4,11 +4,12 @@ import {
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
+  FileDropManager,
   getPageBlock,
   getServiceOrRegister,
   type ImageBlockModel,
+  noop,
   type NoteBlockComponent,
-  OutsideDragManager,
   type PageBlockModel,
   pagePreset,
   readImageSize,
@@ -41,7 +42,7 @@ import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
-BlockSuiteRoot;
+noop(BlockSuiteRoot);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function forwardSlot<T extends Record<string, Slot<any>>>(
@@ -78,9 +79,7 @@ export class EditorContainer
 
   readonly themeObserver = new ThemeObserver();
 
-  public outsideDragManager = new OutsideDragManager(
-    this._onDropEnd.bind(this)
-  );
+  fileDropManager = new FileDropManager(this._onDropEnd.bind(this));
 
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
@@ -235,13 +234,9 @@ export class EditorContainer
     this._disposables.addFromEvent(
       this,
       'dragover',
-      this.outsideDragManager.onDragOver
+      this.fileDropManager.onDragOver
     );
-    this._disposables.addFromEvent(
-      this,
-      'drop',
-      this.outsideDragManager.onDrop
-    );
+    this._disposables.addFromEvent(this, 'drop', this.fileDropManager.onDrop);
 
     this.themeObserver.observer(document.documentElement);
     this._disposables.add(this.themeObserver);
@@ -266,7 +261,7 @@ export class EditorContainer
     }
 
     // adds files from outside by dragging and dropping
-    this.outsideDragManager.register('image/*', async (file: File) => {
+    this.fileDropManager.register('image/*', async (file: File) => {
       const storage = this.page.blobs;
       assertExists(storage);
       const sourceId = await storage.set(file);

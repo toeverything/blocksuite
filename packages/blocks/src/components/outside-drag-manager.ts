@@ -17,7 +17,7 @@ export type DropEndHandler = (
 
 type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;
 
-export class OutsideDragManager {
+export class FileDropManager {
   private _indicator!: DragIndicator;
   private _point: Point | null = null;
   private _result: DropResult | null = null;
