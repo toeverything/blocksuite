@@ -1,4 +1,8 @@
-import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
+import type {
+  Connection,
+  ConnectorElement,
+  SurfaceManager,
+} from '@blocksuite/phasor';
 import {
   almostEqual,
   AStarAlgorithm,
@@ -28,7 +32,7 @@ export class ConnectionOverlay extends Overlay {
   surface!: SurfaceManager;
   points: IVec[] = [];
   highlightPoint: IVec | undefined = undefined;
-  rect: Bound | undefined = undefined;
+  bound: Bound | undefined = undefined;
   override render(ctx: CanvasRenderingContext2D): void {
     const zoom = this.surface.viewport.zoom;
     this.points.forEach(p => {
@@ -53,9 +57,9 @@ export class ConnectionOverlay extends Overlay {
       ctx.fill();
       ctx.stroke();
     }
-    if (this.rect) {
+    if (this.bound) {
       ctx.beginPath();
-      ctx.rect(this.rect.x, this.rect.y, this.rect.w, this.rect.h);
+      ctx.rect(this.bound.x, this.bound.y, this.bound.w, this.bound.h);
       ctx.fillStyle = 'rgba(211, 211, 211, 0.3)';
       ctx.fill();
     }
@@ -63,7 +67,7 @@ export class ConnectionOverlay extends Overlay {
   clear() {
     this.points = [];
     this.highlightPoint = undefined;
-    this.rect = undefined;
+    this.bound = undefined;
   }
 }
 
@@ -75,8 +79,7 @@ export class EdgelessConnectorManager {
     this._connectionOverlay.surface = this._edgeless.surface;
   }
 
-  searchConnection(point: IVec, excludedIds: string[] = []) {
-    const { _connectionOverlay } = this;
+  private _findConnectablesInViewport() {
     const { surface, page } = this._edgeless;
     const { viewport } = surface;
     const surfaceElements = surface
@@ -85,54 +88,75 @@ export class EdgelessConnectorManager {
     const notes = (<TopLevelBlockModel[]>(
       page.getBlockByFlavour('affine:note')
     )).filter(n => viewport.isInViewport(Bound.deserialize(n.xywh)));
-    const connectables: Connectable[] = [...surfaceElements, ...notes];
+    return [...surfaceElements, ...notes] as Connectable[];
+  }
+
+  searchConnection(point: IVec, excludedIds: string[] = []) {
+    const { _connectionOverlay } = this;
+    const { surface } = this._edgeless;
+    const connectables = this._findConnectablesInViewport();
+
     _connectionOverlay.clear();
+    let rst: Connection | undefined = undefined;
     for (let i = 0; i < connectables.length; i++) {
       const connectable = connectables[i];
+      // first check if in excluedIds
       if (excludedIds.includes(connectable.id)) continue;
+
+      // then check if in expanded bound
       const bound = Bound.deserialize(connectables[i].xywh);
       const expandBound = bound.expand(10);
       if (!expandBound.isPointInBound(point)) continue;
+      _connectionOverlay.bound = bound;
+
+      // then check if closes to anchors
       const anchors = this.getAnchors(connectable);
-      _connectionOverlay.rect = bound;
       _connectionOverlay.points = anchors.map(a => a.point);
       for (let j = 0; j < anchors.length; j++) {
         const anchor = anchors[j];
         if (Vec.dist(anchor.point, point) < 4) {
           _connectionOverlay.highlightPoint = anchor.point;
-          surface.refresh();
-          return {
+          rst = {
             id: connectable.id,
             position: anchor.coord,
           };
         }
       }
+      if (rst) break;
+
+      // if not, check if closes to bound
       const nearestPoint = this._getConnectableNearestPoint(connectable, point);
       if (Vec.dist(nearestPoint, point) < 8) {
         _connectionOverlay.highlightPoint = nearestPoint;
         surface.refresh();
-        return {
+        rst = {
           id: connectable.id,
           position: bound.toRelative(nearestPoint).map(n => clamp(n, 0, 1)),
         };
       }
+
+      // if not, check if in original bound
       if (bound.isPointInBound(point)) {
-        surface.refresh();
-        return {
+        rst = {
           id: connectable.id,
         };
       }
     }
+
+    // at last, if not, just return the point
+    if (!rst)
+      rst = {
+        position: point,
+      };
+
     surface.refresh();
-    return {
-      position: point,
-    };
+    return rst;
   }
 
   clear() {
     this._connectionOverlay.points = [];
     this._connectionOverlay.highlightPoint = undefined;
-    this._connectionOverlay.rect = undefined;
+    this._connectionOverlay.bound = undefined;
     this._edgeless.surface.refresh();
   }
 

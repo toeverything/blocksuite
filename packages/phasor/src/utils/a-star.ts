@@ -106,23 +106,20 @@ export class AStarAlgorithm {
       const curCost = this._costSoFar.get(current);
       const curDiagoalCount = this._diagonalCount.get(current);
       const curPointPriority = this._pointPriority.get(current);
+
       assertExists(curCost);
       const newCost = curCost + this._graph.cost(current, next);
+
       assertExists(curDiagoalCount);
       let newDiagonalCount =
-        curDiagoalCount + this._getDiagonalCount(next, current);
+        curDiagoalCount +
+        this._getDiagonalCount(next, current) +
+        this._getDiagonalCount(this._originalEp, next, current);
+
       if (current !== this._sp) {
-        newDiagonalCount -= this._getDiagonalCount(
-          this._originalEp,
-          this._ep,
-          current
-        );
+        newDiagonalCount -= this._getDiagonalCount(this._originalEp, current);
       }
-      newDiagonalCount += this._getDiagonalCount(
-        this._originalEp,
-        this._ep,
-        current
-      );
+
       assertExists(next[2]);
       assertExists(curPointPriority);
       const newPointPriority = curPointPriority + next[2];
