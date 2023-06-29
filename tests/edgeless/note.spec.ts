@@ -554,7 +554,9 @@ test('manage note index and hidden status', async ({ page }) => {
   expect(await page.locator('.note-status').innerText()).toBe('3');
 });
 
-test('add new note if all notes is empty', async ({ page }) => {
+test('when no visible note block, clicking in page mode will auto add a new note block', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -567,5 +569,16 @@ test('add new note if all notes is empty', async ({ page }) => {
   expect(await page.locator('affine-note').count()).toBe(1);
   // hide note
   await page.locator('.note-status-button').click();
-  expect(await page.locator('affine-note').count()).toBe(2);
+
+  await switchEditorMode(page);
+  let note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
+  });
+  expect(note).toBeNull();
+  await click(page, { x: 100, y: 280 });
+
+  note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
+  });
+  expect(note).not.toBeNull();
 });

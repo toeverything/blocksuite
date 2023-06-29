@@ -308,7 +308,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     const noteBlock = this._container.querySelector(
       '.affine-note-block-container'
     );
-    assertExists(noteBlock);
+    if (!noteBlock) return;
     const noteBlockRect = noteBlock.getBoundingClientRect();
     // See https://github.com/toeverything/blocksuite/issues/1611
     if (event.raw.clientY < noteBlockRect.y) {

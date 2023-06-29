@@ -180,20 +180,9 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const noteParentLastNote =
       noteParentChildNotes[noteParentChildNotes.length - 1];
 
-    if (!hidden) {
-      if (note !== noteParentLastNote) {
-        // move to the end
-        this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
-      }
-    } else {
-      // if all notes are hidden, add a new note
-      if (noteParentChildNotes.every(block => block.hidden)) {
-        const newNoteId = this.page.addBlock('affine:note', {}, noteParent.id);
-        this.page.addBlock('affine:paragraph', {}, newNoteId);
-        const newNote = this.page.getBlockById(newNoteId);
-        assertExists(newNote);
-        this.page.moveBlocks([newNote], noteParent, noteParentLastNote, true);
-      }
+    if (!hidden && note !== noteParentLastNote) {
+      // move to the end
+      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
     this.requestUpdate();
     // force update selection, because connector mode changed
