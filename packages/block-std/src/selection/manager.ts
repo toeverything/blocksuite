@@ -49,7 +49,11 @@ export class SelectionManager {
   }
 
   get remoteSelections() {
-    return this._store.getStates();
+    return Object.fromEntries(
+      Array.from(this._store.getStates().entries())
+        .filter(([key]) => key !== this._store.awareness.clientID)
+        .map(([key, value]) => [key, value.selection] as const)
+    );
   }
 
   dispose() {
