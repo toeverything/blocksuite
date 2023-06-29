@@ -41,8 +41,8 @@ export class Graph {
 
   private _isOverlap(line: IVec[], line2: IVec[]) {
     if (
-      [line[0][1], line[1][1], line2[0][1], line2[1][1]].every(
-        y => y === line[0][1]
+      [line[0][1], line[1][1], line2[0][1], line2[1][1]].every(y =>
+        almostEqual(y, line[0][1], 0.02)
       )
     ) {
       if (
@@ -55,8 +55,8 @@ export class Graph {
         return true;
       }
     } else if (
-      [line[0][0], line[1][0], line2[0][0], line2[1][0]].every(
-        x => x === line[0][0]
+      [line[0][0], line[1][0], line2[0][0], line2[1][0]].every(x =>
+        almostEqual(x, line[0][0], 0.02)
       )
     ) {
       if (
