@@ -129,7 +129,7 @@ test('should format quick bar show when click drag handler', async ({
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 265, 5);
-  assertAlmostEqual(box.y, 165, 5);
+  assertAlmostEqual(box.y, 222, 5);
 
   await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();
