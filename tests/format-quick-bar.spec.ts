@@ -89,7 +89,7 @@ test('should format quick bar show when select text', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  const formatQuickBar = page.locator(`.format-quick-bar`);
+  const { formatQuickBar } = getFormatBar(page);
   await expect(formatQuickBar).toBeVisible();
 
   const box = await formatQuickBar.boundingBox();
@@ -104,6 +104,32 @@ test('should format quick bar show when select text', async ({ page }) => {
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
   // Even not any button is clicked, the format quick bar should't be hidden
   await expect(formatQuickBar).toBeVisible();
+
+  await page.mouse.click(0, 0);
+  await expect(formatQuickBar).not.toBeVisible();
+});
+
+test('should format quick bar show when click drag handler', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  const locator = page.locator('affine-paragraph').first();
+  await locator.hover();
+  const dragHandle = page.locator('affine-drag-handle');
+  await dragHandle.click();
+
+  const { formatQuickBar } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+
+  const box = await formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(box.x, 265, 5);
+  assertAlmostEqual(box.y, 222, 5);
 
   await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();

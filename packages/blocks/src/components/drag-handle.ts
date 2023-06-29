@@ -211,6 +211,7 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   constructor(options: {
     container: HTMLElement;
+    onDragStartCallback?: (e: DragEvent) => void;
     onDropCallback: (
       point: Point,
       draggingBlockElements: BlockComponentElement[],
@@ -232,6 +233,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     };
     this.addEventListener('beforeprint', () => this.hide(true));
     this.onDropCallback = options?.onDropCallback;
+    this.onDragStartCallback = options?.onDragStartCallback;
     this.setDragType = options?.setDragType;
     this.setSelectedBlock = options?.setSelectedBlock;
     this._getSelectedBlocks = options?.getSelectedBlocks;
@@ -249,6 +251,8 @@ export class DragHandle extends WithDisposable(LitElement) {
   public getDropAllowedBlocks: (
     draggingBlockIds: string[] | null
   ) => BaseBlockModel[];
+
+  public onDragStartCallback: ((e: DragEvent) => void) | undefined;
 
   public onDropCallback: (
     point: Point,
@@ -608,6 +612,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
 
     this.setDragType(true);
+    this.onDragStartCallback?.(e);
   };
 
   onDrag = (e: DragEvent, passed?: boolean, isScrolling?: boolean) => {
