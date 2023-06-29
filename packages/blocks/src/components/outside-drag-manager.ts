@@ -38,6 +38,9 @@ export class OutsideDragManager {
   }
 
   onDragOver = (event: DragEvent) => {
+    const files = event.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+
     event.preventDefault();
 
     const { clientX, clientY } = event;
@@ -59,10 +62,10 @@ export class OutsideDragManager {
   };
 
   onDrop = async (event: DragEvent) => {
-    event.preventDefault();
-
     const files = event.dataTransfer?.files;
     if (!files || files.length === 0) return;
+
+    event.preventDefault();
 
     const { clientX, clientY } = event;
     this._point = new Point(clientX, clientY);
