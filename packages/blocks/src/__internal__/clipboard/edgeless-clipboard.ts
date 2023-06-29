@@ -13,13 +13,15 @@ import { assertExists, type Page } from '@blocksuite/store';
 import { render } from 'lit';
 
 import type { NoteBlockModel } from '../../models.js';
-import { getSelectedRect } from '../../page-block/edgeless/components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
 } from '../../page-block/edgeless/utils/consts.js';
-import { isTopLevelBlock } from '../../page-block/edgeless/utils/query.js';
+import {
+  getSelectedRect,
+  isTopLevelBlock,
+} from '../../page-block/edgeless/utils/query.js';
 import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
 import {
@@ -336,12 +338,12 @@ export class EdgelessClipboard implements Clipboard {
 
     if (notesLen + shapesLen === 0) return;
 
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
     // sort by `index`
     notes.sort(compare);
     shapes.sort(compare);
-
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
 
     const { _edgeless } = this;
     const { surface } = _edgeless;
