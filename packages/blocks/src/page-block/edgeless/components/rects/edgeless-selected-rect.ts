@@ -570,6 +570,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         this._showToolbar();
       }
+      if (this.state.by !== 'selecting') {
+        this._selectedRect?.setAttribute('disabled', 'false');
+      }
     }
 
     super.updated(changedProperties);

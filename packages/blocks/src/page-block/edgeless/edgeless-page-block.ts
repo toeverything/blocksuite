@@ -1014,7 +1014,6 @@ export class EdgelessPageBlockComponent
 
     const {
       _rectsOfSelectedBlocks,
-      edgelessTool,
       page,
       root,
       selection,
@@ -1078,7 +1077,6 @@ export class EdgelessPageBlockComponent
         ${state.selected.length > 0
           ? html`
               <edgeless-selected-rect
-                disabled=${edgelessTool.type === 'pan'}
                 .page=${page}
                 .state=${state}
                 .slots=${slots}

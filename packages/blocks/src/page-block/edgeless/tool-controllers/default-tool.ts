@@ -115,11 +115,21 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     resetNativeSelection(null);
   }
 
-  private _setSelectionState(selected: Selectable[], active: boolean) {
-    this._edgeless.slots.selectionUpdated.emit({
+  private _setSelectionState(
+    selected: Selectable[],
+    active: boolean,
+    by = false
+  ) {
+    const state: {
+      selected: Selectable[];
+      active: boolean;
+      by?: 'selecting';
+    } = {
       selected,
       active,
-    });
+    };
+    if (by) state.by = 'selecting';
+    this._edgeless.slots.selectionUpdated.emit(state);
   }
 
   private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
@@ -432,7 +442,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
         const blocks = pickBlocksByBound(this._blocks, bound);
         const elements = this._surface.pickByBound(bound);
-        this._setSelectionState([...blocks, ...elements], false);
+        this._setSelectionState([...blocks, ...elements], false, true);
 
         this._forceUpdateSelection(this.dragType, true);
         break;
