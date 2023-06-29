@@ -416,6 +416,45 @@ test('path #1', async ({ page }) => {
   ]);
 });
 
+test.only('path #2', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+
+  let start = await toViewCoord(page, [0, 0]);
+  let end = await toViewCoord(page, [100, 100]);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+
+  start = await toViewCoord(page, [200, 0]);
+  end = await toViewCoord(page, [300, 100]);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+
+  start = await toViewCoord(page, [100, 50]);
+  end = await toViewCoord(page, [300, 50]);
+  await addBasicConnectorElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+  await assertConnectorPath(page, [
+    [100, 50],
+    [150, 50],
+    [150, 120],
+    [320, 120],
+    [320, 50],
+    [300, 50],
+  ]);
+});
+
 test('change connector line width', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
