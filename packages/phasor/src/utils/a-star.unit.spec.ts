@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { AStarAlgorithm } from './a* algorithm.js';
+import { AStarAlgorithm } from './a-star.js';
 import { almostEqual } from './math-utils.js';
 import type { IVec } from './vec.js';
 

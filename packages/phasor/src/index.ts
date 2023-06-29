@@ -15,7 +15,7 @@ export { getStroke } from './perfect-freehand/getStroke.js';
 export type { SurfaceViewport } from './renderer.js';
 export { Overlay, Renderer } from './renderer.js';
 export * from './surface.js';
-export { AStarAlgorithm } from './utils/a* algorithm.js';
+export { AStarAlgorithm } from './utils/a-star.js';
 export * from './utils/bound.js';
 export {
   almostEqual,

@@ -5,6 +5,7 @@ import { Graph } from './graph.js';
 import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
 import { type IVec } from './vec.js';
+
 export class AStarAlgorithm {
   private _cameFrom = new Map<IVec, IVec | null>();
   private _frontier!: PriorityQueue<
@@ -60,6 +61,7 @@ export class AStarAlgorithm {
   private _heuristic(a: IVec, b: IVec): number {
     return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
   }
+
   private _getDiagonalCount(a: IVec, last?: IVec, last2?: IVec): number {
     last = last ?? this._cameFrom.get(a) ?? undefined;
     if (!last) return 0;
