@@ -15,6 +15,7 @@ export class RoughCanvas {
 
   constructor(canvas: HTMLCanvasElement, config?: Config) {
     this.canvas = canvas;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.ctx = this.canvas.getContext('2d')!;
     this.gen = new RoughGenerator(config);
   }
