@@ -4,6 +4,7 @@ import { computePosition } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import { stopPropagation } from '../../../../__internal__/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { EdgelessZoomToolbar } from './zoom-tool-bar.js';
 
@@ -82,14 +83,14 @@ export class ZoomBarToggleButton extends LitElement {
 
   override render() {
     return html`
-      <div class="toggle-button">
+      <div class="toggle-button" @pointerdown=${stopPropagation}>
         <edgeless-tool-icon-button
           class=${this._popperShow ? 'actived' : 'non-actived'}
           .tooltip=${'Toggle Zoom Tool Bar'}
           .tipPosition=${'right'}
           .active=${this._popperShow}
           .activeMode=${'background'}
-          @click=${() => this._toggleNoteMenu()}
+          @click=${(e: Event) => this._toggleNoteMenu()}
         >
           ${MoreIcon}
         </edgeless-tool-icon-button>
