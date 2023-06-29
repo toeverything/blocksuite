@@ -675,6 +675,8 @@ test(
 
     await page.mouse.move(400, 400);
 
+    await page.waitForTimeout(300);
+
     await pasteByKeyboard(page, false);
 
     await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
