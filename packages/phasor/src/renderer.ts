@@ -1,13 +1,14 @@
 import { assertNotExists } from '@blocksuite/global/utils';
-import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
+import { RoughCanvas } from './rough/canvas.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
 import { Vec } from './utils/vec.js';
+
 export interface SurfaceViewport {
   readonly left: number;
   readonly top: number;

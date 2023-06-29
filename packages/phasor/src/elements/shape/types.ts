@@ -1,6 +1,5 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
 import type { StrokeStyle } from '../../consts.js';
+import type { RoughCanvas } from '../../rough/canvas.js';
 import type { IVec } from '../../utils/vec.js';
 import type { HitTestOptions, ISurfaceElement } from '../surface-element.js';
 import type { ShapeElement } from './shape-element.js';
