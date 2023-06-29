@@ -1,6 +1,5 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
+import type { RoughCanvas } from '../../rough/canvas.js';
 import {
   Bound,
   inflateBound,

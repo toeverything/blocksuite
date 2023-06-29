@@ -26,7 +26,7 @@ class ColumnManager {
     (columnData: any) => [any, (cell: any) => any]
   >();
 
-  private getColumn(type: string) {
+  getColumn(type: string) {
     const column = this.map.get(type);
     if (!column) {
       throw new Error(`${type} is not exist`);

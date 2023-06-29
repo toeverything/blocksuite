@@ -559,6 +559,7 @@ export class Page extends Space<FlatBlockMap> {
     props: Array<Partial<BaseBlockModel>>,
     place: 'after' | 'before' = 'after'
   ): string[] {
+    if (!props.length) return [];
     const parent = this.getParent(targetModel);
     assertExists(parent);
 

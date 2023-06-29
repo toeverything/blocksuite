@@ -1,6 +1,5 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
+import type { RoughCanvas } from '../../rough/canvas.js';
 import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
