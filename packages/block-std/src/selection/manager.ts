@@ -7,7 +7,7 @@ interface SelectionConstructor {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   new (...args: any[]): BaseSelection;
 
-  type: BlockSuiteSelectionType;
+  type: string;
   fromJSON(json: Record<string, unknown>): BaseSelection;
 }
 
@@ -15,7 +15,7 @@ export class SelectionManager {
   private _workspace: Workspace;
 
   disposables = new DisposableGroup();
-  selectionConstructors: Record<string, SelectionConstructor> = {};
+  _selectionConstructors: Record<string, SelectionConstructor> = {};
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
@@ -25,17 +25,28 @@ export class SelectionManager {
     this._workspace = workspace;
   }
 
-  register(type: BlockSuiteSelectionType, ctor: SelectionConstructor) {
-    this.selectionConstructors[type] = ctor;
+  register(ctor: SelectionConstructor) {
+    this._selectionConstructors[ctor.type] = ctor;
   }
 
   private get _store() {
     return this._workspace.awarenessStore;
   }
 
+  getInstance<T extends BlockSuiteSelectionType>(
+    type: T,
+    ...args: ConstructorParameters<BlockSuiteSelection[T]>
+  ) {
+    const ctor = this._selectionConstructors[type];
+    if (!ctor) {
+      throw new Error(`Unknown selection type: ${type}`);
+    }
+    return new ctor(...args);
+  }
+
   get selections() {
     return this._store.getLocalSelection().map(json => {
-      const ctor = this.selectionConstructors[json.type as string];
+      const ctor = this._selectionConstructors[json.type as string];
       if (!ctor) {
         throw new Error(`Unknown selection type: ${json.type}`);
       }

@@ -48,6 +48,6 @@ export class TextSelection extends BaseSelection {
 
 declare global {
   interface BlockSuiteSelection {
-    text: TextSelection;
+    text: typeof TextSelection;
   }
 }

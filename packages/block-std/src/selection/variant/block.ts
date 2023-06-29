@@ -24,6 +24,6 @@ export class BlockSelection extends BaseSelection {
 
 declare global {
   interface BlockSuiteSelection {
-    block: BlockSelection;
+    block: typeof BlockSelection;
   }
 }
