@@ -2,7 +2,6 @@ import '../../../common/filter/filter-group.js';
 
 import {
   CopyIcon,
-  DatabaseExpandWide,
   DatabaseSearchClose,
   DatabaseSearchIcon,
   DeleteIcon,
@@ -31,7 +30,6 @@ import type {
 import { onClickOutside } from '../../../utils/utils.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import { SearchState } from '../../types.js';
-import { showDatabaseTableViewModal } from '../modal/index.js';
 import { initAddNewRecordHandlers } from './index.js';
 
 const styles = css`
@@ -391,15 +389,15 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     popAdvance();
   }
 
-  private _onShowModalView = () => {
-    if (!this.modalMode) {
-      showDatabaseTableViewModal({
-        root: this.root,
-        model: this.targetModel,
-        page: this.targetModel.page,
-      });
-    }
-  };
+  // private _onShowModalView = () => {
+  //   if (!this.modalMode) {
+  //     showDatabaseTableViewModal({
+  //       root: this.root,
+  //       model: this.targetModel,
+  //       page: this.targetModel.page,
+  //     });
+  //   }
+  // };
 
   override render() {
     const expandSearch =
@@ -454,6 +452,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       </div>
     `;
 
+    const expandIcon = null;
+    // this.modalMode
+    //   ? null
+    //   : html`<div
+    //       class="affine-database-toolbar-item expand"
+    //       @click="${this._onShowModalView}"
+    //     >
+    //       ${DatabaseExpandWide}
+    //     </div>`;
+
     return html` <div
       class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
     >
@@ -461,14 +469,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>
-      ${this.modalMode
-        ? null
-        : html` <div
-            class="affine-database-toolbar-item expand"
-            @click="${this._onShowModalView}"
-          >
-            ${DatabaseExpandWide}
-          </div>`}
+      ${expandIcon}
       ${this.readonly
         ? null
         : html` <div
