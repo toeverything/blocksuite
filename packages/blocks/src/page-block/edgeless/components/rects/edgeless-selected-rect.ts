@@ -362,6 +362,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           .surface=${this.surface}
           .slots=${this.slots}
           .selectionState=${state}
+          .edgeless=${this.edgeless}
         >
         </edgeless-component-toolbar>`;
 

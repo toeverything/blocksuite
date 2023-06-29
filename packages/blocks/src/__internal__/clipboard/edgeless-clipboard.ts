@@ -91,6 +91,7 @@ export class EdgelessClipboard implements Clipboard {
         if (isTopLevelBlock(selected)) {
           this._page.deleteBlock(selected);
         } else {
+          this._edgeless.connector.updateConnectorWhenDeleted([selected]);
           this.surface.removeElement(selected.id);
         }
       });

@@ -153,6 +153,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       if (isTopLevelBlock(erasable)) {
         this._page.deleteBlock(erasable);
       } else {
+        this._edgeless.connector.updateConnectorWhenDeleted([erasable]);
         this._surface.removeElement(erasable.id);
       }
     });

@@ -874,10 +874,28 @@ export class EdgelessConnectorManager {
     return false;
   }
 
-  syncConnectorPos(selected: Connectable[]) {
-    const connectors = this.getConnecttedConnectors(selected);
+  syncConnectorPos(connected: Connectable[]) {
+    const connectors = this.getConnecttedConnectors(connected);
     connectors.forEach(connector => {
       this.updatePath(connector);
+    });
+  }
+
+  updateConnectorWhenDeleted(connected: Connectable[]) {
+    const surface = this._edgeless.surface;
+    connected.forEach(ele => {
+      this.getConnecttedConnectors([ele]).forEach(connector => {
+        const absolutePath = connector.absolutePath;
+        if (connector.source.id === ele.id) {
+          surface.updateElement<'connector'>(connector.id, {
+            source: { position: absolutePath[0] },
+          });
+        } else if (connector.target.id === ele.id) {
+          surface.updateElement<'connector'>(connector.id, {
+            target: { position: absolutePath[absolutePath.length - 1] },
+          });
+        }
+      });
     });
   }
 
