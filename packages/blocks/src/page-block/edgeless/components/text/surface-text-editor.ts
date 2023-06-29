@@ -124,6 +124,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
 
       virgoStyle = styleMap({
         position: 'absolute',
+        minWidth: '2px',
         left: rect.x + 'px',
         top: rect.y + 'px',
         fontSize: this._element.fontSize + 'px',

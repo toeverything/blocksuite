@@ -314,7 +314,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Move Right',
             icon: DatabaseMoveRight,
-            hide: () => this.column.isLast,
+            hide: () => this.column.isLast || this.column.type === 'title',
             select: () => {
               const nextId = this.tableViewManager.nextColumn(
                 this.column.id
