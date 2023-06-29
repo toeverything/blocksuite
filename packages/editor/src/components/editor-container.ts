@@ -11,6 +11,7 @@ import {
   OutsideDragManager,
   type PageBlockModel,
   pagePreset,
+  readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -21,7 +22,6 @@ import {
   getClosestNoteBlockElementById,
   getLastNoteBlockElement,
   type Point,
-  readImageSize,
 } from '@blocksuite/blocks/std';
 import {
   BlockSuiteRoot,
@@ -91,7 +91,7 @@ export class EditorContainer
     pageModeSwitched: new Slot(),
   };
 
-  // TODO: merge block-hub logic
+  // add files from outside
   private async _onDropEnd(
     point: Point,
     models: Partial<BaseBlockModel>[],
@@ -272,8 +272,7 @@ export class EditorContainer
       const sourceId = await storage.set(file);
       const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
       return {
-        flavour: 'affine:embed',
-        type: 'image',
+        flavour: 'affine:image',
         sourceId,
         ...size,
       };

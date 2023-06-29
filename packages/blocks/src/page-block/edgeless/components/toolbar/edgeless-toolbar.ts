@@ -14,7 +14,6 @@ import {
   TextIconLarge,
   ViewBarIcon,
 } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -190,26 +189,17 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     innerSmoothTranslate();
   }
 
-  private async _addImage() {
+  private async _addImages() {
     this._imageLoading = true;
 
-    const models = await uploadImageFromLocal(this.edgeless.page.blobs);
+    const fileInfos = await uploadImageFromLocal(this.edgeless.page.blobs);
 
-    if (!models.length) {
+    if (!fileInfos.length) {
       this._imageLoading = false;
       return;
     }
 
-    const notes = models.map(model => this.edgeless.addImage(model));
-    const { noteId } = notes[notes.length - 1];
-
-    const note = this.edgeless.notes.find(note => note.id === noteId);
-    assertExists(note);
-
-    this.edgeless.selection.switchToDefaultMode({
-      selected: [note],
-      active: false,
-    });
+    await this.edgeless.addImages(fileInfos);
 
     this._imageLoading = false;
   }
@@ -293,7 +283,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .disabled=${this._imageLoading}
           .tooltip=${'Image'}
-          @click=${() => this._addImage()}
+          @click=${() => this._addImages()}
         >
           ${ImageIcon}
         </edgeless-tool-icon-button>

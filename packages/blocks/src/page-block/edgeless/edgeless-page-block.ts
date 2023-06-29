@@ -74,6 +74,7 @@ import {
   EdgelessToolbar,
   type ZoomAction,
 } from './components/toolbar/edgeless-toolbar.js';
+import { readImageSize } from './components/utils.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -835,6 +836,35 @@ export class EdgelessPageBlockComponent
     }
 
     return this.addNewNote([model], new Point(x, y), options);
+  }
+
+  async addImages(
+    fileInfos: {
+      file: File;
+      sourceId: string;
+    }[],
+    point?: Point
+  ) {
+    const models: Partial<ImageBlockModel>[] = [];
+    for (const { file, sourceId } of fileInfos) {
+      const size = await readImageSize(file);
+      models.push({
+        flavour: 'affine:image',
+        sourceId,
+        ...size,
+      });
+    }
+
+    const notes = models.map(model => this.addImage(model, point));
+    const { noteId } = notes[notes.length - 1];
+
+    const note = this.notes.find(note => note.id === noteId);
+    assertExists(note);
+
+    this.selection.switchToDefaultMode({
+      selected: [note],
+      active: false,
+    });
   }
 
   /*
