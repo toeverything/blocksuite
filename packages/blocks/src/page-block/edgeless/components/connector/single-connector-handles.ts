@@ -13,10 +13,13 @@ function capPointerdown(
 ) {
   const pointermove = (mousePointerEvent: PointerEvent) => {
     const { clientX, clientY } = mousePointerEvent;
-    const modelXY = edgeless.surface.viewport.clientToModelCoord([
-      clientX,
-      clientY,
-    ]);
+
+    const viewportRect = edgeless.surface.viewport.boundingClientRect;
+    const modelXY = edgeless.surface.viewport.toModelCoord(
+      clientX - viewportRect.left,
+      clientY - viewportRect.top
+    );
+
     edgeless.connector.updateConnection(connector, modelXY, connection);
     requestUpdate();
   };

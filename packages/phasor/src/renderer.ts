@@ -24,10 +24,10 @@ export interface SurfaceViewport {
   readonly viewportMinXY: IPoint;
   readonly viewportMaxXY: IPoint;
   readonly viewportBounds: IBound;
+  readonly boundingClientRect: DOMRect;
 
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
-  clientToModelCoord(vec: Vec): IVec;
 
   setCenter(centerX: number, centerY: number): void;
   setZoom(zoom: number, focusPoint?: IPoint): void;
@@ -71,10 +71,6 @@ export class Renderer implements SurfaceViewport {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.rc = new RoughCanvas(canvas);
-  }
-  clientToModelCoord(vec: IVec): IVec {
-    const rect = this._container.getBoundingClientRect();
-    return this.toModelCoord(vec[0] - rect.left, vec[1] - rect.top);
   }
 
   get left() {
@@ -144,6 +140,10 @@ export class Renderer implements SurfaceViewport {
     };
   }
 
+  get boundingClientRect() {
+    return this._container.getBoundingClientRect();
+  }
+
   isInViewport(bound: Bound) {
     const viewportBounds = Bound.from(this.viewportBounds);
     return (
@@ -157,9 +157,9 @@ export class Renderer implements SurfaceViewport {
     return [viewportX + viewX / zoom, viewportY + viewY / zoom];
   }
 
-  toViewCoord(logicalX: number, logicalY: number): [number, number] {
+  toViewCoord(modelX: number, modelY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
-    return [(logicalX - viewportX) * zoom, (logicalY - viewportY) * zoom];
+    return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
   }
 
   setCenter(centerX: number, centerY: number) {
