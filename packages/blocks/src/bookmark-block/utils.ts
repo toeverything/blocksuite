@@ -3,6 +3,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 import type { BookmarkBlockModel, BookmarkProps } from './bookmark-model.js';
 import { defaultBookmarkProps } from './bookmark-model.js';
+import { BookmarkCreateModal } from './components/bookmark-create-modal.js';
 
 // Result is boolean used to record whether the meta data is crawled
 export async function reloadBookmarkBlock(
@@ -51,4 +52,19 @@ export function cloneBookmarkProperties(
     },
     {} as BookmarkProps
   );
+}
+
+export async function getBookmarkInitialProps(): Promise<null | string> {
+  const bookmarkCreateModal = new BookmarkCreateModal();
+  return new Promise(resolve => {
+    bookmarkCreateModal.onCancel = () => {
+      resolve(null);
+      document.body.removeChild(bookmarkCreateModal);
+    };
+    bookmarkCreateModal.onConfirm = ({ url }) => {
+      resolve(url);
+      document.body.removeChild(bookmarkCreateModal);
+    };
+    document.body.appendChild(bookmarkCreateModal);
+  });
 }

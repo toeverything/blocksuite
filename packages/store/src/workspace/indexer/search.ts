@@ -112,7 +112,7 @@ export class SearchIndexer {
       return;
     }
     const yBlocks = page.get('blocks');
-    if (!(yBlocks instanceof YMap<YBlock>)) {
+    if (!(yBlocks instanceof YMap)) {
       return;
     }
     yBlocks.forEach((_, key) => {
