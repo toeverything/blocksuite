@@ -104,13 +104,18 @@ export function getTooltipWithShortcut(tip: string, shortcut: string) {
 export function readImageSize(file: File) {
   return new Promise<{ width: number; height: number }>(resolve => {
     const reader = new FileReader();
+    const size = { width: 0, height: 0 };
     reader.addEventListener('load', _ => {
       const img = new Image();
-      img.onload = () => resolve({ width: img.width, height: img.height });
-      img.onerror = () => resolve({ width: 0, height: 0 });
+      img.onload = () => {
+        size.width = img.width;
+        size.height = img.height;
+        resolve(size);
+      };
+      img.onerror = () => resolve(size);
       img.src = reader.result as string;
     });
-    reader.addEventListener('error', () => resolve({ width: 0, height: 0 }));
+    reader.addEventListener('error', () => resolve(size));
     reader.readAsDataURL(file);
   });
 }
