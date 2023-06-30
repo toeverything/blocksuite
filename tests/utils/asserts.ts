@@ -47,6 +47,11 @@ import { getStringFromRichText } from './virgo.js';
 
 export const defaultStore: SerializedStore = {
   meta: {
+    properties: {
+      tags: {
+        options: [],
+      },
+    },
     pages: [
       {
         id: 'page0',

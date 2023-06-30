@@ -119,6 +119,8 @@ test('should format quick bar show when click drag handler', async ({
   const locator = page.locator('affine-paragraph').first();
   await locator.hover();
   const dragHandle = page.locator('affine-drag-handle');
+  const dragHandleRect = await dragHandle.boundingBox();
+  assertExists(dragHandleRect);
   await dragHandle.click();
 
   const { formatQuickBar } = getFormatBar(page);
@@ -129,7 +131,7 @@ test('should format quick bar show when click drag handler', async ({
     throw new Error("formatQuickBar doesn't exist");
   }
   assertAlmostEqual(box.x, 265, 5);
-  assertAlmostEqual(box.y, 222, 5);
+  assertAlmostEqual(box.y - dragHandleRect.y, 30, 5);
 
   await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();

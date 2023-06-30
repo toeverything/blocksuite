@@ -18,14 +18,14 @@ type Tag = {
   value: string;
   color: string;
 };
-type AllPagesMeta = {
+type PagesPropertiesMeta = {
   tags: {
     options: Tag[];
   };
 };
 type WorkspaceMetaState = {
   pages?: unknown[];
-  allPagesMeta?: AllPagesMeta;
+  properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
   blockVersions?: Record<string, number>;
   name?: string;
@@ -261,10 +261,10 @@ export class WorkspaceMeta {
     });
   };
 
-  get allPagesMeta(): AllPagesMeta {
-    let meta = this._proxy.allPagesMeta;
+  get properties(): PagesPropertiesMeta {
+    let meta = this._proxy.properties;
     if (!meta) {
-      this._proxy.allPagesMeta = meta = {
+      this._proxy.properties = meta = {
         tags: {
           options: [],
         },
@@ -273,7 +273,7 @@ export class WorkspaceMeta {
     return meta;
   }
 
-  setAllPagesMeta(meta: AllPagesMeta) {
-    this._proxy.allPagesMeta = meta;
+  setProperties(meta: PagesPropertiesMeta) {
+    this._proxy.properties = meta;
   }
 }
