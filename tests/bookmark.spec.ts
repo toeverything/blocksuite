@@ -49,7 +49,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
       prop:description=""
       prop:icon=""
       prop:image=""
-      prop:title=""
+      prop:bookmarkTitle=""
       prop:url="https://google.com"
     />
   </affine:note>
@@ -92,7 +92,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
       prop:description=""
       prop:icon=""
       prop:image=""
-      prop:title=""
+      prop:bookmarkTitle=""
       prop:url="https://google.com"
     />
   </affine:note>
