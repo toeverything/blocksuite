@@ -7,9 +7,7 @@ import {
   FileDropManager,
   getPageBlock,
   getServiceOrRegister,
-  type ImageBlockModel,
   noop,
-  type NoteBlockComponent,
   type PageBlockModel,
   pagePreset,
   readImageSize,
@@ -17,25 +15,11 @@ import {
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import {
-  asyncFocusRichText,
-  type BlockComponentElement,
-  type DropResult,
-  getClosestNoteBlockElementById,
-  getLastNoteBlockElement,
-  type Point,
-} from '@blocksuite/blocks/std';
-import {
   BlockSuiteRoot,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import {
-  assertExists,
-  type BaseBlockModel,
-  isFirefox,
-  type Page,
-  Slot,
-} from '@blocksuite/store';
+import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -79,7 +63,7 @@ export class EditorContainer
 
   readonly themeObserver = new ThemeObserver();
 
-  fileDropManager = new FileDropManager(this._onDropEnd.bind(this));
+  fileDropManager = new FileDropManager(this._getPageInfo.bind(this));
 
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
@@ -90,77 +74,14 @@ export class EditorContainer
     pageModeSwitched: new Slot(),
   };
 
-  // add files from outside
-  private async _onDropEnd(
-    point: Point,
-    models: Partial<BaseBlockModel>[],
-    result: DropResult | null
-  ) {
-    const len = models.length;
-    if (!len) return;
-
+  private _getPageInfo() {
     const { page, mode } = this;
-    const isPageMode = mode === 'page';
-
-    page.captureSync();
-
-    let type = result?.type || 'none';
-    let model = result?.modelState.model || null;
-
-    if (type === 'none' && isPageMode) {
-      type = 'after';
-      if (!model) {
-        const note = getLastNoteBlockElement(this) as NoteBlockComponent;
-        assertExists(note);
-        model = note.model.lastItem();
-      }
-    }
-
-    if (type === 'database') {
-      type = 'after';
-    }
-
-    let noteId;
-    let focusId;
-
-    if (type !== 'none' && model) {
-      const parent = page.getParent(model);
-      assertExists(parent);
-      const ids = page.addSiblingBlocks(model, models, type);
-      focusId = ids[ids.length - 1];
-
-      if (isPageMode) {
-        asyncFocusRichText(page, focusId);
-        return;
-      }
-
-      const targetFrameBlock = getClosestNoteBlockElementById(
-        parent.id,
-        this._edgelessPageBlock
-      ) as BlockComponentElement;
-      assertExists(targetFrameBlock);
-      noteId = targetFrameBlock.model.id;
-    }
-
-    if (isPageMode) return;
-
-    const pageBlock = this._edgelessPageBlock;
-    assertExists(pageBlock);
-
-    // In edgeless mode
-    // Creates new notes on blank area.
-    let i = 0;
-    for (; i < len; i++) {
-      const model = models[i];
-      if (model.flavour === 'affine:image') {
-        const note = pageBlock.addImage(model as ImageBlockModel, point);
-        noteId = note?.noteId;
-      }
-    }
-
-    if (!noteId || !focusId) return;
-
-    pageBlock.setSelection(noteId, true, focusId, point);
+    return {
+      page,
+      mode,
+      pageBlock:
+        mode === 'page' ? this._defaultPageBlock : this._edgelessPageBlock,
+    };
   }
 
   override connectedCallback() {

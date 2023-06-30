@@ -727,7 +727,10 @@ export class EdgelessPageBlockComponent
       offsetX?: number;
       offsetY?: number;
     }
-  ) {
+  ): {
+    noteId: string;
+    ids: string[];
+  } {
     this.page.captureSync();
     const { left, top } = this.surface.viewport;
     point.x -= left;
@@ -782,7 +785,10 @@ export class EdgelessPageBlockComponent
     focus && this.setSelection(noteId, true, blocks[0].id, point);
   }
 
-  addImage(model: Partial<ImageBlockModel>, point?: Point) {
+  addImage(
+    model: Partial<ImageBlockModel>,
+    point?: Point
+  ): { noteId: string; ids: string[] } {
     const options = {
       width: model.width ?? 0,
       height: model.height ?? 0,

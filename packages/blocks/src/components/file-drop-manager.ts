@@ -1,31 +1,45 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type Page,
+} from '@blocksuite/store';
 
 import {
+  asyncFocusRichText,
+  type BlockComponentElement,
   calcDropTarget,
   type DropResult,
   getClosestBlockElementByPoint,
+  getClosestNoteBlockElementById,
+  getLastNoteBlockElement,
   getModelByBlockElement,
   Point,
 } from '../__internal__/index.js';
+import type {
+  DefaultPageBlockComponent,
+  EdgelessPageBlockComponent,
+  ImageBlockModel,
+  NoteBlockComponent,
+} from '../index.js';
 import type { DragIndicator } from './index.js';
 
-export type DropEndHandler = (
-  point: Point,
-  blocks: Partial<BaseBlockModel>[],
-  result: DropResult | null
-) => Promise<void>;
+export type GetPageInfo = () => {
+  page: Page;
+  mode: 'page' | 'edgeless';
+  pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent | undefined;
+};
 
 type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;
 
 export class FileDropManager {
+  private _getPageInfo: GetPageInfo;
   private _indicator!: DragIndicator;
   private _point: Point | null = null;
   private _result: DropResult | null = null;
-  private _onDropEnd: DropEndHandler;
   private _handlers: Map<string, ImportHandler> = new Map();
 
-  constructor(onDropEnd: DropEndHandler) {
-    this._onDropEnd = onDropEnd;
+  constructor(getPageInfo: GetPageInfo) {
+    this._getPageInfo = getPageInfo;
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
@@ -39,7 +53,7 @@ export class FileDropManager {
 
   onDragOver = (event: DragEvent) => {
     const files = event.dataTransfer?.files;
-    if (!files || files.length === 0) return;
+    if (!files || !files.length) return;
 
     event.preventDefault();
 
@@ -63,7 +77,7 @@ export class FileDropManager {
 
   onDrop = async (event: DragEvent) => {
     const files = event.dataTransfer?.files;
-    if (!files || files.length === 0) return;
+    if (!files || !files.length) return;
 
     event.preventDefault();
 
@@ -89,8 +103,87 @@ export class FileDropManager {
 
     await this._onDropEnd(this._point, blocks, this._result);
 
+    this._point = null;
     this._result = null;
     this._indicator.rect = null;
+  };
+
+  private _onDropEnd = async (
+    point: Point,
+    models: Partial<BaseBlockModel>[],
+    result: DropResult | null
+  ) => {
+    const len = models.length;
+    if (!len) return;
+
+    const { page, mode, pageBlock } = this._getPageInfo();
+    assertExists(pageBlock);
+
+    page.captureSync();
+
+    const isPageMode = mode === 'page';
+    let type = result?.type || 'none';
+    let model = result?.modelState.model || null;
+
+    if (type === 'none' && isPageMode) {
+      type = 'after';
+      if (!model) {
+        const note = getLastNoteBlockElement(pageBlock) as NoteBlockComponent;
+        assertExists(note);
+        model = note.model.lastItem();
+      }
+    }
+
+    if (type === 'database') {
+      type = 'after';
+    }
+
+    let noteId: string | undefined;
+    let focusId: string | undefined;
+
+    if (type !== 'none' && model) {
+      const parent = page.getParent(model);
+      assertExists(parent);
+      const ids = page.addSiblingBlocks(model, models, type);
+      focusId = ids[ids.length - 1];
+
+      if (isPageMode) {
+        asyncFocusRichText(page, focusId);
+        return;
+      }
+
+      const note = getClosestNoteBlockElementById(
+        parent.id,
+        pageBlock
+      ) as BlockComponentElement;
+      assertExists(note);
+      noteId = note.model.id;
+    }
+
+    if (isPageMode) return;
+
+    // In edgeless mode
+    // Creates new notes on blank area.
+    let i = 0;
+    for (; i < len; i++) {
+      const model = models[i];
+      if (model.flavour === 'affine:image') {
+        const note = (pageBlock as EdgelessPageBlockComponent).addImage(
+          model as ImageBlockModel,
+          point
+        );
+        noteId = note.noteId;
+      }
+    }
+
+    if (!noteId || !focusId) return;
+
+    (pageBlock as EdgelessPageBlockComponent).setSelection(
+      noteId,
+      true,
+      focusId,
+      point
+    );
   };
 
   get(type: string): ImportHandler | undefined {
