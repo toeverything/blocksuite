@@ -175,6 +175,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         )?.cell?.exitEditMode();
       }
     }
+    this.service.select(data);
   }
 
   cellPosition(left: number, top: number) {
