@@ -288,8 +288,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         >
           <div class="affine-bookmark-title">
             <bookmark-loader
-              size="15px"
-              color="var(--affine-primary-color)"
+              .size=${'15px'}
+              .color=${'var(--affine-primary-color)'}
             ></bookmark-loader>
             <div class="affine-bookmark-title-content">Loading...</div>
           </div>
