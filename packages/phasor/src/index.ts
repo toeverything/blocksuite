@@ -21,6 +21,7 @@ export {
   almostEqual,
   clamp,
   getBoundsWithRotation,
+  getPointsFromBoundsWithRotation,
   getQuadBoundsWithRotation,
   getSvgPathFromStroke,
   intersects,

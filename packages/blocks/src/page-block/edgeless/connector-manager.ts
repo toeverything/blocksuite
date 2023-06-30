@@ -7,6 +7,8 @@ import {
   type ConnectorElement,
   ConnectorMode,
   getBoundFromPoints,
+  getBoundsWithRotation,
+  getPointsFromBoundsWithRotation,
   type IConnector,
   type IVec,
   lineIntersects,
@@ -54,8 +56,30 @@ export function isConnectorAndBindingsAllSelected(
 }
 
 export function getAnchors(ele: Connectable) {
-  const b = Bound.deserialize(ele.xywh);
   const offset = 10;
+  const points: IVec[] = [];
+
+  const { x, y, w, h } = Bound.deserialize(ele.xywh);
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const center = [cx, cy];
+
+  const s = (w + offset * 2) / w;
+  const matrix = new DOMMatrix().scaleSelf(s, s, 1, cx, cy, 0);
+
+  if (isTopLevelBlock(ele)) {
+    points.push(
+      ...[
+        [x, y],
+        [x + w, y],
+        [x + w, y + h],
+        [x, y + h],
+      ]
+    );
+  } else {
+    points.push(...getPointsFromBoundsWithRotation(ele));
+  }
+
   const anchors: { point: IVec; coord: IVec }[] = [];
   const coords = [
     [0.5, 0],
@@ -63,15 +87,23 @@ export function getAnchors(ele: Connectable) {
     [0, 0.5],
     [1, 0.5],
   ];
-  [
-    [b.center[0], b.y - offset],
-    [b.center[0], b.maxY + offset],
-    [b.x - offset, b.center[1]],
-    [b.maxX + offset, b.center[1]],
-  ].forEach((vec, index) => {
-    const rst = connectableIntersectLine(ele, [b.center, vec]);
-    if (rst) anchors.push({ point: rst[0], coord: coords[index] });
-  });
+
+  points
+    .map(p => {
+      const a = new DOMPoint(...p).matrixTransform(matrix);
+      return [a.x, a.y];
+    })
+    .map((curr, i, points) => {
+      const next = points[(i + 1) % points.length];
+      return Vec.med(curr, next);
+    })
+    .forEach((vec, index) => {
+      const rst = connectableIntersectLine(ele, [center, vec]);
+      if (rst) {
+        anchors.push({ point: rst[0], coord: coords[index] });
+      }
+    });
+
   return anchors;
 }
 
@@ -712,7 +744,9 @@ export class EdgelessConnectorManager {
       if (excludedIds.includes(connectable.id)) continue;
 
       // then check if in expanded bound
-      const bound = Bound.deserialize(connectables[i].xywh);
+      const bound = isTopLevelBlock(connectable)
+        ? Bound.deserialize(connectable.xywh)
+        : Bound.from(getBoundsWithRotation(connectable));
       const expandBound = bound.expand(10);
       if (!expandBound.isPointInBound(point)) continue;
       _connectionOverlay.bound = bound;
