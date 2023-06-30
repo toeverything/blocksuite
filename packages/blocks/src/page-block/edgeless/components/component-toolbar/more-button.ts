@@ -13,16 +13,20 @@ import {
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type {
+  EdgelessPageBlockComponent,
+  EdgelessSelectionSlots,
+} from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import type { Selectable } from '../../utils/selection-manager.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  type: 'delete' | ReorderingType;
+  type: 'delete' | 'copy-as-png' | ReorderingType;
   disabled?: boolean;
 };
+
 const ACTIONS: Action[] = [
   // FIXME: should implement these function
   // { name: 'Copy', type: 'copy', disabled: true },
@@ -32,7 +36,7 @@ const ACTIONS: Action[] = [
   { name: 'Bring forward', type: 'forward' },
   { name: 'Send backward', type: 'backward' },
   { name: 'Send to back', type: 'back' },
-  // { name: 'Copy as PNG', type: 'copy as PNG', disabled: true },
+  { name: 'Copy as PNG', type: 'copy-as-png' },
   { name: 'Delete', type: 'delete' },
 ];
 
@@ -109,6 +113,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
   @state()
   private _popperShow = false;
 
@@ -146,6 +153,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           this.page.deleteBlock(element);
         }
       } else {
+        this.edgeless.connector.detachConnectors([element]);
         this.surface.removeElement(element.id);
       }
     });
@@ -154,9 +162,18 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _runAction = ({ type }: Action) => {
     switch (type) {
-      case 'delete':
+      case 'delete': {
         this._delete();
         break;
+      }
+      case 'copy-as-png': {
+        const { notes, shapes } = this._splitElements();
+        this.slots.copyAsPng.emit({
+          notes,
+          shapes,
+        });
+        break;
+      }
       case 'front':
       case 'forward':
       case 'backward':

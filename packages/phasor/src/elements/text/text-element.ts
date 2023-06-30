@@ -1,5 +1,8 @@
 import { Bound } from '../../utils/bound.js';
-import { linePolygonIntersects } from '../../utils/math-utils.js';
+import {
+  linePolygonIntersects,
+  polygonNearestPoint,
+} from '../../utils/math-utils.js';
 import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
@@ -11,6 +14,9 @@ import {
 } from './utils.js';
 
 export class TextElement extends SurfaceElement<IText> {
+  getNearestPoint(point: IVec): IVec {
+    return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
+  }
   get text() {
     return this.yMap.get('text') as IText['text'];
   }
@@ -31,8 +37,8 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
-  override intersectWithLine(start: IVec, end: IVec): boolean {
-    return !!linePolygonIntersects(
+  override intersectWithLine(start: IVec, end: IVec) {
+    return linePolygonIntersects(
       start,
       end,
       Bound.deserialize(this.xywh).points

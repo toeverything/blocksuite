@@ -31,5 +31,10 @@ export interface ShapeMethods {
     element: ShapeElement,
     options?: HitTestOptions
   ) => boolean;
-  intersectWithLine: (start: IVec, end: IVec, element: ShapeElement) => boolean;
+  intersectWithLine: (
+    start: IVec,
+    end: IVec,
+    element: ShapeElement
+  ) => IVec[] | null;
+  getNearestPoint: (point: IVec, element: ShapeElement) => IVec;
 }

@@ -17,6 +17,10 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     addNote(this._edgeless, this._page, e, width);
   }
 
+  onContainerPointerDown(e: PointerEventState): void {
+    noop();
+  }
+
   onContainerClick(e: PointerEventState): void {
     this._addNote(e);
   }

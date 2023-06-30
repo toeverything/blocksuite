@@ -8,6 +8,7 @@ import {
 import {
   getSvgPathFromStroke,
   lineIntersects,
+  polyLineNearestPoint,
 } from '../../utils/math-utils.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
@@ -29,6 +30,16 @@ export class BrushElement extends SurfaceElement<IBrush> {
   private _testCtx = this._testCanvas.getContext(
     '2d'
   ) as CanvasRenderingContext2D;
+
+  override getNearestPoint(point: IVec): IVec {
+    const { x, y } = this;
+    return polyLineNearestPoint(
+      this.points.map(p => Vec.add(p, [x, y])),
+      point
+    );
+  }
+
+  protected override _connectable = false;
 
   /* Brush mouse coords relative to left-top corner */
   get points() {
@@ -53,24 +64,23 @@ export class BrushElement extends SurfaceElement<IBrush> {
     const tl = box.tl;
 
     if (box.w < 8 && box.h < 8) {
-      return Vec.distanceToLineSegment(pa, pb, box.center) < 5;
+      return Vec.distanceToLineSegment(pa, pb, box.center) < 5 ? [] : null;
     }
 
     if (box.intersectLine(pa, pb, true)) {
       for (let i = 1; i < points.length; i++) {
-        if (
-          lineIntersects(
-            Vec.add(points[i - 1], tl),
-            Vec.add(points[i], tl),
-            pa,
-            pb
-          )
-        ) {
-          return true;
+        const rst = lineIntersects(
+          Vec.add(points[i - 1], tl),
+          Vec.add(points[i], tl),
+          pa,
+          pb
+        ) as IVec[] | null;
+        if (rst) {
+          return rst;
         }
       }
     }
-    return false;
+    return null;
   }
 
   override hitTest(x: number, y: number, options?: HitTestOptions): boolean {

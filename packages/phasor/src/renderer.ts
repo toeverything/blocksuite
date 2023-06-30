@@ -4,6 +4,7 @@ import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { RoughCanvas } from './rough/canvas.js';
+import { Bound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
@@ -23,6 +24,7 @@ export interface SurfaceViewport {
   readonly viewportMinXY: IPoint;
   readonly viewportMaxXY: IPoint;
   readonly viewportBounds: IBound;
+  readonly boundingClientRect: DOMRect;
 
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
@@ -30,6 +32,7 @@ export interface SurfaceViewport {
   setCenter(centerX: number, centerY: number): void;
   setZoom(zoom: number, focusPoint?: IPoint): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
+  isInViewport(bound: Bound): boolean;
 
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
@@ -137,14 +140,26 @@ export class Renderer implements SurfaceViewport {
     };
   }
 
+  get boundingClientRect() {
+    return this._container.getBoundingClientRect();
+  }
+
+  isInViewport(bound: Bound) {
+    const viewportBounds = Bound.from(this.viewportBounds);
+    return (
+      viewportBounds.contains(bound) ||
+      viewportBounds.isIntersectWithBound(bound)
+    );
+  }
+
   toModelCoord(viewX: number, viewY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
     return [viewportX + viewX / zoom, viewportY + viewY / zoom];
   }
 
-  toViewCoord(logicalX: number, logicalY: number): [number, number] {
+  toViewCoord(modelX: number, modelY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
-    return [(logicalX - viewportX) * zoom, (logicalY - viewportY) * zoom];
+    return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
   }
 
   setCenter(centerX: number, centerY: number) {

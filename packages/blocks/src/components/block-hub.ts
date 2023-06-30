@@ -815,6 +815,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   private _onDragOver = (e: DragEvent) => {
     e.preventDefault();
+    return false;
   };
 
   private _onDragOverDocument = (e: DragEvent) => {

@@ -40,6 +40,7 @@ import {
 } from '../../../__internal__/index.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
@@ -184,9 +185,11 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     );
   }
 
-  private _ensureNoteExists() {
-    const hasNote = this.page.hasFlavour('affine:note');
-    if (!hasNote) {
+  private _ensureVisibleNoteExists() {
+    const notes = this.page.getBlockByFlavour(
+      'affine:note'
+    ) as NoteBlockModel[];
+    if (notes.length === 0 || notes.every(note => note.hidden)) {
       const noteId = this.page.addBlock('affine:note', {}, this.page.root);
       this.page.addBlock('affine:paragraph', {}, noteId);
       return true;
@@ -322,7 +325,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       keys: { shift },
     } = e;
 
-    const hasAddedNote = this._ensureNoteExists();
+    const hasAddedNote = this._ensureVisibleNoteExists();
 
     if (hasAddedNote && isInsidePageTitle(target)) {
       requestAnimationFrame(() => {
