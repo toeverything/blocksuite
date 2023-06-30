@@ -152,7 +152,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           this.page.deleteBlock(element);
         }
       } else {
-        this.edgeless.connector.updateConnectorWhenDeleted([element]);
+        this.edgeless.connector.detachConnectors([element]);
         this.surface.removeElement(element.id);
       }
     });

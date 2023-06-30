@@ -89,7 +89,7 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
           edgeless.page.deleteBlock(element);
         }
       } else {
-        edgeless.connector.updateConnectorWhenDeleted([element]);
+        edgeless.connector.detachConnectors([element]);
         edgeless.surface.removeElement(element.id);
       }
     });

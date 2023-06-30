@@ -101,7 +101,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
       });
 
     if (this._element?.text.length === 0) {
-      this._edgeless?.connector.updateConnectorWhenDeleted([this._element]);
+      this._edgeless?.connector.detachConnectors([this._element]);
       this._edgeless?.surface.removeElement(this._element?.id);
     }
 

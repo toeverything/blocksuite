@@ -603,7 +603,7 @@ export class EdgelessConnectorManager {
     connectors.forEach(connector => this.updatePath(connector));
   }
 
-  updateConnectorWhenDeleted(connected: Connectable[]) {
+  detachConnectors(connected: Connectable[]) {
     const surface = this._edgeless.surface;
     connected.forEach(ele => {
       this.getConnecttedConnectors([ele]).forEach(connector => {
