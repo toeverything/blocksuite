@@ -98,6 +98,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       dispose: this.eventDispatcher.add('click', context => {
         const event = context.get('pointerState').event;
         const target = event.target;
+        this.selection = undefined;
         if (target instanceof Element && this.isCurrentDatabase(target)) {
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
@@ -105,7 +106,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             return true;
           }
         }
-        this.selection = undefined;
         return false;
       }),
     });
