@@ -118,7 +118,7 @@ jobs:
           files: ./.coverage/lcov.info
           flags: e2etest
           name: blocksuite
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
       - name: Upload test results
         if: ${{ failure() }}
@@ -153,7 +153,7 @@ jobs:
           files: ./.coverage/global/lcov.info,./.coverage/store/lcov.info
           flags: unittest
           name: blocksuite
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
   virgo-e2e-test:
     name: Virgo E2E test

@@ -1,4 +1,5 @@
-import type { BlockElement, UIEventDispatcher } from '@blocksuite/lit';
+import type { UIEventDispatcher } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 import type {
   ConnectorMode,
   PhasorElement,
@@ -12,8 +13,8 @@ import {
 } from '@blocksuite/store';
 
 import type { Cell, Column } from '../../database-block/table/types.js';
-import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { PageBlockModel } from '../../models.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type {
   BlockServiceInstanceByKey,
   ServiceFlavour,
@@ -24,12 +25,14 @@ import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
+
 export type SelectionPosition = 'start' | 'end' | Point;
 
 export interface IPoint {
   x: number;
   y: number;
 }
+
 export interface BlockTransformContext {
   childText?: string;
   begin?: number;
@@ -42,7 +45,6 @@ export interface EditingState {
   rect: DOMRect;
 }
 
-export type DatabaseTableViewRowStateType = 'select' | 'clear' | 'click';
 export type DatabaseTableViewRowSelect = {
   type: 'select';
   databaseId: string;
@@ -67,28 +69,19 @@ export type DatabaseTableViewRowState =
   | DatabaseTableViewRowDelete
   | DatabaseTableViewRowClear;
 
-export type CellCoord = {
+export type CellFocus = {
   rowIndex: number;
-  cellIndex: number;
+  columnIndex: number;
 };
-export type DatabaseTableViewCellSelect = {
-  type: 'select';
+export type MultiSelection = { start: number; end: number };
+export type DatabaseSelection = {
   databaseId: string;
-  // Currently only supports single cell selection.
-  coords: [CellCoord];
+  rowsSelection?: MultiSelection;
+  columnsSelection?: MultiSelection;
+  focus: CellFocus;
+  isEditing: boolean;
 };
-type DatabaseTableViewCellEdit = {
-  type: 'edit';
-  databaseId: string;
-  coords: [CellCoord];
-};
-type DatabaseTableViewCellClear = {
-  type: 'clear';
-};
-export type DatabaseTableViewCellState =
-  | DatabaseTableViewCellSelect
-  | DatabaseTableViewCellEdit
-  | DatabaseTableViewCellClear;
+export type DatabaseSelectionState = DatabaseSelection | undefined;
 
 /** Common context interface definition for block models. */
 
@@ -132,15 +125,17 @@ export type DomSelectionType = 'Caret' | 'Range' | 'None';
 export type ExtendedModel = BaseBlockModel & Record<string, any>;
 
 // blocks that would only appear under the edgeless container root
-export type TopLevelBlockModel = FrameBlockModel;
+export type TopLevelBlockModel = NoteBlockModel;
 
-export type Alignable = FrameBlockModel | PhasorElement;
+export type Alignable = NoteBlockModel | PhasorElement;
 
-export type DefaultMouseMode = {
+export type Erasable = NoteBlockModel | PhasorElement;
+
+export type DefaultTool = {
   type: 'default';
 };
 
-export type ShapeMouseMode = {
+export type ShapeTool = {
   type: 'shape';
   shape: ShapeType | 'roundedRect';
   fillColor: CssVariableName;
@@ -148,44 +143,55 @@ export type ShapeMouseMode = {
 };
 
 export enum BrushSize {
+  LINE_WIDTH_FOUR = 4,
+  LINE_WIDTH_SIX = 6,
+  LINE_WIDTH_EIGHT = 8,
+  LINE_WIDTH_TEN = 10,
+  LINE_WIDTH_TWELVE = 12,
+  LINE_WIDTH_FOURTEEN = 14,
   Thin = 4,
   Thick = 10,
 }
 
-export type TextMouseMode = {
+export type TextTool = {
   type: 'text';
 };
 
-export type BrushMouseMode = {
+export type BrushTool = {
   type: 'brush';
   color: CssVariableName;
   lineWidth: BrushSize;
 };
 
-export type PanMouseMode = {
+export type EraserTool = {
+  type: 'eraser';
+};
+
+export type PanTool = {
   type: 'pan';
   panning: boolean;
 };
 
-export type NoteMouseMode = {
+export type NoteTool = {
   type: 'note';
   background: CssVariableName;
 };
 
-export type ConnectorMouseMode = {
+export type ConnectorTool = {
   type: 'connector';
   mode: ConnectorMode;
   color: CssVariableName;
 };
 
-export type MouseMode =
-  | DefaultMouseMode
-  | TextMouseMode
-  | ShapeMouseMode
-  | BrushMouseMode
-  | PanMouseMode
-  | NoteMouseMode
-  | ConnectorMouseMode;
+export type EdgelessTool =
+  | DefaultTool
+  | TextTool
+  | ShapeTool
+  | BrushTool
+  | PanTool
+  | NoteTool
+  | ConnectorTool
+  | EraserTool;
 
 export type SerializedBlock = {
   flavour: string;
@@ -217,7 +223,7 @@ export type SerializedBlock = {
     cells: Record<string, Record<string, Cell>>;
     columns: Column[];
   };
-  // frame block
+  // note block
   xywh?: string;
   // bookmark block
   title?: string;
@@ -236,7 +242,7 @@ export type EmbedBlockDoubleClickData = {
 declare global {
   interface WindowEventMap {
     'affine.embed-block-db-click': CustomEvent<EmbedBlockDoubleClickData>;
-    'affine.switch-mouse-mode': CustomEvent<MouseMode>;
+    'affine.switch-mouse-mode': CustomEvent<EdgelessTool>;
     'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
   }
 }

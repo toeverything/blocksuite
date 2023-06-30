@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
 
 import {
-  activeFrameInEdgeless,
-  setMouseMode,
+  activeNoteInEdgeless,
+  setEdgelessTool,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
@@ -26,7 +26,7 @@ test('pan tool basic', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicRectShapeElement(page, start, end);
 
-  await setMouseMode(page, 'pan');
+  await setEdgelessTool(page, 'pan');
   await dragBetweenCoords(
     page,
     {
@@ -38,7 +38,7 @@ test('pan tool basic', async ({ page }) => {
       y: start.y + 25,
     }
   );
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
   await page.mouse.move(start.x + 25, start.y + 25);
   await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
@@ -84,9 +84,9 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
-  await activeFrameInEdgeless(page, ids.frameId);
+  await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');

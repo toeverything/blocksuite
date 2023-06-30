@@ -25,6 +25,7 @@ export const bookmarkModalStyles = html`
       top: 0;
       bottom: 0;
       margin: auto;
+      z-index: 1;
     }
     .bookmark-modal-wrapper {
       position: absolute;
@@ -33,6 +34,7 @@ export const bookmarkModalStyles = html`
       top: 0;
       bottom: 0;
       margin: auto;
+      z-index: 1;
 
       width: 360px;
       height: 260px;
@@ -103,11 +105,11 @@ export const bookmarkModalStyles = html`
 `;
 @customElement('bookmark-edit-modal')
 export class BookmarkEditModal extends WithDisposable(LitElement) {
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel<BookmarkBlockModel>;
-  @property()
+  @property({ attribute: false })
   onCancel?: () => void;
-  @property()
+  @property({ attribute: false })
   onConfirm?: () => void;
 
   override get id() {

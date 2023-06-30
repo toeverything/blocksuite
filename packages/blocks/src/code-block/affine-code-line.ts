@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
-import { queryCurrentMode } from '../std.js';
+import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
   highlightCache,
@@ -21,7 +21,7 @@ export class AffineCodeLine extends ShadowlessElement {
     insert: ZERO_WIDTH_SPACE,
   };
 
-  @property()
+  @property({ attribute: false })
   highlightOptionsGetter:
     | (() => {
         lang: Lang;

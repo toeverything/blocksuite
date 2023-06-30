@@ -7,7 +7,7 @@ import { sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { FrameBlockModel } from '../../../packages/blocks/src/index.js';
+import type { NoteBlockModel } from '../../../packages/blocks/src/index.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
@@ -23,16 +23,16 @@ import {
   waitNextFrame,
 } from './misc.js';
 
-export async function getFrameRect(
+export async function getNoteRect(
   page: Page,
-  ids: { pageId: string; frameId: string; paragraphId: string }
+  ids: { pageId: string; noteId: string; paragraphId: string }
 ) {
   const xywh: string | null = await page.evaluate(
     ([id]) => {
       const page = window.workspace.getPage('page0');
-      const block = page?.getBlockById(id.frameId);
-      if (block?.flavour === 'affine:frame') {
-        return (block as FrameBlockModel).xywh;
+      const block = page?.getBlockById(id.noteId);
+      if (block?.flavour === 'affine:note') {
+        return (block as NoteBlockModel).xywh;
       } else {
         return null;
       }
@@ -62,15 +62,16 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type MouseMode =
+type EdgelessTool =
   | 'default'
   | 'shape'
   | 'brush'
   | 'pan'
   | 'text'
   | 'connector'
-  | 'note';
-type ToolType = MouseMode | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+  | 'note'
+  | 'eraser';
+type ToolType = EdgelessTool | 'zoomIn' | 'zoomOut' | 'fitToScreen';
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
@@ -82,11 +83,11 @@ export function locatorEdgelessToolButton(
     default: 'Select',
     shape: 'Shape',
     brush: 'Pen',
+    eraser: 'Eraser',
     pan: 'Hand',
     text: 'Text',
     connector: 'Connector',
     note: 'Note',
-
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
@@ -121,13 +122,14 @@ export function locatorEdgelessComponentToolButton(
   return innerContainer ? button.locator('.icon-container') : button;
 }
 
-export async function setMouseMode(page: Page, mode: MouseMode) {
+export async function setEdgelessTool(page: Page, mode: EdgelessTool) {
   switch (mode) {
     case 'default':
     case 'brush':
     case 'pan':
     case 'text':
     case 'note':
+    case 'eraser':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
@@ -146,13 +148,13 @@ export async function setMouseMode(page: Page, mode: MouseMode) {
   }
 }
 
-export async function assertMouseMode(page: Page, mode: MouseMode) {
+export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
   const type = await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) {
       throw new Error('Missing edgeless page');
     }
-    return container.mouseMode.type;
+    return container.edgelessTool.type;
   });
   expect(type).toEqual(mode);
 }
@@ -169,7 +171,7 @@ export async function getEdgelessHoverRect(page: Page) {
 }
 
 export async function getEdgelessBlockChild(page: Page) {
-  const block = page.locator('.affine-edgeless-block-child');
+  const block = page.locator('.affine-edgeless-child-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Missing edgeless block child rect');
   return blockBox;
@@ -214,9 +216,9 @@ export async function addBasicBrushElement(
   end: { x: number; y: number },
   auto = true
 ) {
-  await setMouseMode(page, 'brush');
+  await setEdgelessTool(page, 'brush');
   await dragBetweenCoords(page, start, end, { steps: 100 });
-  auto && (await setMouseMode(page, 'default'));
+  auto && (await setEdgelessTool(page, 'default'));
 }
 
 export async function addBasicRectShapeElement(
@@ -224,7 +226,7 @@ export async function addBasicRectShapeElement(
   start: { x: number; y: number },
   end: { x: number; y: number }
 ) {
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, start, end, { steps: 20 });
 }
 
@@ -233,12 +235,12 @@ export async function addBasicConnectorElement(
   start: { x: number; y: number },
   end: { x: number; y: number }
 ) {
-  await setMouseMode(page, 'connector');
+  await setEdgelessTool(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
 }
 
 export async function addNote(page: Page, text: string, x: number, y: number) {
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
   await waitForVirgoStateUpdated(page);
   await type(page, text);
@@ -306,19 +308,19 @@ export async function pickColorAtPoints(page: Page, points: number[][]) {
   return pickedColors;
 }
 
-export async function getFrameBoundBoxInEdgeless(page: Page, frameId: string) {
+export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
   const editor = getEditorLocator(page);
-  const frame = editor.locator(`affine-frame[data-block-id="${frameId}"]`);
-  const bound = await frame.boundingBox();
+  const note = editor.locator(`affine-note[data-block-id="${noteId}"]`);
+  const bound = await note.boundingBox();
   if (!bound) {
-    throw new Error(`Missing frame: ${frameId}`);
+    throw new Error(`Missing note: ${noteId}`);
   }
   return bound;
 }
 
-export async function getAllFrames(page: Page) {
+export async function getAllNotes(page: Page) {
   return await page.evaluate(() => {
-    return document.querySelectorAll('affine-frame');
+    return document.querySelectorAll('affine-note');
   });
 }
 
@@ -331,30 +333,24 @@ export async function countBlock(page: Page, flavour: string) {
   );
 }
 
-export async function activeFrameInEdgeless(page: Page, frameId: string) {
-  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+export async function activeNoteInEdgeless(page: Page, noteId: string) {
+  const bound = await getNoteBoundBoxInEdgeless(page, noteId);
   await page.mouse.dblclick(bound.x + 8, bound.y + 8);
 }
 
-export async function selectFrameInEdgeless(page: Page, frameId: string) {
-  const bound = await getFrameBoundBoxInEdgeless(page, frameId);
+export async function selectNoteInEdgeless(page: Page, noteId: string) {
+  const bound = await getNoteBoundBoxInEdgeless(page, noteId);
   await page.mouse.click(bound.x, bound.y);
 }
 
 export async function updateExistedBrushElementSize(
   page: Page,
-  size: 'thin' | 'thick'
+  nthSizeButton: 1 | 2 | 3 | 4 | 5 | 6
 ) {
-  const text = {
-    thin: 'Thin',
-    thick: 'Thick',
-  }[size];
-
-  const btn = page
-    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
-    .filter({
-      hasText: text,
-    });
+  // get the nth brush size button
+  const btn = page.locator(
+    `.line-width-panel > div:nth-child(${nthSizeButton})`
+  );
 
   await btn.click();
 }
@@ -456,7 +452,8 @@ type Action =
   | 'bringForward'
   | 'sendBackward'
   | 'sendToBack'
-  | 'changeFrameColor'
+  | 'copyAsPng'
+  | 'changeNoteColor'
   | 'changeShapeFillColor'
   | 'changeShapeStrokeColor'
   | 'changeShapeStrokeStyles'
@@ -516,9 +513,21 @@ export async function triggerComponentToolbarAction(
       await actionButton.click();
       break;
     }
-    case 'changeFrameColor': {
+    case 'copyAsPng': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Copy as PNG',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'changeNoteColor': {
       const button = locatorComponentToolbar(page).locator(
-        'edgeless-change-frame-button'
+        'edgeless-change-note-button edgeless-tool-icon-button'
       );
       await button.click();
       break;
@@ -561,12 +570,12 @@ export async function triggerComponentToolbarAction(
   }
 }
 
-export async function changeEdgelessFrameBackground(
+export async function changeEdgelessNoteBackground(
   page: Page,
   color: CssVariableName
 ) {
   const colorButton = page.locator(
-    `edgeless-change-frame-button .color-unit[aria-label="${color}"]`
+    `edgeless-change-note-button .color-unit[aria-label="${color}"]`
   );
   await colorButton.click();
 }
@@ -678,28 +687,43 @@ export async function changeConnectorStrokeStyle(
   await button.click();
 }
 
-export async function initThreeShapes(page: Page) {
+export async function initThreeOverlapFilledShapes(page: Page) {
   const rect0 = {
     start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
   };
   await addBasicRectShapeElement(page, rect0.start, rect0.end);
+  await page.mouse.click(rect0.start.x + 5, rect0.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-navy');
 
   const rect1 = {
     start: { x: 130, y: 130 },
     end: { x: 230, y: 230 },
   };
   await addBasicRectShapeElement(page, rect1.start, rect1.end);
+  await page.mouse.click(rect1.start.x + 5, rect1.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-black');
 
   const rect2 = {
     start: { x: 160, y: 160 },
     end: { x: 260, y: 260 },
   };
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
+  await page.mouse.click(rect2.start.x + 5, rect2.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-white');
+}
+
+export async function initThreeOverlapNotes(page: Page) {
+  await addNote(page, 'abc', 30 + 100, 40 + 100);
+  await addNote(page, 'efg', 30 + 130, 40 + 100);
+  await addNote(page, 'hij', 30 + 160, 40 + 100);
 }
 
 export async function initThreeNotes(page: Page) {
   await addNote(page, 'abc', 30 + 100, 40 + 100);
-  await addNote(page, 'efg', 30 + 130, 40 + 100);
-  await addNote(page, 'hij', 30 + 160, 40 + 100);
+  await addNote(page, 'efg', 30 + 130, 40 + 200);
+  await addNote(page, 'hij', 30 + 160, 40 + 300);
 }

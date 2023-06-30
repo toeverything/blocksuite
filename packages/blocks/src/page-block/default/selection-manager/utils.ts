@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import type { PointerEventState } from '@blocksuite/lit';
 import { matchFlavours, type Page, type UserRange } from '@blocksuite/store';
 
 import type {
@@ -128,41 +128,6 @@ export function updateLocalSelectionRange(page: Page) {
   page.awarenessStore.setLocalRange(page, userRange);
 }
 
-/*
-function computeSelectionType(
-  selectedBlocks: Element[],
-  selectionType?: PageSelectionType
-) {
-  let newSelectionType: PageSelectionType = selectionType ?? 'native';
-
-  const isOnlyBlock = selectedBlocks.length === 1;
-  for (const block of selectedBlocks) {
-    if (selectionType) continue;
-    if (!('model' in block)) continue;
-
-    // Calculate selection type
-    const model = getModelByElement(block);
-    newSelectionType = 'block';
-
-    // Other selection types are possible if only one block is selected
-    if (!isOnlyBlock) continue;
-
-    const flavour = model.flavour;
-    switch (flavour) {
-      case 'affine:embed': {
-        newSelectionType = 'embed';
-        break;
-      }
-      case 'affine:database': {
-        newSelectionType = 'database';
-        break;
-      }
-    }
-  }
-  return newSelectionType;
-}
-*/
-
 export function setSelectedBlocks(
   state: PageSelectionState,
   slots: DefaultSelectionSlots,
@@ -185,6 +150,9 @@ export function setSelectedBlocks(
 }
 
 export interface AutoScrollHooks {
+  /**
+   * @deprecated This hook is meaningless.
+   */
   init(): void;
   onMove(): void;
   onScroll(val: number): void;

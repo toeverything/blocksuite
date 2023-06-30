@@ -8,6 +8,7 @@ import type {
   Page,
   Workspace,
 } from '../../packages/store/src/index.js';
+import type { DocProvider } from '../../packages/store/src/index.js';
 
 declare global {
   interface Window {
@@ -26,5 +27,8 @@ declare global {
     page: Page;
     debugMenu: DebugMenu;
     editor: EditorContainer;
+
+    // TODO: remove this when provider support subdocument
+    subdocProviders: Map<string, DocProvider[]>;
   }
 }

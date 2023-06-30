@@ -17,7 +17,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "nanoid": "^4.0.1",
-    "yjs": "^13.6.0"
+    "yjs": "^13.6.5"
   },
   "peerDependencies": {
     "nanoid": "^4",
@@ -38,7 +38,6 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "fractional-indexing": "^3.2.0",
-    "roughjs": "^4.5.2"
+    "fractional-indexing": "^3.2.0"
   }
 }

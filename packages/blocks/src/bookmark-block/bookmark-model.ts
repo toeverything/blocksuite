@@ -35,7 +35,7 @@ export const BookmarkBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:frame'],
+    parent: ['affine:note'],
   },
 });
 

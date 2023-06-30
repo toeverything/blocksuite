@@ -1,4 +1,4 @@
-// Reorders the shapes or frames.
+// Reorders the shapes or notes.
 
 export type ReorderingType = 'front' | 'forward' | 'backward' | 'back';
 

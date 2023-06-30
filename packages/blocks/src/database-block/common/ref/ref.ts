@@ -2,10 +2,9 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
 import { propertyMatcher } from '../../logical/property-matcher.js';
 import type { Variable, VariableOrProperty, VariableRef } from '../ast.js';
-import { DatabaseMenuComponent } from '../menu.js';
-import { createDatabasePopup } from '../popup.js';
 
 @customElement('variable-ref-view')
 export class VariableRefView extends WithDisposable(ShadowlessElement) {
@@ -19,13 +18,13 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       padding: 0 2px;
     }
   `;
-  @property()
+  @property({ attribute: false })
   data?: VariableOrProperty;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: VariableOrProperty) => void;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
 
   get field() {
@@ -70,25 +69,26 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
   }
 
   selectProperty() {
-    const menu = new DatabaseMenuComponent();
     const field = this.field;
     const fieldType = this.vars.find(v => v.id === field)?.type;
     if (!fieldType || !field) {
       return;
     }
     const properties = propertyMatcher.allMatchedData(fieldType);
-    menu.menuGroup = properties.map(v => ({
-      type: 'action',
-      label: v.name,
-      click: () => {
-        this.setData({
-          type: 'property',
-          ref: { type: 'ref', name: field },
-          propertyFuncName: v.name,
-        });
-      },
-    }));
-    createDatabasePopup(this.propertySelect, menu);
+    popFilterableSimpleMenu(
+      this.propertySelect,
+      properties.map(v => ({
+        type: 'action',
+        name: v.name,
+        select: () => {
+          this.setData({
+            type: 'property',
+            ref: { type: 'ref', name: field },
+            propertyFuncName: v.name,
+          });
+        },
+      }))
+    );
   }
 
   override render() {
@@ -105,11 +105,11 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
         <div style="display:flex;align-items:center;">
           ${this.property &&
           html`<span style="margin-right: 4px;">${`'s`}</span>`}
-          <PlainSelect
+          <!-- <PlainSelect
             :value="propertyName"
             @update:value="setPropertyName"
             :options="propertyOptions"
-          ></PlainSelect>
+          ></PlainSelect> -->
         </div>
       </div>
     `;
@@ -128,16 +128,17 @@ export const popSelectField = (
     onSelect: (ref: VariableRef) => void;
   }
 ) => {
-  const menu = new DatabaseMenuComponent();
-  menu.menuGroup = props.vars.map(v => ({
-    type: 'action',
-    label: v.name,
-    click: () => {
-      props.onSelect({
-        type: 'ref',
-        name: v.id,
-      });
-    },
-  }));
-  createDatabasePopup(target, menu);
+  popFilterableSimpleMenu(
+    target,
+    props.vars.map(v => ({
+      type: 'action',
+      name: v.name,
+      select: () => {
+        props.onSelect({
+          type: 'ref',
+          name: v.id,
+        });
+      },
+    }))
+  );
 };

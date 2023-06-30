@@ -26,7 +26,9 @@
         "slash-menu",
         "drag-handle",
         "format-bar",
-        "connector"
+        "connector",
+        "lit",
+        "block-std"
       ]
     ]
   }

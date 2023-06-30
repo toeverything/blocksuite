@@ -1,4 +1,5 @@
-import type { DatabaseBlockModel } from '../database-model.js';
+import type { DatabaseBlockModel, InsertPosition } from '../database-model.js';
+import { insertPositionToIndex } from '../database-model.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column } from '../types.js';
 import type { FilterGroup } from './ast.js';
@@ -33,6 +34,8 @@ export type DatabaseViewDataMap = {
   };
 };
 
+export type TableViewData = DatabaseViewDataMap['table'];
+
 export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
 type ViewOperation<Data> = {
@@ -41,7 +44,7 @@ type ViewOperation<Data> = {
     model: DatabaseBlockModel,
     view: Data,
     newColumn: Column,
-    index?: number
+    position: InsertPosition
   ): void;
   deleteColumn(model: DatabaseBlockModel, view: Data, id: string): void;
 };
@@ -83,18 +86,11 @@ export const ViewOperationMap: {
         },
       };
     },
-    addColumn(model, view, newColumn, index) {
-      if (index != null) {
-        view.columns.splice(index, 0, {
-          id: newColumn.id,
-          width: DEFAULT_COLUMN_WIDTH,
-        });
-      } else {
-        view.columns.push({
-          id: newColumn.id,
-          width: DEFAULT_COLUMN_WIDTH,
-        });
-      }
+    addColumn(model, view, newColumn, position) {
+      view.columns.splice(insertPositionToIndex(position, view.columns), 0, {
+        id: newColumn.id,
+        width: DEFAULT_COLUMN_WIDTH,
+      });
     },
     deleteColumn(model, view, id) {
       const index = view.columns.findIndex(c => c.id === id);

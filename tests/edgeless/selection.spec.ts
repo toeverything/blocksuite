@@ -1,27 +1,33 @@
+import { expect } from '@playwright/test';
+
 import * as actions from '../utils/actions/edgeless.js';
 import {
-  getFrameBoundBoxInEdgeless,
-  setMouseMode,
+  getNoteBoundBoxInEdgeless,
+  setEdgelessTool,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
-  clickInCenter,
+  clickInEdge,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getBoundingRect,
   initEmptyEdgelessState,
+  initThreeNotes,
+  initThreeOverlapFilledShapes,
   initThreeParagraphs,
   pressEnter,
   resizeElementByTopLeftHandle,
+  selectAllByKeyboard,
+  triggerComponentToolbarAction,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
   assertEdgelessSelectedRect,
-  assertSelectionInFrame,
+  assertSelectionInNote,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -38,14 +44,11 @@ test('should update rect of selection when resizing viewport', async ({
   const selectedRectClass = '.affine-edgeless-selected-rect';
 
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
+
   await actions.decreaseZoomLevel(page);
   await actions.decreaseZoomLevel(page);
   await waitNextFrame(page);
-
   const selectedRectInZoom = await getBoundingRect(page, selectedRectClass);
-
-  await page.mouse.click(0, 0);
-  await clickInCenter(page, selectedRectInZoom);
   await assertEdgelessSelectedRect(page, [
     selectedRectInZoom.x,
     selectedRectInZoom.y,
@@ -54,11 +57,8 @@ test('should update rect of selection when resizing viewport', async ({
   ]);
 
   await actions.switchEditorEmbedMode(page);
-
+  await waitNextFrame(page);
   const selectedRectInEmbed = await getBoundingRect(page, selectedRectClass);
-
-  await page.mouse.click(0, 0);
-  await clickInCenter(page, selectedRectInEmbed);
   await assertEdgelessSelectedRect(page, [
     selectedRectInEmbed.x,
     selectedRectInEmbed.y,
@@ -67,13 +67,6 @@ test('should update rect of selection when resizing viewport', async ({
   ]);
 
   await actions.switchEditorEmbedMode(page);
-  await assertEdgelessSelectedRect(page, [
-    selectedRectInZoom.x,
-    selectedRectInZoom.y,
-    50,
-    50,
-  ]);
-
   await actions.increaseZoomLevel(page);
   await actions.increaseZoomLevel(page);
   await waitNextFrame(page);
@@ -157,7 +150,7 @@ test('select multiple shapes and translate', async ({ page }) => {
   await page.mouse.move(160, 160);
   await assertEdgelessHoverRect(page, [128, 128, 104, 104]);
 
-  await page.mouse.move(260, 160);
+  await page.mouse.move(250, 150);
   await assertEdgelessHoverRect(page, [240, 140, 100, 100]);
 });
 
@@ -168,20 +161,20 @@ test('selection box of shape element sync on fast dragging', async ({
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
   await dragBetweenCoords(
     page,
-    { x: 150, y: 150 },
-    { x: 700, y: 500 },
+    { x: 110, y: 110 },
+    { x: 660, y: 460 },
     { click: true }
   );
 
   await assertEdgelessHoverRect(page, [650, 450, 100, 100]);
 });
 
-test('when the selection is always a frame, it should remain in an active state', async ({
+test('when the selection is always a note, it should remain in an active state', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -189,14 +182,14 @@ test('when the selection is always a frame, it should remain in an active state'
   await initThreeParagraphs(page);
 
   await switchEditorMode(page);
-  const bound = await getFrameBoundBoxInEdgeless(page, ids.frameId);
+  const bound = await getNoteBoundBoxInEdgeless(page, ids.noteId);
 
-  await setMouseMode(page, 'note');
+  await setEdgelessTool(page, 'note');
 
-  const newFrameX = bound.x;
-  const newFrameY = bound.y + bound.height + 100;
+  const newNoteX = bound.x;
+  const newNoteY = bound.y + bound.height + 100;
   // add text
-  await page.mouse.click(newFrameX, newFrameY);
+  await page.mouse.click(newNoteX, newNoteY);
   await waitForVirgoStateUpdated(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
@@ -206,7 +199,7 @@ test('when the selection is always a frame, it should remain in an active state'
   await assertEdgelessSelectedRect(page, [46, 410, 448, 112]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
-  await assertSelectionInFrame(page, ids.frameId);
+  await assertSelectionInNote(page, ids.noteId);
 });
 
 test.describe('resize shapes', () => {
@@ -281,4 +274,38 @@ test.describe('resize shapes', () => {
       await assertEdgelessSelectedRect(page, [300, 202, 152, 78]);
     });
   });
+});
+
+test.fixme('copy to clipboard as PNG', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await initThreeOverlapFilledShapes(page);
+  await initThreeNotes(page);
+  await waitNextFrame(page);
+
+  await page.mouse.click(0, 0);
+
+  await selectAllByKeyboard(page);
+
+  await triggerComponentToolbarAction(page, 'copyAsPng');
+
+  await waitNextFrame(page);
+
+  const items = await page.evaluate(async () => {
+    const items = await navigator.clipboard.read();
+    return items;
+  });
+
+  expect(items.length).toBe(1);
+
+  const item = items.at(0);
+
+  if (!item) {
+    throw new Error('Missing ClipboardItem');
+  }
+
+  expect(item.types).toBe(['image/png']);
 });

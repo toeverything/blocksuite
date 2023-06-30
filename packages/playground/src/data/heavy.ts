@@ -22,16 +22,16 @@ export const heavy: InitFn = async (workspace: Workspace, pageId: string) => {
   });
   page.addBlock('affine:surface', {}, pageBlockId);
 
-  // Add frame block inside page block
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
+  // Add note block inside page block
+  const noteId = page.addBlock('affine:note', {}, pageBlockId);
   for (let i = 0; i < count; i++) {
-    // Add paragraph block inside frame block
+    // Add paragraph block inside note block
     page.addBlock(
       'affine:paragraph',
       {
         text: new Text('Hello, world! ' + i),
       },
-      frameId
+      noteId
     );
   }
 };

@@ -101,10 +101,11 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const refMeta = [...page.workspace.meta.pageMetas].find(
       page => page.id === refAttribute.pageId
     );
-    assertExists(refMeta);
-    this._refMeta = {
-      ...refMeta,
-    };
+    this._refMeta = refMeta
+      ? {
+          ...refMeta,
+        }
+      : undefined;
   };
 
   private _onClick(e: MouseEvent) {

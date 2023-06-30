@@ -1,11 +1,12 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
+import type { RoughCanvas } from '../../rough/canvas.js';
 import {
   Bound,
   inflateBound,
   transformPointsToNewBound,
 } from '../../utils/bound.js';
+import { linePolylineIntersects } from '../../utils/math-utils.js';
+import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IConnector } from './types.js';
 import { ConnectorMode } from './types.js';
@@ -45,6 +46,15 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
 
   get controllers() {
     return this.yMap.get('controllers') as IConnector['controllers'];
+  }
+
+  override intersectWithLine(start: IVec, end: IVec): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return !!linePolylineIntersects(
+      start,
+      end,
+      this.controllers.map(c => [c.x + bound.x, c.y + bound.y])
+    );
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
@@ -87,7 +97,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     const last = this.controllers[this.controllers.length - 1];
     const secondToLast = this.controllers[this.controllers.length - 2];
 
-    //TODO: Adjust arrow direction
+    // TODO: Adjust arrow direction
     const { sides, end } = getArrowPoints(
       [secondToLast.x, secondToLast.y],
       [last.x, last.y],

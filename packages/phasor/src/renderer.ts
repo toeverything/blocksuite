@@ -1,13 +1,14 @@
 import { assertNotExists } from '@blocksuite/global/utils';
-import { RoughCanvas } from 'roughjs/bin/canvas.js';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
+import { RoughCanvas } from './rough/canvas.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
 import { Vec } from './utils/vec.js';
+
 export interface SurfaceViewport {
   readonly left: number;
   readonly top: number;
@@ -32,6 +33,8 @@ export interface SurfaceViewport {
 
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
+
+  getCanvasByBound(bound: IBound): HTMLCanvasElement;
 }
 
 /**
@@ -256,7 +259,7 @@ export class Renderer implements SurfaceViewport {
   }
 
   private _render() {
-    const { ctx, gridManager, viewportBounds, width, height, rc, zoom } = this;
+    const { ctx, viewportBounds, width, height, rc, zoom } = this;
     const dpr = window.devicePixelRatio;
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
@@ -264,14 +267,26 @@ export class Renderer implements SurfaceViewport {
 
     ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, 0, 0);
 
-    const elements = gridManager.search(viewportBounds);
+    this._renderByBound(ctx, rc, viewportBounds);
+  }
+
+  private _renderByBound(
+    ctx: CanvasRenderingContext2D | null,
+    rc: RoughCanvas,
+    bound: IBound
+  ) {
+    if (!ctx) return;
+
+    const { gridManager } = this;
+    const elements = gridManager.search(bound);
     for (const element of elements) {
-      const dx = element.x - viewportBounds.x;
-      const dy = element.y - viewportBounds.y;
+      const dx = element.x - bound.x;
+      const dy = element.y - bound.y;
       ctx.save();
       ctx.translate(dx, dy);
-
-      if (intersects(element, viewportBounds) && element.display) {
+      const localRecord = element.localRecord;
+      if (intersects(element, bound) && localRecord.display) {
+        ctx.globalAlpha = localRecord.opacity;
         element.render(ctx, rc);
       }
 
@@ -280,12 +295,27 @@ export class Renderer implements SurfaceViewport {
 
     for (const overlay of this._overlays) {
       ctx.save();
-      ctx.translate(-viewportBounds.x, -viewportBounds.y);
+      ctx.translate(-bound.x, -bound.y);
       overlay.render(ctx);
       ctx.restore();
     }
 
     ctx.restore();
+  }
+
+  public getCanvasByBound(bound: IBound): HTMLCanvasElement {
+    const dpr = window.devicePixelRatio || 1;
+    const canvas = document.createElement('canvas');
+    canvas.width = bound.w * dpr;
+    canvas.height = bound.h * dpr;
+
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    ctx.scale(dpr, dpr);
+
+    const rc = new RoughCanvas(canvas);
+    this._renderByBound(ctx, rc, bound);
+
+    return canvas;
   }
 
   public addOverlay(overlay: Overlay) {

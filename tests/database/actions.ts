@@ -1,8 +1,14 @@
 import type { ColumnType } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import { expect, type Locator, type Page } from '@playwright/test';
 
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
-import { pressEnter, pressEscape, type } from '../utils/actions/keyboard.js';
+import {
+  pressEnter,
+  pressEscape,
+  selectAllByKeyboard,
+  type,
+} from '../utils/actions/keyboard.js';
 import {
   getBoundingBox,
   getBoundingClientRect,
@@ -10,15 +16,15 @@ import {
   waitNextFrame,
 } from '../utils/actions/misc.js';
 import { assertClassName } from '../utils/asserts.js';
-
 export async function initDatabaseColumn(page: Page, title = '') {
   await focusDatabaseHeader(page);
   const editor = getEditorLocator(page);
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
-  await waitNextFrame(page);
+  await waitNextFrame(page, 100);
 
   if (title) {
+    await selectAllByKeyboard(page);
     await type(page, title);
     await waitNextFrame(page);
     await pressEnter(page);
@@ -27,47 +33,39 @@ export async function initDatabaseColumn(page: Page, title = '') {
   }
 }
 
+export const renameColumn = async (page: Page, name: string) => {
+  const column = page.locator('affine-database-header-column', {
+    hasText: name,
+  });
+  await column.click();
+};
+
 export async function performColumnAction(
   page: Page,
-  columnId: string,
+  name: string,
   action: string
 ) {
-  const titleRow = page.locator('.affine-database-column-header');
-  const columnTitle = titleRow.locator(`[data-column-id="${columnId}"]`);
-  await columnTitle.click();
+  await renameColumn(page, name);
 
-  const actionMenu = page.locator(`.${action}`);
+  const actionMenu = page.locator(`.affine-menu-action`, { hasText: action });
   await actionMenu.click();
 }
 
 export async function switchColumnType(
   page: Page,
   columnType: ColumnType,
-  columnIndex = 1,
-  isDefault = false
+  columnIndex = 1
 ) {
-  const { column } = await getDatabaseHeaderColumn(page, columnIndex);
-  await column.click();
-
-  await waitNextFrame(page);
-  const action = page.locator('.column-type');
-  const box = await getBoundingBox(action);
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await waitNextFrame(page, 300);
-
-  if (isDefault) {
-    await assertClassName(
-      page,
-      '.action.multi-select',
-      /action multi-select selected/
-    );
-  }
+  const { typeIcon } = await getDatabaseHeaderColumn(page, columnIndex);
+  await typeIcon.click();
 
   await clickColumnType(page, columnType);
 }
 
 export function clickColumnType(page: Page, columnType: ColumnType) {
-  const typeMenu = page.locator(`.action.${columnType}`);
+  const typeMenu = page.locator(`.affine-menu-action`, {
+    hasText: new RegExp(`${columnType}`),
+  });
   return typeMenu.click();
 }
 
@@ -128,41 +126,19 @@ export function getFirstColumnCell(page: Page, cellClass: string) {
   return cellContent;
 }
 
+export async function clickSelectOption(page: Page, index = 0) {
+  await page.locator('.select-option-icon').nth(index).click();
+}
+
 export async function performSelectColumnTagAction(
   page: Page,
-  actionClass: string,
-  operation: 'click' | 'hover' = 'click',
+  name: string,
   index = 0
 ) {
-  const cell = getFirstColumnCell(
-    page,
-    'affine-database-select-cell-container'
-  );
-  await cell.click();
-
-  const selectOptions = page.locator('.select-option');
-  const selectOption = selectOptions.nth(index);
-  const box = await selectOption.boundingBox();
-  if (!box) throw new Error('Missing select tag option');
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-
-  const actionIcon = selectOption.locator('.select-option-icon');
-  await actionIcon.click();
-  const action = page.locator(`.${actionClass}`);
-  if (operation === 'click') {
-    await action.click();
-  } else if (operation === 'hover') {
-    await action.hover();
-    const firstColorOption = page.locator('.option-color').nth(0);
-    await firstColorOption.click();
-    await clickDatabaseOutside(page);
-  }
-
-  return {
-    cellSelected: cell.locator('.select-selected'),
-    selectOption: selectOptions,
-    saveIcon: actionIcon,
-  };
+  await clickSelectOption(page, index);
+  await page
+    .locator('.affine-menu-action', { hasText: new RegExp(name) })
+    .click();
 }
 
 export async function assertSelectedStyle(
@@ -211,9 +187,9 @@ export async function assertDatabaseCellRichTexts(
       const cell = row?.querySelector(
         `.database-cell:nth-child(${columnIndex + 1})`
       );
-      const richText = cell?.querySelector<RichText>(
-        'affine-database-rich-text-cell'
-      );
+      const richText =
+        cell?.querySelector<RichText>('affine-database-rich-text-cell') ??
+        cell?.querySelector<RichText>('affine-database-rich-text-cell-editing');
       if (!richText) throw new Error('Missing database rich text cell');
       return richText.vEditor.yText.toString();
     },
@@ -241,8 +217,40 @@ export async function assertDatabaseCellNumber(
     .locator('.database-cell')
     .nth(columnIndex)
     .locator('.number')
-    .inputValue();
-  expect(actualText).toEqual(text);
+    .textContent();
+  expect(actualText?.trim()).toEqual(text);
+}
+
+export async function assertDatabaseCellLink(
+  page: Page,
+  {
+    rowIndex = 0,
+    columnIndex = 1,
+    text,
+  }: {
+    rowIndex?: number;
+    columnIndex?: number;
+    text: string;
+  }
+) {
+  const actualTexts = await page.evaluate(
+    ({ rowIndex, columnIndex }) => {
+      const rows = document.querySelector('.affine-database-block-rows');
+      const row = rows?.querySelector(
+        `.database-row:nth-child(${rowIndex + 1})`
+      );
+      const cell = row?.querySelector(
+        `.database-cell:nth-child(${columnIndex + 1})`
+      );
+      const richText =
+        cell?.querySelector<RichText>('affine-database-link-cell') ??
+        cell?.querySelector<RichText>('affine-database-link-cell-editing');
+      if (!richText) throw new Error('Missing database rich text cell');
+      return richText.vEditor.yText.toString();
+    },
+    { rowIndex, columnIndex }
+  );
+  expect(actualTexts).toEqual(text);
 }
 
 export async function assertDatabaseTitleText(page: Page, text: string) {
@@ -312,11 +320,8 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
   const column = page.locator('.affine-database-column').nth(index);
   const box = await getBoundingBox(column);
   const textElement = column.locator('.affine-database-column-text-input');
-  const inputElement = column.locator('.affine-database-column-input');
   const text = await textElement.innerText();
   const typeIcon = column.locator('.affine-database-column-type-icon');
-  const renameIcon = column.locator('.affine-database-column-text-icon');
-  const saveIcon = column.locator('.affine-database-column-text-save-icon');
 
   return {
     column,
@@ -324,9 +329,6 @@ export async function getDatabaseHeaderColumn(page: Page, index = 0) {
     text,
     textElement,
     typeIcon,
-    renameIcon,
-    inputElement,
-    saveIcon,
   };
 }
 
@@ -334,7 +336,7 @@ export async function assertRowsSelection(
   page: Page,
   rowIndexes: [start: number, end: number]
 ) {
-  const selection = page.locator('.database-row-level-selection');
+  const selection = page.locator('.database-selection');
   const selectionBox = await getBoundingBox(selection);
 
   const startIndex = rowIndexes[0];
@@ -344,7 +346,17 @@ export async function assertRowsSelection(
     // single row
     const row = getDatabaseBodyRow(page, startIndex);
     const rowBox = await getBoundingBox(row);
-    expect(selectionBox).toEqual(rowBox);
+    const lastCell = await row
+      .locator('affine-database-cell-container')
+      .last()
+      .boundingBox();
+    assertExists(lastCell);
+    expect(selectionBox).toEqual({
+      x: rowBox.x,
+      y: rowBox.y,
+      height: rowBox.height,
+      width: lastCell.x + lastCell.width - rowBox.x,
+    });
   } else {
     // multiple rows
     // Only test at most two lines when testing.
@@ -352,10 +364,15 @@ export async function assertRowsSelection(
     const endRow = getDatabaseBodyRow(page, endIndex);
     const startRowBox = await getBoundingBox(startRow);
     const endRowBox = await getBoundingBox(endRow);
+    const lastCell = await startRow
+      .locator('affine-database-cell-container')
+      .last()
+      .boundingBox();
+    assertExists(lastCell);
     expect(selectionBox).toEqual({
       x: startRowBox.x,
       y: startRowBox.y,
-      width: startRowBox.width,
+      width: lastCell.x + lastCell.width - startRowBox.x,
       height: startRowBox.height + endRowBox.height,
     });
   }

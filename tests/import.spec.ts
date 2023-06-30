@@ -129,7 +129,8 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
     },
     {
       flavour: 'affine:list',
-      type: 'bulleted',
+      type: 'todo',
+      checked: false,
       text: [
         { insert: '', attributes: {} },
         { insert: '            ', attributes: {} },
@@ -143,7 +144,8 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
         },
         {
           flavour: 'affine:list',
-          type: 'bulleted',
+          type: 'todo',
+          checked: false,
           text: [
             { insert: '', attributes: {} },
             { insert: '                  ', attributes: {} },
@@ -560,8 +562,8 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
-          flavour: 'affine:embed',
-          type: 'image',
+          caption: '',
+          flavour: 'affine:image',
           sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
           children: [],
           text: [{ insert: '' }],
@@ -595,8 +597,8 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
-          flavour: 'affine:embed',
-          type: 'image',
+          caption: '',
+          flavour: 'affine:image',
           sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
           children: [],
           text: [{ insert: '' }],
@@ -708,7 +710,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
 //       ],
 //     },
 //     {
-//       flavour: 'affine:embed',
+//       flavour: 'affine:image',
 //       type: 'image',
 //       sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
 //       children: [],
@@ -729,7 +731,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
 //       ],
 //     },
 //     {
-//       flavour: 'affine:embed',
+//       flavour: 'affine:image',
 //       type: 'image',
 //       sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
 //       children: [],

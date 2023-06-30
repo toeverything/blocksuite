@@ -14,7 +14,7 @@ import {
 import { assertRichTexts } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('block hub should drag and drop a card into existing frame', async ({
+test('block hub should drag and drop a card into existing note', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -24,7 +24,7 @@ test('block hub should drag and drop a card into existing frame', async ({
 
   await switchEditorMode(page);
 
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
 
   await page.click('.block-hub-menu-container [role="menuitem"]');
   await page.waitForTimeout(200);
@@ -43,10 +43,10 @@ test('block hub should drag and drop a card into existing frame', async ({
   await type(page, '000');
   await assertRichTexts(page, ['123', '000', '456', '789']);
 
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
 });
 
-test('block hub should add new frame when dragged to blank area', async ({
+test('block hub should add new note when dragged to blank area', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -56,7 +56,7 @@ test('block hub should add new frame when dragged to blank area', async ({
 
   await switchEditorMode(page);
 
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
 
   await page.click('.block-hub-menu-container [role="menuitem"]');
   await page.waitForTimeout(200);
@@ -74,7 +74,7 @@ test('block hub should add new frame when dragged to blank area', async ({
   await type(page, '000');
   await assertRichTexts(page, ['123', '456', '789', '000']);
 
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
 });
 
 test('click blank area do not remvoe database in edgeless', async ({

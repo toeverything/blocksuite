@@ -1,10 +1,14 @@
 import type { BlockSchemas } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
-import type { DeltaOperation, Page } from '@blocksuite/store';
+import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
-import { richTextHelper } from '../../database-block/common/column-manager.js';
+import { getTagColor } from '../../components/tags/colors.js';
+import {
+  columnManager,
+  richTextHelper,
+} from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser } from './index.js';
@@ -21,6 +25,15 @@ export type TextStyleHandler = (
 export type TableParserHandler = (
   element: Element
 ) => Promise<SerializedBlock[] | null>;
+
+export type ColumnMeta = {
+  type: string;
+  title: string;
+  optionsMap: Map<string, string>;
+};
+export type TableTitleColumnHandler = (
+  element: Element
+) => Promise<string[] | null>;
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -52,19 +65,22 @@ export class HtmlParser {
   private _customFetchFileHandler?: FetchFileHandler;
   private _customTextStyleHandler?: TextStyleHandler;
   private _customTableParserHandler?: TableParserHandler;
+  private _customTableTitleColumnHandler?: TableTitleColumnHandler;
 
   constructor(
     contentParser: ContentParser,
     page: Page,
     fetchFileHandler?: FetchFileHandler,
     textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler
+    tableParserHandler?: TableParserHandler,
+    tableTitleColumnHandler?: TableTitleColumnHandler
   ) {
     this._contentParser = contentParser;
     this._page = page;
     this._customFetchFileHandler = fetchFileHandler;
     this._customTextStyleHandler = textStyleHandler;
     this._customTableParserHandler = tableParserHandler;
+    this._customTableTitleColumnHandler = tableTitleColumnHandler;
   }
 
   private _fetchFileHandler = async (
@@ -487,6 +503,9 @@ export class HtmlParser {
       }
       return summary;
     }
+    if (element.parentElement?.classList?.contains('toggle')) {
+      type = 'toggle';
+    }
     let checked;
     let inputEl;
     if (
@@ -514,6 +533,19 @@ export class HtmlParser {
         type = 'todo';
         checked = true;
       }
+    }
+    let checkBoxEl;
+    if (
+      (checkBoxEl = element.firstElementChild)?.classList.contains(
+        'checkbox'
+      ) ||
+      (checkBoxEl =
+        element.firstElementChild?.firstElementChild)?.classList.contains(
+        'checkbox'
+      )
+    ) {
+      type = 'todo';
+      checked = checkBoxEl?.classList.contains('checked') ?? false;
     }
     return this._contentParser.getParserHtmlText2Block('commonParser')?.({
       element: element,
@@ -621,8 +653,17 @@ export class HtmlParser {
       imgElement = element;
       texts.push({ insert: '' });
     }
+    let caption = '';
     if (imgElement) {
-      const imgUrl = imgElement.getAttribute('src') || '';
+      // TODO: use the real bookmark instead.
+      if (imgElement.classList.contains('bookmark-icon')) {
+        const linkElement = element.querySelector('a');
+        if (linkElement) {
+          caption = linkElement.getAttribute('href') || '';
+        }
+        imgElement = element.querySelector('.bookmark-image');
+      }
+      const imgUrl = imgElement?.getAttribute('src') || '';
       const imgBlob = await this._fetchFileHandler(imgUrl);
       if (!imgBlob || imgBlob.size === 0) {
         const texts = [
@@ -647,11 +688,11 @@ export class HtmlParser {
         const id = await storage.set(imgBlob);
         result = [
           {
-            flavour: 'affine:embed',
-            type: 'image',
+            flavour: 'affine:image',
             sourceId: id,
             children: [],
             text: texts,
+            caption,
           },
         ];
       }
@@ -676,20 +717,73 @@ export class HtmlParser {
       const tbodyElement = element.querySelector('tbody');
       const titleTrEle = theadElement?.querySelector('tr');
       let id = 1;
-      const titles: string[] = [];
+      const columnMeta: ColumnMeta[] = [];
       titleTrEle?.querySelectorAll('th').forEach(ele => {
-        titles.push(ele.textContent || '');
+        columnMeta.push({
+          title: ele.textContent || '',
+          type: getCorrespondingTableColumnType(
+            ele.querySelector('svg') ?? undefined
+          ),
+          optionsMap: new Map<string, string>(),
+        });
       });
-      const rows: string[][] = [];
+      const rows: (string | string[])[][] = [];
       tbodyElement?.querySelectorAll('tr').forEach(ele => {
-        const row: string[] = [];
-        ele.querySelectorAll('td').forEach(ele => {
-          row.push(ele.textContent || '');
+        const row: (string | string[])[] = [];
+        ele.querySelectorAll('td').forEach((ele, index) => {
+          const cellContent: string[] = [];
+          if (ele.children.length === 0) {
+            cellContent.push(ele.textContent || '');
+          }
+          Array.from(ele.children).map(child => {
+            if (child.classList.contains('checkbox-on')) {
+              cellContent.push('on');
+            } else {
+              cellContent.push(child.textContent || '');
+            }
+          });
+          row.push(
+            columnMeta[index]?.type !== 'multi-select'
+              ? cellContent.join('')
+              : cellContent
+          );
         });
         rows.push(row);
       });
-      const columns: Column[] = titles.slice(1).map((value, index) => {
-        return richTextHelper.createWithId('' + id++, value);
+      if (this._customTableTitleColumnHandler) {
+        const titleColumn = await this._customTableTitleColumnHandler(element);
+        if (titleColumn) {
+          for (let i = 1; i < rows.length; i++) {
+            const originalContent = rows[i].shift();
+            rows[i].unshift(titleColumn[i] || originalContent || '');
+          }
+        }
+      }
+      const columns: Column[] = columnMeta.slice(1).map((value, index) => {
+        if (['select', 'multi-select'].includes(value.type)) {
+          const options = rows
+            .map(row => row[index + 1])
+            .flat()
+            .filter((value, index, array) => array.indexOf(value) === index)
+            .map(uniqueValue => {
+              return {
+                id: nanoid(),
+                value: uniqueValue,
+                color: getTagColor(),
+              };
+            });
+          options.map(option =>
+            columnMeta[index + 1].optionsMap.set(option.value, option.id)
+          );
+          return columnManager
+            .getColumn(value.type)
+            .createWithId('' + id++, value.title, {
+              options,
+            });
+        }
+        return columnManager
+          .getColumn(value.type)
+          .createWithId('' + id++, value.title);
       });
       if (rows.length > 0) {
         let maxLen = rows[0].length;
@@ -708,12 +802,34 @@ export class HtmlParser {
         children.push({
           flavour: 'affine:paragraph',
           type: 'text',
-          text: [{ insert: row[0] }],
+          text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
           children: [],
         });
         const rowId = '' + id++;
         cells[rowId] = {};
         row.slice(1).forEach((value, index) => {
+          if (
+            columnMeta[index + 1]?.type === 'multi-select' &&
+            Array.isArray(value)
+          ) {
+            cells[rowId][columns[index].id] = {
+              columnId: columns[index].id,
+              value: value.map(
+                v => columnMeta[index + 1]?.optionsMap.get(v) || ''
+              ),
+            };
+            return;
+          }
+          if (
+            columnMeta[index + 1]?.type === 'select' &&
+            !Array.isArray(value)
+          ) {
+            cells[rowId][columns[index].id] = {
+              columnId: columns[index].id,
+              value: columnMeta[index + 1]?.optionsMap.get(value) || '',
+            };
+            return;
+          }
           cells[rowId][columns[index].id] = {
             columnId: columns[index].id,
             value,
@@ -727,7 +843,7 @@ export class HtmlParser {
           databaseProps: {
             id: '' + databasePropsId,
             title: 'Database',
-            titleColumnName: titles[0],
+            titleColumnName: columnMeta[0]?.title,
             titleColumnWidth: 432,
             rowIds: Object.keys(cells),
             cells: cells,
@@ -759,6 +875,23 @@ export class HtmlParser {
     return result;
   };
 }
+
+interface ColumnClassMap {
+  [key: string]: string;
+}
+
+const getCorrespondingTableColumnType = (htmlElement?: SVGSVGElement) => {
+  const ColumnClassMap: ColumnClassMap = {
+    typesSelect: 'select',
+    typesMultipleSelect: 'multi-select',
+    typesNumber: 'number',
+    typesCheckbox: 'checkbox',
+    typesText: 'rich-text',
+  };
+
+  const className = htmlElement?.classList[0] ?? 'typesText';
+  return ColumnClassMap[className] || 'rich-text';
+};
 
 const getIsLink = (htmlElement: HTMLElement) => {
   return ['A'].includes(htmlElement.tagName);

@@ -3,7 +3,6 @@ import * as Y from 'yjs';
 
 import type { AwarenessStore, UserRange } from './awareness.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
-import { createYMapProxy } from './yjs/index.js';
 
 export interface StackItem {
   meta: Map<'cursor-location', UserRange | undefined>;
@@ -36,10 +35,10 @@ export class Space<
     this.doc = doc;
     this.awarenessStore = awarenessStore;
 
-    this._ySpaceDoc = this._loadSubDoc();
+    this._ySpaceDoc = this._initSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
-    this._proxy = createYMapProxy(this._yBlocks as Y.Map<unknown>);
+    this._proxy = this.doc.proxy.createYProxy(this._yBlocks as Y.Map<unknown>);
   }
 
   get prefixedId() {
@@ -54,21 +53,28 @@ export class Space<
     return this._ySpaceDoc;
   }
 
-  waitForLoaded = async () => {
+  async waitForLoaded() {
     if (this.loaded) {
       return this;
     }
 
-    this._ySpaceDoc.load();
-
-    await new Promise(resolve =>
+    const promise = new Promise(resolve => {
       this._onLoadSlot.once(() => {
         resolve(undefined);
-      })
-    );
+      });
+    });
+
+    this._ySpaceDoc.load();
+
+    await promise;
 
     return this;
-  };
+  }
+
+  remove() {
+    this.destroy();
+    this.doc.spaces.delete(this.prefixedId);
+  }
 
   destroy() {
     this._ySpaceDoc.destroy();
@@ -76,7 +82,11 @@ export class Space<
     this._loaded = false;
   }
 
-  private _loadSubDoc = () => {
+  clear() {
+    this._yBlocks.clear();
+  }
+
+  private _initSubDoc = () => {
     const prefixedId = this.prefixedId;
 
     let subDoc = this.doc.spaces.get(prefixedId);
@@ -84,9 +94,7 @@ export class Space<
       subDoc = new Y.Doc();
       this.doc.spaces.set(prefixedId, subDoc);
       this._loaded = true;
-      setImmediate(() => {
-        this._onLoadSlot.emit();
-      });
+      this._onLoadSlot.emit();
     } else {
       this._loaded = false;
       this.doc.on('subdocs', this._onSubdocEvent);

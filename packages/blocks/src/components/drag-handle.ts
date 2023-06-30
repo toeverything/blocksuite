@@ -1,10 +1,10 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import {
   assertExists,
   type Disposable,
   isFirefox,
 } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, render } from 'lit';
@@ -47,7 +47,7 @@ export class DragIndicator extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   rect: Rect | null = null;
 
   override render() {
@@ -66,7 +66,7 @@ export class DragIndicator extends LitElement {
 
 @customElement('affine-drag-preview')
 export class DragPreview extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   offset = { x: 0, y: 0 };
 
   override render() {
@@ -211,6 +211,7 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   constructor(options: {
     container: HTMLElement;
+    onDragStartCallback?: (e: DragEvent) => void;
     onDropCallback: (
       point: Point,
       draggingBlockElements: BlockComponentElement[],
@@ -232,6 +233,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     };
     this.addEventListener('beforeprint', () => this.hide(true));
     this.onDropCallback = options?.onDropCallback;
+    this.onDragStartCallback = options?.onDragStartCallback;
     this.setDragType = options?.setDragType;
     this.setSelectedBlock = options?.setSelectedBlock;
     this._getSelectedBlocks = options?.getSelectedBlocks;
@@ -249,6 +251,8 @@ export class DragHandle extends WithDisposable(LitElement) {
   public getDropAllowedBlocks: (
     draggingBlockIds: string[] | null
   ) => BaseBlockModel[];
+
+  public onDragStartCallback: ((e: DragEvent) => void) | undefined;
 
   public onDropCallback: (
     point: Point,
@@ -301,13 +305,13 @@ export class DragHandle extends WithDisposable(LitElement) {
     event: PointerEventState,
     modelState: EditingState | null
   ) {
-    const frameBlock = this._container.querySelector(
-      '.affine-frame-block-container'
+    const noteBlock = this._container.querySelector(
+      '.affine-note-block-container'
     );
-    assertExists(frameBlock);
-    const frameBlockRect = frameBlock.getBoundingClientRect();
+    if (!noteBlock) return;
+    const noteBlockRect = noteBlock.getBoundingClientRect();
     // See https://github.com/toeverything/blocksuite/issues/1611
-    if (event.raw.clientY < frameBlockRect.y) {
+    if (event.raw.clientY < noteBlockRect.y) {
       this.hide();
     }
 
@@ -608,6 +612,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
 
     this.setDragType(true);
+    this.onDragStartCallback?.(e);
   };
 
   onDrag = (e: DragEvent, passed?: boolean, isScrolling?: boolean) => {

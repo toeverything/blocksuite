@@ -5,8 +5,12 @@ import {
   inflateBound,
   transformPointsToNewBound,
 } from '../../utils/bound.js';
-import { getSvgPathFromStroke } from '../../utils/math-utils.js';
-import { SurfaceElement } from '../surface-element.js';
+import {
+  getSvgPathFromStroke,
+  lineIntersects,
+} from '../../utils/math-utils.js';
+import { type IVec, Vec } from '../../utils/vec.js';
+import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {
@@ -21,6 +25,11 @@ function getSolidStrokePoints(points: number[][], lineWidth: number) {
 }
 
 export class BrushElement extends SurfaceElement<IBrush> {
+  private _testCanvas = document.createElement('canvas');
+  private _testCtx = this._testCanvas.getContext(
+    '2d'
+  ) as CanvasRenderingContext2D;
+
   /* Brush mouse coords relative to left-top corner */
   get points() {
     const points = this.yMap.get('points') as IBrush['points'];
@@ -35,6 +44,48 @@ export class BrushElement extends SurfaceElement<IBrush> {
   get lineWidth() {
     const lineWidth = this.yMap.get('lineWidth') as IBrush['lineWidth'];
     return lineWidth;
+  }
+
+  intersectWithLine(pa: IVec, pb: IVec) {
+    const { points } = this;
+
+    const box = Bound.deserialize(this.xywh);
+    const tl = box.tl;
+
+    if (box.w < 8 && box.h < 8) {
+      return Vec.distanceToLineSegment(pa, pb, box.center) < 5;
+    }
+
+    if (box.intersectLine(pa, pb, true)) {
+      for (let i = 1; i < points.length; i++) {
+        if (
+          lineIntersects(
+            Vec.add(points[i - 1], tl),
+            Vec.add(points[i], tl),
+            pa,
+            pb
+          )
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  override hitTest(x: number, y: number, options?: HitTestOptions): boolean {
+    const insideBoundingBox = super.hitTest(x, y, options);
+
+    if (!insideBoundingBox) return false;
+
+    const command = getSvgPathFromStroke(getSolidStrokePoints(this.points, 3));
+    const path = new Path2D(command);
+
+    if (this._testCtx.lineWidth !== (options?.expand ?? 1)) {
+      this._testCtx.lineWidth = options?.expand ?? 1;
+    }
+
+    return this._testCtx.isPointInStroke(path, x - this.x, y - this.y);
   }
 
   override render(ctx: CanvasRenderingContext2D) {

@@ -459,11 +459,11 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   /**
    * A function that returns all blocks that are allowed to be moved to
    */
-  @property()
+  @property({ attribute: false })
   public getAllowedBlocks: () => BaseBlockModel[];
 
-  @property()
-  public getHoveringFrameState: (point: Point) => {
+  @property({ attribute: false })
+  public getHoveringNoteState: (point: Point) => {
     container?: Element;
     rect?: Rect;
     scale: number;
@@ -537,7 +537,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     mouseRoot: AbstractEditor;
     enableDatabase: boolean;
     getAllowedBlocks: () => BaseBlockModel[];
-    getHoveringFrameState: (point: Point) => {
+    getHoveringNoteState: (point: Point) => {
       container?: Element;
       rect?: Rect;
       scale: number;
@@ -557,7 +557,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._mouseRoot = options.mouseRoot;
     this._enableDatabase = options.enableDatabase;
     this.getAllowedBlocks = options.getAllowedBlocks;
-    this.getHoveringFrameState = options.getHoveringFrameState;
+    this.getHoveringNoteState = options.getHoveringNoteState;
 
     this._onDragStartCallback = options.onDragStart;
     this._onDropCallback = options.onDrop;
@@ -769,16 +769,16 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const point = new Point(x, y);
     const {
       container,
-      rect: frameRect,
+      rect: noteRect,
       scale,
-    } = this.getHoveringFrameState(point.clone());
-    if (!frameRect) {
+    } = this.getHoveringNoteState(point.clone());
+    if (!noteRect) {
       this._resetDropState();
       return;
     }
     const element = getClosestBlockElementByPoint(
       point,
-      { container, rect: frameRect, snapToEdge: { x: false, y: true } },
+      { container, rect: noteRect, snapToEdge: { x: false, y: true } },
       scale
     );
     if (!element) {
@@ -815,6 +815,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   private _onDragOver = (e: DragEvent) => {
     e.preventDefault();
+    return false;
   };
 
   private _onDragOverDocument = (e: DragEvent) => {

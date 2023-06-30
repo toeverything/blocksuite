@@ -19,6 +19,7 @@ import {
   redoByKeyboard,
   type,
   undoByKeyboard,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import {
   assertImageOption,
@@ -44,13 +45,16 @@ test('can drag resize image by left menu', async ({ page }) => {
   await assertImageSize(page, { width: 736, height: 552 });
 
   await dragEmbedResizeByTopLeft(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await waitNextFrame(page);
+  await assertImageSize(page, { width: 340, height: 255 });
 
   await undoByKeyboard(page);
+  await waitNextFrame(page);
   await assertImageSize(page, { width: 736, height: 552 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await waitNextFrame(page);
+  await assertImageSize(page, { width: 340, height: 255 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -63,13 +67,13 @@ test('can drag resize image by right menu', async ({ page }) => {
   await assertImageSize(page, { width: 736, height: 552 });
 
   await dragEmbedResizeByTopRight(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await assertImageSize(page, { width: 320, height: 240 });
 
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 736, height: 552 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 336, height: 252 });
+  await assertImageSize(page, { width: 320, height: 240 });
 });
 
 test('can click and delete image', async ({ page }) => {
@@ -138,6 +142,8 @@ test('popup menu should follow position of image when scrolling', async ({
   await insertThreeLevelLists(page, 0);
   await pressEnter(page);
   await insertThreeLevelLists(page, 3);
+  await pressEnter(page);
+  await insertThreeLevelLists(page, 6);
 
   await page.evaluate(async () => {
     const viewport = document.querySelector('.affine-default-viewport');
@@ -165,14 +171,17 @@ test('popup menu should follow position of image when scrolling', async ({
 
   expect(menu).toBeVisible();
 
-  await page.evaluate(async () => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    const distance = viewport.scrollHeight - viewport.clientHeight;
-    viewport.scrollTo(0, distance / 2);
-  });
+  await page.evaluate(
+    async ([rect]) => {
+      const viewport = document.querySelector('.affine-default-viewport');
+      if (!viewport) {
+        throw new Error();
+      }
+      // const distance = viewport.scrollHeight - viewport.clientHeight;
+      viewport.scrollTo(0, (rect.bottom + rect.top) / 2);
+    },
+    [rect]
+  );
 
   await page.waitForTimeout(150);
 
@@ -192,8 +201,8 @@ test('popup menu should follow position of image when scrolling', async ({
     ] as const;
   });
 
-  //              -64                        +76
-  expect(imageRect.top).toBeCloseTo(menuRect.top - 76 - 64, -0.325);
+  //              -275                       +76
+  expect(imageRect.top).toBeCloseTo(menuRect.top - 76 - 275, -0.325);
 });
 
 test('select image should not show format bar', async ({ page }) => {
@@ -227,16 +236,15 @@ async function initMockImage(page: Page) {
     const { page } = window;
     page.captureSync();
     const pageId = page.addBlock('affine:page');
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
     page.addBlock(
-      'affine:embed',
+      'affine:image',
       {
-        type: 'image',
         sourceId: '_e2e_test_image_id_',
         width: 200,
         height: 180,
       },
-      frameId
+      noteId
     );
     page.captureSync();
   });

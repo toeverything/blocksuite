@@ -24,7 +24,7 @@ export class Loader extends LitElement {
       display: inline-block;
       -webkit-animation: bouncedelay 1.4s infinite ease-in-out;
       animation: bouncedelay 1.4s infinite ease-in-out;
-      /* Prevent first frame from flickering when animation starts */
+      /* Prevent first note from flickering when animation starts */
       -webkit-animation-fill-mode: both;
       animation-fill-mode: both;
     }
@@ -62,13 +62,13 @@ export class Loader extends LitElement {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   hostModel: BaseBlockModel | null = null;
 
-  @property()
+  @property({ attribute: false })
   radius: string | number = '8px';
 
-  @property()
+  @property({ attribute: false })
   width: string | number = '150px';
 
   constructor() {

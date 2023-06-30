@@ -135,21 +135,17 @@ export class Workspace {
     return this._store.providers;
   }
 
-  get subdocProviders() {
-    return this._store.subdocProviders;
-  }
-
   get blobs() {
     return this._blobStorage;
+  }
+
+  get pages() {
+    return this._pages;
   }
 
   private get _pages() {
     // the meta space is not included
     return this._store.spaces as Map<`space:${string}`, Page>;
-  }
-
-  public getPageNameList() {
-    return [...this._pages.keys()];
   }
 
   get doc() {
@@ -194,10 +190,7 @@ export class Workspace {
         idGenerator: this._store.idGenerator,
       });
       this._store.addSpace(page);
-
-      page.waitForLoaded().then(() => {
-        page.trySyncFromExistingDoc();
-      });
+      this.slots.pageAdded.emit(page.id);
     });
 
     this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
@@ -205,13 +198,14 @@ export class Workspace {
     this.meta.pageMetaRemoved.on(id => {
       const page = this.getPage(id) as Page;
       this._store.removeSpace(page);
+      page.remove();
       this.slots.pageRemoved.emit(id);
     });
   }
 
   /**
    * By default, only an empty page will be created.
-   * If the `init` parameter is passed, a `surface`, `frame`, and `paragraph` block
+   * If the `init` parameter is passed, a `surface`, `note`, and `paragraph` block
    * will be created in the page simultaneously.
    */
   createPage(options: { id?: string } | string = {}) {
@@ -236,6 +230,7 @@ export class Workspace {
       id: pageId,
       title: '',
       createDate: +new Date(),
+      tags: [],
     });
     return this.getPage(pageId) as Page;
   }
@@ -266,142 +261,117 @@ export class Workspace {
   }
 
   /**
-   * @internal Only for testing
-   */
-  exportYDoc() {
-    const binary = Y.encodeStateAsUpdate(this.doc);
-    const file = new Blob([binary], { type: 'application/octet-stream' });
-    const fileUrl = URL.createObjectURL(file);
-
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = 'workspace.ydoc';
-    link.click();
-
-    URL.revokeObjectURL(fileUrl);
-  }
-
-  /** @internal Only for testing */
-  async importYDoc() {
-    return new Promise<void>((resolve, reject) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.ydoc';
-      input.multiple = false;
-      input.onchange = async () => {
-        const file = input.files?.item(0);
-        if (!file) {
-          return reject();
-        }
-        const buffer = await file.arrayBuffer();
-        Y.applyUpdate(this.doc, new Uint8Array(buffer));
-        resolve();
-      };
-      input.onerror = reject;
-      input.click();
-    });
-  }
-
-  /**
    * @internal
    * Import an object expression of a page.
    * Specify the page you want to update by passing the `pageId` parameter and it will
    * create a new page if it does not exist.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async importPageSnapshot(json: any, pageId: string) {
+  async importPageSnapshot(json: unknown, pageId: string) {
     const unprefix = (str: string) =>
       str.replace('sys:', '').replace('prop:', '').replace('space:', '');
     const visited = new Set();
-
     let page = this.getPage(pageId);
-    if (!page) {
+    if (page) {
+      await page.waitForLoaded();
+      page.clear();
+    } else {
       page = this.createPage({ id: pageId });
+      await page.waitForLoaded();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sanitize = async (props: any) => {
+    const sanitize = async (props: Record<string, never>) => {
       const result: Record<string, unknown> = {};
 
       //TODO: https://github.com/toeverything/blocksuite/issues/2939
-      if (props['sys:flavour'] === 'affine:surface' && props['elements']) {
-        for (const [, element] of Object.entries(
-          props['elements']
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ) as any[]) {
-          if (element['type'] === 'text') {
+      if (props['sys:flavour'] === 'affine:surface' && props['prop:elements']) {
+        Object.values(props['prop:elements']).forEach(element => {
+          const _element = element as Record<string, unknown>;
+          if (_element['type'] === 'text') {
             const yText = new Y.Text();
-            yText.applyDelta(element['text']);
-            element['text'] = yText;
+            yText.applyDelta(_element['text']);
+            _element['text'] = yText;
           }
-        }
+        });
       }
 
       // setup embed source
-      if (props['sys:flavour'] === 'affine:embed') {
-        let resp;
+      if (props['sys:flavour'] === 'affine:image') {
         try {
-          resp = await fetch(props['prop:sourceId'], {
+          const resp = await fetch(props['prop:sourceId'], {
             cache: 'no-cache',
             mode: 'cors',
             headers: {
               Origin: window.location.origin,
             },
           });
-        } catch (error) {
-          throw new Error(`Failed to fetch embed source. error: ${error}`);
-        }
-        const imgBlob = await resp.blob();
-        if (!imgBlob.type.startsWith('image/')) {
-          throw new Error('Embed source is not an image');
-        }
+          const imgBlob = await resp.blob();
+          if (!imgBlob.type.startsWith('image/')) {
+            throw new Error('Embed source is not an image');
+          }
 
-        assertExists(page);
-        const storage = page.blobs;
-        assertExists(storage);
-        const id = await storage.set(imgBlob);
-        props['prop:sourceId'] = id;
+          assertExists(page);
+          const storage = page.blobs;
+          assertExists(storage);
+          props['prop:sourceId'] = (await storage.set(imgBlob)) as never;
+        } catch (e) {
+          console.error('Failed to fetch embed source');
+          console.error(e);
+        }
       }
 
-      for (const key of Object.keys(props)) {
+      Object.keys(props).forEach(key => {
         if (key === 'sys:children' || key === 'sys:flavour') {
-          continue;
+          return;
         }
 
         result[unprefix(key)] = props[key];
-
-        // delta array to Y.Text
         if (key === 'prop:text' || key === 'prop:title') {
           const yText = new Y.Text();
           yText.applyDelta(props[key]);
           result[unprefix(key)] = new Text(yText);
         }
-      }
+      });
       return result;
     };
+
+    const { blocks } = json as Record<string, never>;
+    assertExists(blocks, 'Snapshot structure is invalid');
 
     const addBlockByProps = async (
       page: Page,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       props: any,
-      parent: string | null
+      parent?: string
     ) => {
-      if (visited.has(props['sys:id'])) return;
+      const id = props['sys:id'] as string;
+      if (visited.has(id)) return;
       const sanitizedProps = await sanitize(props);
       page.addBlock(props['sys:flavour'], sanitizedProps, parent);
-      for (const id of props['sys:children']) {
-        addBlockByProps(page, json[id], props['sys:id']);
-        visited.add(id);
-      }
+      await props['sys:children'].reduce(
+        async (prev: Promise<unknown>, childId: string) => {
+          await prev;
+          await addBlockByProps(page, blocks[childId], id);
+          visited.add(childId);
+        },
+        Promise.resolve()
+      );
     };
 
-    for (const block of Object.values(json)) {
-      assertExists(json);
-      await addBlockByProps(page, block, null);
-    }
+    const root = Object.values(blocks).find(block => {
+      const _block = block as Record<string, unknown>;
+      const flavour = _block['sys:flavour'] as string;
+      const schema = this.schema.flavourSchemaMap.get(flavour);
+      return schema?.model?.role === 'root';
+    });
+    await addBlockByProps(page, root);
   }
 
-  /** @internal Only for testing */
+  exportPageSnapshot(pageId: string) {
+    const page = this.getPage(pageId);
+    assertExists(page, `page ${pageId} not found`);
+    return serializeYDoc(page.spaceDoc);
+  }
+
   exportSnapshot() {
     return serializeYDoc(this.doc);
   }

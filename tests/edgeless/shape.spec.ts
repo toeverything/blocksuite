@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
-  assertMouseMode,
+  assertEdgelessTool,
   changeShapeFillColor,
   changeShapeStrokeColor,
   changeShapeStrokeStyle,
@@ -13,7 +13,7 @@ import {
   locatorShapeStrokeWidthButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
-  setMouseMode,
+  setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -47,14 +47,14 @@ test.describe('add shape', () => {
     const end0 = { x: 150, y: 200 };
     await addBasicRectShapeElement(page, start0, end0);
 
-    await assertMouseMode(page, 'default');
+    await assertEdgelessTool(page, 'default');
     await assertEdgelessSelectedRect(page, [100, 100, 50, 100]);
 
     const start1 = { x: 100, y: 100 };
     const end1 = { x: 200, y: 150 };
     await addBasicRectShapeElement(page, start1, end1);
 
-    await assertMouseMode(page, 'default');
+    await assertEdgelessTool(page, 'default');
     await assertEdgelessSelectedRect(page, [100, 100, 100, 50]);
   });
 
@@ -71,7 +71,7 @@ test.describe('add shape', () => {
 
     await page.keyboard.up('Shift');
 
-    await assertMouseMode(page, 'default');
+    await assertEdgelessTool(page, 'default');
     await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
     await page.keyboard.down('Shift');
@@ -80,7 +80,7 @@ test.describe('add shape', () => {
     const end1 = { x: 200, y: 150 };
     await addBasicRectShapeElement(page, start1, end1);
 
-    await assertMouseMode(page, 'default');
+    await assertEdgelessTool(page, 'default');
     await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
   });
 });
@@ -178,10 +178,10 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
 
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
   const startPoint = await page.evaluate(() => {
     // @ts-expect-error
     const hitbox = window.std.getShapeBlockHitBox('3');
@@ -242,17 +242,17 @@ test('hovering on shape should not have effect on underlying block', async ({
 
   await switchEditorMode(page);
 
-  const block = page.locator('.affine-edgeless-block-child');
+  const block = page.locator('.affine-edgeless-child-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Unexpected box value: box is null');
 
   const { x, y } = blockBox;
 
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x, y }, { x: x + 100, y: y + 100 });
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
 
-  await page.mouse.move(x + 50, y + 50);
+  await page.mouse.move(x + 10, y + 10);
   await assertEdgelessHoverRect(page, [x, y, 100, 100]);
 });
 
@@ -263,13 +263,13 @@ test('shape element should not move when the selected state is inactive', async 
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  await setMouseMode(page, 'shape');
+  await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await setMouseMode(page, 'default');
+  await setEdgelessTool(page, 'default');
   await dragBetweenCoords(
     page,
     { x: 50, y: 50 },
-    { x: 150, y: 150 },
+    { x: 110, y: 110 },
     { steps: 2 }
   );
 
@@ -281,8 +281,8 @@ test('change shape stroke width', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
+  const start = { x: 100, y: 150 };
+  const end = { x: 200, y: 250 };
   await addBasicRectShapeElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y + 5);

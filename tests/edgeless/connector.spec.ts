@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
-  assertMouseMode,
+  assertEdgelessTool,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
@@ -38,7 +38,7 @@ test('add connector element', async ({ page }) => {
 
   await addBasicConnectorElement(page, start, end);
 
-  await assertMouseMode(page, 'default');
+  await assertEdgelessTool(page, 'default');
   await assertEdgelessSelectedRect(page, [98, 98, 104, 107]);
 });
 
@@ -64,14 +64,14 @@ test('connector attached element', async ({ page }) => {
   await assertEdgelessHoverRect(page, [148, 198, 157, 104]);
 
   const connector2 = {
-    start: { x: 170, y: 150 },
-    end: { x: 300, y: 170 },
+    start: { x: 190, y: 190 },
+    end: { x: 300, y: 200 },
   };
   // start point in rect and not be fixed
   await addBasicConnectorElement(page, connector2.start, connector2.end);
 
   await page.mouse.move(connector2.end.x - 5, connector2.end.y - 5);
-  await assertEdgelessHoverRect(page, [168, 148, 137, 24]);
+  await assertEdgelessHoverRect(page, [188, 188, 117, 14]);
 });
 
 test('drag element which attaches connector', async ({ page }) => {

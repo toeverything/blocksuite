@@ -1,20 +1,20 @@
 import '../../../components/drag-handle.js';
 
-import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type {
   EventName,
   UIEventDispatcher,
   UIEventHandler,
   UIEventStateContext,
-} from '@blocksuite/lit';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+} from '@blocksuite/block-std';
+import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import type { FocusContext } from '@blocksuite/lit';
+import { type BaseBlockModel } from '@blocksuite/store';
 
 import {
   AbstractSelectionManager,
   type BlockComponentElement,
   debounce,
-  type EditingState,
   type EmbedBlockDoubleClickData,
   getBlockElementByModel,
   getBlockElementsByElement,
@@ -33,8 +33,6 @@ import {
   isDatabaseInput,
   isDragHandle,
   isElement,
-  isEmbed,
-  isImage,
   isInsidePageTitle,
   isSelectedBlocks,
   Point,
@@ -42,6 +40,7 @@ import {
 } from '../../../__internal__/index.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
@@ -53,7 +52,6 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
-import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState } from './selection-state.js';
@@ -83,26 +81,19 @@ function shouldFilterMouseEvent(event: Event): boolean {
 export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPageBlockComponent> {
   readonly state = new PageSelectionState('none');
   readonly slots: DefaultSelectionSlots;
-  private readonly _embedResizeManager: EmbedResizeManager;
 
   constructor({
     container,
     dispatcher,
-    page,
-    mouseRoot,
     slots,
   }: {
     container: DefaultPageBlockComponent;
     dispatcher: UIEventDispatcher;
-    page: Page;
-    mouseRoot: HTMLElement;
     slots: DefaultSelectionSlots;
   }) {
     super(container, dispatcher);
 
     this.slots = slots;
-
-    this._embedResizeManager = new EmbedResizeManager(this.state, slots);
 
     let isDragging = false;
     this._add('dragStart', ctx => {
@@ -118,6 +109,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       this._onContainerDragStart(ctx);
     });
     this._add('dragMove', ctx => {
+      if (!isDragging) return;
       const event = ctx.get('pointerState');
       if (shouldFilterMouseEvent(event.raw)) return;
       if (
@@ -129,6 +121,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       this._onContainerDragMove(ctx);
     });
     this._dispatcher.add('dragEnd', ctx => {
+      if (!isDragging) return;
       const event = ctx.get('pointerState');
       if (
         !isInsidePageTitle(event.raw.target) &&
@@ -169,7 +162,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       ) {
         event.raw.preventDefault();
       }
-      if (this.page.hasFlavour('affine:frame')) {
+      if (this.page.hasFlavour('affine:note')) {
         this._onContainerPointerMove(ctx);
       }
     });
@@ -192,11 +185,13 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     );
   }
 
-  private _ensureFrameExists() {
-    const hasFrame = this.page.hasFlavour('affine:frame');
-    if (!hasFrame) {
-      const frameId = this.page.addBlock('affine:frame', {}, this.page.root);
-      this.page.addBlock('affine:paragraph', {}, frameId);
+  private _ensureVisibleNoteExists() {
+    const notes = this.page.getBlockByFlavour(
+      'affine:note'
+    ) as NoteBlockModel[];
+    if (notes.length === 0 || notes.every(note => note.hidden)) {
+      const noteId = this.page.addBlock('affine:note', {}, this.page.root);
+      this.page.addBlock('affine:paragraph', {}, noteId);
       return true;
     }
 
@@ -220,12 +215,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       (isDragHandle(target as Element) || isSelectedBlocks(target as Element))
     ) {
       PreviewDragHandlers.onStart(this, e);
-      return;
-    }
-
-    if (isEmbed(e)) {
-      this.state.type = 'embed';
-      this._embedResizeManager.onStart(e);
       return;
     }
 
@@ -260,10 +249,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       BlockDragHandlers.onMove(this, e);
       return;
     }
-
-    if (this.state.type === 'embed') {
-      return this._embedResizeManager.onMove(e);
-    }
   };
 
   private _onContainerDragEnd = (ctx: UIEventStateContext) => {
@@ -278,8 +263,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       NativeDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'block') {
       BlockDragHandlers.onEnd(this, e);
-    } else if (this.state.type === 'embed') {
-      this._embedResizeManager.onEnd();
     }
 
     if (this.page.readonly) return;
@@ -342,9 +325,9 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       keys: { shift },
     } = e;
 
-    const hasAddedFrame = this._ensureFrameExists();
+    const hasAddedNote = this._ensureVisibleNoteExists();
 
-    if (hasAddedFrame && isInsidePageTitle(target)) {
+    if (hasAddedNote && isInsidePageTitle(target)) {
       requestAnimationFrame(() => {
         handleNativeRangeClick(this.page, e, this.container);
       });
@@ -418,16 +401,18 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     if (
       clickBlockInfo &&
-      matchFlavours(clickBlockInfo.model, ['affine:embed', 'affine:divider'])
+      matchFlavours(clickBlockInfo.model, ['affine:image', 'affine:divider'])
     ) {
       window.getSelection()?.removeAllRanges();
 
       state.activeComponent = clickBlockInfo.element;
 
       assertExists(this.state.activeComponent);
-      if (clickBlockInfo.model.type === 'image') {
+      const clickModel = clickBlockInfo.model;
+      const clickEle = clickBlockInfo.element;
+      if (matchFlavours(clickModel, ['affine:image'])) {
         state.type = 'embed';
-        this.slots.embedRectsUpdated.emit([clickBlockInfo.rect]);
+        this.setFocusedBlock(clickEle, { type: 'pointer', event: e.raw });
       } else {
         state.type = 'block';
         state.selectedBlocks.push(state.activeComponent);
@@ -474,7 +459,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
       if (element) {
         const targetModel = getModelByBlockElement(element);
-        if (matchFlavours(targetModel, ['affine:embed'])) {
+        if (matchFlavours(targetModel, ['affine:image'])) {
           window.dispatchEvent(
             new CustomEvent<EmbedBlockDoubleClickData>(
               'affine.embed-block-db-click',
@@ -553,7 +538,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       const { model, element } = hoverEditingState;
       let shouldClear = true;
 
-      if (model.type === 'image') {
+      if (model.flavour === 'affine:image') {
         const {
           state: {
             viewport: { left, clientWidth },
@@ -664,8 +649,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     const { type } = this.state;
     if (type === 'block') {
       this.refreshSelectedBlocksRects();
-    } else if (type === 'embed') {
-      this.refreshEmbedRects();
     }
   }
 
@@ -708,28 +691,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       .map(getBlockElementByModel)
       .filter((block): block is BlockComponentElement => block !== null);
     this.refreshSelectedBlocksRects();
-  }
-
-  refreshEmbedRects(hoverEditingState: EditingState | null = null) {
-    const { activeComponent, viewport } = this.state;
-    if (activeComponent) {
-      const rect = getSelectedStateRectByBlockElement(activeComponent);
-      const embedRects = [
-        new DOMRect(rect.left, rect.top, rect.width, rect.height),
-      ];
-
-      // updates editing
-      if (hoverEditingState && isImage(activeComponent)) {
-        const isOutside =
-          rect.right + 60 < viewport.left + viewport.clientWidth;
-
-        // when image size is too large, the option popup should show inside
-        rect.x = rect.right + (isOutside ? 10 : -50);
-        hoverEditingState.rect = rect;
-      }
-
-      this.slots.embedRectsUpdated.emit(embedRects);
-    }
   }
 
   refreshRemoteSelection() {
@@ -915,8 +876,29 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     setSelectedBlocks(this.state, this.slots, selectedBlocks, rects);
   }
 
-  setFocusedBlock(blockElement: Element) {
-    this.state.focusedBlock = blockElement as BlockComponentElement;
+  blurFocusedBlock(ctx: FocusContext, blockElement = this.state.focusedBlock) {
+    if (!blockElement) return;
+    const blurState = blockElement.blurBlock(ctx);
+    if (blurState === false) return;
+    this.state.activeComponent = null;
+    this.state.focusedBlock = null;
+  }
+
+  setFocusedBlock(
+    blockElement: BlockComponentElement,
+    ctx: FocusContext,
+    blurPrev = true
+  ) {
+    const focusedBlock = this.state.focusedBlock;
+    if (blurPrev && focusedBlock && blockElement !== focusedBlock) {
+      this.blurFocusedBlock(ctx, focusedBlock);
+    }
+
+    const focusState = blockElement.focusBlock(ctx);
+    if (focusState === false) return;
+
+    this.state.activeComponent = blockElement;
+    this.state.focusedBlock = blockElement;
   }
 
   // clear selection: `block`, `block:drag`, `embed`, `native`
@@ -940,9 +922,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       // clear `format quick bar`
       this.container.querySelector('format-quick-bar')?.remove();
     } else if (type === 'embed') {
-      state.clearEmbedSelection();
-      slots.embedRectsUpdated.emit([]);
-      slots.embedEditingStateUpdated.emit(null);
+      this.blurFocusedBlock({ type: 'UNKNOWN' });
     } else if (type === 'native') {
       state.clearNativeSelection();
     }

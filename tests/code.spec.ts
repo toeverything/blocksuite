@@ -104,6 +104,11 @@ test('use markdown syntax with trailing characters can create code block', async
 });
 
 test('support ```[lang] to add code block with language', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1314',
+  });
+
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -128,7 +133,7 @@ test('support ```[lang] to add code block with language', async ({ page }) => {
   const languageButton = codeBlockController.languageButton;
   await expect(languageButton).toBeVisible();
   const languageText = await languageButton.innerText();
-  expect(languageText).toEqual('Typescript');
+  expect(languageText).toEqual('TypeScript');
 });
 
 test('use more than three backticks can not create code block', async ({
@@ -296,8 +301,9 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:code
@@ -309,7 +315,7 @@ test.skip('use keyboard copy inside code block copy plain text', async ({
       prop:text="use"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -343,8 +349,9 @@ test.skip('use code block copy menu of code block copy whole code block', async 
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:code
@@ -356,7 +363,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
       prop:language="Plain Text"
       prop:text="use"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });

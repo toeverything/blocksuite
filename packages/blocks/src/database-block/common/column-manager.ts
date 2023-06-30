@@ -2,10 +2,10 @@ import { assertExists, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
+import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
-import type { SelectTag } from '../types.js';
 
 type ColumnOps<
   ColumnData extends Record<string, unknown> = Record<string, never>,
@@ -25,6 +25,14 @@ class ColumnManager {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (columnData: any) => [any, (cell: any) => any]
   >();
+
+  getColumn(type: string) {
+    const column = this.map.get(type);
+    if (!column) {
+      throw new Error(`${type} is not exist`);
+    }
+    return column;
+  }
 
   register<
     CellData,
@@ -57,11 +65,11 @@ class ColumnManager {
   }
 
   create(targetType: string, name: string, data?: unknown) {
-    const column = this.map.get(targetType);
-    if (!column) {
-      throw new Error(`${targetType} is not exist`);
-    }
-    return column?.create(name, data);
+    return this.getColumn(targetType)?.create(name, data);
+  }
+
+  defaultData(type: string) {
+    return this.getColumn(type)?.defaultData();
   }
 
   typeOf(type: string, data: unknown): TType {
@@ -80,15 +88,16 @@ class ColumnHelper<
     private ops: ColumnOps<T, CellData>
   ) {}
 
-  create(
-    name: string,
-    data?: T
-  ): { type: string; name: string; data: T; id?: string } {
+  create(name: string, data?: T): { type: string; name: string; data: T } {
     return {
       type: this.type,
       name,
       data: data ?? this.ops.defaultData(),
     };
+  }
+
+  defaultData() {
+    return this.ops.defaultData();
   }
 
   createWithId(
@@ -118,6 +127,12 @@ class ColumnHelper<
 }
 
 export const columnManager = new ColumnManager();
+export const titleHelper = columnManager.register<Text['yText']>('title', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  configRender: () => html``,
+  cellToString: data => data?.toString() ?? '',
+});
 export const richTextHelper = columnManager.register<Text['yText']>(
   'rich-text',
   {
@@ -177,6 +192,12 @@ export const progressHelper = columnManager.register<number>('progress', {
   configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
+export const linkHelper = columnManager.register<string>('link', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  configRender: () => html``,
+  cellToString: data => data?.toString() ?? '',
+});
 
 columnManager.registerConvert(selectHelper, multiSelectHelper, column => [
   column,
@@ -188,7 +209,7 @@ columnManager.registerConvert(selectHelper, richTextHelper, column => [
 ]);
 columnManager.registerConvert(multiSelectHelper, selectHelper, column => [
   column,
-  cell => cell[0],
+  cell => cell?.[0],
 ]);
 columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
   column,
@@ -201,9 +222,9 @@ columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
 ]);
 columnManager.registerConvert(numberHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);
 columnManager.registerConvert(progressHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);

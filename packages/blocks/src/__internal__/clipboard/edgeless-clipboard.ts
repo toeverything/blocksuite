@@ -1,31 +1,40 @@
 import {
   type Bound,
-  type PhasorElement,
-  type PhasorElementType,
-  TextElement,
-} from '@blocksuite/phasor';
-import {
+  compare,
   deserializeXYWH,
   getCommonBound,
+  type PhasorElement,
+  type PhasorElementType,
+  Renderer,
   serializeXYWH,
+  TextElement,
 } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, type Page } from '@blocksuite/store';
+import { render } from 'lit';
 
+import type { NoteBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import type { Selectable } from '../../page-block/edgeless/selection-manager.js';
 import {
-  DEFAULT_FRAME_HEIGHT,
-  DEFAULT_FRAME_WIDTH,
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+} from '../../page-block/edgeless/utils/consts.js';
+import {
+  getSelectedRect,
   isTopLevelBlock,
-} from '../../page-block/edgeless/utils.js';
+} from '../../page-block/edgeless/utils/query.js';
+import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
-import type { SerializedBlock, TopLevelBlockModel } from '../index.js';
+import {
+  type BlockComponentElement,
+  getBlockElementById,
+  type SerializedBlock,
+  type TopLevelBlockModel,
+} from '../index.js';
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/block-range.js';
-import { groupBy } from '../utils/std.js';
+import { groupBy } from '../utils/common.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
@@ -34,6 +43,7 @@ import {
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
+  CLIPBOARD_MIMETYPE,
   createSurfaceClipboardItems,
   getSurfaceClipboardData,
   performNativeCopy,
@@ -104,7 +114,7 @@ export class EdgelessClipboard implements Clipboard {
     }
     e.preventDefault();
     const { state } = this.selection;
-    // when frame active, handle copy like page mode
+    // when note active, handle copy like page mode
     if (state.active) {
       if (state.selected[0] instanceof TextElement) {
         copySurfaceText(this._edgeless);
@@ -137,7 +147,7 @@ export class EdgelessClipboard implements Clipboard {
     const { state } = this.selection;
     if (state.active) {
       if (!(state.selected[0] instanceof TextElement)) {
-        this._pasteInTextFrame(e);
+        this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element
       return;
@@ -148,10 +158,10 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
 
-    this._pasteShapesAndFrames(elementsRawData);
+    this._pasteShapesAndNotes(elementsRawData);
   };
 
-  private async _pasteInTextFrame(e: ClipboardEvent) {
+  private async _pasteInTextNote(e: ClipboardEvent) {
     const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
     if (!blocks.length) {
       return;
@@ -184,21 +194,21 @@ export class EdgelessClipboard implements Clipboard {
     return phasorElements;
   }
 
-  private async _createFrameBlocks(
-    frames: SerializedBlock[],
+  private async _createNoteBlocks(
+    notes: SerializedBlock[],
     pasteX: number,
     pasteY: number,
     oldCommonBound: Bound
   ) {
-    const frameIds = await Promise.all(
-      frames.map(async ({ xywh, children, background }) => {
+    const noteIds = await Promise.all(
+      notes.map(async ({ xywh, children, background }) => {
         const [oldX, oldY, oldW, oldH] = xywh
           ? deserializeXYWH(xywh)
           : [
               oldCommonBound.x,
               oldCommonBound.y,
-              DEFAULT_FRAME_WIDTH,
-              DEFAULT_FRAME_HEIGHT,
+              DEFAULT_NOTE_WIDTH,
+              DEFAULT_NOTE_HEIGHT,
             ];
         const newXywh = serializeXYWH(
           pasteX + oldX - oldCommonBound.x,
@@ -206,31 +216,31 @@ export class EdgelessClipboard implements Clipboard {
           oldW,
           oldH
         );
-        const frameId = this._page.addBlock(
-          'affine:frame',
+        const noteId = this._page.addBlock(
+          'affine:note',
           {
             xywh: newXywh,
             background,
           },
           this._page.root?.id
         );
-        const frame = this._page.getBlockById(frameId);
-        assertExists(frame);
+        const note = this._page.getBlockById(noteId);
+        assertExists(note);
 
-        await addSerializedBlocks(this._page, children, frame, 0);
-        return frameId;
+        await addSerializedBlocks(this._page, children, note, 0);
+        return noteId;
       })
     );
-    return frameIds;
+    return noteIds;
   }
 
   private _getOldCommonBound(
     phasorElements: PhasorElement[],
-    frames: SerializedBlock[]
+    notes: SerializedBlock[]
   ) {
     const commonBound = getCommonBound([
       ...phasorElements,
-      ...(frames
+      ...(notes
         .map(({ xywh }) => {
           if (!xywh) {
             return;
@@ -251,16 +261,16 @@ export class EdgelessClipboard implements Clipboard {
 
   private _emitSelectionChangeAfterPaste(
     phasorElementIds: string[],
-    frameIds: string[]
+    noteIds: string[]
   ) {
     const newSelected = [
       ...(phasorElementIds
         .map(id => this.surface.pickById(id))
         .filter(e => !!e) as PhasorElement[]),
-      ...(frameIds
+      ...(noteIds
         .map(id => this._page.getBlockById(id))
         .filter(
-          f => !!f && f.flavour === 'affine:frame'
+          f => !!f && f.flavour === 'affine:note'
         ) as TopLevelBlockModel[]),
     ];
 
@@ -270,13 +280,13 @@ export class EdgelessClipboard implements Clipboard {
     });
   }
 
-  private async _pasteShapesAndFrames(
+  private async _pasteShapesAndNotes(
     elementsRawData: Record<string, unknown>[]
   ) {
     const groupedByType = groupBy(elementsRawData, data =>
-      isTopLevelBlock(data as unknown as Selectable) ? 'frames' : 'elements'
+      isTopLevelBlock(data as unknown as Selectable) ? 'notes' : 'elements'
     ) as unknown as {
-      frames?: SerializedBlock[];
+      notes?: SerializedBlock[];
       elements?: { type: PhasorElement['type'] }[];
     };
 
@@ -284,7 +294,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const oldCommonBound = this._getOldCommonBound(
       elements,
-      groupedByType.frames || []
+      groupedByType.notes || []
     );
 
     const { lastMousePos } = this.selection;
@@ -309,8 +319,8 @@ export class EdgelessClipboard implements Clipboard {
       });
     });
     // create and add blocks to page
-    const frameIds = await this._createFrameBlocks(
-      groupedByType.frames || [],
+    const noteIds = await this._createNoteBlocks(
+      groupedByType.notes || [],
       pasteX,
       pasteY,
       oldCommonBound
@@ -318,7 +328,113 @@ export class EdgelessClipboard implements Clipboard {
 
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
-      frameIds
+      noteIds
     );
+  }
+
+  async copyAsPng(notes: NoteBlockModel[], shapes: PhasorElement[]) {
+    const notesLen = notes.length;
+    const shapesLen = shapes.length;
+
+    if (notesLen + shapesLen === 0) return;
+
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    // sort by `index`
+    notes.sort(compare);
+    shapes.sort(compare);
+
+    const { _edgeless } = this;
+    const { surface } = _edgeless;
+    const { viewport } = surface;
+    const { zoom } = viewport;
+    const { left, top, right, bottom, width, height } = getSelectedRect(
+      [...notes, ...shapes],
+      viewport
+    );
+    const min = surface.toModelCoord(left, top);
+    const max = surface.toModelCoord(right, bottom);
+    const cx = (min[0] + max[0]) / 2;
+    const cy = (min[1] + max[1]) / 2;
+    const vx = cx - width / 2 / zoom;
+    const vy = cy - height / 2 / zoom;
+
+    const container = document.createElement('div');
+    container.style.position = 'relative';
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+    _edgeless.appendChild(container);
+
+    if (notesLen) {
+      const fragment = document.createDocumentFragment();
+      const layer = document.createElement('div');
+      layer.style.position = 'absolute';
+      layer.style.zIndex = '-1';
+      layer.style.transform = `scale(${zoom})`;
+      for (let i = 0; i < notesLen; i++) {
+        const element = notes[i];
+        const note = getBlockElementById(element.id) as BlockComponentElement;
+        assertExists(note);
+        const parent = note.parentElement;
+        assertExists(parent);
+
+        const [x, y] = deserializeXYWH(element.xywh);
+        const div = document.createElement('div');
+        div.className = parent.className;
+        div.setAttribute('style', parent.getAttribute('style') || '');
+        div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
+        render(note.render(), div);
+        layer.appendChild(div);
+      }
+      fragment.appendChild(layer);
+      container.appendChild(fragment);
+    }
+
+    if (shapesLen) {
+      const renderer = new Renderer();
+      renderer.load(shapes);
+      renderer.setCenter(cx, cy);
+      renderer.setZoom(zoom);
+      renderer.attach(container);
+    }
+
+    try {
+      // waiting for canvas to render
+      await new Promise(requestAnimationFrame);
+
+      const canvas: HTMLCanvasElement = await html2canvas(container, {
+        backgroundColor: null,
+      });
+      assertExists(canvas);
+
+      // @ts-ignore
+      if (window.apis?.clipboard?.copyAsPng) {
+        // @ts-ignore
+        await window.apis.clipboard?.copyAsPng(
+          canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
+        );
+      } else {
+        const blob: Blob = await new Promise((resolve, reject) =>
+          canvas.toBlob(
+            blob =>
+              blob ? resolve(blob) : reject('Canvas can not export blob'),
+            CLIPBOARD_MIMETYPE.IMAGE_PNG
+          )
+        );
+
+        assertExists(blob);
+
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
+          }),
+        ]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    container.remove();
   }
 }

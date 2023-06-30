@@ -185,8 +185,9 @@ test('nested list blocks', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -206,7 +207,7 @@ test('nested list blocks', async ({ page }) => {
         />
       </affine:list>
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -217,8 +218,9 @@ test('nested list blocks', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:list
@@ -237,7 +239,7 @@ test('nested list blocks', async ({ page }) => {
         prop:type="bulleted"
       />
     </affine:list>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
@@ -279,8 +281,9 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -291,7 +294,7 @@ test('basic indent and unindent', async ({ page }) => {
       prop:text="text2"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -300,8 +303,9 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -313,7 +317,7 @@ test('basic indent and unindent', async ({ page }) => {
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -323,8 +327,9 @@ test('basic indent and unindent', async ({ page }) => {
     page,
     /*xml*/ `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -335,14 +340,14 @@ test('basic indent and unindent', async ({ page }) => {
       prop:text="text2"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 });
 
 test('should indent todo block preserve todo status', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'text1');
   await pressEnter(page);
@@ -355,8 +360,9 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -369,15 +375,16 @@ test('should indent todo block preserve todo status', async ({ page }) => {
       prop:type="todo"
     />
   </affine:paragraph>
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
   await pressShiftTab(page);
   await assertStoreMatchJSX(
     page,
     `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -389,8 +396,8 @@ test('should indent todo block preserve todo status', async ({ page }) => {
     prop:text="todo item"
     prop:type="todo"
   />
-</affine:frame>`,
-    frameId
+</affine:note>`,
+    noteId
   );
 });
 

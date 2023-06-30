@@ -1,36 +1,36 @@
-import './toolbar-action-popup.js';
 import '../../../common/filter/filter-group.js';
 
 import {
+  CopyIcon,
   DatabaseSearchClose,
   DatabaseSearchIcon,
+  DeleteIcon,
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
-import { computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { stopPropagation } from '../../../../page-block/edgeless/utils.js';
+import { copyBlocks } from '../../../../__internal__/clipboard/index.js';
+import { stopPropagation } from '../../../../__internal__/utils/event.js';
+import { popFilterableSimpleMenu } from '../../../../components/menu/menu.js';
+import { toast } from '../../../../components/toast.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
-import {
-  columnManager,
-  richTextHelper,
-} from '../../../common/column-manager.js';
+import { columnManager } from '../../../common/column-manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type {
-  DatabaseViewDataMap,
-  TableMixColumn,
-} from '../../../common/view-manager.js';
-import type { DatabaseBlockModel } from '../../../database-model.js';
-import { onClickOutside } from '../../../utils.js';
+  DatabaseBlockModel,
+  InsertPosition,
+} from '../../../database-model.js';
+import { onClickOutside } from '../../../utils/utils.js';
+import type { TableViewManager } from '../../table-view-manager.js';
 import { SearchState } from '../../types.js';
 import { initAddNewRecordHandlers } from './index.js';
-import { ToolbarActionPopup } from './toolbar-action-popup.js';
 
 const styles = css`
   .affine-database-toolbar {
@@ -169,30 +169,33 @@ const styles = css`
 export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
+  root!: BlockSuiteRoot;
+
+  @property({ attribute: false })
   targetModel!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   hoverState!: boolean;
 
-  @property()
+  @property({ attribute: false })
   searchState!: SearchState;
 
-  @property()
-  columns!: TableMixColumn[];
+  @property({ attribute: false })
+  view!: TableViewManager;
 
-  @property()
-  view!: DatabaseViewDataMap['table'];
+  @property({ attribute: false })
+  addRow!: (position: InsertPosition) => void;
 
-  @property()
-  addRow!: (index?: number) => void;
+  @property({ attribute: false })
+  modalMode?: boolean;
 
-  @property()
+  @property({ attribute: false })
   setSearchState!: (state: SearchState) => void;
 
-  @property()
+  @property({ attribute: false })
   setSearchString!: (search: string) => void;
-  @property()
+  @property({ attribute: false })
   setFilteredRowIds!: (rowIds: string[]) => void;
 
   @query('.affine-database-search-input')
@@ -207,7 +210,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   @query('.new-record')
   private _newRecord!: HTMLDivElement;
 
-  private _toolbarAction!: ToolbarActionPopup | undefined;
   private _recordAddDisposables = new DisposableGroup();
 
   private get readonly() {
@@ -305,38 +307,31 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _onShowAction = () => {
     if (this.readonly) return;
-
-    if (this._toolbarAction) {
-      this._closeToolbarAction();
-      return;
-    }
-    this.setSearchState(SearchState.Action);
-    const toolbarAction = new ToolbarActionPopup();
-    toolbarAction.targetModel = this.targetModel;
-    toolbarAction.close = this._closeToolbarAction;
-    this._toolbarAction = toolbarAction;
-    this._moreActionContainer.appendChild(this._toolbarAction);
-    computePosition(this._moreActionContainer, this._toolbarAction, {
-      placement: 'bottom',
-    }).then(({ x, y }) => {
-      Object.assign(toolbarAction.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
-
-    onClickOutside(
-      this._moreActionContainer,
-      () => {
-        this._closeToolbarAction();
+    popFilterableSimpleMenu(this._moreActionContainer, [
+      {
+        type: 'action',
+        name: 'Copy',
+        icon: CopyIcon,
+        select: () => {
+          copyBlocks({
+            type: 'Block',
+            models: [this.targetModel],
+            startOffset: 0,
+            endOffset: 0,
+          });
+          toast('Copied Database to clipboard');
+        },
       },
-      'mousedown'
-    );
-  };
-
-  private _closeToolbarAction = () => {
-    this._toolbarAction?.remove();
-    this._toolbarAction = undefined;
+      {
+        type: 'action',
+        name: 'Delete database',
+        icon: DeleteIcon,
+        select: () => {
+          const models = [this.targetModel, ...this.targetModel.children];
+          models.forEach(model => this.targetModel.page.deleteBlock(model));
+        },
+      },
+    ]);
   };
 
   private _resetSearchStatus = () => {
@@ -347,7 +342,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
-    this.addRow(0);
+    this.addRow('start');
   };
 
   private get _filter() {
@@ -355,25 +350,15 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   }
 
   private set _filter(filter: FilterGroup) {
-    this.targetModel.updateView(this.view.id, 'table', data => {
-      data.filter = filter;
-    });
-    this.targetModel.applyViewsUpdate();
+    this.view.updateFilter(filter);
   }
 
   private get _vars() {
-    return [
-      {
-        name: this.targetModel.titleColumnName,
-        id: this.targetModel.id,
-        type: richTextHelper.dataType({}),
-      },
-      ...this.columns.map(v => ({
-        id: v.id,
-        name: v.name,
-        type: columnManager.typeOf(v.type, v.data),
-      })),
-    ];
+    return this.targetModel.columns.map(v => ({
+      id: v.id,
+      name: v.name,
+      type: columnManager.typeOf(v.type, v.data),
+    }));
   }
 
   private _showFilter(event: MouseEvent) {
@@ -403,6 +388,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     }
     popAdvance();
   }
+
+  // private _onShowModalView = () => {
+  //   if (!this.modalMode) {
+  //     showDatabaseTableViewModal({
+  //       root: this.root,
+  //       model: this.targetModel,
+  //       page: this.targetModel.page,
+  //     });
+  //   }
+  // };
 
   override render() {
     const expandSearch =
@@ -445,7 +440,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
             @input="${this._onSearch}"
             @click="${(event: MouseEvent) => event.stopPropagation()}"
             @keydown="${this._onSearchKeydown}"
-            @pointerdown="${stopPropagation}"
+            @pointerdown=${stopPropagation}
           />
           <div class="has-tool-tip close-icon" @click="${this._clearSearch}">
             ${closeIcon}
@@ -457,6 +452,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       </div>
     `;
 
+    const expandIcon = null;
+    // this.modalMode
+    //   ? null
+    //   : html`<div
+    //       class="affine-database-toolbar-item expand"
+    //       @click="${this._onShowModalView}"
+    //     >
+    //       ${DatabaseExpandWide}
+    //     </div>`;
+
     return html` <div
       class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
     >
@@ -464,6 +469,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
       <div class="affine-database-toolbar-item search-container hidden">
         ${searchTool}
       </div>
+      ${expandIcon}
       ${this.readonly
         ? null
         : html` <div

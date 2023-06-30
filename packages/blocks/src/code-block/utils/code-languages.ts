@@ -87,8 +87,15 @@ function isPlaintext(lang: string) {
   ].includes(lang.toLowerCase());
 }
 
+/**
+ * Get the standard language registration for a given language name,
+ * accept both language id and aliases (by default, or set `strict` to `false`).
+ *
+ * If the language is plaintext, return `null`.
+ */
 export const getStandardLanguage = (
-  languageName: string | null
+  languageName: string,
+  strict = false
 ): ILanguageRegistration | null => {
   if (!languageName) return null;
   if (isPlaintext(languageName)) {
@@ -96,9 +103,13 @@ export const getStandardLanguage = (
   }
 
   const language = BUNDLED_LANGUAGES.find(
-    codeLanguage =>
-      codeLanguage.id.toLowerCase() === languageName.toLowerCase() ||
-      codeLanguage.aliases?.includes(languageName.toLowerCase())
+    codeLanguage => codeLanguage.id.toLowerCase() === languageName.toLowerCase()
   );
-  return language ?? null;
+  if (language) return language;
+  if (strict) return null;
+
+  const aliasLanguage = BUNDLED_LANGUAGES.find(codeLanguage =>
+    codeLanguage.aliases?.includes(languageName.toLowerCase())
+  );
+  return aliasLanguage ?? null;
 };

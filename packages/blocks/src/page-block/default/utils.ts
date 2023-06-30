@@ -10,30 +10,27 @@ import { copyBlocks } from '../../__internal__/clipboard/index.js';
 import {
   type BlockComponentElement,
   type EditingState,
-  type Point,
-  type SerializedBlock,
-} from '../../__internal__/index.js';
-import {
   getBlockElementById,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   isInSamePath,
+  type Point,
+  type SerializedBlock,
 } from '../../__internal__/index.js';
-import {
-  getService,
-  getServiceOrRegister,
-} from '../../__internal__/service.js';
+import { getService } from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
+import type { FormatQuickBar } from '../../components/format-quick-bar/index.js';
+import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
-import type { EmbedBlockModel } from '../../embed-block/embed-model.js';
+import type { ImageBlockModel } from '../../image-block/image-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 function hasOptionBar(block: BaseBlockModel) {
   if (block.flavour === 'affine:code') return true;
-  if (block.flavour === 'affine:embed' && block.type === 'image') return true;
+  if (block.flavour === 'affine:image') return true;
   return false;
 }
 
@@ -50,7 +47,7 @@ function getBlockWithOptionBarRect(
     ) as HTMLElement;
     assertExists(codeBlockDom);
     return codeBlockDom;
-  } else if (block.flavour === 'affine:embed' && block.type === 'image') {
+  } else if (block.flavour === 'affine:image' && block.type === 'image') {
     const imgElement = hoverDom.querySelector(
       '.resizable-img'
     ) as HTMLDivElement;
@@ -65,7 +62,7 @@ function getDetectRect(block: BaseBlockModel, blockRect: DOMRect): DOMRect {
   // there is a optionBar on the right side
   if (block.flavour === 'affine:code') {
     detectRect.width += 52;
-  } else if (block.flavour === 'affine:embed' && block.type === 'image') {
+  } else if (block.flavour === 'affine:image') {
     detectRect.width += 50;
   }
   return detectRect;
@@ -380,7 +377,7 @@ export async function downloadImage(model: BaseBlockModel) {
   URL.revokeObjectURL(downloadUrl);
 }
 
-export async function copyImage(model: EmbedBlockModel) {
+export async function copyImage(model: ImageBlockModel) {
   copyBlocks({
     type: 'Block',
     models: [model],
@@ -481,6 +478,7 @@ export function copyCode(codeBlockModel: CodeBlockModel) {
 
   toast('Copied to clipboard');
 }
+
 export function getAllowSelectedBlocks(
   model: BaseBlockModel
 ): BaseBlockModel[] {
@@ -489,7 +487,7 @@ export function getAllowSelectedBlocks(
 
   const dfs = (blocks: BaseBlockModel[]) => {
     for (const block of blocks) {
-      if (block.flavour !== 'affine:frame') {
+      if (block.flavour !== 'affine:note') {
         result.push(block);
       }
       block.children.length && dfs(block.children);
@@ -501,9 +499,13 @@ export function getAllowSelectedBlocks(
 }
 
 export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
+  let formatBar: FormatQuickBar | undefined;
   return new DragHandle({
     // drag handle should be the same level with editor-container
     container: pageBlock.mouseRoot as HTMLElement,
+    onDragStartCallback() {
+      formatBar?.abortController.abort();
+    },
     onDropCallback(_point, blockElements, editingState, type): void {
       if (!editingState || type === 'none') return;
       const { model } = editingState;
@@ -534,18 +536,18 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
           matchFlavours(dragBlockParent, ['affine:database'])
         ) {
           const service = getService('affine:database');
-          service.refreshRowSelection();
+          service.select(undefined);
         }
 
         if (parent && matchFlavours(parent, ['affine:database'])) {
-          pageBlock.selection.clear();
+          pageBlock.selection?.clear();
           return;
         }
 
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {
-          pageBlock.selection.setSelectedBlocks(
+          pageBlock.selection?.setSelectedBlocks(
             blockElements
               .map(b => getBlockElementById(b.model.id))
               .filter((b): b is BlockComponentElement => !!b)
@@ -554,38 +556,50 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       });
     },
     setDragType(dragging: boolean) {
+      assertExists(pageBlock.selection);
       pageBlock.selection.state.type = dragging ? 'block:drag' : 'block';
     },
     setSelectedBlock(modelState: EditingState | null, element) {
-      if (element && element.closest('affine-database')) {
-        const service = getService('affine:database');
-        const toggled = service.toggleRowSelection(element);
-        if (toggled) {
-          pageBlock.selection.clear();
-          return;
-        }
+      if (!pageBlock.selection) return;
+      const cellContainer = element?.closest('affine-database-cell-container');
+      if (cellContainer) {
+        cellContainer.table.selection.toggleRow(cellContainer.rowIndex);
+        return;
       }
-
-      const model = modelState?.model;
-      if (model) {
-        const parent = model.page.getParent(model);
-        if (parent && matchFlavours(parent, ['affine:database'])) {
-          const service = getService('affine:database');
-          service.setRowSelectionByElement(modelState.element);
-          return;
-        }
+      if (!modelState) {
+        pageBlock.selection.selectOneBlock();
+        return;
       }
-      pageBlock.selection.selectOneBlock(modelState?.element, modelState?.rect);
-
-      const service = getServiceOrRegister('affine:database');
-      Promise.resolve(service).then(service => {
-        const rowSelection = service.getLastRowSelection();
-        if (rowSelection) {
-          service.clearRowSelection();
+      const model = modelState.model;
+      const parent = model.page.getParent(model);
+      if (parent && matchFlavours(parent, ['affine:database'])) {
+        const cellContainer = modelState?.element?.closest(
+          'affine-database-cell-container'
+        );
+        if (cellContainer) {
+          cellContainer.table.selection.selectRow(cellContainer.rowIndex);
         }
+        return;
+      }
+      pageBlock.selection.selectOneBlock(modelState.element, modelState.rect);
+
+      formatBar = showFormatQuickBar({
+        container: pageBlock.selection.container,
+        page: pageBlock.page,
+        direction: 'center-bottom',
+        anchorEl: {
+          getBoundingClientRect: () => {
+            const rect = modelState.element.getBoundingClientRect();
+            return {
+              x: rect.x + rect.width / 2,
+              y: rect.y + rect.height,
+            };
+          },
+        },
       });
     },
     getSelectedBlocks() {
+      assertExists(pageBlock.selection);
       return pageBlock.selection.state.selectedBlocks;
     },
     getClosestBlockElement(point: Point) {

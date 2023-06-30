@@ -1,30 +1,27 @@
+import type { Disposable } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { TableMixColumn } from '../../common/view-manager.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
-import { onClickOutside } from '../../utils.js';
-import type { ColumnRendererHelper } from '../register.js';
-import type { Column, RowHost, SetValueOption } from '../types.js';
+import { getService } from '../../../__internal__/service.js';
+import type { DatabaseCellElement } from '../register.js';
+import type { ColumnManager } from '../table-view-manager.js';
 
 /** affine-database-cell-container padding */
 const CELL_PADDING = 8;
 
 @customElement('affine-database-cell-container')
-export class DatabaseCellContainer
-  extends WithDisposable(ShadowlessElement)
-  implements RowHost
-{
+export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-database-cell-container {
       display: flex;
       align-items: center;
       width: 100%;
       height: 100%;
-      padding: 0 ${CELL_PADDING}px;
       border-right: 1px solid var(--affine-border-color);
     }
 
@@ -41,147 +38,88 @@ export class DatabaseCellContainer
   `;
 
   @state()
-  private _isEditing = false;
+  private editingDisposable?: Disposable;
 
-  @property()
-  columnRenderer!: ColumnRendererHelper;
+  get isEditing() {
+    return this.editingDisposable != null;
+  }
 
-  @property()
-  rowModel!: BaseBlockModel;
+  @property({ attribute: false })
+  public readonly rowId!: string;
+  @property({ attribute: false })
+  public readonly rowIndex!: number;
+  @property({ attribute: false })
+  public readonly columnId!: string;
+  @property({ attribute: false })
+  public readonly columnIndex!: number;
 
-  @property()
-  column!: TableMixColumn;
-
-  @property()
-  databaseModel!: DatabaseBlockModel;
+  @property({ attribute: false })
+  column!: ColumnManager;
 
   private get readonly() {
-    return this.databaseModel.page.readonly;
+    return this.column.readonly;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-
-    const disposables = this._disposables;
-    disposables.addFromEvent(this, 'click', this._onClick);
+  get table() {
+    const table = this.closest('affine-database-table');
+    assertExists(table);
+    return table;
   }
-
-  protected override firstUpdated() {
-    this.setAttribute('data-block-is-database-input', 'true');
-    this.setAttribute('data-row-id', this.rowModel.id);
-    this.setAttribute('data-column-id', this.column.id);
-  }
-
-  private _onClick = (event: Event) => {
-    if (this.readonly) return;
-
-    this._isEditing = true;
-    this.removeEventListener('click', this._onClick);
-    setTimeout(() => {
-      onClickOutside(
-        this,
-        () => {
-          this.addEventListener('click', this._onClick);
-          this._isEditing = false;
-        },
-        'mousedown'
-      );
-    });
-  };
-
-  setValue = (
-    value: unknown,
-    option: SetValueOption = { captureSync: true }
-  ) => {
-    const captureSync = option.captureSync ?? true;
-    const sync = option.sync ?? false;
-    const run = () => {
-      if (captureSync) {
-        this.databaseModel.page.captureSync();
-      }
-      this.databaseModel.updateCell(this.rowModel.id, {
-        columnId: this.column.id,
-        value,
-      });
-      this.databaseModel.applyColumnUpdate();
-      this.requestUpdate();
-    };
-    if (sync) {
-      run();
-    } else {
-      queueMicrotask(() => {
-        run();
-      });
-    }
-  };
 
   setEditing = (isEditing: boolean) => {
-    this._isEditing = isEditing;
-    if (!isEditing) {
-      this.databaseModel;
+    const service = getService('affine:database');
+    if (isEditing) {
+      this.editingDisposable = service.slots.databaseSelectionUpdated.on(
+        state => {
+          if (
+            !state ||
+            !state.isEditing ||
+            state.focus.rowIndex !== this.rowIndex ||
+            state.focus.columnIndex !== this.columnIndex
+          ) {
+            this.editingDisposable?.dispose();
+            this.editingDisposable = undefined;
+          }
+        }
+      );
     }
-    if (!this._isEditing) {
-      setTimeout(() => {
-        this.addEventListener('click', this._onClick);
-      });
-    }
-  };
-
-  setHeight = (height: number) => {
-    this.style.height = `${height + CELL_PADDING * 2}px`;
-  };
-
-  updateColumnProperty = (
-    apply: (oldProperty: Column) => Partial<Column>
-  ): void => {
-    const newProperty = apply(this.column);
-    this.databaseModel.page.captureSync();
-    this.databaseModel.updateColumn({
-      ...this.column,
-      ...newProperty,
+    const databaseId =
+      this.closest<HTMLElement>('affine-database')?.dataset.blockId;
+    assertExists(databaseId);
+    service.select({
+      databaseId: databaseId,
+      focus: { rowIndex: this.rowIndex, columnIndex: this.columnIndex },
+      isEditing: isEditing,
     });
   };
+
+  private _cell = createRef<DatabaseCellElement<unknown>>();
+
+  public get cell() {
+    return this._cell.value;
+  }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
-    const renderer = this.columnRenderer.get(this.column.type);
-    const cell = this.databaseModel.getCell(this.rowModel.id, this.column.id);
-
-    if (
+    const renderer = this.column.renderer;
+    const tag =
       !this.readonly &&
-      this._isEditing &&
+      this.isEditing &&
       renderer.components.CellEditing !== null
-    ) {
-      const editingTag = renderer.components.CellEditing.tag;
-      return html`
-        <${editingTag}
-          data-is-editing-cell='true'
-          .updateColumnProperty='${this.updateColumnProperty}'
-          .readonly='${this.readonly}'
-          .page='${this.databaseModel.page}'
-          .columnData='${this.column.data}'
-          .value='${cell?.value}'
-          .onChange='${this.setValue}'
-          .setHeight='${this.setHeight}'
-          .setEditing='${this.setEditing}'
-          .container='${this}'
-        ></${editingTag}>
-      `;
-    }
-    const previewTag = renderer.components.Cell.tag;
+        ? renderer.components.CellEditing.tag
+        : renderer.components.Cell.tag;
+    const style = styleMap({
+      padding: `0 ${CELL_PADDING}px`,
+    });
     return html`
-      <${previewTag}
-        .updateColumnProperty='${this.updateColumnProperty}'
-        .readonly='${this.readonly}'
-        .page='${this.databaseModel.page}'
-        .columnData='${this.column.data}'
-        .value='${cell?.value}'
-        .onChange='${this.setValue}'
-        .setHeight='${this.setHeight}'
+      <${tag}
+        ${ref(this._cell)}
+        style=${style}
+        .column='${this.column}'
+        .rowId='${this.rowId}'
         .setEditing='${this.setEditing}'
-        .container='${this}'
-      ></${previewTag}>
-    `;
+        .isEditing='${this.isEditing}'
+      ></${tag}>`;
   }
 }
 

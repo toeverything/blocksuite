@@ -10,6 +10,7 @@ import {
 import {
   enterPlaygroundRoom,
   focusRichText,
+  getSelectionRect,
   getVirgoSelectionText,
   initEmptyParagraphState,
   waitNextFrame,
@@ -126,9 +127,10 @@ test.describe('slash menu should show and hide correctly', () => {
     if (!box) {
       throw new Error("slashMenu doesn't exist");
     }
+    const rect = await getSelectionRect(page);
     const { x, y } = box;
-    assertAlmostEqual(x, 80, 40);
-    assertAlmostEqual(y, 167, 8);
+    assertAlmostEqual(x - rect.x, 0, 10);
+    assertAlmostEqual(y - rect.bottom, 5, 10);
   });
 
   test('should move up down with arrow key', async () => {
@@ -258,7 +260,7 @@ test('should clean slash string after soft enter', async ({ page }) => {
 test.describe('slash search', () => {
   test('should slash menu search and keyboard works', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
     await focusRichText(page);
     const slashMenu = page.locator(`.slash-menu`);
     const slashItems = slashMenu.locator('format-bar-button');
@@ -273,16 +275,17 @@ test.describe('slash search', () => {
     await assertStoreMatchJSX(
       page,
       `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list
     prop:checked={false}
     prop:type="todo"
   />
-</affine:frame>`,
-      frameId
+</affine:note>`,
+      noteId
     );
 
     await type(page, '/');

@@ -1,41 +1,57 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import type { Column, ColumnType, SetValueOption } from './types.js';
-
-export abstract class TableViewCell extends ShadowlessElement {
-  abstract readonly cellType: ColumnType;
-}
+import type { ColumnManager } from './table-view-manager.js';
+import type { ColumnType, SetValueOption } from './types.js';
 
 export abstract class DatabaseCellElement<
   Value,
   Data extends Record<string, unknown> = Record<string, unknown>
 > extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
+  @property({ attribute: false })
+  column!: ColumnManager<Value, Data>;
+  @property()
+  rowId!: string;
+  @property({ attribute: false })
+  isEditing!: boolean;
+  @property({ attribute: false })
+  protected setEditing!: (editing: boolean) => void;
 
-  @property()
-  page!: Page;
+  get page() {
+    return this.column.page;
+  }
 
-  @property()
-  updateColumnProperty!: (
-    apply: (oldProperty: Column<Data>) => Partial<Column<Data>>
-  ) => void;
-  @property()
-  readonly!: boolean;
-  @property()
-  columnData!: Data;
-  @property()
-  value: Value | null = null;
-  @property()
-  onChange!: (value: Value | null, ops?: SetValueOption) => void;
-  @property()
-  setHeight!: (height: number) => void;
-  @property()
-  setEditing!: (editing: boolean) => void;
-  @property()
-  container!: HTMLElement;
+  get readonly(): boolean {
+    return this.column.readonly;
+  }
+
+  get value() {
+    return this.column.getValue(this.rowId);
+  }
+
+  onChange(value: Value | undefined, ops?: SetValueOption): void {
+    this.column.setValue(this.rowId, value, ops);
+  }
+
+  protected _setEditing(editing: boolean) {
+    this.setEditing(editing);
+  }
+
+  public enterEditMode() {
+    this._setEditing(true);
+  }
+
+  public exitEditMode() {
+    this._setEditing(false);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.width = '100%';
+    this.style.height = '100%';
+  }
 }
 
 export interface ColumnRenderer<
@@ -66,6 +82,16 @@ export function defineColumnRenderer<
     displayName: string;
   }
 ): ColumnRenderer<Type, Property, Value> {
+  customElements.define(
+    components.Cell.tag._$litStatic$,
+    components.Cell as never
+  );
+  if (components.CellEditing) {
+    customElements.define(
+      components.CellEditing.tag._$litStatic$,
+      components.CellEditing as never
+    );
+  }
   return {
     displayName: config.displayName,
     type,

@@ -1,44 +1,34 @@
-import { customElement } from 'lit/decorators.js';
+import '../../../../components/tags/multi-tag-select.js';
+import '../../../../components/tags/multi-tag-view.js';
+
 import { html, literal } from 'lit/static-html.js';
 
+import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
+import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
 import type { SelectColumnData } from '../../../common/column-manager.js';
-import {
-  DatabaseCellElement,
-  defineColumnRenderer,
-  type TableViewCell,
-} from '../../register.js';
-import type { SelectTag } from '../../types.js';
-import { SelectMode } from '../../types.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-@customElement('affine-database-multi-select-cell')
-class MultiSelectCell
-  extends DatabaseCellElement<string[], SelectColumnData>
-  implements TableViewCell
-{
+class MultiSelectCell extends DatabaseCellElement<string[], SelectColumnData> {
   static override tag = literal`affine-database-multi-select-cell`;
-  cellType = 'multi-select' as const;
 
   override render() {
     return html`
-      <affine-database-multi-tag-view
-        .value=${this.value ?? []}
-        .options=${this.columnData.options}
-        .setHeight=${this.setHeight}
-      ></affine-database-multi-tag-view>
+      <affine-multi-tag-view
+        .value="${this.value ?? []}"
+        .options="${this.column.data.options}"
+      ></affine-multi-tag-view>
     `;
   }
 }
 
-@customElement('affine-database-multi-select-cell-editing')
-class MultiSelectCellEditing
-  extends DatabaseCellElement<string[], SelectColumnData>
-  implements TableViewCell
-{
+class MultiSelectCellEditing extends DatabaseCellElement<
+  string[],
+  SelectColumnData
+> {
   static override tag = literal`affine-database-multi-select-cell-editing`;
-  cellType = 'multi-select' as const;
 
   get _options(): SelectTag[] {
-    return this.columnData.options;
+    return this.column.data.options;
   }
 
   get _value() {
@@ -50,54 +40,39 @@ class MultiSelectCellEditing
   };
 
   _editComplete = () => {
-    this.setEditing(false);
+    this._setEditing(false);
   };
 
-  _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
-    this.updateColumnProperty(oldProperty => {
+  _onOptionsChange = (options: SelectTag[]) => {
+    this.column.updateData(data => {
       return {
-        data: {
-          ...oldProperty.data,
-          options: update(oldProperty.data.options),
-        },
+        ...data,
+        options,
       };
     });
   };
 
-  _newTag = (tag: SelectTag) => {
-    this._updateOptions(options => {
-      if (options.find(v => v.value === tag.value) == null) {
-        return [...options, tag];
-      }
-      return options;
+  override firstUpdated() {
+    this.popTagSelect();
+  }
+
+  private popTagSelect = () => {
+    popTagSelect(this, {
+      options: this._options,
+      onOptionsChange: this._onOptionsChange,
+      value: this._value,
+      onChange: this._onChange,
+      onComplete: this._editComplete,
+      minWidth: 400,
     });
-  };
-
-  _deleteTag = (id: string) => {
-    this._updateOptions(options => options.filter(v => v.id !== id));
-  };
-
-  _changeTag = (tag: SelectTag) => {
-    this._updateOptions(options =>
-      options.map(v => (v.id === tag.id ? tag : v))
-    );
   };
 
   override render() {
     return html`
-      <affine-database-multi-tag-select
-        .mode="${SelectMode.Multi}"
-        .options="${this._options}"
+      <affine-multi-tag-view
         .value="${this._value}"
-        .onChange="${this._onChange}"
-        .editComplete="${this._editComplete}"
-        .newTag="${this._newTag}"
-        .deleteTag="${this._deleteTag}"
-        .changeTag="${this._changeTag}"
-        .container="${this.container}"
-        .page="${this.page}"
-      >
-      </affine-database-multi-tag-select>
+        .options="${this._options}"
+      ></affine-multi-tag-view>
     `;
   }
 }

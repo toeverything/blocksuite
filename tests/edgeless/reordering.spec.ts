@@ -1,8 +1,8 @@
 import { type Page } from '@playwright/test';
 
 import {
-  initThreeNotes,
-  initThreeShapes,
+  initThreeOverlapFilledShapes,
+  initThreeOverlapNotes,
   switchEditorMode,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -19,7 +19,7 @@ test.describe('reordering shapes', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
-    await initThreeShapes(page);
+    await initThreeOverlapFilledShapes(page);
     await page.mouse.click(0, 0);
   }
 
@@ -117,12 +117,12 @@ test.describe('reordering shapes', () => {
   });
 });
 
-test.describe('reordering frames', () => {
+test.describe('reordering notes', () => {
   async function init(page: Page) {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
-    await initThreeNotes(page);
+    await initThreeOverlapNotes(page);
     await waitNextFrame(page);
     await page.mouse.click(0, 0);
   }
@@ -133,28 +133,28 @@ test.describe('reordering frames', () => {
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame2
+    // should be note2
     await page.mouse.click(180, 140);
     await assertEdgelessSelectedRect(page, [160, 100, 448, 80]);
 
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame1
+    // should be note1
     await page.mouse.click(150, 140);
     await assertEdgelessSelectedRect(page, [130, 100, 448, 80]);
 
-    // should be frame0
+    // should be note0
     await page.mouse.click(120, 140);
     await assertEdgelessSelectedRect(page, [100, 100, 448, 80]);
 
-    // bring frame0 to front
+    // bring note0 to front
     await triggerComponentToolbarAction(page, 'bringToFront');
 
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame0
+    // should be note0
     await page.mouse.click(180, 140);
     await assertEdgelessSelectedRect(page, [100, 100, 448, 80]);
   });
@@ -165,11 +165,11 @@ test.describe('reordering frames', () => {
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame0
+    // should be note0
     await page.mouse.click(120, 140);
     await assertEdgelessSelectedRect(page, [100, 100, 448, 80]);
 
-    // bring frame0 forward
+    // bring note0 forward
     await triggerComponentToolbarAction(page, 'bringForward');
 
     // click outside to clear selection
@@ -186,17 +186,17 @@ test.describe('reordering frames', () => {
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame2
+    // should be note2
     await page.mouse.click(180, 140);
     await assertEdgelessSelectedRect(page, [160, 100, 448, 80]);
 
-    // bring frame2 backward
+    // bring note2 backward
     await triggerComponentToolbarAction(page, 'sendBackward');
 
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame1
+    // should be note1
     await page.mouse.click(180, 140);
     await assertEdgelessSelectedRect(page, [130, 100, 448, 80]);
   });
@@ -207,27 +207,27 @@ test.describe('reordering frames', () => {
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame2
+    // should be note2
     await page.mouse.click(180, 140);
     await assertEdgelessSelectedRect(page, [160, 100, 448, 80]);
 
-    // bring frame2 to back
+    // bring note2 to back
     await triggerComponentToolbarAction(page, 'sendToBack');
 
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame1
+    // should be note1
     await page.mouse.click(180, 140);
     await assertEdgelessSelectedRect(page, [130, 100, 448, 80]);
 
-    // send frame1 to back
+    // send note1 to back
     await triggerComponentToolbarAction(page, 'sendToBack');
 
     // click outside to clear selection
     await page.mouse.click(50, 50);
 
-    // should be frame0
+    // should be note0
     await page.mouse.click(180, 140);
     await assertEdgelessSelectedRect(page, [100, 100, 448, 80]);
   });

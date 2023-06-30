@@ -29,7 +29,6 @@ import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/ty
 import { getServiceOrRegister } from '../../__internal__/service.js';
 import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
-  createBookmarkBlock,
   createPage,
   getCurrentNativeRange,
   getVirgoByModel,
@@ -37,6 +36,7 @@ import {
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
@@ -215,7 +215,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
           name: 'Image',
           icon: ImageIcon20,
           showWhen: model => {
-            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+            if (!model.page.schema.flavourSchemaMap.has('affine:image')) {
               return false;
             }
             if (insideDatabase(model)) {
@@ -229,7 +229,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
               return;
             }
             parent.children.indexOf(model);
-            const props = await uploadImageFromLocal(page);
+            const props = (await uploadImageFromLocal(page.blobs)).map(
+              ({ sourceId }) => ({ flavour: 'affine:image', sourceId })
+            );
             page.addSiblingBlocks(model, props);
           },
         },
@@ -242,7 +244,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             ) {
               return false;
             }
-            if (!model.page.schema.flavourSchemaMap.has('affine:embed')) {
+            if (!model.page.schema.flavourSchemaMap.has('affine:image')) {
               return false;
             }
             return !insideDatabase(model);
@@ -252,8 +254,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = (
             if (!parent) {
               return;
             }
-            const index = parent.children.indexOf(model);
-            createBookmarkBlock(parent, index + 1);
+            const url = await getBookmarkInitialProps();
+            if (!url) return;
+            const props = {
+              flavour: 'affine:bookmark',
+              url,
+            } as const;
+            page.addSiblingBlocks(model, [props]);
           },
         },
       ],

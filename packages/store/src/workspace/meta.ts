@@ -9,11 +9,23 @@ import type { Workspace } from './workspace.js';
 export interface PageMeta {
   id: string;
   title: string;
+  tags: string[];
   createDate: number;
 }
 
+type Tag = {
+  id: string;
+  value: string;
+  color: string;
+};
+type AllPagesMeta = {
+  tags: {
+    options: Tag[];
+  };
+};
 type WorkspaceMetaState = {
   pages?: unknown[];
+  allPagesMeta?: AllPagesMeta;
   workspaceVersion?: number;
   blockVersions?: Record<string, number>;
   name?: string;
@@ -206,10 +218,6 @@ export class WorkspaceMeta {
     const { pageMetas, _prevPages } = this;
 
     pageMetas.forEach(pageMeta => {
-      // newly added space can't be found
-      // unless explicitly getMap after meta updated
-      // this.doc.getMap('space:' + pageMeta.id);
-
       if (!_prevPages.has(pageMeta.id)) {
         this.pageMetaAdded.emit(pageMeta.id);
       }
@@ -252,4 +260,20 @@ export class WorkspaceMeta {
       }
     });
   };
+
+  get allPagesMeta(): AllPagesMeta {
+    let meta = this._proxy.allPagesMeta;
+    if (!meta) {
+      this._proxy.allPagesMeta = meta = {
+        tags: {
+          options: [],
+        },
+      };
+    }
+    return meta;
+  }
+
+  setAllPagesMeta(meta: AllPagesMeta) {
+    this._proxy.allPagesMeta = meta;
+  }
 }

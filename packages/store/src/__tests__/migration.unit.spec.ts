@@ -17,7 +17,7 @@ async function loadBinary(name: string) {
 }
 
 describe('migration', () => {
-  test('migrate from group to frame', async () => {
+  test('migrate from group to note', async () => {
     const doc = await loadBinary('legacy-group');
     tryMigrate(doc);
 
@@ -26,16 +26,16 @@ describe('migration', () => {
       'affine:paragraph': 1,
       'affine:page': 2,
       'affine:list': 1,
-      'affine:frame': 1,
+      'affine:note': 1,
       'affine:divider': 1,
-      'affine:embed': 1,
+      'affine:image': 1,
       'affine:code': 1,
       'affine:surface': 3,
     });
 
     assert.equal(
       result['space:page0']['2350844747:1']['sys:flavour'],
-      'affine:frame'
+      'affine:note'
     );
 
     const blockIds = Object.keys(result['space:page0']);
@@ -55,9 +55,9 @@ describe('migration', () => {
       'affine:paragraph': 1,
       'affine:page': 2,
       'affine:list': 1,
-      'affine:frame': 1,
+      'affine:note': 1,
       'affine:divider': 1,
-      'affine:embed': 1,
+      'affine:image': 1,
       'affine:code': 1,
       'affine:surface': 3,
     });
@@ -88,9 +88,9 @@ describe('migration', () => {
       'affine:database': 2,
       'affine:page': 2,
       'affine:list': 1,
-      'affine:frame': 1,
+      'affine:note': 1,
       'affine:divider': 1,
-      'affine:embed': 1,
+      'affine:image': 1,
       'affine:code': 1,
       'affine:surface': 3,
     });
@@ -133,9 +133,9 @@ describe('migration', () => {
       'affine:database': 2,
       'affine:page': 2,
       'affine:list': 1,
-      'affine:frame': 1,
+      'affine:note': 1,
       'affine:divider': 1,
-      'affine:embed': 1,
+      'affine:image': 1,
       'affine:code': 1,
       'affine:surface': 3,
     });
@@ -168,9 +168,9 @@ describe('migration', () => {
         'affine:database': 2,
         'affine:page': 2,
         'affine:list': 1,
-        'affine:frame': 1,
+        'affine:note': 1,
         'affine:divider': 1,
-        'affine:embed': 1,
+        'affine:image': 1,
         'affine:code': 1,
         'affine:surface': 3,
       });

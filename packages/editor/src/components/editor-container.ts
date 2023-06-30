@@ -4,10 +4,13 @@ import {
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
+  FileDropManager,
   getPageBlock,
   getServiceOrRegister,
+  noop,
   type PageBlockModel,
   pagePreset,
+  readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -16,14 +19,14 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { isFirefox, type Page, Slot } from '@blocksuite/store';
+import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
-BlockSuiteRoot;
+noop(BlockSuiteRoot);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function forwardSlot<T extends Record<string, Slot<any>>>(
@@ -43,13 +46,13 @@ export class EditorContainer
   extends WithDisposable(ShadowlessElement)
   implements AbstractEditor
 {
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   mode: 'page' | 'edgeless' = 'page';
 
-  @property()
+  @property({ attribute: false })
   override autofocus = false;
 
   @query('affine-default-page')
@@ -60,6 +63,8 @@ export class EditorContainer
 
   readonly themeObserver = new ThemeObserver();
 
+  fileDropManager = new FileDropManager(this._getPageInfo.bind(this));
+
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
   }
@@ -68,6 +73,16 @@ export class EditorContainer
     pageLinkClicked: new Slot(),
     pageModeSwitched: new Slot(),
   };
+
+  private _getPageInfo() {
+    const { page, mode } = this;
+    return {
+      page,
+      mode,
+      pageBlock:
+        mode === 'page' ? this._defaultPageBlock : this._edgelessPageBlock,
+    };
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -86,7 +101,7 @@ export class EditorContainer
       if (!pageModel) return;
 
       if (this.mode === 'page') {
-        getPageBlock(pageModel)?.selection.clear();
+        getPageBlock(pageModel)?.selection?.clear();
       }
 
       const selection = getSelection();
@@ -112,7 +127,7 @@ export class EditorContainer
     //   window,
     //   'affine.switch-mouse-mode',
     //   ({ detail }) => {
-    //     this.mouseMode = detail;
+    //     this.edgelessTool = detail;
     //   }
     // );
 
@@ -137,6 +152,13 @@ export class EditorContainer
       })
     );
 
+    this._disposables.addFromEvent(
+      this,
+      'dragover',
+      this.fileDropManager.onDragOver
+    );
+    this._disposables.addFromEvent(this, 'drop', this.fileDropManager.onDrop);
+
     this.themeObserver.observer(document.documentElement);
     this._disposables.add(this.themeObserver);
   }
@@ -158,6 +180,19 @@ export class EditorContainer
         }
       });
     }
+
+    // adds files from outside by dragging and dropping
+    this.fileDropManager.register('image/*', async (file: File) => {
+      const storage = this.page.blobs;
+      assertExists(storage);
+      const sourceId = await storage.set(file);
+      const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
+      return {
+        flavour: 'affine:image',
+        sourceId,
+        ...size,
+      };
+    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -194,7 +229,7 @@ export class EditorContainer
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;
-      localStorage.setItem(
+      sessionStorage.setItem(
         'blocksuite:' + this.page.id + ':edgelessViewport',
         JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
       );
@@ -212,7 +247,7 @@ export class EditorContainer
       this.model.id,
       html`<block-suite-root
         .page=${this.page}
-        .componentMap=${this.mode === 'page' ? pagePreset : edgelessPreset}
+        .blocks=${this.mode === 'page' ? pagePreset : edgelessPreset}
       ></block-suite-root>`
     );
 

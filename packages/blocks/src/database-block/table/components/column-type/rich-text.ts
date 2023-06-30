@@ -3,7 +3,7 @@ import type { Y } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import type {
@@ -12,11 +12,7 @@ import type {
 } from '../../../../__internal__/rich-text/virgo/types.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
-import {
-  DatabaseCellElement,
-  defineColumnRenderer,
-  type TableViewCell,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 function toggleStyle(
   vEditor: AffineVEditor,
@@ -65,14 +61,87 @@ function toggleStyle(
 
   vEditor.syncVRange();
 }
+export class RichTextCell extends DatabaseCellElement<Y.Text> {
+  static override tag = literal`affine-database-rich-text-cell`;
 
-@customElement('affine-database-rich-text-cell')
-export class TextCell
-  extends DatabaseCellElement<Y.Text>
-  implements TableViewCell
-{
   static override styles = css`
     affine-database-rich-text-cell {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      user-select: none;
+    }
+
+    .affine-database-rich-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+
+    .affine-database-rich-text v-line {
+      display: flex !important;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+    }
+
+    .affine-database-rich-text v-line > div {
+      flex-grow: 1;
+    }
+  `;
+
+  vEditor: AffineVEditor | null = null;
+
+  @query('.affine-database-rich-text')
+  private _container!: HTMLDivElement;
+
+  protected override firstUpdated() {
+    this._onInitVEditor();
+    this.column.captureSync();
+  }
+
+  private _initYText = (text?: string) => {
+    const yText = new this.column.page.YText(text);
+
+    this.onChange(yText);
+    return yText;
+  };
+
+  private _onInitVEditor() {
+    let value: Y.Text;
+    if (!this.value) {
+      value = this._initYText();
+    } else {
+      // When copying the database, the type of the value is `string`.
+      if (typeof this.value === 'string') {
+        value = this._initYText(this.value);
+      } else {
+        value = this.value;
+      }
+    }
+
+    this.vEditor = new VEditor(value, {
+      active: () => activeEditorManager.isActive(this),
+    });
+    setupVirgoScroll(this.column.page, this.vEditor);
+    this.vEditor.mount(this._container);
+    this.vEditor.setReadonly(true);
+  }
+
+  override render() {
+    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
+  }
+}
+
+export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
+  static override tag = literal`affine-database-rich-text-cell-editing`;
+
+  static override styles = css`
+    affine-database-rich-text-cell-editing {
       display: flex;
       align-items: center;
       width: 100%;
@@ -102,25 +171,19 @@ export class TextCell
   `;
 
   vEditor: AffineVEditor | null = null;
-  static override tag = literal`affine-database-rich-text-cell`;
-  cellType = 'rich-text' as const;
 
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
 
   protected override firstUpdated() {
     this._onInitVEditor();
-    this._disposables.addFromEvent(this, 'click', this._handleClick);
-  }
-
-  private _handleClick() {
-    this.page.captureSync();
+    this.column.captureSync();
   }
 
   private _initYText = (text?: string) => {
     const yText = new this.page.YText(text);
 
-    this.onChange(yText, { sync: true });
+    this.onChange(yText);
     return yText;
   };
 
@@ -129,7 +192,7 @@ export class TextCell
     if (!this.value) {
       value = this._initYText();
     } else {
-      // When copying the database, the type of the value is `string`.s
+      // When copying the database, the type of the value is `string`.
       if (typeof this.value === 'string') {
         value = this._initYText(this.value);
       } else {
@@ -140,11 +203,12 @@ export class TextCell
     this.vEditor = new VEditor(value, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.page, this.vEditor);
+    setupVirgoScroll(this.column.page, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
     });
+    this.vEditor.focusEnd();
     this.vEditor.setReadonly(this.readonly);
   }
 
@@ -155,6 +219,9 @@ export class TextCell
         return;
       }
       event.stopPropagation();
+    } else {
+      // this._setEditing(false);
+      // this._container.blur();
     }
 
     if (!this.vEditor) return;
@@ -164,7 +231,7 @@ export class TextCell
         this._onSoftEnter();
       } else {
         // exit editing
-        this.setEditing(false);
+        this._setEditing(false);
         this._container.blur();
       }
       event.preventDefault();
@@ -224,7 +291,7 @@ export class TextCell
       const vRange = this.vEditor.getVRange();
       assertExists(vRange);
 
-      this.page.captureSync();
+      this.column.captureSync();
       const text = new Text(this.vEditor.yText);
       text.replace(vRange.index, length, '\n');
       this.vEditor.setVRange({
@@ -242,8 +309,8 @@ export class TextCell
 export const RichTextColumnRenderer = defineColumnRenderer(
   'rich-text',
   {
-    Cell: TextCell,
-    CellEditing: null,
+    Cell: RichTextCell,
+    CellEditing: RichTextCellEditing,
   },
   {
     displayName: 'Rich Text',
