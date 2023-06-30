@@ -81,6 +81,10 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._timer = requestAnimationFrame(this._loop);
   };
 
+  onContainerPointerDown(e: PointerEventState): void {
+    noop();
+  }
+
   private toModelCoord(p: IPoint): IVec {
     return this._surface.viewport.toModelCoord(p.x, p.y);
   }
@@ -149,6 +153,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       if (isTopLevelBlock(erasable)) {
         this._page.deleteBlock(erasable);
       } else {
+        this._edgeless.connector.detachConnectors([erasable]);
         this._surface.removeElement(erasable.id);
       }
     });

@@ -42,19 +42,22 @@ export class EdgelessSnapManager extends Overlay {
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
     const { page, surface } = this.container;
+    const connectors =
+      this.container.connector.getConnecttedConnectors(alignables);
+
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);
     viewport.addOverlay(this);
 
     const notes = page.getBlockByFlavour('affine:note') as NoteBlockModel[];
     const phasorElements = surface.getElements();
-
+    const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
     (<Alignable[]>[...notes, ...phasorElements]).forEach(alignable => {
       const bound = Bound.deserialize(alignable.xywh);
       if (
         viewportBounds.isIntersectWithBound(bound) &&
-        !alignables.includes(alignable)
+        !excludes.includes(alignable)
       ) {
         this._alignableBounds.push(bound);
       }
@@ -102,7 +105,6 @@ export class EdgelessSnapManager extends Overlay {
     if (rst.dy === 0) {
       this._alignDistributeVertically(rst, bound, threshold, viewport);
     }
-
     this._draw();
     return rst;
   }
@@ -370,6 +372,7 @@ export class EdgelessSnapManager extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D) {
+    // return
     if (
       this._intraGraphicAlignLines.length === 0 &&
       this._distributedAlignLines.length === 0

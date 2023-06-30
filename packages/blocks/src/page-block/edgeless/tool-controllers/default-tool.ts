@@ -33,10 +33,7 @@ import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
 } from '../../utils/position.js';
-import {
-  handleElementChangedEffectForConnector,
-  isConnectorAndBindingsAllSelected,
-} from '../components/connector/utils.js';
+import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import {
   getXYWH,
   isPhasorElement,
@@ -163,15 +160,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  private _handleDragMoveEffect(element: Selectable) {
-    handleElementChangedEffectForConnector(
-      element,
-      this.state.selected,
-      this._edgeless.surface,
-      this._page
-    );
-  }
-
   private _handleSurfaceDragMove(
     selected: PhasorElement,
     initialBound: Bound,
@@ -188,16 +176,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const bound = initialBound.clone();
     bound.x += (e.x - this._dragStartPos.x) / zoom + align.dx;
     bound.y += (e.y - this._dragStartPos.y) / zoom + align.dy;
-
-    if (
-      selected.type !== 'connector' ||
-      (selected instanceof ConnectorElement &&
-        isConnectorAndBindingsAllSelected(selected, this.state.selected))
-    ) {
-      surface.setElementBound(selected.id, bound);
+    if (selected instanceof ConnectorElement) {
+      this._edgeless.connector.updateXYWH(selected, bound);
     }
-
-    this._handleDragMoveEffect(selected);
+    surface.setElementBound(selected.id, bound);
   }
 
   private _handleBlockDragMove(
@@ -213,8 +195,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.y += (e.y - this._dragStartPos.y) / zoom + align.dy;
 
     this._page.updateBlock(block, { xywh: bound.serialize() });
-    this._handleDragMoveEffect(block);
-
     // TODO: refactor
     if (this.selectedBlocks.length) {
       this._edgeless.slots.selectedBlocksUpdated.emit(this.selectedBlocks);
@@ -244,6 +224,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return true;
     }
     return false;
+  }
+
+  private _isDraggable(element: Selectable) {
+    return !(
+      element instanceof ConnectorElement &&
+      !isConnectorAndBindingsAllSelected(element, this.state.selected)
+    );
   }
 
   private _forceUpdateSelection() {
@@ -284,6 +271,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         hoverEditingState
       );
     }
+  }
+
+  onContainerPointerDown(e: PointerEventState): void {
+    noop();
   }
 
   onContainerClick(e: PointerEventState) {
@@ -436,13 +427,21 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
-        const curBound = this._alignBound.clone();
+        if (
+          this.state.selected.every(ele => {
+            return !this._isDraggable(ele);
+          })
+        )
+          return;
 
+        const curBound = this._alignBound.clone();
         curBound.x += (e.x - this._dragStartPos.x) / zoom;
         curBound.y += (e.y - this._dragStartPos.y) / zoom;
         const alignRst = this._edgeless.snap.align(curBound);
+
         this.state.selected.forEach((element, index) => {
           if (isPhasorElement(element)) {
+            if (!this._isDraggable(element)) return;
             this._handleSurfaceDragMove(
               element,
               this._selectedBounds[index],
@@ -458,6 +457,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           }
         });
+        // this._edgeless.connector.syncConnectorPos(this.state.selected);
         this._forceUpdateSelection();
         break;
       }

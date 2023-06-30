@@ -5,6 +5,7 @@ import {
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
+  polygonNearestPoint,
 } from '../../../utils/math-utils.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
@@ -70,14 +71,28 @@ export const TriangleMethods: ShapeMethods = {
       : pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
     const bound = Bound.deserialize(element.xywh);
     const { x, y, w, h } = bound;
 
-    return !!linePolygonIntersects(start, end, [
+    return linePolygonIntersects(start, end, [
       [x + w / 2, 0 + y],
       [x + w, h + y],
       [x + 0, h + y],
     ]);
+  },
+
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    const bound = Bound.deserialize(element.xywh);
+    const { x, y, w, h } = bound;
+
+    return polygonNearestPoint(
+      [
+        [x + w / 2, 0 + y],
+        [x + w, h + y],
+        [x + 0, h + y],
+      ],
+      point
+    );
   },
 };

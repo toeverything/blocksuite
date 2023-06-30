@@ -37,6 +37,7 @@ export abstract class EdgelessToolController<
   }
 
   abstract tool: Tool;
+  abstract onContainerPointerDown(e: PointerEventState): void;
   abstract onContainerDragStart(e: PointerEventState): void;
   abstract onContainerDragMove(e: PointerEventState): void;
   abstract onContainerDragEnd(e: PointerEventState): void;

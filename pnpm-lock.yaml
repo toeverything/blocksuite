@@ -146,9 +146,6 @@ importers:
 
   packages/blocks:
     dependencies:
-      '@blocksuite/connector':
-        specifier: workspace:*
-        version: link:../connector
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
@@ -210,8 +207,6 @@ importers:
       yjs:
         specifier: ^13.6.5
         version: 13.6.5
-
-  packages/connector: {}
 
   packages/docs:
     dependencies:
@@ -313,9 +308,6 @@ importers:
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
-      '@blocksuite/connector':
-        specifier: workspace:*
-        version: link:../connector
       '@blocksuite/editor':
         specifier: workspace:*
         version: link:../editor

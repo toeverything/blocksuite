@@ -32,6 +32,10 @@ export class ShapeTooolController extends EdgelessToolController<ShapeTool> {
     noop();
   }
 
+  onContainerPointerDown(e: PointerEventState): void {
+    noop();
+  }
+
   onContainerDblClick(e: PointerEventState): void {
     noop();
   }
