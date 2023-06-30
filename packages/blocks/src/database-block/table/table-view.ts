@@ -60,12 +60,12 @@ const styles = css`
   }
 
   .affine-database-block-table::-webkit-scrollbar:horizontal {
-    height: 0;
+    height: 4px;
   }
 
   .affine-database-block-table::-webkit-scrollbar-thumb {
     border-radius: 2px;
-    background-color: var(--affine-black-10);
+    background-color: transparent;
   }
 
   .affine-database-block-table:hover::-webkit-scrollbar:horizontal {
@@ -107,7 +107,7 @@ const styles = css`
     width: 100%;
     height: 28px;
     position: relative;
-    margin-top: -6px;
+    margin-top: -8px;
     z-index: 0;
     background-color: var(--affine-hover-color-filled);
     opacity: 0;
