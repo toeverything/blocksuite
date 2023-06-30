@@ -89,7 +89,7 @@ const styles = css`
 export class BacklinkButton extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   private backlinks: BacklinkData[] = [];
 
   @state()
