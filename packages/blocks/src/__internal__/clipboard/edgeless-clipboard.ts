@@ -347,12 +347,11 @@ export class EdgelessClipboard implements Clipboard {
 
     const { _edgeless } = this;
     const { surface } = _edgeless;
-    const { viewport } = surface;
-    const { zoom } = viewport;
-    const { left, top, right, bottom, width, height } = getSelectedRect(
-      [...notes, ...shapes],
-      viewport
-    );
+    const { zoom } = surface.viewport;
+    const { left, top, right, bottom, width, height } = getSelectedRect([
+      ...notes,
+      ...shapes,
+    ]);
     const min = surface.toModelCoord(left, top);
     const max = surface.toModelCoord(right, bottom);
     const cx = (min[0] + max[0]) / 2;
