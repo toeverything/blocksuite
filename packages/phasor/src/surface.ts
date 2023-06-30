@@ -1,5 +1,4 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { randomSeed } from 'roughjs/bin/math.js';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
@@ -20,6 +19,7 @@ import type {
 import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
+import { randomSeed } from './rough/math.js';
 import { contains, getCommonBound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import {
@@ -265,9 +265,17 @@ export class SurfaceManager {
   pickByPoint(
     x: number,
     y: number,
-    options?: HitTestOptions
+    options: HitTestOptions = {
+      expand: 10,
+    }
   ): SurfaceElement[] {
-    const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
+    const size = options.expand;
+    const bound: IBound = {
+      x: x - size / 2,
+      y: y - size / 2,
+      w: size,
+      h: size,
+    };
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter(element => {
       return element.hitTest(x, y, options);

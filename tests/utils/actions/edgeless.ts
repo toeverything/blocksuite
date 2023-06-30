@@ -171,7 +171,7 @@ export async function getEdgelessHoverRect(page: Page) {
 }
 
 export async function getEdgelessBlockChild(page: Page) {
-  const block = page.locator('.affine-edgeless-block-child');
+  const block = page.locator('.affine-edgeless-child-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Missing edgeless block child rect');
   return blockBox;
@@ -345,18 +345,12 @@ export async function selectNoteInEdgeless(page: Page, noteId: string) {
 
 export async function updateExistedBrushElementSize(
   page: Page,
-  size: 'thin' | 'thick'
+  nthSizeButton: 1 | 2 | 3 | 4 | 5 | 6
 ) {
-  const text = {
-    thin: 'Thin',
-    thick: 'Thick',
-  }[size];
-
-  const btn = page
-    .locator('edgeless-component-toolbar edgeless-tool-icon-button')
-    .filter({
-      hasText: text,
-    });
+  // get the nth brush size button
+  const btn = page.locator(
+    `.line-width-panel > div:nth-child(${nthSizeButton})`
+  );
 
   await btn.click();
 }
@@ -680,24 +674,33 @@ export async function changeConnectorStrokeStyle(
   await button.click();
 }
 
-export async function initThreeOverlapShapes(page: Page) {
+export async function initThreeOverlapFilledShapes(page: Page) {
   const rect0 = {
     start: { x: 100, y: 100 },
     end: { x: 200, y: 200 },
   };
   await addBasicRectShapeElement(page, rect0.start, rect0.end);
+  await page.mouse.click(rect0.start.x + 5, rect0.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-navy');
 
   const rect1 = {
     start: { x: 130, y: 130 },
     end: { x: 230, y: 230 },
   };
   await addBasicRectShapeElement(page, rect1.start, rect1.end);
+  await page.mouse.click(rect1.start.x + 5, rect1.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-black');
 
   const rect2 = {
     start: { x: 160, y: 160 },
     end: { x: 260, y: 260 },
   };
   await addBasicRectShapeElement(page, rect2.start, rect2.end);
+  await page.mouse.click(rect2.start.x + 5, rect2.start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeFillColor');
+  await changeShapeFillColor(page, '--affine-palette-shape-white');
 }
 
 export async function initThreeOverlapNotes(page: Page) {

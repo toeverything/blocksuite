@@ -20,6 +20,12 @@ interface Rect {
   height: number;
 }
 
+export async function clickInEdge(page: Page, rect: Rect) {
+  const edgeX = rect.x + rect.width / 2;
+  const edgeY = rect.y + rect.height - 5;
+  await page.mouse.click(edgeX, edgeY);
+}
+
 export async function clickInCenter(page: Page, rect: Rect) {
   const centerX = rect.x + rect.width / 2;
   const centerY = rect.y + rect.height / 2;

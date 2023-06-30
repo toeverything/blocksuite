@@ -72,8 +72,9 @@ const flagsPreset = {
   enable_edgeless_toolbar: true,
   enable_slash_menu: true,
 
-  enable_database: false,
+  enable_database: true,
   enable_database_filter: false,
+  enable_page_tags: false,
   enable_toggle_block: false,
   enable_block_selection_format_bar: true,
   enable_linked_page: false,

@@ -2,10 +2,10 @@ import { assertExists, Text } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
+import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
-import type { SelectTag } from '../types.js';
 
 type ColumnOps<
   ColumnData extends Record<string, unknown> = Record<string, never>,
@@ -26,7 +26,7 @@ class ColumnManager {
     (columnData: any) => [any, (cell: any) => any]
   >();
 
-  private getColumn(type: string) {
+  getColumn(type: string) {
     const column = this.map.get(type);
     if (!column) {
       throw new Error(`${type} is not exist`);
@@ -192,6 +192,12 @@ export const progressHelper = columnManager.register<number>('progress', {
   configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
+export const linkHelper = columnManager.register<string>('link', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  configRender: () => html``,
+  cellToString: data => data?.toString() ?? '',
+});
 
 columnManager.registerConvert(selectHelper, multiSelectHelper, column => [
   column,
@@ -216,9 +222,9 @@ columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
 ]);
 columnManager.registerConvert(numberHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);
 columnManager.registerConvert(progressHelper, richTextHelper, column => [
   {},
-  cell => new Text(cell.toString()).yText,
+  cell => new Text(cell?.toString()).yText,
 ]);

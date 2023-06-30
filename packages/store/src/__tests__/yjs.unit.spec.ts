@@ -1,11 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import {
-  BlockSuiteDoc,
-  createYArrayProxy,
-  createYMapProxy,
-} from '../yjs/index.js';
+import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
+
+const proxyManager = new ProxyManager();
 
 describe('blocksuite yjs', () => {
   test('doc', () => {
@@ -23,7 +21,7 @@ describe('blocksuite yjs', () => {
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = createYArrayProxy(arr);
+      const proxy = proxyManager.createYProxy(arr) as unknown[];
       expect(arr.get(0)).toBe(0);
 
       proxy.push(1);
@@ -42,7 +40,9 @@ describe('blocksuite yjs', () => {
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = createYArrayProxy(arr, { readonly: true });
+      const proxy = proxyManager.createYProxy(arr, {
+        readonly: true,
+      }) as unknown[];
       expect(arr.get(0)).toBe(0);
 
       expect(() => proxy.push(1)).toThrowError('Modify data is not allowed');
@@ -62,7 +62,9 @@ describe('blocksuite yjs', () => {
       map2.set('foo', 40);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const proxy = createYMapProxy<Record<string, any>>(map, { deep: true });
+      const proxy = proxyManager.createYProxy<Record<string, any>>(map, {
+        deep: true,
+      });
 
       expect(proxy.num).toBe(0);
       expect(proxy.obj.foo).toBe(1);
@@ -106,9 +108,12 @@ describe('blocksuite yjs', () => {
       const text = new Y.Text('hello');
       inner.set('text', text);
 
-      const proxy = createYMapProxy<{ inner: { text: Y.Text } }>(map, {
-        deep: true,
-      });
+      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(
+        map,
+        {
+          deep: true,
+        }
+      );
       proxy.inner = { ...proxy.inner };
       expect(proxy.inner.text).toBeInstanceOf(Y.Text);
       expect(proxy.inner.text.toJSON()).toBe('hello');

@@ -21,7 +21,6 @@ import {
   getRectByBlockElement,
   handleNativeRangeAtPoint,
   handleNativeRangeDragMove,
-  isEmpty,
   noop,
   Point,
   Rect,
@@ -34,18 +33,19 @@ import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
 } from '../../utils/position.js';
-import type { Selectable } from '../selection-manager.js';
 import {
-  addText,
-  getXYWH,
   handleElementChangedEffectForConnector,
   isConnectorAndBindingsAllSelected,
+} from '../components/connector/utils.js';
+import {
+  getXYWH,
   isPhasorElement,
   isTopLevelBlock,
-  mountTextEditor,
   pickBlocksByBound,
   pickTopBlock,
-} from '../utils.js';
+} from '../utils/query.js';
+import type { Selectable } from '../utils/selection-manager.js';
+import { addText, mountTextEditor } from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
@@ -253,19 +253,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _tryDeleteEmptyBlocks() {
-    const emptyBlocks = this._blocks.filter(b => isEmpty(b));
-    // always keep at least one note block
-    if (emptyBlocks.length === this._blocks.length) {
-      emptyBlocks.shift();
-    }
-
-    if (emptyBlocks.length) {
-      this._page.captureSync();
-      emptyBlocks.forEach(b => this._page.deleteBlock(b));
-    }
-  }
-
   /** Update drag handle by closest block elements */
   private _updateDragHandle(e: PointerEventState) {
     const block = this.state.selected[0];
@@ -300,8 +287,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerClick(e: PointerEventState) {
-    this._tryDeleteEmptyBlocks();
-
     const selected = this._pick(e.x, e.y);
 
     if (selected) {
@@ -333,7 +318,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     if (
       e.raw.target &&
       e.raw.target instanceof HTMLElement &&
-      e.raw.target.classList.contains('affine-edgeless-mask')
+      e.raw.target.classList.contains('affine-note-mask')
     ) {
       this.onContainerClick(e);
       this._isDoubleClickedOnMask = true;

@@ -72,7 +72,7 @@ export function handleBlockSelectionBatchDelete(
     // In the edgeless mode
     return null;
   }
-  defaultPageBlock.selection.clear();
+  defaultPageBlock.selection?.clear();
   asyncFocusRichText(page, id);
   return newBlock;
 }
@@ -536,7 +536,7 @@ export function handleKeydownAfterSelectBlocks({
   requestAnimationFrame(() => {
     const defaultPage = getDefaultPage(page);
     const newBlock = page.getBlockById(id) as BaseBlockModel;
-    defaultPage?.selection.clear();
+    defaultPage?.selection?.clear();
     focusBlockByModel(newBlock, 'end');
 
     // XXX: slash menu trigger probably shouldn't be here

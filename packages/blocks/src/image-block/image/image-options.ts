@@ -8,6 +8,7 @@ import type { Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { stopPropagation } from '../../__internal__/utils/event.js';
 import type { IPoint } from '../../__internal__/utils/types.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
@@ -15,7 +16,6 @@ import {
   downloadImage,
   focusCaption,
 } from '../../page-block/default/utils.js';
-import { stopPropagation } from '../../page-block/edgeless/utils.js';
 import type { ImageBlockModel } from '../image-model.js';
 
 export function ImageOptionsTemplate({

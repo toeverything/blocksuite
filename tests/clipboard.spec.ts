@@ -1,6 +1,7 @@
 import './utils/declare-test-window.js';
 
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 
 import { initDatabaseColumn } from './database/actions.js';
 import {
@@ -14,6 +15,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getAllNotes,
+  getEditorLocator,
   getRichTextBoundingBox,
   importMarkdown,
   initDatabaseDynamicRowWithData,
@@ -224,20 +226,14 @@ test(scoped`split block when paste`, async ({ page }) => {
   await type(page, 'aa');
   await pressEnter(page);
   await type(page, 'bb');
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 2, y: bbox.top + 2 };
-  });
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="5"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 2, y: bbox.bottom - 2 };
-  });
+  const topLeft123 = await getEditorLocator(page)
+    .locator('[data-block-id="2"] .virgo-editor')
+    .boundingBox();
+  const bottomRight789 = await getEditorLocator(page)
+    .locator('[data-block-id="5"] .virgo-editor')
+    .boundingBox();
+  assertExists(topLeft123);
+  assertExists(bottomRight789);
   await dragBetweenCoords(page, topLeft123, bottomRight789);
 
   // FIXME see https://github.com/toeverything/blocksuite/pull/878

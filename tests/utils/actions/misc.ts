@@ -6,11 +6,12 @@ import type {
   ListType,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import { type BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -61,6 +62,14 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
+
+export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
+  const rect = await page.evaluate(() => {
+    return getSelection()?.getRangeAt(0).getBoundingClientRect();
+  });
+  assertExists(rect);
+  return rect;
+};
 
 /**
  * @example
@@ -302,6 +311,7 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 
     const noteId = page.addBlock('affine:note', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    // page.addBlock('affine:surface', {}, pageId);
     page.captureSync();
     return { pageId, noteId, paragraphId };
   }, pageId);

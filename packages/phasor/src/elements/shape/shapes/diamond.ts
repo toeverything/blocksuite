@@ -1,10 +1,10 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
-import { type IBound, StrokeStyle } from '../../../consts.js';
+import { StrokeStyle } from '../../../consts.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
   linePolygonIntersects,
   pointInPolygon,
+  pointOnPolygonStoke,
 } from '../../../utils/math-utils.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
@@ -54,14 +54,22 @@ export const DiamondMethods: ShapeMethods = {
     );
   },
 
-  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
+  hitTest(
+    x: number,
+    y: number,
+    element: ShapeElement,
+    options?: HitTestOptions
+  ) {
     const points = [
-      [bound.x + bound.w / 2, bound.y + 0],
-      [bound.x + bound.w, bound.y + bound.h / 2],
-      [bound.x + bound.w / 2, bound.y + bound.h],
-      [bound.x + 0, bound.y + bound.h / 2],
+      [element.x + element.w / 2, element.y + 0],
+      [element.x + element.w, element.y + element.h / 2],
+      [element.x + element.w / 2, element.y + element.h],
+      [element.x + 0, element.y + element.h / 2],
     ];
-    return pointInPolygon([x, y], points);
+
+    return element.filled
+      ? pointInPolygon([x, y], points)
+      : pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {

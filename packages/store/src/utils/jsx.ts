@@ -96,20 +96,29 @@ export function serializeYDoc(doc: Y.Doc) {
   return json;
 }
 
+function serializeY(value: unknown): unknown {
+  if (value instanceof Y.Doc) {
+    return serializeYDoc(value);
+  }
+  if (value instanceof Y.Map) {
+    return serializeYMap(value);
+  }
+  if (value instanceof Y.Text) {
+    return serializeYText(value);
+  }
+  if (value instanceof Y.Array) {
+    return value.toArray().map(x => serializeY(x));
+  }
+  if (value instanceof Y.AbstractType) {
+    return value.toJSON();
+  }
+  return value;
+}
+
 function serializeYMap(map: Y.Map<unknown>) {
   const json: Record<string, unknown> = {};
   map.forEach((value, key) => {
-    if (value instanceof Y.Map) {
-      json[key] = serializeYMap(value);
-    } else if (value instanceof Y.Text) {
-      json[key] = serializeYText(value);
-    } else if (value instanceof Y.Array) {
-      json[key] = value.toArray();
-    } else if (value instanceof Y.AbstractType) {
-      json[key] = value.toJSON();
-    } else {
-      json[key] = value;
-    }
+    json[key] = serializeY(value);
   });
   return json;
 }

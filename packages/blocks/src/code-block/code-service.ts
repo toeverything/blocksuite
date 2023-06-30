@@ -39,7 +39,7 @@ const allIndexOf = (
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {
   setLang(model: CodeBlockModel, lang: string | null) {
-    const standardLang = getStandardLanguage(lang);
+    const standardLang = lang ? getStandardLanguage(lang) : null;
     const langName = standardLang?.id ?? FALLBACK_LANG;
     model.page.updateBlock(model, {
       language: langName,

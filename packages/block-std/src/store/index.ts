@@ -24,6 +24,7 @@ export class BlockStore<ComponentType = unknown> {
   dispose() {
     this._services.forEach(service => {
       service.dispose();
+      service.unmounted();
     });
     this._services.clear();
   }
@@ -37,28 +38,41 @@ export class BlockStore<ComponentType = unknown> {
     return spec.view;
   }
 
+  getService(flavour: string) {
+    return this._services.get(flavour);
+  }
+
   private _diffServices(
     oldSpecs: Map<string, BlockSpec<ComponentType>>,
     newSpecs: Map<string, BlockSpec<ComponentType>>
   ) {
     oldSpecs.forEach((oldSpec, flavour) => {
-      if (newSpecs.has(flavour)) {
+      if (
+        newSpecs.has(flavour) &&
+        newSpecs.get(flavour)?.service === oldSpec.service
+      ) {
         return;
       }
 
-      const service = this._services.get(oldSpec.schema.model.flavour);
+      const service = this._services.get(flavour);
       if (service) {
         service.dispose();
+        service.unmounted();
       }
-      this._services.delete(oldSpec.schema.model.flavour);
+      this._services.delete(flavour);
     });
     newSpecs.forEach((newSpec, flavour) => {
-      if (oldSpecs.has(flavour) || !newSpec.service) {
+      if (this._services.has(flavour)) {
+        return;
+      }
+
+      if (!newSpec.service) {
         return;
       }
 
       const service = new newSpec.service(this._serviceOptions);
       this._services.set(flavour, service);
+      service.mounted();
     });
   }
 

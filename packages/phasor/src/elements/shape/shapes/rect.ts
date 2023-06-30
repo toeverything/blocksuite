@@ -1,8 +1,11 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
-import { type IBound, StrokeStyle } from '../../../consts.js';
+import { StrokeStyle } from '../../../consts.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
-import { isPointIn, linePolygonIntersects } from '../../../utils/math-utils.js';
+import {
+  isPointIn,
+  linePolygonIntersects,
+  pointOnPolygonStoke,
+} from '../../../utils/math-utils.js';
 import type { IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
@@ -67,8 +70,24 @@ export const RectMethods: ShapeMethods = {
     );
   },
 
-  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
-    return isPointIn(bound, x, y);
+  hitTest(
+    x: number,
+    y: number,
+    element: ShapeElement,
+    options?: HitTestOptions
+  ) {
+    return element.filled
+      ? isPointIn(element, x, y)
+      : pointOnPolygonStoke(
+          [x, y],
+          [
+            [element.x, element.y],
+            [element.x + element.w, element.y],
+            [element.x + element.w, element.y + element.h],
+            [element.x, element.y + element.h],
+          ],
+          options?.expand ?? 1
+        );
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {

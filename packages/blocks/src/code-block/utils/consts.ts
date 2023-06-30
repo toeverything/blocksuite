@@ -9,6 +9,7 @@ export const FALLBACK_LANG = 'Plain Text';
  */
 export const PLAIN_TEXT_REGISTRATION = {
   id: FALLBACK_LANG,
+  displayName: FALLBACK_LANG,
   scopeName: 'source.plaintext',
   /**
    * Do not use this path. It is only used to match the type of `ILanguageRegistration`

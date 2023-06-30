@@ -1,6 +1,6 @@
-import '../tool-icon-button.js';
-import '../../toolbar/shape/shape-menu.js';
-import '../color-panel.js';
+import '../buttons/tool-icon-button.js';
+import '../toolbar/shape/shape-menu.js';
+import '../panel/color-panel.js';
 
 import { HiddenIcon, NoteIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -16,8 +16,8 @@ import {
   type NoteBlockModel,
 } from '../../../../note-block/note-model.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { ColorEvent } from '../color-panel.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { ColorEvent } from '../panel/color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 @customElement('edgeless-change-note-button')
@@ -72,25 +72,35 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       background: var(--affine-blue-600);
       border-radius: 4px;
       color: var(--affine-white);
+      font-size: 12px;
+      font-family: Avenir Next;
+      font-weight: 600;
+      line-height: 16px;
     }
 
     .note-status > span {
-      width: 12px;
-      height: 16px;
-      font-weight: 600;
-      font-size: 12px;
-      line-height: 16px;
+      display: flex;
+      padding: 4px 6px;
+      width: 24px;
+      flex-direction: column;
+    }
+
+    .note-status.hidden > span {
+      display: flex;
+      padding: 4px;
     }
 
     .note-status-button {
       display: flex;
-      flex-direction: row;
       justify-content: center;
       align-items: center;
-      gap: 2px;
       color: var(--affine-text-secondary-color);
-      padding: 0 4px;
+      width: 72px;
       height: 24px;
+    }
+
+    .note-status-button.hidden {
+      width: 126px;
     }
 
     .note-status-button:hover {
@@ -109,16 +119,20 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     }
 
     .note-status-button svg {
-      width: 16px;
-      height: 16px;
+      width: 20px;
+      height: 20px;
     }
 
     .note-status-button > span {
-      font-weight: 600;
       font-size: 12px;
+      font-family: Avenir Next;
+      font-style: normal;
+      font-weight: 600;
       line-height: 16px;
       display: flex;
+      justify-content: center;
       align-items: center;
+      gap: 2px;
     }
   `;
 
@@ -163,15 +177,18 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
     this.page.updateBlock(note, { hidden });
-    if (!hidden) {
-      const noteParent = this.page.getParent(note);
-      assertExists(noteParent);
-      const noteParentLastChild =
-        noteParent.children[noteParent.children.length - 1];
-      if (note !== noteParentLastChild) {
-        // move to the end
-        this.page.moveBlocks([note], noteParent, noteParentLastChild, false);
-      }
+
+    const noteParent = this.page.getParent(note);
+    assertExists(noteParent);
+    const noteParentChildNotes = noteParent.children.filter(block =>
+      matchFlavours(block, ['affine:note'])
+    ) as NoteBlockModel[];
+    const noteParentLastNote =
+      noteParentChildNotes[noteParentChildNotes.length - 1];
+
+    if (!hidden && note !== noteParentLastNote) {
+      // move to the end
+      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
     this.requestUpdate();
     // force update selection, because connector mode changed
@@ -208,14 +225,13 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (note.hidden) {
       return html`
-        <div class="note-status hidden">${HiddenIcon}</div>
+        <div class="note-status hidden"><span>${HiddenIcon}</span></div>
         <div
           @click=${() => this._setNoteHidden(note, !note.hidden)}
-          class="note-status-button"
+          class="note-status-button hidden"
         >
-          <span class="unhover">${'Hidden on page mode'}</span>
-          <span class="hover">${NoteIcon}</span>
-          <span class="hover">${'Show on page'}</span>
+          <span class="unhover"><span>Hidden on page mode</span></span>
+          <span class="hover">${NoteIcon}<span>Show on page</span></span>
         </div>
       `;
     } else {
@@ -227,10 +243,8 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
           @click=${() => this._setNoteHidden(note, !note.hidden)}
           class="note-status-button unhover"
         >
-          <span class="unhover">${NoteIcon}</span>
-          <span class="unhover">${'On Page'}</span>
-          <span class="hover">${HiddenIcon}</span>
-          <span class="hover">${'Hidden'}</span>
+          <span class="unhover">${NoteIcon}<span>On page</span></span>
+          <span class="hover">${HiddenIcon}<span>Hidden</span></span>
         </div>
         <edgeless-tool-icon-button
           .tooltip=${this._popperShow ? '' : 'Color'}

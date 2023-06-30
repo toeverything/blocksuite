@@ -9,7 +9,7 @@ import type {
 import { PAGE_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { FocusContext } from '@blocksuite/lit';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 
 import {
   AbstractSelectionManager,
@@ -33,7 +33,6 @@ import {
   isDatabaseInput,
   isDragHandle,
   isElement,
-  isEmbed,
   isInsidePageTitle,
   isSelectedBlocks,
   Point,
@@ -41,6 +40,7 @@ import {
 } from '../../../__internal__/index.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import { showFormatQuickBarByClicks } from '../../index.js';
 import {
   calcCurrentSelectionPosition,
@@ -52,7 +52,6 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
-import { EmbedResizeManager } from './embed-resize-manager.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState } from './selection-state.js';
@@ -82,26 +81,19 @@ function shouldFilterMouseEvent(event: Event): boolean {
 export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPageBlockComponent> {
   readonly state = new PageSelectionState('none');
   readonly slots: DefaultSelectionSlots;
-  private readonly _embedResizeManager: EmbedResizeManager;
 
   constructor({
     container,
     dispatcher,
-    page,
-    mouseRoot,
     slots,
   }: {
     container: DefaultPageBlockComponent;
     dispatcher: UIEventDispatcher;
-    page: Page;
-    mouseRoot: HTMLElement;
     slots: DefaultSelectionSlots;
   }) {
     super(container, dispatcher);
 
     this.slots = slots;
-
-    this._embedResizeManager = new EmbedResizeManager(this.state);
 
     let isDragging = false;
     this._add('dragStart', ctx => {
@@ -193,9 +185,11 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     );
   }
 
-  private _ensureNoteExists() {
-    const hasNote = this.page.hasFlavour('affine:note');
-    if (!hasNote) {
+  private _ensureVisibleNoteExists() {
+    const notes = this.page.getBlockByFlavour(
+      'affine:note'
+    ) as NoteBlockModel[];
+    if (notes.length === 0 || notes.every(note => note.hidden)) {
       const noteId = this.page.addBlock('affine:note', {}, this.page.root);
       this.page.addBlock('affine:paragraph', {}, noteId);
       return true;
@@ -221,12 +215,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       (isDragHandle(target as Element) || isSelectedBlocks(target as Element))
     ) {
       PreviewDragHandlers.onStart(this, e);
-      return;
-    }
-
-    if (isEmbed(e)) {
-      this.state.type = 'embed';
-      this._embedResizeManager.onStart(e);
       return;
     }
 
@@ -261,10 +249,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       BlockDragHandlers.onMove(this, e);
       return;
     }
-
-    if (this.state.type === 'embed') {
-      return this._embedResizeManager.onMove(e);
-    }
   };
 
   private _onContainerDragEnd = (ctx: UIEventStateContext) => {
@@ -279,8 +263,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       NativeDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'block') {
       BlockDragHandlers.onEnd(this, e);
-    } else if (this.state.type === 'embed') {
-      this._embedResizeManager.onEnd();
     }
 
     if (this.page.readonly) return;
@@ -343,7 +325,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       keys: { shift },
     } = e;
 
-    const hasAddedNote = this._ensureNoteExists();
+    const hasAddedNote = this._ensureVisibleNoteExists();
 
     if (hasAddedNote && isInsidePageTitle(target)) {
       requestAnimationFrame(() => {

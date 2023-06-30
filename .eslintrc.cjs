@@ -36,6 +36,15 @@ const createPattern = packageName => [
     message: 'Do not import package itself',
     allowTypeImports: false,
   },
+  ...(packageName === 'blocks'
+    ? [
+        {
+          group: ['**/std.js'],
+          message: 'Do not import from std',
+          allowTypeImports: false,
+        },
+      ]
+    : []),
 ];
 
 module.exports = {

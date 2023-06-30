@@ -1,4 +1,4 @@
-import '../tool-icon-button.js';
+import '../buttons/tool-icon-button.js';
 import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
@@ -21,12 +21,13 @@ import { join } from 'lit/directives/join.js';
 import {
   atLeastNMatches,
   groupBy,
-} from '../../../../__internal__/utils/std.js';
+} from '../../../../__internal__/utils/common.js';
+import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { Selectable } from '../../selection-manager.js';
-import { isTopLevelBlock, stopPropagation } from '../../utils.js';
+import { isTopLevelBlock } from '../../utils/query.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { Selectable } from '../../utils/selection-manager.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
@@ -50,7 +51,7 @@ export class EdgelessComponentToolbar extends LitElement {
       align-items: center;
       height: 48px;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
+      box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
     }
 

@@ -1,14 +1,14 @@
-import './menu.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { DatabaseMenuComponent } from '../common/menu.js';
+import {
+  popFilterableSimpleMenu,
+  popMenu,
+} from '../../components/menu/menu.js';
 import { ViewOperationMap } from '../common/view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import { createDatabasePopup } from './popup.js';
 
 @customElement('database-view-header')
 export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
@@ -49,45 +49,55 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   setViewId!: (id: string) => void;
 
-  @query('.database-view-header')
-  private _container!: HTMLDivElement;
-
-  popupContainer() {
-    return this._container.parentElement?.parentElement?.parentElement;
-  }
-
   _addViewMenu(event: MouseEvent) {
-    const menu = new DatabaseMenuComponent();
-    menu.style.zIndex = '2';
-    menu.menuGroup = Object.keys(ViewOperationMap).map(type => ({
-      type: 'action',
-      label: type,
-      click: () => {
-        const view = this.model.addView(type as keyof typeof ViewOperationMap);
-        this.setViewId(view.id);
-        this.model.applyViewsUpdate();
-      },
-    }));
-    createDatabasePopup(event.target as HTMLElement, menu);
-  }
-
-  _viewMenu(event: MouseEvent, id: string) {
-    event.preventDefault();
-    const menu = new DatabaseMenuComponent();
-    menu.menuGroup = [
-      {
-        label: 'Delete',
-        click: () => {
-          if (this.model.getViewList().length <= 1) {
-            return;
-          }
-          this.model.deleteView(id);
+    popFilterableSimpleMenu(
+      event.target as HTMLElement,
+      Object.keys(ViewOperationMap).map(type => ({
+        type: 'action',
+        name: type,
+        select: () => {
+          const view = this.model.addView(
+            type as keyof typeof ViewOperationMap
+          );
+          this.setViewId(view.id);
           this.model.applyViewsUpdate();
         },
-        type: 'action',
+      }))
+    );
+  }
+
+  _clickView(event: MouseEvent, id: string) {
+    if (this.currentView !== id) {
+      this.setViewId(id);
+      return;
+    }
+    const view = this.model.views.find(v => v.id === id);
+    if (!view) {
+      return;
+    }
+    popMenu(event.target as HTMLElement, {
+      options: {
+        input: {
+          initValue: view.name,
+          onComplete: text => {
+            this.model.updateView(view.id, data => {
+              data.name = text;
+            });
+            this.model.applyViewsUpdate();
+          },
+        },
+        items: [
+          {
+            type: 'action',
+            name: 'Delete',
+            select: () => {
+              this.model.deleteView(view.id);
+              this.model.applyViewsUpdate();
+            },
+          },
+        ],
       },
-    ];
-    createDatabasePopup(event.target as HTMLElement, menu);
+    });
   }
 
   override connectedCallback() {
@@ -112,9 +122,8 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
                 : ''}"
             >
               <div
-                @contextmenu="${(event: MouseEvent) =>
-                  this._viewMenu(event, view.id)}"
-                @click="${() => this.setViewId(view.id)}"
+                @click="${(event: MouseEvent) =>
+                  this._clickView(event, view.id)}"
                 class="database-view-button"
               >
                 ${view.name}

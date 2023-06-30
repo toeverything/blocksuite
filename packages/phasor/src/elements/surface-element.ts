@@ -1,8 +1,8 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 import type * as Y from 'yjs';
 
 import type { IVec } from '../index.js';
 import type { Renderer } from '../renderer.js';
+import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
 import { isPointIn } from '../utils/math-utils.js';
 import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
@@ -16,8 +16,7 @@ export interface ISurfaceElement {
 }
 
 export interface HitTestOptions {
-  expandStroke: boolean;
-  fillHollow: boolean;
+  expand: number;
 }
 
 export type ComputedValue = (value: string) => string;

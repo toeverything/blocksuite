@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
-import './components/edgeless-selected-rect.js';
-import './toolbar/edgeless-toolbar.js';
+import './components/rects/edgeless-selected-rect.js';
+import './components/toolbar/edgeless-toolbar.js';
 
 import {
   BLOCK_ID_ATTR,
@@ -64,32 +64,32 @@ import type {
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
-import { EdgelessBlockChildrenContainer } from './components/block-children-container.js';
-import { EdgelessDraggingArea } from './components/dragging-area.js';
-import { EdgelessHoverRect } from './components/hover-rect.js';
-import { FIT_TO_SCREEN_PADDING } from './consts.js';
-import { createDragHandle } from './create-drag-handle.js';
-import { bindEdgelessHotkeys } from './hotkey.js';
-import { NoteResizeObserver } from './note-resize-observer.js';
-import {
-  EdgelessSelectionManager,
-  type EdgelessSelectionState,
-  type Selectable,
-} from './selection-manager.js';
-import { EdgelessSnapManager } from './snap-manager.js';
+import { createDragHandle } from './components/create-drag-handle.js';
+import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
+import { EdgelessNotesStatus } from './components/notes-status.js';
+import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
+import { EdgelessHoverRect } from './components/rects/hover-rect.js';
 import {
   EdgelessToolbar,
   type ZoomAction,
-} from './toolbar/edgeless-toolbar.js';
+} from './components/toolbar/edgeless-toolbar.js';
+import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
   DEFAULT_NOTE_OFFSET_Y,
   DEFAULT_NOTE_WIDTH,
-  getBackgroundGrid,
-  getCursorMode,
-  xywhArrayToObject,
-} from './utils.js';
+  FIT_TO_SCREEN_PADDING,
+} from './utils/consts.js';
+import { xywhArrayToObject } from './utils/convert.js';
+import { bindEdgelessHotkeys } from './utils/hotkey.js';
+import { NoteResizeObserver } from './utils/note-resize-observer.js';
+import { getBackgroundGrid, getCursorMode } from './utils/query.js';
+import {
+  type EdgelessSelectionState,
+  type Selectable,
+} from './utils/selection-manager.js';
+import { EdgelessSnapManager } from './utils/snap-manager.js';
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -110,7 +110,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends BlockElement<PageBlockModel>
+  extends BlockElement<PageBlockModel, EdgelessPageService>
   implements EdgelessContainer, BlockHost
 {
   static override styles = css`
@@ -230,7 +230,11 @@ export class EdgelessPageBlockComponent
 
   getService = getService;
 
-  selection!: EdgelessSelectionManager;
+  get selection() {
+    const selection = this.service?.selection;
+    assertExists(selection, 'Selection should be initialized before used');
+    return selection;
+  }
 
   snap!: EdgelessSnapManager;
 
@@ -536,6 +540,12 @@ export class EdgelessPageBlockComponent
     });
   }
 
+  getSortedElementsByBound(bound: IBound) {
+    return this.sortedNotes.filter(element => {
+      return intersects(bound, xywhArrayToObject(element));
+    });
+  }
+
   // Just update `index`, we don't change the order of the notes in the children.
   reorderNotes = ({ elements, type }: ReorderingAction<Selectable>) => {
     const updateIndexes = (keys: string[], elements: Selectable[]) => {
@@ -824,10 +834,7 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
-      this.selection = new EdgelessSelectionManager(
-        this,
-        this.root.uiEventDispatcher
-      );
+      this.service?.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
     }
     if (changedProperties.has('edgelessTool')) {
@@ -954,6 +961,7 @@ export class EdgelessPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
+    this.service?.unmountSelectionManager();
   }
 
   override render() {
@@ -968,14 +976,14 @@ export class EdgelessPageBlockComponent
     const { state, draggingArea } = selection;
     const { viewport } = surface;
 
-    const childrenContainer = EdgelessBlockChildrenContainer(
+    const notesContainer = EdgelessNotesContainer(
       this.sortedNotes,
       state.active,
       this.root.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
-    const draggingAreaTpl = EdgelessDraggingArea(draggingArea);
+    const draggingAreaTpl = EdgelessDraggingAreaRect(draggingArea);
 
     const hoverState = selection.getHoverState();
     const hoverRectTpl = EdgelessHoverRect(hoverState);
@@ -1004,7 +1012,7 @@ export class EdgelessPageBlockComponent
         style=${styleMap(blockContainerStyle)}
       >
         <div class="affine-block-children-container edgeless">
-          <div class="affine-edgeless-layer">${childrenContainer}</div>
+          <div class="affine-edgeless-layer">${notesContainer}</div>
         </div>
         <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}
@@ -1029,6 +1037,7 @@ export class EdgelessPageBlockComponent
               ></edgeless-selected-rect>
             `
           : nothing}
+        ${EdgelessNotesStatus(this, this.sortedNotes)}
       </div>
     `;
   }
