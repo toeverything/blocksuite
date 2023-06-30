@@ -1,5 +1,6 @@
 export * from './block-hub.js';
 export * from './drag-handle.js';
+export * from './file-drop-manager.js';
 export * from './import-page/index.js';
 export * from './menu-divider.js';
 export * from './remote-selection/remote-selection.js';

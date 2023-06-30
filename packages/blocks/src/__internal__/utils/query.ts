@@ -1146,3 +1146,10 @@ export function isDragHandle(target: Element) {
 export function hasDatabase(elements: Element[]) {
   return elements.some(isDatabase);
 }
+
+/**
+ * Returns the last note element.
+ */
+export function getLastNoteBlockElement(parent: Element) {
+  return parent.querySelector('affine-note:last-of-type');
+}
