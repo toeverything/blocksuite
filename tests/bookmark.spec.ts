@@ -44,12 +44,12 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
+      prop:bookmarkTitle=""
       prop:caption=""
       prop:crawled={false}
       prop:description=""
       prop:icon=""
       prop:image=""
-      prop:bookmarkTitle=""
       prop:url="https://google.com"
     />
   </affine:note>
@@ -87,12 +87,12 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
       prop:type="text"
     />
     <affine:bookmark
+      prop:bookmarkTitle=""
       prop:caption=""
       prop:crawled={false}
       prop:description=""
       prop:icon=""
       prop:image=""
-      prop:bookmarkTitle=""
       prop:url="https://google.com"
     />
   </affine:note>
