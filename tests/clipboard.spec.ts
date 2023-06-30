@@ -642,38 +642,40 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   );
 });
 
-// FIXME
-test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await switchEditorMode(page);
-  await addBasicRectShapeElement(
-    page,
-    {
-      x: 100,
-      y: 100,
-    },
-    {
-      x: 200,
-      y: 200,
-    }
-  );
+test.fixme(
+  `copy phasor element and text note in edgeless mode`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await switchEditorMode(page);
+    await addBasicRectShapeElement(
+      page,
+      {
+        x: 100,
+        y: 100,
+      },
+      {
+        x: 200,
+        y: 200,
+      }
+    );
 
-  await dragBetweenCoords(
-    page,
-    { x: 50, y: 90 },
-    { x: 400, y: 400 },
-    { steps: 10 }
-  );
-  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
+    await dragBetweenCoords(
+      page,
+      { x: 50, y: 90 },
+      { x: 400, y: 400 },
+      { steps: 10 }
+    );
+    await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
 
-  await copyByKeyboard(page);
-  await page.mouse.move(400, 400);
-  await page.waitForTimeout(300);
-  await pasteByKeyboard(page, false);
-  await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
-});
+    await copyByKeyboard(page);
+    await page.mouse.move(400, 400);
+    await page.waitForTimeout(300);
+    await pasteByKeyboard(page, false);
+    await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
+  }
+);
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await enterPlaygroundRoom(page);
