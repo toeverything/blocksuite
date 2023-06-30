@@ -178,9 +178,13 @@ export type PanTool = {
   panning: boolean;
 };
 
+export type NoteChildrenFlavour = ServiceFlavour;
+
 export type NoteTool = {
   type: 'note';
   background: CssVariableName;
+  childFlavour: NoteChildrenFlavour;
+  childType: string | null;
 };
 
 export type ConnectorTool = {

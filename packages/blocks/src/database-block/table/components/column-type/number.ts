@@ -83,6 +83,10 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
   }
 
   private _setValue = (str: string = this._inputEle.value) => {
+    if (!str) {
+      this.onChange(undefined);
+      return;
+    }
     const value = Number.parseFloat(str);
     if (Object.is(value, NaN)) {
       this._inputEle.value = `${this.value ?? ''}`;

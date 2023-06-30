@@ -3,18 +3,25 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { type NoteTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
-import { addNote } from '../utils/note.js';
+import { addNote, type NoteOptions } from '../utils/note.js';
 import { EdgelessToolController } from './index.js';
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {
   readonly tool = <NoteTool>{
     type: 'note',
+    background: '--affine-background-secondary-color',
+    childFlavour: 'affine:paragraph',
+    childType: 'text',
   };
 
   private _dragStartEvent: PointerEventState | null = null;
 
-  private _addNote(e: PointerEventState, width = DEFAULT_NOTE_WIDTH) {
-    addNote(this._edgeless, this._page, e, width);
+  private _addNote(
+    e: PointerEventState,
+    width = DEFAULT_NOTE_WIDTH,
+    options: NoteOptions
+  ) {
+    addNote(this._edgeless, this._page, e, width, options);
   }
 
   onContainerPointerDown(e: PointerEventState): void {
@@ -22,7 +29,12 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    this._addNote(e);
+    const { childFlavour, childType } = this.tool;
+    const options = {
+      childFlavour,
+      childType,
+    };
+    this._addNote(e, DEFAULT_NOTE_WIDTH, options);
   }
 
   onContainerContextMenu(e: PointerEventState): void {
@@ -53,6 +65,11 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   onContainerDragEnd(e: PointerEventState) {
+    const { childFlavour, childType } = this.tool;
+    const options = {
+      childFlavour,
+      childType,
+    };
     if (this._dragStartEvent) {
       const startEvent =
         e.x > this._dragStartEvent.x ? this._dragStartEvent : e;
@@ -60,7 +77,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
         Math.abs(e.x - this._dragStartEvent.x),
         DEFAULT_NOTE_WIDTH
       );
-      this._addNote(startEvent, width);
+      this._addNote(startEvent, width, options);
     }
     this._dragStartEvent = null;
     this._draggingArea = null;

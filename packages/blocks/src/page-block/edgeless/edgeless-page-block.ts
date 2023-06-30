@@ -72,11 +72,13 @@ import { EdgelessNotesContainer } from './components/edgeless-notes-container.js
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
-import {
-  EdgelessToolbar,
-  type ZoomAction,
-} from './components/toolbar/edgeless-toolbar.js';
+import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
+import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
+import {
+  EdgelessZoomToolbar,
+  type ZoomAction,
+} from './components/zoom/zoom-tool-bar.js';
 import { EdgelessConnectorManager } from './connector-manager.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
@@ -207,6 +209,26 @@ export class EdgelessPageBlockComponent
       z-index: 1;
       border: var(--affine-border-width) solid var(--affine-blue);
     }
+
+    edgeless-zoom-toolbar,
+    zoom-bar-toggle-button {
+      position: fixed;
+      bottom: 20px;
+      left: 12px;
+      z-index: var(--affine-z-index-popover);
+    }
+
+    @media screen and (max-width: 1048px) {
+      edgeless-zoom-toolbar {
+        display: none;
+      }
+    }
+
+    @media screen and (min-width: 1048px) {
+      zoom-bar-toggle-button {
+        display: none;
+      }
+    }
   `;
 
   flavour = 'edgeless' as const;
@@ -217,6 +239,8 @@ export class EdgelessPageBlockComponent
   components = {
     dragHandle: <DragHandle | null>null,
     toolbar: <EdgelessToolbar | null>null,
+    zoomToolbar: <EdgelessZoomToolbar | null>null,
+    zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
   mouseRoot!: HTMLElement;
@@ -370,13 +394,22 @@ export class EdgelessPageBlockComponent
   private _handleToolbarFlag() {
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
+      const zoomToolBar = new EdgelessZoomToolbar(this);
+      const zoomBarToggleButton = new ZoomBarToggleButton(this);
+
       this.appendChild(toolbar);
+      this.appendChild(zoomToolBar);
+      this.appendChild(zoomBarToggleButton);
       this.components.toolbar = toolbar;
+      this.components.zoomToolbar = zoomToolBar;
+      this.components.zoomBarToggleButton = zoomBarToggleButton;
     };
 
     if (
       this.page.awarenessStore.getFlag('enable_edgeless_toolbar') &&
-      !this.components.toolbar
+      !this.components.toolbar &&
+      !this.components.zoomToolbar &&
+      !this.components.zoomBarToggleButton
     ) {
       createToolbar();
     }
@@ -392,7 +425,11 @@ export class EdgelessPageBlockComponent
           }
 
           this.components.toolbar?.remove();
+          this.components.zoomToolbar?.remove();
+          this.components.zoomBarToggleButton?.remove();
           this.components.toolbar = null;
+          this.components.zoomToolbar = null;
+          this.components.zoomBarToggleButton = null;
         },
         {
           filter: msg => msg.id === this.page.doc.clientID,
@@ -548,7 +585,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
     _disposables.add(
       slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.toolbar?.setZoomByAction(action)
+        this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(
