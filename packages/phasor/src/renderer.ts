@@ -6,7 +6,7 @@ import { GridManager } from './grid.js';
 import { RoughCanvas } from './rough/canvas.js';
 import { Bound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
-import { clamp } from './utils/math-utils.js';
+import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
 import { Vec } from './utils/vec.js';
 
@@ -301,7 +301,10 @@ export class Renderer implements SurfaceViewport {
       ctx.save();
 
       const localRecord = element.localRecord;
-      if (intersects(element, bound) && localRecord.display) {
+      if (
+        intersects(getBoundsWithRotation(element), bound) &&
+        localRecord.display
+      ) {
         ctx.globalAlpha = localRecord.opacity;
         const dx = element.x - bound.x;
         const dy = element.y - bound.y;

@@ -21,11 +21,11 @@ function square(num: number) {
   return num * num;
 }
 
-function sumSqr(v: number[], w: number[]) {
+function sumSqr(v: IVec, w: IVec) {
   return square(v[0] - w[0]) + square(v[1] - w[1]);
 }
 
-function distToSegmentSquared(p: number[], v: number[], w: number[]) {
+function distToSegmentSquared(p: IVec, v: IVec, w: IVec) {
   const l2 = sumSqr(v, w);
   if (l2 == 0) return sumSqr(p, v);
   let t = ((p[0] - v[0]) * (w[0] - v[0]) + (p[1] - v[1]) * (w[1] - v[1])) / l2;
@@ -35,7 +35,7 @@ function distToSegmentSquared(p: number[], v: number[], w: number[]) {
   return sumSqr(p, [v[0] + t * (w[0] - v[0]), v[1] + t * (w[1] - v[1])]);
 }
 
-function distToSegment(p: number[], v: number[], w: number[]) {
+function distToSegment(p: IVec, v: IVec, w: IVec) {
   return Math.sqrt(distToSegmentSquared(p, v, w));
 }
 
@@ -53,7 +53,7 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
 }
 
-export function arrayAlmostEqual(a: number[], b: number[], epsilon = 0.0001) {
+export function arrayAlmostEqual(a: IVec, b: IVec, epsilon = 0.0001) {
   return a.length === b.length && a.every((v, i) => almostEqual(v, b[i]));
 }
 
@@ -62,8 +62,8 @@ export function clamp(n: number, min: number, max?: number): number {
 }
 
 export function pointInEllipse(
-  A: number[],
-  C: number[],
+  A: IVec,
+  C: IVec,
   rx: number,
   ry: number,
   rotation = 0
@@ -77,7 +77,7 @@ export function pointInEllipse(
   return (tdx * tdx) / (rx * rx) + (tdy * tdy) / (ry * ry) <= 1;
 }
 
-export function pointInPolygon(p: number[], points: IVec[]): boolean {
+export function pointInPolygon(p: IVec, points: IVec[]): boolean {
   let wn = 0; // winding number
 
   points.forEach((a, i) => {
@@ -95,7 +95,7 @@ export function pointInPolygon(p: number[], points: IVec[]): boolean {
 }
 
 export function pointOnEllipse(
-  point: number[],
+  point: IVec,
   rx: number,
   ry: number,
   threshold: number

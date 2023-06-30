@@ -20,8 +20,7 @@ import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
-import { Bound, contains, getCommonBound } from './utils/bound.js';
-import { getQuadBoundsWithRotation } from './utils/math-utils.js';
+import { Bound, getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
   generateKeyBetween,
@@ -263,17 +262,13 @@ export class SurfaceManager {
     }
   ): SurfaceElement[] {
     const size = options.expand;
-    const bound: IBound = {
+    const candidates = this._renderer.gridManager.search({
       x: x - size / 2,
       y: y - size / 2,
       w: size,
       h: size,
-    };
-    const candidates = this._renderer.gridManager.search(bound);
-    const picked = candidates.filter(element => {
-      return element.hitTest(x, y, options);
     });
-
+    const picked = candidates.filter(element => element.hitTest(x, y, options));
     return picked;
   }
 
@@ -285,18 +280,14 @@ export class SurfaceManager {
   pickByBound(bound: IBound): SurfaceElement[] {
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: SurfaceElement) => {
+      const b = Bound.from(bound);
       return (
-        contains(
-          bound,
-          Bound.fromDOMRect(getQuadBoundsWithRotation(element))
-        ) ||
-        element.containedByBounds(Bound.from(bound)) ||
-        Bound.from(bound).points.some((point, i, points) =>
+        element.containedByBounds(b) ||
+        b.points.some((point, i, points) =>
           element.intersectWithLine(point, points[(i + 1) % points.length])
         )
       );
     });
-
     return picked;
   }
 
