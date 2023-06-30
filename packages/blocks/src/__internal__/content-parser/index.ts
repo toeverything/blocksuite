@@ -61,9 +61,13 @@ export class ContentParser {
   public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[1].children
-    );
+    const pageBlock = {
+      id: root.id,
+      children: root.children
+        .filter(child => child.flavour === 'affine:note')
+        .map(child => this._getSelectedBlock(child)),
+    };
+    const htmlContent = await this.block2Html([pageBlock]);
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
       htmlContent
@@ -73,9 +77,13 @@ export class ContentParser {
   public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[1].children
-    );
+    const pageBlock = {
+      id: root.id,
+      children: root.children
+        .filter(child => child.flavour === 'affine:note')
+        .map(child => this._getSelectedBlock(child)),
+    };
+    const htmlContent = await this.block2Html([pageBlock]);
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       htmlContent
