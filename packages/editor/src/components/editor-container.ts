@@ -72,6 +72,7 @@ export class EditorContainer
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
     pageModeSwitched: new Slot(),
+    tagClicked: new Slot<{ tagId: string }>(),
   };
 
   private _getPageInfo() {
