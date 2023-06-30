@@ -108,11 +108,6 @@ export abstract class SurfaceElement<
     return h;
   }
 
-  get widthAndHeight() {
-    const [, , w, h] = this.deserializeXYWH();
-    return [w, h];
-  }
-
   get localRecord() {
     return this.surface.getElementLocalRecord(this.id);
   }

@@ -79,15 +79,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
     // const insideBoundingBox = super.hitTest(x, y, options);
     // if (!insideBoundingBox) return false;
 
-    const {
-      x,
-      y,
-      rotate,
-      widthAndHeight: [w, h],
-      points,
-      _testCtx,
-    } = this;
-
+    const { rotate, points, _testCtx } = this;
+    const [x, y, w, h] = this.deserializeXYWH();
     const command = getSvgPathFromStroke(getSolidStrokePoints(points, 3));
     const path = new Path2D(command);
 
@@ -109,13 +102,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
-    const {
-      points,
-      lineWidth,
-      color,
-      rotate,
-      widthAndHeight: [w, h],
-    } = this;
+    const { points, lineWidth, color, rotate } = this;
+    const [, , w, h] = this.deserializeXYWH();
     const cx = w / 2;
     const cy = h / 2;
 

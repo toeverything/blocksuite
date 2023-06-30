@@ -28,9 +28,8 @@ export const DiamondMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
-      widthAndHeight: [w, h],
     } = element;
-
+    const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;

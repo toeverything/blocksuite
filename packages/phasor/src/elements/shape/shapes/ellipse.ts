@@ -27,9 +27,8 @@ export const EllipseMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
-      widthAndHeight: [w, h],
     } = element;
-
+    const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = Math.max(1, w - renderOffset * 2);
     const renderHeight = Math.max(1, h - renderOffset * 2);

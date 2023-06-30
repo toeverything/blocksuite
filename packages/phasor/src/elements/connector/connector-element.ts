@@ -75,8 +75,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       controllers,
       mode,
       // rotate
-      // widthAndHeight: [w, h],
     } = this;
+    // const [, , w, h] = this.deserializeXYWH();
     // const cx = w / 2;
     // const cy = h / 2;
 

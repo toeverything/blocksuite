@@ -40,11 +40,8 @@ export class DebugElement extends SurfaceElement<IDebug> {
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix): void {
-    const {
-      color,
-      rotate,
-      widthAndHeight: [w, h],
-    } = this;
+    const { color, rotate } = this;
+    const [, , w, h] = this.deserializeXYWH();
     const cx = w / 2;
     const cy = h / 2;
 

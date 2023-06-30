@@ -45,15 +45,8 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
-    const {
-      text,
-      color,
-      fontSize,
-      fontFamily,
-      textAlign,
-      rotate,
-      widthAndHeight: [w, h],
-    } = this;
+    const { text, color, fontSize, fontFamily, textAlign, rotate } = this;
+    const [, , w, h] = this.deserializeXYWH();
     const cx = w / 2;
     const cy = h / 2;
 
