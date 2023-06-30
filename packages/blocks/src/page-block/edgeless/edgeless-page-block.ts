@@ -222,7 +222,7 @@ export class EdgelessPageBlockComponent
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
-    elementDimensionsUpdated: new Slot<string>(),
+    elementSizeUpdated: new Slot<string>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -309,7 +309,7 @@ export class EdgelessPageBlockComponent
     this._disposables.add(
       this.surface.slots.elementUpdated.on(({ id, props }) => {
         if ('xywh' in props) {
-          this.slots.elementDimensionsUpdated.emit(id);
+          this.slots.elementSizeUpdated.emit(id);
         }
         const element = this.surface.pickById(id);
         if (element instanceof ConnectorElement) {
@@ -401,14 +401,14 @@ export class EdgelessPageBlockComponent
         if (e.type === 'update') {
           const block = page.getBlockById(e.id);
           if (block && block.flavour === 'affine:note' && 'xywh' in e.props) {
-            this.slots.elementDimensionsUpdated.emit(e.id);
+            this.slots.elementSizeUpdated.emit(e.id);
           }
         }
       })
     );
 
     _disposables.add(
-      slots.elementDimensionsUpdated.on(id => {
+      slots.elementSizeUpdated.on(id => {
         const element =
           this.surface.pickById(id) ??
           <TopLevelBlockModel>page.getBlockById(id);
