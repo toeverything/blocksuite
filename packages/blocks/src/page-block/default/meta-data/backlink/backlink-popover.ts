@@ -1,5 +1,4 @@
 import {
-  ArrowDownIcon,
   DualLinkIcon16,
   LinkedPageIcon,
   PageIcon,
@@ -9,21 +8,24 @@ import { assertExists, type Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import type { BlockHost } from '../../__internal__/utils/types.js';
+import type { AffineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
+import type { BlockHost } from '../../../../__internal__/utils/types.js';
+import { listenBacklinkList } from './backlink.js';
 
 const styles = css`
   :host {
     position: relative;
+    display: flex;
   }
 
   .btn {
+    padding: 0 12px;
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     border: none;
-    padding: 1px 4px;
-    border-radius: 5px;
+    height: 30px;
+    border-radius: 8px;
     gap: 4px;
     background: transparent;
     cursor: pointer;
@@ -52,16 +54,19 @@ const styles = css`
   .backlink-popover {
     position: absolute;
     left: 0;
-    bottom: -8px;
+    bottom: 0;
+    transform: translateY(100%);
+    z-index: 1;
+    padding-top: 8px;
+  }
 
+  .menu {
     display: flex;
     flex-direction: column;
     padding: 8px 4px;
     background: var(--affine-white);
     box-shadow: var(--affine-menu-shadow);
     border-radius: 12px;
-    transform: translateY(100%);
-    z-index: 1;
   }
 
   .backlink-popover .group-title {
@@ -79,6 +84,7 @@ const styles = css`
     -webkit-appearance: none;
     width: 4px;
   }
+
   ::-webkit-scrollbar-thumb {
     border-radius: 2px;
     background-color: #b1b1b1;
@@ -110,13 +116,10 @@ export class BacklinkButton extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     this.tabIndex = 0;
-
     const page = this.page;
     assertExists(page);
-    const backlinkIndexer = page.workspace.indexer.backlink;
-    this._backlinks = backlinkIndexer.getBacklink(page.id);
-    backlinkIndexer.slots.indexUpdated.on(() => {
-      this._backlinks = backlinkIndexer.getBacklink(page.id);
+    listenBacklinkList(page, list => {
+      this._backlinks = list;
       if (!this._backlinks.length) {
         this._showPopover = false;
       }
@@ -143,13 +146,14 @@ export class BacklinkButton extends WithDisposable(LitElement) {
     if (!linkedBacklinks.length) {
       return null;
     }
-    return html`<div class="btn" @click=${this.onClick}>
-        ${DualLinkIcon16}<span>Backlinks (${linkedBacklinks.length})</span
-        >${ArrowDownIcon}
+    return html`
+      <div class="btn" @click="${this.onClick}">
+        ${DualLinkIcon16}<span>Backlinks (${linkedBacklinks.length})</span>
+        ${this._showPopover
+          ? backlinkPopover(this.host, linkedBacklinks)
+          : null}
       </div>
-      ${this._showPopover
-        ? backlinkPopover(this.host, linkedBacklinks)
-        : null}`;
+    `;
   }
 }
 
@@ -157,32 +161,37 @@ const DEFAULT_PAGE_NAME = 'Untitled';
 
 function backlinkPopover(host: BlockHost, backlinks: BackLink[]) {
   const metas = host.page.workspace.meta.pageMetas;
-  return html`<div class="backlink-popover">
-    <div class="group-title">Linked to this page</div>
-    <div class="group" style="overflow-y: scroll; max-height: 372px;">
-      ${backlinks.map(({ pageId, blockId, type }) => {
-        const icon = type === 'LinkedPage' ? LinkedPageIcon : PageIcon;
-        const pageMeta = metas.find(page => page.id === pageId);
-        if (!pageMeta) {
-          console.warn('Unexpected page meta not found', pageId);
-        }
-        const title = pageMeta?.title || DEFAULT_PAGE_NAME;
-        return html`<icon-button
-          width="248px"
-          height="32px"
-          text=${title}
-          @click=${() => {
-            if (pageId === host.page.id) {
-              // On the current page, no need to jump
-              // TODO jump to block
-              return;
-            }
-            host.slots.pageLinkClicked.emit({ pageId, blockId });
-          }}
-        >
-          ${icon}
-        </icon-button>`;
-      })}
+  return html` <div class="backlink-popover">
+    <div class="menu">
+      <div class="group-title">Linked to this page</div>
+      <div class="group" style="overflow-y: scroll; max-height: 372px;">
+        ${backlinks.map(({ pageId, blockId, type }) => {
+          const icon = type === 'LinkedPage' ? LinkedPageIcon : PageIcon;
+          const pageMeta = metas.find(page => page.id === pageId);
+          if (!pageMeta) {
+            console.warn('Unexpected page meta not found', pageId);
+          }
+          const title = pageMeta?.title || DEFAULT_PAGE_NAME;
+          return html` <icon-button
+            width="248px"
+            height="32px"
+            text="${title}"
+            @click="${(e: MouseEvent) => {
+              if (pageId === host.page.id) {
+                // On the current page, no need to jump
+                // TODO jump to block
+                return;
+              }
+              host.slots.pageLinkClicked.emit({
+                pageId,
+                blockId,
+              });
+            }}"
+          >
+            ${icon}
+          </icon-button>`;
+        })}
+      </div>
     </div>
   </div>`;
 }

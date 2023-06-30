@@ -1,4 +1,4 @@
-import './default/backlink-popover.js';
+import './default/meta-data/backlink/backlink-popover.js';
 
 import type { LitBlockSpec } from '@blocksuite/lit';
 import { literal } from 'lit/static-html.js';

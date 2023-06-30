@@ -545,15 +545,6 @@ export class DefaultPageBlockComponent
       child => this.root.renderModel(child)
     )}`;
 
-    const renderMetaData = this.page.workspace.awarenessStore.getFlag(
-      'enable_page_tags'
-    )
-      ? html` <affine-page-meta-data
-          .host="${this}"
-          .page="${this.page}"
-        ></affine-page-meta-data>`
-      : null;
-
     return html`
       <div class="affine-default-viewport">
         <div class="affine-default-page-block-container">
@@ -564,11 +555,10 @@ export class DefaultPageBlockComponent
                 ? 'affine-default-page-block-title-empty'
                 : ''}"
             ></div>
-            ${renderMetaData}
-            <backlink-button
+            <affine-page-meta-data
               .host="${this}"
               .page="${this.page}"
-            ></backlink-button>
+            ></affine-page-meta-data>
           </div>
           ${content}
         </div>
