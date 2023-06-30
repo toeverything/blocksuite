@@ -52,10 +52,11 @@ export class FileDropManager {
   }
 
   onDragOver = (event: DragEvent) => {
-    const files = event.dataTransfer?.files;
-    if (!files || !files.length) return;
-
     event.preventDefault();
+
+    // allow only external drag-and-drop files
+    const effectAllowed = event.dataTransfer?.effectAllowed ?? 'none';
+    if (effectAllowed !== 'all') return;
 
     const { clientX, clientY } = event;
     const point = new Point(clientX, clientY);
@@ -65,7 +66,8 @@ export class FileDropManager {
     let rect = null;
     if (element) {
       const model = getModelByBlockElement(element);
-      result = calcDropTarget(point, model, element, [], 1);
+      // TODO: Currently only picture types are supported, `affine:image`
+      result = calcDropTarget(point, model, element, [], 1, 'affine:image');
       if (result) {
         rect = result.rect;
       }
@@ -76,10 +78,14 @@ export class FileDropManager {
   };
 
   onDrop = async (event: DragEvent) => {
-    const files = event.dataTransfer?.files;
-    if (!files || !files.length) return;
-
     event.preventDefault();
+
+    const files = event.dataTransfer?.files;
+    if (!files || !files.length) {
+      this._result = null;
+      this._indicator.rect = null;
+      return;
+    }
 
     const { clientX, clientY } = event;
     this._point = new Point(clientX, clientY);
@@ -108,11 +114,11 @@ export class FileDropManager {
     this._indicator.rect = null;
   };
 
-  private _onDropEnd = async (
+  private _onDropEnd(
     point: Point,
     models: Partial<BaseBlockModel>[],
     result: DropResult | null
-  ) => {
+  ) {
     const len = models.length;
     if (!len) return;
 
@@ -184,7 +190,7 @@ export class FileDropManager {
       focusId,
       point
     );
-  };
+  }
 
   get(type: string): ImportHandler | undefined {
     const handler = this._handlers.get(type);
