@@ -226,6 +226,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return false;
   }
 
+  private _isDraggable(element: Selectable) {
+    return !(
+      element instanceof ConnectorElement &&
+      !isConnectorAndBindingsAllSelected(element, this.state.selected)
+    );
+  }
+
   private _forceUpdateSelection() {
     // FIXME: force triggering selection change to re-render selection rect
     this._edgeless.slots.selectionUpdated.emit({
@@ -398,13 +405,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private canBeDragged(element: Selectable) {
-    return !(
-      element instanceof ConnectorElement &&
-      !isConnectorAndBindingsAllSelected(element, this.state.selected)
-    );
-  }
-
   onContainerDragMove(e: PointerEventState) {
     const zoom = this._edgeless.surface.viewport.zoom;
     switch (this.dragType) {
@@ -429,7 +429,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       case DefaultModeDragType.ContentMoving: {
         if (
           this.state.selected.every(ele => {
-            return !this.canBeDragged(ele);
+            return !this._isDraggable(ele);
           })
         )
           return;
@@ -441,7 +441,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
         this.state.selected.forEach((element, index) => {
           if (isPhasorElement(element)) {
-            if (!this.canBeDragged(element)) return;
+            if (!this._isDraggable(element)) return;
             this._handleSurfaceDragMove(
               element,
               this._selectedBounds[index],
