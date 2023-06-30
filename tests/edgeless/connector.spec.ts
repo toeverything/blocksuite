@@ -1,5 +1,4 @@
 import { expect } from '@playwright/test';
-import { assert } from 'console';
 
 import {
   addBasicConnectorElement,
@@ -18,7 +17,6 @@ import {
 } from '../utils/actions/edgeless.js';
 import {
   addBasicRectShapeElement,
-  click,
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
@@ -509,8 +507,8 @@ test('change connector line width', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await deleteAll(page);
-  const start = { x: 100, y: 100 };
-  const end = { x: 300, y: 200 };
+  const start = { x: 100, y: 200 };
+  const end = { x: 300, y: 300 };
   await addBasicConnectorElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y);
@@ -540,8 +538,8 @@ test('change connector stroke style', async ({ page }) => {
   await switchEditorMode(page);
   await deleteAll(page);
 
-  const start = { x: 100, y: 100 };
-  const end = { x: 300, y: 200 };
+  const start = { x: 100, y: 200 };
+  const end = { x: 300, y: 300 };
   await addBasicConnectorElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y);
