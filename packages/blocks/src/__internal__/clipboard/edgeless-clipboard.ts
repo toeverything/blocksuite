@@ -1,26 +1,35 @@
 import {
   type Bound,
-  type PhasorElement,
-  type PhasorElementType,
-  TextElement,
-} from '@blocksuite/phasor';
-import {
+  compare,
   deserializeXYWH,
   getCommonBound,
+  type PhasorElement,
+  type PhasorElementType,
+  Renderer,
   serializeXYWH,
+  TextElement,
 } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, type Page } from '@blocksuite/store';
+import { render } from 'lit';
 
+import type { NoteBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
 } from '../../page-block/edgeless/utils/consts.js';
-import { isTopLevelBlock } from '../../page-block/edgeless/utils/query.js';
+import {
+  getSelectedRect,
+  isTopLevelBlock,
+} from '../../page-block/edgeless/utils/query.js';
 import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
-import type { SerializedBlock, TopLevelBlockModel } from '../index.js';
+import {
+  type BlockComponentElement,
+  getBlockElementById,
+  type SerializedBlock,
+  type TopLevelBlockModel,
+} from '../index.js';
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
@@ -34,6 +43,7 @@ import {
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
+  CLIPBOARD_MIMETYPE,
   createSurfaceClipboardItems,
   getSurfaceClipboardData,
   performNativeCopy,
@@ -321,5 +331,111 @@ export class EdgelessClipboard implements Clipboard {
       elements.map(ele => ele.id),
       noteIds
     );
+  }
+
+  async copyAsPng(notes: NoteBlockModel[], shapes: PhasorElement[]) {
+    const notesLen = notes.length;
+    const shapesLen = shapes.length;
+
+    if (notesLen + shapesLen === 0) return;
+
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    // sort by `index`
+    notes.sort(compare);
+    shapes.sort(compare);
+
+    const { _edgeless } = this;
+    const { surface } = _edgeless;
+    const { viewport } = surface;
+    const { zoom } = viewport;
+    const { left, top, right, bottom, width, height } = getSelectedRect(
+      [...notes, ...shapes],
+      viewport
+    );
+    const min = surface.toModelCoord(left, top);
+    const max = surface.toModelCoord(right, bottom);
+    const cx = (min[0] + max[0]) / 2;
+    const cy = (min[1] + max[1]) / 2;
+    const vx = cx - width / 2 / zoom;
+    const vy = cy - height / 2 / zoom;
+
+    const container = document.createElement('div');
+    container.style.position = 'relative';
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+    _edgeless.appendChild(container);
+
+    if (notesLen) {
+      const fragment = document.createDocumentFragment();
+      const layer = document.createElement('div');
+      layer.style.position = 'absolute';
+      layer.style.zIndex = '-1';
+      layer.style.transform = `scale(${zoom})`;
+      for (let i = 0; i < notesLen; i++) {
+        const element = notes[i];
+        const note = getBlockElementById(element.id) as BlockComponentElement;
+        assertExists(note);
+        const parent = note.parentElement;
+        assertExists(parent);
+
+        const [x, y] = deserializeXYWH(element.xywh);
+        const div = document.createElement('div');
+        div.className = parent.className;
+        div.setAttribute('style', parent.getAttribute('style') || '');
+        div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
+        render(note.render(), div);
+        layer.appendChild(div);
+      }
+      fragment.appendChild(layer);
+      container.appendChild(fragment);
+    }
+
+    if (shapesLen) {
+      const renderer = new Renderer();
+      renderer.load(shapes);
+      renderer.setCenter(cx, cy);
+      renderer.setZoom(zoom);
+      renderer.attach(container);
+    }
+
+    try {
+      // waiting for canvas to render
+      await new Promise(requestAnimationFrame);
+
+      const canvas: HTMLCanvasElement = await html2canvas(container, {
+        backgroundColor: null,
+      });
+      assertExists(canvas);
+
+      // @ts-ignore
+      if (window.apis?.clipboard?.copyAsPng) {
+        // @ts-ignore
+        await window.apis.clipboard?.copyAsPng(
+          canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
+        );
+      } else {
+        const blob: Blob = await new Promise((resolve, reject) =>
+          canvas.toBlob(
+            blob =>
+              blob ? resolve(blob) : reject('Canvas can not export blob'),
+            CLIPBOARD_MIMETYPE.IMAGE_PNG
+          )
+        );
+
+        assertExists(blob);
+
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
+          }),
+        ]);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    container.remove();
   }
 }

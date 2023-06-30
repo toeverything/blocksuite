@@ -462,6 +462,7 @@ type Action =
   | 'bringForward'
   | 'sendBackward'
   | 'sendToBack'
+  | 'copyAsPng'
   | 'changeNoteColor'
   | 'changeShapeFillColor'
   | 'changeShapeStrokeColor'
@@ -518,6 +519,18 @@ export async function triggerComponentToolbarAction(
         .locator('.more-actions-container .action-item')
         .filter({
           hasText: 'Send to back',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'copyAsPng': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Copy as PNG',
         });
       await actionButton.click();
       break;
