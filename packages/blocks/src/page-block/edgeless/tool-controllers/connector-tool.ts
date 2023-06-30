@@ -12,9 +12,9 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     type: 'connector',
   };
 
-  private _connector: ConnectorElement | undefined = undefined;
-  private _source: Connection | undefined = undefined;
-  private _startPoint: IVec | undefined = undefined;
+  private _connector: ConnectorElement | null = null;
+  private _source: Connection | null = null;
+  private _startPoint: IVec | null = null;
 
   onContainerClick(e: PointerEventState): void {
     noop();
@@ -80,7 +80,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       selected: [this._connector],
       active: false,
     });
-    this._connector = undefined;
+    this._connector = null;
   }
 
   onContainerMouseMove(e: PointerEventState) {

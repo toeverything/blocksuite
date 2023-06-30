@@ -534,7 +534,7 @@ test('change connector line width', async ({ page }) => {
   expect(pickedColor[0]).toBe(pickedColor[1]);
 });
 
-test.only('change connector stroke style', async ({ page }) => {
+test('change connector stroke style', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);

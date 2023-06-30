@@ -37,7 +37,7 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
   elements: ConnectorElement[]
-): CssVariableName | undefined {
+): CssVariableName | null {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.stroke);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
