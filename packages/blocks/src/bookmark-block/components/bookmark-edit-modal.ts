@@ -34,7 +34,7 @@ export const bookmarkModalStyles = html`
       top: 0;
       bottom: 0;
       margin: auto;
-      z-index: 1;
+      z-index: 2;
 
       width: 360px;
       height: 260px;

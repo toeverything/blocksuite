@@ -12,7 +12,7 @@ import { isTransparent } from '../components/panel/color-panel.js';
 import type { SelectionArea } from '../utils/selection-manager.js';
 import { EdgelessToolController } from './index.js';
 
-export class ShapeTooolController extends EdgelessToolController<ShapeTool> {
+export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   readonly tool = <ShapeTool>{
     type: 'shape',
     shape: 'rect',
