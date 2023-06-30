@@ -30,9 +30,14 @@ export async function reloadBookmarkBlock(
       return;
     }
 
+    const { title, description, icon, image } = metaData;
+
     model.page.withoutTransact(() => {
       model.page.updateBlock(model, {
-        ...metaData,
+        bookmarkTitle: title,
+        description,
+        icon,
+        image,
         url: model.url,
         crawled: true,
       });
