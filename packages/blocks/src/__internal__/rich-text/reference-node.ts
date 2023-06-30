@@ -21,6 +21,7 @@ const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
+  tagClicked: Slot<{ tagId: string }>;
 };
 
 @customElement('affine-reference')

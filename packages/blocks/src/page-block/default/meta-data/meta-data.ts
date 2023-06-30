@@ -5,13 +5,10 @@ import {
   AddCursorIcon,
   ArrowDownSmallIcon,
   DualLinkIcon16,
-  LinkedPageIcon,
-  PageIcon,
   TagsIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { Disposable, Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -20,8 +17,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { BlockHost } from '../../../__internal__/index.js';
 import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../components/tags/multi-tag-select.js';
-import { listenBacklinkList } from './backlink/backlink.js';
-import type { BackLink } from './backlink/backlink-popover.js';
+import type { BacklinkData } from './backlink/backlink.js';
+import { DEFAULT_PAGE_NAME, listenBacklinkList } from './backlink/backlink.js';
 
 @customElement('affine-page-meta-data')
 export class PageMetaData extends WithDisposable(LitElement) {
@@ -176,6 +173,12 @@ export class PageMetaData extends WithDisposable(LitElement) {
       font-size: 15px;
       cursor: pointer;
       width: max-content;
+      border-radius: 4px;
+      padding: 0 8px 0 4px;
+      margin: 0 -8px 0 -4px;
+    }
+    .backlinks .link:hover {
+      background-color: var(--affine-hover-color);
     }
     .backlinks .link svg {
       fill: var(--affine-icon-color);
@@ -183,6 +186,9 @@ export class PageMetaData extends WithDisposable(LitElement) {
 
     .link-title {
       border-bottom: 0.5px solid var(--affine-divider-color);
+    }
+    .backlinks .link:hover .link-title {
+      border-bottom-color: transparent;
     }
   `;
 
@@ -220,13 +226,13 @@ export class PageMetaData extends WithDisposable(LitElement) {
   }
 
   @state()
-  metaInfo!: MetaInfo;
+  backlinkList!: BacklinkData[];
 
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      listenMetaInfo(this.page, metaInfo1 => {
-        this.metaInfo = metaInfo1;
+      listenBacklinkList(this.host, list => {
+        this.backlinkList = list;
       })
     );
     this._disposables.add(
@@ -254,8 +260,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
     return html`
       <backlink-button
         @click=${click}
-        .host="${this}"
-        .page="${this.page}"
+        .backlinks="${this.backlinkList}"
       ></backlink-button>
     `;
   };
@@ -292,32 +297,17 @@ export class PageMetaData extends WithDisposable(LitElement) {
     this.expanded = !this.expanded;
   };
   private renderBacklinkExpanded = () => {
-    const backlinkList = this.metaInfo.backlinkList;
+    const backlinkList = this.backlinkList;
     if (!backlinkList.length) {
       return null;
     }
-    const metaMap = Object.fromEntries(
-      this.page.workspace.meta.pageMetas.map(v => [v.id, v])
-    );
-    const renderLink = (link: BackLink) => {
-      const click = () => {
-        if (link.pageId === this.page.id) {
-          // On the current page, no need to jump
-          // TODO jump to block
-          return;
-        }
-        this.host.slots.pageLinkClicked.emit({
-          pageId: link.pageId,
-          blockId: link.blockId,
-        });
-      };
-      const meta = metaMap[link.pageId];
-      return html`<div @click=${click} class="link">
-        ${link.type === 'LinkedPage' ? LinkedPageIcon : PageIcon}
-        <div class="link-title">${meta.title}</div>
+    const renderLink = (link: BacklinkData) => {
+      return html`<div @click=${link.jump} class="link">
+        ${link.icon}
+        <div class="link-title">${link.title || DEFAULT_PAGE_NAME}</div>
       </div>`;
     };
-    return html` <div class="meta-data-expanded-item">
+    return html`<div class="meta-data-expanded-item">
       <div class="type">${DualLinkIcon16}</div>
       <div class="value">
         <div class="backlinks">
@@ -344,7 +334,12 @@ export class PageMetaData extends WithDisposable(LitElement) {
               const style = styleMap({
                 backgroundColor: tag.color,
               });
-              return html` <div class="tag" style=${style}>${tag.value}</div>`;
+              const click = () => {
+                this.host.slots.tagClicked.emit({ tagId: tag.id });
+              };
+              return html` <div class="tag" @click=${click} style=${style}>
+                ${tag.value}
+              </div>`;
             }
           )}
           <div class="add-tag" @click="${this._selectTags}">
@@ -384,30 +379,3 @@ declare global {
     'affine-page-meta-data': PageMetaData;
   }
 }
-type MetaInfo = {
-  backlinkList: BackLink[];
-};
-const listenMetaInfo = (
-  page: Page,
-  update: (metaInfo: MetaInfo) => void
-): Disposable => {
-  const disposableGroup = new DisposableGroup();
-  const data: MetaInfo = {
-    backlinkList: [],
-  };
-  update(data);
-  const updateData = (cb: (data: MetaInfo) => void) => {
-    cb(data);
-    update(data);
-  };
-  disposableGroup.add(
-    listenBacklinkList(page, list => {
-      updateData(data => {
-        data.backlinkList = list;
-      });
-    })
-  );
-  return {
-    dispose: () => disposableGroup.dispose(),
-  };
-};

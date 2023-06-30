@@ -1,16 +1,10 @@
-import {
-  DualLinkIcon16,
-  LinkedPageIcon,
-  PageIcon,
-} from '@blocksuite/global/config';
+import { DualLinkIcon16 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists, type Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { AffineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
-import type { BlockHost } from '../../../../__internal__/utils/types.js';
-import { listenBacklinkList } from './backlink.js';
+import type { BacklinkData } from './backlink.js';
+import { DEFAULT_PAGE_NAME } from './backlink.js';
 
 const styles = css`
   :host {
@@ -91,24 +85,12 @@ const styles = css`
   }
 `;
 
-export type BackLink = {
-  pageId: string;
-  blockId: string;
-  type: NonNullable<AffineTextAttributes['reference']>['type'];
-};
-
 @customElement('backlink-button')
 export class BacklinkButton extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property({ attribute: false })
-  page?: Page;
-
-  @property({ attribute: false })
-  host!: BlockHost;
-
-  @state()
-  private _backlinks: BackLink[] = [];
+  @property()
+  private backlinks: BacklinkData[] = [];
 
   @state()
   private _showPopover = false;
@@ -116,14 +98,6 @@ export class BacklinkButton extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     this.tabIndex = 0;
-    const page = this.page;
-    assertExists(page);
-    listenBacklinkList(page, list => {
-      this._backlinks = list;
-      if (!this._backlinks.length) {
-        this._showPopover = false;
-      }
-    });
     this._disposables.addFromEvent(window, 'mousedown', this._onClickAway);
   }
 
@@ -140,55 +114,33 @@ export class BacklinkButton extends WithDisposable(LitElement) {
 
   override render() {
     // Only show linked page backlinks
-    const linkedBacklinks = this._backlinks.filter(
-      ({ type }) => type === 'LinkedPage'
-    );
-    if (!linkedBacklinks.length) {
+    const backlinks = this.backlinks;
+    if (!backlinks.length) {
       return null;
     }
     return html`
       <div class="btn" @click="${this.onClick}">
-        ${DualLinkIcon16}<span>Backlinks (${linkedBacklinks.length})</span>
-        ${this._showPopover
-          ? backlinkPopover(this.host, linkedBacklinks)
-          : null}
+        ${DualLinkIcon16}<span>Backlinks (${backlinks.length})</span>
+        ${this._showPopover ? backlinkPopover(backlinks) : null}
       </div>
     `;
   }
 }
 
-const DEFAULT_PAGE_NAME = 'Untitled';
-
-function backlinkPopover(host: BlockHost, backlinks: BackLink[]) {
-  const metas = host.page.workspace.meta.pageMetas;
+function backlinkPopover(backlinks: BacklinkData[]) {
   return html` <div class="backlink-popover">
     <div class="menu">
       <div class="group-title">Linked to this page</div>
       <div class="group" style="overflow-y: scroll; max-height: 372px;">
-        ${backlinks.map(({ pageId, blockId, type }) => {
-          const icon = type === 'LinkedPage' ? LinkedPageIcon : PageIcon;
-          const pageMeta = metas.find(page => page.id === pageId);
-          if (!pageMeta) {
-            console.warn('Unexpected page meta not found', pageId);
-          }
-          const title = pageMeta?.title || DEFAULT_PAGE_NAME;
-          return html` <icon-button
+        ${backlinks.map(link => {
+          const title = link.title || DEFAULT_PAGE_NAME;
+          return html`<icon-button
             width="248px"
             height="32px"
             text="${title}"
-            @click="${(e: MouseEvent) => {
-              if (pageId === host.page.id) {
-                // On the current page, no need to jump
-                // TODO jump to block
-                return;
-              }
-              host.slots.pageLinkClicked.emit({
-                pageId,
-                blockId,
-              });
-            }}"
+            @click="${link.jump}"
           >
-            ${icon}
+            ${link.icon}
           </icon-button>`;
         })}
       </div>
