@@ -223,6 +223,15 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }, 100);
   }
 
+  private _onCardClick() {
+    let link = this.model.url;
+
+    if (!link.match(/^[a-zA-Z]+:\/\//)) {
+      link = 'https://' + link;
+    }
+    window.open(link, '_blank');
+  }
+
   private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
     type => {
       if (type === 'caption') {
@@ -290,10 +299,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         </div>`
       : nothing;
 
-    const linkCard = html`<a
-      href="${url}"
-      target="_blank"
+    const linkCard = html`<div
       class="affine-bookmark-link"
+      @click=${this._onCardClick}
     >
       <div class="affine-bookmark-content-wrapper">
         <div class="affine-bookmark-title">
@@ -311,7 +319,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
         ${image ? html`<img src="${image}" alt="image" />` : DefaultBanner}
       </div>
-    </a>`;
+    </div>`;
 
     if (!url) {
       return createModal;
