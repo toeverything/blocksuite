@@ -24,7 +24,10 @@ import {
 } from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type {
+  EdgelessPageBlockComponent,
+  EdgelessSelectionSlots,
+} from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import type { Selectable } from '../../utils/selection-manager.js';
@@ -78,6 +81,9 @@ export class EdgelessComponentToolbar extends LitElement {
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
+
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
 
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selected, s => {
@@ -157,7 +163,7 @@ export class EdgelessComponentToolbar extends LitElement {
 
   override render() {
     const groupedSelected = this._groupSelected();
-    const { page, selected, slots, surface } = this;
+    const { edgeless, page, selected, slots, surface } = this;
     const { shape, brush, connector, note, text } = groupedSelected;
 
     // when selected types more than two, only show `more` button
@@ -188,6 +194,7 @@ export class EdgelessComponentToolbar extends LitElement {
         .page=${page}
         .slots=${slots}
         .surface=${surface}
+        .edgeless=${edgeless}
       >
       </edgeless-more-button>
     </div>`;

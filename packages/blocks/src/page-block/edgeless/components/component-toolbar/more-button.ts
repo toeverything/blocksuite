@@ -13,7 +13,10 @@ import {
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type {
+  EdgelessPageBlockComponent,
+  EdgelessSelectionSlots,
+} from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import type { Selectable } from '../../utils/selection-manager.js';
 import { createButtonPopper } from '../utils.js';
@@ -110,6 +113,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
   @state()
   private _popperShow = false;
 
@@ -147,6 +153,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           this.page.deleteBlock(element);
         }
       } else {
+        this.edgeless.connector.detachConnectors([element]);
         this.surface.removeElement(element.id);
       }
     });

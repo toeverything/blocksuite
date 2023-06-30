@@ -1,10 +1,11 @@
 import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/store';
 import { type BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';
 
@@ -84,9 +85,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     ${tooltipStyle}
     .bookmark-bar {
       box-sizing: border-box;
-      position: absolute;
-      right: 0;
-      top: -40px;
+      position: fixed;
       display: flex;
       align-items: center;
       padding: 4px 8px;
@@ -112,6 +111,15 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   @property({ attribute: false })
   onSelected?: ToolbarActionCallback & MenuActionCallback;
 
+  @property({ attribute: false })
+  root!: HTMLElement;
+
+  @property({ attribute: false })
+  private toolbarHoverStateSlot = new Slot<{
+    inBookmark?: boolean;
+    inToolbar?: boolean;
+  }>();
+
   @query('.bookmark-bar')
   formatQuickBarElement!: HTMLElement;
 
@@ -119,7 +127,10 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   moreButton!: HTMLElement;
 
   private _menu: OperationMenuPopper | null = null;
+  private _timer: ReturnType<typeof setTimeout> | null = null;
 
+  @state()
+  private _position: { x: number; y: number } = { x: 0, y: 0 };
   private _toggleMenu() {
     if (this._menu) {
       this._menu.dispose();
@@ -135,8 +146,31 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     }
   }
 
+  private _calculatePosition() {
+    const { right, top } = this.root.getBoundingClientRect();
+    const { width, height } =
+      this.formatQuickBarElement.getBoundingClientRect();
+
+    this._position = { x: right - width, y: top - height };
+  }
+
+  private _onHover() {
+    this._timer && clearTimeout(this._timer);
+    this.toolbarHoverStateSlot.emit({ inToolbar: true });
+  }
+
+  private _onHoverOut() {
+    this._timer = setTimeout(() => {
+      this.toolbarHoverStateSlot.emit({ inToolbar: false });
+    }, 100);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
+
+    requestAnimationFrame(() => {
+      this._calculatePosition();
+    });
   }
 
   override render() {
@@ -160,7 +194,12 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     );
 
     return html`
-      <div class="bookmark-bar">
+      <div
+        class="bookmark-bar"
+        style="left:${this._position.x}px;top:${this._position.y}px"
+        @mouseover="${this._onHover}"
+        @mouseout="${this._onHoverOut}"
+      >
         ${buttons}
 
         <div class="more-button-wrapper">

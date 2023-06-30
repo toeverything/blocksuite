@@ -91,10 +91,10 @@ export const EllipseMethods: ShapeMethods = {
     return points.some(point => bounds.containsPoint(point));
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
     const rad = (element.rotate * Math.PI) / 180;
     const bound = Bound.deserialize(element.xywh);
-    return !!lineEllipseIntersects(
+    return lineEllipseIntersects(
       start,
       end,
       bound.center,
@@ -102,5 +102,9 @@ export const EllipseMethods: ShapeMethods = {
       bound.h / 2,
       rad
     );
+  },
+
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    return point;
   },
 };

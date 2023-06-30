@@ -6,6 +6,7 @@ import {
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
+  polygonNearestPoint,
 } from '../../../utils/math-utils.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
@@ -88,7 +89,7 @@ export const DiamondMethods: ShapeMethods = {
     return hited;
   },
 
-  containedByBounds(bounds: Bound, element: ShapeElement): boolean {
+  containedByBounds(bounds: Bound, element: ShapeElement) {
     const points = getPointsFromBoundsWithRotation(
       element,
       ({ x, y, w, h }) => [
@@ -101,7 +102,7 @@ export const DiamondMethods: ShapeMethods = {
     return points.some(point => bounds.containsPoint(point));
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
     const points = getPointsFromBoundsWithRotation(
       element,
       ({ x, y, w, h }) => [
@@ -111,6 +112,19 @@ export const DiamondMethods: ShapeMethods = {
         [x + w / 2, y + h],
       ]
     );
-    return !!linePolygonIntersects(start, end, points);
+    return linePolygonIntersects(start, end, points);
+  },
+
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h / 2],
+        [x + w / 2, y],
+        [x + w, y + h / 2],
+        [x + w / 2, y + h],
+      ]
+    );
+    return polygonNearestPoint(points, point);
   },
 };

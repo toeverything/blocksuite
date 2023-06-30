@@ -76,10 +76,17 @@ export class Page extends Space<FlatBlockMap> {
     onYEvent: new Slot<{
       event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
     }>(),
-    blockUpdated: new Slot<{
-      type: 'add' | 'delete' | 'update';
-      id: string;
-    }>(),
+    blockUpdated: new Slot<
+      | {
+          type: 'add' | 'delete';
+          id: string;
+        }
+      | {
+          type: 'update';
+          id: string;
+          props: Partial<BlockProps>;
+        }
+    >(),
     copied: new Slot(),
     pasted: new Slot<SerializedBlock[]>(),
   };
@@ -551,6 +558,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.emit({
       type: 'update',
       id: model.id,
+      props,
     });
   }
 

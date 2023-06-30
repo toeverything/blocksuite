@@ -10,6 +10,7 @@ import {
   getQuadBoundsWithRotation,
   getSvgPathFromStroke,
   lineIntersects,
+  polyLineNearestPoint,
 } from '../../utils/math-utils.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
@@ -32,6 +33,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
     '2d'
   ) as CanvasRenderingContext2D;
 
+  protected override _connectable = false;
+
   /* Brush mouse coords relative to left-top corner */
   get points() {
     const points = this.yMap.get('points') as IBrush['points'];
@@ -48,6 +51,14 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return lineWidth;
   }
 
+  override getNearestPoint(point: IVec): IVec {
+    const { x, y } = this;
+    return polyLineNearestPoint(
+      this.points.map(p => Vec.add(p, [x, y])),
+      point
+    );
+  }
+
   override containedByBounds(bounds: Bound) {
     return false;
   }
@@ -61,18 +72,22 @@ export class BrushElement extends SurfaceElement<IBrush> {
     const box = Bound.fromDOMRect(getQuadBoundsWithRotation(this));
 
     if (box.w < 8 && box.h < 8) {
-      return Vec.distanceToLineSegment(start, end, box.center) < 5;
+      return Vec.distanceToLineSegment(start, end, box.center) < 5 ? [] : null;
     }
 
     if (box.intersectLine(start, end, true)) {
       const len = points.length;
       for (let i = 1; i < len; i++) {
-        if (lineIntersects(start, end, points[i - 1], points[i])) {
-          return true;
+        const result = lineIntersects(start, end, points[i - 1], points[i]) as
+          | IVec[]
+          | null;
+        if (result) {
+          return result;
         }
       }
     }
-    return false;
+
+    return null;
   }
 
   override hitTest(px: number, py: number, options?: HitTestOptions): boolean {

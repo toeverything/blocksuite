@@ -4,8 +4,7 @@ import type {
   UIEventDispatcher,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { PhasorElement } from '@blocksuite/phasor';
-import { normalizeWheelDeltaY } from '@blocksuite/phasor';
+import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
 
 import {
   AbstractSelectionManager,
@@ -368,7 +367,11 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
-    if (!isMiddleButtonPressed(e.raw)) return;
+    if (!isMiddleButtonPressed(e.raw)) {
+      if (this.page.readonly) return;
+
+      return this.currentController.onContainerPointerDown(e);
+    }
 
     const prevEdgelessTool = this._edgelessTool;
     const switchToPreMode = (_e: MouseEvent) => {
@@ -467,7 +470,9 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     }
   ) => {
     if (this.edgelessTool === edgelessTool) return;
-    this._controllers[this.edgelessTool.type].beforeModeSwitch(edgelessTool);
+    const lastType = this.edgelessTool.type;
+    this._controllers[lastType].beforeModeSwitch(edgelessTool);
+    this._controllers[edgelessTool.type].beforeModeSwitch(edgelessTool);
     if (edgelessTool.type === 'default') {
       if (!state.selected.length && this.lastState) {
         state = this.lastState;
@@ -481,6 +486,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
     this.container.slots.selectionUpdated.emit(state);
+    this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
 

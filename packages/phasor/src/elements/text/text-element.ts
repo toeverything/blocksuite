@@ -1,7 +1,8 @@
-import { type Bound } from '../../utils/bound.js';
+import { Bound } from '../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
+  polygonNearestPoint,
 } from '../../utils/math-utils.js';
 import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
@@ -34,14 +35,18 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
+  getNearestPoint(point: IVec): IVec {
+    return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
+  }
+
   override containedByBounds(bounds: Bound): boolean {
     const points = getPointsFromBoundsWithRotation(this);
     return points.some(point => bounds.containsPoint(point));
   }
 
-  override intersectWithLine(start: IVec, end: IVec): boolean {
+  override intersectWithLine(start: IVec, end: IVec) {
     const points = getPointsFromBoundsWithRotation(this);
-    return !!linePolygonIntersects(start, end, points);
+    return linePolygonIntersects(start, end, points);
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {

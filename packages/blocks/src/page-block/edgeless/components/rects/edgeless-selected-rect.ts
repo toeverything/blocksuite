@@ -18,7 +18,10 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import type {
+  EdgelessPageBlockComponent,
+  EdgelessSelectionSlots,
+} from '../../edgeless-page-block.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
@@ -31,7 +34,6 @@ import type {
 } from '../../utils/selection-manager.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import { SingleConnectorHandles } from '../connector/single-connector-handles.js';
-import { handleElementChangedEffectForConnector } from '../connector/utils.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
@@ -223,6 +225,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
   @query('.affine-edgeless-selected-rect')
   private _selectedRect!: HTMLDivElement;
 
@@ -314,7 +319,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           });
         }
       }
-      handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
     const { currentRect } = _resizeManager;
@@ -330,7 +334,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _onDragRotate = (center: IPoint, delta: number) => {
     const {
-      page,
       surface,
       state: { selected },
       _rotate,
@@ -354,8 +357,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         xywh: serializeXYWH(center.x - w / 2, center.y - h / 2, w, h),
         rotate: normalizeDegAngle(rotate + delta),
       });
-
-      handleElementChangedEffectForConnector(element, [element], surface, page);
     });
 
     const angle = normalizeDegAngle(delta + _rotate);
@@ -590,8 +591,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       return nothing;
     }
 
-    const { page, resizeMode, slots, surface, _resizeManager, _updateCursor } =
-      this;
+    const {
+      edgeless,
+      page,
+      resizeMode,
+      slots,
+      surface,
+      _resizeManager,
+      _updateCursor,
+    } = this;
 
     const hasResizeHandles = !active && !page.readonly;
     const resizeHandles = hasResizeHandles
@@ -607,8 +615,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       selected.length === 1 && selected[0].type === 'connector'
         ? SingleConnectorHandles(
             selected[0] as ConnectorElement,
-            surface,
-            page,
+            edgeless,
             () => slots.selectionUpdated.emit({ ...state })
           )
         : nothing;

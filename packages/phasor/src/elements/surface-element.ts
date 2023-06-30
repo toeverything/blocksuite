@@ -1,15 +1,17 @@
 import type * as Y from 'yjs';
 
-import type { Bound, IVec } from '../index.js';
+import type { Bound } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
 import { isPointIn } from '../utils/math-utils.js';
+import type { IVec } from '../utils/vec.js';
 import {
   deserializeXYWH,
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
+import type { IElementUpdateProps, IPhasorElementType } from './index.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -33,11 +35,14 @@ export abstract class SurfaceElement<
 > {
   abstract containedByBounds(bounds: Bound): boolean;
 
-  abstract intersectWithLine(start: IVec, end: IVec): boolean;
+  abstract getNearestPoint(point: IVec): IVec;
+
+  abstract intersectWithLine(start: IVec, end: IVec): IVec[] | null;
 
   yMap: Y.Map<unknown>;
 
   protected renderer: Renderer | null = null;
+  protected _connectable = true;
 
   computedValue: ComputedValue = v => v;
 
@@ -112,6 +117,10 @@ export abstract class SurfaceElement<
     return this.surface.getElementLocalRecord(this.id);
   }
 
+  get connectable() {
+    return this._connectable;
+  }
+
   applyUpdate(updates: Partial<T>) {
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
@@ -130,9 +139,22 @@ export abstract class SurfaceElement<
     return isPointIn(this, x, y);
   }
 
-  private _onMap = () => {
+  private _onMap = <T extends keyof IPhasorElementType>(
+    events: Y.YEvent<Y.Map<unknown>>[]
+  ) => {
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
+    const e = events[0] as Y.YMapEvent<Y.Map<unknown>>;
+    const props: IElementUpdateProps<T> = {};
+    e.keysChanged.forEach(key => {
+      props[key as keyof IElementUpdateProps<T>] = this.yMap.get(
+        key
+      ) as IPhasorElementType[T][keyof IElementUpdateProps<T>];
+    });
+    this.surface.slots.elementUpdated.emit({
+      id: this.id,
+      props: props,
+    });
   };
 
   mount(renderer: Renderer) {

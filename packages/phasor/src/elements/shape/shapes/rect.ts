@@ -6,11 +6,13 @@ import {
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
+  polygonNearestPoint,
 } from '../../../utils/math-utils.js';
 import type { IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
 
@@ -101,8 +103,13 @@ export const RectMethods: ShapeMethods = {
     return points.some(point => bounds.containsPoint(point));
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
     const points = getPointsFromBoundsWithRotation(element);
-    return !!linePolygonIntersects(start, end, points);
+    return linePolygonIntersects(start, end, points);
+  },
+
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(element);
+    return polygonNearestPoint(points, point);
   },
 };

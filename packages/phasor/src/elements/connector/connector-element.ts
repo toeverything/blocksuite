@@ -1,28 +1,50 @@
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
+import type { Bound } from '../../utils/bound.js';
 import {
-  Bound,
-  inflateBound,
-  transformPointsToNewBound,
-} from '../../utils/bound.js';
-import { linePolylineIntersects } from '../../utils/math-utils.js';
-import { type IVec } from '../../utils/vec.js';
-import { SurfaceElement } from '../surface-element.js';
+  linePolylineIntersects,
+  polyLineNearestPoint,
+} from '../../utils/math-utils.js';
+import { type IVec, Vec } from '../../utils/vec.js';
+import type { SerializedXYWH } from '../../utils/xywh.js';
+import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { IConnector } from './types.js';
-import { ConnectorMode } from './types.js';
-import { getArrowPoints, getConnectorPointsBound } from './utils.js';
+import { getArrowPoints } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
+  private _path: IVec[] = [];
+  private _xywh: SerializedXYWH = `[0, 0, 0, 0]`;
+  protected override _connectable = false;
+
+  // relative to it's xywh
+  get path() {
+    return this._path;
+  }
+
+  set path(p: IVec[]) {
+    this._path = p;
+  }
+
+  override get xywh() {
+    return this._xywh;
+  }
+
+  override set xywh(xywh: SerializedXYWH) {
+    this._xywh = xywh;
+    this.renderer?.removeElement(this);
+    this.renderer?.addElement(this);
+  }
+
   get mode() {
     return this.yMap.get('mode') as IConnector['mode'];
   }
 
-  get lineWidth() {
-    return this.yMap.get('lineWidth') as IConnector['lineWidth'];
+  get strokeWidth() {
+    return this.yMap.get('strokeWidth') as IConnector['strokeWidth'];
   }
 
-  get color() {
-    return this.yMap.get('color') as IConnector['color'];
+  get stroke() {
+    return this.yMap.get('stroke') as IConnector['stroke'];
   }
 
   get strokeStyle() {
@@ -36,29 +58,44 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     );
   }
 
-  get startElement() {
-    return this.yMap.get('startElement') as IConnector['startElement'];
+  get target() {
+    return this.yMap.get('target') as IConnector['target'];
   }
 
-  get endElement() {
-    return this.yMap.get('endElement') as IConnector['endElement'];
+  get source() {
+    return this.yMap.get('source') as IConnector['source'];
   }
 
   get controllers() {
     return this.yMap.get('controllers') as IConnector['controllers'];
   }
 
+  get absolutePath() {
+    const { x, y } = this;
+    return this.path.map(p => [p[0] + x, p[1] + y]);
+  }
+
+  override hitTest(
+    x: number,
+    y: number,
+    options?: HitTestOptions | undefined
+  ): boolean {
+    const point = polyLineNearestPoint(this.absolutePath, [x, y]);
+    return (
+      Vec.dist(point, [x, y]) < (options?.expand ? this.strokeWidth / 2 : 0) + 8
+    );
+  }
+
   override containedByBounds(bounds: Bound) {
     return false;
   }
 
-  override intersectWithLine(start: IVec, end: IVec): boolean {
-    const bound = Bound.deserialize(this.xywh);
-    return !!linePolylineIntersects(
-      start,
-      end,
-      this.controllers.map(c => [c.x + bound.x, c.y + bound.y])
-    );
+  override getNearestPoint(point: IVec): IVec {
+    return polyLineNearestPoint(this.absolutePath, point);
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
+    return linePolylineIntersects(start, end, this.absolutePath);
   }
 
   override render(
@@ -67,139 +104,41 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     rc: RoughCanvas
   ) {
     const {
+      absolutePath: points,
       seed,
+      stroke,
       strokeStyle,
-      color,
+      strokeWidth,
       roughness,
-      lineWidth,
-      controllers,
-      mode,
-      // rotate
     } = this;
-    // const [, , w, h] = this.deserializeXYWH();
-    // const cx = w / 2;
-    // const cy = h / 2;
+    const [x, y] = this.deserializeXYWH();
 
-    ctx.setTransform(
-      matrix
-      // .translateSelf(cx, cy)
-      // .multiplySelf(new DOMMatrix(localMatrix))
-      // .translateSelf(-cx, -cy)
-    );
+    ctx.setTransform(matrix.translateSelf(-x, -y));
 
-    const realStrokeColor = this.computedValue(color);
+    const realStrokeColor = this.computedValue(stroke);
 
-    if (mode === ConnectorMode.Orthogonal) {
-      rc.linearPath(
-        controllers.map(controller => [controller.x, controller.y]),
-        {
-          seed,
-          roughness,
-          strokeLineDash:
-            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-          stroke: realStrokeColor,
-          strokeWidth: lineWidth,
-        }
-      );
-    } else {
+    const options = {
+      seed,
+      roughness,
+      strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+      stroke: realStrokeColor,
+      strokeWidth,
+    };
+
+    rc.linearPath(points.map(p => p) as [number, number][], options);
+
+    const last = points[points.length - 1];
+    const secondToLast = points[points.length - 2];
+
+    if (last && secondToLast) {
+      const { sides, end } = getArrowPoints(secondToLast, last, 15);
       rc.linearPath(
         [
-          [controllers[0].x, controllers[0].y],
-          [
-            controllers[controllers.length - 1].x,
-            controllers[controllers.length - 1].y,
-          ],
+          [sides[0][0], sides[0][1]],
+          [end[0], end[1]],
+          [sides[1][0], sides[1][1]],
         ],
-        {
-          seed,
-          roughness,
-          strokeLineDash:
-            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-          stroke: realStrokeColor,
-          strokeWidth: lineWidth,
-        }
-      );
-    }
-
-    const last = controllers[controllers.length - 1];
-    const secondToLast = controllers[controllers.length - 2];
-
-    // TODO: Adjust arrow direction
-    const { sides, end } = getArrowPoints(
-      [secondToLast.x, secondToLast.y],
-      [last.x, last.y],
-      35
-    );
-    rc.linearPath(
-      [
-        [sides[0][0], sides[0][1]],
-        [end[0], end[1]],
-        [sides[1][0], sides[1][1]],
-      ],
-      {
-        seed,
-        roughness,
-        strokeLineDash:
-          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke: realStrokeColor,
-        strokeWidth: lineWidth,
-      }
-    );
-  }
-
-  override applyUpdate(props: Partial<IConnector>) {
-    const updates = { ...props };
-
-    const { controllers, xywh } = props;
-    if (controllers?.length) {
-      const lineWidth = props.lineWidth ?? this.lineWidth;
-      const bound = getConnectorPointsBound(controllers);
-      const boundWidthLineWidth = inflateBound(bound, lineWidth);
-      const relativeControllers = controllers.map(c => {
-        return {
-          ...c,
-          x: c.x - boundWidthLineWidth.x,
-          y: c.y - boundWidthLineWidth.y,
-        };
-      });
-      updates.controllers = relativeControllers;
-      updates.xywh = boundWidthLineWidth.serialize();
-    }
-
-    if (xywh) {
-      const { lineWidth } = this;
-      const bound = Bound.deserialize(xywh);
-      const transformed = transformPointsToNewBound(
-        this.controllers,
-        this,
-        lineWidth / 2,
-        bound,
-        lineWidth / 2
-      );
-
-      updates.controllers = transformed.points;
-      updates.xywh = transformed.bound.serialize();
-    }
-
-    if (props.lineWidth && props.lineWidth !== this.lineWidth) {
-      const bound = updates.xywh ? Bound.deserialize(updates.xywh) : this;
-      const controllers = updates.controllers ?? this.controllers;
-      const transformed = transformPointsToNewBound(
-        controllers,
-        bound,
-        this.lineWidth / 2,
-        inflateBound(bound, props.lineWidth - this.lineWidth),
-        props.lineWidth / 2
-      );
-
-      updates.controllers = transformed.points;
-      updates.xywh = transformed.bound.serialize();
-    }
-
-    for (const key in updates) {
-      this.yMap.set(
-        key,
-        updates[key as keyof IConnector] as IConnector[keyof IConnector]
+        options
       );
     }
   }

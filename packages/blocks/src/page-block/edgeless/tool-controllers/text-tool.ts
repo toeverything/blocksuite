@@ -18,6 +18,10 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     noop();
   }
 
+  onContainerPointerDown(e: PointerEventState): void {
+    noop();
+  }
+
   onContainerDblClick(e: PointerEventState): void {
     noop();
   }

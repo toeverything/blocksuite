@@ -35,7 +35,11 @@ export class DebugElement extends SurfaceElement<IDebug> {
     throw new Error('Method not implemented.');
   }
 
-  override intersectWithLine(start: IVec, end: IVec): boolean {
+  override getNearestPoint(point: IVec): IVec {
+    throw new Error('Method not implemented.');
+  }
+
+  override intersectWithLine(start: IVec, end: IVec): IVec[] | null {
     throw new Error('Method not implemented.');
   }
 

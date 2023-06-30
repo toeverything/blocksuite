@@ -5,6 +5,7 @@ import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
+
 export class ShapeElement extends SurfaceElement<IShape> {
   get shapeType() {
     const shapeType = this.yMap.get('shapeType') as IShape['shapeType'];
@@ -60,12 +61,16 @@ export class ShapeElement extends SurfaceElement<IShape> {
     return hitTest(x, y, this, options);
   }
 
-  override containedByBounds(bounds: Bound): boolean {
+  override containedByBounds(bounds: Bound) {
     return ShapeMethodsMap[this.shapeType].containedByBounds(bounds, this);
   }
 
-  override intersectWithLine(start: IVec, end: IVec): boolean {
+  override intersectWithLine(start: IVec, end: IVec) {
     return ShapeMethodsMap[this.shapeType].intersectWithLine(start, end, this);
+  }
+
+  override getNearestPoint(point: IVec): IVec {
+    return ShapeMethodsMap[this.shapeType].getNearestPoint(point, this);
   }
 
   override render(

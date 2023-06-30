@@ -24,12 +24,26 @@ export class Bound implements IBound {
     return new Bound(left, top, width, height);
   }
 
+  static fromPoints(points: IVec[]) {
+    const { minX, minY, maxX, maxY } = getBoundsFromPoints(points);
+    return new Bound(minX, minY, maxX - minX, maxY - minY);
+  }
+
   get points(): IVec[] {
     return [
       [this.x, this.y],
       [this.x + this.w, this.y],
       [this.x + this.w, this.y + this.h],
       [this.x, this.y + this.h],
+    ];
+  }
+
+  get midPoints(): IVec[] {
+    return [
+      [this.x + this.w / 2, this.y],
+      [this.x + this.w, this.y + this.h / 2],
+      [this.x + this.w / 2, this.y + this.h],
+      [this.x, this.y + this.h / 2],
     ];
   }
 
@@ -78,6 +92,48 @@ export class Bound implements IBound {
     );
   }
 
+  get verticalLine(): IVec[] {
+    return [
+      [this.x + this.w / 2, this.y],
+      [this.x + this.w / 2, this.y + this.h],
+    ];
+  }
+
+  get horizontalLine(): IVec[] {
+    return [
+      [this.x, this.y + this.h / 2],
+      [this.x + this.w, this.y + this.h / 2],
+    ];
+  }
+
+  get upperLine(): IVec[] {
+    return [
+      [this.x, this.y],
+      [this.x + this.w, this.y],
+    ];
+  }
+
+  get lowerLine(): IVec[] {
+    return [
+      [this.x, this.y + this.h],
+      [this.x + this.w, this.y + this.h],
+    ];
+  }
+
+  get leftLine(): IVec[] {
+    return [
+      [this.x, this.y],
+      [this.x, this.y + this.h],
+    ];
+  }
+
+  get rightLine(): IVec[] {
+    return [
+      [this.x + this.w, this.y],
+      [this.x + this.w, this.y + this.h],
+    ];
+  }
+
   intersectLine(sp: IVec, ep: IVec, infinite = false) {
     const rst: IVec[] = [];
     [
@@ -109,6 +165,22 @@ export class Bound implements IBound {
     return new Bound(x1, y1, x2 - x1, y2 - y1);
   }
 
+  include(point: IVec) {
+    const x1 = Math.min(this.x, point[0]),
+      y1 = Math.min(this.y, point[1]),
+      x2 = Math.max(this.maxX, point[0]),
+      y2 = Math.max(this.maxY, point[1]);
+    return new Bound(x1, y1, x2 - x1, y2 - y1);
+  }
+
+  getRelativePoint([x, y]: IVec): IVec {
+    return [this.x + x * this.w, this.y + y * this.h];
+  }
+
+  toRelative([x, y]: IVec): IVec {
+    return [(x - this.x) / this.w, (y - this.y) / this.h];
+  }
+
   serialize(): SerializedXYWH {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
@@ -137,6 +209,42 @@ export class Bound implements IBound {
       Math.abs(this.minY - bound.maxY),
       Math.abs(this.maxY - bound.minY)
     );
+  }
+
+  expand(
+    left: number,
+    top: number = left,
+    right: number = left,
+    bottom: number = left
+  ) {
+    return new Bound(
+      this.x - left,
+      this.y - top,
+      this.w + left + right,
+      this.h + top + bottom
+    );
+  }
+
+  isPointInBound([x, y]: IVec, tolerance = 0.01) {
+    return (
+      x > this.minX + tolerance &&
+      x < this.maxX - tolerance &&
+      y > this.minY + tolerance &&
+      y < this.maxY - tolerance
+    );
+  }
+
+  contains(bound: Bound) {
+    return (
+      bound.x >= this.x &&
+      bound.y >= this.y &&
+      bound.maxX <= this.maxX &&
+      bound.maxY <= this.maxY
+    );
+  }
+
+  getVerticesAndMidpoints() {
+    return [...this.points, ...this.midPoints];
   }
 
   static deserialize(s: string) {
