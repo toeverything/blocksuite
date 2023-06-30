@@ -35,6 +35,7 @@ export class EdgelessNoteMenu extends LitElement {
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 4px;
       background: var(--affine-background-overlay-panel-color);
       border: 1px solid var(--affine-border-color);
       border-radius: 8px 8px 0 0;
