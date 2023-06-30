@@ -10,7 +10,6 @@ packages=(
   "playground"
   "store"
   "virgo"
-  "connector"
   "lit"
 )
 
