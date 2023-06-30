@@ -33,7 +33,7 @@ import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,
 } from '../../utils/position.js';
-import { isConnectorAndBindingsAllSelected } from '../utils/connector.js';
+import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import {
   getXYWH,
   isPhasorElement,
