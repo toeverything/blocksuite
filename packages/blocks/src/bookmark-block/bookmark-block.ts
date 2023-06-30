@@ -2,6 +2,7 @@ import './components/bookmark-toolbar.js';
 import './components/bookmark-edit-modal.js';
 import './components/bookmark-create-modal.js';
 import './components/loader.js';
+import '../components/portal.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { Slot } from '@blocksuite/store';
@@ -155,7 +156,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   private _showCreateModal = false;
 
   @state()
-  private _showToolbar = false;
+  private _toolbarHoverState: {
+    inBookmark: boolean;
+    inToolbar: boolean;
+  } = {
+    inBookmark: false,
+    inToolbar: false,
+  };
 
   @state()
   private _showEditModal = false;
@@ -165,6 +172,11 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   @state()
   private _isLoading = false;
+
+  private _toolbarHoverStateSlot = new Slot<{
+    inBookmark?: boolean;
+    inToolbar?: boolean;
+  }>();
 
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -197,6 +209,26 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
     });
+
+    this._toolbarHoverStateSlot.on(({ inToolbar, inBookmark }) => {
+      const {
+        inBookmark: currentBookmarkState,
+        inToolbar: currentToolbarState,
+      } = this._toolbarHoverState;
+
+      if (
+        inBookmark === currentBookmarkState &&
+        inToolbar === currentToolbarState
+      ) {
+        return;
+      }
+
+      this._toolbarHoverState = {
+        inToolbar: inToolbar === undefined ? currentToolbarState : inToolbar,
+        inBookmark:
+          inBookmark === undefined ? currentBookmarkState : inBookmark,
+      };
+    });
   }
 
   private _onInputChange() {
@@ -211,15 +243,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   private _onHover() {
-    if (this._isLoading) return;
-
-    this._showToolbar = true;
     this._timer && clearTimeout(this._timer);
+    this._toolbarHoverStateSlot.emit({ inBookmark: true });
   }
 
   private _onHoverOut() {
     this._timer = setTimeout(() => {
-      this._showToolbar = false;
+      this._toolbarHoverStateSlot.emit({ inBookmark: false });
     }, 100);
   }
 
@@ -236,12 +266,14 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         this._showEditModal = true;
       }
 
-      this._showToolbar = false;
+      this._toolbarHoverStateSlot.emit({ inBookmark: false, inToolbar: false });
     };
 
   override render() {
     const { url, title, description, icon, image } = this.model;
     const mode = queryCurrentMode();
+    const showToolbar =
+      this._toolbarHoverState.inToolbar || this._toolbarHoverState.inBookmark;
 
     const createModal = this._showCreateModal
       ? html`<bookmark-create-modal
@@ -266,10 +298,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           }}
         ></bookmark-edit-modal>`
       : nothing;
-    const toolbar = this._showToolbar
+    const toolbar = showToolbar
       ? html`<bookmark-toolbar
           .model=${this.model}
           .onSelected=${this._onToolbarSelected}
+          .root=${this}
+          .toolbarHoverStateSlot=${this._toolbarHoverStateSlot}
         ></bookmark-toolbar>`
       : nothing;
 
@@ -324,7 +358,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         @mouseover="${this._onHover}"
         @mouseout="${this._onHoverOut}"
       >
-        ${toolbar} ${this._isLoading ? loading : linkCard}
+        <affine-portal .template=${toolbar}></affine-portal>
+        ${this._isLoading ? loading : linkCard}
         <input
           .disabled=${this.model.page.readonly}
           placeholder="Write a caption"
