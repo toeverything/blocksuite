@@ -1592,13 +1592,13 @@ export const EdgelessConnectorIcon = html`<svg
 </svg> `;
 
 export const nextItemIcon = html`<svg
-  width="24"
-  height="24"
-  viewBox="8 4 18 16"
+  width="34"
+  height="34"
+  viewBox="0 0 34 34"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
 >
-  <g>
+  <g filter="url(#filter0_dd_5199_107478)">
     <rect
       x="25"
       y="19"
@@ -1613,7 +1613,7 @@ export const nextItemIcon = html`<svg
       fill-rule="evenodd"
       clip-rule="evenodd"
       d="M15.313 14.6869C15.1177 14.4916 15.1177 14.175 15.313 13.9798L18.057 11.2357C18.1872 11.1055 18.1872 10.8945 18.057 10.7643L15.313 8.02022C15.1177 7.82495 15.1177 7.50837 15.313 7.31311C15.5082 7.11785 15.8248 7.11785 16.0201 7.31311L18.7641 10.0572C19.2848 10.5779 19.2848 11.4221 18.7641 11.9428L16.0201 14.6869C15.8248 14.8821 15.5082 14.8821 15.313 14.6869Z"
-      fill="#77757D"
+      fill="none"
     />
     <rect
       x="24.5"
@@ -1624,8 +1624,74 @@ export const nextItemIcon = html`<svg
       transform="rotate(-180 24.5 18.5)"
       stroke="none"
       class="next-item-icon-stroke"
+      fill="none"
     />
   </g>
+  <defs>
+    <filter
+      id="filter0_dd_5199_107478"
+      x="0"
+      y="0"
+      width="34"
+      height="34"
+      filterUnits="userSpaceOnUse"
+      color-interpolation-filters="sRGB"
+    >
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="2"
+        operator="erode"
+        in="SourceAlpha"
+        result="effect1_dropShadow_5199_107478"
+      />
+      <feOffset dy="4" />
+      <feGaussianBlur stdDeviation="2" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0.258824 0 0 0 0 0.254902 0 0 0 0 0.286275 0 0 0 0.1 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="BackgroundImageFix"
+        result="effect1_dropShadow_5199_107478"
+      />
+      <feColorMatrix
+        in="SourceAlpha"
+        type="matrix"
+        values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+        result="hardAlpha"
+      />
+      <feMorphology
+        radius="1"
+        operator="dilate"
+        in="SourceAlpha"
+        result="effect2_dropShadow_5199_107478"
+      />
+      <feOffset dy="6" />
+      <feGaussianBlur stdDeviation="4" />
+      <feColorMatrix
+        type="matrix"
+        values="0 0 0 0 0.258824 0 0 0 0 0.254902 0 0 0 0 0.286275 0 0 0 0.05 0"
+      />
+      <feBlend
+        mode="normal"
+        in2="effect1_dropShadow_5199_107478"
+        result="effect2_dropShadow_5199_107478"
+      />
+      <feBlend
+        mode="normal"
+        in="SourceGraphic"
+        in2="effect2_dropShadow_5199_107478"
+        result="shape"
+      />
+    </filter>
+  </defs>
 </svg> `;
 
 export const MoreIcon = html` <svg

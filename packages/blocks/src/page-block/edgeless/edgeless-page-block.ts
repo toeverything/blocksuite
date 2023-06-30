@@ -186,14 +186,6 @@ export class EdgelessPageBlockComponent
       border: var(--affine-border-width) solid var(--affine-blue);
     }
 
-    edgeless-zoom-toolbar,
-    zoom-bar-toggle-button {
-      position: fixed;
-      bottom: 20px;
-      left: 12px;
-      z-index: var(--affine-z-index-popover);
-    }
-
     @media screen and (max-width: 1048px) {
       edgeless-zoom-toolbar {
         display: none;
