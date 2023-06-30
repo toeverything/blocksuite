@@ -105,7 +105,6 @@ const styles = css`
     display: flex;
     width: 100%;
     height: 28px;
-    margin-top: -8px;
     position: relative;
     z-index: 1;
     background-color: var(--affine-hover-color-filled);
