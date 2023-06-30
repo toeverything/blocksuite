@@ -55,7 +55,7 @@ export class EdgelessComponentToolbar extends LitElement {
       align-items: center;
       height: 48px;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
+      box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
     }
 

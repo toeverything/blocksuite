@@ -38,7 +38,7 @@ import {
   bringForward,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
-  type Point,
+  Point,
   reorder,
   type ReorderingAction,
   type ReorderingRange,
@@ -59,6 +59,7 @@ import type {
   BlockHost,
   DragHandle,
   EdgelessTool,
+  ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
   SurfaceBlockModel,
@@ -74,6 +75,7 @@ import {
   EdgelessToolbar,
   type ZoomAction,
 } from './components/toolbar/edgeless-toolbar.js';
+import { readImageSize } from './components/utils.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -110,6 +112,10 @@ export interface EdgelessSelectionSlots {
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
   cursorUpdated: Slot<string>;
+  copyAsPng: Slot<{
+    notes: NoteBlockModel[];
+    shapes: PhasorElement[];
+  }>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -186,7 +192,7 @@ export class EdgelessPageBlockComponent
       border: 2px solid var(--affine-white-10);
       border-radius: 8px;
       box-shadow: var(--affine-shadow-3);
-      pointerevents: all;
+      pointer-events: all;
     }
 
     .affine-edgeless-hover-rect {
@@ -251,6 +257,10 @@ export class EdgelessPageBlockComponent
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
+    copyAsPng: new Slot<{
+      notes: NoteBlockModel[];
+      shapes: PhasorElement[];
+    }>(),
 
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
@@ -504,6 +514,17 @@ export class EdgelessPageBlockComponent
           this.style.cursor = cursor;
         }, 144)
       )
+    );
+
+    let canCopyAsPng = true;
+    _disposables.add(
+      slots.copyAsPng.on(({ notes, shapes }) => {
+        if (!canCopyAsPng) return;
+        canCopyAsPng = false;
+        this.clipboard
+          .copyAsPng(notes, shapes)
+          .finally(() => (canCopyAsPng = true));
+      })
     );
   }
 
@@ -766,7 +787,10 @@ export class EdgelessPageBlockComponent
       offsetX?: number;
       offsetY?: number;
     }
-  ) {
+  ): {
+    noteId: string;
+    ids: string[];
+  } {
     this.page.captureSync();
     const { left, top } = this.surface.viewport;
     point.x -= left;
@@ -819,6 +843,94 @@ export class EdgelessPageBlockComponent
     this.page.moveBlocks(blocks, noteModel);
 
     focus && this.setSelection(noteId, true, blocks[0].id, point);
+  }
+
+  addImage(
+    model: Partial<ImageBlockModel>,
+    point?: Point
+  ): { noteId: string; ids: string[] } {
+    const options = {
+      width: model.width ?? 0,
+      height: model.height ?? 0,
+    };
+    // force update size of image
+    {
+      delete model.width;
+      delete model.height;
+    }
+
+    const rect = this.pageBlockContainer.getBoundingClientRect();
+    const { width, height } = rect;
+
+    if (options.width && options.height) {
+      const w = width > 100 ? width - 100 : width;
+      const h = height > 100 ? height - 100 : height;
+      const s = w / h;
+      const p = options.width / options.height;
+      if (s >= 1) {
+        options.height = Math.min(options.height, h);
+        options.width = options.height * p;
+      } else {
+        options.width = Math.min(options.width, w);
+        options.height = options.width / p;
+      }
+    }
+
+    const { zoom } = this.surface.viewport;
+
+    if (!point) point = new Point(0, 0);
+
+    if (point.x === 0 && point.y === 0) {
+      const { centerX, centerY } = this.surface.viewport;
+      const [cx, cy] = this.surface.toViewCoord(centerX, centerY);
+      point.x = cx;
+      point.y = cy;
+    }
+    const cx = point.x;
+    const cy = point.y;
+
+    let x = 0;
+    let y = 0;
+    if (zoom > 1) {
+      x = cx - options.width / 2;
+      y = cy - options.height / 2;
+      options.width /= zoom;
+      options.height /= zoom;
+    } else {
+      x = cx - (options.width * zoom) / 2;
+      y = cy - (options.height * zoom) / 2;
+    }
+
+    return this.addNewNote([model], new Point(x, y), options);
+  }
+
+  async addImages(
+    fileInfos: {
+      file: File;
+      sourceId: string;
+    }[],
+    point?: Point
+  ) {
+    const models: Partial<ImageBlockModel>[] = [];
+    for (const { file, sourceId } of fileInfos) {
+      const size = await readImageSize(file);
+      models.push({
+        flavour: 'affine:image',
+        sourceId,
+        ...size,
+      });
+    }
+
+    const notes = models.map(model => this.addImage(model, point));
+    const { noteId } = notes[notes.length - 1];
+
+    const note = this.notes.find(note => note.id === noteId);
+    assertExists(note);
+
+    this.selection.switchToDefaultMode({
+      selected: [note],
+      active: false,
+    });
   }
 
   /*

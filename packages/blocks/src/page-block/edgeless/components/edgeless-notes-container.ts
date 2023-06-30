@@ -46,7 +46,7 @@ function EdgelessChildNote(
     background: isHiddenNote
       ? 'transparent'
       : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-    boxShadow: 'var(--affine-shadow-3)',
+    boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
     pointerEvents: 'all',
     overflow: 'hidden',
     transformOrigin: '0 0',

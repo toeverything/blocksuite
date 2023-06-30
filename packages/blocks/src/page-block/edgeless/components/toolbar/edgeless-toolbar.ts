@@ -14,7 +14,6 @@ import {
   TextIconLarge,
   ViewBarIcon,
 } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -27,7 +26,7 @@ import { Point } from '../../../../__internal__/utils/rect.js';
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
 import { DEFAULT_NOTE_COLOR } from '../../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getTooltipWithShortcut, readImageSize } from '../utils.js';
+import { getTooltipWithShortcut } from '../utils.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
@@ -190,73 +189,17 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     innerSmoothTranslate();
   }
 
-  private async _addImage() {
+  private async _addImages() {
     this._imageLoading = true;
-    const options = {
-      width: 0,
-      height: 0,
-      offsetX: 0,
-      offsetY: 0,
-    };
 
     const fileInfos = await uploadImageFromLocal(this.edgeless.page.blobs);
 
-    for (let index = 0; index < fileInfos.length; index++) {
-      const file = fileInfos[index].file;
-      const size = await readImageSize(file);
-      options.width = Math.max(options.width, size.width);
-      options.height = Math.max(options.height, size.height);
+    if (!fileInfos.length) {
+      this._imageLoading = false;
+      return;
     }
 
-    const models = fileInfos.map(({ sourceId }) => ({
-      flavour: 'affine:image',
-      sourceId,
-    }));
-
-    const { left, width, top, height } =
-      this.edgeless.pageBlockContainer.getBoundingClientRect();
-
-    if (options.width && options.height) {
-      const s = width / height;
-      const sh = height > 100 ? height - 100 : height;
-      const p = options.width / options.height;
-      if (s >= 1) {
-        options.height = Math.min(options.height, sh);
-        options.width = p * options.height;
-      } else {
-        const sw = sh * s;
-        options.width = Math.min(options.width, sw);
-        options.height = options.width / p;
-      }
-    }
-
-    const { zoom } = this.edgeless.surface.viewport;
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    let x = 0;
-    let y = 0;
-    if (zoom > 1) {
-      x = centerX - options.width / 2;
-      y = centerY - options.height / 2;
-      options.width /= zoom;
-      options.height /= zoom;
-    } else {
-      x = centerX - (options.width * zoom) / 2;
-      y = centerY - (options.height * zoom) / 2;
-    }
-
-    const { noteId } = this.edgeless.addNewNote(
-      models,
-      new Point(x, y),
-      options
-    );
-    const note = this.edgeless.notes.find(note => note.id === noteId);
-    assertExists(note);
-
-    this.edgeless.selection.switchToDefaultMode({
-      selected: [note],
-      active: false,
-    });
+    await this.edgeless.addImages(fileInfos);
 
     this._imageLoading = false;
   }
@@ -340,7 +283,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .disabled=${this._imageLoading}
           .tooltip=${'Image'}
-          @click=${() => this._addImage()}
+          @click=${() => this._addImages()}
         >
           ${ImageIcon}
         </edgeless-tool-icon-button>

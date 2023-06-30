@@ -4,7 +4,6 @@ import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
 import type { Space } from './space.js';
 import type { Store } from './store.js';
-import { uuidv4 } from './utils/id-generator.js';
 
 export interface UserRange {
   startOffset: number;
@@ -18,29 +17,14 @@ export interface UserInfo {
   color: string;
 }
 
-type Request<
-  Flags extends Record<string, unknown> = BlockSuiteFlags,
-  Key extends keyof Flags = keyof Flags
-> = {
-  id: string;
-  clientId: number;
-  field: Key;
-  value: Flags[Key];
-};
-
-type Response = {
-  id: string;
-};
-
 // Raw JSON state in awareness CRDT
 export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > = {
-  rangeMap?: Record<Space['prefixedId'], UserRange>;
+  rangeMap?: Record<string, UserRange>;
   user?: UserInfo;
   flags: Flags;
-  request?: Request<Flags>[];
-  response?: Response[];
+  selection: Array<Record<string, unknown>>;
 };
 
 interface AwarenessEvent<
@@ -69,16 +53,16 @@ export class AwarenessStore<
     this.store = store;
     this.awareness = awareness;
     this.awareness.on('change', this._onAwarenessChange);
-    this.slots.update.on(this._onAwarenessMessage);
-    const upstreamFlags = awareness.getLocalState()?.flags;
-    if (upstreamFlags) {
-      this.awareness.setLocalStateField(
-        'flags',
-        merge(true, defaultFlags, upstreamFlags)
-      );
-    } else {
-      this.awareness.setLocalStateField('flags', { ...defaultFlags });
-    }
+    this.awareness.setLocalStateField('selection', []);
+    this._initFlags(defaultFlags);
+  }
+
+  private _initFlags(defaultFlags: Flags) {
+    const upstreamFlags = this.awareness.getLocalState()?.flags;
+    const flags = upstreamFlags
+      ? merge(true, defaultFlags, upstreamFlags)
+      : { ...defaultFlags };
+    this.awareness.setLocalStateField('flags', flags);
   }
 
   setFlag<Key extends keyof Flags>(field: Key, value: Flags[Key]) {
@@ -108,27 +92,6 @@ export class AwarenessStore<
     }
   }
 
-  setRemoteFlag<Key extends keyof Flags>(
-    clientId: number,
-    field: Key,
-    value: Flags[Key]
-  ) {
-    if (!this.getFlag('enable_set_remote_flag')) {
-      console.error('set remote flag feature disabled');
-      return;
-    }
-    const oldRequest = this.awareness.getLocalState()?.request ?? [];
-    this.awareness.setLocalStateField('request', [
-      ...oldRequest,
-      {
-        id: uuidv4(),
-        clientId,
-        field,
-        value,
-      },
-    ] satisfies Request<Flags>[]);
-  }
-
   setLocalRange(space: Space, range: UserRange | null) {
     const rangeMap = this.awareness.getLocalState()?.rangeMap ?? {};
     if (range === null) {
@@ -144,6 +107,14 @@ export class AwarenessStore<
 
   getLocalRange(space: Space): UserRange | undefined {
     return this.awareness.getLocalState()?.['rangeMap']?.[space.prefixedId];
+  }
+
+  setLocalSelection(selection: Array<Record<string, unknown>>) {
+    this.awareness.setLocalStateField('selection', selection);
+  }
+
+  getLocalSelection(): ReadonlyArray<Record<string, unknown>> {
+    return this.awareness.getLocalState()?.selection || [];
   }
 
   getStates(): Map<number, RawAwarenessState<Flags>> {
@@ -162,14 +133,14 @@ export class AwarenessStore<
       this.slots.update.emit({
         id,
         type: 'add',
-        state: states.get(id) as RawAwarenessState<Flags>,
+        state: states.get(id),
       });
     });
     updated.forEach(id => {
       this.slots.update.emit({
         id,
         type: 'update',
-        state: states.get(id) as RawAwarenessState<Flags>,
+        state: states.get(id),
       });
     });
     removed.forEach(id => {
@@ -179,78 +150,6 @@ export class AwarenessStore<
       });
     });
   };
-
-  private _onAwarenessMessage = (awMsg: AwarenessEvent<Flags>) => {
-    if (this.getFlag('enable_set_remote_flag') === true) {
-      this._handleRemoteFlags();
-    }
-  };
-
-  private _handleRemoteFlags() {
-    const nextTick: (() => void)[] = [];
-    const localState =
-      this.awareness.getLocalState() as RawAwarenessState<Flags>;
-    const request = (localState?.request ?? []) as Request<Flags>[];
-    const selfResponse = [] as Response[];
-    const fakeDirtyResponse = [] as Response[];
-    if (localState && Array.isArray(localState.response)) {
-      selfResponse.push(...localState.response);
-      fakeDirtyResponse.push(...localState.response);
-    }
-    const response = [] as Response[];
-    for (const [clientId, state] of this.awareness.getStates()) {
-      if (clientId === this.awareness.clientID) {
-        continue;
-      }
-      if (Array.isArray(state.response)) {
-        response.push(...state.response);
-      }
-      if (Array.isArray(state.request)) {
-        const remoteRequest = state.request as Request<Flags>[];
-        selfResponse.forEach((response, idx) => {
-          if (response === null) {
-            return;
-          }
-          const index = remoteRequest.findIndex(
-            request => request.id === response.id
-          );
-          if (index === -1) {
-            fakeDirtyResponse[idx].id = 'remove';
-          }
-        });
-        remoteRequest.forEach(request => {
-          if (request.clientId === this.awareness.clientID) {
-            // handle request
-            nextTick.push(() => {
-              this.setFlag(request.field, request.value);
-            });
-            selfResponse.push({
-              id: request.id,
-            });
-          }
-        });
-      }
-    }
-    response.forEach(response => {
-      const idx = request.findIndex(request => request.id === response.id);
-      if (idx !== -1) {
-        request.splice(idx, 1);
-      }
-    });
-    nextTick.push(() => {
-      this.awareness.setLocalStateField('request', request);
-      this.awareness.setLocalStateField(
-        'response',
-        selfResponse.filter((response, idx) =>
-          fakeDirtyResponse[idx] ? fakeDirtyResponse[idx].id !== 'remove' : true
-        )
-      );
-    });
-
-    setTimeout(() => {
-      nextTick.forEach(fn => fn());
-    }, 100);
-  }
 
   destroy() {
     if (this.awareness) {
