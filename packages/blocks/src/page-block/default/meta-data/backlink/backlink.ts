@@ -1,4 +1,4 @@
-import type { Disposable } from '@blocksuite/global/utils.js';
+import type { Disposable } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
 import type { BackLink } from './backlink-popover.js';
