@@ -169,6 +169,7 @@ export class DefaultPageBlockComponent
       pageId: string;
       blockId?: string;
     }>(),
+    tagClicked: new Slot<{ tagId: string }>(),
   };
 
   @query('.affine-default-page-block-title')
