@@ -166,7 +166,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   set selection(data) {
-    this.service.select(data);
+    if (data == null) {
+      const current = this.selection;
+      if (current?.isEditing) {
+        this.getCellContainer(
+          current.focus.rowIndex,
+          current.focus.columnIndex
+        )?.cell?.exitEditMode();
+      }
+    }
   }
 
   cellPosition(left: number, top: number) {
