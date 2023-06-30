@@ -141,6 +141,67 @@ function getNextPoint(
   return result;
 }
 
+function computeNextStartEndPoint(
+  startPoint: IVec,
+  endPoint: IVec,
+  startBound: Bound | null,
+  endBound: Bound | null,
+  startOffset: IVec | null,
+  endOffset: IVec | null
+) {
+  const nextStartPoint =
+    startBound && startOffset
+      ? getNextPoint(
+          startBound,
+          startPoint,
+          startOffset[0],
+          startOffset[1],
+          startOffset[2],
+          startOffset[3]
+        )
+      : startPoint;
+  const lastEndPoint =
+    endBound && endOffset
+      ? getNextPoint(
+          endBound,
+          endPoint,
+          endOffset[0],
+          endOffset[1],
+          endOffset[2],
+          endOffset[3]
+        )
+      : endPoint;
+  return [nextStartPoint, lastEndPoint];
+}
+
+function adjustStartEndPoint(
+  startPoint: IVec,
+  endPoint: IVec,
+  startBound: Bound | null,
+  endBound: Bound | null
+) {
+  if (!endBound) {
+    if (
+      Math.abs(endPoint[0] - startPoint[0]) >
+      Math.abs(endPoint[1] - startPoint[1])
+    ) {
+      endPoint[0] += sign(endPoint[0] - startPoint[0]);
+    } else {
+      endPoint[1] += sign(endPoint[1] - startPoint[1]);
+    }
+  }
+  if (!startBound) {
+    if (
+      Math.abs(endPoint[0] - startPoint[0]) >
+      Math.abs(endPoint[1] - startPoint[1])
+    ) {
+      startPoint[0] -= sign(endPoint[0] - startPoint[0]);
+    } else {
+      startPoint[1] -= sign(endPoint[1] - startPoint[1]);
+    }
+  }
+}
+
 export class ConnectionOverlay extends Overlay {
   surface!: SurfaceManager;
   points: IVec[] = [];
@@ -383,7 +444,7 @@ export class EdgelessConnectorManager {
     const startBound = start ? Bound.deserialize(start.xywh) : null;
     const endBound = end ? Bound.deserialize(end.xywh) : null;
     const [startOffset, endOffset] = computeOffset(startBound, endBound);
-    const [nextStartPoint, lastEndPoint] = this._computeNextStartEndPoint(
+    const [nextStartPoint, lastEndPoint] = computeNextStartEndPoint(
       startPoint,
       endPoint,
       startBound,
@@ -450,67 +511,6 @@ export class EdgelessConnectorManager {
     return [startPoint, endPoint];
   }
 
-  private _computeNextStartEndPoint(
-    startPoint: IVec,
-    endPoint: IVec,
-    startBound: Bound | null,
-    endBound: Bound | null,
-    startOffset: IVec | null,
-    endOffset: IVec | null
-  ) {
-    const nextStartPoint =
-      startBound && startOffset
-        ? getNextPoint(
-            startBound,
-            startPoint,
-            startOffset[0],
-            startOffset[1],
-            startOffset[2],
-            startOffset[3]
-          )
-        : startPoint;
-    const lastEndPoint =
-      endBound && endOffset
-        ? getNextPoint(
-            endBound,
-            endPoint,
-            endOffset[0],
-            endOffset[1],
-            endOffset[2],
-            endOffset[3]
-          )
-        : endPoint;
-    return [nextStartPoint, lastEndPoint];
-  }
-
-  private _adjustStartEndPoint(
-    startPoint: IVec,
-    endPoint: IVec,
-    startBound: Bound | null,
-    endBound: Bound | null
-  ) {
-    if (!endBound) {
-      if (
-        Math.abs(endPoint[0] - startPoint[0]) >
-        Math.abs(endPoint[1] - startPoint[1])
-      ) {
-        endPoint[0] += sign(endPoint[0] - startPoint[0]);
-      } else {
-        endPoint[1] += sign(endPoint[1] - startPoint[1]);
-      }
-    }
-    if (!startBound) {
-      if (
-        Math.abs(endPoint[0] - startPoint[0]) >
-        Math.abs(endPoint[1] - startPoint[1])
-      ) {
-        startPoint[0] -= sign(endPoint[0] - startPoint[0]);
-      } else {
-        startPoint[1] -= sign(endPoint[1] - startPoint[1]);
-      }
-    }
-  }
-
   _generateOrthogonalConnectorPath(connector: ConnectorElement) {
     const info = this._prepareOrthogonalConnectorInfo(connector);
     let [startPoint, endPoint, nextStartPoint, lastEndPoint] = info;
@@ -542,7 +542,7 @@ export class EdgelessConnectorManager {
     );
     const finalPoints = points[0];
     [, startPoint, endPoint, nextStartPoint, lastEndPoint] = points;
-    this._adjustStartEndPoint(startPoint, endPoint, startBound, endBound);
+    adjustStartEndPoint(startPoint, endPoint, startBound, endBound);
     this._aStarRunner = new AStarRunner(
       finalPoints,
       nextStartPoint,

@@ -39,43 +39,31 @@ export function isConnectorAndBindingsAllSelected(
   return false;
 }
 
-export function getConnectablePoints(
-  startPoint: IVec,
-  endPoint: IVec,
-  nextStartPoint: IVec,
-  lastEndPoint: IVec,
-  startBound: Bound | null,
-  endBound: Bound | null,
-  expandStartBound: Bound | null,
-  expandEndBound: Bound | null
-) {
-  const lineBound = Bound.fromPoints([startPoint, endPoint]);
-  const outerBound =
-    expandStartBound &&
-    expandEndBound &&
-    expandStartBound.unite(expandEndBound);
-  let points: IVec[] = [nextStartPoint, lastEndPoint];
-  function pushWithPriority(vecs: IVec[], priority = 0) {
-    points.push(...vecs.map(vec => [...vec, priority]));
-  }
-  function pushLineIntersectsToPoints(
-    aLine: IVec[],
-    bLine: IVec[],
-    priority = 0
-  ) {
-    const rst = lineIntersects(aLine[0], aLine[1], bLine[0], bLine[1], true);
-    if (rst) {
-      pushWithPriority([rst], priority);
-    }
-  }
-  pushWithPriority(lineBound.getVerticesAndMidpoints());
+function pushWithPriority(points: IVec[], vecs: IVec[], priority = 0) {
+  points.push(...vecs.map(vec => [...vec, priority]));
+}
 
-  if (!startBound || !endBound) {
-    pushWithPriority([lineBound.center], 6);
+function pushLineIntersectsToPoints(
+  points: IVec[],
+  aLine: IVec[],
+  bLine: IVec[],
+  priority = 0
+) {
+  const rst = lineIntersects(aLine[0], aLine[1], bLine[0], bLine[1], true);
+  if (rst) {
+    pushWithPriority(points, [rst], priority);
   }
+}
+
+function pushOuterPoints(
+  points: IVec[],
+  expandStartBound: Bound,
+  expandEndBound: Bound,
+  outerBound: Bound
+) {
   if (expandStartBound && expandEndBound && outerBound) {
-    pushWithPriority(outerBound.getVerticesAndMidpoints());
-    pushWithPriority([outerBound.center], 2);
+    pushWithPriority(points, outerBound.getVerticesAndMidpoints());
+    pushWithPriority(points, [outerBound.center], 2);
     [
       expandStartBound.upperLine,
       expandStartBound.horizontalLine,
@@ -84,8 +72,8 @@ export function getConnectablePoints(
       expandEndBound.horizontalLine,
       expandEndBound.lowerLine,
     ].forEach(line => {
-      pushLineIntersectsToPoints(line, outerBound.leftLine, 0);
-      pushLineIntersectsToPoints(line, outerBound.rightLine, 0);
+      pushLineIntersectsToPoints(points, line, outerBound.leftLine, 0);
+      pushLineIntersectsToPoints(points, line, outerBound.rightLine, 0);
     });
     [
       expandStartBound.leftLine,
@@ -95,162 +83,141 @@ export function getConnectablePoints(
       expandEndBound.verticalLine,
       expandEndBound.rightLine,
     ].forEach(line => {
-      pushLineIntersectsToPoints(line, outerBound.upperLine, 0);
-      pushLineIntersectsToPoints(line, outerBound.lowerLine, 0);
+      pushLineIntersectsToPoints(points, line, outerBound.upperLine, 0);
+      pushLineIntersectsToPoints(points, line, outerBound.lowerLine, 0);
     });
   }
+}
 
-  function pushBoundMidPoint(b1: Bound, b2: Bound, eb1: Bound, eb2: Bound) {
-    if (b1.maxX < b2.x) {
-      const midX = (b1.maxX + b2.x) / 2;
-      [
-        eb1.horizontalLine,
-        eb2.horizontalLine,
-        eb1.upperLine,
-
-        eb1.lowerLine,
-        eb2.upperLine,
-
-        eb2.lowerLine,
-      ].forEach((line, index) => {
-        pushLineIntersectsToPoints(
-          line,
-          [
-            [midX, 0],
-            [midX, 1],
-          ],
-          index === 0 || index === 1 ? 6 : 3
-        );
-      });
-    }
-    if (b1.maxY < b2.y) {
-      const midY = (b1.maxY + b2.y) / 2;
-      [
-        eb1.verticalLine,
-        eb2.verticalLine,
-        eb1.leftLine,
-        eb1.rightLine,
-        eb2.leftLine,
-        eb2.rightLine,
-      ].forEach((line, index) => {
-        pushLineIntersectsToPoints(
-          line,
-          [
-            [0, midY],
-            [1, midY],
-          ],
-          index === 0 || index === 1 ? 6 : 3
-        );
-      });
-    }
+function pushBoundMidPoint(
+  points: IVec[],
+  bound1: Bound,
+  bound2: Bound,
+  expandBound1: Bound,
+  expandBound2: Bound
+) {
+  if (bound1.maxX < bound2.x) {
+    const midX = (bound1.maxX + bound2.x) / 2;
+    [
+      expandBound1.horizontalLine,
+      expandBound2.horizontalLine,
+      expandBound1.upperLine,
+      expandBound1.lowerLine,
+      expandBound2.upperLine,
+      expandBound2.lowerLine,
+    ].forEach((line, index) => {
+      pushLineIntersectsToPoints(
+        points,
+        line,
+        [
+          [midX, 0],
+          [midX, 1],
+        ],
+        index === 0 || index === 1 ? 6 : 3
+      );
+    });
   }
+  if (bound1.maxY < bound2.y) {
+    const midY = (bound1.maxY + bound2.y) / 2;
+    [
+      expandBound1.verticalLine,
+      expandBound2.verticalLine,
+      expandBound1.leftLine,
+      expandBound1.rightLine,
+      expandBound2.leftLine,
+      expandBound2.rightLine,
+    ].forEach((line, index) => {
+      pushLineIntersectsToPoints(
+        points,
+        line,
+        [
+          [0, midY],
+          [1, midY],
+        ],
+        index === 0 || index === 1 ? 6 : 3
+      );
+    });
+  }
+}
 
-  function pushGapMidPoint(
-    point: IVec,
-    bound: Bound,
-    bound2: Bound,
-    expandBound: Bound,
-    expandBound2: Bound
+function pushGapMidPoint(
+  points: IVec[],
+  point: IVec,
+  bound: Bound,
+  bound2: Bound,
+  expandBound: Bound,
+  expandBound2: Bound
+) {
+  /** on top or on bottom */
+  if (
+    almostEqual(point[1], bound.y, 0.02) ||
+    almostEqual(point[1], bound.maxY, 0.02)
   ) {
-    /** on top or on bottom */
-    if (
-      almostEqual(point[1], bound.y, 0.02) ||
-      almostEqual(point[1], bound.maxY, 0.02)
-    ) {
-      const rst = [
-        bound.upperLine,
-        bound.lowerLine,
-        bound2.upperLine,
-        bound2.lowerLine,
-      ].map(line => {
-        return lineIntersects(
-          point,
-          [point[0], point[1] + 1],
-          line[0],
-          line[1],
-          true
-        );
-      }) as number[][];
-      rst.sort((a, b) => a[1] - b[1]);
-      const midPoint = Vec.lrp(rst[1], rst[2], 0.5);
-      pushWithPriority([midPoint], 6);
-      [
-        expandBound.leftLine,
-        expandBound.rightLine,
-        expandBound2.leftLine,
-        expandBound2.rightLine,
-      ].forEach(line => {
-        pushLineIntersectsToPoints(
-          [midPoint, [midPoint[0] + 1, midPoint[1]]],
-          line,
-          0
-        );
-      });
-    } else {
-      const rst = [
-        bound.leftLine,
-        bound.rightLine,
-        bound2.leftLine,
-        bound2.rightLine,
-      ].map(line => {
-        return lineIntersects(
-          point,
-          [point[0] + 1, point[1]],
-          line[0],
-          line[1],
-          true
-        );
-      }) as number[][];
-      rst.sort((a, b) => a[0] - b[0]);
-      const midPoint = Vec.lrp(rst[1], rst[2], 0.5);
-      pushWithPriority([midPoint], 6);
-      [
-        expandBound.upperLine,
-        expandBound.lowerLine,
-        expandBound2.upperLine,
-        expandBound2.lowerLine,
-      ].forEach(line => {
-        pushLineIntersectsToPoints(
-          [midPoint, [midPoint[0], midPoint[1] + 1]],
-          line,
-          0
-        );
-      });
-    }
+    const rst = [
+      bound.upperLine,
+      bound.lowerLine,
+      bound2.upperLine,
+      bound2.lowerLine,
+    ].map(line => {
+      return lineIntersects(
+        point,
+        [point[0], point[1] + 1],
+        line[0],
+        line[1],
+        true
+      );
+    }) as number[][];
+    rst.sort((a, b) => a[1] - b[1]);
+    const midPoint = Vec.lrp(rst[1], rst[2], 0.5);
+    pushWithPriority(points, [midPoint], 6);
+    [
+      expandBound.leftLine,
+      expandBound.rightLine,
+      expandBound2.leftLine,
+      expandBound2.rightLine,
+    ].forEach(line => {
+      pushLineIntersectsToPoints(
+        points,
+        [midPoint, [midPoint[0] + 1, midPoint[1]]],
+        line,
+        0
+      );
+    });
+  } else {
+    const rst = [
+      bound.leftLine,
+      bound.rightLine,
+      bound2.leftLine,
+      bound2.rightLine,
+    ].map(line => {
+      return lineIntersects(
+        point,
+        [point[0] + 1, point[1]],
+        line[0],
+        line[1],
+        true
+      );
+    }) as number[][];
+    rst.sort((a, b) => a[0] - b[0]);
+    const midPoint = Vec.lrp(rst[1], rst[2], 0.5);
+    pushWithPriority(points, [midPoint], 6);
+    [
+      expandBound.upperLine,
+      expandBound.lowerLine,
+      expandBound2.upperLine,
+      expandBound2.lowerLine,
+    ].forEach(line => {
+      pushLineIntersectsToPoints(
+        points,
+        [midPoint, [midPoint[0], midPoint[1] + 1]],
+        line,
+        0
+      );
+    });
   }
-  if (startBound && endBound && expandStartBound && expandEndBound) {
-    pushGapMidPoint(
-      startPoint,
-      startBound,
-      endBound,
-      expandStartBound,
-      expandEndBound
-    );
-    pushGapMidPoint(
-      endPoint,
-      endBound,
-      startBound,
-      expandEndBound,
-      expandStartBound
-    );
-    pushBoundMidPoint(startBound, endBound, expandStartBound, expandEndBound);
-    pushBoundMidPoint(endBound, startBound, expandEndBound, expandStartBound);
-  }
+}
 
-  if (expandStartBound) {
-    pushWithPriority(expandStartBound.getVerticesAndMidpoints());
-    pushWithPriority(
-      expandStartBound.include(lastEndPoint).getVerticesAndMidpoints()
-    );
-  }
-
-  if (expandEndBound) {
-    pushWithPriority(expandEndBound.getVerticesAndMidpoints());
-    pushWithPriority(
-      expandEndBound.include(nextStartPoint).getVerticesAndMidpoints()
-    );
-  }
-
+function removeDulicatePoints(points: IVec[]) {
   points = points.map(downscalePrecision);
   points.sort((a, b) => a[0] - b[0]);
   for (let i = 1; i < points.length - 1; i++) {
@@ -288,6 +255,83 @@ export function getConnectablePoints(
       continue;
     }
   }
+  return points;
+}
+
+export function getConnectablePoints(
+  startPoint: IVec,
+  endPoint: IVec,
+  nextStartPoint: IVec,
+  lastEndPoint: IVec,
+  startBound: Bound | null,
+  endBound: Bound | null,
+  expandStartBound: Bound | null,
+  expandEndBound: Bound | null
+) {
+  const lineBound = Bound.fromPoints([startPoint, endPoint]);
+  const outerBound =
+    expandStartBound &&
+    expandEndBound &&
+    expandStartBound.unite(expandEndBound);
+  let points: IVec[] = [nextStartPoint, lastEndPoint];
+  pushWithPriority(points, lineBound.getVerticesAndMidpoints());
+
+  if (!startBound || !endBound) {
+    pushWithPriority(points, [lineBound.center], 6);
+  }
+  if (outerBound) {
+    pushOuterPoints(points, expandStartBound, expandEndBound, outerBound);
+  }
+
+  if (startBound && endBound && expandStartBound && expandEndBound) {
+    pushGapMidPoint(
+      points,
+      startPoint,
+      startBound,
+      endBound,
+      expandStartBound,
+      expandEndBound
+    );
+    pushGapMidPoint(
+      points,
+      endPoint,
+      endBound,
+      startBound,
+      expandEndBound,
+      expandStartBound
+    );
+    pushBoundMidPoint(
+      points,
+      startBound,
+      endBound,
+      expandStartBound,
+      expandEndBound
+    );
+    pushBoundMidPoint(
+      points,
+      endBound,
+      startBound,
+      expandEndBound,
+      expandStartBound
+    );
+  }
+
+  if (expandStartBound) {
+    pushWithPriority(points, expandStartBound.getVerticesAndMidpoints());
+    pushWithPriority(
+      points,
+      expandStartBound.include(lastEndPoint).getVerticesAndMidpoints()
+    );
+  }
+
+  if (expandEndBound) {
+    pushWithPriority(points, expandEndBound.getVerticesAndMidpoints());
+    pushWithPriority(
+      points,
+      expandEndBound.include(nextStartPoint).getVerticesAndMidpoints()
+    );
+  }
+  points = removeDulicatePoints(points);
 
   const sorted = points.map(point => point[0] + ',' + point[1]).sort();
   sorted.forEach((cur, index) => {

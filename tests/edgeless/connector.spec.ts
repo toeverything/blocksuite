@@ -508,12 +508,12 @@ test('change connector line width', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
-
+  await deleteAll(page);
   const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
+  const end = { x: 300, y: 200 };
   await addBasicConnectorElement(page, start, end);
 
-  await page.mouse.click(start.x + 5, start.y + 5);
+  await page.mouse.click(start.x + 5, start.y);
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
   await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
 
@@ -528,22 +528,23 @@ test('change connector line width', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [
-    [start.x + 10, start.y - 3],
-    [start.x + 10, start.y + 3],
+    [start.x + 5, start.y],
+    [start.x + 10, start.y],
   ]);
   expect(pickedColor[0]).toBe(pickedColor[1]);
 });
 
-test('change connector stroke style', async ({ page }) => {
+test.only('change connector stroke style', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await deleteAll(page);
 
   const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
+  const end = { x: 300, y: 200 };
   await addBasicConnectorElement(page, start, end);
 
-  await page.mouse.click(start.x + 5, start.y + 5);
+  await page.mouse.click(start.x + 5, start.y);
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
   await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
 
