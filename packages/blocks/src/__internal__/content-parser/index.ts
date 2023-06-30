@@ -61,13 +61,7 @@ export class ContentParser {
   public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
-    const pageBlock = {
-      id: root.id,
-      children: root.children
-        .filter(child => child.flavour === 'affine:note')
-        .map(child => this._getSelectedBlock(child)),
-    };
-    const htmlContent = await this.block2Html([pageBlock]);
+    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
       htmlContent
@@ -77,13 +71,7 @@ export class ContentParser {
   public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
-    const pageBlock = {
-      id: root.id,
-      children: root.children
-        .filter(child => child.flavour === 'affine:note')
-        .map(child => this._getSelectedBlock(child)),
-    };
-    const htmlContent = await this.block2Html([pageBlock]);
+    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       htmlContent
@@ -428,10 +416,18 @@ export class ContentParser {
     });
   }
 
-  private _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+  public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+    if (model.flavour === 'affine:page') {
+      return {
+        id: model.id,
+        children: model.children
+          .filter(child => child.flavour === 'affine:note')
+          .map(child => this.getSelectedBlock(child)),
+      };
+    }
     return {
       id: model.id,
-      children: model.children.map(child => this._getSelectedBlock(child)),
+      children: model.children.map(child => this.getSelectedBlock(child)),
     };
   }
 
