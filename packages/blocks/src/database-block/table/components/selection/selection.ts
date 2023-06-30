@@ -450,9 +450,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       div.style.top = `${top - tableRect.top / scale}px`;
       div.style.width = `${width}px`;
       div.style.height = `${height}px`;
-      div.style.borderColor = isEditing
-        ? '#90b19c'
-        : 'var(--affine-primary-color)';
+      div.style.borderColor = 'var(--affine-primary-color)';
+      div.style.boxShadow = isEditing
+        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
+        : 'unset';
       div.style.display = 'block';
     } else {
       div.style.display = 'none';
