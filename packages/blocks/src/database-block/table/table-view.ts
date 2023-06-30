@@ -108,6 +108,11 @@ const styles = css`
     position: relative;
     z-index: 1;
     background-color: var(--affine-hover-color-filled);
+    opacity: 0;
+  }
+
+  .affine-database-block-footer:hover {
+    opacity: 1;
   }
 
   .affine-database-block-add-row {
