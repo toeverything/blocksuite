@@ -3,7 +3,7 @@ import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocksuite/blocks';
 import type { IPoint } from '@blocksuite/blocks/std';
-import { sleep } from '@blocksuite/global/utils';
+import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -22,6 +22,9 @@ import {
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
+
+const AWAIT_TIMEOUT = 160;
+const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1048;
 
 export async function getNoteRect(
   page: Page,
@@ -62,16 +65,12 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type EdgelessTool =
-  | 'default'
-  | 'shape'
-  | 'brush'
-  | 'pan'
-  | 'text'
-  | 'connector'
-  | 'note'
-  | 'eraser';
-type ToolType = EdgelessTool | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type BasicEdgelessTool = 'default' | 'pan' | 'note';
+type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
+
+type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
+type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ToolType = EdgelessTool | ZoomToolType;
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
@@ -92,8 +91,60 @@ export function locatorEdgelessToolButton(
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
   }[type];
+
+  let buttonType;
+  switch (type) {
+    case 'brush':
+    case 'text':
+    case 'eraser':
+    case 'connector':
+    case 'shape':
+      buttonType = 'edgeless-toolbar-button';
+      break;
+    default:
+      buttonType = 'edgeless-tool-icon-button';
+  }
+  const button = page.locator(`edgeless-toolbar ${buttonType}`).filter({
+    hasText: text,
+  });
+
+  return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export async function toggleZoomBarWhenSmallScreenWidth(page: Page) {
+  const toggleZoomBarButton = page.locator(
+    '.toggle-button edgeless-tool-icon-button.non-actived'
+  );
+  const isClosed = (await toggleZoomBarButton.count()) === 1;
+  if (isClosed) {
+    await toggleZoomBarButton.click();
+    await page.waitForTimeout(200);
+  }
+}
+
+export async function locatorEdgelessZoomToolButton(
+  page: Page,
+  type: ZoomToolType,
+  innerContainer = true
+) {
+  const text = {
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fitToScreen: 'Fit to screen',
+  }[type];
+
+  const screenWidth = page.viewportSize()?.width;
+  assertExists(screenWidth);
+  let zoomBarClass = 'horizontal';
+  if (screenWidth < ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH) {
+    await toggleZoomBarWhenSmallScreenWidth(page);
+    zoomBarClass = 'vertical';
+  }
+
   const button = page
-    .locator('edgeless-toolbar edgeless-tool-icon-button')
+    .locator(
+      `.edgeless-zoom-toolbar-container.${zoomBarClass} edgeless-tool-icon-button`
+    )
     .filter({
       hasText: text,
     });
@@ -190,22 +241,20 @@ export async function getEdgelessSelectedRect(page: Page) {
   return selectedBox;
 }
 
-const AWAIT_TIMEOUT = 160;
-
 export async function decreaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'zoomOut', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
 
 export async function increaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'zoomIn', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
 
 export async function autoFit(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'fitToScreen', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'fitToScreen', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
@@ -410,8 +459,18 @@ export async function zoomInByKeyboard(page: Page) {
 }
 
 export async function getZoomLevel(page: Page) {
-  const span = page.locator('.zoom-percent');
+  const screenWidth = page.viewportSize()?.width;
+  assertExists(screenWidth);
+  let zoomBarClass = 'horizontal';
+  if (screenWidth < ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH) {
+    await toggleZoomBarWhenSmallScreenWidth(page);
+    zoomBarClass = 'vertical';
+  }
+  const span = page.locator(
+    `.edgeless-zoom-toolbar-container.${zoomBarClass} .zoom-percent`
+  );
   // fixme
+  console.log(span);
   await waitNextFrame(page, 60 / 0.25);
   const text = await span.textContent();
   if (!text) {

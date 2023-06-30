@@ -1,7 +1,7 @@
-import '../../buttons/tool-icon-button.js';
+import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { PenIcon } from '@blocksuite/global/config';
+import { EdgelessPenIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
@@ -51,6 +51,28 @@ export class EdgelessBrushToolButton extends LitElement {
     :host {
       display: flex;
     }
+    edgeless-tool-icon-button.icon-container:hover {
+      background: var(--affine-background-overlay-panel-color);
+    }
+    .edgeless-brush-button {
+      position: relative;
+      height: 72px;
+      width: 30px;
+      overflow-y: hidden;
+    }
+    #edgeless-pen-icon {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: top 0.3s ease-in-out;
+    }
+    #edgeless-pen-icon:hover {
+      top: 6px;
+    }
+    .pen-color {
+      fill: var(--affine-blue-800);
+    }
   `;
 
   @property({ attribute: false })
@@ -88,19 +110,14 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
-  override disconnectedCallback() {
-    this._brushMenu?.dispose();
-    this._brushMenu = null;
-    super.disconnectedCallback();
-  }
-
   override render() {
     const type = this.edgelessTool?.type;
 
     return html`
-      <edgeless-tool-icon-button
+      <edgeless-toolbar-button
         .tooltip=${getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
+        .activeMode=${'background'}
         @click=${() => {
           this.setEdgelessTool({
             type: 'brush',
@@ -110,8 +127,8 @@ export class EdgelessBrushToolButton extends LitElement {
           this._toggleBrushMenu();
         }}
       >
-        ${PenIcon}
-      </edgeless-tool-icon-button>
+        <div class="edgeless-brush-button">${EdgelessPenIcon}</div>
+      </edgeless-toolbar-button>
     `;
   }
 }
