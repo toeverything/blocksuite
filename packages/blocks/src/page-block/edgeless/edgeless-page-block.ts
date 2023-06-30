@@ -71,12 +71,12 @@ import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
+import { readImageSize } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
 import {
   EdgelessZoomToolbar,
   type ZoomAction,
 } from './components/zoom/zoom-tool-bar.js';
-import { readImageSize } from './components/utils.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,

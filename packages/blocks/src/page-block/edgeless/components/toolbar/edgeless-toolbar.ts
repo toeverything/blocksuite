@@ -18,7 +18,6 @@ import { customElement } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
-import { Point } from '../../../../__internal__/utils/rect.js';
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getTooltipWithShortcut } from '../utils.js';
@@ -178,6 +177,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
           @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
+        >
           ${HandIcon}
         </edgeless-tool-icon-button>
         <div class="short-divider"></div>
@@ -220,7 +220,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             .disabled=${this._imageLoading}
             .activeMode=${'background'}
             .tooltip=${'Image'}
-            @click=${() => this._addImage()}
+            @click=${() => this._addImages()}
           >
             ${EdgelessImageIcon}
           </edgeless-toolbar-button>
