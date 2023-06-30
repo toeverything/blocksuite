@@ -197,15 +197,15 @@ export class PageMetaData extends WithDisposable(LitElement) {
   }
 
   get options() {
-    return this.meta.allPagesMeta.tags.options;
+    return this.meta.properties.tags.options;
   }
 
   set options(tags: SelectTag[]) {
     this.tags = this.tags.filter(v => tags.find(x => x.id === v));
-    this.page.workspace.meta.setAllPagesMeta({
-      ...this.meta.allPagesMeta,
+    this.page.workspace.meta.setProperties({
+      ...this.meta.properties,
       tags: {
-        ...this.meta.allPagesMeta.tags,
+        ...this.meta.properties.tags,
         options: tags,
       },
     });
