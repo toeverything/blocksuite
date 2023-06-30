@@ -279,9 +279,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
                 if (!tag) {
                   return null;
                 }
-                return html` <div style="white-space: pre">
-                    ${i !== 0 ? ', ' : ''}
-                  </div>
+                return html` <div>${i !== 0 ? html`,&nbsp;` : ''}</div>
                   <div class="tag-inline">${tag.value}</div>`;
               }
             )}
