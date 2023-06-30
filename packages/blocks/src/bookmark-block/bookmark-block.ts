@@ -240,7 +240,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     };
 
   override render() {
-    const { url, title, description, icon, image } = this.model;
+    const { url, bookmarkTitle, description, icon, image } = this.model;
     const mode = queryCurrentMode();
 
     const createModal = this._showCreateModal
@@ -301,7 +301,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
             ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
           </div>
           <div class="affine-bookmark-title-content">
-            ${title || 'Bookmark'}
+            ${bookmarkTitle || 'Bookmark'}
           </div>
         </div>
 

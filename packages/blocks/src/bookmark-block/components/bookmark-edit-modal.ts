@@ -152,7 +152,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
     ) as HTMLInputElement;
 
     this.model.page.updateBlock(this.model, {
-      title: titleInput.value,
+      bookmarkTitle: titleInput.value,
       description: descInput.value,
     });
     this.onConfirm?.();
@@ -183,7 +183,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
             type="text"
             class="bookmark-input title"
             placeholder="Title"
-            value=${this.model.title || 'Bookmark'}
+            value=${this.model.bookmarkTitle || 'Bookmark'}
             tabindex="1"
           />
           <input

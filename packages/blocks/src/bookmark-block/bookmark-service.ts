@@ -12,7 +12,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
     return `<p><a href="${block.url}">${
-      block.title ? block.title : 'Bookmark'
+      block.bookmarkTitle ? block.bookmarkTitle : 'Bookmark'
     }</a></p>`;
   }
   override block2Text(
