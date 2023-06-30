@@ -75,7 +75,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
        * up to the one that implements the gesture (in other words, the first containing scrolling element)
        * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
        */
-      touchaction: none;
+      touch-action: none;
     }
 
     .affine-edgeless-selected-rect[disabled='false'] .handle {
