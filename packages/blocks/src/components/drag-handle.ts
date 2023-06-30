@@ -43,7 +43,7 @@ export class DragIndicator extends LitElement {
       transition-delay: 0s;
       transform-origin: 0 0;
       pointer-events: none;
-      z-index: 1;
+      z-index: 2;
     }
   `;
 
