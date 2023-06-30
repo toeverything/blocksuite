@@ -1,41 +1,33 @@
 import '../buttons/tool-icon-button.js';
+import '../buttons/toolbar-button.js';
+import './shape/shape-tool-button.js';
 import './brush/brush-tool-button.js';
 import './connector/connector-tool-button.js';
-import './shape/shape-tool-button.js';
+import './note/note-tool-button.js';
 
 import {
-  EraserIcon,
+  EdgelessEraserIcon,
+  EdgelessImageIcon,
+  EdgelessTextIcon,
   HandIcon,
-  ImageIcon,
-  MinusIcon,
-  NoteIcon,
-  PlusIcon,
   SelectIcon,
-  TextIconLarge,
-  ViewBarIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { clamp } from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
-import { Point } from '../../../../__internal__/utils/rect.js';
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
-import { DEFAULT_NOTE_COLOR } from '../../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getTooltipWithShortcut } from '../utils.js';
-
-export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
-      z-index: 2;
+      z-index: 3;
       bottom: 28px;
       left: calc(50%);
       display: flex;
@@ -43,52 +35,64 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       transform: translateX(-50%);
       user-select: none;
     }
-
     .edgeless-toolbar-container {
       display: flex;
       align-items: center;
-      height: 48px;
+      flex-direction: row;
+      padding: 4px 10px;
+      height: 64px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
+      border-radius: 40px;
       fill: currentcolor;
     }
-
     .edgeless-toolbar-container[level='second'] {
       position: absolute;
       bottom: 8px;
       transform: translateY(-100%);
     }
-
     .edgeless-toolbar-container[hidden] {
       display: none;
     }
-
-    .divider {
+    .short-divider {
       width: 1px;
       height: 24px;
       margin: 0 7px;
       background-color: var(--affine-border-color);
     }
-
-    .zoom-percent {
-      display: block;
-      box-sizing: border-box;
-      width: 48px;
-      height: 32px;
-      line-height: 22px;
-      padding: 5px;
-      border-radius: 5px;
-      font-size: 14px;
-      font-weight: 500;
-      text-align: center;
-      cursor: pointer;
-      color: var(--affine-icon-color);
+    .full-divider {
+      width: 1px;
+      height: 100%;
+      margin: 0 7px;
+      background-color: var(--affine-border-color);
     }
-
-    .zoom-percent:hover {
-      color: var(--affine-primary-color);
-      background-color: var(--affine-hover-color);
+    .eraser-button {
+      position: relative;
+      height: 72px;
+      width: 30px;
+      overflow-y: hidden;
+    }
+    #edgeless-eraser-icon {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: top 0.3s ease-in-out;
+    }
+    #edgeless-eraser-icon:hover {
+      top: 6px;
+    }
+    .edgeless-right-part {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 8px;
+    }
+    .transform-button svg {
+      transition: 0.3s ease-in-out;
+    }
+    .transform-button:hover svg {
+      transform: translateY(-8px);
     }
   `;
 
@@ -103,91 +107,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     return this.edgeless.edgelessTool;
   }
 
-  get zoom() {
-    return this.edgeless.surface.viewport.zoom;
-  }
+  setEdgelessTool = (edgelessTool: EdgelessTool) => {
+    this.edgeless.selection.setEdgelessTool(edgelessTool);
+  };
 
   private _imageLoading = false;
-  private _rafId: number | null = null;
-
-  private _setCenter(x: number, y: number) {
-    this.edgeless.surface.viewport.setCenter(x, y);
-    this.edgeless.slots.viewportUpdated.emit();
-  }
-
-  private _setZoom(zoom: number, focusPoint?: Point) {
-    this.edgeless.surface.viewport.setZoom(zoom, focusPoint);
-    this.edgeless.slots.viewportUpdated.emit();
-  }
-
-  private _setZoomByStep(step: number) {
-    this._smoothZoom(clamp(this.zoom + step, ZOOM_MIN, ZOOM_MAX));
-  }
-
-  private _smoothZoom(zoom: number, focusPoint?: Point) {
-    const delta = zoom - this.zoom;
-
-    const innerSmoothZoom = () => {
-      if (this._rafId) cancelAnimationFrame(this._rafId);
-      this._rafId = requestAnimationFrame(() => {
-        const sign = delta > 0 ? 1 : -1;
-        const total = 10;
-        const step = delta / total;
-        const nextZoom = this._cutoff(this.zoom + step, zoom, sign);
-
-        this._setZoom(nextZoom, focusPoint);
-        if (nextZoom != zoom) innerSmoothZoom();
-      });
-    };
-    innerSmoothZoom();
-  }
-
-  private _cutoff(value: number, ref: number, sign: number) {
-    if (sign > 0 && value > ref) return ref;
-    if (sign < 0 && value < ref) return ref;
-    return value;
-  }
-
-  private _zoomToFit() {
-    const { centerX, centerY, zoom } = this.edgeless.getFitToScreenData();
-    const { viewport } = this.edgeless.surface;
-    const preZoom = this.zoom;
-    const newZoom = zoom;
-    const cofficient = preZoom / newZoom;
-    if (cofficient === 1) {
-      this._smoothTranslate(centerX, centerY);
-    } else {
-      const center = new Point(viewport.centerX, viewport.centerY);
-      const newCenter = new Point(centerX, centerY);
-      const focusPoint = newCenter
-        .subtract(center.scale(cofficient))
-        .scale(1 / (1 - cofficient));
-      this._smoothZoom(zoom, focusPoint);
-    }
-  }
-
-  private _smoothTranslate(x: number, y: number) {
-    const { viewport } = this.edgeless.surface;
-    const delta = { x: x - viewport.centerX, y: y - viewport.centerY };
-    const innerSmoothTranslate = () => {
-      if (this._rafId) cancelAnimationFrame(this._rafId);
-      this._rafId = requestAnimationFrame(() => {
-        const rate = 10;
-        const step = { x: delta.x / rate, y: delta.y / rate };
-        const nextCenter = {
-          x: viewport.centerX + step.x,
-          y: viewport.centerY + step.y,
-        };
-        const signX = delta.x > 0 ? 1 : -1;
-        const signY = delta.y > 0 ? 1 : -1;
-        nextCenter.x = this._cutoff(nextCenter.x, x, signX);
-        nextCenter.y = this._cutoff(nextCenter.y, y, signY);
-        this._setCenter(nextCenter.x, nextCenter.y);
-        if (nextCenter.x != x || nextCenter.y != y) innerSmoothTranslate();
-      });
-    };
-    innerSmoothTranslate();
-  }
 
   private async _addImages() {
     this._imageLoading = true;
@@ -202,24 +126,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     await this.edgeless.addImages(fileInfos);
 
     this._imageLoading = false;
-  }
-
-  setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.selection.setEdgelessTool(edgelessTool);
-  };
-
-  setZoomByAction(action: ZoomAction) {
-    switch (action) {
-      case 'fit':
-        this._zoomToFit();
-        break;
-      case 'reset':
-        this._smoothZoom(1.0);
-        break;
-      case 'in':
-      case 'out':
-        this._setZoomByStep(ZOOM_STEP * (action === 'in' ? 1 : -1));
-    }
   }
 
   override firstUpdated() {
@@ -251,7 +157,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   override render() {
     const { type } = this.edgelessTool;
-    const formattedZoom = `${Math.round(this.zoom * 100)}%`;
 
     return html`
       <div
@@ -269,83 +174,62 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           ${SelectIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Text', 'T')}
-          .active=${type === 'text'}
-          @click=${() => this.setEdgelessTool({ type: 'text' })}
-        >
-          ${TextIconLarge}
-        </edgeless-tool-icon-button>
-        <edgeless-shape-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-shape-tool-button>
-        <edgeless-tool-icon-button
-          .disabled=${this._imageLoading}
-          .tooltip=${'Image'}
-          @click=${() => this._addImages()}
-        >
-          ${ImageIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-connector-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-connector-tool-button>
-        <edgeless-brush-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-brush-tool-button>
-
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
-          .active=${type === 'eraser'}
-          @click=${() => this.setEdgelessTool({ type: 'eraser' })}
-        >
-          ${EraserIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
           @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Note', 'N')}
-          .active=${type === 'note'}
-          @click=${() =>
-            this.setEdgelessTool({
-              type: 'note',
-              background: DEFAULT_NOTE_COLOR,
-            })}
+        <div class="short-divider"></div>
+        <edgeless-note-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-note-tool-button>
+        <div class="full-divider"></div>
+        <edgeless-brush-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-brush-tool-button>
+        <edgeless-toolbar-button
+          .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
+          .active=${type === 'eraser'}
+          .activeMode=${'background'}
+          @click=${() => this.setEdgelessTool({ type: 'eraser' })}
         >
-          ${NoteIcon}
-        </edgeless-tool-icon-button>
-
-        <div class="divider"></div>
-        <edgeless-tool-icon-button
-          .tooltip=${'Fit to screen'}
-          @click=${() => this._zoomToFit()}
-        >
-          ${ViewBarIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${'Zoom out'}
-          @click=${() => this._setZoomByStep(-ZOOM_STEP)}
-        >
-          ${MinusIcon}
-        </edgeless-tool-icon-button>
-        <span class="zoom-percent" @click=${() => this._smoothZoom(1)}>
-          ${formattedZoom}
-        </span>
-        <edgeless-tool-icon-button
-          .tooltip=${'Zoom in'}
-          @click=${() => this._setZoomByStep(ZOOM_STEP)}
-        >
-          ${PlusIcon}
-        </edgeless-tool-icon-button>
+          <div class="eraser-button">${EdgelessEraserIcon}</div>
+        </edgeless-toolbar-button>
+        <div class="edgeless-right-part">
+          <edgeless-toolbar-button
+            class="transform-button"
+            .tooltip=${getTooltipWithShortcut('Text', 'T')}
+            .active=${type === 'text'}
+            .activeMode=${'background'}
+            @click=${() => this.setEdgelessTool({ type: 'text' })}
+          >
+            ${EdgelessTextIcon}
+          </edgeless-toolbar-button>
+          <edgeless-shape-tool-button
+            .edgelessTool=${this.edgelessTool}
+            .edgeless=${this.edgeless}
+            .setEdgelessTool=${this.setEdgelessTool}
+          ></edgeless-shape-tool-button>
+          <edgeless-toolbar-button
+            class="transform-button"
+            .disabled=${this._imageLoading}
+            .activeMode=${'background'}
+            .tooltip=${'Image'}
+            @click=${() => this._addImages()}
+          >
+            ${EdgelessImageIcon}
+          </edgeless-toolbar-button>
+          <edgeless-connector-tool-button
+            .edgelessTool=${this.edgelessTool}
+            .edgeless=${this.edgeless}
+            .setEdgelessTool=${this.setEdgelessTool}
+          ></edgeless-connector-tool-button>
+        </div>
       </div>
     `;
   }

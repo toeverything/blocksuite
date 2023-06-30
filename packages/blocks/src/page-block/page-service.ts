@@ -14,7 +14,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     block: PageBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    return `<div>${block.title.toString()}${childText}</div>`;
+    return `<header><h1 class="page-title">${block.title.toString()}</h1></header><div>${childText}</div>`;
   }
 
   override block2Text(

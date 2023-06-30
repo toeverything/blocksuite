@@ -4,6 +4,7 @@ import '../declare-test-window.js';
 import type {
   CssVariableName,
   ListType,
+  PageBlockModel,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
@@ -958,5 +959,14 @@ export async function transformHtml(page: Page, data: string) {
     },
     { data }
   );
+  return promiseResult;
+}
+
+export async function export2Html(page: Page) {
+  const promiseResult = await page.evaluate(() => {
+    const contentParser = new window.ContentParser(window.page);
+    const root = window.page.root as PageBlockModel;
+    return contentParser.block2Html([contentParser.getSelectedBlock(root)]);
+  });
   return promiseResult;
 }
