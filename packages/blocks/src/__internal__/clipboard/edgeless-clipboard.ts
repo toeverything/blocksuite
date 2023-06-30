@@ -403,23 +403,34 @@ export class EdgelessClipboard implements Clipboard {
       // waiting for canvas to render
       await new Promise(requestAnimationFrame);
 
-      const canvas: HTMLCanvasElement = await html2canvas(container);
+      const canvas: HTMLCanvasElement = await html2canvas(container, {
+        backgroundColor: null,
+      });
       assertExists(canvas);
 
-      const blob: Blob = await new Promise((resolve, reject) =>
-        canvas.toBlob(
-          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
-          CLIPBOARD_MIMETYPE.IMAGE_PNG
-        )
-      );
+      // @ts-ignore
+      if (window.apis?.clipboard?.copyAsPng) {
+        // @ts-ignore
+        await window.apis.clipboard?.copyAsPng(
+          canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
+        );
+      } else {
+        const blob: Blob = await new Promise((resolve, reject) =>
+          canvas.toBlob(
+            blob =>
+              blob ? resolve(blob) : reject('Canvas can not export blob'),
+            CLIPBOARD_MIMETYPE.IMAGE_PNG
+          )
+        );
 
-      assertExists(blob);
+        assertExists(blob);
 
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
-        }),
-      ]);
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
+          }),
+        ]);
+      }
     } catch (error) {
       console.error(error);
     }
