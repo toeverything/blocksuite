@@ -4,17 +4,24 @@ import { assertExists, type Page } from '@blocksuite/store';
 import {
   handleNativeRangeAtPoint,
   isEmpty,
+  type NoteChildrenFlavour,
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { DEFAULT_NOTE_WIDTH } from './consts.js';
 
+export type NoteOptions = {
+  childFlavour: NoteChildrenFlavour;
+  childType: string | null;
+};
+
 export function addNote(
   edgeless: EdgelessPageBlockComponent,
   page: Page,
   event: PointerEventState,
-  width = DEFAULT_NOTE_WIDTH
+  width = DEFAULT_NOTE_WIDTH,
+  options: NoteOptions
 ) {
   const noteId = edgeless.addNoteWithPoint(
     new Point(event.point.x, event.point.y),
@@ -22,7 +29,8 @@ export function addNote(
       width,
     }
   );
-  page.addBlock('affine:paragraph', {}, noteId);
+
+  page.addBlock(options.childFlavour, { type: options.childType }, noteId);
   edgeless.slots.edgelessToolUpdated.emit({ type: 'default' });
 
   // Wait for edgelessTool updated

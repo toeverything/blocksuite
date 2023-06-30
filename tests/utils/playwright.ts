@@ -87,7 +87,7 @@ if (scope) {
       },
       [currentEditorIndex]
     );
-    await expect(focusInSecondEditor).toBe(true);
+    expect(focusInSecondEditor).toBe(true);
   });
 
   test('ensure enable two editor', async ({ page }) => {
@@ -97,6 +97,6 @@ if (scope) {
       return document.querySelectorAll('editor-container').length;
     });
 
-    await expect(count).toBe(2);
+    expect(count).toBe(2);
   });
 }

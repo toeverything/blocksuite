@@ -3,7 +3,7 @@ import '../declare-test-window.js';
 
 import type { CssVariableName } from '@blocksuite/blocks';
 import type { IPoint } from '@blocksuite/blocks/std';
-import { sleep } from '@blocksuite/global/utils';
+import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -22,6 +22,9 @@ import {
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
+
+const AWAIT_TIMEOUT = 160;
+const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1048;
 
 export async function getNoteRect(
   page: Page,
@@ -62,16 +65,12 @@ export function locatorPanButton(page: Page, innerContainer = true) {
   return locatorEdgelessToolButton(page, 'pan', innerContainer);
 }
 
-type EdgelessTool =
-  | 'default'
-  | 'shape'
-  | 'brush'
-  | 'pan'
-  | 'text'
-  | 'connector'
-  | 'note'
-  | 'eraser';
-type ToolType = EdgelessTool | 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type BasicEdgelessTool = 'default' | 'pan' | 'note';
+type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
+
+type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
+type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
+type ToolType = EdgelessTool | ZoomToolType;
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
@@ -92,8 +91,60 @@ export function locatorEdgelessToolButton(
     zoomOut: 'Zoom out',
     fitToScreen: 'Fit to screen',
   }[type];
+
+  let buttonType;
+  switch (type) {
+    case 'brush':
+    case 'text':
+    case 'eraser':
+    case 'connector':
+    case 'shape':
+      buttonType = 'edgeless-toolbar-button';
+      break;
+    default:
+      buttonType = 'edgeless-tool-icon-button';
+  }
+  const button = page.locator(`edgeless-toolbar ${buttonType}`).filter({
+    hasText: text,
+  });
+
+  return innerContainer ? button.locator('.icon-container') : button;
+}
+
+export async function toggleZoomBarWhenSmallScreenWidth(page: Page) {
+  const toggleZoomBarButton = page.locator(
+    '.toggle-button edgeless-tool-icon-button.non-actived'
+  );
+  const isClosed = (await toggleZoomBarButton.count()) === 1;
+  if (isClosed) {
+    await toggleZoomBarButton.click();
+    await page.waitForTimeout(200);
+  }
+}
+
+export async function locatorEdgelessZoomToolButton(
+  page: Page,
+  type: ZoomToolType,
+  innerContainer = true
+) {
+  const text = {
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fitToScreen: 'Fit to screen',
+  }[type];
+
+  const screenWidth = page.viewportSize()?.width;
+  assertExists(screenWidth);
+  let zoomBarClass = 'horizontal';
+  if (screenWidth < ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH) {
+    await toggleZoomBarWhenSmallScreenWidth(page);
+    zoomBarClass = 'vertical';
+  }
+
   const button = page
-    .locator('edgeless-toolbar edgeless-tool-icon-button')
+    .locator(
+      `.edgeless-zoom-toolbar-container.${zoomBarClass} edgeless-tool-icon-button`
+    )
     .filter({
       hasText: text,
     });
@@ -190,22 +241,20 @@ export async function getEdgelessSelectedRect(page: Page) {
   return selectedBox;
 }
 
-const AWAIT_TIMEOUT = 160;
-
 export async function decreaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'zoomOut', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'zoomOut', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
 
 export async function increaseZoomLevel(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'zoomIn', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'zoomIn', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
 
 export async function autoFit(page: Page) {
-  const btn = locatorEdgelessToolButton(page, 'fitToScreen', false);
+  const btn = await locatorEdgelessZoomToolButton(page, 'fitToScreen', false);
   await btn.click();
   await sleep(AWAIT_TIMEOUT);
 }
@@ -410,8 +459,18 @@ export async function zoomInByKeyboard(page: Page) {
 }
 
 export async function getZoomLevel(page: Page) {
-  const span = page.locator('.zoom-percent');
+  const screenWidth = page.viewportSize()?.width;
+  assertExists(screenWidth);
+  let zoomBarClass = 'horizontal';
+  if (screenWidth < ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH) {
+    await toggleZoomBarWhenSmallScreenWidth(page);
+    zoomBarClass = 'vertical';
+  }
+  const span = page.locator(
+    `.edgeless-zoom-toolbar-container.${zoomBarClass} .zoom-percent`
+  );
   // fixme
+  console.log(span);
   await waitNextFrame(page, 60 / 0.25);
   const text = await span.textContent();
   if (!text) {
@@ -437,6 +496,16 @@ export async function deleteAll(page: Page) {
   await pressBackspace(page);
 }
 
+export async function deleteAllConnectors(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    container.surface.getElementsByType('connector').forEach(c => {
+      container.surface.removeElement(c.id);
+    });
+  });
+}
+
 export function locatorComponentToolbar(page: Page) {
   return page.locator('edgeless-component-toolbar');
 }
@@ -452,6 +521,7 @@ type Action =
   | 'bringForward'
   | 'sendBackward'
   | 'sendToBack'
+  | 'copyAsPng'
   | 'changeNoteColor'
   | 'changeShapeFillColor'
   | 'changeShapeStrokeColor'
@@ -508,6 +578,18 @@ export async function triggerComponentToolbarAction(
         .locator('.more-actions-container .action-item')
         .filter({
           hasText: 'Send to back',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'copyAsPng': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Copy as PNG',
         });
       await actionButton.click();
       break;
@@ -713,4 +795,37 @@ export async function initThreeNotes(page: Page) {
   await addNote(page, 'abc', 30 + 100, 40 + 100);
   await addNote(page, 'efg', 30 + 130, 40 + 200);
   await addNote(page, 'hij', 30 + 160, 40 + 300);
+}
+
+export async function toViewCoord(page: Page, point: number[]) {
+  return await page.evaluate(point => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.viewport.toViewCoord(point[0], point[1]);
+  }, point);
+}
+
+export async function toModelCoord(page: Page, point: number[]) {
+  return await page.evaluate(point => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.viewport.toModelCoord(point[0], point[1]);
+  }, point);
+}
+
+export async function getConnectorSourceConnection(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElementsByType('connector')[0].source;
+  });
+}
+
+export async function getConnectorPath(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    const connectors = container.surface.getElementsByType('connector');
+    return connectors[0].absolutePath;
+  });
 }

@@ -10,6 +10,7 @@ import { BlockElement } from '@blocksuite/lit';
 import {
   Bound,
   compare,
+  ConnectorElement,
   deserializeXYWH,
   generateKeyBetween,
   generateNKeysBetween,
@@ -38,7 +39,7 @@ import {
   bringForward,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
-  type Point,
+  Point,
   reorder,
   type ReorderingAction,
   type ReorderingRange,
@@ -58,6 +59,7 @@ import type {
   BlockHost,
   DragHandle,
   EdgelessTool,
+  ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
   SurfaceBlockModel,
@@ -69,10 +71,14 @@ import { EdgelessNotesContainer } from './components/edgeless-notes-container.js
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
+import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
+import { readImageSize } from './components/utils.js';
+import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
 import {
-  EdgelessToolbar,
+  EdgelessZoomToolbar,
   type ZoomAction,
-} from './components/toolbar/edgeless-toolbar.js';
+} from './components/zoom/zoom-tool-bar.js';
+import { EdgelessConnectorManager } from './connector-manager.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import {
   DEFAULT_NOTE_HEIGHT,
@@ -100,6 +106,10 @@ export interface EdgelessSelectionSlots {
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
+  copyAsPng: Slot<{
+    notes: NoteBlockModel[];
+    shapes: PhasorElement[];
+  }>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -175,6 +185,26 @@ export class EdgelessPageBlockComponent
       z-index: 1;
       border: var(--affine-border-width) solid var(--affine-blue);
     }
+
+    edgeless-zoom-toolbar,
+    zoom-bar-toggle-button {
+      position: fixed;
+      bottom: 20px;
+      left: 12px;
+      z-index: var(--affine-z-index-popover);
+    }
+
+    @media screen and (max-width: 1048px) {
+      edgeless-zoom-toolbar {
+        display: none;
+      }
+    }
+
+    @media screen and (min-width: 1048px) {
+      zoom-bar-toggle-button {
+        display: none;
+      }
+    }
   `;
 
   flavour = 'edgeless' as const;
@@ -185,6 +215,8 @@ export class EdgelessPageBlockComponent
   components = {
     dragHandle: <DragHandle | null>null,
     toolbar: <EdgelessToolbar | null>null,
+    zoomToolbar: <EdgelessZoomToolbar | null>null,
+    zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
   mouseRoot!: HTMLElement;
@@ -218,7 +250,11 @@ export class EdgelessPageBlockComponent
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
-
+    elementSizeUpdated: new Slot<string>(),
+    copyAsPng: new Slot<{
+      notes: NoteBlockModel[];
+      shapes: PhasorElement[];
+    }>(),
     subpageLinked: new Slot<{ pageId: string }>(),
     subpageUnlinked: new Slot<{ pageId: string }>(),
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
@@ -237,6 +273,8 @@ export class EdgelessPageBlockComponent
   }
 
   snap!: EdgelessSnapManager;
+
+  connector!: EdgelessConnectorManager;
 
   // Gets the top level notes.
   get notes() {
@@ -291,6 +329,29 @@ export class EdgelessPageBlockComponent
       return value;
     });
     this._disposables.add(
+      this.surface.slots.elementAdded.on(id => {
+        const element = this.surface.pickById(id);
+        if (element && element instanceof ConnectorElement) {
+          this.connector.updatePath(element);
+        }
+      })
+    );
+
+    this._disposables.add(
+      this.surface.slots.elementUpdated.on(({ id, props }) => {
+        if ('xywh' in props) {
+          this.slots.elementSizeUpdated.emit(id);
+        }
+        const element = this.surface.pickById(id);
+        if (element instanceof ConnectorElement) {
+          if ('target' in props || 'source' in props || 'mode' in props) {
+            this.connector.updatePath(element as ConnectorElement);
+          }
+        }
+      })
+    );
+
+    this._disposables.add(
       listenToThemeChange(this, () => {
         this.surface.refresh();
       })
@@ -300,13 +361,22 @@ export class EdgelessPageBlockComponent
   private _handleToolbarFlag() {
     const createToolbar = () => {
       const toolbar = new EdgelessToolbar(this);
+      const zoomToolBar = new EdgelessZoomToolbar(this);
+      const zoomBarToggleButton = new ZoomBarToggleButton(this);
+
       this.appendChild(toolbar);
+      this.appendChild(zoomToolBar);
+      this.appendChild(zoomBarToggleButton);
       this.components.toolbar = toolbar;
+      this.components.zoomToolbar = zoomToolBar;
+      this.components.zoomBarToggleButton = zoomBarToggleButton;
     };
 
     if (
       this.page.awarenessStore.getFlag('enable_edgeless_toolbar') &&
-      !this.components.toolbar
+      !this.components.toolbar &&
+      !this.components.zoomToolbar &&
+      !this.components.zoomBarToggleButton
     ) {
       createToolbar();
     }
@@ -322,7 +392,11 @@ export class EdgelessPageBlockComponent
           }
 
           this.components.toolbar?.remove();
+          this.components.zoomToolbar?.remove();
+          this.components.zoomBarToggleButton?.remove();
           this.components.toolbar = null;
+          this.components.zoomToolbar = null;
+          this.components.zoomBarToggleButton = null;
         },
         {
           filter: msg => msg.id === this.page.doc.clientID,
@@ -365,7 +439,29 @@ export class EdgelessPageBlockComponent
     // this.model.children.forEach(note => {
     //   note.propsUpdated.on(() => this.selection.syncDraggingArea());
     // });
-    const { _disposables, slots } = this;
+    const { _disposables, slots, page } = this;
+    _disposables.add(
+      page.slots.blockUpdated.on(e => {
+        if (e.type === 'update') {
+          const block = page.getBlockById(e.id);
+          if (block && block.flavour === 'affine:note' && 'xywh' in e.props) {
+            this.slots.elementSizeUpdated.emit(e.id);
+          }
+        }
+      })
+    );
+
+    _disposables.add(
+      slots.elementSizeUpdated.on(id => {
+        const element =
+          this.surface.pickById(id) ??
+          <TopLevelBlockModel>page.getBlockById(id);
+        if (element) {
+          this.connector.syncConnectorPos([element]);
+        }
+      })
+    );
+
     _disposables.add(
       slots.viewportUpdated.on(() => {
         const prevZoom = this.style.getPropertyValue('--affine-zoom');
@@ -455,13 +551,24 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
     _disposables.add(
       slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.toolbar?.setZoomByAction(action)
+        this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(
       slots.pressShiftKeyUpdated.on(pressed => {
         this.selection.shiftKey = pressed;
         this.requestUpdate();
+      })
+    );
+
+    let canCopyAsPng = true;
+    _disposables.add(
+      slots.copyAsPng.on(({ notes, shapes }) => {
+        if (!canCopyAsPng) return;
+        canCopyAsPng = false;
+        this.clipboard
+          .copyAsPng(notes, shapes)
+          .finally(() => (canCopyAsPng = true));
       })
     );
   }
@@ -725,7 +832,10 @@ export class EdgelessPageBlockComponent
       offsetX?: number;
       offsetY?: number;
     }
-  ) {
+  ): {
+    noteId: string;
+    ids: string[];
+  } {
     this.page.captureSync();
     const { left, top } = this.surface.viewport;
     point.x -= left;
@@ -778,6 +888,94 @@ export class EdgelessPageBlockComponent
     this.page.moveBlocks(blocks, noteModel);
 
     focus && this.setSelection(noteId, true, blocks[0].id, point);
+  }
+
+  addImage(
+    model: Partial<ImageBlockModel>,
+    point?: Point
+  ): { noteId: string; ids: string[] } {
+    const options = {
+      width: model.width ?? 0,
+      height: model.height ?? 0,
+    };
+    // force update size of image
+    {
+      delete model.width;
+      delete model.height;
+    }
+
+    const rect = this.pageBlockContainer.getBoundingClientRect();
+    const { width, height } = rect;
+
+    if (options.width && options.height) {
+      const w = width > 100 ? width - 100 : width;
+      const h = height > 100 ? height - 100 : height;
+      const s = w / h;
+      const p = options.width / options.height;
+      if (s >= 1) {
+        options.height = Math.min(options.height, h);
+        options.width = options.height * p;
+      } else {
+        options.width = Math.min(options.width, w);
+        options.height = options.width / p;
+      }
+    }
+
+    const { zoom } = this.surface.viewport;
+
+    if (!point) point = new Point(0, 0);
+
+    if (point.x === 0 && point.y === 0) {
+      const { centerX, centerY } = this.surface.viewport;
+      const [cx, cy] = this.surface.toViewCoord(centerX, centerY);
+      point.x = cx;
+      point.y = cy;
+    }
+    const cx = point.x;
+    const cy = point.y;
+
+    let x = 0;
+    let y = 0;
+    if (zoom > 1) {
+      x = cx - options.width / 2;
+      y = cy - options.height / 2;
+      options.width /= zoom;
+      options.height /= zoom;
+    } else {
+      x = cx - (options.width * zoom) / 2;
+      y = cy - (options.height * zoom) / 2;
+    }
+
+    return this.addNewNote([model], new Point(x, y), options);
+  }
+
+  async addImages(
+    fileInfos: {
+      file: File;
+      sourceId: string;
+    }[],
+    point?: Point
+  ) {
+    const models: Partial<ImageBlockModel>[] = [];
+    for (const { file, sourceId } of fileInfos) {
+      const size = await readImageSize(file);
+      models.push({
+        flavour: 'affine:image',
+        sourceId,
+        ...size,
+      });
+    }
+
+    const notes = models.map(model => this.addImage(model, point));
+    const { noteId } = notes[notes.length - 1];
+
+    const note = this.notes.find(note => note.id === noteId);
+    assertExists(note);
+
+    this.selection.switchToDefaultMode({
+      selected: [note],
+      active: false,
+    });
   }
 
   /*
@@ -834,8 +1032,10 @@ export class EdgelessPageBlockComponent
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('page')) {
       this._initSurface();
+      this.connector = new EdgelessConnectorManager(this);
       this.service?.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
+      this.surface.init();
     }
     if (changedProperties.has('edgelessTool')) {
       this.selection.edgelessTool = this.edgelessTool;
@@ -1034,6 +1234,7 @@ export class EdgelessPageBlockComponent
                 .state=${state}
                 .slots=${this.slots}
                 .surface=${surface}
+                .edgeless=${this}
               ></edgeless-selected-rect>
             `
           : nothing}

@@ -98,6 +98,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       dispose: this.eventDispatcher.add('click', context => {
         const event = context.get('pointerState').event;
         const target = event.target;
+        this.selection = undefined;
         if (target instanceof Element && this.isCurrentDatabase(target)) {
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
@@ -105,7 +106,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             return true;
           }
         }
-        this.selection = undefined;
         return false;
       }),
     });
@@ -166,6 +166,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   set selection(data) {
+    if (data == null) {
+      const current = this.selection;
+      if (current?.isEditing) {
+        this.getCellContainer(
+          current.focus.rowIndex,
+          current.focus.columnIndex
+        )?.cell?.exitEditMode();
+      }
+    }
     this.service.select(data);
   }
 
@@ -441,9 +450,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       div.style.top = `${top - tableRect.top / scale}px`;
       div.style.width = `${width}px`;
       div.style.height = `${height}px`;
-      div.style.borderColor = isEditing
-        ? '#90b19c'
-        : 'var(--affine-primary-color)';
+      div.style.borderColor = 'var(--affine-primary-color)';
+      div.style.boxShadow = isEditing
+        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
+        : 'unset';
       div.style.display = 'block';
     } else {
       div.style.display = 'none';

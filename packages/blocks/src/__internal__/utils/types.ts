@@ -1,6 +1,8 @@
 import type { UIEventDispatcher } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import type {
+  BrushElement,
+  ConnectorElement,
   ConnectorMode,
   PhasorElement,
   ShapeType,
@@ -131,6 +133,10 @@ export type Alignable = NoteBlockModel | PhasorElement;
 
 export type Erasable = NoteBlockModel | PhasorElement;
 
+export type Connectable =
+  | NoteBlockModel
+  | Exclude<PhasorElement, ConnectorElement | BrushElement>;
+
 export type DefaultTool = {
   type: 'default';
 };
@@ -172,9 +178,13 @@ export type PanTool = {
   panning: boolean;
 };
 
+export type NoteChildrenFlavour = ServiceFlavour;
+
 export type NoteTool = {
   type: 'note';
   background: CssVariableName;
+  childFlavour: NoteChildrenFlavour;
+  childType: string | null;
 };
 
 export type ConnectorTool = {

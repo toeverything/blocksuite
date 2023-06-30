@@ -239,6 +239,14 @@ export class ImportPage extends WithDisposable(LitElement) {
 
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              if (lastSplitIndex !== -1) {
+                const text = await zipFile.files[file].async('text');
+                const doc = new DOMParser().parseFromString(text, 'text/html');
+                const pageBody = doc.querySelector('.page-body');
+                if (pageBody && pageBody.children.length == 0) {
+                  continue;
+                }
+              }
               const page = await createPage(this.workspace);
               pageMap.set(file, page);
             }
