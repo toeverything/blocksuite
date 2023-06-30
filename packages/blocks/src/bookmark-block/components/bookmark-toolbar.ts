@@ -168,9 +168,9 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       this._calculatePosition();
-    }, 100);
+    });
   }
 
   override render() {
@@ -185,8 +185,6 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
             @click=${() => {
               action(this.model, this.onSelected, this);
             }}
-            @mouseover="${this._onHover}"
-            @mouseout="${this._onHoverOut}"
           >
             ${icon}
             <tool-tip inert role="tooltip">${tooltip}</tool-tip>

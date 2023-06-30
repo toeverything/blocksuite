@@ -224,8 +224,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       }
 
       this._toolbarHoverState = {
-        inToolbar: inToolbar || currentToolbarState,
-        inBookmark: inBookmark || currentBookmarkState,
+        inToolbar: inToolbar === undefined ? currentToolbarState : inToolbar,
+        inBookmark:
+          inBookmark === undefined ? currentBookmarkState : inBookmark,
       };
     });
   }
@@ -305,13 +306,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           .toolbarHoverStateSlot=${this._toolbarHoverStateSlot}
         ></bookmark-toolbar>`
       : nothing;
-
-    // const toolbar = html`<bookmark-toolbar
-    //       .model=${this.model}
-    //       .onSelected=${this._onToolbarSelected}
-    //       .root=${this}
-    //       .hoverState=${this.hoverState}
-    //     ></bookmark-toolbar>`
 
     const loading = this._isLoading
       ? html`<div
