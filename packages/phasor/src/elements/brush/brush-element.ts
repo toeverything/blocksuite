@@ -51,45 +51,6 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return lineWidth;
   }
 
-  override getNearestPoint(point: IVec): IVec {
-    const { x, y } = this;
-    return polyLineNearestPoint(
-      this.points.map(p => Vec.add(p, [x, y])),
-      point
-    );
-  }
-
-  override containedByBounds(bounds: Bound) {
-    return false;
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
-    const tl = [this.x, this.y];
-    const points = getPointsFromBoundsWithRotation(this, _ =>
-      this.points.map(point => Vec.add(point, tl))
-    );
-
-    const box = Bound.fromDOMRect(getQuadBoundsWithRotation(this));
-
-    if (box.w < 8 && box.h < 8) {
-      return Vec.distanceToLineSegment(start, end, box.center) < 5 ? [] : null;
-    }
-
-    if (box.intersectLine(start, end, true)) {
-      const len = points.length;
-      for (let i = 1; i < len; i++) {
-        const result = lineIntersects(start, end, points[i - 1], points[i]) as
-          | IVec[]
-          | null;
-        if (result) {
-          return result;
-        }
-      }
-    }
-
-    return null;
-  }
-
   override hitTest(px: number, py: number, options?: HitTestOptions): boolean {
     // const insideBoundingBox = super.hitTest(x, y, options);
     // if (!insideBoundingBox) return false;
@@ -184,5 +145,43 @@ export class BrushElement extends SurfaceElement<IBrush> {
     for (const key in updates) {
       this.yMap.set(key, updates[key as keyof IBrush] as IBrush[keyof IBrush]);
     }
+  }
+  override containedByBounds(bounds: Bound) {
+    return false;
+  }
+
+  override getNearestPoint(point: IVec): IVec {
+    const { x, y } = this;
+    return polyLineNearestPoint(
+      this.points.map(p => Vec.add(p, [x, y])),
+      point
+    );
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
+    const tl = [this.x, this.y];
+    const points = getPointsFromBoundsWithRotation(this, _ =>
+      this.points.map(point => Vec.add(point, tl))
+    );
+
+    const box = Bound.fromDOMRect(getQuadBoundsWithRotation(this));
+
+    if (box.w < 8 && box.h < 8) {
+      return Vec.distanceToLineSegment(start, end, box.center) < 5 ? [] : null;
+    }
+
+    if (box.intersectLine(start, end, true)) {
+      const len = points.length;
+      for (let i = 1; i < len; i++) {
+        const result = lineIntersects(start, end, points[i - 1], points[i]) as
+          | IVec[]
+          | null;
+        if (result) {
+          return result;
+        }
+      }
+    }
+
+    return null;
   }
 }

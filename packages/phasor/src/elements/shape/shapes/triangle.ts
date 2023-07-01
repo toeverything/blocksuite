@@ -99,18 +99,6 @@ export const TriangleMethods: ShapeMethods = {
     return points.some(point => bounds.containsPoint(point));
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h],
-        [x + w / 2, y],
-        [x + w, y + h],
-      ]
-    );
-    return linePolygonIntersects(start, end, points);
-  },
-
   getNearestPoint(point: IVec, element: ShapeElement) {
     const points = getPointsFromBoundsWithRotation(
       element,
@@ -121,5 +109,17 @@ export const TriangleMethods: ShapeMethods = {
       ]
     );
     return polygonNearestPoint(points, point);
+  },
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h],
+        [x + w / 2, y],
+        [x + w, y + h],
+      ]
+    );
+    return linePolygonIntersects(start, end, points);
   },
 };
