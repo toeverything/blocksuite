@@ -41,6 +41,8 @@ test('should update rect of selection when resizing viewport', async ({
 
   const selectedRectClass = '.affine-edgeless-selected-rect';
 
+  await actions.zoomResetByKeyboard(page);
+
   await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
   await actions.decreaseZoomLevel(page);

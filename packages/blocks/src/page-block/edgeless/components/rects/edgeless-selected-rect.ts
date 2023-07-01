@@ -484,7 +484,21 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(
       // vewport zooming / scrolling
       slots.viewportUpdated.on(() => {
+        const {
+          _resizeManager,
+          _rotate,
+          resizeMode,
+          zoom,
+          state: { selected },
+        } = this;
         this._updateSelectedRect();
+        _resizeManager.updateState(
+          resizeMode,
+          _rotate,
+          zoom,
+          getSelectedRect(selected)
+        );
+        _resizeManager.updateBounds(getSelectableBounds(selected));
       })
     );
     _disposables.add(
@@ -528,8 +542,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             const rect = getSelectedRect(selected);
             const width = rect.width * zoom;
             const height = rect.height * zoom;
-            this._selectedRect.style.width = `${width}px`;
-            this._selectedRect.style.height = `${height}px`;
+            _selectedRect.style.width = `${width}px`;
+            _selectedRect.style.height = `${height}px`;
             break;
           }
         }
@@ -547,8 +561,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     autoUpdate(this._selectedRect, componentToolbar, () => {
       this._computeComponentToolbarPosition();
     });
-
-    this._updateSelectedRect();
   }
 
   override updated(changedProperties: Map<string, unknown>) {
