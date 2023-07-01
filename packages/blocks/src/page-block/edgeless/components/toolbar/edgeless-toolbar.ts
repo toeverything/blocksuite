@@ -39,7 +39,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       flex-direction: row;
-      padding: 0 16px;
+      padding: 0 12px;
       height: 64px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
@@ -90,7 +90,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       margin-left: 12px;
     }
     .transform-button svg {

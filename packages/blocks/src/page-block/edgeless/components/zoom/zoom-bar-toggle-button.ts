@@ -45,7 +45,7 @@ export class ZoomBarToggleButton extends LitElement {
     :host {
       display: flex;
       position: absolute;
-      bottom: 12px;
+      bottom: 20px;
       left: 12px;
     }
     .toggle-button {

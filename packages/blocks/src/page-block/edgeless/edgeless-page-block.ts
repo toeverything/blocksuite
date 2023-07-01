@@ -186,13 +186,13 @@ export class EdgelessPageBlockComponent
       border: var(--affine-border-width) solid var(--affine-blue);
     }
 
-    @media screen and (max-width: 1048px) {
+    @media screen and (max-width: 1200px) {
       edgeless-zoom-toolbar {
         display: none;
       }
     }
 
-    @media screen and (min-width: 1048px) {
+    @media screen and (min-width: 1200px) {
       zoom-bar-toggle-button {
         display: none;
       }

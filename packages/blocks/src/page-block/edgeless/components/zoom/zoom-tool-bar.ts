@@ -19,7 +19,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
-      bottom: 12px;
+      bottom: 20px;
       left: 12px;
       z-index: var(--affine-z-index-popover);
       display: flex;
