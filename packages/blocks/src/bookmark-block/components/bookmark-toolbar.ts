@@ -42,7 +42,7 @@ const config: ConfigItem[] = [
       const index = parent?.children.indexOf(model);
 
       const yText = new Y.Text();
-      const insert = model.title || model.caption || model.url;
+      const insert = model.bookmarkTitle || model.caption || model.url;
       yText.insert(0, insert);
       yText.format(0, insert.length, { link: model.url });
       const text = new page.Text(yText);

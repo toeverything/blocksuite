@@ -29,7 +29,7 @@ import { EraserToolController } from '../tool-controllers/eraser-tool.js';
 import type { EdgelessToolController } from '../tool-controllers/index.js';
 import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
-import { ShapeTooolController } from '../tool-controllers/shape-tool.js';
+import { ShapeToolController } from '../tool-controllers/shape-tool.js';
 import { TextToolController } from '../tool-controllers/text-tool.js';
 import {
   getSelectionBoxBound,
@@ -157,7 +157,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     this._controllers = {
       default: new DefaultToolController(this.container),
       text: new TextToolController(this.container),
-      shape: new ShapeTooolController(this.container),
+      shape: new ShapeToolController(this.container),
       brush: new BrushToolController(this.container),
       pan: new PanToolController(this.container),
       note: new NoteToolController(this.container),

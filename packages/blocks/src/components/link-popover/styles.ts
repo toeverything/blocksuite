@@ -71,7 +71,7 @@ export const editLinkStyle = css`
   .affine-confirm-button {
     grid-area: btn;
     user-select: none;
-    fill: var(--affine-icon-color);
+    fill: var(--affine-primary-color);
   }
   .affine-confirm-button[disabled],
   .affine-confirm-button:disabled {
