@@ -1215,11 +1215,9 @@ export class EdgelessPageBlockComponent
 
     const {
       _rectsOfSelectedBlocks,
-      page,
       root,
       selection,
       showGrid,
-      slots,
       sortedNotes,
       surface,
     } = this;
@@ -1278,10 +1276,7 @@ export class EdgelessPageBlockComponent
         ${state.selected.length > 0
           ? html`
               <edgeless-selected-rect
-                .page=${page}
                 .state=${state}
-                .slots=${slots}
-                .surface=${surface}
                 .edgeless=${this}
               ></edgeless-selected-rect>
             `

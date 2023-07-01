@@ -8,20 +8,16 @@ import {
   normalizeDegAngle,
   type PhasorElement,
   serializeXYWH,
-  type SurfaceManager,
   TextElement,
 } from '@blocksuite/phasor';
-import { matchFlavours, type Page } from '@blocksuite/store';
+import { matchFlavours } from '@blocksuite/store';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
-import type {
-  EdgelessPageBlockComponent,
-  EdgelessSelectionSlots,
-} from '../../edgeless-page-block.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
@@ -213,17 +209,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   `;
 
-  @property({ attribute: false })
-  page!: Page;
-
-  @property({ attribute: false })
-  surface!: SurfaceManager;
-
   @property({ type: Object })
   state!: EdgelessSelectionState;
-
-  @property({ attribute: false })
-  slots!: EdgelessSelectionSlots;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -249,6 +236,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
+  }
+
+  get page() {
+    return this.edgeless.page;
+  }
+
+  get slots() {
+    return this.edgeless.slots;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
   }
 
   get zoom() {
@@ -472,7 +471,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _showToolbar() {
     this._componentToolbar.selectionState = this.state;
-    this._componentToolbar.selected = this.state.selected;
     this._componentToolbar.setAttribute('data-show', '');
   }
 
@@ -591,15 +589,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       return nothing;
     }
 
-    const {
-      edgeless,
-      page,
-      resizeMode,
-      slots,
-      surface,
-      _resizeManager,
-      _updateCursor,
-    } = this;
+    const { edgeless, page, resizeMode, slots, _resizeManager, _updateCursor } =
+      this;
 
     const hasResizeHandles = !active && !page.readonly;
     const resizeHandles = hasResizeHandles
@@ -625,11 +616,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         ${resizeHandles} ${connectorHandles}
       </div>
       <edgeless-component-toolbar
-        .page=${page}
-        .slots=${slots}
-        .surface=${surface}
-        .selected=${selected}
         .selectionState=${state}
+        .edgeless=${edgeless}
       >
       </edgeless-component-toolbar>
     `;

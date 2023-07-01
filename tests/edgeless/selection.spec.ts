@@ -17,7 +17,6 @@ import {
   initThreeOverlapFilledShapes,
   initThreeParagraphs,
   pressEnter,
-  resizeElementByTopLeftHandle,
   selectAllByKeyboard,
   triggerComponentToolbarAction,
   waitForVirgoStateUpdated,
