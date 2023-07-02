@@ -16,12 +16,11 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
-  resizeElementByTopLeftHandle,
+  resizeElementByHandle,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessColorSameWithHexColor,
   assertEdgelessHoverRect,
-  assertEdgelessSelectedRect,
   assertSameColor,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -67,7 +66,7 @@ test('resize brush element', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   const delta = { x: 20, y: 40 };
-  await resizeElementByTopLeftHandle(page, delta, 10);
+  await resizeElementByHandle(page, delta, 10);
 
   await page.mouse.move(start.x + 25, start.y + 45);
   await assertEdgelessHoverRect(page, [118, 138, 84, 64]);

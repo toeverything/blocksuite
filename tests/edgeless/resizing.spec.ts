@@ -5,7 +5,7 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
-  resizeElementByTopLeftHandle,
+  resizeElementByHandle,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
@@ -17,7 +17,6 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
   test('positive adjustment', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
-
     await switchEditorMode(page);
 
     await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -44,7 +43,7 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     // const dy = 50 / p;
     // [x + dx - 2, y + dy - 2, w - dx + 2, h - dy + 2];
 
-    await resizeElementByTopLeftHandle(page, { x: 50, y: 50 });
+    await resizeElementByHandle(page, { x: 50, y: 50 });
     await assertEdgelessSelectedRect(page, [148, 124.19, 162, 85.81]);
 
     await page.mouse.move(160, 160);
@@ -57,7 +56,6 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
   test('negative adjustment', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
-
     await switchEditorMode(page);
 
     await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -87,7 +85,7 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     // const nh = 400 - 210 = 190 - 2 = 188
     // const nw = 188 * p = 358 - 2 = 356
 
-    await resizeElementByTopLeftHandle(page, { x: 400, y: 300 }, 30);
+    await resizeElementByHandle(page, { x: 400, y: 300 }, 30);
     await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
 
     await page.mouse.move(450, 300);
