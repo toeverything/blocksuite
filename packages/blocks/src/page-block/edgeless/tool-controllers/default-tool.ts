@@ -185,13 +185,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta.x;
     bound.y += delta.y;
 
-    if (
-      selected.type !== 'connector' ||
-      (selected instanceof ConnectorElement &&
-        isConnectorAndBindingsAllSelected(selected, this.state.selected))
-    ) {
-      surface.setElementBound(selected.id, bound);
+    if (selected instanceof ConnectorElement) {
+      this._edgeless.connector.updateXYWH(selected, bound);
     }
+
     surface.setElementBound(selected.id, bound);
   }
 
@@ -205,6 +202,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.y += delta.y;
 
     this._page.updateBlock(block, { xywh: bound.serialize() });
+
     // TODO: refactor
     if (this.selectedBlocks.length) {
       this._edgeless.slots.selectedBlocksUpdated.emit(this.selectedBlocks);

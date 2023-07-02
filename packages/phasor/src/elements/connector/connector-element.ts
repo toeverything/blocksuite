@@ -87,7 +87,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
   }
 
   override containedByBounds(bounds: Bound) {
-    return false;
+    return this.absolutePath.some(point => bounds.containsPoint(point));
   }
 
   override getNearestPoint(point: IVec): IVec {
@@ -104,12 +104,12 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     rc: RoughCanvas
   ) {
     const {
-      absolutePath: points,
       seed,
       stroke,
       strokeStyle,
       strokeWidth,
       roughness,
+      absolutePath: points,
     } = this;
     const [x, y] = this.deserializeXYWH();
 
