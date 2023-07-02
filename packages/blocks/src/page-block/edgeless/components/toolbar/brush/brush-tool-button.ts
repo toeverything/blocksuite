@@ -1,7 +1,7 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { EdgelessPenIcon } from '@blocksuite/global/config';
+import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
@@ -51,24 +51,34 @@ export class EdgelessBrushToolButton extends LitElement {
     :host {
       display: flex;
     }
-    edgeless-tool-icon-button.icon-container:hover {
-      background: var(--affine-background-overlay-panel-color);
-    }
     .edgeless-brush-button {
       position: relative;
-      height: 72px;
-      width: 30px;
+      height: 66px;
+      width: 36px;
       overflow-y: hidden;
     }
     #edgeless-pen-icon {
       position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 10px;
+      left: 0;
       transition: top 0.3s ease-in-out;
     }
     #edgeless-pen-icon:hover {
-      top: 6px;
+      top: 2px;
+    }
+    .arrow-up-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      right: 0px;
+      top: 12px;
+      width: 14px;
+      height: 14px;
+      fill: var(--affine-icon-color);
+    }
+    .arrow-up-icon:hover {
+      background: var(--affine-hover-color);
     }
     .pen-color {
       fill: var(--affine-blue-800);
@@ -127,7 +137,10 @@ export class EdgelessBrushToolButton extends LitElement {
           this._toggleBrushMenu();
         }}
       >
-        <div class="edgeless-brush-button">${EdgelessPenIcon}</div>
+        <div class="edgeless-brush-button">
+          ${EdgelessPenIcon}
+          <div class="arrow-up-icon">${ArrowUpIcon}</div>
+        </div>
       </edgeless-toolbar-button>
     `;
   }

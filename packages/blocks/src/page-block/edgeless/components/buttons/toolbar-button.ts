@@ -11,9 +11,9 @@ export class EdgelessToolbarButton extends EdgelessToolIconButton {
       position: relative;
       display: flex;
       align-items: center;
+      justify-content: center;
       padding: 0 4px;
       color: var(--affine-icon-color);
-      margin: 4px;
       border-radius: 5px;
       cursor: pointer;
     }

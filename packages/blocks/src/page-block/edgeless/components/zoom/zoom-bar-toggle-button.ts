@@ -44,6 +44,9 @@ export class ZoomBarToggleButton extends LitElement {
   static override styles = css`
     :host {
       display: flex;
+      position: absolute;
+      bottom: 20px;
+      left: 12px;
     }
     .toggle-button {
       display: flex;
@@ -51,6 +54,7 @@ export class ZoomBarToggleButton extends LitElement {
     }
     edgeless-zoom-toolbar {
       position: absolute;
+      bottom: 48px;
     }
   `;
 
