@@ -8,6 +8,7 @@ import {
   ConnectorMode,
   getBoundFromPoints,
   type IConnector,
+  isOverlap,
   type IVec,
   lineIntersects,
   linePolygonIntersects,
@@ -17,7 +18,6 @@ import {
   type SurfaceManager,
   Vec,
 } from '@blocksuite/phasor';
-import { isOverlap } from '@blocksuite/phasor/utils/math-utils.js';
 import { assertEquals, assertExists } from '@blocksuite/store';
 
 import {

@@ -1,9 +1,5 @@
 import type { Bound } from './bound.js';
-import {
-  almostEqual,
-  linePolygonIntersects,
-  linePolylineIntersects,
-} from './math-utils.js';
+import { almostEqual, linePolygonIntersects } from './math-utils.js';
 import { type IVec } from './vec.js';
 
 export class Graph {
