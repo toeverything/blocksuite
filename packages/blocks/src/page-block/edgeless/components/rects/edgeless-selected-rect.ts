@@ -460,12 +460,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       matchFlavours(selected[0], ['affine:note']) &&
       selected[0].hidden;
 
-    _selectedRect.style.backgroundColor =
-      !active && selected ? 'var(--affine-hover-color)' : '';
-    _selectedRect.style.borderWidth = `${active ? 2 : 1}px`;
-    _selectedRect.style.borderStyle = isSingleHiddenNote ? 'dashed' : 'solid';
     _selectedRect.style.width = `${width}px`;
     _selectedRect.style.height = `${height}px`;
+    _selectedRect.style.borderWidth = `${active ? 2 : 1}px`;
+    _selectedRect.style.borderStyle = isSingleHiddenNote ? 'dashed' : 'solid';
     _selectedRect.style.transform = `translate(${left}px, ${top}px) rotate(${rotate}deg)`;
   }
 
