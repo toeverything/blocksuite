@@ -26,7 +26,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
       transition: 0.3s ease-in-out;
     }
     edgeless-toolbar-button:hover svg {
-      scale: 1.2;
+      scale: 1.15;
     }
     edgeless-shape-menu {
       display: none;

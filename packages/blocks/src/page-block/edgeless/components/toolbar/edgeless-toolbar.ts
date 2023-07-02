@@ -39,7 +39,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       flex-direction: row;
-      padding: 4px 10px;
+      padding: 0 12px;
       height: 64px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
@@ -66,33 +66,38 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       margin: 0 7px;
       background-color: var(--affine-border-color);
     }
+    .brush-and-eraser {
+      display: flex;
+      margin-left: 8px;
+    }
     .eraser-button {
       position: relative;
-      height: 72px;
+      height: 66px;
       width: 30px;
       overflow-y: hidden;
     }
     #edgeless-eraser-icon {
       position: absolute;
-      top: 14px;
+      top: 10px;
       left: 50%;
       transform: translateX(-50%);
       transition: top 0.3s ease-in-out;
     }
     #edgeless-eraser-icon:hover {
-      top: 6px;
+      top: 2px;
     }
     .edgeless-right-part {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: 8px;
+      gap: 6px;
+      margin-left: 12px;
     }
     .transform-button svg {
       transition: 0.3s ease-in-out;
     }
     .transform-button:hover svg {
-      transform: translateY(-8px);
+      transform: scale(1.15);
     }
   `;
 
@@ -187,19 +192,21 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-note-tool-button>
         <div class="full-divider"></div>
-        <edgeless-brush-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-brush-tool-button>
-        <edgeless-toolbar-button
-          .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
-          .active=${type === 'eraser'}
-          .activeMode=${'background'}
-          @click=${() => this.setEdgelessTool({ type: 'eraser' })}
-        >
-          <div class="eraser-button">${EdgelessEraserIcon}</div>
-        </edgeless-toolbar-button>
+        <div class="brush-and-eraser">
+          <edgeless-brush-tool-button
+            .edgelessTool=${this.edgelessTool}
+            .edgeless=${this.edgeless}
+            .setEdgelessTool=${this.setEdgelessTool}
+          ></edgeless-brush-tool-button>
+          <edgeless-toolbar-button
+            .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
+            .active=${type === 'eraser'}
+            .activeMode=${'background'}
+            @click=${() => this.setEdgelessTool({ type: 'eraser' })}
+          >
+            <div class="eraser-button">${EdgelessEraserIcon}</div>
+          </edgeless-toolbar-button>
+        </div>
         <div class="edgeless-right-part">
           <edgeless-toolbar-button
             class="transform-button"

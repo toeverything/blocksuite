@@ -24,7 +24,7 @@ import {
 } from './misc.js';
 
 const AWAIT_TIMEOUT = 160;
-const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1048;
+const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 
 export async function getNoteRect(
   page: Page,

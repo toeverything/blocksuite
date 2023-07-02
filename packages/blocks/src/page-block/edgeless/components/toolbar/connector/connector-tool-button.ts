@@ -56,7 +56,7 @@ export class EdgelessConnectorToolButton extends LitElement {
       transition: 0.3s ease-in-out;
     }
     edgeless-toolbar-button:hover svg {
-      transform: translateY(-8px);
+      transform: scale(1.15);
     }
   `;
 

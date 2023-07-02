@@ -19,13 +19,11 @@ export class EdgelessNoteMenu extends LitElement {
       position: absolute;
       height: 76px;
       display: flex;
-      padding: 0;
       box-shadow: var(--affine-shadow-2);
       z-index: -1;
     }
     .note-menu-container {
       display: flex;
-      align-items: center;
       flex-direction: column;
       background: var(--affine-background-overlay-panel-color);
       fill: currentcolor;
@@ -35,10 +33,11 @@ export class EdgelessNoteMenu extends LitElement {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 4px;
       background: var(--affine-background-overlay-panel-color);
       border: 1px solid var(--affine-border-color);
       border-radius: 8px 8px 0 0;
+      padding-bottom: 8px;
+      padding-right: 2px;
     }
     .button-group-label {
       font-family: 'Avenir Next';
@@ -46,11 +45,12 @@ export class EdgelessNoteMenu extends LitElement {
       font-weight: 400;
       font-style: normal;
       margin-left: 12px;
-      line-height: 16px;
       display: flex;
-      align-items: center;
+      align-items: end;
       text-align: center;
       color: var(--affine-text-disable-color);
+      align-self: flex-end;
+      margin-bottom: 9px;
     }
     .button-group-container > :is(edgeless-tool-icon-button) > svg {
       fill: currentColor;
@@ -60,22 +60,29 @@ export class EdgelessNoteMenu extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 8px;
+      width: 42px;
     }
     .next-item-button {
       position: absolute;
+      top: 12px;
       right: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0;
       transform: translateX(50%);
+      align-self: flex-end;
+    }
+    .next-item-button > svg path {
+      fill: var(--affine-icon-color);
     }
     .next-item-button > svg {
-      transform: scale(0.8);
+      transition: 0.3s ease-in-out;
     }
     .next-item-button > svg:hover {
       cursor: pointer;
-      transform: scale(1);
+      transform: scale(1.2);
     }
     .next-item-icon-background {
       fill: var(--affine-background-overlay-panel-color);
@@ -92,6 +99,9 @@ export class EdgelessNoteMenu extends LitElement {
       height: 2px;
       background: #d9d9d9;
       border-radius: 11px;
+    }
+    edgeless-tool-icon-button {
+      margin-top: 4px;
     }
   `;
 
