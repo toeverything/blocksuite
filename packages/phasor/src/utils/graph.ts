@@ -1,5 +1,9 @@
 import type { Bound } from './bound.js';
-import { almostEqual, linePolygonIntersects } from './math-utils.js';
+import {
+  almostEqual,
+  linePolygonIntersects,
+  linePolylineIntersects,
+} from './math-utils.js';
 import { type IVec } from './vec.js';
 
 export class Graph {
@@ -8,6 +12,7 @@ export class Graph {
   constructor(
     private points: IVec[],
     private blocks: Bound[] = [],
+    private expandedBlocks: Bound[] = [],
     private excludedPoints: IVec[] = []
   ) {
     const xMap = this._xMap;
@@ -21,22 +26,28 @@ export class Graph {
     });
   }
   private _isBlock(sp: IVec, ep: IVec) {
-    return this.blocks.some(block => {
-      const rst = linePolygonIntersects(sp, ep, block.points);
-      return (
-        rst?.length === 2 ||
-        block.isPointInBound(sp, 0) ||
-        block.isPointInBound(ep, 0) ||
-        [
-          block.leftLine,
-          block.upperLine,
-          block.rightLine,
-          block.lowerLine,
-        ].some(line => {
-          return this._isOverlap(line, [sp, ep]);
-        })
-      );
-    });
+    return (
+      this.blocks.some(block => {
+        const rst = linePolygonIntersects(sp, ep, block.points);
+        return (
+          rst?.length === 2 ||
+          block.isPointInBound(sp, 0) ||
+          block.isPointInBound(ep, 0) ||
+          [
+            block.leftLine,
+            block.upperLine,
+            block.rightLine,
+            block.lowerLine,
+          ].some(line => {
+            return this._isOverlap(line, [sp, ep]);
+          })
+        );
+      }) ||
+      this.expandedBlocks.some(block => {
+        const result = linePolygonIntersects(sp, ep, block.expand(-0.5).points);
+        return result?.length === 2;
+      })
+    );
   }
 
   private _isOverlap(line: IVec[], line2: IVec[]) {

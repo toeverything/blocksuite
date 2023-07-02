@@ -17,6 +17,6 @@ describe('priority queue', () => {
     pq.enqueue('e', 5);
     expect(pq.dequeue()).toBe('d');
     expect(pq.dequeue()).toBe('e');
-    expect(pq.dequeue()).toBe(undefined);
+    expect(pq.dequeue()).toBe(null);
   });
 });

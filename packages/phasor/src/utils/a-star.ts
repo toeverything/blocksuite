@@ -7,16 +7,16 @@ import { PriorityQueue } from './priority-queue.js';
 import { type IVec } from './vec.js';
 
 export class AStarRunner {
-  private _cameFrom = new Map<IVec, IVec | null>();
+  private _cameFrom = new Map<IVec, { from: IVec[]; indexs: number[] }>();
   private _frontier!: PriorityQueue<
     IVec,
     [diagonalCount: number, pointPriority: number, distCost: number]
   >;
 
   private _graph: Graph;
-  private _costSoFar = new Map<IVec, number>();
-  private _diagonalCount = new Map<IVec, number>();
-  private _pointPriority = new Map<IVec, number>();
+  private _costSoFar = new Map<IVec, number[]>();
+  private _diagonalCount = new Map<IVec, number[]>();
+  private _pointPriority = new Map<IVec, number[]>();
   private _current: IVec | null = null;
   private _complete = false;
 
@@ -32,48 +32,60 @@ export class AStarRunner {
     this._sp[2] = 0;
     this._ep[2] = 0;
     this._originalEp[2] = 0;
-    this._graph = new Graph([...points], blocks);
+    this._graph = new Graph([...points], blocks, expandBlocks);
     this._init();
   }
   private _init() {
-    this._cameFrom.set(this._sp, this._originalSp);
-    this._cameFrom.set(this._originalSp, null);
-    this._cameFrom.set(this._originalEp, this._ep);
+    this._cameFrom.set(this._sp, { from: [this._originalSp], indexs: [-1] });
+    this._cameFrom.set(this._originalSp, { from: [], indexs: [] });
 
-    this._costSoFar.set(this._sp, 0);
-    this._diagonalCount.set(this._sp, 0);
-    this._pointPriority.set(this._sp, 0);
+    this._costSoFar.set(this._sp, [0]);
+    this._diagonalCount.set(this._sp, [0]);
+    this._pointPriority.set(this._sp, [0]);
     this._frontier = new PriorityQueue<
       IVec,
       [diagonalCount: number, pointPriority: number, distCost: number]
-    >((a, b) => {
-      if (a[2] + 0.01 < b[2]) return -1;
-      else if (a[2] - 0.01 > b[2]) return 1;
-      else if (a[0] < b[0]) return -1;
-      else if (a[0] > b[0]) return 1;
-      else if (a[1] > b[1]) return -1;
-      else if (a[1] < b[1]) return 1;
-      else return 0;
-    });
+    >(this._compare);
     this._frontier.enqueue(this._sp, [0, 0, 0]);
+  }
+
+  private _compare(a: [number, number, number], b: [number, number, number]) {
+    if (a[2] + 0.01 < b[2]) return -1;
+    else if (a[2] - 0.01 > b[2]) return 1;
+    else if (a[0] < b[0]) return -1;
+    else if (a[0] > b[0]) return 1;
+    else if (a[1] > b[1]) return -1;
+    else if (a[1] < b[1]) return 1;
+    else return 0;
   }
 
   private _heuristic(a: IVec, b: IVec): number {
     return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
   }
 
-  private _getDiagonalCount(a: IVec, last?: IVec, last2?: IVec): number {
-    last = last ?? this._cameFrom.get(a) ?? undefined;
-    if (!last) return 0;
-    last2 = last2 ?? this._cameFrom.get(last) ?? undefined;
-    if (!last2) return 0;
+  private _getDiagonalCount(a: IVec, last: IVec, last2: IVec): number {
     if (almostEqual(a[0], last[0]) && almostEqual(a[0], last2[0])) return 0;
     if (almostEqual(a[1], last[1]) && almostEqual(a[1], last2[1])) return 0;
     return 1;
   }
 
   private _almostEqual(a: IVec, b: IVec): boolean {
-    return almostEqual(a[0], b[0]) && almostEqual(a[1], b[1]);
+    return almostEqual(a[0], b[0], 0.02) && almostEqual(a[1], b[1], 0.02);
+  }
+
+  private _neighbors(cur: IVec) {
+    const neighbors = this._graph.neighbors(cur);
+    const cameFroms = this._cameFrom.get(cur);
+    assertExists(cameFroms);
+
+    cameFroms.from.forEach(from => {
+      const index = neighbors.findIndex(n => this._almostEqual(n, from));
+      if (index >= 0) {
+        neighbors.splice(index, 1);
+      }
+    });
+    if (cur === this._ep) neighbors.push(this._originalEp);
+    return neighbors;
   }
 
   public step() {
@@ -84,76 +96,113 @@ export class AStarRunner {
       this._complete = true;
       return;
     }
-    if (this._almostEqual(current, this._ep)) {
-      this._complete = true;
-      return;
+    if (current === this._ep && this._almostEqual(this._ep, this._originalEp)) {
+      this._originalEp = this._ep;
     }
-    const neighbors = this._graph.neighbors(current);
-    const index = neighbors.findIndex(n =>
-      this._almostEqual(n, this._cameFrom.get(current) ?? [])
-    );
-    if (index !== -1) {
-      neighbors.splice(index, 1);
-    }
+    const neighbors = this._neighbors(current);
 
     for (let i = 0; i < neighbors.length; i++) {
       const next = neighbors[i];
-      if (
-        this._almostEqual(current, this._ep) &&
-        !this._almostEqual(next, this._originalEp)
-      )
-        continue;
-      const curCost = this._costSoFar.get(current);
-      const curDiagoalCount = this._diagonalCount.get(current);
-      const curPointPriority = this._pointPriority.get(current);
+      const curCosts = this._costSoFar.get(current);
+      const curDiagoalCounts = this._diagonalCount.get(current);
+      const curPointPrioritys = this._pointPriority.get(current);
+      const cameFroms = this._cameFrom.get(current);
+      assertExists(curCosts);
+      assertExists(curDiagoalCounts);
+      assertExists(curPointPrioritys);
+      assertExists(cameFroms);
+      const newCosts = curCosts.map(
+        cost => cost + this._graph.cost(current, next)
+      );
 
-      assertExists(curCost);
-      const newCost = curCost + this._graph.cost(current, next);
-
-      assertExists(curDiagoalCount);
-      let newDiagonalCount =
-        curDiagoalCount +
-        this._getDiagonalCount(next, current) +
-        this._getDiagonalCount(this._originalEp, next, current);
-
-      if (current !== this._sp) {
-        newDiagonalCount -= this._getDiagonalCount(this._originalEp, current);
-      }
-
+      const newDiagonalCounts = curDiagoalCounts.map(
+        (count, index) =>
+          count + this._getDiagonalCount(next, current, cameFroms.from[index])
+      );
       assertExists(next[2]);
-      assertExists(curPointPriority);
-      const newPointPriority = curPointPriority + next[2];
-      let canUpdate = false;
-
-      const lastCost = this._costSoFar.get(next);
-      const lastDiagonalCount = this._diagonalCount.get(next);
-      const lastPointPriority = this._pointPriority.get(next);
-      if (!lastCost || newCost - lastCost < -0.01) {
-        canUpdate = true;
-      } else if (almostEqual(newCost, lastCost)) {
-        assertExists(lastPointPriority);
-        assertExists(lastDiagonalCount);
-        const compensation = (newDiagonalCount - lastDiagonalCount) * 3;
-        if (newPointPriority >= lastPointPriority + compensation) {
-          canUpdate = true;
-        } else if (newPointPriority === lastPointPriority + compensation) {
-          if (newDiagonalCount < lastDiagonalCount) {
-            canUpdate = true;
+      const newPointPrioritys = curPointPrioritys.map(
+        pointPriority => pointPriority + next[2]
+      );
+      let index = -1;
+      if (newCosts.length === 1) {
+        index = 0;
+      } else {
+        const costsIndexs = findAllMinimalIndexs(
+          newCosts,
+          (a, b) => a + 0.01 < b,
+          (a, b) => almostEqual(a, b, 0.02)
+        );
+        if (costsIndexs.length === 1) {
+          index = costsIndexs[0];
+        } else {
+          const diagonalCounts = costsIndexs.map(i => newDiagonalCounts[i]);
+          const diagonalCountsIndexs = findAllMinimalIndexs(
+            diagonalCounts,
+            (a, b) => a < b,
+            (a, b) => a === b
+          );
+          if (diagonalCountsIndexs.length === 1) {
+            index = costsIndexs[diagonalCountsIndexs[0]];
+          } else {
+            const pointPriorities = diagonalCountsIndexs.map(
+              i => newPointPrioritys[costsIndexs[i]]
+            );
+            const pointPrioritiesIndexs = findAllMaximalIndexs(
+              pointPriorities,
+              (a, b) => a > b,
+              (a, b) => a === b
+            );
+            index = pointPrioritiesIndexs[0];
           }
         }
       }
+      const shouldEnqueue = !this._costSoFar.has(next);
+      const nextCosts = this._costSoFar.get(next) ?? [];
+      const nextDiagonalCounts = this._diagonalCount.get(next) ?? [];
+      const nextPointPriorities = this._pointPriority.get(next) ?? [];
+      const nextCameFrom = this._cameFrom.get(next) ?? { from: [], indexs: [] };
+      nextCosts.push(newCosts[index]);
+      nextDiagonalCounts.push(newDiagonalCounts[index]);
+      nextPointPriorities.push(newPointPrioritys[index]);
+      nextCameFrom.from.push(current);
+      nextCameFrom.indexs.push(index);
 
-      if (canUpdate) {
-        this._costSoFar.set(next, newCost);
-        this._diagonalCount.set(next, newDiagonalCount);
-        this._pointPriority.set(next, newPointPriority);
-        const priority: [number, number, number] = [
-          newDiagonalCount,
-          newPointPriority,
-          newCost + this._heuristic(next, this._ep),
-        ];
-        this._frontier.enqueue(next, priority);
-        this._cameFrom.set(next, current);
+      const newDiagonalCount = newDiagonalCounts[index];
+      const newPointPriority = newPointPrioritys[index];
+      const newCost = newCosts[index];
+
+      this._costSoFar.set(next, nextCosts);
+      this._diagonalCount.set(next, nextDiagonalCounts);
+      this._pointPriority.set(next, nextPointPriorities);
+      this._cameFrom.set(next, nextCameFrom);
+      const newPriority: [number, number, number] = [
+        newDiagonalCount,
+        newPointPriority,
+        newCost + this._heuristic(next, this._ep),
+      ];
+      if (shouldEnqueue) {
+        this._frontier.enqueue(next, newPriority);
+      } else {
+        const index = this._frontier.heap.findIndex(
+          item => item.value === next
+        );
+        const old = this._frontier.heap[index];
+        if (old) {
+          if (this._compare(newPriority, old.priority) < 0) {
+            old.priority = newPriority;
+            this._frontier.bubbleUp(index);
+          }
+        } else {
+          this._frontier.enqueue(next, newPriority);
+        }
+      }
+      if (
+        this._almostEqual(current, this._ep) &&
+        this._almostEqual(next, this._originalEp)
+      ) {
+        this._originalEp = next;
+        this._complete = true;
+        return;
       }
     }
   }
@@ -175,13 +224,57 @@ export class AStarRunner {
 
   get path() {
     const result: IVec[] = [];
-    let current: null | undefined | IVec = this._complete
+    let current: null | IVec = this._complete
       ? this._originalEp
       : this._current;
+    const nextIndexs = [0];
     while (current) {
       result.unshift(current);
-      current = this._cameFrom.get(current);
+      const froms = this._cameFrom.get(current);
+      assertExists(froms);
+      const index = nextIndexs.shift();
+      assertExists(index);
+      nextIndexs.push(froms.indexs[index]);
+      current = froms.from[index];
     }
     return result;
   }
+}
+
+function findAllMinimalIndexs(
+  data: IVec,
+  isLess: (a: number, b: number) => boolean,
+  isEqual: (a: number, b: number) => boolean
+) {
+  let min = Infinity;
+  let indexs: number[] = [];
+  for (let i = 0; i < data.length; i++) {
+    const cur = data[i];
+    if (isLess(cur, min)) {
+      min = cur;
+      indexs = [i];
+    } else if (isEqual(cur, min)) {
+      indexs.push(i);
+    }
+  }
+  return indexs;
+}
+
+function findAllMaximalIndexs(
+  data: IVec,
+  isGreat: (a: number, b: number) => boolean,
+  isEqual: (a: number, b: number) => boolean
+) {
+  let max = -Infinity;
+  let indexs: number[] = [];
+  for (let i = 0; i < data.length; i++) {
+    const cur = data[i];
+    if (isGreat(cur, max)) {
+      max = cur;
+      indexs = [i];
+    } else if (isEqual(cur, max)) {
+      indexs.push(i);
+    }
+  }
+  return indexs;
 }

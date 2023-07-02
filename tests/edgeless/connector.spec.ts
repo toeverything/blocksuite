@@ -382,7 +382,9 @@ test('elbow connector both side attached element with all fixed', async ({
   ]);
 });
 
-test('path #1', async ({ page }) => {
+test('path #1, the upper line is parallel with the lower line of antoher, and anchor from top to bottom of another', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -413,15 +415,58 @@ test('path #1', async ({ page }) => {
   );
   await assertConnectorPath(page, [
     [50, 0],
-    [50, -60],
-    [200, -60],
-    [200, 60],
-    [350, 60],
+    [50, -20],
+    [200, -20],
+    [200, 20],
+    [350, 20],
     [350, 0],
   ]);
 });
 
-test('path #2', async ({ page }) => {
+test('path #2, the top-right point is overlapped with the bottom-left point of another, and anchor from top to bottom of another', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+
+  let start = await toViewCoord(page, [0, 0]);
+  let end = await toViewCoord(page, [100, 100]);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+
+  start = await toViewCoord(page, [100, -100]);
+  end = await toViewCoord(page, [200, 0]);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+
+  start = await toViewCoord(page, [50, 0]);
+  end = await toViewCoord(page, [150, 0]);
+  await addBasicConnectorElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+  await assertConnectorPath(page, [
+    [50, 0],
+    [50, -120],
+    [220, -120],
+    [220, 20],
+    [150, 20],
+    [150, 0],
+  ]);
+});
+
+test('path #3, the two shape are parallel in x axis, the anchor from the right to right', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
