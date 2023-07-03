@@ -85,7 +85,7 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     // const nh = 400 - 210 = 190 - 2 = 188
     // const nw = 188 * p = 358 - 2 = 356
 
-    await resizeElementByHandle(page, { x: 400, y: 300 }, 30);
+    await resizeElementByHandle(page, { x: 400, y: 300 }, 'top-left', 30);
     await assertEdgelessSelectedRect(page, [310, 210, 356, 188]);
 
     await page.mouse.move(450, 300);

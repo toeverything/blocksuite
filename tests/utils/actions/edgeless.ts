@@ -299,8 +299,12 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
 export async function resizeElementByHandle(
   page: Page,
   delta: { x: number; y: number },
-  steps = 1,
-  corner = 'top-left'
+  corner:
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-right'
+    | 'bottom-left' = 'top-left',
+  steps = 1
 ) {
   const handle = page.locator(`.handle[aria-label="${corner}"] .resize`);
   const box = await handle.boundingBox();
@@ -319,7 +323,11 @@ export async function resizeElementByHandle(
 export async function rotateElementByHandle(
   page: Page,
   deg = 0,
-  corner = 'top-left',
+  corner:
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-right'
+    | 'bottom-left' = 'top-left',
   steps = 1
 ) {
   const rect = await page

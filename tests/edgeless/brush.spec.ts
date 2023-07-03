@@ -66,7 +66,7 @@ test('resize brush element', async ({ page }) => {
 
   await page.mouse.click(start.x + 5, start.y + 5);
   const delta = { x: 20, y: 40 };
-  await resizeElementByHandle(page, delta, 10);
+  await resizeElementByHandle(page, delta, 'top-left', 10);
 
   await page.mouse.move(start.x + 25, start.y + 45);
   await assertEdgelessHoverRect(page, [118, 138, 84, 64]);
