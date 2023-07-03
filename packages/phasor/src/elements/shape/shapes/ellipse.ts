@@ -2,9 +2,9 @@ import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
+  getPointsFromBoundsWithRotation,
   lineEllipseIntersects,
   pointInEllipse,
-  pointOnEllipse,
 } from '../../../utils/math-utils.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
@@ -14,12 +14,11 @@ import type { ShapeMethods } from '../types.js';
 export const EllipseMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) {
     const {
-      w,
-      h,
       seed,
       strokeWidth,
       filled,
@@ -27,15 +26,24 @@ export const EllipseMethods: ShapeMethods = {
       realStrokeColor,
       strokeStyle,
       roughness,
+      rotate,
     } = element;
-
+    const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = Math.max(1, w - renderOffset * 2);
     const renderHeight = Math.max(1, h - renderOffset * 2);
+    const cx = renderWidth / 2;
+    const cy = renderHeight / 2;
 
-    ctx.translate(renderOffset, renderOffset);
+    ctx.setTransform(
+      matrix
+        .translateSelf(renderOffset, renderOffset)
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
+    );
 
-    rc.ellipse(renderWidth / 2, renderHeight / 2, renderWidth, renderHeight, {
+    rc.ellipse(cx, cy, renderWidth, renderHeight, {
       seed,
       roughness,
       strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
@@ -52,38 +60,51 @@ export const EllipseMethods: ShapeMethods = {
     element: ShapeElement,
     options?: HitTestOptions
   ) {
-    const renderOffset = Math.max(element.strokeWidth, 0) / 2;
+    const point = [x, y];
+    const expand = options?.expand ?? 1;
+    const rx = element.w / 2;
+    const ry = element.h / 2;
+    const center = [element.x + rx, element.y + ry];
+    const rad = (element.rotate * Math.PI) / 180;
 
-    return element.filled
-      ? pointInEllipse(
-          [x, y],
-          [element.x + element.w / 2, element.y + element.h / 2],
-          element.w / 2,
-          element.h / 2
-        )
-      : pointOnEllipse(
-          [
-            x - (element.x + (element.w - renderOffset) / 2),
-            y - (element.y + (element.h - renderOffset) / 2),
-          ],
-          (element.w - renderOffset * 2) / 2,
-          (element.h - renderOffset * 2) / 2,
-          options?.expand ?? 1
-        );
+    let hited =
+      pointInEllipse(point, center, rx + expand, ry + expand, rad) &&
+      !pointInEllipse(point, center, rx - expand, ry - expand, rad);
+
+    if (element.filled && !hited) {
+      hited = pointInEllipse(point, center, rx, ry, rad);
+    }
+
+    return hited;
+  },
+
+  containedByBounds(bounds: Bound, element: ShapeElement): boolean {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h / 2],
+        [x + w / 2, y],
+        [x + w, y + h / 2],
+        [x + w / 2, y + h],
+      ]
+    );
+    return points.some(point => bounds.containsPoint(point));
+  },
+
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    return point;
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
+    const rad = (element.rotate * Math.PI) / 180;
     const bound = Bound.deserialize(element.xywh);
     return lineEllipseIntersects(
       start,
       end,
       bound.center,
       bound.w / 2,
-      bound.h / 2
+      bound.h / 2,
+      rad
     );
-  },
-
-  getNearestPoint(point: IVec, element: ShapeElement) {
-    return point;
   },
 };

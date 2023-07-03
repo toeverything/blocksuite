@@ -85,6 +85,7 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
         | 'path'
         | 'absolutePath'
         | 'controllers'
+        | 'rotate'
       >
     : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>;
 

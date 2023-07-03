@@ -9,6 +9,8 @@ export interface IText {
   xywh: SerializedXYWH;
   seed: number;
 
+  rotate: number;
+
   text: Y.Text;
   color: string;
   fontSize: number;

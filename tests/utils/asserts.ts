@@ -707,6 +707,17 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {
+  const editor = getEditorLocator(page);
+  const selectedRect = editor
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+
+  const transform = await selectedRect.evaluate(el => el.style.transform);
+  const r = new RegExp(`rotate\\(${deg}deg\\)`);
+  expect(transform).toMatch(r);
+}
+
 export async function assertEdgelessNonSelectedRect(page: Page) {
   const rect = page.locator('edgeless-selected-rect');
   await expect(rect).toBeHidden();

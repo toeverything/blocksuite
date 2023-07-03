@@ -6,7 +6,7 @@ import { GridManager } from './grid.js';
 import { RoughCanvas } from './rough/canvas.js';
 import { Bound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
-import { clamp } from './utils/math-utils.js';
+import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
 import { Vec } from './utils/vec.js';
 
@@ -276,17 +276,20 @@ export class Renderer implements SurfaceViewport {
   private _render() {
     const { ctx, viewportBounds, width, height, rc, zoom } = this;
     const dpr = window.devicePixelRatio;
+    const scale = zoom * dpr;
+    const matrix = new DOMMatrix().scaleSelf(scale);
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
     ctx.save();
 
-    ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, 0, 0);
+    ctx.setTransform(matrix);
 
-    this._renderByBound(ctx, rc, viewportBounds);
+    this._renderByBound(ctx, matrix, rc, viewportBounds);
   }
 
   private _renderByBound(
     ctx: CanvasRenderingContext2D | null,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     bound: IBound
   ) {
@@ -295,14 +298,17 @@ export class Renderer implements SurfaceViewport {
     const { gridManager } = this;
     const elements = gridManager.search(bound);
     for (const element of elements) {
-      const dx = element.x - bound.x;
-      const dy = element.y - bound.y;
       ctx.save();
-      ctx.translate(dx, dy);
+
       const localRecord = element.localRecord;
-      if (intersects(element, bound) && localRecord.display) {
+      if (
+        intersects(getBoundsWithRotation(element), bound) &&
+        localRecord.display
+      ) {
         ctx.globalAlpha = localRecord.opacity;
-        element.render(ctx, rc);
+        const dx = element.x - bound.x;
+        const dy = element.y - bound.y;
+        element.render(ctx, matrix.translate(dx, dy), rc);
       }
 
       ctx.restore();
@@ -325,10 +331,12 @@ export class Renderer implements SurfaceViewport {
     canvas.height = bound.h * dpr;
 
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    ctx.scale(dpr, dpr);
-
+    const matrix = new DOMMatrix().scaleSelf(dpr);
     const rc = new RoughCanvas(canvas);
-    this._renderByBound(ctx, rc, bound);
+
+    ctx.setTransform(matrix);
+
+    this._renderByBound(ctx, matrix, rc, bound);
 
     return canvas;
   }

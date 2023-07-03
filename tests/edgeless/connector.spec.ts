@@ -161,13 +161,16 @@ test('elbow connector both side attatched element', async ({ page }) => {
     [200, 50],
   ]);
 
-  start = await toViewCoord(page, [250, 50]);
+  // select
+  start = await toViewCoord(page, [250, -10]);
   end = await toViewCoord(page, [260, 50]);
   await dragBetweenCoords(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
+
+  start = await toViewCoord(page, [250, 50]);
   end = await toViewCoord(page, [250, 0]);
   await dragBetweenCoords(
     page,
@@ -287,13 +290,15 @@ test('elbow connector both side attached element with one attach element and oth
     [200, 50],
   ]);
 
-  start = end;
+  // select
+  start = await toViewCoord(page, [255, -10]);
   end = await toViewCoord(page, [255, 55]);
   await dragBetweenCoords(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
-  ); // select
+  );
+
   start = await toViewCoord(page, [250, 50]);
   end = await toViewCoord(page, [250, 0]);
   await dragBetweenCoords(
@@ -477,8 +482,8 @@ test('when element is removed, connector should updated', async ({ page }) => {
     { x: end[0], y: end[1] }
   );
 
-  start = await toViewCoord(page, [50, 50]);
-  end = await toViewCoord(page, [60, 60]);
+  start = await toViewCoord(page, [-10, -10]);
+  end = await toViewCoord(page, [20, 20]);
   // select
   await dragBetweenCoords(
     page,

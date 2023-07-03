@@ -1,11 +1,16 @@
 import type * as Y from 'yjs';
 
+import type { Bound } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
 import { isPointIn } from '../utils/math-utils.js';
 import type { IVec } from '../utils/vec.js';
-import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
 import type { IElementUpdateProps, IPhasorElementType } from './index.js';
 
 export interface ISurfaceElement {
@@ -14,6 +19,9 @@ export interface ISurfaceElement {
   xywh: SerializedXYWH;
   index: string;
   seed: number;
+
+  // degree: [0, 360]
+  rotate: number;
 }
 
 export interface HitTestOptions {
@@ -25,8 +33,11 @@ export type ComputedValue = (value: string) => string;
 export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement
 > {
-  abstract intersectWithLine(start: IVec, end: IVec): IVec[] | null;
+  abstract containedByBounds(bounds: Bound): boolean;
+
   abstract getNearestPoint(point: IVec): IVec;
+
+  abstract intersectWithLine(start: IVec, end: IVec): IVec[] | null;
 
   yMap: Y.Map<unknown>;
 
@@ -72,29 +83,34 @@ export abstract class SurfaceElement<
     return xywh;
   }
 
+  get seed() {
+    const seed = this.yMap.get('seed') as T['seed'];
+    return seed;
+  }
+
+  get rotate() {
+    const rotate = this.yMap.get('rotate') as T['rotate'];
+    return rotate ?? 0;
+  }
+
   get x() {
-    const [x] = deserializeXYWH(this.xywh);
+    const [x] = this.deserializeXYWH();
     return x;
   }
 
   get y() {
-    const [, y] = deserializeXYWH(this.xywh);
+    const [, y] = this.deserializeXYWH();
     return y;
   }
 
   get w() {
-    const [, , w] = deserializeXYWH(this.xywh);
+    const [, , w] = this.deserializeXYWH();
     return w;
   }
 
   get h() {
-    const [, , , h] = deserializeXYWH(this.xywh);
+    const [, , , h] = this.deserializeXYWH();
     return h;
-  }
-
-  get seed() {
-    const seed = this.yMap.get('seed') as T['seed'];
-    return seed;
   }
 
   get localRecord() {
@@ -109,6 +125,10 @@ export abstract class SurfaceElement<
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
     }
+  }
+
+  deserializeXYWH(): XYWH {
+    return deserializeXYWH(this.xywh);
   }
 
   serialize(): T {
@@ -149,7 +169,7 @@ export abstract class SurfaceElement<
     this.renderer = null;
   }
 
-  render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+  render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix, rc: RoughCanvas) {
     return;
   }
 }
