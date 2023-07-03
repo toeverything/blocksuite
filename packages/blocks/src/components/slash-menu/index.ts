@@ -159,8 +159,8 @@ export class SlashMenuWidget extends WithDisposable(LitElement) {
     // Fixme @Saul-Mirone get model from getCurrentSelection
     const target = event.target;
     if (!target || !(target instanceof HTMLElement)) return;
-
     const model = getModelByElement(target);
+
     if (matchFlavours(model, ['affine:code'])) return;
     const vEditor = getVirgoByModel(model);
     if (!vEditor) return;
