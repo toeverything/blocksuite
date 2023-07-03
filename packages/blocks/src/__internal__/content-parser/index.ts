@@ -143,13 +143,12 @@ export class ContentParser {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
       },
+      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
     };
 
     const nodeElements = edgeless.getSortedElementsByBound(bound);
     for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementById(nodeElement.id)?.closest(
-        '.affine-edgeless-block-child'
-      );
+      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
       const blockBound = xywhArrayToObject(nodeElement);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
@@ -192,6 +191,7 @@ export class ContentParser {
           return false;
         }
       },
+      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
     };
 
     const data = await html2canvas(
