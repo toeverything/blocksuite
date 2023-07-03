@@ -1,6 +1,11 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import {
+  addNote,
+  setEdgelessTool,
+  switchEditorMode,
+} from 'utils/actions/edgeless.js';
+import {
   pressBackspace,
   pressEnter,
   SHORT_KEY,
@@ -12,6 +17,7 @@ import {
   focusRichText,
   getSelectionRect,
   getVirgoSelectionText,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
@@ -391,6 +397,20 @@ test.describe('slash menu with code block', () => {
     await page.waitForTimeout(500);
     await assertRichTexts(page, ['111000']);
   });
+});
+
+test('slash menu should work in edgeless mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setEdgelessTool(page, 'note');
+
+  await addNote(page, '/', 30, 40);
+  await assertRichTexts(page, ['', '/']);
+
+  const slashMenu = page.locator(`.slash-menu`);
+  await expect(slashMenu).toBeVisible();
 });
 
 test.describe('slash menu with date & time', () => {
