@@ -593,7 +593,7 @@ function getNextPoint(
   const result = [...point];
   if (almostEqual(bound.x, result[0])) result[0] -= offsetX;
   else if (almostEqual(bound.y, result[1])) result[1] -= offsetY;
-  if (almostEqual(bound.maxX, result[0])) result[0] += offsetW;
+  else if (almostEqual(bound.maxX, result[0])) result[0] += offsetW;
   else if (almostEqual(bound.maxY, result[1])) result[1] += offsetH;
   return result;
 }
