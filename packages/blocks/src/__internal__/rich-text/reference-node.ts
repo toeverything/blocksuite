@@ -30,9 +30,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     .affine-reference {
       white-space: nowrap;
       word-break: break-word;
-      color: var(--affine-link-color);
-      fill: var(--affine-link-color);
-      border-radius: 2px;
+      color: var(--affine-text-primary-color);
+      fill: var(--affine-icon-color);
+      border-radius: 4px;
       text-decoration: none;
       cursor: pointer;
       user-select: none;
@@ -41,6 +41,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     }
     .affine-reference:hover {
       background: var(--affine-hover-color);
+    }
+    .affine-reference:hover .affine-reference-title::after {
+      border-color: var(--affine-divider-color);
     }
 
     .affine-reference > svg {
@@ -53,10 +56,25 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
     .affine-reference-title {
       color: var(--affine-text-primary-color);
+      position: relative;
     }
+    .affine-reference-unavailable {
+      color: var(--affine-text-disable-color);
+      text-decoration: line-through;
+      text-decoration-color: var(--affine-text-disable-color);
+    }
+    .affine-reference-title::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 0;
+      left: 0;
+      bottom: 1px;
+      border-top: 1px solid var(--affine-hover-color);
+    }
+
     .affine-reference-title::before {
       content: attr(data-title);
-      color: var(--affine-link-color);
     }
   `;
 
@@ -170,7 +188,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       style=${style}
       @click=${this._onClick}
       >${type === 'LinkedPage' ? FontLinkedPageIcon : FontPageIcon}<span
-        class="affine-reference-title"
+        class="affine-reference-title ${unavailable
+          ? 'affine-reference-unavailable'
+          : ''}"
         data-title=${title || DEFAULT_PAGE_NAME}
         data-virgo-text="true"
         data-virgo-text-value=${ZERO_WIDTH_NON_JOINER}

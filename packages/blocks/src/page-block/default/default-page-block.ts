@@ -99,6 +99,7 @@ export class DefaultPageBlockComponent
       font-family: inherit;
       color: inherit;
       cursor: text;
+      padding: 38px 0;
     }
 
     .affine-default-page-block-title-empty::before {
