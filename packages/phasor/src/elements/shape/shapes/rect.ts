@@ -44,7 +44,7 @@ export const RectMethods: ShapeMethods = {
 
     ctx.setTransform(
       matrix
-        .translate(renderOffset, renderOffset)
+        .translateSelf(renderOffset, renderOffset)
         .translateSelf(cx, cy)
         .rotateSelf(rotate)
         .translateSelf(-cx, -cy)

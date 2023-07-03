@@ -50,7 +50,15 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
-    const { text, color, fontSize, fontFamily, textAlign, rotate } = this;
+    const {
+      text,
+      color,
+      fontSize,
+      fontFamily,
+      textAlign,
+      rotate,
+      computedValue,
+    } = this;
     const [, , w, h] = this.deserializeXYWH();
     const cx = w / 2;
     const cy = h / 2;
@@ -88,7 +96,7 @@ export class TextElement extends SurfaceElement<IText> {
         }
         ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
         ctx.font = font;
-        ctx.fillStyle = this.computedValue(color);
+        ctx.fillStyle = computedValue(color);
         ctx.textAlign = textAlign;
 
         ctx.textBaseline = 'ideographic';
