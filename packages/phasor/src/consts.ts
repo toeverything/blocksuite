@@ -10,6 +10,7 @@ export interface IBound {
   y: number;
   w: number;
   h: number;
+  rotate?: number;
 }
 
 export enum StrokeStyle {

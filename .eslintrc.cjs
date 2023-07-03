@@ -9,7 +9,6 @@ const allPackages = [
   'playground',
   'store',
   'virgo',
-  'connector',
   'lit',
   'block-std',
 ];
@@ -69,7 +68,6 @@ module.exports = {
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
-    'packages/connector/dist/*',
     'packages/block-std/dist/*',
   ],
   overrides: [

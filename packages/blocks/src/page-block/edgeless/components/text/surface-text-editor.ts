@@ -101,6 +101,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
       });
 
     if (this._element?.text.length === 0) {
+      this._edgeless?.connector.detachConnectors([this._element]);
       this._edgeless?.surface.removeElement(this._element?.id);
     }
 
@@ -117,17 +118,15 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
     let virgoStyle = styleMap({});
     if (viewport && this._element && this._edgeless) {
       const zoom = viewport.zoom;
-      const rect = getSelectedRect(
-        [this._element],
-        this._edgeless.surface.viewport
-      );
+      const rect = getSelectedRect([this._element]);
+      const [x, y] = this._edgeless.surface.toViewCoord(rect.left, rect.top);
 
       virgoStyle = styleMap({
         position: 'absolute',
         minWidth: '2px',
-        left: rect.x + 'px',
-        top: rect.y + 'px',
-        fontSize: this._element.fontSize + 'px',
+        left: `${x}px`,
+        top: `${y}px`,
+        fontSize: `${this._element.fontSize}px`,
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',
         outline: 'none',

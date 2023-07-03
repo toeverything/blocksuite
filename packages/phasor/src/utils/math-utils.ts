@@ -21,11 +21,11 @@ function square(num: number) {
   return num * num;
 }
 
-function sumSqr(v: number[], w: number[]) {
+function sumSqr(v: IVec, w: IVec) {
   return square(v[0] - w[0]) + square(v[1] - w[1]);
 }
 
-function distToSegmentSquared(p: number[], v: number[], w: number[]) {
+function distToSegmentSquared(p: IVec, v: IVec, w: IVec) {
   const l2 = sumSqr(v, w);
   if (l2 == 0) return sumSqr(p, v);
   let t = ((p[0] - v[0]) * (w[0] - v[0]) + (p[1] - v[1]) * (w[1] - v[1])) / l2;
@@ -35,7 +35,7 @@ function distToSegmentSquared(p: number[], v: number[], w: number[]) {
   return sumSqr(p, [v[0] + t * (w[0] - v[0]), v[1] + t * (w[1] - v[1])]);
 }
 
-function distToSegment(p: number[], v: number[], w: number[]) {
+function distToSegment(p: IVec, v: IVec, w: IVec) {
   return Math.sqrt(distToSegmentSquared(p, v, w));
 }
 
@@ -53,7 +53,7 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
 }
 
-export function arrayAlmostEqual(a: number[], b: number[], epsilon = 0.0001) {
+export function arrayAlmostEqual(a: IVec, b: IVec, epsilon = 0.0001) {
   return a.length === b.length && a.every((v, i) => almostEqual(v, b[i]));
 }
 
@@ -62,13 +62,12 @@ export function clamp(n: number, min: number, max?: number): number {
 }
 
 export function pointInEllipse(
-  A: number[],
-  C: number[],
+  A: IVec,
+  C: IVec,
   rx: number,
   ry: number,
   rotation = 0
 ): boolean {
-  rotation = rotation || 0;
   const cos = Math.cos(rotation);
   const sin = Math.sin(rotation);
   const delta = Vec.sub(A, C);
@@ -78,7 +77,7 @@ export function pointInEllipse(
   return (tdx * tdx) / (rx * rx) + (tdy * tdy) / (ry * ry) <= 1;
 }
 
-export function pointInPolygon(p: number[], points: number[][]): boolean {
+export function pointInPolygon(p: IVec, points: IVec[]): boolean {
   let wn = 0; // winding number
 
   points.forEach((a, i) => {
@@ -96,7 +95,7 @@ export function pointInPolygon(p: number[], points: number[][]): boolean {
 }
 
 export function pointOnEllipse(
-  point: number[],
+  point: IVec,
   rx: number,
   ry: number,
   threshold: number
@@ -118,7 +117,7 @@ export function pointOnEllipse(
 
 export function pointOnPolygonStoke(
   p: number[],
-  points: number[][],
+  points: IVec[],
   threshold: number
 ): boolean {
   for (let i = 0; i < points.length; ++i) {
@@ -131,10 +130,7 @@ export function pointOnPolygonStoke(
   return false;
 }
 
-export function getBoundsFromPoints(
-  points: number[][],
-  rotation = 0
-): TLBounds {
+export function getBoundsFromPoints(points: IVec[], rotation = 0): TLBounds {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -172,10 +168,7 @@ export function getBoundsFromPoints(
   };
 }
 
-export function getSvgPathFromStroke(
-  points: number[][],
-  closed = true
-): string {
+export function getSvgPathFromStroke(points: IVec[], closed = true): string {
   const len = points.length;
 
   if (len < 4) {
@@ -306,6 +299,28 @@ export function linePolygonIntersects(
   return result.length ? result : null;
 }
 
+export function polygonNearestPoint(points: IVec[], point: IVec) {
+  const len = points.length;
+  let rst: IVec = [];
+  let dis = Infinity;
+  for (let i = 0; i < len; i++) {
+    const p = points[i];
+    const p2 = points[(i + 1) % len];
+    const temp = Vec.nearestPointOnLineSegment(p, p2, point, true);
+    const curDis = Vec.dist(temp, point);
+    if (curDis < dis) {
+      dis = curDis;
+      rst = temp;
+    }
+  }
+  return rst;
+}
+
+export function polygonPointDistance(points: IVec[], point: IVec) {
+  const nearest = polygonNearestPoint(points, point);
+  return Vec.dist(nearest, point);
+}
+
 export function linePolylineIntersects(
   sp: IVec,
   ep: IVec,
@@ -324,4 +339,104 @@ export function linePolylineIntersects(
   }
 
   return result.length ? result : null;
+}
+
+export function polyLineNearestPoint(points: IVec[], point: IVec) {
+  const len = points.length;
+  let rst: IVec = [];
+  let dis = Infinity;
+  for (let i = 0; i < len - 1; i++) {
+    const p = points[i];
+    const p2 = points[i + 1];
+    const temp = Vec.nearestPointOnLineSegment(p, p2, point, true);
+    const curDis = Vec.dist(temp, point);
+    if (curDis < dis) {
+      dis = curDis;
+      rst = temp;
+    }
+  }
+  return rst;
+}
+
+export function sign(number: number) {
+  return number > 0 ? 1 : -1;
+}
+
+export function getPointFromBoundsWithRotation(
+  bounds: IBound,
+  point: IVec
+): IVec {
+  const { x, y, w, h, rotate } = bounds;
+
+  if (!rotate) return point;
+
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+
+  const m = new DOMMatrix()
+    .translateSelf(cx, cy)
+    .rotateSelf(rotate)
+    .translateSelf(-cx, -cy);
+
+  const p = new DOMPoint(...point).matrixTransform(m);
+  return [p.x, p.y];
+}
+
+export function getPointsFromBoundsWithRotation(
+  bounds: IBound,
+  getPoints: (bounds: IBound) => IVec[] = ({ x, y, w, h }: IBound) => [
+    // left-top
+    [x, y],
+    // right-top
+    [x + w, y],
+    // right-bottom
+    [x + w, y + h],
+    // left-bottom
+    [x, y + h],
+  ]
+): IVec[] {
+  const { rotate } = bounds;
+  let points = getPoints(bounds);
+
+  if (rotate) {
+    const { x, y, w, h } = bounds;
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+
+    const m = new DOMMatrix()
+      .translateSelf(cx, cy)
+      .rotateSelf(rotate)
+      .translateSelf(-cx, -cy);
+
+    points = points.map(point => {
+      const { x, y } = new DOMPoint(...point).matrixTransform(m);
+      return [x, y];
+    });
+  }
+
+  return points;
+}
+
+export function getQuadBoundsWithRotation(bounds: IBound): DOMRect {
+  const { x, y, w, h, rotate } = bounds;
+  const rect = new DOMRect(x, y, w, h);
+
+  if (!rotate) return rect;
+
+  return new DOMQuad(
+    ...getPointsFromBoundsWithRotation(bounds).map(
+      point => new DOMPoint(...point)
+    )
+  ).getBounds();
+}
+
+export function getBoundsWithRotation(bounds: IBound): IBound {
+  const { x, y, width: w, height: h } = getQuadBoundsWithRotation(bounds);
+  return { x, y, w, h };
+}
+
+export function normalizeDegAngle(angle: number) {
+  if (angle < 0) angle += 360;
+  angle %= 360;
+  return angle;
 }

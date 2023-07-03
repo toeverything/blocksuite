@@ -4,8 +4,7 @@ import type {
   UIEventDispatcher,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import type { PhasorElement } from '@blocksuite/phasor';
-import { normalizeWheelDeltaY } from '@blocksuite/phasor';
+import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
 
 import {
   AbstractSelectionManager,
@@ -30,7 +29,7 @@ import { EraserToolController } from '../tool-controllers/eraser-tool.js';
 import type { EdgelessToolController } from '../tool-controllers/index.js';
 import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
-import { ShapeTooolController } from '../tool-controllers/shape-tool.js';
+import { ShapeToolController } from '../tool-controllers/shape-tool.js';
 import { TextToolController } from '../tool-controllers/text-tool.js';
 import {
   getSelectionBoxBound,
@@ -68,6 +67,7 @@ export interface EdgelessSelectionState {
   selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
+  by?: 'selecting';
 }
 
 export interface SelectionArea {
@@ -157,7 +157,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     this._controllers = {
       default: new DefaultToolController(this.container),
       text: new TextToolController(this.container),
-      shape: new ShapeTooolController(this.container),
+      shape: new ShapeToolController(this.container),
       brush: new BrushToolController(this.container),
       pan: new PanToolController(this.container),
       note: new NoteToolController(this.container),
@@ -367,7 +367,11 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   };
 
   private _onContainerPointerDown = (e: PointerEventState) => {
-    if (!isMiddleButtonPressed(e.raw)) return;
+    if (!isMiddleButtonPressed(e.raw)) {
+      if (this.page.readonly) return;
+
+      return this.currentController.onContainerPointerDown(e);
+    }
 
     const prevEdgelessTool = this._edgelessTool;
     const switchToPreMode = (_e: MouseEvent) => {
@@ -466,7 +470,9 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     }
   ) => {
     if (this.edgelessTool === edgelessTool) return;
-    this._controllers[this.edgelessTool.type].beforeModeSwitch(edgelessTool);
+    const lastType = this.edgelessTool.type;
+    this._controllers[lastType].beforeModeSwitch(edgelessTool);
+    this._controllers[edgelessTool.type].beforeModeSwitch(edgelessTool);
     if (edgelessTool.type === 'default') {
       if (!state.selected.length && this.lastState) {
         state = this.lastState;
@@ -480,6 +486,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
     this.container.slots.selectionUpdated.emit(state);
+    this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
 

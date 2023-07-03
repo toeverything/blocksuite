@@ -10,7 +10,7 @@ import {
   getNoteRect,
   initThreeNotes,
   locatorComponentToolbar,
-  locatorEdgelessToolButton,
+  locatorEdgelessZoomToolButton,
   selectNoteInEdgeless,
   setEdgelessTool,
   switchEditorMode,
@@ -89,7 +89,7 @@ test('resize note in edgeless mode', async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   const initRect = await getNoteRect(page, ids);
-  const leftHandle = page.locator('[aria-label="handle-left"]');
+  const leftHandle = page.locator('.handle[aria-label="left"] .resize');
   const box = await leftHandle.boundingBox();
   if (box === null) throw new Error();
 
@@ -386,7 +386,11 @@ test('double click toolbar zoom button, should not add text', async ({
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const zoomOutButton = locatorEdgelessToolButton(page, 'zoomOut', false);
+  const zoomOutButton = await locatorEdgelessZoomToolButton(
+    page,
+    'zoomOut',
+    false
+  );
   await zoomOutButton.dblclick();
   await assertEdgelessNonSelectedRect(page);
 });

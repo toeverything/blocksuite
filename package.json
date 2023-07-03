@@ -10,8 +10,7 @@
     "packages/phasor",
     "packages/playground",
     "packages/store",
-    "packages/virgo",
-    "packages/connector"
+    "packages/virgo"
   ],
   "private": true,
   "type": "module",

@@ -10,7 +10,6 @@ packages=(
   # "playground" # NOT PUBLISHED
   "store"
   "virgo"
-  "connector"
   "lit"
   "block-std"
 )

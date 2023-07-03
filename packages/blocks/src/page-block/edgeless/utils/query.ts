@@ -1,4 +1,4 @@
-import { Bound, getCommonBound } from '@blocksuite/phasor';
+import { Bound } from '@blocksuite/phasor';
 import {
   type PhasorElement,
   type SurfaceManager,
@@ -7,6 +7,7 @@ import {
 import {
   contains,
   deserializeXYWH,
+  getQuadBoundsWithRotation,
   intersects,
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
@@ -151,48 +152,72 @@ export function getBackgroundGrid(
   };
 }
 
-export function getSelectedRect(
-  selected: Selectable[],
-  viewport: SurfaceViewport
-): DOMRect {
+export function getSelectedRect(selected: Selectable[]): DOMRect {
   if (selected.length === 0) {
-    return new DOMRect(0, 0, 0, 0);
+    return new DOMRect();
   }
-  const rects = selected.map(selectable => {
-    const { x, y, width, height } = getSelectionBoxBound(
-      viewport,
-      getXYWH(selectable)
-    );
 
-    return {
+  if (selected.length === 1) {
+    const [x, y, w, h] = deserializeXYWH(selected[0].xywh);
+    return new DOMRect(x, y, w, h);
+  }
+
+  return selected.reduce((bounds, selectable, index) => {
+    const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
+    const [x, y, w, h] = deserializeXYWH(selectable.xywh);
+    let { left, top, right, bottom } = getQuadBoundsWithRotation({
       x,
       y,
-      w: width,
-      h: height,
-    };
-  });
+      w,
+      h,
+      rotate,
+    });
 
-  const commonBound = getCommonBound(rects);
-  return new DOMRect(
-    commonBound?.x,
-    commonBound?.y,
-    commonBound?.w,
-    commonBound?.h
-  );
+    if (index !== 0) {
+      left = Math.min(left, bounds.left);
+      top = Math.min(top, bounds.top);
+      right = Math.max(right, bounds.right);
+      bottom = Math.max(bottom, bounds.bottom);
+    }
+
+    bounds.x = left;
+    bounds.y = top;
+    bounds.width = right - left;
+    bounds.height = bottom - top;
+
+    return bounds;
+  }, new DOMRect());
 }
 
-export function getSelectableBounds(
-  selected: Selectable[]
-): Map<string, Bound> {
-  const bounds = new Map<string, Bound>();
+export function getSelectableBounds(selected: Selectable[]): Map<
+  string,
+  {
+    bound: Bound;
+    rotate: number;
+  }
+> {
+  const bounds = new Map<
+    string,
+    {
+      bound: Bound;
+      rotate: number;
+    }
+  >();
   for (const s of selected) {
     let bound: Bound;
+    let rotate = 0;
+
     if (isTopLevelBlock(s)) {
-      bound = Bound.deserialize(getXYWH(s));
+      bound = Bound.deserialize(s.xywh);
     } else {
       bound = new Bound(s.x, s.y, s.w, s.h);
+      rotate = s.rotate ?? 0;
     }
-    bounds.set(s.id, bound);
+
+    bounds.set(s.id, {
+      bound,
+      rotate,
+    });
   }
   return bounds;
 }
