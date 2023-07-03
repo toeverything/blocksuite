@@ -32,7 +32,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       word-break: break-word;
       color: var(--affine-text-primary-color);
       fill: var(--affine-icon-color);
-      border-radius: 2px;
+      border-radius: 4px;
       text-decoration: none;
       cursor: pointer;
       user-select: none;
