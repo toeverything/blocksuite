@@ -56,7 +56,6 @@ import {
   getThemePropertyValue,
   listenToThemeChange,
 } from '../../__internal__/theme/utils.js';
-import { SlashMenu } from '../../components/slash-menu/slash-menu-popover.js';
 import type {
   BlockHost,
   DragHandle,
@@ -234,7 +233,6 @@ export class EdgelessPageBlockComponent
     toolbar: <EdgelessToolbar | null>null,
     zoomToolbar: <EdgelessZoomToolbar | null>null,
     zoomBarToggleButton: <ZoomBarToggleButton | null>null,
-    slashMenu: <typeof SlashMenu | null>SlashMenu,
   };
 
   mouseRoot!: HTMLElement;

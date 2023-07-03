@@ -9,12 +9,11 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   getCurrentNativeRange,
   getModelByElement,
-  getPageBlock,
   getVirgoByModel,
   throttle,
 } from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
-import type { SlashMenu } from './slash-menu-popover.js';
+import { SlashMenu } from './slash-menu-popover.js';
 
 export { SlashMenu } from './slash-menu-popover.js';
 
@@ -93,12 +92,7 @@ export function showSlashMenu({
   globalAbortController.abort();
   globalAbortController = abortController;
 
-  const defaultPage = getPageBlock(model);
-  if (!defaultPage || !defaultPage.components.slashMenu) {
-    return;
-  }
-
-  const slashMenu = new defaultPage.components.slashMenu();
+  const slashMenu = new SlashMenu();
   slashMenu.model = model;
   slashMenu.abortController = abortController;
 
