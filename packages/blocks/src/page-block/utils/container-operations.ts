@@ -19,7 +19,6 @@ import {
   focusBlockByModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
-  getCurrentNativeRange,
   getDefaultPage,
   getVirgoByModel,
   handleNativeRangeDblClick,
@@ -41,7 +40,6 @@ import {
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
-import { showSlashMenu } from '../../components/slash-menu/index.js';
 import type { BlockSchemas } from '../../models.js';
 import type {
   DefaultSelectionManager,
@@ -538,14 +536,6 @@ export function handleKeydownAfterSelectBlocks({
     const newBlock = page.getBlockById(id) as BaseBlockModel;
     defaultPage?.selection?.clear();
     focusBlockByModel(newBlock, 'end');
-
-    // XXX: slash menu trigger probably shouldn't be here
-    if (key === '/') {
-      const curRange = getCurrentNativeRange();
-      const model = page.getBlockById(id);
-      assertExists(model);
-      showSlashMenu({ model, range: curRange });
-    }
   });
 }
 export async function onModelTextUpdated(

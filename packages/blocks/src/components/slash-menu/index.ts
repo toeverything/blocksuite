@@ -1,9 +1,21 @@
+import type { UIEventStateContext } from '@blocksuite/block-std';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, matchFlavours } from '@blocksuite/store';
+import { LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
-import { getVirgoByModel, throttle } from '../../__internal__/utils/index.js';
+import {
+  getCurrentNativeRange,
+  getModelByElement,
+  getVirgoByModel,
+  throttle,
+} from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
 import { SlashMenu } from './slash-menu-popover.js';
+
+export { SlashMenu } from './slash-menu-popover.js';
 
 let globalAbortController = new AbortController();
 
@@ -108,4 +120,50 @@ export function showSlashMenu({
   });
 
   return slashMenu;
+}
+
+@customElement('affine-slash-menu-widget')
+export class SlashMenuWidget extends WithDisposable(LitElement) {
+  @property({ attribute: false })
+  root!: BlockSuiteRoot;
+
+  abortController = new AbortController();
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+
+    this._disposables.add(
+      this.root.uiEventDispatcher.add('keyDown', this._onKeyDown)
+    );
+  }
+
+  private _onKeyDown = (ctx: UIEventStateContext) => {
+    const flag = this.root.page.awarenessStore.getFlag('enable_slash_menu');
+    if (!flag) return;
+
+    const eventState = ctx.get('keyboardState');
+    const event = eventState.event as KeyboardEvent;
+    if (
+      event.key !== '/' &&
+      // Compatible with CJK IME
+      event.key !== '、'
+    )
+      return;
+
+    // Fixme @Saul-Mirone get model from getCurrentSelection
+    const target = event.target;
+    if (!target || !(target instanceof HTMLElement)) return;
+    const model = getModelByElement(target);
+
+    if (matchFlavours(model, ['affine:code'])) return;
+    const vEditor = getVirgoByModel(model);
+    if (!vEditor) return;
+    vEditor.slots.rangeUpdated.once(() => {
+      // Wait for dom update, see this case https://github.com/toeverything/blocksuite/issues/2611
+      requestAnimationFrame(() => {
+        const curRange = getCurrentNativeRange();
+        showSlashMenu({ model, range: curRange });
+      });
+    });
+  };
 }
