@@ -37,7 +37,7 @@ export class EdgelessNoteMenu extends LitElement {
       border: 1px solid var(--affine-border-color);
       border-radius: 8px 8px 0 0;
       padding-bottom: 8px;
-      padding-right: 2px;
+      padding-right: 3px;
     }
     .button-group-label {
       font-family: 'Avenir Next';
