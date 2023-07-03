@@ -9,10 +9,7 @@ import {
   initEmptyEdgelessState,
 } from '../utils/actions/misc.js';
 import { waitNextFrame } from '../utils/actions/misc.js';
-import {
-  assertEdgelessHoverRect,
-  assertEdgelessSelectedRect,
-} from '../utils/asserts.js';
+import { assertEdgelessHoverRect } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test('snap', async ({ page }) => {

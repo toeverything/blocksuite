@@ -5,12 +5,10 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
-  autoFit,
   decreaseZoomLevel,
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
-  getZoomLevel,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,

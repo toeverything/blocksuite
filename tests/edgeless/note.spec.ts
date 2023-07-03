@@ -10,7 +10,6 @@ import {
   getNoteRect,
   initThreeNotes,
   locatorComponentToolbar,
-  locatorEdgelessToolButton,
   locatorEdgelessZoomToolButton,
   selectNoteInEdgeless,
   setEdgelessTool,
