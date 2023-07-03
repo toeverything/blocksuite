@@ -587,6 +587,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
+    this._computeComponentToolbarPosition();
+
     super.updated(changedProperties);
   }
 
