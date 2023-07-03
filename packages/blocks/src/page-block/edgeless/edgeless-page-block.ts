@@ -1273,7 +1273,7 @@ export class EdgelessPageBlockComponent
               ></edgeless-selected-rect>
             `
           : nothing}
-        ${EdgelessNotesStatus(this, this.sortedNotes)}
+        ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets}
       </div>
     `;
   }
