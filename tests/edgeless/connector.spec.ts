@@ -413,6 +413,9 @@ test('path #1, the upper line is parallel with the lower line of antoher, and an
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
+
+  await waitNextFrame(page);
+
   await assertConnectorPath(page, [
     [50, 0],
     [50, -20],

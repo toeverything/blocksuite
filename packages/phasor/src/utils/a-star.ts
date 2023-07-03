@@ -6,6 +6,34 @@ import { almostEqual } from './math-utils.js';
 import { PriorityQueue } from './priority-queue.js';
 import { type IVec } from './vec.js';
 
+function cost(point: IVec, point2: IVec) {
+  return Math.abs(point[0] - point2[0]) + Math.abs(point[1] - point2[1]);
+}
+
+function compare(a: [number, number, number], b: [number, number, number]) {
+  if (a[2] + 0.01 < b[2]) return -1;
+  else if (a[2] - 0.01 > b[2]) return 1;
+  else if (a[0] < b[0]) return -1;
+  else if (a[0] > b[0]) return 1;
+  else if (a[1] > b[1]) return -1;
+  else if (a[1] < b[1]) return 1;
+  else return 0;
+}
+
+function heuristic(a: IVec, b: IVec): number {
+  return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+}
+
+function getDiagonalCount(a: IVec, last: IVec, last2: IVec): number {
+  if (almostEqual(a[0], last[0]) && almostEqual(a[0], last2[0])) return 0;
+  if (almostEqual(a[1], last[1]) && almostEqual(a[1], last2[1])) return 0;
+  return 1;
+}
+
+function arrayAlmostEqual(a: IVec, b: IVec): boolean {
+  return almostEqual(a[0], b[0], 0.02) && almostEqual(a[1], b[1], 0.02);
+}
+
 export class AStarRunner {
   private _cameFrom = new Map<IVec, { from: IVec[]; indexs: number[] }>();
   private _frontier!: PriorityQueue<
@@ -45,32 +73,8 @@ export class AStarRunner {
     this._frontier = new PriorityQueue<
       IVec,
       [diagonalCount: number, pointPriority: number, distCost: number]
-    >(this._compare);
+    >(compare);
     this._frontier.enqueue(this._sp, [0, 0, 0]);
-  }
-
-  private _compare(a: [number, number, number], b: [number, number, number]) {
-    if (a[2] + 0.01 < b[2]) return -1;
-    else if (a[2] - 0.01 > b[2]) return 1;
-    else if (a[0] < b[0]) return -1;
-    else if (a[0] > b[0]) return 1;
-    else if (a[1] > b[1]) return -1;
-    else if (a[1] < b[1]) return 1;
-    else return 0;
-  }
-
-  private _heuristic(a: IVec, b: IVec): number {
-    return Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
-  }
-
-  private _getDiagonalCount(a: IVec, last: IVec, last2: IVec): number {
-    if (almostEqual(a[0], last[0]) && almostEqual(a[0], last2[0])) return 0;
-    if (almostEqual(a[1], last[1]) && almostEqual(a[1], last2[1])) return 0;
-    return 1;
-  }
-
-  private _almostEqual(a: IVec, b: IVec): boolean {
-    return almostEqual(a[0], b[0], 0.02) && almostEqual(a[1], b[1], 0.02);
   }
 
   private _neighbors(cur: IVec) {
@@ -79,7 +83,7 @@ export class AStarRunner {
     assertExists(cameFroms);
 
     cameFroms.from.forEach(from => {
-      const index = neighbors.findIndex(n => this._almostEqual(n, from));
+      const index = neighbors.findIndex(n => arrayAlmostEqual(n, from));
       if (index >= 0) {
         neighbors.splice(index, 1);
       }
@@ -96,7 +100,7 @@ export class AStarRunner {
       this._complete = true;
       return;
     }
-    if (current === this._ep && this._almostEqual(this._ep, this._originalEp)) {
+    if (current === this._ep && arrayAlmostEqual(this._ep, this._originalEp)) {
       this._originalEp = this._ep;
     }
     const neighbors = this._neighbors(current);
@@ -111,13 +115,11 @@ export class AStarRunner {
       assertExists(curDiagoalCounts);
       assertExists(curPointPrioritys);
       assertExists(cameFroms);
-      const newCosts = curCosts.map(
-        cost => cost + this._graph.cost(current, next)
-      );
+      const newCosts = curCosts.map(co => co + cost(current, next));
 
       const newDiagonalCounts = curDiagoalCounts.map(
         (count, index) =>
-          count + this._getDiagonalCount(next, current, cameFroms.from[index])
+          count + getDiagonalCount(next, current, cameFroms.from[index])
       );
       assertExists(next[2]);
       const newPointPrioritys = curPointPrioritys.map(
@@ -178,7 +180,7 @@ export class AStarRunner {
       const newPriority: [number, number, number] = [
         newDiagonalCount,
         newPointPriority,
-        newCost + this._heuristic(next, this._ep),
+        newCost + heuristic(next, this._ep),
       ];
       if (shouldEnqueue) {
         this._frontier.enqueue(next, newPriority);
@@ -188,7 +190,7 @@ export class AStarRunner {
         );
         const old = this._frontier.heap[index];
         if (old) {
-          if (this._compare(newPriority, old.priority) < 0) {
+          if (compare(newPriority, old.priority) < 0) {
             old.priority = newPriority;
             this._frontier.bubbleUp(index);
           }
@@ -197,8 +199,8 @@ export class AStarRunner {
         }
       }
       if (
-        this._almostEqual(current, this._ep) &&
-        this._almostEqual(next, this._originalEp)
+        arrayAlmostEqual(current, this._ep) &&
+        arrayAlmostEqual(next, this._originalEp)
       ) {
         this._originalEp = next;
         this._complete = true;
