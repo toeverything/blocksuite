@@ -25,20 +25,44 @@ test.describe('rotation', () => {
     );
 
     await rotateElementByHandle(page, 45, 'top-left');
-
     await assertEdgelessSelectedRectRotation(page, 45);
 
     await rotateElementByHandle(page, 45, 'top-right');
-
     await assertEdgelessSelectedRectRotation(page, 90);
 
     await rotateElementByHandle(page, 45, 'bottom-right');
-
     await assertEdgelessSelectedRectRotation(page, 135);
 
     await rotateElementByHandle(page, 45, 'bottom-left');
-
     await assertEdgelessSelectedRectRotation(page, 180);
+  });
+
+  test('angle snap', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 100, y: 100 },
+      { x: 200, y: 200 }
+    );
+
+    await page.keyboard.down('Shift');
+
+    await rotateElementByHandle(page, 5, 'top-left');
+    await assertEdgelessSelectedRectRotation(page, 0);
+
+    await rotateElementByHandle(page, 10, 'top-left');
+    await assertEdgelessSelectedRectRotation(page, 15);
+
+    await rotateElementByHandle(page, 10, 'top-left');
+    await assertEdgelessSelectedRectRotation(page, 30);
+
+    await rotateElementByHandle(page, 10, 'top-left');
+    await assertEdgelessSelectedRectRotation(page, 45);
+
+    await page.keyboard.up('Shift');
   });
 
   test('single shape', async ({ page }) => {
@@ -54,7 +78,6 @@ test.describe('rotation', () => {
     await assertEdgelessSelectedRect(page, [100, 100, 100, 100]);
 
     await rotateElementByHandle(page, 45, 'top-right');
-
     await assertEdgelessSelectedRectRotation(page, 45);
   });
 
@@ -78,7 +101,6 @@ test.describe('rotation', () => {
     await assertEdgelessSelectedRect(page, [100, 100, 200, 100]);
 
     await rotateElementByHandle(page, 90, 'bottom-right');
-
     await assertEdgelessSelectedRectRotation(page, 90);
   });
 });
