@@ -110,7 +110,7 @@ export function pointOnEllipse(
   return (
     Math.abs(
       Math.sqrt(square(point[1]) + square(point[0])) -
-      Math.sqrt(squaredX + squaredY)
+        Math.sqrt(squaredX + squaredY)
     ) < threshold
   );
 }
@@ -445,8 +445,8 @@ export function normalizeDegAngle(angle: number) {
 export function isOverlap(line1: IVec[], line2: IVec[], axis: 0 | 1) {
   return !(
     Math.max(line1[0][axis], line1[1][axis]) <
-    Math.min(line2[0][axis], line2[1][axis]) ||
+      Math.min(line2[0][axis], line2[1][axis]) ||
     Math.min(line1[0][axis], line1[1][axis]) >
-    Math.max(line2[0][axis], line2[1][axis])
-  )
+      Math.max(line2[0][axis], line2[1][axis])
+  );
 }
