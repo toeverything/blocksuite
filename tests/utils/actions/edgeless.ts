@@ -8,6 +8,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { NoteBlockModel } from '../../../packages/blocks/src/index.js';
+import { Vec } from '../../../packages/phasor/src/utils/vec.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
@@ -295,19 +296,60 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   await type(page, text);
 }
 
-export async function resizeElementByTopLeftHandle(
+export async function resizeElementByHandle(
   page: Page,
   delta: { x: number; y: number },
+  corner:
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-right'
+    | 'bottom-left' = 'top-left',
   steps = 1
 ) {
-  const topLeftHandle = page.locator('[aria-label="handle-top-left"]');
-  const box = await topLeftHandle.boundingBox();
+  const handle = page.locator(`.handle[aria-label="${corner}"] .resize`);
+  const box = await handle.boundingBox();
   if (box === null) throw new Error();
   const offset = 5;
   await dragBetweenCoords(
     page,
     { x: box.x + offset, y: box.y + offset },
     { x: box.x + delta.x + offset, y: box.y + delta.y + offset },
+    {
+      steps,
+    }
+  );
+}
+
+export async function rotateElementByHandle(
+  page: Page,
+  deg = 0,
+  corner:
+    | 'top-left'
+    | 'top-right'
+    | 'bottom-right'
+    | 'bottom-left' = 'top-left',
+  steps = 1
+) {
+  const rect = await page
+    .locator('.affine-edgeless-selected-rect')
+    .boundingBox();
+  if (rect === null) throw new Error();
+  const box = await page
+    .locator(`.handle[aria-label="${corner}"] .rotate`)
+    .boundingBox();
+  if (box === null) throw new Error();
+
+  const cx = rect.x + rect.width / 2;
+  const cy = rect.y + rect.height / 2;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+
+  const t = Vec.rotWith([x, y], [cx, cy], (deg * Math.PI) / 180);
+
+  await dragBetweenCoords(
+    page,
+    { x, y },
+    { x: t[0], y: t[1] },
     {
       steps,
     }

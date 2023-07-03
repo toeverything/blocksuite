@@ -67,6 +67,7 @@ export interface EdgelessSelectionState {
   selected: Selectable[];
   /* True if the selected content is active (like after double click) */
   active: boolean;
+  by?: 'selecting';
 }
 
 export interface SelectionArea {

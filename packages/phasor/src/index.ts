@@ -20,16 +20,20 @@ export * from './utils/bound.js';
 export {
   almostEqual,
   clamp,
+  getBoundsWithRotation,
+  getPointsFromBoundsWithRotation,
+  getQuadBoundsWithRotation,
+  getSvgPathFromStroke,
   intersects,
   isPointIn,
   lineIntersects,
   linePolygonIntersects,
+  normalizeDegAngle,
   polygonNearestPoint,
   polygonPointDistance,
   polyLineNearestPoint,
   sign,
 } from './utils/math-utils.js';
-export { getSvgPathFromStroke } from './utils/math-utils.js';
 export * from './utils/std.js';
 export { type IVec, Vec } from './utils/vec.js';
 export * from './utils/xywh.js';

@@ -712,7 +712,7 @@ export class EdgelessConnectorManager {
       if (excludedIds.includes(connectable.id)) continue;
 
       // then check if in expanded bound
-      const bound = Bound.deserialize(connectables[i].xywh);
+      const bound = Bound.deserialize(connectable.xywh);
       const expandBound = bound.expand(10);
       if (!expandBound.isPointInBound(point)) continue;
       _connectionOverlay.bound = bound;

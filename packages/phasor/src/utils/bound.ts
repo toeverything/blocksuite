@@ -20,6 +20,10 @@ export class Bound implements IBound {
     return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
   }
 
+  static fromDOMRect({ left, top, width, height }: DOMRect) {
+    return new Bound(left, top, width, height);
+  }
+
   static fromPoints(points: IVec[]) {
     const { minX, minY, maxX, maxY } = getBoundsFromPoints(points);
     return new Bound(minX, minY, maxX - minX, maxY - minY);
@@ -119,6 +123,11 @@ export class Bound implements IBound {
       [this.x + this.w, this.y],
       [this.x + this.w, this.y + this.h],
     ];
+  }
+
+  containsPoint([x, y]: IVec): boolean {
+    const { minX, minY, maxX, maxY } = this;
+    return minX <= x && x <= maxX && minY <= y && y <= maxY;
   }
 
   intersectLine(sp: IVec, ep: IVec, infinite = false) {

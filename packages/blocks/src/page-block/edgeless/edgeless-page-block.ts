@@ -46,6 +46,7 @@ import {
   reorderTo,
   resetNativeSelection,
   sendBackward,
+  throttle,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
@@ -101,11 +102,20 @@ export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
   selectionUpdated: Slot<EdgelessSelectionState>;
+  selectedRectUpdated: Slot<{
+    type: 'move' | 'select' | 'resize';
+    delta?: {
+      x: number;
+      y: number;
+    };
+    dragging?: boolean;
+  }>;
   surfaceUpdated: Slot;
   edgelessToolUpdated: Slot<EdgelessTool>;
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
+  cursorUpdated: Slot<string>;
   copyAsPng: Slot<{
     notes: NoteBlockModel[];
     shapes: PhasorElement[];
@@ -172,13 +182,27 @@ export class EdgelessPageBlockComponent
 
     .affine-edgeless-layer {
       position: absolute;
+      top: 0;
+      left: 0;
       contain: layout style size;
       transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
         scale(var(--affine-zoom));
     }
 
+    .affine-edgeless-block-child {
+      position: absolute;
+      transform-origin: center;
+      box-sizing: border-box;
+      border: 2px solid var(--affine-white-10);
+      border-radius: 8px;
+      box-shadow: var(--affine-shadow-3);
+      pointer-events: all;
+    }
+
     .affine-edgeless-hover-rect {
       position: absolute;
+      top: 0;
+      left: 0;
       border-radius: 0;
       pointer-events: none;
       box-sizing: border-box;
@@ -235,6 +259,14 @@ export class EdgelessPageBlockComponent
     viewportUpdated: new Slot(),
     selectedBlocksUpdated: new Slot<BlockComponentElement[]>(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
+    selectedRectUpdated: new Slot<{
+      type: 'move' | 'select' | 'resize';
+      delta?: {
+        x: number;
+        y: number;
+      };
+      dragging?: boolean;
+    }>(),
     hoverUpdated: new Slot(),
     surfaceUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
@@ -242,6 +274,7 @@ export class EdgelessPageBlockComponent
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
+    cursorUpdated: new Slot<string>(),
     elementSizeUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       notes: NoteBlockModel[];
@@ -497,6 +530,8 @@ export class EdgelessPageBlockComponent
           this.components.dragHandle?.hide();
         }
         this.edgelessTool = edgelessTool;
+
+        slots.cursorUpdated.emit(getCursorMode(edgelessTool));
       })
     );
     _disposables.add(
@@ -535,8 +570,7 @@ export class EdgelessPageBlockComponent
           }
         });
 
-        // FIXME: force updating selection for triggering re-render `selected-rect`
-        slots.selectionUpdated.emit({ ...this.selection.state });
+        slots.selectedRectUpdated.emit({ type: 'resize' });
       })
     );
 
@@ -552,6 +586,13 @@ export class EdgelessPageBlockComponent
         this.selection.shiftKey = pressed;
         this.requestUpdate();
       })
+    );
+    _disposables.add(
+      slots.cursorUpdated.on(
+        throttle((cursor: string) => {
+          this.style.cursor = cursor;
+        }, 144)
+      )
     );
 
     let canCopyAsPng = true;
@@ -1164,15 +1205,21 @@ export class EdgelessPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const { edgelessTool, page, selection, surface, _rectsOfSelectedBlocks } =
-      this;
+    const {
+      _rectsOfSelectedBlocks,
+      root,
+      selection,
+      showGrid,
+      sortedNotes,
+      surface,
+    } = this;
     const { state, draggingArea } = selection;
     const { viewport } = surface;
 
     const notesContainer = EdgelessNotesContainer(
-      this.sortedNotes,
+      sortedNotes,
       state.active,
-      this.root.renderModel
+      root.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
@@ -1185,11 +1232,10 @@ export class EdgelessPageBlockComponent
       viewportX,
       viewportY,
       zoom,
-      this.showGrid
+      showGrid
     );
 
     const blockContainerStyle = {
-      cursor: getCursorMode(edgelessTool),
       '--affine-edgeless-gap': `${gap}px`,
       '--affine-edgeless-grid': grid,
       '--affine-edgeless-x': `${translateX}px`,
@@ -1219,14 +1265,10 @@ export class EdgelessPageBlockComponent
           }}
         ></affine-selected-blocks>
         ${hoverRectTpl} ${draggingAreaTpl}
-        ${state.selected.length
+        ${state.selected.length > 0
           ? html`
               <edgeless-selected-rect
-                disabled=${edgelessTool.type === 'pan'}
-                .page=${page}
                 .state=${state}
-                .slots=${this.slots}
-                .surface=${surface}
                 .edgeless=${this}
               ></edgeless-selected-rect>
             `

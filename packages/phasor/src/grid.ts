@@ -2,13 +2,18 @@ import { assertExists } from '@blocksuite/store';
 
 import { GRID_SIZE, type IBound } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import { intersects, isPointIn } from './utils/math-utils.js';
+import {
+  getBoundsWithRotation,
+  intersects,
+  isPointIn,
+} from './utils/math-utils.js';
 
 function getGridIndex(val: number) {
   return Math.ceil(val / GRID_SIZE) - 1;
 }
 
 function rangeFromBound(a: IBound): number[] {
+  if (a.rotate) a = getBoundsWithRotation(a);
   const minRow = getGridIndex(a.x);
   const maxRow = getGridIndex(a.x + a.w);
   const minCol = getGridIndex(a.y);
@@ -93,7 +98,7 @@ export class GridManager {
         if (!gridElements) continue;
 
         for (const element of gridElements) {
-          if (intersects(element, bound)) {
+          if (intersects(getBoundsWithRotation(element), bound)) {
             results.add(element);
           }
         }
@@ -114,7 +119,7 @@ export class GridManager {
 
     const results: SurfaceElement[] = [];
     for (const element of gridElements) {
-      if (isPointIn(element, x, y)) {
+      if (isPointIn(getBoundsWithRotation(element), x, y)) {
         results.push(element);
       }
     }

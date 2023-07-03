@@ -1,5 +1,6 @@
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
+import type { Bound } from '../../utils/bound.js';
 import {
   linePolylineIntersects,
   polyLineNearestPoint,
@@ -9,10 +10,12 @@ import type { SerializedXYWH } from '../../utils/xywh.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { IConnector } from './types.js';
 import { getArrowPoints } from './utils.js';
+
 export class ConnectorElement extends SurfaceElement<IConnector> {
   private _path: IVec[] = [];
   private _xywh: SerializedXYWH = `[0, 0, 0, 0]`;
   protected override _connectable = false;
+
   // relative to it's xywh
   get path() {
     return this._path;
@@ -20,25 +23,6 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
 
   set path(p: IVec[]) {
     this._path = p;
-  }
-
-  getNearestPoint(point: IVec): IVec {
-    return polyLineNearestPoint(this.absolutePath, point);
-  }
-
-  intersectWithLine(start: IVec, end: IVec) {
-    return linePolylineIntersects(start, end, this.absolutePath);
-  }
-
-  override hitTest(
-    x: number,
-    y: number,
-    options?: HitTestOptions | undefined
-  ): boolean {
-    const point = polyLineNearestPoint(this.absolutePath, [x, y]);
-    return (
-      Vec.dist(point, [x, y]) < (options?.expand ? this.strokeWidth / 2 : 0) + 8
-    );
   }
 
   override get xywh() {
@@ -91,9 +75,46 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.path.map(p => [p[0] + x, p[1] + y]);
   }
 
-  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
-    ctx.translate(-this.x, -this.y);
-    const { seed, strokeStyle, stroke, roughness, strokeWidth } = this;
+  override hitTest(
+    x: number,
+    y: number,
+    options?: HitTestOptions | undefined
+  ): boolean {
+    const point = polyLineNearestPoint(this.absolutePath, [x, y]);
+    return (
+      Vec.dist(point, [x, y]) < (options?.expand ? this.strokeWidth / 2 : 0) + 8
+    );
+  }
+
+  override containedByBounds(bounds: Bound) {
+    return this.absolutePath.some(point => bounds.containsPoint(point));
+  }
+
+  override getNearestPoint(point: IVec): IVec {
+    return polyLineNearestPoint(this.absolutePath, point);
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
+    return linePolylineIntersects(start, end, this.absolutePath);
+  }
+
+  override render(
+    ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
+    rc: RoughCanvas
+  ) {
+    const {
+      seed,
+      stroke,
+      strokeStyle,
+      strokeWidth,
+      roughness,
+      absolutePath: points,
+    } = this;
+    const [x, y] = this.deserializeXYWH();
+
+    ctx.setTransform(matrix.translateSelf(-x, -y));
+
     const realStrokeColor = this.computedValue(stroke);
 
     const options = {
@@ -103,7 +124,6 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       stroke: realStrokeColor,
       strokeWidth,
     };
-    const points = this.absolutePath;
 
     rc.linearPath(points.map(p => p) as [number, number][], options);
 

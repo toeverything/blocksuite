@@ -1,9 +1,10 @@
 import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { Bound } from '../../../utils/bound.js';
+import { type Bound } from '../../../utils/bound.js';
 import {
-  isPointIn,
+  getPointsFromBoundsWithRotation,
   linePolygonIntersects,
+  pointInPolygon,
   pointOnPolygonStoke,
   polygonNearestPoint,
 } from '../../../utils/math-utils.js';
@@ -18,12 +19,11 @@ const kRect = 1 - 0.5522847498;
 export const RectMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) {
     const {
-      w,
-      h,
       seed,
       strokeWidth,
       filled,
@@ -32,14 +32,23 @@ export const RectMethods: ShapeMethods = {
       radius,
       strokeStyle,
       roughness,
+      rotate,
     } = element;
-
+    const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
     const r = Math.min(renderWidth * radius, renderHeight * radius);
+    const cx = renderWidth / 2;
+    const cy = renderHeight / 2;
 
-    ctx.translate(renderOffset, renderOffset);
+    ctx.setTransform(
+      matrix
+        .translateSelf(renderOffset, renderOffset)
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
+    );
 
     rc.path(
       `
@@ -78,30 +87,29 @@ export const RectMethods: ShapeMethods = {
     element: ShapeElement,
     options?: HitTestOptions
   ) {
-    return element.filled
-      ? isPointIn(element, x, y)
-      : pointOnPolygonStoke(
-          [x, y],
-          [
-            [element.x, element.y],
-            [element.x + element.w, element.y],
-            [element.x + element.w, element.y + element.h],
-            [element.x, element.y + element.h],
-          ],
-          options?.expand ?? 1
-        );
+    const points = getPointsFromBoundsWithRotation(element);
+
+    let hited = pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
+
+    if (element.filled && !hited) {
+      hited = pointInPolygon([x, y], points);
+    }
+
+    return hited;
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
-    return linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(element.xywh).points
-    );
+  containedByBounds(bounds: Bound, element: ShapeElement): boolean {
+    const points = getPointsFromBoundsWithRotation(element);
+    return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
-    const bound = Bound.deserialize(element.xywh);
-    return polygonNearestPoint(bound.points, point);
+    const points = getPointsFromBoundsWithRotation(element);
+    return polygonNearestPoint(points, point);
+  },
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(element);
+    return linePolygonIntersects(start, end, points);
   },
 };
