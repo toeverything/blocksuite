@@ -863,11 +863,14 @@ export async function getConnectorSourceConnection(page: Page) {
   });
 }
 
-export async function getConnectorPath(page: Page) {
-  return await page.evaluate(() => {
-    const container = document.querySelector('affine-edgeless-page');
-    if (!container) throw new Error('container not found');
-    const connectors = container.surface.getElementsByType('connector');
-    return connectors[0].absolutePath;
-  });
+export async function getConnectorPath(page: Page, index = 0) {
+  return await page.evaluate(
+    ([index]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      const connectors = container.surface.getElementsByType('connector');
+      return connectors[index].absolutePath;
+    },
+    [index]
+  );
 }

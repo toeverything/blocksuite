@@ -770,7 +770,11 @@ export async function assertZoomLevel(page: Page, zoom: number) {
   expect(z).toBe(zoom);
 }
 
-export async function assertConnectorPath(page: Page, path: number[][]) {
-  const actualPath = await getConnectorPath(page);
+export async function assertConnectorPath(
+  page: Page,
+  path: number[][],
+  index = 0
+) {
+  const actualPath = await getConnectorPath(page, index);
   expect(actualPath).toMatchObject(path);
 }
