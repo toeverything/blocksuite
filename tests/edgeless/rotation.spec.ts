@@ -13,6 +13,34 @@ import {
 import { test } from '../utils/playwright.js';
 
 test.describe('rotation', () => {
+  test('angle adjustment by four corners', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 100, y: 100 },
+      { x: 200, y: 200 }
+    );
+
+    await rotateElementByHandle(page, 45, 'top-left');
+
+    await assertEdgelessSelectedRectRotation(page, 45);
+
+    await rotateElementByHandle(page, 45, 'top-right');
+
+    await assertEdgelessSelectedRectRotation(page, 90);
+
+    await rotateElementByHandle(page, 45, 'bottom-right');
+
+    await assertEdgelessSelectedRectRotation(page, 135);
+
+    await rotateElementByHandle(page, 45, 'bottom-left');
+
+    await assertEdgelessSelectedRectRotation(page, 180);
+  });
+
   test('single shape', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
