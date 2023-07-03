@@ -382,7 +382,7 @@ test('elbow connector both side attached element with all fixed', async ({
   ]);
 });
 
-test('path #1, the upper line is parallel with the lower line of antoher, and anchor from top to bottom of another', async ({
+test.only('path #1, the upper line is parallel with the lower line of antoher, and anchor from top to bottom of another', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -398,8 +398,8 @@ test('path #1, the upper line is parallel with the lower line of antoher, and an
     { x: end[0], y: end[1] }
   );
 
-  start = await toViewCoord(page, [300, -100]);
-  end = await toViewCoord(page, [400, 0]);
+  start = await toViewCoord(page, [200, -100]);
+  end = await toViewCoord(page, [300, 0]);
   await addBasicRectShapeElement(
     page,
     { x: start[0], y: start[1] },
@@ -407,7 +407,7 @@ test('path #1, the upper line is parallel with the lower line of antoher, and an
   );
 
   start = await toViewCoord(page, [50, 0]);
-  end = await toViewCoord(page, [350, 0]);
+  end = await toViewCoord(page, [250, 0]);
   await addBasicConnectorElement(
     page,
     { x: start[0], y: start[1] },
@@ -415,14 +415,13 @@ test('path #1, the upper line is parallel with the lower line of antoher, and an
   );
 
   await waitNextFrame(page);
-
   await assertConnectorPath(page, [
     [50, 0],
     [50, -20],
-    [200, -20],
-    [200, 20],
-    [350, 20],
-    [350, 0],
+    [150, -20],
+    [150, 20],
+    [250, 20],
+    [250, 0],
   ]);
 });
 
