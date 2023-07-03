@@ -30,7 +30,7 @@ function getDiagonalCount(a: IVec, last: IVec, last2: IVec): number {
   return 1;
 }
 
-function arrayAlmostEqual(a: IVec, b: IVec): boolean {
+function pointAlmostEqual(a: IVec, b: IVec): boolean {
   return almostEqual(a[0], b[0], 0.02) && almostEqual(a[1], b[1], 0.02);
 }
 
@@ -83,7 +83,7 @@ export class AStarRunner {
     assertExists(cameFroms);
 
     cameFroms.from.forEach(from => {
-      const index = neighbors.findIndex(n => arrayAlmostEqual(n, from));
+      const index = neighbors.findIndex(n => pointAlmostEqual(n, from));
       if (index >= 0) {
         neighbors.splice(index, 1);
       }
@@ -100,7 +100,7 @@ export class AStarRunner {
       this._complete = true;
       return;
     }
-    if (current === this._ep && arrayAlmostEqual(this._ep, this._originalEp)) {
+    if (current === this._ep && pointAlmostEqual(this._ep, this._originalEp)) {
       this._originalEp = this._ep;
     }
     const neighbors = this._neighbors(current);
@@ -199,8 +199,8 @@ export class AStarRunner {
         }
       }
       if (
-        arrayAlmostEqual(current, this._ep) &&
-        arrayAlmostEqual(next, this._originalEp)
+        pointAlmostEqual(current, this._ep) &&
+        pointAlmostEqual(next, this._originalEp)
       ) {
         this._originalEp = next;
         this._complete = true;

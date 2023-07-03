@@ -53,7 +53,7 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
 }
 
-export function arrayAlmostEqual(a: IVec, b: IVec, epsilon = 0.0001) {
+export function pointAlmostEqual(a: IVec, b: IVec, epsilon = 0.0001) {
   return a.length === b.length && a.every((v, i) => almostEqual(v, b[i]));
 }
 
