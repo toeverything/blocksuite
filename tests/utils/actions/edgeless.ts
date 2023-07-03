@@ -847,6 +847,16 @@ export async function toViewCoord(page: Page, point: number[]) {
   }, point);
 }
 
+export async function dragBetweenViewCoords(
+  page: Page,
+  start: number[],
+  end: number[]
+) {
+  const [startX, startY] = await toViewCoord(page, start);
+  const [endX, endY] = await toViewCoord(page, end);
+  await dragBetweenCoords(page, { x: startX, y: startY }, { x: endX, y: endY });
+}
+
 export async function toModelCoord(page: Page, point: number[]) {
   return await page.evaluate(point => {
     const container = document.querySelector('affine-edgeless-page');
