@@ -382,7 +382,7 @@ test('elbow connector both side attached element with all fixed', async ({
   ]);
 });
 
-test.only('path #1, the upper line is parallel with the lower line of antoher, and anchor from top to bottom of another', async ({
+test('path #1, the upper line is parallel with the lower line of antoher, and anchor from top to bottom of another', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
