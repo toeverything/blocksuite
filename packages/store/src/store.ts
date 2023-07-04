@@ -79,6 +79,7 @@ const flagsPreset = {
   enable_block_selection_format_bar: true,
   enable_linked_page: false,
   enable_bookmark_operation: false,
+  enable_note_index: false,
 
   readonly: {},
 } satisfies BlockSuiteFlags;

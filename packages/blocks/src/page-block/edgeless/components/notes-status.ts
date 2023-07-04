@@ -13,6 +13,9 @@ export function EdgelessNotesStatus(
   edgeless: EdgelessPageBlockComponent,
   notes: NoteBlockModel[]
 ) {
+  if (!edgeless.page.awarenessStore.getFlag('enable_note_index'))
+    return nothing;
+
   const state = edgeless.selection.state;
   const isSelectOne = state.selected.length === 1;
   const singleSelected = state.selected[0];
