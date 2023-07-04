@@ -80,6 +80,8 @@ const flagsPreset = {
   enable_linked_page: false,
   enable_bookmark_operation: false,
 
+  enable_note_cut: true,
+
   readonly: {},
 } satisfies BlockSuiteFlags;
 
