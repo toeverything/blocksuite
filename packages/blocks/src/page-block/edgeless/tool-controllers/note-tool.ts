@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { Overlay } from '@blocksuite/phasor/renderer.js';
+import { Overlay } from '@blocksuite/phasor';
 
 import {
   type EdgelessTool,
