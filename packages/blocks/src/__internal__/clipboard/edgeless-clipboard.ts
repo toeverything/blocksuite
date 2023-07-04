@@ -409,16 +409,13 @@ export class EdgelessClipboard implements Clipboard {
     const { _edgeless } = this;
     const { surface } = _edgeless;
     const { zoom } = surface.viewport;
-    const { left, top, right, bottom, width, height } = getSelectedRect([
-      ...notes,
-      ...shapes,
-    ]);
-    const min = surface.toModelCoord(left, top);
-    const max = surface.toModelCoord(right, bottom);
-    const cx = (min[0] + max[0]) / 2;
-    const cy = (min[1] + max[1]) / 2;
-    const vx = cx - width / 2 / zoom;
-    const vy = cy - height / 2 / zoom;
+    const rect = getSelectedRect([...notes, ...shapes]);
+    const cx = (rect.left + rect.right) / 2;
+    const cy = (rect.top + rect.bottom) / 2;
+    const vx = cx - rect.width / 2;
+    const vy = cy - rect.height / 2;
+    const width = rect.width * zoom;
+    const height = rect.height * zoom;
 
     const container = document.createElement('div');
     container.style.position = 'relative';
@@ -468,27 +465,21 @@ export class EdgelessClipboard implements Clipboard {
       });
       assertExists(canvas);
 
+      const blob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob(
+          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
+          CLIPBOARD_MIMETYPE.IMAGE_PNG
+        )
+      );
+      assertExists(blob);
+
       // @ts-ignore
-      if (window.apis?.clipboard?.copyAsPng) {
+      if (window.apis?.clipboard?.copyAsImageFromBlob) {
         // @ts-ignore
-        await window.apis.clipboard?.copyAsPng(
-          canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
-        );
+        await window.apis.clipboard?.copyAsImageFromBlob(blob);
       } else {
-        const blob: Blob = await new Promise((resolve, reject) =>
-          canvas.toBlob(
-            blob =>
-              blob ? resolve(blob) : reject('Canvas can not export blob'),
-            CLIPBOARD_MIMETYPE.IMAGE_PNG
-          )
-        );
-
-        assertExists(blob);
-
         await navigator.clipboard.write([
-          new ClipboardItem({
-            [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
-          }),
+          new ClipboardItem({ [blob.type]: blob }),
         ]);
       }
     } catch (error) {

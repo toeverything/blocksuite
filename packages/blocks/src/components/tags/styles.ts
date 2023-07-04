@@ -5,7 +5,7 @@ export const styles = css`
     width: 100%;
     z-index: 2;
     border: 1px solid var(--affine-border-color);
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-2);
   }
