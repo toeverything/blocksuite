@@ -1,7 +1,7 @@
 import { CutIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 
 const buttonStyle = css`
   .scissors-button {
@@ -92,11 +92,11 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
     this.dispatchEvent(e);
   }
 
-  private _dispatchClipEvent() {
+  private _dispatchClipEvent = () => {
     const e = new CustomEvent('clip');
 
     this.dispatchEvent(e);
-  }
+  };
 
   protected override firstUpdated(): void {
     if (!this._externalButton) {
