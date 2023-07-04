@@ -1,26 +1,21 @@
-import { expect, type Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
-  deleteAll,
+  createConnectorElementWithModel as createConnectorElement,
+  createRectShapeElementWithModel as createRectShapeElement,
   deleteAllConnectors,
   dragBetweenViewCoords,
-  getConnectorPath,
+  edgelessCommonSetup as commonSetup,
   locatorConnectorStrokeStyleButton,
   locatorConnectorStrokeWidthButton,
   pickColorAtPoints,
-  switchEditorMode,
-  toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
-  addBasicRectShapeElement,
-  dragBetweenCoords,
-  enterPlaygroundRoom,
-  initEmptyEdgelessState,
   pressBackspace,
   redoByClick,
   undoByClick,
@@ -28,41 +23,6 @@ import {
 } from '../utils/actions/index.js';
 import { assertConnectorPath } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
-
-async function commonSetup(page: Page) {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
-}
-
-async function createRectShapeElement(
-  page: Page,
-  coord1: number[],
-  coord2: number[]
-) {
-  const start = await toViewCoord(page, coord1);
-  const end = await toViewCoord(page, coord2);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-}
-
-async function createConnectorElement(
-  page: Page,
-  coord1: number[],
-  coord2: number[]
-) {
-  const start = await toViewCoord(page, coord1);
-  const end = await toViewCoord(page, coord2);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-}
 
 test('elbow connector without node and width greater than height', async ({
   page,

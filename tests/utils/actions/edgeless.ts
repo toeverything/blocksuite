@@ -19,7 +19,9 @@ import {
 } from './keyboard.js';
 import { MODIFIER_KEY } from './keyboard.js';
 import {
+  enterPlaygroundRoom,
   getEditorLocator,
+  initEmptyEdgelessState,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
@@ -873,11 +875,49 @@ export async function getConnectorSourceConnection(page: Page) {
   });
 }
 
-export async function getConnectorPath(page: Page) {
-  return await page.evaluate(() => {
-    const container = document.querySelector('affine-edgeless-page');
-    if (!container) throw new Error('container not found');
-    const connectors = container.surface.getElementsByType('connector');
-    return connectors[0].absolutePath;
-  });
+export async function getConnectorPath(page: Page, index = 0) {
+  return await page.evaluate(
+    ([index]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      const connectors = container.surface.getElementsByType('connector');
+      return connectors[index].absolutePath;
+    },
+    [index]
+  );
+}
+
+export async function edgelessCommonSetup(page: Page) {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+}
+
+export async function createRectShapeElementWithModel(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+}
+
+export async function createConnectorElementWithModel(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicConnectorElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
 }
