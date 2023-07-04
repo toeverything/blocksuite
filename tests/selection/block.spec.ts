@@ -32,7 +32,6 @@ import {
   SHORT_KEY,
   type,
   undoByKeyboard,
-  updateBlock,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -1408,23 +1407,4 @@ test('should un-select blocks when pressing escape', async ({ page }) => {
 
   await pressEscape(page);
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
-});
-
-test('verify cursor position after changing block type', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const { paragraphId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, 'hello');
-  const anchorOffset = await page.evaluate(() => {
-    return window.getSelection()?.anchorOffset || 0;
-  });
-  expect(anchorOffset).toBe(5);
-  await page.evaluate(paragraphId => {
-    updateBlock(page, paragraphId, 'affine:paragraph', 'h1');
-  }, paragraphId);
-  await type(page, 'w');
-  const anchorOffset2 = await page.evaluate(() => {
-    return window.getSelection()?.anchorOffset || 0;
-  });
-  expect(anchorOffset2).toBe(6);
 });

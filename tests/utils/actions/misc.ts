@@ -6,9 +6,7 @@ import {
   type ListType,
   type PageBlockModel,
   type ThemeObserver,
-  updateBlockType,
 } from '@blocksuite/blocks';
-import type { BlockSchemas } from '@blocksuite/blocks/models';
 import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
@@ -961,22 +959,6 @@ export async function transformHtml(page: Page, data: string) {
     { data }
   );
   return promiseResult;
-}
-
-export async function updateBlock(
-  page: Page,
-  blockId: string,
-  flavour: keyof BlockSchemas,
-  type: string
-) {
-  await page.evaluate(
-    ({ blockId, flavour, type }) => {
-      const { page } = window;
-      const blockModel = page.getBlockById(blockId) as PageBlockModel;
-      updateBlockType([blockModel], flavour, type);
-    },
-    { blockId, flavour, type }
-  );
 }
 
 export async function export2Html(page: Page) {
