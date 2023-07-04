@@ -1,6 +1,6 @@
 import { CutIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, type PropertyValueMap } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';

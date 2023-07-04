@@ -47,7 +47,7 @@ export class NoteCut extends WithDisposable(LitElement) {
   @query('note-scissors-button')
   button!: NoteScissorsVisualButton;
 
-  private _hintLine: NoteCutHint | null;
+  private _hintLine: NoteCutHint | null = null;
 
   private _lastRect: {
     x: number;
@@ -68,8 +68,10 @@ export class NoteCut extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
 
+    if (!this.edgelessPage.service) return;
+
     this._disposables.add(
-      this.edgelessPage.service!.uiEventDispatcher.add('pointerMove', ctx => {
+      this.edgelessPage.service.uiEventDispatcher.add('pointerMove', ctx => {
         const e = ctx.get('pointerState');
         this._updateVisiblity(e);
       })
@@ -85,6 +87,8 @@ export class NoteCut extends WithDisposable(LitElement) {
 
     document.body.appendChild(this._hintLine);
     this._disposables.add(() => {
+      if (!this._hintLine) return;
+
       document.body.removeChild(this._hintLine);
       this._hintLine = null;
     });
