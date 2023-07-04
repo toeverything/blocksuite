@@ -4,6 +4,10 @@
 
 # Name the node stage "builder"
 FROM node:18 AS builder
+# Setting this manually for the moment but find a way to make this automated.
+# JAVASCRIPT HEAP OUT OF MEMORY IN DOCKER IMAGE RUN-DOCKER
+# https://www.appsloveworld.com/docker/100/12/javascript-heap-out-of-memory-in-docker-image-run
+ENV NODE_OPTIONS=--max_old_space_size=2048
 # Install pnpm
 RUN npm install --global pnpm
 # Set working directory
