@@ -11,7 +11,6 @@ import {
   type BlockComponentElement,
   type EditingState,
   getBlockElementById,
-  getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
@@ -25,7 +24,6 @@ import type { FormatQuickBar } from '../../components/format-quick-bar/index.js'
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
-import type { ImageBlockModel } from '../../image-block/image-model.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 
 function hasOptionBar(block: BaseBlockModel) {
@@ -329,65 +327,6 @@ function getBlockAndRect(blocks: BaseBlockModel[], mid: number) {
   };
 }
 
-export async function downloadImage(model: BaseBlockModel) {
-  const img = await getUrlByModel(model);
-  if (!img) {
-    return;
-  }
-  const arrayBuffer = await img.arrayBuffer();
-  const buffer = new Uint8Array(arrayBuffer);
-  let fileType: string;
-  if (
-    buffer[0] === 0x47 &&
-    buffer[1] === 0x49 &&
-    buffer[2] === 0x46 &&
-    buffer[3] === 0x38
-  ) {
-    fileType = 'image/gif';
-  } else if (
-    buffer[0] === 0x89 &&
-    buffer[1] === 0x50 &&
-    buffer[2] === 0x4e &&
-    buffer[3] === 0x47
-  ) {
-    fileType = 'image/png';
-  } else if (
-    buffer[0] === 0xff &&
-    buffer[1] === 0xd8 &&
-    buffer[2] === 0xff &&
-    buffer[3] === 0xe0
-  ) {
-    fileType = 'image/jpeg';
-  } else {
-    // unknown, fallback to png
-    console.error('unknown image type');
-    fileType = 'image/png';
-  }
-  const downloadUrl = URL.createObjectURL(
-    new Blob([arrayBuffer], { type: fileType })
-  );
-  const a = document.createElement('a');
-  const event = new MouseEvent('click');
-  a.download = 'image';
-  a.href = downloadUrl;
-  a.dispatchEvent(event);
-
-  // cleanup
-  a.remove();
-  URL.revokeObjectURL(downloadUrl);
-}
-
-export async function copyImage(model: ImageBlockModel) {
-  copyBlocks({
-    type: 'Block',
-    models: [model],
-    startOffset: 0,
-    endOffset: 0,
-  });
-
-  toast('Copied image to clipboard');
-}
-
 function getTextDelta(model: BaseBlockModel) {
   if (!model.text) {
     return [];
@@ -449,23 +388,6 @@ function performNativeCopy(items: ClipboardItem[]): boolean {
     document.body.removeChild(tempElem);
   }
   return success;
-}
-
-export function focusCaption(model: BaseBlockModel) {
-  const blockEle = getBlockElementByModel(model);
-  assertExists(blockEle);
-  const dom = blockEle.querySelector(
-    '.affine-embed-wrapper-caption'
-  ) as HTMLInputElement;
-  dom.classList.add('caption-show');
-  dom.focus();
-}
-
-async function getUrlByModel(model: BaseBlockModel) {
-  assertExists(model.sourceId);
-  const store = await model.page.blobs;
-  const url = store?.get(model.sourceId);
-  return url;
 }
 
 export function copyCode(codeBlockModel: CodeBlockModel) {
