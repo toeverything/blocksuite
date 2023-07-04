@@ -1,8 +1,8 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';
-import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor/index.js';
-import type { BaseBlockModel } from '@blocksuite/store/index.js';
-import { assertExists } from '@blocksuite/store/index.js';
+import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
