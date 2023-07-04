@@ -25,7 +25,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
-import { getZoomLevel } from './actions/edgeless.js';
+import { getConnectorPath, getZoomLevel } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -47,6 +47,11 @@ import { getStringFromRichText } from './virgo.js';
 
 export const defaultStore: SerializedStore = {
   meta: {
+    properties: {
+      tags: {
+        options: [],
+      },
+    },
     pages: [
       {
         id: 'page0',
@@ -620,21 +625,23 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   // Clear input before test
   await locator.clear();
   // type/backspace
-  await type(page, '1234');
-  await expect(locator).toHaveValue('1234');
+  await type(page, '12/34');
+  await expect(locator).toHaveValue('12/34');
   await captureHistory(page);
   await pressBackspace(page);
-  await expect(locator).toHaveValue('123');
+  await expect(locator).toHaveValue('12/3');
 
   // undo/redo
   await undoByKeyboard(page);
-  await expect(locator).toHaveValue('1234');
+  await expect(locator).toHaveValue('12/34');
   await redoByKeyboard(page);
-  await expect(locator).toHaveValue('123');
+  await expect(locator).toHaveValue('12/3');
 
   // keyboard
   await pressArrowLeft(page, 2);
   await pressArrowRight(page, 1);
+  await pressBackspace(page);
+  await expect(locator).toHaveValue('123');
   await pressBackspace(page);
   await expect(locator).toHaveValue('13');
 
@@ -702,6 +709,17 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {
+  const editor = getEditorLocator(page);
+  const selectedRect = editor
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+
+  const transform = await selectedRect.evaluate(el => el.style.transform);
+  const r = new RegExp(`rotate\\(${deg}deg\\)`);
+  expect(transform).toMatch(r);
+}
+
 export async function assertEdgelessNonSelectedRect(page: Page) {
   const rect = page.locator('edgeless-selected-rect');
   await expect(rect).toBeHidden();
@@ -752,4 +770,9 @@ export async function assertEdgelessColorSameWithHexColor(
 export async function assertZoomLevel(page: Page, zoom: number) {
   const z = await getZoomLevel(page);
   expect(z).toBe(zoom);
+}
+
+export async function assertConnectorPath(page: Page, path: number[][]) {
+  const actualPath = await getConnectorPath(page);
+  expect(actualPath).toMatchObject(path);
 }

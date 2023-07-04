@@ -1,9 +1,15 @@
-import { Bound, Overlay } from '@blocksuite/phasor';
+import {
+  Bound,
+  deserializeXYWH,
+  getBoundsWithRotation,
+  Overlay,
+} from '@blocksuite/phasor';
 
 import { Point } from '../../../__internal__/utils/rect.js';
 import type { Alignable } from '../../../__internal__/utils/types.js';
 import { type NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { isTopLevelBlock } from '../utils/query.js';
 
 interface Distance {
   absXDistance: number;
@@ -39,29 +45,39 @@ export class EdgelessSnapManager extends Overlay {
    */
   private _distributedAlignLines: [Point, Point][] = [];
 
+  private _getBoundsWithRotationByAlignable(alignable: Alignable) {
+    const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
+    const [x, y, w, h] = deserializeXYWH(alignable.xywh);
+    return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
+  }
+
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
     const { page, surface } = this.container;
+    const connectors =
+      this.container.connector.getConnecttedConnectors(alignables);
+
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);
     viewport.addOverlay(this);
 
     const notes = page.getBlockByFlavour('affine:note') as NoteBlockModel[];
     const phasorElements = surface.getElements();
-
+    const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
     (<Alignable[]>[...notes, ...phasorElements]).forEach(alignable => {
-      const bound = Bound.deserialize(alignable.xywh);
+      const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
-        viewportBounds.isIntersectWithBound(bound) &&
-        !alignables.includes(alignable)
+        viewportBounds.isIntersectWithBound(bounds) &&
+        !excludes.includes(alignable)
       ) {
-        this._alignableBounds.push(bound);
+        this._alignableBounds.push(bounds);
       }
     });
 
     return alignables.reduce((prev, element) => {
-      return prev.unite(Bound.deserialize(element.xywh));
+      const bounds = this._getBoundsWithRotationByAlignable(element);
+      return prev.unite(bounds);
     }, Bound.deserialize(alignables[0].xywh));
   }
 
@@ -102,7 +118,6 @@ export class EdgelessSnapManager extends Overlay {
     if (rst.dy === 0) {
       this._alignDistributeVertically(rst, bound, threshold, viewport);
     }
-
     this._draw();
     return rst;
   }
@@ -370,6 +385,7 @@ export class EdgelessSnapManager extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D) {
+    // return
     if (
       this._intraGraphicAlignLines.length === 0 &&
       this._distributedAlignLines.length === 0

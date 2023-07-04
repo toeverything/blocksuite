@@ -1,8 +1,5 @@
-import {
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
-} from '@blocksuite/blocks';
-import { StrokeStyle } from '@blocksuite/phasor';
+import { DEFAULT_SHAPE_STROKE_COLOR } from '@blocksuite/blocks';
+import { serializeXYWH, StrokeStyle } from '@blocksuite/phasor';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
@@ -41,14 +38,30 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           id: '0',
           index: 'a0',
           type: 'shape',
-          xywh: '[0,-100,100,100]',
+          xywh: '[0,0,100,100]',
+          seed: Math.floor(Math.random() * 2 ** 31),
+          shapeType: 'rect',
+
+          radius: 0,
+          filled: true,
+          fillColor: '--affine-palette-shape-navy',
+          strokeWidth: 4,
+          strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+          strokeStyle: StrokeStyle.Solid,
+          roughness: 2,
+        },
+        1: {
+          id: '1',
+          index: 'a1',
+          type: 'shape',
+          xywh: '[200,0,100,100]',
           seed: Math.floor(Math.random() * 2 ** 31),
 
           shapeType: 'rect',
 
           radius: 0,
-          filled: false,
-          fillColor: DEFAULT_SHAPE_FILL_COLOR,
+          filled: true,
+          fillColor: '--affine-palette-shape-navy',
           strokeWidth: 4,
           strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
           strokeStyle: StrokeStyle.Solid,
@@ -60,7 +73,11 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   );
 
   // Add note block inside page block
-  const noteId = page.addBlock('affine:note', {}, pageBlockId);
+  const noteId = page.addBlock(
+    'affine:note',
+    { xywh: serializeXYWH(0, 100, 800, 640) },
+    pageBlockId
+  );
   // Import preset markdown content inside note block
   const contentParser = new window.ContentParser(page);
 

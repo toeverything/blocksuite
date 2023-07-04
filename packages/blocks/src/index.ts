@@ -31,7 +31,6 @@ export * as SelectionUtils from './__internal__/utils/selection.js';
 export * from './__internal__/utils/types.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
-export { FormatQuickBar } from './components/format-quick-bar/format-bar-node.js';
 export * from './components/index.js';
 export * from './counter-block/index.js';
 export * from './database-block/index.js';

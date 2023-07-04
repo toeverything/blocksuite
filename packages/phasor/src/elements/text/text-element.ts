@@ -1,5 +1,9 @@
 import { Bound } from '../../utils/bound.js';
-import { linePolygonIntersects } from '../../utils/math-utils.js';
+import {
+  getPointsFromBoundsWithRotation,
+  linePolygonIntersects,
+  polygonNearestPoint,
+} from '../../utils/math-utils.js';
 import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
@@ -31,22 +35,43 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
-  override intersectWithLine(start: IVec, end: IVec): boolean {
-    return !!linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(this.xywh).points
-    );
+  getNearestPoint(point: IVec): IVec {
+    return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
   }
 
-  override render(ctx: CanvasRenderingContext2D) {
-    const { w, text, color, fontSize, fontFamily, textAlign } = this;
+  override containedByBounds(bounds: Bound): boolean {
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
+    const {
+      text,
+      color,
+      fontSize,
+      fontFamily,
+      textAlign,
+      rotate,
+      computedValue,
+    } = this;
+    const [, , w, h] = this.deserializeXYWH();
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
 
     const yText = text;
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
     const lines = deltaInsertsToChunks(deltas);
 
-    const lineHeightPx = this.h / lines.length;
+    const lineHeightPx = h / lines.length;
     const font = getFontString({
       fontSize: fontSize,
       lineHeight: `${lineHeightPx}px`,
@@ -71,7 +96,7 @@ export class TextElement extends SurfaceElement<IText> {
         }
         ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
         ctx.font = font;
-        ctx.fillStyle = this.computedValue(color);
+        ctx.fillStyle = computedValue(color);
         ctx.textAlign = textAlign;
 
         ctx.textBaseline = 'ideographic';

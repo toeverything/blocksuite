@@ -1,10 +1,12 @@
 import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { Bound } from '../../../utils/bound.js';
+import { type Bound } from '../../../utils/bound.js';
 import {
+  getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
+  polygonNearestPoint,
 } from '../../../utils/math-utils.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
@@ -14,12 +16,11 @@ import type { ShapeMethods } from '../types.js';
 export const TriangleMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) {
     const {
-      w,
-      h,
       seed,
       strokeWidth,
       filled,
@@ -27,13 +28,22 @@ export const TriangleMethods: ShapeMethods = {
       realStrokeColor,
       strokeStyle,
       roughness,
+      rotate,
     } = element;
-
+    const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
+    const cx = renderWidth / 2;
+    const cy = renderHeight / 2;
 
-    ctx.translate(renderOffset, renderOffset);
+    ctx.setTransform(
+      matrix
+        .translateSelf(renderOffset, renderOffset)
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
+    );
 
     rc.polygon(
       [
@@ -59,25 +69,57 @@ export const TriangleMethods: ShapeMethods = {
     element: ShapeElement,
     options?: HitTestOptions
   ) {
-    const points = [
-      [element.x + element.w / 2, element.y + 0],
-      [element.x + element.w, element.y + element.h],
-      [element.x + 0, element.y + element.h],
-    ];
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h],
+        [x + w / 2, y],
+        [x + w, y + h],
+      ]
+    );
 
-    return element.filled
-      ? pointInPolygon([x, y], points)
-      : pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
+    let hited = pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
+
+    if (element.filled && !hited) {
+      hited = pointInPolygon([x, y], points);
+    }
+
+    return hited;
   },
 
-  intersectWithLine(start: IVec, end: IVec, element: ShapeElement): boolean {
-    const bound = Bound.deserialize(element.xywh);
-    const { x, y, w, h } = bound;
+  containedByBounds(bounds: Bound, element: ShapeElement): boolean {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h],
+        [x + w / 2, y],
+        [x + w, y + h],
+      ]
+    );
+    return points.some(point => bounds.containsPoint(point));
+  },
 
-    return !!linePolygonIntersects(start, end, [
-      [x + w / 2, 0 + y],
-      [x + w, h + y],
-      [x + 0, h + y],
-    ]);
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h],
+        [x + w / 2, y],
+        [x + w, y + h],
+      ]
+    );
+    return polygonNearestPoint(points, point);
+  },
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h],
+        [x + w / 2, y],
+        [x + w, y + h],
+      ]
+    );
+    return linePolygonIntersects(start, end, points);
   },
 };

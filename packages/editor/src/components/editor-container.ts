@@ -72,6 +72,7 @@ export class EditorContainer
   slots: AbstractEditor['slots'] = {
     pageLinkClicked: new Slot(),
     pageModeSwitched: new Slot(),
+    tagClicked: new Slot<{ tagId: string }>(),
   };
 
   private _getPageInfo() {
@@ -174,9 +175,8 @@ export class EditorContainer
     getServiceOrRegister('affine:code');
     if (this.mode === 'page') {
       setTimeout(() => {
-        const defaultPage = this.querySelector('affine-default-page');
         if (this.autofocus) {
-          defaultPage?.titleVEditor.focusEnd();
+          this._defaultPageBlock?.titleVEditor.focusEnd();
         }
       });
     }

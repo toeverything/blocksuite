@@ -191,8 +191,8 @@ export async function enterPlaygroundRoom(
   page.on('console', message => {
     const ignore = shamefullyIgnoreConsoleMessage(message);
     if (!ignore) {
-      expect('no console message').toBe(
-        'Unexpected console message: ' + message.text()
+      expect('Unexpected console message: ' + message.text()).toBe(
+        'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
       );
       // throw new Error('Unexpected console message: ' + message.text());
     }
@@ -969,7 +969,7 @@ export async function updateBlock(
   flavour: keyof BlockSchemas,
   type: string
 ) {
-  const promiseResult = await page.evaluate(
+  await page.evaluate(
     ({ blockId, flavour, type }) => {
       const { page } = window;
       const blockModel = page.getBlockById(blockId) as PageBlockModel;
@@ -977,5 +977,13 @@ export async function updateBlock(
     },
     { blockId, flavour, type }
   );
+}
+
+export async function export2Html(page: Page) {
+  const promiseResult = await page.evaluate(() => {
+    const contentParser = new window.ContentParser(window.page);
+    const root = window.page.root as PageBlockModel;
+    return contentParser.block2Html([contentParser.getSelectedBlock(root)]);
+  });
   return promiseResult;
 }

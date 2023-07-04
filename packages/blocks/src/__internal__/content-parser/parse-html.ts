@@ -631,7 +631,6 @@ export class HtmlParser {
   private _embedItemParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
-    let result: SerializedBlock[] | null = [];
     let imgElement = null;
     const texts = [];
     if (element.tagName === 'FIGURE') {
@@ -648,6 +647,17 @@ export class HtmlParser {
         if (captionResult && captionResult.length > 0) {
           texts.push(...(captionResult[0].text || []));
         }
+      }
+      const bookmarkUrlElement = element.querySelector('.bookmark.source');
+      if (bookmarkUrlElement) {
+        const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
+        return [
+          {
+            flavour: 'affine:bookmark',
+            children: [],
+            url: bookmarkUrl,
+          },
+        ];
       }
     } else if (element instanceof HTMLImageElement) {
       imgElement = element;
@@ -674,7 +684,7 @@ export class HtmlParser {
             },
           },
         ];
-        result = [
+        return [
           {
             flavour: 'affine:paragraph',
             type: 'text',
@@ -686,7 +696,7 @@ export class HtmlParser {
         const storage = this._page.blobs;
         assertExists(storage);
         const id = await storage.set(imgBlob);
-        result = [
+        return [
           {
             flavour: 'affine:image',
             sourceId: id,
@@ -698,7 +708,14 @@ export class HtmlParser {
       }
     }
 
-    return result;
+    return [
+      {
+        flavour: 'affine:paragraph',
+        type: 'text',
+        children: [],
+        text: texts,
+      },
+    ];
   };
 
   // TODO parse children block, this is temporary solution

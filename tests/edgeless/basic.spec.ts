@@ -5,12 +5,10 @@ import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
-  autoFit,
   decreaseZoomLevel,
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
-  getZoomLevel,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
@@ -18,6 +16,7 @@ import {
   shiftClick,
   switchEditorMode,
   zoomByMouseWheel,
+  zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
@@ -70,6 +69,8 @@ test('can zoom viewport', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+
   await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
