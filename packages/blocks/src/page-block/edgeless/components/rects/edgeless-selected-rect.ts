@@ -530,8 +530,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             }
 
             if (dragging) {
-              this._computeComponentToolbarPosition();
+              if (delta?.x || delta?.y) {
+                this._hideToolbar();
+              }
             } else {
+              this._showToolbar();
               _resizeManager.updateBounds(getSelectableBounds(selected));
             }
             break;
