@@ -1,0 +1,21 @@
+version: '3'
+services:
+  blocksuite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_OPTIONS=--max_old_space_size=2048
+    ports:
+      - '5173:80'
+    networks:
+      - blocksuite
+    volumes:
+      - ./packages:/usr/src/app
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - /usr/src/app/node_modules
+
+networks:
+  blocksuite:
+    external:
+      name: dev
