@@ -3,8 +3,6 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-
 const buttonStyle = css`
   .scissors-button {
     display: flex;
@@ -37,15 +35,12 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
     `,
   ];
 
-  @property({ attribute: false })
-  edgelessPage!: EdgelessPageBlockComponent;
-
   @query('.scissors-button')
   private _button!: HTMLButtonElement;
 
   private _externalButton: null | NoteScissorsButton = null;
 
-  private _reseted = false;
+  private _zoom = 1;
 
   private _createExternalButton() {
     const externalButton = document.createElement(
@@ -54,23 +49,19 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
 
     document.body.appendChild(externalButton);
     this._externalButton = externalButton;
+    this._disposables.addFromEvent(
+      this._externalButton,
+      'click',
+      this._dispatchClipEvent
+    );
     this._disposables.add(() => {
       document.body.removeChild(externalButton);
       this._externalButton = null;
     });
   }
 
-  private _slideout() {
-    this._reseted = false;
-
-    this._button.addEventListener('transitionend', this._popupButton, {
-      once: true,
-    });
-    this._button.classList.add('slideout');
-  }
-
   private _popupButton = () => {
-    if (!this._externalButton || this._reseted) return;
+    if (!this._externalButton) return;
 
     const button = this._externalButton;
 
@@ -78,7 +69,7 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
       const rect = this._button.getBoundingClientRect();
 
       this._button.style.visibility = 'hidden';
-      button.show(rect, this.edgelessPage.surface.viewport.zoom);
+      button.show(rect, this._zoom);
       button.addEventListener(
         'transitionend',
         () => {
@@ -89,8 +80,20 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
     });
   };
 
+  private _dispatchEnterButtonEvent() {
+    const e = new CustomEvent('mouseenterbutton');
+
+    this.dispatchEvent(e);
+  }
+
   private _dispatchIndicatorEvent() {
     const e = new CustomEvent('showindicator');
+
+    this.dispatchEvent(e);
+  }
+
+  private _dispatchClipEvent() {
+    const e = new CustomEvent('clip');
 
     this.dispatchEvent(e);
   }
@@ -101,8 +104,16 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
     }
   }
 
+  show(zoom: number) {
+    this._zoom = zoom;
+
+    this._button.addEventListener('transitionend', this._popupButton, {
+      once: true,
+    });
+    this._button.classList.add('slideout');
+  }
+
   reset() {
-    this._reseted = true;
     this._button.removeEventListener('transitionend', this._popupButton);
     this._button.classList.remove('slideout');
     this._button.style.removeProperty('visibility');
@@ -110,7 +121,10 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<button class="scissors-button" @mouseenter=${this._slideout}>
+    return html`<button
+      class="scissors-button"
+      @mouseenter=${this._dispatchEnterButtonEvent}
+    >
       ${CutIcon}
     </button>`;
   }

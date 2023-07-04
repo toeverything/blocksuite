@@ -200,11 +200,16 @@ export class NoteCut extends WithDisposable(LitElement) {
     }
   }
 
+  private _popupButton() {
+    this._scissorsButton.show(this.edgelessPage.surface.viewport.zoom);
+  }
+
   override render() {
     return html`<div class="affine-note-cut-container">
       <note-scissors-button
         .edgelessPage=${this.edgelessPage}
         @showindicator=${this._showIndicator}
+        @mouseenterbutton=${this._popupButton}
       ></note-scissors-button>
       <note-cut-indicator></note-cut-indicator>
     </div> `;
