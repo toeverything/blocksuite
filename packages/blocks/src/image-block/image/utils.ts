@@ -53,10 +53,10 @@ export async function copyImage(model: ImageBlockModel) {
   try {
     // @ts-ignore
     if (window.apis?.clipboard?.copyAsImageFromString) {
+      const dataURL = await convertToString(blob);
+      if (!dataURL) throw new Error('Cant convert a blob to data URL.');
       // @ts-ignore
-      await window.apis.clipboard?.copyAsImageFromString(
-        await convertToString(blob)
-      );
+      await window.apis.clipboard?.copyAsImageFromString(dataURL);
     } else {
       // DOMException: Type image/jpeg not supported on write.
       if (blob.type !== 'image/png') {
