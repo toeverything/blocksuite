@@ -235,6 +235,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_edgeless_toolbar: true,
       enable_linked_page: true,
       enable_bookmark_operation: true,
+      enable_note_index: true,
       readonly: {
         'space:page0': false,
       },

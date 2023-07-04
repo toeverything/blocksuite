@@ -5,7 +5,7 @@ import '../panel/color-panel.js';
 import { HiddenIcon, NoteIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -223,9 +223,15 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     const selectedBackground = note.background;
     const noteIndex = allNotes.indexOf(note) + 1;
 
+    const enableIndex = this.page.awarenessStore.getFlag('enable_note_index');
+
     if (note.hidden) {
       return html`
-        <div class="note-status hidden"><span>${HiddenIcon}</span></div>
+        ${enableIndex
+          ? html`<div class="note-status hidden">
+              <span>${HiddenIcon}</span>
+            </div>`
+          : nothing}
         <div
           @click=${() => this._setNoteHidden(note, !note.hidden)}
           class="note-status-button hidden"
@@ -236,9 +242,11 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       `;
     } else {
       return html`
-        <div class="note-status">
-          <span>${noteIndex}</span>
-        </div>
+        ${enableIndex
+          ? html`<div class="note-status">
+              <span>${noteIndex}</span>
+            </div>`
+          : nothing}
         <div
           @click=${() => this._setNoteHidden(note, !note.hidden)}
           class="note-status-button unhover"
