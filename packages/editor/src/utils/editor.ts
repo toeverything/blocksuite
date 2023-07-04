@@ -38,10 +38,15 @@ export const createBlockHub: (
       const models = [];
 
       const isDatabase = data.flavour === 'affine:database';
+
       if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
         console.warn('database block is not enabled');
         return;
       }
+
+      // In some cases, like insert bookmark block, range in editor will blur, so we need to get range before insert.
+      const range = getCurrentBlockRange(page);
+
       if (data.flavour === 'affine:image' && data.type === 'image') {
         models.push(
           ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
@@ -56,7 +61,7 @@ export const createBlockHub: (
         models.push(data);
       }
       const last = page.root?.lastItem();
-      const range = getCurrentBlockRange(page);
+
       if (range) {
         const lastModel = range.models[range.models.length - 1];
         const arr = page.addSiblingBlocks(lastModel, models, 'after');
