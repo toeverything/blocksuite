@@ -4,7 +4,7 @@ import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
   almostEqual,
@@ -53,6 +53,7 @@ export class NoteCut extends WithDisposable(LitElement) {
   @query('note-cut-indicator')
   private _indicatorLine!: NoteCutIndicator;
 
+  @state()
   private _lastPosition: {
     transformX: number;
     transformY: number;
@@ -205,7 +206,7 @@ export class NoteCut extends WithDisposable(LitElement) {
   private _showIndicator() {
     if (this._lastPosition) {
       this.style.zIndex = (Number(this.style.zIndex) + 1).toString();
-      this._indicatorLine?.show(this._lastPosition.width);
+      this._indicatorLine?.show();
     }
   }
 
@@ -249,7 +250,9 @@ export class NoteCut extends WithDisposable(LitElement) {
         @mouseenterbutton=${this._popupButton}
         @clip=${this._clipNote}
       ></note-scissors-button>
-      <note-cut-indicator></note-cut-indicator>
+      <note-cut-indicator
+        .width=${this._lastPosition?.width ?? 0}
+      ></note-cut-indicator>
     </div> `;
   }
 }

@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 @customElement('note-cut-indicator')
 export class NoteCutIndicator extends WithDisposable(LitElement) {
-  @property()
+  @property({ attribute: false })
   width!: number;
 
   static override styles = css`
@@ -22,8 +22,7 @@ export class NoteCutIndicator extends WithDisposable(LitElement) {
     }
   `;
 
-  show(width: number) {
-    this.width = width;
+  show() {
     this.style.visibility = 'visible';
   }
 
