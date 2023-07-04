@@ -355,7 +355,7 @@ export class ContentParser {
       },
     };
     marked.use({ extensions: [underline, inlineCode] });
-    const md2html = marked.parse(text);
+    const md2html = marked.parse(text, { gfm: false });
     return this.htmlText2Block(md2html);
   }
 
