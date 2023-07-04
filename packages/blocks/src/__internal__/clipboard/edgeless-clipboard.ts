@@ -461,23 +461,40 @@ export class EdgelessClipboard implements Clipboard {
       await new Promise(requestAnimationFrame);
 
       const canvas: HTMLCanvasElement = await html2canvas(container, {
-        backgroundColor: null,
+        ignoreElements: function (element: Element) {
+          if (
+            element.tagName === 'AFFINE-BLOCK-HUB' ||
+            element.tagName === 'EDGELESS-TOOLBAR' ||
+            element.classList.contains('dg')
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        onclone: function (documentClone: Document, element: HTMLElement) {
+          // html2canvas can't support transform feature
+          element.style.setProperty('transform', 'none');
+        },
+        backgroundColor: window.getComputedStyle(document.body).backgroundColor,
       });
       assertExists(canvas);
 
-      const blob: Blob = await new Promise((resolve, reject) =>
-        canvas.toBlob(
-          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
-          CLIPBOARD_MIMETYPE.IMAGE_PNG
-        )
-      );
-      assertExists(blob);
-
       // @ts-ignore
-      if (window.apis?.clipboard?.copyAsImageFromBlob) {
+      if (window.apis?.clipboard?.copyAsImageFromString) {
         // @ts-ignore
-        await window.apis.clipboard?.copyAsImageFromBlob(blob);
+        await window.apis.clipboard?.copyAsImageFromString(
+          canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
+        );
       } else {
+        const blob: Blob = await new Promise((resolve, reject) =>
+          canvas.toBlob(
+            blob =>
+              blob ? resolve(blob) : reject('Canvas can not export blob'),
+            CLIPBOARD_MIMETYPE.IMAGE_PNG
+          )
+        );
+        assertExists(blob);
         await navigator.clipboard.write([
           new ClipboardItem({ [blob.type]: blob }),
         ]);
