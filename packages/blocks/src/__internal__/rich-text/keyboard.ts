@@ -4,7 +4,6 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { showLinkedPagePopover } from '../../components/linked-page/index.js';
-import { showSlashMenu } from '../../components/slash-menu/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
@@ -104,38 +103,6 @@ export function createKeyboardBindings(
           }
           const curRange = getCurrentNativeRange();
           showLinkedPagePopover({ model, range: curRange });
-        });
-        return ALLOW_DEFAULT;
-      },
-    },
-
-    slash: {
-      key: [
-        '/',
-        // Compatible with CJK IME
-        '、',
-      ],
-      shiftKey: null,
-      // prefix non digit or empty string
-      // see https://stackoverflow.com/questions/19127384/what-is-a-regex-to-match-only-an-empty-string
-      // prefix: /[^\d]$|^(?![\s\S])/,
-      handler(range, context) {
-        // TODO remove feature flag after slash menu is stable
-        const flag = page.awarenessStore.getFlag('enable_slash_menu');
-        if (!flag) {
-          return ALLOW_DEFAULT;
-        }
-        // End of feature flag
-
-        if (matchFlavours(model, ['affine:code'])) {
-          return ALLOW_DEFAULT;
-        }
-        // if (context.format['code'] === true) {
-        //   return ALLOW_DEFAULT;
-        // }
-        this.vEditor.slots.rangeUpdated.once(() => {
-          const curRange = getCurrentNativeRange();
-          showSlashMenu({ model, range: curRange });
         });
         return ALLOW_DEFAULT;
       },

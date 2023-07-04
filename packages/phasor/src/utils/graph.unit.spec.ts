@@ -4,11 +4,6 @@ import { Bound } from './bound.js';
 import { Graph } from './graph.js';
 
 describe('graph', () => {
-  it('cost', () => {
-    const graph = new Graph([]);
-    expect(graph.cost([0, 0, 0], [1, 1, 0])).toBe(2);
-  });
-
   it('neighbors', () => {
     const bound = new Bound(-5, 5, 10, 10);
     const graph = new Graph(

@@ -27,8 +27,7 @@ export class PriorityQueue<T, K> {
     return this.heap.length === 0;
   }
 
-  bubbleUp(): void {
-    let index = this.heap.length - 1;
+  bubbleUp(index: number = this.heap.length - 1): void {
     const element = this.heap[index];
 
     while (index > 0) {

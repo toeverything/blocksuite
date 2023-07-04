@@ -43,7 +43,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           shapeType: 'rect',
 
           radius: 0,
-          filled: false,
+          filled: true,
           fillColor: '--affine-palette-shape-navy',
           strokeWidth: 4,
           strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
@@ -60,7 +60,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           shapeType: 'rect',
 
           radius: 0,
-          filled: false,
+          filled: true,
           fillColor: '--affine-palette-shape-navy',
           strokeWidth: 4,
           strokeColor: DEFAULT_SHAPE_STROKE_COLOR,

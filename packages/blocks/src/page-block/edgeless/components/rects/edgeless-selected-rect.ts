@@ -497,6 +497,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           getSelectedRect(selected)
         );
         _resizeManager.updateBounds(getSelectableBounds(selected));
+        this._computeComponentToolbarPosition();
       })
     );
     _disposables.add(
@@ -529,8 +530,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             }
 
             if (dragging) {
-              this._computeComponentToolbarPosition();
+              if (delta?.x || delta?.y) {
+                this._hideToolbar();
+              }
             } else {
+              this._showToolbar();
               _resizeManager.updateBounds(getSelectableBounds(selected));
             }
             break;
@@ -556,9 +560,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const componentToolbar = this._componentToolbar;
     if (!componentToolbar) return;
 
-    autoUpdate(this._selectedRect, componentToolbar, () => {
-      this._computeComponentToolbarPosition();
-    });
+    _disposables.add(
+      autoUpdate(this._selectedRect, componentToolbar, () => {
+        this._computeComponentToolbarPosition();
+      })
+    );
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -584,9 +590,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
-    super.updated(changedProperties);
-    // when viewport updates, popper should update too.
     this._computeComponentToolbarPosition();
+
+    super.updated(changedProperties);
   }
 
   override render() {

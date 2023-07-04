@@ -8,6 +8,7 @@ import {
   ConnectorMode,
   getBoundFromPoints,
   type IConnector,
+  isOverlap,
   type IVec,
   lineIntersects,
   linePolygonIntersects,
@@ -129,8 +130,8 @@ function computePoints(
   nextStartPoint = result.nextStartPoint;
   lastEndPoint = result.lastEndPoint;
   const finalPoints = filterConnectablePoints(
-    filterConnectablePoints(points, startBound),
-    endBound
+    filterConnectablePoints(points, expandStartBound?.expand(-1) ?? null),
+    expandEndBound?.expand(-1) ?? null
   );
   return [finalPoints, startPoint, endPoint, nextStartPoint, lastEndPoint];
 }
@@ -388,13 +389,15 @@ function getConnectablePoints(
   pushWithPriority(points, lineBound.getVerticesAndMidpoints());
 
   if (!startBound || !endBound) {
-    pushWithPriority(points, [lineBound.center], 6);
+    pushWithPriority(points, [lineBound.center], 3);
   }
   if (outerBound) {
     pushOuterPoints(points, expandStartBound, expandEndBound, outerBound);
   }
 
-  if (startBound && endBound && expandStartBound && expandEndBound) {
+  if (startBound && endBound) {
+    assertExists(expandStartBound);
+    assertExists(expandEndBound);
     pushGapMidPoint(
       points,
       startPoint,
@@ -429,18 +432,12 @@ function getConnectablePoints(
 
   if (expandStartBound) {
     pushWithPriority(points, expandStartBound.getVerticesAndMidpoints());
-    pushWithPriority(
-      points,
-      expandStartBound.include(lastEndPoint).getVerticesAndMidpoints()
-    );
+    pushWithPriority(points, expandStartBound.include(lastEndPoint).points);
   }
 
   if (expandEndBound) {
     pushWithPriority(points, expandEndBound.getVerticesAndMidpoints());
-    pushWithPriority(
-      points,
-      expandEndBound.include(nextStartPoint).getVerticesAndMidpoints()
-    );
+    pushWithPriority(points, expandEndBound.include(nextStartPoint).points);
   }
   points = removeDulicatePoints(points);
 
@@ -520,39 +517,67 @@ function computeOffset(startBound: Bound | null, endBound: Bound | null) {
     return [startOffset, endOffset];
   }
   // left, top, right, bottom
-  let dist = Vec.distanceToLineSegment(
-    startBound.leftLine[0],
-    startBound.leftLine[1],
-    endBound.rightLine[0],
-    false
-  );
-  startOffset[0] = Math.max(Math.min(dist / 2, startOffset[0]), 0);
-  dist = Vec.distanceToLineSegment(
-    startBound.upperLine[0],
-    startBound.upperLine[1],
-    endBound.lowerLine[0],
-    false
-  );
-  startOffset[1] = Math.max(Math.min(dist / 2, startOffset[1]), 0);
-  dist = Vec.distanceToLineSegment(
-    startBound.rightLine[0],
-    startBound.rightLine[1],
-    endBound.leftLine[0],
-    false
-  );
-  startOffset[2] = Math.max(Math.min(dist / 2, startOffset[2]), 0);
-  dist = Vec.distanceToLineSegment(
-    startBound.lowerLine[0],
-    startBound.lowerLine[1],
-    endBound.upperLine[0],
-    false
-  );
-  startOffset[3] = Math.max(Math.min(dist / 2, startOffset[3]), 0);
+  let overlap = isOverlap(startBound.leftLine, endBound.rightLine, 1);
+  let dist: number;
+  if (overlap) {
+    dist = Vec.distanceToLineSegment(
+      startBound.leftLine[0],
+      startBound.leftLine[1],
+      endBound.rightLine[0],
+      false
+    );
+    startOffset[0] = Math.max(Math.min(dist / 2, startOffset[0]), 0);
+  }
 
-  startOffset[0] = endOffset[2] = Math.min(startOffset[0], endOffset[2]);
-  startOffset[1] = endOffset[3] = Math.min(startOffset[1], endOffset[3]);
-  startOffset[2] = endOffset[0] = Math.min(startOffset[2], endOffset[0]);
-  startOffset[3] = endOffset[1] = Math.min(startOffset[3], endOffset[1]);
+  overlap = isOverlap(startBound.upperLine, endBound.lowerLine, 0);
+  if (overlap) {
+    dist = Vec.distanceToLineSegment(
+      startBound.upperLine[0],
+      startBound.upperLine[1],
+      endBound.lowerLine[0],
+      false
+    );
+    startOffset[1] = Math.max(Math.min(dist / 2, startOffset[1]), 0);
+  }
+
+  overlap = isOverlap(startBound.rightLine, endBound.leftLine, 1);
+  if (overlap) {
+    dist = Vec.distanceToLineSegment(
+      startBound.rightLine[0],
+      startBound.rightLine[1],
+      endBound.leftLine[0],
+      false
+    );
+    startOffset[2] = Math.max(Math.min(dist / 2, startOffset[2]), 0);
+  }
+
+  overlap = isOverlap(startBound.lowerLine, endBound.upperLine, 0);
+  if (overlap) {
+    dist = Vec.distanceToLineSegment(
+      startBound.lowerLine[0],
+      startBound.lowerLine[1],
+      endBound.upperLine[0],
+      false
+    );
+    startOffset[3] = Math.max(Math.min(dist / 2, startOffset[3]), 0);
+  }
+
+  startOffset[0] = endOffset[2] =
+    Math.min(startOffset[0], endOffset[2]) === 0
+      ? 20
+      : Math.min(startOffset[0], endOffset[2]);
+  startOffset[1] = endOffset[3] =
+    Math.min(startOffset[1], endOffset[3]) === 0
+      ? 20
+      : Math.min(startOffset[1], endOffset[3]);
+  startOffset[2] = endOffset[0] =
+    Math.min(startOffset[2], endOffset[0]) === 0
+      ? 20
+      : Math.min(startOffset[2], endOffset[0]);
+  startOffset[3] = endOffset[1] =
+    Math.min(startOffset[3], endOffset[1]) === 0
+      ? 20
+      : Math.min(startOffset[3], endOffset[1]);
 
   return [startOffset, endOffset];
 }
@@ -568,7 +593,7 @@ function getNextPoint(
   const result = [...point];
   if (almostEqual(bound.x, result[0])) result[0] -= offsetX;
   else if (almostEqual(bound.y, result[1])) result[1] -= offsetY;
-  if (almostEqual(bound.maxX, result[0])) result[0] += offsetW;
+  else if (almostEqual(bound.maxX, result[0])) result[0] += offsetW;
   else if (almostEqual(bound.maxY, result[1])) result[1] += offsetH;
   return result;
 }
@@ -617,9 +642,9 @@ function adjustStartEndPoint(
       Math.abs(endPoint[0] - startPoint[0]) >
       Math.abs(endPoint[1] - startPoint[1])
     ) {
-      endPoint[0] += sign(endPoint[0] - startPoint[0]);
+      endPoint[0] += sign(endPoint[0] - startPoint[0]) * 20;
     } else {
-      endPoint[1] += sign(endPoint[1] - startPoint[1]);
+      endPoint[1] += sign(endPoint[1] - startPoint[1]) * 20;
     }
   }
   if (!startBound) {
@@ -627,9 +652,9 @@ function adjustStartEndPoint(
       Math.abs(endPoint[0] - startPoint[0]) >
       Math.abs(endPoint[1] - startPoint[1])
     ) {
-      startPoint[0] -= sign(endPoint[0] - startPoint[0]);
+      startPoint[0] -= sign(endPoint[0] - startPoint[0]) * 20;
     } else {
-      startPoint[1] -= sign(endPoint[1] - startPoint[1]);
+      startPoint[1] -= sign(endPoint[1] - startPoint[1]) * 20;
     }
   }
 }
@@ -956,9 +981,19 @@ export class EdgelessConnectorManager {
     expandEndBound && expandBlocks.push(expandEndBound.clone());
 
     if (
-      (startBound && startBound.isPointInBound(endPoint)) ||
-      (endBound && endBound.isPointInBound(startPoint))
+      startBound &&
+      endBound &&
+      startBound.isPointInBound(endPoint) &&
+      endBound.isPointInBound(startPoint)
     ) {
+      return getDirectPath(startPoint, endPoint);
+    }
+
+    if (startBound && expandStartBound?.isPointInBound(endPoint, 0)) {
+      return getDirectPath(startPoint, endPoint);
+    }
+
+    if (endBound && expandEndBound?.isPointInBound(startPoint, 0)) {
       return getDirectPath(startPoint, endPoint);
     }
 

@@ -190,8 +190,8 @@ export async function enterPlaygroundRoom(
   page.on('console', message => {
     const ignore = shamefullyIgnoreConsoleMessage(message);
     if (!ignore) {
-      expect('no console message').toBe(
-        'Unexpected console message: ' + message.text()
+      expect('Unexpected console message: ' + message.text()).toBe(
+        'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
       );
       // throw new Error('Unexpected console message: ' + message.text());
     }

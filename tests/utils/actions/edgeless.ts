@@ -19,12 +19,14 @@ import {
 } from './keyboard.js';
 import { MODIFIER_KEY } from './keyboard.js';
 import {
+  enterPlaygroundRoom,
   getEditorLocator,
+  initEmptyEdgelessState,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
 
-const AWAIT_TIMEOUT = 160;
+const AWAIT_TIMEOUT = 260;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 
 export async function getNoteRect(
@@ -847,6 +849,16 @@ export async function toViewCoord(page: Page, point: number[]) {
   }, point);
 }
 
+export async function dragBetweenViewCoords(
+  page: Page,
+  start: number[],
+  end: number[]
+) {
+  const [startX, startY] = await toViewCoord(page, start);
+  const [endX, endY] = await toViewCoord(page, end);
+  await dragBetweenCoords(page, { x: startX, y: startY }, { x: endX, y: endY });
+}
+
 export async function toModelCoord(page: Page, point: number[]) {
   return await page.evaluate(point => {
     const container = document.querySelector('affine-edgeless-page');
@@ -863,11 +875,49 @@ export async function getConnectorSourceConnection(page: Page) {
   });
 }
 
-export async function getConnectorPath(page: Page) {
-  return await page.evaluate(() => {
-    const container = document.querySelector('affine-edgeless-page');
-    if (!container) throw new Error('container not found');
-    const connectors = container.surface.getElementsByType('connector');
-    return connectors[0].absolutePath;
-  });
+export async function getConnectorPath(page: Page, index = 0) {
+  return await page.evaluate(
+    ([index]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      const connectors = container.surface.getElementsByType('connector');
+      return connectors[index].absolutePath;
+    },
+    [index]
+  );
+}
+
+export async function edgelessCommonSetup(page: Page) {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await deleteAll(page);
+}
+
+export async function createRectShapeElementWithModel(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+}
+
+export async function createConnectorElementWithModel(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicConnectorElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
 }

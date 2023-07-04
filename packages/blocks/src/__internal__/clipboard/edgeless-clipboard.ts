@@ -1,6 +1,9 @@
+import type { SurfaceManager } from '@blocksuite/phasor';
 import {
-  type Bound,
+  Bound,
   compare,
+  type Connection,
+  ConnectorElement,
   deserializeXYWH,
   getCommonBound,
   type PhasorElement,
@@ -48,6 +51,42 @@ import {
   getSurfaceClipboardData,
   performNativeCopy,
 } from './utils/index.js';
+
+function prepareConnnectorClipboardData(
+  connector: ConnectorElement,
+  selected: Selectable[],
+  surface: SurfaceManager
+) {
+  const sourceId = connector.source?.id;
+  const targetId = connector.target?.id;
+  const serialized = connector.serialize();
+  if (sourceId && !selected.find(s => s.id === sourceId)) {
+    serialized.source = { position: connector.absolutePath[0] };
+  }
+  if (targetId && !selected.find(s => s.id === targetId)) {
+    serialized.target = {
+      position: connector.absolutePath[connector.absolutePath.length - 1],
+    };
+  }
+  return serialized;
+}
+
+function prepareClipboardData(
+  selectedAll: Selectable[],
+  surface: SurfaceManager
+) {
+  return selectedAll
+    .map(selected => {
+      if (isTopLevelBlock(selected)) {
+        return getBlockClipboardInfo(selected).json;
+      } else if (selected instanceof ConnectorElement) {
+        return prepareConnnectorClipboardData(selected, selectedAll, surface);
+      } else {
+        return selected.serialize();
+      }
+    })
+    .filter(d => !!d);
+}
 
 export class EdgelessClipboard implements Clipboard {
   private _page!: Page;
@@ -126,15 +165,7 @@ export class EdgelessClipboard implements Clipboard {
       }
       return;
     }
-    const data = state.selected
-      .map(selected => {
-        if (isTopLevelBlock(selected)) {
-          return getBlockClipboardInfo(selected).json;
-        } else {
-          return selected.serialize();
-        }
-      })
-      .filter(d => !!d);
+    const data = prepareClipboardData(state.selected, this.surface);
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
@@ -180,19 +211,45 @@ export class EdgelessClipboard implements Clipboard {
     await service.json2Block(focusedBlockModel, blocks, range);
   }
 
+  private _createPhasorElement(clipboardData: Record<string, unknown>) {
+    const id = this.surface.addElement(
+      clipboardData.type as keyof PhasorElementType,
+      clipboardData
+    );
+    const element = this.surface.pickById(id);
+    assertExists(element);
+    return element;
+  }
+
   private _createPhasorElements(elements: Record<string, unknown>[]) {
-    const phasorElements =
-      (elements
+    const result = groupBy(elements, item =>
+      item.type === 'connector' ? 'connectors' : 'nonConnectors'
+    );
+    const idMap = new Map<string, string>();
+
+    return [
+      ...(result.nonConnectors
         ?.map(d => {
-          const id = this.surface.addElement(
-            d.type as keyof PhasorElementType,
-            d
-          );
-          const element = this.surface.pickById(id);
+          const oldId = d.id as string;
+          assertExists(oldId);
+          const element = this._createPhasorElement(d);
+          idMap.set(oldId, element.id);
           return element;
         })
-        .filter(e => !!e) as PhasorElement[]) || [];
-    return phasorElements;
+        .filter(e => !!e) ?? []),
+
+      ...(result.connectors?.map(connector => {
+        const sourceId = (<Connection>connector.source).id;
+        if (sourceId) {
+          (<Connection>connector.source).id = idMap.get(sourceId) as string;
+        }
+        const targetId = (<Connection>connector.target).id;
+        if (targetId) {
+          (<Connection>connector.target).id = idMap.get(targetId) as string;
+        }
+        return this._createPhasorElement(connector);
+      }) ?? []),
+    ];
   }
 
   private async _createNoteBlocks(
@@ -308,16 +365,19 @@ export class EdgelessClipboard implements Clipboard {
 
     // update phasor elements' position to mouse position
     elements.forEach(ele => {
-      const newXYWH = serializeXYWH(
+      const newBound = new Bound(
         pasteX + ele.x - oldCommonBound.x,
         pasteY + ele.y - oldCommonBound.y,
         ele.w,
         ele.h
       );
-
-      this.surface.updateElement(ele.id, {
-        xywh: newXYWH,
-      });
+      if (ele instanceof ConnectorElement) {
+        this._edgeless.connector.updateXYWH(ele, newBound);
+      } else {
+        this.surface.updateElement(ele.id, {
+          xywh: newBound.serialize(),
+        });
+      }
     });
     // create and add blocks to page
     const noteIds = await this._createNoteBlocks(

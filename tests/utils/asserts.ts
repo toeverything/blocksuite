@@ -625,21 +625,23 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   // Clear input before test
   await locator.clear();
   // type/backspace
-  await type(page, '1234');
-  await expect(locator).toHaveValue('1234');
+  await type(page, '12/34');
+  await expect(locator).toHaveValue('12/34');
   await captureHistory(page);
   await pressBackspace(page);
-  await expect(locator).toHaveValue('123');
+  await expect(locator).toHaveValue('12/3');
 
   // undo/redo
   await undoByKeyboard(page);
-  await expect(locator).toHaveValue('1234');
+  await expect(locator).toHaveValue('12/34');
   await redoByKeyboard(page);
-  await expect(locator).toHaveValue('123');
+  await expect(locator).toHaveValue('12/3');
 
   // keyboard
   await pressArrowLeft(page, 2);
   await pressArrowRight(page, 1);
+  await pressBackspace(page);
+  await expect(locator).toHaveValue('123');
   await pressBackspace(page);
   await expect(locator).toHaveValue('13');
 
@@ -770,7 +772,11 @@ export async function assertZoomLevel(page: Page, zoom: number) {
   expect(z).toBe(zoom);
 }
 
-export async function assertConnectorPath(page: Page, path: number[][]) {
-  const actualPath = await getConnectorPath(page);
+export async function assertConnectorPath(
+  page: Page,
+  path: number[][],
+  index = 0
+) {
+  const actualPath = await getConnectorPath(page, index);
   expect(actualPath).toMatchObject(path);
 }
