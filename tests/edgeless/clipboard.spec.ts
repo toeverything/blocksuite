@@ -4,7 +4,6 @@ import {
   toViewCoord,
 } from '../utils/actions/edgeless.js';
 import {
-  addBasicRectShapeElement,
   copyByKeyboard,
   edgelessCommonSetup as commonSetup,
   pasteByKeyboard,
