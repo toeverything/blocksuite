@@ -7,12 +7,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import {
+  almostEqual,
   type BlockComponentElement,
-  getClosestBlockElementByPoint,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
-  Rect,
 } from '../../../../__internal__/index.js';
 import {
   type EdgelessPageBlockComponent,
@@ -21,10 +20,11 @@ import {
 } from '../../../../index.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { NoteScissorsVisualButton } from './cut-button.js';
-import { NoteCutHint } from './cut-hint.js';
+import { NoteCutIndicator } from './cut-indicator.js';
+import { findClosestBlock } from './utils.js';
 
 NoteScissorsVisualButton;
-NoteCutHint;
+NoteCutIndicator;
 
 @customElement('affine-note-cut')
 export class NoteCut extends WithDisposable(LitElement) {
@@ -36,8 +36,10 @@ export class NoteCut extends WithDisposable(LitElement) {
       left: 0;
     }
 
-    .cut-hint {
-      background-color: var(--affine-blue-500);
+    .affine-note-cut-container {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
     }
   `;
 
@@ -45,25 +47,17 @@ export class NoteCut extends WithDisposable(LitElement) {
   edgelessPage!: EdgelessPageBlockComponent;
 
   @query('note-scissors-button')
-  button!: NoteScissorsVisualButton;
+  private _scissorsButton!: NoteScissorsVisualButton;
 
-  private _hintLine: NoteCutHint | null = null;
+  @query('note-cut-indicator')
+  private _indicatorLine!: NoteCutIndicator;
 
-  private _lastRect: {
-    x: number;
-    y: number;
-    blockRect: DOMRect | null;
-  } = {
-    x: 0,
-    y: 0,
-    blockRect: null,
-  };
-
-  protected override firstUpdated(): void {
-    if (!this._hintLine) {
-      this._createHintLine();
-    }
-  }
+  private _lastPosition: {
+    transformX: number;
+    transformY: number;
+    width: number;
+    gapRect: DOMRect;
+  } | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -80,18 +74,6 @@ export class NoteCut extends WithDisposable(LitElement) {
 
   private get selection() {
     return this.edgelessPage.selection;
-  }
-
-  private _createHintLine() {
-    this._hintLine = document.createElement('affine-note-cut-hintline');
-
-    document.body.appendChild(this._hintLine);
-    this._disposables.add(() => {
-      if (!this._hintLine) return;
-
-      document.body.removeChild(this._hintLine);
-      this._hintLine = null;
-    });
   }
 
   private _updateVisiblity(e: PointerEventState) {
@@ -117,25 +99,41 @@ export class NoteCut extends WithDisposable(LitElement) {
     const {
       raw: { clientX, clientY },
     } = e;
-    const noteRect = Rect.fromDOM(noteBlockElement);
-    const element = getClosestBlockElementByPoint(
-      new Point(clientX, clientY),
-      {
-        container: noteBlockElement,
-        rect: noteRect,
-      },
-      this.edgelessPage.surface.viewport.zoom
+    const element = findClosestBlock(
+      noteBlockElement,
+      new Point(clientX, clientY)
     );
 
-    return element
-      ? {
-          note: block,
-          noteElement: noteBlockElement,
-          block: getModelByBlockElement(element),
-          blockElement: element as BlockComponentElement,
-          blockRect: getRectByBlockElement(element),
-        }
-      : null;
+    if (!element) return null;
+
+    const elementRect = getRectByBlockElement(element);
+    const onUpperPart = clientY <= elementRect.y + elementRect.height / 2;
+    const nearbyBlockElement = onUpperPart
+      ? element.previousElementSibling
+      : element.nextElementSibling;
+
+    if (!nearbyBlockElement) {
+      return null;
+    }
+
+    const currentBlock = getModelByBlockElement(element);
+    const nearbyBlock = getModelByBlockElement(nearbyBlockElement);
+    const nearbyBlockRect = nearbyBlockElement.getBoundingClientRect();
+    const upperBlockRect = onUpperPart ? nearbyBlockRect : elementRect;
+    const lowerBlockRect = onUpperPart ? elementRect : nearbyBlockRect;
+
+    return {
+      note: block,
+      noteElement: noteBlockElement,
+      upperBlock: onUpperPart ? nearbyBlock : currentBlock,
+      lowerBlock: onUpperPart ? currentBlock : nearbyBlock,
+      gapRect: new DOMRect(
+        upperBlockRect.x,
+        upperBlockRect.y + upperBlockRect.height,
+        upperBlockRect.width,
+        lowerBlockRect.y - (upperBlockRect.y + upperBlockRect.height)
+      ),
+    };
   }
 
   private _show(
@@ -143,12 +141,12 @@ export class NoteCut extends WithDisposable(LitElement) {
     modelState: {
       note: NoteBlockModel;
       noteElement: BlockComponentElement;
-      block: BaseBlockModel<object>;
-      blockElement: BlockComponentElement;
-      blockRect: DOMRect;
+      upperBlock: BaseBlockModel<object>;
+      lowerBlock: BaseBlockModel<object>;
+      gapRect: DOMRect;
     }
   ) {
-    const { note, noteElement, blockRect } = modelState;
+    const { note, noteElement, gapRect } = modelState;
 
     if (!noteElement.parentElement) {
       this._hide();
@@ -161,45 +159,44 @@ export class NoteCut extends WithDisposable(LitElement) {
     const transformX = baseX;
     const transformY =
       baseY +
-      (blockRect.top - containerRect.top) /
+      (gapRect.top + gapRect.height / 2 + 1 - containerRect.top) /
         this.edgelessPage.surface.viewport.zoom;
 
-    if (
-      this.style.display &&
-      (transformX !== this._lastRect.x || transformY !== this._lastRect.y)
-    ) {
-      this.button.reset();
-      this._hintLine?.reset();
+    if (this._lastPosition) {
+      if (
+        !almostEqual(transformX, this._lastPosition.transformX) ||
+        !almostEqual(transformY, this._lastPosition.transformY)
+      ) {
+        this._scissorsButton?.reset();
+        this._indicatorLine?.reset();
+      } else {
+        return;
+      }
     }
 
-    this._lastRect = {
-      x: transformX,
-      y: transformY,
-      blockRect,
+    this._lastPosition = {
+      transformX,
+      transformY,
+      width: noteElement.offsetWidth,
+      gapRect,
     };
 
-    this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0)`;
+    this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0)`;
     this.style.display = 'block';
     this.style.zIndex = noteContainer.style.zIndex;
   }
 
   private _hide() {
     this.style.removeProperty('display');
-    this.button.reset();
-    this._hintLine?.reset();
-    this._lastRect = {
-      x: 0,
-      y: 0,
-      blockRect: null,
-    };
+    this._scissorsButton?.reset();
+    this._indicatorLine?.reset();
+    this._lastPosition = null;
   }
 
-  private _showHint() {
-    if (this._lastRect.blockRect) {
-      this._hintLine?.show(
-        this._lastRect.blockRect,
-        this.edgelessPage.surface.viewport.zoom
-      );
+  private _showIndicator() {
+    if (this._lastPosition) {
+      this.style.zIndex = (Number(this.style.zIndex) + 1).toString();
+      this._indicatorLine?.show(this._lastPosition.width);
     }
   }
 
@@ -207,8 +204,9 @@ export class NoteCut extends WithDisposable(LitElement) {
     return html`<div class="affine-note-cut-container">
       <note-scissors-button
         .edgelessPage=${this.edgelessPage}
-        @showhint=${this._showHint}
+        @showindicator=${this._showIndicator}
       ></note-scissors-button>
+      <note-cut-indicator></note-cut-indicator>
     </div> `;
   }
 }
