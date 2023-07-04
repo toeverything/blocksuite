@@ -7,7 +7,8 @@ import {
   type PageBlockModel,
   type ThemeObserver,
 } from '@blocksuite/blocks';
-import { assertExists, type BaseBlockModel } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
