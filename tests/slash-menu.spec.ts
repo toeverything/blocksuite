@@ -1,6 +1,11 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import {
+  addNote,
+  setEdgelessTool,
+  switchEditorMode,
+} from 'utils/actions/edgeless.js';
+import {
   pressBackspace,
   pressEnter,
   SHORT_KEY,
@@ -12,6 +17,7 @@ import {
   focusRichText,
   getSelectionRect,
   getVirgoSelectionText,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
@@ -393,6 +399,20 @@ test.describe('slash menu with code block', () => {
   });
 });
 
+test('slash menu should work in edgeless mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setEdgelessTool(page, 'note');
+
+  await addNote(page, '/', 30, 40);
+  await assertRichTexts(page, ['', '/']);
+
+  const slashMenu = page.locator(`.slash-menu`);
+  await expect(slashMenu).toBeVisible();
+});
+
 test.describe('slash menu with date & time', () => {
   test("should insert Today's time string", async ({ page }) => {
     await enterPlaygroundRoom(page);
@@ -546,4 +566,82 @@ test.skip('should compatible CJK IME', async ({ page }) => {
   const slashItems = slashMenu.locator('format-bar-button');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['Heading 2']);
+});
+
+test.describe.skip('slash menu with customize menu', () => {
+  test('can remove specified menus', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await page.evaluate(async () => {
+      const editor = document.querySelector('editor-container');
+      if (!editor) throw new Error("Can't find editor-container");
+      const defaultPage = editor.querySelector('affine-default-page');
+      if (!defaultPage) throw new Error("Can't find affine-default-page");
+      const SlashMenu = (await import('@blocksuite/blocks')).SlashMenu;
+      if (!SlashMenu) throw new Error("Can't find SlashMenu");
+      class CustomSlashMenu extends SlashMenu {
+        override get menuGroups() {
+          return super.menuGroups.slice(0, 1);
+        }
+      }
+      // Fix `Illegal constructor` error
+      // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
+      customElements.define('custom-slash-menu', CustomSlashMenu);
+    });
+
+    const slashMenu = page.locator(`.slash-menu`);
+    const slashItems = slashMenu.locator('format-bar-button');
+
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    await expect(slashItems).toHaveCount(10);
+  });
+
+  test('can add some menus', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    await page.evaluate(async () => {
+      const editor = document.querySelector('editor-container');
+      if (!editor) throw new Error("Can't find editor-container");
+      const defaultPage = editor.querySelector('affine-default-page');
+      if (!defaultPage) throw new Error("Can't find affine-default-page");
+      const SlashMenu = (await import('@blocksuite/blocks')).SlashMenu;
+      if (!SlashMenu) throw new Error("Can't find SlashMenu");
+      class CustomSlashMenu extends SlashMenu {
+        override get menuGroups() {
+          const defaultMenuGroups = super.menuGroups;
+          return [
+            {
+              name: 'Custom Menu',
+              items: [
+                {
+                  name: 'Custom Menu Item',
+                  groupName: 'Custom Menu',
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  icon: '' as any,
+                  action: () => {
+                    // do nothing
+                  },
+                },
+              ],
+            },
+          ] satisfies typeof defaultMenuGroups;
+        }
+      }
+      // Fix `Illegal constructor` error
+      // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
+      customElements.define('custom-slash-menu', CustomSlashMenu);
+    });
+
+    const slashMenu = page.locator(`.slash-menu`);
+    const slashItems = slashMenu.locator('format-bar-button');
+
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    await expect(slashItems).toHaveCount(1);
+  });
 });

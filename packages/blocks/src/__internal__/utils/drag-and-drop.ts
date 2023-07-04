@@ -17,6 +17,12 @@ import { type EditingState } from './types.js';
  */
 export type DroppingType = 'none' | 'before' | 'after' | 'database';
 
+export type DropResult = {
+  type: DroppingType;
+  rect: Rect;
+  modelState: EditingState;
+};
+
 /**
  * Calculates the drop target.
  */
@@ -27,11 +33,7 @@ export function calcDropTarget(
   draggingElements: BlockComponentElement[],
   scale: number,
   flavour: string | null = null // for block-hub
-): {
-  type: DroppingType;
-  rect: Rect;
-  modelState: EditingState;
-} | null {
+): DropResult | null {
   const schema = model.page.getSchemaByFlavour('affine:database');
   assertExists(schema);
   const children = schema.model.children ?? [];

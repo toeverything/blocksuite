@@ -11,9 +11,9 @@ export class EdgelessToolIconButton extends LitElement {
       position: relative;
       display: flex;
       align-items: center;
-      padding: 4px;
+      padding: 6px;
       color: var(--affine-icon-color);
-      margin: 8px;
+      margin: 2px;
       border-radius: 5px;
       cursor: pointer;
     }
@@ -57,7 +57,7 @@ export class EdgelessToolIconButton extends LitElement {
   tooltip!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  tipPosition: 'top' | 'bottom' | 'left' | 'right' = 'top';
+  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' = 'top';
 
   @property({ attribute: false })
   active = false;

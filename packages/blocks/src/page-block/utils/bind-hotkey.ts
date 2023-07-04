@@ -123,7 +123,7 @@ export function bindCommonHotkey(page: Page) {
 
     const range = blockRangeToNativeRange(blockRange);
     if (!range || !isMultiBlockRange(range)) return;
-    deleteModelsByRange(page);
+    deleteModelsByRange(page, blockRange);
   });
 
   // !!!

@@ -61,9 +61,7 @@ export class ContentParser {
   public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[1].children
-    );
+    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
       htmlContent
@@ -73,9 +71,7 @@ export class ContentParser {
   public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[1].children
-    );
+    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       htmlContent
@@ -147,13 +143,12 @@ export class ContentParser {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
       },
+      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
     };
 
     const nodeElements = edgeless.getSortedElementsByBound(bound);
     for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementById(nodeElement.id)?.closest(
-        '.affine-edgeless-block-child'
-      );
+      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
       const blockBound = xywhArrayToObject(nodeElement);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
@@ -196,6 +191,7 @@ export class ContentParser {
           return false;
         }
       },
+      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
     };
 
     const data = await html2canvas(
@@ -420,10 +416,18 @@ export class ContentParser {
     });
   }
 
-  private _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+  public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+    if (model.flavour === 'affine:page') {
+      return {
+        id: model.id,
+        children: model.children
+          .filter(child => child.flavour === 'affine:note')
+          .map(child => this.getSelectedBlock(child)),
+      };
+    }
     return {
       id: model.id,
-      children: model.children.map(child => this._getSelectedBlock(child)),
+      children: model.children.map(child => this.getSelectedBlock(child)),
     };
   }
 

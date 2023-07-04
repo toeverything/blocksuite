@@ -21,6 +21,10 @@ import {
 } from '../components/component-toolbar/change-shape-button.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import {
+  DEFAULT_NOTE_CHILD_FLAVOUR,
+  DEFAULT_NOTE_CHILD_TYPE,
+} from './consts.js';
 import { isTopLevelBlock } from './query.js';
 
 function setEdgelessTool(
@@ -89,6 +93,7 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
           edgeless.page.deleteBlock(element);
         }
       } else {
+        edgeless.connector.detachConnectors([element]);
         edgeless.surface.removeElement(element.id);
       }
     });
@@ -162,6 +167,8 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
       setEdgelessTool(edgeless, {
         type: 'note',
         background: DEFAULT_NOTE_COLOR,
+        childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
+        childType: DEFAULT_NOTE_CHILD_TYPE,
       })
     );
     hotkey.addListener('p', () =>

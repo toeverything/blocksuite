@@ -1,7 +1,7 @@
-import '../../buttons/tool-icon-button.js';
+import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { PenIcon } from '@blocksuite/global/config';
+import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
@@ -51,6 +51,38 @@ export class EdgelessBrushToolButton extends LitElement {
     :host {
       display: flex;
     }
+    .edgeless-brush-button {
+      position: relative;
+      height: 66px;
+      width: 36px;
+      overflow-y: hidden;
+    }
+    #edgeless-pen-icon {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      transition: top 0.3s ease-in-out;
+    }
+    #edgeless-pen-icon:hover {
+      top: 2px;
+    }
+    .arrow-up-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      right: 0px;
+      top: 12px;
+      width: 14px;
+      height: 14px;
+      fill: var(--affine-icon-color);
+    }
+    .arrow-up-icon:hover {
+      background: var(--affine-hover-color);
+    }
+    .pen-color {
+      fill: var(--affine-blue-800);
+    }
   `;
 
   @property({ attribute: false })
@@ -88,19 +120,14 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
-  override disconnectedCallback() {
-    this._brushMenu?.dispose();
-    this._brushMenu = null;
-    super.disconnectedCallback();
-  }
-
   override render() {
     const type = this.edgelessTool?.type;
 
     return html`
-      <edgeless-tool-icon-button
+      <edgeless-toolbar-button
         .tooltip=${getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
+        .activeMode=${'background'}
         @click=${() => {
           this.setEdgelessTool({
             type: 'brush',
@@ -110,8 +137,11 @@ export class EdgelessBrushToolButton extends LitElement {
           this._toggleBrushMenu();
         }}
       >
-        ${PenIcon}
-      </edgeless-tool-icon-button>
+        <div class="edgeless-brush-button">
+          ${EdgelessPenIcon}
+          <div class="arrow-up-icon">${ArrowUpIcon}</div>
+        </div>
+      </edgeless-toolbar-button>
     `;
   }
 }

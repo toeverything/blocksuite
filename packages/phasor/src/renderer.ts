@@ -4,8 +4,9 @@ import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { GridManager } from './grid.js';
 import { RoughCanvas } from './rough/canvas.js';
+import { Bound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
-import { clamp } from './utils/math-utils.js';
+import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
 import { Vec } from './utils/vec.js';
 
@@ -23,6 +24,7 @@ export interface SurfaceViewport {
   readonly viewportMinXY: IPoint;
   readonly viewportMaxXY: IPoint;
   readonly viewportBounds: IBound;
+  readonly boundingClientRect: DOMRect;
 
   toModelCoord(viewX: number, viewY: number): [number, number];
   toViewCoord(logicalX: number, logicalY: number): [number, number];
@@ -30,6 +32,7 @@ export interface SurfaceViewport {
   setCenter(centerX: number, centerY: number): void;
   setZoom(zoom: number, focusPoint?: IPoint): void;
   applyDeltaCenter(deltaX: number, deltaY: number): void;
+  isInViewport(bound: Bound): boolean;
 
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
@@ -137,14 +140,26 @@ export class Renderer implements SurfaceViewport {
     };
   }
 
+  get boundingClientRect() {
+    return this._container.getBoundingClientRect();
+  }
+
+  isInViewport(bound: Bound) {
+    const viewportBounds = Bound.from(this.viewportBounds);
+    return (
+      viewportBounds.contains(bound) ||
+      viewportBounds.isIntersectWithBound(bound)
+    );
+  }
+
   toModelCoord(viewX: number, viewY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
     return [viewportX + viewX / zoom, viewportY + viewY / zoom];
   }
 
-  toViewCoord(logicalX: number, logicalY: number): [number, number] {
+  toViewCoord(modelX: number, modelY: number): [number, number] {
     const { viewportX, viewportY, zoom } = this;
-    return [(logicalX - viewportX) * zoom, (logicalY - viewportY) * zoom];
+    return [(modelX - viewportX) * zoom, (modelY - viewportY) * zoom];
   }
 
   setCenter(centerX: number, centerY: number) {
@@ -261,17 +276,20 @@ export class Renderer implements SurfaceViewport {
   private _render() {
     const { ctx, viewportBounds, width, height, rc, zoom } = this;
     const dpr = window.devicePixelRatio;
+    const scale = zoom * dpr;
+    const matrix = new DOMMatrix().scaleSelf(scale);
 
     ctx.clearRect(0, 0, width * dpr, height * dpr);
     ctx.save();
 
-    ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, 0, 0);
+    ctx.setTransform(matrix);
 
-    this._renderByBound(ctx, rc, viewportBounds);
+    this._renderByBound(ctx, matrix, rc, viewportBounds);
   }
 
   private _renderByBound(
     ctx: CanvasRenderingContext2D | null,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     bound: IBound
   ) {
@@ -280,14 +298,17 @@ export class Renderer implements SurfaceViewport {
     const { gridManager } = this;
     const elements = gridManager.search(bound);
     for (const element of elements) {
-      const dx = element.x - bound.x;
-      const dy = element.y - bound.y;
       ctx.save();
-      ctx.translate(dx, dy);
+
       const localRecord = element.localRecord;
-      if (intersects(element, bound) && localRecord.display) {
+      if (
+        intersects(getBoundsWithRotation(element), bound) &&
+        localRecord.display
+      ) {
         ctx.globalAlpha = localRecord.opacity;
-        element.render(ctx, rc);
+        const dx = element.x - bound.x;
+        const dy = element.y - bound.y;
+        element.render(ctx, matrix.translate(dx, dy), rc);
       }
 
       ctx.restore();
@@ -310,10 +331,12 @@ export class Renderer implements SurfaceViewport {
     canvas.height = bound.h * dpr;
 
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    ctx.scale(dpr, dpr);
-
+    const matrix = new DOMMatrix().scaleSelf(dpr);
     const rc = new RoughCanvas(canvas);
-    this._renderByBound(ctx, rc, bound);
+
+    ctx.setTransform(matrix);
+
+    this._renderByBound(ctx, matrix, rc, bound);
 
     return canvas;
   }

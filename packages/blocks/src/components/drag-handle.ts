@@ -43,7 +43,7 @@ export class DragIndicator extends LitElement {
       transition-delay: 0s;
       transform-origin: 0 0;
       pointer-events: none;
-      z-index: 1;
+      z-index: 2;
     }
   `;
 
@@ -211,6 +211,7 @@ export class DragHandle extends WithDisposable(LitElement) {
 
   constructor(options: {
     container: HTMLElement;
+    onDragStartCallback?: (e: DragEvent) => void;
     onDropCallback: (
       point: Point,
       draggingBlockElements: BlockComponentElement[],
@@ -232,6 +233,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     };
     this.addEventListener('beforeprint', () => this.hide(true));
     this.onDropCallback = options?.onDropCallback;
+    this.onDragStartCallback = options?.onDragStartCallback;
     this.setDragType = options?.setDragType;
     this.setSelectedBlock = options?.setSelectedBlock;
     this._getSelectedBlocks = options?.getSelectedBlocks;
@@ -249,6 +251,8 @@ export class DragHandle extends WithDisposable(LitElement) {
   public getDropAllowedBlocks: (
     draggingBlockIds: string[] | null
   ) => BaseBlockModel[];
+
+  public onDragStartCallback: ((e: DragEvent) => void) | undefined;
 
   public onDropCallback: (
     point: Point,
@@ -304,7 +308,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     const noteBlock = this._container.querySelector(
       '.affine-note-block-container'
     );
-    assertExists(noteBlock);
+    if (!noteBlock) return;
     const noteBlockRect = noteBlock.getBoundingClientRect();
     // See https://github.com/toeverything/blocksuite/issues/1611
     if (event.raw.clientY < noteBlockRect.y) {
@@ -608,6 +612,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     );
 
     this.setDragType(true);
+    this.onDragStartCallback?.(e);
   };
 
   onDrag = (e: DragEvent, passed?: boolean, isScrolling?: boolean) => {

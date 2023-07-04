@@ -6,8 +6,11 @@ import {
   transformPointsToNewBound,
 } from '../../utils/bound.js';
 import {
+  getPointsFromBoundsWithRotation,
+  getQuadBoundsWithRotation,
   getSvgPathFromStroke,
   lineIntersects,
+  polyLineNearestPoint,
 } from '../../utils/math-utils.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
@@ -30,6 +33,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
     '2d'
   ) as CanvasRenderingContext2D;
 
+  protected override _connectable = false;
+
   /* Brush mouse coords relative to left-top corner */
   get points() {
     const points = this.yMap.get('points') as IBrush['points'];
@@ -46,54 +51,47 @@ export class BrushElement extends SurfaceElement<IBrush> {
     return lineWidth;
   }
 
-  intersectWithLine(pa: IVec, pb: IVec) {
-    const { points } = this;
+  override hitTest(px: number, py: number, options?: HitTestOptions): boolean {
+    // const insideBoundingBox = super.hitTest(x, y, options);
+    // if (!insideBoundingBox) return false;
 
-    const box = Bound.deserialize(this.xywh);
-    const tl = box.tl;
-
-    if (box.w < 8 && box.h < 8) {
-      return Vec.distanceToLineSegment(pa, pb, box.center) < 5;
-    }
-
-    if (box.intersectLine(pa, pb, true)) {
-      for (let i = 1; i < points.length; i++) {
-        if (
-          lineIntersects(
-            Vec.add(points[i - 1], tl),
-            Vec.add(points[i], tl),
-            pa,
-            pb
-          )
-        ) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  override hitTest(x: number, y: number, options?: HitTestOptions): boolean {
-    const insideBoundingBox = super.hitTest(x, y, options);
-
-    if (!insideBoundingBox) return false;
-
-    const command = getSvgPathFromStroke(getSolidStrokePoints(this.points, 3));
+    const { rotate, points, _testCtx } = this;
+    const [x, y, w, h] = this.deserializeXYWH();
+    const command = getSvgPathFromStroke(getSolidStrokePoints(points, 3));
     const path = new Path2D(command);
 
-    if (this._testCtx.lineWidth !== (options?.expand ?? 1)) {
-      this._testCtx.lineWidth = options?.expand ?? 1;
+    if (_testCtx.lineWidth !== (options?.expand ?? 1)) {
+      _testCtx.lineWidth = options?.expand ?? 1;
     }
 
-    return this._testCtx.isPointInStroke(path, x - this.x, y - this.y);
+    const cx = w / 2;
+    const cy = h / 2;
+
+    _testCtx.setTransform(
+      new DOMMatrix()
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
+    );
+
+    return _testCtx.isPointInStroke(path, px - x, py - y);
   }
 
-  override render(ctx: CanvasRenderingContext2D) {
-    const stroke = getSolidStrokePoints(this.points, this.lineWidth);
+  override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
+    const { points, lineWidth, color, rotate } = this;
+    const [, , w, h] = this.deserializeXYWH();
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
+
+    const stroke = getSolidStrokePoints(points, lineWidth);
     const commands = getSvgPathFromStroke(stroke);
     const path = new Path2D(commands);
 
-    ctx.fillStyle = this.computedValue(this.color);
+    ctx.fillStyle = this.computedValue(color);
     ctx.fill(path);
   }
 
@@ -147,5 +145,43 @@ export class BrushElement extends SurfaceElement<IBrush> {
     for (const key in updates) {
       this.yMap.set(key, updates[key as keyof IBrush] as IBrush[keyof IBrush]);
     }
+  }
+  override containedByBounds(bounds: Bound) {
+    return false;
+  }
+
+  override getNearestPoint(point: IVec): IVec {
+    const { x, y } = this;
+    return polyLineNearestPoint(
+      this.points.map(p => Vec.add(p, [x, y])),
+      point
+    );
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
+    const tl = [this.x, this.y];
+    const points = getPointsFromBoundsWithRotation(this, _ =>
+      this.points.map(point => Vec.add(point, tl))
+    );
+
+    const box = Bound.fromDOMRect(getQuadBoundsWithRotation(this));
+
+    if (box.w < 8 && box.h < 8) {
+      return Vec.distanceToLineSegment(start, end, box.center) < 5 ? [] : null;
+    }
+
+    if (box.intersectLine(start, end, true)) {
+      const len = points.length;
+      for (let i = 1; i < len; i++) {
+        const result = lineIntersects(start, end, points[i - 1], points[i]) as
+          | IVec[]
+          | null;
+        if (result) {
+          return result;
+        }
+      }
+    }
+
+    return null;
   }
 }

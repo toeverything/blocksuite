@@ -2,15 +2,10 @@ import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
 // This type is declared in Affine, this block will move to Affine
 type MetaData = {
-  title?: string;
+  bookmarkTitle?: string;
   description?: string;
   icon?: string;
   image?: string;
-  // keywords?: string[];
-  // language?: string;
-  // type?: string;
-  // url?: string;
-  // provider?: string;
   [x: string]: string | string[] | undefined | boolean;
 };
 export type BookmarkProps = {
@@ -21,7 +16,7 @@ export type BookmarkProps = {
 
 export const defaultBookmarkProps: BookmarkProps = {
   url: '',
-  title: '',
+  bookmarkTitle: '',
   description: '',
   icon: '',
   image: '',

@@ -50,7 +50,7 @@ export function createEvent<
   return new CustomEvent<Detail<T>>(type, { detail });
 }
 
-export function noop() {
+export function noop(_?: unknown) {
   return;
 }
 
@@ -280,10 +280,10 @@ export function atLeastNMatches<T>(
  *  '25': [ { name: 'Alice', age: 25 }, { name: 'Cathy', age: 25 } ]
  * }
  */
-export function groupBy<T>(
+export function groupBy<T, K extends string>(
   arr: T[],
-  key: string | ((item: T) => string)
-): Record<string, T[]> {
+  key: K | ((item: T) => K)
+): Record<K, T[]> {
   const result = {} as Record<string, T[]>;
 
   for (const item of arr) {

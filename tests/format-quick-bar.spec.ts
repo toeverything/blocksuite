@@ -89,7 +89,7 @@ test('should format quick bar show when select text', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
-  const formatQuickBar = page.locator(`.format-quick-bar`);
+  const { formatQuickBar } = getFormatBar(page);
   await expect(formatQuickBar).toBeVisible();
 
   const box = await formatQuickBar.boundingBox();
@@ -104,6 +104,34 @@ test('should format quick bar show when select text', async ({ page }) => {
   await page.mouse.click(box.x + 4, box.y + box.height / 2);
   // Even not any button is clicked, the format quick bar should't be hidden
   await expect(formatQuickBar).toBeVisible();
+
+  await page.mouse.click(0, 0);
+  await expect(formatQuickBar).not.toBeVisible();
+});
+
+test('should format quick bar show when click drag handler', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  const locator = page.locator('affine-paragraph').first();
+  await locator.hover();
+  const dragHandle = page.locator('affine-drag-handle');
+  const dragHandleRect = await dragHandle.boundingBox();
+  assertExists(dragHandleRect);
+  await dragHandle.click();
+
+  const { formatQuickBar } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+
+  const box = await formatQuickBar.boundingBox();
+  if (!box) {
+    throw new Error("formatQuickBar doesn't exist");
+  }
+  assertAlmostEqual(box.x, 265, 5);
+  assertAlmostEqual(box.y - dragHandleRect.y, 30, 5);
 
   await page.mouse.click(0, 0);
   await expect(formatQuickBar).not.toBeVisible();
@@ -467,7 +495,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   // drag only the `456` paragraph
-  await dragBetweenIndices(page, [1, 0], [1, 3]);
+  await dragBetweenIndices(page, [0, 0], [0, 3]);
 
   const paragraphBtn = page.locator(`.paragraph-button`);
   await paragraphBtn.hover();
@@ -487,11 +515,11 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 >
   <affine:paragraph
     prop:text="123"
-    prop:type="text"
+    prop:type="h1"
   />
   <affine:paragraph
     prop:text="456"
-    prop:type="h1"
+    prop:type="text"
   />
   <affine:paragraph
     prop:text="789"
@@ -513,14 +541,14 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   prop:hidden={false}
   prop:index="a0"
 >
-  <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
   <affine:list
     prop:checked={false}
-    prop:text="456"
+    prop:text="123"
     prop:type="bulleted"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
   />
   <affine:paragraph
     prop:text="789"
@@ -560,7 +588,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   );
   await page.waitForTimeout(10);
   // The paragraph button should prevent selection after click
-  await assertSelection(page, 1, 0, 3);
+  await assertSelection(page, 0, 0, 3);
 });
 
 test('should format quick bar be able to copy', async ({ page }) => {
