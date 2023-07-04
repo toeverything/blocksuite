@@ -2,9 +2,9 @@ import '../../../components/tags/multi-tag-select.js';
 import '../../../components/tags/multi-tag-view.js';
 
 import {
-  AddCursorIcon,
   ArrowDownSmallIcon,
   DualLinkIcon16,
+  PlusIcon,
   TagsIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -71,7 +71,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
     }
 
     .meta-data-expanded {
-      padding: 10px 24px;
+      padding: 10px 12px 24px;
       margin: 0 -24px;
       display: flex;
       flex-direction: column;
@@ -83,10 +83,17 @@ export class PageMetaData extends WithDisposable(LitElement) {
     .meta-data-expanded-title {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      padding: 0 12px;
       font-weight: 600;
       font-size: 14px;
       color: var(--affine-text-secondary-color);
-      align-items: center;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .meta-data-expanded-title:hover {
+      background-color: var(--affine-hover-color);
     }
 
     .meta-data-expanded-title .close {
@@ -94,7 +101,6 @@ export class PageMetaData extends WithDisposable(LitElement) {
       border-radius: 4px;
       display: flex;
       align-items: center;
-      cursor: pointer;
     }
 
     .meta-data-expanded-title .close:hover {
@@ -105,6 +111,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
       display: flex;
       flex-direction: column;
       gap: 24px;
+      padding: 0 12px;
     }
 
     .meta-data-expanded-item {
@@ -113,7 +120,6 @@ export class PageMetaData extends WithDisposable(LitElement) {
     }
 
     .meta-data-expanded-item .type {
-      height: 23px;
       display: flex;
       align-items: center;
     }
@@ -133,7 +139,9 @@ export class PageMetaData extends WithDisposable(LitElement) {
       cursor: pointer;
     }
     .add-tag svg {
-      fill: var(--affine-text-secondary-color);
+      width: 16px;
+      height: 16px;
+      fill: var(--affine-icon-color);
     }
 
     .add-tag:hover {
@@ -150,8 +158,8 @@ export class PageMetaData extends WithDisposable(LitElement) {
       padding: 4px 10px;
       border-radius: 8px;
       color: var(--affine-text-primary-color);
-      font-size: 12px;
-      line-height: 12px;
+      font-size: 13px;
+      line-height: 13px;
       display: flex;
       align-items: center;
       font-weight: 400;
@@ -165,6 +173,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
     .backlinks .title {
       height: 28px;
       color: var(--affine-text-secondary-color);
+      font-size: var(--affine-font-sm);
     }
     .backlinks .link {
       display: flex;
@@ -340,9 +349,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
               </div>`;
             }
           )}
-          <div class="add-tag" @click="${this._selectTags}">
-            ${AddCursorIcon}
-          </div>
+          <div class="add-tag" @click="${this._selectTags}">${PlusIcon}</div>
         </div>
       </div>
     </div>`;
@@ -359,11 +366,11 @@ export class PageMetaData extends WithDisposable(LitElement) {
         </div>
       `;
     }
-    this._disposables;
+
     return html` <div class="meta-data-expanded">
-      <div class="meta-data-expanded-title">
+      <div class="meta-data-expanded-title" @click="${this._toggle}">
         <div>Page info</div>
-        <div @click="${this._toggle}" class="close">${ArrowDownSmallIcon}</div>
+        <div class="close">${ArrowDownSmallIcon}</div>
       </div>
       <div class="meta-data-expanded-content">
         ${this.renderBacklinkExpanded()} ${this.renderTagsExpanded()}
