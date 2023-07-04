@@ -24,7 +24,7 @@ import {
   waitNextFrame,
 } from './misc.js';
 
-const AWAIT_TIMEOUT = 160;
+const AWAIT_TIMEOUT = 260;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 
 export async function getNoteRect(
