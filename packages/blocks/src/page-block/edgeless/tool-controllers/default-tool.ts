@@ -70,6 +70,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
+  private _lastMoveDelta = { x: 0, y: 0 };
   private _lock = false;
   // Do not select the text, when click again after activating the note.
   private _isDoubleClickedOnMask = false;
@@ -480,12 +481,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           }
         });
 
-        // this._edgeless.connector.syncConnectorPos(this.state.selected);
-        // FIXME: we need to add align offset
         this._forceUpdateSelection(this.dragType, true, {
-          x: e.delta.x / zoom,
-          y: e.delta.y / zoom,
+          x: delta.x - this._lastMoveDelta.x,
+          y: delta.y - this._lastMoveDelta.y,
         });
+        this._lastMoveDelta = delta;
         break;
       }
       case DefaultModeDragType.NativeEditing: {
@@ -529,6 +529,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
+    this._lastMoveDelta = { x: 0, y: 0 };
     this._edgeless.snap.cleanupAlignables();
   }
 
