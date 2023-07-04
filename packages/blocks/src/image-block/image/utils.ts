@@ -15,6 +15,15 @@ async function getImageBlob(model: BaseBlockModel) {
   return blob;
 }
 
+function convertToString(blob: Blob): Promise<string | null> {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.addEventListener('load', _ => resolve(reader.result as string));
+    reader.addEventListener('error', () => resolve(null));
+    reader.readAsDataURL(blob);
+  });
+}
+
 function convertToPng(blob: Blob): Promise<Blob | null> {
   return new Promise(resolve => {
     const reader = new FileReader();
@@ -43,9 +52,11 @@ export async function copyImage(model: ImageBlockModel) {
 
   try {
     // @ts-ignore
-    if (window.apis?.clipboard?.copyAsImageFromBlob) {
+    if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore
-      await window.apis.clipboard?.copyAsImageFromBlob(blob);
+      await window.apis.clipboard?.copyAsImageFromString(
+        await convertToString(blob)
+      );
     } else {
       // DOMException: Type image/jpeg not supported on write.
       if (blob.type !== 'image/png') {
