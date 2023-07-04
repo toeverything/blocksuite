@@ -25,6 +25,7 @@ export {
   getQuadBoundsWithRotation,
   getSvgPathFromStroke,
   intersects,
+  isOverlap,
   isPointIn,
   lineIntersects,
   linePolygonIntersects,

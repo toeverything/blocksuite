@@ -53,7 +53,7 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
 }
 
-export function arrayAlmostEqual(a: IVec, b: IVec, epsilon = 0.0001) {
+export function pointAlmostEqual(a: IVec, b: IVec, epsilon = 0.0001) {
   return a.length === b.length && a.every((v, i) => almostEqual(v, b[i]));
 }
 
@@ -439,4 +439,14 @@ export function normalizeDegAngle(angle: number) {
   if (angle < 0) angle += 360;
   angle %= 360;
   return angle;
+}
+
+// 0 means x axis, 1 means y axis
+export function isOverlap(line1: IVec[], line2: IVec[], axis: 0 | 1) {
+  return !(
+    Math.max(line1[0][axis], line1[1][axis]) <
+      Math.min(line2[0][axis], line2[1][axis]) ||
+    Math.min(line1[0][axis], line1[1][axis]) >
+      Math.max(line2[0][axis], line2[1][axis])
+  );
 }

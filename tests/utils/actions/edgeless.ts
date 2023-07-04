@@ -24,7 +24,7 @@ import {
   waitNextFrame,
 } from './misc.js';
 
-const AWAIT_TIMEOUT = 160;
+const AWAIT_TIMEOUT = 260;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 
 export async function getNoteRect(
@@ -845,6 +845,16 @@ export async function toViewCoord(page: Page, point: number[]) {
     if (!container) throw new Error('container not found');
     return container.surface.viewport.toViewCoord(point[0], point[1]);
   }, point);
+}
+
+export async function dragBetweenViewCoords(
+  page: Page,
+  start: number[],
+  end: number[]
+) {
+  const [startX, startY] = await toViewCoord(page, start);
+  const [endX, endY] = await toViewCoord(page, end);
+  await dragBetweenCoords(page, { x: startX, y: startY }, { x: endX, y: endY });
 }
 
 export async function toModelCoord(page: Page, point: number[]) {

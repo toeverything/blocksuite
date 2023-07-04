@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
   addBasicConnectorElement,
@@ -7,6 +7,7 @@ import {
   changeConnectorStrokeWidth,
   deleteAll,
   deleteAllConnectors,
+  dragBetweenViewCoords,
   getConnectorPath,
   locatorConnectorStrokeStyleButton,
   locatorConnectorStrokeWidthButton,
@@ -28,23 +29,47 @@ import {
 import { assertConnectorPath } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('elbow connector without node and width greater than height', async ({
-  page,
-}) => {
+async function commonSetup(page: Page) {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
   await deleteAll(page);
-  const start = await toViewCoord(page, [0, 0]);
-  const end = await toViewCoord(page, [200, 100]);
+}
+
+async function createRectShapeElement(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
+  await addBasicRectShapeElement(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] }
+  );
+}
+
+async function createConnectorElement(
+  page: Page,
+  coord1: number[],
+  coord2: number[]
+) {
+  const start = await toViewCoord(page, coord1);
+  const end = await toViewCoord(page, coord2);
   await addBasicConnectorElement(
     page,
     { x: start[0], y: start[1] },
     { x: end[0], y: end[1] }
   );
+}
 
-  const path = await getConnectorPath(page);
-  expect(path).toMatchObject([
+test('elbow connector without node and width greater than height', async ({
+  page,
+}) => {
+  await commonSetup(page);
+  await createConnectorElement(page, [0, 0], [200, 100]);
+  await assertConnectorPath(page, [
     [0, 0],
     [100, 0],
     [100, 100],
@@ -55,21 +80,9 @@ test('elbow connector without node and width greater than height', async ({
 test('elbow connector without node and width less than height', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
-
-  const start = await toViewCoord(page, [0, 0]);
-  const end = await toViewCoord(page, [100, 200]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  const path = await getConnectorPath(page);
-  expect(path).toMatchObject([
+  await commonSetup(page);
+  await createConnectorElement(page, [0, 0], [100, 200]);
+  await assertConnectorPath(page, [
     [0, 0],
     [0, 100],
     [100, 100],
@@ -80,29 +93,11 @@ test('elbow connector without node and width less than height', async ({
 test('elbow connector one side attached element another side free', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+  await commonSetup(page);
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createConnectorElement(page, [50, 50], [200, 0]);
 
-  let start = await toViewCoord(page, [0, 0]);
-  let end = await toViewCoord(page, [100, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [50, 50]);
-  end = await toViewCoord(page, [200, 0]);
-
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-  let path = await getConnectorPath(page);
-  expect(path).toMatchObject([
+  await assertConnectorPath(page, [
     [100, 50],
     [150, 50],
     [150, 0],
@@ -110,16 +105,9 @@ test('elbow connector one side attached element another side free', async ({
   ]);
 
   await deleteAllConnectors(page);
+  await createConnectorElement(page, [50, 50], [125, 0]);
 
-  end = await toViewCoord(page, [125, 0]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-  path = await getConnectorPath(page);
-
-  expect(path).toMatchObject([
+  await assertConnectorPath(page, [
     [100, 50],
     [125, 50],
     [125, 0],
@@ -127,34 +115,11 @@ test('elbow connector one side attached element another side free', async ({
 });
 
 test('elbow connector both side attatched element', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+  await commonSetup(page);
 
-  let start = await toViewCoord(page, [0, 0]);
-  let end = await toViewCoord(page, [100, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [200, 0]);
-  end = await toViewCoord(page, [300, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [50, 50]);
-  end = await toViewCoord(page, [250, 50]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createConnectorElement(page, [50, 50], [250, 50]);
 
   await assertConnectorPath(page, [
     [100, 50],
@@ -162,21 +127,9 @@ test('elbow connector both side attatched element', async ({ page }) => {
   ]);
 
   // select
-  start = await toViewCoord(page, [250, -10]);
-  end = await toViewCoord(page, [260, 50]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await dragBetweenViewCoords(page, [250, -10], [260, 50]);
 
-  start = await toViewCoord(page, [250, 50]);
-  end = await toViewCoord(page, [250, 0]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await dragBetweenViewCoords(page, [250, 50], [250, 0]);
   await assertConnectorPath(page, [
     [100, 50],
     [150, 50],
@@ -184,25 +137,14 @@ test('elbow connector both side attatched element', async ({ page }) => {
     [200, 0],
   ]);
 
-  start = end;
-  end = await toViewCoord(page, [150, -50]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await dragBetweenViewCoords(page, [250, 0], [150, -50]);
   await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
     [100, -50],
   ]);
-  start = end;
-  end = await toViewCoord(page, [150, -150]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+
+  await dragBetweenViewCoords(page, [150, -50], [150, -150]);
   await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
@@ -253,34 +195,11 @@ test('elbow connector both side attatched element', async ({ page }) => {
 test('elbow connector both side attached element with one attach element and other is fixed', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+  await commonSetup(page);
 
-  let start = await toViewCoord(page, [0, 0]);
-  let end = await toViewCoord(page, [100, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [200, 0]);
-  end = await toViewCoord(page, [300, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [50, 0]);
-  end = await toViewCoord(page, [250, 50]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createConnectorElement(page, [50, 0], [250, 50]);
 
   await assertConnectorPath(page, [
     [50, 0],
@@ -291,21 +210,9 @@ test('elbow connector both side attached element with one attach element and oth
   ]);
 
   // select
-  start = await toViewCoord(page, [255, -10]);
-  end = await toViewCoord(page, [255, 55]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await dragBetweenViewCoords(page, [255, -10], [255, 55]);
+  await dragBetweenViewCoords(page, [250, 50], [250, 0]);
 
-  start = await toViewCoord(page, [250, 50]);
-  end = await toViewCoord(page, [250, 0]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
   await assertConnectorPath(page, [
     [50, 0],
     [50, -20],
@@ -314,26 +221,14 @@ test('elbow connector both side attached element with one attach element and oth
     [200, 0],
   ]);
 
-  start = end;
-  end = await toViewCoord(page, [250, -20]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await dragBetweenViewCoords(page, [250, 0], [250, -20]);
   await assertConnectorPath(page, [
     [50, 0],
     [50, -20],
     [200, -20],
   ]);
 
-  start = end;
-  end = await toViewCoord(page, [150, -150]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await dragBetweenViewCoords(page, [250, -20], [150, -150]);
   await assertConnectorPath(page, [
     [50, 0],
     [50, -50],
@@ -345,34 +240,11 @@ test('elbow connector both side attached element with one attach element and oth
 test('elbow connector both side attached element with all fixed', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+  await commonSetup(page);
 
-  let start = await toViewCoord(page, [0, 0]);
-  let end = await toViewCoord(page, [100, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [200, 0]);
-  end = await toViewCoord(page, [300, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [50, 0]);
-  end = await toViewCoord(page, [300, 50]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createConnectorElement(page, [50, 0], [300, 50]);
   await assertConnectorPath(page, [
     [50, 0],
     [50, -20],
@@ -382,74 +254,52 @@ test('elbow connector both side attached element with all fixed', async ({
   ]);
 });
 
-test('path #1', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+test('path #1, the upper line is parallel with the lower line of antoher, and anchor from top to bottom of another', async ({
+  page,
+}) => {
+  await commonSetup(page);
 
-  let start = await toViewCoord(page, [0, 0]);
-  let end = await toViewCoord(page, [100, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createRectShapeElement(page, [200, -100], [300, 0]);
+  await createConnectorElement(page, [50, 0], [250, 0]);
 
-  start = await toViewCoord(page, [300, -100]);
-  end = await toViewCoord(page, [400, 0]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [50, 0]);
-  end = await toViewCoord(page, [350, 0]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await waitNextFrame(page);
   await assertConnectorPath(page, [
     [50, 0],
-    [50, -60],
-    [200, -60],
-    [200, 60],
-    [350, 60],
-    [350, 0],
+    [50, -20],
+    [150, -20],
+    [150, 20],
+    [250, 20],
+    [250, 0],
   ]);
 });
 
-test('path #2', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+test('path #2, the top-right point is overlapped with the bottom-left point of another, and anchor from top to bottom of another', async ({
+  page,
+}) => {
+  await commonSetup(page);
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createRectShapeElement(page, [100, -100], [200, 0]);
+  await createConnectorElement(page, [50, 0], [150, 0]);
 
-  let start = await toViewCoord(page, [0, 0]);
-  let end = await toViewCoord(page, [100, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await assertConnectorPath(page, [
+    [50, 0],
+    [50, -120],
+    [220, -120],
+    [220, 20],
+    [150, 20],
+    [150, 0],
+  ]);
+});
 
-  start = await toViewCoord(page, [200, 0]);
-  end = await toViewCoord(page, [300, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+test('path #3, the two shape are parallel in x axis, the anchor from the right to right', async ({
+  page,
+}) => {
+  await commonSetup(page);
 
-  start = await toViewCoord(page, [100, 50]);
-  end = await toViewCoord(page, [300, 50]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createConnectorElement(page, [100, 50], [300, 50]);
   await assertConnectorPath(page, [
     [100, 50],
     [150, 50],
@@ -461,44 +311,14 @@ test('path #2', async ({ page }) => {
 });
 
 test('when element is removed, connector should updated', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+  await commonSetup(page);
+  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createConnectorElement(page, [100, 50], [200, 0]);
 
-  let start = await toViewCoord(page, [0, 0]);
-  let end = await toViewCoord(page, [100, 100]);
-  await addBasicRectShapeElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [100, 50]);
-  end = await toViewCoord(page, [200, 0]);
-  await addBasicConnectorElement(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
-  start = await toViewCoord(page, [-10, -10]);
-  end = await toViewCoord(page, [20, 20]);
-  // select
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
-
+  //select
+  await dragBetweenViewCoords(page, [10, -10], [20, 20]);
   await pressBackspace(page);
-  start = await toViewCoord(page, [100, 50]);
-  end = await toViewCoord(page, [0, 50]);
-  await dragBetweenCoords(
-    page,
-    { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
-  );
+  await dragBetweenViewCoords(page, [100, 50], [0, 50]);
   await assertConnectorPath(page, [
     [0, 50],
     [50, 50],
@@ -508,10 +328,8 @@ test('when element is removed, connector should updated', async ({ page }) => {
 });
 
 test('change connector line width', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+  await commonSetup(page);
+
   const start = { x: 100, y: 200 };
   const end = { x: 300, y: 300 };
   await addBasicConnectorElement(page, start, end);
@@ -538,10 +356,7 @@ test('change connector line width', async ({ page }) => {
 });
 
 test('change connector stroke style', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
+  await commonSetup(page);
 
   const start = { x: 100, y: 200 };
   const end = { x: 300, y: 300 };
