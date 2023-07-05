@@ -561,6 +561,22 @@ export const HiddenIcon = html`<svg
   />
 </svg>`;
 
+export const CutIcon = html`<svg
+  width="8"
+  height="8"
+  viewBox="0 0 8 8"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M2.71727 5.28335L7.00003 1.33333M4.1083 4.00001L2.71667 2.71667M7.00003 6.66669L5.00002 4.82233M3.00001 2C3.00001 2.55229 2.55229 3.00001 2 3.00001C1.44772 3.00001 1 2.55229 1 2C1 1.44772 1.44772 1 2 1C2.55229 1 3.00001 1.44772 3.00001 2ZM3.00001 6.00002C3.00001 6.55231 2.55229 7.00003 2 7.00003C1.44772 7.00003 1 6.55231 1 6.00002C1 5.44774 1.44772 5.00002 2 5.00002C2.55229 5.00002 3.00001 5.44774 3.00001 6.00002Z"
+    stroke="#77757D"
+    stroke-width="0.66667"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg> `;
+
 export const ArrowUpIcon = html`<svg
   width="8"
   height="4"
