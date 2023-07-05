@@ -4,6 +4,7 @@ import { Overlay } from '@blocksuite/phasor';
 import {
   type EdgelessTool,
   type NoteTool,
+  queryCurrentMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import { DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
@@ -17,18 +18,23 @@ const OVERLAY_HEIGHT = 50;
 const OVERLAY_CORNER_RADIUS = 6;
 const OVERLAY_STOKE_COLOR = '#E3E2E4';
 const OVERLAY_TEXT_COLOR = '#77757D';
+const OVERLAY_LIGHT_BACKGROUND_COLOR = 'rgba(252, 252, 253, 1)';
+const OVERLAY_DARK_BACKGROUND_COLOR = 'rgb(32, 32, 32)';
 
 class NoteOverlay extends Overlay {
   x = 0;
   y = 0;
   text = '';
   globalAlpha = 0;
-  backgroundColor = 'white';
+  themeMode = 'light';
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = this.globalAlpha;
     // Draw the overlay rectangle
     ctx.strokeStyle = OVERLAY_STOKE_COLOR;
-    ctx.fillStyle = this.backgroundColor;
+    ctx.fillStyle =
+      this.themeMode === 'light'
+        ? OVERLAY_LIGHT_BACKGROUND_COLOR
+        : OVERLAY_DARK_BACKGROUND_COLOR;
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(this.x + OVERLAY_CORNER_RADIUS, this.y);
@@ -204,6 +210,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     // if mouse is in viewport and move, update overlay pointion and show overlay
     if (this._noteOverlay.globalAlpha === 0) this._noteOverlay.globalAlpha = 1;
     this._noteOverlay.text = this._getOverlayText();
+    this._noteOverlay.themeMode = queryCurrentMode();
     const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
@@ -224,6 +231,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     if (newTool.type !== 'note') return;
     this._noteOverlay = new NoteOverlay();
     this._noteOverlay.text = this._getOverlayText();
+    this._noteOverlay.themeMode = queryCurrentMode();
     this._edgeless.surface.viewport.addOverlay(this._noteOverlay);
   }
 }
