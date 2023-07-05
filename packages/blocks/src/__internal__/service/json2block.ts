@@ -150,6 +150,8 @@ async function setRange(model: BaseBlockModel, vRange: VRange) {
   const vEditor = await asyncGetVirgoByModel(model);
   assertExists(vEditor);
   vEditor.setVRange(vRange);
+  // mount new dom range in this trick
+  vEditor.syncVRange();
 }
 
 export async function addSerializedBlocks(
