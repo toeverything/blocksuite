@@ -13,7 +13,7 @@ const buttonStyle = css`
     align-items: center;
     color: var(--affine-icon-color);
     border: 1px solid var(--affine-border-color);
-    background-color: var(--affine-background-primary-color);
+    background-color: var(--affine-hover-color-filled);
     cursor: pointer;
   }
 `;
@@ -25,12 +25,11 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
     css`
       .scissors-button {
         transform: translate3d(-50%, 0, 0);
-        transition: transform 0.2s ease-out;
+        transition: transform 0.1s ease-out;
       }
 
       .scissors-button.slideout {
         transform: translate3d(-150%, 0, 0) translate3d(3px, 0, 0);
-        background-color: var(--affine-hover-color);
       }
     `,
   ];
@@ -141,10 +140,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
         left: 0;
         top: 0;
         z-index: 1;
-      }
-
-      .scissors-button {
-        background-color: var(--affine-tag-white);
+        transform-origin: top left;
       }
     `,
   ];
@@ -154,13 +150,12 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
   show(rect: DOMRect, zoom: number) {
     this.style.display = 'block';
     this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0) scale(${zoom})`;
-    this.style.transformOrigin = `top left`;
 
     const rafId = requestAnimationFrame(() => {
-      this.style.transition = `transform 0.2s 0.2s ease-in-out, transform-origin 0.2s 0.2s ease-in-out`;
+      this.style.transition = `transform 0.1s 0.1s ease-in-out`;
       this.style.transform = `translate3d(${rect.x + rect.width * 0.8}px, ${
-        rect.y
-      }px, 0) scale(${zoom})`;
+        rect.y - 2
+      }px, 0) scale(${zoom * 1.2})`;
 
       if (rafId === this._rafId) this._rafId = 0;
     });
@@ -172,7 +167,6 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
     this.style.removeProperty('display');
     this.style.removeProperty('transform');
     this.style.removeProperty('transition');
-    this.style.removeProperty('transformOrigin');
   }
 
   override render() {
