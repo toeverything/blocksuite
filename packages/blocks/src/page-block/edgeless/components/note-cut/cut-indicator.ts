@@ -11,6 +11,8 @@ export class NoteCutIndicator extends WithDisposable(LitElement) {
     :host {
       visibility: hidden;
       z-index: 1;
+      width: 1px;
+      transition: width 0.1s ease-in-out;
     }
 
     .indicator-line {
@@ -18,23 +20,27 @@ export class NoteCutIndicator extends WithDisposable(LitElement) {
       box-shadow: 0px 4px 11px #3ab4f7;
       border-radius: 1px;
       background-color: var(--affine-blue-500);
-      transform-origin: top left;
     }
   `;
 
   show() {
-    this.style.visibility = 'visible';
+    requestAnimationFrame(() => {
+      this.style.visibility = 'visible';
+
+      requestAnimationFrame(() => {
+        this.style.width = `${this.width}px`;
+      });
+    });
   }
 
   reset() {
     this.style.removeProperty('visibility');
+    this.style.removeProperty('transform');
+    this.style.removeProperty('width');
   }
 
   override render() {
-    return html`<div
-      class="indicator-line"
-      style="width: ${this.width}px"
-    ></div>`;
+    return html`<div class="indicator-line"></div>`;
   }
 }
 
