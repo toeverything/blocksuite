@@ -97,8 +97,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           selection?.columnsSelection,
           selection?.focus
         );
+
+        if (
+          selection?.focus.columnIndex === -1 ||
+          old?.focus.columnIndex === -1
+        )
+          return;
+
         this.updateFocusSelectionStyle(selection?.focus, selection?.isEditing);
-        if (old && old.focus.columnIndex !== -1) {
+        if (old) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
             old.focus.columnIndex
@@ -113,7 +120,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           }
         }
 
-        if (selection && selection.focus.columnIndex !== -1) {
+        if (selection) {
           const container = this.getCellContainer(
             selection.focus.rowIndex,
             selection.focus.columnIndex
