@@ -7,6 +7,7 @@ import {
   transformMarkdown,
 } from './utils/actions/index.js';
 import { scoped, test } from './utils/playwright.js';
+
 test(scoped`import notion markdown-format text todo head`, async ({ page }) => {
   await enterPlaygroundRoom(page);
 
@@ -319,6 +320,72 @@ test(scoped`import notion html-format list`, async ({ page }) => {
   expect(blocks).toEqual(expectedValue);
 });
 
+test(scoped`import notion html-format bookmark`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  const tempText = `
+  <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>demo</title>
+  </head>
+  <body>
+    <article id="8da888cd-8160-4fd6-929c-628fca9189d8" class="page sans">
+      <header><h1 class="page-title">demo</h1></header>
+      <div class="page-body">
+        <figure id="5b57744f-875a-4a73-b86b-a0a4c6e4de73">
+          <a
+            href="https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel"
+            class="bookmark source"
+            ><div class="bookmark-info">
+              <div class="bookmark-text">
+                <div class="bookmark-title">
+                  Beyond Frank Lloyd Wright: A Broader View of Art in Chicago
+                </div>
+                <div class="bookmark-description">
+                  "We had been aware of the Walker exhibit but hadn't quite known how to
+                  connect," said Steve Weaver, executive director of the Chicago Public
+                  Art Group. On April 7 it is hosting a Terra-supported tour of
+                  neighborhood murals by Mr. Walker, as well as by artists including
+                  Mitchell Caton, Calvin Jones and Justine DeVan, with a stop at the
+                  Hyde Park exhibition.
+                </div>
+              </div>
+              <div class="bookmark-href">
+                <img
+                  src="https://static01.nyt.com/favicon.ico"
+                  class="icon bookmark-icon"
+                />https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel
+              </div>
+            </div>
+            <img
+              src="https://static01.nyt.com/images/2018/03/15/arts/15ARTCHICAGO1/15ARTCHICAGO1-facebookJumbo.jpg"
+              class="bookmark-image"
+          /></a>
+        </figure>
+      </div>
+    </article>
+  </body>
+  </html>
+`;
+  const expectedValue = [
+    {
+      flavour: 'affine:page',
+      type: 'h1',
+      text: [{ insert: 'demo', attributes: {} }],
+      children: [],
+    },
+    {
+      flavour: 'affine:bookmark',
+      children: [],
+      url: 'https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel',
+    },
+  ];
+
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
+});
+
 // todo this is temporary solution
 test(scoped`import notion markdown-format table`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -396,22 +463,123 @@ test(scoped`import notion html-format table`, async ({ page }) => {
     <article id="8da888cd-8160-4fd6-929c-628fca9189d8" class="page sans">
       <header><h1 class="page-title">demo</h1></header>
       <div class="page-body">
-        <table id="b94f7bb7-9331-4121-8fe5-866465277b93" class="simple-table">
-          <tbody>
-            <tr id="c35d91c6-e443-4eb4-b70b-b1fc16f193d4">
-              <td id="FkBK" class="">table-title1</td>
-              <td id="&gt;VYO" class="">table-title2</td>
-            </tr>
-            <tr id="a04ad6bc-476a-4420-9103-9d43f9ac4d1e">
-              <td id="FkBK" class="">table-content1</td>
-              <td id="&gt;VYO" class="">table-content2</td>
-            </tr>
-            <tr id="1d0064a3-300e-44ca-870b-e969f691b839">
-              <td id="FkBK" class=""></td>
-              <td id="&gt;VYO" class=""></td>
-            </tr>
-          </tbody>
-        </table>
+      <table class="collection-content">
+      <thead>
+        <tr>
+          <th>
+            <span class="icon property-icon"
+              ><svg
+                class="typesTitle"
+              >
+                </svg></span
+            >Name
+          </th>
+          <th>
+            <span class="icon property-icon"
+              ><svg
+                class="typesText"
+              >
+                </svg></span
+            >Text
+          </th>
+          <th>
+            <span class="icon property-icon"
+              ><svg
+                class="typesSelect"
+              >
+                </svg></span
+            >Select
+          </th>
+          <th>
+            <span class="icon property-icon"
+              ><svg
+                class="typesMultipleSelect"
+              >
+                </svg></span
+            >Multi-select
+          </th>
+          <th>
+            <span class="icon property-icon"
+              ><svg
+                class="typesCheckbox"
+              >
+                </svg></span
+            >Checkbox
+          </th>
+          <th>
+            <span class="icon property-icon"
+              ><svg
+                class="typesNumber"
+              >
+                </svg></span
+            >Number
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="421a5c7b-5d4f-469d-b00b-cdbcd87833c8">
+          <td class="cell-title">
+            <a
+              href="Untitled%20Database%2077a6e37b9f014fffb4ebacf37d9120a2/@Untitled%20421a5c7b5d4f469db00bcdbcd87833c8.html"
+              >@Untitled
+            </a>
+          </td>
+          <td class="cell-LBE^"></td>
+          <td class="cell-vnv~">
+            <span class="selected-value select-value-color-purple">s</span>
+          </td>
+          <td class="cell-qUzA">
+            <span class="selected-value select-value-color-purple"
+              >aaa</span
+            >
+          </td>
+          <td class="cell-t&gt;Zc">
+            <div class="checkbox checkbox-on"></div>
+          </td>
+          <td class="cell-Oy}n">123</td>
+        </tr>
+        <tr id="bfdd7e43-902f-4a77-a08f-19e73c57764e">
+          <td class="cell-title">
+            <a
+              href="Untitled%20Database%2077a6e37b9f014fffb4ebacf37d9120a2/Untitled%20bfdd7e43902f4a77a08f19e73c57764e.html"
+              >Untitled</a
+            >
+          </td>
+          <td class="cell-LBE^">aaa</td>
+          <td class="cell-vnv~">
+            <span class="selected-value select-value-color-pink">a</span>
+          </td>
+          <td class="cell-qUzA">
+            <span class="selected-value select-value-color-pink">bbb</span>
+          </td>
+          <td class="cell-t&gt;Zc">
+            <div class="checkbox checkbox-off"></div>
+          </td>
+          <td class="cell-Oy}n"></td>
+        </tr>
+        <tr id="f2f5456d-55cd-4b47-8783-376586e6cc86">
+          <td class="cell-title">
+            <a
+              href="Untitled%20Database%2077a6e37b9f014fffb4ebacf37d9120a2/Untitled%20f2f5456d55cd4b478783376586e6cc86.html"
+              >Untitled</a
+            >
+          </td>
+          <td class="cell-LBE^"></td>
+          <td class="cell-vnv~">
+            <span class="selected-value select-value-color-purple">s</span>
+          </td>
+          <td class="cell-qUzA">
+            <span class="selected-value select-value-color-purple">aaa</span
+            ><span class="selected-value select-value-color-pink">bbb</span>
+          </td>
+          <td class="cell-t&gt;Zc">
+            <div class="checkbox checkbox-off"></div>
+          </td>
+          <td class="cell-Oy}n"></td>
+        </tr>
+      </tbody>
+    </table>
+    <br />
       </div>
     </article>
   </body>
@@ -425,7 +593,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
       text: [
         {
           insert: 'demo',
-          attributes: {},
+          'matchesReplaceMap[0]': {},
         },
       ],
       children: [],
@@ -433,42 +601,143 @@ test(scoped`import notion html-format table`, async ({ page }) => {
     {
       flavour: 'affine:database',
       databaseProps: {
-        id: '3',
+        id: '7',
         title: 'Database',
+        titleColumnName: 'Name',
         titleColumnWidth: 432,
-        rowIds: ['4', '5', '6'],
+        rowIds: ['8', '9', '10'],
         cells: {
-          '4': {
+          '8': {
             '1': {
               columnId: '1',
-              value: 'table-title2',
+              value: '',
+            },
+            '2': {
+              columnId: '2',
+              value: 'matchesReplaceMap[8]',
+            },
+            '3': {
+              columnId: '3',
+              value: ['matchesReplaceMap[12]'],
+            },
+            '4': {
+              columnId: '4',
+              value: 'on',
+            },
+            '5': {
+              columnId: '5',
+              value: '123',
             },
           },
-          '5': {
+          '9': {
             '1': {
               columnId: '1',
-              value: 'table-content2',
+              value: 'aaa',
+            },
+            '2': {
+              columnId: '2',
+              value: 'matchesReplaceMap[10]',
+            },
+            '3': {
+              columnId: '3',
+              value: ['matchesReplaceMap[14]'],
+            },
+            '4': {
+              columnId: '4',
+              value: '',
+            },
+            '5': {
+              columnId: '5',
+              value: '',
             },
           },
-          '6': {
+          '10': {
             '1': {
               columnId: '1',
+              value: '',
+            },
+            '2': {
+              columnId: '2',
+              value: 'matchesReplaceMap[8]',
+            },
+            '3': {
+              columnId: '3',
+              value: ['matchesReplaceMap[12]', 'matchesReplaceMap[14]'],
+            },
+            '4': {
+              columnId: '4',
+              value: '',
+            },
+            '5': {
+              columnId: '5',
               value: '',
             },
           },
         },
         columns: [
           {
-            name: '',
-            type: 'rich-text',
-            data: {},
             id: '1',
+            type: 'rich-text',
+            name: 'Text',
+            data: {},
           },
           {
-            name: '',
-            type: 'rich-text',
-            data: {},
             id: '2',
+            type: 'select',
+            name: 'Select',
+            data: {
+              options: [
+                {
+                  id: 'matchesReplaceMap[8]',
+                  value: 's',
+                  color: 'matchesReplaceMap[9]',
+                },
+                {
+                  id: 'matchesReplaceMap[10]',
+                  value: 'a',
+                  color: 'matchesReplaceMap[11]',
+                },
+              ],
+            },
+          },
+          {
+            id: '3',
+            type: 'multi-select',
+            name: 'Multi-select',
+            data: {
+              options: [
+                {
+                  id: 'matchesReplaceMap[12]',
+                  value: 'aaa',
+                  color: 'matchesReplaceMap[13]',
+                },
+                {
+                  id: 'matchesReplaceMap[14]',
+                  value: 'bbb',
+                  color: 'matchesReplaceMap[15]',
+                },
+              ],
+            },
+          },
+          {
+            id: '4',
+            type: 'checkbox',
+            name: 'Checkbox',
+            data: {},
+          },
+          {
+            id: '5',
+            type: 'number',
+            name: 'Number',
+            data: {
+              decimal: 0,
+            },
+          },
+          {
+            id: '6',
+            type: 'rich-text',
+            name: '',
+            data: {},
           },
         ],
       },
@@ -478,7 +747,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
           type: 'text',
           text: [
             {
-              insert: 'table-title1',
+              insert: '@Untitled\n            ',
             },
           ],
           children: [],
@@ -488,7 +757,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
           type: 'text',
           text: [
             {
-              insert: 'table-content1',
+              insert: 'Untitled',
             },
           ],
           children: [],
@@ -498,7 +767,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
           type: 'text',
           text: [
             {
-              insert: '',
+              insert: 'Untitled',
             },
           ],
           children: [],
@@ -508,7 +777,19 @@ test(scoped`import notion html-format table`, async ({ page }) => {
   ];
 
   const blocks = await transformMarkdown(page, tempText);
-  expect(blocks).toEqual(expectedValue);
+  const blocksString = JSON.stringify(blocks, null, 2);
+  const matches = blocksString.matchAll(
+    /("[A-Za-z0-9-_]{10}")|("var\(--affine-tag-[a-z]{3,10}\)")/g
+  );
+  const matchesReplaceMap = new Map();
+  Array.from(matches).map((match, index) =>
+    matchesReplaceMap.set(match[0], `"matchesReplaceMap[${index}]"`)
+  );
+  const replacedBlocksString = blocksString.replace(
+    /("[A-Za-z0-9-_]{10}")|("var\(--affine-tag-[a-z]{3,10}\)")/g,
+    match => matchesReplaceMap.get(match)
+  );
+  expect(JSON.parse(replacedBlocksString)).toEqual(expectedValue);
 });
 
 // todo this is temporary solution
