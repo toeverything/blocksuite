@@ -279,7 +279,7 @@ export class Workspace {
       await page.waitForLoaded();
     }
 
-    const sanitize = async (props: Record<string, never>) => {
+    const sanitize = async (props: Record<string, unknown>) => {
       const result: Record<string, unknown> = {};
 
       //TODO: https://github.com/toeverything/blocksuite/issues/2939
@@ -296,26 +296,32 @@ export class Workspace {
 
       // setup embed source
       if (props['sys:flavour'] === 'affine:image') {
-        try {
-          const resp = await fetch(props['prop:sourceId'], {
-            cache: 'no-cache',
-            mode: 'cors',
-            headers: {
-              Origin: window.location.origin,
-            },
-          });
-          const imgBlob = await resp.blob();
-          if (!imgBlob.type.startsWith('image/')) {
-            throw new Error('Embed source is not an image');
-          }
+        const maybeUrl = props['prop:sourceId'];
+        if (typeof maybeUrl !== 'string') {
+          throw new Error('Embed source is not a string');
+        }
+        if (maybeUrl.startsWith('http')) {
+          try {
+            const resp = await fetch(maybeUrl, {
+              cache: 'no-cache',
+              mode: 'cors',
+              headers: {
+                Origin: window.location.origin,
+              },
+            });
+            const imgBlob = await resp.blob();
+            if (!imgBlob.type.startsWith('image/')) {
+              throw new Error('Embed source is not an image');
+            }
 
-          assertExists(page);
-          const storage = page.blobs;
-          assertExists(storage);
-          props['prop:sourceId'] = (await storage.set(imgBlob)) as never;
-        } catch (e) {
-          console.error('Failed to fetch embed source');
-          console.error(e);
+            assertExists(page);
+            const storage = page.blobs;
+            assertExists(storage);
+            props['prop:sourceId'] = (await storage.set(imgBlob)) as never;
+          } catch (e) {
+            console.error('Failed to fetch embed source');
+            console.error(e);
+          }
         }
       }
 

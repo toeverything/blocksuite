@@ -409,16 +409,13 @@ export class EdgelessClipboard implements Clipboard {
     const { _edgeless } = this;
     const { surface } = _edgeless;
     const { zoom } = surface.viewport;
-    const { left, top, right, bottom, width, height } = getSelectedRect([
-      ...notes,
-      ...shapes,
-    ]);
-    const min = surface.toModelCoord(left, top);
-    const max = surface.toModelCoord(right, bottom);
-    const cx = (min[0] + max[0]) / 2;
-    const cy = (min[1] + max[1]) / 2;
-    const vx = cx - width / 2 / zoom;
-    const vy = cy - height / 2 / zoom;
+    const rect = getSelectedRect([...notes, ...shapes]);
+    const cx = (rect.left + rect.right) / 2;
+    const cy = (rect.top + rect.bottom) / 2;
+    const vx = cx - rect.width / 2;
+    const vy = cy - rect.height / 2;
+    const width = rect.width * zoom;
+    const height = rect.height * zoom;
 
     const container = document.createElement('div');
     container.style.position = 'relative';
@@ -464,14 +461,29 @@ export class EdgelessClipboard implements Clipboard {
       await new Promise(requestAnimationFrame);
 
       const canvas: HTMLCanvasElement = await html2canvas(container, {
-        backgroundColor: null,
+        ignoreElements: function (element: Element) {
+          if (
+            element.tagName === 'AFFINE-BLOCK-HUB' ||
+            element.tagName === 'EDGELESS-TOOLBAR' ||
+            element.classList.contains('dg')
+          ) {
+            return true;
+          } else {
+            return false;
+          }
+        },
+        onclone: function (documentClone: Document, element: HTMLElement) {
+          // html2canvas can't support transform feature
+          element.style.setProperty('transform', 'none');
+        },
+        backgroundColor: window.getComputedStyle(document.body).backgroundColor,
       });
       assertExists(canvas);
 
       // @ts-ignore
-      if (window.apis?.clipboard?.copyAsPng) {
+      if (window.apis?.clipboard?.copyAsImageFromString) {
         // @ts-ignore
-        await window.apis.clipboard?.copyAsPng(
+        await window.apis.clipboard?.copyAsImageFromString(
           canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
         );
       } else {
@@ -482,13 +494,9 @@ export class EdgelessClipboard implements Clipboard {
             CLIPBOARD_MIMETYPE.IMAGE_PNG
           )
         );
-
         assertExists(blob);
-
         await navigator.clipboard.write([
-          new ClipboardItem({
-            [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
-          }),
+          new ClipboardItem({ [blob.type]: blob }),
         ]);
       }
     } catch (error) {
