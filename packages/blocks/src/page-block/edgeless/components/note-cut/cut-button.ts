@@ -25,7 +25,7 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
     css`
       .scissors-button {
         transform: translate3d(-50%, 0, 0);
-        transition: transform 0.2s ease-out;
+        transition: transform 0.1s ease-out;
       }
 
       .scissors-button.slideout {
@@ -140,6 +140,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
         left: 0;
         top: 0;
         z-index: 1;
+        transform-origin: top left;
       }
     `,
   ];
@@ -149,13 +150,12 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
   show(rect: DOMRect, zoom: number) {
     this.style.display = 'block';
     this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0) scale(${zoom})`;
-    this.style.transformOrigin = `top left`;
 
     const rafId = requestAnimationFrame(() => {
-      this.style.transition = `transform 0.2s 0.2s ease-in-out, transform-origin 0.2s 0.2s ease-in-out`;
+      this.style.transition = `transform 0.1s 0.1s ease-in-out`;
       this.style.transform = `translate3d(${rect.x + rect.width * 0.8}px, ${
-        rect.y
-      }px, 0) scale(${zoom})`;
+        rect.y - 2
+      }px, 0) scale(${zoom * 1.2})`;
 
       if (rafId === this._rafId) this._rafId = 0;
     });
@@ -167,7 +167,6 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
     this.style.removeProperty('display');
     this.style.removeProperty('transform');
     this.style.removeProperty('transition');
-    this.style.removeProperty('transformOrigin');
   }
 
   override render() {
