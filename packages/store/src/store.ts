@@ -81,6 +81,8 @@ const flagsPreset = {
   enable_bookmark_operation: false,
   enable_note_index: false,
 
+  enable_note_cut: true,
+
   readonly: {},
 } satisfies BlockSuiteFlags;
 

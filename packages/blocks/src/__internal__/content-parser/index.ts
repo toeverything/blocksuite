@@ -326,8 +326,7 @@ export class ContentParser {
         }
         return;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderer(token: any) {
+      renderer(token: marked.Tokens.Generic) {
         return `<u>${token.text}</u>`;
       },
     };
@@ -349,12 +348,51 @@ export class ContentParser {
         }
         return;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderer(token: any) {
+      renderer(token: marked.Tokens.Generic) {
         return `<code>${token.text}</code>`;
       },
     };
-    marked.use({ extensions: [underline, inlineCode] });
+
+    const walkTokens = (token: marked.Token) => {
+      // fix: https://github.com/toeverything/blocksuite/issues/3304
+      if (
+        token.type === 'list_item' &&
+        token.tokens.length > 0 &&
+        token.tokens[0].type === 'list' &&
+        token.tokens[0].items.length === 1
+      ) {
+        const fistItem = token.tokens[0].items[0];
+        if (
+          fistItem.tokens.length === 0 ||
+          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
+        ) {
+          // transform list_item to text
+          const newToken =
+            fistItem.tokens.length === 1
+              ? (fistItem.tokens[0] as marked.Tokens.Text)
+              : ({
+                  raw: '',
+                  text: '',
+                  type: 'text',
+                  tokens: [],
+                } as marked.Tokens.Text);
+          const preText = fistItem.raw.substring(
+            0,
+            fistItem.raw.length - fistItem.text.length
+          );
+          newToken.raw = preText + newToken.raw;
+          newToken.text = preText + newToken.text;
+          newToken.tokens = newToken.tokens || [];
+          newToken.tokens.unshift({
+            type: 'text',
+            text: preText,
+            raw: preText,
+          });
+          token.tokens[0] = newToken;
+        }
+      }
+    };
+    marked.use({ extensions: [underline, inlineCode], walkTokens });
     const md2html = marked.parse(text);
     return this.htmlText2Block(md2html);
   }
