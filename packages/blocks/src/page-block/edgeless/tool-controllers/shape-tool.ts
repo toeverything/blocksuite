@@ -1,9 +1,8 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { Options } from '@blocksuite/phasor';
 import { Bound, Overlay, StrokeStyle } from '@blocksuite/phasor';
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { RoughCanvas } from '@blocksuite/phasor/rough/canvas.js';
-import type { Options } from '@blocksuite/phasor/rough/core.js';
+import { RoughCanvas } from '@blocksuite/phasor';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
