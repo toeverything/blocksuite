@@ -17,11 +17,7 @@ export abstract class DatabaseCellElement<
   @property({ attribute: false })
   isEditing!: boolean;
   @property({ attribute: false })
-  protected setEditing!: (editing: boolean) => void;
-
-  get page() {
-    return this.column.page;
-  }
+  public selectCurrentCell!: (editing: boolean) => void;
 
   get readonly(): boolean {
     return this.column.readonly;
@@ -35,22 +31,33 @@ export abstract class DatabaseCellElement<
     this.column.setValue(this.rowId, value, ops);
   }
 
-  protected _setEditing(editing: boolean) {
-    this.setEditing(editing);
+  public beforeEnterEditMode(): boolean {
+    return true;
   }
 
-  public enterEditMode() {
-    this._setEditing(true);
+  public onEnterEditMode(): void {
+    // do nothing
   }
 
-  public exitEditMode() {
-    this._setEditing(false);
+  public onExitEditMode() {
+    // do nothing
   }
 
   override connectedCallback() {
     super.connectedCallback();
     this.style.width = '100%';
     this.style.height = '100%';
+    this._disposables.addFromEvent(this, 'click', e => {
+      this.selectCurrentCell(true);
+    });
+  }
+
+  public focusCell() {
+    this.parentElement?.focus();
+  }
+
+  public blurCell() {
+    this.parentElement?.blur();
   }
 }
 
