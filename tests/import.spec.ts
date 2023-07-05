@@ -1046,3 +1046,103 @@ test(scoped`import notion html-format inline`, async ({ page }) => {
   const blocks = await transformMarkdown(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
+
+test(scoped`import notion markdown-format todo`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  // fix: https://github.com/toeverything/blocksuite/issues/3304
+  const tempText = `
+  - [ ]  1.
+  - [ ]  2.
+  - [ ]  3.
+  - [x]  4.
+  - [ ]  5. 
+  - [x]  
+      1.
+`;
+
+  const expectedValue = [
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: ' 1.',
+          attributes: {},
+        },
+      ],
+      children: [],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: ' 2.',
+          attributes: {},
+        },
+      ],
+      children: [],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: ' 3.',
+          attributes: {},
+        },
+      ],
+      children: [],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: true,
+      text: [
+        {
+          insert: ' 4.',
+          attributes: {},
+        },
+      ],
+      children: [],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: ' 5. ',
+          attributes: {},
+        },
+      ],
+      children: [],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: true,
+      text: [
+        {
+          insert: ' ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'numbered',
+          text: [],
+          children: [],
+        },
+      ],
+    },
+  ];
+
+  const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
+});
