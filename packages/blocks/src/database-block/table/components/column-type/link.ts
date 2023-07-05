@@ -51,17 +51,12 @@ export class LinkCell extends DatabaseCellElement<string> {
     }
   `;
 
-  override _setEditing(_: boolean) {
-    // override
-  }
-
   private _onClick = (event: Event) => {
     event.stopPropagation();
-
     const value = this.value ?? '';
 
     if (!value || !isValidLink(value)) {
-      this.setEditing(true);
+      this.selectCurrentCell(true);
       return;
     }
 
@@ -78,7 +73,7 @@ export class LinkCell extends DatabaseCellElement<string> {
 
   private _onEdit = (e: Event) => {
     e.stopPropagation();
-    this.setEditing(true);
+    this.selectCurrentCell(true);
   };
 
   override render() {
@@ -141,9 +136,8 @@ export class LinkCellEditing extends DatabaseCellElement<string> {
     this._container.setSelectionRange(end, end);
   };
 
-  override exitEditMode() {
+  override onExitEditMode() {
     this._setValue();
-    super.exitEditMode();
   }
 
   private _setValue = (value: string = this._container.value) => {
@@ -155,7 +149,7 @@ export class LinkCellEditing extends DatabaseCellElement<string> {
     if (e.key === 'Enter') {
       this._setValue();
       setTimeout(() => {
-        this.exitEditMode();
+        this.selectCurrentCell(false);
       });
     }
   };

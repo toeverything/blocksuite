@@ -232,7 +232,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
         this._onSoftEnter();
       } else {
         // exit editing
-        this._setEditing(false);
+        this.selectCurrentCell(false);
         this._container.blur();
       }
       event.preventDefault();

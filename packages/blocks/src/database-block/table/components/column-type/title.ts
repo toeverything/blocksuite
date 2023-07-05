@@ -1,4 +1,4 @@
-import type { TemplateResult } from 'lit';
+import type { PropertyValues, TemplateResult } from 'lit';
 import { css } from 'lit';
 import { html, literal } from 'lit/static-html.js';
 
@@ -37,8 +37,32 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     }
   `;
 
+  protected override firstUpdated(_changedProperties: PropertyValues) {
+    this._disposables.addFromEvent(
+      this,
+      'keydown',
+      e => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          this.selectCurrentCell(false);
+        }
+      },
+      true
+    );
+    setTimeout(() => {
+      this.querySelector('rich-text')?.vEditor?.slots.vRangeUpdated.on(
+        range => {
+          this.selectCurrentCell(true);
+        }
+      );
+    });
+  }
+
   override focusCell() {
     this.querySelector('rich-text')?.vEditor?.focusEnd();
+  }
+  override blurCell() {
+    this.querySelector<HTMLDivElement>('.virgo-editor')?.blur();
   }
 
   override render() {
