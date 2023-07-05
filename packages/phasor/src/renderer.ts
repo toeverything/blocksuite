@@ -45,7 +45,7 @@ export interface SurfaceViewport {
  * can be used for rendering non-CRDT state indicators.
  */
 export abstract class Overlay {
-  abstract render(ctx: CanvasRenderingContext2D): void;
+  abstract render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
 }
 
 export class Renderer implements SurfaceViewport {
@@ -317,7 +317,7 @@ export class Renderer implements SurfaceViewport {
     for (const overlay of this._overlays) {
       ctx.save();
       ctx.translate(-bound.x, -bound.y);
-      overlay.render(ctx);
+      overlay.render(ctx, rc);
       ctx.restore();
     }
 

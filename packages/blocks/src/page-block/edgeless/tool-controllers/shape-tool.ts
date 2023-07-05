@@ -1,8 +1,8 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Options } from '@blocksuite/phasor';
+import type { RoughCanvas } from '@blocksuite/phasor';
 import { Bound, Overlay, StrokeStyle } from '@blocksuite/phasor';
-import { RoughCanvas } from '@blocksuite/phasor';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
@@ -220,9 +220,8 @@ class ShapeOverlay extends Overlay {
     );
   }
 
-  override render(ctx: CanvasRenderingContext2D): void {
+  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     ctx.globalAlpha = this.shape.globalAlpha;
-    const rc = new RoughCanvas(ctx.canvas);
     this.shape.draw(ctx, rc);
   }
 }
