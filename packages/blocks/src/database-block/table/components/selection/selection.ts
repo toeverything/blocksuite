@@ -6,6 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import { getService } from '../../../../__internal__/service.js';
+import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import type {
   CellFocus,
   DatabaseSelection,
@@ -85,6 +86,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   override firstUpdated() {
     this._disposables.add(
       this.service.slots.databaseSelectionUpdated.on(({ selection, old }) => {
+        if (!activeEditorManager.isActive(this)) {
+          return;
+        }
         if (selection?.databaseId !== this.databaseId) {
           selection = undefined;
         }
@@ -414,7 +418,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         columnIndex,
       },
     };
-    this.focusRef.value?.scrollIntoView();
+    this.focusRef.value?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    });
   }
 
   selectRange(
