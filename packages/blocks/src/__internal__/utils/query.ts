@@ -541,6 +541,13 @@ export function isDatabaseInput(element: unknown): boolean {
   );
 }
 
+export function isDatabaseCell(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.tagName === 'affine-database-cell-container'.toUpperCase()
+  );
+}
+
 export function isRawInput(element: unknown): boolean {
   return (
     element instanceof HTMLInputElement && !!element.closest('affine-database')
