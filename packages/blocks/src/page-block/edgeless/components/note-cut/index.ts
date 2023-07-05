@@ -18,6 +18,10 @@ import {
   getBlockElementByModel,
   type NoteBlockModel,
 } from '../../../../index.js';
+import {
+  DefaultModeDragType,
+  type DefaultToolController,
+} from '../../tool-controllers/default-tool.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { NoteScissorsVisualButton } from './cut-button.js';
@@ -86,9 +90,19 @@ export class NoteCut extends WithDisposable(LitElement) {
     return this.edgelessPage.selection;
   }
 
+  private get _notHovering() {
+    return (
+      this.edgelessPage.edgelessTool.type !== 'default' ||
+      (
+        this.edgelessPage.service?.selection
+          ?.currentController as DefaultToolController
+      ).dragType !== DefaultModeDragType.None
+    );
+  }
+
   private _updateVisiblity(e: PointerEventState) {
     const block = this.selection.state.selected[0];
-    if (!block || !isTopLevelBlock(block)) {
+    if (this._notHovering || !block || !isTopLevelBlock(block)) {
       this._hide();
       return;
     }
@@ -163,9 +177,7 @@ export class NoteCut extends WithDisposable(LitElement) {
       return;
     }
 
-    this._noteModel = note;
-    this._blockModel = upperBlock;
-
+    const shouldTransition = note === this._noteModel;
     const noteContainer = noteElement.parentElement;
     const [baseX, baseY] = deserializeXYWH(note.xywh);
     const containerRect = noteContainer.getBoundingClientRect();
@@ -187,6 +199,8 @@ export class NoteCut extends WithDisposable(LitElement) {
       }
     }
 
+    this._noteModel = note;
+    this._blockModel = upperBlock;
     this._lastPosition = {
       transformX,
       transformY,
@@ -194,9 +208,17 @@ export class NoteCut extends WithDisposable(LitElement) {
       gapRect,
     };
 
-    this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0)`;
-    this.style.display = 'block';
-    this.style.zIndex = noteContainer.style.zIndex;
+    requestAnimationFrame(() => {
+      if (this.style.display === 'block' && shouldTransition) {
+        this.style.transition = 'transform .2s ease-in-out';
+      } else {
+        this.style.display = 'block';
+        this.style.removeProperty('transition');
+      }
+
+      this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0)`;
+      this.style.zIndex = noteContainer.style.zIndex;
+    });
   }
 
   private _hide() {

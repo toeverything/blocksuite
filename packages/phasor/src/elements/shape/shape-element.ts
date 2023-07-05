@@ -58,7 +58,7 @@ export class ShapeElement extends SurfaceElement<IShape> {
 
   override hitTest(x: number, y: number, options?: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
-    return hitTest(x, y, this, options);
+    return hitTest.apply(this, [x, y, options]);
   }
 
   override containedByBounds(bounds: Bound) {
