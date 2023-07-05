@@ -13,7 +13,7 @@ const buttonStyle = css`
     align-items: center;
     color: var(--affine-icon-color);
     border: 1px solid var(--affine-border-color);
-    background-color: var(--affine-background-primary-color);
+    background-color: var(--affine-hover-color-filled);
     cursor: pointer;
   }
 `;
@@ -30,7 +30,6 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
 
       .scissors-button.slideout {
         transform: translate3d(-150%, 0, 0) translate3d(3px, 0, 0);
-        background-color: var(--affine-hover-color);
       }
     `,
   ];
@@ -141,10 +140,6 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
         left: 0;
         top: 0;
         z-index: 1;
-      }
-
-      .scissors-button {
-        background-color: var(--affine-tag-white);
       }
     `,
   ];
