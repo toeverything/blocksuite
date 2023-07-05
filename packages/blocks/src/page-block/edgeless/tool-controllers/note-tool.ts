@@ -7,19 +7,20 @@ import {
   queryCurrentMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
-import { DEFAULT_NOTE_WIDTH } from '../utils/consts.js';
+import {
+  DEFAULT_NOTE_WIDTH,
+  NOTE_OVERLAY_CORNER_RADIUS,
+  NOTE_OVERLAY_DARK_BACKGROUND_COLOR,
+  NOTE_OVERLAY_HEIGHT,
+  NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR,
+  NOTE_OVERLAY_OFFSET_X,
+  NOTE_OVERLAY_OFFSET_Y,
+  NOTE_OVERLAY_STOKE_COLOR,
+  NOTE_OVERLAY_TEXT_COLOR,
+  NOTE_OVERLAY_WIDTH,
+} from '../utils/consts.js';
 import { addNote, type NoteOptions } from '../utils/note.js';
 import { EdgelessToolController } from './index.js';
-
-const OVERLAY_OFFSET_X = 6;
-const OVERLAY_OFFSET_Y = 6;
-const OVERLAY_WIDTH = 100;
-const OVERLAY_HEIGHT = 50;
-const OVERLAY_CORNER_RADIUS = 6;
-const OVERLAY_STOKE_COLOR = '#E3E2E4';
-const OVERLAY_TEXT_COLOR = '#77757D';
-const OVERLAY_LIGHT_BACKGROUND_COLOR = 'rgba(252, 252, 253, 1)';
-const OVERLAY_DARK_BACKGROUND_COLOR = 'rgb(32, 32, 32)';
 
 class NoteOverlay extends Overlay {
   x = 0;
@@ -30,43 +31,49 @@ class NoteOverlay extends Overlay {
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = this.globalAlpha;
     // Draw the overlay rectangle
-    ctx.strokeStyle = OVERLAY_STOKE_COLOR;
+    ctx.strokeStyle = NOTE_OVERLAY_STOKE_COLOR;
     ctx.fillStyle =
       this.themeMode === 'light'
-        ? OVERLAY_LIGHT_BACKGROUND_COLOR
-        : OVERLAY_DARK_BACKGROUND_COLOR;
+        ? NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR
+        : NOTE_OVERLAY_DARK_BACKGROUND_COLOR;
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(this.x + OVERLAY_CORNER_RADIUS, this.y);
-    ctx.lineTo(this.x + OVERLAY_WIDTH - OVERLAY_CORNER_RADIUS, this.y);
+    ctx.moveTo(this.x + NOTE_OVERLAY_CORNER_RADIUS, this.y);
+    ctx.lineTo(
+      this.x + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
+      this.y
+    );
     ctx.quadraticCurveTo(
-      this.x + OVERLAY_WIDTH,
+      this.x + NOTE_OVERLAY_WIDTH,
       this.y,
-      this.x + OVERLAY_WIDTH,
-      this.y + OVERLAY_CORNER_RADIUS
+      this.x + NOTE_OVERLAY_WIDTH,
+      this.y + NOTE_OVERLAY_CORNER_RADIUS
     );
     ctx.lineTo(
-      this.x + OVERLAY_WIDTH,
-      this.y + OVERLAY_HEIGHT - OVERLAY_CORNER_RADIUS
+      this.x + NOTE_OVERLAY_WIDTH,
+      this.y + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
     );
     ctx.quadraticCurveTo(
-      this.x + OVERLAY_WIDTH,
-      this.y + OVERLAY_HEIGHT,
-      this.x + OVERLAY_WIDTH - OVERLAY_CORNER_RADIUS,
-      this.y + OVERLAY_HEIGHT
+      this.x + NOTE_OVERLAY_WIDTH,
+      this.y + NOTE_OVERLAY_HEIGHT,
+      this.x + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
+      this.y + NOTE_OVERLAY_HEIGHT
     );
-    ctx.lineTo(this.x + OVERLAY_CORNER_RADIUS, this.y + OVERLAY_HEIGHT);
+    ctx.lineTo(
+      this.x + NOTE_OVERLAY_CORNER_RADIUS,
+      this.y + NOTE_OVERLAY_HEIGHT
+    );
     ctx.quadraticCurveTo(
       this.x,
-      this.y + OVERLAY_HEIGHT,
+      this.y + NOTE_OVERLAY_HEIGHT,
       this.x,
-      this.y + OVERLAY_HEIGHT - OVERLAY_CORNER_RADIUS
+      this.y + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
     );
-    ctx.lineTo(this.x, this.y + OVERLAY_CORNER_RADIUS);
+    ctx.lineTo(this.x, this.y + NOTE_OVERLAY_CORNER_RADIUS);
     ctx.quadraticCurveTo(
       this.x,
       this.y,
-      this.x + OVERLAY_CORNER_RADIUS,
+      this.x + NOTE_OVERLAY_CORNER_RADIUS,
       this.y
     );
     ctx.closePath();
@@ -74,7 +81,7 @@ class NoteOverlay extends Overlay {
     ctx.fill();
 
     // Draw the overlay text
-    ctx.fillStyle = OVERLAY_TEXT_COLOR;
+    ctx.fillStyle = NOTE_OVERLAY_TEXT_COLOR;
     let fontSize = 16;
     ctx.font = `${fontSize}px Arial`;
     ctx.textAlign = 'left';
@@ -82,12 +89,12 @@ class NoteOverlay extends Overlay {
 
     // measure the width of the text
     // if the text is wider than the rectangle, reduce the maximum width of the text
-    while (ctx.measureText(this.text).width > OVERLAY_WIDTH - 10) {
+    while (ctx.measureText(this.text).width > NOTE_OVERLAY_WIDTH - 10) {
       fontSize -= 1;
       ctx.font = `${fontSize}px Arial`;
     }
 
-    ctx.fillText(this.text, this.x + 10, this.y + OVERLAY_HEIGHT / 2);
+    ctx.fillText(this.text, this.x + 10, this.y + NOTE_OVERLAY_HEIGHT / 2);
   }
 }
 export class NoteToolController extends EdgelessToolController<NoteTool> {
@@ -182,8 +189,8 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
   private _updateOverlayPosition(x: number, y: number) {
     if (!this._noteOverlay) return;
-    this._noteOverlay.x = x + OVERLAY_OFFSET_X;
-    this._noteOverlay.y = y + OVERLAY_OFFSET_Y;
+    this._noteOverlay.x = x + NOTE_OVERLAY_OFFSET_X;
+    this._noteOverlay.y = y + NOTE_OVERLAY_OFFSET_Y;
     this._edgeless.surface.refresh();
   }
 

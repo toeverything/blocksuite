@@ -11,20 +11,15 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../components/component-toolbar/change-shape-button.js';
 import { isTransparent } from '../components/panel/color-panel.js';
+import {
+  SHAPE_OVERLAY_HEIGHT,
+  SHAPE_OVERLAY_OFFSET_X,
+  SHAPE_OVERLAY_OFFSET_Y,
+  SHAPE_OVERLAY_OPTIONS,
+  SHAPE_OVERLAY_WIDTH,
+} from '../utils/consts.js';
 import type { SelectionArea } from '../utils/selection-manager.js';
 import { EdgelessToolController } from './index.js';
-
-const DEFAULT_SHAPE_WIDTH = 80;
-const DEFAULT_SHAPE_HEIGHT = 80;
-const DEFAULT_SHAPE_OFFSET_X = 6;
-const DEFAULT_SHAPE_OFFSET_Y = 6;
-const DEFAULT_SHAPE_OPTIONS = {
-  seed: 0,
-  roughness: 0.1,
-  strokeLineDash: [0, 0],
-  stroke: 'black',
-  strokeWidth: 4,
-};
 
 abstract class Shape {
   x: number;
@@ -53,10 +48,10 @@ abstract class Shape {
 class RectShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.rectangle(
-      this.x + DEFAULT_SHAPE_OFFSET_X,
-      this.y + DEFAULT_SHAPE_OFFSET_Y,
-      DEFAULT_SHAPE_WIDTH,
-      DEFAULT_SHAPE_HEIGHT,
+      this.x + SHAPE_OVERLAY_OFFSET_X,
+      this.y + SHAPE_OVERLAY_OFFSET_Y,
+      SHAPE_OVERLAY_WIDTH,
+      SHAPE_OVERLAY_HEIGHT,
       this.options
     );
   }
@@ -66,9 +61,9 @@ class TriangleShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.polygon(
       [
-        [this.x + DEFAULT_SHAPE_WIDTH / 2, this.y],
-        [this.x, this.y + DEFAULT_SHAPE_HEIGHT],
-        [this.x + DEFAULT_SHAPE_WIDTH, this.y + DEFAULT_SHAPE_HEIGHT],
+        [this.x + SHAPE_OVERLAY_WIDTH / 2, this.y],
+        [this.x, this.y + SHAPE_OVERLAY_HEIGHT],
+        [this.x + SHAPE_OVERLAY_WIDTH, this.y + SHAPE_OVERLAY_HEIGHT],
       ],
       this.options
     );
@@ -79,10 +74,10 @@ class DiamondShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.polygon(
       [
-        [this.x + DEFAULT_SHAPE_WIDTH / 2, this.y],
-        [this.x + DEFAULT_SHAPE_WIDTH, this.y + DEFAULT_SHAPE_HEIGHT / 2],
-        [this.x + DEFAULT_SHAPE_WIDTH / 2, this.y + DEFAULT_SHAPE_HEIGHT],
-        [this.x, this.y + DEFAULT_SHAPE_HEIGHT / 2],
+        [this.x + SHAPE_OVERLAY_WIDTH / 2, this.y],
+        [this.x + SHAPE_OVERLAY_WIDTH, this.y + SHAPE_OVERLAY_HEIGHT / 2],
+        [this.x + SHAPE_OVERLAY_WIDTH / 2, this.y + SHAPE_OVERLAY_HEIGHT],
+        [this.x, this.y + SHAPE_OVERLAY_HEIGHT / 2],
       ],
       this.options
     );
@@ -92,10 +87,10 @@ class DiamondShape extends Shape {
 class EllipseShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.ellipse(
-      this.x + DEFAULT_SHAPE_WIDTH / 2,
-      this.y + DEFAULT_SHAPE_HEIGHT / 2,
-      DEFAULT_SHAPE_WIDTH,
-      DEFAULT_SHAPE_HEIGHT,
+      this.x + SHAPE_OVERLAY_WIDTH / 2,
+      this.y + SHAPE_OVERLAY_HEIGHT / 2,
+      SHAPE_OVERLAY_WIDTH,
+      SHAPE_OVERLAY_HEIGHT,
       this.options
     );
   }
@@ -105,13 +100,13 @@ class RoundedRectShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     const radius = 0.1;
     const r = Math.min(
-      DEFAULT_SHAPE_WIDTH * radius,
-      DEFAULT_SHAPE_HEIGHT * radius
+      SHAPE_OVERLAY_WIDTH * radius,
+      SHAPE_OVERLAY_HEIGHT * radius
     );
     const x0 = this.x + r;
-    const x1 = this.x + DEFAULT_SHAPE_WIDTH + 20 - r;
+    const x1 = this.x + SHAPE_OVERLAY_WIDTH + 20 - r;
     const y0 = this.y + r;
-    const y1 = this.y + DEFAULT_SHAPE_HEIGHT - r;
+    const y1 = this.y + SHAPE_OVERLAY_HEIGHT - r;
     const path = `
         M${x0},${this.y} L${x1},${this.y} 
         A${r},${r} 0 0 1 ${x1},${y0} 
@@ -164,7 +159,7 @@ class ShapeOverlay extends Overlay {
     y = 0,
     globalAlpha = 0,
     type = 'rect',
-    options = DEFAULT_SHAPE_OPTIONS
+    options = SHAPE_OVERLAY_OPTIONS
   ) {
     super();
     this.shape = ShapeFactory.createShape(x, y, globalAlpha, type, options);
@@ -401,7 +396,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     if (!this._shapeOverlay) return;
     // shpae options, like stroke color, fill color, etc.
     const options = {
-      ...DEFAULT_SHAPE_OPTIONS,
+      ...SHAPE_OVERLAY_OPTIONS,
       stroke: this.tool.strokeColor,
     };
     this._shapeOverlay.setShape(this.tool.shape, options);
@@ -424,7 +419,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     this._shapeOverlay = new ShapeOverlay();
     // shpae options, like stroke color, fill color, etc.
     const options = {
-      ...DEFAULT_SHAPE_OPTIONS,
+      ...SHAPE_OVERLAY_OPTIONS,
       stroke: this.tool.strokeColor,
     };
     this._shapeOverlay.setShape(this.tool.shape, options);
