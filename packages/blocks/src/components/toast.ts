@@ -1,4 +1,4 @@
-import { css, html, type TemplateResult } from 'lit';
+import { html, type TemplateResult } from 'lit';
 
 let ToastContainer: HTMLDivElement | null = null;
 
@@ -21,7 +21,7 @@ const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
 };
 
 const createToastContainer = () => {
-  const styles = css`
+  const styles = `
     position: fixed;
     z-index: 9999;
     top: 16px;
@@ -50,7 +50,7 @@ export const toast = (message: string, duration = 2500) => {
     ToastContainer = createToastContainer();
   }
 
-  const styles = css`
+  const styles = `
     max-width: 480px;
     text-align: center;
     font-family: var(--affine-font-family);
