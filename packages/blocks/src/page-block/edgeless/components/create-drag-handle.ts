@@ -3,17 +3,15 @@ import { assertExists } from '@blocksuite/store';
 import type {
   BlockComponentElement,
   EditingState,
+  Point,
 } from '../../../__internal__/index.js';
 import {
-  getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getClosestNoteBlockElementById,
   getHoveringNote,
   getModelByBlockElement,
-  getRectByBlockElement,
   isInSamePath,
-  Point,
   Rect,
 } from '../../../__internal__/index.js';
 import { DragHandle } from '../../../components/index.js';
@@ -68,39 +66,6 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       }
       // blank area
       page.captureSync();
-
-      const parent = page.getParent(models[0]);
-      assertExists(parent);
-
-      const firstModelIndex = parent.children.findIndex(
-        m => m.id === models[0].id
-      );
-      const lastModelIndex = parent.children.findIndex(
-        m => m.id === models[models.length - 1].id
-      );
-
-      pageBlock.moveBlocksWithNewNote(models, point, {
-        rect: getRectByBlockElement(blockElementsExcludeSubtrees[0]),
-        focus: true,
-        noteIndex: firstModelIndex === 0 ? 0 : undefined,
-      });
-
-      if (
-        firstModelIndex !== 0 &&
-        lastModelIndex !== parent.children.length - 1
-      ) {
-        const nextFirstBlockElement = getBlockElementByModel(
-          parent?.children[lastModelIndex]
-        );
-
-        assertExists(nextFirstBlockElement);
-        const nextFirstBlockRect = getRectByBlockElement(nextFirstBlockElement);
-        pageBlock.moveBlocksWithNewNote(
-          parent?.children.slice(lastModelIndex),
-          new Point(nextFirstBlockRect.x, nextFirstBlockRect.y),
-          { rect: nextFirstBlockRect }
-        );
-      }
     },
     setDragType(dragging: boolean) {
       const { selection } = pageBlock;

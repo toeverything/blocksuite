@@ -132,7 +132,6 @@ export class PageMetaData extends WithDisposable(LitElement) {
     }
 
     .add-tag {
-      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -141,10 +140,11 @@ export class PageMetaData extends WithDisposable(LitElement) {
     .add-tag svg {
       width: 16px;
       height: 16px;
+      border-radius: 4px;
       fill: var(--affine-icon-color);
     }
 
-    .add-tag:hover {
+    .add-tag:hover svg {
       background-color: var(--affine-hover-color);
     }
 

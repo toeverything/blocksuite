@@ -139,7 +139,7 @@ function backlinkPopover(backlinks: BacklinkData[]) {
             width="248px"
             height="32px"
             text="${title}"
-            @click="${link.jump}"
+            @mousedown="${link.jump}"
           >
             ${link.icon}
           </icon-button>`;

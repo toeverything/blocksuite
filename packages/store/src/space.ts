@@ -91,7 +91,7 @@ export class Space<
 
     let subDoc = this.doc.spaces.get(prefixedId);
     if (!subDoc) {
-      subDoc = new Y.Doc();
+      subDoc = new Y.Doc({ guid: prefixedId });
       this.doc.spaces.set(prefixedId, subDoc);
       this._loaded = true;
       this._onLoadSlot.emit();

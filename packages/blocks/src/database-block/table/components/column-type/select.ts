@@ -42,7 +42,7 @@ export class SelectCellEditing extends DatabaseCellElement<
   };
 
   _editComplete = () => {
-    this._setEditing(false);
+    this.selectCurrentCell(false);
   };
   _onOptionsChange = (options: SelectTag[]) => {
     this.column.updateData(data => {

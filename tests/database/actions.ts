@@ -15,7 +15,6 @@ import {
   getEditorLocator,
   waitNextFrame,
 } from '../utils/actions/misc.js';
-import { assertClassName } from '../utils/asserts.js';
 export async function initDatabaseColumn(page: Page, title = '') {
   await focusDatabaseHeader(page);
   const editor = getEditorLocator(page);

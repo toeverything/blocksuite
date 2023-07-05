@@ -64,25 +64,21 @@ export const DiamondMethods: ShapeMethods = {
     );
   },
 
-  hitTest(
-    x: number,
-    y: number,
-    element: ShapeElement,
-    options?: HitTestOptions
-  ) {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h / 2],
-        [x + w / 2, y],
-        [x + w, y + h / 2],
-        [x + w / 2, y + h],
-      ]
+  hitTest(this: ShapeElement, x: number, y: number, options?: HitTestOptions) {
+    const points = getPointsFromBoundsWithRotation(this, ({ x, y, w, h }) => [
+      [x, y + h / 2],
+      [x + w / 2, y],
+      [x + w, y + h / 2],
+      [x + w / 2, y + h],
+    ]);
+
+    let hited = pointOnPolygonStoke(
+      [x, y],
+      points,
+      (options?.expand ?? 1) / (this.renderer?.zoom ?? 1)
     );
 
-    let hited = pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
-
-    if (element.filled && !hited) {
+    if (this.filled && !hited) {
       hited = pointInPolygon([x, y], points);
     }
 

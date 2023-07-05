@@ -140,7 +140,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     const inputValue = this.text.trim();
     if (event.key === 'Backspace' && inputValue === '') {
       this._onDeleteSelected(this.value, this.value[this.value.length - 1]);
-    } else if (event.key === 'Enter') {
+    } else if (event.key === 'Enter' && !event.isComposing) {
       this.selectedTag?.select();
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
