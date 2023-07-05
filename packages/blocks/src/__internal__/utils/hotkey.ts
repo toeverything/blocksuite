@@ -50,11 +50,12 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
       return false;
     }
+    if (isDatabaseCell(event.target)) {
+      return false;
+    }
     // undo/redo should work in database title or cell container
     if (
-      (isInsideDatabaseTitle(event.target) ||
-        isDatabaseInput(event.target) ||
-        isDatabaseCell(event.target)) &&
+      (isInsideDatabaseTitle(event.target) || isDatabaseInput(event.target)) &&
       isUndoRedo(event)
     ) {
       return false;
