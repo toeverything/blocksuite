@@ -54,13 +54,13 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   private _selectCurrentCell = (editing: boolean) => {
     const selection = this.closest('affine-database-table')?.selection;
     if (selection) {
-      selection.forceSelect({
+      selection.selection = {
         focus: {
           rowIndex: this.rowIndex,
           columnIndex: this.columnIndex,
         },
         isEditing: editing,
-      });
+      };
     }
   };
 
@@ -76,7 +76,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
   private _cell = createRef<DatabaseCellElement<unknown>>();
 
-  public get cell() {
+  public get cell(): DatabaseCellElement<unknown> | undefined {
     return this._cell.value;
   }
 

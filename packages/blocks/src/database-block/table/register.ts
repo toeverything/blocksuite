@@ -31,8 +31,12 @@ export abstract class DatabaseCellElement<
     this.column.setValue(this.rowId, value, ops);
   }
 
-  public onEnterEditMode(): boolean {
+  public beforeEnterEditMode(): boolean {
     return true;
+  }
+
+  public onEnterEditMode(): void {
+    // do nothing
   }
 
   public onExitEditMode() {

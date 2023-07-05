@@ -115,6 +115,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           );
           const cell = container?.cell;
           if (selection.isEditing) {
+            cell?.onEnterEditMode();
             container.isEditing = true;
             cell?.focusCell();
           } else {
@@ -190,7 +191,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         focus.columnIndex
       );
       const cell = container?.cell;
-      const isEditing = cell ? cell.onEnterEditMode() : true;
+      const isEditing = cell ? cell.beforeEnterEditMode() : true;
       this.service.select({
         ...selection,
         isEditing,
@@ -198,23 +199,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       return;
     }
     this.service.select(selection);
-  }
-
-  forceSelect(data: Omit<DatabaseSelection, 'databaseId'> | undefined) {
-    const selection = data
-      ? { ...data, databaseId: this.databaseId }
-      : undefined;
-    this.service.select(selection);
-  }
-
-  setEditing(focus: CellFocus, editing: boolean) {
-    const cell = this.getCellContainer(focus.rowIndex, focus.columnIndex)?.cell;
-    if (cell && (editing ? cell.onEnterEditMode() : cell.onExitEditMode())) {
-      this.selection = {
-        focus,
-        isEditing: editing,
-      };
-    }
   }
 
   cellPosition(left: number, top: number) {
@@ -366,6 +350,8 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     if (evt.key === hotkeys.Enter) {
       this.selection = {
         ...selection,
+        rowsSelection: undefined,
+        columnsSelection: undefined,
         isEditing: true,
       };
       return true;
