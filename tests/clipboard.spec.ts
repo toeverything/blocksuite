@@ -563,12 +563,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, 'abc', true);
   await pressEscape(page);
   await selectAllByKeyboard(page);
-  await waitNextFrame(page);
-  await selectAllByKeyboard(page);
   await copyByKeyboard(page);
-  await waitNextFrame(page);
-
-  await focusRichText(page, 1);
+  await pressEnter(page);
   await pasteByKeyboard(page);
   await page.waitForTimeout(100);
 
@@ -592,6 +588,9 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
     <affine:database
       prop:columns="Array [1]"
       prop:title="Database 1"
@@ -631,6 +630,9 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
     <affine:paragraph
       prop:type="text"
     />
