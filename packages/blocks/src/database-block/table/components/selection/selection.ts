@@ -438,9 +438,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     div.style.width = `${width}px`;
     div.style.height = `${height}px`;
     div.style.display = 'block';
-    if (focus?.columnIndex === -1) {
-      div.style.border = '2px solid var(--affine-primary-color)';
-    }
+    const isRowSelection = focus?.columnIndex === -1;
+    div.style.border = isRowSelection
+      ? '2px solid var(--affine-primary-color)'
+      : 'unset';
   }
 
   updateFocusSelectionStyle(focus?: CellFocus, isEditing = false) {
