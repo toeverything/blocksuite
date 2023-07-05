@@ -28,9 +28,9 @@ export interface ShapeMethods {
     element: ShapeElement
   ) => void;
   hitTest: (
+    this: ShapeElement,
     x: number,
     y: number,
-    element: ShapeElement,
     options?: HitTestOptions
   ) => boolean;
   containedByBounds: (bounds: Bound, element: ShapeElement) => boolean;

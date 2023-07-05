@@ -55,13 +55,13 @@ export class BrushElement extends SurfaceElement<IBrush> {
     // const insideBoundingBox = super.hitTest(x, y, options);
     // if (!insideBoundingBox) return false;
 
-    const { rotate, points, _testCtx } = this;
+    const { rotate, points, _testCtx, renderer } = this;
     const [x, y, w, h] = this.deserializeXYWH();
     const command = getSvgPathFromStroke(getSolidStrokePoints(points, 3));
     const path = new Path2D(command);
 
     if (_testCtx.lineWidth !== (options?.expand ?? 1)) {
-      _testCtx.lineWidth = options?.expand ?? 1;
+      _testCtx.lineWidth = (options?.expand ?? 1) / (renderer?.zoom ?? 1);
     }
 
     const cx = w / 2;
@@ -147,7 +147,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
     }
   }
   override containedByBounds(bounds: Bound) {
-    return false;
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
   }
 
   override getNearestPoint(point: IVec): IVec {

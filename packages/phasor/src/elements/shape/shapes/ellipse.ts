@@ -54,24 +54,19 @@ export const EllipseMethods: ShapeMethods = {
     });
   },
 
-  hitTest(
-    x: number,
-    y: number,
-    element: ShapeElement,
-    options?: HitTestOptions
-  ) {
+  hitTest(this: ShapeElement, x: number, y: number, options?: HitTestOptions) {
     const point = [x, y];
-    const expand = options?.expand ?? 1;
-    const rx = element.w / 2;
-    const ry = element.h / 2;
-    const center = [element.x + rx, element.y + ry];
-    const rad = (element.rotate * Math.PI) / 180;
+    const expand = (options?.expand ?? 1) / (this.renderer?.zoom ?? 1);
+    const rx = this.w / 2;
+    const ry = this.h / 2;
+    const center = [this.x + rx, this.y + ry];
+    const rad = (this.rotate * Math.PI) / 180;
 
     let hited =
       pointInEllipse(point, center, rx + expand, ry + expand, rad) &&
       !pointInEllipse(point, center, rx - expand, ry - expand, rad);
 
-    if (element.filled && !hited) {
+    if (this.filled && !hited) {
       hited = pointInEllipse(point, center, rx, ry, rad);
     }
 
