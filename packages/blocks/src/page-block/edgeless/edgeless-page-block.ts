@@ -70,6 +70,7 @@ import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
+import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
@@ -99,6 +100,7 @@ import {
 } from './utils/selection-manager.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 
+NoteCut;
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
@@ -313,6 +315,10 @@ export class EdgelessPageBlockComponent
   // Gets the sorted notes.
   get sortedNotes() {
     return this.notes.sort(compare);
+  }
+
+  get enableNoteCut() {
+    return this.page.awarenessStore.getFlag('enable_note_cut');
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -1253,7 +1259,12 @@ export class EdgelessPageBlockComponent
         style=${styleMap(blockContainerStyle)}
       >
         <div class="affine-block-children-container edgeless">
-          <div class="affine-edgeless-layer">${notesContainer}</div>
+          <div class="affine-edgeless-layer">
+            ${this.enableNoteCut
+              ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
+              : nothing}
+            ${notesContainer}
+          </div>
         </div>
         <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}
