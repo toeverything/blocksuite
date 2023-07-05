@@ -22,16 +22,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   private _databaseSelection?: DatabaseSelection;
 
   slots = {
-    databaseSelectionUpdated: new Slot<DatabaseSelectionState>(),
+    databaseSelectionUpdated: new Slot<{
+      selection: DatabaseSelectionState;
+      old: DatabaseSelectionState;
+    }>(),
   };
-
-  constructor() {
-    super();
-
-    this.slots.databaseSelectionUpdated.on(selection => {
-      this._databaseSelection = selection;
-    });
-  }
 
   initDatabaseBlock(
     page: Page,
@@ -131,8 +126,12 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   }
 
   select(state: DatabaseSelectionState) {
+    const old = this._databaseSelection;
     this._databaseSelection = state;
-    this.slots.databaseSelectionUpdated.emit(state);
+    this.slots.databaseSelectionUpdated.emit({
+      selection: state,
+      old,
+    });
   }
 
   getSelection() {

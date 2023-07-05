@@ -22,7 +22,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       align-items: center;
       width: 100%;
       height: 100%;
-      border-right: 1px solid var(--affine-border-color);
+      border: none;
+      outline: none;
+      border-right: 1px solid var(--affine-border-color) !important;
     }
 
     affine-database-cell-container * {
@@ -70,12 +72,12 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     const service = getService('affine:database');
     if (isEditing) {
       this.editingDisposable = service.slots.databaseSelectionUpdated.on(
-        state => {
+        ({ selection }) => {
           if (
-            !state ||
-            !state.isEditing ||
-            state.focus.rowIndex !== this.rowIndex ||
-            state.focus.columnIndex !== this.columnIndex
+            !selection ||
+            !selection.isEditing ||
+            selection.focus.rowIndex !== this.rowIndex ||
+            selection.focus.columnIndex !== this.columnIndex
           ) {
             this.editingDisposable?.dispose();
             this.editingDisposable = undefined;

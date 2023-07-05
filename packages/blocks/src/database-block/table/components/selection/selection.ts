@@ -43,10 +43,11 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       width: 100%;
       z-index: 1;
       box-sizing: border-box;
-      border: 2px solid var(--affine-primary-color);
+      border: 2px solid var(--affine-primary-color) !important;
       border-radius: 2px;
       pointer-events: none;
       display: none;
+      outline: none;
     }
   `;
 
@@ -83,7 +84,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     this._disposables.add(
-      this.service.slots.databaseSelectionUpdated.on(selection => {
+      this.service.slots.databaseSelectionUpdated.on(({ selection, old }) => {
         if (selection?.databaseId !== this.databaseId) {
           selection = undefined;
         }
@@ -92,14 +93,21 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           selection?.columnsSelection
         );
         this.updateFocusSelectionStyle(selection?.focus, selection?.isEditing);
+        if (selection) {
+          console.log(selection);
+          this.getCellContainer(
+            selection.focus.rowIndex,
+            selection.focus.columnIndex
+          )?.cell?.focusCell();
+        }
       })
     );
     this._disposables.add({
       dispose: this.eventDispatcher.add('click', context => {
         const event = context.get('pointerState').event;
         const target = event.target;
-        this.selection = undefined;
         if (target instanceof Element && this.isCurrentDatabase(target)) {
+          this.selection = undefined;
           const cell = target.closest('affine-database-cell-container');
           if (cell) {
             cell?.cell?.enterEditMode();
@@ -241,8 +249,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       };
     };
     startDrag<
-      { row: MultiSelection; column: MultiSelection } | undefined,
-      { x: number; y: number }
+      | {
+          row: MultiSelection;
+          column: MultiSelection;
+        }
+      | undefined,
+      {
+        x: number;
+        y: number;
+      }
     >(evt, {
       transform: evt => ({ x: evt.x, y: evt.y }),
       onDrag: () => undefined,
@@ -515,7 +530,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   override render() {
     return html`
       <div ${ref(this.selectionRef)} class="database-selection"></div>
-      <div ${ref(this.focusRef)} class="database-focus"></div>
+      <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
   }
 }

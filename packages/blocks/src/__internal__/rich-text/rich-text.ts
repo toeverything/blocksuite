@@ -165,7 +165,7 @@ export class RichText extends ShadowlessElement {
     this._vEditor = new VEditor(this.model.text.yText, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.model.page, this._vEditor);
+    setupVirgoScroll(this, this._vEditor);
     const textSchema = this.textSchema;
     assertExists(
       textSchema,

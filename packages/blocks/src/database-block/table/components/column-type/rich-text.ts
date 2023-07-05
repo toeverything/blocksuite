@@ -5,6 +5,7 @@ import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
+import { Text as YText } from 'yjs';
 
 import type {
   AffineTextAttributes,
@@ -105,7 +106,7 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
   }
 
   private _initYText = (text?: string) => {
-    const yText = new this.column.page.YText(text);
+    const yText = new YText(text);
 
     this.onChange(yText);
     return yText;
@@ -127,7 +128,7 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
     this.vEditor = new VEditor(value, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.column.page, this.vEditor);
+    setupVirgoScroll(this, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.setReadonly(true);
   }
@@ -181,7 +182,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
   }
 
   private _initYText = (text?: string) => {
-    const yText = new this.page.YText(text);
+    const yText = new YText(text);
 
     this.onChange(yText);
     return yText;
@@ -203,7 +204,7 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     this.vEditor = new VEditor(value, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.column.page, this.vEditor);
+    setupVirgoScroll(this, this.vEditor);
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,

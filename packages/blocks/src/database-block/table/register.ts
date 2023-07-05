@@ -19,10 +19,6 @@ export abstract class DatabaseCellElement<
   @property({ attribute: false })
   protected setEditing!: (editing: boolean) => void;
 
-  get page() {
-    return this.column.page;
-  }
-
   get readonly(): boolean {
     return this.column.readonly;
   }
@@ -51,6 +47,14 @@ export abstract class DatabaseCellElement<
     super.connectedCallback();
     this.style.width = '100%';
     this.style.height = '100%';
+  }
+  public focusCell() {
+    console.log('focus');
+    this.parentElement?.focus();
+  }
+
+  public blurCell() {
+    this.parentElement?.blur();
   }
 }
 

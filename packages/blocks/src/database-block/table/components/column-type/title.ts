@@ -11,6 +11,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     affine-database-title-cell {
       background-color: var(--affine-hover-color);
     }
+
     .affine-database-block-row-cell-content {
       display: flex;
       align-items: center;
@@ -35,6 +36,10 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
       margin-top: unset;
     }
   `;
+
+  override focusCell() {
+    this.querySelector('rich-text')?.vEditor?.focusEnd();
+  }
 
   override render() {
     return html`
