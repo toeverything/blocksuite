@@ -117,7 +117,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           if (selection.isEditing) {
             container.isEditing = true;
             cell?.focusCell();
-            cell?.onEnterEditMode();
           } else {
             container.focus();
           }

@@ -1,6 +1,7 @@
 import type { KeyHandler } from 'hotkeys-js';
 import hotkeys from 'hotkeys-js';
 
+import { DatabaseCellContainer } from '../../database-block/table/components/cell-container.js';
 import {
   isCaptionElement,
   isDatabaseInput,
@@ -58,6 +59,10 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     }
     // undo/redo should work in edgeless text editor
     if (isInsideEdgelessTextEditor(event.target) && isUndoRedo(event)) {
+      return false;
+    }
+    // focus on database cell
+    if (event.target instanceof DatabaseCellContainer) {
       return false;
     }
     // Some event dispatch from body
