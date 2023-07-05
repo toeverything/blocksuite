@@ -75,6 +75,11 @@ export class NoteCut extends WithDisposable(LitElement) {
         this._updateVisiblity(e);
       })
     );
+    this._disposables.add(
+      this.edgelessPage.service.uiEventDispatcher.add('wheel', () => {
+        this._hide();
+      })
+    );
   }
 
   private get selection() {
