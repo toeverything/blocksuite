@@ -56,6 +56,7 @@ import {
   getThemePropertyValue,
   listenToThemeChange,
 } from '../../__internal__/theme/utils.js';
+import { toast } from '../../components/toast.js';
 import type {
   BlockHost,
   DragHandle,
@@ -600,9 +601,10 @@ export class EdgelessPageBlockComponent
       slots.copyAsPng.on(({ notes, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
-        this.clipboard
-          .copyAsPng(notes, shapes)
-          .finally(() => (canCopyAsPng = true));
+        this.clipboard.copyAsPng(notes, shapes).finally(() => {
+          canCopyAsPng = true;
+          toast('Copied to clipboard');
+        });
       })
     );
   }
