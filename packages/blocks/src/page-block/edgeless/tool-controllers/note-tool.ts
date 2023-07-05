@@ -23,7 +23,7 @@ class NoteOverlay extends Overlay {
   y = 0;
   text = '';
   globalAlpha = 0;
-  backgroundColor = 'white';
+  backgroundColor = 'rgba(0, 0, 0, 0)';
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = this.globalAlpha;
     // TODO: use theme color (should consider dark mode)
