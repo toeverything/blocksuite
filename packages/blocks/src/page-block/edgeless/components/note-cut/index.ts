@@ -18,6 +18,10 @@ import {
   getBlockElementByModel,
   type NoteBlockModel,
 } from '../../../../index.js';
+import {
+  DefaultModeDragType,
+  type DefaultToolController,
+} from '../../tool-controllers/default-tool.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { NoteScissorsVisualButton } from './cut-button.js';
@@ -86,9 +90,19 @@ export class NoteCut extends WithDisposable(LitElement) {
     return this.edgelessPage.selection;
   }
 
+  private get _notHovering() {
+    return (
+      this.edgelessPage.edgelessTool.type !== 'default' ||
+      (
+        this.edgelessPage.service?.selection
+          ?.currentController as DefaultToolController
+      ).dragType !== DefaultModeDragType.None
+    );
+  }
+
   private _updateVisiblity(e: PointerEventState) {
     const block = this.selection.state.selected[0];
-    if (!block || !isTopLevelBlock(block)) {
+    if (this._notHovering || !block || !isTopLevelBlock(block)) {
       this._hide();
       return;
     }
