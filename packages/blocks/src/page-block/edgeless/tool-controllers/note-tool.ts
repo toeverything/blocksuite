@@ -15,18 +15,21 @@ const OVERLAY_OFFSET_Y = 6;
 const OVERLAY_WIDTH = 100;
 const OVERLAY_HEIGHT = 50;
 const OVERLAY_CORNER_RADIUS = 6;
+const OVERLAY_STOKE_COLOR = '#E3E2E4';
+const OVERLAY_TEXT_COLOR = '#77757D';
 
 class NoteOverlay extends Overlay {
   x = 0;
   y = 0;
   text = '';
   globalAlpha = 0;
+  backgroundColor = 'white';
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = this.globalAlpha;
     // TODO: use theme color (should consider dark mode)
     // Draw the overlay rectangle
-    ctx.strokeStyle = '#E3E2E4';
-    ctx.fillStyle = 'white';
+    ctx.strokeStyle = OVERLAY_STOKE_COLOR;
+    ctx.fillStyle = this.backgroundColor;
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(this.x + OVERLAY_CORNER_RADIUS, this.y);
@@ -66,8 +69,8 @@ class NoteOverlay extends Overlay {
     ctx.fill();
 
     // Draw the overlay text
-    ctx.fillStyle = '#77757D';
-    let fontSize = 20;
+    ctx.fillStyle = OVERLAY_TEXT_COLOR;
+    let fontSize = 16;
     ctx.font = `${fontSize}px Arial`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
@@ -75,7 +78,7 @@ class NoteOverlay extends Overlay {
     // measure the width of the text
     // if the text is wider than the rectangle, reduce the maximum width of the text
     while (ctx.measureText(this.text).width > OVERLAY_WIDTH - 10) {
-      fontSize -= 2;
+      fontSize -= 1;
       ctx.font = `${fontSize}px Arial`;
     }
 
@@ -88,11 +91,12 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     background: '--affine-background-secondary-color',
     childFlavour: 'affine:paragraph',
     childType: 'text',
+    tip: 'Text',
   };
 
   private _dragStartEvent: PointerEventState | null = null;
 
-  private _noteOverlay: NoteOverlay | null = new NoteOverlay();
+  private _noteOverlay: NoteOverlay | null = null;
 
   private _addNote(
     e: PointerEventState,
@@ -167,18 +171,8 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   private _getOverlayText() {
-    // TODO: find a better way, should confirm what the tip should be
-    let text = '';
-    if (this.tool.childType) {
-      text = this.tool.childType;
-    } else {
-      // if child type is null, return second part of child flavour
-      const idx = this.tool.childFlavour.indexOf(':');
-      text = this.tool.childFlavour.slice(idx + 1);
-    }
-
-    text = text[0].toUpperCase() + text.slice(1);
-    return text;
+    const text = this.tool.tip;
+    return text[0].toUpperCase() + text.slice(1);
   }
 
   private _updateOverlayPosition(x: number, y: number) {

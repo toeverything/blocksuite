@@ -1,6 +1,9 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { Bound, Overlay, StrokeStyle } from '@blocksuite/phasor';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { RoughCanvas } from '@blocksuite/phasor/rough/canvas.js';
+import type { Options } from '@blocksuite/phasor/rough/core.js';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
@@ -12,95 +15,116 @@ import { isTransparent } from '../components/panel/color-panel.js';
 import type { SelectionArea } from '../utils/selection-manager.js';
 import { EdgelessToolController } from './index.js';
 
-const DEFAULT_SHAPE_WIDTH = 120;
-const DEFAULT_SHAPE_HEIGHT = 120;
+const DEFAULT_SHAPE_WIDTH = 80;
+const DEFAULT_SHAPE_HEIGHT = 80;
+const DEFAULT_SHAPE_OFFSET_X = 6;
+const DEFAULT_SHAPE_OFFSET_Y = 6;
+const DEFAULT_SHAPE_OPTIONS = {
+  seed: 0,
+  roughness: 0.1,
+  strokeLineDash: [0, 0],
+  stroke: 'black',
+  strokeWidth: 4,
+};
+
 abstract class Shape {
   x: number;
   y: number;
   globalAlpha: number;
   type: string;
+  options: Options;
 
-  constructor(x: number, y: number, globalAlpha: number, type: string) {
+  constructor(
+    x: number,
+    y: number,
+    globalAlpha: number,
+    type: string,
+    options: Options
+  ) {
     this.x = x;
     this.y = y;
     this.globalAlpha = globalAlpha;
     this.type = type;
+    this.options = options;
   }
 
-  abstract draw(ctx: CanvasRenderingContext2D): void;
+  abstract draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void;
 }
 
 class RectShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D): void {
-    ctx.strokeRect(this.x, this.y, DEFAULT_SHAPE_WIDTH, DEFAULT_SHAPE_HEIGHT);
+  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+    rc.rectangle(
+      this.x + DEFAULT_SHAPE_OFFSET_X,
+      this.y + DEFAULT_SHAPE_OFFSET_Y,
+      DEFAULT_SHAPE_WIDTH,
+      DEFAULT_SHAPE_HEIGHT,
+      this.options
+    );
   }
 }
 
 class TriangleShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D): void {
-    const height = (Math.sqrt(3) / 2) * DEFAULT_SHAPE_WIDTH; // height of equilateral triangle with side length 100
-    ctx.beginPath();
-    ctx.moveTo(this.x, this.y - height / 2); // top vertex
-    ctx.lineTo(this.x - DEFAULT_SHAPE_WIDTH / 2, this.y + height / 2); // bottom-left vertex
-    ctx.lineTo(this.x + DEFAULT_SHAPE_WIDTH / 2, this.y + height / 2); // bottom-right vertex
-    ctx.closePath();
-    ctx.stroke();
+  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+    rc.polygon(
+      [
+        [this.x + DEFAULT_SHAPE_WIDTH / 2, this.y],
+        [this.x, this.y + DEFAULT_SHAPE_HEIGHT],
+        [this.x + DEFAULT_SHAPE_WIDTH, this.y + DEFAULT_SHAPE_HEIGHT],
+      ],
+      this.options
+    );
   }
 }
 
 class DiamondShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D): void {
-    ctx.beginPath();
-    ctx.moveTo(this.x, this.y - DEFAULT_SHAPE_WIDTH / 2); // top vertex
-    ctx.lineTo(this.x - DEFAULT_SHAPE_WIDTH / 2, this.y); // left vertex
-    ctx.lineTo(this.x, this.y + DEFAULT_SHAPE_WIDTH / 2); // bottom vertex
-    ctx.lineTo(this.x + DEFAULT_SHAPE_WIDTH / 2, this.y); // right vertex
-    ctx.closePath();
-    ctx.stroke();
+  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+    rc.polygon(
+      [
+        [this.x + DEFAULT_SHAPE_WIDTH / 2, this.y],
+        [this.x + DEFAULT_SHAPE_WIDTH, this.y + DEFAULT_SHAPE_HEIGHT / 2],
+        [this.x + DEFAULT_SHAPE_WIDTH / 2, this.y + DEFAULT_SHAPE_HEIGHT],
+        [this.x, this.y + DEFAULT_SHAPE_HEIGHT / 2],
+      ],
+      this.options
+    );
   }
 }
 
-class CircleShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D): void {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, 50, 0, Math.PI * 2);
-    ctx.stroke();
+class EllipseShape extends Shape {
+  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+    rc.ellipse(
+      this.x + DEFAULT_SHAPE_WIDTH / 2,
+      this.y + DEFAULT_SHAPE_HEIGHT / 2,
+      DEFAULT_SHAPE_WIDTH,
+      DEFAULT_SHAPE_HEIGHT,
+      this.options
+    );
   }
 }
 
 class RoundedRectShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D): void {
-    const cornerRadius = 10;
-    ctx.beginPath();
-    ctx.moveTo(this.x + cornerRadius, this.y);
-    ctx.lineTo(this.x + DEFAULT_SHAPE_WIDTH - cornerRadius, this.y);
-    ctx.quadraticCurveTo(
-      this.x + DEFAULT_SHAPE_WIDTH,
-      this.y,
-      this.x + DEFAULT_SHAPE_WIDTH,
-      this.y + cornerRadius
+  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+    const radius = 0.1;
+    const r = Math.min(
+      DEFAULT_SHAPE_WIDTH * radius,
+      DEFAULT_SHAPE_HEIGHT * radius
     );
-    ctx.lineTo(
-      this.x + DEFAULT_SHAPE_WIDTH,
-      this.y + DEFAULT_SHAPE_WIDTH - cornerRadius
-    );
-    ctx.quadraticCurveTo(
-      this.x + DEFAULT_SHAPE_WIDTH,
-      this.y + DEFAULT_SHAPE_WIDTH,
-      this.x + DEFAULT_SHAPE_WIDTH - cornerRadius,
-      this.y + DEFAULT_SHAPE_WIDTH
-    );
-    ctx.lineTo(this.x + cornerRadius, this.y + DEFAULT_SHAPE_WIDTH);
-    ctx.quadraticCurveTo(
-      this.x,
-      this.y + DEFAULT_SHAPE_WIDTH,
-      this.x,
-      this.y + DEFAULT_SHAPE_WIDTH - cornerRadius
-    );
-    ctx.lineTo(this.x, this.y + cornerRadius);
-    ctx.quadraticCurveTo(this.x, this.y, this.x + cornerRadius, this.y);
-    ctx.closePath();
-    ctx.stroke();
+    const x0 = this.x + r;
+    const x1 = this.x + DEFAULT_SHAPE_WIDTH + 20 - r;
+    const y0 = this.y + r;
+    const y1 = this.y + DEFAULT_SHAPE_HEIGHT - r;
+    const path = `
+        M${x0},${this.y} L${x1},${this.y} 
+        A${r},${r} 0 0 1 ${x1},${y0} 
+        L${x1},${y1} 
+        A${r},${r} 0 0 1 ${x1 - r},${y1} 
+        L${x0 + r},${y1} 
+        A${r},${r} 0 0 1 ${x0},${y1 - r} 
+        L${x0},${y0} 
+        A${r},${r} 0 0 1 ${x0 + r},${this.y}
+      `;
+
+    rc.path(path, this.options);
   }
 }
 
@@ -109,19 +133,20 @@ class ShapeFactory {
     x: number,
     y: number,
     globalAlpha: number,
-    type: string
+    type: string,
+    options: Options
   ): Shape {
     switch (type) {
       case 'rect':
-        return new RectShape(x, y, globalAlpha, type);
+        return new RectShape(x, y, globalAlpha, type, options);
       case 'triangle':
-        return new TriangleShape(x, y, globalAlpha, type);
+        return new TriangleShape(x, y, globalAlpha, type, options);
       case 'diamond':
-        return new DiamondShape(x, y, globalAlpha, type);
+        return new DiamondShape(x, y, globalAlpha, type, options);
       case 'ellipse':
-        return new CircleShape(x, y, globalAlpha, type);
+        return new EllipseShape(x, y, globalAlpha, type, options);
       case 'roundedRect':
-        return new RoundedRectShape(x, y, globalAlpha, type);
+        return new RoundedRectShape(x, y, globalAlpha, type, options);
       default:
         throw new Error(`Unknown shape type: ${type}`);
     }
@@ -133,13 +158,21 @@ class ShapeOverlay extends Overlay {
   private _x: number;
   private _y: number;
   private _globalAlpha: number;
+  private _options: Options;
 
-  constructor(x = 0, y = 0, globalAlpha = 0, type = 'rect') {
+  constructor(
+    x = 0,
+    y = 0,
+    globalAlpha = 0,
+    type = 'rect',
+    options = DEFAULT_SHAPE_OPTIONS
+  ) {
     super();
-    this.shape = ShapeFactory.createShape(x, y, globalAlpha, type);
+    this.shape = ShapeFactory.createShape(x, y, globalAlpha, type, options);
     this._x = x;
     this._y = y;
     this._globalAlpha = globalAlpha;
+    this._options = options;
   }
 
   get x(): number {
@@ -169,20 +202,29 @@ class ShapeOverlay extends Overlay {
     this.shape.globalAlpha = value;
   }
 
-  setShape(type: string): void {
+  get options(): Options {
+    return this._options;
+  }
+
+  set options(value: Options) {
+    this._options = value;
+    this.shape.options = value;
+  }
+
+  setShape(type: string, options: Options): void {
     this.shape = ShapeFactory.createShape(
       this._x,
       this._y,
       this._globalAlpha,
-      type
+      type,
+      options
     );
   }
 
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = this.shape.globalAlpha;
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = 'black';
-    this.shape.draw(ctx);
+    const rc = new RoughCanvas(ctx.canvas);
+    this.shape.draw(ctx, rc);
   }
 }
 
@@ -201,7 +243,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   protected override _draggingArea: SelectionArea | null = null;
 
-  private _addNewShapeToSurface(
+  private _addNewShape(
     e: PointerEventState,
     width: number,
     height: number
@@ -230,25 +272,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
-    this._clearOverlay();
-
-    this._page.captureSync();
-
-    const id = this._addNewShapeToSurface(
-      e,
-      DEFAULT_SHAPE_WIDTH,
-      DEFAULT_SHAPE_HEIGHT
-    );
-
-    const element = this._surface.pickById(id);
-    assertExists(element);
-    this._edgeless.slots.surfaceUpdated.emit();
-
-    this._edgeless.selection.switchToDefaultMode({
-      selected: [element],
-      active: false,
-    });
+    noop();
   }
 
   onContainerContextMenu(e: PointerEventState): void {
@@ -273,7 +297,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._page.captureSync();
 
-    const id = this._addNewShapeToSurface(e, 0, 0);
+    const id = this._addNewShape(e, 0, 0);
 
     this._draggingElementId = id;
 
@@ -377,8 +401,12 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   onContainerMouseMove(e: PointerEventState) {
     if (!this._shapeOverlay) return;
-
-    this._shapeOverlay.setShape(this.tool.shape);
+    // shpae options, like stroke color, fill color, etc.
+    const options = {
+      ...DEFAULT_SHAPE_OPTIONS,
+      stroke: this.tool.strokeColor,
+    };
+    this._shapeOverlay.setShape(this.tool.shape, options);
     if (this._shapeOverlay.globalAlpha === 0)
       this._shapeOverlay.globalAlpha = 0.66;
     const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
@@ -396,6 +424,12 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'shape') return;
     this._shapeOverlay = new ShapeOverlay();
+    // shpae options, like stroke color, fill color, etc.
+    const options = {
+      ...DEFAULT_SHAPE_OPTIONS,
+      stroke: this.tool.strokeColor,
+    };
+    this._shapeOverlay.setShape(this.tool.shape, options);
     this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
   }
 }

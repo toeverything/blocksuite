@@ -8,6 +8,7 @@ export const DEFAULT_NOTE_OFFSET_Y = 40;
 
 export const DEFAULT_NOTE_CHILD_FLAVOUR = 'affine:paragraph';
 export const DEFAULT_NOTE_CHILD_TYPE = 'text';
+export const DEFAULT_NOTE_TIP = 'Text';
 
 export const FIT_TO_SCREEN_PADDING = 100;
 

@@ -24,6 +24,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
+  DEFAULT_NOTE_TIP,
 } from './consts.js';
 import { isTopLevelBlock } from './query.js';
 
@@ -169,6 +170,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
         background: DEFAULT_NOTE_COLOR,
         childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
         childType: DEFAULT_NOTE_CHILD_TYPE,
+        tip: DEFAULT_NOTE_TIP,
       })
     );
     hotkey.addListener('p', () =>
