@@ -136,7 +136,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
     buttonStyle,
     css`
       :host {
-        visibility: none;
+        display: none;
         position: absolute;
         left: 0;
         top: 0;
@@ -152,7 +152,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
   private _rafId = 0;
 
   show(rect: DOMRect, zoom: number) {
-    this.style.visibility = 'visible';
+    this.style.display = 'block';
     this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0) scale(${zoom})`;
     this.style.transformOrigin = `top left`;
 
@@ -169,7 +169,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
 
   reset() {
     this._rafId && cancelAnimationFrame(this._rafId);
-    this.style.removeProperty('visibility');
+    this.style.removeProperty('display');
     this.style.removeProperty('transform');
     this.style.removeProperty('transition');
     this.style.removeProperty('transformOrigin');
