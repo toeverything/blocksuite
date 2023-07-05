@@ -12,6 +12,14 @@ import { REFERENCE_NODE } from './reference-node.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 
 const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
+const isValidUrl = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 const autoIdentifyLink = (
   editor: AffineVEditor,
@@ -23,9 +31,6 @@ const autoIdentifyLink = (
     delete context.attributes['link'];
     return;
   }
-
-  const linkPattern =
-    /.*\.(com|cn|org|edu|net|gov|mil|info|biz|io|me)(\/\S*)?$/i;
 
   if (context.attributes?.link) {
     const linkDeltaInfo = editor.deltaService
@@ -48,9 +53,10 @@ const autoIdentifyLink = (
       delta.insert.slice(0, rangePositionInDelta) +
       context.data +
       delta.insert.slice(rangePositionInDelta);
-    const match = linkPattern.exec(newText);
+    const isUrl = isValidUrl(newText);
+
     // If the new text with original link text is not pattern matched, we should reset the text
-    if (!match) {
+    if (!isUrl) {
       editor.resetText({ index, length });
       delete context.attributes['link'];
       return;
@@ -73,27 +79,36 @@ const autoIdentifyLink = (
   }
 
   const [line] = editor.getLine(vRange.index);
-  const prefixText = line.textContent.slice(0, vRange.index);
-  const match = linkPattern.exec(prefixText + context.data);
-  if (!match) {
+
+  // In delete, context.data is null
+  const insertText = context.data || '';
+  const verifyData = `${line.textContent.slice(
+    0,
+    vRange.index
+  )}${insertText}`.split(' ');
+
+  const verifyStr = verifyData[verifyData.length - 1];
+
+  const isUrl = isValidUrl(verifyStr);
+
+  if (!isUrl) {
     return;
   }
-  const linkText = match[0];
-  const startIndex = vRange.index - linkText.length;
+  const startIndex = vRange.index + insertText.length - verifyStr.length;
 
   editor.formatText(
     {
       index: startIndex,
-      length: linkText.length,
+      length: verifyStr.length,
     },
     {
-      link: linkText,
+      link: verifyStr,
     }
   );
 
   context.attributes = {
     ...context.attributes,
-    link: linkText,
+    link: verifyStr,
   };
 };
 
