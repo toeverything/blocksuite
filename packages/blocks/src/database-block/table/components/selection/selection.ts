@@ -99,6 +99,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       dispose: this.eventDispatcher.add('click', context => {
         const event = context.get('pointerState').event;
         const target = event.target as Element;
+        // TODO: refactor hardcoded here
         if (!target.closest('affine-drag-handle')) {
           this.selection = undefined;
         }
@@ -142,6 +143,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     this._disposables.addFromEvent(window, 'mousedown', event => {
       const target = event.target as Element;
       if (
+        // TODO: refactor hardcoded here
         !target.closest('affine-drag-handle') &&
         (!(target instanceof Element) ||
           !(this.isCurrentDatabase(target) && this.isInTableBody(target)))
