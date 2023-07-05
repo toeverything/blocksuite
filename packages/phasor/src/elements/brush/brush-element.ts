@@ -147,7 +147,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
     }
   }
   override containedByBounds(bounds: Bound) {
-    return false;
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
   }
 
   override getNearestPoint(point: IVec): IVec {
