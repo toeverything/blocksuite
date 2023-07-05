@@ -56,6 +56,8 @@ export interface ColumnManager<
 > {
   get id(): string;
 
+  get index(): number;
+
   get type(): string;
 
   get name(): string;
@@ -125,6 +127,7 @@ export class DatabaseTableViewManager implements TableViewManager {
           column,
           this._model,
           this._view,
+          i + 1,
           false,
           i === this._view.columns.length - 1
         );
@@ -235,12 +238,17 @@ export class DatabaseColumnManager implements ColumnManager {
     protected _column: TableViewColumn,
     protected _model: DatabaseBlockModel,
     protected _view: TableViewData,
+    protected _index: number,
     protected _isFirst: boolean,
     protected _isLast: boolean
   ) {
     const dataColumn = this._model.columns.find(v => v.id === this._column.id);
     assertExists(dataColumn);
     this._dataColumn = dataColumn;
+  }
+
+  get index(): number {
+    return this._index;
   }
 
   get data(): Record<string, unknown> {
@@ -411,6 +419,10 @@ export class DatabaseTitleColumnManager implements ColumnManager {
 
   get type(): string {
     return 'title';
+  }
+
+  get index(): number {
+    return 0;
   }
 
   getValue(rowId: string): unknown | undefined {
