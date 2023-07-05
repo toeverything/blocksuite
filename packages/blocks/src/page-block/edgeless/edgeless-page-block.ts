@@ -899,39 +899,6 @@ export class EdgelessPageBlockComponent
     };
   }
 
-  /** Moves selected blocks into a new note at the given point. */
-  moveBlocksWithNewNote(
-    blocks: BaseBlockModel[],
-    point: Point,
-    {
-      rect,
-      focus,
-      parentId,
-      noteIndex,
-    }: {
-      rect?: DOMRect;
-      focus?: boolean;
-      parentId?: string;
-      noteIndex?: number;
-    } = {}
-  ) {
-    const { left, top, zoom } = this.surface.viewport;
-    const width = rect?.width
-      ? rect.width / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2
-      : DEFAULT_NOTE_WIDTH;
-    point.x -= left;
-    point.y -= top;
-    const noteId = this.addNoteWithPoint(point, {
-      width,
-      parentId,
-      noteIndex,
-    });
-    const noteModel = this.page.getBlockById(noteId) as NoteBlockModel;
-    this.page.moveBlocks(blocks, noteModel);
-
-    focus && this.setSelection(noteId, true, blocks[0].id, point);
-  }
-
   addImage(
     model: Partial<ImageBlockModel>,
     point?: Point
