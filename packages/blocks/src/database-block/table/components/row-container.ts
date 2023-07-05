@@ -77,6 +77,7 @@ export function DataBaseRowContainer(view: TableViewManager) {
                         data-column-id=${column.id}
                         .columnIndex="${i}"
                         data-column-index=${i}
+                        tabindex="0"
                       >
                       </affine-database-cell-container>
                     </div>

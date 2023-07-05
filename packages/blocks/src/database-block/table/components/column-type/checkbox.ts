@@ -65,9 +65,9 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
     }
   `;
 
-  override _setEditing() {
+  override beforeEnterEditMode() {
     this.onChange(!this.value);
-    this.setEditing(false);
+    return false;
   }
 
   override render() {

@@ -420,10 +420,11 @@ export async function initDatabaseDynamicRowWithData(
   addRow = false,
   index = 0
 ) {
+  const editor = getEditorLocator(page);
   if (addRow) {
     await initDatabaseRow(page);
   }
-  const lastRow = page.locator('.affine-database-block-row').last();
+  const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
   await type(page, data);

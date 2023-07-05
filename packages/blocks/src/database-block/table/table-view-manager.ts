@@ -102,11 +102,6 @@ export interface ColumnManager<
    * @deprecated
    */
   captureSync(): void;
-
-  /**
-   * @deprecated
-   */
-  get page(): Page;
 }
 
 export class DatabaseTableViewManager implements TableViewManager {
@@ -372,11 +367,11 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   get readonly(): boolean {
-    return this.page.readonly;
+    return this._model.page.readonly;
   }
 
   captureSync(): void {
-    this.page.captureSync();
+    this._model.page.captureSync();
   }
 
   get page(): Page {
@@ -462,7 +457,7 @@ export class DatabaseTitleColumnManager implements ColumnManager {
   }
 
   captureSync(): void {
-    this.page.captureSync();
+    this._model.page.captureSync();
   }
 
   get hide(): boolean {
@@ -482,7 +477,7 @@ export class DatabaseTitleColumnManager implements ColumnManager {
   }
 
   get readonly(): boolean {
-    return this.page.readonly;
+    return this._model.page.readonly;
   }
 
   get renderer(): ColumnRenderer {
@@ -502,6 +497,6 @@ export class DatabaseTitleColumnManager implements ColumnManager {
   }
 
   getStringValue(rowId: string): string {
-    return this.page.getBlockById(rowId)?.text?.toString() ?? '';
+    return this._model.page.getBlockById(rowId)?.text?.toString() ?? '';
   }
 }

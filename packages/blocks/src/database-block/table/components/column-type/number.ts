@@ -77,9 +77,8 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     this._inputEle.setSelectionRange(end, end);
   };
 
-  override exitEditMode() {
+  override onExitEditMode() {
     this._setValue();
-    super.exitEditMode();
   }
 
   private _setValue = (str: string = this._inputEle.value) => {
@@ -100,7 +99,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     if (e.key === 'Enter') {
       this._setValue();
       setTimeout(() => {
-        this.exitEditMode();
+        this.selectCurrentCell(false);
       });
     }
   };
