@@ -354,8 +354,46 @@ export class ContentParser {
         return `<code>${token.text}</code>`;
       },
     };
-    marked.use({ extensions: [underline, inlineCode] });
-    const md2html = marked.parse(text, { gfm: false });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const walkTokens = (token: any) => {
+      if (
+        token.type === 'list_item' &&
+        token.tokens.length > 0 &&
+        token.tokens[0].type === 'list' &&
+        token.tokens[0].items.length === 1
+      ) {
+        const fistItem = token.tokens[0].items[0];
+        if (
+          fistItem.tokens.length === 0 ||
+          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
+        ) {
+          const newToken =
+            fistItem.tokens.length === 1
+              ? fistItem.tokens[0]
+              : {
+                  raw: '',
+                  text: '',
+                  type: 'text',
+                  tokens: [],
+                };
+          const preText = fistItem.raw.substring(
+            0,
+            fistItem.raw.length - fistItem.text.length
+          );
+          newToken.raw = preText + newToken.raw;
+          newToken.text = preText + newToken.text;
+          newToken.tokens.unshift({
+            type: 'text',
+            text: preText,
+            raw: preText,
+          });
+          token.tokens[0] = newToken;
+        }
+      }
+    };
+    marked.use({ extensions: [underline, inlineCode], walkTokens });
+    const md2html = marked.parse(text);
     return this.htmlText2Block(md2html);
   }
 
