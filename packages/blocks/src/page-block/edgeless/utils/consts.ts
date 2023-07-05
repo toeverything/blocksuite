@@ -3,8 +3,8 @@ export const NOTE_MIN_HEIGHT = 20;
 
 export const DEFAULT_NOTE_WIDTH = 448;
 export const DEFAULT_NOTE_HEIGHT = 72;
-export const DEFAULT_NOTE_OFFSET_X = 0;
-export const DEFAULT_NOTE_OFFSET_Y = 0;
+export const DEFAULT_NOTE_OFFSET_X = 30;
+export const DEFAULT_NOTE_OFFSET_Y = 40;
 export const NOTE_OVERLAY_OFFSET_X = 6;
 export const NOTE_OVERLAY_OFFSET_Y = 6;
 export const NOTE_OVERLAY_WIDTH = 100;
