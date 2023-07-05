@@ -41,6 +41,7 @@ import {
   triggerComponentToolbarAction,
   type,
   undoByClick,
+  undoByKeyboard,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -609,7 +610,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 </affine:page>`
   );
 
-  await undoByClick(page);
+  await undoByKeyboard(page);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
