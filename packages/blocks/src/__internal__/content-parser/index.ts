@@ -357,6 +357,7 @@ export class ContentParser {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const walkTokens = (token: any) => {
+      // fix: https://github.com/toeverything/blocksuite/issues/3304
       if (
         token.type === 'list_item' &&
         token.tokens.length > 0 &&
@@ -368,6 +369,7 @@ export class ContentParser {
           fistItem.tokens.length === 0 ||
           (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
         ) {
+          // transform list_item to text
           const newToken =
             fistItem.tokens.length === 1
               ? fistItem.tokens[0]
