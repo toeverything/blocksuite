@@ -10,17 +10,13 @@ import {
   isFuzzyMatch,
 } from '../../__internal__/utils/index.js';
 import { createKeydownObserver } from '../utils.js';
-import { menuGroups, type SlashItem } from './config.js';
 import { styles } from './styles.js';
-
-function collectGroupNames(menuItem: SlashItem[]) {
-  return menuItem.reduce((acc, item) => {
-    if (!acc.length || acc[acc.length - 1] !== item.groupName) {
-      acc.push(item.groupName);
-    }
-    return acc;
-  }, [] as string[]);
-}
+import {
+  collectGroupNames,
+  type InternSlashItem as InternalSlashItem,
+  type SlashItem,
+  type SlashMenuOptions,
+} from './utils.js';
 
 @customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
@@ -28,6 +24,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   model!: BaseBlockModel;
+
+  @property({ attribute: false })
+  options!: SlashMenuOptions;
 
   @query('.slash-menu')
   slashMenuElement?: HTMLElement;
@@ -39,7 +38,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   private _activatedItemIndex = 0;
 
   @state()
-  private _filterItems: SlashItem[] = [];
+  private _filterItems: InternalSlashItem[] = [];
 
   @state()
   private _hide = false;
@@ -57,10 +56,6 @@ export class SlashMenu extends WithDisposable(LitElement) {
    * Does not include the slash character
    */
   private _searchString = '';
-
-  get menuGroups() {
-    return menuGroups;
-  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -189,7 +184,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
   };
 
-  private _updateItem(query: string): SlashItem[] {
+  private _updateItem(query: string): InternalSlashItem[] {
     this._searchString = query;
     this._activatedItemIndex = 0;
     // Activate the right panel when search string is not empty
@@ -197,7 +192,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
       this._leftPanelActivated = false;
     }
     const searchStr = this._searchString.toLowerCase();
-    let allMenus = this.menuGroups.flatMap(group => group.items);
+    let allMenus = this.options.menus
+      .map(group =>
+        group.items.map(item => ({ ...item, groupName: group.name }))
+      )
+      .flat();
 
     allMenus = allMenus.filter(({ showWhen = () => true }) =>
       showWhen(this.model)
