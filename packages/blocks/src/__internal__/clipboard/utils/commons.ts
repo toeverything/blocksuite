@@ -165,7 +165,8 @@ export async function clipboardData2Blocks(
     markdownUtils.checkIfTextContainsMd(textClipData);
   if (HTMLClipboardData && !shouldConvertMarkdown) {
     return await contentParser.htmlText2Block(
-      removeFragmentFromHtmlClipboardString(HTMLClipboardData)
+      removeFragmentFromHtmlClipboardString(HTMLClipboardData),
+      'NotionHtml'
     );
   }
 
