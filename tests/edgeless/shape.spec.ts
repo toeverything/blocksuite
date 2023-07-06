@@ -331,3 +331,19 @@ test('change shape stroke style', async ({ page }) => {
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
   expect(pickedColor[0]).toBe('#3b25cc');
 });
+
+test('click to add shape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setEdgelessTool(page, 'shape');
+  await page.waitForTimeout(500);
+
+  await page.mouse.move(400, 400);
+  await page.mouse.move(200, 200);
+  await page.mouse.click(200, 200, { button: 'left', delay: 300 });
+
+  await assertEdgelessTool(page, 'default');
+  await assertEdgelessSelectedRect(page, [200, 200, 100, 100]);
+});
