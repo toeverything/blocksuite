@@ -1,7 +1,7 @@
 import { WithDisposable } from '@blocksuite/lit';
 import type { ConnectorElement } from '@blocksuite/phasor';
-import { DisposableGroup } from '@blocksuite/store/index.js';
-import { css, html,LitElement } from 'lit';
+import { DisposableGroup } from '@blocksuite/store';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
