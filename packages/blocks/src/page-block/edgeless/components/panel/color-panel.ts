@@ -191,7 +191,7 @@ export class EdgelessColorPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value?: CssVariableName;
+  value: CssVariableName | null = null;
 
   @property({ attribute: false })
   options: CssVariableName[] = LINE_COLORS;

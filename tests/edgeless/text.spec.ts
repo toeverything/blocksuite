@@ -30,10 +30,10 @@ test('add text element in default mode', async ({ page }) => {
 
   await page.mouse.click(120, 140);
 
-  expect(await page.locator('surface-text-editor').count()).toBe(0);
+  expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
   await page.mouse.dblclick(145, 155);
-  await page.locator('surface-text-editor').waitFor({
+  await page.locator('edgeless-text-editor').waitFor({
     state: 'attached',
   });
   await type(page, 'hello');
@@ -60,10 +60,10 @@ test('add text element in text mode', async ({ page }) => {
 
   await page.mouse.click(120, 140);
 
-  expect(await page.locator('surface-text-editor').count()).toBe(0);
+  expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
   await page.mouse.dblclick(145, 155);
-  await page.locator('surface-text-editor').waitFor({
+  await page.locator('edgeless-text-editor').waitFor({
     state: 'attached',
   });
   await type(page, 'hello');

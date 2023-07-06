@@ -311,8 +311,8 @@ test('change shape stroke style', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
+  const start = { x: 100, y: 150 };
+  const end = { x: 200, y: 250 };
   await addBasicRectShapeElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y + 5);
