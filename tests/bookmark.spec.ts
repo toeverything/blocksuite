@@ -5,14 +5,11 @@ import { expect } from '@playwright/test';
 
 import {
   activeNoteInEdgeless,
-  click,
   copyByKeyboard,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
-  pasteByKeyboard,
-  pressBackspace,
   pressEnter,
   setVirgoSelection,
   SHORT_KEY,
@@ -20,7 +17,7 @@ import {
   type,
   waitForVirgoStateUpdated,
 } from './utils/actions/index.js';
-import { assertStoreMatchJSX, assertText } from './utils/asserts.js';
+import { assertStoreMatchJSX } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
 const inputUrl = 'https://google.com';
