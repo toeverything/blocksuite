@@ -338,10 +338,12 @@ test('click to add shape', async ({ page }) => {
   await switchEditorMode(page);
 
   await setEdgelessTool(page, 'shape');
-
-  await page.mouse.click(800, 800);
   await page.waitForTimeout(500);
 
+  await page.mouse.move(400, 400);
+  await page.mouse.move(200, 200);
+  await page.mouse.click(200, 200, { button: 'left', delay: 300 });
+
   await assertEdgelessTool(page, 'default');
-  await assertEdgelessSelectedRect(page, [800, 800, 100, 100]);
+  await assertEdgelessSelectedRect(page, [200, 200, 100, 100]);
 });
