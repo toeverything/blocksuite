@@ -89,7 +89,7 @@ class NoteOverlay extends Overlay {
 
     // measure the width of the text
     // if the text is wider than the rectangle, reduce the maximum width of the text
-    while (ctx.measureText(this.text).width > NOTE_OVERLAY_WIDTH - 10) {
+    while (ctx.measureText(this.text).width > NOTE_OVERLAY_WIDTH - 20) {
       fontSize -= 1;
       ctx.font = `${fontSize}px Arial`;
     }
