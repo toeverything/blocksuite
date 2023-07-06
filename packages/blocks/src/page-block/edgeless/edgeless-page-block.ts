@@ -33,7 +33,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
-  almostEqual,
   asyncFocusRichText,
   type BlockComponentElement,
   bringForward,
