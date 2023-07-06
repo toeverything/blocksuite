@@ -7,11 +7,7 @@ import { createRef, ref } from 'lit/directives/ref.js';
 
 import { getService } from '../../../../__internal__/service.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
-import type {
-  CellFocus,
-  DatabaseSelection,
-  MultiSelection,
-} from '../../../../__internal__/utils/types.js';
+import type { CellFocus, DatabaseSelection, MultiSelection } from '../../../../__internal__/utils/types.js';
 import { startDrag } from '../../../utils/drag.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import type { DatabaseCellContainer } from '../cell-container.js';
@@ -386,7 +382,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       }
     }
     if (evt.key === hotkeys.Tab || evt.key === hotkeys.ArrowRight) {
-      const length = this.view.columns.length;
+      const length = this.view.columnManagerList.length;
       const column = selection.focus.columnIndex + 1;
       this.focusTo(
         selection.focus.rowIndex + (column >= length ? 1 : 0),
@@ -395,7 +391,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       return true;
     }
     if (evt.key === hotkeys.ArrowLeft) {
-      const length = this.view.columns.length;
+      const length = this.view.columnManagerList.length;
       const column = selection.focus.columnIndex - 1;
       this.focusTo(
         selection.focus.rowIndex + (column < 0 ? -1 : 0),
@@ -418,7 +414,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     if (rowIndex < 0 || rowIndex >= this.view.rows.length) {
       return;
     }
-    if (columnIndex < 0 || columnIndex >= this.view.columns.length) {
+    if (columnIndex < 0 || columnIndex >= this.view.columnManagerList.length) {
       return;
     }
     this.selection = {
@@ -473,7 +469,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       rowSelection?.start ?? 0,
       rowSelection?.end ?? this.view.rows.length - 1,
       columnSelection?.start ?? 0,
-      columnSelection?.end ?? this.view.columns.length - 1
+      columnSelection?.end ?? this.view.columnManagerList.length - 1
     );
     div.style.left = `${left - tableRect.left / scale}px`;
     div.style.top = `${top - tableRect.top / scale}px`;

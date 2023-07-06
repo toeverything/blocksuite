@@ -120,7 +120,7 @@ export class ColumnRendererHelper {
   get(type: ColumnRenderer['type']): ColumnRenderer {
     const renderer = this._columns.get(type);
     if (!renderer) {
-      throw new Error('cannot find renderer');
+      throw new Error(`cannot find renderer of ${type} type`);
     }
     return renderer;
   }

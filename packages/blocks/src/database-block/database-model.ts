@@ -1,10 +1,7 @@
 import { BaseBlockModel, defineBlockSchema, Text } from '@blocksuite/store';
 
 import type { SelectTag } from '../components/tags/multi-tag-select.js';
-import type {
-  DatabaseViewData,
-  DatabaseViewDataMap,
-} from './common/view-manager.js';
+import type { DatabaseViewData, DatabaseViewDataMap } from './common/view-manager.js';
 import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
 import type { Cell, Column } from './table/types.js';
@@ -29,10 +26,15 @@ export type ColumnUpdater<T extends Column = Column> = (data: T) => Partial<T>;
 export type ColumnDataUpdater<
   Data extends Record<string, unknown> = Record<string, unknown>
 > = (data: Data) => Partial<Data>;
-export type InsertPosition = 'end' | 'start' | { id: string; before: boolean };
-export const insertPositionToIndex = <T extends { id: string }>(
+export type InsertPosition = 'end' | 'start' | {
+  id: string;
+  before: boolean
+};
+export const insertPositionToIndex = <T extends {
+  id: string
+}>(
   position: InsertPosition,
-  arr: T[]
+  arr: T[],
 ): number => {
   if (typeof position === 'object') {
     const index = arr.findIndex(v => v.id === position.id);
@@ -87,13 +89,13 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  updateView(id: string, update: (data: DatabaseViewData) => void) {
+  updateView(id: string, update: (data: DatabaseViewData) => Partial<DatabaseViewData>) {
     this.page.transact(() => {
-      this.views.map(v => {
+      this.views = this.views.map(v => {
         if (v.id !== id) {
           return v;
         }
-        return update(v);
+        return { ...v, ...update(v) };
       });
     });
   }
@@ -130,7 +132,9 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
   addColumn(
     position: InsertPosition,
-    column: Omit<Column, 'id'> & { id?: string }
+    column: Omit<Column, 'id'> & {
+      id?: string
+    },
   ): string {
     const id = column.id ?? this.page.generateId();
     this.page.transact(() => {
@@ -138,14 +142,14 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       this.columns.splice(
         insertPositionToIndex(position, this.columns),
         0,
-        col
+        col,
       );
       this.views.forEach(view => {
         ViewOperationMap[view.mode].addColumn(
           this,
           view as never,
           col,
-          position
+          position,
         );
       });
     });
@@ -288,7 +292,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
         const selected = cell.value as SelectTag[];
         const newSelected = [...selected].filter(
-          item => item.value !== target.value
+          item => item.value !== target.value,
         );
 
         this.cells[rowId][columnId] = {

@@ -28,13 +28,13 @@ export type DatabaseModeMap = {
 };
 export type DatabaseViewDataMap = {
   [K in keyof DatabaseModeMap]: DatabaseModeMap[K] & {
-    id: string;
-    name: string;
-    mode: K;
-  };
+  id: string;
+  name: string;
+  mode: K;
 };
-
-export type TableViewData = DatabaseViewDataMap['table'];
+};
+type Pretty<T> = { [K in keyof T]: T[K] }
+export type TableViewData = Pretty<DatabaseViewDataMap['table']>;
 
 export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
@@ -44,7 +44,7 @@ type ViewOperation<Data> = {
     model: DatabaseBlockModel,
     view: Data,
     newColumn: Column,
-    position: InsertPosition
+    position: InsertPosition,
   ): void;
   deleteColumn(model: DatabaseBlockModel, view: Data, id: string): void;
 };

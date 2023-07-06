@@ -23,8 +23,7 @@ import { onClickOutside } from '../utils/utils.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection/selection.js';
-import type { ColumnManager, TableViewManager } from './table-view-manager.js';
-import { DatabaseTableViewManager } from './table-view-manager.js';
+import type { TableViewManager } from './table-view-manager.js';
 import { SearchState } from './types.js';
 
 const styles = css`
@@ -145,6 +144,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  tableViewManager!: TableViewManager;
+
+  @property({ attribute: false })
   model!: DatabaseBlockModel;
 
   @property({ attribute: false })
@@ -169,9 +171,6 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   private _searchState: SearchState = SearchState.SearchIcon;
 
   @state()
-  private _searchString = '';
-
-  @state()
   private _hoverState = false;
 
   private get readonly() {
@@ -190,23 +189,26 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => {
-      this.requestUpdate();
-      // TODO: optimize performance here
-      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
-        cell.requestUpdate();
-      });
-      this.querySelector('affine-database-column-header')?.requestUpdate();
-    });
-    this.model.childrenUpdated.on(() => {
-      this.requestUpdate();
-      // TODO: optimize performance here
-      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
-        cell.requestUpdate();
-      });
-      this.querySelector('affine-database-column-header')?.requestUpdate();
-      this._updateHoverState();
-    });
+    this._disposables.add(this.tableViewManager.slots.update.on(()=>{
+      this.requestUpdate()
+    }))
+    // this.model.propsUpdated.on(() => {
+    //   this.requestUpdate();
+    //   // TODO: optimize performance here
+    //   this.querySelectorAll('affine-database-cell-container').forEach(cell => {
+    //     cell.requestUpdate();
+    //   });
+    //   this.querySelector('affine-database-column-header')?.requestUpdate();
+    // });
+    // this.model.childrenUpdated.on(() => {
+    //   this.requestUpdate();
+    //   // TODO: optimize performance here
+    //   this.querySelectorAll('affine-database-cell-container').forEach(cell => {
+    //     cell.requestUpdate();
+    //   });
+    //   this.querySelector('affine-database-column-header')?.requestUpdate();
+    //   this._updateHoverState();
+    // });
 
     if (this.readonly) return;
     const tableContent = this._tableContainer.parentElement;
@@ -275,14 +277,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     });
   };
 
-  private _tableViewManager(): TableViewManager {
-    return new DatabaseTableViewManager(
-      this.model,
-      this.view,
-      this.root,
-      this._searchString
-    );
-  }
+
 
   private _addRow = (
     tableViewManager: TableViewManager,
@@ -302,10 +297,10 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     this._setSearchState(currentSearchState);
   };
 
-  private _renderColumnWidthDragBar = (columns: ColumnManager[]) => {
+  private _renderColumnWidthDragBar = () => {
     let left = 0;
     return repeat(
-      columns,
+      this.tableViewManager.columnManagerList,
       v => v.id,
       column => {
         left += column.width;
@@ -318,10 +313,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    const tableViewManager = this._tableViewManager();
-    const rowsTemplate = DataBaseRowContainer(tableViewManager);
+    const rowsTemplate = DataBaseRowContainer(this.tableViewManager);
     const addRow = (position: InsertPosition) => {
-      this._addRow(tableViewManager, position);
+      this._addRow(this.tableViewManager, position);
     };
     return html`
       <div class="affine-database-table">
@@ -333,7 +327,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
           <affine-database-toolbar
             .root=${this.root}
             .modalMode=${this.modalMode}
-            .view="${tableViewManager}"
+            .view="${this.tableViewManager}"
             .addRow="${addRow}"
             .targetModel="${this.model}"
             .hoverState="${this._hoverState}"
@@ -345,15 +339,15 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">
             <affine-database-column-header
-              .tableViewManager="${tableViewManager}"
+              .tableViewManager="${this.tableViewManager}"
               .targetModel="${this.model}"
             ></affine-database-column-header>
             ${rowsTemplate}
-            ${this._renderColumnWidthDragBar(tableViewManager.columns)}
+            ${this._renderColumnWidthDragBar()}
             <affine-database-selection
               .databaseId="${this.model.id}"
               .eventDispatcher="${this.root.uiEventDispatcher}"
-              .view="${tableViewManager}"
+              .view="${this.tableViewManager}"
             ></affine-database-selection>
           </div>
         </div>

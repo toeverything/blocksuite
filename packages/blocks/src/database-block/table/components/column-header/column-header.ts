@@ -7,8 +7,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { getDefaultPage } from '../../../../__internal__/index.js';
-import type { DatabaseBlockModel } from '../../../database-model.js';
+import { getDefaultPageByElement } from '../../../../__internal__/index.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
@@ -19,9 +18,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   tableViewManager!: TableViewManager;
-
-  @property({ attribute: false })
-  targetModel!: DatabaseBlockModel;
 
   @query('.affine-database-column-header')
   private _headerContainer!: HTMLElement;
@@ -50,7 +46,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
 
   private _initResizeEffect(element: HTMLElement) {
-    const pageBlock = getDefaultPage(this.targetModel.page);
+    const pageBlock = getDefaultPageByElement(this);
     const viewportElement = pageBlock?.viewportElement;
     if (viewportElement) {
       const resizeObserver = new ResizeObserver(
@@ -129,7 +125,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     return html`
       <div class="affine-database-column-header database-row">
         ${repeat(
-          this.tableViewManager.columns,
+          this.tableViewManager.columnManagerList,
           column => column.id,
           (column, index) => {
             return html` <affine-database-header-column

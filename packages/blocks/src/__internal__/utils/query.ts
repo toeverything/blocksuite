@@ -185,6 +185,16 @@ export function getDefaultPage(page: Page) {
 }
 
 /**
+ * If it's not in the page mode, it will return `null` directly.
+ */
+export function getDefaultPageByElement(ele:Element) {
+  const editor = getClosestEditorContainer(ele);
+  if (editor.mode !== 'page') return null;
+  const pageComponent = editor.querySelector('affine-default-page');
+  return pageComponent;
+}
+
+/**
  * If it's not in the edgeless mode, it will return `null` directly.
  */
 export function getEdgelessPage(page: Page) {
@@ -210,6 +220,12 @@ export function getEditorContainer(page: Page): AbstractEditor {
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
 }
+
+export const getClosestEditorContainer = (ele: Element) =>{
+  const editorContainer = ele.closest('editor-container');
+  assertExists(editorContainer);
+  return editorContainer as AbstractEditor;
+};
 
 export function getEditorContainerByElement(ele: Element) {
   // EditorContainer

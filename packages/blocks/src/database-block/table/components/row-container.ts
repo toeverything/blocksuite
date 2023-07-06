@@ -57,7 +57,7 @@ export function DataBaseRowContainer(view: TableViewManager) {
               data-row-id="${id}"
             >
               ${repeat(
-                view.columns,
+                view.columnManagerList,
                 v => v.id,
                 (column, i) => {
                   return html`
