@@ -20,8 +20,8 @@ export const SHAPE_OVERLAY_HEIGHT = 100;
 export const SHAPE_OVERLAY_OFFSET_X = 6;
 export const SHAPE_OVERLAY_OFFSET_Y = 6;
 export const SHAPE_OVERLAY_OPTIONS = {
-  seed: 0,
-  roughness: 0.1,
+  seed: 666,
+  roughness: 2,
   strokeLineDash: [0, 0],
   stroke: 'black',
   strokeWidth: 4,

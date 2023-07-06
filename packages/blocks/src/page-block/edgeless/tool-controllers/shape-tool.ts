@@ -104,7 +104,7 @@ class RoundedRectShape extends Shape {
       SHAPE_OVERLAY_HEIGHT * radius
     );
     const x0 = this.x + r;
-    const x1 = this.x + SHAPE_OVERLAY_WIDTH + 20 - r;
+    const x1 = this.x + SHAPE_OVERLAY_WIDTH + 40 - r;
     const y0 = this.y + r;
     const y1 = this.y + SHAPE_OVERLAY_HEIGHT - r;
     const path = `
@@ -265,7 +265,25 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    noop();
+    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
+    this._clearOverlay();
+
+    this._page.captureSync();
+
+    // RoundedRect shape should different with normal rect
+    let shapeWidth = SHAPE_OVERLAY_WIDTH;
+    if (this.tool.shape === 'roundedRect') shapeWidth += 40;
+
+    const id = this._addNewShape(e, shapeWidth, SHAPE_OVERLAY_HEIGHT);
+
+    const element = this._surface.pickById(id);
+    assertExists(element);
+    this._edgeless.slots.surfaceUpdated.emit();
+
+    this._edgeless.selection.switchToDefaultMode({
+      selected: [element],
+      active: false,
+    });
   }
 
   onContainerContextMenu(e: PointerEventState): void {
@@ -401,7 +419,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     };
     this._shapeOverlay.setShape(this.tool.shape, options);
     if (this._shapeOverlay.globalAlpha === 0)
-      this._shapeOverlay.globalAlpha = 0.66;
+      this._shapeOverlay.globalAlpha = 1;
     const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
