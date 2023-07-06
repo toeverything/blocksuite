@@ -311,7 +311,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private onKeydown(selection: DatabaseSelection, evt: KeyboardEvent): boolean {
-    //TODO delete this stupid code
+    // TODO delete this stupid code
     if (
       !selection.isEditing &&
       evt.key === 'a' &&
@@ -371,7 +371,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       return true;
     }
     if (evt.shiftKey) {
-      //TODO
+      // TODO
       if (evt.key === hotkeys.ArrowRight) {
         return true;
       }

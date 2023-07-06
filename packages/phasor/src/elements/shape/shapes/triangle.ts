@@ -1,17 +1,29 @@
 import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { type Bound } from '../../../utils/bound.js';
+import { Bound } from '../../../utils/bound.js';
 import {
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
+  polygonGetPointTangent,
   polygonNearestPoint,
+  rotatePoints,
 } from '../../../utils/math-utils.js';
+import { PointLocation } from '../../../utils/point-location.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+
+function trianglePoints(bound: Bound) {
+  const { x, y, w, h } = bound;
+  return [
+    [x, y + h],
+    [x + w / 2, y],
+    [x + w, y + h],
+  ];
+}
 
 export const TriangleMethods: ShapeMethods = {
   render(
@@ -63,7 +75,7 @@ export const TriangleMethods: ShapeMethods = {
     );
   },
 
-  hitTest(this: ShapeElement, x: number, y: number, options?: HitTestOptions) {
+  hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
     const points = getPointsFromBoundsWithRotation(this, ({ x, y, w, h }) => [
       [x, y + h],
       [x + w / 2, y],
@@ -76,7 +88,7 @@ export const TriangleMethods: ShapeMethods = {
       (options?.expand ?? 1) / (this.renderer?.zoom ?? 1)
     );
 
-    if (this.filled && !hited) {
+    if ((!options.ignoreTransparent || this.filled) && !hited) {
       hited = pointInPolygon([x, y], points);
     }
 
@@ -117,5 +129,17 @@ export const TriangleMethods: ShapeMethods = {
       ]
     );
     return linePolygonIntersects(start, end, points);
+  },
+
+  getRelativePointLocation(position, element) {
+    const bound = Bound.deserialize(element.xywh);
+    const point = bound.getRelativePoint(position);
+    let points = trianglePoints(bound);
+    points.push(point);
+
+    points = rotatePoints(points, bound.center, element.rotate);
+    const rotatePoint = points.pop() as IVec;
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
   },
 };
