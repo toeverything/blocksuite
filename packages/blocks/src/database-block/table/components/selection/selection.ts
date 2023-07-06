@@ -324,7 +324,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         const rows = this.view.rows.filter(
           (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
         );
-        this.view.deleteRow(rows);
+        this.view.rowDelete(rows);
         this.focusTo(rowsSelection.start - 1, selection.focus.columnIndex);
       }
     }

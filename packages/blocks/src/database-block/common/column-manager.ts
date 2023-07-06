@@ -321,9 +321,6 @@ columnManager.registerConvert(richTextHelper, selectHelper, (column, cells) => {
     return tag;
   };
   return {
-    column: {
-      options: Object.values(options),
-    },
     cells: cells.map(v => {
       const tags = v?.toString().split(',');
       const value = tags?.[0]?.trim();
@@ -332,6 +329,9 @@ columnManager.registerConvert(richTextHelper, selectHelper, (column, cells) => {
       }
       return undefined;
     }),
+    column: {
+      options: Object.values(options),
+    },
   };
 });
 columnManager.registerConvert(
@@ -350,9 +350,6 @@ columnManager.registerConvert(
       return tag;
     };
     return {
-      column: {
-        options: Object.values(options),
-      },
       cells: cells.map(v => {
         const result: string[] = [];
         const values = v?.toString().split(',');
@@ -364,6 +361,9 @@ columnManager.registerConvert(
         });
         return result;
       }),
+      column: {
+        options: Object.values(options),
+      },
     };
   }
 );

@@ -12,7 +12,7 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
@@ -23,7 +23,6 @@ import type { DatabaseColumnHeader } from './components/column-header/column-hea
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection/selection.js';
 import type { TableViewManager } from './table-view-manager.js';
-import { SearchState } from './types.js';
 
 const styles = css`
   affine-database-table {
@@ -166,9 +165,6 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @query('affine-database-selection')
   public selection!: DatabaseSelectionView;
 
-  @state()
-  private _searchState: SearchState = SearchState.SearchIcon;
-
   private get readonly() {
     return this.root.page.readonly;
   }
@@ -190,17 +186,6 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-  }
-
-  private _setSearchState = (state: SearchState) => {
-    this._searchState = state;
-  };
-  private _resetSearchState() {
-    this._searchState = SearchState.SearchIcon;
-  }
-
   private _onDatabaseScroll = (event: Event) => {
     this._columnHeaderComponent.showAddColumnButton();
   };
@@ -211,15 +196,11 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   ) => {
     if (this.readonly) return;
 
-    const currentSearchState = this._searchState;
-    this._resetSearchState();
-
     const page = this.root.page;
     page.captureSync();
-    const id = tableViewManager.addRow(position);
+    const id = tableViewManager.rowAdd(position);
     asyncFocusRichText(page, id);
     // save the search state
-    this._setSearchState(currentSearchState);
   };
 
   private _renderColumnWidthDragBar = () => {

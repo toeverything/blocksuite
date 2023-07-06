@@ -1,4 +1,5 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 
 import { columnManager, multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel, InsertPosition } from './database-model.js';
@@ -6,7 +7,10 @@ import { insertPositionToIndex } from './database-model.js';
 import type { DataSource } from './table/table-view-manager.js';
 
 export class DatabaseBlockDataSource implements DataSource {
-  constructor(private _model: DatabaseBlockModel) {
+  constructor(
+    private _model: DatabaseBlockModel,
+    private root: BlockSuiteRoot
+  ) {
     this._model.childrenUpdated.pipe(this.slots.update);
     this._model.propsUpdated.pipe(this.slots.update);
   }
@@ -33,6 +37,24 @@ export class DatabaseBlockDataSource implements DataSource {
   }
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
+    if (propertyId === this._model.id) {
+      const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
+      if (model) {
+        return model.text?.yText;
+      }
+      return;
+    }
+    return this._model.getCell(rowId, propertyId)?.value;
+  }
+
+  public cellGetRenderValue(rowId: string, propertyId: string): unknown {
+    if (propertyId === this._model.id) {
+      const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
+      if (model) {
+        return this.root.renderModel(model);
+      }
+      return;
+    }
     return this._model.getCell(rowId, propertyId)?.value;
   }
 
@@ -80,8 +102,8 @@ export class DatabaseBlockDataSource implements DataSource {
     }));
     const cells: Record<string, unknown> = {};
     currentCells.forEach((value, i) => {
-      if (value != null) {
-        cells[rows[i]] = value;
+      if (value != null || result.cells[i] != null) {
+        cells[rows[i]] = result.cells[i];
       }
     });
     this._model.updateCells(propertyId, cells);

@@ -36,6 +36,11 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     if (this.readonly) return;
+    this._disposables.add(
+      this.tableViewManager.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
 
     this._initHeaderMousemoveHandlers();
 
@@ -108,7 +113,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
   private _onAddColumn = () => {
     if (this.readonly) return;
-    this.tableViewManager.newColumn('end');
+    this.tableViewManager.columnAdd('end');
     Promise.resolve().then(() => {
       this.editLastColumnTitle();
     });

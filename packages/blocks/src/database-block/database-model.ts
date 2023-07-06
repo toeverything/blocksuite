@@ -120,6 +120,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         return { ...v, ...update(v) };
       });
     });
+    this.applyViewsUpdate();
   }
 
   applyViewsUpdate() {

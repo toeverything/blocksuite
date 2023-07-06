@@ -2,7 +2,7 @@ import { Slot } from '@blocksuite/store';
 
 import type { FilterGroup } from '../common/ast.js';
 import { columnManager } from '../common/column-manager.js';
-import type { TableMixColumn, TableViewData } from '../common/view-manager.js';
+import type { TableViewData } from '../common/view-manager.js';
 import type { ColumnDataUpdater, InsertPosition } from '../database-model.js';
 import { insertPositionToIndex } from '../database-model.js';
 import { evalFilter } from '../logical/eval-filter.js';
@@ -20,12 +20,6 @@ export interface TableViewManager {
 
   get filter(): FilterGroup;
 
-  setSearch(str: string): void;
-
-  updateName(name: string): void;
-
-  updateFilter(filter: FilterGroup): void;
-
   get readonly(): boolean;
 
   get columnManagerList(): ColumnManager[];
@@ -33,6 +27,12 @@ export interface TableViewManager {
   get columns(): string[];
 
   get rows(): string[];
+
+  setSearch(str: string): void;
+
+  updateName(name: string): void;
+
+  updateFilter(filter: FilterGroup): void;
 
   cellGetRenderValue(rowId: string, columnId: string): unknown;
 
@@ -83,18 +83,6 @@ export interface TableViewManager {
   columnUpdateType(columnId: string, type: string): void;
 
   columnUpdateData(columnId: string, data: Record<string, unknown>): void;
-
-  deleteRow(ids: string[]): void;
-
-  addRow(insertPosition: InsertPosition): string;
-
-  moveColumn(column: string, toAfterOfColumn: InsertPosition): void;
-
-  newColumn(toAfterOfColumn: InsertPosition): void;
-
-  preColumn(id: string): TableMixColumn | undefined;
-
-  nextColumn(id: string): TableMixColumn | undefined;
 
   slots: {
     update: Slot;
@@ -159,6 +147,7 @@ export interface DataSource {
   properties: string[];
   rows: string[];
   cellGetValue: (rowId: string, propertyId: string) => unknown;
+  cellGetRenderValue: (rowId: string, propertyId: string) => unknown;
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
   rowAdd: (insertPosition: InsertPosition) => string;
   rowDelete: (ids: string[]) => void;
@@ -187,13 +176,21 @@ export class DatabaseTableViewManager implements TableViewManager {
     return this.filteredRows(this.searchString);
   }
 
+  private readonly updateView: (
+    updater: (view: TableViewData) => Partial<TableViewData>
+  ) => void;
+
   constructor(
     private getView: () => TableViewData,
-    private updateView: (
+    private ____updateView: (
       updater: (view: TableViewData) => Partial<TableViewData>
     ) => void,
     private dataSource: DataSource
   ) {
+    this.updateView = updater => {
+      this.syncView();
+      ____updateView(updater);
+    };
     this.dataSource.slots.update.pipe(this.slots.update);
   }
 
@@ -254,55 +251,33 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   updateName(name: string): void {
-    //
-  }
-
-  moveColumn(id: string, toAfterOfColumn: InsertPosition): void {
-    this.updateView(view => {
-      const columnIndex = view.columns.findIndex(v => v.id === id);
-      if (columnIndex < 0) {
-        return {};
-      }
-      const columns = [...view.columns];
-      const [column] = columns.splice(columnIndex, 1);
-      const index = insertPositionToIndex(toAfterOfColumn, columns);
-      columns.splice(index, 0, column);
+    this.updateView(() => {
       return {
-        columns,
+        name,
       };
     });
   }
 
-  newColumn(position: InsertPosition): void {
-    const id = this.dataSource.propertyAdd(position);
-    this.updateView(view => {
-      const index = insertPositionToIndex(position, view.columns);
-      const columns = [...view.columns];
-      columns.splice(index, 0, {
-        id,
-        width: DEFAULT_COLUMN_WIDTH,
-        hide: false,
-      });
+  private syncView() {
+    if (this.getView().columns.length === this.columns.length) {
+      return;
+    }
+    this.____updateView(view => {
       return {
-        columns,
+        columns: this.columnManagerList.map((column, i) => {
+          if (column.id === view.columns[i]?.id) {
+            return view.columns[i];
+          }
+          return (
+            view.columns.find(v => v.id === column.id) ?? {
+              id: column.id,
+              width: DEFAULT_COLUMN_WIDTH,
+              hide: false,
+            }
+          );
+        }),
       };
     });
-  }
-
-  nextColumn(id: string): ColumnManager | undefined {
-    return this.columnManagerList[this.columnGetIndex(id) + 1];
-  }
-
-  preColumn(id: string): ColumnManager | undefined {
-    return this.columnManagerList[this.columnGetIndex(id) - 1];
-  }
-
-  deleteRow(ids: string[]): void {
-    this.dataSource.rowDelete(ids);
-  }
-
-  addRow(insertPosition: InsertPosition): string {
-    return this.dataSource.rowAdd(insertPosition);
   }
 
   public slots = {
@@ -319,7 +294,7 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   public cellGetRenderValue(rowId: string, columnId: string): unknown {
-    return this.dataSource.cellGetValue(rowId, columnId);
+    return this.dataSource.cellGetRenderValue(rowId, columnId);
   }
 
   public cellGetStringValue(rowId: string, columnId: string): string {
@@ -341,7 +316,8 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   public columnAdd(toAfterOfColumn: InsertPosition): void {
-    this.dataSource.propertyAdd(toAfterOfColumn);
+    const id = this.dataSource.propertyAdd(toAfterOfColumn);
+    this.columnMove(id, toAfterOfColumn);
   }
 
   public columnDelete(columnId: string): void {
@@ -401,14 +377,14 @@ export class DatabaseTableViewManager implements TableViewManager {
 
   public columnMove(columnId: string, toAfterOfColumn: InsertPosition): void {
     this.updateView(view => {
-      const columns = [...view.columns];
-      const index = columns.findIndex(v => v.id === columnId);
-      if (index < 0) {
+      const columnIndex = view.columns.findIndex(v => v.id === columnId);
+      if (columnIndex < 0) {
         return {};
       }
-      const [column] = columns.splice(index, 1);
-      const toIndex = insertPositionToIndex(toAfterOfColumn, columns);
-      columns.splice(toIndex, 0, column);
+      const columns = [...view.columns];
+      const [column] = columns.splice(columnIndex, 1);
+      const index = insertPositionToIndex(toAfterOfColumn, columns);
+      columns.splice(index, 0, column);
       return {
         columns,
       };
@@ -438,14 +414,25 @@ export class DatabaseTableViewManager implements TableViewManager {
     this.updateView(view => {
       return {
         columns: view.columns.map(v =>
-          v.id === columnId ? { ...v, width: v.width } : v
+          v.id === columnId ? { ...v, width: width } : v
         ),
       };
     });
   }
 
   public get columns(): string[] {
-    return this.getView().columns.map(v => v.id);
+    const showed = new Set<string>();
+    const result: string[] = [];
+    this.getView().columns.forEach(v => {
+      result.push(v.id);
+      showed.add(v.id);
+    });
+    this.dataSource.properties.forEach(id => {
+      if (!showed.has(id)) {
+        result.push(id);
+      }
+    });
+    return result;
   }
 
   public rowAdd(insertPosition: InsertPosition): string {
@@ -511,7 +498,7 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   setValue(rowId: string, value: unknown | undefined): void {
-    this.viewManager.cellUpdateRenderValue(this.id, rowId, value);
+    this.viewManager.cellUpdateRenderValue(rowId, this.id, value);
   }
 
   updateData(updater: ColumnDataUpdater): void {

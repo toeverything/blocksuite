@@ -32,8 +32,7 @@ import type {
   ColumnManager,
   TableViewManager,
 } from '../../table-view-manager.js';
-import type { ColumnTypeIcon } from '../../types.js';
-import type { ColumnHeader } from '../../types.js';
+import type { ColumnHeader, ColumnTypeIcon } from '../../types.js';
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
@@ -47,6 +46,14 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   column!: ColumnManager;
+
+  override firstUpdated() {
+    this._disposables.add(
+      this.tableViewManager.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   private _columnsOffset = (header: Element, scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
@@ -193,7 +200,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
       onDrop: ({ insertPosition }) => {
         if (insertPosition) {
-          this.tableViewManager.moveColumn(this.column.id, insertPosition);
+          this.tableViewManager.columnMove(this.column.id, insertPosition);
         }
         cancelScroll();
         html?.classList.toggle('affine-database-header-column-grabbing', false);
@@ -263,7 +270,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             name: 'Insert left column',
             icon: DatabaseInsertLeft,
             select: () => {
-              this.tableViewManager.newColumn({
+              this.tableViewManager.columnAdd({
                 id: this.column.id,
                 before: true,
               });
@@ -281,7 +288,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             name: 'Insert right column',
             icon: DatabaseInsertRight,
             select: () => {
-              this.tableViewManager.newColumn({
+              this.tableViewManager.columnAdd({
                 id: this.column.id,
                 before: false,
               });
@@ -300,11 +307,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             icon: DatabaseMoveLeft,
             hide: () => this.column.isFirst || this.column.index === 1,
             select: () => {
-              const preId = this.tableViewManager.preColumn(this.column.id)?.id;
+              const preId = this.tableViewManager.columnGetPreColumn(
+                this.column.id
+              )?.id;
               if (!preId) {
                 return;
               }
-              this.tableViewManager.moveColumn(this.column.id, {
+              this.tableViewManager.columnMove(this.column.id, {
                 id: preId,
                 before: true,
               });
@@ -316,13 +325,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             icon: DatabaseMoveRight,
             hide: () => this.column.isLast || this.column.type === 'title',
             select: () => {
-              const nextId = this.tableViewManager.nextColumn(
+              const nextId = this.tableViewManager.columnGetNextColumn(
                 this.column.id
               )?.id;
               if (!nextId) {
                 return;
               }
-              this.tableViewManager.moveColumn(this.column.id, {
+              this.tableViewManager.columnMove(this.column.id, {
                 id: nextId,
                 before: false,
               });

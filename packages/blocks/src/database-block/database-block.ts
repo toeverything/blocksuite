@@ -21,9 +21,7 @@ import { DatabaseTableViewManager } from './table/table-view-manager.js';
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
-
     registerService('affine:database', DatabaseBlockService);
-    this.model.propsUpdated.on(() => this.requestUpdate());
     this.currentView = this.model.getViewList()[0].id;
   }
 
@@ -39,7 +37,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.model);
+      this._dataSource = new DatabaseBlockDataSource(this.model, this.root);
     }
     return this._dataSource;
   }

@@ -91,8 +91,8 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
       this._inputEle.value = `${this.value ?? ''}`;
       return;
     }
-    this.onChange(value, { captureSync: true });
     this._inputEle.value = `${this.value ?? ''}`;
+    this.onChange(value, { captureSync: true });
   };
 
   private _keydown = (e: KeyboardEvent) => {

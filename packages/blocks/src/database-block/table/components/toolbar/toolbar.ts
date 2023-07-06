@@ -29,7 +29,7 @@ import { initAddNewRecordHandlers } from './index.js';
 
 const styles = css`
   .affine-database-toolbar {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 26px;
   }
