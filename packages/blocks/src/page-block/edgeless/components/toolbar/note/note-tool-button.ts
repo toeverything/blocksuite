@@ -127,6 +127,7 @@ export class EdgelessNoteToolButton extends LitElement {
             background: DEFAULT_NOTE_COLOR,
             childFlavour: 'affine:paragraph',
             childType: 'text',
+            tip: 'Text',
           });
           this._toggleNoteMenu();
         }}

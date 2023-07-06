@@ -124,7 +124,8 @@ export class EdgelessNoteMenu extends LitElement {
 
   private _updateNoteTool(
     childFlavour: NoteChildrenFlavour,
-    childType: string | null
+    childType: string | null,
+    tip: string
   ) {
     if (this.edgelessTool.type !== 'note') return;
 
@@ -134,16 +135,18 @@ export class EdgelessNoteMenu extends LitElement {
       background,
       childFlavour,
       childType,
+      tip,
     });
   }
 
   private _setNoteBlockType(
     index: number,
     childFlavour: NoteChildrenFlavour,
-    childType: string | null
+    childType: string | null,
+    tip: string
   ) {
     this._activeIndex = index;
-    this._updateNoteTool(childFlavour, childType);
+    this._updateNoteTool(childFlavour, childType, tip);
   }
 
   private _activeNextItem() {
@@ -157,7 +160,8 @@ export class EdgelessNoteMenu extends LitElement {
 
     const childFlavour = NOTE_MENU_ITEMS[this._activeIndex].childFlavour;
     const childType = NOTE_MENU_ITEMS[this._activeIndex].childType;
-    this._updateNoteTool(childFlavour, childType);
+    const tip = NOTE_MENU_ITEMS[this._activeIndex].tooltip;
+    this._updateNoteTool(childFlavour, childType, tip);
   }
 
   private _handleWheel(e: WheelEvent) {
@@ -191,11 +195,11 @@ export class EdgelessNoteMenu extends LitElement {
       return;
     const childFlavour = NOTE_MENU_ITEMS[this._activeIndex].childFlavour;
     const childType = NOTE_MENU_ITEMS[this._activeIndex].childType;
-
+    const tip = NOTE_MENU_ITEMS[this._activeIndex].tooltip;
     // debounce the update of the note tool
     this._wheelTimer && clearTimeout(this._wheelTimer);
     this._wheelTimer = setTimeout(() => {
-      this._updateNoteTool(childFlavour, childType);
+      this._updateNoteTool(childFlavour, childType, tip);
     }, 500);
   }
 
@@ -212,7 +216,8 @@ export class EdgelessNoteMenu extends LitElement {
               this._setNoteBlockType(
                 start + index,
                 item.childFlavour,
-                item.childType
+                item.childType,
+                item.tooltip
               )}
           >
             ${item.icon}
