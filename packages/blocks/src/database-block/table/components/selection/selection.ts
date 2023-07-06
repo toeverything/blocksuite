@@ -94,8 +94,16 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         }
         this.updateSelectionStyle(
           selection?.rowsSelection,
-          selection?.columnsSelection
+          selection?.columnsSelection,
+          selection?.focus
         );
+
+        if (
+          selection?.focus.columnIndex === -1 ||
+          old?.focus.columnIndex === -1
+        )
+          return;
+
         this.updateFocusSelectionStyle(selection?.focus, selection?.isEditing);
         if (old) {
           const container = this.getCellContainer(
@@ -156,10 +164,12 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       }),
     });
     this._disposables.addFromEvent(window, 'mousedown', event => {
-      const target = event.target;
+      const target = event.target as Element;
       if (
-        !(target instanceof Element) ||
-        !(this.isCurrentDatabase(target) && this.isInTableBody(target))
+        // TODO: refactor hardcoded here
+        !target.closest('affine-drag-handle') &&
+        (!(target instanceof Element) ||
+          !(this.isCurrentDatabase(target) && this.isInTableBody(target)))
       ) {
         this.selection = undefined;
       }
@@ -450,7 +460,8 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   updateSelectionStyle(
     rowSelection?: MultiSelection,
-    columnSelection?: MultiSelection
+    columnSelection?: MultiSelection,
+    focus?: CellFocus
   ) {
     const div = this.selectionRef.value;
     assertExists(div);
@@ -470,12 +481,16 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     div.style.width = `${width}px`;
     div.style.height = `${height}px`;
     div.style.display = 'block';
+    const isRowSelection = focus?.columnIndex === -1;
+    div.style.border = isRowSelection
+      ? '2px solid var(--affine-primary-color)'
+      : 'unset';
   }
 
   updateFocusSelectionStyle(focus?: CellFocus, isEditing = false) {
     const div = this.focusRef.value;
     assertExists(div);
-    if (focus) {
+    if (focus && focus.columnIndex !== -1) {
       const { left, top, width, height, scale } = this.getRect(
         focus.rowIndex,
         focus.rowIndex,
@@ -518,7 +533,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   public selectRow(index: number) {
     this.selection = {
       rowsSelection: { start: index, end: index },
-      focus: { rowIndex: index, columnIndex: 0 },
+      focus: { rowIndex: index, columnIndex: -1 },
       isEditing: false,
     };
   }
@@ -542,7 +557,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     }
     this.selection = {
       rowsSelection: { start: index, end: index },
-      focus: { rowIndex: index, columnIndex: 0 },
+      focus: { rowIndex: index, columnIndex: -1 },
       isEditing: false,
     };
   }
