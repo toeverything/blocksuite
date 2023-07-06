@@ -15,7 +15,7 @@ function ResizeHandle(
   onPointerDown?: (e: PointerEvent, direction: HandleDirection) => void,
   updateCursor?: (
     dragging: boolean,
-    data?: {
+    options?: {
       type: 'resize' | 'rotate';
       target?: HTMLElement;
       point?: IVec;
@@ -75,7 +75,7 @@ export function ResizeHandles(
   onPointerDown: (e: PointerEvent, direction: HandleDirection) => void,
   updateCursor?: (
     dragging: boolean,
-    data?: {
+    options?: {
       type: 'resize' | 'rotate';
       target?: HTMLElement;
       point?: IVec;

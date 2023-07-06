@@ -389,7 +389,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _updateCursor = (
     dragging: boolean,
-    data?: {
+    options?: {
       type: 'resize' | 'rotate';
       angle?: number;
       target?: HTMLElement;
@@ -398,9 +398,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   ) => {
     let cursor = 'default';
 
-    if (dragging && data) {
-      const { type, target, point } = data;
-      let { angle } = data;
+    if (dragging && options) {
+      const { type, target, point } = options;
+      let { angle } = options;
       if (type === 'rotate') {
         if (target && point) {
           angle = calcAngle(target, point, 45);
