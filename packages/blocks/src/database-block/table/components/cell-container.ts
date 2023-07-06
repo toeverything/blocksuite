@@ -1,4 +1,3 @@
-import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
@@ -7,7 +6,6 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getService } from '../../../__internal__/service.js';
 import type { DatabaseCellElement } from '../register.js';
 import type { ColumnManager } from '../table-view-manager.js';
 
@@ -22,7 +20,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       align-items: center;
       width: 100%;
       height: 100%;
-      border-right: 1px solid var(--affine-border-color);
+      border: none;
+      outline: none;
+      border-right: 1px solid var(--affine-border-color) !important;
     }
 
     affine-database-cell-container * {
@@ -38,11 +38,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   `;
 
   @state()
-  private editingDisposable?: Disposable;
-
-  get isEditing() {
-    return this.editingDisposable != null;
-  }
+  public isEditing = false;
 
   @property({ attribute: false })
   public readonly rowId!: string;
@@ -55,6 +51,18 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   column!: ColumnManager;
+  private _selectCurrentCell = (editing: boolean) => {
+    const selection = this.closest('affine-database-table')?.selection;
+    if (selection) {
+      selection.selection = {
+        focus: {
+          rowIndex: this.rowIndex,
+          columnIndex: this.columnIndex,
+        },
+        isEditing: editing,
+      };
+    }
+  };
 
   private get readonly() {
     return this.column.readonly;
@@ -66,36 +74,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return table;
   }
 
-  setEditing = (isEditing: boolean) => {
-    const service = getService('affine:database');
-    if (isEditing) {
-      this.editingDisposable = service.slots.databaseSelectionUpdated.on(
-        state => {
-          if (
-            !state ||
-            !state.isEditing ||
-            state.focus.rowIndex !== this.rowIndex ||
-            state.focus.columnIndex !== this.columnIndex
-          ) {
-            this.editingDisposable?.dispose();
-            this.editingDisposable = undefined;
-          }
-        }
-      );
-    }
-    const databaseId =
-      this.closest<HTMLElement>('affine-database')?.dataset.blockId;
-    assertExists(databaseId);
-    service.select({
-      databaseId: databaseId,
-      focus: { rowIndex: this.rowIndex, columnIndex: this.columnIndex },
-      isEditing: isEditing,
-    });
-  };
-
   private _cell = createRef<DatabaseCellElement<unknown>>();
 
-  public get cell() {
+  public get cell(): DatabaseCellElement<unknown> | undefined {
     return this._cell.value;
   }
 
@@ -117,8 +98,8 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
         style=${style}
         .column='${this.column}'
         .rowId='${this.rowId}'
-        .setEditing='${this.setEditing}'
         .isEditing='${this.isEditing}'
+        .selectCurrentCell='${this._selectCurrentCell}'
       ></${tag}>`;
   }
 }

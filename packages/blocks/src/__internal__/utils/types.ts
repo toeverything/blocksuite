@@ -185,6 +185,7 @@ export type NoteTool = {
   background: CssVariableName;
   childFlavour: NoteChildrenFlavour;
   childType: string | null;
+  tip: string;
 };
 
 export type ConnectorTool = {

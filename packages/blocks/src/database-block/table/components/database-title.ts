@@ -88,7 +88,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       rootElement: this._titleContainer,
       maxLength: DATABASE_TITLE_LENGTH,
     });
-    setupVirgoScroll(this.targetModel.page, this._titleVInput.vEditor);
+    setupVirgoScroll(this, this._titleVInput.vEditor);
     this._titleVInput.vEditor.setReadonly(this.targetModel.page.readonly);
     this._titleContainer.addEventListener('keydown', this._handleKeyDown);
 

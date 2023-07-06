@@ -25,6 +25,7 @@ const styles = css`
     cursor: pointer;
 
     user-select: none;
+    font-size: var(--affine-font-sm);
     font-family: var(--affine-font-family);
     fill: var(--affine-text-secondary-color);
     color: var(--affine-text-secondary-color);
@@ -138,7 +139,7 @@ function backlinkPopover(backlinks: BacklinkData[]) {
             width="248px"
             height="32px"
             text="${title}"
-            @click="${link.jump}"
+            @mousedown="${link.jump}"
           >
             ${link.icon}
           </icon-button>`;

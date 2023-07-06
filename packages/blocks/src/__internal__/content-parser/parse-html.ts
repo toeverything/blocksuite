@@ -737,7 +737,7 @@ export class HtmlParser {
       const columnMeta: ColumnMeta[] = [];
       titleTrEle?.querySelectorAll('th').forEach(ele => {
         columnMeta.push({
-          title: ele.textContent || '',
+          title: ele.textContent?.trim() || '',
           type: getCorrespondingTableColumnType(
             ele.querySelector('svg') ?? undefined
           ),

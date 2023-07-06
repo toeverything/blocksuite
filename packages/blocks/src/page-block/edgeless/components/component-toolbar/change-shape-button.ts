@@ -383,7 +383,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         class="change-shape-button"
-        .tooltip=${this._popperShow ? '' : 'Switch type'}
+        .tooltip=${this._popperShow ? '' : 'Shape type'}
         .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._shapeMenuPopper?.toggle()}
@@ -397,7 +397,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="fill-color-button"
-        .tooltip=${this._popperShow ? '' : 'Shape color'}
+        .tooltip=${this._popperShow ? '' : 'Fill color'}
         .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._fillColorMenuPopper?.toggle()}

@@ -56,6 +56,7 @@ import {
   getThemePropertyValue,
   listenToThemeChange,
 } from '../../__internal__/theme/utils.js';
+import { toast } from '../../components/toast.js';
 import type {
   BlockHost,
   DragHandle,
@@ -69,6 +70,7 @@ import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
+import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
@@ -98,6 +100,7 @@ import {
 } from './utils/selection-manager.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 
+NoteCut;
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
@@ -312,6 +315,10 @@ export class EdgelessPageBlockComponent
   // Gets the sorted notes.
   get sortedNotes() {
     return this.notes.sort(compare);
+  }
+
+  get enableNoteCut() {
+    return this.page.awarenessStore.getFlag('enable_note_cut');
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -600,9 +607,10 @@ export class EdgelessPageBlockComponent
       slots.copyAsPng.on(({ notes, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
-        this.clipboard
-          .copyAsPng(notes, shapes)
-          .finally(() => (canCopyAsPng = true));
+        this.clipboard.copyAsPng(notes, shapes).finally(() => {
+          canCopyAsPng = true;
+          toast('Copied to clipboard');
+        });
       })
     );
   }
@@ -889,39 +897,6 @@ export class EdgelessPageBlockComponent
       noteId,
       ids,
     };
-  }
-
-  /** Moves selected blocks into a new note at the given point. */
-  moveBlocksWithNewNote(
-    blocks: BaseBlockModel[],
-    point: Point,
-    {
-      rect,
-      focus,
-      parentId,
-      noteIndex,
-    }: {
-      rect?: DOMRect;
-      focus?: boolean;
-      parentId?: string;
-      noteIndex?: number;
-    } = {}
-  ) {
-    const { left, top, zoom } = this.surface.viewport;
-    const width = rect?.width
-      ? rect.width / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2
-      : DEFAULT_NOTE_WIDTH;
-    point.x -= left;
-    point.y -= top;
-    const noteId = this.addNoteWithPoint(point, {
-      width,
-      parentId,
-      noteIndex,
-    });
-    const noteModel = this.page.getBlockById(noteId) as NoteBlockModel;
-    this.page.moveBlocks(blocks, noteModel);
-
-    focus && this.setSelection(noteId, true, blocks[0].id, point);
   }
 
   addImage(
@@ -1251,7 +1226,12 @@ export class EdgelessPageBlockComponent
         style=${styleMap(blockContainerStyle)}
       >
         <div class="affine-block-children-container edgeless">
-          <div class="affine-edgeless-layer">${notesContainer}</div>
+          <div class="affine-edgeless-layer">
+            ${this.enableNoteCut
+              ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
+              : nothing}
+            ${notesContainer}
+          </div>
         </div>
         <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}

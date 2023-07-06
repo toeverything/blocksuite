@@ -31,7 +31,9 @@ export type BlockComponentElement = BlockElement<any>;
 
 export type BlockCustomElement =
   HTMLElementTagNameMap[keyof HTMLElementTagNameMap] extends infer U
-    ? U extends { model: infer M }
+    ? U extends {
+        model: infer M;
+      }
       ? M extends BaseBlockModel
         ? U
         : never
@@ -219,6 +221,14 @@ export function getEditorContainerByElement(ele: Element) {
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
+    throw new Error('Failed to check page mode! Editor mode is not exists!');
+  }
+  return editor.mode === 'page';
+}
+
+export function checkIsPageModeByDom(ele: Element) {
+  const editor = ele?.closest('editor-container');
+  if (!editor || !('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
   return editor.mode === 'page';
@@ -531,6 +541,13 @@ export function isDatabaseInput(element: unknown): boolean {
   );
 }
 
+export function isDatabaseCell(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.tagName === 'affine-database-cell-container'.toUpperCase()
+  );
+}
+
 export function isRawInput(element: unknown): boolean {
   return (
     element instanceof HTMLInputElement && !!element.closest('affine-database')
@@ -686,7 +703,10 @@ export function getClosestBlockElementByPoint(
   state: {
     rect?: Rect;
     container?: Element;
-    snapToEdge?: { x: boolean; y: boolean };
+    snapToEdge?: {
+      x: boolean;
+      y: boolean;
+    };
   } | null = null,
   scale = 1
 ): Element | null {
