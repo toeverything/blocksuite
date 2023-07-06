@@ -1,15 +1,18 @@
-import './affine-link.js';
+import '../../__internal__/rich-text/link-node/affine-link.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
-import { showLinkPopover } from '../../../components/link-popover/index.js';
+import { LinkMockSelection } from '../../__internal__/rich-text/link-node/mock-selection.js';
 import {
   blockRangeToNativeRange,
   getCurrentBlockRange,
-} from '../../utils/block-range.js';
-import { getEditorContainer, getVirgoByModel } from '../../utils/index.js';
-import { LinkMockSelection } from './mock-selection.js';
+} from '../../__internal__/utils/block-range.js';
+import {
+  getEditorContainer,
+  getVirgoByModel,
+} from '../../__internal__/utils/index.js';
+import { showLinkPopover } from './index.js';
 
 export function createLink(page: Page) {
   const blockRange = getCurrentBlockRange(page);
@@ -69,7 +72,7 @@ export function createLink(page: Page) {
   setTimeout(async () => {
     const linkState = await showLinkPopover({
       anchorEl: mockSelection.shadowRoot?.querySelector('div') as HTMLElement,
-      page,
+      model: startModel,
     });
 
     mockSelection.remove();
