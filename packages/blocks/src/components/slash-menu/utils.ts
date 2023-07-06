@@ -1,6 +1,6 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { Page } from '@blocksuite/store/index.js';
-import { Utils } from '@blocksuite/store/index.js';
+import type { Page } from '@blocksuite/store';
+import { Utils } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
