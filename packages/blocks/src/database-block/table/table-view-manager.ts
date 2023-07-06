@@ -305,7 +305,7 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   updateHide(hide: boolean): void {
-    //TODO
+    // TODO
   }
 
   updateName(name: string): void {

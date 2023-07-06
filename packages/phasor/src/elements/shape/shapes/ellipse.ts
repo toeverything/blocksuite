@@ -88,7 +88,7 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
-    //TODO: get real nearest point on ellipse
+    // TODO: get real nearest point on ellipse
     return point;
   },
 

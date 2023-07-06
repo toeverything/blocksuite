@@ -10,7 +10,7 @@ export const tUnion = (list: TType[]): TUnion => ({
   list,
 });
 
-//TODO treat as data type
+// TODO treat as data type
 export interface TArray<Ele extends TType = TType> {
   type: 'array';
   ele: TType;
