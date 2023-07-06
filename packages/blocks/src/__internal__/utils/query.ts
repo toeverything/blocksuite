@@ -520,7 +520,9 @@ export function isInsidePageTitle(element: unknown): boolean {
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
   const editor = activeEditorManager.getActiveEditor();
-  const textElement = (editor ?? document).querySelector('surface-text-editor');
+  const textElement = (editor ?? document).querySelector(
+    'edgeless-text-editor'
+  );
   if (!textElement) return false;
 
   return textElement.contains(element as Node);
