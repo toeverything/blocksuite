@@ -627,10 +627,11 @@ function getNextPoint(
     const direction = Vec.normalize(Vec.sub(result, bound.center));
     const xDirection = direction[0] > 0 ? 1 : -1;
     const yDirection = direction[1] > 0 ? 1 : -1;
-    // if the slope is big, use the x direction
-    const xORy =
+
+    const slope =
       Math.abs(point.tangent[0]) < Math.abs(point.tangent[1]) ? 0 : 1;
-    if (xORy === 0) {
+    // if the slope is big, use the x direction
+    if (slope === 0) {
       if (xDirection > 0) {
         const intersects = lineIntersects(
           bound.rightLine[0],
