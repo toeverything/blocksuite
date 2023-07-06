@@ -26,7 +26,9 @@ import type {
 import { HtmlParser } from './parse-html.js';
 import type { SelectedBlock } from './types.js';
 
-type ParseHtml2BlockHandler = (
+export type ParseContext = 'Markdown' | 'NotionHtml';
+
+export type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
@@ -318,7 +320,10 @@ export class ContentParser {
     ).reduce((text, block) => text + block, '');
   }
 
-  public async htmlText2Block(html: string): Promise<SerializedBlock[]> {
+  public async htmlText2Block(
+    html: string,
+    context: ParseContext
+  ): Promise<SerializedBlock[]> {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
@@ -434,7 +439,7 @@ export class ContentParser {
     };
     marked.use({ extensions: [underline, inlineCode], walkTokens });
     const md2html = marked.parse(text);
-    return this.htmlText2Block(md2html);
+    return this.htmlText2Block(md2html, 'Markdown');
   }
 
   public async importMarkdown(text: string, insertPositionId: string) {
@@ -449,7 +454,7 @@ export class ContentParser {
   }
 
   public async importHtml(text: string, insertPositionId: string) {
-    const blocks = await this.htmlText2Block(text);
+    const blocks = await this.htmlText2Block(text, 'NotionHtml');
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
@@ -464,6 +469,17 @@ export class ContentParser {
     handler: ParseHtml2BlockHandler
   ) {
     this._parsers[name] = handler;
+  }
+
+  public withContext(context: ParseContext) {
+    return {
+      get context() {
+        return context;
+      },
+      getParserHtmlText2Block: (name: string): ParseHtml2BlockHandler => {
+        return this._parsers[context + name] || null;
+      },
+    };
   }
 
   public getParserHtmlText2Block(name: string): ParseHtml2BlockHandler {
@@ -571,8 +587,9 @@ export class ContentParser {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
         return (
-          (await this.getParserHtmlText2Block('nodeParser')?.(childElement)) ||
-          []
+          (await this.withContext('NotionHtml').getParserHtmlText2Block(
+            'NodeParser'
+          )?.(childElement)) || []
         );
       }
     );
