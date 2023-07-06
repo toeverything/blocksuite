@@ -569,6 +569,7 @@ export class EdgelessPageBlockComponent
           const newModelHeight =
             domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
 
+          // FIXME: make height a local value
           if (Math.abs(newModelHeight - h) >= 0.1) {
             page.updateBlock(model, {
               xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
