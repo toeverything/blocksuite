@@ -16,7 +16,7 @@ import {
 import { registerService } from '../__internal__/service.js';
 import { DefaultPageBlockComponent } from '../index.js';
 import type { ListBlockModel } from './list-model.js';
-import { ListBlockService } from './list-service.js';
+import { LegacyListBlockService } from './list-service.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
@@ -151,7 +151,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:list', ListBlockService);
+    registerService('affine:list', LegacyListBlockService);
   }
 
   override render() {
@@ -161,6 +161,10 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
+
+    if (!this.service) {
+      return html`${nothing}`;
+    }
 
     const children = html`<div
       class="affine-block-children-container"
@@ -182,6 +186,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
         >
           ${listIcon}
           <rich-text
+            .selection=${this.service?.selectionManager}
             .model=${this.model}
             .textSchema=${this.textSchema}
           ></rich-text>

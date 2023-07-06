@@ -1,5 +1,6 @@
 export abstract class BaseSelection {
   static readonly type: string;
+  abstract readonly type: string;
   readonly blockId: string;
   constructor(blockId: string) {
     this.blockId = blockId;

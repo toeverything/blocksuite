@@ -1,6 +1,17 @@
+import type { SelectionManager } from '@blocksuite/block-std';
+import type { BaseSelection } from '@blocksuite/block-std';
+import type { TextSelection } from '@blocksuite/block-std';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { assertExists, type BaseBlockModel } from '@blocksuite/store';
-import type { BaseTextAttributes, VHandlerContext } from '@blocksuite/virgo';
+import {
+  assertExists,
+  type BaseBlockModel,
+  DisposableGroup,
+} from '@blocksuite/store';
+import type {
+  BaseTextAttributes,
+  VHandlerContext,
+  VRangeUpdatedProp,
+} from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -160,23 +171,30 @@ export class RichText extends ShadowlessElement {
 
   @query('.affine-rich-text')
   private _virgoContainer!: HTMLDivElement;
-  get virgoContainer() {
-    return this._virgoContainer;
-  }
 
   @property({ attribute: false })
   model!: BaseBlockModel;
 
   @property({ attribute: false })
+  selection!: SelectionManager;
+
+  @property({ attribute: false })
   textSchema?: AffineTextSchema;
 
+  get virgoContainer() {
+    return this._virgoContainer;
+  }
+
   private _vEditor: AffineVEditor | null = null;
+  private _disposables = new DisposableGroup();
+
   get vEditor() {
     return this._vEditor;
   }
 
-  override firstUpdated() {
-    assertExists(this.model.text, 'rich-text need text to init.');
+  override connectedCallback() {
+    super.connectedCallback();
+    assertExists(this.model.text, 'Rich text need text to init');
     this._vEditor = new VEditor(this.model.text.yText, {
       active: () => activeEditorManager.isActive(this),
     });
@@ -190,6 +208,72 @@ export class RichText extends ShadowlessElement {
     this._vEditor.setAttributeRenderer(textSchema.textRenderer());
     autoIdentifyReference(this._vEditor, this.model.text.yText.toString());
 
+    const vRangeUpdated = this._vEditor.slots.vRangeUpdated;
+    this._disposables.add(vRangeUpdated.on(this._onRangeUpdated));
+    this._disposables.add(this.selection.subscribe(this._onSelectionChanged));
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    const selections = this._removeCurrentSelection();
+    this.selection.setSelections(selections, false);
+
+    this._vEditor?.unmount();
+    this._disposables.dispose();
+  }
+
+  private _removeCurrentSelection = () => {
+    return this.selection.selections.filter(selection => {
+      const toBeRemoved =
+        selection.type === 'text' && selection.blockId === this.model.id;
+      return !toBeRemoved;
+    });
+  };
+
+  private _onRangeUpdated = ([range]: VRangeUpdatedProp) => {
+    const selections = this._removeCurrentSelection();
+
+    if (range) {
+      const instance = this.selection.getInstance('text', {
+        blockId: this.model.id,
+        index: range.index,
+        length: range.length,
+      });
+      selections.push(instance);
+    }
+
+    this.selection.setSelections(selections, false);
+  };
+
+  private _onSelectionChanged = (selections: BaseSelection[]) => {
+    if (!this._vEditor) {
+      return;
+    }
+
+    const selection = selections.find(
+      (selection): selection is TextSelection => {
+        return selection.type === 'text' && selection.blockId === this.model.id;
+      }
+    );
+
+    if (!selection) {
+      return;
+    }
+
+    const range = this._vEditor.toDomRange({
+      index: selection.index,
+      length: selection.length,
+    });
+
+    if (!range) {
+      return;
+    }
+
+    this.selection.rangeController.add(range);
+  };
+
+  private _bindVirgoEvents() {
+    assertExists(this._vEditor, 'virgo editor is not initialized.');
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(
       this._vEditor,
@@ -198,8 +282,6 @@ export class RichText extends ShadowlessElement {
     );
 
     let ifPrefixSpace = false;
-
-    this._vEditor.mount(this._virgoContainer);
     this._vEditor.bindHandlers({
       keydown: keyDownHandler,
       virgoInput: ctx => {
@@ -272,6 +354,13 @@ export class RichText extends ShadowlessElement {
         return ctx;
       },
     });
+  }
+
+  override firstUpdated() {
+    assertExists(this._vEditor, 'virgo editor is not initialized.');
+
+    this._vEditor.mount(this._virgoContainer);
+    this._bindVirgoEvents();
 
     this._vEditor.setReadonly(this.model.page.readonly);
   }

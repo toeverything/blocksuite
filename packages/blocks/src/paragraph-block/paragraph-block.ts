@@ -7,9 +7,10 @@ import {
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { when } from 'lit/directives/when.js';
 
 import { isPageMode } from '../__internal__/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
@@ -270,7 +271,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     this._placeholderDisposables = new DisposableGroup();
   };
 
-  private isInDatabase = () => {
+  private _isInDatabase = () => {
     let parent = this.parentElement;
     while (parent && parent !== document.body) {
       if (parent.tagName.toLowerCase() === 'affine-database') {
@@ -284,23 +285,16 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   override render() {
     const { type } = this.model;
 
-    // hide placeholder in database
-    const tipsPlaceholderTemplate = this.isInDatabase()
-      ? ''
-      : this._tipsPlaceholderTemplate;
-
-    const children = html`<div
-      class="affine-block-children-container"
-      style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
-    >
-      ${this.content}
-    </div>`;
+    if (!this.service) {
+      return html`${nothing}`;
+    }
 
     return html`
       <div class="affine-paragraph-block-container ${type}">
-        ${tipsPlaceholderTemplate}
+        ${when(!this._isInDatabase(), () => this._tipsPlaceholderTemplate)}
         <rich-text
           .model=${this.model}
+          .selection=${this.service.selectionManager}
           .textSchema=${this.textSchema}
           @focusin=${this._onFocusIn}
           @focusout=${this._onFocusOut}
@@ -308,7 +302,12 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
           })}
         ></rich-text>
-        ${children}
+        <div
+          class="affine-block-children-container"
+          style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
+        >
+          ${this.content}
+        </div>
       </div>
     `;
   }

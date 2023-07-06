@@ -1,3 +1,4 @@
+import { BlockService } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { BlockTransformContext } from '../__internal__/index.js';
@@ -5,7 +6,10 @@ import type { BlockRange, SerializedBlock } from '../__internal__/index.js';
 import { BaseService } from '../__internal__/service/index.js';
 import { json2block } from '../__internal__/service/json2block.js';
 import type { ListBlockModel } from './list-model.js';
-export class ListBlockService extends BaseService<ListBlockModel> {
+
+export class ListBlockService extends BlockService<ListBlockModel> {}
+
+export class LegacyListBlockService extends BaseService<ListBlockModel> {
   override block2html(
     block: ListBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}

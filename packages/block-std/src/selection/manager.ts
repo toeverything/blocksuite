@@ -1,7 +1,10 @@
 import type { Workspace } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/store';
+import { createMutex } from 'lib0/mutex.js';
 
 import type { BaseSelection } from './base.js';
+import { RangeController } from './range-controller.js';
+import { BlockSelection, TextSelection } from './variants/index.js';
 
 interface SelectionConstructor {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,26 +15,34 @@ interface SelectionConstructor {
 }
 
 export class SelectionManager {
-  private _workspace: Workspace;
+  private _mutex = createMutex();
+  private _selectionConstructors: Record<string, SelectionConstructor> = {};
+  private _changedSlot = new Slot<BaseSelection[]>();
 
   disposables = new DisposableGroup();
-  _selectionConstructors: Record<string, SelectionConstructor> = {};
+  readonly rangeController = new RangeController();
 
-  slots = {
-    changed: new Slot<BaseSelection[]>(),
-  };
-
-  constructor(workspace: Workspace) {
-    this._workspace = workspace;
+  constructor(public root: HTMLElement, public workspace: Workspace) {
+    this._setupDefaultSelections();
   }
 
-  register(ctor: SelectionConstructor) {
-    this._selectionConstructors[ctor.type] = ctor;
+  register(ctor: SelectionConstructor | SelectionConstructor[]) {
+    [ctor].flat().forEach(ctor => {
+      this._selectionConstructors[ctor.type] = ctor;
+    });
+    return this;
   }
 
   private get _store() {
-    return this._workspace.awarenessStore;
+    return this.workspace.awarenessStore;
   }
+
+  private _setupDefaultSelections() {
+    this.register([TextSelection, BlockSelection]);
+  }
+
+  subscribe = (fn: (selections: BaseSelection[]) => void) =>
+    this._changedSlot.on(selections => this._mutex(() => fn(selections)));
 
   getInstance<T extends BlockSuiteSelectionType>(
     type: T,
@@ -54,9 +65,15 @@ export class SelectionManager {
     });
   }
 
-  setSelections(selections: BaseSelection[]) {
-    this._store.setLocalSelection(selections.map(s => s.toJSON()));
-    this.slots.changed.emit(selections);
+  setSelections(selections: BaseSelection[], needSync = true) {
+    const setter = (): void => {
+      this._store.setLocalSelection(selections.map(s => s.toJSON()));
+      this._changedSlot.emit(selections);
+    };
+    if (needSync) {
+      return setter();
+    }
+    this._mutex(setter);
   }
 
   get remoteSelections() {
@@ -67,8 +84,16 @@ export class SelectionManager {
     );
   }
 
-  dispose() {
-    Object.values(this.slots).forEach(slot => slot.dispose());
+  mount() {
+    this.rangeController.start();
+    if (this.disposables.disposed) {
+      this.disposables = new DisposableGroup();
+    }
+  }
+
+  unmount() {
+    this.rangeController.stop();
+    this._changedSlot.dispose();
     this.disposables.dispose();
   }
 }

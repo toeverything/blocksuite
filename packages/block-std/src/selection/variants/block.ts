@@ -3,6 +3,8 @@ import { BaseSelection } from '../base.js';
 export class BlockSelection extends BaseSelection {
   static override readonly type = 'block';
 
+  override readonly type = 'block';
+
   override equals(other: BaseSelection): boolean {
     if (other instanceof BlockSelection) {
       return other.blockId === this.blockId;

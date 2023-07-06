@@ -1,4 +1,4 @@
-import type { VEditor } from '@blocksuite/virgo';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 
 export async function getStringFromRichText(
@@ -13,8 +13,8 @@ export async function getStringFromRichText(
       throw new Error('Cannot find rich-text');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = (richTexts[index] as any).vEditor as VEditor;
+    const editor = richTexts[index].vEditor;
+    assertExists(editor);
     return editor.yText.toString();
   }, index);
 }

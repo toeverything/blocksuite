@@ -1,3 +1,4 @@
+import { BlockService } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
@@ -37,7 +38,9 @@ const allIndexOf = (
   return indexArr;
 };
 
-export class CodeBlockService extends BaseService<CodeBlockModel> {
+export class CodeBlockService extends BlockService<CodeBlockModel> {}
+
+export class LegacyCodeBlockService extends BaseService<CodeBlockModel> {
   setLang(model: CodeBlockModel, lang: string | null) {
     const standardLang = lang ? getStandardLanguage(lang) : null;
     const langName = standardLang?.id ?? FALLBACK_LANG;

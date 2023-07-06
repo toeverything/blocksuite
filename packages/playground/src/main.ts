@@ -8,6 +8,7 @@ import '@blocksuite/editor/themes/affine.css';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
@@ -98,6 +99,11 @@ async function main() {
   window.std = std;
   window.ContentParser = ContentParser;
   workspace.awarenessStore.setFlag('enable_page_tags', true);
+  Object.defineProperty(globalThis, 'root', {
+    get() {
+      return document.querySelector('block-suite-root') as BlockSuiteRoot;
+    },
+  });
   const syncProviders = async (providers: DocProvider[]) => {
     for (const provider of providers) {
       if ('active' in provider) {

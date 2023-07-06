@@ -28,7 +28,7 @@ import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
-import { CodeBlockService } from './code-service.js';
+import { LegacyCodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
@@ -234,7 +234,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:code', CodeBlockService);
+    registerService('affine:code', LegacyCodeBlockService);
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
@@ -425,11 +425,18 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override render() {
+    if (!this.service) {
+      return html`${nothing}`;
+    }
     return html`<div class="affine-code-block-container">
         ${this._langListTemplate()}
         <div class="rich-text-container">
           <div id="line-numbers"></div>
-          <rich-text .model=${this.model} .textSchema=${this.textSchema}>
+          <rich-text
+            .selection=${this.service.selectionManager}
+            .model=${this.model}
+            .textSchema=${this.textSchema}
+          >
           </rich-text>
         </div>
         ${this.content}

@@ -1,3 +1,4 @@
+import { BlockService } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { BlockRange, SerializedBlock } from '../__internal__/index.js';
@@ -6,7 +7,9 @@ import { BaseService } from '../__internal__/service/index.js';
 import { json2block } from '../__internal__/service/json2block.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
-export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
+export class ParagraphBlockService extends BlockService<ParagraphBlockModel> {}
+
+export class LegacyParagraphBlockService extends BaseService<ParagraphBlockModel> {
   override block2html(
     model: ParagraphBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
@@ -46,4 +49,4 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
   }
 }
 
-export default ParagraphBlockService;
+export default LegacyParagraphBlockService;

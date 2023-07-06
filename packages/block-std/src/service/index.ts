@@ -3,21 +3,24 @@ import { DisposableGroup } from '@blocksuite/store';
 
 import type { UIEventDispatcher } from '../event/index.js';
 import type { EventName, UIEventHandler } from '../event/index.js';
+import type { SelectionManager } from '../selection/index.js';
 
 export interface BlockServiceOptions {
   // TODO: add these
-  // selectionManager;
   // transformer;
 
   uiEventDispatcher: UIEventDispatcher;
+  selectionManager: SelectionManager;
 }
 
 export class BlockService<Model extends BaseBlockModel = BaseBlockModel> {
-  disposables = new DisposableGroup();
-  uiEventDispatcher: UIEventDispatcher;
+  readonly disposables = new DisposableGroup();
+  readonly uiEventDispatcher: UIEventDispatcher;
+  readonly selectionManager: SelectionManager;
 
   constructor(options: BlockServiceOptions) {
     this.uiEventDispatcher = options.uiEventDispatcher;
+    this.selectionManager = options.selectionManager;
   }
 
   // life cycle start
