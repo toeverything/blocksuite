@@ -1,6 +1,6 @@
 import {
-  createConnectorElementWithModel as createConnectorElement,
-  createShapeElementWithModel as createShapeElement,
+  createConnectorElement,
+  createShapeElement,
   Shape,
   toViewCoord,
 } from '../utils/actions/edgeless.js';

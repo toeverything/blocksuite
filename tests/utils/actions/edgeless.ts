@@ -916,7 +916,7 @@ export async function edgelessCommonSetup(page: Page) {
   await deleteAll(page);
 }
 
-export async function createShapeElementWithModel(
+export async function createShapeElement(
   page: Page,
   coord1: number[],
   coord2: number[],
@@ -932,7 +932,7 @@ export async function createShapeElementWithModel(
   );
 }
 
-export async function createConnectorElementWithModel(
+export async function createConnectorElement(
   page: Page,
   coord1: number[],
   coord2: number[]
