@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 
 export async function getStringFromRichText(
@@ -14,7 +13,9 @@ export async function getStringFromRichText(
     }
 
     const editor = richTexts[index].vEditor;
-    assertExists(editor);
+    if (!editor) {
+      throw new Error('Cannot find vEditor');
+    }
     return editor.yText.toString();
   }, index);
 }
