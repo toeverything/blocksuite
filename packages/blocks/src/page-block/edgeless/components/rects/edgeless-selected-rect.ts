@@ -5,6 +5,7 @@ import {
   type Bound,
   type ConnectorElement,
   deserializeXYWH,
+  type IVec,
   normalizeDegAngle,
   type PhasorElement,
   serializeXYWH,
@@ -33,7 +34,12 @@ import { SingleConnectorHandles } from '../connector/single-connector-handles.js
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
-import { generateCursorUrl, rotateResizeCursor } from '../utils.js';
+import {
+  calcAngle,
+  calcAngleWithRotation,
+  generateCursorUrl,
+  rotateResizeCursor,
+} from '../utils.js';
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -365,7 +371,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._rotate = angle;
     this._selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${angle}deg)`;
 
-    this._updateCursor(delta, true, 'rotate');
+    this._updateCursor(true, { type: 'rotate', angle: delta });
   };
 
   private _onDragEnd = () => {
@@ -376,26 +382,43 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._resizeManager.updateBounds(getSelectableBounds(this.state.selected));
 
-    this._updateCursor(0, false);
+    this._updateCursor(false);
 
     this._showToolbar();
   };
 
   private _updateCursor = (
-    angle = 0,
-    dragging = true,
-    type?: 'rotate' | 'resize'
+    dragging: boolean,
+    data?: {
+      type: 'resize' | 'rotate';
+      angle?: number;
+      target?: HTMLElement;
+      point?: IVec;
+    }
   ) => {
     let cursor = 'default';
 
-    if (dragging) {
+    if (dragging && data) {
+      const { type, target, point } = data;
+      let { angle } = data;
       if (type === 'rotate') {
-        this._cursorRotate += angle;
+        if (target && point) {
+          angle = calcAngle(target, point, 45);
+        }
+        this._cursorRotate += angle || 0;
         cursor = generateCursorUrl(this._cursorRotate).toString();
       } else {
         if (this.resizeMode === 'edge') {
           cursor = 'ew';
-        } else {
+        } else if (target && point) {
+          angle = calcAngleWithRotation(
+            target,
+            point,
+            this._resizeManager.currentRect,
+            this._rotate,
+            this.surface
+          );
+
           cursor = rotateResizeCursor((angle * Math.PI) / 180);
         }
         cursor += '-resize';
