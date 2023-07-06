@@ -5,7 +5,7 @@ import {
   linePolylineIntersects,
   polyLineNearestPoint,
 } from '../../utils/math-utils.js';
-import { PointLocation } from '../../utils/pointLocation.js';
+import { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';

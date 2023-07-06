@@ -40,7 +40,7 @@ export {
   sign,
   toRadian,
 } from './utils/math-utils.js';
-export { PointLocation } from './utils/pointLocation.js';
+export { PointLocation } from './utils/point-location.js';
 export * from './utils/std.js';
 export { type IVec, Vec } from './utils/vec.js';
 export * from './utils/xywh.js';

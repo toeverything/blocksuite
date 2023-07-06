@@ -103,7 +103,7 @@ export function connectableIntersectLine(ele: Connectable, line: IVec[]) {
   }
 }
 
-function connectableRelativePointLocation(
+function getConnectableRelativePosition(
   connectable: Connectable,
   position: IVec
 ) {
@@ -127,7 +127,7 @@ function connectableHitTest(connectable: Connectable, point: IVec) {
   }
 }
 
-export function connectableNearestAnchor(ele: Connectable, point: IVec) {
+export function getNearestConnectableAnchor(ele: Connectable, point: IVec) {
   const anchors = getAnchors(ele);
   return closestPoint(
     anchors.map(a => a.point),
@@ -949,8 +949,8 @@ export class EdgelessConnectorManager {
       ) as Connectable;
       const sb = Bound.deserialize(start.xywh);
       const eb = Bound.deserialize(end.xywh);
-      const startPoint = connectableNearestAnchor(start, eb.center);
-      const endPoint = connectableNearestAnchor(end, sb.center);
+      const startPoint = getNearestConnectableAnchor(start, eb.center);
+      const endPoint = getNearestConnectableAnchor(end, sb.center);
       return [startPoint, endPoint];
     } else {
       const endPoint = this._getConnectionPoint(connector, 'target');
@@ -1125,24 +1125,20 @@ export class EdgelessConnectorManager {
   ): PointLocation {
     const connection = connector[type];
     const anotherType = type === 'source' ? 'target' : 'source';
-    const point = new PointLocation();
+
     if (connection.id) {
       const connectable = this._getConnectorEndElement(connector, type);
       assertExists(connectable);
       if (!connection.position) {
         const otherPoint = this._getConnectionPoint(connector, anotherType);
-        return connectableNearestAnchor(connectable, otherPoint);
+        return getNearestConnectableAnchor(connectable, otherPoint);
       } else {
-        return connectableRelativePointLocation(
-          connectable,
-          connection.position
-        );
+        return getConnectableRelativePosition(connectable, connection.position);
       }
     } else {
       assertExists(connection.position);
-      point.copyVec(connection.position);
+      return PointLocation.fromVec(connection.position);
     }
-    return point;
   }
 
   syncConnectorPos(connected: Connectable[]) {

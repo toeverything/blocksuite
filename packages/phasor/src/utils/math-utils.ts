@@ -2,7 +2,7 @@
 // Credits to tldraw
 
 import type { IBound } from '../consts.js';
-import { PointLocation } from './pointLocation.js';
+import { PointLocation } from './point-location.js';
 import { type IVec, Vec } from './vec.js';
 
 export const EPSILON = 1e-12;

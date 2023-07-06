@@ -1,5 +1,5 @@
 import type { Bound } from '../../utils/bound.js';
-import type { PointLocation } from '../../utils/pointLocation.js';
+import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
 import { type SerializedXYWH } from '../../utils/xywh.js';
 import type { IElementDefaultProps } from '../index.js';

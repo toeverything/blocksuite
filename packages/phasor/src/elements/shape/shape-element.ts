@@ -1,7 +1,7 @@
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
-import type { PointLocation } from '../../utils/pointLocation.js';
+import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
