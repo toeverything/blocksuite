@@ -140,7 +140,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 
 export async function assertEdgelessText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
-    const editor = document.querySelector('surface-text-editor');
+    const editor = document.querySelector('edgeless-text-editor');
     if (!editor) {
       throw new Error('editor not found');
     }

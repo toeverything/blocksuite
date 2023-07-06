@@ -4,14 +4,14 @@ import { assertExists } from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
-import { SurfaceTextEditor } from '../components/text/surface-text-editor.js';
+import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 export function mountTextEditor(
   textElement: TextElement,
   edgeless: EdgelessPageBlockComponent
 ) {
-  const textEditor = new SurfaceTextEditor();
+  const textEditor = new EdgelessTextEditor();
   const pageBlockContainer = edgeless.pageBlockContainer;
 
   pageBlockContainer.appendChild(textEditor);
