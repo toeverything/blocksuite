@@ -5,7 +5,7 @@ import type {
   TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { SelectionArea } from '../selection-manager.js';
+import type { SelectionArea } from '../utils/selection-manager.js';
 
 export abstract class EdgelessToolController<
   Tool extends EdgelessTool = EdgelessTool
@@ -37,6 +37,7 @@ export abstract class EdgelessToolController<
   }
 
   abstract tool: Tool;
+  abstract onContainerPointerDown(e: PointerEventState): void;
   abstract onContainerDragStart(e: PointerEventState): void;
   abstract onContainerDragMove(e: PointerEventState): void;
   abstract onContainerDragEnd(e: PointerEventState): void;

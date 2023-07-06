@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  arrayAlmostEqual,
   lineEllipseIntersects,
   lineIntersects,
   linePolygonIntersects,
   linePolylineIntersects,
+  pointAlmostEqual,
 } from './math-utils.js';
 
 describe('Line', () => {
@@ -49,8 +49,8 @@ describe('Line', () => {
     );
     expect(rst).toBeDefined();
     if (rst) {
-      arrayAlmostEqual(rst[0], [0, 3]);
-      arrayAlmostEqual(rst[1], [0, -3]);
+      pointAlmostEqual(rst[0], [0, 3]);
+      pointAlmostEqual(rst[1], [0, -3]);
     }
   });
 

@@ -10,7 +10,7 @@ import {
   getNoteRect,
   initThreeNotes,
   locatorComponentToolbar,
-  locatorEdgelessToolButton,
+  locatorEdgelessZoomToolButton,
   selectNoteInEdgeless,
   setEdgelessTool,
   switchEditorMode,
@@ -89,7 +89,7 @@ test('resize note in edgeless mode', async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   const initRect = await getNoteRect(page, ids);
-  const leftHandle = page.locator('[aria-label="handle-left"]');
+  const leftHandle = page.locator('.handle[aria-label="left"] .resize');
   const box = await leftHandle.boundingBox();
   if (box === null) throw new Error();
 
@@ -207,7 +207,7 @@ test('dragging un-selected note', async ({ page }) => {
   await switchEditorMode(page);
 
   const noteBox = await page
-    .locator('.affine-edgeless-block-child')
+    .locator('.affine-edgeless-child-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -247,7 +247,7 @@ test('drag handle should be shown when a note is actived in default mode or hidd
 
   await switchEditorMode(page);
   const noteBox = await page
-    .locator('.affine-edgeless-block-child')
+    .locator('.affine-edgeless-child-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -317,28 +317,6 @@ test('drag handle should work across multiple notes', async ({ page }) => {
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });
 
-test('drag handle should add new note when dragged outside note', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-
-  await switchEditorMode(page);
-
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(1);
-
-  await page.mouse.dblclick(CENTER_X, CENTER_Y);
-  await dragBlockToPoint(page, '3', { x: 30, y: 40 });
-  await waitNextFrame(page);
-  await expect(page.locator('affine-drag-handle')).toBeHidden();
-  await assertRichTexts(page, ['123', '456', '789']);
-
-  await expect(page.locator('.affine-edgeless-block-child')).toHaveCount(2);
-  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
-});
-
 test('format quick bar should show up when double-clicking on text', async ({
   page,
 }) => {
@@ -386,7 +364,11 @@ test('double click toolbar zoom button, should not add text', async ({
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const zoomOutButton = locatorEdgelessToolButton(page, 'zoomOut', false);
+  const zoomOutButton = await locatorEdgelessZoomToolButton(
+    page,
+    'zoomOut',
+    false
+  );
   await zoomOutButton.dblclick();
   await assertEdgelessNonSelectedRect(page);
 });
@@ -554,7 +536,9 @@ test('manage note index and hidden status', async ({ page }) => {
   expect(await page.locator('.note-status').innerText()).toBe('3');
 });
 
-test('add new note if all notes is empty', async ({ page }) => {
+test('when no visible note block, clicking in page mode will auto add a new note block', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -567,5 +551,16 @@ test('add new note if all notes is empty', async ({ page }) => {
   expect(await page.locator('affine-note').count()).toBe(1);
   // hide note
   await page.locator('.note-status-button').click();
-  expect(await page.locator('affine-note').count()).toBe(2);
+
+  await switchEditorMode(page);
+  let note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
+  });
+  expect(note).toBeNull();
+  await click(page, { x: 100, y: 280 });
+
+  note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
+  });
+  expect(note).not.toBeNull();
 });

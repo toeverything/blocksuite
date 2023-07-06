@@ -71,10 +71,19 @@ export class Space<
     return this;
   }
 
+  remove() {
+    this.destroy();
+    this.doc.spaces.delete(this.prefixedId);
+  }
+
   destroy() {
     this._ySpaceDoc.destroy();
     this._onLoadSlot.dispose();
     this._loaded = false;
+  }
+
+  clear() {
+    this._yBlocks.clear();
   }
 
   private _initSubDoc = () => {
@@ -82,7 +91,7 @@ export class Space<
 
     let subDoc = this.doc.spaces.get(prefixedId);
     if (!subDoc) {
-      subDoc = new Y.Doc();
+      subDoc = new Y.Doc({ guid: prefixedId });
       this.doc.spaces.set(prefixedId, subDoc);
       this._loaded = true;
       this._onLoadSlot.emit();

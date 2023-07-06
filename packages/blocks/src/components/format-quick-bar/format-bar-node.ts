@@ -23,8 +23,10 @@ import {
   getCurrentBlockRange,
   restoreSelection,
 } from '../../__internal__/utils/block-range.js';
-import { getRichTextByModel } from '../../__internal__/utils/index.js';
-import { stopPropagation } from '../../page-block/edgeless/utils.js';
+import {
+  getRichTextByModel,
+  stopPropagation,
+} from '../../__internal__/utils/index.js';
 import { actionConfig } from '../../page-block/utils/const.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {

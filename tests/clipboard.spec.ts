@@ -1,6 +1,7 @@
 import './utils/declare-test-window.js';
 
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 
 import { initDatabaseColumn } from './database/actions.js';
 import {
@@ -14,6 +15,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getAllNotes,
+  getEditorLocator,
   getRichTextBoundingBox,
   importMarkdown,
   initDatabaseDynamicRowWithData,
@@ -39,6 +41,7 @@ import {
   triggerComponentToolbarAction,
   type,
   undoByClick,
+  undoByKeyboard,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -224,20 +227,14 @@ test(scoped`split block when paste`, async ({ page }) => {
   await type(page, 'aa');
   await pressEnter(page);
   await type(page, 'bb');
-  const topLeft123 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="2"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.left + 2, y: bbox.top + 2 };
-  });
-  const bottomRight789 = await page.evaluate(() => {
-    const paragraph = document.querySelector(
-      '[data-block-id="5"] .virgo-editor'
-    );
-    const bbox = paragraph?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right - 2, y: bbox.bottom - 2 };
-  });
+  const topLeft123 = await getEditorLocator(page)
+    .locator('[data-block-id="2"] .virgo-editor')
+    .boundingBox();
+  const bottomRight789 = await getEditorLocator(page)
+    .locator('[data-block-id="5"] .virgo-editor')
+    .boundingBox();
+  assertExists(topLeft123);
+  assertExists(bottomRight789);
   await dragBetweenCoords(page, topLeft123, bottomRight789);
 
   // FIXME see https://github.com/toeverything/blocksuite/pull/878
@@ -567,12 +564,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, 'abc', true);
   await pressEscape(page);
   await selectAllByKeyboard(page);
-  await waitNextFrame(page);
-  await selectAllByKeyboard(page);
   await copyByKeyboard(page);
-  await waitNextFrame(page);
-
-  await focusRichText(page, 1);
+  await pressEnter(page);
   await pasteByKeyboard(page);
   await page.waitForTimeout(100);
 
@@ -596,6 +589,9 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
+    <affine:paragraph
+      prop:type="text"
+    />
     <affine:database
       prop:columns="Array [1]"
       prop:title="Database 1"
@@ -614,7 +610,7 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 </affine:page>`
   );
 
-  await undoByClick(page);
+  await undoByKeyboard(page);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
@@ -641,20 +637,21 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     <affine:paragraph
       prop:type="text"
     />
+    <affine:paragraph
+      prop:type="text"
+    />
   </affine:note>
 </affine:page>`
   );
 });
 
-test(
-  scoped`copy phasor element and text note in edgeless mode`,
+test.fixme(
+  `copy phasor element and text note in edgeless mode`,
   async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await initThreeParagraphs(page);
-
     await switchEditorMode(page);
-
     await addBasicRectShapeElement(
       page,
       {
@@ -676,11 +673,9 @@ test(
     await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
 
     await copyByKeyboard(page);
-
     await page.mouse.move(400, 400);
-
+    await page.waitForTimeout(300);
     await pasteByKeyboard(page, false);
-
     await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
   }
 );

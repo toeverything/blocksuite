@@ -69,7 +69,7 @@ const URL_REGEX = new RegExp(
   'i'
 );
 
-function normalizeUrl(url: string) {
+export function normalizeUrl(url: string) {
   const hasScheme = ALLOWED_SCHEMES.some(scheme =>
     url.startsWith(scheme + ':')
   );
@@ -227,6 +227,7 @@ export class LinkPopover extends LitElement {
   }
 
   private _onKeydown(e: KeyboardEvent) {
+    e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
       e.preventDefault();
       this._onConfirm();

@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import { UIEventStateContext } from './base.js';
+import { UIEventState, UIEventStateContext } from './base.js';
 import type { UIEventDispatcher } from './dispatcher.js';
 import { PointerEventState } from './state.js';
 import { isFarEnough } from './utils.js';
@@ -45,6 +45,10 @@ export class PointerControl {
     this._dragging = false;
   };
 
+  private _createContext(event: Event, pointerState: PointerEventState) {
+    return UIEventStateContext.from(new UIEventState(event), pointerState);
+  }
+
   private _down = (event: PointerEvent) => {
     if (
       this._lastPointerDownEvent &&
@@ -72,7 +76,7 @@ export class PointerControl {
 
     this._dispatcher.run(
       'pointerDown',
-      UIEventStateContext.from(pointerEventState)
+      this._createContext(event, pointerEventState)
     );
 
     this._dispatcher.disposables.addFromEvent(
@@ -91,7 +95,7 @@ export class PointerControl {
       startY: this._startY,
       last: this._lastDragState,
     });
-    const context = UIEventStateContext.from(pointerEventState);
+    const context = this._createContext(event, pointerEventState);
 
     const run = () => {
       if (this._dragging) {
@@ -132,12 +136,12 @@ export class PointerControl {
       this._dragging = true;
       this._dispatcher.run(
         'dragStart',
-        UIEventStateContext.from(this._startDragState)
+        this._createContext(event, this._startDragState)
       );
     }
 
     if (this._dragging) {
-      this._dispatcher.run('dragMove', UIEventStateContext.from(state));
+      this._dispatcher.run('dragMove', this._createContext(event, state));
     }
   };
 
@@ -150,7 +154,7 @@ export class PointerControl {
       last: this._lastDragState,
     });
 
-    this._dispatcher.run('pointerMove', UIEventStateContext.from(state));
+    this._dispatcher.run('pointerMove', this._createContext(event, state));
   };
 
   private _out = (event: PointerEvent) => {
@@ -162,6 +166,6 @@ export class PointerControl {
       last: null,
     });
 
-    this._dispatcher.run('pointerOut', UIEventStateContext.from(state));
+    this._dispatcher.run('pointerOut', this._createContext(event, state));
   };
 }

@@ -38,19 +38,30 @@ export const createBlockHub: (
       const models = [];
 
       const isDatabase = data.flavour === 'affine:database';
+
       if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
         console.warn('database block is not enabled');
         return;
       }
+
+      // In some cases, like insert bookmark block, range in editor will blur, so we need to get range before insert.
+      const range = getCurrentBlockRange(page);
+
       if (data.flavour === 'affine:image' && data.type === 'image') {
-        models.push(...(await uploadImageFromLocal(page)));
+        models.push(
+          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+            flavour: 'affine:image',
+            sourceId,
+          }))
+        );
       } else if (data.flavour === 'affine:bookmark') {
-        models.push(...(await getBookmarkInitialProps()));
+        const url = await getBookmarkInitialProps();
+        url && models.push({ flavour: 'affine:bookmark', url });
       } else {
         models.push(data);
       }
       const last = page.root?.lastItem();
-      const range = getCurrentBlockRange(page);
+
       if (range) {
         const lastModel = range.models[range.models.length - 1];
         const arr = page.addSiblingBlocks(lastModel, models, 'after');
@@ -83,9 +94,15 @@ export const createBlockHub: (
         return;
       }
       if (props.flavour === 'affine:image' && props.type === 'image') {
-        models.push(...(await uploadImageFromLocal(page)));
+        models.push(
+          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+            flavour: 'affine:image',
+            sourceId,
+          }))
+        );
       } else if (props.flavour === 'affine:bookmark') {
-        models.push(...(await getBookmarkInitialProps()));
+        const url = await getBookmarkInitialProps();
+        url && models.push({ flavour: 'affine:bookmark', url });
       } else {
         models.push(props);
       }
@@ -165,7 +182,7 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
-        defaultPageBlock.selection.clear();
+        defaultPageBlock.selection?.clear();
       }
     },
     getAllowedBlocks: () => {

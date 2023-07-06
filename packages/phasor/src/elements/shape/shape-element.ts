@@ -1,10 +1,11 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
+import type { RoughCanvas } from '../../rough/canvas.js';
+import type { Bound } from '../../utils/bound.js';
 import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape } from './types.js';
+
 export class ShapeElement extends SurfaceElement<IShape> {
   get shapeType() {
     const shapeType = this.yMap.get('shapeType') as IShape['shapeType'];
@@ -57,15 +58,27 @@ export class ShapeElement extends SurfaceElement<IShape> {
 
   override hitTest(x: number, y: number, options?: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
-    return hitTest(x, y, this, options);
+    return hitTest.apply(this, [x, y, options]);
   }
 
-  override intersectWithLine(start: IVec, end: IVec): boolean {
+  override containedByBounds(bounds: Bound) {
+    return ShapeMethodsMap[this.shapeType].containedByBounds(bounds, this);
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
     return ShapeMethodsMap[this.shapeType].intersectWithLine(start, end, this);
   }
 
-  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+  override getNearestPoint(point: IVec): IVec {
+    return ShapeMethodsMap[this.shapeType].getNearestPoint(point, this);
+  }
+
+  override render(
+    ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
+    rc: RoughCanvas
+  ) {
     const { render } = ShapeMethodsMap[this.shapeType];
-    render(ctx, rc, this);
+    render(ctx, matrix, rc, this);
   }
 }

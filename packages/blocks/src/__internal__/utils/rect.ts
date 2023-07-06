@@ -1,5 +1,5 @@
 import type { IPoint } from '../index.js';
-import { clamp } from './std.js';
+import { clamp } from './common.js';
 
 export class Point {
   public x: number;

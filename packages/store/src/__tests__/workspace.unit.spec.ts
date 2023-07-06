@@ -91,6 +91,7 @@ describe('basic', () => {
           {
             id: 'page0',
             title: '',
+            tags: [],
           },
         ],
         workspaceVersion: WORKSPACE_VERSION,
@@ -332,9 +333,9 @@ describe('addBlock', () => {
 
     // @ts-expect-error
     assert.equal(workspace._pages.size, 1);
-    assert.deepEqual(
-      serializeWorkspace(page0.doc).spaces['space:page0'].blocks,
-      {}
+    assert.equal(
+      serializeWorkspace(page0.doc).spaces['space:page0'],
+      undefined
     );
 
     workspace.removePage(page1.id);

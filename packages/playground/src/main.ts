@@ -103,7 +103,7 @@ async function main() {
   window.Y = Workspace.Y;
   window.std = std;
   window.ContentParser = ContentParser;
-
+  workspace.awarenessStore.setFlag('enable_page_tags', true);
   const syncProviders = async (providers: DocProvider[]) => {
     for (const provider of providers) {
       if ('active' in provider) {

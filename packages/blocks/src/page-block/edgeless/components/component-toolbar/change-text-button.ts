@@ -1,4 +1,4 @@
-import '../align-panel.js';
+import '../panel/align-panel.js';
 
 import {
   AlignCenterIcon,
@@ -12,16 +12,16 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
+import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { EdgelessAlignPanel } from '../align-panel.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { EdgelessAlignPanel } from '../panel/align-panel.js';
 import {
   type ColorEvent,
   ColorUnit,
   GET_DEFAULT_LINE_COLOR,
   LINE_COLORS,
-} from '../color-panel.js';
+} from '../panel/color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(texts: TextElement[]): TextElement['color'] {

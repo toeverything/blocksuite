@@ -3,6 +3,7 @@ import hotkeys from 'hotkeys-js';
 
 import {
   isCaptionElement,
+  isDatabaseCell,
   isDatabaseInput,
   isInsideDatabaseTitle,
   isInsideEdgelessTextEditor,
@@ -47,6 +48,9 @@ function shouldFilterHotkey(event: KeyboardEvent) {
     }
     // undo/redo should work in page title
     if (isInsidePageTitle(event.target) && isUndoRedo(event)) {
+      return false;
+    }
+    if (isDatabaseCell(event.target)) {
       return false;
     }
     // undo/redo should work in database title or cell container

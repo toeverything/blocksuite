@@ -76,10 +76,17 @@ export class Page extends Space<FlatBlockMap> {
     onYEvent: new Slot<{
       event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
     }>(),
-    blockUpdated: new Slot<{
-      type: 'add' | 'delete' | 'update';
-      id: string;
-    }>(),
+    blockUpdated: new Slot<
+      | {
+          type: 'add' | 'delete';
+          id: string;
+        }
+      | {
+          type: 'update';
+          id: string;
+          props: Partial<BlockProps>;
+        }
+    >(),
     copied: new Slot(),
     pasted: new Slot<SerializedBlock[]>(),
   };
@@ -122,10 +129,6 @@ export class Page extends Space<FlatBlockMap> {
 
   get root() {
     return this._root;
-  }
-
-  getYBlockById(id: string) {
-    return this._yBlocks.get(id);
   }
 
   get isEmpty() {
@@ -342,12 +345,6 @@ export class Page extends Space<FlatBlockMap> {
     if (!flavour) {
       throw new Error('Block props must contain flavour');
     }
-    if (
-      !this.awarenessStore.getFlag('enable_database') &&
-      flavour === 'affine:database'
-    ) {
-      throw new Error('database is not enabled');
-    }
     const parentModel =
       typeof parent === 'string' ? this.getBlockById(parent) : parent;
 
@@ -369,14 +366,13 @@ export class Page extends Space<FlatBlockMap> {
       assertValidChildren(this._yBlocks, clonedProps);
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
-      initInternalProps(yBlock, clonedProps);
 
+      initInternalProps(yBlock, clonedProps);
       syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
 
-      const parentModel =
-        typeof parent === 'string' ? this._blockMap.get(parent) : parent;
-
-      const parentId = parentModel?.id ?? this._root?.id;
+      const parentId =
+        parentModel?.id ??
+        (schema.model.role === 'root' ? undefined : this._root?.id);
 
       if (parentId) {
         const yParent = this._yBlocks.get(parentId) as YBlock;
@@ -562,6 +558,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.emit({
       type: 'update',
       id: model.id,
+      props,
     });
   }
 
@@ -570,6 +567,7 @@ export class Page extends Space<FlatBlockMap> {
     props: Array<Partial<BaseBlockModel>>,
     place: 'after' | 'before' = 'after'
   ): string[] {
+    if (!props.length) return [];
     const parent = this.getParent(targetModel);
     assertExists(parent);
 

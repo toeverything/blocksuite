@@ -74,10 +74,14 @@ const flagsPreset = {
 
   enable_database: true,
   enable_database_filter: false,
+  enable_page_tags: false,
   enable_toggle_block: false,
   enable_block_selection_format_bar: true,
   enable_linked_page: false,
   enable_bookmark_operation: false,
+  enable_note_index: false,
+
+  enable_note_cut: true,
 
   readonly: {},
 } satisfies BlockSuiteFlags;

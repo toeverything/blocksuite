@@ -242,7 +242,7 @@ test('hovering on shape should not have effect on underlying block', async ({
 
   await switchEditorMode(page);
 
-  const block = page.locator('.affine-edgeless-block-child');
+  const block = page.locator('.affine-edgeless-child-note');
   const blockBox = await block.boundingBox();
   if (blockBox === null) throw new Error('Unexpected box value: box is null');
 
@@ -281,8 +281,8 @@ test('change shape stroke width', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
+  const start = { x: 100, y: 150 };
+  const end = { x: 200, y: 250 };
   await addBasicRectShapeElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y + 5);

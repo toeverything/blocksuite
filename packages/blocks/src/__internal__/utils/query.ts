@@ -12,9 +12,9 @@ import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { RichText } from '../rich-text/rich-text.js';
+import { clamp } from './common.js';
 import { type Point, Rect } from './rect.js';
 import { getCurrentNativeRange } from './selection.js';
-import { clamp } from './std.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
@@ -31,7 +31,9 @@ export type BlockComponentElement = BlockElement<any>;
 
 export type BlockCustomElement =
   HTMLElementTagNameMap[keyof HTMLElementTagNameMap] extends infer U
-    ? U extends { model: infer M }
+    ? U extends {
+        model: infer M;
+      }
       ? M extends BaseBlockModel
         ? U
         : never
@@ -219,6 +221,14 @@ export function getEditorContainerByElement(ele: Element) {
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
+    throw new Error('Failed to check page mode! Editor mode is not exists!');
+  }
+  return editor.mode === 'page';
+}
+
+export function checkIsPageModeByDom(ele: Element) {
+  const editor = ele?.closest('editor-container');
+  if (!editor || !('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
   return editor.mode === 'page';
@@ -531,6 +541,13 @@ export function isDatabaseInput(element: unknown): boolean {
   );
 }
 
+export function isDatabaseCell(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.tagName === 'affine-database-cell-container'.toUpperCase()
+  );
+}
+
 export function isRawInput(element: unknown): boolean {
   return (
     element instanceof HTMLInputElement && !!element.closest('affine-database')
@@ -656,10 +673,10 @@ function isDatabase({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is edgeless block child.
+ * Returns `true` if element is edgeless child note.
  */
-export function isEdgelessBlockChild({ classList }: Element) {
-  return classList.contains('affine-edgeless-block-child');
+export function isEdgelessChildNote({ classList }: Element) {
+  return classList.contains('affine-edgeless-child-note');
 }
 
 /**
@@ -686,7 +703,10 @@ export function getClosestBlockElementByPoint(
   state: {
     rect?: Rect;
     container?: Element;
-    snapToEdge?: { x: boolean; y: boolean };
+    snapToEdge?: {
+      x: boolean;
+      y: boolean;
+    };
   } | null = null,
   scale = 1
 ): Element | null {
@@ -978,7 +998,7 @@ export function queryCurrentMode(): 'light' | 'dark' {
  */
 export function getHoveringNote(point: Point) {
   return (
-    document.elementsFromPoint(point.x, point.y).find(isEdgelessBlockChild) ||
+    document.elementsFromPoint(point.x, point.y).find(isEdgelessChildNote) ||
     null
   );
 }
@@ -1145,4 +1165,11 @@ export function isDragHandle(target: Element) {
  */
 export function hasDatabase(elements: Element[]) {
   return elements.some(isDatabase);
+}
+
+/**
+ * Returns the last note element.
+ */
+export function getLastNoteBlockElement(parent: Element) {
+  return parent.querySelector('affine-note:last-of-type');
 }

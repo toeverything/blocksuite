@@ -1,6 +1,6 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
 import type { StrokeStyle } from '../../consts.js';
+import type { RoughCanvas } from '../../rough/canvas.js';
+import type { Bound } from '../../utils/bound.js';
 import type { IVec } from '../../utils/vec.js';
 import type { HitTestOptions, ISurfaceElement } from '../surface-element.js';
 import type { ShapeElement } from './shape-element.js';
@@ -23,14 +23,21 @@ export interface IShape extends ISurfaceElement {
 export interface ShapeMethods {
   render: (
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) => void;
   hitTest: (
+    this: ShapeElement,
     x: number,
     y: number,
-    element: ShapeElement,
     options?: HitTestOptions
   ) => boolean;
-  intersectWithLine: (start: IVec, end: IVec, element: ShapeElement) => boolean;
+  containedByBounds: (bounds: Bound, element: ShapeElement) => boolean;
+  intersectWithLine: (
+    start: IVec,
+    end: IVec,
+    element: ShapeElement
+  ) => IVec[] | null;
+  getNearestPoint: (point: IVec, element: ShapeElement) => IVec;
 }

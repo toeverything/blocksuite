@@ -41,6 +41,7 @@ export function ListIcon(
         : ''}"
       @click="${(e: MouseEvent) => onClick(e)}"
     >
+      <div class="affine-list-block__todo-checked-prefix"></div>
       ${icon}
     </div>
   `;

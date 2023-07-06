@@ -1,6 +1,6 @@
-import '../tool-icon-button.js';
-import '../color-panel.js';
-import '../../toolbar/shape/shape-menu.js';
+import '../buttons/tool-icon-button.js';
+import '../panel/color-panel.js';
+import '../toolbar/shape/shape-menu.js';
 
 import { LineStyleIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -14,24 +14,24 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
+import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import type { ShapeTool } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { EdgelessShapeMenu } from '../../toolbar/shape/shape-menu.js';
-import { ShapeComponentConfigMap } from '../../toolbar/shape/shape-menu-config.js';
-import type { ColorEvent } from '../color-panel.js';
-import { isTransparent } from '../color-panel.js';
-import { ColorUnit } from '../color-panel.js';
-import type { LineSizeButtonProps } from '../line-size-button.js';
-import { lineSizeButtonStyles } from '../line-size-button.js';
-import type { LineStyleButtonProps } from '../line-style-button.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { LineSizeButtonProps } from '../buttons/line-size-button.js';
+import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
+import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
+import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
+import type { ColorEvent } from '../panel/color-panel.js';
+import { isTransparent } from '../panel/color-panel.js';
+import { ColorUnit } from '../panel/color-panel.js';
 import {
   LineStylesPanel,
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
-} from '../line-styles-panel.js';
-import type { EdgelessToolIconButton } from '../tool-icon-button.js';
+} from '../panel/line-styles-panel.js';
+import type { EdgelessShapeMenu } from '../toolbar/shape/shape-menu.js';
+import { ShapeComponentConfigMap } from '../toolbar/shape/shape-menu-config.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonShape(
@@ -383,7 +383,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         class="change-shape-button"
-        .tooltip=${this._popperShow ? '' : 'Switch type'}
+        .tooltip=${this._popperShow ? '' : 'Shape type'}
         .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._shapeMenuPopper?.toggle()}
@@ -397,7 +397,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       <edgeless-tool-icon-button
         class="fill-color-button"
-        .tooltip=${this._popperShow ? '' : 'Shape color'}
+        .tooltip=${this._popperShow ? '' : 'Fill color'}
         .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._fillColorMenuPopper?.toggle()}

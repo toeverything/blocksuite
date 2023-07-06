@@ -1,13 +1,12 @@
-import { assertExists } from '@blocksuite/global/utils';
-import { randomSeed } from 'roughjs/bin/math.js';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { IBound } from './consts.js';
 import {
-  ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
   type IElementCreateProps,
+  type IElementUpdateProps,
   type IPhasorElementType,
   type PhasorElement,
   type PhasorElementType,
@@ -20,8 +19,8 @@ import type {
 import { compare } from './grid.js';
 import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
-import { contains, getCommonBound } from './utils/bound.js';
-import { intersects } from './utils/math-utils.js';
+import { randomSeed } from './rough/math.js';
+import { Bound, getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
   generateKeyBetween,
@@ -40,12 +39,23 @@ export class SurfaceManager {
   private _renderer: Renderer;
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
-  private _bindings = new Map<id, Set<id>>();
   private _elementLocalRecords = new Map<id, ElementLocalRecords>();
 
   private _computedValue: ComputedValue;
 
   indexes = { min: 'a0', max: 'a0' };
+  slots = {
+    elementUpdated: new Slot<{
+      id: id;
+      props:
+        | IElementUpdateProps<'shape'>
+        | IElementUpdateProps<'connector'>
+        | IElementUpdateProps<'brush'>
+        | IElementUpdateProps<'shape'>;
+    }>(),
+    elementAdded: new Slot<id>(),
+    elementRemoved: new Slot<id>(),
+  };
 
   constructor(
     yContainer: Y.Map<unknown>,
@@ -54,40 +64,22 @@ export class SurfaceManager {
     this._renderer = new Renderer();
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
     this._computedValue = computedValue;
-
-    this._syncFromExistingContainer();
     this._yContainer.observe(this._onYContainer);
+  }
+
+  init() {
+    this._syncFromExistingContainer();
   }
 
   get viewport(): SurfaceViewport {
     return this._renderer;
   }
 
-  private _addBinding(id0: string, id1: string) {
-    if (!this._bindings.has(id0)) {
-      this._bindings.set(id0, new Set());
-    }
-    this._bindings.get(id0)?.add(id1);
-  }
-
-  private _updateBindings(element: SurfaceElement) {
-    if (element instanceof ConnectorElement) {
-      if (element.startElement) {
-        this._addBinding(element.startElement.id, element.id);
-        this._addBinding(element.id, element.startElement.id);
-      }
-      if (element.endElement) {
-        this._addBinding(element.endElement.id, element.id);
-        this._addBinding(element.id, element.endElement.id);
-      }
-    }
-  }
-
   private _syncFromExistingContainer() {
     this._transact(() => {
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as keyof PhasorElementType;
-
+        const id = yElement.get('id') as id;
         const ElementCtor = ElementCtors[type];
         assertExists(ElementCtor);
         const element = new ElementCtor(yElement, this);
@@ -101,8 +93,7 @@ export class SurfaceManager {
         } else if (element.index < this.indexes.min) {
           this.indexes.min = element.index;
         }
-
-        this._updateBindings(element);
+        this.slots.elementAdded.emit(id);
       });
     });
   }
@@ -132,13 +123,13 @@ export class SurfaceManager {
         if (element.index > this.indexes.max) {
           this.indexes.max = element.index;
         }
-
-        this._updateBindings(element);
+        this.slots.elementAdded.emit(id);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
       } else if (type.action === 'delete') {
         const element = this._elements.get(id);
         assertExists(element);
+        element.xywh;
         element.unmount();
         this._elements.delete(id);
         this.deleteElementLocalRecord(id);
@@ -146,6 +137,7 @@ export class SurfaceManager {
         if (element.index === this.indexes.min) {
           this.indexes.min = generateKeyBetween(element.index, null);
         }
+        this.slots.elementRemoved.emit(id);
       }
     });
   };
@@ -225,7 +217,7 @@ export class SurfaceManager {
 
   updateElement<T extends keyof IPhasorElementType>(
     id: string,
-    properties: IElementCreateProps<T>
+    properties: IElementUpdateProps<T>
   ) {
     this._transact(() => {
       const element = this._elements.get(id);
@@ -269,12 +261,14 @@ export class SurfaceManager {
       expand: 10,
     }
   ): SurfaceElement[] {
-    const bound: IBound = { x: x - 1, y: y - 1, w: 2, h: 2 };
-    const candidates = this._renderer.gridManager.search(bound);
-    const picked = candidates.filter(element => {
-      return element.hitTest(x, y, options);
+    const size = options.expand;
+    const candidates = this._renderer.gridManager.search({
+      x: x - size / 2,
+      y: y - size / 2,
+      w: size,
+      h: size,
     });
-
+    const picked = candidates.filter(element => element.hitTest(x, y, options));
     return picked;
   }
 
@@ -286,24 +280,19 @@ export class SurfaceManager {
   pickByBound(bound: IBound): SurfaceElement[] {
     const candidates = this._renderer.gridManager.search(bound);
     const picked = candidates.filter((element: SurfaceElement) => {
-      return contains(bound, element) || intersects(bound, element);
+      const b = Bound.from(bound);
+      return (
+        element.containedByBounds(b) ||
+        b.points.some((point, i, points) =>
+          element.intersectWithLine(point, points[(i + 1) % points.length])
+        )
+      );
     });
-
     return picked;
   }
 
   getSortedElementsWithViewportBounds() {
     return this.pickByBound(this.viewport.viewportBounds).sort(compare);
-  }
-
-  getBindingElements(id: string) {
-    const bindingIds = this._bindings.get(id);
-    if (!bindingIds?.size) {
-      return [];
-    }
-    return [...bindingIds.values()]
-      .map(bindingId => this.pickById(bindingId))
-      .filter(e => !!e) as SurfaceElement[];
   }
 
   dispose() {
@@ -331,6 +320,14 @@ export class SurfaceManager {
 
   getElements() {
     return [...this._elements.values()];
+  }
+
+  getElementsByType<T extends keyof IPhasorElementType>(
+    type: T
+  ): IPhasorElementType[T][] {
+    return this.getElements().filter(
+      element => element.type === type
+    ) as unknown as IPhasorElementType[T][];
   }
 
   updateElementLocalRecord(id: id, records: Partial<ElementLocalRecords>) {

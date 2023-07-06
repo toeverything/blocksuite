@@ -8,8 +8,12 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
-import type { DatabaseSelection, DatabaseSelectionState } from '../std.js';
-import { asyncFocusRichText, type SerializedBlock } from '../std.js';
+import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
+import type {
+  DatabaseSelection,
+  DatabaseSelectionState,
+  SerializedBlock,
+} from '../__internal__/utils/types.js';
 import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';
@@ -18,16 +22,11 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   private _databaseSelection?: DatabaseSelection;
 
   slots = {
-    databaseSelectionUpdated: new Slot<DatabaseSelectionState>(),
+    databaseSelectionUpdated: new Slot<{
+      selection: DatabaseSelectionState;
+      old: DatabaseSelectionState;
+    }>(),
   };
-
-  constructor() {
-    super();
-
-    this.slots.databaseSelectionUpdated.on(selection => {
-      this._databaseSelection = selection;
-    });
-  }
 
   initDatabaseBlock(
     page: Page,
@@ -126,9 +125,37 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
+  selectionEqual(a: DatabaseSelectionState, b: DatabaseSelectionState) {
+    if (a === undefined || b === undefined) return a === b;
+    if (a.databaseId !== b.databaseId) return false;
+    if (
+      a.rowsSelection?.start !== b.rowsSelection?.start ||
+      a.rowsSelection?.end !== b.rowsSelection?.end
+    )
+      return false;
+    if (
+      a.columnsSelection?.start !== b.columnsSelection?.start ||
+      a.columnsSelection?.end !== b.columnsSelection?.end
+    )
+      return false;
+    if (
+      a.focus.rowIndex !== b.focus.rowIndex ||
+      a.focus.columnIndex !== b.focus.columnIndex
+    )
+      return false;
+    return a.isEditing === b.isEditing;
+  }
+
   select(state: DatabaseSelectionState) {
+    const old = this._databaseSelection;
+    if (this.selectionEqual(state, old)) {
+      return;
+    }
     this._databaseSelection = state;
-    this.slots.databaseSelectionUpdated.emit(state);
+    this.slots.databaseSelectionUpdated.emit({
+      selection: state,
+      old,
+    });
   }
 
   getSelection() {

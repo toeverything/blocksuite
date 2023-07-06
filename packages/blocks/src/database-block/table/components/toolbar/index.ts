@@ -4,8 +4,8 @@ import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { Point, Rect } from '../../../../__internal__/utils/rect.js';
 import type { DragIndicator } from '../../../../components/drag-handle.js';
-import { Point, Rect } from '../../../../std.js';
 import type { InsertPosition } from '../../../database-model.js';
 
 @customElement('affine-database-new-record-preview')
@@ -27,17 +27,7 @@ class NewRecordPreview extends ShadowlessElement {
           width: 32px;
           border: 1px solid var(--affine-border-color);
           border-radius: 50%;
-          background: linear-gradient(
-              0deg,
-              rgba(96, 70, 254, 0.3),
-              rgba(96, 70, 254, 0.3)
-            ),
-            linear-gradient(
-              0deg,
-              var(--affine-hover-color),
-              var(--affine-hover-color)
-            ),
-            var(--affine-white);
+          background: var(--affine-blue-100);
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
             0px 0px 0px 0.5px var(--affine-black-10);
           cursor: none;

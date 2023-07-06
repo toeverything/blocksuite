@@ -1,5 +1,7 @@
 // Inlined from https://raw.githubusercontent.com/tldraw/tldraw/24cad6959f59f93e20e556d018c391fd89d4ecca/packages/vec/src/index.ts
 // Credits to tldraw
+// import { almostEqual } from './math-utils.js';
+
 export type IVec = number[];
 export class Vec {
   /**

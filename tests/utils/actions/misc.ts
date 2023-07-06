@@ -4,13 +4,15 @@ import '../declare-test-window.js';
 import type {
   CssVariableName,
   ListType,
+  PageBlockModel,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import { type BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -61,6 +63,14 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
+
+export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
+  const rect = await page.evaluate(() => {
+    return getSelection()?.getRangeAt(0).getBoundingClientRect();
+  });
+  assertExists(rect);
+  return rect;
+};
 
 /**
  * @example
@@ -180,8 +190,8 @@ export async function enterPlaygroundRoom(
   page.on('console', message => {
     const ignore = shamefullyIgnoreConsoleMessage(message);
     if (!ignore) {
-      expect('no console message').toBe(
-        'Unexpected console message: ' + message.text()
+      expect('Unexpected console message: ' + message.text()).toBe(
+        'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
       );
       // throw new Error('Unexpected console message: ' + message.text());
     }
@@ -302,6 +312,7 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 
     const noteId = page.addBlock('affine:note', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    // page.addBlock('affine:surface', {}, pageId);
     page.captureSync();
     return { pageId, noteId, paragraphId };
   }, pageId);
@@ -409,10 +420,11 @@ export async function initDatabaseDynamicRowWithData(
   addRow = false,
   index = 0
 ) {
+  const editor = getEditorLocator(page);
   if (addRow) {
     await initDatabaseRow(page);
   }
-  const lastRow = page.locator('.affine-database-block-row').last();
+  const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
   await type(page, data);
@@ -948,5 +960,14 @@ export async function transformHtml(page: Page, data: string) {
     },
     { data }
   );
+  return promiseResult;
+}
+
+export async function export2Html(page: Page) {
+  const promiseResult = await page.evaluate(() => {
+    const contentParser = new window.ContentParser(window.page);
+    const root = window.page.root as PageBlockModel;
+    return contentParser.block2Html([contentParser.getSelectedBlock(root)]);
+  });
   return promiseResult;
 }

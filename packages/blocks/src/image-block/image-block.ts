@@ -1,7 +1,6 @@
 import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
 
-import type { PointerEventState } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement, type FocusContext } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
@@ -9,21 +8,14 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { registerService } from '../__internal__/service.js';
+import { clamp } from '../__internal__/utils/common.js';
+import { stopPropagation } from '../__internal__/utils/event.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
-import { stopPropagation } from '../page-block/edgeless/utils.js';
-import { clamp } from '../std.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
 import { ImageBlockService } from './image-service.js';
-
-export function isImageResizeEvent(e: PointerEventState) {
-  if ((e.raw.target as HTMLElement).classList.contains('resize')) {
-    return true;
-  }
-  return false;
-}
 
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
@@ -247,20 +239,20 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .catch(this._fetchError);
   };
 
-  static embedResizeManager: ImageResizeManager | null = null;
   private _observeDrag() {
-    if (ImageBlockComponent.embedResizeManager) {
-      return;
-    }
-
-    ImageBlockComponent.embedResizeManager = new ImageResizeManager();
-    const embedResizeManager = ImageBlockComponent.embedResizeManager;
+    const embedResizeManager = new ImageResizeManager();
 
     let dragging = false;
     this._disposables.add(
       this.root.uiEventDispatcher.add('dragStart', ctx => {
         const pointerState = ctx.get('pointerState');
-        if (isImageResizeEvent(pointerState)) {
+        const target = pointerState.event.target;
+        if (
+          target &&
+          target instanceof HTMLElement &&
+          this.contains(target) &&
+          target.classList.contains('resize')
+        ) {
           dragging = true;
           embedResizeManager.onStart(pointerState);
           return true;

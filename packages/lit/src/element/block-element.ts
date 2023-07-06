@@ -1,3 +1,4 @@
+import type { BlockService } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -7,7 +8,11 @@ import { WithDisposable } from '../width-disposable.js';
 import type { BlockSuiteRoot } from './lit-root.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
-export type FocusContext = (
+// TODO: remove this
+export type FocusContext<
+  Model extends BaseBlockModel = BaseBlockModel,
+  Service extends BlockService = BlockService
+> = (
   | {
       multi?: false;
     }
@@ -42,9 +47,11 @@ export type FocusContext = (
       }
   );
 
-export class BlockElement<Model extends BaseBlockModel> extends WithDisposable(
-  ShadowlessElement
-) {
+export class BlockElement<
+  Model extends BaseBlockModel,
+  Service extends BlockService = BlockService,
+  FocusCtx extends FocusContext<Model, Service> = FocusContext<Model, Service>
+> extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   root!: BlockSuiteRoot;
 
@@ -59,12 +66,21 @@ export class BlockElement<Model extends BaseBlockModel> extends WithDisposable(
 
   @property({ attribute: false })
   page!: Page;
-  focusBlock(focusContext: FocusContext): boolean {
+
+  get service(): Service | undefined {
+    return this.root.blockStore.getService(this.model.flavour) as
+      | Service
+      | undefined;
+  }
+
+  // TODO: remove this
+  focusBlock(focusContext: FocusCtx): boolean {
     // Return false to prevent default focus behavior
     return true;
   }
 
-  blurBlock(focusContext: FocusContext): boolean {
+  // TODO: remove this
+  blurBlock(focusContext: FocusCtx): boolean {
     // Return false to prevent default focus behavior
     return true;
   }

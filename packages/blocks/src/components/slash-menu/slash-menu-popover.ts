@@ -22,7 +22,7 @@ function collectGroupNames(menuItem: SlashItem[]) {
   }, [] as string[]);
 }
 
-@customElement('slash-menu')
+@customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 

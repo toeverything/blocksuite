@@ -19,6 +19,10 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     noop();
   }
 
+  onContainerPointerDown(e: PointerEventState): void {
+    noop();
+  }
+
   onContainerDblClick(e: PointerEventState): void {
     noop();
   }

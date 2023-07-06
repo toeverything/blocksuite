@@ -1,10 +1,11 @@
-import './components/multi-tag-select.js';
-import './components/multi-tag-view.js';
+import '../../../../components/tags/multi-tag-select.js';
+import '../../../../components/tags/multi-tag-view.js';
 
 import { html, literal } from 'lit/static-html.js';
 
+import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
+import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
 import type { SelectColumnData } from '../../../common/column-manager.js';
-import type { SelectTag } from '../../../types.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 class SelectCell extends DatabaseCellElement<string[], SelectColumnData> {
@@ -13,10 +14,10 @@ class SelectCell extends DatabaseCellElement<string[], SelectColumnData> {
   override render() {
     const value = this.value ? [this.value] : [];
     return html`
-      <affine-database-multi-tag-view
+      <affine-multi-tag-view
         .value="${value}"
         .options="${this.column.data.options}"
-      ></affine-database-multi-tag-view>
+      ></affine-multi-tag-view>
     `;
   }
 }
@@ -41,51 +42,39 @@ export class SelectCellEditing extends DatabaseCellElement<
   };
 
   _editComplete = () => {
-    this._setEditing(false);
+    this.selectCurrentCell(false);
   };
-
-  _updateOptions = (update: (options: SelectTag[]) => SelectTag[]) => {
+  _onOptionsChange = (options: SelectTag[]) => {
     this.column.updateData(data => {
       return {
         ...data,
-        options: update(data.options),
+        options,
       };
     });
   };
 
-  _newTag = (tag: SelectTag) => {
-    this._updateOptions(options => {
-      if (options.find(v => v.value === tag.value) == null) {
-        return [...options, tag];
-      }
-      return options;
+  override firstUpdated() {
+    this.popTagSelect();
+  }
+
+  private popTagSelect = () => {
+    popTagSelect(this, {
+      mode: 'single',
+      options: this._options,
+      onOptionsChange: this._onOptionsChange,
+      value: this._value,
+      onChange: this._onChange,
+      onComplete: this._editComplete,
+      minWidth: 400,
     });
-  };
-
-  _deleteTag = (id: string) => {
-    this._updateOptions(options => options.filter(v => v.id !== id));
-  };
-
-  _changeTag = (tag: SelectTag) => {
-    this._updateOptions(options =>
-      options.map(v => (v.id === tag.id ? tag : v))
-    );
   };
 
   override render() {
     return html`
-      <affine-database-multi-tag-select
-        .options="${this._options}"
+      <affine-multi-tag-view
         .value="${this._value}"
-        .onChange="${this._onChange}"
-        .editComplete="${this._editComplete}"
-        .newTag="${this._newTag}"
-        .deleteTag="${this._deleteTag}"
-        .changeTag="${this._changeTag}"
-        .container="${this.parentElement}"
-        .page="${this.page}"
-      >
-      </affine-database-multi-tag-select>
+        .options="${this._options}"
+      ></affine-multi-tag-view>
     `;
   }
 }

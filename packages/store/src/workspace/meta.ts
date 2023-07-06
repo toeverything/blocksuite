@@ -9,11 +9,23 @@ import type { Workspace } from './workspace.js';
 export interface PageMeta {
   id: string;
   title: string;
+  tags: string[];
   createDate: number;
 }
 
+type Tag = {
+  id: string;
+  value: string;
+  color: string;
+};
+type PagesPropertiesMeta = {
+  tags: {
+    options: Tag[];
+  };
+};
 type WorkspaceMetaState = {
   pages?: unknown[];
+  properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
   blockVersions?: Record<string, number>;
   name?: string;
@@ -248,4 +260,20 @@ export class WorkspaceMeta {
       }
     });
   };
+
+  get properties(): PagesPropertiesMeta {
+    let meta = this._proxy.properties;
+    if (!meta) {
+      this._proxy.properties = meta = {
+        tags: {
+          options: [],
+        },
+      };
+    }
+    return meta;
+  }
+
+  setProperties(meta: PagesPropertiesMeta) {
+    this._proxy.properties = meta;
+  }
 }

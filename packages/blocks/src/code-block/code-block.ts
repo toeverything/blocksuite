@@ -5,14 +5,12 @@ import './components/lang-list.js';
 
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
-import type { Disposable } from '@blocksuite/store';
 import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, render } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
-  BUNDLED_LANGUAGES,
   getHighlighter,
   type Highlighter,
   type ILanguageRegistration,
@@ -20,7 +18,11 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import { getViewportElement, queryCurrentMode } from '../__internal__/index.js';
+import {
+  clamp,
+  getViewportElement,
+  queryCurrentMode,
+} from '../__internal__/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
@@ -28,6 +30,7 @@ import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
+import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
 
@@ -191,9 +194,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
   });
-  private _themeChangeObserver: Disposable | null = null;
 
-  private _preLang: string | null = null;
+  private _curLanguageDisplayName: string = FALLBACK_LANG;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: ILanguageRegistration) {
     const mode = queryCurrentMode();
@@ -236,100 +238,35 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
 
-    // At AFFiNE, avoid the option element to be covered by the header
-    // we need to reserve the space for the header
-    const HEADER_HEIGHT = 64;
-    // The height of the option element
-    // You need to change this value manually if you change the style of the option element
-    const OPTION_ELEMENT_HEIGHT = 96;
+    this._disposables.add(
+      listenToThemeChange(this, async () => {
+        if (!this._highlighter) return;
+        const richText = this.querySelector('rich-text');
+        const vEditor = richText?.vEditor;
+        if (!vEditor) return;
 
-    let timer: number;
-    const updatePosition = () => {
-      // Update option position when scrolling
-      const rect = this.getBoundingClientRect();
-      this._optionPosition = {
-        x: rect.right + 12,
-        y: Math.min(
-          Math.max(rect.top, HEADER_HEIGHT + 12),
-          rect.bottom - OPTION_ELEMENT_HEIGHT
-        ),
-      };
-    };
-    this.hoverState.on(hover => {
-      clearTimeout(timer);
-      if (hover) {
-        updatePosition();
-        return;
-      }
-      timer = window.setTimeout(() => {
-        this._optionPosition = null;
-      }, HOVER_DELAY);
-    });
-    this._disposables.addFromEvent(this, 'mouseover', e => {
-      this.hoverState.emit(true);
-    });
-    const HOVER_DELAY = 300;
-    this._disposables.addFromEvent(this, 'mouseleave', e => {
-      this.hoverState.emit(false);
-    });
+        // update code-line theme
+        setTimeout(() => {
+          vEditor.requestUpdate();
+        });
+      })
+    );
 
-    const viewportElement = getViewportElement(this.model.page);
-    if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
-        if (!this._optionPosition) return;
-        updatePosition();
-      });
-    }
+    this._observePosition();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
-    this._themeChangeObserver?.dispose();
-  }
-
-  private _onClickWrapBtn() {
-    const container = this.querySelector('.affine-code-block-container');
-    assertExists(container);
-    this._wrap = container.classList.toggle('wrap');
-  }
-
-  protected override firstUpdated() {
-    this._themeChangeObserver = listenToThemeChange(this, async a => {
-      if (!this._highlighter) return;
-      const richText = this.querySelector('rich-text');
-      const vEditor = richText?.vEditor;
-      if (!vEditor) return;
-
-      // update code-line theme
-      setTimeout(() => {
-        vEditor.requestUpdate();
-      });
-    });
-
-    if (!this.model.language || this.model.language === FALLBACK_LANG) {
-      this._highlighter = null;
-      return;
-    }
-
-    const lang = BUNDLED_LANGUAGES.find(
-      lang => lang.id === this.model.language.toLowerCase()
-    );
-    if (!lang) {
-      console.warn('Unexpected language: ', this.model.language);
-      return;
-    }
-    this._startHighlight(lang);
   }
 
   override updated() {
-    if (this.model.language !== this._preLang) {
-      this._preLang = this.model.language;
-
-      const lang = BUNDLED_LANGUAGES.find(
-        lang => lang.id === this.model.language.toLowerCase()
-      );
+    if (this.model.language !== this._curLanguageDisplayName) {
+      const lang = getStandardLanguage(this.model.language);
+      this._curLanguageDisplayName = lang
+        ? lang.displayName ?? lang.id
+        : FALLBACK_LANG;
       if (lang) {
         if (this._highlighter) {
           const currentLangs = this._highlighter.getLoadedLanguages();
@@ -362,15 +299,71 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._richTextResizeObserver.observe(richText);
   }
 
+  private _onClickWrapBtn() {
+    const container = this.querySelector('.affine-code-block-container');
+    assertExists(container);
+    this._wrap = container.classList.toggle('wrap');
+  }
+
+  private _observePosition() {
+    // At AFFiNE, avoid the option element to be covered by the header
+    // we need to reserve the space for the header
+    const HEADER_HEIGHT = 64;
+    // The height of the option element
+    // You need to change this value manually if you change the style of the option element
+    const OPTION_ELEMENT_HEIGHT = 96;
+    const TOP_EDGE = 10;
+    const LEFT_EDGE = 12;
+
+    let timer: number;
+    const updatePosition = () => {
+      // Update option position when scrolling
+      const rect = this.getBoundingClientRect();
+      this._optionPosition = {
+        x: rect.right + LEFT_EDGE,
+        y: clamp(
+          rect.top + TOP_EDGE,
+          Math.min(
+            HEADER_HEIGHT + LEFT_EDGE,
+            rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
+          ),
+          rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
+        ),
+      };
+    };
+    this.hoverState.on(hover => {
+      clearTimeout(timer);
+      if (hover) {
+        updatePosition();
+        return;
+      }
+      timer = window.setTimeout(() => {
+        this._optionPosition = null;
+      }, HOVER_DELAY);
+    });
+    this._disposables.addFromEvent(this, 'mouseover', e => {
+      this.hoverState.emit(true);
+    });
+    const HOVER_DELAY = 300;
+    this._disposables.addFromEvent(this, 'mouseleave', e => {
+      this.hoverState.emit(false);
+    });
+
+    const viewportElement = getViewportElement(this.model.page);
+    if (viewportElement) {
+      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
+        if (!this._optionPosition) return;
+        updatePosition();
+      });
+    }
+  }
+
   private _onClickLangBtn() {
     if (this.readonly) return;
     this._showLangList = !this._showLangList;
   }
 
   private _langListTemplate() {
-    // TODO this is a workaround
-    const normalizedLang =
-      this.model.language[0].toUpperCase() + this.model.language.slice(1);
     return html`<div
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
@@ -384,7 +377,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         ?disabled=${this.readonly}
         @click=${this._onClickLangBtn}
       >
-        ${normalizedLang} ${!this.readonly ? ArrowDownIcon : html``}
+        ${this._curLanguageDisplayName}
+        ${!this.readonly ? ArrowDownIcon : html``}
       </icon-button>
       ${this._showLangList
         ? html`<lang-list

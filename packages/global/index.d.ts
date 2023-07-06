@@ -2,6 +2,7 @@ declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
   enable_database: boolean;
   enable_database_filter: boolean;
+  enable_page_tags: boolean;
   enable_drag_handle: boolean;
   enable_surface: boolean;
   enable_block_hub: boolean;
@@ -18,5 +19,9 @@ declare type BlockSuiteFlags = {
   enable_edgeless_toolbar: boolean;
   enable_linked_page: boolean;
   enable_bookmark_operation: boolean;
+  enable_note_index: boolean;
+
   readonly: Record<string, boolean>;
+
+  enable_note_cut: boolean;
 };

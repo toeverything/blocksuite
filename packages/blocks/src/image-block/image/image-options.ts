@@ -8,15 +8,11 @@ import type { Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { stopPropagation } from '../../__internal__/utils/event.js';
 import type { IPoint } from '../../__internal__/utils/types.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import {
-  copyImage,
-  downloadImage,
-  focusCaption,
-} from '../../page-block/default/utils.js';
-import { stopPropagation } from '../../page-block/edgeless/utils.js';
 import type { ImageBlockModel } from '../image-model.js';
+import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function ImageOptionsTemplate({
   model,
@@ -37,7 +33,7 @@ export function ImageOptionsTemplate({
       .affine-embed-editing-state-container > div {
         position: fixed;
         display: block;
-        z-index: 1;
+        z-index: var(--affine-z-index-popover);
       }
 
       .embed-editing-state {
@@ -62,9 +58,7 @@ export function ImageOptionsTemplate({
         <format-bar-button
           class="has-tool-tip"
           width="100%"
-          @click=${() => {
-            focusCaption(model);
-          }}
+          @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
           <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
@@ -72,9 +66,7 @@ export function ImageOptionsTemplate({
         <format-bar-button
           class="has-tool-tip"
           width="100%"
-          @click=${() => {
-            downloadImage(model);
-          }}
+          @click=${() => downloadImage(model)}
         >
           ${DownloadIcon}
           <tool-tip inert tip-position="right" role="tooltip"
@@ -84,9 +76,7 @@ export function ImageOptionsTemplate({
         <format-bar-button
           class="has-tool-tip"
           width="100%"
-          @click=${() => {
-            copyImage(model);
-          }}
+          @click=${() => copyImage(model)}
         >
           ${CopyIcon}
           <tool-tip inert tip-position="right" role="tooltip"
@@ -96,9 +86,7 @@ export function ImageOptionsTemplate({
         <format-bar-button
           class="has-tool-tip"
           width="100%"
-          @click="${() => {
-            model.page.deleteBlock(model);
-          }}"
+          @click="${() => model.page.deleteBlock(model)}"
         >
           ${DeleteIcon}
           <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>

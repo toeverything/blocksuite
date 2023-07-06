@@ -7,6 +7,8 @@ export interface IBrush {
   index: string;
   seed: number;
 
+  rotate: number;
+
   // [[x0,y0],[x1,y1]...]
   points: number[][];
   color: string;

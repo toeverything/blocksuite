@@ -77,12 +77,15 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     this._inputEle.setSelectionRange(end, end);
   };
 
-  override exitEditMode() {
+  override onExitEditMode() {
     this._setValue();
-    super.exitEditMode();
   }
 
   private _setValue = (str: string = this._inputEle.value) => {
+    if (!str) {
+      this.onChange(undefined);
+      return;
+    }
     const value = Number.parseFloat(str);
     if (Object.is(value, NaN)) {
       this._inputEle.value = `${this.value ?? ''}`;
@@ -96,7 +99,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     if (e.key === 'Enter') {
       this._setValue();
       setTimeout(() => {
-        this.exitEditMode();
+        this.selectCurrentCell(false);
       });
     }
   };
