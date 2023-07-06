@@ -135,6 +135,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
           : this._element.color,
+        zIndex: '10',
       });
     }
 
