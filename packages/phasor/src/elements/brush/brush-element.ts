@@ -12,6 +12,7 @@ import {
   lineIntersects,
   polyLineNearestPoint,
 } from '../../utils/math-utils.js';
+import { PointLocation } from '../../utils/pointLocation.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
@@ -174,15 +175,22 @@ export class BrushElement extends SurfaceElement<IBrush> {
     if (box.intersectLine(start, end, true)) {
       const len = points.length;
       for (let i = 1; i < len; i++) {
-        const result = lineIntersects(start, end, points[i - 1], points[i]) as
-          | IVec[]
-          | null;
+        const result = lineIntersects(start, end, points[i - 1], points[i]);
         if (result) {
-          return result;
+          return [
+            new PointLocation(
+              result,
+              Vec.normalize(Vec.sub(points[i], points[i - 1]))
+            ),
+          ];
         }
       }
     }
-
     return null;
+  }
+
+  override getRelativePointLocation(position: IVec): PointLocation {
+    const point = Bound.deserialize(this.xywh).getRelativePoint(position);
+    return new PointLocation(point);
   }
 }

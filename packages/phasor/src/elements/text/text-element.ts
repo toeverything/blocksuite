@@ -1,9 +1,12 @@
 import { Bound } from '../../utils/bound.js';
 import {
+  getPointFromBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
+  polygonGetPointTangent,
   polygonNearestPoint,
 } from '../../utils/math-utils.js';
+import { PointLocation } from '../../utils/pointLocation.js';
 import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
@@ -116,5 +119,16 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.restore();
       }
     }
+  }
+
+  override getRelativePointLocation(point: IVec): PointLocation {
+    const bound = Bound.deserialize(this.xywh);
+    const rotatePoint = getPointFromBoundsWithRotation(
+      this,
+      bound.getRelativePoint(point)
+    );
+    const points = getPointsFromBoundsWithRotation(this);
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
   }
 }

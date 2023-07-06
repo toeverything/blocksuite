@@ -7,12 +7,17 @@ import {
   type ConnectorElement,
   ConnectorMode,
   getBoundFromPoints,
+  getBoundsWithRotation,
+  getPointFromBoundsWithRotation,
+  type IBound,
   type IConnector,
   isOverlap,
   type IVec,
   lineIntersects,
   linePolygonIntersects,
   Overlay,
+  PointLocation,
+  polygonGetPointTangent,
   polygonNearestPoint,
   sign,
   type SurfaceManager,
@@ -27,6 +32,14 @@ import {
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { isTopLevelBlock } from './utils/query.js';
 import type { Selectable } from './utils/selection-manager.js';
+
+function rBound(ele: Connectable, anti = false): IBound {
+  const bound = Bound.deserialize(ele.xywh);
+  if (isTopLevelBlock(ele)) {
+    return { ...bound, rotate: 0 };
+  }
+  return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };
+}
 
 export function isConnectorAndBindingsAllSelected(
   connector: ConnectorElement,
@@ -55,24 +68,26 @@ export function isConnectorAndBindingsAllSelected(
 }
 
 export function getAnchors(ele: Connectable) {
-  const b = Bound.deserialize(ele.xywh);
+  const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
-  const anchors: { point: IVec; coord: IVec }[] = [];
-  const coords = [
-    [0.5, 0],
-    [0.5, 1],
-    [0, 0.5],
-    [1, 0.5],
-  ];
+  const anchors: { point: PointLocation; coord: IVec }[] = [];
+  const rotate = isTopLevelBlock(ele) ? 0 : ele.rotate;
   [
-    [b.center[0], b.y - offset],
-    [b.center[0], b.maxY + offset],
-    [b.x - offset, b.center[1]],
-    [b.maxX + offset, b.center[1]],
-  ].forEach((vec, index) => {
-    const rst = connectableIntersectLine(ele, [b.center, vec]);
-    if (rst) anchors.push({ point: rst[0], coord: coords[index] });
-  });
+    [bound.center[0], bound.y - offset],
+    [bound.center[0], bound.maxY + offset],
+    [bound.x - offset, bound.center[1]],
+    [bound.maxX + offset, bound.center[1]],
+  ]
+    .map(vec => getPointFromBoundsWithRotation({ ...bound, rotate }, vec))
+    .forEach(vec => {
+      const rst = connectableIntersectLine(ele, [bound.center, vec]);
+      assertExists(rst);
+      const originPoint = getPointFromBoundsWithRotation(
+        { ...bound, rotate: -rotate },
+        rst[0]
+      );
+      anchors.push({ point: rst[0], coord: bound.toRelative(originPoint) });
+    });
   return anchors;
 }
 
@@ -88,7 +103,31 @@ export function connectableIntersectLine(ele: Connectable, line: IVec[]) {
   }
 }
 
-export function getConnectableNearestAnchor(ele: Connectable, point: IVec) {
+function connectableRelativePointLocation(
+  connectable: Connectable,
+  position: IVec
+) {
+  if (isTopLevelBlock(connectable)) {
+    const bound = Bound.deserialize(connectable.xywh);
+    const point = bound.getRelativePoint(position);
+    const tangent = polygonGetPointTangent(bound.points, point);
+    return new PointLocation(point, tangent);
+  } else {
+    return connectable.getRelativePointLocation(position);
+  }
+}
+
+function connectableHitTest(connectable: Connectable, point: IVec) {
+  if (isTopLevelBlock(connectable)) {
+    return Bound.deserialize(connectable.xywh).isPointInBound(point);
+  } else {
+    return connectable.hitTest(point[0], point[1], {
+      ignoreTransparent: false,
+    });
+  }
+}
+
+export function connectableNearestAnchor(ele: Connectable, point: IVec) {
   const anchors = getAnchors(ele);
   return closestPoint(
     anchors.map(a => a.point),
@@ -96,7 +135,7 @@ export function getConnectableNearestAnchor(ele: Connectable, point: IVec) {
   );
 }
 
-function closestPoint(points: IVec[], point: IVec) {
+function closestPoint(points: PointLocation[], point: IVec) {
   const rst = points.map(p => ({ p, d: Vec.dist(p, point) }));
   rst.sort((a, b) => a.d - b.d);
   return rst[0].p;
@@ -517,20 +556,9 @@ function computeOffset(startBound: Bound | null, endBound: Bound | null) {
     return [startOffset, endOffset];
   }
   // left, top, right, bottom
-  let overlap = isOverlap(startBound.leftLine, endBound.rightLine, 1);
+  let overlap = isOverlap(startBound.upperLine, endBound.lowerLine, 0, false);
   let dist: number;
-  if (overlap) {
-    dist = Vec.distanceToLineSegment(
-      startBound.leftLine[0],
-      startBound.leftLine[1],
-      endBound.rightLine[0],
-      false
-    );
-    startOffset[0] = Math.max(Math.min(dist / 2, startOffset[0]), 0);
-  }
-
-  overlap = isOverlap(startBound.upperLine, endBound.lowerLine, 0);
-  if (overlap) {
+  if (overlap && startBound.upperLine[0][1] > endBound.lowerLine[0][1]) {
     dist = Vec.distanceToLineSegment(
       startBound.upperLine[0],
       startBound.upperLine[1],
@@ -540,8 +568,8 @@ function computeOffset(startBound: Bound | null, endBound: Bound | null) {
     startOffset[1] = Math.max(Math.min(dist / 2, startOffset[1]), 0);
   }
 
-  overlap = isOverlap(startBound.rightLine, endBound.leftLine, 1);
-  if (overlap) {
+  overlap = isOverlap(startBound.rightLine, endBound.leftLine, 1, false);
+  if (overlap && startBound.rightLine[0][0] < endBound.leftLine[0][0]) {
     dist = Vec.distanceToLineSegment(
       startBound.rightLine[0],
       startBound.rightLine[1],
@@ -551,8 +579,8 @@ function computeOffset(startBound: Bound | null, endBound: Bound | null) {
     startOffset[2] = Math.max(Math.min(dist / 2, startOffset[2]), 0);
   }
 
-  overlap = isOverlap(startBound.lowerLine, endBound.upperLine, 0);
-  if (overlap) {
+  overlap = isOverlap(startBound.lowerLine, endBound.upperLine, 0, false);
+  if (overlap && startBound.lowerLine[0][1] < endBound.upperLine[0][1]) {
     dist = Vec.distanceToLineSegment(
       startBound.lowerLine[0],
       startBound.lowerLine[1],
@@ -584,23 +612,72 @@ function computeOffset(startBound: Bound | null, endBound: Bound | null) {
 
 function getNextPoint(
   bound: Bound,
-  point: IVec,
+  point: PointLocation,
   offsetX = 10,
   offsetY = 10,
   offsetW = 10,
   offsetH = 10
 ) {
-  const result = [...point];
+  const result: IVec = [...point];
   if (almostEqual(bound.x, result[0])) result[0] -= offsetX;
   else if (almostEqual(bound.y, result[1])) result[1] -= offsetY;
   else if (almostEqual(bound.maxX, result[0])) result[0] += offsetW;
   else if (almostEqual(bound.maxY, result[1])) result[1] += offsetH;
+  else {
+    const direction = Vec.normalize(Vec.sub(result, bound.center));
+    const xDirection = direction[0] > 0 ? 1 : -1;
+    const yDirection = direction[1] > 0 ? 1 : -1;
+    // if the slope is big, use the x direction
+    const xORy =
+      Math.abs(point.tangent[0]) < Math.abs(point.tangent[1]) ? 0 : 1;
+    if (xORy === 0) {
+      if (xDirection > 0) {
+        const intersects = lineIntersects(
+          bound.rightLine[0],
+          bound.rightLine[1],
+          result,
+          [bound.maxX + 10, result[1]]
+        );
+        assertExists(intersects);
+        result[0] = intersects[0] + offsetX;
+      } else {
+        const intersects = lineIntersects(
+          bound.leftLine[0],
+          bound.leftLine[1],
+          result,
+          [bound.x - 10, result[1]]
+        );
+        assertExists(intersects);
+        result[0] = intersects[0] - offsetX;
+      }
+    } else {
+      if (yDirection > 0) {
+        const intersects = lineIntersects(
+          bound.lowerLine[0],
+          bound.lowerLine[1],
+          result,
+          [result[0], bound.maxY + 10]
+        );
+        assertExists(intersects);
+        result[1] = intersects[1] + offsetY;
+      } else {
+        const intersects = lineIntersects(
+          bound.upperLine[0],
+          bound.upperLine[1],
+          result,
+          [result[0], bound.y - 10]
+        );
+        assertExists(intersects);
+        result[1] = intersects[1] - offsetY;
+      }
+    }
+  }
   return result;
 }
 
 function computeNextStartEndPoint(
-  startPoint: IVec,
-  endPoint: IVec,
+  startPoint: PointLocation,
+  endPoint: PointLocation,
   startBound: Bound | null,
   endBound: Bound | null,
   startOffset: IVec | null,
@@ -634,8 +711,8 @@ function computeNextStartEndPoint(
 function adjustStartEndPoint(
   startPoint: IVec,
   endPoint: IVec,
-  startBound: Bound | null,
-  endBound: Bound | null
+  startBound: Bound | null = null,
+  endBound: Bound | null = null
 ) {
   if (!endBound) {
     if (
@@ -738,9 +815,10 @@ export class EdgelessConnectorManager {
 
       // then check if in expanded bound
       const bound = Bound.deserialize(connectable.xywh);
-      const expandBound = bound.expand(10);
-      if (!expandBound.isPointInBound(point)) continue;
-      _connectionOverlay.bound = bound;
+      const rotateBound = Bound.from(
+        getBoundsWithRotation(rBound(connectable))
+      );
+      if (!rotateBound.expand(10).isPointInBound(point)) continue;
 
       // then check if closes to anchors
       const anchors = getAnchors(connectable);
@@ -761,15 +839,19 @@ export class EdgelessConnectorManager {
       const nearestPoint = this._getConnectableNearestPoint(connectable, point);
       if (Vec.dist(nearestPoint, point) < 8) {
         _connectionOverlay.highlightPoint = nearestPoint;
+        const originPoint = getPointFromBoundsWithRotation(
+          rBound(connectable, true),
+          nearestPoint
+        );
         surface.refresh();
         result = {
           id: connectable.id,
-          position: bound.toRelative(nearestPoint).map(n => clamp(n, 0, 1)),
+          position: bound.toRelative(originPoint).map(n => clamp(n, 0, 1)),
         };
       }
       if (result) break;
-      // if not, check if in original bound
-      if (bound.isPointInBound(point)) {
+      // if not, check if in inside of the element
+      if (connectableHitTest(connectable, point)) {
         result = {
           id: connectable.id,
         };
@@ -867,8 +949,8 @@ export class EdgelessConnectorManager {
       ) as Connectable;
       const sb = Bound.deserialize(start.xywh);
       const eb = Bound.deserialize(end.xywh);
-      const startPoint = getConnectableNearestAnchor(start, eb.center);
-      const endPoint = getConnectableNearestAnchor(end, sb.center);
+      const startPoint = connectableNearestAnchor(start, eb.center);
+      const endPoint = connectableNearestAnchor(end, sb.center);
       return [startPoint, endPoint];
     } else {
       const endPoint = this._getConnectionPoint(connector, 'target');
@@ -889,17 +971,17 @@ export class EdgelessConnectorManager {
     Bound | null,
     Bound | null
   ] {
-    const start = this._getConnectorEndElement(
-      connector,
-      'source'
-    ) as Connectable;
-    const end = this._getConnectorEndElement(
-      connector,
-      'target'
-    ) as Connectable;
+    const start = this._getConnectorEndElement(connector, 'source');
+    const end = this._getConnectorEndElement(connector, 'target');
+
     const [startPoint, endPoint] = this._computeStartEndPoint(connector);
-    const startBound = start ? Bound.deserialize(start.xywh) : null;
-    const endBound = end ? Bound.deserialize(end.xywh) : null;
+
+    const startBound = start
+      ? Bound.from(getBoundsWithRotation(rBound(start)))
+      : null;
+    const endBound = end
+      ? Bound.from(getBoundsWithRotation(rBound(end)))
+      : null;
     const [startOffset, endOffset] = computeOffset(startBound, endBound);
     const [nextStartPoint, lastEndPoint] = computeNextStartEndPoint(
       startPoint,
@@ -920,6 +1002,7 @@ export class EdgelessConnectorManager {
     const expandEndBound = endBound
       ? endBound.expand(endOffset[0], endOffset[1], endOffset[2], endOffset[3])
       : null;
+
     return [
       startPoint,
       endPoint,
@@ -934,21 +1017,18 @@ export class EdgelessConnectorManager {
 
   private _computeStartEndPoint(connector: ConnectorElement) {
     const { source, target } = connector;
-    const start = this._getConnectorEndElement(
-      connector,
-      'source'
-    ) as Connectable;
-    const end = this._getConnectorEndElement(
-      connector,
-      'target'
-    ) as Connectable;
-    let startPoint: IVec, endPoint: IVec;
+    const start = this._getConnectorEndElement(connector, 'source');
+    const end = this._getConnectorEndElement(connector, 'target');
+
+    let startPoint: PointLocation, endPoint: PointLocation;
     if (source.id && !source.position && target.id && !target.position) {
+      assertExists(start);
+      assertExists(end);
       const startAnchors = getAnchors(start);
       const endAnchors = getAnchors(end);
       let minDist = Infinity;
-      let minStartAnchor: IVec = [0, 0];
-      let minEndAnchor: IVec = [0, 0];
+      let minStartAnchor = new PointLocation();
+      let minEndAnchor = new PointLocation();
       for (const sa of startAnchors) {
         for (const ea of endAnchors) {
           const dist = Vec.dist(sa.point, ea.point);
@@ -1023,7 +1103,6 @@ export class EdgelessConnectorManager {
     let path = this._aStarRunner.path;
     if (!endBound) path.pop();
     if (!startBound) path.shift();
-
     path = mergePath(path);
     return path;
   }
@@ -1031,7 +1110,7 @@ export class EdgelessConnectorManager {
   private _getConnectorEndElement(
     connector: IConnector,
     type: 'source' | 'target'
-  ) {
+  ): Connectable | null {
     const { surface, page } = this._edgeless;
     const id = connector[type].id;
     if (id) {
@@ -1043,24 +1122,25 @@ export class EdgelessConnectorManager {
   private _getConnectionPoint(
     connector: IConnector,
     type: 'source' | 'target'
-  ) {
+  ): PointLocation {
     const connection = connector[type];
     const anotherType = type === 'source' ? 'target' : 'source';
-    let point: IVec = [];
+    const point = new PointLocation();
     if (connection.id) {
-      const ele = this._getConnectorEndElement(connector, type);
-      assertExists(ele);
+      const connectable = this._getConnectorEndElement(connector, type);
+      assertExists(connectable);
       if (!connection.position) {
         const otherPoint = this._getConnectionPoint(connector, anotherType);
-        const rst = getConnectableNearestAnchor(ele, otherPoint);
-        return rst;
+        return connectableNearestAnchor(connectable, otherPoint);
       } else {
-        point = Bound.deserialize(ele.xywh).getRelativePoint(
+        return connectableRelativePointLocation(
+          connectable,
           connection.position
         );
       }
     } else {
-      point = connection.position as IVec;
+      assertExists(connection.position);
+      point.copyVec(connection.position);
     }
     return point;
   }

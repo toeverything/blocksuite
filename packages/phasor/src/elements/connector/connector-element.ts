@@ -1,10 +1,11 @@
 import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
-import type { Bound } from '../../utils/bound.js';
+import { Bound } from '../../utils/bound.js';
 import {
   linePolylineIntersects,
   polyLineNearestPoint,
 } from '../../utils/math-utils.js';
+import { PointLocation } from '../../utils/pointLocation.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
@@ -141,5 +142,11 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
         options
       );
     }
+  }
+
+  override getRelativePointLocation(point: IVec): PointLocation {
+    return new PointLocation(
+      Bound.deserialize(this.xywh).getRelativePoint(point)
+    );
   }
 }

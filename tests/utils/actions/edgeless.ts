@@ -28,6 +28,14 @@ import {
 
 const AWAIT_TIMEOUT = 260;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
+export type Point = { x: number; y: number };
+export enum Shape {
+  Square = 'Square',
+  Ellipse = 'Ellipse',
+  Diamond = 'Diamond',
+  Triangle = 'Triangle',
+  'Rounded rectangle' = 'Rounded rectangle',
+}
 
 export async function getNoteRect(
   page: Page,
@@ -176,7 +184,11 @@ export function locatorEdgelessComponentToolButton(
   return innerContainer ? button.locator('.icon-container') : button;
 }
 
-export async function setEdgelessTool(page: Page, mode: EdgelessTool) {
+export async function setEdgelessTool(
+  page: Page,
+  mode: EdgelessTool,
+  shape = Shape.Square
+) {
   switch (mode) {
     case 'default':
     case 'brush':
@@ -195,7 +207,7 @@ export async function setEdgelessTool(page: Page, mode: EdgelessTool) {
 
       const squareShapeButton = page
         .locator('edgeless-tool-icon-button')
-        .filter({ hasText: 'Square' });
+        .filter({ hasText: shape });
       await squareShapeButton.click();
       break;
     }
@@ -264,8 +276,8 @@ export async function autoFit(page: Page) {
 
 export async function addBasicBrushElement(
   page: Page,
-  start: { x: number; y: number },
-  end: { x: number; y: number },
+  start: Point,
+  end: Point,
   auto = true
 ) {
   await setEdgelessTool(page, 'brush');
@@ -275,17 +287,27 @@ export async function addBasicBrushElement(
 
 export async function addBasicRectShapeElement(
   page: Page,
-  start: { x: number; y: number },
-  end: { x: number; y: number }
+  start: Point,
+  end: Point
 ) {
   await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, start, end, { steps: 20 });
 }
 
+export async function addBasicShapeElement(
+  page: Page,
+  start: Point,
+  end: Point,
+  shape: Shape
+) {
+  await setEdgelessTool(page, 'shape', shape);
+  await dragBetweenCoords(page, start, end, { steps: 20 });
+}
+
 export async function addBasicConnectorElement(
   page: Page,
-  start: { x: number; y: number },
-  end: { x: number; y: number }
+  start: Point,
+  end: Point
 ) {
   await setEdgelessTool(page, 'connector');
   await dragBetweenCoords(page, start, end, { steps: 100 });
@@ -300,7 +322,7 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
 
 export async function resizeElementByHandle(
   page: Page,
-  delta: { x: number; y: number },
+  delta: Point,
   corner:
     | 'top-left'
     | 'top-right'
@@ -894,17 +916,19 @@ export async function edgelessCommonSetup(page: Page) {
   await deleteAll(page);
 }
 
-export async function createRectShapeElementWithModel(
+export async function createShapeElementWithModel(
   page: Page,
   coord1: number[],
-  coord2: number[]
+  coord2: number[],
+  shape: Shape
 ) {
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);
-  await addBasicRectShapeElement(
+  await addBasicShapeElement(
     page,
     { x: start[0], y: start[1] },
-    { x: end[0], y: end[1] }
+    { x: end[0], y: end[1] },
+    shape
   );
 }
 

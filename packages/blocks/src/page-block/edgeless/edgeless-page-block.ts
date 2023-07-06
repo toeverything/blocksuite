@@ -372,7 +372,7 @@ export class EdgelessPageBlockComponent
 
     this._disposables.add(
       this.surface.slots.elementUpdated.on(({ id, props }) => {
-        if ('xywh' in props) {
+        if ('xywh' in props || 'rotate' in props) {
           this.slots.elementSizeUpdated.emit(id);
         }
         const element = this.surface.pickById(id);

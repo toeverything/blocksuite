@@ -6,6 +6,7 @@ import {
   lineEllipseIntersects,
   pointInEllipse,
 } from '../../../utils/math-utils.js';
+import { PointLocation } from '../../../utils/pointLocation.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
@@ -54,7 +55,7 @@ export const EllipseMethods: ShapeMethods = {
     });
   },
 
-  hitTest(this: ShapeElement, x: number, y: number, options?: HitTestOptions) {
+  hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
     const point = [x, y];
     const expand = (options?.expand ?? 1) / (this.renderer?.zoom ?? 1);
     const rx = this.w / 2;
@@ -66,7 +67,7 @@ export const EllipseMethods: ShapeMethods = {
       pointInEllipse(point, center, rx + expand, ry + expand, rad) &&
       !pointInEllipse(point, center, rx - expand, ry - expand, rad);
 
-    if (this.filled && !hited) {
+    if ((!options.ignoreTransparent || this.filled) && !hited) {
       hited = pointInEllipse(point, center, rx, ry, rad);
     }
 
@@ -87,6 +88,7 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
+    //TODO: get real nearest point on ellipse
     return point;
   },
 
@@ -101,5 +103,12 @@ export const EllipseMethods: ShapeMethods = {
       bound.h / 2,
       rad
     );
+  },
+
+  getRelativePointLocation(position, element) {
+    const bound = Bound.deserialize(element.xywh);
+    const point = bound.getRelativePoint(position);
+    // TODO: calculate the tangent of point on ellipse
+    return new PointLocation(point);
   },
 };

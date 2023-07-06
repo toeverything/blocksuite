@@ -2,6 +2,7 @@
 // Credits to tldraw
 
 import type { IBound } from '../consts.js';
+import { PointLocation } from './pointLocation.js';
 import { type IVec, Vec } from './vec.js';
 
 export const EPSILON = 1e-12;
@@ -211,7 +212,7 @@ export function lineIntersects(
   sp2: IVec,
   ep2: IVec,
   infinite = false
-) {
+): IVec | null {
   const v1 = Vec.sub(ep, sp);
   const v2 = Vec.sub(ep2, sp2);
   const cross = Vec.cpr(v1, v2);
@@ -253,7 +254,7 @@ export function lineEllipseIntersects(
   rx *= rx;
   ry *= ry;
 
-  const rst = [];
+  const rst: IVec[] = [];
 
   const v = Vec.sub(B, A);
 
@@ -276,15 +277,15 @@ export function lineEllipseIntersects(
   }
 
   if (rst.length === 0) return null;
-  return rst;
+  return rst.map(v => new PointLocation(v));
 }
 
 export function linePolygonIntersects(
   sp: IVec,
   ep: IVec,
   points: IVec[]
-): IVec[] | null {
-  const result: IVec[] = [];
+): PointLocation[] | null {
+  const result: PointLocation[] = [];
   const len = points.length;
 
   for (let i = 0; i < len; i++) {
@@ -292,7 +293,9 @@ export function linePolygonIntersects(
     const p2 = points[(i + 1) % len];
     const rst = lineIntersects(sp, ep, p, p2);
     if (rst) {
-      result.push(rst);
+      const v = new PointLocation(rst);
+      v.tangent = Vec.normalize(Vec.sub(p2, p));
+      result.push(v);
     }
   }
 
@@ -321,12 +324,31 @@ export function polygonPointDistance(points: IVec[], point: IVec) {
   return Vec.dist(nearest, point);
 }
 
+export function polygonGetPointTangent(points: IVec[], point: IVec) {
+  const len = points.length;
+  for (let i = 0; i < len; i++) {
+    const p = points[i];
+    const p2 = points[(i + 1) % len];
+    if (isPointOnLineSegment(point, [p, p2])) {
+      return Vec.normalize(Vec.sub(p2, p));
+    }
+  }
+  return [0, 0];
+}
+
+export function isPointOnLineSegment(point: IVec, line: IVec[]) {
+  const [sp, ep] = line;
+  const v1 = Vec.sub(point, sp);
+  const v2 = Vec.sub(point, ep);
+  return almostEqual(Vec.cpr(v1, v2), 0) && Vec.dpr(v1, v2) <= 0;
+}
+
 export function linePolylineIntersects(
   sp: IVec,
   ep: IVec,
   points: IVec[]
-): IVec[] | null {
-  const result: IVec[] = [];
+): PointLocation[] | null {
+  const result: PointLocation[] = [];
   const len = points.length;
 
   for (let i = 0; i < len - 1; i++) {
@@ -334,7 +356,7 @@ export function linePolylineIntersects(
     const p2 = points[i + 1];
     const rst = lineIntersects(sp, ep, p, p2);
     if (rst) {
-      result.push(rst);
+      result.push(new PointLocation(rst, Vec.normalize(Vec.sub(p2, p))));
     }
   }
 
@@ -380,6 +402,17 @@ export function getPointFromBoundsWithRotation(
 
   const p = new DOMPoint(...point).matrixTransform(m);
   return [p.x, p.y];
+}
+
+export function rotatePoints<T extends IVec>(
+  points: T[],
+  center: IVec,
+  rotate: number
+): T[] {
+  const rad = toRadian(rotate);
+  return points.map(p =>
+    Vec.add(center, Vec.rot(Vec.sub(p, center), rad))
+  ) as T[];
 }
 
 export function getPointsFromBoundsWithRotation(
@@ -441,12 +474,28 @@ export function normalizeDegAngle(angle: number) {
   return angle;
 }
 
+export function toRadian(angle: number) {
+  return (angle * Math.PI) / 180;
+}
+
 // 0 means x axis, 1 means y axis
-export function isOverlap(line1: IVec[], line2: IVec[], axis: 0 | 1) {
+export function isOverlap(
+  line1: IVec[],
+  line2: IVec[],
+  axis: 0 | 1,
+  strict = true
+) {
+  const less = strict
+    ? (a: number, b: number) => a < b
+    : (a: number, b: number) => a <= b;
   return !(
-    Math.max(line1[0][axis], line1[1][axis]) <
-      Math.min(line2[0][axis], line2[1][axis]) ||
-    Math.min(line1[0][axis], line1[1][axis]) >
-      Math.max(line2[0][axis], line2[1][axis])
+    less(
+      Math.max(line1[0][axis], line1[1][axis]),
+      Math.min(line2[0][axis], line2[1][axis])
+    ) ||
+    less(
+      Math.max(line2[0][axis], line2[1][axis]),
+      Math.min(line1[0][axis], line1[1][axis])
+    )
   );
 }

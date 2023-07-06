@@ -40,7 +40,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           type: 'shape',
           xywh: '[0,0,100,100]',
           seed: Math.floor(Math.random() * 2 ** 31),
-          shapeType: 'rect',
+          shapeType: 'triangle',
 
           radius: 0,
           filled: true,

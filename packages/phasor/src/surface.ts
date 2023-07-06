@@ -261,7 +261,7 @@ export class SurfaceManager {
       expand: 10,
     }
   ): SurfaceElement[] {
-    const size = options.expand;
+    const size = options.expand ?? 10;
     const candidates = this._renderer.gridManager.search({
       x: x - size / 2,
       y: y - size / 2,
