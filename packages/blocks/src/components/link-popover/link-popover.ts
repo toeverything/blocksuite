@@ -69,7 +69,7 @@ const URL_REGEX = new RegExp(
   'i'
 );
 
-function normalizeUrl(url: string) {
+export function normalizeUrl(url: string) {
   const hasScheme = ALLOWED_SCHEMES.some(scheme =>
     url.startsWith(scheme + ':')
   );
