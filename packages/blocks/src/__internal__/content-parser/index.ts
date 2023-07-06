@@ -328,7 +328,7 @@ export class ContentParser {
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
     this.slots.beforeHtml2Block.emit(htmlEl);
-    return this._convertHtml2Blocks(htmlEl);
+    return this._convertHtml2Blocks(htmlEl, context);
   }
 
   async file2Blocks(clipboardData: DataTransfer): Promise<SerializedBlock[]> {
@@ -582,12 +582,13 @@ export class ContentParser {
   }
 
   private async _convertHtml2Blocks(
-    element: Element
+    element: Element,
+    context: ParseContext
   ): Promise<SerializedBlock[]> {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
         return (
-          (await this.withContext('NotionHtml').getParserHtmlText2Block(
+          (await this.withContext(context).getParserHtmlText2Block(
             'NodeParser'
           )?.(childElement)) || []
         );
