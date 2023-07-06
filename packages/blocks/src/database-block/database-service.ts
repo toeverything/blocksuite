@@ -77,8 +77,6 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       databaseProps: {
         id: block.id,
         title: block.title.toString(),
-        titleColumnName: block.titleColumnName,
-        titleColumnWidth: block.titleColumnWidth,
         rowIds,
         cells: block.cells,
         columns,

@@ -7,7 +7,11 @@ import { createRef, ref } from 'lit/directives/ref.js';
 
 import { getService } from '../../../../__internal__/service.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
-import type { CellFocus, DatabaseSelection, MultiSelection } from '../../../../__internal__/utils/types.js';
+import type {
+  CellFocus,
+  DatabaseSelection,
+  MultiSelection,
+} from '../../../../__internal__/utils/types.js';
 import { startDrag } from '../../../utils/drag.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import type { DatabaseCellContainer } from '../cell-container.js';
@@ -49,7 +53,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   `;
 
   @property()
-  databaseId!: string;
+  blockId!: string;
   @property({ attribute: false })
   view!: TableViewManager;
   @property({ attribute: false })
@@ -85,7 +89,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         if (!activeEditorManager.isActive(this)) {
           return;
         }
-        if (selection?.databaseId !== this.databaseId) {
+        if (selection?.databaseId !== this.blockId) {
           selection = undefined;
         }
         this.updateSelectionStyle(
@@ -176,7 +180,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         const selection = this.selection;
         if (
           selection &&
-          selection.databaseId === this.databaseId &&
+          selection.databaseId === this.blockId &&
           event instanceof KeyboardEvent
         ) {
           return this.onKeydown(selection, event);
@@ -191,9 +195,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   set selection(data: Omit<DatabaseSelection, 'databaseId'> | undefined) {
-    const selection = data
-      ? { ...data, databaseId: this.databaseId }
-      : undefined;
+    const selection = data ? { ...data, databaseId: this.blockId } : undefined;
     if (selection && selection.isEditing) {
       const focus = selection.focus;
       const container = this.getCellContainer(

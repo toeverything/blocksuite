@@ -1,11 +1,9 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
-import { assertExists, Slot } from '@blocksuite/store';
-import { undefined } from 'zod';
+import { Slot } from '@blocksuite/store';
 
 import type { FilterGroup } from '../common/ast.js';
+import { columnManager } from '../common/column-manager.js';
 import type { TableMixColumn, TableViewData } from '../common/view-manager.js';
-import type { ColumnDataUpdater, DatabaseBlockModel, InsertPosition } from '../database-model.js';
+import type { ColumnDataUpdater, InsertPosition } from '../database-model.js';
 import { insertPositionToIndex } from '../database-model.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
@@ -16,9 +14,13 @@ import type { SetValueOption } from './types.js';
 const renderer = registerInternalRenderer();
 
 export interface TableViewManager {
+  get id(): string;
+
   get name(): string;
 
   get filter(): FilterGroup;
+
+  setSearch(str: string): void;
 
   updateName(name: string): void;
 
@@ -40,7 +42,6 @@ export interface TableViewManager {
 
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void;
 
-
   rowDelete(ids: string[]): void;
 
   rowAdd(insertPosition: InsertPosition): string;
@@ -55,9 +56,9 @@ export interface TableViewManager {
 
   columnGet(columnId: string): ColumnManager;
 
-  columnGetPreColumn(columnId: string): string | undefined;
+  columnGetPreColumn(columnId: string): ColumnManager | undefined;
 
-  columnGetNextColumn(columnId: string): string | undefined;
+  columnGetNextColumn(columnId: string): ColumnManager | undefined;
 
   columnGetWidth(columnId: string): number;
 
@@ -83,11 +84,9 @@ export interface TableViewManager {
 
   columnUpdateData(columnId: string, data: Record<string, unknown>): void;
 
-
   deleteRow(ids: string[]): void;
 
   addRow(insertPosition: InsertPosition): string;
-
 
   moveColumn(column: string, toAfterOfColumn: InsertPosition): void;
 
@@ -98,9 +97,8 @@ export interface TableViewManager {
   nextColumn(id: string): TableMixColumn | undefined;
 
   slots: {
-    update: Slot
+    update: Slot;
   };
-
 }
 
 export interface ColumnManager<
@@ -157,16 +155,6 @@ export interface ColumnManager<
   captureSync(): void;
 }
 
-export interface DataSourceProperty {
-  id: string;
-  name: string;
-  type: string;
-  data: Record<string, unknown>;
-  changeName: (name: string) => void;
-  changeType: (type: string) => void;
-  changeData: (data: Record<string, unknown>) => void;
-}
-
 export interface DataSource {
   properties: string[];
   rows: string[];
@@ -179,32 +167,20 @@ export interface DataSource {
   propertyGetData: (propertyId: string) => Record<string, unknown>;
   propertyChangeName: (propertyId: string, name: string) => void;
   propertyChangeType: (propertyId: string, type: string) => void;
-  propertyChangeData: (propertyId: string, data: Record<string, unknown>) => void;
+  propertyChangeData: (
+    propertyId: string,
+    data: Record<string, unknown>
+  ) => void;
   propertyAdd: (insertPosition: InsertPosition) => string;
-  propertyDelete: (ids: string) => void;
+  propertyDelete: (id: string) => void;
+  propertyDuplicate: (columnId: string) => void;
 
   slots: {
     update: Slot;
   };
 }
 
-export interface ViewSourceProperty {
-
-}
-
-export interface ViewSource {
-  readonly id: string;
-  readonly properties: ViewSourceProperty[];
-  readonly rows: string[];
-  readonly getCell: (rowId: string, propertyId: string) => unknown;
-  readonly setCell: (rowId: string, propertyId: string, value: unknown) => void;
-  readonly slots: {
-    update: Slot;
-  };
-}
-
 export class DatabaseTableViewManager implements TableViewManager {
-
   private searchString = '';
 
   get rows(): string[] {
@@ -213,39 +189,52 @@ export class DatabaseTableViewManager implements TableViewManager {
 
   constructor(
     private getView: () => TableViewData,
-    private updateView: (updater: (view: TableViewData) => Partial<TableViewData>) => void,
-    private dataSource: DataSource,
+    private updateView: (
+      updater: (view: TableViewData) => Partial<TableViewData>
+    ) => void,
+    private dataSource: DataSource
   ) {
-    this.dataSource.slots.update
-      .pipe(this.slots.update);
+    this.dataSource.slots.update.pipe(this.slots.update);
+  }
+
+  setSearch(str: string): void {
+    this.searchString = str;
+    this.slots.update.emit();
   }
 
   private filteredRows(searchString: string) {
-    return this.dataSource.rows
-      .filter(id => {
-        if (searchString) {
-          const containsSearchString = this.columns.some(columnId => {
-            return this.cellGetStringValue(id, columnId).includes(searchString);
-          });
-          if (!containsSearchString) {
-            return false;
-          }
+    return this.dataSource.rows.filter(id => {
+      if (searchString) {
+        const containsSearchString = this.columns.some(columnId => {
+          return this.cellGetStringValue(id, columnId).includes(searchString);
+        });
+        if (!containsSearchString) {
+          return false;
         }
+      }
+      if (this.filter.conditions.length) {
         const rowMap = Object.fromEntries(
-          this.columnManagerList.map(column => [column.id, column.getFilterValue(id)]),
+          this.columnManagerList.map(column => [
+            column.id,
+            column.getFilterValue(id),
+          ])
         );
         return evalFilter(this.filter, rowMap);
-      });
+      }
+      return true;
+    });
   }
 
   get columnManagerList(): ColumnManager[] {
-    return this.getView().columns.map((property) => {
-      return this.columnGet(property.id);
-    });
+    return this.columns.map(id => this.columnGet(id));
   }
 
   get filter(): FilterGroup {
     return this.getView().filter;
+  }
+
+  get id() {
+    return this.getView().id;
   }
 
   get name(): string {
@@ -272,54 +261,61 @@ export class DatabaseTableViewManager implements TableViewManager {
     this.updateView(view => {
       const columnIndex = view.columns.findIndex(v => v.id === id);
       if (columnIndex < 0) {
-        return;
+        return {};
       }
-      const [column] = view.columns.splice(columnIndex, 1);
-      const index = insertPositionToIndex(toAfterOfColumn, view.columns);
-      view.columns.splice(index, 0, column);
+      const columns = [...view.columns];
+      const [column] = columns.splice(columnIndex, 1);
+      const index = insertPositionToIndex(toAfterOfColumn, columns);
+      columns.splice(index, 0, column);
+      return {
+        columns,
+      };
     });
   }
 
   newColumn(position: InsertPosition): void {
-    const id = this.dataSource.propertyAdd(
-      position,
-    );
-
-    this._model.applyColumnUpdate();
+    const id = this.dataSource.propertyAdd(position);
+    this.updateView(view => {
+      const index = insertPositionToIndex(position, view.columns);
+      const columns = [...view.columns];
+      columns.splice(index, 0, {
+        id,
+        width: DEFAULT_COLUMN_WIDTH,
+        hide: false,
+      });
+      return {
+        columns,
+      };
+    });
   }
 
-  nextColumn(id: string): TableMixColumn | undefined {
-    return this._columns[this._columns.findIndex(v => v.id === id) + 1];
+  nextColumn(id: string): ColumnManager | undefined {
+    return this.columnManagerList[this.columnGetIndex(id) + 1];
   }
 
-  preColumn(id: string): TableMixColumn | undefined {
-    return this._columns[this._columns.findIndex(v => v.id === id) - 1];
+  preColumn(id: string): ColumnManager | undefined {
+    return this.columnManagerList[this.columnGetIndex(id) - 1];
   }
 
   deleteRow(ids: string[]): void {
-    this.dataSource.deleteRows(ids);
-    // this._model.page.updateBlock(this._model, {
-    //   children: this._model.children.filter(v => !ids.includes(v.id)),
-    // });
+    this.dataSource.rowDelete(ids);
   }
 
   addRow(insertPosition: InsertPosition): string {
-    return this.dataSource.addRow(insertPosition);
-    // const index = insertPositionToIndex(insertPosition, this._model.children);
-    // return this._model.page.addBlock(
-    //   'affine:paragraph',
-    //   {},
-    //   this._model.id,
-    //   index,
-    // );
+    return this.dataSource.rowAdd(insertPosition);
   }
 
   public slots = {
-    update: new Slot,
+    update: new Slot(),
   };
 
   public cellGetFilterValue(rowId: string, columnId: string): unknown {
-    return undefined;
+    return columnManager
+      .getColumn(this.columnGetType(columnId))
+      .toJson(
+        this.cellGetRenderValue(rowId, columnId),
+        this.columnGetData(columnId)
+      );
   }
 
   public cellGetRenderValue(rowId: string, columnId: string): unknown {
@@ -327,20 +323,33 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   public cellGetStringValue(rowId: string, columnId: string): string {
-    return '';
+    return (
+      columnManager.toString(
+        this.columnGetType(columnId),
+        this.cellGetRenderValue(rowId, columnId),
+        this.columnGetData(columnId)
+      ) ?? ''
+    );
   }
 
-  public cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void {
+  public cellUpdateRenderValue(
+    rowId: string,
+    columnId: string,
+    value: unknown
+  ): void {
     this.dataSource.cellChangeValue(rowId, columnId, value);
   }
 
   public columnAdd(toAfterOfColumn: InsertPosition): void {
+    this.dataSource.propertyAdd(toAfterOfColumn);
   }
 
   public columnDelete(columnId: string): void {
+    this.dataSource.propertyDelete(columnId);
   }
 
   public columnDuplicate(columnId: string): void {
+    this.dataSource.propertyDuplicate(columnId);
   }
 
   public columnGet(columnId: string): ColumnManager {
@@ -356,27 +365,27 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   public columnGetIdByIndex(index: number): string {
-    return '';
+    return this.columns[index];
   }
 
   public columnGetIndex(columnId: string): number {
-    return 0;
+    return this.columns.indexOf(columnId);
   }
 
   public columnGetName(columnId: string): string {
     return this.dataSource.propertyGetName(columnId);
   }
 
-  public columnGetNextColumn(columnId: string): string | undefined {
-    return undefined;
+  public columnGetNextColumn(columnId: string): ColumnManager | undefined {
+    return this.columnGet(
+      this.columnGetIdByIndex(this.columnGetIndex(columnId) + 1)
+    );
   }
 
-  public columnGetPreColumn(columnId: string): string | undefined {
-    return undefined;
-  }
-
-  private getViewColumn(id: string) {
-    return this.getView().columns.find(v => v.id);
+  public columnGetPreColumn(columnId: string): ColumnManager | undefined {
+    return this.columnGet(
+      this.columnGetIdByIndex(this.columnGetIndex(columnId) - 1)
+    );
   }
 
   public columnGetType(columnId: string): string {
@@ -384,46 +393,75 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   public columnGetWidth(columnId: string): number {
-    return this.getView().columns.find(v => v.id === columnId)?.width ?? DEFAULT_COLUMN_WIDTH;
+    return (
+      this.getView().columns.find(v => v.id === columnId)?.width ??
+      DEFAULT_COLUMN_WIDTH
+    );
   }
 
   public columnMove(columnId: string, toAfterOfColumn: InsertPosition): void {
+    this.updateView(view => {
+      const columns = [...view.columns];
+      const index = columns.findIndex(v => v.id === columnId);
+      if (index < 0) {
+        return {};
+      }
+      const [column] = columns.splice(index, 1);
+      const toIndex = insertPositionToIndex(toAfterOfColumn, columns);
+      columns.splice(toIndex, 0, column);
+      return {
+        columns,
+      };
+    });
   }
 
-  public columnUpdateData(columnId: string, data: Record<string, unknown>): void {
+  public columnUpdateData(
+    columnId: string,
+    data: Record<string, unknown>
+  ): void {
+    this.dataSource.propertyChangeData(columnId, data);
   }
 
   public columnUpdateHide(columnId: string, hide: boolean): void {
+    //TODO
   }
 
   public columnUpdateName(columnId: string, name: string): void {
+    this.dataSource.propertyChangeName(columnId, name);
   }
 
   public columnUpdateType(columnId: string, type: string): void {
+    this.dataSource.propertyChangeType(columnId, type);
   }
 
   public columnUpdateWidth(columnId: string, width: number): void {
+    this.updateView(view => {
+      return {
+        columns: view.columns.map(v =>
+          v.id === columnId ? { ...v, width: v.width } : v
+        ),
+      };
+    });
   }
 
   public get columns(): string[] {
-    return [];
+    return this.getView().columns.map(v => v.id);
   }
 
   public rowAdd(insertPosition: InsertPosition): string {
-    return '';
+    return this.dataSource.rowAdd(insertPosition);
   }
 
   public rowDelete(ids: string[]): void {
+    this.dataSource.rowDelete(ids);
   }
 }
 
 export class DatabaseColumnManager implements ColumnManager {
-
   constructor(
     protected propertyId: string,
-    protected viewManager: TableViewManager,
-  ) {
-  }
+    protected viewManager: TableViewManager
+  ) {}
 
   get index(): number {
     return this.viewManager.columnGetIndex(this.id);
@@ -446,7 +484,10 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   get isLast(): boolean {
-    return this.viewManager.columnGetIndex(this.id) === this.viewManager.columnManagerList.length - 1;
+    return (
+      this.viewManager.columnGetIndex(this.id) ===
+      this.viewManager.columnManagerList.length - 1
+    );
   }
 
   get name(): string {
@@ -469,10 +510,7 @@ export class DatabaseColumnManager implements ColumnManager {
     return this.viewManager.cellGetRenderValue(rowId, this.id);
   }
 
-  setValue(
-    rowId: string,
-    value: unknown | undefined,
-  ): void {
+  setValue(rowId: string, value: unknown | undefined): void {
     this.viewManager.cellUpdateRenderValue(this.id, rowId, value);
   }
 
@@ -494,20 +532,23 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   get delete(): (() => void) | undefined {
-
+    return () => this.viewManager.columnDelete(this.id);
   }
 
   get duplicate(): (() => void) | undefined {
+    return () => this.viewManager.columnDuplicate(this.id);
   }
 
   get updateType(): undefined | ((type: string) => void) {
+    return type => this.viewManager.columnUpdateType(this.id, type);
   }
 
   get readonly(): boolean {
+    return false;
   }
 
   captureSync(): void {
-
+    //
   }
 
   getFilterValue(rowId: string): unknown {
@@ -516,118 +557,5 @@ export class DatabaseColumnManager implements ColumnManager {
 
   getStringValue(rowId: string): string {
     return this.viewManager.cellGetStringValue(this.id, rowId);
-  }
-}
-
-export class DatabaseTitleColumnManager implements ColumnManager {
-  constructor(
-    protected _index: number,
-    protected _model: DatabaseBlockModel,
-    protected _root: BlockSuiteRoot,
-  ) {
-  }
-
-  get id(): string {
-    return 'title';
-  }
-
-  get name(): string {
-    return this._model.titleColumnName;
-  }
-
-  get width(): number {
-    return this._model.titleColumnWidth;
-  }
-
-  get data(): Record<string, unknown> {
-    return {};
-  }
-
-  get type(): string {
-    return 'title';
-  }
-
-  get index(): number {
-    return 0;
-  }
-
-  getValue(rowId: string): unknown | undefined {
-    const block = this._model.page.getBlockById(rowId);
-    assertExists(block);
-    return this._root.renderModel(block);
-  }
-
-  setValue(rowId: string, value: unknown | undefined, option?: SetValueOption) {
-    //
-  }
-
-  updateName(name: string) {
-    this._model.page.captureSync();
-    this._model.page.updateBlock(this._model, {
-      titleColumnName: name,
-    });
-  }
-
-  updateWidth(width: number) {
-    this._model.page.captureSync();
-    this._model.page.updateBlock(this._model, {
-      titleColumnWidth: width,
-    });
-  }
-
-  get delete(): (() => void) | undefined {
-    return undefined;
-  }
-
-  get duplicate(): (() => void) | undefined {
-    return undefined;
-  }
-
-  get updateType(): undefined | ((type: string) => void) {
-    return undefined;
-  }
-
-  captureSync(): void {
-    this._model.page.captureSync();
-  }
-
-  get hide(): boolean {
-    return false;
-  }
-
-  get isFirst(): boolean {
-    return this._index === 0;
-  }
-
-  get isLast(): boolean {
-    return false;
-  }
-
-  get page(): Page {
-    return this._model.page;
-  }
-
-  get readonly(): boolean {
-    return this._model.page.readonly;
-  }
-
-  get renderer(): ColumnRenderer {
-    return renderer.get(this.type);
-  }
-
-  updateData(updater: ColumnDataUpdater<Record<string, unknown>>): void {
-    //
-  }
-
-  updateHide(hide: boolean): void {
-    //
-  }
-
-  getFilterValue(rowId: string): unknown {
-    return this.getStringValue(rowId);
-  }
-
-  getStringValue(rowId: string): string {
-    return this._model.page.getBlockById(rowId)?.text?.toString() ?? '';
   }
 }

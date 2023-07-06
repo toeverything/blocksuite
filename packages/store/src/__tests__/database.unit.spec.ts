@@ -219,20 +219,6 @@ describe('DatabaseManager', () => {
     expect(cell).toBeNull();
   });
 
-  // FIXME: https://github.com/toeverything/blocksuite/issues/1949
-  test.skip('convertCellsByColumn', () => {
-    db.convertCellsByColumn(col1, 'select');
-    const cell = db.getCell(p1, col1);
-    expect(cell).toEqual({
-      columnId: col1,
-      value: ['0.1'],
-    });
-
-    db.convertCellsByColumn(col1, 'rich-text');
-    const richTextCell = db.getCell(p1, col1);
-    expect(richTextCell?.value?.toString()).toEqual('0.1');
-  });
-
   test('deleteSelectedCellTag', () => {
     db.deleteSelectedCellTag(col2, selection[1]);
 

@@ -9,14 +9,16 @@ import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import { registerService } from '../__internal__/service.js';
 import { DatabaseBlockDataSource } from './database-block-data-source.js';
-import type { DatabaseBlockModel } from './database-model.js';
+import type { BlockOperation, DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
-import type { DataSource, TableViewManager } from './table/table-view-manager.js';
+import type {
+  DataSource,
+  TableViewManager,
+} from './table/table-view-manager.js';
 import { DatabaseTableViewManager } from './table/table-view-manager.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -46,7 +48,17 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   private getView(id: string): TableViewManager {
     if (!this.viewMap[id]) {
-      this.viewMap[id] = new DatabaseTableViewManager(() => this.model.views.find(v => v.id === id), (update) => this.model.updateView(id, update),this.dataSource);
+      this.viewMap[id] = new DatabaseTableViewManager(
+        () => {
+          const view = this.model.views.find(v => v.id === id);
+          if (!view || view.mode !== 'table') {
+            throw new Error(`view ${id} not found`);
+          }
+          return view;
+        },
+        update => this.model.updateView(id, update),
+        this.dataSource
+      );
     }
     return this.viewMap[id];
   }
@@ -55,25 +67,26 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
     const databaseTag = literal`affine-database-${unsafeStatic(current.mode)}`;
-    const view = this.model.page.awarenessStore.getFlag(
-      'enable_database_filter',
-    )
-      ? html`
-        <database-view-header
-          .currentView='${current.id}'
-          .setViewId='${this._setViewId}'
-          .model='${this.model}'
+    const view = this.root.page.awarenessStore.getFlag('enable_database_filter')
+      ? html` <database-view-header
+          .currentView="${current.id}"
+          .setViewId="${this._setViewId}"
+          .model="${this.model}"
         ></database-view-header>`
       : '';
-    const currentViewManager = this.getView(current.id)
+    const currentViewManager = this.getView(current.id);
+    const blockOperation: BlockOperation = {
+      copy: this.model.copy,
+      delete: this.model.delete,
+    };
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
-      <div>
+      <div class='toolbar-hover-container'>
         ${view}
         <${databaseTag}
+          .titleText='${this.model.title}'
           .root='${this.root}'
-          .model='${this.model}'
-          .view='${current}'
+          .blockOperation='${blockOperation}'
           .tableViewManager='${currentViewManager}'
           .modalMode='${this.modalMode}'
           class='affine-block-element'
