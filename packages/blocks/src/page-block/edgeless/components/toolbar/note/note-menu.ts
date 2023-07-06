@@ -18,14 +18,15 @@ export class EdgelessNoteMenu extends LitElement {
     :host {
       position: absolute;
       height: 76px;
-      display: flex;
       box-shadow: var(--affine-shadow-2);
+      border-radius: 8px 8px 0 0;
+      display: flex;
       z-index: -1;
     }
     .note-menu-container {
       display: flex;
       flex-direction: column;
-      background: var(--affine-background-overlay-panel-color);
+      background: transparent;
       fill: currentcolor;
       position: relative;
     }
