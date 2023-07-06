@@ -1,5 +1,5 @@
 import '../component-toolbar/component-toolbar.js';
-import '../connector/connector-handler.js';
+import '../connector/connector-handle.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import {
@@ -618,18 +618,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         )
       : nothing;
 
-    const connectorHandler =
+    const connectorHandle =
       selected.length === 1 && selected[0] instanceof ConnectorElement
-        ? html` <edgeless-connector-handler
+        ? html` <edgeless-connector-handle
             .connector=${selected[0]}
             .edgeless=${edgeless}
             .refresh=${() => slots.selectionUpdated.emit({ ...state })}
-          ></edgeless-connector-handler>`
+          ></edgeless-connector-handle>`
         : nothing;
 
     return html`
       <div class="affine-edgeless-selected-rect" disabled="true">
-        ${resizeHandles} ${connectorHandler}
+        ${resizeHandles} ${connectorHandle}
       </div>
       <edgeless-component-toolbar
         .selectionState=${state}

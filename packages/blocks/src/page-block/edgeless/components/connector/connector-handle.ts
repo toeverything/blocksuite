@@ -7,8 +7,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
-@customElement('edgeless-connector-handler')
-export class EdgelessConnectorHandler extends WithDisposable(LitElement) {
+@customElement('edgeless-connector-handle')
+export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   static override styles = css`
     .line-controller {
       position: absolute;
@@ -121,6 +121,6 @@ export class EdgelessConnectorHandler extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-connector-handler': EdgelessConnectorHandler;
+    'edgeless-connector-handle': EdgelessConnectorHandle;
   }
 }
