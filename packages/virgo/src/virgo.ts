@@ -255,7 +255,7 @@ export class VEditor<
    */
   focusEnd(): void {
     this.rangeService.setVRange({
-      index: this.yText.length - 1,
+      index: this.yText.length,
       length: 0,
     });
   }

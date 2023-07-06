@@ -100,7 +100,7 @@ test('basic input', async ({ page }) => {
   await press(page, 'Enter');
   await type(page, 'bbb');
 
-  page.waitForTimeout(100);
+  await page.waitForTimeout(100);
 
   expect(await editorA.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
   expect(await editorB.innerText()).toBe('abc\n' + ZERO_WIDTH_SPACE + '\nbbb');
