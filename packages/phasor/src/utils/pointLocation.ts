@@ -1,5 +1,6 @@
 import { type IVec } from './vec.js';
 export class PointLocation extends Array<number> implements IVec {
+  // the tangent belongs to  the point on the element outline
   _tangent: IVec = [0, 0];
 
   constructor(point: IVec = [0, 0], tangent: IVec = [0, 0]) {
