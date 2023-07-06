@@ -1,9 +1,10 @@
 import '../component-toolbar/component-toolbar.js';
+import '../connector/connector-handle.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import {
   type Bound,
-  type ConnectorElement,
+  ConnectorElement,
   deserializeXYWH,
   normalizeDegAngle,
   type PhasorElement,
@@ -29,7 +30,6 @@ import type {
   Selectable,
 } from '../../utils/selection-manager.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
-import { SingleConnectorHandles } from '../connector/single-connector-handles.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
@@ -618,18 +618,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         )
       : nothing;
 
-    const connectorHandles =
-      selected.length === 1 && selected[0].type === 'connector'
-        ? SingleConnectorHandles(
-            selected[0] as ConnectorElement,
-            edgeless,
-            () => slots.selectionUpdated.emit({ ...state })
-          )
+    const connectorHandle =
+      selected.length === 1 && selected[0] instanceof ConnectorElement
+        ? html` <edgeless-connector-handle
+            .connector=${selected[0]}
+            .edgeless=${edgeless}
+            .refresh=${() => slots.selectionUpdated.emit({ ...state })}
+          ></edgeless-connector-handle>`
         : nothing;
 
     return html`
       <div class="affine-edgeless-selected-rect" disabled="true">
-        ${resizeHandles} ${connectorHandles}
+        ${resizeHandles} ${connectorHandle}
       </div>
       <edgeless-component-toolbar
         .selectionState=${state}
