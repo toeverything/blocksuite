@@ -9,6 +9,7 @@
 
 :root {
   --affine-editor-width: 800px;
+  font-family: var(--affine-font-family);
 }
 
 .dg > ul {
