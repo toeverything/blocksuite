@@ -145,23 +145,18 @@ export class LangList extends ShadowlessElement {
   }
 
   override render() {
-    const filteredBundledLanguages = [...BUNDLED_LANGUAGES]
-      .filter(language => {
-        if (!this._filterText) {
-          return true;
-        }
-        return (
-          language.id.startsWith(this._filterText.toLowerCase()) ||
-          language.aliases?.some(alias =>
-            alias.startsWith(this._filterText.toLowerCase())
-          )
-        );
-      })
-      .sort(
-        (a, b) =>
-          (POPULAR_LANGUAGES_MAP[a.id as Lang] ?? Infinity) -
-          (POPULAR_LANGUAGES_MAP[b.id as Lang] ?? Infinity)
+    const filteredBundledLanguages = [...BUNDLED_LANGUAGES].filter(language => {
+      if (!this._filterText) {
+        return true;
+      }
+      return (
+        language.id.startsWith(this._filterText.toLowerCase()) ||
+        language.aliases?.some(alias =>
+          alias.startsWith(this._filterText.toLowerCase())
+        )
       );
+    });
+
     const filteredLanguages = [
       PLAIN_TEXT_REGISTRATION,
       ...filteredBundledLanguages,
