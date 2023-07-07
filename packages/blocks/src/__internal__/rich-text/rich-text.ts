@@ -260,10 +260,13 @@ export class RichText extends ShadowlessElement {
       return;
     }
 
-    const range = this._vEditor.toDomRange({
+    const vRange = {
       index: selection.index,
       length: selection.length,
-    });
+    };
+
+    this._vEditor.setVRange(vRange);
+    const range = this._vEditor.toDomRange(vRange);
 
     if (!range) {
       return;

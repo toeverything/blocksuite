@@ -1,9 +1,20 @@
+type RangeSnapshot = {
+  startContainer: Node;
+  endContainer: Node;
+  startOffset: number;
+  endOffset: number;
+};
 export class RangeController {
-  private _pending: Range[] = [];
+  private _pending: RangeSnapshot[] = [];
   private _timer = 0;
 
   add(range: Range) {
-    this._pending.push(range);
+    this._pending.push({
+      startContainer: range.startContainer,
+      endContainer: range.endContainer,
+      startOffset: range.startOffset,
+      endOffset: range.endOffset,
+    });
   }
 
   start() {
@@ -27,15 +38,25 @@ export class RangeController {
     window.clearInterval(this._timer);
   }
 
-  private _mergeRanges(ranges: Range[]): Range | null {
+  private _snapshotToRange(snapshot: RangeSnapshot): Range {
+    const range = new Range();
+    range.setStart(snapshot.startContainer, snapshot.startOffset);
+    range.setEnd(snapshot.endContainer, snapshot.endOffset);
+    return range;
+  }
+
+  private _mergeRanges(ranges: RangeSnapshot[]): Range | null {
     if (ranges.length === 0) {
       return null;
     }
     if (ranges.length === 1) {
-      return ranges[0];
+      const [current] = ranges;
+      return this._snapshotToRange(current);
     }
 
-    let [leftRange, rightRange] = ranges;
+    const [leftRangeSnapshot, rightRangeSnapshot] = ranges;
+    let leftRange = this._snapshotToRange(leftRangeSnapshot);
+    let rightRange = this._snapshotToRange(rightRangeSnapshot);
 
     const restRanges = ranges.slice(2);
     const result = leftRange.compareBoundaryPoints(
@@ -47,10 +68,11 @@ export class RangeController {
     }
 
     while (restRanges.length > 0) {
-      const range = restRanges.pop();
-      if (!range) {
+      const snapshot = restRanges.pop();
+      if (!snapshot) {
         break;
       }
+      const range = this._snapshotToRange(snapshot);
       const left = range.compareBoundaryPoints(Range.START_TO_END, leftRange);
       const right = range.compareBoundaryPoints(Range.END_TO_START, rightRange);
       if (left < 0) {
@@ -71,6 +93,13 @@ export class RangeController {
   private _renderRange(range: Range) {
     const selection = document.getSelection();
     if (!selection) {
+      return;
+    }
+
+    if (
+      !document.contains(range.startContainer) ||
+      !document.contains(range.endContainer)
+    ) {
       return;
     }
 

@@ -53,7 +53,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
       selectionManager: this.selectionManager,
     });
     this.uiEventDispatcher.mount();
-    this.selectionManager.mount();
+    this.selectionManager.mount(this.page);
     this.blockStore.applySpecs(this.blocks);
   }
 

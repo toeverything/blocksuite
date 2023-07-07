@@ -14,7 +14,6 @@ import { type BaseBlockModel } from '@blocksuite/store';
 import {
   AbstractSelectionManager,
   type BlockComponentElement,
-  debounce,
   type EmbedBlockDoubleClickData,
   getBlockElementByModel,
   getBlockElementsByElement,
@@ -57,11 +56,7 @@ import { BlockDragHandlers } from './block-drag-handlers.js';
 import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState } from './selection-state.js';
-import {
-  filterBlocksExcludeSubtrees,
-  setSelectedBlocks,
-  updateLocalSelectionRange,
-} from './utils.js';
+import { filterBlocksExcludeSubtrees, setSelectedBlocks } from './utils.js';
 
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;
@@ -169,22 +164,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       }
     });
     this._add('contextMenu', this._onContainerContextMenu);
-    this._add('virgo-vrange-updated', () => {
-      this._onSelectionChangeWithoutDebounce();
-    });
-    this._add(
-      'virgo-vrange-updated',
-      debounce((ctx: UIEventStateContext) => {
-        const { event } = ctx.get('defaultState');
-
-        if (shouldFilterMouseEvent(event)) return;
-        if (isDragging) {
-          return;
-        }
-
-        this._onSelectionChangeWithDebounce();
-      }, 300)
-    );
   }
 
   private _ensureVisibleNoteExists() {
@@ -609,10 +588,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
         },
       },
     });
-  };
-
-  private _onSelectionChangeWithoutDebounce = () => {
-    updateLocalSelectionRange(this.page);
   };
 
   get viewportElement() {

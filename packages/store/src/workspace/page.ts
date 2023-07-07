@@ -6,7 +6,7 @@ import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
 import { BaseBlockModel, internalPrimitives } from '../base.js';
-import { Space, type StackItem } from '../space.js';
+import { Space } from '../space.js';
 import { Text } from '../text-adapter.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
@@ -36,8 +36,6 @@ export type PrefixedBlockProps = Record<string, unknown> & {
   'sys:id': string;
   'sys:flavour': string;
 };
-
-const isWeb = typeof window !== 'undefined';
 
 function createChildMap(yChildIds: Y.Array<string>) {
   return new Map(yChildIds.map((child, index) => [child, index]));
@@ -709,8 +707,8 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     this._history.on('stack-cleared', this._historyObserver);
-    this._history.on('stack-item-added', this._historyAddObserver);
-    this._history.on('stack-item-popped', this._historyPopObserver);
+    this._history.on('stack-item-added', this._historyObserver);
+    this._history.on('stack-item-popped', this._historyObserver);
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
@@ -721,27 +719,6 @@ export class Page extends Space<FlatBlockMap> {
     }
     return yBlock;
   }
-
-  private _historyAddObserver = (event: { stackItem: StackItem }) => {
-    if (isWeb) {
-      event.stackItem.meta.set(
-        'cursor-location',
-        this.awarenessStore.getLocalRange(this)
-      );
-    }
-
-    this._historyObserver();
-  };
-
-  private _historyPopObserver = (event: { stackItem: StackItem }) => {
-    const range = event.stackItem.meta.get('cursor-location');
-    if (!range) {
-      return;
-    }
-
-    this.awarenessStore.setLocalRange(this, range);
-    this._historyObserver();
-  };
 
   private _historyObserver = () => {
     this.slots.historyUpdated.emit();
