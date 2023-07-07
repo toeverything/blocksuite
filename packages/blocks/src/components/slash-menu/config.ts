@@ -322,7 +322,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
     name: 'Data View',
     items: [
       {
-        name: 'Table View',
+        name: 'Data View Table',
         alias: ['table'],
         icon: DatabaseTableViewIcon,
         showWhen: model => {
