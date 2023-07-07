@@ -78,12 +78,17 @@ export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
  * await initEmptyEditor(page, { enable_some_flag: true });
  * ```
  */
-async function initEmptyEditor(
-  page: Page,
-  flags: Partial<BlockSuiteFlags> = {},
+async function initEmptyEditor({
+  page,
+  flags = {},
   noInit = false,
-  multiEditor = false
-) {
+  multiEditor = false,
+}: {
+  page: Page;
+  flags?: Partial<BlockSuiteFlags>;
+  noInit?: boolean;
+  multiEditor?: boolean;
+}) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
@@ -208,7 +213,12 @@ export async function enterPlaygroundRoom(
     throw new Error(`Uncaught exception: "${exception}"\n${exception.stack}`);
   });
 
-  await initEmptyEditor(page, ops?.flags, ops?.noInit, multiEditor);
+  await initEmptyEditor({
+    page,
+    flags: ops?.flags,
+    noInit: ops?.noInit,
+    multiEditor,
+  });
 
   await readyPromise;
 
@@ -271,7 +281,7 @@ export async function enterPlaygroundWithList(
 ) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
-  await initEmptyEditor(page);
+  await initEmptyEditor({ page });
 
   await page.evaluate(
     async ({ contents, type }: { contents: string[]; type: ListType }) => {

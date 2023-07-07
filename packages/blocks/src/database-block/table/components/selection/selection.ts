@@ -104,8 +104,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           isRowSelection,
           selection?.isEditing
         );
-
-        if (old) {
+        if (old && old.databaseId === this.databaseId) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
             old.focus.columnIndex
@@ -120,7 +119,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           }
         }
 
-        if (selection) {
+        if (selection && selection.databaseId === this.databaseId) {
           const container = this.getCellContainer(
             selection.focus.rowIndex,
             selection.focus.columnIndex
@@ -165,14 +164,14 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     });
     this._disposables.addFromEvent(window, 'mousedown', event => {
       const target = event.target as Element;
-      if (
-        // TODO: refactor hardcoded here
-        !target.closest('affine-drag-handle') &&
-        (!(target instanceof Element) ||
-          !(this.isCurrentDatabase(target) && this.isInTableBody(target)))
-      ) {
-        this.selection = undefined;
+      if (this.isInTableBody(target)) {
+        return;
       }
+      // TODO: refactor hardcoded here
+      if (target.closest('affine-drag-handle')) {
+        return;
+      }
+      this.selection = undefined;
     });
     this._disposables.add({
       dispose: this.eventDispatcher.add('keyDown', context => {
@@ -309,7 +308,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private onKeydown(selection: DatabaseSelection, evt: KeyboardEvent): boolean {
-    //TODO delete this stupid code
+    // TODO delete this stupid code
     if (
       !selection.isEditing &&
       evt.key === 'a' &&
@@ -369,7 +368,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       return true;
     }
     if (evt.shiftKey) {
-      //TODO
+      // TODO
       if (evt.key === hotkeys.ArrowRight) {
         return true;
       }

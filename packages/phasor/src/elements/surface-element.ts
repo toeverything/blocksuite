@@ -1,6 +1,6 @@
 import type * as Y from 'yjs';
 
-import type { Bound } from '../index.js';
+import type { Bound, PointLocation } from '../index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
@@ -25,7 +25,8 @@ export interface ISurfaceElement {
 }
 
 export interface HitTestOptions {
-  expand: number;
+  expand?: number;
+  ignoreTransparent?: boolean;
 }
 
 export type ComputedValue = (value: string) => string;
@@ -37,7 +38,9 @@ export abstract class SurfaceElement<
 
   abstract getNearestPoint(point: IVec): IVec;
 
-  abstract intersectWithLine(start: IVec, end: IVec): IVec[] | null;
+  abstract intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
+
+  abstract getRelativePointLocation(point: IVec): PointLocation;
 
   yMap: Y.Map<unknown>;
 
