@@ -371,8 +371,6 @@ export class ImportPage extends WithDisposable(LitElement) {
                       databaseProps: {
                         id: '' + databasePropsId,
                         title: element.textContent || 'Database',
-                        titleColumnName: titles[0],
-                        titleColumnWidth: 432,
                         rowIds: Object.keys(cells),
                         cells: cells,
                         columns: columns,

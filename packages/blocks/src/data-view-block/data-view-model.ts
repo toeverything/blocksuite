@@ -6,9 +6,7 @@ import type { FilterGroup } from '../database-block/common/ast.js';
 
 export type DataProperty = {
   id: string;
-  name: string;
-  type: string;
-  data: unknown;
+  width: number;
 };
 export type DataView = {
   id: string;

@@ -860,8 +860,6 @@ export class HtmlParser {
           databaseProps: {
             id: '' + databasePropsId,
             title: 'Database',
-            titleColumnName: columnMeta[0]?.title,
-            titleColumnWidth: 432,
             rowIds: Object.keys(cells),
             cells: cells,
             columns: columns,

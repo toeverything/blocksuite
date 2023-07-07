@@ -58,7 +58,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
           }
           return view;
         },
-        update => this.model.updateView(id, update),
+        update => this.model.updateView(id, update as never),
         this.model.propsUpdated,
         createDatasource(this.root, view.dataSource)
       );

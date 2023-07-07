@@ -58,7 +58,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           }
           return view;
         },
-        update => this.model.updateView(id, update),
+        update => this.model.updateView(id, update as never),
         this.model.propsUpdated,
         this.dataSource
       );
