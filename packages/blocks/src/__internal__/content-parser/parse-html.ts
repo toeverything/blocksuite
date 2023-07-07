@@ -1,5 +1,5 @@
 import type { BlockSchemas } from '@blocksuite/global/types';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertEquals, assertExists } from '@blocksuite/global/utils';
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
@@ -241,6 +241,7 @@ export class HtmlParser {
           break;
         case 'P':
           if (
+            contextedContentParser.context === 'Markdown' &&
             node.firstChild instanceof Text &&
             (node.firstChild.textContent?.startsWith('[] ') ||
               node.firstChild.textContent?.startsWith('[ ] ') ||
@@ -335,14 +336,16 @@ export class HtmlParser {
       });
 
       if (!hasNonInlineOrNonLeaf) {
-        const allInlineResult = await this._commonHTML2Block(
-          node,
-          context,
-          'affine:paragraph',
-          'text'
-        );
+        const allInlineResult =
+          await contextedContentParser.getParserHtmlText2Block(
+            'CommonParser'
+          )?.({
+            element: node,
+            flavour: 'affine:paragraph',
+            type: 'text',
+          });
         if (allInlineResult) {
-          return [allInlineResult];
+          return allInlineResult;
         }
       }
     }
@@ -555,14 +558,15 @@ export class HtmlParser {
         return 'numbered';
       }
       if (element.tagName === 'UL') {
+        if (element.classList.contains('bulleted-list')) {
+          return 'bulleted';
+        }
+        // no toggle list in blocksuite
         if (element.classList.contains('toggle')) {
-          return 'toggle';
+          return 'bulleted';
         }
         if (element.classList.contains('to-do-list')) {
           return 'todo';
-        }
-        if (element.classList.contains('bulleted-list')) {
-          return 'bulleted';
         }
       }
       return 'bulleted';
@@ -624,12 +628,9 @@ export class HtmlParser {
   private _markdownListItemParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
+    const contextedContentParser = this._contentParser.withContext('Markdown');
     const tagName = element.parentElement?.tagName;
     let type = tagName === 'OL' ? 'numbered' : 'bulleted';
-    const contextedContentParser = this._contentParser.withContext('Markdown');
-    if (element.parentElement?.classList?.contains('toggle')) {
-      type = 'toggle';
-    }
     let checked;
     let inputEl;
     if (
@@ -657,19 +658,6 @@ export class HtmlParser {
         type = 'todo';
         checked = true;
       }
-    }
-    let checkBoxEl;
-    if (
-      (checkBoxEl = element.firstElementChild)?.classList.contains(
-        'checkbox'
-      ) ||
-      (checkBoxEl =
-        element.firstElementChild?.firstElementChild)?.classList.contains(
-        'checkbox'
-      )
-    ) {
-      type = 'todo';
-      checked = checkBoxEl?.classList.contains('checked') ?? false;
     }
     return contextedContentParser.getParserHtmlText2Block('CommonParser')?.({
       element: element,
@@ -888,155 +876,60 @@ export class HtmlParser {
     element: Element,
     _context: ParseContext
   ): Promise<SerializedBlock[] | null> => {
-    let result: SerializedBlock[] | null = [];
     if (this._customTableParserHandler) {
-      result = await this._customTableParserHandler(element);
+      const result = await this._customTableParserHandler(element);
       if (result && result.length > 0) {
         return result;
       }
     }
-    if (element.tagName === 'TABLE') {
-      const theadElement = element.querySelector('thead');
-      const tbodyElement = element.querySelector('tbody');
-      const titleTrEle = theadElement?.querySelector('tr');
+    assertEquals(element.tagName, 'TABLE');
+    const theadElement = element.querySelector('thead');
+    const tbodyElement = element.querySelector('tbody');
+    const titleTrEle = theadElement?.querySelector('tr');
+    const makeIdCounter = () => {
       let id = 1;
-      const columnMeta: ColumnMeta[] = [];
-      titleTrEle?.querySelectorAll('th').forEach(ele => {
-        columnMeta.push({
-          title: ele.textContent?.trim() || '',
-          type: getCorrespondingTableColumnType(
-            ele.querySelector('svg') ?? undefined
-          ),
-          optionsMap: new Map<string, string>(),
-        });
-      });
-      const rows: (string | string[])[][] = [];
-      tbodyElement?.querySelectorAll('tr').forEach(ele => {
-        const row: (string | string[])[] = [];
-        ele.querySelectorAll('td').forEach((ele, index) => {
-          const cellContent: string[] = [];
-          if (ele.children.length === 0) {
-            cellContent.push(ele.textContent || '');
-          }
-          Array.from(ele.children).map(child => {
-            if (child.classList.contains('checkbox-on')) {
-              cellContent.push('on');
-            } else {
-              cellContent.push(child.textContent || '');
-            }
-          });
-          row.push(
-            columnMeta[index]?.type !== 'multi-select'
-              ? cellContent.join('')
-              : cellContent
-          );
-        });
-        rows.push(row);
-      });
-      if (this._customTableTitleColumnHandler) {
-        const titleColumn = await this._customTableTitleColumnHandler(element);
-        if (titleColumn) {
-          for (let i = 1; i < rows.length; i++) {
-            const originalContent = rows[i].shift();
-            rows[i].unshift(titleColumn[i] || originalContent || '');
-          }
-        }
-      }
-      const columns: Column[] = columnMeta.slice(1).map((value, index) => {
-        if (['select', 'multi-select'].includes(value.type)) {
-          const options = rows
-            .map(row => row[index + 1])
-            .flat()
-            .filter((value, index, array) => array.indexOf(value) === index)
-            .map(uniqueValue => {
-              return {
-                id: nanoid(),
-                value: uniqueValue,
-                color: getTagColor(),
-              };
-            });
-          options.map(option =>
-            columnMeta[index + 1].optionsMap.set(option.value, option.id)
-          );
-          return columnManager
-            .getColumn(value.type)
-            .createWithId('' + id++, value.title, {
-              options,
-            });
-        }
-        return columnManager
-          .getColumn(value.type)
-          .createWithId('' + id++, value.title);
-      });
-      if (rows.length > 0) {
-        let maxLen = rows[0].length;
+      return {
+        next: () => id++,
+      };
+    };
+    const idCounter = makeIdCounter();
+    const columnMeta: ColumnMeta[] = getTableColumnMeta(titleTrEle);
+    const rows: (string | string[])[][] = getTableRows(
+      tbodyElement,
+      columnMeta
+    );
+    if (this._customTableTitleColumnHandler) {
+      const titleColumn = await this._customTableTitleColumnHandler(element);
+      if (titleColumn) {
         for (let i = 1; i < rows.length; i++) {
-          maxLen = Math.max(maxLen, rows[i].length);
-        }
-        const addNum = maxLen - columns.length;
-        for (let i = 0; i < addNum; i++) {
-          columns.push(richTextHelper.createWithId('' + id++, ''));
+          const originalContent = rows[i].shift();
+          rows[i].unshift(titleColumn[i] || originalContent || '');
         }
       }
-      const databasePropsId = id++;
-      const cells: Record<string, Record<string, Cell>> = {};
-      const children: SerializedBlock[] = [];
-      rows.forEach(row => {
-        children.push({
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
-          children: [],
-        });
-        const rowId = '' + id++;
-        cells[rowId] = {};
-        row.slice(1).forEach((value, index) => {
-          if (
-            columnMeta[index + 1]?.type === 'multi-select' &&
-            Array.isArray(value)
-          ) {
-            cells[rowId][columns[index].id] = {
-              columnId: columns[index].id,
-              value: value.map(
-                v => columnMeta[index + 1]?.optionsMap.get(v) || ''
-              ),
-            };
-            return;
-          }
-          if (
-            columnMeta[index + 1]?.type === 'select' &&
-            !Array.isArray(value)
-          ) {
-            cells[rowId][columns[index].id] = {
-              columnId: columns[index].id,
-              value: columnMeta[index + 1]?.optionsMap.get(value) || '',
-            };
-            return;
-          }
-          cells[rowId][columns[index].id] = {
-            columnId: columns[index].id,
-            value,
-          };
-        });
-      });
-
-      result = [
-        {
-          flavour: 'affine:database',
-          databaseProps: {
-            id: '' + databasePropsId,
-            title: 'Database',
-            titleColumnName: columnMeta[0]?.title,
-            titleColumnWidth: 432,
-            rowIds: Object.keys(cells),
-            cells: cells,
-            columns: columns,
-          },
-          children: children,
-        },
-      ];
     }
-    return result;
+    const columns: Column[] = getTableColumns(columnMeta, rows, idCounter);
+    const databasePropsId = idCounter.next();
+    const { cells, children } = getTableCellsAndChildren(
+      rows,
+      idCounter,
+      columnMeta,
+      columns
+    );
+    return [
+      {
+        flavour: 'affine:database',
+        databaseProps: {
+          id: '' + databasePropsId,
+          title: 'Database',
+          titleColumnName: columnMeta[0]?.title,
+          titleColumnWidth: 432,
+          rowIds: Object.keys(cells),
+          cells: cells,
+          columns: columns,
+        },
+        children: children,
+      },
+    ];
   };
 
   private _notionHtmlHeaderParser = async (
@@ -1162,3 +1055,137 @@ const checkWebComponentIfInline = (element: Element) => {
     (element as HTMLElement).style.display.includes('inline')
   );
 };
+
+function getTableCellsAndChildren(
+  rows: (string | string[])[][],
+  idCounter: { next: () => number },
+  columnMeta: ColumnMeta[],
+  columns: Column<Record<string, unknown>>[]
+) {
+  const cells: Record<string, Record<string, Cell>> = {};
+  const children: SerializedBlock[] = [];
+  rows.forEach(row => {
+    children.push({
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
+      children: [],
+    });
+    const rowId = '' + idCounter.next();
+    cells[rowId] = {};
+    row.slice(1).forEach((value, index) => {
+      if (
+        columnMeta[index + 1]?.type === 'multi-select' &&
+        Array.isArray(value)
+      ) {
+        cells[rowId][columns[index].id] = {
+          columnId: columns[index].id,
+          value: value.map(v => columnMeta[index + 1]?.optionsMap.get(v) || ''),
+        };
+        return;
+      }
+      if (columnMeta[index + 1]?.type === 'select' && !Array.isArray(value)) {
+        cells[rowId][columns[index].id] = {
+          columnId: columns[index].id,
+          value: columnMeta[index + 1]?.optionsMap.get(value) || '',
+        };
+        return;
+      }
+      cells[rowId][columns[index].id] = {
+        columnId: columns[index].id,
+        value,
+      };
+    });
+  });
+  return { cells, children };
+}
+
+function getTableColumns(
+  columnMeta: ColumnMeta[],
+  rows: (string | string[])[][],
+  idCounter: { next: () => number }
+): Column<Record<string, unknown>>[] {
+  const columns: Column[] = columnMeta.slice(1).map((value, index) => {
+    if (['select', 'multi-select'].includes(value.type)) {
+      const options = rows
+        .map(row => row[index + 1])
+        .flat()
+        .filter((value, index, array) => array.indexOf(value) === index)
+        .map(uniqueValue => {
+          return {
+            id: nanoid(),
+            value: uniqueValue,
+            color: getTagColor(),
+          };
+        });
+      options.map(option =>
+        columnMeta[index + 1].optionsMap.set(option.value, option.id)
+      );
+      return columnManager
+        .getColumn(value.type)
+        .createWithId('' + idCounter.next(), value.title, {
+          options,
+        });
+    }
+    return columnManager
+      .getColumn(value.type)
+      .createWithId('' + idCounter.next(), value.title);
+  });
+  if (rows.length > 0) {
+    let maxLen = rows[0].length;
+    for (let i = 1; i < rows.length; i++) {
+      maxLen = Math.max(maxLen, rows[i].length);
+    }
+    const addNum = maxLen - columns.length;
+    for (let i = 0; i < addNum; i++) {
+      columns.push(richTextHelper.createWithId('' + idCounter.next(), ''));
+    }
+  }
+  return columns;
+}
+
+function getTableRows(
+  tbodyElement: HTMLTableSectionElement | null,
+  columnMeta: ColumnMeta[]
+) {
+  const rows: (string | string[])[][] = [];
+  tbodyElement?.querySelectorAll('tr').forEach(ele => {
+    const row: (string | string[])[] = [];
+    ele.querySelectorAll('td').forEach((ele, index) => {
+      const cellContent: string[] = [];
+      if (ele.children.length === 0) {
+        cellContent.push(ele.textContent || '');
+      }
+      Array.from(ele.children).map(child => {
+        if (child.classList.contains('checkbox-on')) {
+          cellContent.push('on');
+        } else {
+          cellContent.push(child.textContent || '');
+        }
+      });
+      row.push(
+        columnMeta[index]?.type !== 'multi-select'
+          ? cellContent.join('')
+          : cellContent
+      );
+    });
+    rows.push(row);
+  });
+  return rows;
+}
+
+function getTableColumnMeta(
+  titleTrEle: HTMLTableRowElement | null | undefined
+) {
+  const columnMeta: ColumnMeta[] = [];
+  titleTrEle?.querySelectorAll('th').forEach(ele => {
+    columnMeta.push({
+      title: ele.textContent?.trim() || '',
+      type: getCorrespondingTableColumnType(
+        ele.querySelector('svg') ?? undefined
+      ),
+      optionsMap: new Map<string, string>(),
+    });
+  });
+  return columnMeta;
+}

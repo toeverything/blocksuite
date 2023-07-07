@@ -4,6 +4,7 @@ import { expect } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  transformHtml,
   transformMarkdown,
 } from './utils/actions/index.js';
 import { scoped, test } from './utils/playwright.js';
@@ -182,7 +183,7 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -316,7 +317,7 @@ test(scoped`import notion html-format list`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -382,7 +383,7 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -776,7 +777,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   const blocksString = JSON.stringify(blocks, null, 2);
   const matches = blocksString.matchAll(
     /("[A-Za-z0-9-_]{10}")|("var\(--affine-tag-[a-z]{3,10}\)")/g
@@ -1031,7 +1032,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
 //     },
 //   ];
 
-//   const blocks = await transformMarkdown(page, tempText);
+//   const blocks = await transformHtml(page, tempText);
 //   expect(blocks).toEqual(expectedValue);
 // });
 
@@ -1146,7 +1147,7 @@ test(scoped`import notion html-format toggle list`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -1324,7 +1325,7 @@ test(scoped`import notion html-format inline`, async ({ page }) => {
     { flavour: 'affine:paragraph', type: 'text', text: [], children: [] },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -1583,6 +1584,6 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
