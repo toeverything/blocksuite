@@ -64,49 +64,6 @@ Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/blocksuite-overv
 
 To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/getting-started.html).
 
-## Current Status (`@blocksuite/editor`)
-
-> For more detailed planning and recent progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/22).
-
-- Basic text editing
-  - ✅ Paragraph with inline style
-  - ✅ Nested list
-  - ✅ Code block
-  - ✅ Markdown shortcuts
-- Block-level editing
-  - ✅ Inline text format bar
-  - ✅ Inline slash menu
-  - ✅ Block hub
-  - ✅ Block drag handle
-  - ✅ Block-level selection
-- Rich-content
-  - ✅ Image block
-  - ⚛️ Database block
-  - 📌 Third-party embedded block
-- Whiteboard (edgeless mode)
-  - ✅ Zooming and panning
-  - ✅ Frame block
-  - ✅ Shape element
-  - ✅ Handwriting element
-  - ⚛️ Shape connector
-  - 🚧 Grouping
-- Playground
-  - ✅ Multiplayer collaboration
-  - ✅ Local data persistence
-  - ✅ E2E test suite
-- Developer experience
-  - ✅ Block tree update API
-  - ✅ Zero cost time travel (undo/redo)
-  - ✅ Reusable NPM package
-  - 🚧 Block schema
-
-Icons above correspond to the following meanings:
-
-- ✅ - **Beta**
-- ⚛️ - **Alpha**
-- 🚧 - **Developing**
-- 📌 - **Planned**
-
 ## Building
 
 See [BUILDING.md](BUILDING.md) for instructions on how to build BlockSuite from source code.
