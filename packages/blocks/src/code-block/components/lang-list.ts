@@ -145,7 +145,7 @@ export class LangList extends ShadowlessElement {
   }
 
   override render() {
-    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
+    const filteredBundledLanguages = [...BUNDLED_LANGUAGES]
       .filter(language => {
         if (!this._filterText) {
           return true;
@@ -162,7 +162,10 @@ export class LangList extends ShadowlessElement {
           (POPULAR_LANGUAGES_MAP[a.id as Lang] ?? Infinity) -
           (POPULAR_LANGUAGES_MAP[b.id as Lang] ?? Infinity)
       );
-
+    const filteredLanguages = [
+      PLAIN_TEXT_REGISTRATION,
+      ...filteredBundledLanguages,
+    ];
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
