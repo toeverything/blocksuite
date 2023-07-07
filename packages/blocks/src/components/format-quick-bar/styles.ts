@@ -1,6 +1,7 @@
 import { css } from 'lit';
 
 import { tooltipStyle } from '../tooltip/tooltip.js';
+import { scrollbarStyle } from '../utils.js';
 
 const paragraphPanelStyle = css`
   .paragraph-button > svg:nth-child(2) {
@@ -23,6 +24,8 @@ const paragraphPanelStyle = css`
     border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
+
+  ${scrollbarStyle}
 `;
 
 export const formatQuickBarStyle = css`
@@ -46,11 +49,6 @@ export const formatQuickBarStyle = css`
     width: 1px;
     height: 24px;
     background-color: var(--affine-border-color);
-  }
-
-  format-bar-button svg {
-    width: 20px;
-    height: 20px;
   }
 
   ${paragraphPanelStyle}

@@ -215,9 +215,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     if (!shadowRoot) {
       return;
     }
-    const ele = shadowRoot.querySelector(
-      `format-bar-button[text="${item.name}"]`
-    );
+    const ele = shadowRoot.querySelector(`icon-button[text="${item.name}"]`);
     if (!ele) {
       return;
     }
@@ -302,17 +300,18 @@ export class SlashMenu extends WithDisposable(LitElement) {
         });
 
     const btnItems = this._filterItems.map(
-      ({ name, icon, disabled = false, groupName }, index) => {
+      ({ name, icon, suffix, disabled = false, groupName }, index) => {
         const showDivider =
           index !== 0 && this._filterItems[index - 1].groupName !== groupName;
         return html`<div
             class="slash-item-divider"
             ?hidden=${!showDivider || !!this._searchString.length}
           ></div>
-          <format-bar-button
+          <icon-button
             ?disabled=${disabled}
             width="100%"
-            style="padding-left: 12px; justify-content: flex-start;"
+            height="32px"
+            style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
             ?hover=${!disabled &&
             !this._leftPanelActivated &&
             this._activatedItemIndex === index}
@@ -328,7 +327,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
             }}
           >
             ${icon}
-          </format-bar-button>`;
+            <div slot="suffix">${suffix}</div>
+          </icon-button>`;
       }
     );
 

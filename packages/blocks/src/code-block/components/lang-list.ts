@@ -9,6 +9,7 @@ import {
 } from 'shiki';
 
 import { createEvent } from '../../__internal__/index.js';
+import { scrollbarStyle } from '../../components/utils.js';
 import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
@@ -41,14 +42,9 @@ export class LangList extends ShadowlessElement {
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
-        /*scrollbar-color: #fff0 #fff0;*/
       }
 
-      /*
-      .lang-list-button-container::-webkit-scrollbar {
-        background: none;
-      }
-      */
+      ${scrollbarStyle}
 
       .lang-item {
         display: flex;
