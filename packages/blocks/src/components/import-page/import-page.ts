@@ -293,7 +293,7 @@ export class ImportPage extends WithDisposable(LitElement) {
                 }
               };
 
-              const tableParserHandler = async (element: Element) => {
+              const tableParseHandler = async (element: Element) => {
                 // if (element.tagName === 'TABLE') {
                 //   const parentElement = element.parentElement;
                 //   if (
@@ -406,13 +406,12 @@ export class ImportPage extends WithDisposable(LitElement) {
                 }
                 return null;
               };
-              const contentParser = new ContentParser(
-                page,
+              const contentParser = new ContentParser(page, {
                 fetchFileHandler,
                 textStyleHandler,
-                tableParserHandler,
-                tableTitleColumnHandler
-              );
+                tableParseHandler,
+                tableTitleColumnHandler,
+              });
               const text = (await zipFile.file(file)?.async('string')) || '';
               if (rootId) {
                 pageIds.push(page.id);
@@ -530,7 +529,7 @@ export class ImportPage extends WithDisposable(LitElement) {
         >
           ${NotionIcon}
           <div
-            slot="optional"
+            slot="suffix"
             class="has-tool-tip"
             @click=${this._openLearnImportLink}
           >

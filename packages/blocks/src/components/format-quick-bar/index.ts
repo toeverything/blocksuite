@@ -1,5 +1,3 @@
-import './button.js';
-
 import type { Page } from '@blocksuite/store';
 import { matchFlavours, Slot } from '@blocksuite/store';
 
