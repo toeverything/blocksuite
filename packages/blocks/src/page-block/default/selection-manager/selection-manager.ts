@@ -20,7 +20,6 @@ import {
   getBlockElementsExcludeSubtrees,
   getBlockElementsIncludeSubtrees,
   getClosestBlockElementByPoint,
-  getCurrentNativeRange,
   getEditorContainerByElement,
   getModelByBlockElement,
   getRectByBlockElement,
@@ -544,50 +543,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     }
 
     this.slots.embedEditingStateUpdated.emit(hoverEditingState);
-  };
-
-  private _onSelectionChangeWithDebounce = () => {
-    const selection = window.getSelection();
-    if (!selection) return;
-
-    // filter out selection change event from title
-    if (
-      isInsidePageTitle(selection.anchorNode) ||
-      isInsidePageTitle(selection.focusNode)
-    ) {
-      return;
-    }
-
-    // Exclude selection change outside the editor
-    if (!selection.containsNode(this.container, true)) {
-      return;
-    }
-
-    const range = getCurrentNativeRange(selection);
-    if (range.collapsed) return;
-    if (this.page.readonly) return;
-
-    const offsetDelta = selection.anchorOffset - selection.focusOffset;
-    let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
-
-    if (offsetDelta > 0) {
-      selectionDirection = 'right-left';
-    } else if (offsetDelta < 0) {
-      selectionDirection = 'left-right';
-    }
-    const direction =
-      selectionDirection === 'left-right' ? 'right-bottom' : 'left-top';
-    // Show quick bar when user select text by keyboard(Shift + Arrow)
-    showFormatQuickBar({
-      page: this.page,
-      container: this.container,
-      direction,
-      anchorEl: {
-        getBoundingClientRect: () => {
-          return calcCurrentSelectionPosition(direction, this.state);
-        },
-      },
-    });
   };
 
   get viewportElement() {
