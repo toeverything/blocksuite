@@ -8,7 +8,7 @@ export const styles = css`
     width: 480px;
     left: calc(50% - 480px / 2);
     top: calc(50% - 270px / 2);
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
     padding: 20px 40px 24px 40px;

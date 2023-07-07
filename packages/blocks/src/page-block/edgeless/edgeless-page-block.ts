@@ -141,7 +141,7 @@ export class EdgelessPageBlockComponent
       box-sizing: border-box;
       overflow: hidden;
       height: 100%;
-      font-family: var(--affine-font-family);
+      font-family: inherit;
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);

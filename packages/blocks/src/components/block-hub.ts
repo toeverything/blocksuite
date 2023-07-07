@@ -167,7 +167,7 @@ const styles = css`
 
   .block-hub-menu-container {
     display: flex;
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     flex-flow: column;
     justify-content: center;
     align-items: center;

@@ -117,7 +117,7 @@ const styles = css`
     height: 16px;
     width: 80px;
     border: none;
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     color: inherit;

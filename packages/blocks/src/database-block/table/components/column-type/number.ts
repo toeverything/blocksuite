@@ -21,7 +21,7 @@ class NumberCell extends DatabaseCellElement<number> {
       width: 100%;
       padding: 0;
       border: none;
-      font-family: var(--affine-font-family);
+      font-family: inherit;
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
@@ -55,7 +55,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
       width: 100%;
       padding: 0;
       border: none;
-      font-family: var(--affine-font-family);
+      font-family: inherit;
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);

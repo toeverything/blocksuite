@@ -118,7 +118,7 @@ export class LinkCellEditing extends DatabaseCellElement<string> {
       width: 100%;
       padding: 0;
       border: none;
-      font-family: var(--affine-font-family);
+      font-family: inherit;
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);

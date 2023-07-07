@@ -62,7 +62,7 @@ export const styles = css`
   }
 
   .slash-category-name {
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     font-size: var(--affine-font-sm);
     white-space: nowrap;
     cursor: pointer;

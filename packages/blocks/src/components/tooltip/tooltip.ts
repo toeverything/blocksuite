@@ -12,7 +12,7 @@ import { css } from 'lit';
  */
 export const tooltipStyle = css`
   tool-tip {
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     position: absolute;
 
     inline-size: max-content;

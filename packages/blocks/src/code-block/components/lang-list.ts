@@ -74,7 +74,7 @@ export class LangList extends ShadowlessElement {
         padding-left: 44px;
         padding-top: 4px;
 
-        font-family: var(--affine-font-family);
+        font-family: inherit;
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;

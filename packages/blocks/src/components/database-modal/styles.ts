@@ -2,7 +2,7 @@ import { css } from 'lit';
 
 export const styles = css`
   :host {
-    font-family: var(--affine-font-family);
+    font-family: inherit;
   }
   :host * {
     box-sizing: border-box;

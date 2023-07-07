@@ -81,7 +81,7 @@ export const editLinkStyle = css`
 
 export const linkPopoverStyle = css`
   .popover-container {
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     font-size: var(--affine-font-base);
     font-style: normal;
     line-height: 24px;
@@ -129,7 +129,7 @@ export const linkPopoverStyle = css`
   }
 
   label {
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     padding: 6px 0 6px 12px;
@@ -137,7 +137,7 @@ export const linkPopoverStyle = css`
   }
 
   input {
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     font-size: var(--affine-font-base);
     box-sizing: border-box;
     padding: 6px 12px 6px 0;

@@ -26,7 +26,7 @@ const styles = css`
 
     user-select: none;
     font-size: var(--affine-font-sm);
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     fill: var(--affine-text-secondary-color);
     color: var(--affine-text-secondary-color);
     pointer-events: auto;

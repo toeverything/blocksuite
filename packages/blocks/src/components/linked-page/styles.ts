@@ -10,7 +10,7 @@ export const styles = css`
     left: 0;
     top: 0;
     box-sizing: border-box;
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     font-size: var(--affine-font-base);
     padding: 12px 8px;
     display: flex;

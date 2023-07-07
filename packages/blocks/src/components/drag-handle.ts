@@ -78,7 +78,7 @@ export class DragPreview extends ShadowlessElement {
         display: block;
         position: absolute;
         box-sizing: border-box;
-        font-family: var(--affine-font-family);
+        font-family: inherit;
         font-size: var(--affine-font-base);
         line-height: var(--affine-line-height);
         color: var(--affine-text-primary-color);

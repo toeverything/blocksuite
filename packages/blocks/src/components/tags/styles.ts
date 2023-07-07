@@ -28,7 +28,7 @@ export const styles = css`
     flex: 1 1 0;
     height: 24px;
     border: none;
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     color: inherit;
     background: transparent;
     line-height: 24px;

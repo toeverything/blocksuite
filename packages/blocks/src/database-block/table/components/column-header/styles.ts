@@ -141,7 +141,7 @@ export const styles = css`
     color: inherit;
     font-weight: 600;
     font-size: 14px;
-    font-family: var(--affine-font-family);
+    font-family: inherit;
     background: transparent;
   }
   .affine-database-column-input:focus {
