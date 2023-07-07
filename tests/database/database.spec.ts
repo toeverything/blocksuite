@@ -587,24 +587,20 @@ test('should support modifying the content format of the title column', async ({
   await initEmptyDatabaseState(page);
 
   await initDatabaseColumn(page);
+  await switchColumnType(page, 'Text');
   await initDatabaseDynamicRowWithData(page, 'a', true);
-  await initDatabaseColumn(page, 'text');
-  await switchColumnType(page, 'rich-text', 2);
-  await initDatabaseDynamicRowWithData(page, 'abc123', false, 1);
+  await pressEscape(page);
 
-  await focusRichText(page);
+  await pressArrowLeft(page);
+  await pressEnter(page);
   await type(page, '1');
   await pressArrowLeft(page);
   await type(page, '-');
   await pressSpace(page);
+  await pressEscape(page);
 
-  await assertDatabaseCellRichTexts(page, { columnIndex: 2, text: 'abc123' });
-  const cell = getFirstColumnCell(page, 'select-selected');
-  expect(await cell.count()).toBe(1);
-  expect(await cell.nth(0).innerText()).toBe('a');
-
+  await assertDatabaseCellRichTexts(page, { text: 'a' });
   await undoByClick(page);
-  await assertDatabaseCellRichTexts(page, { columnIndex: 2, text: 'abc123' });
-  expect(await cell.count()).toBe(1);
-  expect(await cell.nth(0).innerText()).toBe('a');
+  await undoByClick(page);
+  await assertDatabaseCellRichTexts(page, { text: 'a' });
 });
