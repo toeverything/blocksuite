@@ -211,21 +211,4 @@ describe('DatabaseManager', () => {
       value: [selection[1]],
     });
   });
-
-  test('deleteCellsByColumn', () => {
-    db.deleteCellsByColumn(col2);
-
-    const cell = db.getCell(p2, col2);
-    expect(cell).toBeNull();
-  });
-
-  test('deleteSelectedCellTag', () => {
-    db.deleteSelectedCellTag(col2, selection[1]);
-
-    const cell = db.getCell(p2, col2);
-    expect(cell).toEqual({
-      columnId: col2,
-      value: [],
-    });
-  });
 });

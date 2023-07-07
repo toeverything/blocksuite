@@ -104,7 +104,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           isRowSelection,
           selection?.isEditing
         );
-        if (old && old.databaseId === this.databaseId) {
+        if (old && old.databaseId === this.blockId) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
             old.focus.columnIndex
@@ -119,7 +119,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           }
         }
 
-        if (selection && selection.databaseId === this.databaseId) {
+        if (selection && selection.databaseId === this.blockId) {
           const container = this.getCellContainer(
             selection.focus.rowIndex,
             selection.focus.columnIndex

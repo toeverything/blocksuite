@@ -275,5 +275,6 @@ export class WorkspaceMeta {
 
   setProperties(meta: PagesPropertiesMeta) {
     this._proxy.properties = meta;
+    this.pageMetasUpdated.emit();
   }
 }

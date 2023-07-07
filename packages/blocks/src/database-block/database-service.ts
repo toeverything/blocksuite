@@ -99,9 +99,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
   ) {
     const { rowIds, columns, cells } = props;
-
     const columnIds = columns.map(column => column.id);
-
+    model.deleteColumn(model.id);
     const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
       return model.addColumn('end', nonIdProps);

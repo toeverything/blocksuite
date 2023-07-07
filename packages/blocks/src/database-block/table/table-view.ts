@@ -16,9 +16,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { asyncFocusRichText } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { BlockOperation, InsertPosition } from '../database-model.js';
+import { insertPositionToIndex } from '../database-model.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection/selection.js';
@@ -198,9 +198,20 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
     const page = this.root.page;
     page.captureSync();
-    const id = tableViewManager.rowAdd(position);
-    asyncFocusRichText(page, id);
-    // save the search state
+    const index = insertPositionToIndex(
+      position,
+      this.tableViewManager.rows.map(id => ({ id }))
+    );
+    tableViewManager.rowAdd(position);
+    setTimeout(() => {
+      this.selection.selection = {
+        focus: {
+          rowIndex: index,
+          columnIndex: 0,
+        },
+        isEditing: true,
+      };
+    });
   };
 
   private _renderColumnWidthDragBar = () => {
@@ -232,7 +243,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
             .root="${this.root}"
           ></affine-database-title>
           <affine-database-toolbar
-            .root=${this.root}
+            .root="${this.root}"
             .copyBlock="${this.blockOperation.copy}"
             .deleteSelf="${this.blockOperation.delete}"
             .view="${this.tableViewManager}"

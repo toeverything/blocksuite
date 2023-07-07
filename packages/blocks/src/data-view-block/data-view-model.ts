@@ -1,28 +1,26 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
+import { copyBlocks } from '../__internal__/clipboard/index.js';
+import type { DataSourceConfig } from '../__internal__/datasource/datasource-manager.js';
 import type { FilterGroup } from '../database-block/common/ast.js';
-
 
 export type DataProperty = {
   id: string;
   name: string;
   type: string;
-  data: unknown
-}
-export type DataSource = {
-  type: string;
-}
+  data: unknown;
+};
 export type DataView = {
   id: string;
-  type: string;
-  dataSource?: DataSource;
-  properties: DataProperty[]
+  mode: 'table';
+  name: string;
+  dataSource?: DataSourceConfig;
+  columns: DataProperty[];
   filter: FilterGroup;
-}
-export type Props = {
+};
+type Props = {
   views: DataView[];
 };
-
 
 export class DataViewBlockModel extends BaseBlockModel<Props> {
   override onCreated() {
@@ -32,11 +30,17 @@ export class DataViewBlockModel extends BaseBlockModel<Props> {
     }
   }
 
-  addView(type: DataView['type']) {
+  addView(mode: DataView['mode']) {
     this.page.captureSync();
     const id = this.page.generateId();
     this.page.transact(() => {
-      this.views.push({ id, type, properties: [], filter: { type: 'group', op: 'and', conditions: [] } });
+      this.views.push({
+        id,
+        mode,
+        columns: [],
+        name: mode,
+        filter: { type: 'group', op: 'and', conditions: [] },
+      });
     });
     return id;
   }
@@ -48,15 +52,16 @@ export class DataViewBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  updateView(id: string, update: (data: DataView) => void) {
+  updateView(id: string, update: (data: DataView) => Partial<DataView>) {
     this.page.transact(() => {
-      this.views.map(v => {
+      this.views = this.views.map(v => {
         if (v.id !== id) {
           return v;
         }
-        return update(v);
+        return { ...v, ...update(v) };
       });
     });
+    this.applyViewsUpdate();
   }
 
   applyViewsUpdate() {
@@ -65,6 +70,18 @@ export class DataViewBlockModel extends BaseBlockModel<Props> {
     });
   }
 
+  copy = () => {
+    copyBlocks({
+      type: 'Block',
+      models: [this],
+      startOffset: 0,
+      endOffset: 0,
+    });
+  };
+  delete = () => {
+    const models = [this, ...this.children];
+    models.forEach(model => this.page.deleteBlock(model));
+  };
 }
 
 export const DataViewBlockSchema = defineBlockSchema({
@@ -74,7 +91,7 @@ export const DataViewBlockSchema = defineBlockSchema({
   }),
   metadata: {
     role: 'hub',
-    version: 2,
+    version: 1,
     parent: ['affine:note'],
     children: ['affine:paragraph', 'affine:list'],
   },

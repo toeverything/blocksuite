@@ -6,6 +6,7 @@ import { NumberColumnRenderer } from './number.js';
 import { ProgressColumnRenderer } from './progress.js';
 import { RichTextColumnRenderer } from './rich-text.js';
 import { SelectColumnRenderer } from './select.js';
+import { TextColumnRenderer } from './text.js';
 import { TitleColumnRenderer } from './title.js';
 
 export function registerInternalRenderer() {
@@ -19,6 +20,7 @@ export function registerInternalRenderer() {
   columnRenderer.register(ProgressColumnRenderer);
   columnRenderer.register(CheckboxColumnRenderer);
   columnRenderer.register(LinkColumnRenderer);
+  columnRenderer.register(TextColumnRenderer);
 
   return columnRenderer;
 }

@@ -258,6 +258,14 @@ export const linkHelper = columnManager.register<string>('link', {
   cellToJson: data => data ?? null,
 });
 
+export const textHelper = columnManager.register<string>('text', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  configRender: () => html``,
+  cellToString: data => data ?? '',
+  cellToJson: data => data ?? null,
+});
+
 columnManager.registerConvert(
   selectHelper,
   multiSelectHelper,

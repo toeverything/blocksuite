@@ -7,8 +7,8 @@ import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
+import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
-import { DatabaseBlockDataSource } from './database-block-data-source.js';
 import type { BlockOperation, DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
 import type {
@@ -37,7 +37,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.model, this.root);
+      this._dataSource = new DatabaseBlockDatasource(this.root, {
+        type: 'database-block',
+        pageId: this.root.page.id,
+        blockId: this.model.id,
+      });
     }
     return this._dataSource;
   }
@@ -55,6 +59,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           return view;
         },
         update => this.model.updateView(id, update),
+        this.model.propsUpdated,
         this.dataSource
       );
     }
@@ -79,7 +84,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     };
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
-      <div class='toolbar-hover-container'>
+      <div class='toolbar-hover-container data-view-root'>
         ${view}
         <${databaseTag}
           .titleText='${this.model.title}'

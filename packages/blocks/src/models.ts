@@ -9,6 +9,7 @@ import {
   type CodeBlockModel,
   CodeBlockSchema,
 } from './code-block/code-model.js';
+import { DataViewBlockSchema } from './data-view-block/index.js';
 import type { DatabaseBlockModel } from './database-block/database-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
 import type { DividerBlockModel } from './divider-block/divider-model.js';
@@ -53,9 +54,10 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   // DatabaseBlockSchema,
 ];
 
-export const __unstableSchemas = [DatabaseBlockSchema] satisfies z.infer<
-  typeof BlockSchema
->[];
+export const __unstableSchemas = [
+  DatabaseBlockSchema,
+  DataViewBlockSchema,
+] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register
 export type BlockSchemas = {

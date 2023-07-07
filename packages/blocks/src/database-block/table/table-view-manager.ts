@@ -162,7 +162,7 @@ export interface DataSource {
   ) => void;
   propertyAdd: (insertPosition: InsertPosition) => string;
   propertyDelete: (id: string) => void;
-  propertyDuplicate: (columnId: string) => void;
+  propertyDuplicate: (columnId: string) => string;
 
   slots: {
     update: Slot;
@@ -185,12 +185,14 @@ export class DatabaseTableViewManager implements TableViewManager {
     private ____updateView: (
       updater: (view: TableViewData) => Partial<TableViewData>
     ) => void,
+    viewUpdatedSlot: Slot,
     private dataSource: DataSource
   ) {
     this.updateView = updater => {
       this.syncView();
       ____updateView(updater);
     };
+    viewUpdatedSlot.pipe(this.slots.update);
     this.dataSource.slots.update.pipe(this.slots.update);
   }
 
@@ -264,18 +266,11 @@ export class DatabaseTableViewManager implements TableViewManager {
     }
     this.____updateView(view => {
       return {
-        columns: this.columnManagerList.map((column, i) => {
-          if (column.id === view.columns[i]?.id) {
-            return view.columns[i];
-          }
-          return (
-            view.columns.find(v => v.id === column.id) ?? {
-              id: column.id,
-              width: DEFAULT_COLUMN_WIDTH,
-              hide: false,
-            }
-          );
-        }),
+        columns: this.columnManagerList.map((column, i) => ({
+          id: column.id,
+          width: column.width,
+          hide: column.hide,
+        })),
       };
     });
   }
@@ -301,7 +296,7 @@ export class DatabaseTableViewManager implements TableViewManager {
     return (
       columnManager.toString(
         this.columnGetType(columnId),
-        this.cellGetRenderValue(rowId, columnId),
+        this.dataSource.cellGetValue(rowId, columnId),
         this.columnGetData(columnId)
       ) ?? ''
     );
@@ -325,7 +320,8 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   public columnDuplicate(columnId: string): void {
-    this.dataSource.propertyDuplicate(columnId);
+    const id = this.dataSource.propertyDuplicate(columnId);
+    this.columnMove(id, { before: false, id: columnId });
   }
 
   public columnGet(columnId: string): ColumnManager {
@@ -421,17 +417,15 @@ export class DatabaseTableViewManager implements TableViewManager {
   }
 
   public get columns(): string[] {
-    const showed = new Set<string>();
+    const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
     this.getView().columns.forEach(v => {
-      result.push(v.id);
-      showed.add(v.id);
-    });
-    this.dataSource.properties.forEach(id => {
-      if (!showed.has(id)) {
-        result.push(id);
+      if (needShow.has(v.id)) {
+        result.push(v.id);
+        needShow.delete(v.id);
       }
     });
+    result.push(...needShow);
     return result;
   }
 
@@ -539,10 +533,10 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   getFilterValue(rowId: string): unknown {
-    return this.viewManager.cellGetFilterValue(this.id, rowId);
+    return this.viewManager.cellGetFilterValue(rowId, this.id);
   }
 
   getStringValue(rowId: string): string {
-    return this.viewManager.cellGetStringValue(this.id, rowId);
+    return this.viewManager.cellGetStringValue(rowId, this.id);
   }
 }

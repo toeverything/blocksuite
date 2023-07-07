@@ -44,13 +44,13 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
 
     this._initHeaderMousemoveHandlers();
 
-    const databaseElement = this.closest('affine-database');
+    const databaseElement = this.closest('.data-view-root');
     if (databaseElement) {
       this._initResizeEffect(databaseElement);
     }
   }
 
-  private _initResizeEffect(element: HTMLElement) {
+  private _initResizeEffect(element: Element) {
     const pageBlock = getDefaultPageByElement(this);
     const viewportElement = pageBlock?.viewportElement;
     if (viewportElement) {
@@ -90,7 +90,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
 
   showAddColumnButton = (event?: MouseEvent) => {
-    const databaseElement = this.closest('affine-database');
+    const databaseElement = this.closest('.data-view-root');
     assertExists(databaseElement);
     const { right: boundaryRight } = databaseElement.getBoundingClientRect();
     const { left: headerAddColumnButtonLeft } =

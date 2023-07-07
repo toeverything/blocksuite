@@ -2,7 +2,6 @@ import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { copyBlocks } from '../__internal__/clipboard/index.js';
-import type { SelectTag } from '../components/tags/multi-tag-select.js';
 import type {
   DatabaseViewData,
   DatabaseViewDataMap,
@@ -11,7 +10,7 @@ import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
 import type { Cell, Column } from './table/types.js';
 
-export type Props = {
+type Props = {
   views: DatabaseViewData[];
   title: Text;
   cells: SerializedCells;
@@ -145,12 +144,8 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return this.columns.findIndex(v => v.id === id);
   }
 
-  getColumn(id: Column['id']): Column | null {
-    const index = this.findColumnIndex(id);
-    if (index < 0) {
-      return null;
-    }
-    return this.columns[index];
+  getColumn(id: Column['id']): Column | undefined {
+    return this.columns.find(v => v.id === id);
   }
 
   addColumn(
@@ -160,6 +155,9 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     }
   ): string {
     const id = column.id ?? this.page.generateId();
+    if (this.columns.find(v => v.id === id)) {
+      return id;
+    }
     this.page.transact(() => {
       const col = { ...column, id };
       this.columns.splice(
@@ -183,26 +181,12 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return id;
   }
 
-  updateColumnData(id: string, update: ColumnDataUpdater) {
-    this.page.transact(() => {
-      const i = this.findColumnIndex(id);
-      const data = this.columns[i].data;
-      this.columns[i].data = {
-        ...data,
-        ...update(data),
-      };
-    });
-  }
-
   deleteColumn(columnId: Column['id']) {
     const index = this.findColumnIndex(columnId);
     if (index < 0) return;
 
     this.page.transact(() => {
       this.columns.splice(index, 1);
-      this.views.forEach(view => {
-        ViewOperationMap[view.mode].deleteColumn(this, view as never, columnId);
-      });
     });
   }
 
@@ -247,37 +231,10 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  deleteCellsByColumn(columnId: Column['id']) {
-    this.page.transact(() => {
-      Object.keys(this.cells).forEach(rowId => {
-        delete this.cells[rowId][columnId];
-      });
-    });
-  }
-
   updateCells(columnId: string, cells: Record<string, unknown>) {
     this.page.transact(() => {
       Object.entries(cells).forEach(([rowId, value]) => {
         this.cells[rowId][columnId] = { columnId, value };
-      });
-    });
-  }
-
-  deleteSelectedCellTag(columnId: Column['id'], target: SelectTag) {
-    this.page.transact(() => {
-      Object.keys(this.cells).forEach(rowId => {
-        const cell = this.cells[rowId][columnId];
-        if (!cell) return;
-
-        const selected = cell.value as SelectTag[];
-        const newSelected = [...selected].filter(
-          item => item.value !== target.value
-        );
-
-        this.cells[rowId][columnId] = {
-          columnId,
-          value: newSelected,
-        };
       });
     });
   }

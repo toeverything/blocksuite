@@ -10,7 +10,6 @@ import {
   NewPageIcon,
   NowIcon,
   paragraphConfig,
-  // PasteIcon,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -316,6 +315,41 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         action: ({ model }) => {},
+      },
+    ],
+  },
+  {
+    name: 'Data View',
+    items: [
+      {
+        name: 'Table View',
+        alias: ['table'],
+        icon: DatabaseTableViewIcon,
+        showWhen: model => {
+          if (!model.page.awarenessStore.getFlag('enable_database')) {
+            return false;
+          }
+          if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
+            return false;
+          }
+          if (insideDatabase(model)) {
+            // You can't add a database block inside another database block
+            return false;
+          }
+          return true;
+        },
+        action: async ({ page, model }) => {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+
+          page.addBlock(
+            'affine:data-view',
+            {},
+            page.getParent(model),
+            index + 1
+          );
+        },
       },
     ],
   },

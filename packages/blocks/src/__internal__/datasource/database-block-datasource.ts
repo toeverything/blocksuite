@@ -1,16 +1,28 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import { columnManager, multiSelectHelper } from './common/column-manager.js';
-import type { DatabaseBlockModel, InsertPosition } from './database-model.js';
-import { insertPositionToIndex } from './database-model.js';
-import type { DataSource } from './table/table-view-manager.js';
+import {
+  columnManager,
+  multiSelectHelper,
+} from '../../database-block/common/column-manager.js';
+import type {
+  DatabaseBlockModel,
+  InsertPosition,
+} from '../../database-block/database-model.js';
+import { insertPositionToIndex } from '../../database-block/database-model.js';
+import type { DataSource } from '../../database-block/table/table-view-manager.js';
+import type { DatabaseBlockDatasourceConfig } from './datasource-manager.js';
 
-export class DatabaseBlockDataSource implements DataSource {
+export class DatabaseBlockDatasource implements DataSource {
+  private _model: DatabaseBlockModel;
+
   constructor(
-    private _model: DatabaseBlockModel,
-    private root: BlockSuiteRoot
+    private root: BlockSuiteRoot,
+    config: DatabaseBlockDatasourceConfig
   ) {
+    this._model = root.page.workspace
+      .getPage(config.pageId)
+      ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
     this._model.propsUpdated.pipe(this.slots.update);
   }
@@ -37,7 +49,8 @@ export class DatabaseBlockDataSource implements DataSource {
   }
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
-    if (propertyId === this._model.id) {
+    const type = this.propertyGetType(propertyId);
+    if (type === 'title') {
       const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
       if (model) {
         return model.text?.yText;
@@ -48,7 +61,8 @@ export class DatabaseBlockDataSource implements DataSource {
   }
 
   public cellGetRenderValue(rowId: string, propertyId: string): unknown {
-    if (propertyId === this._model.id) {
+    const type = this.propertyGetType(propertyId);
+    if (type === 'title') {
       const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
       if (model) {
         return this.root.renderModel(model);
@@ -126,7 +140,7 @@ export class DatabaseBlockDataSource implements DataSource {
     return this._model.columns.find(v => v.id === propertyId)?.type ?? '';
   }
 
-  public propertyDuplicate(columnId: string): void {
+  public propertyDuplicate(columnId: string): string {
     this._model.page.captureSync();
     const currentSchema = this._model.getColumn(columnId);
     assertExists(currentSchema);
@@ -135,6 +149,7 @@ export class DatabaseBlockDataSource implements DataSource {
     const id = this._model.addColumn({ before: false, id: columnId }, schema);
     this._model.applyColumnUpdate();
     this._model.copyCellsByColumn(copyId, id);
+    return id;
   }
 
   public rowAdd(insertPosition: InsertPosition): string {
