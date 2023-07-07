@@ -1,5 +1,5 @@
 import type { BlockSchemas } from '@blocksuite/global/types';
-import { assertEquals, assertExists } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
