@@ -7,6 +7,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
+import { getService } from '../service.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import { supportsChildren } from '../utils/common.js';
 import {
@@ -426,9 +427,16 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
     children: model.children,
   };
   page.captureSync();
+  const parentModel = page.getParent(model);
+  const deletedId = model.id;
   page.deleteBlock(model);
   const id = page.addBlock('affine:paragraph', blockProps, parent, index);
   asyncFocusRichText(page, id);
+
+  if (parentModel && matchFlavours(parentModel, ['affine:database'])) {
+    const service = getService('affine:database');
+    service.replaceChild(parentModel, deletedId, id);
+  }
   return true;
 }
 
