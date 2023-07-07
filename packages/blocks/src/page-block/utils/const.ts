@@ -1,6 +1,6 @@
 import {
   CopyIcon,
-  DatabaseTableViewIcon,
+  DatabaseTableViewIcon20,
   SHORT_KEY,
 } from '@blocksuite/global/config';
 import { type BaseBlockModel, matchFlavours } from '@blocksuite/store';
@@ -44,7 +44,7 @@ export const actionConfig = [
     name: 'Group as Database',
     disabledToolTip:
       'Contains Block types that cannot be converted to Database',
-    icon: DatabaseTableViewIcon,
+    icon: DatabaseTableViewIcon20,
     hotkey: `${SHORT_KEY}+g`,
     showWhen: (page: Page, models: BaseBlockModel[]) => {
       if (

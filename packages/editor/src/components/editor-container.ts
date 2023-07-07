@@ -53,6 +53,12 @@ export class EditorContainer
   mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
+  pagePreset = pagePreset;
+
+  @property({ attribute: false })
+  edgelessPreset = edgelessPreset;
+
+  @property({ attribute: false })
   override autofocus = false;
 
   @query('affine-default-page')

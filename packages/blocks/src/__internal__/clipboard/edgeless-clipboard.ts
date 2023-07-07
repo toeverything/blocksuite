@@ -175,6 +175,13 @@ export class EdgelessClipboard implements Clipboard {
     if (!activeEditorManager.isActive(this._edgeless)) {
       return;
     }
+
+    if (
+      document.activeElement instanceof HTMLInputElement ||
+      document.activeElement instanceof HTMLTextAreaElement
+    ) {
+      return;
+    }
     e.preventDefault();
     const { state } = this.selection;
     if (state.active) {

@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { Utils } from '@blocksuite/store';
 
 import {
   getDefaultPage,
@@ -7,7 +8,7 @@ import {
   noop,
 } from '../../__internal__/utils/index.js';
 import { calcSafeCoordinate } from '../../page-block/utils/position.js';
-import type { LinkDetail, LinkPopover } from './link-popover.js';
+import { type LinkDetail, LinkPopover } from './link-popover.js';
 
 function updatePosition(element: LinkPopover, anchorEl: HTMLElement) {
   const rect = anchorEl.getBoundingClientRect();
@@ -27,15 +28,16 @@ function createEditLinkElement(
   {
     showMask,
     previewLink,
-    page,
-  }: { showMask: boolean; previewLink: string; page: Page }
+    model,
+  }: { showMask: boolean; previewLink: string; model: BaseBlockModel }
 ) {
-  const linkPanel = document.createElement('edit-link-panel');
+  const page = model.page;
+  const linkPanel = new LinkPopover();
   linkPanel.showMask = showMask;
   linkPanel.previewLink = previewLink;
-  linkPanel.showBookmarkOperation = !!page.awarenessStore.getFlag(
-    'enable_bookmark_operation'
-  );
+  linkPanel.showBookmarkOperation =
+    !!page.awarenessStore.getFlag('enable_bookmark_operation') &&
+    !Utils.isInsideBlockByFlavour(page, model, 'affine:database');
   container.appendChild(linkPanel);
 
   requestAnimationFrame(() => {
@@ -92,7 +94,7 @@ function bindHoverState(
 
 interface LinkPopoverOptions {
   anchorEl: HTMLElement;
-  page: Page;
+  model: BaseBlockModel;
   container?: HTMLElement;
   text?: string;
   link?: string;
@@ -103,7 +105,7 @@ interface LinkPopoverOptions {
 
 export async function showLinkPopover({
   anchorEl,
-  page,
+  model,
   container = document.body,
   text = '',
   link = '',
@@ -120,7 +122,7 @@ export async function showLinkPopover({
   const editLinkEle = createEditLinkElement(anchorEl, container, {
     showMask,
     previewLink: link,
-    page,
+    model,
   });
 
   const unsubscribeHoverAbort =

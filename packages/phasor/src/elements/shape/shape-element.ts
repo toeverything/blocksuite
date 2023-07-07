@@ -1,6 +1,7 @@
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
+import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { ITextDelta } from '../text/types.js';
@@ -105,8 +106,9 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return textVerticalAlign;
   }
 
-  override hitTest(x: number, y: number, options?: HitTestOptions) {
+  override hitTest(x: number, y: number, options: HitTestOptions) {
     const { hitTest } = ShapeMethodsMap[this.shapeType];
+    options.ignoreTransparent = options.ignoreTransparent ?? true;
     return hitTest.apply(this, [x, y, options]);
   }
 
@@ -120,6 +122,13 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
 
   override getNearestPoint(point: IVec): IVec {
     return ShapeMethodsMap[this.shapeType].getNearestPoint(point, this);
+  }
+
+  override getRelativePointLocation(point: IVec): PointLocation {
+    return ShapeMethodsMap[this.shapeType].getRelativePointLocation(
+      point,
+      this
+    );
   }
 
   override render(

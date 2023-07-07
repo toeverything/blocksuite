@@ -1,4 +1,10 @@
-import type { Disposable } from '@blocksuite/store';
+import {
+  type IVec,
+  normalizeDegAngle,
+  type SurfaceManager,
+  Vec,
+} from '@blocksuite/phasor';
+import { assertExists, type Disposable } from '@blocksuite/store';
 import { computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
 
@@ -145,4 +151,79 @@ export function rotateResizeCursor(angle: number) {
   const a = Math.round(angle / (Math.PI / 4));
   const cursor = RESIZE_CURSORS[a % RESIZE_CURSORS.length];
   return cursor;
+}
+
+export function calcAngle(target: HTMLElement, point: IVec, offset = 0) {
+  const rect = target
+    .closest('.affine-edgeless-selected-rect')
+    ?.getBoundingClientRect();
+  assertExists(rect);
+  const { left, top, right, bottom } = rect;
+  const center = Vec.med([left, top], [right, bottom]);
+  return normalizeDegAngle(
+    ((Vec.angle(center, point) + offset) * 180) / Math.PI
+  );
+}
+
+export function calcAngleWithRotation(
+  target: HTMLElement,
+  point: IVec,
+  rect: DOMRect,
+  rotate: number,
+  surface: SurfaceManager
+) {
+  const handle = target.parentElement;
+  assertExists(handle);
+  const ariaLabel = handle.getAttribute('aria-label');
+  assertExists(ariaLabel);
+  const { left, top, right, bottom, width, height } = rect;
+  const size = Math.min(width, height);
+  const sx = size / width;
+  const sy = size / height;
+  const center = Vec.med([left, top], [right, bottom]);
+  const draggingPoint = [0, 0];
+
+  switch (ariaLabel) {
+    case 'top-left': {
+      draggingPoint[0] = left;
+      draggingPoint[1] = top;
+      break;
+    }
+    case 'top-right': {
+      draggingPoint[0] = right;
+      draggingPoint[1] = top;
+      break;
+    }
+    case 'bottom-right': {
+      draggingPoint[0] = right;
+      draggingPoint[1] = bottom;
+      break;
+    }
+    case 'bottom-left': {
+      draggingPoint[0] = left;
+      draggingPoint[1] = bottom;
+      break;
+    }
+  }
+
+  const dp = new DOMMatrix()
+    .translateSelf(center[0], center[1])
+    .rotateSelf(rotate)
+    .translateSelf(-center[0], -center[1])
+    .transformPoint(new DOMPoint(...draggingPoint));
+
+  const m = new DOMMatrix()
+    .translateSelf(dp.x, dp.y)
+    .rotateSelf(rotate)
+    .translateSelf(-dp.x, -dp.y)
+    .scaleSelf(sx, sy, 1, dp.x, dp.y, 0)
+    .translateSelf(dp.x, dp.y)
+    .rotateSelf(-rotate)
+    .translateSelf(-dp.x, -dp.y);
+
+  const c = new DOMPoint(...center).matrixTransform(m);
+
+  const p = surface.toModelCoord(point[0], point[1]);
+
+  return normalizeDegAngle((Vec.angle([c.x, c.y], p) * 180) / Math.PI);
 }
