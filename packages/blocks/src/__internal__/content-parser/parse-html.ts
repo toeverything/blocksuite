@@ -882,7 +882,9 @@ export class HtmlParser {
         return result;
       }
     }
-    assertEquals(element.tagName, 'TABLE');
+    if (element.tagName !== 'TABLE') {
+      return [];
+    }
     const theadElement = element.querySelector('thead');
     const tbodyElement = element.querySelector('tbody');
     const titleTrEle = theadElement?.querySelector('tr');
