@@ -324,7 +324,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Data View Table',
         alias: ['table'],
-        icon: DatabaseTableViewIcon,
+        icon: DatabaseKanbanViewIcon20,
         showWhen: model => {
           if (!model.page.awarenessStore.getFlag('enable_database')) {
             return false;
