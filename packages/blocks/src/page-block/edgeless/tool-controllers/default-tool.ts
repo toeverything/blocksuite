@@ -8,6 +8,7 @@ import {
   isPointIn,
   type PhasorElement,
   type PhasorElementType,
+  ShapeElement,
   type SurfaceManager,
   TextElement,
 } from '@blocksuite/phasor';
@@ -42,7 +43,7 @@ import {
   pickTopBlock,
 } from '../utils/query.js';
 import type { Selectable } from '../utils/selection-manager.js';
-import { addText, mountTextEditor } from '../utils/text.js';
+import { addText, mountShapeEditor, mountTextEditor } from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
@@ -309,13 +310,24 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDblClick(e: PointerEventState) {
-    const selected = this._pick(e.x, e.y);
-    if (!selected) {
+    const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
+      e.x,
+      e.y
+    );
+    const topElement = this._edgeless.surface
+      .pickByPointWithoutPierce(modelX, modelY)
+      .pop();
+    if (!topElement) {
       addText(this._edgeless, e);
       return;
     } else {
-      if (selected instanceof TextElement) {
-        mountTextEditor(selected, this._edgeless);
+      console.log(topElement);
+      if (topElement instanceof TextElement) {
+        mountTextEditor(topElement, this._edgeless);
+        return;
+      }
+      if (topElement instanceof ShapeElement) {
+        mountShapeEditor(topElement, this._edgeless);
         return;
       }
     }

@@ -7,6 +7,7 @@ import {
   ElementDefaultProps,
   type IElementCreateProps,
   type IElementUpdateProps,
+  type IPhasorElementLocalRecord,
   type IPhasorElementType,
   type PhasorElement,
   type PhasorElementType,
@@ -21,6 +22,7 @@ import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import { Bound, getCommonBound } from './utils/bound.js';
+import { isPointIn } from './utils/math-utils.js';
 import {
   generateElementId,
   generateKeyBetween,
@@ -30,16 +32,14 @@ import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
 
-export interface ElementLocalRecords {
-  display: boolean;
-  opacity: number;
-}
-
 export class SurfaceManager {
   private _renderer: Renderer;
   private _yContainer: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
-  private _elementLocalRecords = new Map<id, ElementLocalRecords>();
+  private _elementLocalRecords = new Map<
+    id,
+    IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
+  >();
 
   private _computedValue: ComputedValue;
 
@@ -272,6 +272,19 @@ export class SurfaceManager {
     return picked;
   }
 
+  pickByPointWithoutPierce(x: number, y: number): SurfaceElement[] {
+    return this._renderer.gridManager
+      .search({
+        x,
+        y,
+        w: 1,
+        h: 1,
+      })
+      .filter(element =>
+        isPointIn(new Bound(element.x, element.y, element.w, element.h), x, y)
+      );
+  }
+
   pickTop(x: number, y: number): SurfaceElement | null {
     const results = this.pickByPoint(x, y);
     return results[results.length - 1] ?? null;
@@ -330,17 +343,23 @@ export class SurfaceManager {
     ) as unknown as IPhasorElementType[T][];
   }
 
-  updateElementLocalRecord(id: id, records: Partial<ElementLocalRecords>) {
-    const elementLocalRecord = this._elementLocalRecords.get(id) ?? {
-      display: true,
-      opacity: 1,
-    };
-    this._elementLocalRecords.set(id, { ...elementLocalRecord, ...records });
+  updateElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
+    id: id,
+    records: IPhasorElementLocalRecord[T]
+  ) {
+    const elementLocalRecord = this._elementLocalRecords.get(id);
+    if (elementLocalRecord) {
+      this._elementLocalRecords.set(id, { ...elementLocalRecord, ...records });
+    } else {
+      this._elementLocalRecords.set(id, records);
+    }
     this.refresh();
   }
 
-  getElementLocalRecord(id: id) {
-    return this._elementLocalRecords.get(id) ?? { display: true, opacity: 1 };
+  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
+    id: id
+  ): IPhasorElementLocalRecord[T] | undefined {
+    return this._elementLocalRecords.get(id);
   }
 
   deleteElementLocalRecord(id: id) {

@@ -22,6 +22,7 @@ import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../utils/query.js';
 import type {
@@ -600,7 +601,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { active, selected } = state;
     if (
       selected.length === 0 ||
-      (active && selected[0] instanceof TextElement)
+      (active && isPhasorElementWithText(selected[0]))
     ) {
       return nothing;
     }
