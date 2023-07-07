@@ -13,10 +13,10 @@ export const empty: InitFn = async (workspace: Workspace, id: string) => {
 
   page.addBlock('affine:surface', {}, pageBlockId);
 
-  // Add frame block inside page block
-  const frameId = page.addBlock('affine:frame', {}, pageBlockId);
-  // Add paragraph block inside frame block
-  page.addBlock('affine:paragraph', {}, frameId);
+  // Add note block inside page block
+  const noteId = page.addBlock('affine:note', {}, pageBlockId);
+  // Add paragraph block inside note block
+  page.addBlock('affine:paragraph', {}, noteId);
   page.resetHistory();
 };
 

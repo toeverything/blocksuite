@@ -14,7 +14,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     block: PageBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    return `<div>${block.title.toString()}${childText}</div>`;
+    return `<header><h1 class="page-title">${block.title.toString()}</h1></header><div>${childText}</div>`;
   }
 
   override block2Text(
@@ -54,15 +54,15 @@ export class PageBlockService extends BaseService<PageBlockModel> {
       pastedBlocks = pastedBlocks.slice(1);
     }
     // this is page block empty case
-    const frameId = focusedBlockModel.page.addBlock(
-      'affine:frame',
+    const noteId = focusedBlockModel.page.addBlock(
+      'affine:note',
       {},
       focusedBlockModel.id
     );
-    const frameModel = focusedBlockModel.page.getBlockById(frameId);
-    assertExists(frameModel);
-    const service = getService('affine:frame');
-    return service.json2Block(frameModel, pastedBlocks);
+    const noteModel = focusedBlockModel.page.getBlockById(noteId);
+    assertExists(noteModel);
+    const service = getService('affine:note');
+    return service.json2Block(noteModel, pastedBlocks);
     // TODO: if page is not empty
   }
 }

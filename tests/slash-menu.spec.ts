@@ -1,6 +1,11 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import {
+  addNote,
+  setEdgelessTool,
+  switchEditorMode,
+} from 'utils/actions/edgeless.js';
+import {
   pressBackspace,
   pressEnter,
   SHORT_KEY,
@@ -10,7 +15,9 @@ import {
 import {
   enterPlaygroundRoom,
   focusRichText,
+  getSelectionRect,
   getVirgoSelectionText,
+  initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
 } from 'utils/actions/misc.js';
@@ -126,9 +133,10 @@ test.describe('slash menu should show and hide correctly', () => {
     if (!box) {
       throw new Error("slashMenu doesn't exist");
     }
+    const rect = await getSelectionRect(page);
     const { x, y } = box;
-    assertAlmostEqual(x, 80, 40);
-    assertAlmostEqual(y, 167, 8);
+    assertAlmostEqual(x - rect.x, 0, 10);
+    assertAlmostEqual(y - rect.bottom, 5, 10);
   });
 
   test('should move up down with arrow key', async () => {
@@ -258,7 +266,7 @@ test('should clean slash string after soft enter', async ({ page }) => {
 test.describe('slash search', () => {
   test('should slash menu search and keyboard works', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
     await focusRichText(page);
     const slashMenu = page.locator(`.slash-menu`);
     const slashItems = slashMenu.locator('format-bar-button');
@@ -273,16 +281,17 @@ test.describe('slash search', () => {
     await assertStoreMatchJSX(
       page,
       `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:list
     prop:checked={false}
     prop:type="todo"
   />
-</affine:frame>`,
-      frameId
+</affine:note>`,
+      noteId
     );
 
     await type(page, '/');
@@ -388,6 +397,20 @@ test.describe('slash menu with code block', () => {
     await page.waitForTimeout(500);
     await assertRichTexts(page, ['111000']);
   });
+});
+
+test('slash menu should work in edgeless mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setEdgelessTool(page, 'note');
+
+  await addNote(page, '/', 30, 40);
+  await assertRichTexts(page, ['', '/']);
+
+  const slashMenu = page.locator(`.slash-menu`);
+  await expect(slashMenu).toBeVisible();
 });
 
 test.describe('slash menu with date & time', () => {
@@ -543,4 +566,114 @@ test.skip('should compatible CJK IME', async ({ page }) => {
   const slashItems = slashMenu.locator('format-bar-button');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['Heading 2']);
+});
+
+test.describe('slash menu with customize menu', () => {
+  test('can remove specified menus', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await page.evaluate(async () => {
+      // https://github.com/lit/lit/blob/84df6ef8c73fffec92384891b4b031d7efc01a64/packages/lit-html/src/static.ts#L93
+      const fakeLiteral = (strings: TemplateStringsArray) =>
+        ({
+          ['_$litStatic$']: strings[0],
+          r: Symbol.for(''),
+        } as const);
+
+      const editor = document.querySelector('editor-container');
+      if (!editor) throw new Error("Can't find editor-container");
+
+      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+      class CustomSlashMenu extends SlashMenuWidget {
+        override options = {
+          ...SlashMenuWidget.DEFAULT_OPTIONS,
+          menus: SlashMenuWidget.DEFAULT_OPTIONS.menus.slice(0, 1),
+        };
+      }
+      // Fix `Illegal constructor` error
+      // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
+      customElements.define('affine-custom-slash-menu', CustomSlashMenu);
+
+      const pagePreset = window.$blocksuite.blocks.pagePreset;
+      const pageBlockSpec = pagePreset.shift();
+      if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
+      pageBlockSpec.view.widgets = [
+        fakeLiteral`affine-custom-slash-menu`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
+      pagePreset.unshift(pageBlockSpec);
+      editor.pagePreset = pagePreset;
+    });
+
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    const slashMenu = page.locator(`.slash-menu`);
+    const slashItems = slashMenu.locator('format-bar-button');
+
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    await expect(slashItems).toHaveCount(10);
+  });
+
+  test('can add some menus', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+
+    await page.evaluate(async () => {
+      // https://github.com/lit/lit/blob/84df6ef8c73fffec92384891b4b031d7efc01a64/packages/lit-html/src/static.ts#L93
+      const fakeLiteral = (strings: TemplateStringsArray) =>
+        ({
+          ['_$litStatic$']: strings[0],
+          r: Symbol.for(''),
+        } as const);
+
+      const editor = document.querySelector('editor-container');
+      if (!editor) throw new Error("Can't find editor-container");
+      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+
+      class CustomSlashMenu extends SlashMenuWidget {
+        override options = {
+          ...SlashMenuWidget.DEFAULT_OPTIONS,
+          menus: [
+            {
+              name: 'Custom Menu',
+              items: [
+                {
+                  name: 'Custom Menu Item',
+                  groupName: 'Custom Menu',
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  icon: '' as any,
+                  action: () => {
+                    // do nothing
+                  },
+                },
+              ],
+            },
+          ],
+        };
+      }
+      // Fix `Illegal constructor` error
+      // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
+      customElements.define('affine-custom-slash-menu', CustomSlashMenu);
+
+      const pagePreset = window.$blocksuite.blocks.pagePreset;
+      const pageBlockSpec = pagePreset.shift();
+      if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
+      pageBlockSpec.view.widgets = [
+        fakeLiteral`affine-custom-slash-menu`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
+      pagePreset.unshift(pageBlockSpec);
+      editor.pagePreset = pagePreset;
+    });
+
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    const slashMenu = page.locator(`.slash-menu`);
+    const slashItems = slashMenu.locator('format-bar-button');
+
+    await type(page, '/');
+    await expect(slashMenu).toBeVisible();
+    await expect(slashItems).toHaveCount(1);
+  });
 });

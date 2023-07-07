@@ -54,16 +54,6 @@ const attributeRenderer = (delta: DeltaInsert) => {
         'word-wrap': 'break-word',
       });
 
-  // split it to test v-element with multiple v-text
-  if (delta.insert.length > 4) {
-    const leftStr = delta.insert.slice(0, 3);
-    const rightStr = delta.insert.slice(3);
-
-    return html`<span style=${style}
-      ><v-text .str=${leftStr}></v-text><v-text .str=${rightStr}></v-text
-    ></span>`;
-  }
-
   return html`<span style=${style}
     ><v-text .str=${delta.insert}></v-text
   ></span>`;

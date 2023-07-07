@@ -6,7 +6,7 @@ import { serializeXYWH, type ShapeType, StrokeStyle } from '@blocksuite/phasor';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
 import { getOptions } from '../utils';
-import { addShapeElement, type InitFn } from './utils';
+import { type InitFn } from './utils';
 
 const SHAPE_TYPES = ['rect', 'triangle', 'ellipse', 'diamond'];
 
@@ -31,16 +31,17 @@ export const heavyWhiteboard: InitFn = async (
     title: new Text(),
   });
 
-  const surfaceBlockId = page.addBlock('affine:surface', {}, pageBlockId);
+  const surfaceBlockElements: Record<string, unknown> = {};
 
   let i = 0;
 
-  // Add frame block inside page block
+  // Add note block inside page block
   for (; i < count; i++) {
     const x = Math.random() * count * 2;
     const y = Math.random() * count * 2;
-    addShapeElement(page, surfaceBlockId, {
-      id: nanoid(),
+    const id = nanoid();
+    surfaceBlockElements[id] = {
+      id,
       index: 'a0',
       type: 'shape',
       xywh: `[${x},${y},100,100]`,
@@ -55,27 +56,33 @@ export const heavyWhiteboard: InitFn = async (
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
       strokeStyle: StrokeStyle.Solid,
       roughness: 2,
-    });
+    };
   }
 
-  // Add frame block inside page block
+  page.addBlock(
+    'affine:surface',
+    { elements: surfaceBlockElements },
+    pageBlockId
+  );
+
+  // Add note block inside page block
   for (i = 0; i < count; i++) {
     const x = Math.random() * -count * 2 - 100;
     const y = Math.random() * count * 2;
-    const frameId = page.addBlock(
-      'affine:frame',
+    const noteId = page.addBlock(
+      'affine:note',
       {
         xywh: serializeXYWH(x, y, 100, 50),
       },
       pageBlockId
     );
-    // Add paragraph block inside frame block
+    // Add paragraph block inside note block
     page.addBlock(
       'affine:paragraph',
       {
-        text: new Text('Frame #' + i),
+        text: new Text('Note #' + i),
       },
-      frameId
+      noteId
     );
   }
 };

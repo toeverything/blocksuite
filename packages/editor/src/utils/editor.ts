@@ -1,24 +1,24 @@
 import {
   asyncFocusRichText,
   BlockHub,
-  createBookmarkBlock,
   getAllowSelectedBlocks,
+  getBookmarkInitialProps,
   getEdgelessPage,
   getServiceOrRegister,
-  tryUpdateFrameSize,
+  tryUpdateNoteSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
   type BlockComponentElement,
-  getClosestFrameBlockElementById,
+  getClosestNoteBlockElementById,
   getCurrentBlockRange,
-  getHoveringFrame,
+  getHoveringNote,
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
 import { PAGE_BLOCK_PADDING_BOTTOM } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import type { EditorContainer } from '../components/index.js';
 
@@ -38,34 +38,36 @@ export const createBlockHub: (
       const models = [];
 
       const isDatabase = data.flavour === 'affine:database';
+
       if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
         console.warn('database block is not enabled');
         return;
       }
-      if (data.flavour === 'affine:embed' && data.type === 'image') {
-        models.push(...(await uploadImageFromLocal(page)));
+
+      // In some cases, like insert bookmark block, range in editor will blur, so we need to get range before insert.
+      const range = getCurrentBlockRange(page);
+
+      if (data.flavour === 'affine:image' && data.type === 'image') {
+        models.push(
+          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+            flavour: 'affine:image',
+            sourceId,
+          }))
+        );
+      } else if (data.flavour === 'affine:bookmark') {
+        const url = await getBookmarkInitialProps();
+        url && models.push({ flavour: 'affine:bookmark', url });
       } else {
         models.push(data);
       }
       const last = page.root?.lastItem();
-      const range = getCurrentBlockRange(page);
+
       if (range) {
         const lastModel = range.models[range.models.length - 1];
-        if (data.flavour === 'affine:bookmark') {
-          const parent = page.getParent(lastModel);
-          assertExists(parent);
-          const index = parent.children.indexOf(lastModel);
-          createBookmarkBlock(parent, index + 1);
-          return;
-        }
         const arr = page.addSiblingBlocks(lastModel, models, 'after');
         const lastId = arr[arr.length - 1];
         asyncFocusRichText(page, lastId);
       } else if (last) {
-        if (data.flavour === 'affine:bookmark') {
-          createBookmarkBlock(page.root?.lastItem() as BaseBlockModel);
-          return;
-        }
         // add to end
         let lastId = page.root?.lastItem()?.id;
         models.forEach(model => {
@@ -91,11 +93,22 @@ export const createBlockHub: (
         console.warn('database block is not enabled');
         return;
       }
-      if (props.flavour === 'affine:embed' && props.type === 'image') {
-        models.push(...(await uploadImageFromLocal(page)));
+      if (props.flavour === 'affine:image' && props.type === 'image') {
+        models.push(
+          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+            flavour: 'affine:image',
+            sourceId,
+          }))
+        );
+      } else if (props.flavour === 'affine:bookmark') {
+        const url = await getBookmarkInitialProps();
+        url && models.push({ flavour: 'affine:bookmark', url });
       } else {
         models.push(props);
       }
+
+      // In some cases, like cancel bookmark initial modal, there will be no models.
+      if (!models.length) return;
 
       let parentId;
       let focusId;
@@ -108,12 +121,6 @@ export const createBlockHub: (
           const ids = page.addBlocks(models, model);
           focusId = ids[0];
           parentId = model.id;
-        } else if (props.flavour === 'affine:bookmark') {
-          const parent = page.getParent(model);
-          assertExists(parent);
-          const index = parent.children.indexOf(model);
-          focusId = createBookmarkBlock(parent, index + 1);
-          parentId = parent.id;
         } else {
           const parent = page.getParent(model);
           assertExists(parent);
@@ -134,7 +141,7 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         if (focusId) {
           asyncFocusRichText(page, focusId);
-          tryUpdateFrameSize(page, 1);
+          tryUpdateNoteSize(page, 1);
         }
         return;
       }
@@ -143,27 +150,39 @@ export const createBlockHub: (
       const pageBlock = getEdgelessPage(page);
       assertExists(pageBlock);
 
-      let frameId;
+      let noteId;
       if (focusId && parentId) {
-        const targetFrameBlock = getClosestFrameBlockElementById(
+        const targetNoteBlock = getClosestNoteBlockElementById(
           parentId,
           pageBlock
         ) as BlockComponentElement;
-        assertExists(targetFrameBlock);
-        frameId = targetFrameBlock.model.id;
+        assertExists(targetNoteBlock);
+        noteId = targetNoteBlock.model.id;
       } else {
-        // Creates new frame block on blank area.
-        const result = pageBlock.addNewFrame(models, point);
-        frameId = result.frameId;
+        // Creates new note block on blank area.
+        const result = pageBlock.addNewNote(
+          models,
+          point,
+          isDatabase ? { width: 752 } : undefined
+        );
+        noteId = result.noteId;
         focusId = result.ids[0];
+        const model = page.getBlockById(focusId);
+        assertExists(model);
+        if (isDatabase) {
+          const service = await getServiceOrRegister<'affine:database'>(
+            props.flavour
+          );
+          service.initDatabaseBlock(page, model, model.id);
+        }
       }
-      pageBlock.setSelection(frameId, true, focusId, point);
+      pageBlock.setSelection(noteId, true, focusId, point);
     },
     onDragStart: () => {
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
-        defaultPageBlock.selection.clear();
+        defaultPageBlock.selection?.clear();
       }
     },
     getAllowedBlocks: () => {
@@ -177,7 +196,7 @@ export const createBlockHub: (
         return getAllowSelectedBlocks(edgelessPageBlock.model);
       }
     },
-    getHoveringFrameState: (point: Point) => {
+    getHoveringNoteState: (point: Point) => {
       const state = {
         scale: 1,
       } as { container?: Element; rect?: Rect; scale: number };
@@ -194,7 +213,7 @@ export const createBlockHub: (
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
         state.scale = edgelessPageBlock.surface.viewport.zoom;
-        const container = getHoveringFrame(point);
+        const container = getHoveringNote(point);
         if (container) {
           state.rect = Rect.fromDOM(container);
           state.container = container;

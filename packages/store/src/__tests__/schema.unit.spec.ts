@@ -5,14 +5,13 @@ import { describe, expect, it } from 'vitest';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
-import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
+import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import { SchemaValidateError } from '../../../global/src/error/index.js';
 import { defineBlockSchema } from '../base';
 import { Generator } from '../store';
-import type { Page } from '../workspace';
 import { Workspace } from '../workspace';
 
 function createTestOptions() {
@@ -20,29 +19,29 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, isSSR: true };
 }
 
-const TestCustomFrameBlockSchema = defineBlockSchema({
-  flavour: 'affine:frame-block-video',
+const TestCustomNoteBlockSchema = defineBlockSchema({
+  flavour: 'affine:note-block-video',
   props: internal => ({
     text: internal.Text(),
   }),
   metadata: {
     version: 1,
     role: 'content',
-    tag: literal`affine-frame-block-video`,
-    parent: ['affine:frame'],
+    tag: literal`affine-note-block-video`,
+    parent: ['affine:note'],
   },
 });
 
-const TestInvalidFrameBlockSchema = defineBlockSchema({
-  flavour: 'affine:frame-invalid-block-video',
+const TestInvalidNoteBlockSchema = defineBlockSchema({
+  flavour: 'affine:note-invalid-block-video',
   props: internal => ({
     text: internal.Text(),
   }),
   metadata: {
     version: 1,
     role: 'content',
-    tag: literal`affine-invalid-frame-block-video`,
-    parent: ['affine:frame'],
+    tag: literal`affine-invalid-note-block-video`,
+    parent: ['affine:note'],
   },
 });
 
@@ -50,10 +49,10 @@ const BlockSchemas = [
   ParagraphBlockSchema,
   PageBlockSchema,
   ListBlockSchema,
-  FrameBlockSchema,
+  NoteBlockSchema,
   DividerBlockSchema,
-  TestCustomFrameBlockSchema,
-  TestInvalidFrameBlockSchema,
+  TestCustomNoteBlockSchema,
+  TestInvalidNoteBlockSchema,
 ];
 
 const defaultPageId = 'page0';
@@ -69,21 +68,19 @@ describe('schema', () => {
   it('should be able to validate schema by role', async () => {
     const page = await createTestPage();
     const pageId = page.addBlock('affine:page', {});
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
 
-    // add frame to root should throw
-    expect(() => page.addBlock('affine:frame', {})).toThrow(
-      SchemaValidateError
-    );
+    // add note to root should throw
+    expect(() => page.addBlock('affine:note', {})).toThrow(SchemaValidateError);
 
     // add paragraph to root should throw
     expect(() => page.addBlock('affine:paragraph', {}, pageId)).toThrow(
       SchemaValidateError
     );
 
-    expect(() => page.addBlock('affine:frame', {}, pageId)).not.toThrow();
-    expect(() => page.addBlock('affine:paragraph', {}, frameId)).not.toThrow();
+    expect(() => page.addBlock('affine:note', {}, pageId)).not.toThrow();
+    expect(() => page.addBlock('affine:paragraph', {}, noteId)).not.toThrow();
     expect(() =>
       page.addBlock('affine:paragraph', {}, paragraphId)
     ).not.toThrow();
@@ -92,14 +89,14 @@ describe('schema', () => {
   it('should glob match works', async () => {
     const page = await createTestPage();
     const pageId = page.addBlock('affine:page', {});
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
 
     expect(() =>
-      page.addBlock('affine:frame-block-video', {}, frameId)
+      page.addBlock('affine:note-block-video', {}, noteId)
     ).not.toThrow();
 
     expect(() =>
-      page.addBlock('affine:frame-invalid-block-video', {}, frameId)
+      page.addBlock('affine:note-invalid-block-video', {}, noteId)
     ).toThrow();
   });
 });

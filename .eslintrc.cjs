@@ -9,9 +9,8 @@ const allPackages = [
   'playground',
   'store',
   'virgo',
-  'connector',
   'lit',
-  'hosts',
+  'block-std',
 ];
 
 const createPattern = packageName => [
@@ -36,6 +35,15 @@ const createPattern = packageName => [
     message: 'Do not import package itself',
     allowTypeImports: false,
   },
+  ...(packageName === 'blocks'
+    ? [
+        {
+          group: ['**/std.js'],
+          message: 'Do not import from std',
+          allowTypeImports: false,
+        },
+      ]
+    : []),
 ];
 
 module.exports = {
@@ -60,8 +68,7 @@ module.exports = {
     'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
-    'packages/connector/dist/*',
-    'packages/hosts/dist/*',
+    'packages/block-std/dist/*',
   ],
   overrides: [
     {

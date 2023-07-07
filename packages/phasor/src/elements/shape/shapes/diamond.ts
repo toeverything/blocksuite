@@ -1,20 +1,39 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
-
-import { type IBound, StrokeStyle } from '../../../consts.js';
-import { pointInPolygon } from '../../../utils/math-utils.js';
+import { StrokeStyle } from '../../../consts.js';
+import type { RoughCanvas } from '../../../rough/canvas.js';
+import { Bound } from '../../../utils/bound.js';
+import {
+  getPointsFromBoundsWithRotation,
+  linePolygonIntersects,
+  pointInPolygon,
+  pointOnPolygonStoke,
+  polygonGetPointTangent,
+  polygonNearestPoint,
+  rotatePoints,
+} from '../../../utils/math-utils.js';
+import { PointLocation } from '../../../utils/point-location.js';
+import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 
+function diamondPoints(bound: Bound): IVec[] {
+  const { x, y, w, h } = bound;
+  return [
+    [x, y + h / 2],
+    [x + w / 2, y],
+    [x + w, y + h / 2],
+    [x + w / 2, y + h],
+  ];
+}
+
 export const DiamondMethods: ShapeMethods = {
   render(
     ctx: CanvasRenderingContext2D,
+    matrix: DOMMatrix,
     rc: RoughCanvas,
     element: ShapeElement
   ) {
     const {
-      w,
-      h,
       seed,
       strokeWidth,
       filled,
@@ -22,13 +41,22 @@ export const DiamondMethods: ShapeMethods = {
       realStrokeColor,
       strokeStyle,
       roughness,
+      rotate,
     } = element;
-
+    const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
     const renderWidth = w - renderOffset * 2;
     const renderHeight = h - renderOffset * 2;
+    const cx = renderWidth / 2;
+    const cy = renderHeight / 2;
 
-    ctx.translate(renderOffset, renderOffset);
+    ctx.setTransform(
+      matrix
+        .translateSelf(renderOffset, renderOffset)
+        .translateSelf(cx, cy)
+        .rotateSelf(rotate)
+        .translateSelf(-cx, -cy)
+    );
 
     rc.polygon(
       [
@@ -49,13 +77,75 @@ export const DiamondMethods: ShapeMethods = {
     );
   },
 
-  hitTest(x: number, y: number, bound: IBound, options?: HitTestOptions) {
-    const points = [
-      [bound.x + bound.w / 2, bound.y + 0],
-      [bound.x + bound.w, bound.y + bound.h / 2],
-      [bound.x + bound.w / 2, bound.y + bound.h],
-      [bound.x + 0, bound.y + bound.h / 2],
-    ];
-    return pointInPolygon([x, y], points);
+  hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
+    const points = getPointsFromBoundsWithRotation(this, ({ x, y, w, h }) => [
+      [x, y + h / 2],
+      [x + w / 2, y],
+      [x + w, y + h / 2],
+      [x + w / 2, y + h],
+    ]);
+
+    let hited = pointOnPolygonStoke(
+      [x, y],
+      points,
+      (options?.expand ?? 1) / (this.renderer?.zoom ?? 1)
+    );
+
+    if ((!options.ignoreTransparent || this.filled) && !hited) {
+      hited = pointInPolygon([x, y], points);
+    }
+
+    return hited;
+  },
+
+  containedByBounds(bounds: Bound, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h / 2],
+        [x + w / 2, y],
+        [x + w, y + h / 2],
+        [x + w / 2, y + h],
+      ]
+    );
+    return points.some(point => bounds.containsPoint(point));
+  },
+
+  getNearestPoint(point: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h / 2],
+        [x + w / 2, y],
+        [x + w, y + h / 2],
+        [x + w / 2, y + h],
+      ]
+    );
+    return polygonNearestPoint(points, point);
+  },
+
+  intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      ({ x, y, w, h }) => [
+        [x, y + h / 2],
+        [x + w / 2, y],
+        [x + w, y + h / 2],
+        [x + w / 2, y + h],
+      ]
+    );
+    return linePolygonIntersects(start, end, points);
+  },
+
+  getRelativePointLocation(position, element) {
+    const bound = Bound.deserialize(element.xywh);
+    const point = bound.getRelativePoint(position);
+    let points = diamondPoints(bound);
+    points.push(point);
+
+    points = rotatePoints(points, bound.center, element.rotate);
+    const rotatePoint = points.pop() as IVec;
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
   },
 };

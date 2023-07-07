@@ -1,5 +1,5 @@
-import '../tool-icon-button.js';
-import '../color-panel.js';
+import '../buttons/tool-icon-button.js';
+import '../panel/color-panel.js';
 
 import {
   ConnectorLIcon,
@@ -16,33 +16,29 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/std.js';
+import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
-import {
-  generateConnectorPath,
-  getConnectorAttachedInfo,
-} from '../../utils.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { LineSizeButtonProps } from '../buttons/line-size-button.js';
+import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
+import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
+import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
-} from '../color-panel.js';
-import type { LineSizeButtonProps } from '../line-size-button.js';
-import { lineSizeButtonStyles } from '../line-size-button.js';
-import type { LineStyleButtonProps } from '../line-style-button.js';
+} from '../panel/color-panel.js';
 import {
   LineStylesPanel,
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
-} from '../line-styles-panel.js';
-import type { EdgelessToolIconButton } from '../tool-icon-button.js';
+} from '../panel/line-styles-panel.js';
 import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(
   elements: ConnectorElement[]
 ): CssVariableName | null {
-  const colors = countBy(elements, (ele: ConnectorElement) => ele.color);
+  const colors = countBy(elements, (ele: ConnectorElement) => ele.stroke);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
@@ -57,7 +53,7 @@ function getMostCommonLineWidth(
   elements: ConnectorElement[]
 ): LineSizeButtonProps['size'] | null {
   const sizes = countBy(elements, (ele: ConnectorElement) => {
-    return ele.lineWidth === 4 ? 's' : 'l';
+    return ele.strokeWidth === 4 ? 's' : 'l';
   });
   const max = maxBy(Object.entries(sizes), ([k, count]) => count);
   return max ? (max[0] as LineSizeButtonProps['size']) : null;
@@ -146,19 +142,19 @@ export class EdgelessChangeConnectorButton extends LitElement {
     `,
   ];
 
-  @property()
+  @property({ attribute: false })
   elements: ConnectorElement[] = [];
 
   @property({ type: Object })
   selectionState!: EdgelessSelectionState;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
-  @property()
+  @property({ attribute: false })
   surface!: SurfaceManager;
 
-  @property()
+  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @query('.connector-color-button')
@@ -188,59 +184,31 @@ export class EdgelessChangeConnectorButton extends LitElement {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.mode !== mode) {
-        if (element.mode === ConnectorMode.Orthogonal) {
-          const controllers = [
-            element.controllers[0],
-            element.controllers[element.controllers.length - 1],
-          ].map(c => {
-            return {
-              ...c,
-              x: c.x + element.x,
-              y: c.y + element.y,
-            };
-          });
-
-          this.surface.updateElement<'connector'>(element.id, {
-            controllers,
-            mode,
-          });
-        } else {
-          const { start, end } = getConnectorAttachedInfo(
-            element,
-            this.surface,
-            this.page
-          );
-          const route = generateConnectorPath(
-            start.rect,
-            end.rect,
-            start.point,
-            end.point,
-            []
-          );
-
-          this.surface.updateElement<'connector'>(element.id, {
-            controllers: route,
-            mode,
-          });
-        }
+        this.surface.updateElement<'connector'>(element.id, {
+          mode,
+        });
       }
     });
     this._forceUpdateSelection();
   }
 
-  private _setConnectorColor(color: CssVariableName) {
+  private _setConnectorColor(stroke: CssVariableName) {
     this.page.captureSync();
+
+    let shouldUpdate = false;
     this.elements.forEach(element => {
-      if (element.color !== color) {
-        this.surface.updateElement<'connector'>(element.id, { color });
+      if (element.stroke !== stroke) {
+        shouldUpdate = true;
+        this.surface.updateElement<'connector'>(element.id, { stroke });
       }
     });
+    if (shouldUpdate) this.requestUpdate();
   }
 
-  private _setShapeStrokeWidth(lineWidth: number) {
+  private _setShapeStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
       this.surface.updateElement<'connector'>(ele.id, {
-        lineWidth,
+        strokeWidth,
       });
     });
     this._forceUpdateSelection();

@@ -1,10 +1,17 @@
-import type { RoughCanvas } from 'roughjs/bin/canvas.js';
 import type * as Y from 'yjs';
 
+import type { Bound, PointLocation } from '../index.js';
 import type { Renderer } from '../renderer.js';
+import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
 import { isPointIn } from '../utils/math-utils.js';
-import { deserializeXYWH, type SerializedXYWH } from '../utils/xywh.js';
+import type { IVec } from '../utils/vec.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  type XYWH,
+} from '../utils/xywh.js';
+import type { IElementUpdateProps, IPhasorElementType } from './index.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -12,45 +19,48 @@ export interface ISurfaceElement {
   xywh: SerializedXYWH;
   index: string;
   seed: number;
+
+  // degree: [0, 360]
+  rotate: number;
 }
 
 export interface HitTestOptions {
-  expandStroke: boolean;
-  fillHollow: boolean;
+  expand?: number;
+  ignoreTransparent?: boolean;
 }
 
 export type ComputedValue = (value: string) => string;
 
-export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
+export abstract class SurfaceElement<
+  T extends ISurfaceElement = ISurfaceElement
+> {
+  abstract containedByBounds(bounds: Bound): boolean;
+
+  abstract getNearestPoint(point: IVec): IVec;
+
+  abstract intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
+
+  abstract getRelativePointLocation(point: IVec): PointLocation;
+
   yMap: Y.Map<unknown>;
 
   protected renderer: Renderer | null = null;
-  protected surface: SurfaceManager | null = null;
+  protected _connectable = true;
 
   computedValue: ComputedValue = v => v;
 
-  private _display = true;
-
-  get display() {
-    return this._display;
-  }
-
-  setDisplay(display: boolean) {
-    this._display = display;
-    this.renderer?.removeElement(this);
-    this.renderer?.addElement(this);
-  }
-
-  constructor(yMap: Y.Map<unknown>, surface: SurfaceManager, data?: T) {
+  constructor(
+    yMap: Y.Map<unknown>,
+    protected surface: SurfaceManager,
+    data: Partial<T> = {}
+  ) {
     if (!yMap.doc) {
       throw new Error('yMap must be bound to a Y.Doc');
     }
 
     this.yMap = yMap;
-    if (data) {
-      for (const key in data) {
-        this.yMap.set(key, data[key] as T[keyof T]);
-      }
+    for (const key in data) {
+      this.yMap.set(key, data[key] as T[keyof T]);
     }
 
     this.surface = surface;
@@ -76,35 +86,52 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return xywh;
   }
 
+  get seed() {
+    const seed = this.yMap.get('seed') as T['seed'];
+    return seed;
+  }
+
+  get rotate() {
+    const rotate = this.yMap.get('rotate') as T['rotate'];
+    return rotate ?? 0;
+  }
+
   get x() {
-    const [x] = deserializeXYWH(this.xywh);
+    const [x] = this.deserializeXYWH();
     return x;
   }
 
   get y() {
-    const [, y] = deserializeXYWH(this.xywh);
+    const [, y] = this.deserializeXYWH();
     return y;
   }
 
   get w() {
-    const [, , w] = deserializeXYWH(this.xywh);
+    const [, , w] = this.deserializeXYWH();
     return w;
   }
 
   get h() {
-    const [, , , h] = deserializeXYWH(this.xywh);
+    const [, , , h] = this.deserializeXYWH();
     return h;
   }
 
-  get seed() {
-    const seed = this.yMap.get('seed') as T['seed'];
-    return seed;
+  get localRecord() {
+    return this.surface.getElementLocalRecord(this.id);
+  }
+
+  get connectable() {
+    return this._connectable;
   }
 
   applyUpdate(updates: Partial<T>) {
     for (const key in updates) {
       this.yMap.set(key, updates[key] as T[keyof T]);
     }
+  }
+
+  deserializeXYWH(): XYWH {
+    return deserializeXYWH(this.xywh);
   }
 
   serialize(): T {
@@ -115,9 +142,22 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     return isPointIn(this, x, y);
   }
 
-  private _onMap = () => {
+  private _onMap = <T extends keyof IPhasorElementType>(
+    events: Y.YEvent<Y.Map<unknown>>[]
+  ) => {
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
+    const e = events[0] as Y.YMapEvent<Y.Map<unknown>>;
+    const props: IElementUpdateProps<T> = {};
+    e.keysChanged.forEach(key => {
+      props[key as keyof IElementUpdateProps<T>] = this.yMap.get(
+        key
+      ) as IPhasorElementType[T][keyof IElementUpdateProps<T>];
+    });
+    this.surface.slots.elementUpdated.emit({
+      id: this.id,
+      props: props,
+    });
   };
 
   mount(renderer: Renderer) {
@@ -132,7 +172,7 @@ export class SurfaceElement<T extends ISurfaceElement = ISurfaceElement> {
     this.renderer = null;
   }
 
-  render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+  render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix, rc: RoughCanvas) {
     return;
   }
 }

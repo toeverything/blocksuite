@@ -1,12 +1,10 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { Variable, VariableOrProperty } from '../../common/ast.js';
-import { DatabaseMenuComponent } from '../../common/menu.js';
+import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
 import { propertyMatcher } from '../../logical/property-matcher.js';
-import { onClickOutside } from '../../utils.js';
+import type { Variable, VariableOrProperty, VariableRef } from '../ast.js';
 
 @customElement('variable-ref-view')
 export class VariableRefView extends WithDisposable(ShadowlessElement) {
@@ -20,13 +18,13 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       padding: 0 2px;
     }
   `;
-  @property()
+  @property({ attribute: false })
   data?: VariableOrProperty;
 
-  @property()
+  @property({ attribute: false })
   setData!: (filter: VariableOrProperty) => void;
 
-  @property()
+  @property({ attribute: false })
   vars!: Variable[];
 
   get field() {
@@ -64,84 +62,39 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
   propertySelect!: HTMLElement;
 
   selectField() {
-    const menu = new DatabaseMenuComponent();
-    menu.menuGroup = this.vars.map(v => ({
-      type: 'action',
-      label: v.name,
-      click: () => {
-        this.setData({
-          type: 'ref',
-          name: v.id,
-        });
-        menu.remove();
-      },
-    }));
-    this.append(menu);
-    computePosition(this.fieldSelect, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
+    popSelectField(this.fieldSelect, {
+      vars: this.vars,
+      onSelect: ref => this.setData(ref),
     });
-
-    onClickOutside(
-      menu,
-      () => {
-        menu.remove();
-      },
-      'mousedown'
-    );
   }
 
   selectProperty() {
-    const menu = new DatabaseMenuComponent();
     const field = this.field;
     const fieldType = this.vars.find(v => v.id === field)?.type;
     if (!fieldType || !field) {
       return;
     }
     const properties = propertyMatcher.allMatchedData(fieldType);
-    menu.menuGroup = properties.map(v => ({
-      type: 'action',
-      label: v.name,
-      click: () => {
-        this.setData({
-          type: 'property',
-          ref: { type: 'ref', name: field },
-          propertyFuncName: v.name,
-        });
-        menu.remove();
-      },
-    }));
-    this.append(menu);
-    computePosition(this.fieldSelect, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
-    onClickOutside(
-      menu,
-      () => {
-        menu.remove();
-      },
-      'mousedown'
+    popFilterableSimpleMenu(
+      this.propertySelect,
+      properties.map(v => ({
+        type: 'action',
+        name: v.name,
+        select: () => {
+          this.setData({
+            type: 'property',
+            ref: { type: 'ref', name: field },
+            propertyFuncName: v.name,
+          });
+        },
+      }))
     );
   }
 
   override render() {
+    // const property = html`<span class='property-select' @click='${this.selectProperty}'
+    //       >${this.property ?? '⋮'}</span>
+    //       `;
     return html`
       <div style="display:flex;align-items:center;">
         <div style="display:flex;align-items:center;">
@@ -152,14 +105,11 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
         <div style="display:flex;align-items:center;">
           ${this.property &&
           html`<span style="margin-right: 4px;">${`'s`}</span>`}
-          <span class="property-select" @click="${this.selectProperty}"
-            >${this.property ?? '⋮'}</span
-          >
-          <PlainSelect
+          <!-- <PlainSelect
             :value="propertyName"
             @update:value="setPropertyName"
             :options="propertyOptions"
-          ></PlainSelect>
+          ></PlainSelect> -->
         </div>
       </div>
     `;
@@ -171,3 +121,24 @@ declare global {
     'variable-ref-view': VariableRefView;
   }
 }
+export const popSelectField = (
+  target: HTMLElement,
+  props: {
+    vars: Variable[];
+    onSelect: (ref: VariableRef) => void;
+  }
+) => {
+  popFilterableSimpleMenu(
+    target,
+    props.vars.map(v => ({
+      type: 'action',
+      name: v.name,
+      select: () => {
+        props.onSelect({
+          type: 'ref',
+          name: v.id,
+        });
+      },
+    }))
+  );
+};

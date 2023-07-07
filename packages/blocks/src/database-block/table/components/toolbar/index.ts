@@ -1,16 +1,16 @@
 import { PlusIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { DisposableGroup } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { Point, Rect } from '../../../../__internal__/utils/rect.js';
 import type { DragIndicator } from '../../../../components/drag-handle.js';
-import { Point, Rect } from '../../../../std.js';
+import type { InsertPosition } from '../../../database-model.js';
 
 @customElement('affine-database-new-record-preview')
 class NewRecordPreview extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   offset = { x: 0, y: 0 };
 
   override render() {
@@ -27,17 +27,7 @@ class NewRecordPreview extends ShadowlessElement {
           width: 32px;
           border: 1px solid var(--affine-border-color);
           border-radius: 50%;
-          background: linear-gradient(
-              0deg,
-              rgba(96, 70, 254, 0.3),
-              rgba(96, 70, 254, 0.3)
-            ),
-            linear-gradient(
-              0deg,
-              var(--affine-hover-color),
-              var(--affine-hover-color)
-            ),
-            var(--affine-white);
+          background: var(--affine-blue-100);
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
             0px 0px 0px 0.5px var(--affine-black-10);
           cursor: none;
@@ -46,10 +36,12 @@ class NewRecordPreview extends ShadowlessElement {
           caret-color: transparent;
           z-index: 100;
         }
+
         affine-database-new-record-preview svg {
           width: 16px;
           height: 16px;
         }
+
         affine-database-new-record-preview path {
           fill: var(--affine-brand-color);
         }
@@ -60,14 +52,14 @@ class NewRecordPreview extends ShadowlessElement {
 }
 
 export type ColumnConfig = {
-  index: number;
+  position?: InsertPosition;
   rows: HTMLElement[];
 };
 
 export function initAddNewRecordHandlers(
   element: HTMLElement,
   container: HTMLElement,
-  addRow: (index: number) => void
+  addRow: (position: InsertPosition) => void
 ) {
   let dragConfig: ColumnConfig | null = null;
   let dragPreview: NewRecordPreview | null = null;
@@ -104,7 +96,6 @@ export function initAddNewRecordHandlers(
       rowContainer.querySelectorAll<HTMLElement>('.affine-database-block-row')
     );
     dragConfig = {
-      index: -1,
       rows,
     };
   };
@@ -131,16 +122,16 @@ export function initAddNewRecordHandlers(
       const { width: databaseWidth, left: databaseLeft } =
         database.getBoundingClientRect();
       indicator.rect = Rect.fromLWTH(databaseLeft, databaseWidth, rectTop, 3);
-      dragConfig.index = row.insertRowIndex;
+      dragConfig.position = row.position;
     } else {
       indicator.rect = null;
-      dragConfig.index = -1;
+      dragConfig.position = undefined;
     }
   };
 
   const onDragEnd = () => {
     if (!dragConfig) return;
-    const { index } = dragConfig;
+    const { position } = dragConfig;
     // clear data
     dragConfig = null;
     if (indicator) indicator.rect = null;
@@ -148,8 +139,8 @@ export function initAddNewRecordHandlers(
       dragPreview.remove();
       dragPreview = null;
     }
-    if (index !== -1) {
-      addRow(index);
+    if (position) {
+      addRow(position);
     }
   };
 
@@ -172,7 +163,7 @@ function getClosestRow(
   rows: HTMLElement[]
 ): {
   element: HTMLElement;
-  insertRowIndex: number;
+  position: InsertPosition;
   isLast: boolean;
 } | null {
   const length = rows.length;
@@ -183,7 +174,7 @@ function getClosestRow(
     if (point.y <= top + 20 && point.y >= top - 20) {
       return {
         element: row,
-        insertRowIndex: i,
+        position: { id: row.dataset.rowId ?? '', before: true },
         isLast: false,
       };
     }
@@ -193,7 +184,7 @@ function getClosestRow(
       if (point.y >= bottom - 20 && point.y <= bottom + 20) {
         return {
           element: row,
-          insertRowIndex: i + 1,
+          position: { id: row.dataset.rowId ?? '', before: false },
           isLast: true,
         };
       }

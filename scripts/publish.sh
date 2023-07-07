@@ -3,6 +3,7 @@
 # ALL_PACKAGES
 packages=(
   "blocks"
+  "block-std"
   # "docs" # NOT PUBLISHED
   "editor"
   "global"
@@ -10,7 +11,6 @@ packages=(
   # "playground" # NOT PUBLISHED
   "store"
   "virgo"
-  "connector"
   "lit"
 )
 

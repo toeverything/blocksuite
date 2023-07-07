@@ -1,8 +1,8 @@
-import '../tool-icon-button.js';
+import '../buttons/tool-icon-button.js';
 import './change-shape-button.js';
 import './change-brush-button.js';
 import './change-connector-button.js';
-import './change-frame-button.js';
+import './change-note-button.js';
 import './change-text-button.js';
 import './more-button.js';
 
@@ -10,10 +10,8 @@ import type {
   BrushElement,
   ConnectorElement,
   ShapeElement,
-  SurfaceManager,
   TextElement,
 } from '@blocksuite/phasor';
-import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
@@ -21,17 +19,17 @@ import { join } from 'lit/directives/join.js';
 import {
   atLeastNMatches,
   groupBy,
-} from '../../../../__internal__/utils/std.js';
+} from '../../../../__internal__/utils/common.js';
+import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../selection-manager.js';
-import type { Selectable } from '../../selection-manager.js';
-import { isTopLevelBlock, stopPropagation } from '../../utils.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { isTopLevelBlock } from '../../utils/query.js';
+import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
   brush: BrushElement[];
-  frame: TopLevelBlockModel[];
+  note: TopLevelBlockModel[];
   connector: ConnectorElement[];
   text: TextElement[];
 };
@@ -40,9 +38,13 @@ type CategorizedElements = {
 export class EdgelessComponentToolbar extends LitElement {
   static override styles = css`
     :host {
-      display: block;
+      display: none;
       position: absolute;
       user-select: none;
+    }
+
+    :host([data-show]) {
+      display: block;
     }
 
     .container {
@@ -50,7 +52,7 @@ export class EdgelessComponentToolbar extends LitElement {
       align-items: center;
       height: 48px;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
+      box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
     }
 
@@ -59,25 +61,32 @@ export class EdgelessComponentToolbar extends LitElement {
     }
   `;
 
-  @property()
-  selected: Selectable[] = [];
-
   @property({ type: Object })
   selectionState!: EdgelessSelectionState;
 
-  @property()
-  page!: Page;
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
 
-  @property()
-  surface!: SurfaceManager;
+  get page() {
+    return this.edgeless.page;
+  }
 
-  @property()
-  slots!: EdgelessSelectionSlots;
+  get selected() {
+    return this.selectionState.selected;
+  }
+
+  get slots() {
+    return this.edgeless.slots;
+  }
+
+  get surface() {
+    return this.edgeless.surface;
+  }
 
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selected, s => {
       if (isTopLevelBlock(s)) {
-        return 'frame';
+        return 'note';
       }
       return s.type;
     });
@@ -94,7 +103,7 @@ export class EdgelessComponentToolbar extends LitElement {
           .selectionState=${this.selectionState}
         >
         </edgeless-change-shape-button>`
-      : null;
+      : nothing;
     return shapeButton;
   }
 
@@ -108,7 +117,7 @@ export class EdgelessComponentToolbar extends LitElement {
           .selectionState=${this.selectionState}
         >
         </edgeless-change-brush-button>`
-      : null;
+      : nothing;
   }
 
   private _getConnectorButton(connectorElements?: ConnectorElement[]) {
@@ -121,20 +130,20 @@ export class EdgelessComponentToolbar extends LitElement {
           .selectionState=${this.selectionState}
         >
         </edgeless-change-connector-button>`
-      : null;
+      : nothing;
   }
 
-  private _getFrameButton(blocks?: TopLevelBlockModel[]) {
+  private _getNoteButton(blocks?: TopLevelBlockModel[]) {
     return blocks?.length
-      ? html`<edgeless-change-frame-button
-          .frames=${blocks}
+      ? html`<edgeless-change-note-button
+          .notes=${blocks}
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
           .selectionState=${this.selectionState}
         >
-        </edgeless-change-frame-button>`
-      : null;
+        </edgeless-change-note-button>`
+      : nothing;
   }
 
   private _getTextButton(textElements: TextElement[]) {
@@ -147,12 +156,13 @@ export class EdgelessComponentToolbar extends LitElement {
           .selectionState=${this.selectionState}
         >
         </edgeless-change-text-button>`
-      : null;
+      : nothing;
   }
 
   override render() {
     const groupedSelected = this._groupSelected();
-    const { shape, brush, connector, frame, text } = groupedSelected;
+    const { edgeless, selected } = this;
+    const { shape, brush, connector, note, text } = groupedSelected;
 
     // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
@@ -167,21 +177,17 @@ export class EdgelessComponentToolbar extends LitElement {
           this._getShapeButton(shape),
           this._getBrushButton(brush),
           this._getConnectorButton(connector),
-          this._getFrameButton(frame),
+          this._getNoteButton(note),
           this._getTextButton(text),
         ].filter(b => !!b);
 
-    const divider = !buttons.length
-      ? nothing
-      : html`<menu-divider .vertical=${true}></menu-divider>`;
+    const divider = buttons.length
+      ? html`<menu-divider .vertical=${true}></menu-divider>`
+      : nothing;
+
     return html`<div class="container" @pointerdown=${stopPropagation}>
       ${join(buttons, () => '')} ${divider}
-      <edgeless-more-button
-        .elements=${this.selected}
-        .page=${this.page}
-        .surface=${this.surface}
-        .slots=${this.slots}
-      >
+      <edgeless-more-button .elements=${selected} .edgeless=${edgeless}>
       </edgeless-more-button>
     </div>`;
   }

@@ -8,9 +8,9 @@ import { assertExists, type Page } from '@blocksuite/store';
 
 import { copyBlocks } from '../../__internal__/clipboard/utils/commons.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { showDatabaseModal } from '../../components/database-modal/index.js';
 import { toast } from '../../components/toast.js';
-import { getCurrentBlockRange } from '../../std.js';
 
 export type ActionProps = {
   page: Page;
@@ -43,7 +43,7 @@ export const actionConfig = [
     id: 'convert-to-database',
     name: 'Group as Database',
     disabledToolTip:
-      'Contains Block types that cannot be converted to Database. Learn more',
+      'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon,
     hotkey: `${SHORT_KEY}+g`,
     showWhen: (page: Page, models: BaseBlockModel[]) => {

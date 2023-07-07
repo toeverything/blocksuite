@@ -1,14 +1,7 @@
+import { tDate, tNumber, tString } from './data-type.js';
 import { Matcher } from './matcher.js';
 import type { TFunction } from './typesystem.js';
-import {
-  tArray,
-  tDate,
-  tFunction,
-  tNumber,
-  tString,
-  tUnknown,
-  typesystem,
-} from './typesystem.js';
+import { tArray, tFunction, tUnknown, typesystem } from './typesystem.js';
 
 export const propertyMatcher = new Matcher<
   {

@@ -6,10 +6,10 @@ import './declare-test-window.js';
 
 import type {
   CssVariableName,
-  FrameBlockModel,
+  NoteBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -17,7 +17,7 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
-import { toHex } from '../../packages/blocks/src/__internal__/utils/std.js';
+import { toHex } from '../../packages/blocks/src/__internal__/utils/common.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import type {
   BaseBlockModel,
@@ -25,6 +25,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import { getConnectorPath, getZoomLevel } from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -46,10 +47,16 @@ import { getStringFromRichText } from './virgo.js';
 
 export const defaultStore: SerializedStore = {
   meta: {
+    properties: {
+      tags: {
+        options: [],
+      },
+    },
     pages: [
       {
         id: 'page0',
         title: '',
+        tags: [],
       },
     ],
     blockVersions: {
@@ -57,13 +64,14 @@ export const defaultStore: SerializedStore = {
       'affine:page': 2,
       'affine:database': 2,
       'affine:list': 1,
-      'affine:frame': 1,
+      'affine:note': 1,
       'affine:divider': 1,
-      'affine:embed': 1,
+      'affine:image': 1,
       'affine:code': 1,
       'affine:surface': 3,
       'affine:bookmark': 1,
     },
+    workspaceVersion: WORKSPACE_VERSION,
   },
   spaces: {
     'space:page0': {
@@ -75,12 +83,13 @@ export const defaultStore: SerializedStore = {
           'sys:children': ['1'],
         },
         '1': {
-          'sys:flavour': 'affine:frame',
+          'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
           'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
+          'prop:hidden': false,
         },
         '2': {
           'sys:flavour': 'affine:paragraph',
@@ -131,7 +140,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 
 export async function assertEdgelessText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
-    const editor = document.querySelector('surface-text-editor');
+    const editor = document.querySelector('edgeless-text-editor');
     if (!editor) {
       throw new Error('editor not found');
     }
@@ -236,16 +245,16 @@ export async function assertNativeSelectionRangeCount(
   expect(actual).toEqual(count);
 }
 
-export async function assertFrameXYWH(
+export async function assertNoteXYWH(
   page: Page,
   expected: [number, number, number, number]
 ) {
   const actual = await page.evaluate(() => {
     const root = window.page.root as PageBlockModel;
-    const frame = root.children.find(
-      x => x.flavour === 'affine:frame'
-    ) as FrameBlockModel;
-    return JSON.parse(frame.xywh) as number[];
+    const note = root.children.find(
+      x => x.flavour === 'affine:note'
+    ) as NoteBlockModel;
+    return JSON.parse(note.xywh) as number[];
   });
   expect(actual[0]).toBeCloseTo(expected[0]);
   expect(actual[1]).toBeCloseTo(expected[1]);
@@ -558,6 +567,15 @@ export function assertAlmostEqual(
   ).toBeLessThan(precision);
 }
 
+export function assertPointAlmostEqual(
+  actual: number[],
+  expected: number[],
+  precision = 0.001
+) {
+  assertAlmostEqual(actual[0], expected[0], precision);
+  assertAlmostEqual(actual[1], expected[1], precision);
+}
+
 /**
  * Assert the locator is visible in the viewport.
  * It will check the bounding box of the locator is within the viewport.
@@ -616,21 +634,23 @@ export async function assertKeyboardWorkInInput(page: Page, locator: Locator) {
   // Clear input before test
   await locator.clear();
   // type/backspace
-  await type(page, '1234');
-  await expect(locator).toHaveValue('1234');
+  await type(page, '12/34');
+  await expect(locator).toHaveValue('12/34');
   await captureHistory(page);
   await pressBackspace(page);
-  await expect(locator).toHaveValue('123');
+  await expect(locator).toHaveValue('12/3');
 
   // undo/redo
   await undoByKeyboard(page);
-  await expect(locator).toHaveValue('1234');
+  await expect(locator).toHaveValue('12/34');
   await redoByKeyboard(page);
-  await expect(locator).toHaveValue('123');
+  await expect(locator).toHaveValue('12/3');
 
   // keyboard
   await pressArrowLeft(page, 2);
   await pressArrowRight(page, 1);
+  await pressBackspace(page);
+  await expect(locator).toHaveValue('123');
   await pressBackspace(page);
   await expect(locator).toHaveValue('13');
 
@@ -698,36 +718,47 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {
+  const editor = getEditorLocator(page);
+  const selectedRect = editor
+    .locator('edgeless-selected-rect')
+    .locator('.affine-edgeless-selected-rect');
+
+  const transform = await selectedRect.evaluate(el => el.style.transform);
+  const r = new RegExp(`rotate\\(${deg}deg\\)`);
+  expect(transform).toMatch(r);
+}
+
 export async function assertEdgelessNonSelectedRect(page: Page) {
   const rect = page.locator('edgeless-selected-rect');
   await expect(rect).toBeHidden();
 }
 
-export async function assertSelectionInFrame(page: Page, frameId: string) {
-  const closestFrameId = await page.evaluate(() => {
+export async function assertSelectionInNote(page: Page, noteId: string) {
+  const closestNoteId = await page.evaluate(() => {
     const selection = window.getSelection();
-    const frame = selection?.anchorNode?.parentElement?.closest('affine-frame');
-    return frame?.getAttribute('data-block-id');
+    const note = selection?.anchorNode?.parentElement?.closest('affine-note');
+    return note?.getAttribute('data-block-id');
   });
-  expect(closestFrameId).toEqual(frameId);
+  expect(closestNoteId).toEqual(noteId);
 }
 
-export async function assertEdgelessFrameBackground(
+export async function assertEdgelessNoteBackground(
   page: Page,
-  frameId: string,
+  noteId: string,
   color: CssVariableName
 ) {
   const editor = getEditorLocator(page);
   const backgroundColor = await editor
-    .locator(`affine-frame[data-block-id="${frameId}"]`)
+    .locator(`affine-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
-      const frameWrapper = ele.closest<HTMLDivElement>(
-        '.affine-edgeless-block-child'
+      const noteWrapper = ele.closest<HTMLDivElement>(
+        '.affine-edgeless-child-note'
       );
-      if (!frameWrapper) {
-        throw new Error(`Could not find frame: ${frameId}`);
+      if (!noteWrapper) {
+        throw new Error(`Could not find note: ${noteId}`);
       }
-      return frameWrapper.style.background;
+      return noteWrapper.style.background;
     });
 
   expect(backgroundColor).toEqual(`var(${color})`);
@@ -743,4 +774,18 @@ export async function assertEdgelessColorSameWithHexColor(
   const edgelessHexColor = toHex(themeColor as string);
 
   assertSameColor(hexColor, edgelessHexColor as `#${string}`);
+}
+
+export async function assertZoomLevel(page: Page, zoom: number) {
+  const z = await getZoomLevel(page);
+  expect(z).toBe(zoom);
+}
+
+export async function assertConnectorPath(
+  page: Page,
+  path: number[][],
+  index = 0
+) {
+  const actualPath = await getConnectorPath(page, index);
+  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i]));
 }

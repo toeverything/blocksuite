@@ -1,33 +1,64 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 import type { literal } from 'lit/static-html.js';
 
-import type { SelectColumnData } from '../common/column-manager.js';
-import type { TableMixColumn } from '../common/view-manager.js';
-import type { DatabaseBlockModel } from '../database-model.js';
-import type { Cell, ColumnType, RowHost } from './types.js';
-
-export abstract class TableViewCell extends ShadowlessElement {
-  abstract readonly cellType: ColumnType;
-}
+import type { ColumnManager } from './table-view-manager.js';
+import type { ColumnType, SetValueOption } from './types.js';
 
 export abstract class DatabaseCellElement<
   Value,
   Data extends Record<string, unknown> = Record<string, unknown>
 > extends WithDisposable(ShadowlessElement) {
   static tag: ReturnType<typeof literal>;
+  @property({ attribute: false })
+  column!: ColumnManager<Value, Data>;
+  @property()
+  rowId!: string;
+  @property({ attribute: false })
+  isEditing!: boolean;
+  @property({ attribute: false })
+  public selectCurrentCell!: (editing: boolean) => void;
 
-  @property()
-  rowHost!: RowHost<Value, SelectColumnData>;
-  @property()
-  databaseModel!: DatabaseBlockModel;
-  @property()
-  rowModel!: BaseBlockModel;
-  @property()
-  column!: TableMixColumn<Data>;
-  @property()
-  cell: Cell<Value> | null = null;
+  get readonly(): boolean {
+    return this.column.readonly;
+  }
+
+  get value() {
+    return this.column.getValue(this.rowId);
+  }
+
+  onChange(value: Value | undefined, ops?: SetValueOption): void {
+    this.column.setValue(this.rowId, value, ops);
+  }
+
+  public beforeEnterEditMode(): boolean {
+    return true;
+  }
+
+  public onEnterEditMode(): void {
+    // do nothing
+  }
+
+  public onExitEditMode() {
+    // do nothing
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.style.width = '100%';
+    this.style.height = '100%';
+    this._disposables.addFromEvent(this, 'click', e => {
+      this.selectCurrentCell(true);
+    });
+  }
+
+  public focusCell() {
+    this.parentElement?.focus();
+  }
+
+  public blurCell() {
+    this.parentElement?.blur();
+  }
 }
 
 export interface ColumnRenderer<
@@ -37,14 +68,14 @@ export interface ColumnRenderer<
 > {
   displayName: string;
   type: Type;
-  propertyCreator: () => Property;
   components: ColumnComponents;
-  defaultValue: (page: Page) => Value;
 }
 
-export interface ColumnComponents<Value = unknown> {
-  Cell: typeof DatabaseCellElement<Value>;
-  CellEditing: typeof DatabaseCellElement<Value> | null;
+export interface ColumnComponents {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Cell: typeof DatabaseCellElement<any, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CellEditing: typeof DatabaseCellElement<any, any> | null;
 }
 
 export function defineColumnRenderer<
@@ -53,19 +84,25 @@ export function defineColumnRenderer<
   Value
 >(
   type: Type,
-  propertyCreator: () => Property,
-  defaultValue: (page: Page) => Value,
   components: ColumnComponents,
   config: {
     displayName: string;
   }
 ): ColumnRenderer<Type, Property, Value> {
+  customElements.define(
+    components.Cell.tag._$litStatic$,
+    components.Cell as never
+  );
+  if (components.CellEditing) {
+    customElements.define(
+      components.CellEditing.tag._$litStatic$,
+      components.CellEditing as never
+    );
+  }
   return {
     displayName: config.displayName,
     type,
-    propertyCreator,
     components,
-    defaultValue,
   };
 }
 

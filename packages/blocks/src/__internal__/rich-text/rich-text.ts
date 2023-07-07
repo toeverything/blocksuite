@@ -8,9 +8,18 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
+import { REFERENCE_NODE } from './reference-node.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 
 const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
+const isValidUrl = (url: string) => {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
 
 const autoIdentifyLink = (
   editor: AffineVEditor,
@@ -22,9 +31,6 @@ const autoIdentifyLink = (
     delete context.attributes['link'];
     return;
   }
-
-  const linkPattern =
-    /.*\.(com|cn|org|edu|net|gov|mil|info|biz|io|me)(\/\S*)?$/i;
 
   if (context.attributes?.link) {
     const linkDeltaInfo = editor.deltaService
@@ -47,9 +53,10 @@ const autoIdentifyLink = (
       delta.insert.slice(0, rangePositionInDelta) +
       context.data +
       delta.insert.slice(rangePositionInDelta);
-    const match = linkPattern.exec(newText);
+    const isUrl = isValidUrl(newText);
+
     // If the new text with original link text is not pattern matched, we should reset the text
-    if (!match) {
+    if (!isUrl) {
       editor.resetText({ index, length });
       delete context.attributes['link'];
       return;
@@ -72,28 +79,67 @@ const autoIdentifyLink = (
   }
 
   const [line] = editor.getLine(vRange.index);
-  const prefixText = line.textContent.slice(0, vRange.index);
-  const match = linkPattern.exec(prefixText + context.data);
-  if (!match) {
+
+  // In delete, context.data is null
+  const insertText = context.data || '';
+  const verifyData = `${line.textContent.slice(
+    0,
+    vRange.index
+  )}${insertText}`.split(' ');
+
+  const verifyStr = verifyData[verifyData.length - 1];
+
+  const isUrl = isValidUrl(verifyStr);
+
+  if (!isUrl) {
     return;
   }
-  const linkText = match[0];
-  const startIndex = vRange.index - linkText.length;
+  const startIndex = vRange.index + insertText.length - verifyStr.length;
 
   editor.formatText(
     {
       index: startIndex,
-      length: linkText.length,
+      length: verifyStr.length,
     },
     {
-      link: linkText,
+      link: verifyStr,
     }
   );
 
   context.attributes = {
     ...context.attributes,
-    link: linkText,
+    link: verifyStr,
   };
+};
+
+const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
+  // @AffineReference:(id)
+  const referencePattern = /@AffineReference:\((.*)\)/g;
+
+  const match = referencePattern.exec(text);
+  if (!match) {
+    return;
+  }
+
+  const pageId = match[1];
+
+  editor.deleteText({
+    index: 0,
+    length: match[0].length,
+  });
+  editor.setVRange({
+    index: 0,
+    length: 0,
+  });
+
+  const vRange = {
+    index: match[0].length,
+    length: 0,
+  };
+
+  editor.insertText(vRange, REFERENCE_NODE, {
+    reference: { type: 'Subpage', pageId },
+  });
 };
 
 @customElement('rich-text')
@@ -118,10 +164,10 @@ export class RichText extends ShadowlessElement {
     return this._virgoContainer;
   }
 
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   textSchema?: AffineTextSchema;
 
   private _vEditor: AffineVEditor | null = null;
@@ -134,7 +180,7 @@ export class RichText extends ShadowlessElement {
     this._vEditor = new VEditor(this.model.text.yText, {
       active: () => activeEditorManager.isActive(this),
     });
-    setupVirgoScroll(this.model.page, this._vEditor);
+    setupVirgoScroll(this, this._vEditor);
     const textSchema = this.textSchema;
     assertExists(
       textSchema,
@@ -142,6 +188,7 @@ export class RichText extends ShadowlessElement {
     );
     this._vEditor.setAttributeSchema(textSchema.attributesSchema);
     this._vEditor.setAttributeRenderer(textSchema.textRenderer());
+    autoIdentifyReference(this._vEditor, this.model.text.yText.toString());
 
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(

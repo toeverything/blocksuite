@@ -1,3 +1,4 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
@@ -5,7 +6,6 @@ import {
   assertFlavours,
   matchFlavours,
 } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -19,7 +19,6 @@ import {
   focusBlockByModel,
   getBlockElementByModel,
   getClosestBlockElementByElement,
-  getCurrentNativeRange,
   getDefaultPage,
   getVirgoByModel,
   handleNativeRangeDblClick,
@@ -41,7 +40,6 @@ import {
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
-import { showSlashMenu } from '../../components/slash-menu/index.js';
 import type { BlockSchemas } from '../../models.js';
 import type {
   DefaultSelectionManager,
@@ -72,7 +70,7 @@ export function handleBlockSelectionBatchDelete(
     // In the edgeless mode
     return null;
   }
-  defaultPageBlock.selection.clear();
+  defaultPageBlock.selection?.clear();
   asyncFocusRichText(page, id);
   return newBlock;
 }
@@ -536,16 +534,8 @@ export function handleKeydownAfterSelectBlocks({
   requestAnimationFrame(() => {
     const defaultPage = getDefaultPage(page);
     const newBlock = page.getBlockById(id) as BaseBlockModel;
-    defaultPage?.selection.clear();
+    defaultPage?.selection?.clear();
     focusBlockByModel(newBlock, 'end');
-
-    // XXX: slash menu trigger probably shouldn't be here
-    if (key === '/') {
-      const curRange = getCurrentNativeRange();
-      const model = page.getBlockById(id);
-      assertExists(model);
-      showSlashMenu({ model, range: curRange });
-    }
   });
 }
 export async function onModelTextUpdated(
@@ -573,13 +563,13 @@ export async function onModelElementUpdated(
   }
 }
 
-export function tryUpdateFrameSize(page: Page, zoom: number) {
+export function tryUpdateNoteSize(page: Page, zoom: number) {
   requestAnimationFrame(() => {
     if (!page.root) return;
-    const frames = page.root.children.filter(
-      child => child.flavour === 'affine:frame'
+    const notes = page.root.children.filter(
+      child => child.flavour === 'affine:note'
     ) as TopLevelBlockModel[];
-    frames.forEach(model => {
+    notes.forEach(model => {
       // DO NOT resize shape block
       // FIXME: we don't have shape block for now.
       // if (matchFlavours(model, ['affine:shape'])) return;

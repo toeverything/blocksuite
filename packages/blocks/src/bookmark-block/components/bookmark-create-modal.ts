@@ -3,28 +3,23 @@ import '../../components/portal.js';
 import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { toast } from '../..//components/toast.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
+import { toast } from '../../components/toast.js';
 import { CloseIcon } from '../images/icons.js';
 import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 
 @customElement('bookmark-create-modal')
 export class BookmarkCreateModal extends WithDisposable(LitElement) {
-  @property()
-  model!: BaseBlockModel<BookmarkBlockModel>;
-
-  @property()
+  @property({ attribute: false })
   onCancel?: () => void;
 
-  @property()
-  onConfirm?: () => void;
+  @property({ attribute: false })
+  onConfirm?: (props: { url: string }) => void;
 
   override get id() {
-    return `bookmark-create-modal-${this.model.id.split(':')[0]}`;
+    return 'bookmark-create-modal';
   }
 
   override connectedCallback() {
@@ -64,10 +59,7 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
       return;
     }
 
-    this.model.page.updateBlock(this.model, {
-      url: linkInput.value,
-    });
-    this.onConfirm?.();
+    this.onConfirm?.({ url: linkInput.value });
   }
 
   override render() {
@@ -77,7 +69,6 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
           class="bookmark-modal-mask"
           @click=${() => {
             this.onCancel?.();
-            this.model.page.deleteBlock(this.model);
           }}
         ></div>
         <div class="bookmark-modal-wrapper" style="width:480px">
@@ -87,7 +78,6 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
             class="bookmark-modal-close-button"
             @click=${() => {
               this.onCancel?.();
-              this.model.page.deleteBlock(this.model);
             }}
             >${CloseIcon}</icon-button
           >

@@ -1,3 +1,13 @@
+import { Bound } from '../../utils/bound.js';
+import {
+  getPointFromBoundsWithRotation,
+  getPointsFromBoundsWithRotation,
+  linePolygonIntersects,
+  polygonGetPointTangent,
+  polygonNearestPoint,
+} from '../../utils/math-utils.js';
+import { PointLocation } from '../../utils/point-location.js';
+import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
 import {
@@ -28,14 +38,43 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
-  override render(ctx: CanvasRenderingContext2D) {
-    const { w, text, color, fontSize, fontFamily, textAlign } = this;
+  getNearestPoint(point: IVec): IVec {
+    return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
+  }
+
+  override containedByBounds(bounds: Bound): boolean {
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
+    const {
+      text,
+      color,
+      fontSize,
+      fontFamily,
+      textAlign,
+      rotate,
+      computedValue,
+    } = this;
+    const [, , w, h] = this.deserializeXYWH();
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.setTransform(
+      matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
+    );
 
     const yText = text;
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
     const lines = deltaInsertsToChunks(deltas);
 
-    const lineHeightPx = this.h / lines.length;
+    const lineHeightPx = h / lines.length;
     const font = getFontString({
       fontSize: fontSize,
       lineHeight: `${lineHeightPx}px`,
@@ -60,7 +99,7 @@ export class TextElement extends SurfaceElement<IText> {
         }
         ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
         ctx.font = font;
-        ctx.fillStyle = this.computedValue(color);
+        ctx.fillStyle = computedValue(color);
         ctx.textAlign = textAlign;
 
         ctx.textBaseline = 'ideographic';
@@ -80,5 +119,16 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.restore();
       }
     }
+  }
+
+  override getRelativePointLocation(point: IVec): PointLocation {
+    const bound = Bound.deserialize(this.xywh);
+    const rotatePoint = getPointFromBoundsWithRotation(
+      this,
+      bound.getRelativePoint(point)
+    );
+    const points = getPointsFromBoundsWithRotation(this);
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
   }
 }

@@ -59,11 +59,15 @@ export function getCurrentBlockRange(page: Page) {
   // check exist block selection
   const pageBlock = getDefaultPage(page);
   if (pageBlock) {
+    assertExists(pageBlock.selection);
     const selectedBlocks = pageBlock.selection.state.selectedBlocks;
     // Add embeds block to fix click image and delete case
-    const selectedEmbeds = pageBlock.selection.state.selectedEmbeds;
+    const selectedEmbeds = pageBlock.selection.state.selectedEmbed;
     // Fix order may be wrong
-    const models = [...selectedBlocks, ...selectedEmbeds]
+    const models = [
+      ...selectedBlocks,
+      ...(selectedEmbeds ? [selectedEmbeds] : []),
+    ]
       .map(element => getModelByElement(element))
       .filter(Boolean);
     if (models.length) {
@@ -190,6 +194,7 @@ export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
 
     // In the default mode
     if (defaultPageBlock) {
+      assertExists(defaultPageBlock.selection);
       defaultPageBlock.selection.state.clearBlockSelection();
       defaultPageBlock.selection.state.type = 'native';
     }
@@ -199,6 +204,7 @@ export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
   if (blockRange.type === 'Block') {
     // In the default mode
     if (defaultPageBlock) {
+      assertExists(defaultPageBlock.selection);
       defaultPageBlock.selection.state.type = 'block';
       defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
         blockRange.models

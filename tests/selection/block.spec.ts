@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { assert } from 'console';
 
 import {
   activeEmbed,
@@ -21,6 +20,10 @@ import {
   pasteByKeyboard,
   pressBackspace,
   pressEnter,
+  pressEscape,
+  pressForwardDelete,
+  pressShiftTab,
+  pressSpace,
   pressTab,
   redoByKeyboard,
   resetHistory,
@@ -66,6 +69,33 @@ test('block level range delete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
+test('block level range delete by forwardDelete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await resetHistory(page);
+
+  const box123 = await getRichTextBoundingBox(page, '2');
+  const above123 = { x: box123.left, y: box123.top - 10 };
+
+  const box789 = await getRichTextBoundingBox(page, '4');
+  const below789 = { x: box789.right - 10, y: box789.bottom + 10 };
+
+  await dragBetweenCoords(page, below789, above123);
+  await pressForwardDelete(page);
+  await assertBlockCount(page, 'paragraph', 1);
+  await assertRichTexts(page, ['']);
+
+  await waitNextFrame(page);
+  await undoByKeyboard(page);
+  // FIXME
+  // await assertRichTexts(page, ['123', '456', '789']);
+
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['']);
+});
+
 // XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
 test('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -76,6 +106,20 @@ test('select all and delete', async ({ page }) => {
   await page.keyboard.press(`${SHORT_KEY}+a`);
   await shamefullyBlurActiveElement(page);
   await page.keyboard.press('Backspace');
+  await focusRichText(page, 0);
+  await type(page, 'abc');
+  await assertRichTexts(page, ['abc']);
+});
+
+test('select all and delete by forwardDelete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
   await focusRichText(page, 0);
   await type(page, 'abc');
   await assertRichTexts(page, ['abc']);
@@ -122,6 +166,25 @@ test('click the list icon can select and delete', async ({ page }) => {
   await clickListIcon(page, 0);
   await shamefullyBlurActiveElement(page);
   await pressBackspace(page);
+  await assertRichTexts(page, ['', '']);
+});
+
+test('click the list icon can select and delete by forwardDelete', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await clickListIcon(page, 0);
+  await pressForwardDelete(page);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
+  await assertRichTexts(page, ['', '456', '789']);
+  await clickListIcon(page, 0);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
   await assertRichTexts(page, ['', '']);
 });
 
@@ -195,8 +258,9 @@ test('should indent multi-selection block', async ({ page }) => {
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -212,7 +276,88 @@ test('should indent multi-selection block', async ({ page }) => {
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:frame>
+  </affine:note>
+</affine:page>`
+  );
+});
+
+test('should unindent multi-selection block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  let coord = await getIndexCoordinate(page, [1, 2]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
+  await page.mouse.up();
+
+  await page.keyboard.press('Tab');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="456"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:note>
+</affine:page>`
+  );
+
+  coord = await getIndexCoordinate(page, [1, 2]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
+  await page.mouse.up();
+
+  await pressShiftTab(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="123"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+  </affine:note>
 </affine:page>`
   );
 });
@@ -405,7 +550,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -520,7 +665,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
     }
     const distance = viewport.scrollHeight - viewport.clientHeight;
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -628,7 +773,7 @@ test('should not clear selected rects when clicking on scrollbar', async ({
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance / 2);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -711,7 +856,7 @@ test('should not clear selected rects when scrolling the wheel', async ({
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance / 2);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -794,7 +939,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
     const distance = viewport.scrollHeight - viewport.clientHeight;
     viewport.scrollTo(0, distance / 2);
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -930,7 +1075,7 @@ test('should not be misaligned when the editor container has padding or margin',
       throw new Error();
     }
     const container = viewport.querySelector(
-      'affine-frame .affine-block-children-container'
+      'affine-note .affine-block-children-container'
     );
     if (!container) {
       throw new Error();
@@ -1009,8 +1154,9 @@ test('should not draw rect for sub selected blocks when entering tab key', async
     page,
     `
 <affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -1026,7 +1172,7 @@ test('should not draw rect for sub selected blocks when entering tab key', async
         prop:type="text"
       />
     </affine:paragraph>
-  </affine:frame>
+  </affine:note>
 </affine:page>`
   );
 
@@ -1178,7 +1324,6 @@ test('click bottom of page and if the last is embed block, editor should insert 
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
   await initImageState(page);
 
   await page.evaluate(async () => {
@@ -1194,37 +1339,72 @@ test('click bottom of page and if the last is embed block, editor should insert 
     return pageBlock?.getBoundingClientRect() || null;
   });
 
-  assert(pageRect !== null);
+  expect(pageRect).not.toBeNull();
   await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
 
   await assertStoreMatchJSX(
     page,
     `<affine:page>
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
+    <affine:image
+      prop:caption=""
+      prop:height={0}
+      prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
+      prop:width={0}
+    />
     <affine:paragraph
       prop:type="text"
     />
-  </affine:frame>
-  <affine:page>
-    <affine:frame
-      prop:background="--affine-background-secondary-color"
-      prop:index="a0"
-    >
-      <affine:embed
-        prop:caption=""
-        prop:height={0}
-        prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
-        prop:type="image"
-        prop:width={0}
-      />
-      <affine:paragraph
-        prop:type="text"
-      />
-    </affine:frame>
-  </affine:page>
+  </affine:note>
 </affine:page>`
   );
+});
+
+test('should select blocks when pressing escape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 2);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+  await page.keyboard.press('Escape');
+
+  const cords = await getIndexCoordinate(page, [1, 2]);
+  await page.mouse.move(cords.x + 10, cords.y + 10, { steps: 20 });
+  await page.mouse.down();
+  await page.mouse.move(cords.x + 20, cords.y + 30, { steps: 20 });
+  await page.mouse.up();
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(2);
+});
+
+test('should un-select blocks when pressing escape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page, 2);
+  await pressEscape(page);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+
+  await pressEscape(page);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
+
+  await focusRichText(page, 2);
+  await pressEnter(page);
+  await type(page, '-');
+  await pressSpace(page);
+  await clickListIcon(page, 0);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(1);
+
+  await pressEscape(page);
+  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });

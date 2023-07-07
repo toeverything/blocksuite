@@ -1,4 +1,4 @@
-import type { Column, SelectTag } from '@blocksuite/blocks';
+import type { Column } from '@blocksuite/blocks';
 import { MigrationError } from '@blocksuite/global/error';
 import * as Y from 'yjs';
 
@@ -15,14 +15,17 @@ interface Migration {
 // New migration should be added to the end of this list
 const migrations: Migration[] = [
   {
-    desc: 'convert affine:group to affine:frame',
+    desc: 'convert affine:group to affine:note',
     condition: doc => {
       const yVersions = doc
         .getMap('space:meta')
         .get('versions') as Y.Map<number>;
       if (!yVersions) return false;
 
-      return yVersions.get('affine:group') === 1;
+      return (
+        yVersions.get('affine:group') === 1 ||
+        yVersions.get('affine:frame') === 1
+      );
     },
     migrate: doc => {
       // @ts-ignore
@@ -36,8 +39,11 @@ const migrations: Migration[] = [
         const yBlocks = doc.getMap(spaceId);
         // @ts-ignore
         yBlocks.forEach((yBlock: Y.Map<unknown>) => {
-          if (yBlock.get('sys:flavour') === 'affine:group') {
-            yBlock.set('sys:flavour', 'affine:frame');
+          if (
+            yBlock.get('sys:flavour') === 'affine:group' ||
+            yBlock.get('sys:flavour') === 'affine:frame'
+          ) {
+            yBlock.set('sys:flavour', 'affine:note');
           }
         });
       }
@@ -46,7 +52,44 @@ const migrations: Migration[] = [
         .getMap('space:meta')
         .get('versions') as Y.Map<number>;
       yVersions.delete('affine:group');
-      yVersions.set('affine:frame', 1);
+      yVersions.delete('affine:frame');
+      yVersions.set('affine:note', 1);
+    },
+  },
+  {
+    desc: 'convert affine:embed to affine:image',
+    condition: doc => {
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+      if (!yVersions) return false;
+
+      return yVersions.get('affine:embed') === 1;
+    },
+    migrate: doc => {
+      // @ts-ignore
+      const pageIds = doc
+        .getMap('space:meta')
+        .get('pages')
+        .map((a: Y.Map<unknown>) => a.get('id')) as string[];
+      const yVersions = doc
+        .getMap('space:meta')
+        .get('versions') as Y.Map<number>;
+
+      for (const pageId of pageIds) {
+        const spaceId = `space:${pageId}`;
+        const yBlocks = doc.getMap(spaceId);
+        // @ts-ignore
+        yBlocks.forEach((yBlock: Y.Map<unknown>) => {
+          if (yBlock.get('sys:flavour') === 'affine:embed') {
+            yBlock.set('sys:flavour', 'affine:frame');
+            yBlock.delete('prop:type');
+          }
+        });
+      }
+
+      yVersions.delete('affine:embed');
+      yVersions.set('affine:image', 1);
     },
   },
   {
@@ -355,3 +398,9 @@ export function tryMigrate(doc: Y.Doc) {
     }
   }
 }
+
+export type SelectTag = {
+  id: string;
+  color: string;
+  value: string;
+};

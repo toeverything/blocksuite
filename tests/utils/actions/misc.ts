@@ -3,15 +3,16 @@ import '../declare-test-window.js';
 
 import type {
   CssVariableName,
-  DatabaseBlockModel,
   ListType,
+  PageBlockModel,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { assertExists } from '@blocksuite/global/utils';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import { type BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -63,23 +64,37 @@ function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
 
+export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
+  const rect = await page.evaluate(() => {
+    return getSelection()?.getRangeAt(0).getBoundingClientRect();
+  });
+  assertExists(rect);
+  return rect;
+};
+
 /**
  * @example
  * ```ts
  * await initEmptyEditor(page, { enable_some_flag: true });
  * ```
  */
-async function initEmptyEditor(
-  page: Page,
-  flags: Partial<BlockSuiteFlags> = {},
+async function initEmptyEditor({
+  page,
+  flags = {},
   noInit = false,
-  multiEditor = false
-) {
+  multiEditor = false,
+}: {
+  page: Page;
+  flags?: Partial<BlockSuiteFlags>;
+  noInit?: boolean;
+  multiEditor?: boolean;
+}) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
 
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
+        page.waitForLoaded();
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
@@ -160,7 +175,7 @@ export async function enterPlaygroundRoom(
   ops?: {
     flags?: Partial<BlockSuiteFlags>;
     room?: string;
-    blobStorage?: ('memory' | 'indexeddb' | 'mock')[];
+    blobStorage?: ('memory' | 'idb' | 'mock')[];
     noInit?: boolean;
   }
 ) {
@@ -171,7 +186,7 @@ export async function enterPlaygroundRoom(
     room = generateRandomRoomId();
   }
   url.searchParams.set('room', room);
-  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'indexeddb');
+  url.searchParams.set('blobStorage', blobStorage?.join(',') || 'idb');
   await page.goto(url.toString());
   const readyPromise = waitForPageReady(page);
 
@@ -180,8 +195,8 @@ export async function enterPlaygroundRoom(
   page.on('console', message => {
     const ignore = shamefullyIgnoreConsoleMessage(message);
     if (!ignore) {
-      expect('no console message').toBe(
-        'Unexpected console message: ' + message.text()
+      expect('Unexpected console message: ' + message.text()).toBe(
+        'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
       );
       // throw new Error('Unexpected console message: ' + message.text());
     }
@@ -198,7 +213,12 @@ export async function enterPlaygroundRoom(
     throw new Error(`Uncaught exception: "${exception}"\n${exception.stack}`);
   });
 
-  await initEmptyEditor(page, ops?.flags, ops?.noInit, multiEditor);
+  await initEmptyEditor({
+    page,
+    flags: ops?.flags,
+    noInit: ops?.noInit,
+    multiEditor,
+  });
 
   await readyPromise;
 
@@ -236,25 +256,6 @@ export async function waitForPageReady(page: Page) {
   );
 }
 
-export async function waitForRemoteUpdateSlot(page: Page) {
-  return page.evaluate(() => {
-    return new Promise<void>(resolve => {
-      const DebugDocProvider = window.$blocksuite.store.DebugDocProvider;
-      const providers = window.workspace.subdocProviders;
-      const debugProvider = Array.from(providers.values())
-        .flat()
-        .find(provider => provider instanceof DebugDocProvider) as InstanceType<
-        typeof DebugDocProvider
-      >;
-      const callback = window.$blocksuite.blocks.debounce(() => {
-        disposable.dispose();
-        resolve();
-      }, 500);
-      const disposable = debugProvider.remoteUpdateSlot.on(callback);
-    });
-  });
-}
-
 export async function clearLog(page: Page) {
   await page.evaluate(() => console.clear());
 }
@@ -280,22 +281,24 @@ export async function enterPlaygroundWithList(
 ) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
-  await initEmptyEditor(page);
+  await initEmptyEditor({ page });
 
   await page.evaluate(
-    ({ contents, type }: { contents: string[]; type: ListType }) => {
+    async ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
+      await page.waitForLoaded();
+
       const pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
-      const frameId = page.addBlock('affine:frame', {}, pageId);
+      const noteId = page.addBlock('affine:note', {}, pageId);
       for (let i = 0; i < contents.length; i++) {
         page.addBlock(
           'affine:list',
           contents.length > 0
             ? { text: new page.Text(contents[i]), type }
             : { type },
-          frameId
+          noteId
         );
       }
     },
@@ -306,8 +309,9 @@ export async function enterPlaygroundWithList(
 
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
 export async function initEmptyParagraphState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(pageId => {
+  const ids = await page.evaluate(async pageId => {
     const { page } = window;
+    await page.waitForLoaded();
     page.captureSync();
 
     if (!pageId) {
@@ -316,51 +320,55 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
       });
     }
 
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    // page.addBlock('affine:surface', {}, pageId);
     page.captureSync();
-    return { pageId, frameId, paragraphId };
+    return { pageId, noteId, paragraphId };
   }, pageId);
   return ids;
 }
 
 export async function initEmptyEdgelessState(page: Page) {
-  const ids = await page.evaluate(() => {
+  const ids = await page.evaluate(async () => {
     const { page } = window;
+    await page.waitForLoaded();
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
     page.addBlock('affine:surface', {}, pageId);
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    const paragraphId = page.addBlock('affine:paragraph', {}, frameId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
     page.resetHistory();
 
-    return { pageId, frameId, paragraphId };
+    return { pageId, noteId, paragraphId };
   });
   return ids;
 }
 
 export async function initEmptyDatabaseState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(pageId => {
+  const ids = await page.evaluate(async pageId => {
     const { page } = window;
+    await page.waitForLoaded();
+
     page.captureSync();
     if (!pageId) {
       pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
     }
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
     const paragraphId = page.addBlock(
       'affine:database',
       {
         title: new page.Text('Database 1'),
         titleColumnName: 'Title',
       },
-      frameId
+      noteId
     );
     page.captureSync();
-    return { pageId, frameId, paragraphId };
+    return { pageId, noteId, paragraphId };
   }, pageId);
   return ids;
 }
@@ -369,26 +377,28 @@ export async function initEmptyDatabaseWithParagraphState(
   page: Page,
   pageId?: string
 ) {
-  const ids = await page.evaluate(pageId => {
+  const ids = await page.evaluate(async pageId => {
     const { page } = window;
+    await page.waitForLoaded();
+
     page.captureSync();
     if (!pageId) {
       pageId = page.addBlock('affine:page', {
         title: new page.Text(),
       });
     }
-    const frameId = page.addBlock('affine:frame', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
     const databaseId = page.addBlock(
       'affine:database',
       {
         title: new page.Text('Database 1'),
         titleColumnName: 'Title',
       },
-      frameId
+      noteId
     );
-    page.addBlock('affine:paragraph', {}, frameId);
+    page.addBlock('affine:paragraph', {}, noteId);
     page.captureSync();
-    return { pageId, frameId, databaseId };
+    return { pageId, noteId, databaseId };
   }, pageId);
   return ids;
 }
@@ -420,12 +430,12 @@ export async function initDatabaseDynamicRowWithData(
   addRow = false,
   index = 0
 ) {
+  const editor = getEditorLocator(page);
   if (addRow) {
     await initDatabaseRow(page);
   }
-  const lastRow = page.locator('.affine-database-block-row').last();
+  const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
-  await cell.click();
   await cell.click();
   await type(page, data);
   await pressEnter(page);
@@ -437,22 +447,26 @@ export async function focusDatabaseTitle(page: Page) {
 }
 
 export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
-  const columns = await page.evaluate(async () => {
-    const database = window.page?.getBlockById('2') as DatabaseBlockModel;
-    return database.columns.map(col => col.id);
-  });
-  expect(columns).toEqual(order);
+  const columns = await page
+    .locator('affine-database-column-header')
+    .locator('affine-database-header-column')
+    .all();
+  expect(await Promise.all(columns.slice(1).map(v => v.innerText()))).toEqual(
+    order
+  );
 }
 
 export async function initEmptyCodeBlockState(page: Page) {
-  const ids = await page.evaluate(() => {
+  const ids = await page.evaluate(async () => {
     const { page } = window;
+    await page.waitForLoaded();
+
     page.captureSync();
     const pageId = page.addBlock('affine:page');
-    const frameId = page.addBlock('affine:frame', {}, pageId);
-    const codeBlockId = page.addBlock('affine:code', {}, frameId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const codeBlockId = page.addBlock('affine:code', {}, noteId);
     page.captureSync();
-    return { pageId, frameId, codeBlockId };
+    return { pageId, noteId, codeBlockId };
   });
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
@@ -956,5 +970,14 @@ export async function transformHtml(page: Page, data: string) {
     },
     { data }
   );
+  return promiseResult;
+}
+
+export async function export2Html(page: Page) {
+  const promiseResult = await page.evaluate(() => {
+    const contentParser = new window.ContentParser(window.page);
+    const root = window.page.root as PageBlockModel;
+    return contentParser.block2Html([contentParser.getSelectedBlock(root)]);
+  });
   return promiseResult;
 }

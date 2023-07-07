@@ -26,7 +26,7 @@ export class AffineLink extends ShadowlessElement {
     return link;
   }
 
-  @property()
+  @property({ attribute: false })
   popoverHoverOpenDelay = 150;
 
   @state()
@@ -83,7 +83,7 @@ export class AffineLink extends ShadowlessElement {
     const text = this.delta.insert;
     const linkState = await showLinkPopover({
       anchorEl: e.target as HTMLElement,
-      page: model.page,
+      model,
       text,
       link: this.link,
       showMask: false,

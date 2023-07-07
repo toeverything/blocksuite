@@ -45,13 +45,13 @@ const databaseViews: DatabaseView[] = [
 export class DatabaseModal extends LitElement {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   page!: Page;
 
   @state()
   private _selectedView: DatabaseViewName = 'table';
 
-  @property()
+  @property({ attribute: false })
   abortController!: AbortController;
 
   private _convertToDatabase(viewType: DatabaseViewName) {
@@ -80,7 +80,8 @@ export class DatabaseModal extends LitElement {
     assertExists(databaseModel);
 
     // default column
-    databaseModel.updateColumn(
+    databaseModel.addColumn(
+      'end',
       multiSelectHelper.create('Tag', { options: [] })
     );
     databaseModel.applyColumnUpdate();
@@ -102,12 +103,12 @@ export class DatabaseModal extends LitElement {
   }
 
   override render() {
-    return html`<div class="overlay-root">
-      <div class="overlay-mask" @click=${this._hide}></div>
+    return html` <div class="overlay-root">
+      <div class="overlay-mask" @click="${this._hide}"></div>
       <div class="modal-container">
         <div class="modal-header">
           <div class="modal-header-title">Select Database View</div>
-          <div class="modal-header-close-icon" @click=${this._hide}>
+          <div class="modal-header-close-icon" @click="${this._hide}">
             ${DatabaseSearchClose}
           </div>
         </div>

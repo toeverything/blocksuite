@@ -8,49 +8,59 @@ import {
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
-import type { BlobStorage, Page } from '@blocksuite/store';
-import type { DocProvider, Y } from '@blocksuite/store';
+import type {
+  BlobStorage,
+  DocProviderCreator,
+  Page,
+  PassiveDocProvider,
+} from '@blocksuite/store';
+import type { Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
   assertExists,
   createIndexeddbStorage,
   createMemoryStorage,
   createSimpleServerStorage,
-  DebugDocProvider,
-  type DocProviderConstructor,
   Generator,
   Utils,
   Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
+import { createBroadcastChannelProvider } from '@blocksuite/store/providers/broadcast-channel';
 import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
 import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
-const providerArgs = (params.get('providers') ?? 'webrtc').split(',');
+const providerArgs = (params.get('providers') ?? 'bc').split(',');
 const blobStorageArgs = (params.get('blobStorage') ?? 'memory').split(',');
 const featureArgs = (params.get('features') ?? '').split(',');
 
-class IndexedDBProviderWrapper implements DocProvider {
+class IndexedDBProviderWrapper implements PassiveDocProvider {
+  public readonly flavour = 'blocksuite-indexeddb';
+  public readonly passive = true as const;
+  private _connected = false;
   #provider: IndexedDBProvider;
   constructor(id: string, doc: Y.Doc) {
     this.#provider = createIndexedDBProvider(id, doc);
   }
   connect() {
     this.#provider.connect();
+    this._connected = true;
   }
   disconnect() {
     this.#provider.disconnect();
+    this._connected = false;
+  }
+  get connected() {
+    return this._connected;
   }
 }
 
 export const defaultMode =
   params.get('mode') === 'edgeless' ? 'edgeless' : 'page';
-export const initParam = providerArgs.includes('indexeddb')
-  ? null
-  : params.get('init');
+export const initParam = params.get('init');
 export const isE2E = room.startsWith('playwright');
 
 export const getOptions = (
@@ -174,29 +184,29 @@ export async function tryInitExternalContent(
 }
 
 /**
- * Provider configuration is specified by `?providers=webrtc` or `?providers=indexeddb,webrtc` in URL params.
- * We use webrtcDocProvider by default if the `providers` param is missing.
+ * Provider configuration is specified by `?providers=broadcast` or `?providers=indexeddb,broadcast` in URL params.
+ * We use BroadcastChannelProvider by default if the `providers` param is missing.
  */
 export function createWorkspaceOptions(): WorkspaceOptions {
-  const providers: DocProviderConstructor[] = [];
+  const providerCreators: DocProviderCreator[] = [];
   const blobStorages: ((id: string) => BlobStorage)[] = [];
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
-  if (providerArgs.includes('webrtc')) {
-    providers.push(DebugDocProvider);
-    idGenerator = Generator.AutoIncrementByClientId; // works in multi-user mode
+  if (providerArgs.includes('idb')) {
+    providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
+    idGenerator = Generator.NanoID; // works in production
   }
 
-  if (providerArgs.includes('indexeddb')) {
-    providers.push(IndexedDBProviderWrapper);
-    idGenerator = Generator.UUIDv4; // works in production
+  if (providerArgs.includes('bc')) {
+    providerCreators.push(createBroadcastChannelProvider);
+    idGenerator = Generator.NanoID; // works in production
   }
 
   if (blobStorageArgs.includes('memory')) {
     blobStorages.push(createMemoryStorage);
   }
 
-  if (blobStorageArgs.includes('indexeddb')) {
+  if (blobStorageArgs.includes('idb')) {
     blobStorages.push(createIndexeddbStorage);
   }
 
@@ -213,7 +223,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
 
   return {
     id: room,
-    providers,
+    providerCreators,
     idGenerator,
     blobStorages,
     defaultFlags: {
@@ -225,6 +235,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_edgeless_toolbar: true,
       enable_linked_page: true,
       enable_bookmark_operation: true,
+      enable_note_index: true,
       readonly: {
         'space:page0': false,
       },

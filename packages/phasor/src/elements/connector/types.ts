@@ -1,23 +1,18 @@
 import type { StrokeStyle } from '../../consts.js';
-import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { IVec } from '../../utils/vec.js';
+import type { ISurfaceElement } from '../surface-element.js';
 
 export enum ConnectorMode {
   Straight,
   Orthogonal,
 }
 
-// x/y is in range of [0,1] relative to element's left-top
-// real x = element.x + element.w * x
-// real y = element.y + element.h * y
-export interface AttachedElementPosition {
-  x: number;
-  y: number;
-}
-
-export interface AttachedElement {
-  id: string;
-  position: AttachedElementPosition;
-}
+// at least one of id and position is not null
+// both exists means the position is relative to the element
+export type Connection = {
+  id?: string;
+  position?: IVec;
+};
 
 export interface Controller {
   x: number;
@@ -26,23 +21,22 @@ export interface Controller {
   customized?: boolean;
 }
 
-export interface IConnector {
-  id: string;
+export interface IConnector extends ISurfaceElement {
   type: 'connector';
-  xywh: SerializedXYWH;
-  index: string;
-  seed: number;
 
   mode: ConnectorMode;
-  lineWidth: number;
-  color: string;
+  stroke: string;
+  strokeWidth: number;
   strokeStyle: StrokeStyle;
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
 
-  startElement?: AttachedElement;
-  endElement?: AttachedElement;
+  source: Connection;
+  target: Connection;
 
-  // relative to element x,y.
+  // absolute canvas point
   controllers: Controller[];
+
+  path: IVec[];
+  absolutePath: IVec[];
 }

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
-import { expect, test as baseTest } from '@playwright/test';
+import { expect, type Page, test as baseTest } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
@@ -60,7 +60,7 @@ export const test = baseTest.extend({
   },
 });
 if (scope) {
-  test.beforeEach(async ({ page, browser }, testInfo) => {
+  test.beforeEach(async ({ browser }, testInfo) => {
     if (scope && !testInfo.title.startsWith(scope)) {
       testInfo.fn = () => {
         testInfo.skip();
@@ -70,7 +70,14 @@ if (scope) {
     }
   });
 
-  test.afterAll(async ({ page }, testInfo) => {
+  let page: Page;
+
+  test.beforeAll(async ({ browser }) => {
+    page = await browser.newPage();
+  });
+
+  // eslint-disable-next-line no-empty-pattern
+  test.afterAll(async ({}, testInfo) => {
     if (!scope || !testInfo.title.startsWith(scope)) {
       return;
     }
@@ -87,7 +94,7 @@ if (scope) {
       },
       [currentEditorIndex]
     );
-    await expect(focusInSecondEditor).toBe(true);
+    expect(focusInSecondEditor).toBe(true);
   });
 
   test('ensure enable two editor', async ({ page }) => {
@@ -97,6 +104,6 @@ if (scope) {
       return document.querySelectorAll('editor-container').length;
     });
 
-    await expect(count).toBe(2);
+    expect(count).toBe(2);
   });
 }

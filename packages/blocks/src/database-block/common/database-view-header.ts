@@ -1,15 +1,14 @@
-import './menu.js';
-
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { DatabaseMenuComponent } from '../common/menu.js';
+import {
+  popFilterableSimpleMenu,
+  popMenu,
+} from '../../components/menu/menu.js';
 import { ViewOperationMap } from '../common/view-manager.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import { onClickOutside } from '../utils.js';
 
 @customElement('database-view-header')
 export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
@@ -41,94 +40,64 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
       background-color: #e0e0e0;
     }
   `;
-  @property()
+  @property({ attribute: false })
   model!: DatabaseBlockModel;
 
-  @property()
+  @property({ attribute: false })
   currentView?: string;
 
-  @property()
+  @property({ attribute: false })
   setViewId!: (id: string) => void;
 
-  @query('.database-view-header')
-  private _container!: HTMLDivElement;
-
-  popupContainer() {
-    return this._container.parentElement?.parentElement?.parentElement;
-  }
-
   _addViewMenu(event: MouseEvent) {
-    const menu = new DatabaseMenuComponent();
-    menu.style.zIndex = '2';
-    menu.menuGroup = Object.keys(ViewOperationMap).map(type => ({
-      type: 'action',
-      label: type,
-      click: () => {
-        const view = this.model.addView(type as keyof typeof ViewOperationMap);
-        this.setViewId(view.id);
-        this.model.applyViewsUpdate();
-        menu.remove();
-      },
-    }));
-    this.popupContainer()?.appendChild(menu);
-    computePosition(event.target as HTMLElement, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
-    });
-    onClickOutside(
-      menu,
-      (ele, target) => {
-        ele.remove();
-      },
-      'mousedown'
+    popFilterableSimpleMenu(
+      event.target as HTMLElement,
+      Object.keys(ViewOperationMap).map(type => ({
+        type: 'action',
+        name: type,
+        select: () => {
+          const view = this.model.addView(
+            type as keyof typeof ViewOperationMap
+          );
+          this.setViewId(view.id);
+          this.model.applyViewsUpdate();
+        },
+      }))
     );
   }
 
-  _viewMenu(event: MouseEvent, id: string) {
-    event.preventDefault();
-    const menu = new DatabaseMenuComponent();
-    menu.menuGroup = [
-      {
-        label: 'Delete',
-        click: () => {
-          if (this.model.getViewList().length <= 1) {
-            return;
-          }
-          this.model.deleteView(id);
-          this.model.applyViewsUpdate();
-          menu.remove();
+  _clickView(event: MouseEvent, id: string) {
+    if (this.currentView !== id) {
+      this.setViewId(id);
+      return;
+    }
+    const view = this.model.views.find(v => v.id === id);
+    if (!view) {
+      return;
+    }
+    popMenu(event.target as HTMLElement, {
+      options: {
+        input: {
+          initValue: view.name,
+          onComplete: text => {
+            this.model.updateView(view.id, data => {
+              data.name = text;
+            });
+            this.model.applyViewsUpdate();
+          },
         },
-        type: 'action',
+        items: [
+          {
+            type: 'action',
+            name: 'Delete',
+            select: () => {
+              this.model.deleteView(view.id);
+              this.model.applyViewsUpdate();
+            },
+          },
+        ],
       },
-    ];
-    this.popupContainer()?.appendChild(menu);
-    computePosition(event.target as HTMLElement, menu, {
-      middleware: [
-        autoPlacement({
-          allowedPlacements: ['right-start', 'bottom-start'],
-        }),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(menu.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
     });
-    onClickOutside(
-      menu,
-      (ele, target) => {
-        ele.remove();
-      },
-      'mousedown'
-    );
   }
 
   override connectedCallback() {
@@ -153,9 +122,8 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
                 : ''}"
             >
               <div
-                @contextmenu="${(event: MouseEvent) =>
-                  this._viewMenu(event, view.id)}"
-                @click="${() => this.setViewId(view.id)}"
+                @click="${(event: MouseEvent) =>
+                  this._clickView(event, view.id)}"
                 class="database-view-button"
               >
                 ${view.name}

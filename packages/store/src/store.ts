@@ -1,14 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
-import type * as Y from 'yjs';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
 import type { BlobStorage } from './persistence/blob/types.js';
-import type {
-  DocProvider,
-  DocProviderConstructor,
-} from './persistence/doc/index.js';
+import type { DocProvider, DocProviderCreator } from './providers/type.js';
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import {
@@ -18,7 +14,6 @@ import {
   uuidv4,
 } from './utils/id-generator.js';
 import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
-import type { SubdocEvent } from './yjs/index.js';
 import { BlockSuiteDoc } from './yjs/index.js';
 
 export interface SerializedStore {
@@ -62,7 +57,7 @@ export interface StoreOptions<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > extends SSROptions {
   id: string;
-  providers?: DocProviderConstructor[];
+  providerCreators?: DocProviderCreator[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
   idGenerator?: Generator;
   defaultFlags?: Partial<Flags>;
@@ -77,12 +72,16 @@ const flagsPreset = {
   enable_edgeless_toolbar: true,
   enable_slash_menu: true,
 
-  enable_database: false,
+  enable_database: true,
   enable_database_filter: false,
+  enable_page_tags: false,
   enable_toggle_block: false,
   enable_block_selection_format_bar: true,
   enable_linked_page: false,
   enable_bookmark_operation: false,
+  enable_note_index: false,
+
+  enable_note_cut: true,
 
   readonly: {},
 } satisfies BlockSuiteFlags;
@@ -93,14 +92,13 @@ export class Store {
   readonly providers: DocProvider[] = [];
   readonly spaces = new Map<string, Space>();
   readonly awarenessStore: AwarenessStore;
-  readonly subdocProviders: Map<string, DocProvider[]> = new Map();
   readonly idGenerator: IdGenerator;
 
   // TODO: The user cursor should be spread by the spaceId in awareness
   constructor(
     {
       id,
-      providers = [],
+      providerCreators = [],
       awareness,
       idGenerator,
       defaultFlags,
@@ -136,43 +134,20 @@ export class Store {
       }
     }
 
-    this.providers = providers.map(
-      ProviderConstructor =>
-        new ProviderConstructor(id, this.doc, {
-          awareness: this.awarenessStore.awareness,
-        })
+    this.providers = providerCreators.map(creator =>
+      creator(id, this.doc, {
+        awareness: this.awarenessStore.awareness,
+      })
     );
-    this.doc.on('subdocs', ({ loaded }: SubdocEvent) => {
-      loaded.forEach(subdoc => {
-        const space = this._findSpaceByDoc(subdoc);
-        if (!space) {
-          return;
-        }
-
-        const subdocProviders = providers.map(Provider => {
-          return new Provider(subdoc.guid, subdoc, {
-            awareness: this.awarenessStore.awareness,
-          });
-        });
-
-        this.subdocProviders.set(space.prefixedId, subdocProviders);
-      });
-    });
   }
+
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
   }
 
   removeSpace(space: Space) {
     this.spaces.delete(space.prefixedId);
-    this.subdocProviders.delete(space.prefixedId);
   }
-
-  private _findSpaceByDoc = (doc: Y.Doc) => {
-    return Array.from(this.spaces.values()).find(space => {
-      return space.spaceDoc.guid === doc.guid;
-    });
-  };
 
   /**
    * @internal Only for testing, 'page0' should be replaced by props 'spaceId'

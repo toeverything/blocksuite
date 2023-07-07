@@ -8,86 +8,25 @@ import {
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
+import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import type {
-  DatabaseTableViewCellSelect,
-  DatabaseTableViewCellState,
-  DatabaseTableViewRowState,
-} from '../std.js';
-import { asyncFocusRichText, type SerializedBlock } from '../std.js';
+  DatabaseSelection,
+  DatabaseSelectionState,
+  SerializedBlock,
+} from '../__internal__/utils/types.js';
 import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import {
-  clearAllDatabaseCellSelection,
-  clearAllDatabaseRowsSelection,
-  setDatabaseCellEditing,
-  setDatabaseCellSelection,
-  setDatabaseRowsSelection,
-} from './table/components/selection/utils.js';
-import {
-  getClosestDatabaseId,
-  getClosestRowId,
-} from './table/selection-manager/utils.js';
 import type { Cell, Column } from './table/types.js';
 
-type LastTableViewRowSelection = {
-  databaseId: string;
-  rowIds: string[];
-};
-type LastTableViewCellSelection = Pick<
-  DatabaseTableViewCellSelect,
-  'databaseId' | 'coords'
->;
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
-  private _lastRowSelection: LastTableViewRowSelection | null = null;
-  private _lastCellSelection: LastTableViewCellSelection | null = null;
+  private _databaseSelection?: DatabaseSelection;
 
   slots = {
-    tableViewRowSelectionUpdated: new Slot<DatabaseTableViewRowState>(),
-    tableViewCellSelectionUpdated: new Slot<DatabaseTableViewCellState>(),
+    databaseSelectionUpdated: new Slot<{
+      selection: DatabaseSelectionState;
+      old: DatabaseSelectionState;
+    }>(),
   };
-
-  constructor() {
-    super();
-
-    this.slots.tableViewRowSelectionUpdated.on(state => {
-      const { type } = state;
-
-      if (type === 'select' || type === 'click') {
-        const { rowIds, databaseId } = state;
-
-        this._lastRowSelection = {
-          databaseId,
-          rowIds,
-        };
-        setDatabaseRowsSelection(databaseId, rowIds);
-      } else if (type === 'clear') {
-        this.clearLastRowSelection();
-        clearAllDatabaseRowsSelection();
-      }
-    });
-
-    this.slots.tableViewCellSelectionUpdated.on(state => {
-      const { type } = state;
-
-      if (type === 'select') {
-        const { databaseId, coords } = state;
-        //  select
-        this._lastCellSelection = {
-          databaseId,
-          coords,
-        };
-        setDatabaseCellSelection(databaseId, coords);
-      } else if (type === 'edit') {
-        this._lastCellSelection = null;
-        const { databaseId, coords } = state;
-        setDatabaseCellEditing(databaseId, coords[0]);
-      } else if (type === 'clear') {
-        // clear
-        this._lastCellSelection = null;
-        clearAllDatabaseCellSelection();
-      }
-    });
-  }
 
   initDatabaseBlock(
     page: Page,
@@ -117,6 +56,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     assertExists(blockModel);
     // default column
     blockModel.addColumn(
+      'end',
       multiSelectHelper.create('Tag', {
         options: [],
       })
@@ -166,7 +106,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
     const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
-      return model.updateColumn(nonIdProps);
+      return model.addColumn('end', nonIdProps);
     });
     model.applyColumnUpdate();
 
@@ -185,102 +125,48 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     });
   }
 
+  selectionEqual(a: DatabaseSelectionState, b: DatabaseSelectionState) {
+    if (a === undefined || b === undefined) return a === b;
+    if (a.databaseId !== b.databaseId) return false;
+    if (
+      a.rowsSelection?.start !== b.rowsSelection?.start ||
+      a.rowsSelection?.end !== b.rowsSelection?.end
+    )
+      return false;
+    if (
+      a.columnsSelection?.start !== b.columnsSelection?.start ||
+      a.columnsSelection?.end !== b.columnsSelection?.end
+    )
+      return false;
+    if (
+      a.focus.rowIndex !== b.focus.rowIndex ||
+      a.focus.columnIndex !== b.focus.columnIndex
+    )
+      return false;
+    return a.isEditing === b.isEditing;
+  }
+
+  select(state: DatabaseSelectionState) {
+    const old = this._databaseSelection;
+    if (this.selectionEqual(state, old)) {
+      return;
+    }
+    this._databaseSelection = state;
+    this.slots.databaseSelectionUpdated.emit({
+      selection: state,
+      old,
+    });
+  }
+
+  getSelection() {
+    return this._databaseSelection;
+  }
+
   replaceChild(
     model: BlockModels['affine:database'],
     oldChildId: string,
     newChildId: string
   ) {
     model.replaceChild(oldChildId, newChildId);
-  }
-
-  clearSelection() {
-    this.clearRowSelection();
-    this.clearCellLevelSelection();
-  }
-
-  // row level selection
-  clearRowSelection() {
-    this.slots.tableViewRowSelectionUpdated.emit({
-      type: 'clear',
-    });
-  }
-
-  setRowSelection(state: DatabaseTableViewRowState) {
-    if (
-      state.type === 'click' &&
-      this._lastRowSelection &&
-      state.rowIds?.[0] === this._lastRowSelection.rowIds?.[0]
-    ) {
-      this.clearRowSelection();
-      return;
-    }
-
-    this.slots.tableViewRowSelectionUpdated.emit(state);
-  }
-
-  setRowSelectionByElement(element: Element) {
-    const rowId = getClosestRowId(element);
-    if (rowId !== '') {
-      const databaseId = getClosestDatabaseId(element);
-      this.setRowSelection({
-        type: 'select',
-        databaseId,
-        rowIds: [rowId],
-      });
-    }
-  }
-
-  clearLastRowSelection() {
-    this._lastRowSelection = null;
-  }
-
-  refreshRowSelection() {
-    if (!this._lastRowSelection) return;
-
-    const { databaseId, rowIds } = this._lastRowSelection;
-
-    this.setRowSelection({
-      type: 'select',
-      databaseId,
-      rowIds,
-    });
-  }
-
-  toggleRowSelection(element: Element) {
-    const rowId = getClosestRowId(element);
-    // click on database's drag handle
-    if (rowId === '') return false;
-
-    const rowIds = this._lastRowSelection?.rowIds ?? [];
-
-    if (rowIds.indexOf(rowId) > -1) {
-      this.clearRowSelection();
-    } else {
-      this.setRowSelection({
-        type: 'click',
-        databaseId: getClosestDatabaseId(element),
-        rowIds: [rowId],
-      });
-    }
-    return true;
-  }
-
-  getLastRowSelection() {
-    return this._lastRowSelection;
-  }
-
-  // cell level selection
-  clearCellLevelSelection() {
-    this.slots.tableViewCellSelectionUpdated.emit({
-      type: 'clear',
-    });
-  }
-
-  setCellSelection(cellSelectionState: DatabaseTableViewCellState) {
-    this.slots.tableViewCellSelectionUpdated.emit(cellSelectionState);
-  }
-
-  getLastCellSelection() {
-    return this._lastCellSelection;
   }
 }

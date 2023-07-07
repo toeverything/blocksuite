@@ -59,13 +59,6 @@ export class BlockIndexer {
       return;
     }
     // lazy init
-    if ('requestIdleCallback' in globalThis) {
-      requestIdleCallback(() => {
-        this._initIndex();
-      });
-      return;
-    }
-    // fallback to setTimeout
     setTimeout(() => {
       this._initIndex();
     }, 0);
@@ -153,7 +146,7 @@ export class BlockIndexer {
 
       if (e instanceof YMapEvent) {
         if (e.target !== e.currentTarget) {
-          // add 'elements' to 'affine:surface' or add 'prop:xywh' to 'affine:frame'
+          // add 'elements' to 'affine:surface' or add 'prop:xywh' to 'affine:note'
           if (e.keysChanged.has('prop:text')) {
             // update block text by `page.updateBlock(paragraph, { text: new page.Text() })` API
             const blockId = e.path[0] as string;
@@ -212,7 +205,7 @@ export class BlockIndexer {
 
   private _getPage(pageId: PageId): Y.Doc | undefined {
     if (pageId.startsWith('space:')) {
-      console.warn('Unexpected page prefix', pageId);
+      throw new Error(`Unexpected 'space:' prefix for: ${pageId}`);
     }
     pageId = `space:${pageId}`;
     return this._doc.spaces.get(pageId) as Y.Doc | undefined;

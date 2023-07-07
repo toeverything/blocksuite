@@ -1,3 +1,4 @@
+import { WORKSPACE_VERSION } from '@blocksuite/global/config';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 
@@ -8,11 +9,24 @@ import type { Workspace } from './workspace.js';
 export interface PageMeta {
   id: string;
   title: string;
+  tags: string[];
   createDate: number;
 }
 
+type Tag = {
+  id: string;
+  value: string;
+  color: string;
+};
+type PagesPropertiesMeta = {
+  tags: {
+    options: Tag[];
+  };
+};
 type WorkspaceMetaState = {
   pages?: unknown[];
+  properties?: PagesPropertiesMeta;
+  workspaceVersion?: number;
   blockVersions?: Record<string, number>;
   name?: string;
   avatar?: string;
@@ -39,6 +53,7 @@ export class WorkspaceMeta {
       deep: true,
     });
     this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
+    this._proxy.workspaceVersion = WORKSPACE_VERSION;
   }
 
   get yPages() {
@@ -59,6 +74,10 @@ export class WorkspaceMeta {
 
   get blockVersions() {
     return this._proxy.blockVersions;
+  }
+
+  get workspaceVersion() {
+    return this._proxy.workspaceVersion;
   }
 
   setName(name: string) {
@@ -199,10 +218,6 @@ export class WorkspaceMeta {
     const { pageMetas, _prevPages } = this;
 
     pageMetas.forEach(pageMeta => {
-      // newly added space can't be found
-      // unless explicitly getMap after meta updated
-      // this.doc.getMap('space:' + pageMeta.id);
-
       if (!_prevPages.has(pageMeta.id)) {
         this.pageMetaAdded.emit(pageMeta.id);
       }
@@ -245,4 +260,20 @@ export class WorkspaceMeta {
       }
     });
   };
+
+  get properties(): PagesPropertiesMeta {
+    let meta = this._proxy.properties;
+    if (!meta) {
+      this._proxy.properties = meta = {
+        tags: {
+          options: [],
+        },
+      };
+    }
+    return meta;
+  }
+
+  setProperties(meta: PagesPropertiesMeta) {
+    this._proxy.properties = meta;
+  }
 }

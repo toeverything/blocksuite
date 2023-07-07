@@ -1,5 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { caretRangeFromPoint } from '@blocksuite/global/utils';
-import type { PointerEventState } from '@blocksuite/lit';
 
 import type {
   BlockComponentElement,
@@ -11,8 +11,7 @@ import {
   Point,
   resetNativeSelection,
 } from '../../../__internal__/index.js';
-import type { RichText } from '../../../__internal__/rich-text/rich-text.js';
-import type { EmbedBlockComponent } from '../../../embed-block/index.js';
+import type { ImageBlockComponent } from '../../../image-block/index.js';
 
 export type PageSelectionType =
   | 'native'
@@ -34,6 +33,7 @@ export interface PageViewport {
 }
 
 export class PageSelectionState {
+  // TODO add readonly
   type: PageSelectionType;
   viewport: PageViewport = {
     left: 0,
@@ -46,16 +46,23 @@ export class PageSelectionState {
   };
 
   draggingArea: { start: Point; end: Point } | null = null;
-  selectedEmbeds: EmbedBlockComponent[] = [];
+  /**
+   * @deprecated TODO merge to `selectedBlocks` or `_activeComponent`
+   */
+  get selectedEmbed() {
+    if (this.type === 'embed') {
+      return this._activeComponent as ImageBlockComponent;
+    }
+    return null;
+  }
+
   selectedBlocks: BlockComponentElement[] = [];
   // null: SELECT_ALL
   focusedBlock: BlockComponentElement | null = null;
   rafID?: number;
   lastPoint: Point | null = null;
   private _startRange: Range | null = null;
-  private _richTextCache = new Map<RichText, DOMRect>();
   private _blockCache = new Map<BlockComponentElement, DOMRect>();
-  private _embedCache = new Map<EmbedBlockComponent, DOMRect>();
   private _activeComponent: BlockComponentElement | null = null;
 
   constructor(type: PageSelectionType) {
@@ -74,16 +81,8 @@ export class PageSelectionState {
     return this._startRange;
   }
 
-  get richTextCache() {
-    return this._richTextCache;
-  }
-
   get blockCache() {
     return this._blockCache;
-  }
-
-  get embedCache() {
-    return this._embedCache;
   }
 
   get viewportOffset(): IPoint {
@@ -157,7 +156,6 @@ export class PageSelectionState {
   clearNativeSelection() {
     this.clearRaf();
     this.type = 'none';
-    this._richTextCache.clear();
     this._startRange = null;
     this.lastPoint = null;
     resetNativeSelection(null);
@@ -173,7 +171,6 @@ export class PageSelectionState {
 
   clearEmbedSelection() {
     this.type = 'none';
-    this.selectedEmbeds = [];
     this._activeComponent = null;
   }
 

@@ -1,13 +1,9 @@
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { literal } from 'lit/static-html.js';
 
-import {
-  DatabaseCellElement,
-  defineColumnRenderer,
-  type TableViewCell,
-} from '../../register.js';
+import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -17,9 +13,11 @@ const styles = css`
     padding: 0 4px;
   }
 
-  affine-database-progress-cell-editing:hover
-    .affine-database-progress-drag-handle {
-    opacity: 1;
+  affine-database-progress-cell {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0 4px;
   }
 
   .affine-database-progress {
@@ -53,7 +51,7 @@ const styles = css`
     width: 6px;
     height: 15px;
     border-radius: 2px;
-    opacity: 0;
+    opacity: 1;
     cursor: ew-resize;
     background: var(--affine-primary-color);
     transition: opacity 0.2s ease-in-out;
@@ -82,63 +80,80 @@ type DragConfig = {
   boundLeft: number;
 };
 
-@customElement('affine-database-progress-cell-editing')
-class ProgressCellEditing
-  extends DatabaseCellElement<number>
-  implements TableViewCell
-{
+class ProgressCell extends DatabaseCellElement<number> {
+  static override tag = literal`affine-database-progress-cell`;
+
   static override styles = styles;
 
-  static override tag = literal`affine-database-progress-cell-editing`;
-  cellType = 'progress' as const;
+  _bgClick(e: MouseEvent) {
+    this.onChange(
+      Math.round(
+        (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth
+      )
+    );
+  }
 
-  @query('.affine-database-progress-drag-handle')
-  private _dragHandle!: HTMLElement;
+  protected override render() {
+    const progress = this.value ?? 0;
+    let backgroundColor = progressColors.processing;
+    if (progress === 100) {
+      backgroundColor = progressColors.success;
+    }
+    const fgStyles = styleMap({
+      width: `${progress}%`,
+      backgroundColor,
+    });
+    const bgStyles = styleMap({
+      backgroundColor:
+        progress === 0 ? progressColors.empty : 'var(--affine-hover-color)',
+    });
+
+    return html` <div class="affine-database-progress">
+      <div class="affine-database-progress-bar">
+        <div
+          class="affine-database-progress-bg"
+          @click="${this._bgClick}"
+          style=${bgStyles}
+        >
+          <div class="affine-database-progress-fg" style=${fgStyles}></div>
+        </div>
+      </div>
+      <div class="progress-number progress">${progress}</div>
+    </div>`;
+  }
+}
+
+class ProgressCellEditing extends DatabaseCellElement<number> {
+  static override tag = literal`affine-database-progress-cell-editing`;
+
+  static override styles = styles;
 
   @query('.affine-database-progress-bg')
   private _progressBg!: HTMLElement;
 
   private _dragConfig: DragConfig | null = null;
-  private _progressBgWidth = 0;
 
   override firstUpdated() {
     const disposables = this._disposables;
 
     disposables.addFromEvent(
-      this._dragHandle,
+      this._progressBg,
       'pointerdown',
       this._onPointerDown
     );
-    disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
-    disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
-    disposables.addFromEvent(document, 'pointermove', this._onDocumentMove);
-
-    const { width } = this._progressBg.getBoundingClientRect();
-    const visibleWidth = width - 6;
-    this._progressBgWidth = visibleWidth;
-    const value = this.cell?.value;
-    if (value) {
-      this._setDragHandlePosition(value);
-    }
+    disposables.addFromEvent(document, 'pointermove', this._onPointerMove);
+    disposables.addFromEvent(document, 'pointerup', this._onPointerUp);
+    disposables.addFromEvent(window, 'keydown', evt => {
+      if (evt.key === 'ArrowDown') {
+        this.onChange(Math.max(0, (this.value ?? 0) - 1));
+        return;
+      }
+      if (evt.key === 'ArrowUp') {
+        this.onChange(Math.min(100, (this.value ?? 0) + 1));
+        return;
+      }
+    });
   }
-
-  private _setDragHandlePosition(value: number) {
-    const x = this._progressBgWidth * (value / 100);
-    this._dragHandle.style.transform = `translate(${x}px, -1px)`;
-  }
-
-  protected override updated(_changedProperties: Map<string, unknown>) {
-    super.updated(_changedProperties);
-
-    if (_changedProperties.has('cell')) {
-      this._setDragHandlePosition(this.cell?.value ?? 0);
-    }
-  }
-
-  private _onDocumentMove = () => {
-    if (!this._dragConfig) return;
-    this._onPointerUp();
-  };
 
   private _onPointerDown = (event: PointerEvent) => {
     event.stopPropagation();
@@ -149,7 +164,8 @@ class ProgressCellEditing
       boundLeft: left,
       containerWidth: visibleWidth,
     };
-    this.databaseModel.page.captureSync();
+    this.column.captureSync();
+    this._onPointerMove(event);
   };
 
   private _onPointerMove = (event: PointerEvent) => {
@@ -167,18 +183,18 @@ class ProgressCellEditing
       steps = Math.floor((x - boundLeft) / stepWidth);
     }
 
-    if (this.cell?.value !== steps) {
-      this.rowHost.setValue(steps, { captureSync: false });
+    if (this.value !== steps) {
+      this.onChange(steps, { captureSync: false });
     }
   };
 
   private _onPointerUp = () => {
     this._dragConfig = null;
-    this.databaseModel.page.captureSync();
+    this.column.captureSync();
   };
 
   protected override render() {
-    const progress = this.cell?.value ?? 0;
+    const progress = this.value ?? 0;
     let backgroundColor = progressColors.processing;
     if (progress === 100) {
       backgroundColor = progressColors.success;
@@ -191,15 +207,21 @@ class ProgressCellEditing
       backgroundColor:
         progress === 0 ? progressColors.empty : 'var(--affine-hover-color)',
     });
+    const handleStyles = styleMap({
+      left: `calc(${progress}% - 3px)`,
+    });
 
-    return html`<div
+    return html` <div
       class="affine-database-progress"
-      @mousedown=${(e: Event) => e.preventDefault()}
+      @mousedown="${(e: Event) => e.preventDefault()}"
     >
       <div class="affine-database-progress-bar">
         <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>
-          <div class="affine-database-progress-drag-handle"></div>
+          <div
+            class="affine-database-progress-drag-handle"
+            style=${handleStyles}
+          ></div>
         </div>
       </div>
       <div class="progress-number progress">${progress}</div>
@@ -209,11 +231,9 @@ class ProgressCellEditing
 
 export const ProgressColumnRenderer = defineColumnRenderer(
   'progress',
-  () => ({}),
-  () => 0,
   {
-    Cell: ProgressCellEditing,
-    CellEditing: null,
+    Cell: ProgressCell,
+    CellEditing: ProgressCellEditing,
   },
   {
     displayName: 'Progress',

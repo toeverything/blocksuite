@@ -37,16 +37,12 @@ export function CodeOptionTemplate({
 
   return html`
     <style>
-      .affine-codeblock-option-container > div {
-          position: fixed;
-          z-index: 1;
-          box-shadow:var(--affine-shadow-2)
-      }
       .affine-codeblock-option {
-        box-shadow:var(--affine-shadow-2);
-        padding:4px;
-        border-radius:8px;
-        background:var(--affine-background-overlay-panel-color)
+        box-shadow: var(--affine-shadow-2);
+        padding: 4px;
+        border-radius: 8px;
+        z-index: var(--affine-z-index-popover);
+        background: var(--affine-background-overlay-panel-color);
       }
 
       ${tooltipStyle}

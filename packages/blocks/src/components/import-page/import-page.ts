@@ -239,6 +239,14 @@ export class ImportPage extends WithDisposable(LitElement) {
 
             const fileName = file.substring(lastSplitIndex + 1);
             if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+              if (lastSplitIndex !== -1) {
+                const text = await zipFile.files[file].async('text');
+                const doc = new DOMParser().parseFromString(text, 'text/html');
+                const pageBody = doc.querySelector('.page-body');
+                if (pageBody && pageBody.children.length == 0) {
+                  continue;
+                }
+              }
               const page = await createPage(this.workspace);
               pageMap.set(file, page);
             }
@@ -376,11 +384,36 @@ export class ImportPage extends WithDisposable(LitElement) {
                 }
                 return null;
               };
+              const tableTitleColumnHandler = async (element: Element) => {
+                if (element.tagName === 'TABLE') {
+                  const titleColumn: string[] = [];
+                  element.querySelectorAll('.cell-title').forEach(ele => {
+                    const link = ele.querySelector('a');
+                    const subPageLink = link?.getAttribute('href') || '';
+                    if (
+                      subPageLink.startsWith('http://') ||
+                      subPageLink.startsWith('https://')
+                    ) {
+                      titleColumn.push(ele.textContent || '');
+                      return;
+                    }
+                    const linkPage = pageMap.get(decodeURI(subPageLink));
+                    if (linkPage) {
+                      titleColumn.push(`@AffineReference:(${linkPage.id})`);
+                    } else {
+                      titleColumn.push(link?.textContent || '');
+                    }
+                  });
+                  return titleColumn;
+                }
+                return null;
+              };
               const contentParser = new ContentParser(
                 page,
                 fetchFileHandler,
                 textStyleHandler,
-                tableParserHandler
+                tableParserHandler,
+                tableTitleColumnHandler
               );
               const text = (await zipFile.file(file)?.async('string')) || '';
               if (rootId) {

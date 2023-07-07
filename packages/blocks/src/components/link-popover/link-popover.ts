@@ -69,7 +69,7 @@ const URL_REGEX = new RegExp(
   'i'
 );
 
-function normalizeUrl(url: string) {
+export function normalizeUrl(url: string) {
   const hasScheme = ALLOWED_SCHEMES.some(scheme =>
     url.startsWith(scheme + ':')
   );
@@ -86,7 +86,7 @@ function normalizeUrl(url: string) {
 /**
  * For more detail see https://www.ietf.org/rfc/rfc1738.txt
  */
-const isValidLink = (str: string) => {
+export const isValidLink = (str: string) => {
   if (!str) {
     return false;
   }
@@ -111,7 +111,7 @@ export class LinkPopover extends LitElement {
   @property()
   type: 'create' | 'edit' = 'create';
 
-  @property()
+  @property({ type: Boolean })
   showMask = true;
 
   @property()
@@ -120,7 +120,7 @@ export class LinkPopover extends LitElement {
   @property()
   previewLink = '';
 
-  @property()
+  @property({ type: Boolean })
   showBookmarkOperation = false;
 
   @state()
@@ -227,6 +227,7 @@ export class LinkPopover extends LitElement {
   }
 
   private _onKeydown(e: KeyboardEvent) {
+    e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
       e.preventDefault();
       this._onConfirm();

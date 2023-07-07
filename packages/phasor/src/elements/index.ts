@@ -1,4 +1,3 @@
-import type { SurfaceElement } from '../index.js';
 import { BrushElement } from './brush/brush-element.js';
 import { BrushElementDefaultProps } from './brush/constants.js';
 import type { IBrush } from './brush/types.js';
@@ -13,6 +12,7 @@ import {
 import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape } from './shape/types.js';
+import type { SurfaceElement } from './surface-element.js';
 import { TextElementDefaultProps } from './text/constants.js';
 import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
@@ -22,7 +22,6 @@ export { ConnectorElement } from './connector/connector-element.js';
 export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
-export type { SurfaceElement } from './surface-element.js';
 export { TextElement } from './text/text-element.js';
 
 export type PhasorElement =
@@ -71,9 +70,23 @@ export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
   Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>
 >;
 
-export type IElementDefaultProps<T extends keyof IPhasorElementType> = Omit<
-  IPhasorElementType[T],
-  'id' | 'index' | 'seed'
+export type IElementUpdateProps<T extends keyof IPhasorElementType> = Partial<
+  Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'type'>
 >;
+
+export type IElementDefaultProps<T extends keyof IPhasorElementType> =
+  T extends 'connector'
+    ? Omit<
+        IPhasorElementType['connector'],
+        | 'xywh'
+        | 'id'
+        | 'index'
+        | 'seed'
+        | 'path'
+        | 'absolutePath'
+        | 'controllers'
+        | 'rotate'
+      >
+    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>;
 
 export type { IBrush, IConnector, IDebug, IShape, IText };

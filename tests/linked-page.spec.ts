@@ -108,15 +108,16 @@ test.describe('multiple page', () => {
 <affine:page
   prop:title="title0"
 >
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
       prop:text="page0"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`;
     await assertStoreMatchJSX(page, page1Snapshot);
 
@@ -135,15 +136,16 @@ test.describe('multiple page', () => {
   prop:title="title1"
 >
   <affine:surface />
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
       prop:text="page1"
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
 
@@ -183,6 +185,7 @@ test.describe('reference node', () => {
   test('should reference node attributes correctly', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);
+    const { id } = await addNewPage(page);
     await focusRichText(page);
     await type(page, '[[');
     await pressEnter(page);
@@ -197,7 +200,7 @@ test.describe('reference node', () => {
         insert=" "
         reference={
           Object {
-            "pageId": "page0",
+            "pageId": "${id}",
             "type": "LinkedPage",
           }
         }
@@ -225,6 +228,7 @@ test.describe('reference node', () => {
   }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);
+    const { id } = await addNewPage(page);
     await focusRichText(page);
 
     await type(page, '1');
@@ -254,7 +258,7 @@ test.describe('reference node', () => {
         insert=" "
         reference={
           Object {
-            "pageId": "page0",
+            "pageId": "${id}",
             "type": "LinkedPage",
           }
         }
@@ -297,8 +301,12 @@ test.describe('reference node', () => {
   test('should create reference node works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
+    const defaultPageId = 'page0';
+    const { id: newId } = await addNewPage(page);
+    await switchToPage(page, newId);
     await focusTitle(page);
     await type(page, 'title');
+    await switchToPage(page, defaultPageId);
 
     await focusRichText(page);
     await type(page, '@');
@@ -314,9 +322,12 @@ test.describe('reference node', () => {
     await expect(refNode).toBeVisible();
     await expect(refNode).toHaveCount(1);
     await assertReferenceText('title');
+
+    await switchToPage(page, newId);
     await focusTitle(page);
     await pressBackspace(page);
     await type(page, '1');
+    await switchToPage(page, defaultPageId);
     await assertReferenceText('titl1');
   });
 
@@ -339,14 +350,15 @@ test.describe('reference node', () => {
   prop:title="page1"
 >
   <affine:surface />
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
     await focusRichText(page);
@@ -361,8 +373,9 @@ test.describe('reference node', () => {
 <affine:page
   prop:title="page0"
 >
-  <affine:frame
+  <affine:note
     prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
     prop:index="a0"
   >
     <affine:paragraph
@@ -381,7 +394,7 @@ test.describe('reference node', () => {
       }
       prop:type="text"
     />
-  </affine:frame>
+  </affine:note>
 </affine:page>`
     );
   });
@@ -467,7 +480,7 @@ test.describe('linked page popover', () => {
     await focusRichText(page);
     await type(page, '@');
     await expect(linkedPagePopover).toBeVisible();
-    await expect(pageBtn).toHaveCount(3);
+    await expect(pageBtn).toHaveCount(2);
 
     await assertActivePageIdx(0);
     await page.keyboard.press('ArrowDown');
@@ -480,7 +493,7 @@ test.describe('linked page popover', () => {
     await page.keyboard.press('Shift+Tab');
     await assertActivePageIdx(0);
 
-    await expect(pageBtn).toHaveText(['page0', 'page1', 'page2']);
+    await expect(pageBtn).toHaveText(['page1', 'page2']);
     // page2
     //  ^  ^
     await type(page, 'a2');
@@ -559,7 +572,7 @@ test.describe.skip('linked page with clipboard', () => {
 
   test(' duplicated subpage should paste as linked page', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
     await focusRichText(page);
 
     const { createLinkedPage, createSubpage } = getLinkedPagePopover(page);
@@ -572,8 +585,9 @@ test.describe.skip('linked page with clipboard', () => {
     await assertStoreMatchJSX(
       page,
       `
-<affine:frame
+<affine:note
   prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
   prop:index="a0"
 >
   <affine:paragraph
@@ -626,8 +640,8 @@ test.describe.skip('linked page with clipboard', () => {
     }
     prop:type="text"
   />
-</affine:frame>`,
-      frameId
+</affine:note>`,
+      noteId
     );
   });
 });

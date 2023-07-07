@@ -25,6 +25,7 @@ export const bookmarkModalStyles = html`
       top: 0;
       bottom: 0;
       margin: auto;
+      z-index: 1;
     }
     .bookmark-modal-wrapper {
       position: absolute;
@@ -33,6 +34,7 @@ export const bookmarkModalStyles = html`
       top: 0;
       bottom: 0;
       margin: auto;
+      z-index: 2;
 
       width: 360px;
       height: 260px;
@@ -103,11 +105,11 @@ export const bookmarkModalStyles = html`
 `;
 @customElement('bookmark-edit-modal')
 export class BookmarkEditModal extends WithDisposable(LitElement) {
-  @property()
+  @property({ attribute: false })
   model!: BaseBlockModel<BookmarkBlockModel>;
-  @property()
+  @property({ attribute: false })
   onCancel?: () => void;
-  @property()
+  @property({ attribute: false })
   onConfirm?: () => void;
 
   override get id() {
@@ -150,7 +152,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
     ) as HTMLInputElement;
 
     this.model.page.updateBlock(this.model, {
-      title: titleInput.value,
+      bookmarkTitle: titleInput.value,
       description: descInput.value,
     });
     this.onConfirm?.();
@@ -181,7 +183,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
             type="text"
             class="bookmark-input title"
             placeholder="Title"
-            value=${this.model.title || 'Bookmark'}
+            value=${this.model.bookmarkTitle || 'Bookmark'}
             tabindex="1"
           />
           <input

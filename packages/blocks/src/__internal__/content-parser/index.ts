@@ -1,12 +1,15 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { IBound } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import {
+  getBlockElementById,
   getEditorContainer,
   getPageBlock,
   isPageMode,
@@ -16,6 +19,7 @@ import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,
   TableParserHandler,
+  TableTitleColumnHandler,
   TextStyleHandler,
 } from './parse-html.js';
 import { HtmlParser } from './parse-html.js';
@@ -39,7 +43,8 @@ export class ContentParser {
     page: Page,
     fetchFileHandler?: FetchFileHandler,
     textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler
+    tableParserHandler?: TableParserHandler,
+    tableTitleColumnHandler?: TableTitleColumnHandler
   ) {
     this._page = page;
     this._htmlParser = new HtmlParser(
@@ -47,7 +52,8 @@ export class ContentParser {
       page,
       fetchFileHandler,
       textStyleHandler,
-      tableParserHandler
+      tableParserHandler,
+      tableTitleColumnHandler
     );
     this._htmlParser.registerParsers();
   }
@@ -55,9 +61,7 @@ export class ContentParser {
   public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[1].children
-    );
+    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
       htmlContent
@@ -67,75 +71,156 @@ export class ContentParser {
   public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html(
-      this._getSelectedBlock(root).children[1].children
-    );
+    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       htmlContent
     );
   }
 
-  public async transPageToCanvas(): Promise<HTMLCanvasElement | undefined> {
+  private async _checkReady() {
+    const promise = new Promise(resolve => {
+      let count = 0;
+      const checkReactRender = setInterval(async () => {
+        const root = this._page.root;
+        const pageBlock = root ? getPageBlock(root) : null;
+        const imageLoadingComponent = document.querySelector(
+          'affine-image-block-loading-card'
+        );
+        if (pageBlock && !imageLoadingComponent) {
+          clearInterval(checkReactRender);
+          resolve(true);
+        }
+        count++;
+        if (count > 10 * 60) {
+          clearInterval(checkReactRender);
+          resolve(false);
+        }
+      }, 100);
+    });
+    return await promise;
+  }
+
+  private async _edgelessToCanvas(
+    edgeless: EdgelessPageBlockComponent,
+    bound: IBound
+  ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
-    const html2image = await import('html-to-image');
 
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    const container = document.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!container) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const canvas = document.createElement('canvas');
+    canvas.width = (bound.w + 100) * dpr;
+    canvas.height = (bound.h + 100) * dpr;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+
+    ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const html2canvasOption = {
+      ignoreElements: function (element: Element) {
+        if (
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      onclone: function (documentClone: Document, element: HTMLElement) {
+        // html2canvas can't support transform feature
+        element.style.setProperty('transform', 'none');
+      },
+      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+    };
+
+    const nodeElements = edgeless.getSortedElementsByBound(bound);
+    for (const nodeElement of nodeElements) {
+      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
+      const blockBound = xywhArrayToObject(nodeElement);
+      const canvasData = await html2canvas(
+        blockElement as HTMLElement,
+        html2canvasOption
+      );
+      ctx.drawImage(
+        canvasData,
+        blockBound.x - bound.x + 50,
+        blockBound.y - bound.y + 50,
+        blockBound.w,
+        blockBound.h
+      );
+    }
+
+    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(bound);
+    ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+
+    return canvas;
+  }
+
+  private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
     const editorContainer = getEditorContainer(this._page);
+    const pageContainer = editorContainer.querySelector(
+      '.affine-default-page-block-container'
+    );
+    if (!pageContainer) return;
+
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    const html2canvasOption = {
+      ignoreElements: function (element: Element) {
+        if (
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+    };
+
+    const data = await html2canvas(
+      pageContainer as HTMLElement,
+      html2canvasOption
+    );
+    return data;
+  }
+
+  private async _toCanvas(): Promise<HTMLCanvasElement | void> {
+    await this._checkReady();
+
     if (isPageMode(this._page)) {
-      const styleElement = document.createElement('style');
-      styleElement.textContent =
-        'editor-container,.affine-editor-container {height: auto;}';
-      editorContainer.appendChild(styleElement);
-
-      // todo check render and image
-
-      const data = await html2image.toCanvas(editorContainer, {
-        cacheBust: true,
-      });
-      editorContainer.removeChild(styleElement);
-      return data;
+      return await this._docToCanvas();
     } else {
-      const styleElement = document.createElement('style');
+      const root = this._page.root;
+      if (!root) return;
+
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      const { x, y, w, h } = bound;
-      styleElement.textContent = `
-        edgeless-toolbar {display: none;}
-        editor-container,.affine-editor-container {height: ${
-          h + 100
-        }px; width: ${w + 100}px}
-      `;
-      editorContainer.appendChild(styleElement);
-
-      const width = edgeless.surface.viewport.width;
-      const height = edgeless.surface.viewport.height;
-      edgeless.surface.viewport.setCenter(
-        x + width / 2 - 50,
-        y + height / 2 - 50
-      );
-
-      // todo check render and image
-
-      const promise = new Promise(resolve => {
-        setTimeout(async () => {
-          const pngData = await html2image.toCanvas(editorContainer, {
-            cacheBust: true,
-          });
-          resolve(pngData);
-        }, 500);
-      });
-      const data = (await promise) as HTMLCanvasElement;
-      editorContainer.removeChild(styleElement);
-      return data;
+      return await this._edgelessToCanvas(edgeless, bound);
     }
   }
 
   public async exportPng() {
     const root = this._page.root;
     if (!root) return;
-    const canvasImage = await this.transPageToCanvas();
+    const canvasImage = await this._toCanvas();
     if (!canvasImage) {
       return;
     }
@@ -149,7 +234,7 @@ export class ContentParser {
   public async exportPdf() {
     const root = this._page.root;
     if (!root) return;
-    const canvasImage = await this.transPageToCanvas();
+    const canvasImage = await this._toCanvas();
     if (!canvasImage) {
       return;
     }
@@ -165,7 +250,9 @@ export class ContentParser {
       0,
       0,
       canvasImage.width,
-      canvasImage.height
+      canvasImage.height,
+      '',
+      'FAST'
     );
     FileExporter.exportFile(
       (root as PageBlockModel).title.toString() + '.pdf',
@@ -210,8 +297,7 @@ export class ContentParser {
         const id = await storage.set(file);
         return [
           {
-            flavour: 'affine:embed',
-            type: 'image',
+            flavour: 'affine:image',
             sourceId: id,
             children: [],
           },
@@ -240,8 +326,7 @@ export class ContentParser {
         }
         return;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderer(token: any) {
+      renderer(token: marked.Tokens.Generic) {
         return `<u>${token.text}</u>`;
       },
     };
@@ -263,12 +348,51 @@ export class ContentParser {
         }
         return;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderer(token: any) {
+      renderer(token: marked.Tokens.Generic) {
         return `<code>${token.text}</code>`;
       },
     };
-    marked.use({ extensions: [underline, inlineCode] });
+
+    const walkTokens = (token: marked.Token) => {
+      // fix: https://github.com/toeverything/blocksuite/issues/3304
+      if (
+        token.type === 'list_item' &&
+        token.tokens.length > 0 &&
+        token.tokens[0].type === 'list' &&
+        token.tokens[0].items.length === 1
+      ) {
+        const fistItem = token.tokens[0].items[0];
+        if (
+          fistItem.tokens.length === 0 ||
+          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
+        ) {
+          // transform list_item to text
+          const newToken =
+            fistItem.tokens.length === 1
+              ? (fistItem.tokens[0] as marked.Tokens.Text)
+              : ({
+                  raw: '',
+                  text: '',
+                  type: 'text',
+                  tokens: [],
+                } as marked.Tokens.Text);
+          const preText = fistItem.raw.substring(
+            0,
+            fistItem.raw.length - fistItem.text.length
+          );
+          newToken.raw = preText + newToken.raw;
+          newToken.text = preText + newToken.text;
+          newToken.tokens = newToken.tokens || [];
+          newToken.tokens.unshift({
+            type: 'text',
+            text: preText,
+            raw: preText,
+          });
+          token.tokens[0] = newToken;
+        }
+      }
+    };
+    marked.use({ extensions: [underline, inlineCode], walkTokens });
     const md2html = marked.parse(text);
     return this.htmlText2Block(md2html);
   }
@@ -330,10 +454,18 @@ export class ContentParser {
     });
   }
 
-  private _getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+  public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
+    if (model.flavour === 'affine:page') {
+      return {
+        id: model.id,
+        children: model.children
+          .filter(child => child.flavour === 'affine:note')
+          .map(child => this.getSelectedBlock(child)),
+      };
+    }
     return {
       id: model.id,
-      children: model.children.map(child => this._getSelectedBlock(child)),
+      children: model.children.map(child => this.getSelectedBlock(child)),
     };
   }
 

@@ -7,10 +7,6 @@ import type { Page } from './workspace/index.js';
 import type { YBlock } from './workspace/page.js';
 
 const FlavourSchema = z.string();
-const ElementTagSchema = z.object({
-  _$litStatic$: z.string(),
-  r: z.symbol(),
-});
 const ParentSchema = z.array(z.string()).optional();
 const ContentSchema = z.array(z.string()).optional();
 const role = ['root', 'hub', 'content'] as const;
@@ -31,7 +27,6 @@ export const BlockSchema = z.object({
   model: z.object({
     role: RoleSchema,
     flavour: FlavourSchema,
-    tag: ElementTagSchema,
     parent: ParentSchema,
     children: ContentSchema,
     props: z
@@ -49,12 +44,9 @@ export type PropsSetter<Props> = (props: Props) => Partial<Props>;
 export type PropsGetter<Props> = (
   internalPrimitives: InternalPrimitives
 ) => Props;
-
-// ported from lit
-interface StaticValue {
-  _$litStatic$: string;
-  r: symbol;
-}
+export type PropsFromGetter<T> = T extends PropsGetter<infer Props>
+  ? Props
+  : never;
 
 export type SchemaToModel<
   Schema extends {
@@ -63,7 +55,7 @@ export type SchemaToModel<
       flavour: string;
     };
   }
-> = BaseBlockModel &
+> = BaseBlockModel<PropsFromGetter<Schema['model']['props']>> &
   ReturnType<Schema['model']['props']> & {
     flavour: Schema['model']['flavour'];
   };
@@ -76,7 +68,6 @@ export function defineBlockSchema<
   Metadata extends Readonly<{
     version: number;
     role: Role;
-    tag: StaticValue;
     parent?: string[];
     children?: string[];
   }>,
@@ -105,7 +96,6 @@ export function defineBlockSchema({
   metadata: {
     version: number;
     role: RoleType;
-    tag: StaticValue;
     parent?: string[];
     children?: string[];
   };
@@ -115,7 +105,6 @@ export function defineBlockSchema({
   const schema = {
     version: metadata.version,
     model: {
-      tag: metadata.tag,
       role: metadata.role,
       parent: metadata.parent,
       children: metadata.children,
@@ -128,6 +117,17 @@ export function defineBlockSchema({
   return schema;
 }
 
+/**
+ * The MagicProps function is used to append the props to the class.
+ * For example:
+ *
+ * ```ts
+ * class MyBlock extends MagicProps()<{ foo: string }> {}
+ * const myBlock = new MyBlock();
+ * // You'll get type checking for the foo prop
+ * myBlock.foo = 'bar';
+ * ```
+ */
 function MagicProps(): {
   new <Props>(): Props;
 } {
@@ -141,7 +141,6 @@ export class BaseBlockModel<
 > extends MagicProps()<Props> {
   static version: number;
   flavour!: string;
-  tag!: StaticValue;
   role!: RoleType;
   page!: Page;
   id!: string;
@@ -157,6 +156,11 @@ export class BaseBlockModel<
   type?: string;
   text?: Text;
   sourceId?: string;
+
+  // TODO: infer return type
+  originProp(prop: string & keyof Props) {
+    return this.yBlock.get(`prop:${prop}`);
+  }
 
   isEmpty() {
     return this.children.length === 0;

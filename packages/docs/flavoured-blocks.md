@@ -54,16 +54,16 @@ In [BlockSuite playground](https://blocksuite-toeverything.vercel.app/?init), yo
 
 ## Block Flavours
 
-In the prebuilt editor, creating a simple page requires following block flavours: [`affine:page`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/page-block), [`affine:frame`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/frame-block), and [`affine:paragraph`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/paragraph-block).
+In the prebuilt editor, creating a simple page requires following block flavours: [`affine:page`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/page-block), [`affine:note`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/note-block), and [`affine:paragraph`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/paragraph-block).
 
 - The `affine:page` block serves as the top-level container for a page, holding all other blocks within the page hierarchy.
-- The `affine:frame` block acts as a flat container within the page, and multiple frames can be positioned on the whiteboard.
+- The `affine:note` block acts as a flat container within the page, and multiple notes can be positioned on the whiteboard.
 - Each `affine:paragraph` block holds a linear sequence of rich text within the page. It enables users to create text-based content and style it according to their needs.
 
 ![block-nesting](./images/block-nesting.png)
 
 ::: tip
-In AFFiNE, the `affine:frame` block is crucial for blending the document mode with the whiteboard mode. In document mode, the frame acts as a transparent container that doesn't affect the display of its internal blocks. However, in whiteboard mode, the frame has absolute positioning, allowing its content to be freely placed on the canvas.
+In AFFiNE, the `affine:note` block is crucial for blending the document mode with the whiteboard mode. In document mode, the note acts as a transparent container that doesn't affect the display of its internal blocks. However, in whiteboard mode, the note has absolute positioning, allowing its content to be freely placed on the canvas.
 :::
 
 There are more block flavours available in the prebuilt editor, including:
@@ -79,10 +79,10 @@ There are more block flavours available in the prebuilt editor, including:
 
 In BlockSuite, the blocks can be also be categorized into two distinct roles:
 
-1. `HubBlock` serves as an empty block container, which include `affine:page`, `affine:frame` and `affine:database`.
+1. `HubBlock` serves as an empty block container, which include `affine:page`, `affine:note` and `affine:database`.
 2. `ContentBlock` contains atomic content, this includes `affine:paragraph`, `affine:list`, `affine:code` and `affine:embed`.
 
-`HubBlock` acts as container that affects the presentation of the blocks it contains. For example, a frame block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards. In contrast, `ContentBlock` can only nest other `ContentBlock` to express structures like nested markdown lists.
+`HubBlock` acts as container that affects the presentation of the blocks it contains. For example, a note block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards. In contrast, `ContentBlock` can only nest other `ContentBlock` to express structures like nested markdown lists.
 
 ## Defining Block Schema
 

@@ -18,23 +18,23 @@
   "peerDependencies": {
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "yjs": "^13"
   },
   "dependencies": {
-    "@blocksuite/connector": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.2.9",
     "hotkeys-js": "^3.10.1",
-    "html-to-image": "^1.11.11",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
     "lit": "^2.7.3",
     "marked": "^4.2.12",
-    "shiki": "^0.14.1",
+    "shiki": "^0.14.3",
     "turndown": "^7.1.1",
-    "zod": "^3.21.4",
-    "jspdf": "^2.5.1"
+    "zod": "^3.21.4"
   },
   "exports": {
     "./dist/*": "./dist/*",
@@ -69,10 +69,12 @@
     }
   },
   "devDependencies": {
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@blocksuite/block-std": "workspace:*",
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.0.8",
     "@types/turndown": "^5.0.1",
-    "yjs": "^13.6.0"
+    "yjs": "^13.6.5"
   }
 }

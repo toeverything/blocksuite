@@ -20,7 +20,7 @@ import {
   pressEscape,
   pressForwardDelete,
   selectAllByKeyboard,
-  selectFrameInEdgeless,
+  selectNoteInEdgeless,
   type,
 } from '../utils/actions/index.js';
 import {
@@ -52,6 +52,14 @@ test('shortcut', async ({ page }) => {
   await page.keyboard.press('h');
   const panButton = locatorEdgelessToolButton(page, 'pan');
   await expect(panButton).toHaveAttribute('active', '');
+
+  await page.keyboard.press('l');
+  const connectorButton = locatorEdgelessToolButton(page, 'connector');
+  await expect(connectorButton).toHaveAttribute('active', '');
+
+  await page.mouse.click(100, 100);
+  await page.keyboard.press('x');
+  await expect(connectorButton).toHaveAttribute('active', '');
 });
 
 test('pressing the ESC key will return to the default state', async ({
@@ -78,13 +86,14 @@ test.describe('zooming', () => {
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
 
-    const start = { x: 100, y: 100 };
+    const start = { x: 0, y: 0 };
     const end = { x: 200, y: 200 };
     await addBasicRectShapeElement(page, start, end);
 
     await zoomFitByKeyboard(page);
 
     const zoom = await getZoomLevel(page);
+
     expect(zoom).not.toBe(100);
   });
   test('zoom out', async ({ page }) => {
@@ -150,9 +159,9 @@ test('cmd + A should select all elements by default', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
 });
 
-test('cmd + A should not fire inside active frame', async ({ page }) => {
+test('cmd + A should not fire inside active note', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  const { frameId } = await initEmptyEdgelessState(page);
+  const { noteId } = await initEmptyEdgelessState(page);
   await focusRichText(page);
   await type(page, 'hello');
   await switchEditorMode(page);
@@ -162,11 +171,11 @@ test('cmd + A should not fire inside active frame', async ({ page }) => {
   await addBasicRectShapeElement(page, start, end);
   await selectAllByKeyboard(page);
 
-  await selectFrameInEdgeless(page, frameId);
+  await selectNoteInEdgeless(page, noteId);
   const box1 = await getEdgelessSelectedRect(page);
 
   // second click become active
-  await selectFrameInEdgeless(page, frameId);
+  await selectNoteInEdgeless(page, noteId);
   await selectAllByKeyboard(page);
 
   const box2 = await getEdgelessSelectedRect(page);
@@ -177,13 +186,13 @@ test('cmd + A should not fire inside active frame', async ({ page }) => {
 test.describe('delete', () => {
   test('do not delete element when active', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    const { frameId } = await initEmptyEdgelessState(page);
+    const { noteId } = await initEmptyEdgelessState(page);
     await focusRichText(page);
     await type(page, 'hello');
     await switchEditorMode(page);
-    await selectFrameInEdgeless(page, frameId);
+    await selectNoteInEdgeless(page, noteId);
     const box1 = await getEdgelessSelectedRect(page);
-    await selectFrameInEdgeless(page, frameId);
+    await selectNoteInEdgeless(page, noteId);
     await pressBackspace(page);
     const box2 = await getEdgelessSelectedRect(page);
     assertDOMRectEqual(box1, box2);
