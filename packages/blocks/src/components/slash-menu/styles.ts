@@ -1,5 +1,7 @@
 import { css } from 'lit';
 
+import { scrollbarStyle } from '../utils.js';
+
 export const styles = css`
   .overlay-mask {
     position: fixed;
@@ -98,22 +100,10 @@ export const styles = css`
     width: 200px;
   }
 
-  ::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 4px;
-  }
-  ::-webkit-scrollbar-thumb {
-    border-radius: 2px;
-    background-color: #b1b1b1;
-  }
+  ${scrollbarStyle}
 
   .slash-item-divider {
     border-top: 1px dashed var(--affine-border-color);
     margin: 8px 0;
-  }
-
-  format-bar-button svg {
-    width: 20px;
-    height: 20px;
   }
 `;

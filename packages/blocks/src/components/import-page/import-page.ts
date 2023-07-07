@@ -531,7 +531,7 @@ export class ImportPage extends WithDisposable(LitElement) {
         >
           ${NotionIcon}
           <div
-            slot="optional"
+            slot="suffix"
             class="has-tool-tip"
             @click=${this._openLearnImportLink}
           >

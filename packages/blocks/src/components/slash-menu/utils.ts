@@ -16,8 +16,12 @@ export type SlashMenuOptions = {
 
 export type SlashItem = {
   name: string;
+  /**
+   * search alias
+   */
   alias?: string[];
   icon: TemplateResult<1>;
+  suffix?: TemplateResult<1>;
   showWhen?: (model: BaseBlockModel) => boolean;
   disabled?: boolean;
   action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
