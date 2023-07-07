@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { Options } from '@blocksuite/phasor';
 import type { RoughCanvas } from '@blocksuite/phasor';
 import { Bound, Overlay, StrokeStyle } from '@blocksuite/phasor';
@@ -11,6 +11,7 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../components/component-toolbar/change-shape-button.js';
 import { isTransparent } from '../components/panel/color-panel.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_OFFSET_X,
@@ -148,25 +149,58 @@ class ShapeFactory {
 }
 
 class ShapeOverlay extends Overlay {
-  private shape: Shape;
+  private _shape: Shape;
   private _x: number;
   private _y: number;
   private _globalAlpha: number;
   private _options: Options;
+  private _edgeless: EdgelessPageBlockComponent;
+  private _disposables!: DisposableGroup;
+  private _lastViewportX: number;
+  private _lastViewportY: number;
 
-  constructor(
-    x = 0,
-    y = 0,
-    globalAlpha = 0,
-    type = 'rect',
-    options = SHAPE_OVERLAY_OPTIONS
-  ) {
+  constructor(edgeless: EdgelessPageBlockComponent) {
     super();
-    this.shape = ShapeFactory.createShape(x, y, globalAlpha, type, options);
-    this._x = x;
-    this._y = y;
-    this._globalAlpha = globalAlpha;
-    this._options = options;
+    this._x = 0;
+    this._y = 0;
+    this._globalAlpha = 0;
+    this._options = SHAPE_OVERLAY_OPTIONS;
+    this._shape = ShapeFactory.createShape(
+      this.x,
+      this.y,
+      this.globalAlpha,
+      'rect',
+      this._options
+    );
+    this._edgeless = edgeless;
+    this._disposables = new DisposableGroup();
+    this._lastViewportX = edgeless.surface.viewport.viewportX;
+    this._lastViewportY = edgeless.surface.viewport.viewportY;
+    this._disposables.add(
+      this._edgeless.slots.viewportUpdated.on(() => {
+        // TODO: consoder zoom in zoom out
+        // get current viewport position
+        const currentViewportX = this._edgeless.surface.viewport.viewportX;
+        const currentViewportY = this._edgeless.surface.viewport.viewportY;
+        // calculate position delta
+        const deltaX = currentViewportX - this._lastViewportX;
+        const deltaY = currentViewportY - this._lastViewportY;
+        // update overlay current position
+        this.x += deltaX;
+        this.y += deltaY;
+        // update last viewport position
+        this._lastViewportX = currentViewportX;
+        this._lastViewportY = currentViewportY;
+        // refresh to show new overlay
+        this._edgeless.surface.refresh();
+      })
+    );
+    this._disposables.add(
+      this._edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
+        // when change note child type, update overlay text
+        this._shape.type = edgelessTool.type;
+      })
+    );
   }
 
   get x(): number {
@@ -175,7 +209,7 @@ class ShapeOverlay extends Overlay {
 
   set x(value: number) {
     this._x = value;
-    this.shape.x = value;
+    this._shape.x = value;
   }
 
   get y(): number {
@@ -184,7 +218,7 @@ class ShapeOverlay extends Overlay {
 
   set y(value: number) {
     this._y = value;
-    this.shape.y = value;
+    this._shape.y = value;
   }
 
   get globalAlpha(): number {
@@ -193,7 +227,7 @@ class ShapeOverlay extends Overlay {
 
   set globalAlpha(value: number) {
     this._globalAlpha = value;
-    this.shape.globalAlpha = value;
+    this._shape.globalAlpha = value;
   }
 
   get options(): Options {
@@ -202,11 +236,11 @@ class ShapeOverlay extends Overlay {
 
   set options(value: Options) {
     this._options = value;
-    this.shape.options = value;
+    this._shape.options = value;
   }
 
   setShape(type: string, options: Options): void {
-    this.shape = ShapeFactory.createShape(
+    this._shape = ShapeFactory.createShape(
       this._x,
       this._y,
       this._globalAlpha,
@@ -216,8 +250,8 @@ class ShapeOverlay extends Overlay {
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    ctx.globalAlpha = this.shape.globalAlpha;
-    this.shape.draw(ctx, rc);
+    ctx.globalAlpha = this._shape.globalAlpha;
+    this._shape.draw(ctx, rc);
   }
 }
 
@@ -434,7 +468,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'shape') return;
-    this._shapeOverlay = new ShapeOverlay();
+    this._shapeOverlay = new ShapeOverlay(this._edgeless);
     // shpae options, like stroke color, fill color, etc.
     const options = {
       ...SHAPE_OVERLAY_OPTIONS,

@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { Overlay } from '@blocksuite/phasor';
+import { DisposableGroup } from '@blocksuite/store/index.js';
 
 import {
   type EdgelessTool,
@@ -7,6 +8,7 @@ import {
   queryCurrentMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   DEFAULT_NOTE_WIDTH,
   NOTE_OVERLAY_CORNER_RADIUS,
@@ -28,6 +30,49 @@ class NoteOverlay extends Overlay {
   text = '';
   globalAlpha = 0;
   themeMode = 'light';
+  _edgeless: EdgelessPageBlockComponent;
+  _disposables!: DisposableGroup;
+  _lastViewportX: number;
+  _lastViewportY: number;
+
+  private _getOverlayText(text: string): string {
+    return text[0].toUpperCase() + text.slice(1);
+  }
+
+  constructor(edgeless: EdgelessPageBlockComponent) {
+    super();
+    this._edgeless = edgeless;
+    this._disposables = new DisposableGroup();
+    this._lastViewportX = edgeless.surface.viewport.viewportX;
+    this._lastViewportY = edgeless.surface.viewport.viewportY;
+    this._disposables.add(
+      this._edgeless.slots.viewportUpdated.on(() => {
+        // get current viewport position
+        const currentViewportX = this._edgeless.surface.viewport.viewportX;
+        const currentViewportY = this._edgeless.surface.viewport.viewportY;
+        // calculate position delta
+        const deltaX = currentViewportX - this._lastViewportX;
+        const deltaY = currentViewportY - this._lastViewportY;
+        // update overlay current position
+        this.x += deltaX;
+        this.y += deltaY;
+        // update last viewport position
+        this._lastViewportX = currentViewportX;
+        this._lastViewportY = currentViewportY;
+        // refresh to show new overlay
+        this._edgeless.surface.refresh();
+      })
+    );
+    this._disposables.add(
+      this._edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
+        // when change note child type, update overlay text
+        if (edgelessTool.type === 'note') {
+          this.text = this._getOverlayText(edgelessTool.tip);
+        }
+      })
+    );
+  }
+
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = this.globalAlpha;
     // Draw the overlay rectangle
@@ -182,11 +227,6 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._draggingArea = null;
   }
 
-  private _getOverlayText() {
-    const text = this.tool.tip;
-    return text[0].toUpperCase() + text.slice(1);
-  }
-
   private _updateOverlayPosition(x: number, y: number) {
     if (!this._noteOverlay) return;
     this._noteOverlay.x = x + NOTE_OVERLAY_OFFSET_X;
@@ -216,8 +256,8 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
     // if mouse is in viewport and move, update overlay pointion and show overlay
     if (this._noteOverlay.globalAlpha === 0) this._noteOverlay.globalAlpha = 1;
-    this._noteOverlay.text = this._getOverlayText();
-    this._noteOverlay.themeMode = queryCurrentMode();
+    // this._noteOverlay.text = this._getOverlayText();
+    // this._noteOverlay.themeMode = queryCurrentMode();
     const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
@@ -236,8 +276,9 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'note') return;
-    this._noteOverlay = new NoteOverlay();
-    this._noteOverlay.text = this._getOverlayText();
+
+    this._noteOverlay = new NoteOverlay(this._edgeless);
+    this._noteOverlay.text = newTool.tip;
     this._noteOverlay.themeMode = queryCurrentMode();
     this._edgeless.surface.viewport.addOverlay(this._noteOverlay);
   }
