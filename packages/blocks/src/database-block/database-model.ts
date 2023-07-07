@@ -116,7 +116,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         if (v.id !== id) {
           return v;
         }
-        return { ...v, ...update(v) };
+        return { ...v, ...update(v) } as DatabaseViewData;
       });
     });
     this.applyViewsUpdate();
