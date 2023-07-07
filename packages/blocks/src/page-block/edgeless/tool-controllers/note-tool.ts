@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { Overlay } from '@blocksuite/phasor';
-import { DisposableGroup } from '@blocksuite/store/index.js';
 
 import {
   type EdgelessTool,
