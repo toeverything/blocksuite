@@ -408,13 +408,12 @@ export class ImportPage extends WithDisposable(LitElement) {
                 }
                 return null;
               };
-              const contentParser = new ContentParser(
-                page,
+              const contentParser = new ContentParser(page, {
                 fetchFileHandler,
                 textStyleHandler,
                 tableParserHandler,
-                tableTitleColumnHandler
-              );
+                tableTitleColumnHandler,
+              });
               const text = (await zipFile.file(file)?.async('string')) || '';
               if (rootId) {
                 pageIds.push(page.id);

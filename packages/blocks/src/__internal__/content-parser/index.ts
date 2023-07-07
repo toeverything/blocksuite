@@ -37,23 +37,28 @@ export class ContentParser {
   };
   private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _htmlParser: HtmlParser;
+  private _imageProxy?: string;
   private urlPattern =
     /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
   constructor(
     page: Page,
-    fetchFileHandler?: FetchFileHandler,
-    textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler,
-    tableTitleColumnHandler?: TableTitleColumnHandler
+    option?: {
+      imageProxy?: string;
+      fetchFileHandler?: FetchFileHandler;
+      textStyleHandler?: TextStyleHandler;
+      tableParserHandler?: TableParserHandler;
+      tableTitleColumnHandler?: TableTitleColumnHandler;
+    }
   ) {
     this._page = page;
+    this._imageProxy = option?.imageProxy;
     this._htmlParser = new HtmlParser(
       this,
       page,
-      fetchFileHandler,
-      textStyleHandler,
-      tableParserHandler,
-      tableTitleColumnHandler
+      option?.fetchFileHandler,
+      option?.textStyleHandler,
+      option?.tableParserHandler,
+      option?.tableTitleColumnHandler
     );
     this._htmlParser.registerParsers();
   }
@@ -144,6 +149,8 @@ export class ContentParser {
         element.style.setProperty('transform', 'none');
       },
       backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      useCORS: this._imageProxy ? false : true,
+      proxy: this._imageProxy,
     };
 
     const nodeElements = edgeless.getSortedElementsByBound(bound);
@@ -192,6 +199,8 @@ export class ContentParser {
         }
       },
       backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      useCORS: this._imageProxy ? false : true,
+      proxy: this._imageProxy,
     };
 
     const data = await html2canvas(
