@@ -287,7 +287,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     >
   ) => {
-    const { page, state, surface, _rotate, _resizeManager, zoom } = this;
+    const { page, state, surface, _rotate, zoom } = this;
     const selectedMap = new Map<string, Selectable>(
       state.selected.map(element => [element.id, element])
     );
