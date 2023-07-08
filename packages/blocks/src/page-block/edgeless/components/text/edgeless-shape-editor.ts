@@ -40,11 +40,6 @@ export class EdgelessShapeEditor extends WithDisposable(ShadowlessElement) {
       const containerHeight =
         this._virgoContainer.getBoundingClientRect().height /
         edgeless.surface.viewport.zoom;
-      console.log(
-        this._virgoContainer.getBoundingClientRect().height,
-        containerHeight,
-        edgeless.surface.viewport.zoom
-      );
       if (containerHeight > element.h) {
         edgeless.surface.updateElement<'shape'>(element.id, {
           xywh: new Bound(
