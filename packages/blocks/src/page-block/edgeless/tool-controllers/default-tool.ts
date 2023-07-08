@@ -5,6 +5,7 @@ import {
   ConnectorElement,
   deserializeXYWH,
   getCommonBound,
+  type HitTestOptions,
   isPointIn,
   type PhasorElement,
   type PhasorElementType,
@@ -100,10 +101,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return this._edgeless.selection.state.active;
   }
 
-  private _pick(x: number, y: number) {
+  private _pick(x: number, y: number, options?: HitTestOptions) {
     const { surface } = this._edgeless;
     const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
-    const selectedShape = surface.pickTop(modelX, modelY);
+    const selectedShape = surface.pickTop(modelX, modelY, options);
     return selectedShape
       ? selectedShape
       : pickTopBlock(this._blocks, modelX, modelY);
@@ -310,24 +311,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDblClick(e: PointerEventState) {
-    const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
-      e.x,
-      e.y
-    );
-    const topElement = this._edgeless.surface
-      .pickByPointWithoutPierce(modelX, modelY)
-      .pop();
-    if (!topElement) {
+    const selected = this._pick(e.x, e.y, {
+      pierce: false,
+    });
+    if (!selected) {
       addText(this._edgeless, e);
       return;
     } else {
-      console.log(topElement);
-      if (topElement instanceof TextElement) {
-        mountTextEditor(topElement, this._edgeless);
+      if (selected instanceof TextElement) {
+        mountTextEditor(selected, this._edgeless);
         return;
       }
-      if (topElement instanceof ShapeElement) {
-        mountShapeEditor(topElement, this._edgeless);
+      if (selected instanceof ShapeElement) {
+        mountShapeEditor(selected, this._edgeless);
         return;
       }
     }

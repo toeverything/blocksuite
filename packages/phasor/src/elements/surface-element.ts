@@ -32,6 +32,7 @@ export interface ISurfaceElementLocalRecord {
 export interface HitTestOptions {
   expand?: number;
   ignoreTransparent?: boolean;
+  pierce?: boolean;
 }
 
 export type ComputedValue = (value: string) => string;

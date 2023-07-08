@@ -22,7 +22,6 @@ import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import { Bound, getCommonBound } from './utils/bound.js';
-import { isPointIn } from './utils/math-utils.js';
 import {
   generateElementId,
   generateKeyBetween,
@@ -272,21 +271,12 @@ export class SurfaceManager {
     return picked;
   }
 
-  pickByPointWithoutPierce(x: number, y: number): SurfaceElement[] {
-    return this._renderer.gridManager
-      .search({
-        x,
-        y,
-        w: 1,
-        h: 1,
-      })
-      .filter(element =>
-        isPointIn(new Bound(element.x, element.y, element.w, element.h), x, y)
-      );
-  }
-
-  pickTop(x: number, y: number): SurfaceElement | null {
-    const results = this.pickByPoint(x, y);
+  pickTop(
+    x: number,
+    y: number,
+    options?: HitTestOptions
+  ): SurfaceElement | null {
+    const results = this.pickByPoint(x, y, options);
     return results[results.length - 1] ?? null;
   }
 

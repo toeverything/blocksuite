@@ -1,6 +1,7 @@
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
+import { isPointIn } from '../../utils/math-utils.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
@@ -106,6 +107,11 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
   }
 
   override hitTest(x: number, y: number, options: HitTestOptions) {
+    const pierce = options.pierce ?? true;
+    if (!pierce) {
+      return isPointIn(this, x, y);
+    }
+
     const { hitTest } = ShapeMethodsMap[this.shapeType];
     options.ignoreTransparent = options.ignoreTransparent ?? true;
     return hitTest.apply(this, [x, y, options]);
