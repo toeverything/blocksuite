@@ -8,8 +8,10 @@ import {
   deserializeXYWH,
   type IVec,
   normalizeDegAngle,
+  normalizeShapeBound,
   type PhasorElement,
   serializeXYWH,
+  ShapeElement,
   TextElement,
 } from '@blocksuite/phasor';
 import { matchFlavours } from '@blocksuite/store';
@@ -320,6 +322,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             fontSize: element.fontSize * p,
           });
         } else {
+          if (element instanceof ShapeElement) {
+            bound = normalizeShapeBound(element, bound);
+          }
           surface.updateElement(id, {
             xywh: bound.serialize(),
           });
@@ -327,7 +332,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     });
 
-    const { currentRect } = _resizeManager;
+    const currentRect = getSelectedRect(state.selected);
     const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
 
     // notes resize observer

@@ -9,11 +9,10 @@ import {
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
-  getTextWidth,
   isRTL,
   wrapText,
 } from '../text/utils.js';
-import { SHAPE_TEXT_FONT_SIZE } from './constants.js';
+import { SHAPE_TEXT_FONT_SIZE, SHAPE_TEXT_PADDING } from './constants.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape, IShapeLocalRecord } from './types.js';
 
@@ -139,7 +138,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     const { render } = ShapeMethodsMap[this.shapeType];
     render(ctx, matrix, rc, this);
     const record = this.getLocalRecord();
-    if (record?.textDisplay) {
+    if (record?.textDisplay ?? true) {
       this._renderText(ctx);
     }
   }
@@ -166,7 +165,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     const yText = text;
     const deltas: ITextDelta[] = (yText.toDelta() as ITextDelta[]).flatMap(
       delta => ({
-        insert: wrapText(delta.insert, font, w - 20),
+        insert: wrapText(delta.insert, font, w - SHAPE_TEXT_PADDING * 2),
         attributes: delta.attributes,
       })
     ) as ITextDelta[];
@@ -182,12 +181,10 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       textVerticalAlign === 'center'
         ? (this.h - lineHeight * lines.length) / 2
         : textVerticalAlign === 'top'
-        ? 10
-        : this.h - lineHeight * lines.length - 10;
+        ? SHAPE_TEXT_PADDING
+        : this.h - lineHeight * lines.length - SHAPE_TEXT_PADDING;
 
     for (const [lineIndex, line] of lines.entries()) {
-      let beforeTextWidth = 0;
-
       for (const delta of line) {
         ctx.save();
 
@@ -211,8 +208,6 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
           horizontalOffset - 2,
           (lineIndex + 1) * lineHeight + verticalOffset
         );
-
-        beforeTextWidth += getTextWidth(str, fontFamily);
 
         if (shouldTemporarilyAttach) {
           ctx.canvas.remove();

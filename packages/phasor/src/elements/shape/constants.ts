@@ -23,3 +23,5 @@ export enum SHAPE_TEXT_FONT_SIZE {
   LARGE = 28,
   XLARGE = 36,
 }
+
+export const SHAPE_TEXT_PADDING = 10;

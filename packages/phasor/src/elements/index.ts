@@ -20,12 +20,16 @@ import { TextElementDefaultProps } from './text/constants.js';
 import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
 
+// eslint-disable-next-line simple-import-sort/exports
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
 export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
 export { TextElement } from './text/text-element.js';
+
+export { normalizeShapeBound } from './shape/utils.js';
+export { SHAPE_TEXT_PADDING } from './shape/constants.js';
 
 export type PhasorElement =
   | ShapeElement

@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { ShapeElement } from '@blocksuite/phasor';
+import { SHAPE_TEXT_PADDING, ShapeElement } from '@blocksuite/phasor';
 import { Bound } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
@@ -165,10 +165,10 @@ export class EdgelessShapeEditor extends WithDisposable(ShadowlessElement) {
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
           : this._element.color,
-        padding: '10px',
+        padding: SHAPE_TEXT_PADDING + 'px',
         textAlign: this._element.textVerticalAlign,
         display: 'grid',
-        gridTemplateColumns: '1fr',
+        gridTemplateColumns: '100%',
         alignItems:
           this._element.textVerticalAlign === 'center'
             ? 'center'
