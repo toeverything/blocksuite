@@ -80,15 +80,21 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       });
       this._vEditor.mount(this._virgoContainer);
 
-      this._virgoContainer.addEventListener(
-        'blur',
-        () => {
-          if (this._keeping) return;
-          this._unmount();
-        },
-        {
-          once: true,
-        }
+      const dispacher = this._edgeless?.dispacher;
+      assertExists(dispacher);
+      this._disposables.addFromEvent(this._virgoContainer, 'blur', () => {
+        if (this._keeping) return;
+        this._unmount();
+      });
+      this._disposables.add(
+        dispacher.add('click', () => {
+          return true;
+        })
+      );
+      this._disposables.add(
+        dispacher.add('doubleClick', () => {
+          return true;
+        })
       );
     });
   }
