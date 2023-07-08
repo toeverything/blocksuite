@@ -111,6 +111,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   private _clearOverlay() {
     if (!this._noteOverlay) return;
 
+    this._noteOverlay.dispose();
     this._edgeless.surface.viewport.removeOverlay(this._noteOverlay);
     this._noteOverlay = null;
     this._edgeless.surface.refresh();

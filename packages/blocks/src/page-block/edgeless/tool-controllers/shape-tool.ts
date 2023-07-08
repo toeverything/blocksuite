@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { Bound, StrokeStyle } from '@blocksuite/phasor';
+import { Bound, type Options, StrokeStyle } from '@blocksuite/phasor';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
@@ -187,14 +187,15 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   private _updateOverlayPosition(x: number, y: number) {
     if (!this._shapeOverlay) return;
-    this._shapeOverlay.x = x;
-    this._shapeOverlay.y = y;
+    this._shapeOverlay.shape.x = x;
+    this._shapeOverlay.shape.y = y;
     this._edgeless.surface.refresh();
   }
 
   private _clearOverlay() {
     if (!this._shapeOverlay) return;
 
+    this._shapeOverlay.dispose();
     this._edgeless.surface.viewport.removeOverlay(this._shapeOverlay);
     this._shapeOverlay = null;
     this._edgeless.surface.refresh();
@@ -203,15 +204,15 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   private _hideOverlay() {
     if (!this._shapeOverlay) return;
 
-    this._shapeOverlay.globalAlpha = 0;
+    this._shapeOverlay.shape.globalAlpha = 0;
     this._edgeless.surface.refresh();
   }
 
   onContainerMouseMove(e: PointerEventState) {
     if (!this._shapeOverlay) return;
     // shpae options, like stroke color, fill color, etc.
-    if (this._shapeOverlay.globalAlpha === 0)
-      this._shapeOverlay.globalAlpha = 1;
+    if (this._shapeOverlay.shape.globalAlpha === 0)
+      this._shapeOverlay.shape.globalAlpha = 1;
     const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
@@ -226,13 +227,29 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'shape') return;
-    this._shapeOverlay = new ShapeOverlay(this._edgeless);
-    // shpae options, like stroke color, fill color, etc.
-    const options = {
-      ...SHAPE_OVERLAY_OPTIONS,
-      stroke: this.tool.strokeColor,
-    };
-    this._shapeOverlay.setShape(newTool.shape, options);
+    console.log(this._shapeOverlay);
+    let x = 0;
+    let y = 0;
+    let globalAlpha = 0;
+    let type = 'rect';
+    let options = SHAPE_OVERLAY_OPTIONS as Options;
+    if (this._shapeOverlay) {
+      x = this._shapeOverlay.shape.x;
+      y = this._shapeOverlay.shape.y;
+      globalAlpha = this._shapeOverlay.shape.globalAlpha;
+      options = this._shapeOverlay.shape.options;
+      this._clearOverlay();
+    }
+
+    type = newTool.shape;
+    this._shapeOverlay = new ShapeOverlay(
+      this._edgeless,
+      x,
+      y,
+      globalAlpha,
+      type,
+      options
+    );
     this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
   }
 }

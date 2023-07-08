@@ -16,19 +16,26 @@ import {
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_OFFSET_X,
   SHAPE_OVERLAY_OFFSET_Y,
-  SHAPE_OVERLAY_OPTIONS,
   SHAPE_OVERLAY_WIDTH,
 } from '../utils/consts.js';
 
 abstract class Shape {
   x: number;
   y: number;
+  type: string;
   globalAlpha: number;
   options: Options;
 
-  constructor(x: number, y: number, globalAlpha: number, options: Options) {
+  constructor(
+    x: number,
+    y: number,
+    type: string,
+    globalAlpha: number,
+    options: Options
+  ) {
     this.x = x;
     this.y = y;
+    this.type = 'rect';
     this.globalAlpha = globalAlpha;
     this.options = options;
   }
@@ -123,15 +130,15 @@ class ShapeFactory {
   ): Shape {
     switch (type) {
       case 'rect':
-        return new RectShape(x, y, globalAlpha, options);
+        return new RectShape(x, y, type, globalAlpha, options);
       case 'triangle':
-        return new TriangleShape(x, y, globalAlpha, options);
+        return new TriangleShape(x, y, type, globalAlpha, options);
       case 'diamond':
-        return new DiamondShape(x, y, globalAlpha, options);
+        return new DiamondShape(x, y, type, globalAlpha, options);
       case 'ellipse':
-        return new EllipseShape(x, y, globalAlpha, options);
+        return new EllipseShape(x, y, type, globalAlpha, options);
       case 'roundedRect':
-        return new RoundedRectShape(x, y, globalAlpha, options);
+        return new RoundedRectShape(x, y, type, globalAlpha, options);
       default:
         throw new Error(`Unknown shape type: ${type}`);
     }
@@ -152,31 +159,28 @@ class ToolOverlay extends Overlay {
     this.lastViewportY = edgeless.surface.viewport.viewportY;
   }
 
+  dispose(): void {
+    this.disposables.dispose();
+  }
+
   render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     noop();
   }
 }
 
 export class ShapeOverlay extends ToolOverlay {
-  private _shape: Shape;
-  private _x: number;
-  private _y: number;
-  private _globalAlpha: number;
-  private _options: Options;
+  public shape: Shape;
 
-  constructor(edgeless: EdgelessPageBlockComponent) {
+  constructor(
+    edgeless: EdgelessPageBlockComponent,
+    x: number,
+    y: number,
+    globalAlpha: number,
+    type: string,
+    options: Options
+  ) {
     super(edgeless);
-    this._x = 0;
-    this._y = 0;
-    this._globalAlpha = 0;
-    this._options = SHAPE_OVERLAY_OPTIONS;
-    this._shape = ShapeFactory.createShape(
-      this._x,
-      this._y,
-      this._globalAlpha,
-      'rect',
-      this._options
-    );
+    this.shape = ShapeFactory.createShape(x, y, globalAlpha, type, options);
     this.disposables.add(
       this.edgeless.slots.viewportUpdated.on(() => {
         // TODO: consoder zoom in zoom out
@@ -187,8 +191,8 @@ export class ShapeOverlay extends ToolOverlay {
         const deltaX = currentViewportX - this.lastViewportX;
         const deltaY = currentViewportY - this.lastViewportY;
         // update overlay current position
-        this.x += deltaX;
-        this.y += deltaY;
+        this.shape.x += deltaX;
+        this.shape.y += deltaY;
         // update last viewport position
         this.lastViewportX = currentViewportX;
         this.lastViewportY = currentViewportY;
@@ -196,64 +200,11 @@ export class ShapeOverlay extends ToolOverlay {
         this.edgeless.surface.refresh();
       })
     );
-    this.disposables.add(
-      this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
-        if (edgelessTool.type !== 'shape') return;
-        this.setShape(edgelessTool.shape, this._options);
-        this.edgeless.surface.refresh();
-      })
-    );
-  }
-
-  get x(): number {
-    return this._x;
-  }
-
-  set x(value: number) {
-    this._x = value;
-    this._shape.x = value;
-  }
-
-  get y(): number {
-    return this._y;
-  }
-
-  set y(value: number) {
-    this._y = value;
-    this._shape.y = value;
-  }
-
-  get globalAlpha(): number {
-    return this._globalAlpha;
-  }
-
-  set globalAlpha(value: number) {
-    this._globalAlpha = value;
-    this._shape.globalAlpha = value;
-  }
-
-  get options(): Options {
-    return this._options;
-  }
-
-  set options(value: Options) {
-    this._options = value;
-    this._shape.options = value;
-  }
-
-  setShape(type: string, options: Options): void {
-    this._shape = ShapeFactory.createShape(
-      this._x,
-      this._y,
-      this._globalAlpha,
-      type,
-      options
-    );
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    ctx.globalAlpha = this._shape.globalAlpha;
-    this._shape.draw(ctx, rc);
+    ctx.globalAlpha = this.shape.globalAlpha;
+    this.shape.draw(ctx, rc);
   }
 }
 
