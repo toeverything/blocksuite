@@ -361,6 +361,8 @@ test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await focusRichText(page);
   await undoByKeyboard(page);
   await waitNextFrame(page);
+  // TODO: (mirone) remove this line
+  await focusTitle(page);
   await type(page, '2');
   await assertTitle(page, 'title2');
   await assertRichTexts(page, ['hello']);

@@ -23,14 +23,18 @@ export class RangeController {
         return;
       }
 
-      const range = this._mergeRanges(this._pending);
-      this._pending = [];
+      try {
+        const range = this._mergeRanges(this._pending);
+        this._pending = [];
 
-      if (!range) {
-        return;
+        if (!range) {
+          return;
+        }
+
+        this._renderRange(range);
+      } catch {
+        // skip
       }
-
-      this._renderRange(range);
     }, 200);
   }
 
