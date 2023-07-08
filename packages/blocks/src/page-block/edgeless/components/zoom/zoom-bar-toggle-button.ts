@@ -99,6 +99,7 @@ export class ZoomBarToggleButton extends LitElement {
           .tooltip=${'Toggle Zoom Tool Bar'}
           .tipPosition=${'right'}
           .active=${this._popperShow}
+          .arrow=${false}
           .activeMode=${'background'}
           @click=${() => this._toggleNoteMenu()}
         >
