@@ -1177,6 +1177,6 @@ export function getLastNoteBlockElement(parent: Element) {
 
 export function getEdgelessCanvasTextEditor(element: Element | Document) {
   return element.querySelector(
-    '[data-edgeless-canvas-text-editor="true"]'
+    'edgeless-text-editor,edgeless-shape-editor'
   ) as EdgelessCanvasTextEditor | null;
 }

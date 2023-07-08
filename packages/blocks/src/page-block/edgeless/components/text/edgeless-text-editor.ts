@@ -139,11 +139,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       });
     }
 
-    return html`<div
-      style=${virgoStyle}
-      data-edgeless-canvas-text-editor="true"
-      class="virgo-container"
-    ></div>`;
+    return html`<div style=${virgoStyle} class="virgo-container"></div>`;
   }
 }
 
