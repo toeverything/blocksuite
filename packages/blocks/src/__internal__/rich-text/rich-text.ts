@@ -245,7 +245,7 @@ export class RichText extends ShadowlessElement {
     this.selection.setSelections(selections, false);
   };
 
-  private _onSelectionChanged = (selections: BaseSelection[]) => {
+  private _onSelectionChanged = async (selections: BaseSelection[]) => {
     if (!this._vEditor) {
       return;
     }
@@ -264,6 +264,8 @@ export class RichText extends ShadowlessElement {
       index: selection.index,
       length: selection.length,
     };
+
+    await this.vEditor?.waitForUpdate();
 
     this._vEditor.setVRange(vRange);
     const range = this._vEditor.toDomRange(vRange);

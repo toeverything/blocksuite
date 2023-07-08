@@ -129,10 +129,9 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     }
     const newRange = this.toDomRange(vRange);
 
-    assertExists(
-      newRange,
-      `Cannot get valid range from vRange: ${JSON.stringify(vRange)}`
-    );
+    if (!newRange) {
+      return;
+    }
 
     selection.removeAllRanges();
     selection.addRange(newRange);

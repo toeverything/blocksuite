@@ -96,13 +96,6 @@ export class RangeController {
       return;
     }
 
-    if (
-      !document.contains(range.startContainer) ||
-      !document.contains(range.endContainer)
-    ) {
-      return;
-    }
-
     selection.removeAllRanges();
     selection.addRange(range);
   }
