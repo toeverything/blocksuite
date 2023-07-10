@@ -23,7 +23,10 @@ export const pageBlockSpec: LitBlockSpec = {
   service: DefaultPageService,
   view: {
     component: literal`affine-default-page`,
-    widgets: [literal`affine-slash-menu-widget`],
+    widgets: [
+      literal`affine-slash-menu-widget`,
+      literal`affine-linked-page-widget`,
+    ],
   },
 };
 
@@ -32,6 +35,9 @@ export const edgelessBlockSpec: LitBlockSpec = {
   service: EdgelessPageService,
   view: {
     component: literal`affine-edgeless-page`,
-    widgets: [literal`affine-slash-menu-widget`],
+    widgets: [
+      literal`affine-slash-menu-widget`,
+      literal`affine-linked-page-widget`,
+    ],
   },
 };
