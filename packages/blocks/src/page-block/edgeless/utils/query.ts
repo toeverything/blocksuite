@@ -12,7 +12,7 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import { GRID_GAP_MAX, GRID_GAP_MIN } from '@blocksuite/phasor/consts.js';
+import { GRID_GAP_MAX, GRID_GAP_MIN } from '@blocksuite/phasor';
 import { type Page } from '@blocksuite/store';
 
 import {
