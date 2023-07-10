@@ -282,7 +282,7 @@ export class Workspace {
     const sanitize = async (props: Record<string, unknown>) => {
       const result: Record<string, unknown> = {};
 
-      //TODO: https://github.com/toeverything/blocksuite/issues/2939
+      // TODO: https://github.com/toeverything/blocksuite/issues/2939
       if (props['sys:flavour'] === 'affine:surface' && props['prop:elements']) {
         Object.values(props['prop:elements']).forEach(element => {
           const _element = element as Record<string, unknown>;

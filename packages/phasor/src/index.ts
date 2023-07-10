@@ -6,6 +6,7 @@ export {
   ZOOM_MIN,
   ZOOM_STEP,
 } from './consts.js';
+export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export type { Controller } from './elements/connector/types.js';
 export { type Connection, ConnectorMode } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';
@@ -23,6 +24,7 @@ export {
   almostEqual,
   clamp,
   getBoundsWithRotation,
+  getPointFromBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   getQuadBoundsWithRotation,
   getSvgPathFromStroke,
@@ -32,11 +34,14 @@ export {
   lineIntersects,
   linePolygonIntersects,
   normalizeDegAngle,
+  polygonGetPointTangent,
   polygonNearestPoint,
   polygonPointDistance,
   polyLineNearestPoint,
   sign,
+  toRadian,
 } from './utils/math-utils.js';
+export { PointLocation } from './utils/point-location.js';
 export * from './utils/std.js';
 export { type IVec, Vec } from './utils/vec.js';
 export * from './utils/xywh.js';

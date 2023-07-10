@@ -225,6 +225,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${'Fit to screen'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top-end'}
+          .arrow=${!this._isVerticalBar()}
           @click=${() => this._zoomToFit()}
         >
           ${ViewBarIcon}
@@ -232,6 +233,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${'Zoom out'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
+          .arrow=${!this._isVerticalBar()}
           @click=${() => this._setZoomByStep(-ZOOM_STEP)}
         >
           ${MinusIcon}
@@ -242,6 +244,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${'Zoom in'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
+          .arrow=${!this._isVerticalBar()}
           @click=${() => this._setZoomByStep(ZOOM_STEP)}
         >
           ${PlusIcon}

@@ -1,4 +1,5 @@
 import { assertExists, sleep } from '@blocksuite/global/utils';
+import { css } from 'lit';
 
 import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { isControlledKeyboardEvent } from '../__internal__/utils/common.js';
@@ -194,3 +195,14 @@ export const createKeydownObserver = ({
     });
   }
 };
+
+export const scrollbarStyle = css`
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: #b1b1b1;
+  }
+`;

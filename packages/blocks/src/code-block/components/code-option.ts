@@ -6,7 +6,7 @@ import {
 } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
@@ -54,7 +54,8 @@ export function CodeOptionTemplate({
       @mouseover=${() => hoverState.emit(true)}
       @mouseout=${() => hoverState.emit(false)}
     >
-      <format-bar-button
+      <icon-button
+        size="32px"
         class="has-tool-tip"
         data-testid="copy-button"
         @click=${() => copyCode(model as CodeBlockModel)}
@@ -63,8 +64,9 @@ export function CodeOptionTemplate({
         <tool-tip inert tip-position="right" role="tooltip"
           >Copy to Clipboard</tool-tip
         >
-      </format-bar-button>
-      <format-bar-button
+      </icon-button>
+      <icon-button
+        size="32px"
         class="has-tool-tip"
         data-testid="wrap-button"
         ?active=${wrap}
@@ -72,10 +74,11 @@ export function CodeOptionTemplate({
       >
         ${wrap ? CancelWrapIcon : WrapIcon}
         <tool-tip inert tip-position="right" role="tooltip">Wrap code</tool-tip>
-      </format-bar-button>
+      </icon-button>
       ${readonly
-        ? ''
-        : html`<format-bar-button
+        ? nothing
+        : html`<icon-button
+            size="32px"
             data-testid="delete-button"
             class="has-tool-tip"
             @click=${() => {
@@ -87,7 +90,7 @@ export function CodeOptionTemplate({
             <tool-tip inert tip-position="right" role="tooltip"
               >Delete</tool-tip
             >
-          </format-bar-button>`}
+          </icon-button>`}
     </div>
   `;
 }
