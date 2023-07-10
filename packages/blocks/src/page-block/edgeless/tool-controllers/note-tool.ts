@@ -2,12 +2,14 @@ import type { PointerEventState } from '@blocksuite/block-std';
 
 import {
   type EdgelessTool,
+  hasClassNameInList,
   type NoteTool,
   queryCurrentMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
+  EXCLUDING_MOUSE_OUT_CLASS_LIST,
   NOTE_OVERLAY_OFFSET_X,
   NOTE_OVERLAY_OFFSET_Y,
 } from '../utils/consts.js';
@@ -102,8 +104,8 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
   private _updateOverlayPosition(x: number, y: number) {
     if (!this._noteOverlay) return;
-    this._noteOverlay.x = x + NOTE_OVERLAY_OFFSET_X;
-    this._noteOverlay.y = y + NOTE_OVERLAY_OFFSET_Y;
+    this._noteOverlay.x = x;
+    this._noteOverlay.y = y;
     this._edgeless.surface.refresh();
   }
 
@@ -135,6 +137,15 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   }
 
   onContainerMouseOut(e: PointerEventState) {
+    // should not hide the overlay when pointer on the area of other notes
+    if (
+      e.raw.relatedTarget &&
+      hasClassNameInList(
+        e.raw.relatedTarget as Element,
+        EXCLUDING_MOUSE_OUT_CLASS_LIST
+      )
+    )
+      return;
     this._hideOverlay();
   }
 

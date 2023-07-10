@@ -1175,3 +1175,10 @@ export function hasDatabase(elements: Element[]) {
 export function getLastNoteBlockElement(parent: Element) {
   return parent.querySelector('affine-note:last-of-type');
 }
+
+/**
+ * Return `true` if the element has class name in the class list.
+ */
+export function hasClassNameInList(element: Element, classList: string[]) {
+  return classList.some(className => element.classList.contains(className));
+}

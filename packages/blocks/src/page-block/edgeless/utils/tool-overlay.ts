@@ -10,6 +10,8 @@ import {
   NOTE_OVERLAY_DARK_BACKGROUND_COLOR,
   NOTE_OVERLAY_HEIGHT,
   NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR,
+  NOTE_OVERLAY_OFFSET_X,
+  NOTE_OVERLAY_OFFSET_Y,
   NOTE_OVERLAY_STOKE_COLOR,
   NOTE_OVERLAY_TEXT_COLOR,
   NOTE_OVERLAY_WIDTH,
@@ -23,20 +25,12 @@ abstract class Shape {
   x: number;
   y: number;
   type: string;
-  globalAlpha: number;
   options: Options;
 
-  constructor(
-    x: number,
-    y: number,
-    type: string,
-    globalAlpha: number,
-    options: Options
-  ) {
+  constructor(x: number, y: number, type: string, options: Options) {
     this.x = x;
     this.y = y;
     this.type = 'rect';
-    this.globalAlpha = globalAlpha;
     this.options = options;
   }
 
@@ -124,21 +118,20 @@ class ShapeFactory {
   static createShape(
     x: number,
     y: number,
-    globalAlpha: number,
     type: string,
     options: Options
   ): Shape {
     switch (type) {
       case 'rect':
-        return new RectShape(x, y, type, globalAlpha, options);
+        return new RectShape(x, y, type, options);
       case 'triangle':
-        return new TriangleShape(x, y, type, globalAlpha, options);
+        return new TriangleShape(x, y, type, options);
       case 'diamond':
-        return new DiamondShape(x, y, type, globalAlpha, options);
+        return new DiamondShape(x, y, type, options);
       case 'ellipse':
-        return new EllipseShape(x, y, type, globalAlpha, options);
+        return new EllipseShape(x, y, type, options);
       case 'roundedRect':
-        return new RoundedRectShape(x, y, type, globalAlpha, options);
+        return new RoundedRectShape(x, y, type, options);
       default:
         throw new Error(`Unknown shape type: ${type}`);
     }
@@ -146,17 +139,30 @@ class ShapeFactory {
 }
 
 class ToolOverlay extends Overlay {
+  public x: number;
+  public y: number;
+  public globalAlpha: number;
   protected edgeless: EdgelessPageBlockComponent;
   protected disposables!: DisposableGroup;
-  protected lastViewportX: number;
-  protected lastViewportY: number;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
+    this.x = 0;
+    this.y = 0;
+    this.globalAlpha = 0;
     this.edgeless = edgeless;
     this.disposables = new DisposableGroup();
-    this.lastViewportX = edgeless.surface.viewport.viewportX;
-    this.lastViewportY = edgeless.surface.viewport.viewportY;
+    this.disposables.add(
+      this.edgeless.slots.viewportUpdated.on(() => {
+        // when viewport is updated, we should keep the overlay in the same position
+        // to get last mouse position and convert it to model coordinates
+        const lastX = this.edgeless.selection.lastMousePos.x;
+        const lastY = this.edgeless.selection.lastMousePos.y;
+        const [x, y] = this.edgeless.surface.toModelCoord(lastX, lastY);
+        this.x = x;
+        this.y = y;
+      })
+    );
   }
 
   dispose(): void {
@@ -173,47 +179,24 @@ export class ShapeOverlay extends ToolOverlay {
 
   constructor(
     edgeless: EdgelessPageBlockComponent,
-    x: number,
-    y: number,
-    globalAlpha: number,
     type: string,
     options: Options
   ) {
     super(edgeless);
-    this.shape = ShapeFactory.createShape(x, y, globalAlpha, type, options);
-    this.disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => {
-        // TODO: consoder zoom in zoom out
-        // get current viewport position
-        const currentViewportX = this.edgeless.surface.viewport.viewportX;
-        const currentViewportY = this.edgeless.surface.viewport.viewportY;
-        // calculate position delta
-        const deltaX = currentViewportX - this.lastViewportX;
-        const deltaY = currentViewportY - this.lastViewportY;
-        // update overlay current position
-        this.shape.x += deltaX;
-        this.shape.y += deltaY;
-        // update last viewport position
-        this.lastViewportX = currentViewportX;
-        this.lastViewportY = currentViewportY;
-        // refresh to show new overlay
-        this.edgeless.surface.refresh();
-      })
-    );
+    this.shape = ShapeFactory.createShape(this.x, this.y, type, options);
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
-    ctx.globalAlpha = this.shape.globalAlpha;
+    ctx.globalAlpha = this.globalAlpha;
+    this.shape.x = this.x;
+    this.shape.y = this.y;
     this.shape.draw(ctx, rc);
   }
 }
 
 export class NoteOverlay extends ToolOverlay {
-  x: number;
-  y: number;
-  globalAlpha: number;
-  text = '';
-  themeMode = 'light';
+  public text = '';
+  public themeMode = 'light';
 
   private _getOverlayText(text: string): string {
     return text[0].toUpperCase() + text.slice(1);
@@ -221,28 +204,7 @@ export class NoteOverlay extends ToolOverlay {
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super(edgeless);
-    this.x = 0;
-    this.y = 0;
     this.globalAlpha = 0;
-    this.disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => {
-        console.log('viewportUpdated');
-        // get current viewport position
-        const currentViewportX = this.edgeless.surface.viewport.viewportX;
-        const currentViewportY = this.edgeless.surface.viewport.viewportY;
-        // calculate position delta
-        const deltaX = currentViewportX - this.lastViewportX;
-        const deltaY = currentViewportY - this.lastViewportY;
-        // update overlay current position
-        this.x += deltaX;
-        this.y += deltaY;
-        // update last viewport position
-        this.lastViewportX = currentViewportX;
-        this.lastViewportY = currentViewportY;
-        // refresh to show new overlay
-        this.edgeless.surface.refresh();
-      })
-    );
     this.disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
         // when change note child type, update overlay text
@@ -255,6 +217,8 @@ export class NoteOverlay extends ToolOverlay {
 
   override render(ctx: CanvasRenderingContext2D): void {
     ctx.globalAlpha = this.globalAlpha;
+    const overlayX = this.x + NOTE_OVERLAY_OFFSET_X;
+    const overlayY = this.y + NOTE_OVERLAY_OFFSET_Y;
     // Draw the overlay rectangle
     ctx.strokeStyle = NOTE_OVERLAY_STOKE_COLOR;
     ctx.fillStyle =
@@ -263,43 +227,43 @@ export class NoteOverlay extends ToolOverlay {
         : NOTE_OVERLAY_DARK_BACKGROUND_COLOR;
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(this.x + NOTE_OVERLAY_CORNER_RADIUS, this.y);
+    ctx.moveTo(overlayX + NOTE_OVERLAY_CORNER_RADIUS, overlayY);
     ctx.lineTo(
-      this.x + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
-      this.y
+      overlayX + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
+      overlayY
     );
     ctx.quadraticCurveTo(
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y,
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y + NOTE_OVERLAY_CORNER_RADIUS
-    );
-    ctx.lineTo(
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
-    );
-    ctx.quadraticCurveTo(
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y + NOTE_OVERLAY_HEIGHT,
-      this.x + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
-      this.y + NOTE_OVERLAY_HEIGHT
+      overlayX + NOTE_OVERLAY_WIDTH,
+      overlayY,
+      overlayX + NOTE_OVERLAY_WIDTH,
+      overlayY + NOTE_OVERLAY_CORNER_RADIUS
     );
     ctx.lineTo(
-      this.x + NOTE_OVERLAY_CORNER_RADIUS,
-      this.y + NOTE_OVERLAY_HEIGHT
+      overlayX + NOTE_OVERLAY_WIDTH,
+      overlayY + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
     );
     ctx.quadraticCurveTo(
-      this.x,
-      this.y + NOTE_OVERLAY_HEIGHT,
-      this.x,
-      this.y + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
+      overlayX + NOTE_OVERLAY_WIDTH,
+      overlayY + NOTE_OVERLAY_HEIGHT,
+      overlayX + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
+      overlayY + NOTE_OVERLAY_HEIGHT
     );
-    ctx.lineTo(this.x, this.y + NOTE_OVERLAY_CORNER_RADIUS);
+    ctx.lineTo(
+      overlayX + NOTE_OVERLAY_CORNER_RADIUS,
+      overlayY + NOTE_OVERLAY_HEIGHT
+    );
     ctx.quadraticCurveTo(
-      this.x,
-      this.y,
-      this.x + NOTE_OVERLAY_CORNER_RADIUS,
-      this.y
+      overlayX,
+      overlayY + NOTE_OVERLAY_HEIGHT,
+      overlayX,
+      overlayY + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
+    );
+    ctx.lineTo(overlayX, overlayY + NOTE_OVERLAY_CORNER_RADIUS);
+    ctx.quadraticCurveTo(
+      overlayX,
+      overlayY,
+      overlayX + NOTE_OVERLAY_CORNER_RADIUS,
+      overlayY
     );
     ctx.closePath();
     ctx.stroke();
@@ -319,6 +283,6 @@ export class NoteOverlay extends ToolOverlay {
       ctx.font = `${fontSize}px Arial`;
     }
 
-    ctx.fillText(this.text, this.x + 10, this.y + NOTE_OVERLAY_HEIGHT / 2);
+    ctx.fillText(this.text, overlayX + 10, overlayY + NOTE_OVERLAY_HEIGHT / 2);
   }
 }

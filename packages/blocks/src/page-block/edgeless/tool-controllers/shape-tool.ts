@@ -1,15 +1,16 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { Bound, type Options, StrokeStyle } from '@blocksuite/phasor';
+import { Bound, StrokeStyle } from '@blocksuite/phasor';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
-import { noop } from '../../../__internal__/index.js';
+import { hasClassNameInList, noop } from '../../../__internal__/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../components/component-toolbar/change-shape-button.js';
 import { isTransparent } from '../components/panel/color-panel.js';
 import {
+  EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_OPTIONS,
   SHAPE_OVERLAY_WIDTH,
@@ -42,6 +43,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
+    console.log('modelX: ', modelX, 'modelY: ', modelY);
     const bound = new Bound(modelX, modelY, width, height);
     const { shape, fillColor, strokeColor } = this.tool;
 
@@ -62,6 +64,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
+    console.log('x: ', e.x, 'y: ', e.y);
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     this._clearOverlay();
 
@@ -187,8 +190,8 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   private _updateOverlayPosition(x: number, y: number) {
     if (!this._shapeOverlay) return;
-    this._shapeOverlay.shape.x = x;
-    this._shapeOverlay.shape.y = y;
+    this._shapeOverlay.x = x;
+    this._shapeOverlay.y = y;
     this._edgeless.surface.refresh();
   }
 
@@ -204,20 +207,28 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   private _hideOverlay() {
     if (!this._shapeOverlay) return;
 
-    this._shapeOverlay.shape.globalAlpha = 0;
+    this._shapeOverlay.globalAlpha = 0;
     this._edgeless.surface.refresh();
   }
 
   onContainerMouseMove(e: PointerEventState) {
     if (!this._shapeOverlay) return;
     // shpae options, like stroke color, fill color, etc.
-    if (this._shapeOverlay.shape.globalAlpha === 0)
-      this._shapeOverlay.shape.globalAlpha = 1;
+    if (this._shapeOverlay.globalAlpha === 0)
+      this._shapeOverlay.globalAlpha = 1;
     const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
 
   onContainerMouseOut(e: PointerEventState) {
+    if (
+      e.raw.relatedTarget &&
+      hasClassNameInList(
+        e.raw.relatedTarget as Element,
+        EXCLUDING_MOUSE_OUT_CLASS_LIST
+      )
+    )
+      return;
     this._hideOverlay();
   }
 
@@ -227,27 +238,12 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'shape') return;
-    console.log(this._shapeOverlay);
-    let x = 0;
-    let y = 0;
-    let globalAlpha = 0;
-    let type = 'rect';
-    let options = SHAPE_OVERLAY_OPTIONS as Options;
-    if (this._shapeOverlay) {
-      x = this._shapeOverlay.shape.x;
-      y = this._shapeOverlay.shape.y;
-      globalAlpha = this._shapeOverlay.shape.globalAlpha;
-      options = this._shapeOverlay.shape.options;
-      this._clearOverlay();
-    }
+    this._clearOverlay();
 
-    type = newTool.shape;
+    const options = SHAPE_OVERLAY_OPTIONS;
     this._shapeOverlay = new ShapeOverlay(
       this._edgeless,
-      x,
-      y,
-      globalAlpha,
-      type,
+      newTool.shape,
       options
     );
     this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
