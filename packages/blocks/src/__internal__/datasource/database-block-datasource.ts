@@ -120,10 +120,8 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       type: toType,
       data: result.column,
     }));
-    console.log(result);
     const cells: Record<string, unknown> = {};
     currentCells.forEach((value, i) => {
-      console.log(value, result.cells[i]);
       if (value != null || result.cells[i] != null) {
         cells[rows[i]] = result.cells[i];
       }

@@ -32,7 +32,6 @@ export class AllPageDatasource extends BaseDataSource {
       type: textHelper.type,
       getValue: page => page.meta.title,
       setValue: (page, value) => {
-        console.log(value);
         page.meta.title = `${value ?? ''}`;
       },
     },

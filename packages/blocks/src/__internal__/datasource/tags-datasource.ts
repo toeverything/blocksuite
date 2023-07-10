@@ -153,7 +153,6 @@ export class TagsDatasource extends BaseDataSource {
         color: getTagColor(),
       },
     ]);
-    console.log(this.tags);
     return id;
   }
 
