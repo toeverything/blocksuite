@@ -22,10 +22,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../../components/menu/menu.js';
-import type { InsertPosition } from '../../../database-model.js';
-import { insertPositionToIndex } from '../../../database-model.js';
+import type { InsertPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';
+import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { getTableContainer } from '../../table-view.js';
 import type {

@@ -10,10 +10,11 @@ import { html, literal, unsafeStatic } from 'lit/static-html.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
-import type { BlockOperation, DatabaseBlockModel } from './database-model.js';
+import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
 import type { TableViewManager } from './table/table-view-manager.js';
 import { DatabaseTableViewManager } from './table/table-view-manager.js';
+import type { BlockOperation } from './types.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {

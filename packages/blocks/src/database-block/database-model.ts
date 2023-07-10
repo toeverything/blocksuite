@@ -9,6 +9,8 @@ import type {
 import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
 import type { Cell, Column } from './table/types.js';
+import type { ColumnUpdater, InsertPosition } from './types.js';
+import { insertPositionToIndex } from './utils/insert.js';
 
 type Props = {
   views: DatabaseViewData[];
@@ -23,41 +25,6 @@ type SerializedCells = {
     // column
     [key: string]: Cell;
   };
-};
-export type ColumnUpdater<T extends Column = Column> = (data: T) => Partial<T>;
-export type ColumnDataUpdater<
-  Data extends Record<string, unknown> = Record<string, unknown>
-> = (data: Data) => Partial<Data>;
-export type InsertPosition =
-  | 'end'
-  | 'start'
-  | {
-      id: string;
-      before: boolean;
-    };
-export const insertPositionToIndex = <
-  T extends {
-    id: string;
-  }
->(
-  position: InsertPosition,
-  arr: T[]
-): number => {
-  if (typeof position === 'object') {
-    const index = arr.findIndex(v => v.id === position.id);
-    return index + (position.before ? 0 : 1);
-  }
-  if (position == null || position === 'start') {
-    return 0;
-  }
-  if (position === 'end') {
-    return arr.length;
-  }
-  return arr.findIndex(v => v.id === position) + 1;
-};
-export type BlockOperation = {
-  copy: () => void;
-  delete: () => void;
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<Props> {

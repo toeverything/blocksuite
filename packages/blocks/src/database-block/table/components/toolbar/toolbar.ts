@@ -23,7 +23,7 @@ import { firstFilterByRef } from '../../../common/ast.js';
 import { columnManager } from '../../../common/column-manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
-import type { InsertPosition } from '../../../database-model.js';
+import type { InsertPosition } from '../../../types.js';
 import type { TableViewManager } from '../../table-view-manager.js';
 import { initAddNewRecordHandlers } from './index.js';
 

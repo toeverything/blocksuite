@@ -1,16 +1,13 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { undefined } from 'zod';
 
 import {
   columnManager,
   multiSelectHelper,
 } from '../../database-block/common/column-manager.js';
-import type {
-  DatabaseBlockModel,
-  InsertPosition,
-} from '../../database-block/database-model.js';
-import { insertPositionToIndex } from '../../database-block/database-model.js';
+import type { DatabaseBlockModel } from '../../database-block/database-model.js';
+import type { InsertPosition } from '../../database-block/index.js';
+import { insertPositionToIndex } from '../../database-block/utils/insert.js';
 import { BaseDataSource } from './base.js';
 import type { DatabaseBlockDatasourceConfig } from './datasource-manager.js';
 
@@ -123,8 +120,10 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       type: toType,
       data: result.column,
     }));
+    console.log(result);
     const cells: Record<string, unknown> = {};
     currentCells.forEach((value, i) => {
+      console.log(value, result.cells[i]);
       if (value != null || result.cells[i] != null) {
         cells[rows[i]] = result.cells[i];
       }

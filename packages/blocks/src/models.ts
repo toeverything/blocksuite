@@ -9,6 +9,7 @@ import {
   type CodeBlockModel,
   CodeBlockSchema,
 } from './code-block/code-model.js';
+import type { DataViewBlockModel } from './data-view-block/index.js';
 import { DataViewBlockSchema } from './data-view-block/index.js';
 import type { DatabaseBlockModel } from './database-block/database-model.js';
 import { DatabaseBlockSchema } from './database-block/database-model.js';
@@ -70,6 +71,7 @@ export type BlockSchemas = {
   'affine:image': ImageBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
+  'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
 };
 

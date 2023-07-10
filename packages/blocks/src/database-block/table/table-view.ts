@@ -17,8 +17,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import type { BlockOperation, InsertPosition } from '../database-model.js';
-import { insertPositionToIndex } from '../database-model.js';
+import type { BlockOperation, InsertPosition } from '../types.js';
+import { insertPositionToIndex } from '../utils/insert.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection/selection.js';

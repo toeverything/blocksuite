@@ -1,7 +1,7 @@
-import type { DatabaseBlockModel, InsertPosition } from '../database-model.js';
-import { insertPositionToIndex } from '../database-model.js';
+import type { DatabaseBlockModel } from '../database-model.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
-import type { Column } from '../types.js';
+import type { Column, InsertPosition } from '../types.js';
+import { insertPositionToIndex } from '../utils/insert.js';
 import type { FilterGroup } from './ast.js';
 
 export type TableViewColumn = {

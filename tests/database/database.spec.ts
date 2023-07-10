@@ -131,6 +131,7 @@ test('should rich-text column support soft enter', async ({ page }) => {
   await pressArrowRight(page);
   await pressArrowLeft(page);
   await pressShiftEnter(page);
+  await pressEnter(page);
   await assertDatabaseCellRichTexts(page, { text: '12\n3' });
 });
 
@@ -472,7 +473,7 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
   );
   const rows = getDatabaseBodyRows(page);
   expect(await rows.count()).toBe(3);
-
+  await waitNextFrame(page, 50);
   await type(page, '1');
   await waitNextFrame(page);
   await assertDatabaseTitleColumnText(page, '1');
