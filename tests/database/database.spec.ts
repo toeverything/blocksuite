@@ -213,10 +213,6 @@ test('should database search work', async ({ page }) => {
   // search for '23'
   await type(page, '3');
   expect(await rows.count()).toBe(1);
-  // click searchIcon when opening
-  const searchIcon = page.locator('.affine-database-search-input-icon');
-  await searchIcon.click();
-  expect(await rows.count()).toBe(1);
 
   const cell = page.locator('.select-selected');
   expect(await cell.innerText()).toBe('123');

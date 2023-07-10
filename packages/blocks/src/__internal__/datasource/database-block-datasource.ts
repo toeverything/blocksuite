@@ -1,5 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { undefined } from 'zod';
 
 import {
   columnManager,
@@ -10,16 +11,17 @@ import type {
   InsertPosition,
 } from '../../database-block/database-model.js';
 import { insertPositionToIndex } from '../../database-block/database-model.js';
-import type { DataSource } from '../../database-block/table/table-view-manager.js';
+import { BaseDataSource } from './base.js';
 import type { DatabaseBlockDatasourceConfig } from './datasource-manager.js';
 
-export class DatabaseBlockDatasource implements DataSource {
+export class DatabaseBlockDatasource extends BaseDataSource {
   private _model: DatabaseBlockModel;
 
   constructor(
     private root: BlockSuiteRoot,
     config: DatabaseBlockDatasourceConfig
   ) {
+    super();
     this._model = root.page.workspace
       .getPage(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
@@ -71,12 +73,19 @@ export class DatabaseBlockDatasource implements DataSource {
     }
     return this._model.getCell(rowId, propertyId)?.value;
   }
+  private newColumnName() {
+    let i = 1;
+    while (this._model.columns.find(column => column.name === `Column ${i}`)) {
+      i++;
+    }
+    return `Column ${i}`;
+  }
 
   public propertyAdd(insertPosition: InsertPosition): string {
     this._model.page.captureSync();
     return this._model.addColumn(
       insertPosition,
-      multiSelectHelper.create('Column')
+      multiSelectHelper.create(this.newColumnName())
     );
   }
 
@@ -168,5 +177,16 @@ export class DatabaseBlockDatasource implements DataSource {
     this._model.page.updateBlock(this._model, {
       children: this._model.children.filter(v => !ids.includes(v.id)),
     });
+  }
+
+  public override captureSync(): void {
+    this._model.page.captureSync();
+  }
+
+  public override propertyGetDefaultWidth(propertyId: string): number {
+    if (this.propertyGetType(propertyId) === 'title') {
+      return 432;
+    }
+    return super.propertyGetDefaultWidth(propertyId);
   }
 }

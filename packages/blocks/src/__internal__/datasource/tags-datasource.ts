@@ -1,4 +1,4 @@
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { Workspace } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
@@ -13,10 +13,10 @@ import {
   textHelper,
 } from '../../database-block/common/column-manager.js';
 import type { InsertPosition } from '../../database-block/index.js';
-import type { DataSource } from '../../database-block/table/table-view-manager.js';
+import { BaseDataSource } from './base.js';
 import type { TagsDatasourceConfig } from './datasource-manager.js';
 
-export class TagsDatasource implements DataSource {
+export class TagsDatasource extends BaseDataSource {
   private meta: Workspace['meta'];
 
   public get rows(): string[] {
@@ -78,6 +78,7 @@ export class TagsDatasource implements DataSource {
   }
 
   constructor(root: BlockSuiteRoot, config: TagsDatasourceConfig) {
+    super();
     this.meta = root.page.workspace.meta;
     root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
   }
@@ -87,10 +88,10 @@ export class TagsDatasource implements DataSource {
     propertyId: string,
     value: unknown
   ): void {
-    this.propertiesMap[propertyId]?.setValue?.(
-      this.tags.find(v => v.id === rowId)!,
-      value
-    );
+    const tag = this.tags.find(v => v.id === rowId);
+    if (tag) {
+      this.propertiesMap[propertyId]?.setValue?.(tag, value);
+    }
   }
 
   public cellGetRenderValue(rowId: string, propertyId: string): unknown {
@@ -98,9 +99,9 @@ export class TagsDatasource implements DataSource {
   }
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
-    return this.propertiesMap[propertyId]?.getValue(
-      this.tags.find(v => v.id === rowId)!
-    );
+    const tag = this.tags.find(v => v.id === rowId);
+    assertExists(tag);
+    return this.propertiesMap[propertyId]?.getValue(tag);
   }
 
   public propertyAdd(insertPosition: InsertPosition): string {

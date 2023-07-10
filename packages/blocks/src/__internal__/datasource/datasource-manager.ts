@@ -1,8 +1,8 @@
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
-import type { DataSource } from '../../database-block/table/table-view-manager.js';
 import { AllPageDatasource } from './all-page-datasource.js';
+import type { DataSource } from './base.js';
 import { DatabaseBlockDatasource } from './database-block-datasource.js';
 import { TagsDatasource } from './tags-datasource.js';
 

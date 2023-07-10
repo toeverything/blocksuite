@@ -40,6 +40,7 @@ import {
   formatDate,
   insertContent,
   insideDatabase,
+  insideDataView,
   type SlashItem,
 } from './utils.js';
 
@@ -326,14 +327,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         alias: ['table'],
         icon: DatabaseKanbanViewIcon20,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_database')) {
+          if (!model.page.awarenessStore.getFlag('enable_data_view')) {
             return false;
           }
-          if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
+          if (!model.page.schema.flavourSchemaMap.has('affine:data-view')) {
             return false;
           }
-          if (insideDatabase(model)) {
-            // You can't add a database block inside another database block
+          if (insideDataView(model)) {
             return false;
           }
           return true;

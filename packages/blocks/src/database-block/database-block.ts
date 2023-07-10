@@ -7,14 +7,12 @@ import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
+import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
 import type { BlockOperation, DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
-import type {
-  DataSource,
-  TableViewManager,
-} from './table/table-view-manager.js';
+import type { TableViewManager } from './table/table-view-manager.js';
 import { DatabaseTableViewManager } from './table/table-view-manager.js';
 
 @customElement('affine-database')

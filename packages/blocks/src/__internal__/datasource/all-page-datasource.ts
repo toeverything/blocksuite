@@ -1,4 +1,4 @@
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store';
 
@@ -8,10 +8,10 @@ import {
   textHelper,
 } from '../../database-block/common/column-manager.js';
 import type { InsertPosition } from '../../database-block/index.js';
-import type { DataSource } from '../../database-block/table/table-view-manager.js';
+import { BaseDataSource } from './base.js';
 import type { AllPageDatasourceConfig } from './datasource-manager.js';
 
-export class AllPageDatasource implements DataSource {
+export class AllPageDatasource extends BaseDataSource {
   private workspace: Workspace;
 
   public get rows(): string[] {
@@ -61,6 +61,7 @@ export class AllPageDatasource implements DataSource {
   }
 
   constructor(root: BlockSuiteRoot, config: AllPageDatasourceConfig) {
+    super();
     this.workspace = root.page.workspace;
     root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
   }
@@ -70,10 +71,9 @@ export class AllPageDatasource implements DataSource {
     propertyId: string,
     value: unknown
   ): void {
-    this.propertiesMap[propertyId]?.setValue?.(
-      this.workspace.getPage(rowId)!,
-      value
-    );
+    const page = this.workspace.getPage(rowId);
+    assertExists(page);
+    this.propertiesMap[propertyId]?.setValue?.(page, value);
   }
 
   public cellGetRenderValue(rowId: string, propertyId: string): unknown {
@@ -81,9 +81,9 @@ export class AllPageDatasource implements DataSource {
   }
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
-    return this.propertiesMap[propertyId]?.getValue(
-      this.workspace.getPage(rowId)!
-    );
+    const page = this.workspace.getPage(rowId);
+    assertExists(page);
+    return this.propertiesMap[propertyId]?.getValue(page);
   }
 
   public propertyAdd(insertPosition: InsertPosition): string {

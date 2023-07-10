@@ -250,9 +250,10 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   };
   preventBlur = false;
   private _onSearchBlur = (e: Event) => {
-    if (!this.preventBlur) {
-      this.showSearch = false;
+    if (this._searchInput.value || this.preventBlur) {
+      return;
     }
+    this.showSearch = false;
   };
 
   private _onSearchKeydown = (event: KeyboardEvent) => {
@@ -268,6 +269,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   private _clearSearch = () => {
     this._searchInput.value = '';
+    this.view.setSearch('');
     this.preventBlur = true;
     setTimeout(() => {
       this.preventBlur = false;

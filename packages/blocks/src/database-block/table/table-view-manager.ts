@@ -1,5 +1,6 @@
 import { Slot } from '@blocksuite/store';
 
+import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
 import { columnManager } from '../common/column-manager.js';
 import type { TableViewData } from '../common/view-manager.js';
@@ -7,7 +8,6 @@ import type { ColumnDataUpdater, InsertPosition } from '../database-model.js';
 import { insertPositionToIndex } from '../database-model.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
-import { DEFAULT_COLUMN_WIDTH } from './consts.js';
 import type { ColumnRenderer } from './register.js';
 import type { SetValueOption } from './types.js';
 
@@ -84,6 +84,11 @@ export interface TableViewManager {
 
   columnUpdateData(columnId: string, data: Record<string, unknown>): void;
 
+  /**
+   * @deprecated
+   */
+  captureSync(): void;
+
   slots: {
     update: Slot;
   };
@@ -141,32 +146,6 @@ export interface ColumnManager<
    * @deprecated
    */
   captureSync(): void;
-}
-
-export interface DataSource {
-  properties: string[];
-  rows: string[];
-  cellGetValue: (rowId: string, propertyId: string) => unknown;
-  cellGetRenderValue: (rowId: string, propertyId: string) => unknown;
-  cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
-  rowAdd: (insertPosition: InsertPosition) => string;
-  rowDelete: (ids: string[]) => void;
-  propertyGetName: (propertyId: string) => string;
-  propertyGetType: (propertyId: string) => string;
-  propertyGetData: (propertyId: string) => Record<string, unknown>;
-  propertyChangeName: (propertyId: string, name: string) => void;
-  propertyChangeType: (propertyId: string, type: string) => void;
-  propertyChangeData: (
-    propertyId: string,
-    data: Record<string, unknown>
-  ) => void;
-  propertyAdd: (insertPosition: InsertPosition) => string;
-  propertyDelete: (id: string) => void;
-  propertyDuplicate: (columnId: string) => string;
-
-  slots: {
-    update: Slot;
-  };
 }
 
 export class DatabaseTableViewManager implements TableViewManager {
@@ -367,7 +346,7 @@ export class DatabaseTableViewManager implements TableViewManager {
   public columnGetWidth(columnId: string): number {
     return (
       this.getView().columns.find(v => v.id === columnId)?.width ??
-      DEFAULT_COLUMN_WIDTH
+      this.dataSource.propertyGetDefaultWidth(columnId)
     );
   }
 
@@ -436,12 +415,16 @@ export class DatabaseTableViewManager implements TableViewManager {
   public rowDelete(ids: string[]): void {
     this.dataSource.rowDelete(ids);
   }
+
+  public captureSync(): void {
+    this.dataSource.captureSync();
+  }
 }
 
 export class DatabaseColumnManager implements ColumnManager {
   constructor(
     protected propertyId: string,
-    protected viewManager: TableViewManager
+    public viewManager: TableViewManager
   ) {}
 
   get index(): number {
@@ -529,7 +512,7 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   captureSync(): void {
-    //
+    this.viewManager.captureSync();
   }
 
   getFilterValue(rowId: string): unknown {
