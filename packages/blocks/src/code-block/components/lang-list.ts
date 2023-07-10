@@ -2,14 +2,9 @@ import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import {
-  BUNDLED_LANGUAGES,
-  type ILanguageRegistration,
-  type Lang,
-} from 'shiki';
+import { BUNDLED_LANGUAGES, type ILanguageRegistration } from 'shiki';
 
 import { createEvent } from '../../__internal__/index.js';
-import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
