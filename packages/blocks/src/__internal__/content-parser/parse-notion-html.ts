@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store/index.js';
+import type { Page } from '@blocksuite/store';
 
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
