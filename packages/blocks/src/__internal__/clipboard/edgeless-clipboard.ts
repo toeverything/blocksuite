@@ -12,7 +12,6 @@ import {
   serializeXYWH,
 } from '@blocksuite/phasor';
 import { assertExists, type Page } from '@blocksuite/store';
-import { render } from 'lit';
 
 import type { NoteBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -464,10 +463,17 @@ export class EdgelessClipboard implements Clipboard {
 
         const [x, y] = deserializeXYWH(element.xywh);
         const div = document.createElement('div');
+        // render(note.render(), div);
+        const canvas: HTMLCanvasElement = await html2canvas(note, {
+          ignoreElements: (element: Element) =>
+            element.tagName === 'AFFINE-BLOCK-HUB' ||
+            element.tagName === 'EDGELESS-TOOLBAR' ||
+            element.classList.contains('dg'),
+        });
         div.className = parent.className;
         div.setAttribute('style', parent.getAttribute('style') || '');
         div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
-        render(note.render(), div);
+        div.appendChild(canvas);
         layer.appendChild(div);
       }
       fragment.appendChild(layer);
@@ -488,17 +494,10 @@ export class EdgelessClipboard implements Clipboard {
 
       const editorContainer = getEditorContainer(this._page);
       const canvas: HTMLCanvasElement = await html2canvas(container, {
-        ignoreElements: function (element: Element) {
-          if (
-            element.tagName === 'AFFINE-BLOCK-HUB' ||
-            element.tagName === 'EDGELESS-TOOLBAR' ||
-            element.classList.contains('dg')
-          ) {
-            return true;
-          } else {
-            return false;
-          }
-        },
+        ignoreElements: (element: Element) =>
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg'),
         onclone: function (documentClone: Document, element: HTMLElement) {
           // html2canvas can't support transform feature
           element.style.setProperty('transform', 'none');
