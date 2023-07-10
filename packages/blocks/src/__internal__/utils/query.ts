@@ -31,7 +31,9 @@ export type BlockComponentElement = BlockElement<any>;
 
 export type BlockCustomElement =
   HTMLElementTagNameMap[keyof HTMLElementTagNameMap] extends infer U
-    ? U extends { model: infer M }
+    ? U extends {
+        model: infer M;
+      }
       ? M extends BaseBlockModel
         ? U
         : never
@@ -219,6 +221,14 @@ export function getEditorContainerByElement(ele: Element) {
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
+    throw new Error('Failed to check page mode! Editor mode is not exists!');
+  }
+  return editor.mode === 'page';
+}
+
+export function checkIsPageModeByDom(ele: Element) {
+  const editor = ele?.closest('editor-container');
+  if (!editor || !('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
   return editor.mode === 'page';
@@ -510,7 +520,9 @@ export function isInsidePageTitle(element: unknown): boolean {
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
   const editor = activeEditorManager.getActiveEditor();
-  const textElement = (editor ?? document).querySelector('surface-text-editor');
+  const textElement = (editor ?? document).querySelector(
+    'edgeless-text-editor'
+  );
   if (!textElement) return false;
 
   return textElement.contains(element as Node);
@@ -528,6 +540,13 @@ export function isDatabaseInput(element: unknown): boolean {
     element instanceof HTMLElement &&
     element.getAttribute('data-virgo-root') === 'true' &&
     !!element.closest('affine-database')
+  );
+}
+
+export function isDatabaseCell(element: unknown): boolean {
+  return (
+    element instanceof HTMLElement &&
+    element.tagName === 'affine-database-cell-container'.toUpperCase()
   );
 }
 
@@ -686,7 +705,10 @@ export function getClosestBlockElementByPoint(
   state: {
     rect?: Rect;
     container?: Element;
-    snapToEdge?: { x: boolean; y: boolean };
+    snapToEdge?: {
+      x: boolean;
+      y: boolean;
+    };
   } | null = null,
   scale = 1
 ): Element | null {

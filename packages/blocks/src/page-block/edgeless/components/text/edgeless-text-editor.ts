@@ -10,8 +10,8 @@ import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 
-@customElement('surface-text-editor')
-export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
+@customElement('edgeless-text-editor')
+export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
@@ -135,6 +135,7 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
           : this._element.color,
+        zIndex: '10',
       });
     }
 
@@ -144,6 +145,6 @@ export class SurfaceTextEditor extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'surface-text-editor': SurfaceTextEditor;
+    'edgeless-text-editor': EdgelessTextEditor;
   }
 }

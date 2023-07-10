@@ -480,6 +480,7 @@ export const popTagSelect = (
     remove();
   };
   const remove = createPopup(target, component, {
+    onClose: ops.onComplete,
     middleware: [
       offset(state => {
         return {

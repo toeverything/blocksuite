@@ -22,7 +22,7 @@ export type TextStyleHandler = (
   styles: Record<string, unknown>
 ) => void;
 
-export type TableParserHandler = (
+export type TableParseHandler = (
   element: Element
 ) => Promise<SerializedBlock[] | null>;
 
@@ -64,7 +64,7 @@ export class HtmlParser {
   private _page: Page;
   private _customFetchFileHandler?: FetchFileHandler;
   private _customTextStyleHandler?: TextStyleHandler;
-  private _customTableParserHandler?: TableParserHandler;
+  private _customTableParserHandler?: TableParseHandler;
   private _customTableTitleColumnHandler?: TableTitleColumnHandler;
 
   constructor(
@@ -72,7 +72,7 @@ export class HtmlParser {
     page: Page,
     fetchFileHandler?: FetchFileHandler,
     textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler,
+    tableParserHandler?: TableParseHandler,
     tableTitleColumnHandler?: TableTitleColumnHandler
   ) {
     this._contentParser = contentParser;
@@ -737,7 +737,7 @@ export class HtmlParser {
       const columnMeta: ColumnMeta[] = [];
       titleTrEle?.querySelectorAll('th').forEach(ele => {
         columnMeta.push({
-          title: ele.textContent || '',
+          title: ele.textContent?.trim() || '',
           type: getCorrespondingTableColumnType(
             ele.querySelector('svg') ?? undefined
           ),

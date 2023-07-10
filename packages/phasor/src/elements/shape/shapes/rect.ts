@@ -1,13 +1,16 @@
 import { StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
-import { type Bound } from '../../../utils/bound.js';
+import { Bound } from '../../../utils/bound.js';
 import {
+  getPointFromBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
+  polygonGetPointTangent,
   polygonNearestPoint,
 } from '../../../utils/math-utils.js';
+import { PointLocation } from '../../../utils/point-location.js';
 import type { IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
@@ -81,17 +84,16 @@ export const RectMethods: ShapeMethods = {
     );
   },
 
-  hitTest(
-    x: number,
-    y: number,
-    element: ShapeElement,
-    options?: HitTestOptions
-  ) {
-    const points = getPointsFromBoundsWithRotation(element);
+  hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
+    const points = getPointsFromBoundsWithRotation(this);
 
-    let hited = pointOnPolygonStoke([x, y], points, options?.expand ?? 1);
+    let hited = pointOnPolygonStoke(
+      [x, y],
+      points,
+      (options?.expand ?? 1) / (this.renderer?.zoom ?? 1)
+    );
 
-    if (element.filled && !hited) {
+    if ((!options.ignoreTransparent || this.filled) && !hited) {
       hited = pointInPolygon([x, y], points);
     }
 
@@ -111,5 +113,16 @@ export const RectMethods: ShapeMethods = {
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
     const points = getPointsFromBoundsWithRotation(element);
     return linePolygonIntersects(start, end, points);
+  },
+
+  getRelativePointLocation(point, element) {
+    const bound = Bound.deserialize(element.xywh);
+    const rotatePoint = getPointFromBoundsWithRotation(
+      element,
+      bound.getRelativePoint(point)
+    );
+    const points = getPointsFromBoundsWithRotation(element);
+    const tangent = polygonGetPointTangent(points, rotatePoint);
+    return new PointLocation(rotatePoint, tangent);
   },
 };

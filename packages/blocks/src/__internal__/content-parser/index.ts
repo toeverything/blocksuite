@@ -18,7 +18,7 @@ import {
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,
-  TableParserHandler,
+  TableParseHandler,
   TableTitleColumnHandler,
   TextStyleHandler,
 } from './parse-html.js';
@@ -37,23 +37,29 @@ export class ContentParser {
   };
   private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _htmlParser: HtmlParser;
+  private _imageProxyEndpoint?: string;
   private urlPattern =
     /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
   constructor(
     page: Page,
-    fetchFileHandler?: FetchFileHandler,
-    textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler,
-    tableTitleColumnHandler?: TableTitleColumnHandler
+    options: {
+      /** API endpoint used for cross-domain image export */
+      imageProxyEndpoint?: string;
+      fetchFileHandler?: FetchFileHandler;
+      textStyleHandler?: TextStyleHandler;
+      tableParseHandler?: TableParseHandler;
+      tableTitleColumnHandler?: TableTitleColumnHandler;
+    } = {}
   ) {
     this._page = page;
+    this._imageProxyEndpoint = options?.imageProxyEndpoint;
     this._htmlParser = new HtmlParser(
       this,
       page,
-      fetchFileHandler,
-      textStyleHandler,
-      tableParserHandler,
-      tableTitleColumnHandler
+      options.fetchFileHandler,
+      options.textStyleHandler,
+      options.tableParseHandler,
+      options.tableTitleColumnHandler
     );
     this._htmlParser.registerParsers();
   }
@@ -144,6 +150,8 @@ export class ContentParser {
         element.style.setProperty('transform', 'none');
       },
       backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      useCORS: this._imageProxyEndpoint ? false : true,
+      proxy: this._imageProxyEndpoint,
     };
 
     const nodeElements = edgeless.getSortedElementsByBound(bound);
@@ -192,6 +200,8 @@ export class ContentParser {
         }
       },
       backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      useCORS: this._imageProxyEndpoint ? false : true,
+      proxy: this._imageProxyEndpoint,
     };
 
     const data = await html2canvas(
@@ -326,8 +336,7 @@ export class ContentParser {
         }
         return;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderer(token: any) {
+      renderer(token: marked.Tokens.Generic) {
         return `<u>${token.text}</u>`;
       },
     };
@@ -349,12 +358,51 @@ export class ContentParser {
         }
         return;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      renderer(token: any) {
+      renderer(token: marked.Tokens.Generic) {
         return `<code>${token.text}</code>`;
       },
     };
-    marked.use({ extensions: [underline, inlineCode] });
+
+    const walkTokens = (token: marked.Token) => {
+      // fix: https://github.com/toeverything/blocksuite/issues/3304
+      if (
+        token.type === 'list_item' &&
+        token.tokens.length > 0 &&
+        token.tokens[0].type === 'list' &&
+        token.tokens[0].items.length === 1
+      ) {
+        const fistItem = token.tokens[0].items[0];
+        if (
+          fistItem.tokens.length === 0 ||
+          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
+        ) {
+          // transform list_item to text
+          const newToken =
+            fistItem.tokens.length === 1
+              ? (fistItem.tokens[0] as marked.Tokens.Text)
+              : ({
+                  raw: '',
+                  text: '',
+                  type: 'text',
+                  tokens: [],
+                } as marked.Tokens.Text);
+          const preText = fistItem.raw.substring(
+            0,
+            fistItem.raw.length - fistItem.text.length
+          );
+          newToken.raw = preText + newToken.raw;
+          newToken.text = preText + newToken.text;
+          newToken.tokens = newToken.tokens || [];
+          newToken.tokens.unshift({
+            type: 'text',
+            text: preText,
+            raw: preText,
+          });
+          token.tokens[0] = newToken;
+        }
+      }
+    };
+    marked.use({ extensions: [underline, inlineCode], walkTokens });
     const md2html = marked.parse(text);
     return this.htmlText2Block(md2html);
   }

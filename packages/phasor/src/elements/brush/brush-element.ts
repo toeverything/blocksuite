@@ -12,6 +12,7 @@ import {
   lineIntersects,
   polyLineNearestPoint,
 } from '../../utils/math-utils.js';
+import { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
@@ -55,13 +56,13 @@ export class BrushElement extends SurfaceElement<IBrush> {
     // const insideBoundingBox = super.hitTest(x, y, options);
     // if (!insideBoundingBox) return false;
 
-    const { rotate, points, _testCtx } = this;
+    const { rotate, points, _testCtx, renderer } = this;
     const [x, y, w, h] = this.deserializeXYWH();
     const command = getSvgPathFromStroke(getSolidStrokePoints(points, 3));
     const path = new Path2D(command);
 
     if (_testCtx.lineWidth !== (options?.expand ?? 1)) {
-      _testCtx.lineWidth = options?.expand ?? 1;
+      _testCtx.lineWidth = (options?.expand ?? 1) / (renderer?.zoom ?? 1);
     }
 
     const cx = w / 2;
@@ -147,7 +148,8 @@ export class BrushElement extends SurfaceElement<IBrush> {
     }
   }
   override containedByBounds(bounds: Bound) {
-    return false;
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
   }
 
   override getNearestPoint(point: IVec): IVec {
@@ -173,15 +175,22 @@ export class BrushElement extends SurfaceElement<IBrush> {
     if (box.intersectLine(start, end, true)) {
       const len = points.length;
       for (let i = 1; i < len; i++) {
-        const result = lineIntersects(start, end, points[i - 1], points[i]) as
-          | IVec[]
-          | null;
+        const result = lineIntersects(start, end, points[i - 1], points[i]);
         if (result) {
-          return result;
+          return [
+            new PointLocation(
+              result,
+              Vec.normalize(Vec.sub(points[i], points[i - 1]))
+            ),
+          ];
         }
       }
     }
-
     return null;
+  }
+
+  override getRelativePointLocation(position: IVec): PointLocation {
+    const point = Bound.deserialize(this.xywh).getRelativePoint(position);
+    return new PointLocation(point);
   }
 }

@@ -2,14 +2,10 @@ import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import {
-  BUNDLED_LANGUAGES,
-  type ILanguageRegistration,
-  type Lang,
-} from 'shiki';
+import { BUNDLED_LANGUAGES, type ILanguageRegistration } from 'shiki';
 
 import { createEvent } from '../../__internal__/index.js';
-import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
+import { scrollbarStyle } from '../../components/utils.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -41,14 +37,9 @@ export class LangList extends ShadowlessElement {
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
-        /*scrollbar-color: #fff0 #fff0;*/
       }
 
-      /*
-      .lang-list-button-container::-webkit-scrollbar {
-        background: none;
-      }
-      */
+      ${scrollbarStyle}
 
       .lang-item {
         display: flex;
@@ -145,23 +136,20 @@ export class LangList extends ShadowlessElement {
   }
 
   override render() {
-    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
-      .filter(language => {
-        if (!this._filterText) {
-          return true;
-        }
-        return (
-          language.id.startsWith(this._filterText.toLowerCase()) ||
-          language.aliases?.some(alias =>
-            alias.startsWith(this._filterText.toLowerCase())
-          )
-        );
-      })
-      .sort(
-        (a, b) =>
-          (POPULAR_LANGUAGES_MAP[a.id as Lang] ?? Infinity) -
-          (POPULAR_LANGUAGES_MAP[b.id as Lang] ?? Infinity)
+    const filteredLanguages = [
+      PLAIN_TEXT_REGISTRATION,
+      ...BUNDLED_LANGUAGES,
+    ].filter(language => {
+      if (!this._filterText) {
+        return true;
+      }
+      return (
+        language.id.startsWith(this._filterText.toLowerCase()) ||
+        language.aliases?.some(alias =>
+          alias.startsWith(this._filterText.toLowerCase())
+        )
       );
+    });
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {

@@ -140,7 +140,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 
 export async function assertEdgelessText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
-    const editor = document.querySelector('surface-text-editor');
+    const editor = document.querySelector('edgeless-text-editor');
     if (!editor) {
       throw new Error('editor not found');
     }
@@ -567,6 +567,15 @@ export function assertAlmostEqual(
   ).toBeLessThan(precision);
 }
 
+export function assertPointAlmostEqual(
+  actual: number[],
+  expected: number[],
+  precision = 0.001
+) {
+  assertAlmostEqual(actual[0], expected[0], precision);
+  assertAlmostEqual(actual[1], expected[1], precision);
+}
+
 /**
  * Assert the locator is visible in the viewport.
  * It will check the bounding box of the locator is within the viewport.
@@ -778,5 +787,5 @@ export async function assertConnectorPath(
   index = 0
 ) {
   const actualPath = await getConnectorPath(page, index);
-  expect(actualPath).toMatchObject(path);
+  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i]));
 }

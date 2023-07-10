@@ -1,6 +1,7 @@
 import {
-  createConnectorElementWithModel as createConnectorElement,
-  createRectShapeElementWithModel as createRectShapeElement,
+  createConnectorElement,
+  createShapeElement,
+  Shape,
   toViewCoord,
 } from '../utils/actions/edgeless.js';
 import {
@@ -37,8 +38,8 @@ test('copy and paste connector whose both sides connect elements', async ({
   page,
 }) => {
   await commonSetup(page);
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
   await createConnectorElement(page, [50, 50], [250, 50]);
 
   await selectAllByKeyboard(page);
@@ -60,8 +61,8 @@ test('copy and paste connector whose both sides connect elements, but only paste
   page,
 }) => {
   await commonSetup(page);
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
   await createConnectorElement(page, [50, 50], [250, 50]);
 
   await page.pause();
@@ -83,7 +84,7 @@ test('copy and paste connector whose one side connects elements', async ({
   page,
 }) => {
   await commonSetup(page);
-  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
   await createConnectorElement(page, [50, 50], [200, 50]);
 
   await selectAllByKeyboard(page);

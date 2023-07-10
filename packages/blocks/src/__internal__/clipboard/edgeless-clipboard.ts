@@ -42,7 +42,7 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocks,
-  copySurfaceText,
+  copyEdgelessText,
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
@@ -157,7 +157,7 @@ export class EdgelessClipboard implements Clipboard {
     // when note active, handle copy like page mode
     if (state.active) {
       if (state.selected[0] instanceof TextElement) {
-        copySurfaceText(this._edgeless);
+        copyEdgelessText(this._edgeless);
       } else {
         const range = getCurrentBlockRange(this._page);
         assertExists(range);
@@ -173,6 +173,13 @@ export class EdgelessClipboard implements Clipboard {
 
   private _onPaste = async (e: ClipboardEvent) => {
     if (!activeEditorManager.isActive(this._edgeless)) {
+      return;
+    }
+
+    if (
+      document.activeElement instanceof HTMLInputElement ||
+      document.activeElement instanceof HTMLTextAreaElement
+    ) {
       return;
     }
     e.preventDefault();

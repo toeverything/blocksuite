@@ -27,11 +27,7 @@ import {
   undoByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import {
-  assertBlockCount,
-  assertBlockProps,
-  assertLocatorVisible,
-} from '../utils/asserts.js';
+import { assertBlockCount, assertBlockProps } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 import {
   assertColumnWidth,
@@ -272,7 +268,6 @@ test('should database title and rich-text support undo/redo', async ({
   await initDatabaseColumn(page);
   await switchColumnType(page, 'Text');
   await initDatabaseDynamicRowWithData(page, '123', true);
-  await pressArrowLeft(page);
   await undoByKeyboard(page);
   await assertDatabaseCellRichTexts(page, { text: '' });
   await redoByKeyboard(page);

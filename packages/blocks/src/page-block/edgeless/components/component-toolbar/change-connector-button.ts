@@ -194,11 +194,15 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
   private _setConnectorColor(stroke: CssVariableName) {
     this.page.captureSync();
+
+    let shouldUpdate = false;
     this.elements.forEach(element => {
       if (element.stroke !== stroke) {
+        shouldUpdate = true;
         this.surface.updateElement<'connector'>(element.id, { stroke });
       }
     });
+    if (shouldUpdate) this.requestUpdate();
   }
 
   private _setShapeStrokeWidth(strokeWidth: number) {

@@ -33,7 +33,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
-  almostEqual,
   asyncFocusRichText,
   type BlockComponentElement,
   bringForward,
@@ -70,6 +69,7 @@ import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
+import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
@@ -99,6 +99,7 @@ import {
 } from './utils/selection-manager.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 
+NoteCut;
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
@@ -315,6 +316,10 @@ export class EdgelessPageBlockComponent
     return this.notes.sort(compare);
   }
 
+  get enableNoteCut() {
+    return this.page.awarenessStore.getFlag('enable_note_cut');
+  }
+
   private _resizeObserver: ResizeObserver | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
@@ -366,7 +371,7 @@ export class EdgelessPageBlockComponent
 
     this._disposables.add(
       this.surface.slots.elementUpdated.on(({ id, props }) => {
-        if ('xywh' in props) {
+        if ('xywh' in props || 'rotate' in props) {
           this.slots.elementSizeUpdated.emit(id);
         }
         const element = this.surface.pickById(id);
@@ -564,7 +569,8 @@ export class EdgelessPageBlockComponent
           const newModelHeight =
             domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
 
-          if (!almostEqual(newModelHeight, h)) {
+          // FIXME: make height a local value
+          if (Math.abs(newModelHeight - h) >= 0.1) {
             page.updateBlock(model, {
               xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
             });
@@ -891,39 +897,6 @@ export class EdgelessPageBlockComponent
       noteId,
       ids,
     };
-  }
-
-  /** Moves selected blocks into a new note at the given point. */
-  moveBlocksWithNewNote(
-    blocks: BaseBlockModel[],
-    point: Point,
-    {
-      rect,
-      focus,
-      parentId,
-      noteIndex,
-    }: {
-      rect?: DOMRect;
-      focus?: boolean;
-      parentId?: string;
-      noteIndex?: number;
-    } = {}
-  ) {
-    const { left, top, zoom } = this.surface.viewport;
-    const width = rect?.width
-      ? rect.width / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2
-      : DEFAULT_NOTE_WIDTH;
-    point.x -= left;
-    point.y -= top;
-    const noteId = this.addNoteWithPoint(point, {
-      width,
-      parentId,
-      noteIndex,
-    });
-    const noteModel = this.page.getBlockById(noteId) as NoteBlockModel;
-    this.page.moveBlocks(blocks, noteModel);
-
-    focus && this.setSelection(noteId, true, blocks[0].id, point);
   }
 
   addImage(
@@ -1253,7 +1226,12 @@ export class EdgelessPageBlockComponent
         style=${styleMap(blockContainerStyle)}
       >
         <div class="affine-block-children-container edgeless">
-          <div class="affine-edgeless-layer">${notesContainer}</div>
+          <div class="affine-edgeless-layer">
+            ${this.enableNoteCut
+              ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
+              : nothing}
+            ${notesContainer}
+          </div>
         </div>
         <affine-selected-blocks
           .mouseRoot=${this.mouseRoot}

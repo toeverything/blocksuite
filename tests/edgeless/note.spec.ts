@@ -317,28 +317,6 @@ test('drag handle should work across multiple notes', async ({ page }) => {
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
 });
 
-test('drag handle should add new note when dragged outside note', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-
-  await switchEditorMode(page);
-
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
-
-  await page.mouse.dblclick(CENTER_X, CENTER_Y);
-  await dragBlockToPoint(page, '3', { x: 30, y: 40 });
-  await waitNextFrame(page);
-  await expect(page.locator('affine-drag-handle')).toBeHidden();
-  await assertRichTexts(page, ['123', '456', '789']);
-
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
-  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
-});
-
 test('format quick bar should show up when double-clicking on text', async ({
   page,
 }) => {

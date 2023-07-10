@@ -143,7 +143,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await page.keyboard.press('ArrowDown');
     await expect(slashMenu).toBeVisible();
 
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
     const maybeActivatedItem = slashItems.nth(1);
     await expect(maybeActivatedItem).toHaveText(['Heading 1']);
     await expect(maybeActivatedItem).toHaveAttribute('hover', '');
@@ -164,7 +164,7 @@ test.describe('slash menu should show and hide correctly', () => {
     page.keyboard.press(`${SHORT_KEY}+N`);
     await expect(slashMenu).toBeVisible();
 
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
     const maybeActivatedItem = slashItems.nth(1);
     await expect(maybeActivatedItem).toHaveText(['Heading 1']);
     await expect(maybeActivatedItem).toHaveAttribute('hover', '');
@@ -202,7 +202,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await page.keyboard.press('ArrowRight');
     await expect(slashMenu).toBeVisible();
 
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
     const maybeActivatedItem = slashItems.nth(-3);
     await expect(maybeActivatedItem).toHaveText(['Copy']);
     await expect(maybeActivatedItem).toHaveAttribute('hover', '');
@@ -213,7 +213,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await page.keyboard.press('Tab');
     await expect(slashMenu).toBeVisible();
 
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
     const slashItem0 = slashItems.nth(0);
     const slashItem1 = slashItems.nth(1);
     await expect(slashItem0).not.toHaveAttribute('hover', '');
@@ -269,7 +269,7 @@ test.describe('slash search', () => {
     const { noteId } = await initEmptyParagraphState(page);
     await focusRichText(page);
     const slashMenu = page.locator(`.slash-menu`);
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
 
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
@@ -325,7 +325,7 @@ test.describe('slash search', () => {
     const slashMenu = page.locator(`.slash-menu`);
     await expect(slashMenu).toBeVisible();
 
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
     await type(page, 'c');
     await expect(slashItems).toHaveText([
       'Code Block',
@@ -346,7 +346,7 @@ test.describe('slash search', () => {
     const slashMenu = page.locator(`.slash-menu`);
     await expect(slashMenu).toBeVisible();
 
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
     await type(page, 'database');
     await expect(slashItems).toHaveCount(2);
     await expect(slashItems).toHaveText(['Table View', 'Kanban View']);
@@ -563,36 +563,52 @@ test.skip('should compatible CJK IME', async ({ page }) => {
   test.fail();
   await expect(slashMenu).toBeVisible();
   await type(page, 'h2');
-  const slashItems = slashMenu.locator('format-bar-button');
+  const slashItems = slashMenu.locator('icon-button');
   await expect(slashItems).toHaveCount(1);
   await expect(slashItems).toHaveText(['Heading 2']);
 });
 
-test.describe.skip('slash menu with customize menu', () => {
+test.describe('slash menu with customize menu', () => {
   test('can remove specified menus', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
-
     await page.evaluate(async () => {
+      // https://github.com/lit/lit/blob/84df6ef8c73fffec92384891b4b031d7efc01a64/packages/lit-html/src/static.ts#L93
+      const fakeLiteral = (strings: TemplateStringsArray) =>
+        ({
+          ['_$litStatic$']: strings[0],
+          r: Symbol.for(''),
+        } as const);
+
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");
-      const defaultPage = editor.querySelector('affine-default-page');
-      if (!defaultPage) throw new Error("Can't find affine-default-page");
-      const SlashMenu = (await import('@blocksuite/blocks')).SlashMenu;
-      if (!SlashMenu) throw new Error("Can't find SlashMenu");
-      class CustomSlashMenu extends SlashMenu {
-        override get menuGroups() {
-          return super.menuGroups.slice(0, 1);
-        }
+
+      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+      class CustomSlashMenu extends SlashMenuWidget {
+        override options = {
+          ...SlashMenuWidget.DEFAULT_OPTIONS,
+          menus: SlashMenuWidget.DEFAULT_OPTIONS.menus.slice(0, 1),
+        };
       }
       // Fix `Illegal constructor` error
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
-      customElements.define('custom-slash-menu', CustomSlashMenu);
+      customElements.define('affine-custom-slash-menu', CustomSlashMenu);
+
+      const pagePreset = window.$blocksuite.blocks.pagePreset;
+      const pageBlockSpec = pagePreset.shift();
+      if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
+      pageBlockSpec.view.widgets = [
+        fakeLiteral`affine-custom-slash-menu`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
+      pagePreset.unshift(pageBlockSpec);
+      editor.pagePreset = pagePreset;
     });
 
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
     const slashMenu = page.locator(`.slash-menu`);
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
 
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
@@ -601,20 +617,23 @@ test.describe.skip('slash menu with customize menu', () => {
 
   test('can add some menus', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
 
     await page.evaluate(async () => {
+      // https://github.com/lit/lit/blob/84df6ef8c73fffec92384891b4b031d7efc01a64/packages/lit-html/src/static.ts#L93
+      const fakeLiteral = (strings: TemplateStringsArray) =>
+        ({
+          ['_$litStatic$']: strings[0],
+          r: Symbol.for(''),
+        } as const);
+
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");
-      const defaultPage = editor.querySelector('affine-default-page');
-      if (!defaultPage) throw new Error("Can't find affine-default-page");
-      const SlashMenu = (await import('@blocksuite/blocks')).SlashMenu;
-      if (!SlashMenu) throw new Error("Can't find SlashMenu");
-      class CustomSlashMenu extends SlashMenu {
-        override get menuGroups() {
-          const defaultMenuGroups = super.menuGroups;
-          return [
+      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+
+      class CustomSlashMenu extends SlashMenuWidget {
+        override options = {
+          ...SlashMenuWidget.DEFAULT_OPTIONS,
+          menus: [
             {
               name: 'Custom Menu',
               items: [
@@ -629,16 +648,29 @@ test.describe.skip('slash menu with customize menu', () => {
                 },
               ],
             },
-          ] satisfies typeof defaultMenuGroups;
-        }
+          ],
+        };
       }
       // Fix `Illegal constructor` error
       // see https://stackoverflow.com/questions/41521812/illegal-constructor-with-ecmascript-6
-      customElements.define('custom-slash-menu', CustomSlashMenu);
+      customElements.define('affine-custom-slash-menu', CustomSlashMenu);
+
+      const pagePreset = window.$blocksuite.blocks.pagePreset;
+      const pageBlockSpec = pagePreset.shift();
+      if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
+      pageBlockSpec.view.widgets = [
+        fakeLiteral`affine-custom-slash-menu`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
+      pagePreset.unshift(pageBlockSpec);
+      editor.pagePreset = pagePreset;
     });
 
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
     const slashMenu = page.locator(`.slash-menu`);
-    const slashItems = slashMenu.locator('format-bar-button');
+    const slashItems = slashMenu.locator('icon-button');
 
     await type(page, '/');
     await expect(slashMenu).toBeVisible();

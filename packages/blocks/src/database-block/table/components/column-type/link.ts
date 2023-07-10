@@ -5,7 +5,10 @@ import { css } from 'lit';
 import { query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
-import { isValidLink } from '../../../../components/link-popover/link-popover.js';
+import {
+  isValidLink,
+  normalizeUrl,
+} from '../../../../components/link-popover/link-popover.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
 export class LinkCell extends DatabaseCellElement<string> {
@@ -27,10 +30,12 @@ export class LinkCell extends DatabaseCellElement<string> {
 
     .affine-database-link {
       display: flex;
+      position: relative;
       align-items: center;
       width: 100%;
       height: 100%;
       outline: none;
+      overflow: hidden;
     }
 
     affine-database-link-node {
@@ -38,10 +43,13 @@ export class LinkCell extends DatabaseCellElement<string> {
     }
 
     .affine-database-link-icon {
+      position: absolute;
+      right: 0;
       display: flex;
       align-items: center;
       visibility: hidden;
       cursor: pointer;
+      background: var(--affine-white);
     }
 
     .affine-database-link-icon svg {
@@ -51,17 +59,12 @@ export class LinkCell extends DatabaseCellElement<string> {
     }
   `;
 
-  override _setEditing(_: boolean) {
-    // override
-  }
-
   private _onClick = (event: Event) => {
     event.stopPropagation();
-
     const value = this.value ?? '';
 
     if (!value || !isValidLink(value)) {
-      this.setEditing(true);
+      this.selectCurrentCell(true);
       return;
     }
 
@@ -78,7 +81,7 @@ export class LinkCell extends DatabaseCellElement<string> {
 
   private _onEdit = (e: Event) => {
     e.stopPropagation();
-    this.setEditing(true);
+    this.selectCurrentCell(true);
   };
 
   override render() {
@@ -141,21 +144,25 @@ export class LinkCellEditing extends DatabaseCellElement<string> {
     this._container.setSelectionRange(end, end);
   };
 
-  override exitEditMode() {
+  override onExitEditMode() {
     this._setValue();
-    super.exitEditMode();
   }
 
   private _setValue = (value: string = this._container.value) => {
-    this.onChange(value, { captureSync: true });
-    this._container.value = `${this.value ?? ''}`;
+    let url = value;
+    if (isValidLink(value)) {
+      url = normalizeUrl(value);
+    }
+
+    this.onChange(url, { captureSync: true });
+    this._container.value = url;
   };
 
   private _onKeydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       this._setValue();
       setTimeout(() => {
-        this.exitEditMode();
+        this.selectCurrentCell(false);
       });
     }
   };

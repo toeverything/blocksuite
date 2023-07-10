@@ -298,7 +298,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Move left',
             icon: DatabaseMoveLeft,
-            hide: () => this.column.isFirst,
+            hide: () => this.column.isFirst || this.column.index === 1,
             select: () => {
               const preId = this.tableViewManager.preColumn(this.column.id)?.id;
               if (!preId) {

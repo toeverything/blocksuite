@@ -1,33 +1,42 @@
-import { html, render } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
+import { html, type TemplateResult } from 'lit';
 
-let toastContainer: HTMLDivElement | null = null;
+let ToastContainer: HTMLDivElement | null = null;
 
-const updateComplete = () => new Promise(r => requestAnimationFrame(r));
+/**
+ * DO NOT USE FOR USER INPUT
+ * See https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
+ */
+const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
+  const template = document.createElement('template');
+  if (typeof html === 'string') {
+    html = html.trim(); // Never return a text node of whitespace as the result
+    template.innerHTML = html;
+  } else {
+    const { strings, values } = html;
+    const v = [...values, '']; // + last empty part
+    const htmlString = strings.reduce((acc, cur, i) => acc + cur + v[i], '');
+    template.innerHTML = htmlString;
+  }
+  return template.content.firstChild as T;
+};
 
-const createToastContainer = async () => {
-  render(
-    html`<div
-      data-toast-container="true"
-      style=${styleMap({
-        position: 'fixed',
-        zIndex: 9999,
-        top: '16px',
-        left: '16px',
-        right: '16px',
-        bottom: '78px',
-        pointerEvents: 'none',
-        display: 'flex',
-        flexDirection: 'column-reverse',
-        alignItems: 'center',
-      })}
-    ></div>`,
-    document.body
-  );
-  await updateComplete();
-  return document.querySelector(
-    '[data-toast-container="true"]'
-  ) as HTMLDivElement;
+const createToastContainer = () => {
+  const styles = `
+    position: fixed;
+    z-index: 9999;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    bottom: 78px;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+  `;
+  const template = html`<div style="${styles}"></div>`;
+  const element = htmlToElement<HTMLDivElement>(template);
+  document.body.appendChild(element);
+  return element;
 };
 
 /**
@@ -36,35 +45,31 @@ const createToastContainer = async () => {
  * toast('Hello World');
  * ```
  */
-export const toast = async (message: string, duration = 2500) => {
-  if (!toastContainer) {
-    toastContainer = await createToastContainer();
+export const toast = (message: string, duration = 2500) => {
+  if (!ToastContainer) {
+    ToastContainer = createToastContainer();
   }
 
-  render(
-    html`<div
-      style=${styleMap({
-        maxWidth: '480px',
-        textAlign: 'center',
-        fontFamily: 'var(--affine-font-family)',
-        fontSize: 'var(--affine-font-sm)',
-        padding: '6px 12px',
-        margin: '10px 0 0 0',
-        color: 'var(--affine-white)',
-        background: 'var(--affine-tooltip)',
-        boxShadow: 'var(--affine-float-button-shadow)',
-        borderRadius: '10px',
-        transition: 'all 230ms cubic-bezier(0.21, 1.02, 0.73, 1)',
-        opacity: '0',
-      })}
-    >
-      ${message}
-    </div>`,
-    toastContainer
-  );
+  const styles = `
+    max-width: 480px;
+    text-align: center;
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-sm);
+    padding: 6px 12px;
+    margin: 10px 0 0 0;
+    color: var(--affine-white);
+    background: var(--affine-tooltip);
+    box-shadow: var(--affine-float-button-shadow);
+    border-radius: 10px;
+    transition: all 230ms cubic-bezier(0.21, 1.02, 0.73, 1);
+    opacity: 0;
+  `;
 
-  await updateComplete();
-  const element = toastContainer.lastElementChild as HTMLDivElement;
+  const template = html`<div style="${styles}"></div>`;
+  const element = htmlToElement<HTMLDivElement>(template);
+  // message is not trusted
+  element.textContent = message;
+  ToastContainer.appendChild(element);
 
   const fadeIn = [
     {

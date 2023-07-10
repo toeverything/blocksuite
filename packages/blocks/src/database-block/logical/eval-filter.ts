@@ -21,7 +21,7 @@ const evalRef = (
 
 const evalValue = (value: Value, row: Record<string, unknown>): unknown => {
   return value.value;
-  //TODO
+  // TODO
   // switch (value.type) {
   //     case "ref":
   //         return evalRef(value, row)

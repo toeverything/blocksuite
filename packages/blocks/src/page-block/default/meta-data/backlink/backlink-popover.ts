@@ -3,6 +3,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import { scrollbarStyle } from '../../../../components/utils.js';
 import type { BacklinkData } from './backlink.js';
 import { DEFAULT_PAGE_NAME } from './backlink.js';
 
@@ -75,15 +76,7 @@ const styles = css`
     gap: 8px;
   }
 
-  ::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border-radius: 2px;
-    background-color: #b1b1b1;
-  }
+  ${scrollbarStyle}
 `;
 
 @customElement('backlink-button')
@@ -139,7 +132,7 @@ function backlinkPopover(backlinks: BacklinkData[]) {
             width="248px"
             height="32px"
             text="${title}"
-            @click="${link.jump}"
+            @mousedown="${link.jump}"
           >
             ${link.icon}
           </icon-button>`;
