@@ -1,4 +1,10 @@
-import { Bound, clamp } from '@blocksuite/phasor';
+import {
+  Bound,
+  clamp,
+  type PhasorElementWithText,
+  ShapeElement,
+  TextElement,
+} from '@blocksuite/phasor';
 import {
   type PhasorElement,
   type SurfaceManager,
@@ -31,6 +37,12 @@ export function isPhasorElement(
   selectable: Selectable | null
 ): selectable is PhasorElement {
   return !isTopLevelBlock(selectable);
+}
+
+export function isPhasorElementWithText(
+  element: Selectable
+): element is PhasorElementWithText {
+  return element instanceof TextElement || element instanceof ShapeElement;
 }
 
 function isPointIn(

@@ -320,6 +320,10 @@ export class EdgelessPageBlockComponent
     return this.page.awarenessStore.getFlag('enable_note_cut');
   }
 
+  get dispacher() {
+    return this.service?.uiEventDispatcher;
+  }
+
   private _resizeObserver: ResizeObserver | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();

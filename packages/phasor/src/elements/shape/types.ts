@@ -1,9 +1,16 @@
+import type * as Y from 'yjs';
+
 import type { StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
-import type { HitTestOptions, ISurfaceElement } from '../surface-element.js';
+import type {
+  HitTestOptions,
+  ISurfaceElement,
+  ISurfaceElementLocalRecord,
+} from '../surface-element.js';
+import type { SHAPE_TEXT_FONT_SIZE } from './constants.js';
 import type { ShapeElement } from './shape-element.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';
@@ -19,6 +26,19 @@ export interface IShape extends ISurfaceElement {
   strokeStyle: StrokeStyle;
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
+
+  text?: Y.Text;
+  color?: string;
+  fontSize?: SHAPE_TEXT_FONT_SIZE;
+  fontFamily?: string;
+  textHorizontalAlign?: 'left' | 'center' | 'right';
+  textVerticalAlign?: 'top' | 'center' | 'bottom';
+}
+
+export interface IShapeLocalRecord extends ISurfaceElementLocalRecord {
+  // used to control the render of the shape text because we
+  // need to hide the text in canvas when we are editing the text
+  textDisplay?: boolean;
 }
 
 export interface ShapeMethods {

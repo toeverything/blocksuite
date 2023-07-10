@@ -24,15 +24,24 @@ export interface ISurfaceElement {
   rotate: number;
 }
 
+export interface ISurfaceElementLocalRecord {
+  display?: boolean;
+  opacity?: number;
+}
+
 export interface HitTestOptions {
   expand?: number;
   ignoreTransparent?: boolean;
+  // we will select a shape without fill color by selecting its content area if
+  // we set `pierce` to false, shape element used this options in `hitTest` method
+  pierce?: boolean;
 }
 
 export type ComputedValue = (value: string) => string;
 
 export abstract class SurfaceElement<
-  T extends ISurfaceElement = ISurfaceElement
+  T extends ISurfaceElement = ISurfaceElement,
+  L extends ISurfaceElementLocalRecord = ISurfaceElementLocalRecord
 > {
   abstract containedByBounds(bounds: Bound): boolean;
 
@@ -44,6 +53,7 @@ export abstract class SurfaceElement<
 
   yMap: Y.Map<unknown>;
 
+  protected surface: SurfaceManager;
   protected renderer: Renderer | null = null;
   protected _connectable = true;
 
@@ -51,7 +61,7 @@ export abstract class SurfaceElement<
 
   constructor(
     yMap: Y.Map<unknown>,
-    protected surface: SurfaceManager,
+    surface: SurfaceManager,
     data: Partial<T> = {}
   ) {
     if (!yMap.doc) {
@@ -122,6 +132,10 @@ export abstract class SurfaceElement<
 
   get connectable() {
     return this._connectable;
+  }
+
+  getLocalRecord(): L {
+    return this.surface.getElementLocalRecord(this.id) as L;
   }
 
   applyUpdate(updates: Partial<T>) {

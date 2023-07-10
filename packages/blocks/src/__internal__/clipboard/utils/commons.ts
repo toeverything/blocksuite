@@ -10,6 +10,7 @@ import { getService } from '../../service.js';
 import {
   type BlockRange,
   getCurrentNativeRange,
+  getEdgelessCanvasTextEditor,
   hasNativeSelection,
   resetNativeSelection,
   type SerializedBlock,
@@ -171,8 +172,10 @@ export async function clipboardData2Blocks(
   return contentParser.text2blocks(textClipData);
 }
 
-export function copyEdgelessText(edgeless: EdgelessPageBlockComponent) {
-  const edgelessTextEditor = edgeless.querySelector('edgeless-text-editor');
+export function copyOnPhasorElementWithText(
+  edgeless: EdgelessPageBlockComponent
+) {
+  const edgelessTextEditor = getEdgelessCanvasTextEditor(edgeless);
   if (edgelessTextEditor) {
     const vEditor = edgelessTextEditor.vEditor;
     assertExists(vEditor);
