@@ -43,7 +43,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
-    console.log('modelX: ', modelX, 'modelY: ', modelY);
     const bound = new Bound(modelX, modelY, width, height);
     const { shape, fillColor, strokeColor } = this.tool;
 
@@ -64,7 +63,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    console.log('x: ', e.x, 'y: ', e.y);
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     this._clearOverlay();
 
