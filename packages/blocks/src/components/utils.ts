@@ -2,6 +2,7 @@ import { assertExists, sleep } from '@blocksuite/global/utils';
 import { css } from 'lit';
 
 import type { RichText } from '../__internal__/rich-text/rich-text.js';
+import type { AffineVEditor } from '../__internal__/rich-text/virgo/types.js';
 import { isControlledKeyboardEvent } from '../__internal__/utils/common.js';
 import { getCurrentNativeRange } from '../__internal__/utils/selection.js';
 
@@ -195,6 +196,27 @@ export const createKeydownObserver = ({
     });
   }
 };
+
+/**
+ * Remove specified text from the current range.
+ */
+export function cleanSpecifiedTail(vEditor: AffineVEditor, str: string) {
+  const vRange = vEditor.getVRange();
+  assertExists(vRange);
+  const idx = vRange.index - str.length;
+  const textStr = vEditor.yText.toString().slice(idx, idx + str.length);
+  if (textStr !== str) {
+    console.warn(
+      `Failed to clean text! Text mismatch expected: ${str} but actual: ${textStr}`
+    );
+    return;
+  }
+  vEditor.deleteText({ index: idx, length: str.length });
+  vEditor.setVRange({
+    index: idx,
+    length: 0,
+  });
+}
 
 export const scrollbarStyle = css`
   ::-webkit-scrollbar {

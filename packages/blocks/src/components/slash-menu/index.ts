@@ -17,6 +17,7 @@ import {
   throttle,
 } from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
+import { cleanSpecifiedTail } from '../utils.js';
 import { menuGroups } from './config.js';
 import { SlashMenu } from './slash-menu-popover.js';
 import type { SlashMenuOptions } from './utils.js';
@@ -32,19 +33,10 @@ function cleanSlashTextAfterAbort(e: Event, model: BaseBlockModel) {
     // Should not clean slash text when click away or abort
     return;
   }
-
   if (typeof e.target.reason !== 'string') {
     throw new Error('Failed to clean slash search text! Unknown abort reason');
   }
   const searchStr = '/' + e.target.reason;
-  const text = model.text;
-  if (!text) {
-    console.warn(
-      'Failed to clean slash search text! No text found for model',
-      model
-    );
-    return;
-  }
   const vEditor = getVirgoByModel(model);
   if (!vEditor) {
     console.warn(
@@ -53,22 +45,7 @@ function cleanSlashTextAfterAbort(e: Event, model: BaseBlockModel) {
     );
     return;
   }
-  const vRange = vEditor.getVRange();
-  assertExists(vRange);
-  const idx = vRange.index - searchStr.length;
-
-  const textStr = text.toString().slice(idx, idx + searchStr.length);
-  if (textStr !== searchStr) {
-    console.warn(
-      `Failed to clean slash search text! Text mismatch expected: ${searchStr} but actual: ${textStr}`
-    );
-    return;
-  }
-  text.delete(idx, searchStr.length);
-  vEditor.setVRange({
-    index: idx,
-    length: 0,
-  });
+  cleanSpecifiedTail(vEditor, searchStr);
 }
 
 function showSlashMenu({
