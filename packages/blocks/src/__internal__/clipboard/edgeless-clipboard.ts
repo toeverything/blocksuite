@@ -50,6 +50,7 @@ import {
   CLIPBOARD_MIMETYPE,
   createSurfaceClipboardItems,
   getSurfaceClipboardData,
+  isPureFileInClipboard,
   performNativeCopy,
 } from './utils/index.js';
 
@@ -190,6 +191,23 @@ export class EdgelessClipboard implements Clipboard {
         this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element
+      return;
+    }
+
+    if (e.clipboardData && isPureFileInClipboard(e.clipboardData)) {
+      const files = e.clipboardData.files;
+      if (files.length === 0) {
+        return;
+      }
+      const res: { file: File; sourceId: string }[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image')) {
+          const sourceId = await this._edgeless.page.blobs.set(file);
+          res.push({ file, sourceId });
+        }
+      }
+      await this._edgeless.addImages(res);
       return;
     }
 
