@@ -30,6 +30,7 @@ import { deleteModelsByRange } from '../../page-block/utils/container-operations
 import {
   type BlockComponentElement,
   getBlockElementById,
+  getEditorContainer,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
@@ -467,6 +468,7 @@ export class EdgelessClipboard implements Clipboard {
       // waiting for canvas to render
       await new Promise(requestAnimationFrame);
 
+      const editorContainer = getEditorContainer(this._page);
       const canvas: HTMLCanvasElement = await html2canvas(container, {
         ignoreElements: function (element: Element) {
           if (
@@ -483,7 +485,8 @@ export class EdgelessClipboard implements Clipboard {
           // html2canvas can't support transform feature
           element.style.setProperty('transform', 'none');
         },
-        backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+        backgroundColor:
+          window.getComputedStyle(editorContainer).backgroundColor,
       });
       assertExists(canvas);
 
