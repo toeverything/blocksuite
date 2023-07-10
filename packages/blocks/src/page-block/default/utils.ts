@@ -20,9 +20,9 @@ import {
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
+import { DragHandle } from '../../components/drag-handle.js';
 import type { FormatQuickBar } from '../../components/format-quick-bar/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
-import { DragHandle } from '../../components/index.js';
 import { toast } from '../../components/toast.js';
 import type { DefaultPageBlockComponent } from './default-page-block.js';
 

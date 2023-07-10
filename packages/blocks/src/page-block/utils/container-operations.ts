@@ -1,4 +1,3 @@
-import type { PointerEventState } from '@blocksuite/block-std';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
@@ -21,8 +20,6 @@ import {
   getClosestBlockElementByElement,
   getDefaultPage,
   getVirgoByModel,
-  handleNativeRangeDblClick,
-  handleNativeRangeTripleClick,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
@@ -39,13 +36,8 @@ import {
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { BlockSchemas } from '../../models.js';
-import type {
-  DefaultSelectionManager,
-  PageSelectionState,
-} from '../default/selection-manager/index.js';
-import { calcCurrentSelectionPosition } from './position.js';
+import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 
 export function handleBlockSelectionBatchDelete(
   page: Page,
@@ -586,34 +578,5 @@ export function tryUpdateNoteSize(page: Page, zoom: number) {
         });
       }
     });
-  });
-}
-
-// Show format quick bar when double/triple clicking on text
-export function showFormatQuickBarByClicks(
-  type: 'double' | 'triple',
-  e: PointerEventState,
-  page: Page,
-  container?: HTMLElement,
-  state?: PageSelectionState
-) {
-  const range =
-    type === 'double'
-      ? handleNativeRangeDblClick()
-      : handleNativeRangeTripleClick(e);
-  if (e.raw.target instanceof HTMLTextAreaElement) return;
-  if (!range || range.collapsed) return;
-  if (page.readonly) return;
-
-  const direction = 'center-bottom';
-  showFormatQuickBar({
-    page,
-    container,
-    direction,
-    anchorEl: {
-      getBoundingClientRect: () => {
-        return calcCurrentSelectionPosition(direction, state);
-      },
-    },
   });
 }
