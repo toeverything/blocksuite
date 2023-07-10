@@ -1504,15 +1504,9 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
 
   const expectedValue = [
     {
-      flavour: 'affine:list',
-      type: 'todo',
-      checked: false,
-      text: [
-        {
-          insert: ' 1.',
-          attributes: {},
-        },
-      ],
+      flavour: 'affine:page',
+      type: 'h1',
+      text: [],
       children: [],
     },
     {
@@ -1521,11 +1515,27 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
       checked: false,
       text: [
         {
-          insert: ' 2.',
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
           attributes: {},
         },
       ],
-      children: [],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '1.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
     },
     {
       flavour: 'affine:list',
@@ -1533,11 +1543,55 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
       checked: false,
       text: [
         {
-          insert: ' 3.',
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
           attributes: {},
         },
       ],
-      children: [],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '2.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '3.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
     },
     {
       flavour: 'affine:list',
@@ -1545,11 +1599,27 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
       checked: true,
       text: [
         {
-          insert: ' 4.',
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
           attributes: {},
         },
       ],
-      children: [],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '4.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
     },
     {
       flavour: 'affine:list',
@@ -1557,11 +1627,27 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
       checked: false,
       text: [
         {
-          insert: ' 5. ',
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
           attributes: {},
         },
       ],
-      children: [],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '5.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
     },
     {
       flavour: 'affine:list',
@@ -1569,7 +1655,11 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
       checked: true,
       text: [
         {
-          insert: ' ',
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
           attributes: {},
         },
       ],

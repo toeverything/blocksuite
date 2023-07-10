@@ -22,16 +22,22 @@ import type {
   TableParseHandler,
   TableTitleColumnHandler,
   TextStyleHandler,
-} from './parse-html.js';
-import { HtmlParser } from './parse-html.js';
+} from './parse-base.js';
+import { MarkdownParser } from './parse-markdown.js';
+import { NotionHtmlParser } from './parse-notion-html.js';
 import type { SelectedBlock } from './types.js';
 
-export type ParseContext = 'Markdown' | 'NotionHtml';
+type ParseContext = 'Markdown' | 'NotionHtml';
 
 export type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
+
+export type ContextedContentParser = {
+  context: string;
+  getParserHtmlText2Block: (name: string) => ParseHtml2BlockHandler;
+};
 
 export class ContentParser {
   private _page: Page;
@@ -39,8 +45,9 @@ export class ContentParser {
     beforeHtml2Block: new Slot<Element>(),
   };
   private _parsers: Record<string, ParseHtml2BlockHandler> = {};
-  private _htmlParser: HtmlParser;
   private _imageProxyEndpoint?: string;
+  private _markdownParser: MarkdownParser;
+  private _notionHtmlParser: NotionHtmlParser;
   private urlPattern =
     /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
   constructor(
@@ -65,7 +72,7 @@ export class ContentParser {
       this._imageProxyEndpoint =
         'https://workers.toeverything.workers.dev/proxy/image';
     }
-    this._htmlParser = new HtmlParser(
+    this._markdownParser = new MarkdownParser(
       this,
       page,
       options.fetchFileHandler,
@@ -73,7 +80,16 @@ export class ContentParser {
       options.tableParseHandler,
       options.tableTitleColumnHandler
     );
-    this._htmlParser.registerParsers();
+    this._notionHtmlParser = new NotionHtmlParser(
+      this,
+      page,
+      options.fetchFileHandler,
+      options.textStyleHandler,
+      options.tableParseHandler,
+      options.tableTitleColumnHandler
+    );
+    this._markdownParser.registerParsers();
+    this._notionHtmlParser.registerParsers();
   }
 
   public async exportHtml() {
@@ -471,7 +487,7 @@ export class ContentParser {
     this._parsers[name] = handler;
   }
 
-  public withContext(context: ParseContext) {
+  public withContext(context: ParseContext): ContextedContentParser {
     return {
       get context() {
         return context;

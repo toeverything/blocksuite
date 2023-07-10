@@ -1,5 +1,4 @@
 import type { BlockSchemas } from '@blocksuite/global/types';
-import { assertExists } from '@blocksuite/global/utils';
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
@@ -11,7 +10,7 @@ import {
 } from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
-import type { ContentParser, ParseContext } from './index.js';
+import type { ContentParser, ContextedContentParser } from './index.js';
 
 export type FetchFileHandler = (
   fileName: string
@@ -31,6 +30,7 @@ export type ColumnMeta = {
   title: string;
   optionsMap: Map<string, string>;
 };
+
 export type TableTitleColumnHandler = (
   element: Element
 ) => Promise<string[] | null>;
@@ -59,13 +59,14 @@ const INLINE_TAGS = [
   'TIME',
 ];
 
-export class HtmlParser {
-  private _contentParser: ContentParser;
-  private _page: Page;
-  private _customFetchFileHandler?: FetchFileHandler;
-  private _customTextStyleHandler?: TextStyleHandler;
-  private _customTableParserHandler?: TableParseHandler;
-  private _customTableTitleColumnHandler?: TableTitleColumnHandler;
+export abstract class BaseParser {
+  protected _contentParser: ContentParser;
+  protected _page: Page;
+  protected _customFetchFileHandler?: FetchFileHandler;
+  protected _customTextStyleHandler?: TextStyleHandler;
+  protected _customTableParserHandler?: TableParseHandler;
+  protected _customTableTitleColumnHandler?: TableTitleColumnHandler;
+  protected abstract _contextedContentParser: ContextedContentParser;
 
   constructor(
     contentParser: ContentParser,
@@ -83,7 +84,7 @@ export class HtmlParser {
     this._customTableTitleColumnHandler = tableTitleColumnHandler;
   }
 
-  private _fetchFileHandler = async (
+  protected _fetchFileHandler = async (
     fileName: string
   ): Promise<Blob | null | undefined> => {
     if (this._customFetchFileHandler) {
@@ -113,94 +114,15 @@ export class HtmlParser {
     return imgBlob;
   };
 
-  public registerParsers() {
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownNodeParser',
-      this._markdownNodeParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlNodeParser',
-      this._notionHtmlNodeParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownCommonParser',
-      this._markdownCommonParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlCommonParser',
-      this._notionHtmlCommonParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownListItemParser',
-      this._markdownListItemParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlListItemParser',
-      this._notionHtmlListItemParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownBlockQuoteParser',
-      this._markdownBlockQuoteParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlBlockQuoteParser',
-      this._notionHtmlBlockQuoteParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownCodeBlockParser',
-      this._codeBlockParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlCodeBlockParser',
-      this._codeBlockParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownEmbedItemParser',
-      this._markdownEmbedItemParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlEmbedItemParser',
-      this._notionHtmlEmbedItemParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownTableParser',
-      this._markdownTableParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlTableParser',
-      this._notionHtmlTableParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'MarkdownHeaderParser',
-      this._markdownHeaderParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'NotionHtmlHeaderParser',
-      this._notionHtmlHeaderParser
-    );
-  }
-
-  private _notionHtmlNodeParser = async (
-    node: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._nodeParser(node, 'NotionHtml');
-  };
-
-  private _markdownNodeParser = async (
-    node: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._nodeParser(node, 'Markdown');
-  };
+  public abstract registerParsers(): void;
 
   // TODO parse children block
-  private _nodeParser = async (
-    node: Element,
-    context: ParseContext
+  protected _nodeParser = async (
+    node: Element
   ): Promise<SerializedBlock[] | null> => {
-    const contextedContentParser = this._contentParser.withContext(context);
     let result;
     // custom parser
-    result = await contextedContentParser.getParserHtmlText2Block(
+    result = await this._contextedContentParser.getParserHtmlText2Block(
       'CustomNodeParser'
     )?.(node);
     if (result && result.length > 0) {
@@ -211,7 +133,7 @@ export class HtmlParser {
     const isInlineOrLeaf =
       node instanceof Text || INLINE_TAGS.includes(tagName);
     if (isInlineOrLeaf && node.textContent?.length) {
-      result = await contextedContentParser.getParserHtmlText2Block(
+      result = await this._contextedContentParser.getParserHtmlText2Block(
         'CommonParser'
       )?.({
         element: node,
@@ -226,7 +148,7 @@ export class HtmlParser {
         case 'H4':
         case 'H5':
         case 'H6':
-          result = await contextedContentParser.getParserHtmlText2Block(
+          result = await this._contextedContentParser.getParserHtmlText2Block(
             'CommonParser'
           )?.({
             element: node,
@@ -235,34 +157,34 @@ export class HtmlParser {
           });
           break;
         case 'BLOCKQUOTE':
-          result = await contextedContentParser.getParserHtmlText2Block(
+          result = await this._contextedContentParser.getParserHtmlText2Block(
             'BlockQuoteParser'
           )?.(node);
           break;
         case 'P':
           if (
-            contextedContentParser.context === 'Markdown' &&
+            this._contextedContentParser.context === 'Markdown' &&
             node.firstChild instanceof Text &&
             (node.firstChild.textContent?.startsWith('[] ') ||
               node.firstChild.textContent?.startsWith('[ ] ') ||
               node.firstChild.textContent?.startsWith('[x] '))
           ) {
-            result = await contextedContentParser.getParserHtmlText2Block(
+            result = await this._contextedContentParser.getParserHtmlText2Block(
               'ListItemParser'
             )?.(node);
           } else if (node.firstChild instanceof HTMLImageElement) {
-            result = await contextedContentParser.getParserHtmlText2Block(
+            result = await this._contextedContentParser.getParserHtmlText2Block(
               'EmbedItemParser'
             )?.(node.firstChild);
           } else if (
             node.firstElementChild?.tagName === 'A' ||
             node.firstElementChild?.getAttribute('href')?.endsWith('.csv')
           ) {
-            result = await contextedContentParser.getParserHtmlText2Block(
+            result = await this._contextedContentParser.getParserHtmlText2Block(
               'TableParser'
             )?.(node.firstChild);
           } else {
-            result = await contextedContentParser.getParserHtmlText2Block(
+            result = await this._contextedContentParser.getParserHtmlText2Block(
               'CommonParser'
             )?.({
               element: node,
@@ -272,12 +194,12 @@ export class HtmlParser {
           }
           break;
         case 'LI':
-          result = await contextedContentParser.getParserHtmlText2Block(
+          result = await this._contextedContentParser.getParserHtmlText2Block(
             'ListItemParser'
           )?.(node);
           break;
         case 'HR':
-          result = await contextedContentParser.getParserHtmlText2Block(
+          result = await this._contextedContentParser.getParserHtmlText2Block(
             'CommonParser'
           )?.({
             element: node,
@@ -285,25 +207,25 @@ export class HtmlParser {
           });
           break;
         case 'PRE':
-          result = await contextedContentParser.getParserHtmlText2Block(
+          result = await this._contextedContentParser.getParserHtmlText2Block(
             'CodeBlockParser'
           )?.(node);
           break;
         case 'FIGURE':
         case 'IMG':
           {
-            result = await contextedContentParser.getParserHtmlText2Block(
+            result = await this._contextedContentParser.getParserHtmlText2Block(
               'EmbedItemParser'
             )?.(node);
           }
           break;
         case 'HEADER':
-          result = await contextedContentParser.getParserHtmlText2Block(
+          result = await this._contextedContentParser.getParserHtmlText2Block(
             'HeaderParser'
           )?.(node);
           break;
         case 'TABLE':
-          result = await contextedContentParser.getParserHtmlText2Block(
+          result = await this._contextedContentParser.getParserHtmlText2Block(
             'TableParser'
           )?.(node);
           break;
@@ -337,7 +259,7 @@ export class HtmlParser {
 
       if (!hasNonInlineOrNonLeaf) {
         const allInlineResult =
-          await contextedContentParser.getParserHtmlText2Block(
+          await this._contextedContentParser.getParserHtmlText2Block(
             'CommonParser'
           )?.({
             element: node,
@@ -353,9 +275,9 @@ export class HtmlParser {
     const openBlockPromises = Array.from(node.children).map(
       async childElement => {
         const clipBlockInfos =
-          (await contextedContentParser.getParserHtmlText2Block('NodeParser')?.(
-            childElement
-          )) || [];
+          (await this._contextedContentParser.getParserHtmlText2Block(
+            'NodeParser'
+          )?.(childElement)) || [];
         return clipBlockInfos;
       }
     );
@@ -367,63 +289,13 @@ export class HtmlParser {
     return results.flat().filter(v => v);
   };
 
-  private _notionHtmlCommonParser = async ({
-    element,
-    flavour,
-    type,
-    checked,
-    ignoreEmptyElement = true,
-  }: {
-    element: Element;
-    flavour: string;
-    type: string;
-    checked?: boolean;
-    ignoreEmptyElement?: boolean;
-  }): Promise<SerializedBlock[] | null> => {
-    const res = await this._commonHTML2Block(
-      element,
-      'NotionHtml',
-      flavour,
-      type,
-      checked,
-      ignoreEmptyElement
-    );
-    return res ? [res] : null;
-  };
-
-  private _markdownCommonParser = async ({
-    element,
-    flavour,
-    type,
-    checked,
-    ignoreEmptyElement = true,
-  }: {
-    element: Element;
-    flavour: string;
-    type: string;
-    checked?: boolean;
-    ignoreEmptyElement?: boolean;
-  }): Promise<SerializedBlock[] | null> => {
-    const res = await this._commonHTML2Block(
-      element,
-      'Markdown',
-      flavour,
-      type,
-      checked,
-      ignoreEmptyElement
-    );
-    return res ? [res] : null;
-  };
-
-  private async _commonHTML2Block(
+  protected async _commonHTML2Block(
     element: Element,
-    context: ParseContext,
     flavour: string,
     type: string,
     checked?: boolean,
     ignoreEmptyElement = true
   ): Promise<SerializedBlock | null> {
-    const contextedContentParser = this._contentParser.withContext(context);
     const childNodes = element.childNodes;
     let isChildNode = false;
     const textValues: DeltaOperation[] = [];
@@ -453,9 +325,10 @@ export class HtmlParser {
         }
       }
       if (node instanceof Element) {
-        const childNode = await contextedContentParser.getParserHtmlText2Block(
-          'NodeParser'
-        )?.(node);
+        const childNode =
+          await this._contextedContentParser.getParserHtmlText2Block(
+            'NodeParser'
+          )?.(node);
         childNode && children.push(...childNode);
       }
       isChildNode = true;
@@ -494,7 +367,7 @@ export class HtmlParser {
     };
   }
 
-  private _commonHTML2Text(
+  protected _commonHTML2Text(
     element: Element | Node,
     textStyle: { [key: string]: unknown } = {},
     ignoreEmptyText = true
@@ -549,141 +422,9 @@ export class HtmlParser {
       .filter(v => v);
   }
 
-  private _notionHtmlListItemParser = async (
+  protected _blockQuoteParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
-    const getListItemType = (element: Element | null) => {
-      assertExists(element);
-      if (element.tagName === 'OL') {
-        return 'numbered';
-      }
-      if (element.tagName === 'UL') {
-        if (element.classList.contains('bulleted-list')) {
-          return 'bulleted';
-        }
-        // no toggle list in blocksuite
-        if (element.classList.contains('toggle')) {
-          return 'bulleted';
-        }
-        if (element.classList.contains('to-do-list')) {
-          return 'todo';
-        }
-      }
-      return 'bulleted';
-    };
-
-    const contextedContentParser =
-      this._contentParser.withContext('NotionHtml');
-    const listItemType = getListItemType(element.parentElement);
-    if (
-      element.firstElementChild?.tagName === 'DETAIL' ||
-      element.firstElementChild?.firstElementChild?.tagName === 'SUMMARY'
-    ) {
-      const summary = await contextedContentParser.getParserHtmlText2Block(
-        'CommonParser'
-      )?.({
-        element: element.firstElementChild.firstElementChild,
-        flavour: 'affine:list',
-        type: listItemType,
-      });
-      const childNodes = element.firstElementChild.childNodes;
-      const children = [];
-      for (let i = 1; i < childNodes.length; i++) {
-        const node = childNodes.item(i);
-        if (!node) continue;
-        if (node instanceof Element) {
-          const childNode =
-            await contextedContentParser.getParserHtmlText2Block(
-              'NodeParser'
-            )?.(node);
-          childNode && children.push(...childNode);
-        }
-      }
-      if (summary && summary.length > 0) {
-        summary[0].children = [...(summary[0].children || []), ...children];
-      }
-      return summary;
-    }
-    let checked;
-    let checkBoxEl;
-    if (
-      (checkBoxEl = element.firstElementChild)?.classList.contains(
-        'checkbox'
-      ) ||
-      (checkBoxEl =
-        element.firstElementChild?.firstElementChild)?.classList.contains(
-        'checkbox'
-      )
-    ) {
-      checked = checkBoxEl?.classList.contains('checkbox-on') ?? false;
-    }
-    return contextedContentParser.getParserHtmlText2Block('CommonParser')?.({
-      element: element,
-      flavour: 'affine:list',
-      type: listItemType,
-      checked: checked,
-    });
-  };
-
-  private _markdownListItemParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    const contextedContentParser = this._contentParser.withContext('Markdown');
-    const tagName = element.parentElement?.tagName;
-    let type = tagName === 'OL' ? 'numbered' : 'bulleted';
-    let checked;
-    let inputEl;
-    if (
-      (inputEl = element.firstElementChild)?.tagName === 'INPUT' ||
-      (inputEl = element.firstElementChild?.firstElementChild)?.tagName ===
-        'INPUT'
-    ) {
-      type = 'todo';
-      checked = inputEl?.getAttribute('checked') !== null;
-    }
-    if (element.firstChild instanceof Text) {
-      if (element.firstChild.textContent?.startsWith('[] ')) {
-        element.firstChild.textContent =
-          element.firstChild.textContent.slice(3);
-        type = 'todo';
-        checked = false;
-      } else if (element.firstChild.textContent?.startsWith('[ ] ')) {
-        element.firstChild.textContent =
-          element.firstChild.textContent.slice(4);
-        type = 'todo';
-        checked = false;
-      } else if (element.firstChild.textContent?.startsWith('[x] ')) {
-        element.firstChild.textContent =
-          element.firstChild.textContent.slice(4);
-        type = 'todo';
-        checked = true;
-      }
-    }
-    return contextedContentParser.getParserHtmlText2Block('CommonParser')?.({
-      element: element,
-      flavour: 'affine:list',
-      type: type,
-      checked: checked,
-    });
-  };
-
-  private _notionHtmlBlockQuoteParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._blockQuoteParser(element, 'NotionHtml');
-  };
-
-  private _markdownBlockQuoteParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._blockQuoteParser(element, 'Markdown');
-  };
-
-  private _blockQuoteParser = async (
-    element: Element,
-    context: ParseContext
-  ): Promise<SerializedBlock[] | null> => {
-    const contextedContentParser = this._contentParser.withContext(context);
     const getText = (list: SerializedBlock[]): SerializedBlock['text'] => {
       const result: SerializedBlock['text'] = [];
       list.forEach(item => {
@@ -702,13 +443,14 @@ export class HtmlParser {
       return result;
     };
 
-    const commonResult = await contextedContentParser.getParserHtmlText2Block(
-      'CommonParser'
-    )?.({
-      element: element,
-      flavour: 'affine:paragraph',
-      type: 'text',
-    });
+    const commonResult =
+      await this._contextedContentParser.getParserHtmlText2Block(
+        'CommonParser'
+      )?.({
+        element: element,
+        flavour: 'affine:paragraph',
+        type: 'text',
+      });
     if (!commonResult) {
       return null;
     }
@@ -723,7 +465,7 @@ export class HtmlParser {
     ];
   };
 
-  private _codeBlockParser = async (
+  protected _codeBlockParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     // code block doesn't parse other nested Markdown syntax, thus is always one layer deep, example:
@@ -754,127 +496,9 @@ export class HtmlParser {
     ];
   };
 
-  private _notionHtmlEmbedItemParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._embedItemParser(element, 'NotionHtml');
-  };
-
-  private _markdownEmbedItemParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._embedItemParser(element, 'Markdown');
-  };
-
-  private _embedItemParser = async (
-    element: Element,
-    context: ParseContext
-  ): Promise<SerializedBlock[] | null> => {
-    const contextedContentParser = this._contentParser.withContext(context);
-    let imgElement = null;
-    const texts = [];
-    if (element.tagName === 'FIGURE') {
-      imgElement = element.querySelector('img');
-      const figcaptionElement = element.querySelector('figcaption');
-      if (figcaptionElement) {
-        const captionResult =
-          await contextedContentParser.getParserHtmlText2Block(
-            'CommonParser'
-          )?.({
-            element: figcaptionElement,
-            flavour: 'affine:paragraph',
-            type: 'text',
-          });
-        if (captionResult && captionResult.length > 0) {
-          texts.push(...(captionResult[0].text || []));
-        }
-      }
-      const bookmarkUrlElement = element.querySelector('.bookmark.source');
-      if (bookmarkUrlElement) {
-        const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
-        return [
-          {
-            flavour: 'affine:bookmark',
-            children: [],
-            url: bookmarkUrl,
-          },
-        ];
-      }
-    } else if (element instanceof HTMLImageElement) {
-      imgElement = element;
-      texts.push({ insert: '' });
-    }
-    let caption = '';
-    if (imgElement) {
-      // TODO: use the real bookmark instead.
-      if (imgElement.classList.contains('bookmark-icon')) {
-        const linkElement = element.querySelector('a');
-        if (linkElement) {
-          caption = linkElement.getAttribute('href') || '';
-        }
-        imgElement = element.querySelector('.bookmark-image');
-      }
-      const imgUrl = imgElement?.getAttribute('src') || '';
-      const imgBlob = await this._fetchFileHandler(imgUrl);
-      if (!imgBlob || imgBlob.size === 0) {
-        const texts = [
-          {
-            insert: imgUrl,
-            attributes: {
-              link: imgUrl,
-            },
-          },
-        ];
-        return [
-          {
-            flavour: 'affine:paragraph',
-            type: 'text',
-            children: [],
-            text: texts,
-          },
-        ];
-      } else {
-        const storage = this._page.blobs;
-        assertExists(storage);
-        const id = await storage.set(imgBlob);
-        return [
-          {
-            flavour: 'affine:image',
-            sourceId: id,
-            children: [],
-            text: texts,
-            caption,
-          },
-        ];
-      }
-    }
-
-    return [
-      {
-        flavour: 'affine:paragraph',
-        type: 'text',
-        children: [],
-        text: texts,
-      },
-    ];
-  };
-
-  private _notionHtmlTableParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._tableParser(element, 'NotionHtml');
-  };
-
-  private _markdownTableParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._tableParser(element, 'Markdown');
-  };
-
   // TODO parse children block, this is temporary solution
-  private _tableParser = async (
-    element: Element,
-    _context: ParseContext
+  protected _tableParser = async (
+    element: Element
   ): Promise<SerializedBlock[] | null> => {
     if (this._customTableParserHandler) {
       const result = await this._customTableParserHandler(element);
@@ -934,30 +558,15 @@ export class HtmlParser {
     ];
   };
 
-  private _notionHtmlHeaderParser = async (
+  protected _headerParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
-    return this._headerParser(element, 'NotionHtml');
-  };
-
-  private _markdownHeaderParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    return this._headerParser(element, 'Markdown');
-  };
-
-  private _headerParser = async (
-    element: Element,
-    context: ParseContext
-  ): Promise<SerializedBlock[] | null> => {
-    const contextedContentParser = this._contentParser.withContext(context);
     let node = element;
     if (element.getElementsByClassName('page-title').length > 0) {
       node = element.getElementsByClassName('page-title')[0];
     }
-
     const tagName = node.tagName;
-    const result = await contextedContentParser.getParserHtmlText2Block(
+    const result = await this._contextedContentParser.getParserHtmlText2Block(
       'CommonParser'
     )?.({
       element: node,
@@ -1058,12 +667,12 @@ const checkWebComponentIfInline = (element: Element) => {
   );
 };
 
-function getTableCellsAndChildren(
+const getTableCellsAndChildren = (
   rows: (string | string[])[][],
   idCounter: { next: () => number },
   columnMeta: ColumnMeta[],
   columns: Column<Record<string, unknown>>[]
-) {
+) => {
   const cells: Record<string, Record<string, Cell>> = {};
   const children: SerializedBlock[] = [];
   rows.forEach(row => {
@@ -1100,13 +709,13 @@ function getTableCellsAndChildren(
     });
   });
   return { cells, children };
-}
+};
 
-function getTableColumns(
+const getTableColumns = (
   columnMeta: ColumnMeta[],
   rows: (string | string[])[][],
   idCounter: { next: () => number }
-): Column<Record<string, unknown>>[] {
+): Column<Record<string, unknown>>[] => {
   const columns: Column[] = columnMeta.slice(1).map((value, index) => {
     if (['select', 'multi-select'].includes(value.type)) {
       const options = rows
@@ -1144,12 +753,12 @@ function getTableColumns(
     }
   }
   return columns;
-}
+};
 
-function getTableRows(
+const getTableRows = (
   tbodyElement: HTMLTableSectionElement | null,
   columnMeta: ColumnMeta[]
-) {
+) => {
   const rows: (string | string[])[][] = [];
   tbodyElement?.querySelectorAll('tr').forEach(ele => {
     const row: (string | string[])[] = [];
@@ -1174,11 +783,11 @@ function getTableRows(
     rows.push(row);
   });
   return rows;
-}
+};
 
-function getTableColumnMeta(
+const getTableColumnMeta = (
   titleTrEle: HTMLTableRowElement | null | undefined
-) {
+) => {
   const columnMeta: ColumnMeta[] = [];
   titleTrEle?.querySelectorAll('th').forEach(ele => {
     columnMeta.push({
@@ -1190,4 +799,4 @@ function getTableColumnMeta(
     });
   });
   return columnMeta;
-}
+};
