@@ -10,8 +10,6 @@ import { noop } from '../../../__internal__/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
-  NOTE_OVERLAY_OFFSET_X,
-  NOTE_OVERLAY_OFFSET_Y,
 } from '../utils/consts.js';
 import { addNote, type NoteOptions } from '../utils/note.js';
 import { NoteOverlay } from '../utils/tool-overlay.js';
