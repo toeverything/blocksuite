@@ -30,6 +30,7 @@ import { deleteModelsByRange } from '../../page-block/utils/container-operations
 import {
   type BlockComponentElement,
   getBlockElementById,
+  getEditorContainer,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
@@ -49,6 +50,7 @@ import {
   CLIPBOARD_MIMETYPE,
   createSurfaceClipboardItems,
   getSurfaceClipboardData,
+  isPureFileInClipboard,
   performNativeCopy,
 } from './utils/index.js';
 
@@ -189,6 +191,23 @@ export class EdgelessClipboard implements Clipboard {
         this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element
+      return;
+    }
+
+    if (e.clipboardData && isPureFileInClipboard(e.clipboardData)) {
+      const files = e.clipboardData.files;
+      if (files.length === 0) {
+        return;
+      }
+      const res: { file: File; sourceId: string }[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image')) {
+          const sourceId = await this._edgeless.page.blobs.set(file);
+          res.push({ file, sourceId });
+        }
+      }
+      await this._edgeless.addImages(res);
       return;
     }
 
@@ -467,6 +486,7 @@ export class EdgelessClipboard implements Clipboard {
       // waiting for canvas to render
       await new Promise(requestAnimationFrame);
 
+      const editorContainer = getEditorContainer(this._page);
       const canvas: HTMLCanvasElement = await html2canvas(container, {
         ignoreElements: function (element: Element) {
           if (
@@ -483,7 +503,8 @@ export class EdgelessClipboard implements Clipboard {
           // html2canvas can't support transform feature
           element.style.setProperty('transform', 'none');
         },
-        backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+        backgroundColor:
+          window.getComputedStyle(editorContainer).backgroundColor,
       });
       assertExists(canvas);
 

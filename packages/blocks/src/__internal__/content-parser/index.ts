@@ -117,6 +117,7 @@ export class ContentParser {
     const html2canvas = (await import('html2canvas')).default;
     if (!(html2canvas instanceof Function)) return;
 
+    const editorContainer = getEditorContainer(this._page);
     const container = document.querySelector(
       '.affine-block-children-container'
     );
@@ -149,7 +150,7 @@ export class ContentParser {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
       },
-      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
       proxy: this._imageProxyEndpoint,
     };
@@ -199,7 +200,7 @@ export class ContentParser {
           return false;
         }
       },
-      backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
       proxy: this._imageProxyEndpoint,
     };
