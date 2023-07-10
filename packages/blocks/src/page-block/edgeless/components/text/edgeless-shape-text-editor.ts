@@ -12,8 +12,8 @@ import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 
-@customElement('edgeless-shape-editor')
-export class EdgelessShapeEditor extends WithDisposable(ShadowlessElement) {
+@customElement('edgeless-shape-text-editor')
+export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
@@ -187,6 +187,6 @@ export class EdgelessShapeEditor extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-shape-editor': EdgelessShapeEditor;
+    'edgeless-shape-text-editor': EdgelessShapeTextEditor;
   }
 }

@@ -5,7 +5,7 @@ import { assertExists } from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
-import { EdgelessShapeEditor } from '../components/text/edgeless-shape-editor.js';
+import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
@@ -29,7 +29,7 @@ export function mountShapeEditor(
   shapeElement: ShapeElement,
   edgeless: EdgelessPageBlockComponent
 ) {
-  const shapeEditor = new EdgelessShapeEditor();
+  const shapeEditor = new EdgelessShapeTextEditor();
   const pageBlockContainer = edgeless.pageBlockContainer;
 
   pageBlockContainer.appendChild(shapeEditor);

@@ -1,5 +1,6 @@
 import {
   Bound,
+  clamp,
   type PhasorElementWithText,
   ShapeElement,
   TextElement,

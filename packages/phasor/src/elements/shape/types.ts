@@ -36,6 +36,8 @@ export interface IShape extends ISurfaceElement {
 }
 
 export interface IShapeLocalRecord extends ISurfaceElementLocalRecord {
+  // used to control the render of the shape text because we
+  // need to hide the text in canvas when we are editing the text
   textDisplay?: boolean;
 }
 

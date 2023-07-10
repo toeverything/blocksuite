@@ -32,6 +32,8 @@ export interface ISurfaceElementLocalRecord {
 export interface HitTestOptions {
   expand?: number;
   ignoreTransparent?: boolean;
+  // we will select a shape without fill color by selecting its content area if
+  // we set `pierce` to false, shape element used this options in `hitTest` method
   pierce?: boolean;
 }
 
