@@ -11,7 +11,7 @@ import {
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertEdgelessText } from '../utils/asserts.js';
+import { assertEdgelessCanvasText } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test('add text element in default mode', async ({ page }) => {
@@ -25,7 +25,7 @@ test('add text element in default mode', async ({ page }) => {
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
   await assertEdgelessTool(page, 'default');
 
   await page.mouse.click(120, 140);
@@ -37,11 +37,11 @@ test('add text element in default mode', async ({ page }) => {
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hellohello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nellohello');
 });
 
 test('add text element in text mode', async ({ page }) => {
@@ -52,10 +52,10 @@ test('add text element in text mode', async ({ page }) => {
   await setEdgelessTool(page, 'text');
 
   await page.mouse.click(130, 140);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
 
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
   await assertEdgelessTool(page, 'default');
 
   await page.mouse.click(120, 140);
@@ -67,11 +67,11 @@ test('add text element in text mode', async ({ page }) => {
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hellohello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nellohello');
 });
 
 test('copy and paste', async ({ page }) => {
@@ -82,10 +82,10 @@ test('copy and paste', async ({ page }) => {
   await setEdgelessTool(page, 'default');
 
   await page.mouse.dblclick(130, 140);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
 
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
   await assertEdgelessTool(page, 'default');
 
   await page.mouse.move(145, 155);
@@ -94,14 +94,15 @@ test('copy and paste', async ({ page }) => {
     steps: 10,
   });
   await page.mouse.up();
+  // h|ell|o
   await waitNextFrame(page, 200);
   await page.keyboard.press(`${SHORT_KEY}+c`);
 
   await waitNextFrame(page, 200);
-  await type(page, 'ddd');
+  await type(page, 'ddd', 100);
   await waitNextFrame(page, 200);
-  await assertEdgelessText(page, 'hdddo');
+  await assertEdgelessCanvasText(page, 'hdddo');
 
   await page.keyboard.press(`${SHORT_KEY}+v`);
-  await assertEdgelessText(page, 'hdddello');
+  await assertEdgelessCanvasText(page, 'hdddello');
 });

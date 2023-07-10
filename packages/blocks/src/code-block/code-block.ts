@@ -6,7 +6,7 @@ import './components/lang-list.js';
 import { ArrowDownIcon } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import { assertExists, Slot } from '@blocksuite/store';
-import { css, html, render } from 'lit';
+import { css, html, nothing, render } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -32,7 +32,11 @@ import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
-import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
+import {
+  DARK_THEME,
+  LIGHT_THEME,
+  PLAIN_TEXT_REGISTRATION,
+} from './utils/consts.js';
 
 @customElement('affine-code')
 export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
@@ -195,7 +199,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._updateLineNumbers();
   });
 
-  private _curLanguageDisplayName: string = FALLBACK_LANG;
+  private _curLanguage: ILanguageRegistration = PLAIN_TEXT_REGISTRATION;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: ILanguageRegistration) {
     const mode = queryCurrentMode();
@@ -262,11 +266,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override updated() {
-    if (this.model.language !== this._curLanguageDisplayName) {
+    if (this.model.language !== this._curLanguage.displayName) {
       const lang = getStandardLanguage(this.model.language);
-      this._curLanguageDisplayName = lang
-        ? lang.displayName ?? lang.id
-        : FALLBACK_LANG;
+      this._curLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
       if (lang) {
         if (this._highlighter) {
           const currentLangs = this._highlighter.getLoadedLanguages();
@@ -364,6 +366,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   private _langListTemplate() {
+    const curLanguageDisplayName =
+      this._curLanguage.displayName ?? this._curLanguage.id;
     return html`<div
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
@@ -377,11 +381,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         ?disabled=${this.readonly}
         @click=${this._onClickLangBtn}
       >
-        ${this._curLanguageDisplayName}
-        ${!this.readonly ? ArrowDownIcon : html``}
+        ${curLanguageDisplayName} ${!this.readonly ? ArrowDownIcon : nothing}
       </icon-button>
       ${this._showLangList
         ? html`<lang-list
+            .currentLanguageId=${this._curLanguage.id}
             @selected-language-changed=${(e: CustomEvent) => {
               getService('affine:code').setLang(this.model, e.detail.language);
               this._showLangList = false;

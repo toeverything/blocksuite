@@ -1,25 +1,29 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { Bound, type TextElement } from '@blocksuite/phasor';
+import { SHAPE_TEXT_PADDING, ShapeElement } from '@blocksuite/phasor';
+import { Bound } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import * as Y from 'yjs';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 
-@customElement('edgeless-text-editor')
-export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
+@customElement('edgeless-shape-text-editor')
+export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
   private _vEditor: VEditor | null = null;
 
-  private _element: TextElement | null = null;
+  private _element: ShapeElement | null = null;
   private _edgeless: EdgelessPageBlockComponent | null = null;
   private _keeping = false;
+
+  private _resizeObserver: ResizeObserver | null = null;
 
   get vEditor() {
     return this._vEditor;
@@ -29,23 +33,24 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     this._keeping = keeping;
   }
 
-  private _syncRect() {
+  private _updateHeight() {
     const edgeless = this._edgeless;
     const element = this._element;
     if (edgeless && element) {
-      const rect = this._virgoContainer.getBoundingClientRect();
-      const vLines = Array.from(
-        this._virgoContainer.querySelectorAll('v-line')
-      );
-      const lineHeight = vLines[0].getBoundingClientRect().height;
-      edgeless.surface.updateElement(element.id, {
-        xywh: new Bound(
-          element.x,
-          element.y,
-          rect.width / edgeless.surface.viewport.zoom,
-          (vLines.length / edgeless.surface.viewport.zoom) * lineHeight
-        ).serialize(),
-      });
+      const containerHeight =
+        this._virgoContainer.getBoundingClientRect().height /
+        edgeless.surface.viewport.zoom;
+      if (containerHeight > element.h) {
+        edgeless.surface.updateElement<'shape'>(element.id, {
+          xywh: new Bound(
+            element.x,
+            element.y,
+            element.w,
+            containerHeight
+          ).serialize(),
+        });
+        this._virgoContainer.style.minHeight = `${containerHeight}px`;
+      }
       edgeless.slots.selectionUpdated.emit({
         selected: [element],
         active: true,
@@ -53,20 +58,41 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  mount(element: TextElement, edgeless: EdgelessPageBlockComponent) {
-    this._element = element;
+  mount(element: ShapeElement, edgeless: EdgelessPageBlockComponent) {
+    if (!element.text) {
+      const text = new Y.Text();
+      edgeless.surface.updateElement<'shape'>(element.id, {
+        text,
+      });
+      const updatedElement = edgeless.surface.pickById(element.id);
+      if (updatedElement instanceof ShapeElement && updatedElement.text) {
+        this._element = updatedElement;
+      } else {
+        throw new Error(
+          'Failed to mount shape editor because of no text or element type mismatch.'
+        );
+      }
+    } else {
+      this._element = element;
+    }
     this._edgeless = edgeless;
-    this._vEditor = new VEditor(element.text);
+
+    assertExists(this._element);
+    assertExists(
+      this._element.text,
+      'Failed to mount shape editor because of no text.'
+    );
+    this._vEditor = new VEditor(this._element.text);
 
     this._vEditor.slots.updated.on(() => {
-      this._syncRect();
+      this._updateHeight();
     });
 
     this._disposables.add(
       edgeless.slots.viewportUpdated.on(() => {
         this.requestUpdate();
         requestAnimationFrame(() => {
-          this._syncRect();
+          this._updateHeight();
         });
       })
     );
@@ -76,7 +102,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       assertExists(this._vEditor);
       assertExists(this._element);
       this._edgeless?.surface.updateElementLocalRecord(this._element.id, {
-        display: false,
+        textDisplay: false,
       });
       this._vEditor.mount(this._virgoContainer);
 
@@ -100,16 +126,14 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   private _unmount() {
+    this._resizeObserver?.disconnect();
+    this._resizeObserver = null;
+
     this.vEditor?.unmount();
     assertExists(this._element);
     this._edgeless?.surface.updateElementLocalRecord(this._element.id, {
-      display: true,
+      textDisplay: true,
     });
-
-    if (this._element?.text.length === 0) {
-      this._edgeless?.connector.detachConnectors([this._element]);
-      this._edgeless?.surface.removeElement(this._element?.id);
-    }
 
     this.remove();
     assertExists(this._edgeless);
@@ -129,10 +153,11 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
       virgoStyle = styleMap({
         position: 'absolute',
-        minWidth: '2px',
-        left: `${x}px`,
-        top: `${y}px`,
-        fontSize: `${this._element.fontSize}px`,
+        left: x + 'px',
+        top: y + 'px',
+        width: rect.width + 'px',
+        minHeight: rect.height + 'px',
+        fontSize: this._element.fontSize + 'px',
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',
         outline: 'none',
@@ -141,7 +166,18 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
           : this._element.color,
-        zIndex: '10',
+        padding: SHAPE_TEXT_PADDING + 'px',
+        textAlign: this._element.textVerticalAlign,
+        display: 'grid',
+        gridTemplateColumns: '100%',
+        alignItems:
+          this._element.textVerticalAlign === 'center'
+            ? 'center'
+            : this._element.textVerticalAlign === 'bottom'
+            ? 'end'
+            : 'start',
+        alignContent: 'center',
+        gap: '0',
       });
     }
 
@@ -151,6 +187,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-text-editor': EdgelessTextEditor;
+    'edgeless-shape-text-editor': EdgelessShapeTextEditor;
   }
 }

@@ -8,6 +8,7 @@ import {
   changeEdgelessNoteBackground,
   countBlock,
   getNoteRect,
+  hoverOnNote,
   initThreeNotes,
   locatorComponentToolbar,
   locatorEdgelessZoomToolButton,
@@ -21,7 +22,6 @@ import {
   clickBlockById,
   copyByKeyboard,
   dragBetweenCoords,
-  dragBlockToPoint,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
   focusRichText,
@@ -32,8 +32,10 @@ import {
   pressArrowUp,
   pressEnter,
   redoByClick,
+  redoByKeyboard,
   type,
   undoByClick,
+  undoByKeyboard,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
@@ -46,6 +48,7 @@ import {
   assertNativeSelectionRangeCount,
   assertNoteXYWH,
   assertRectEqual,
+  assertRectExist,
   assertRichTexts,
   assertSelection,
 } from '../utils/asserts.js';
@@ -315,6 +318,67 @@ test('drag handle should work across multiple notes', async ({ page }) => {
   await assertRichTexts(page, ['456', '000', '789', '123']);
 
   await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
+});
+
+test('note clipping will add new note', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await selectNoteInEdgeless(page, ids.noteId);
+
+  await hoverOnNote(page, ids.noteId);
+  await waitNextFrame(page);
+  await expect(page.locator('affine-note-cut').isVisible()).toBeTruthy();
+
+  const buttonRect = await page
+    .locator('note-scissors-button .scissors-button')
+    .boundingBox();
+
+  assertRectExist(buttonRect);
+
+  await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
+
+  await waitNextFrame(page, 2000);
+  await expect(page.locator('affine-note-scissors').isVisible()).toBeTruthy();
+  await page.locator('affine-note-scissors').click();
+
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+});
+
+test('undo/redo should work correctly after clipping', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await selectNoteInEdgeless(page, ids.noteId);
+
+  await hoverOnNote(page, ids.noteId);
+  await waitNextFrame(page, 500);
+
+  const buttonRect = await page
+    .locator('note-scissors-button .scissors-button')
+    .boundingBox();
+
+  assertRectExist(buttonRect);
+
+  await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
+
+  await waitNextFrame(page, 2000);
+  await page.locator('affine-note-scissors').click();
+
+  await undoByKeyboard(page);
+  await waitNextFrame(page);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
+  await redoByKeyboard(page);
+  await waitNextFrame(page);
+  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
 });
 
 test('format quick bar should show up when double-clicking on text', async ({
