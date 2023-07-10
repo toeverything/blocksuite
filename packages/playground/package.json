@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
-    "@blocksuite/lit": "workspace:*",
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/global": "workspace:*",
+    "@blocksuite/lit": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
@@ -24,15 +24,15 @@
     "@shoelace-style/shoelace": "2.0.0",
     "@toeverything/y-indexeddb": "0.7.0-canary.16",
     "browser-fs-access": "^0.32.1",
+    "jszip": "^3.10.1",
     "lit": "^2.7.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "yjs": "^13.6.5",
-    "jszip": "^3.10.1"
+    "yjs": "^13.6.6"
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@types/dat.gui": "^0.7.7",
+    "@types/dat.gui": "^0.7.10",
     "@types/micromatch": "^4.0.2",
     "dat.gui": "^0.7.9",
     "magic-string": "^0.29.0"
