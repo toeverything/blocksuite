@@ -1,7 +1,6 @@
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type {
   DatabaseViewData,
   DatabaseViewDataMap,
@@ -205,19 +204,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       });
     });
   }
-
-  copy = () => {
-    copyBlocks({
-      type: 'Block',
-      models: [this],
-      startOffset: 0,
-      endOffset: 0,
-    });
-  };
-  delete = () => {
-    const models = [this, ...this.children];
-    models.forEach(model => this.page.deleteBlock(model));
-  };
 }
 
 export const DatabaseBlockSchema = defineBlockSchema({

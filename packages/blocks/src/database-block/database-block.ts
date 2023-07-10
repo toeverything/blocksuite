@@ -7,6 +7,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
+import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
@@ -78,8 +79,18 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       : '';
     const currentViewManager = this.getView(current.id);
     const blockOperation: BlockOperation = {
-      copy: this.model.copy,
-      delete: this.model.delete,
+      copy: () => {
+        copyBlocks({
+          type: 'Block',
+          models: [this.model],
+          startOffset: 0,
+          endOffset: 0,
+        });
+      },
+      delete: () => {
+        const models = [this.model, ...this.model.children];
+        models.forEach(model => this.page.deleteBlock(model));
+      },
     };
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`

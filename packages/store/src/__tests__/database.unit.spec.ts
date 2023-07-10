@@ -144,7 +144,7 @@ describe('DatabaseManager', () => {
     expect(db.getColumn(column.id)).toEqual(column);
 
     db.deleteColumn(column.id);
-    expect(db.getColumn(column.id)).toBeNull();
+    expect(db.getColumn(column.id)).toBeUndefined();
   });
 
   test('getCell', () => {
