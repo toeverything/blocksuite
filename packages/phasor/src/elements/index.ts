@@ -11,18 +11,26 @@ import {
 } from './debug/debug-element.js';
 import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
-import type { IShape } from './shape/types.js';
-import type { SurfaceElement } from './surface-element.js';
+import type { IShape, IShapeLocalRecord } from './shape/types.js';
+import type {
+  ISurfaceElementLocalRecord,
+  SurfaceElement,
+} from './surface-element.js';
 import { TextElementDefaultProps } from './text/constants.js';
 import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
 
+// eslint-disable-next-line simple-import-sort/exports
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
 export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
 export { TextElement } from './text/text-element.js';
+
+export { normalizeShapeBound } from './shape/utils.js';
+export { SHAPE_TEXT_PADDING } from './shape/constants.js';
+export type { HitTestOptions } from './surface-element.js';
 
 export type PhasorElement =
   | ShapeElement
@@ -45,6 +53,14 @@ export type IPhasorElementType = {
   brush: IBrush;
   connector: IConnector;
   text: IText;
+};
+
+export type IPhasorElementLocalRecord = {
+  shape: IShapeLocalRecord;
+  debug: ISurfaceElementLocalRecord;
+  brush: ISurfaceElementLocalRecord;
+  connector: ISurfaceElementLocalRecord;
+  text: ISurfaceElementLocalRecord;
 };
 
 export const ElementCtors = {
@@ -88,5 +104,7 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
         | 'rotate'
       >
     : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>;
+
+export type PhasorElementWithText = ShapeElement | TextElement;
 
 export type { IBrush, IConnector, IDebug, IShape, IText };

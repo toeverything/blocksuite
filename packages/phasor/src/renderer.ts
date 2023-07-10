@@ -301,11 +301,10 @@ export class Renderer implements SurfaceViewport {
       ctx.save();
 
       const localRecord = element.localRecord;
-      if (
-        intersects(getBoundsWithRotation(element), bound) &&
-        localRecord.display
-      ) {
-        ctx.globalAlpha = localRecord.opacity;
+      const display = localRecord?.display ?? true;
+      const opacity = localRecord?.opacity ?? 1;
+      if (intersects(getBoundsWithRotation(element), bound) && display) {
+        ctx.globalAlpha = opacity;
         const dx = element.x - bound.x;
         const dy = element.y - bound.y;
         element.render(ctx, matrix.translate(dx, dy), rc);

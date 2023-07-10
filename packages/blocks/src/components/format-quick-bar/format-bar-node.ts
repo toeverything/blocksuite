@@ -1,5 +1,3 @@
-import './button.js';
-
 import {
   ArrowDownIcon,
   type BlockConfig,
@@ -103,15 +101,16 @@ function ParagraphPanel(
       .filter(({ flavour }) => flavour !== 'affine:divider')
       .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
       .map(
-        ({ flavour, type, name, icon }) => html`<format-bar-button
+        ({ flavour, type, name, icon }) => html`<icon-button
           width="100%"
-          style="padding-left: 12px; justify-content: flex-start;"
+          height="32px"
+          style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
           text="${name}"
           data-testid="${flavour}/${type}"
           @click="${() => updateParagraphType(flavour, type)}"
         >
           ${icon}
-        </format-bar-button>`
+        </icon-button>`
       )}
   </div>`;
 }
@@ -314,14 +313,15 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
           : html`<tool-tip tip-position="top" inert role="tooltip"
               >${disabledToolTip}</tool-tip
             >`;
-        return html`<format-bar-button
+        return html`<icon-button
+          size="32px"
           class="has-tool-tip"
           data-testid=${id}
           ?disabled=${!enabled}
           @click=${() => enabled && action({ page })}
         >
           ${icon}${toolTip}
-        </format-bar-button>`;
+        </icon-button>`;
       });
 
     if (
@@ -341,14 +341,15 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       paragraphConfig.find(
         ({ flavour, type }) => `${flavour}/${type}` === this._paragraphType
       )?.icon ?? paragraphConfig[0].icon;
-    const paragraphItems = html` <format-bar-button
+    const paragraphItems = html` <icon-button
       class="paragraph-button"
       width="52px"
+      height="32px"
       @mouseover="${this._onHover}"
       @mouseout="${this._onHoverEnd}"
     >
       ${paragraphIcon} ${ArrowDownIcon}
-    </format-bar-button>`;
+    </icon-button>`;
 
     const paragraphPanel = ParagraphPanel(
       this._showParagraphPanel,
@@ -364,7 +365,8 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
     const formatItems = formatConfig
       .filter(({ showWhen = () => true }) => showWhen(this.models))
       .map(
-        ({ id, name, icon, action, activeWhen }) => html` <format-bar-button
+        ({ id, name, icon, action, activeWhen }) => html` <icon-button
+          size="32px"
           class="has-tool-tip"
           data-testid=${id}
           ?active=${activeWhen(this._format)}
@@ -381,7 +383,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
         >
           ${icon}
           <tool-tip inert role="tooltip">${name}</tool-tip>
-        </format-bar-button>`
+        </icon-button>`
       );
 
     return html` <div

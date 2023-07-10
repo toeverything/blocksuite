@@ -1,4 +1,10 @@
-import { Bound } from '@blocksuite/phasor';
+import {
+  Bound,
+  clamp,
+  type PhasorElementWithText,
+  ShapeElement,
+  TextElement,
+} from '@blocksuite/phasor';
 import {
   type PhasorElement,
   type SurfaceManager,
@@ -12,6 +18,7 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import { GRID_GAP_MAX, GRID_GAP_MIN } from '@blocksuite/phasor';
 import { type Page } from '@blocksuite/store';
 
 import {
@@ -30,6 +37,12 @@ export function isPhasorElement(
   selectable: Selectable | null
 ): selectable is PhasorElement {
   return !isTopLevelBlock(selectable);
+}
+
+export function isPhasorElementWithText(
+  element: Selectable
+): element is PhasorElementWithText {
+  return element instanceof TextElement || element instanceof ShapeElement;
 }
 
 function isPointIn(
@@ -138,7 +151,7 @@ export function getBackgroundGrid(
   showGrid: boolean
 ) {
   const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
-  const gap = 20 * step * zoom;
+  const gap = clamp(20 * step * zoom, GRID_GAP_MIN, GRID_GAP_MAX);
   const translateX = -viewportX * zoom;
   const translateY = -viewportY * zoom;
 

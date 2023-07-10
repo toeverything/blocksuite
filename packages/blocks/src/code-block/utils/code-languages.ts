@@ -72,13 +72,21 @@ const PopularLanguages: Lang[] = [
   'vue',
 ];
 
-export const POPULAR_LANGUAGES_MAP: Partial<Record<Lang, number>> =
+const POPULAR_LANGUAGES_MAP: Partial<Record<Lang, number>> =
   PopularLanguages.reduce((acc, lang, i) => {
     return {
       [lang]: i,
       ...acc,
     };
   }, {});
+
+export function getLanguagePriority(lang: Lang, isCurrentLanguage = false) {
+  if (isCurrentLanguage) {
+    // Important to show the current language first
+    return -Infinity;
+  }
+  return POPULAR_LANGUAGES_MAP[lang] ?? Infinity;
+}
 
 function isPlaintext(lang: string) {
   return [

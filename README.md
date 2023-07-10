@@ -19,7 +19,7 @@
 
 ---
 
-BlockSuite (_pronounced "block sweet"_ 🍬) is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
+BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/toeverything/AFFiNE). It provides an out-of-the-box block-based editor built on top of a framework designed for general-purpose collaborative applications. This monorepo maintains both the editor and the underlying framework.
 
 ![BlockSuite-based Editor in AFFiNE](https://user-images.githubusercontent.com/79301703/230893796-dc707955-e4e5-4a42-a3c9-18d1ea754f6f.gif)
 
@@ -63,49 +63,6 @@ Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/blocksuite-overv
 ## Getting Started
 
 To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/getting-started.html).
-
-## Current Status (`@blocksuite/editor`)
-
-> For more detailed planning and recent progress, please checkout our [GitHub project](https://github.com/orgs/toeverything/projects/22).
-
-- Basic text editing
-  - ✅ Paragraph with inline style
-  - ✅ Nested list
-  - ✅ Code block
-  - ✅ Markdown shortcuts
-- Block-level editing
-  - ✅ Inline text format bar
-  - ✅ Inline slash menu
-  - ✅ Block hub
-  - ✅ Block drag handle
-  - ✅ Block-level selection
-- Rich-content
-  - ✅ Image block
-  - ⚛️ Database block
-  - 📌 Third-party embedded block
-- Whiteboard (edgeless mode)
-  - ✅ Zooming and panning
-  - ✅ Frame block
-  - ✅ Shape element
-  - ✅ Handwriting element
-  - ⚛️ Shape connector
-  - 🚧 Grouping
-- Playground
-  - ✅ Multiplayer collaboration
-  - ✅ Local data persistence
-  - ✅ E2E test suite
-- Developer experience
-  - ✅ Block tree update API
-  - ✅ Zero cost time travel (undo/redo)
-  - ✅ Reusable NPM package
-  - 🚧 Block schema
-
-Icons above correspond to the following meanings:
-
-- ✅ - **Beta**
-- ⚛️ - **Alpha**
-- 🚧 - **Developing**
-- 📌 - **Planned**
 
 ## Building
 

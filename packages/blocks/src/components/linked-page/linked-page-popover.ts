@@ -1,4 +1,4 @@
-import { DualLinkIcon, ImportIcon, PageIcon } from '@blocksuite/global/config';
+import { ImportIcon, NewPageIcon, PageIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   assertExists,
@@ -11,36 +11,14 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { createPage } from '../../__internal__/index.js';
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
-import type { AffineVEditor } from '../../__internal__/rich-text/virgo/types.js';
 import { isFuzzyMatch } from '../../__internal__/utils/common.js';
 import {
   getRichTextByModel,
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
 import { showImportModal } from '../import-page/index.js';
-import { createKeydownObserver } from '../utils.js';
+import { cleanSpecifiedTail, createKeydownObserver } from '../utils.js';
 import { styles } from './styles.js';
-
-/**
- * Remove specified text from the current range.
- */
-function cleanSpecifiedTail(vEditor: AffineVEditor, str: string) {
-  const vRange = vEditor.getVRange();
-  assertExists(vRange);
-  const idx = vRange.index - str.length;
-  const textStr = vEditor.yText.toString().slice(idx, idx + str.length);
-  if (textStr !== str) {
-    console.warn(
-      `Failed to clean text! Text mismatch expected: ${str} but actual: ${textStr}`
-    );
-    return;
-  }
-  vEditor.deleteText({ index: idx, length: str.length });
-  vEditor.setVRange({
-    index: idx,
-    length: 0,
-  });
-}
 
 const DEFAULT_PAGE_NAME = 'Untitled';
 
@@ -88,7 +66,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         key: 'create-linked-page',
         name: `Create "${displayPageName}" page`,
         active: filteredPageList.length === this._activatedItemIndex,
-        icon: DualLinkIcon,
+        icon: NewPageIcon,
         action: () => this._createPage(),
       },
       // {
@@ -224,17 +202,6 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       onSuccess,
     });
   }
-
-  // private _createSubpage() {
-  //   const pageName = this._query;
-  //   const page = this._page.workspace.createPage({
-  //     init: {
-  //       title: pageName,
-  //     },
-  //   });
-
-  //   this._insertLinkedNode('Subpage', page.id);
-  // }
 
   override render() {
     const MAX_HEIGHT = 396;

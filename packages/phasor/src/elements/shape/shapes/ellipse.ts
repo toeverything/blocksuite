@@ -1,4 +1,4 @@
-import { StrokeStyle } from '../../../consts.js';
+import { type IBound, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -11,6 +11,15 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+
+function ellipsePoints({ x, y, w, h }: IBound): IVec[] {
+  return [
+    [x, y + h / 2],
+    [x + w / 2, y],
+    [x + w, y + h / 2],
+    [x + w / 2, y + h],
+  ];
+}
 
 export const EllipseMethods: ShapeMethods = {
   render(
@@ -75,15 +84,7 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h / 2],
-        [x + w / 2, y],
-        [x + w, y + h / 2],
-        [x + w / 2, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, ellipsePoints);
     return points.some(point => bounds.containsPoint(point));
   },
 

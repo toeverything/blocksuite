@@ -138,12 +138,15 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   expect(actualTexts).toEqual(texts);
 }
 
-export async function assertEdgelessText(page: Page, text: string) {
+export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
-    const editor = document.querySelector('edgeless-text-editor');
+    const editor = document.querySelector(
+      'edgeless-text-editor,edgeless-shape-text-editor'
+    );
     if (!editor) {
       throw new Error('editor not found');
     }
+    // @ts-ignore
     const vEditor = editor.vEditor;
     return vEditor?.yText.toString();
   });
@@ -788,4 +791,10 @@ export async function assertConnectorPath(
 ) {
   const actualPath = await getConnectorPath(page, index);
   actualPath.every((p, i) => assertPointAlmostEqual(p, path[i]));
+}
+
+export function assertRectExist(
+  rect: { x: number; y: number; width: number; height: number } | null
+): asserts rect is { x: number; y: number; width: number; height: number } {
+  expect(rect).not.toBe(null);
 }

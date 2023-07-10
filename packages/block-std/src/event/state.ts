@@ -35,7 +35,7 @@ export class PointerEventState extends UIEventState {
   }
 
   constructor({ event, rect, startX, startY, last }: PointerEventStateOptions) {
-    super(event as Event);
+    super(event);
 
     const offsetX = event.clientX - rect.left;
     const offsetY = event.clientY - rect.top;
@@ -67,7 +67,7 @@ export class KeyboardEventState extends UIEventState {
   raw: KeyboardEvent;
 
   constructor({ event }: KeyboardEventStateOptions) {
-    super(event as Event);
+    super(event);
 
     this.raw = event;
   }

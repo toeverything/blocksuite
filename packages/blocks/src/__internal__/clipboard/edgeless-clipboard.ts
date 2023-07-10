@@ -10,10 +10,8 @@ import {
   type PhasorElementType,
   Renderer,
   serializeXYWH,
-  TextElement,
 } from '@blocksuite/phasor';
 import { assertExists, type Page } from '@blocksuite/store';
-import { render } from 'lit';
 
 import type { NoteBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -23,6 +21,7 @@ import {
 } from '../../page-block/edgeless/utils/consts.js';
 import {
   getSelectedRect,
+  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
@@ -30,6 +29,7 @@ import { deleteModelsByRange } from '../../page-block/utils/container-operations
 import {
   type BlockComponentElement,
   getBlockElementById,
+  getEditorContainer,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
@@ -42,13 +42,14 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocks,
-  copyEdgelessText,
+  copyOnPhasorElementWithText,
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
   CLIPBOARD_MIMETYPE,
   createSurfaceClipboardItems,
   getSurfaceClipboardData,
+  isPureFileInClipboard,
   performNativeCopy,
 } from './utils/index.js';
 
@@ -156,8 +157,8 @@ export class EdgelessClipboard implements Clipboard {
     const { state } = this.selection;
     // when note active, handle copy like page mode
     if (state.active) {
-      if (state.selected[0] instanceof TextElement) {
-        copyEdgelessText(this._edgeless);
+      if (isPhasorElementWithText(state.selected[0])) {
+        copyOnPhasorElementWithText(this._edgeless);
       } else {
         const range = getCurrentBlockRange(this._page);
         assertExists(range);
@@ -185,10 +186,27 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     const { state } = this.selection;
     if (state.active) {
-      if (!(state.selected[0] instanceof TextElement)) {
+      if (!isPhasorElementWithText(state.selected[0])) {
         this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element
+      return;
+    }
+
+    if (e.clipboardData && isPureFileInClipboard(e.clipboardData)) {
+      const files = e.clipboardData.files;
+      if (files.length === 0) {
+        return;
+      }
+      const res: { file: File; sourceId: string }[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image')) {
+          const sourceId = await this._edgeless.page.blobs.set(file);
+          res.push({ file, sourceId });
+        }
+      }
+      await this._edgeless.addImages(res);
       return;
     }
 
@@ -445,10 +463,17 @@ export class EdgelessClipboard implements Clipboard {
 
         const [x, y] = deserializeXYWH(element.xywh);
         const div = document.createElement('div');
+        // render(note.render(), div);
+        const canvas: HTMLCanvasElement = await html2canvas(note, {
+          ignoreElements: (element: Element) =>
+            element.tagName === 'AFFINE-BLOCK-HUB' ||
+            element.tagName === 'EDGELESS-TOOLBAR' ||
+            element.classList.contains('dg'),
+        });
         div.className = parent.className;
         div.setAttribute('style', parent.getAttribute('style') || '');
         div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
-        render(note.render(), div);
+        div.appendChild(canvas);
         layer.appendChild(div);
       }
       fragment.appendChild(layer);
@@ -467,23 +492,18 @@ export class EdgelessClipboard implements Clipboard {
       // waiting for canvas to render
       await new Promise(requestAnimationFrame);
 
+      const editorContainer = getEditorContainer(this._page);
       const canvas: HTMLCanvasElement = await html2canvas(container, {
-        ignoreElements: function (element: Element) {
-          if (
-            element.tagName === 'AFFINE-BLOCK-HUB' ||
-            element.tagName === 'EDGELESS-TOOLBAR' ||
-            element.classList.contains('dg')
-          ) {
-            return true;
-          } else {
-            return false;
-          }
-        },
+        ignoreElements: (element: Element) =>
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg'),
         onclone: function (documentClone: Document, element: HTMLElement) {
           // html2canvas can't support transform feature
           element.style.setProperty('transform', 'none');
         },
-        backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+        backgroundColor:
+          window.getComputedStyle(editorContainer).backgroundColor,
       });
       assertExists(canvas);
 

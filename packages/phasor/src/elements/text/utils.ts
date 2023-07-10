@@ -15,7 +15,19 @@ export const isChrome =
 export const isSafari =
   !isChrome && globalThis.navigator?.userAgent.indexOf('Safari') !== -1;
 
-export const getFontString = ({
+export function getLineHeight(fontFamily: string, fontSize: string) {
+  const span = document.createElement('span');
+  span.style.fontFamily = fontFamily;
+  span.style.fontSize = fontSize + 'px';
+  span.style.lineHeight = 'initial';
+  span.textContent = 'M';
+  document.body.appendChild(span);
+  const { height } = span.getBoundingClientRect();
+  span.remove();
+  return height;
+}
+
+export function getFontString({
   fontSize,
   fontFamily,
   lineHeight,
@@ -23,9 +35,9 @@ export const getFontString = ({
   fontSize: number;
   lineHeight: string;
   fontFamily: string;
-}) => {
+}): string {
   return `${fontSize}px/${lineHeight} ${fontFamily}`;
-};
+}
 
 export function normalizeText(text: string): string {
   return (
@@ -37,9 +49,9 @@ export function normalizeText(text: string): string {
   );
 }
 
-export const splitIntoLines = (text: string) => {
+export function splitIntoLines(text: string): string[] {
   return normalizeText(text).split('\n');
-};
+}
 
 export function getLineWidth(text: string, font: string): number {
   const canvas = document.createElement('canvas');

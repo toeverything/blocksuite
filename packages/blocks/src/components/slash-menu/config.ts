@@ -1,8 +1,8 @@
 import {
   BookmarkIcon,
   CopyIcon,
-  DatabaseKanbanViewIcon,
-  DatabaseTableViewIcon,
+  DatabaseKanbanViewIcon20,
+  DatabaseTableViewIcon20,
   DeleteIcon,
   DualLinkIcon,
   DuplicateIcon,
@@ -267,7 +267,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Table View',
         alias: ['database'],
-        icon: DatabaseTableViewIcon,
+        icon: DatabaseTableViewIcon20,
         showWhen: model => {
           if (!model.page.awarenessStore.getFlag('enable_database')) {
             return false;
@@ -300,7 +300,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         name: 'Kanban View',
         alias: ['database'],
         disabled: true,
-        icon: DatabaseKanbanViewIcon,
+        icon: DatabaseKanbanViewIcon20,
         showWhen: model => {
           if (!model.page.awarenessStore.getFlag('enable_database')) {
             return false;

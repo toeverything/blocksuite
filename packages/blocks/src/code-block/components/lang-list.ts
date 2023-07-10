@@ -9,7 +9,8 @@ import {
 } from 'shiki';
 
 import { createEvent } from '../../__internal__/index.js';
-import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
+import { scrollbarStyle } from '../../components/utils.js';
+import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -41,14 +42,9 @@ export class LangList extends ShadowlessElement {
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
-        /*scrollbar-color: #fff0 #fff0;*/
       }
 
-      /*
-      .lang-list-button-container::-webkit-scrollbar {
-        background: none;
-      }
-      */
+      ${scrollbarStyle}
 
       .lang-item {
         display: flex;
@@ -111,6 +107,9 @@ export class LangList extends ShadowlessElement {
   filterInput!: HTMLInputElement;
 
   @property({ attribute: false })
+  currentLanguageId!: Lang;
+
+  @property({ attribute: false })
   delay = 150;
 
   override async connectedCallback() {
@@ -159,8 +158,8 @@ export class LangList extends ShadowlessElement {
       })
       .sort(
         (a, b) =>
-          (POPULAR_LANGUAGES_MAP[a.id as Lang] ?? Infinity) -
-          (POPULAR_LANGUAGES_MAP[b.id as Lang] ?? Infinity)
+          getLanguagePriority(a.id as Lang, this.currentLanguageId === a.id) -
+          getLanguagePriority(b.id as Lang, this.currentLanguageId === b.id)
       );
 
     const onLanguageSelect = (e: KeyboardEvent) => {

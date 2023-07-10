@@ -1,4 +1,4 @@
-import { StrokeStyle } from '../../../consts.js';
+import { type IBound, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -16,8 +16,7 @@ import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 
-function trianglePoints(bound: Bound) {
-  const { x, y, w, h } = bound;
+function trianglePoints({ x, y, w, h }: IBound) {
   return [
     [x, y + h],
     [x + w / 2, y],
@@ -76,11 +75,7 @@ export const TriangleMethods: ShapeMethods = {
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
-    const points = getPointsFromBoundsWithRotation(this, ({ x, y, w, h }) => [
-      [x, y + h],
-      [x + w / 2, y],
-      [x + w, y + h],
-    ]);
+    const points = getPointsFromBoundsWithRotation(this, trianglePoints);
 
     let hited = pointOnPolygonStoke(
       [x, y],
@@ -96,38 +91,17 @@ export const TriangleMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h],
-        [x + w / 2, y],
-        [x + w, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, trianglePoints);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h],
-        [x + w / 2, y],
-        [x + w, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, trianglePoints);
     return polygonNearestPoint(points, point);
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h],
-        [x + w / 2, y],
-        [x + w, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, trianglePoints);
     return linePolygonIntersects(start, end, points);
   },
 

@@ -1,4 +1,4 @@
-import { StrokeStyle } from '../../../consts.js';
+import { type IBound, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -16,8 +16,7 @@ import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 
-function diamondPoints(bound: Bound): IVec[] {
-  const { x, y, w, h } = bound;
+function diamondPoints({ x, y, w, h }: IBound): IVec[] {
   return [
     [x, y + h / 2],
     [x + w / 2, y],
@@ -78,12 +77,7 @@ export const DiamondMethods: ShapeMethods = {
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
-    const points = getPointsFromBoundsWithRotation(this, ({ x, y, w, h }) => [
-      [x, y + h / 2],
-      [x + w / 2, y],
-      [x + w, y + h / 2],
-      [x + w / 2, y + h],
-    ]);
+    const points = getPointsFromBoundsWithRotation(this, diamondPoints);
 
     let hited = pointOnPolygonStoke(
       [x, y],
@@ -99,41 +93,17 @@ export const DiamondMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h / 2],
-        [x + w / 2, y],
-        [x + w, y + h / 2],
-        [x + w / 2, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, diamondPoints);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h / 2],
-        [x + w / 2, y],
-        [x + w, y + h / 2],
-        [x + w / 2, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, diamondPoints);
     return polygonNearestPoint(points, point);
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h / 2],
-        [x + w / 2, y],
-        [x + w, y + h / 2],
-        [x + w / 2, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, diamondPoints);
     return linePolygonIntersects(start, end, points);
   },
 
