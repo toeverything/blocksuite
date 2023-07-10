@@ -1,7 +1,6 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
-import type { DataSourceConfig } from '../__internal__/datasource/datasource-manager.js';
+import type { DataSourceConfig } from '../__internal__/datasource/base.js';
 import type { FilterGroup } from '../database-block/common/ast.js';
 
 export type DataProperty = {
@@ -67,19 +66,6 @@ export class DataViewBlockModel extends BaseBlockModel<Props> {
       views: this.views,
     });
   }
-
-  copy = () => {
-    copyBlocks({
-      type: 'Block',
-      models: [this],
-      startOffset: 0,
-      endOffset: 0,
-    });
-  };
-  delete = () => {
-    const models = [this, ...this.children];
-    models.forEach(model => this.page.deleteBlock(model));
-  };
 }
 
 export const DataViewBlockSchema = defineBlockSchema({

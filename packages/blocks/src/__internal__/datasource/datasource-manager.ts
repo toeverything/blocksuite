@@ -2,33 +2,17 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import { AllPageDatasource } from './all-page-datasource.js';
-import type { DataSource } from './base.js';
+import type {
+  AllPageDatasourceConfig,
+  DatabaseBlockDatasourceConfig,
+  DataSource,
+  DataSourceConfig,
+  GetConfig,
+  TagsDatasourceConfig,
+} from './base.js';
 import { DatabaseBlockDatasource } from './database-block-datasource.js';
 import { TagsDatasource } from './tags-datasource.js';
 
-export type DatabaseBlockDatasourceConfig = {
-  type: 'database-block';
-  pageId: string;
-  blockId: string;
-};
-export type AllPageDatasourceConfig = {
-  type: 'all-pages';
-};
-export type TagsDatasourceConfig = {
-  type: 'tags';
-};
-export type DataSourceConfig =
-  | DatabaseBlockDatasourceConfig
-  | AllPageDatasourceConfig
-  | TagsDatasourceConfig;
-type GetConfig<
-  K extends DataSourceConfig['type'],
-  T = DataSourceConfig
-> = T extends {
-  type: K;
-}
-  ? T
-  : never;
 const datasourceMap: {
   [K in DataSourceConfig['type']]: {
     title: (root: BlockSuiteRoot, config: GetConfig<K>) => string;

@@ -10,7 +10,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import type { DatabaseBlockDatasourceConfig } from '../__internal__/datasource/datasource-manager.js';
+import { copyBlocks } from '../__internal__/clipboard/index.js';
+import type { DatabaseBlockDatasourceConfig } from '../__internal__/datasource/base.js';
 import {
   createDatasource,
   getDatasourceTitle,
@@ -106,8 +107,18 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
         ></database-view-header>`
       : '';
     const blockOperation: BlockOperation = {
-      copy: this.model.copy,
-      delete: this.model.delete,
+      copy: () => {
+        copyBlocks({
+          type: 'Block',
+          models: [this.model],
+          startOffset: 0,
+          endOffset: 0,
+        });
+      },
+      delete: () => {
+        const models = [this.model, ...this.model.children];
+        models.forEach(model => this.page.deleteBlock(model));
+      },
     };
     if (!current.dataSource) {
       return html`

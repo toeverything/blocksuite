@@ -89,3 +89,27 @@ export abstract class BaseDataSource implements DataSource {
     //
   }
 }
+
+export type DatabaseBlockDatasourceConfig = {
+  type: 'database-block';
+  pageId: string;
+  blockId: string;
+};
+export type AllPageDatasourceConfig = {
+  type: 'all-pages';
+};
+export type TagsDatasourceConfig = {
+  type: 'tags';
+};
+export type DataSourceConfig =
+  | DatabaseBlockDatasourceConfig
+  | AllPageDatasourceConfig
+  | TagsDatasourceConfig;
+export type GetConfig<
+  K extends DataSourceConfig['type'],
+  T = DataSourceConfig
+> = T extends {
+  type: K;
+}
+  ? T
+  : never;

@@ -8,8 +8,8 @@ import {
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';
+import type { DatabaseBlockDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
-import type { DatabaseBlockDatasourceConfig } from './datasource-manager.js';
 
 export class DatabaseBlockDatasource extends BaseDataSource {
   private _model: DatabaseBlockModel;

@@ -8,8 +8,8 @@ import {
   textHelper,
 } from '../../database-block/common/column-manager.js';
 import type { InsertPosition } from '../../database-block/index.js';
+import type { AllPageDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
-import type { AllPageDatasourceConfig } from './datasource-manager.js';
 
 export class AllPageDatasource extends BaseDataSource {
   private workspace: Workspace;

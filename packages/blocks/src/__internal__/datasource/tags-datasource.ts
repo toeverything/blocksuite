@@ -13,8 +13,8 @@ import {
   textHelper,
 } from '../../database-block/common/column-manager.js';
 import type { InsertPosition } from '../../database-block/index.js';
+import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
-import type { TagsDatasourceConfig } from './datasource-manager.js';
 
 export class TagsDatasource extends BaseDataSource {
   private meta: Workspace['meta'];
