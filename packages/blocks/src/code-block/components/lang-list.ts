@@ -5,6 +5,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { BUNDLED_LANGUAGES, type ILanguageRegistration } from 'shiki';
 
 import { createEvent } from '../../__internal__/index.js';
+import { scrollbarStyle } from '../../components/utils.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -36,14 +37,9 @@ export class LangList extends ShadowlessElement {
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
-        /*scrollbar-color: #fff0 #fff0;*/
       }
 
-      /*
-      .lang-list-button-container::-webkit-scrollbar {
-        background: none;
-      }
-      */
+      ${scrollbarStyle}
 
       .lang-item {
         display: flex;
