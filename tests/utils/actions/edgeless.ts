@@ -945,3 +945,16 @@ export async function createConnectorElement(
     { x: end[0], y: end[1] }
   );
 }
+
+export async function hoverOnNote(
+  page: Page,
+  id: string,
+  point?: { x: number; y: number }
+) {
+  const blockRect = await page.locator(`[data-block-id="${id}"]`).boundingBox();
+
+  assertExists(blockRect);
+
+  point = { x: blockRect.width / 2, y: blockRect.height / 2 };
+  await page.mouse.move(blockRect.x + point.x, blockRect.y + point.y);
+}

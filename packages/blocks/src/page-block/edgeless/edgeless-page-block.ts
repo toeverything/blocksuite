@@ -33,6 +33,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
+  almostEqual,
   asyncFocusRichText,
   type BlockComponentElement,
   bringForward,
@@ -573,10 +574,12 @@ export class EdgelessPageBlockComponent
           const newModelHeight =
             domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
 
-          // FIXME: make height a local value
-          if (Math.abs(newModelHeight - h) >= 0.1) {
-            page.updateBlock(model, {
-              xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+          if (!almostEqual(newModelHeight, h)) {
+            page.withoutTransact(() => {
+              page.updateBlock(model, {
+                xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+              });
+              this.requestUpdate();
             });
           }
         });
@@ -1066,10 +1069,33 @@ export class EdgelessPageBlockComponent
     this._resizeObserver = resizeObserver;
   }
 
+  private _initNoteHeightUpdate() {
+    const resetNoteResizeObserver = throttle(
+      () => {
+        requestAnimationFrame(() => {
+          this._noteResizeObserver.resetListener(this.page);
+        });
+      },
+      16,
+      { leading: true }
+    );
+    const listenChildrenUpdate = (root: BaseBlockModel<object> | null) => {
+      if (!root) return;
+
+      this._disposables.add(root.childrenUpdated.on(resetNoteResizeObserver));
+    };
+
+    listenChildrenUpdate(this.page.root);
+    this._disposables.add(
+      this.page.slots.rootAdded.on(root => listenChildrenUpdate(root))
+    );
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
     this._initDragHandle();
     this._initResizeEffect();
+    this._initNoteHeightUpdate();
     this.clipboard.init(this.page);
     tryUpdateNoteSize(this.page, this.surface.viewport.zoom);
 
@@ -1088,13 +1114,6 @@ export class EdgelessPageBlockComponent
 
     // XXX: should be called after rich text components are mounted
     this._clearSelection();
-
-    // should be updated on any frame add and delete
-    this.page.root?.childrenUpdated.on(() => {
-      requestAnimationFrame(() => {
-        this._noteResizeObserver.resetListener(this.page);
-      });
-    });
   }
 
   private _tryLoadViewportLocalRecord() {

@@ -1,6 +1,6 @@
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
-import { Slot } from '@blocksuite/store';
+import { matchFlavours, Slot } from '@blocksuite/store';
 
 import { almostEqual, throttle } from '../../../__internal__/utils/common.js';
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
@@ -59,6 +59,7 @@ export class NoteResizeObserver {
   resetListener(page: Page) {
     const unCachedKeys = new Set(this._cachedElements.keys());
     page.root?.children.forEach(model => {
+      if (!matchFlavours(model, ['affine:note'])) return;
       const blockId = model.id;
       unCachedKeys.delete(blockId);
       const blockElement = getBlockElementByModel(model);
