@@ -16,3 +16,12 @@ export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
   strokeStyle: StrokeStyle.Solid,
   roughness: 2,
 };
+
+export enum SHAPE_TEXT_FONT_SIZE {
+  SMALL = 12,
+  MEDIUM = 20,
+  LARGE = 28,
+  XLARGE = 36,
+}
+
+export const SHAPE_TEXT_PADDING = 20;

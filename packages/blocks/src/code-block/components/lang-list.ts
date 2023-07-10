@@ -2,10 +2,15 @@ import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { BUNDLED_LANGUAGES, type ILanguageRegistration } from 'shiki';
+import {
+  BUNDLED_LANGUAGES,
+  type ILanguageRegistration,
+  type Lang,
+} from 'shiki';
 
 import { createEvent } from '../../__internal__/index.js';
 import { scrollbarStyle } from '../../components/utils.js';
+import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -102,6 +107,9 @@ export class LangList extends ShadowlessElement {
   filterInput!: HTMLInputElement;
 
   @property({ attribute: false })
+  currentLanguageId!: Lang;
+
+  @property({ attribute: false })
   delay = 150;
 
   override async connectedCallback() {
@@ -136,20 +144,23 @@ export class LangList extends ShadowlessElement {
   }
 
   override render() {
-    const filteredLanguages = [
-      PLAIN_TEXT_REGISTRATION,
-      ...BUNDLED_LANGUAGES,
-    ].filter(language => {
-      if (!this._filterText) {
-        return true;
-      }
-      return (
-        language.id.startsWith(this._filterText.toLowerCase()) ||
-        language.aliases?.some(alias =>
-          alias.startsWith(this._filterText.toLowerCase())
-        )
+    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
+      .filter(language => {
+        if (!this._filterText) {
+          return true;
+        }
+        return (
+          language.id.startsWith(this._filterText.toLowerCase()) ||
+          language.aliases?.some(alias =>
+            alias.startsWith(this._filterText.toLowerCase())
+          )
+        );
+      })
+      .sort(
+        (a, b) =>
+          getLanguagePriority(a.id as Lang, this.currentLanguageId === a.id) -
+          getLanguagePriority(b.id as Lang, this.currentLanguageId === b.id)
       );
-    });
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {

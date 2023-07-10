@@ -10,6 +10,7 @@ import { activeEditorManager } from '../../__internal__/utils/active-editor-mana
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { clamp } from './common.js';
@@ -520,9 +521,7 @@ export function isInsidePageTitle(element: unknown): boolean {
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
   const editor = activeEditorManager.getActiveEditor();
-  const textElement = (editor ?? document).querySelector(
-    'edgeless-text-editor'
-  );
+  const textElement = getEdgelessCanvasTextEditor(editor ?? document);
   if (!textElement) return false;
 
   return textElement.contains(element as Node);
@@ -1174,4 +1173,10 @@ export function hasDatabase(elements: Element[]) {
  */
 export function getLastNoteBlockElement(parent: Element) {
   return parent.querySelector('affine-note:last-of-type');
+}
+
+export function getEdgelessCanvasTextEditor(element: Element | Document) {
+  return element.querySelector(
+    'edgeless-text-editor,edgeless-shape-text-editor'
+  ) as EdgelessCanvasTextEditor | null;
 }

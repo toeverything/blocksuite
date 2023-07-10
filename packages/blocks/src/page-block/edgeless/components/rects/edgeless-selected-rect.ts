@@ -8,8 +8,10 @@ import {
   deserializeXYWH,
   type IVec,
   normalizeDegAngle,
+  normalizeShapeBound,
   type PhasorElement,
   serializeXYWH,
+  ShapeElement,
   TextElement,
 } from '@blocksuite/phasor';
 import { matchFlavours } from '@blocksuite/store';
@@ -24,6 +26,7 @@ import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../utils/query.js';
 import type {
@@ -284,7 +287,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     >
   ) => {
-    const { page, state, surface, _rotate, _resizeManager, zoom } = this;
+    const { page, state, surface, _rotate, zoom } = this;
     const selectedMap = new Map<string, Selectable>(
       state.selected.map(element => [element.id, element])
     );
@@ -319,6 +322,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             fontSize: element.fontSize * p,
           });
         } else {
+          if (element instanceof ShapeElement) {
+            bound = normalizeShapeBound(element, bound);
+          }
           surface.updateElement(id, {
             xywh: bound.serialize(),
           });
@@ -326,7 +332,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     });
 
-    const { currentRect } = _resizeManager;
+    const currentRect = getSelectedRect(state.selected);
     const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
 
     // notes resize observer
@@ -623,7 +629,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { active, selected } = state;
     if (
       selected.length === 0 ||
-      (active && selected[0] instanceof TextElement)
+      (active && isPhasorElementWithText(selected[0]))
     ) {
       return nothing;
     }
