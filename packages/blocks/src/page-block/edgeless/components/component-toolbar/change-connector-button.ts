@@ -13,7 +13,6 @@ import type { Page } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
@@ -25,6 +24,7 @@ import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import {
   type ColorEvent,
+  ColorUnit,
   type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
 } from '../panel/color-panel.js';
@@ -35,9 +35,7 @@ import {
 } from '../panel/line-styles-panel.js';
 import { createButtonPopper } from '../utils.js';
 
-function getMostCommonColor(
-  elements: ConnectorElement[]
-): CssVariableName | null {
+function getMostCommonColor(elements: ConnectorElement[]): CssVariableName {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.stroke);
   const max = maxBy(Object.entries(colors), ([k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
@@ -125,12 +123,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
       .connector-mode-button[active] {
         background-color: var(--affine-hover-color);
-      }
-
-      .connector-color-button .color {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
       }
 
       .line-style-panel {
@@ -268,10 +260,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
   override render() {
     const selectedColor = getMostCommonColor(this.elements);
-    const style = {
-      backgroundColor: `var(${selectedColor})`,
-    };
-
     const selectedMode = getMostCommonMode(this.elements);
     const selectedLineSize = getMostCommonLineWidth(this.elements) ?? 's';
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
@@ -309,9 +297,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
         .active=${false}
         @click=${() => this._colorPanelPopper?.toggle()}
       >
-        <div>
-          <div class="color" style=${styleMap(style)}></div>
-        </div>
+        ${ColorUnit(selectedColor)}
       </edgeless-tool-icon-button>
       <div class="color-panel-container">
         <edgeless-color-panel
@@ -320,7 +306,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         >
         </edgeless-color-panel>
       </div>
-
       <edgeless-tool-icon-button
         class="line-styles-button"
         .tooltip=${this._popperShow ? '' : 'Border style'}
