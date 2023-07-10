@@ -1065,18 +1065,16 @@ export class EdgelessPageBlockComponent
     this._resizeObserver = resizeObserver;
   }
 
-  private _initNoteResize() {
-    let raqId = 0;
-
-    const resetNoteResizeObserver = () => {
-      if (raqId) return;
-
-      raqId = requestAnimationFrame(() => {
-        this._noteResizeObserver.resetListener(this.page);
-        raqId = 0;
-      });
-    };
-
+  private _initNoteHeightUpdate() {
+    const resetNoteResizeObserver = throttle(
+      () => {
+        requestAnimationFrame(() => {
+          this._noteResizeObserver.resetListener(this.page);
+        });
+      },
+      16,
+      { leading: true }
+    );
     const listenChildrenUpdate = (root: BaseBlockModel<object> | null) => {
       if (!root) return;
 
@@ -1093,7 +1091,7 @@ export class EdgelessPageBlockComponent
     this._initSlotEffects();
     this._initDragHandle();
     this._initResizeEffect();
-    this._initNoteResize();
+    this._initNoteHeightUpdate();
     this.clipboard.init(this.page);
     tryUpdateNoteSize(this.page, this.surface.viewport.zoom);
 
