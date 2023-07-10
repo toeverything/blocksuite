@@ -10,7 +10,10 @@ import {
 import { LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { throttle } from '../../__internal__/utils/common.js';
+import {
+  isControlledKeyboardEvent,
+  throttle,
+} from '../../__internal__/utils/common.js';
 import {
   getModelByElement,
   getViewportElement,
@@ -106,7 +109,7 @@ export class LinkedPageWidget extends WithDisposable(LitElement) {
     if (!flag) return;
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
-    if (event.key.length !== 1) return;
+    if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
 
     // Fixme @Saul-Mirone get model from getCurrentSelection
     const target = event.target;

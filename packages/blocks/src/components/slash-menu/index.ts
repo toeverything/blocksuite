@@ -14,6 +14,7 @@ import {
   getCurrentNativeRange,
   getModelByElement,
   getVirgoByModel,
+  isControlledKeyboardEvent,
   throttle,
 } from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
@@ -128,7 +129,12 @@ export class SlashMenuWidget extends WithDisposable(LitElement) {
 
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
-    if (!this.options.triggerKeys.includes(event.key)) return;
+    if (
+      isControlledKeyboardEvent(event) ||
+      event.key.length !== 1 ||
+      !this.options.triggerKeys.includes(event.key)
+    )
+      return;
 
     // Fixme @Saul-Mirone get model from getCurrentSelection
     const target = event.target;
