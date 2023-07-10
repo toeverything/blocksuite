@@ -1,9 +1,8 @@
-import { ALLOW_DEFAULT, IS_IOS, IS_MAC } from '@blocksuite/global/config';
+import { IS_IOS, IS_MAC } from '@blocksuite/global/config';
 import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
-import { showLinkedPagePopover } from '../../components/linked-page/index.js';
 import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
@@ -57,56 +56,11 @@ export function createKeyboardBindings(
   model: BaseBlockModel,
   vEditor: AffineVEditor
 ): KeyboardBindings {
-  const page = model.page;
-
   const service = getService(model.flavour);
   const blockKeyBinding = service.defineKeymap(model, vEditor);
 
   const keyboardBindings: KeyboardBindings = {
     ...blockKeyBinding,
-
-    linkedPage: {
-      key: ['[', '【', '@'],
-      altKey: null,
-      shiftKey: null,
-      handler(range, { event, prefix }) {
-        if (range.length > 0) {
-          // When select text and press `[[` should not trigger transform,
-          // since it will break the bracket complete.
-          // Expected `[[selected text]]` instead of `@selected text]]`
-          return ALLOW_DEFAULT;
-        }
-        if (
-          (event.key === '[' || event.key === '【') &&
-          !prefix.endsWith(event.key)
-        ) {
-          // not end with `[[` or `【【`
-          return ALLOW_DEFAULT;
-        }
-        const flag = page.awarenessStore.getFlag('enable_linked_page');
-        if (!flag) return ALLOW_DEFAULT;
-        if (matchFlavours(model, ['affine:code'])) {
-          return ALLOW_DEFAULT;
-        }
-
-        this.vEditor.slots.rangeUpdated.once(() => {
-          if (event.key === '[' || event.key === '【') {
-            // Convert to `@`
-            this.vEditor.deleteText({ index: range.index - 1, length: 2 });
-            this.vEditor.insertText({ index: range.index - 1, length: 0 }, '@');
-            this.vEditor.setVRange({ index: range.index, length: 0 });
-            this.vEditor.slots.rangeUpdated.once(() => {
-              const curRange = getCurrentNativeRange();
-              showLinkedPagePopover({ model, range: curRange });
-            });
-            return;
-          }
-          const curRange = getCurrentNativeRange();
-          showLinkedPagePopover({ model, range: curRange });
-        });
-        return ALLOW_DEFAULT;
-      },
-    },
     ...createBracketAutoCompleteBindings(model),
   };
 
