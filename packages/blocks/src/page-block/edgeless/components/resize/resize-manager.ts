@@ -14,22 +14,13 @@ const SHIFT_LOCKING_ANGLE = Math.PI / 12;
 
 type DragStartHandler = () => void;
 type DragEndHandler = () => void;
-
-type ResizeMoveHandler = (
-  bounds: Map<
-    string,
-    {
-      bound: Bound;
-    }
-  >
-) => void;
-
-type RotateMoveHandler = (point: IPoint, rotate: number) => void;
+type ResizeHandler = (bounds: Map<string, { bound: Bound }>) => void;
+type RotateHandler = (point: IPoint, rotate: number) => void;
 
 export class HandleResizeManager {
   private _onDragStart: DragStartHandler;
-  private _onResizeMove: ResizeMoveHandler;
-  private _onRotateMove: RotateMoveHandler;
+  private _resizeHandler: ResizeHandler;
+  private _rotateHandler: RotateHandler;
   private _onDragEnd: DragEndHandler;
   private _dragDirection: HandleDirection = HandleDirection.Left;
   private _dragPos: {
@@ -63,13 +54,13 @@ export class HandleResizeManager {
 
   constructor(
     onDragStart: DragStartHandler,
-    onResizeMove: ResizeMoveHandler,
-    onRotateMove: RotateMoveHandler,
+    resizeHandler: ResizeHandler,
+    rotatehandler: RotateHandler,
     onDragEnd: DragEndHandler
   ) {
     this._onDragStart = onDragStart;
-    this._onResizeMove = onResizeMove;
-    this._onRotateMove = onRotateMove;
+    this._resizeHandler = resizeHandler;
+    this._rotateHandler = rotatehandler;
     this._onDragEnd = onDragEnd;
   }
 
@@ -512,7 +503,7 @@ export class HandleResizeManager {
     }
 
     this._bounds.forEach(process);
-    this._onResizeMove(newBounds);
+    this._resizeHandler(newBounds);
   }
 
   private _onRotate(shiftKey = false) {
@@ -555,7 +546,7 @@ export class HandleResizeManager {
       y = point.y;
     }
 
-    this._onRotateMove(
+    this._rotateHandler(
       // center of element in suface
       { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
       delta

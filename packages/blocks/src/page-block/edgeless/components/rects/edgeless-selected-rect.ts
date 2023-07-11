@@ -297,8 +297,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     super();
     this._resizeManager = new HandleResizeManager(
       this._onDragStart,
-      this._onDragMove,
-      this._onDragRotate,
+      this._resizeHandler,
+      this._rotateHandler,
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
@@ -338,7 +338,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.requestUpdate();
   };
 
-  private _onDragMove = (
+  private _resizeHandler = (
     newBounds: Map<
       string,
       {
@@ -391,18 +391,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     });
 
-    const currentRect = getSelectedRect(state.selected);
-    const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
+    const { left, top, width, height } = this._resizeManager.currentRect;
+    const [x, y] = surface.viewport.toViewCoord(left, top);
 
     // notes resize observer
     if (!hasNotes) {
-      this._selectedRect.style.height = `${currentRect.height * zoom}px`;
+      this._selectedRect.style.height = `${height * zoom}px`;
     }
-    this._selectedRect.style.width = `${currentRect.width * zoom}px`;
+    this._selectedRect.style.width = `${width * zoom}px`;
     this._selectedRect.style.transform = `translate(${x}px, ${y}px) rotate(${_rotate}deg)`;
   };
 
-  private _onDragRotate = (center: IPoint, delta: number) => {
+  private _rotateHandler = (center: IPoint, delta: number) => {
     const {
       surface,
       state: { selected },
@@ -447,13 +447,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     this._resizeManager.updateBounds(getSelectableBounds(this.state.selected));
 
-    this._updateCursor(false);
+    this._updateCursor();
 
     this._showToolbar();
   };
 
   private _updateCursor = (
-    dragging: boolean,
+    dragging = false,
     options?: {
       type: 'resize' | 'rotate';
       angle?: number;
