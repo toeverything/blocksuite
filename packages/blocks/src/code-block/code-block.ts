@@ -343,7 +343,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         this._optionPosition = null;
       }, HOVER_DELAY);
     });
-    this._disposables.addFromEvent(this, 'mouseover', e => {
+    this._disposables.addFromEvent(this, 'mouseenter', e => {
       this.hoverState.emit(true);
     });
     const HOVER_DELAY = 300;
