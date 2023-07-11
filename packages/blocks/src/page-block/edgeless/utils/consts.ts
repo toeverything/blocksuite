@@ -34,3 +34,9 @@ export const DEFAULT_NOTE_TIP = 'Text';
 export const FIT_TO_SCREEN_PADDING = 100;
 
 export const ATTACHED_DISTANCE = 20;
+
+export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
+  'affine-note-mask',
+  'affine-edgeless-child-note',
+  'affine-block-children-container',
+];

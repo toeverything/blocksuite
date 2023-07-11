@@ -1,102 +1,20 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { Overlay } from '@blocksuite/phasor';
 
 import {
   type EdgelessTool,
+  hasClassNameInList,
   type NoteTool,
   queryCurrentMode,
 } from '../../../__internal__/index.js';
 import { noop } from '../../../__internal__/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
-  NOTE_OVERLAY_CORNER_RADIUS,
-  NOTE_OVERLAY_DARK_BACKGROUND_COLOR,
-  NOTE_OVERLAY_HEIGHT,
-  NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR,
-  NOTE_OVERLAY_OFFSET_X,
-  NOTE_OVERLAY_OFFSET_Y,
-  NOTE_OVERLAY_STOKE_COLOR,
-  NOTE_OVERLAY_TEXT_COLOR,
-  NOTE_OVERLAY_WIDTH,
+  EXCLUDING_MOUSE_OUT_CLASS_LIST,
 } from '../utils/consts.js';
 import { addNote, type NoteOptions } from '../utils/note.js';
+import { NoteOverlay } from '../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
-class NoteOverlay extends Overlay {
-  x = 0;
-  y = 0;
-  text = '';
-  globalAlpha = 0;
-  themeMode = 'light';
-  override render(ctx: CanvasRenderingContext2D): void {
-    ctx.globalAlpha = this.globalAlpha;
-    // Draw the overlay rectangle
-    ctx.strokeStyle = NOTE_OVERLAY_STOKE_COLOR;
-    ctx.fillStyle =
-      this.themeMode === 'light'
-        ? NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR
-        : NOTE_OVERLAY_DARK_BACKGROUND_COLOR;
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(this.x + NOTE_OVERLAY_CORNER_RADIUS, this.y);
-    ctx.lineTo(
-      this.x + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
-      this.y
-    );
-    ctx.quadraticCurveTo(
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y,
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y + NOTE_OVERLAY_CORNER_RADIUS
-    );
-    ctx.lineTo(
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
-    );
-    ctx.quadraticCurveTo(
-      this.x + NOTE_OVERLAY_WIDTH,
-      this.y + NOTE_OVERLAY_HEIGHT,
-      this.x + NOTE_OVERLAY_WIDTH - NOTE_OVERLAY_CORNER_RADIUS,
-      this.y + NOTE_OVERLAY_HEIGHT
-    );
-    ctx.lineTo(
-      this.x + NOTE_OVERLAY_CORNER_RADIUS,
-      this.y + NOTE_OVERLAY_HEIGHT
-    );
-    ctx.quadraticCurveTo(
-      this.x,
-      this.y + NOTE_OVERLAY_HEIGHT,
-      this.x,
-      this.y + NOTE_OVERLAY_HEIGHT - NOTE_OVERLAY_CORNER_RADIUS
-    );
-    ctx.lineTo(this.x, this.y + NOTE_OVERLAY_CORNER_RADIUS);
-    ctx.quadraticCurveTo(
-      this.x,
-      this.y,
-      this.x + NOTE_OVERLAY_CORNER_RADIUS,
-      this.y
-    );
-    ctx.closePath();
-    ctx.stroke();
-    ctx.fill();
-
-    // Draw the overlay text
-    ctx.fillStyle = NOTE_OVERLAY_TEXT_COLOR;
-    let fontSize = 16;
-    ctx.font = `${fontSize}px Arial`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-
-    // measure the width of the text
-    // if the text is wider than the rectangle, reduce the maximum width of the text
-    while (ctx.measureText(this.text).width > NOTE_OVERLAY_WIDTH - 20) {
-      fontSize -= 1;
-      ctx.font = `${fontSize}px Arial`;
-    }
-
-    ctx.fillText(this.text, this.x + 10, this.y + NOTE_OVERLAY_HEIGHT / 2);
-  }
-}
 export class NoteToolController extends EdgelessToolController<NoteTool> {
   readonly tool = <NoteTool>{
     type: 'note',
@@ -182,15 +100,10 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._draggingArea = null;
   }
 
-  private _getOverlayText() {
-    const text = this.tool.tip;
-    return text[0].toUpperCase() + text.slice(1);
-  }
-
   private _updateOverlayPosition(x: number, y: number) {
     if (!this._noteOverlay) return;
-    this._noteOverlay.x = x + NOTE_OVERLAY_OFFSET_X;
-    this._noteOverlay.y = y + NOTE_OVERLAY_OFFSET_Y;
+    this._noteOverlay.x = x;
+    this._noteOverlay.y = y;
     this._edgeless.surface.refresh();
   }
 
@@ -198,6 +111,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   private _clearOverlay() {
     if (!this._noteOverlay) return;
 
+    this._noteOverlay.dispose();
     this._edgeless.surface.viewport.removeOverlay(this._noteOverlay);
     this._noteOverlay = null;
     this._edgeless.surface.refresh();
@@ -216,13 +130,20 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
     // if mouse is in viewport and move, update overlay pointion and show overlay
     if (this._noteOverlay.globalAlpha === 0) this._noteOverlay.globalAlpha = 1;
-    this._noteOverlay.text = this._getOverlayText();
-    this._noteOverlay.themeMode = queryCurrentMode();
     const [x, y] = this._surface.viewport.toModelCoord(e.x, e.y);
     this._updateOverlayPosition(x, y);
   }
 
   onContainerMouseOut(e: PointerEventState) {
+    // should not hide the overlay when pointer on the area of other notes
+    if (
+      e.raw.relatedTarget &&
+      hasClassNameInList(
+        e.raw.relatedTarget as Element,
+        EXCLUDING_MOUSE_OUT_CLASS_LIST
+      )
+    )
+      return;
     this._hideOverlay();
   }
 
@@ -236,8 +157,9 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'note') return;
-    this._noteOverlay = new NoteOverlay();
-    this._noteOverlay.text = this._getOverlayText();
+
+    this._noteOverlay = new NoteOverlay(this._edgeless);
+    this._noteOverlay.text = newTool.tip;
     this._noteOverlay.themeMode = queryCurrentMode();
     this._edgeless.surface.viewport.addOverlay(this._noteOverlay);
   }
