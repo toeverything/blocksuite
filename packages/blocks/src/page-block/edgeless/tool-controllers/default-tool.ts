@@ -29,8 +29,10 @@ import {
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import { showFormatQuickBar } from '../../../components/format-quick-bar/index.js';
-import { showFormatQuickBarByClicks } from '../../index.js';
+import {
+  showFormatQuickBar,
+  showFormatQuickBarByClicks,
+} from '../../../components/format-quick-bar/index.js';
 import {
   calcCurrentSelectionPosition,
   getNativeSelectionMouseDragInfo,

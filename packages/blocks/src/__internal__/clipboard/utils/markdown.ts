@@ -9,15 +9,11 @@ export class MarkdownUtils {
     /!\[([^\]]*?)][ \t]*()\([ \t]?<([^>]*)>(?: =([*\d]+[A-Za-z%]{0,4})x([*\d]+[A-Za-z%]{0,4}))?[ \t]*(?:(?:(["'])([^"]*?)\6))?[ \t]?\)/g, // crazyImage
     /!\[([^\]]*?)][ \t]*()\([ \t]?<?(data:.+?\/.+?;base64,[A-Za-z0-9+/=\n]+?)>?(?: =([*\d]+[A-Za-z%]{0,4})x([*\d]+[A-Za-z%]{0,4}))?[ \t]*(?:(["'])([^"]*?)\6)?[ \t]?\)/g, // base64Image
     // eslint-disable-next-line
-    /!\[([^\[\]]+)]()()()()()/g, // referShortcutImage
-    // eslint-disable-next-line
     /\[((?:\[[^\]]*]|[^\[\]])*)]()[ \t]*\([ \t]?<?([\S]+?(?:\([\S]*?\)[\S]*?)?)>?(?:[ \t]*((["'])([^"]*?)\5))?[ \t]?\)/g, // Generallink
     // eslint-disable-next-line
     /\[((?:\[[^\]]*]|[^\[\]])*)] ?(?:\n *)?\[(.*?)]()()()()/g, // inlineLink
     // eslint-disable-next-line
     /\[((?:\[[^\]]*]|[^\[\]])*)]()[ \t]*\([ \t]?<([^>]*)>(?:[ \t]*((["'])([^"]*?)\5))?[ \t]?\)/g, // special link
-    // eslint-disable-next-line
-    /\[([^\[\]]+)]()()()()()/g, // abbreviationlink
   ];
 
   /** Extract some grammar rules to check whether a piece of text contains markdown grammar */
