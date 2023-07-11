@@ -5,15 +5,12 @@ import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
-import { css, html, LitElement, type PropertyValueMap } from 'lit';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import {
-  DEFAULT_BRUSH_COLOR,
-  GET_DEFAULT_LINE_COLOR,
-} from '../../panel/color-panel.js';
+import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
 
