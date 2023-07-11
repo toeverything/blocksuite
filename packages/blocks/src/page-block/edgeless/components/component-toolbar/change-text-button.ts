@@ -4,6 +4,13 @@ import {
   AlignCenterIcon,
   AlignLeftIcon,
   AlignRightIcon,
+  ArrowDownIcon,
+  BoldIcon,
+  BulletedListIcon,
+  FontFamilyIcon,
+  ItalicIcon,
+  NumberedListIcon,
+  UnderlineIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { SurfaceManager, TextElement } from '@blocksuite/phasor';
@@ -49,8 +56,12 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
       fill: currentColor;
     }
 
-    .color-panel-container,
-    .align-panel-container {
+    menu-divider {
+      height: 24px;
+    }
+
+    .color-panel-container.text-color,
+    .align-panel-container.text-align {
       display: none;
       padding: 4px;
       justify-content: center;
@@ -63,6 +74,16 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
     .color-panel-container[data-show],
     .align-panel-container[data-show] {
       display: block;
+    }
+
+    .text-color-button {
+      margin-left: 8px;
+    }
+
+    .button-with-arrow-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   `;
 
@@ -166,17 +187,64 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
       <menu-divider .vertical=${true}></menu-divider>
 
       <edgeless-tool-icon-button
+        class="font-family-button"
+        .tooltip=${this._popperShow ? '' : 'Font'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+      >
+        <div class="button-with-arrow-group">
+          ${FontFamilyIcon} ${ArrowDownIcon}
+        </div>
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .tooltip=${this._popperShow ? '' : 'Bold'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+      >
+        ${BoldIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .tooltip=${this._popperShow ? '' : 'Italic'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+      >
+        ${ItalicIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .tooltip=${this._popperShow ? '' : 'Underline'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+      >
+        ${UnderlineIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        class="convert-to-list-button"
+        .tooltip=${this._popperShow ? '' : 'Convert to list'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+      >
+        <div class="button-with-arrow-group">
+          ${NumberedListIcon} ${ArrowDownIcon}
+        </div>
+      </edgeless-tool-icon-button>
+
+      <menu-divider .vertical=${true}></menu-divider>
+
+      <edgeless-tool-icon-button
         class="text-align-button"
         .tooltip=${this._popperShow ? '' : 'Alignment'}
         .tipPosition=${'bottom'}
         .active=${false}
         @click=${() => this._textAlignPopper?.toggle()}
       >
-        ${selectedAlign === 'left'
-          ? AlignLeftIcon
-          : selectedAlign === 'center'
-          ? AlignCenterIcon
-          : AlignRightIcon}
+        <div class="button-with-arrow-group">
+          ${selectedAlign === 'left'
+            ? AlignLeftIcon
+            : selectedAlign === 'center'
+            ? AlignCenterIcon
+            : AlignRightIcon}
+          ${ArrowDownIcon}
+        </div>
       </edgeless-tool-icon-button>
       <div class="align-panel-container text-align">
         <edgeless-align-panel
