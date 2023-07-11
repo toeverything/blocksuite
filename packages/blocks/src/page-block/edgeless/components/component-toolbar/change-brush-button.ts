@@ -28,10 +28,10 @@ function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonSize(elements: BrushElement[]): BrushSize | null {
+function getMostCommonSize(elements: BrushElement[]): BrushSize {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : null;
+  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
 }
 
 @customElement('edgeless-change-brush-button')

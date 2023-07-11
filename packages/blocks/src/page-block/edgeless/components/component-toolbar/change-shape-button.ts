@@ -15,10 +15,12 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
-import type { ShapeTool } from '../../../../__internal__/utils/types.js';
+import {
+  BrushSize,
+  type ShapeTool,
+} from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
-import type { LineSizeButtonProps } from '../buttons/line-size-button.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
@@ -66,14 +68,12 @@ function getMostCommonStrokeColor(
   return max ? (max[0] as ShapeTool['fillColor']) : null;
 }
 
-function getMostCommonLineSize(
-  elements: ShapeElement[]
-): LineSizeButtonProps['size'] | null {
+function getMostCommonLineSize(elements: ShapeElement[]): BrushSize {
   const sizes = countBy(elements, (ele: ShapeElement) => {
-    return ele.strokeWidth === 4 ? 's' : 'l';
+    return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([k, count]) => count);
-  return max ? (max[0] as LineSizeButtonProps['size']) : null;
+  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
 }
 
 function getMostCommonLineStyle(
@@ -159,6 +159,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       .change-shape-button {
         fill: none;
         stroke: currentColor;
+        margin-left: 8px;
       }
 
       .color-panel-container {
@@ -291,7 +292,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
     if (type === 'size') {
-      const strokeWidth = value === 's' ? 4 : 10;
+      const strokeWidth = value;
       this._setShapeStrokeWidth(strokeWidth);
     } else if (type === 'lineStyle') {
       switch (value) {
@@ -377,7 +378,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       getMostCommonFillColor(this.elements) ?? FILL_COLORS[0];
     const selectedStrokeColor =
       getMostCommonStrokeColor(this.elements) ?? STROKE_COLORS[0];
-    const selectedLineSize = getMostCommonLineSize(this.elements) ?? 's';
+    const selectedLineSize =
+      getMostCommonLineSize(this.elements) ?? BrushSize.LINE_WIDTH_FOUR;
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
 
     return html`
