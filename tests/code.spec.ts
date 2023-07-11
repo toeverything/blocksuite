@@ -46,7 +46,7 @@ function getCodeBlock(page: Page) {
   const languageButton = codeBlock.getByTestId('lang-button');
   const clickLanguageButton = async () => {
     await codeBlock.hover();
-    await languageButton.click();
+    await languageButton.click({ delay: 50 });
   };
 
   const langList = codeBlock.locator('lang-list');
@@ -54,6 +54,7 @@ function getCodeBlock(page: Page) {
   const copyButton = codeOption.getByTestId('copy-button');
   const wrapButton = codeOption.getByTestId('wrap-button');
   const deleteButton = codeOption.getByTestId('delete-button');
+  const langFilterInput = langList.locator('#filter-input');
   return {
     codeBlock,
     languageButton,
@@ -63,6 +64,7 @@ function getCodeBlock(page: Page) {
     copyButton,
     wrapButton,
     deleteButton,
+    langFilterInput,
   };
 }
 
@@ -173,7 +175,7 @@ test('change code language can work', async ({ page }) => {
   await codeBlockController.clickLanguageButton();
   const locator = codeBlockController.langList;
   await expect(locator).toBeVisible();
-  await assertKeyboardWorkInInput(page, page.locator('#filter-input'));
+  await assertKeyboardWorkInInput(page, codeBlockController.langFilterInput);
 
   await type(page, 'rust');
   await page.click('.lang-list-button-container > icon-button:nth-child(1)');
@@ -198,6 +200,14 @@ test('change code language can work', async ({ page }) => {
 />`,
     codeBlockId
   );
+
+  // Can switch to another language
+  await codeBlockController.clickLanguageButton();
+  await assertKeyboardWorkInInput(page, codeBlockController.langFilterInput);
+  await type(page, 'ts');
+  await pressEnter(page);
+  await expect(locator).toBeHidden();
+  await expect(codeBlockController.languageButton).toHaveText('TypeScript');
 });
 
 test('language select list can disappear when click other place', async ({
