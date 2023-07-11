@@ -338,7 +338,8 @@ export class ContentParser {
 
   public async htmlText2Block(
     html: string,
-    context: ParseContext
+    // TODO: for now, we will use notion html as default context
+    context: ParseContext = 'NotionHtml'
   ): Promise<SerializedBlock[]> {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
