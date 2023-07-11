@@ -2,14 +2,18 @@ import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
 import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { css, html, LitElement, type PropertyValueMap } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
+import {
+  DEFAULT_BRUSH_COLOR,
+  GET_DEFAULT_LINE_COLOR,
+} from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
 
@@ -46,7 +50,7 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
 }
 
 @customElement('edgeless-brush-tool-button')
-export class EdgelessBrushToolButton extends LitElement {
+export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -80,9 +84,6 @@ export class EdgelessBrushToolButton extends LitElement {
     .arrow-up-icon:hover {
       background: var(--affine-hover-color);
     }
-    .pen-color {
-      fill: var(--affine-blue-800);
-    }
   `;
 
   @property({ attribute: false })
@@ -93,6 +94,15 @@ export class EdgelessBrushToolButton extends LitElement {
 
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
+
+  @query('.brush-head-rect')
+  private _brushHeadRect!: SVGElement;
+
+  @query('.brush-midline-rect')
+  private _brushMidlineRect!: SVGElement;
+
+  @query('.brush-midline-stroke')
+  private _brushMidlineStroke!: SVGElement;
 
   private _brushMenu: BrushMenuPopper | null = null;
 
@@ -105,6 +115,22 @@ export class EdgelessBrushToolButton extends LitElement {
       this._brushMenu.element.edgelessTool = this.edgelessTool;
       this._brushMenu.element.edgeless = this.edgeless;
     }
+  }
+
+  private _setBrushColor(color: string) {
+    this._brushHeadRect.style.fill = `var(${color})`;
+    this._brushMidlineRect.style.fill = `var(${color})`;
+    this._brushMidlineStroke.style.stroke = `var(${color})`;
+  }
+
+  private _tryLoadBrushStateLocalColor(): string | null {
+    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessBrush';
+    const brushData = sessionStorage.getItem(key);
+    let color = null;
+    if (brushData) {
+      color = JSON.parse(brushData).color;
+    }
+    return color;
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -120,6 +146,29 @@ export class EdgelessBrushToolButton extends LitElement {
     }
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.updateComplete.then(() => {
+      let color = this._tryLoadBrushStateLocalColor();
+      if (!color) {
+        color = DEFAULT_BRUSH_COLOR;
+      }
+      this._setBrushColor(color);
+    });
+    this._disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+        if (newTool.type === 'brush') {
+          this._setBrushColor(newTool.color);
+        }
+      })
+    );
+  }
+
+  override disconnectedCallback(): void {
+    this._disposables.dispose();
+    super.disconnectedCallback();
+  }
+
   override render() {
     const type = this.edgelessTool?.type;
 
@@ -132,7 +181,7 @@ export class EdgelessBrushToolButton extends LitElement {
           this.setEdgelessTool({
             type: 'brush',
             lineWidth: 4,
-            color: GET_DEFAULT_LINE_COLOR(),
+            color: DEFAULT_BRUSH_COLOR,
           });
           this._toggleBrushMenu();
         }}
