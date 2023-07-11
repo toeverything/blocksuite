@@ -16,9 +16,9 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
+import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
-import type { LineSizeButtonProps } from '../buttons/line-size-button.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
@@ -47,14 +47,12 @@ function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
   return max ? (Number(max[0]) as ConnectorMode) : null;
 }
 
-function getMostCommonLineWidth(
-  elements: ConnectorElement[]
-): LineSizeButtonProps['size'] | null {
+function getMostCommonLineWidth(elements: ConnectorElement[]): BrushSize {
   const sizes = countBy(elements, (ele: ConnectorElement) => {
-    return ele.strokeWidth === 4 ? 's' : 'l';
+    return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([k, count]) => count);
-  return max ? (max[0] as LineSizeButtonProps['size']) : null;
+  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
 }
 
 function getMostCommonLineStyle(
@@ -123,6 +121,10 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
       .connector-mode-button[active] {
         background-color: var(--affine-hover-color);
+      }
+
+      .straight-line-button {
+        margin-left: 8px;
       }
 
       .line-style-panel {
@@ -217,7 +219,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
   private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
     if (type === 'size') {
-      const strokeWidth = value === 's' ? 4 : 10;
+      const strokeWidth = value;
       this._setShapeStrokeWidth(strokeWidth);
     } else if (type === 'lineStyle') {
       switch (value) {
@@ -261,11 +263,13 @@ export class EdgelessChangeConnectorButton extends LitElement {
   override render() {
     const selectedColor = getMostCommonColor(this.elements);
     const selectedMode = getMostCommonMode(this.elements);
-    const selectedLineSize = getMostCommonLineWidth(this.elements) ?? 's';
+    const selectedLineSize =
+      getMostCommonLineWidth(this.elements) ?? BrushSize.LINE_WIDTH_FOUR;
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
 
     return html`
       <edgeless-tool-icon-button
+        class="straight-line-button"
         .tooltip=${'Straight line'}
         .tipPosition=${'bottom'}
         @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
