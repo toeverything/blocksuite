@@ -442,27 +442,30 @@ export class ContentParser {
   }
 
   public text2blocks(text: string): SerializedBlock[] {
-    return text.split('\n').map((str: string) => {
-      const splitText = str.split(this.urlPattern);
-      const urls = str.match(this.urlPattern);
-      const result = [];
+    return text
+      .replaceAll('\r\n', '\n')
+      .split('\n')
+      .map((str: string) => {
+        const splitText = str.split(this.urlPattern);
+        const urls = str.match(this.urlPattern);
+        const result = [];
 
-      for (let i = 0; i < splitText.length; i++) {
-        if (splitText[i]) {
-          result.push({ insert: splitText[i] });
+        for (let i = 0; i < splitText.length; i++) {
+          if (splitText[i]) {
+            result.push({ insert: splitText[i] });
+          }
+          if (urls && urls[i]) {
+            result.push({ insert: urls[i], attributes: { link: urls[i] } });
+          }
         }
-        if (urls && urls[i]) {
-          result.push({ insert: urls[i], attributes: { link: urls[i] } });
-        }
-      }
 
-      return {
-        flavour: 'affine:paragraph',
-        type: 'text',
-        text: result,
-        children: [],
-      };
-    });
+        return {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: result,
+          children: [],
+        };
+      });
   }
 
   public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
