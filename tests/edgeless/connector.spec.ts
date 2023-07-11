@@ -25,6 +25,7 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertConnectorPath,
+  assertEdgelessHoverRect,
   assertPointAlmostEqual,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -349,14 +350,13 @@ test('change connector line width', async ({ page }) => {
   await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
-  await changeConnectorStrokeWidth(page, 'l');
+  await changeConnectorStrokeWidth(page, 5);
+  await page.mouse.move(start.x + 5, start.y);
+  await assertEdgelessHoverRect(page, [100, 200, 200, 100]);
 
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
-  const activeButton = locatorConnectorStrokeWidthButton(page, 'l');
-  const className = await activeButton.evaluate(ele => ele.className);
-  expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [
     [start.x + 5, start.y],

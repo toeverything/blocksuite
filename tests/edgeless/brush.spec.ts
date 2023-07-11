@@ -156,45 +156,45 @@ test('change brush element size by component-toolbar', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicBrushElement(page, start, end);
 
-  // change to line width 14
+  // change to line width 12
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 6);
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
+  await assertEdgelessHoverRect(page, [99, 99, 102, 102]);
 
-  // change to line width 12
+  // change to line width 10
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 5);
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [97, 97, 106, 106]);
+  await assertEdgelessHoverRect(page, [98, 98, 104, 104]);
 
-  // change to line width 10
+  // change to line width 8
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 4);
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [96, 96, 108, 108]);
+  await assertEdgelessHoverRect(page, [97, 97, 106, 106]);
 
-  // change to line width 8
+  // change to line width 6
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 3);
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [95, 95, 110, 110]);
+  await assertEdgelessHoverRect(page, [96, 96, 108, 108]);
 
-  // change to line width 6
+  // change to line width 4
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 2);
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [94, 94, 112, 112]);
+  await assertEdgelessHoverRect(page, [95, 95, 110, 110]);
 
-  // change to line width 4
+  // change to line width 2
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 1);
 
   await page.mouse.move(110, 110);
-  await assertEdgelessHoverRect(page, [93, 93, 114, 114]);
+  await assertEdgelessHoverRect(page, [94, 94, 112, 112]);
 });
