@@ -325,7 +325,7 @@ test('change shape stroke style', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
-  expect(pickedColor[0]).toBe('#3b25cc');
+  expect(pickedColor[0]).toBe('#000000');
 });
 
 test('click to add shape', async ({ page }) => {

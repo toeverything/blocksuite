@@ -178,7 +178,6 @@ export function showFormatQuickBarByClicks(
   const direction = 'center-bottom';
   showFormatQuickBar({
     page,
-    container,
     direction,
     anchorEl: {
       getBoundingClientRect: () => {
