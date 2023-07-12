@@ -448,6 +448,7 @@ export class EdgelessClipboard implements Clipboard {
     container.style.height = `${height}px`;
     _edgeless.appendChild(container);
 
+    // FIXME: if multiple notes are selected, the image in the second note is lost.
     if (notesLen) {
       const fragment = document.createDocumentFragment();
       const layer = document.createElement('div');
@@ -463,16 +464,27 @@ export class EdgelessClipboard implements Clipboard {
 
         const [x, y] = deserializeXYWH(element.xywh);
         const div = document.createElement('div');
+        div.className = parent.className;
+        div.setAttribute('style', parent.getAttribute('style') || '');
+        div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
         // render(note.render(), div);
         const canvas: HTMLCanvasElement = await html2canvas(note, {
+          allowTaint: true,
+          useCORS: true,
           ignoreElements: (element: Element) =>
             element.tagName === 'AFFINE-BLOCK-HUB' ||
             element.tagName === 'EDGELESS-TOOLBAR' ||
             element.classList.contains('dg'),
+          onclone: (documentClone: Document, element: HTMLElement) => {
+            (
+              documentClone.querySelector(
+                '.affine-edgeless-layer'
+              ) as HTMLElement
+            ).style.transform = 'scale(1)';
+            element.style.setProperty('transform', 'none');
+          },
+          backgroundColor: window.getComputedStyle(note).backgroundColor,
         });
-        div.className = parent.className;
-        div.setAttribute('style', parent.getAttribute('style') || '');
-        div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
         div.appendChild(canvas);
         layer.appendChild(div);
       }
@@ -498,7 +510,7 @@ export class EdgelessClipboard implements Clipboard {
           element.tagName === 'AFFINE-BLOCK-HUB' ||
           element.tagName === 'EDGELESS-TOOLBAR' ||
           element.classList.contains('dg'),
-        onclone: function (documentClone: Document, element: HTMLElement) {
+        onclone: (documentClone: Document, element: HTMLElement) => {
           // html2canvas can't support transform feature
           element.style.setProperty('transform', 'none');
         },
