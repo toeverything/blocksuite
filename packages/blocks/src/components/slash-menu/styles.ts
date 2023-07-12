@@ -106,4 +106,9 @@ export const styles = css`
     border-top: 1px dashed var(--affine-border-color);
     margin: 8px 0;
   }
+  .slash-item.Delete:hover {
+    background: var(--affine-background-error-color);
+    color: var(--affine-error-color);
+    fill: var(--affine-error-color);
+  }
 `;
