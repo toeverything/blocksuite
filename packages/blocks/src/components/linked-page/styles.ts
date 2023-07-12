@@ -1,5 +1,7 @@
 import { css } from 'lit';
 
+import { scrollbarStyle } from '../utils.js';
+
 export const styles = css`
   :host {
     position: absolute;
@@ -39,12 +41,5 @@ export const styles = css`
     background: var(--affine-border-color);
   }
 
-  ::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 4px;
-  }
-  ::-webkit-scrollbar-thumb {
-    border-radius: 2px;
-    background-color: #b1b1b1;
-  }
+  ${scrollbarStyle}
 `;

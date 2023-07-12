@@ -18,7 +18,7 @@ import {
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,
-  TableParserHandler,
+  TableParseHandler,
   TableTitleColumnHandler,
   TextStyleHandler,
 } from './parse-html.js';
@@ -37,23 +37,29 @@ export class ContentParser {
   };
   private _parsers: Record<string, ParseHtml2BlockHandler> = {};
   private _htmlParser: HtmlParser;
+  private _imageProxyEndpoint?: string;
   private urlPattern =
     /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
   constructor(
     page: Page,
-    fetchFileHandler?: FetchFileHandler,
-    textStyleHandler?: TextStyleHandler,
-    tableParserHandler?: TableParserHandler,
-    tableTitleColumnHandler?: TableTitleColumnHandler
+    options: {
+      /** API endpoint used for cross-domain image export */
+      imageProxyEndpoint?: string;
+      fetchFileHandler?: FetchFileHandler;
+      textStyleHandler?: TextStyleHandler;
+      tableParseHandler?: TableParseHandler;
+      tableTitleColumnHandler?: TableTitleColumnHandler;
+    } = {}
   ) {
     this._page = page;
+    this._imageProxyEndpoint = options?.imageProxyEndpoint;
     this._htmlParser = new HtmlParser(
       this,
       page,
-      fetchFileHandler,
-      textStyleHandler,
-      tableParserHandler,
-      tableTitleColumnHandler
+      options.fetchFileHandler,
+      options.textStyleHandler,
+      options.tableParseHandler,
+      options.tableTitleColumnHandler
     );
     this._htmlParser.registerParsers();
   }
@@ -144,6 +150,8 @@ export class ContentParser {
         element.style.setProperty('transform', 'none');
       },
       backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      useCORS: this._imageProxyEndpoint ? false : true,
+      proxy: this._imageProxyEndpoint,
     };
 
     const nodeElements = edgeless.getSortedElementsByBound(bound);
@@ -192,6 +200,8 @@ export class ContentParser {
         }
       },
       backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+      useCORS: this._imageProxyEndpoint ? false : true,
+      proxy: this._imageProxyEndpoint,
     };
 
     const data = await html2canvas(

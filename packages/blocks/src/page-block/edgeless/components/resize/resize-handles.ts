@@ -1,5 +1,4 @@
-import { normalizeDegAngle, Vec } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
+import { type IVec } from '@blocksuite/phasor';
 import { html, nothing } from 'lit';
 
 export enum HandleDirection {
@@ -15,9 +14,12 @@ function ResizeHandle(
   handleDirection: HandleDirection,
   onPointerDown?: (e: PointerEvent, direction: HandleDirection) => void,
   updateCursor?: (
-    angle: number,
     dragging: boolean,
-    type?: 'resize' | 'rotate'
+    options?: {
+      type: 'resize' | 'rotate';
+      target?: HTMLElement;
+      point?: IVec;
+    }
   ) => void
 ) {
   const handlerPointerDown = (e: PointerEvent) => {
@@ -27,23 +29,20 @@ function ResizeHandle(
 
   const pointerEnter = (type: 'resize' | 'rotate') => (e: PointerEvent) => {
     e.stopPropagation();
-    if (type === 'rotate' && e.buttons === 1) return;
+    if ((type === 'rotate' && e.buttons === 1) || !updateCursor) return;
 
-    if (updateCursor) {
-      const { clientX, clientY } = e;
-      const target = e.target as HTMLElement;
-      const point = [clientX, clientY];
-      const angle = calcAngle(target, point, type === 'rotate' ? 45 : 0);
+    const { clientX, clientY } = e;
+    const target = e.target as HTMLElement;
+    const point = [clientX, clientY];
 
-      updateCursor(angle, true, type);
-    }
+    updateCursor(true, { type, point, target });
   };
 
   const pointerLeave = (e: PointerEvent) => {
     e.stopPropagation();
-    if (e.buttons === 1) return;
+    if (e.buttons === 1 || !updateCursor) return;
 
-    updateCursor && updateCursor(0, false);
+    updateCursor(false);
   };
 
   const rotationTpl =
@@ -74,10 +73,13 @@ export type ResizeMode = 'corner' | 'edge' | 'none';
 export function ResizeHandles(
   resizeMode: ResizeMode,
   onPointerDown: (e: PointerEvent, direction: HandleDirection) => void,
-  updateCursor: (
-    angle: number,
+  updateCursor?: (
     dragging: boolean,
-    type?: 'resize' | 'rotate'
+    options?: {
+      type: 'resize' | 'rotate';
+      target?: HTMLElement;
+      point?: IVec;
+    }
   ) => void
 ) {
   switch (resizeMode) {
@@ -129,16 +131,4 @@ export function ResizeHandles(
       return nothing;
     }
   }
-}
-
-function calcAngle(target: HTMLElement, point: number[], offset = 0) {
-  const rect = target
-    .closest('.affine-edgeless-selected-rect')
-    ?.getBoundingClientRect();
-  assertExists(rect);
-  const { left, top, right, bottom } = rect;
-  const center = Vec.med([left, top], [right, bottom]);
-  return normalizeDegAngle(
-    ((Vec.angle(center, point) + offset) * 180) / Math.PI
-  );
 }

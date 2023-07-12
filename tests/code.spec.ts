@@ -336,7 +336,7 @@ test.skip('use code block copy menu of code block copy whole code block', async 
 
   const position = await getCenterPosition(
     page,
-    '.affine-codeblock-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > icon-button:nth-child(1)'
   );
 
   await page.mouse.move(position.x, position.y);
@@ -379,7 +379,7 @@ test('code block copy button can work', async ({ page }) => {
 
   const position = await getCenterPosition(
     page,
-    '.affine-codeblock-option > format-bar-button:nth-child(1)'
+    '.affine-codeblock-option > icon-button:nth-child(1)'
   );
   await page.mouse.click(position.x, position.y);
   await focusRichText(page);
@@ -655,7 +655,7 @@ test('should code block works in read only mode', async ({ page }) => {
   await expect(codeBlockController.langList).toBeHidden();
   await expect(codeBlockController.codeOption).toBeVisible();
   await expect(
-    codeBlockController.codeOption.locator('format-bar-button')
+    codeBlockController.codeOption.locator('icon-button')
   ).toHaveCount(2);
 });
 

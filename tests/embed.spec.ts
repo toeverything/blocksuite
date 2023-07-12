@@ -32,7 +32,7 @@ import {
 import { test } from './utils/playwright.js';
 
 async function focusCaption(page: Page) {
-  await page.click('.embed-editing-state>format-bar-button:nth-child(1)');
+  await page.click('.embed-editing-state>icon-button:nth-child(1)');
 }
 
 test('can drag resize image by left menu', async ({ page }) => {
