@@ -1265,7 +1265,7 @@ test('should register custom elements in format quick bar', async ({
   await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });
 
-test('format quick bar should not break cussor jumping', async ({ page }) => {
+test('format quick bar should not break cursor jumping', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
