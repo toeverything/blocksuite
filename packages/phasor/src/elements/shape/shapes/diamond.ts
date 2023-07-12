@@ -69,7 +69,7 @@ export const DiamondMethods: ShapeMethods = {
         roughness,
         strokeLineDash:
           strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke: realStrokeColor,
+        stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
         strokeWidth,
         fill: filled ? realFillColor : undefined,
       }
