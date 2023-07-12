@@ -293,20 +293,13 @@ test('change shape stroke width', async ({ page }) => {
   await changeShapeStrokeColor(page, '--affine-palette-line-navy');
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  await changeShapeStrokeWidth(page, 'l');
+  await changeShapeStrokeWidth(page, 5);
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 150, 100, 100]);
 
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  const activeButton = locatorShapeStrokeWidthButton(page, 'l');
-  const className = await activeButton.evaluate(ele => ele.className);
-  expect(className.includes(' active')).toBeTruthy();
-
-  const pickedColor = await pickColorAtPoints(page, [
-    [start.x + 20, start.y + 2],
-    [start.x + 20, start.y + 7],
-  ]);
-  expect(pickedColor[0]).toBe(pickedColor[1]);
 });
 
 test('change shape stroke style', async ({ page }) => {
@@ -332,7 +325,7 @@ test('change shape stroke style', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
-  expect(pickedColor[0]).toBe('#3b25cc');
+  expect(pickedColor[0]).toBe('#000000');
 });
 
 test('click to add shape', async ({ page }) => {

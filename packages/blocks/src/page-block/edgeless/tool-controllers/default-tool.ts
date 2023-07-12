@@ -525,7 +525,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       showFormatQuickBar({
         page: this._page,
-        container: this._edgeless,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {

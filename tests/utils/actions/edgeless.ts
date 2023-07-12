@@ -535,8 +535,6 @@ export async function getZoomLevel(page: Page) {
   const span = page.locator(
     `.edgeless-zoom-toolbar-container.${zoomBarClass} .zoom-percent`
   );
-  // fixme
-  console.log(span);
   await waitNextFrame(page, 60 / 0.25);
   const text = await span.textContent();
   if (!text) {
@@ -755,14 +753,21 @@ export async function resizeConnectorByStartCapitalHandler(
   );
 }
 
-export function locatorShapeStrokeWidthButton(page: Page, size: 's' | 'l') {
+export function locatorShapeStrokeWidthButton(
+  page: Page,
+  buttonPosition: number
+) {
   return page
     .locator('edgeless-change-shape-button')
     .locator('.line-style-panel')
-    .locator(`.edgeless-component-line-size-button.size-${size}`);
+    .locator(`edgeless-line-width-panel`)
+    .locator(`.line-width-button:nth-child(${buttonPosition})`);
 }
-export async function changeShapeStrokeWidth(page: Page, size: 's' | 'l') {
-  const button = locatorShapeStrokeWidthButton(page, size);
+export async function changeShapeStrokeWidth(
+  page: Page,
+  buttonPosition: number
+) {
+  const button = locatorShapeStrokeWidthButton(page, buttonPosition);
   await button.click();
 }
 
@@ -794,14 +799,21 @@ export async function changeConnectorStrokeColor(
   await colorButton.click();
 }
 
-export function locatorConnectorStrokeWidthButton(page: Page, size: 's' | 'l') {
+export function locatorConnectorStrokeWidthButton(
+  page: Page,
+  buttonPosition: number
+) {
   return page
     .locator('edgeless-change-connector-button')
     .locator('.line-style-panel')
-    .locator(`.edgeless-component-line-size-button.size-${size}`);
+    .locator(`edgeless-line-width-panel`)
+    .locator(`.line-width-button:nth-child(${buttonPosition})`);
 }
-export async function changeConnectorStrokeWidth(page: Page, size: 's' | 'l') {
-  const button = locatorConnectorStrokeWidthButton(page, size);
+export async function changeConnectorStrokeWidth(
+  page: Page,
+  buttonPosition: number
+) {
+  const button = locatorConnectorStrokeWidthButton(page, buttonPosition);
   await button.click();
 }
 
