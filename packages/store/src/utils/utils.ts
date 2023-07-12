@@ -74,6 +74,7 @@ export function syncBlockProps(
       throw new Error('Only top level primitives are supported for now');
     }
 
+    // FIXME
     // see https://github.com/toeverything/blocksuite/issues/3467
     if (flavour === 'affine:surface' && key === 'elements') {
       const yMap = new Y.Map();
