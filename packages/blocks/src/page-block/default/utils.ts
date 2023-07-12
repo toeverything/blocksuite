@@ -506,7 +506,6 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       pageBlock.selection.selectOneBlock(modelState.element, modelState.rect);
 
       formatBar = showFormatQuickBar({
-        container: pageBlock.selection.container,
         page: pageBlock.page,
         direction: 'center-bottom',
         anchorEl: {

@@ -50,14 +50,10 @@ export class IconButton extends LitElement {
 
     :host(:hover) {
       background: var(--affine-hover-color);
-      fill: var(--affine-primary-color);
-      color: var(--affine-primary-color);
     }
 
     :host(:active) {
       background: transparent;
-      fill: var(--affine-primary-color);
-      color: var(--affine-primary-color);
     }
 
     :host([disabled]),
@@ -71,8 +67,6 @@ export class IconButton extends LitElement {
     /* You can add a 'hover' attribute to the button to show the hover style */
     :host([hover]) {
       background: var(--affine-hover-color);
-      fill: var(--affine-primary-color);
-      color: var(--affine-primary-color);
     }
 
     /* You can add a 'active' attribute to the button to revert the active style */

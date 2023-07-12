@@ -57,14 +57,22 @@ export const bookmarkModalStyles = html`
       margin-top: 20px;
       caret-color: var(--affine-primary-color);
     }
+    .bookmark-input-wrapper {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+    }
+    .bookmark-input-wrapper label {
+      font-size: var(--affine-font-base);
+      color: var(--affine-text-secondary-color);
+      margin-right: 15px;
+    }
     .bookmark-input {
       width: 100%;
       height: 32px;
       font-size: var(--affine-font-base);
-      margin-top: 20px;
       caret-color: var(--affine-primary-color);
       transition: border-color 0.15s;
-
       line-height: 22px;
       padding: 8px 12px;
       color: var(--affine-text-primary-color);
@@ -179,20 +187,29 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           >
 
           <div class="bookmark-modal-title">Edit</div>
-          <input
-            type="text"
-            class="bookmark-input title"
-            placeholder="Title"
-            value=${this.model.bookmarkTitle || 'Bookmark'}
-            tabindex="1"
-          />
-          <input
-            type="text"
-            class="bookmark-input description"
-            placeholder="Description"
-            value=${this.model.description || this.model.url}
-            tabindex="2"
-          />
+          <div class="bookmark-input-wrapper">
+            <label for="${this.id}-title">Title</label>
+            <input
+              type="text"
+              class="bookmark-input title"
+              placeholder="Title"
+              value=${this.model.bookmarkTitle || 'Bookmark'}
+              tabindex="1"
+              id="${this.id}-title"
+            />
+          </div>
+          <div class="bookmark-input-wrapper">
+            <label for="${this.id}-description">URL</label>
+            <input
+              type="text"
+              class="bookmark-input description"
+              placeholder="Description"
+              value=${this.model.description || this.model.url}
+              tabindex="2"
+              id="${this.id}-description"
+            />
+          </div>
+
           <div class="bookmark-modal-footer">
             <div
               class="bookmark-confirm-button"
