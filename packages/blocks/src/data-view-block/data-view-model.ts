@@ -11,9 +11,9 @@ export type DataView = {
   id: string;
   mode: 'table';
   name: string;
-  dataSource?: DataSourceConfig;
   columns: DataProperty[];
   filter: FilterGroup;
+  dataSource?: DataSourceConfig;
 };
 type Props = {
   views: DataView[];

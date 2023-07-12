@@ -14,6 +14,10 @@ import { BaseDataSource } from './base.js';
 export class DatabaseBlockDatasource extends BaseDataSource {
   private _model: DatabaseBlockModel;
 
+  get page() {
+    return this._model.page;
+  }
+
   constructor(
     private root: BlockSuiteRoot,
     config: DatabaseBlockDatasourceConfig
@@ -43,7 +47,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     propertyId: string,
     value: unknown
   ): void {
-    this._model.page.captureSync();
+    this.page.captureSync();
     this._model.updateCell(rowId, { columnId: propertyId, value });
   }
 
@@ -70,6 +74,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     }
     return this._model.getCell(rowId, propertyId)?.value;
   }
+
   private newColumnName() {
     let i = 1;
     while (this._model.columns.find(column => column.name === `Column ${i}`)) {
@@ -79,7 +84,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public propertyAdd(insertPosition: InsertPosition): string {
-    this._model.page.captureSync();
+    this.page.captureSync();
     return this._model.addColumn(
       insertPosition,
       multiSelectHelper.create(this.newColumnName())
@@ -90,12 +95,12 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     propertyId: string,
     data: Record<string, unknown>
   ): void {
-    this._model.page.captureSync();
+    this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({ data }));
   }
 
   public propertyChangeName(propertyId: string, name: string): void {
-    this._model.page.captureSync();
+    this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({ name }));
   }
 
@@ -115,7 +120,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       column: columnManager.defaultData(toType),
       cells: currentCells.map(() => undefined),
     };
-    this._model.page.captureSync();
+    this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({
       type: toType,
       data: result.column,
@@ -130,8 +135,13 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public propertyDelete(id: string): void {
-    this._model.page.captureSync();
-    this._model.deleteColumn(id);
+    this.page.captureSync();
+    const index = this._model.findColumnIndex(id);
+    if (index < 0) return;
+
+    this.page.transact(() => {
+      this._model.columns.splice(index, 1);
+    });
   }
 
   public propertyGetData(propertyId: string): Record<string, unknown> {
@@ -147,7 +157,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public propertyDuplicate(columnId: string): string {
-    this._model.page.captureSync();
+    this.page.captureSync();
     const currentSchema = this._model.getColumn(columnId);
     assertExists(currentSchema);
     const { id: copyId, ...nonIdProps } = currentSchema;
@@ -159,25 +169,20 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public rowAdd(insertPosition: InsertPosition): string {
-    this._model.page.captureSync();
+    this.page.captureSync();
     const index = insertPositionToIndex(insertPosition, this._model.children);
-    return this._model.page.addBlock(
-      'affine:paragraph',
-      {},
-      this._model.id,
-      index
-    );
+    return this.page.addBlock('affine:paragraph', {}, this._model.id, index);
   }
 
   public rowDelete(ids: string[]): void {
-    this._model.page.captureSync();
-    this._model.page.updateBlock(this._model, {
+    this.page.captureSync();
+    this.page.updateBlock(this._model, {
       children: this._model.children.filter(v => !ids.includes(v.id)),
     });
   }
 
   public override captureSync(): void {
-    this._model.page.captureSync();
+    this.page.captureSync();
   }
 
   public override propertyGetDefaultWidth(propertyId: string): number {

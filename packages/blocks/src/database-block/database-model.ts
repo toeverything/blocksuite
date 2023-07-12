@@ -100,12 +100,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  applyCellsUpdate() {
-    this.page.updateBlock(this, {
-      cells: this.cells,
-    });
-  }
-
   findColumnIndex(id: Column['id']) {
     return this.columns.findIndex(v => v.id === id);
   }

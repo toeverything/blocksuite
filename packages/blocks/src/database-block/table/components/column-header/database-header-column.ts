@@ -27,12 +27,14 @@ import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
+import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import { getTableContainer } from '../../table-view.js';
 import type {
   ColumnManager,
   TableViewManager,
 } from '../../table-view-manager.js';
 import type { ColumnHeader, ColumnTypeIcon } from '../../types.js';
+import { DataViewColumnPreview } from './column-renderer.js';
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
@@ -145,12 +147,16 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     const max = (headerContainerRect.width - columnHeaderRect.width) / scale;
 
     const { computeInsertInfo } = this._columnsOffset(tableContainer, scale);
-
+    const column = new DataViewColumnPreview();
+    column.tableViewManager = this.tableViewManager;
+    column.column = this.column;
+    column.table = tableContainer;
     const dragPreview = createDragPreview(
       tableContainer,
       columnHeaderRect.width / scale,
       headerContainerRect.height / scale,
-      startOffset
+      startOffset,
+      column
     );
     const dropPreview = createDropPreview(
       tableContainer,
@@ -382,7 +388,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   override render() {
     const column = this.column;
     const style = styleMap({
-      width: `${column.width}px`,
+      height: DEFAULT_COLUMN_TITLE_HEIGHT + 'px',
     });
     return html`
       <div
@@ -423,9 +429,11 @@ const createDragPreview = (
   container: Element,
   width: number,
   height: number,
-  startLeft: number
+  startLeft: number,
+  content: HTMLElement
 ) => {
   const div = document.createElement('div');
+  div.append(content);
   // div.style.pointerEvents='none';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
@@ -433,7 +441,6 @@ const createDragPreview = (
   div.style.left = `${startLeft}px`;
   div.style.top = `0px`;
   div.style.zIndex = '9';
-  div.style.backgroundColor = 'rgba(0,0,0,0.3)';
   container.append(div);
   return {
     display(offset: number) {

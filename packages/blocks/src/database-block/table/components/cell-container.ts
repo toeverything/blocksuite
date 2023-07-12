@@ -22,7 +22,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       height: 100%;
       border: none;
       outline: none;
-      border-right: 1px solid var(--affine-border-color) !important;
     }
 
     affine-database-cell-container * {

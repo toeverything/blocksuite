@@ -5,6 +5,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { getDefaultPageByElement } from '../../../../__internal__/index.js';
@@ -133,8 +134,13 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
           this.tableViewManager.columnManagerList,
           column => column.id,
           (column, index) => {
+            const style = styleMap({
+              width: `${column.width}px`,
+            });
             return html` <affine-database-header-column
+              style="${style}"
               data-column-id="${column.id}"
+              data-column-index="${index}"
               class="affine-database-column database-cell"
               .column="${column}"
               .tableViewManager="${this.tableViewManager}"

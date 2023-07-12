@@ -28,6 +28,9 @@ const styles = css`
   affine-database-table {
     position: relative;
   }
+  affine-database-table * {
+    box-sizing: border-box;
+  }
 
   .affine-database-block-title-container {
     display: flex;
@@ -130,6 +133,10 @@ const styles = css`
   .affine-database-block-add-row svg {
     width: 16px;
     height: 16px;
+  }
+
+  .database-cell {
+    border-left: 1px solid var(--affine-border-color);
   }
 
   ${tooltipStyle}

@@ -14,6 +14,7 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
   await page.waitForLoaded();
   page.awarenessStore.setFlag('enable_database', true);
   page.awarenessStore.setFlag('enable_database_filter', true);
+  page.awarenessStore.setFlag('enable_data_view', true);
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),

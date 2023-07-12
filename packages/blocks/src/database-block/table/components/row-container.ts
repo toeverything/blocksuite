@@ -29,10 +29,6 @@ export function DataBaseRowContainer(view: TableViewManager) {
         background: transparent;
       }
 
-      .affine-database-block-row > .affine-database-block-row-cell:first-child {
-        background: var(--affine-hover-color);
-      }
-
       .affine-database-block-row > .database-cell {
         background: var(--affine-white);
       }
@@ -40,10 +36,9 @@ export function DataBaseRowContainer(view: TableViewManager) {
       .database-cell {
         min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
       }
-
-      .database-cell:last-child affine-database-cell-container {
-        border-right: none;
-      }
+      /*.database-cell:last-child affine-database-cell-container {*/
+      /*  border-right: none;*/
+      /*}*/
     </style>
     <div class="affine-database-block-rows">
       ${repeat(
@@ -61,13 +56,12 @@ export function DataBaseRowContainer(view: TableViewManager) {
                 v => v.id,
                 (column, i) => {
                   return html`
-                    <div
-                      class="database-cell"
-                      style=${styleMap({
-                        width: `${column.width}px`,
-                      })}
-                    >
+                    <div>
                       <affine-database-cell-container
+                        class="database-cell"
+                        style=${styleMap({
+                          width: `${column.width}px`,
+                        })}
                         .column="${column}"
                         .rowId="${id}"
                         data-row-id=${id}
