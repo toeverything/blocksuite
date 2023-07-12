@@ -196,6 +196,16 @@ export class ContentParser {
           element.classList.contains('dg')
         ) {
           return true;
+        } else if (
+          (element.classList.contains('close') &&
+            element.parentElement?.classList.contains(
+              'meta-data-expanded-title'
+            )) ||
+          (element.classList.contains('expand') &&
+            element.parentElement?.classList.contains('meta-data'))
+        ) {
+          // the close and expand buttons in affine-page-meta-data is not needed to be showed
+          return true;
         } else {
           return false;
         }
