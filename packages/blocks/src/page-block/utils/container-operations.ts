@@ -228,21 +228,21 @@ export function updateBlockType(
   const ifResolvedFlags: boolean[] = [];
   savedBlockRange?.models.forEach(model => {
     if (model.flavour !== flavour) {
-      resolvedFlag.push(false);
+      ifResolvedFlags.push(false);
     } else {
       switch (flavour) {
         case 'affine:paragraph':
-          resolvedFlag.push(true);
+          ifResolvedFlags.push(true);
           break;
         case 'affine:list':
           if (model.type === type) {
-            resolvedFlag.push(true);
+            ifResolvedFlags.push(true);
           } else {
-            resolvedFlag.push(false);
+            ifResolvedFlags.push(false);
           }
           break;
         default:
-          resolvedFlag.push(false);
+          ifResolvedFlags.push(false);
       }
     }
   });
