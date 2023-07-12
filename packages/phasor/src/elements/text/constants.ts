@@ -13,4 +13,6 @@ export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
   fontSize: 16,
   fontFamily: "'Kalam', cursive",
   textAlign: 'center',
+  isBold: false,
+  isItalic: false,
 };
