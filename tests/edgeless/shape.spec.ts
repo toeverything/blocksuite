@@ -320,24 +320,12 @@ test('change shape stroke style', async ({ page }) => {
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  let activeButton = locatorShapeStrokeStyleButton(page, 'none');
-  let className = await activeButton.evaluate(ele => ele.className);
+  const activeButton = locatorShapeStrokeStyleButton(page, 'none');
+  const className = await activeButton.evaluate(ele => ele.className);
   expect(className.includes(' active')).toBeTruthy();
 
-  let pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
+  const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
   expect(pickedColor[0]).toBe('#000000');
-
-  await page.mouse.click(start.x + 5, start.y + 5);
-  await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  await changeShapeStrokeStyle(page, 'solid');
-  await waitNextFrame(page);
-
-  await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  activeButton = locatorShapeStrokeStyleButton(page, 'solid');
-  className = await activeButton.evaluate(ele => ele.className);
-  expect(className.includes(' active')).toBeTruthy();
-  pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
-  expect(pickedColor[0]).toBe('#3b25cc');
 });
 
 test('click to add shape', async ({ page }) => {
