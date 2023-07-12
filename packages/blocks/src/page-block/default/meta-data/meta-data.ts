@@ -104,7 +104,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
     }
 
     @media print {
-      .close {
+      .meta-data-expanded-title .close {
         display: none;
       }
       .expand {
