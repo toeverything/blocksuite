@@ -31,12 +31,18 @@ export function getFontString({
   fontSize,
   fontFamily,
   lineHeight,
+  isBold = false,
+  isItalic = false,
 }: {
+  isBold?: boolean;
+  isItalic?: boolean;
   fontSize: number;
   lineHeight: string;
   fontFamily: string;
 }): string {
-  return `${fontSize}px/${lineHeight} ${fontFamily}`;
+  return `${isItalic ? 'italic' : ''} ${
+    isBold ? 'bold' : ''
+  } ${fontSize}px/${lineHeight} ${fontFamily}`.trim();
 }
 
 export function normalizeText(text: string): string {
