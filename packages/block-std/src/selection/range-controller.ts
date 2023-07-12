@@ -35,7 +35,7 @@ export class RangeController {
       } catch {
         // skip
       }
-    }, 200);
+    }, 50);
   }
 
   stop() {

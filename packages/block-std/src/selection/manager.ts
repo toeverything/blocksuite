@@ -66,7 +66,7 @@ export class SelectionManager {
     });
   }
 
-  setSelections(selections: BaseSelection[], needSync = true) {
+  set(selections: BaseSelection[], needSync = true) {
     const setter = (): void => {
       this._oldSelections = this.selections;
       this._store.setLocalSelection(selections.map(s => s.toJSON()));
@@ -76,6 +76,18 @@ export class SelectionManager {
       return setter();
     }
     this._mutex(setter);
+  }
+
+  update(
+    fn: (currentSelections: BaseSelection[]) => BaseSelection[],
+    needSync = true
+  ) {
+    const selections = fn(this.selections);
+    this.set(selections, needSync);
+  }
+
+  clear(needSync = true) {
+    this.set([], needSync);
   }
 
   get remoteSelections() {
@@ -97,12 +109,13 @@ export class SelectionManager {
     page.history.on('stack-item-popped', (event: { stackItem: StackItem }) => {
       const selection = event.stackItem.meta.get('selection-state');
       if (selection) {
-        this.setSelections(selection as BaseSelection[]);
+        this.set(selection as BaseSelection[]);
       }
     });
   }
 
   unmount() {
+    this.clear();
     this.rangeController.stop();
     this._changedSlot.dispose();
     this.disposables.dispose();

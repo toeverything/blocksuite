@@ -10,22 +10,22 @@ import { autoScroll } from './utils.js';
 
 export const NativeDragHandlers = {
   onStart(selection: DefaultSelectionManager, e: PointerEventState) {
-    selection.state.resetStartRange(e);
-    selection.state.type = 'native';
+    // selection.state.resetStartRange(e);
+    // selection.state.type = 'native';
   },
 
   onMove(selection: DefaultSelectionManager, e: PointerEventState) {
-    autoScroll(selection, e, {
-      init() {
-        selection.state.lastPoint = new Point(e.raw.clientX, e.raw.clientY);
-        handleNativeRangeDragMove(selection.state.startRange, e);
-      },
-      onMove: noop,
-      onScroll: noop,
-    });
+    // autoScroll(selection, e, {
+    //   init() {
+    //     selection.state.lastPoint = new Point(e.raw.clientX, e.raw.clientY);
+    //     handleNativeRangeDragMove(selection.state.startRange, e);
+    //   },
+    //   onMove: noop,
+    //   onScroll: noop,
+    // });
   },
 
   onEnd(selection: DefaultSelectionManager, _: PointerEventState) {
-    selection.state.clearRaf();
+    // selection.state.clearRaf();
   },
 };

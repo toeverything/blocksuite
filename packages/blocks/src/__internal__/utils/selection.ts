@@ -440,7 +440,7 @@ export function handleNativeRangeDragMove(
  * It will set the point to the top-left or bottom-right corner
  * when the point is out of the horizontal range of container.
  */
-function normalizePointIntoContainer(point: IPoint, container: Element) {
+export function normalizePointIntoContainer(point: IPoint, container: Element) {
   const { top, left, right, bottom } = container.getBoundingClientRect();
   const newPoint = { ...point };
   const { x, y } = point;

@@ -11,7 +11,7 @@ type PointerEventStateOptions = {
 type Point = { x: number; y: number };
 
 export class PointerEventState extends UIEventState {
-  override readonly type = 'pointerState';
+  override type = 'pointerState';
 
   raw: PointerEvent;
   point: Point;
@@ -62,7 +62,7 @@ type KeyboardEventStateOptions = {
 };
 
 export class KeyboardEventState extends UIEventState {
-  override readonly type = 'keyboardState';
+  override type = 'keyboardState';
 
   raw: KeyboardEvent;
 

@@ -22,7 +22,7 @@ export class TextSelection extends BaseSelection {
   }
 
   empty(): boolean {
-    return this.index === this.length;
+    return this.length === 0;
   }
 
   override equals(other: BaseSelection): boolean {

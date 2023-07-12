@@ -216,7 +216,7 @@ export class RichText extends ShadowlessElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
     const selections = this._removeCurrentSelection();
-    this.selection.setSelections(selections, false);
+    this.selection.set(selections, false);
 
     this._vEditor?.unmount();
     this._disposables.dispose();
@@ -242,7 +242,7 @@ export class RichText extends ShadowlessElement {
       selections.push(instance);
     }
 
-    this.selection.setSelections(selections, false);
+    this.selection.set(selections, false);
   };
 
   private _onSelectionChanged = async (selections: BaseSelection[]) => {

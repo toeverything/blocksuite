@@ -50,7 +50,7 @@ export function caretRangeFromPoint(
   }
 
   // See https://github.com/toeverything/blocksuite/issues/1382
-  const rangeRects = range?.getClientRects();
+  const rangeRects = range.getClientRects();
   if (
     rangeRects &&
     rangeRects.length === 2 &&
