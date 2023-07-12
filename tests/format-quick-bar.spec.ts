@@ -16,6 +16,7 @@ import {
   pasteByKeyboard,
   pressArrowDown,
   pressArrowRight,
+  pressArrowUp,
   pressEnter,
   registerFormatBarCustomElements,
   setSelection,
@@ -1262,4 +1263,18 @@ test('should register custom elements in format quick bar', async ({
   await registerFormatBarCustomElements(page);
   await dragBetweenIndices(page, [0, 0], [2, 3]);
   await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
+});
+
+test('format quick bar should not break cussor jumping', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [1, 3], [1, 2]);
+
+  const { formatQuickBar } = getFormatBar(page);
+  await expect(formatQuickBar).toBeVisible();
+
+  await pressArrowUp(page);
+  await type(page, '0');
+  await assertRichTexts(page, ['1203', '456', '789']);
 });
