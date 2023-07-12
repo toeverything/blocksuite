@@ -129,7 +129,7 @@ export class EdgelessLineWidthPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  selectedSize: BrushSize = BrushSize.LINE_WIDTH_FOUR;
+  selectedSize: BrushSize = BrushSize.LINE_WIDTH_TWO;
 
   @query('.line-width-overlay')
   private _lineWidthOverlay!: HTMLElement;
@@ -138,19 +138,19 @@ export class EdgelessLineWidthPanel extends LitElement {
     if (!this._lineWidthOverlay) return;
     let width = 0;
     switch (selectedSize) {
-      case BrushSize.LINE_WIDTH_FOUR:
+      case BrushSize.LINE_WIDTH_TWO:
         width = 0;
         break;
-      case BrushSize.LINE_WIDTH_SIX:
+      case BrushSize.LINE_WIDTH_FOUR:
         width = 16;
         break;
-      case BrushSize.LINE_WIDTH_EIGHT:
+      case BrushSize.LINE_WIDTH_SIX:
         width = 32;
         break;
-      case BrushSize.LINE_WIDTH_TEN:
+      case BrushSize.LINE_WIDTH_EIGHT:
         width = 48;
         break;
-      case BrushSize.LINE_WIDTH_TWELVE:
+      case BrushSize.LINE_WIDTH_TEN:
         width = 64;
         break;
       default:
@@ -191,13 +191,6 @@ export class EdgelessLineWidthPanel extends LitElement {
     return html`<div class="line-width-panel has-tool-tip">
       <div
         class="line-width-button"
-        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_FOURTEEN}
-        @click=${() => this._onSelect(BrushSize.LINE_WIDTH_FOURTEEN)}
-      >
-        <div class="line-width-icon"></div>
-      </div>
-      <div
-        class="line-width-button"
         ?active=${this.selectedSize === BrushSize.LINE_WIDTH_TWELVE}
         @click=${() => this._onSelect(BrushSize.LINE_WIDTH_TWELVE)}
       >
@@ -228,6 +221,13 @@ export class EdgelessLineWidthPanel extends LitElement {
         class="line-width-button"
         ?active=${this.selectedSize === BrushSize.LINE_WIDTH_FOUR}
         @click=${() => this._onSelect(BrushSize.LINE_WIDTH_FOUR)}
+      >
+        <div class="line-width-icon"></div>
+      </div>
+      <div
+        class="line-width-button"
+        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_TWO}
+        @click=${() => this._onSelect(BrushSize.LINE_WIDTH_TWO)}
       >
         <div class="line-width-icon"></div>
       </div>

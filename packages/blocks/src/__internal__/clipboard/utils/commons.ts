@@ -147,10 +147,11 @@ export async function clipboardData2Blocks(
   }
 
   const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+
   if (HTMLClipboardData) {
     const blockSuiteClipboardData = extractCustomDataFromHTMLString(
       CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
-      clipboardData.getData(CLIPBOARD_MIMETYPE.HTML)
+      HTMLClipboardData
     );
 
     if (blockSuiteClipboardData) {
@@ -159,10 +160,13 @@ export async function clipboardData2Blocks(
   }
 
   const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+
   const shouldConvertMarkdown =
     markdownUtils.checkIfTextContainsMd(textClipData);
   if (HTMLClipboardData && !shouldConvertMarkdown) {
-    return await contentParser.htmlText2Block(HTMLClipboardData);
+    return await contentParser.htmlText2Block(
+      removeFragmentFromHtmlClipboardString(HTMLClipboardData)
+    );
   }
 
   if (shouldConvertMarkdown) {
@@ -170,6 +174,11 @@ export async function clipboardData2Blocks(
   }
 
   return contentParser.text2blocks(textClipData);
+}
+
+// https://learn.microsoft.com/en-us/windows/win32/dataxchg/html-clipboard-format
+export function removeFragmentFromHtmlClipboardString(html: string) {
+  return html.replace(/<!--StartFragment-->([^]*)<!--EndFragment-->/g, '$1');
 }
 
 export function copyOnPhasorElementWithText(

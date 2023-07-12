@@ -620,16 +620,24 @@ export const EdgelessPenIcon = html`<svg
     />
   </mask>
   <g mask="url(#mask0_5690_125889)">
-    <rect x="6" y="-1" width="11" height="11" fill="none" class="pen-color" />
+    <rect
+      x="6"
+      y="-1"
+      width="11"
+      height="11"
+      fill="none"
+      class="brush-head-rect"
+    />
   </g>
-  <rect y="48" width="22" height="2" fill="none" class="pen-color" />
+  <rect y="48" width="22" height="2" fill="none" class="brush-midline-rect" />
   <rect
     x="0.5"
     y="48.5"
     width="21"
     height="1"
-    stroke="black"
+    stroke="none"
     stroke-opacity="0.1"
+    class="brush-midline-stroke"
   />
   <defs>
     <linearGradient

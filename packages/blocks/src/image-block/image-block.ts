@@ -38,7 +38,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       text-align: center;
       color: var(--affine-icon-color);
       display: none;
-      background: var(--affine-background-primary-color);
+      background: transparent;
     }
     .affine-embed-wrapper-caption::placeholder {
       color: var(--affine-placeholder-color);
