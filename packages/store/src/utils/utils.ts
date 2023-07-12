@@ -50,6 +50,8 @@ export function syncBlockProps(
   ignoredKeys: Set<string>
 ) {
   const propSchema = schema.model.props?.(internalPrimitives) ?? {};
+  const flavour = schema.model.flavour;
+
   Object.entries(props).forEach(([key, value]) => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
 
@@ -70,6 +72,18 @@ export function syncBlockProps(
       typeof value !== 'object'
     ) {
       throw new Error('Only top level primitives are supported for now');
+    }
+
+    // see https://github.com/toeverything/blocksuite/issues/3467
+    if (flavour === 'affine:surface' && key === 'elements') {
+      const yMap = new Y.Map();
+
+      Object.entries(value).forEach(([key, surfaceElement]) => {
+        yMap.set(key, native2Y(surfaceElement, false));
+      });
+
+      yBlock.set(`prop:${key}`, yMap);
+      return;
     }
 
     if (value !== undefined) {
