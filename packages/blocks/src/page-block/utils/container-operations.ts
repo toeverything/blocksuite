@@ -225,6 +225,27 @@ export function updateBlockType(
 
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
+  const ifResolvedFlags: boolean[] = [];
+  savedBlockRange?.models.forEach(model => {
+    if (model.flavour !== flavour) {
+      resolvedFlag.push(false);
+    } else {
+      switch (flavour) {
+        case 'affine:paragraph':
+          resolvedFlag.push(true);
+          break;
+        case 'affine:list':
+          if (model.type === type) {
+            resolvedFlag.push(true);
+          } else {
+            resolvedFlag.push(false);
+          }
+          break;
+        default:
+          resolvedFlag.push(false);
+      }
+    }
+  });
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
@@ -241,9 +262,11 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
-  const allTextUpdated = savedBlockRange?.models.map(model =>
-    onModelTextUpdated(model)
-  );
+  const allTextUpdated = savedBlockRange?.models.map((model, index) => {
+    return new Promise(resolve =>
+      onModelTextUpdated(model, resolve, ifResolvedFlags[index])
+    );
+  });
   if (allTextUpdated && savedBlockRange) {
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(savedBlockRange);
@@ -540,13 +563,16 @@ export function handleKeydownAfterSelectBlocks({
 }
 export async function onModelTextUpdated(
   model: BaseBlockModel,
-  callback?: (text: RichText) => void
+  callback: (text: RichText) => void,
+  resolveFlag = false
 ) {
   const richText = await asyncGetRichTextByModel(model);
+  if (richText && resolveFlag) {
+    callback(richText);
+    return;
+  }
   richText?.vEditor?.slots.updated.once(() => {
-    if (callback) {
-      callback(richText);
-    }
+    callback(richText);
   });
 }
 
