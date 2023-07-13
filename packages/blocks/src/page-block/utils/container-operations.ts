@@ -225,24 +225,24 @@ export function updateBlockType(
 
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
-  const ifResolvedFlags: boolean[] = [];
+  const resolvedFlags: boolean[] = [];
   savedBlockRange?.models.forEach(model => {
     if (model.flavour !== flavour) {
-      ifResolvedFlags.push(false);
+      resolvedFlags.push(false);
     } else {
       switch (flavour) {
         case 'affine:paragraph':
-          ifResolvedFlags.push(true);
+          resolvedFlags.push(true);
           break;
         case 'affine:list':
           if (model.type === type) {
-            ifResolvedFlags.push(true);
+            resolvedFlags.push(true);
           } else {
-            ifResolvedFlags.push(false);
+            resolvedFlags.push(false);
           }
           break;
         default:
-          ifResolvedFlags.push(false);
+          resolvedFlags.push(false);
       }
     }
   });
@@ -264,9 +264,10 @@ export function updateBlockType(
 
   const allTextUpdated = savedBlockRange?.models.map((model, index) => {
     return new Promise(resolve =>
-      onModelTextUpdated(model, resolve, ifResolvedFlags[index])
+      onModelTextUpdated(model, resolve, resolvedFlags[index])
     );
   });
+
   if (allTextUpdated && savedBlockRange) {
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(savedBlockRange);
@@ -526,6 +527,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
 
   resetNativeSelection(null);
 }
+
 export function handleKeydownAfterSelectBlocks({
   page,
   keyboardEvent,
@@ -561,13 +563,14 @@ export function handleKeydownAfterSelectBlocks({
     focusBlockByModel(newBlock, 'end');
   });
 }
+
 export async function onModelTextUpdated(
   model: BaseBlockModel,
   callback: (text: RichText) => void,
-  resolveFlag = false
+  resolved = false
 ) {
   const richText = await asyncGetRichTextByModel(model);
-  if (richText && resolveFlag) {
+  if (richText && resolved) {
     callback(richText);
     return;
   }
