@@ -57,6 +57,8 @@ export function addText(
       textAlign: 'left',
       fontSize: 24,
       color: GET_DEFAULT_LINE_COLOR(),
+      isBold: false,
+      isItalic: false,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);

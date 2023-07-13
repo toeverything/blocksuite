@@ -45,6 +45,11 @@ export function ImageOptionsTemplate({
         background-color: var(--affine-background-overlay-panel-color);
         margin: 0;
       }
+      .has-tool-tip.delete-image-button:hover {
+        background: var(--affine-background-error-color);
+        fill: var(--affine-error-color);
+        color: var(--affine-error-color);
+      }
       ${tooltipStyle}
     </style>
 
@@ -87,7 +92,7 @@ export function ImageOptionsTemplate({
           >
         </icon-button>
         <icon-button
-          class="has-tool-tip"
+          class="has-tool-tip delete-image-button"
           width="100%"
           height="32px"
           @click="${() => model.page.deleteBlock(model)}"

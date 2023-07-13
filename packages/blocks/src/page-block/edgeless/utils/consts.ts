@@ -40,3 +40,6 @@ export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
   'affine-edgeless-child-note',
   'affine-block-children-container',
 ];
+
+export const SCIBBLED_CANVAS_FONT_FANILY = "'Kalam', cursive";
+export const GENERAL_CANVAS_FONT_FAMILY = 'sans-serif';

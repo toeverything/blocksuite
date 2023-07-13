@@ -38,6 +38,14 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
+  get isBold() {
+    return this.yMap.get('isBold') as IText['isBold'];
+  }
+
+  get isItalic() {
+    return this.yMap.get('isItalic') as IText['isItalic'];
+  }
+
   getNearestPoint(point: IVec): IVec {
     return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
   }
@@ -61,6 +69,8 @@ export class TextElement extends SurfaceElement<IText> {
       textAlign,
       rotate,
       computedValue,
+      isBold,
+      isItalic,
     } = this;
     const [, , w, h] = this.deserializeXYWH();
     const cx = w / 2;
@@ -76,6 +86,8 @@ export class TextElement extends SurfaceElement<IText> {
 
     const lineHeightPx = h / lines.length;
     const font = getFontString({
+      isBold,
+      isItalic,
       fontSize: fontSize,
       lineHeight: `${lineHeightPx}px`,
       fontFamily: fontFamily,
