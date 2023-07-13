@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/phasor';
-import type { SurfaceElement } from '@blocksuite/phasor/elements/surface-element.js';
+import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
@@ -113,7 +112,7 @@ export class ContentParser {
     edgeless: EdgelessPageBlockComponent,
     bound: IBound,
     nodes?: TopLevelBlockModel[],
-    surfaces?: SurfaceElement[]
+    surfaces?: PhasorElement[]
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
