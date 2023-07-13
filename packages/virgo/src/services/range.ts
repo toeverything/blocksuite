@@ -26,7 +26,9 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     document.dispatchEvent(new CustomEvent('virgo-vrange-updated'));
 
     if (!isVRangeEqual(this._prevVRange, newVRange)) {
-      this._editor.requestUpdate();
+      // no need to sync and native selection behavior about shift+arrow will
+      // be broken if we sync
+      this._editor.requestUpdate(false);
     }
     this._prevVRange = newVRange;
 
