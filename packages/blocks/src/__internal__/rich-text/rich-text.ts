@@ -12,13 +12,10 @@ import { REFERENCE_NODE } from './reference-node.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
 
 const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
+export const REGEX_VALID_URL =
+  /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g;
 const isValidUrl = (url: string) => {
-  try {
-    new URL(url);
-    return true;
-  } catch (e) {
-    return false;
-  }
+  return url.match(REGEX_VALID_URL) !== null;
 };
 
 const autoIdentifyLink = (
