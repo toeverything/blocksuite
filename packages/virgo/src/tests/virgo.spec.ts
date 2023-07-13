@@ -728,6 +728,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
+  assertSelection(page, 0, 8);
 
   /**
    * abc
@@ -736,6 +737,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
    */
   await page.keyboard.down('Shift');
   await press(page, 'ArrowUp');
+  assertSelection(page, 0, 4, 4);
 
   /**
    * a|bc
@@ -745,6 +747,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
+  assertSelection(page, 0, 1, 7);
   await press(page, 'Backspace');
   await page.waitForTimeout(100);
 
