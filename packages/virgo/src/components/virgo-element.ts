@@ -3,9 +3,9 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
-import { getVEditorInsideRoot } from '../index.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
+import { getVEditorInsideRoot } from '../utils/query.js';
 
 @customElement('v-element')
 export class VirgoElement<
