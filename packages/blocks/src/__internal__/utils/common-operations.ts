@@ -67,7 +67,7 @@ export function convertToList(
   prefix: string,
   otherProperties?: Record<string, unknown>
 ): boolean {
-  if (matchFlavours(model, ['affine:list']) && model['type'] === listType) {
+  if (matchFlavours(model, ['affine:list'])) {
     return false;
   }
   if (matchFlavours(model, ['affine:paragraph'])) {
@@ -89,16 +89,6 @@ export function convertToList(
 
     const id = page.addBlock('affine:list', blockProps, parent, index);
     asyncFocusRichText(page, id);
-  } else if (
-    matchFlavours(model, ['affine:list']) &&
-    model['type'] !== listType
-  ) {
-    model.text?.insert(' ', prefix.length);
-    page.captureSync();
-
-    model.text?.delete(0, prefix.length + 1);
-    page.updateBlock(model, { type: listType });
-    asyncFocusRichText(page, model.id);
   }
   return true;
 }
