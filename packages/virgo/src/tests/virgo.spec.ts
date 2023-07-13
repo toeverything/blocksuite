@@ -746,6 +746,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'Backspace');
+  await page.waitForTimeout(100);
 
   expect(await editorA.innerText()).toBe('aghi');
   expect(await editorB.innerText()).toBe('aghi');
@@ -843,6 +844,7 @@ test('embed', async ({ page }) => {
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   page.keyboard.up('Shift');
+  await page.waitForTimeout(100);
   await assertSelection(page, 0, 0, 3);
 
   await editorAEmbed.click();
