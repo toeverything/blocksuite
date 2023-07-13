@@ -955,8 +955,6 @@ export class EdgelessPageBlockComponent
     if (zoom > 1) {
       x = cx - options.width / 2;
       y = cy - options.height / 2;
-      options.width /= zoom;
-      options.height /= zoom;
     } else {
       x = cx - (options.width * zoom) / 2;
       y = cy - (options.height * zoom) / 2;
