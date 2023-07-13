@@ -73,13 +73,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
                 );
               }
               const codeModel = newModels[0];
-              onModelTextUpdated(codeModel, () => {
-                restoreSelection({
-                  type: 'Native',
-                  startOffset: 0,
-                  endOffset: 0,
-                  models: [codeModel],
-                });
+              onModelTextUpdated(codeModel, richText => {
+                const vEditor = richText.vEditor;
+                assertExists(vEditor);
+                vEditor.focusEnd();
               });
             }
           },

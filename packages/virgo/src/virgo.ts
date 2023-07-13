@@ -53,6 +53,8 @@ export class VEditor<
   private _deltaService: VirgoDeltaService<TextAttributes> =
     new VirgoDeltaService<TextAttributes>(this);
 
+  private _mounted = false;
+
   shouldLineScrollIntoView = true;
   shouldCursorScrollIntoView = true;
 
@@ -90,6 +92,10 @@ export class VEditor<
 
   get deltaService() {
     return this._deltaService;
+  }
+
+  get mounted() {
+    return this._mounted;
   }
 
   // Expose attribute service API
@@ -165,6 +171,7 @@ export class VEditor<
 
     this._eventService.mount();
 
+    this._mounted = true;
     this.slots.mounted.emit();
   }
 
@@ -175,6 +182,7 @@ export class VEditor<
     this._rootElement?.replaceChildren();
     this._rootElement = null;
 
+    this._mounted = false;
     this.slots.unmounted.emit();
   }
 
