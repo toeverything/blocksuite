@@ -1,4 +1,4 @@
-import type { PropertyValues, TemplateResult } from 'lit';
+import type { TemplateResult } from 'lit';
 import { css } from 'lit';
 import { html, literal } from 'lit/static-html.js';
 
@@ -10,6 +10,14 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
   static override styles = css`
     affine-database-title-cell {
       background-color: var(--affine-hover-color);
+      position: relative;
+    }
+    affine-database-title-cell .mask {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
     }
 
     .affine-database-block-row-cell-content {
@@ -37,7 +45,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     }
   `;
 
-  protected override firstUpdated(_changedProperties: PropertyValues) {
+  protected override firstUpdated() {
     this._disposables.addFromEvent(
       this,
       'keydown',
@@ -68,6 +76,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
   override render() {
     return html`
       <div class="affine-database-block-row-cell-content">${this.value}</div>
+      ${this.isEditing ? '' : html`<div class="mask"></div>`}
     `;
   }
 }
