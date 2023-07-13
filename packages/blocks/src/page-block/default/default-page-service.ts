@@ -5,7 +5,10 @@ import type {
 } from '@blocksuite/block-std';
 import { BlockService } from '@blocksuite/block-std';
 
+import { debounce } from '../../__internal__/utils/index.js';
+import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { PageBlockModel } from '../page-model.js';
+import { calcCurrentSelectionPosition } from '../utils/position.js';
 import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
@@ -131,6 +134,8 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
         }
 
         this._updateRange(state);
+        this._showFormatBar();
+
         const result = this._autoScroll(state.y);
         if (result) {
           this._rafID = requestAnimationFrame(runner);
@@ -202,6 +207,32 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     }
     return false;
   };
+
+  private _showFormatBar = debounce(() => {
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    const offsetDelta = selection.anchorOffset - selection.focusOffset;
+    let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
+
+    if (offsetDelta > 0) {
+      selectionDirection = 'right-left';
+    } else if (offsetDelta < 0) {
+      selectionDirection = 'left-right';
+    }
+    const direction =
+      selectionDirection === 'left-right' ? 'right-bottom' : 'left-top';
+    // Show quick bar when user select text by keyboard(Shift + Arrow)
+    showFormatQuickBar({
+      page: this.page,
+      direction,
+      anchorEl: {
+        getBoundingClientRect: () => {
+          return calcCurrentSelectionPosition(direction);
+        },
+      },
+    });
+  }, 100);
 
   override mounted() {
     super.mounted();

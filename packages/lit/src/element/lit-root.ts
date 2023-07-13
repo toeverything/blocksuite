@@ -41,6 +41,9 @@ export class BlockSuiteRoot extends ShadowlessElement {
     if (changedProperties.has('blocks')) {
       this.blockStore.applySpecs(this.blocks);
     }
+    if (changedProperties.has('page')) {
+      this.blockStore.page = this.page;
+    }
     super.willUpdate(changedProperties);
   }
 
@@ -51,6 +54,8 @@ export class BlockSuiteRoot extends ShadowlessElement {
     this.blockStore = new BlockStore<StaticValue>({
       uiEventDispatcher: this.uiEventDispatcher,
       selectionManager: this.selectionManager,
+      workspace: this.page.workspace,
+      page: this.page,
     });
     this.uiEventDispatcher.mount();
     this.selectionManager.mount(this.page);

@@ -1,26 +1,38 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import { DisposableGroup } from '@blocksuite/store';
 
-import type { UIEventDispatcher } from '../event/index.js';
 import type { EventName, UIEventHandler } from '../event/index.js';
-import type { SelectionManager } from '../selection/index.js';
+import type { BlockStore } from '../store/index.js';
 
 export interface BlockServiceOptions {
+  store: BlockStore;
+
   // TODO: add these
   // transformer;
-
-  uiEventDispatcher: UIEventDispatcher;
-  selectionManager: SelectionManager;
 }
 
 export class BlockService<Model extends BaseBlockModel = BaseBlockModel> {
+  readonly store: BlockStore;
   readonly disposables = new DisposableGroup();
-  readonly uiEventDispatcher: UIEventDispatcher;
-  readonly selectionManager: SelectionManager;
 
   constructor(options: BlockServiceOptions) {
-    this.uiEventDispatcher = options.uiEventDispatcher;
-    this.selectionManager = options.selectionManager;
+    this.store = options.store;
+  }
+
+  get workspace() {
+    return this.store.workspace;
+  }
+
+  get page() {
+    return this.store.page;
+  }
+
+  get selectionManager() {
+    return this.store.selectionManager;
+  }
+
+  get uiEventDispatcher() {
+    return this.store.uiEventDispatcher;
   }
 
   // life cycle start
