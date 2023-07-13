@@ -19,7 +19,6 @@ import { assertExists, Text } from '@blocksuite/store';
 
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
 import { getServiceOrRegister } from '../../__internal__/service.js';
-import { restoreSelection } from '../../__internal__/utils/block-range.js';
 import {
   createPage,
   getCurrentNativeRange,
