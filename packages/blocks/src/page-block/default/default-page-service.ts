@@ -1,4 +1,8 @@
-import type { EventName, UIEventHandler } from '@blocksuite/block-std';
+import type {
+  EventName,
+  PointerEventState,
+  UIEventHandler,
+} from '@blocksuite/block-std';
 import { BlockService } from '@blocksuite/block-std';
 
 import type { PageBlockModel } from '../page-model.js';
@@ -47,11 +51,50 @@ function rangeFromCaret(caret: { node: Node; offset: number }): Range {
   return range;
 }
 
+export interface PageViewport {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+  clientWidth: number;
+}
+
 export class DefaultPageService extends BlockService<PageBlockModel> {
   selection: DefaultSelectionManager | null = null;
 
   private _isNativeSelection = false;
   private _startRange: Range | null = null;
+  private _viewportElement: HTMLElement | null = null;
+  private _rafID = 0;
+
+  private get _viewport(): PageViewport {
+    if (!this._viewportElement) {
+      return {
+        left: 0,
+        top: 0,
+        scrollLeft: 0,
+        scrollTop: 0,
+        scrollHeight: 0,
+        clientHeight: 0,
+        clientWidth: 0,
+      };
+    }
+
+    const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
+      this._viewportElement;
+    const { top, left } = this._viewportElement.getBoundingClientRect();
+    return {
+      top,
+      left,
+      clientHeight,
+      clientWidth,
+      scrollHeight,
+      scrollLeft,
+      scrollTop,
+    };
+  }
 
   private _addEvent(name: EventName, handler: UIEventHandler) {
     this.disposables.add(this.uiEventDispatcher.add(name, handler));
@@ -80,25 +123,24 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
 
   private _dragMoveHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    if (this._isNativeSelection && this._startRange) {
-      const caret = caretFromPoint(state.x, state.y);
-      if (!caret) {
-        return;
-      }
+    this._clearRaf();
+    if (this._isNativeSelection) {
+      const runner = () => {
+        if (!this._rafID) {
+          return;
+        }
 
-      if (caret.node.nodeType !== Node.TEXT_NODE) {
-        return;
-      }
+        this._updateRange(state);
+        const result = this._autoScroll(state.y);
+        if (result) {
+          this._rafID = requestAnimationFrame(runner);
+          return;
+        }
 
-      caret.node.parentElement
-        ?.closest('v-line')
-        ?.scrollIntoView({ block: 'nearest' });
+        this._clearRaf();
+      };
 
-      const range = rangeFromCaret(caret);
-      this.selectionManager.rangeController.add(this._startRange);
-      this.selectionManager.rangeController.add(range);
-
-      this._isNativeSelection = true;
+      this._rafID = requestAnimationFrame(runner);
     }
   };
 
@@ -109,14 +151,68 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     }
   };
 
+  private _clearRaf() {
+    if (this._rafID) {
+      cancelAnimationFrame(this._rafID);
+      this._rafID = 0;
+    }
+  }
+
+  private _updateRange = (state: PointerEventState) => {
+    if (!this._startRange) return;
+
+    const caret = caretFromPoint(state.x, state.y);
+    if (!caret) {
+      return;
+    }
+
+    if (caret.node.nodeType !== Node.TEXT_NODE) {
+      return;
+    }
+
+    const range = rangeFromCaret(caret);
+    this.selectionManager.rangeController.add(this._startRange);
+    this.selectionManager.rangeController.add(range);
+  };
+
+  private _autoScroll = (y: number): boolean => {
+    const { scrollHeight, clientHeight, scrollTop } = this._viewport;
+    let _scrollTop = scrollTop;
+    const threshold = 50;
+    const max = scrollHeight - clientHeight;
+
+    let d = 0;
+    let flag = false;
+
+    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
+      // ↓
+      d = threshold - (clientHeight - y);
+      flag = Math.ceil(_scrollTop) < max;
+    } else if (scrollTop > 0 && y < threshold) {
+      // ↑
+      d = y - threshold;
+      flag = _scrollTop > 0;
+    }
+
+    _scrollTop += d * 0.25;
+
+    if (this._viewportElement && flag && scrollTop !== _scrollTop) {
+      this._viewportElement.scrollTop = _scrollTop;
+      return true;
+    }
+    return false;
+  };
+
   override mounted() {
     super.mounted();
 
     this._addEvent('dragStart', this._dragStartHandler);
-
     this._addEvent('dragMove', this._dragMoveHandler);
-
     this._addEvent('dragEnd', this._dragEndHandler);
+  }
+
+  bindViewport(viewportElement: HTMLElement) {
+    this._viewportElement = viewportElement;
   }
 
   mountSelectionManager(
@@ -146,6 +242,7 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
 
   override unmounted() {
     super.unmounted();
+    this._clearRaf();
     this.unmountSelectionManager();
   }
 }

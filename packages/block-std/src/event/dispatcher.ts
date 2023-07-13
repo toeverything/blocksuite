@@ -33,10 +33,12 @@ const eventNames = [
   'pointerMove',
   'pointerUp',
   'pointerOut',
+  'pointerOver',
 
   'dragStart',
   'dragMove',
   'dragEnd',
+  'dragOver',
 
   'keyDown',
   'keyUp',

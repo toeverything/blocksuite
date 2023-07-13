@@ -52,7 +52,6 @@ import type {
   DefaultSelectionSlots,
 } from '../default-page-block.js';
 import { BlockDragHandlers } from './block-drag-handlers.js';
-import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState } from './selection-state.js';
 import { filterBlocksExcludeSubtrees, setSelectedBlocks } from './utils.js';
@@ -207,14 +206,14 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     if (isBlankArea(e)) {
       BlockDragHandlers.onStart(this, e);
     } else {
-      NativeDragHandlers.onStart(this, e);
+      // NativeDragHandlers.onStart(this, e);
     }
   };
 
   private _onContainerDragMove = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
     if (this.state.type === 'native') {
-      NativeDragHandlers.onMove(this, e);
+      // NativeDragHandlers.onMove(this, e);
       return;
     }
 
@@ -240,7 +239,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       return;
     }
     if (this.state.type === 'native') {
-      NativeDragHandlers.onEnd(this, e);
+      // NativeDragHandlers.onEnd(this, e);
     } else if (this.state.type === 'block') {
       BlockDragHandlers.onEnd(this, e);
     }
@@ -416,7 +415,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     this.clear();
 
     // switch native selection
-    NativeDragHandlers.onStart(this, e);
+    // NativeDragHandlers.onStart(this, e);
 
     // The following code is for the fullscreen image modal
     // fixme:

@@ -477,6 +477,7 @@ export class DefaultPageBlockComponent
   }
 
   override firstUpdated() {
+    this.service?.bindViewport(this.viewportElement);
     const { page, selection } = this;
     const scope = hotkey.newScope(HOTKEY_SCOPE_TYPE.AFFINE_PAGE);
     if (activeEditorManager.isActive(this)) {

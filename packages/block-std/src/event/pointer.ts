@@ -32,6 +32,11 @@ export class PointerControl {
       'pointerout',
       this._out
     );
+    this._dispatcher.disposables.addFromEvent(
+      this._dispatcher.root,
+      'pointerover',
+      this._overOn
+    );
   }
 
   private get _rect() {
@@ -48,6 +53,36 @@ export class PointerControl {
   private _createContext(event: Event, pointerState: PointerEventState) {
     return UIEventStateContext.from(new UIEventState(event), pointerState);
   }
+
+  private _overOn = (event: PointerEvent) => {
+    const pointerEventState = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: this._startX,
+      startY: this._startY,
+      last: this._lastDragState,
+    });
+
+    this._dispatcher.run(
+      'pointerOver',
+      this._createContext(event, pointerEventState)
+    );
+  };
+
+  private _over = (event: PointerEvent) => {
+    const last = this._lastDragState;
+    const state = new PointerEventState({
+      event,
+      rect: this._rect,
+      startX: this._startX,
+      startY: this._startY,
+      last,
+    });
+
+    if (this._dragging) {
+      this._dispatcher.run('dragOver', this._createContext(event, state));
+    }
+  };
 
   private _down = (event: PointerEvent) => {
     if (
@@ -84,6 +119,13 @@ export class PointerControl {
       'pointermove',
       this._move
     );
+
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'pointerover',
+      this._over
+    );
+
     this._dispatcher.disposables.addFromEvent(document, 'pointerup', this._up);
   };
 
@@ -117,6 +159,7 @@ export class PointerControl {
     this._reset();
     document.removeEventListener('pointermove', this._move);
     document.removeEventListener('pointerup', this._up);
+    document.removeEventListener('pointerover', this._over);
   };
 
   private _move = (event: PointerEvent) => {
