@@ -123,6 +123,7 @@ In this example, `props` defines the fields on each block instance, while `metad
 workspace.register([ListBlockSchema]);
 const page = workspace.createPage();
 
+await page.waitForLoaded();
 const id = page.addBlock('affine:list');
 const listBlock = page.getBlockById(id);
 
