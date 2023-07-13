@@ -27,6 +27,7 @@ type NormalMenu = MenuCommon &
         label?: TemplateResult;
         icon?: TemplateResult;
         select: () => void;
+        class?: string;
       }
     | {
         type: 'sub-menu';
@@ -62,6 +63,7 @@ type Item = {
   upDivider?: boolean;
   downDivider?: boolean;
   mouseEnter?: () => void;
+  class?: string;
 };
 
 @customElement('affine-menu')
@@ -129,6 +131,13 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
 
     .affine-menu-action.selected .content {
       background-color: var(--affine-hover-color);
+    }
+    .affine-menu-action.selected.delete-item .content {
+      background-color: var(--affine-background-error-color);
+      color: var(--affine-error-color);
+    }
+    .affine-menu-action.selected.delete-item .icon > svg {
+      fill: var(--affine-error-color);
     }
 
     .database-menu-component-action-button:hover {
@@ -234,6 +243,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
             menu.select();
             this._complete();
           },
+          class: menu.class ?? '',
         },
       ];
     },
@@ -293,6 +303,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
             </div>`,
           mouseEnter: select,
           select,
+          class: '',
         },
       ];
     },
@@ -368,9 +379,11 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
           const mouseEnter = () => {
             this._mouseEnter(i);
           };
+          const itemClass = menu.class ?? '';
           const classes = classMap({
             'affine-menu-action': true,
             selected: this._selectedIndex === i,
+            [itemClass]: true,
           });
           return html`
             ${divider ? html` <div class="affine-menu-divider"></div>` : null}
