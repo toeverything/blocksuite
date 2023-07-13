@@ -217,6 +217,27 @@ export function updateBlockType(
 
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
+  const resolvedFlags: boolean[] = [];
+  savedBlockRange?.models.forEach(model => {
+    if (model.flavour !== flavour) {
+      resolvedFlags.push(false);
+    } else {
+      switch (flavour) {
+        case 'affine:paragraph':
+          resolvedFlags.push(true);
+          break;
+        case 'affine:list':
+          if (model.type === type) {
+            resolvedFlags.push(true);
+          } else {
+            resolvedFlags.push(false);
+          }
+          break;
+        default:
+          resolvedFlags.push(false);
+      }
+    }
+  });
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
@@ -233,9 +254,12 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
-  const allTextUpdated = savedBlockRange?.models.map(
-    model => new Promise(resolve => onModelTextUpdated(model, resolve))
-  );
+  const allTextUpdated = savedBlockRange?.models.map((model, index) => {
+    return new Promise(resolve =>
+      onModelTextUpdated(model, resolve, resolvedFlags[index])
+    );
+  });
+
   if (allTextUpdated && savedBlockRange) {
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(savedBlockRange);
@@ -495,6 +519,7 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
 
   resetNativeSelection(null);
 }
+
 export function handleKeydownAfterSelectBlocks({
   page,
   keyboardEvent,
@@ -530,11 +555,17 @@ export function handleKeydownAfterSelectBlocks({
     focusBlockByModel(newBlock, 'end');
   });
 }
+
 export async function onModelTextUpdated(
   model: BaseBlockModel,
-  callback: (text: RichText) => void
+  callback: (text: RichText) => void,
+  resolved = false
 ) {
   const richText = await asyncGetRichTextByModel(model);
+  if (richText && resolved) {
+    callback(richText);
+    return;
+  }
   richText?.vEditor?.slots.updated.once(() => {
     callback(richText);
   });
