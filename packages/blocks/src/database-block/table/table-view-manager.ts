@@ -137,7 +137,10 @@ export class DatabaseTableViewManager implements TableViewManager {
       .filter(v => {
         if (searchString) {
           const containsSearchString = this.columns.some(column => {
-            return column.getStringValue(v.id).includes(searchString);
+            return column
+              .getStringValue(v.id)
+              ?.toLowerCase()
+              .includes(searchString?.toLowerCase());
           });
           if (!containsSearchString) {
             return false;
