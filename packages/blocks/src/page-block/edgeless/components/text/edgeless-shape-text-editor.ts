@@ -167,7 +167,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           ? `var(${this._element.color})`
           : this._element.color,
         padding: SHAPE_TEXT_PADDING + 'px',
-        textAlign: this._element.textVerticalAlign,
+        textAlign: this._element.textAlign,
         display: 'grid',
         gridTemplateColumns: '100%',
         alignItems:
