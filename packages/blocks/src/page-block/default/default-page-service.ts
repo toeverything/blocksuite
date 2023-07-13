@@ -8,7 +8,10 @@ import { BlockService } from '@blocksuite/block-std';
 import { throttle } from '../../__internal__/utils/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { PageBlockModel } from '../page-model.js';
-import { calcCurrentSelectionPosition } from '../utils/position.js';
+import {
+  calcCurrentSelectionPosition,
+  getDragDirection,
+} from '../utils/position.js';
 import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
@@ -134,9 +137,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
         }
 
         this._updateRange(state);
-        requestAnimationFrame(() => {
-          this._showFormatBar();
-        });
 
         const result = this._autoScroll(state.y);
         if (result) {
@@ -152,7 +152,11 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
   };
 
   private _dragEndHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
     if (this._isNativeSelection) {
+      requestAnimationFrame(() => {
+        this._showFormatBar(state);
+      });
       this._startRange = null;
       this._isNativeSelection = false;
     }
@@ -210,21 +214,11 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     return false;
   };
 
-  private _showFormatBar = throttle(() => {
+  private _showFormatBar = throttle((event: PointerEventState) => {
     const selection = window.getSelection();
     if (!selection) return;
 
-    const offsetDelta = selection.anchorOffset - selection.focusOffset;
-    let selectionDirection: 'left-right' | 'right-left' | 'none' = 'none';
-
-    if (offsetDelta > 0) {
-      selectionDirection = 'right-left';
-    } else if (offsetDelta < 0) {
-      selectionDirection = 'left-right';
-    }
-    const direction =
-      selectionDirection === 'left-right' ? 'right-bottom' : 'left-top';
-    // Show quick bar when user select text by keyboard(Shift + Arrow)
+    const direction = getDragDirection(event);
     showFormatQuickBar({
       page: this.page,
       direction,
