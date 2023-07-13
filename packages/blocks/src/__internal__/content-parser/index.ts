@@ -54,7 +54,7 @@ export class ContentParser {
   ) {
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
-    // future we will use a better solution in the future https://github.com/toeverything/blocksuite/issues/3506
+    // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
     if (
       !this._imageProxyEndpoint &&
       location.protocol === 'https:' &&
