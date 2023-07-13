@@ -308,6 +308,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
             ?hidden=${!showDivider || !!this._searchString.length}
           ></div>
           <icon-button
+            class="slash-item ${name}"
             ?disabled=${disabled}
             width="100%"
             height="32px"

@@ -355,6 +355,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 select: () => {
                   this.column.delete?.();
                 },
+                class: 'delete-item',
               },
             ],
           },

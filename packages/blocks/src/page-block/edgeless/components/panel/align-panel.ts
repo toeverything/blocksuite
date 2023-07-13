@@ -18,7 +18,6 @@ export class EdgelessAlignPanel extends LitElement {
       flex-direction: row;
       align-items: flex-start;
       background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       fill: none;
       stroke: currentColor;

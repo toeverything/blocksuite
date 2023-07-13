@@ -300,6 +300,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
         select: () => {
           this.deleteSelf();
         },
+        class: 'delete-item',
       },
     ]);
   };
