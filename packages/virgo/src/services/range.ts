@@ -1,12 +1,12 @@
 import { VirgoLine } from '../components/index.js';
 import type { VRange } from '../types.js';
 import type { VRangeUpdatedProp } from '../types.js';
+import type { BaseTextAttributes } from '../utils/base-attributes.js';
+import { findDocumentOrShadowRoot } from '../utils/query.js';
 import {
-  type BaseTextAttributes,
   domRangeToVirgoRange,
-  findDocumentOrShadowRoot,
   virgoRangeToDomRange,
-} from '../utils/index.js';
+} from '../utils/range-conversion.js';
 import { isVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 

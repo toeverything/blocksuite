@@ -389,6 +389,8 @@ test('format quick bar should show up when double-clicking on text', async ({
   await initThreeParagraphs(page);
   await switchEditorMode(page);
 
+  //FIXME: workaround for test failure only in playwright but don't know why
+  await page.mouse.click(CENTER_X + 5, CENTER_Y);
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await waitNextFrame(page);
 

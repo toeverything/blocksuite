@@ -1,6 +1,6 @@
 import type * as Y from 'yjs';
 
-import { VirgoElement } from '../index.js';
+import { VirgoElement } from '../components/virgo-element.js';
 import type { VRange } from '../types.js';
 import { isInEmbedElement } from './guard.js';
 import {
