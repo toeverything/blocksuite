@@ -20,8 +20,8 @@ function ConnectorModeButtonGroup(
   if (edgelessTool.type !== 'connector') return nothing;
 
   const { mode } = edgelessTool;
-  const straightLineTooltip = getTooltipWithShortcut('Straight line', 'L');
-  const orthogonalTooltip = getTooltipWithShortcut('Connector', 'X');
+  const straightLineTooltip = getTooltipWithShortcut('Straight', 'L');
+  const orthogonalTooltip = getTooltipWithShortcut('Elbowed', 'X');
   /**
    * There is little hacky on rendering tooltip.
    * We don't want either tooltip overlap the top button or tooltip on left.
