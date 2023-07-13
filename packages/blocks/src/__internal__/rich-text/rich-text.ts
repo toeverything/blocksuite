@@ -5,18 +5,13 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { isValidLink } from '../../components/link-popover/link-popover.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { REFERENCE_NODE } from './reference-node.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
-
 const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
-export const REGEX_VALID_URL =
-  /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g;
-const isValidUrl = (url: string) => {
-  return url.match(REGEX_VALID_URL) !== null;
-};
 
 const autoIdentifyLink = (
   editor: AffineVEditor,
@@ -50,7 +45,7 @@ const autoIdentifyLink = (
       delta.insert.slice(0, rangePositionInDelta) +
       context.data +
       delta.insert.slice(rangePositionInDelta);
-    const isUrl = isValidUrl(newText);
+    const isUrl = isValidLink(newText);
 
     // If the new text with original link text is not pattern matched, we should reset the text
     if (!isUrl) {
@@ -86,7 +81,7 @@ const autoIdentifyLink = (
 
   const verifyStr = verifyData[verifyData.length - 1];
 
-  const isUrl = isValidUrl(verifyStr);
+  const isUrl = isValidLink(verifyStr);
 
   if (!isUrl) {
     return;
