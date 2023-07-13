@@ -8,7 +8,6 @@ import {
   getCommonBound,
   type PhasorElement,
   type PhasorElementType,
-  Renderer,
   serializeXYWH,
 } from '@blocksuite/phasor';
 import { assertExists, type Page } from '@blocksuite/store';
