@@ -5,8 +5,8 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { isValidLink } from '../../components/link-popover/link-popover.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
+import { isValidUrl } from '../utils/url.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { REFERENCE_NODE } from './reference-node.js';
@@ -45,7 +45,7 @@ const autoIdentifyLink = (
       delta.insert.slice(0, rangePositionInDelta) +
       context.data +
       delta.insert.slice(rangePositionInDelta);
-    const isUrl = isValidLink(newText);
+    const isUrl = isValidUrl(newText);
 
     // If the new text with original link text is not pattern matched, we should reset the text
     if (!isUrl) {
@@ -81,7 +81,7 @@ const autoIdentifyLink = (
 
   const verifyStr = verifyData[verifyData.length - 1];
 
-  const isUrl = isValidLink(verifyStr);
+  const isUrl = isValidUrl(verifyStr);
 
   if (!isUrl) {
     return;
