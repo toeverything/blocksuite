@@ -184,7 +184,9 @@ export class DatabaseTableViewManager implements TableViewManager {
     return this.dataSource.rows.filter(id => {
       if (searchString) {
         const containsSearchString = this.columns.some(columnId => {
-          return this.cellGetStringValue(id, columnId).includes(searchString);
+          return this.cellGetStringValue(id, columnId)
+            ?.toLowerCase()
+            .includes(searchString?.toLowerCase());
         });
         if (!containsSearchString) {
           return false;

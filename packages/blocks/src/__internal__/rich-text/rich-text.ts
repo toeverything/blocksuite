@@ -6,20 +6,12 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { activeEditorManager } from '../utils/active-editor-manager.js';
+import { isValidUrl } from '../utils/url.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { REFERENCE_NODE } from './reference-node.js';
 import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
-
 const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
-const isValidUrl = (url: string) => {
-  try {
-    new URL(url);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
 
 const autoIdentifyLink = (
   editor: AffineVEditor,
