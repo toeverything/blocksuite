@@ -379,10 +379,11 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
           const mouseEnter = () => {
             this._mouseEnter(i);
           };
+          const itemClass = menu.class ?? '';
           const classes = classMap({
             'affine-menu-action': true,
             selected: this._selectedIndex === i,
-            'delete-item': menu.class === 'delete',
+            [itemClass]: true,
           });
           return html`
             ${divider ? html` <div class="affine-menu-divider"></div>` : null}

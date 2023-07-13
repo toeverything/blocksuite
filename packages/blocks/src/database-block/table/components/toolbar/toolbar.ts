@@ -330,7 +330,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
           const models = [this.targetModel, ...this.targetModel.children];
           models.forEach(model => this.targetModel.page.deleteBlock(model));
         },
-        class: 'delete',
+        class: 'delete-item',
       },
     ]);
   };

@@ -340,7 +340,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 select: () => {
                   this.column.delete?.();
                 },
-                class: 'delete',
+                class: 'delete-item',
               },
             ],
           },
