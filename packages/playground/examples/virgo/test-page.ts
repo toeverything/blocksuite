@@ -2,14 +2,18 @@ import '@shoelace-style/shoelace';
 
 import { ShadowlessElement } from '@blocksuite/lit';
 import {
+  type AttributeRenderer,
   type BaseTextAttributes,
+  baseTextAttributes,
   type DeltaInsert,
   VEditor,
+  ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
+import { z } from 'zod';
 
 function virgoTextStyles(
   props: BaseTextAttributes
@@ -46,7 +50,22 @@ function virgoTextStyles(
   });
 }
 
-const attributeRenderer = (delta: DeltaInsert) => {
+const attributeRenderer: AttributeRenderer = (
+  delta: DeltaInsert,
+  selected: boolean
+) => {
+  // @ts-ignore
+  if (delta.attributes?.embed) {
+    return html`<span
+      style=${styleMap({
+        padding: '0 0.4em',
+        border: selected ? '1px solid #eb763a' : '',
+        background: 'rgba(135,131,120,0.15)',
+      })}
+      >@flrande<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+    ></span>`;
+  }
+
   const style = delta.attributes
     ? virgoTextStyles(delta.attributes)
     : styleMap({
@@ -121,13 +140,37 @@ export class RichText extends ShadowlessElement {
 
   override firstUpdated() {
     this.vEditor.mount(this._container);
+
+    this.vEditor.slots.updated.on(() => {
+      const el = this.querySelector('.y-text');
+      if (el) {
+        const text = this.vEditor.yText.toDelta();
+        const span = document.createElement('span');
+        span.innerHTML = JSON.stringify(text);
+        el.replaceChildren(span);
+      }
+    });
+    this.vEditor.slots.vRangeUpdated.on(() => {
+      const el = this.querySelector('.v-range');
+      if (el) {
+        const vRange = this.vEditor.getVRange();
+        const span = document.createElement('span');
+        span.innerHTML = JSON.stringify(vRange);
+        el.replaceChildren(span);
+      }
+    });
   }
 
   override render() {
     return html`<style>
-        .rich-text-container {
+        virgo-test-rich-text {
+          display: grid;
+          grid-template-rows: minmax(0, 3fr) minmax(0, 1fr) minmax(0, 1fr);
+          grid-template-columns: minmax(0, 1fr);
           width: 100%;
-          height: 100%;
+        }
+
+        .rich-text-container {
           outline: none;
           word-break: break-word;
           white-space: break-spaces;
@@ -143,8 +186,24 @@ export class RichText extends ShadowlessElement {
           font-size: 85%;
           padding: 0.2em 0.4em;
         }
+
+        .v-range,
+        .y-text {
+          font-family: 'SFMono-Regular', Menlo, Consolas, 'PT Mono',
+            'Liberation Mono', Courier, monospace;
+          line-height: normal;
+          background: rgba(135, 131, 120, 0.15);
+        }
+
+        .v-range,
+        .y-text > span {
+          display: block;
+          word-wrap: break-word;
+        }
       </style>
-      <div class="rich-text-container"></div>`;
+      <div class="rich-text-container"></div>
+      <div class="v-range"></div>
+      <div class="y-text"></div>`;
   }
 }
 
@@ -153,8 +212,8 @@ export class ToolBar extends ShadowlessElement {
   static override styles = css`
     .tool-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
     }
   `;
 
@@ -171,6 +230,7 @@ export class ToolBar extends ShadowlessElement {
     const underlineButton = this.querySelector('.underline');
     const strikeButton = this.querySelector('.strike');
     const code = this.querySelector('.code');
+    const embed = this.querySelector('.embed');
     const resetButton = this.querySelector('.reset');
     const undoButton = this.querySelector('.undo');
     const redoButton = this.querySelector('.redo');
@@ -181,6 +241,7 @@ export class ToolBar extends ShadowlessElement {
       !underlineButton ||
       !strikeButton ||
       !code ||
+      !embed ||
       !resetButton ||
       !undoButton ||
       !redoButton
@@ -234,6 +295,11 @@ export class ToolBar extends ShadowlessElement {
       undoManager.stopCapturing();
       toggleStyle(this.vEditor, { code: true });
     });
+    embed.addEventListener('click', () => {
+      undoManager.stopCapturing();
+      //@ts-ignore
+      toggleStyle(this.vEditor, { embed: true });
+    });
     resetButton.addEventListener('click', () => {
       undoManager.stopCapturing();
       const rangeStatic = this.vEditor.getVRange();
@@ -252,6 +318,7 @@ export class ToolBar extends ShadowlessElement {
         <sl-button class="underline">underline</sl-button>
         <sl-button class="strike">strike</sl-button>
         <sl-button class="code">code</sl-button>
+        <sl-button class="embed">embed</sl-button>
         <sl-button class="reset">reset</sl-button>
         <sl-button class="undo">undo</sl-button>
         <sl-button class="redo">redo</sl-button>
@@ -273,7 +340,7 @@ export class TestPage extends ShadowlessElement {
 
     .editors {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       padding: 20px;
       background-color: #202124;
       border-radius: 10px;
@@ -283,9 +350,10 @@ export class TestPage extends ShadowlessElement {
 
     .editors > div {
       height: 600px;
-      width: 400px;
+      max-width: 400px;
       display: grid;
-      grid-template-rows: 100px 1fr;
+      grid-template-rows: 150px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       overflow-y: scroll;
     }
   `;
@@ -305,12 +373,20 @@ export class TestPage extends ShadowlessElement {
 
     const textA = yDocA.getText(TEXT_ID);
     const editorA = new VEditor(textA, {
-      embed: delta => !!delta.attributes?.code,
+      //@ts-ignore
+      embed: delta => delta.attributes?.embed,
     });
+    editorA.setAttributeSchema(
+      baseTextAttributes.extend({
+        embed: z.literal(true).optional().catch(undefined),
+      })
+    );
     editorA.setAttributeRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new VEditor(textB);
+    const editorB = new VEditor(textB, {
+      active: () => false,
+    });
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);

@@ -7,11 +7,13 @@ import {
   findDocumentOrShadowRoot,
   virgoRangeToDomRange,
 } from '../utils/index.js';
+import { isVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private readonly _editor: VEditor<TextAttributes>;
 
+  private _prevVRange: VRange | null = null;
   private _vRange: VRange | null = null;
   private _lastScrollLeft = 0;
 
@@ -22,6 +24,11 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
     document.dispatchEvent(new CustomEvent('virgo-vrange-updated'));
+
+    if (!isVRangeEqual(this._prevVRange, newVRange)) {
+      this._editor.requestUpdate();
+    }
+    this._prevVRange = newVRange;
 
     if (origin !== 'other') {
       return;

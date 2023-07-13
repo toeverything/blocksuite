@@ -117,6 +117,8 @@ export class VEditor<
   getDeltasByVRange = this.deltaService.getDeltasByVRange;
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
   mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
+  isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
+
   constructor(
     yText: VEditor['yText'],
     ops?: {
