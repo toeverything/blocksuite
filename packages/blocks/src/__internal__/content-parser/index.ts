@@ -54,6 +54,15 @@ export class ContentParser {
   ) {
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
+    // future we will use a better solution in the future https://github.com/toeverything/blocksuite/issues/3506
+    if (
+      !this._imageProxyEndpoint &&
+      location.protocol === 'https:' &&
+      location.hostname.split('.').includes('affine')
+    ) {
+      this._imageProxyEndpoint =
+        'https://workers.toeverything.workers.dev/proxy/image';
+    }
     this._htmlParser = new HtmlParser(
       this,
       page,
