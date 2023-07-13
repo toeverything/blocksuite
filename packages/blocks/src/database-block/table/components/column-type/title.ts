@@ -70,7 +70,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     this.querySelector('rich-text')?.vEditor?.focusEnd();
   }
   override blurCell() {
-    this.querySelector<HTMLDivElement>('.virgo-editor')?.blur();
+    getSelection()?.removeAllRanges();
   }
 
   override render() {
