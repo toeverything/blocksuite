@@ -270,7 +270,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     return html`
       <edgeless-tool-icon-button
         class="straight-line-button"
-        .tooltip=${'Straight line'}
+        .tooltip=${'Straight'}
         .tipPosition=${'bottom'}
         @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
       >
@@ -282,7 +282,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
         </div>
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
-        .tooltip=${'Connector'}
+        .tooltip=${'Elbowed'}
         .tipPosition=${'bottom'}
         @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
       >
