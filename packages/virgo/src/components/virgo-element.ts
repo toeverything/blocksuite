@@ -1,12 +1,11 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { ZERO_WIDTH_SPACE } from '../consts.js';
+import { getVEditorInsideRoot } from '../index.js';
 import type { DeltaInsert } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
-import type { VirgoRootElement } from '../virgo.js';
 
 @customElement('v-element')
 export class VirgoElement<
@@ -21,16 +20,7 @@ export class VirgoElement<
   selected!: boolean;
 
   override render() {
-    const rootElement = this.closest(
-      '[data-virgo-root="true"]'
-    ) as VirgoRootElement;
-    assertExists(rootElement, 'v-element must be inside a v-root');
-    const virgoEditor = rootElement.virgoEditor;
-    assertExists(
-      virgoEditor,
-      'v-element must be inside a v-root with virgo-editor'
-    );
-
+    const virgoEditor = getVEditorInsideRoot(this);
     const attributeRenderer = virgoEditor.attributeService.attributeRenderer;
 
     const isEmbed = virgoEditor.isEmbed(this.delta);

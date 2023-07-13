@@ -1,4 +1,6 @@
-import type { VEditor } from '../virgo.js';
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { VEditor, VirgoRootElement } from '../virgo.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 export function findDocumentOrShadowRoot<
@@ -20,4 +22,17 @@ export function findDocumentOrShadowRoot<
   }
 
   return el.ownerDocument;
+}
+
+export function getVEditorInsideRoot(element: Element): VEditor {
+  const rootElement = element.closest(
+    '[data-virgo-root="true"]'
+  ) as VirgoRootElement;
+  assertExists(rootElement, 'element must be inside a v-root');
+  const virgoEditor = rootElement.virgoEditor;
+  assertExists(
+    virgoEditor,
+    'element must be inside a v-root with virgo-editor'
+  );
+  return virgoEditor;
 }
