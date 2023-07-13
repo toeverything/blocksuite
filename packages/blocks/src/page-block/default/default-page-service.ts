@@ -5,7 +5,7 @@ import type {
 } from '@blocksuite/block-std';
 import { BlockService } from '@blocksuite/block-std';
 
-import { debounce } from '../../__internal__/utils/index.js';
+import { throttle } from '../../__internal__/utils/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { calcCurrentSelectionPosition } from '../utils/position.js';
@@ -134,7 +134,9 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
         }
 
         this._updateRange(state);
-        this._showFormatBar();
+        requestAnimationFrame(() => {
+          this._showFormatBar();
+        });
 
         const result = this._autoScroll(state.y);
         if (result) {
@@ -208,7 +210,7 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     return false;
   };
 
-  private _showFormatBar = debounce(() => {
+  private _showFormatBar = throttle(() => {
     const selection = window.getSelection();
     if (!selection) return;
 
