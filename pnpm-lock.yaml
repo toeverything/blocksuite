@@ -359,6 +359,9 @@ importers:
       yjs:
         specifier: ^13.6.6
         version: 13.6.6
+      zod:
+        specifier: ^3.21.4
+        version: 3.21.4
     devDependencies:
       '@types/dat.gui':
         specifier: ^0.7.10

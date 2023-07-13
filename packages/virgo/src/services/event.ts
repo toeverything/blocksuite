@@ -5,15 +5,10 @@ import type { NativePoint, VRange } from '../types.js';
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
+  isInEmbedElement,
+  isInEmbedGap,
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
-import {
-  intersectVRange,
-  isPoint,
-  isVRangeContain,
-  isVRangeEdge,
-  isVRangeEqual,
-} from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export interface VHandlerContext<
@@ -75,10 +70,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   mount = () => {
     const rootElement = this._editor.rootElement;
     this._mountAbortController = new AbortController();
-
-    document.addEventListener('selectionchange', this._onSelectionChange);
-
     const signal = this._mountAbortController.signal;
+
+    document.addEventListener('selectionchange', this._onSelectionChange, {
+      signal,
+    });
 
     rootElement.addEventListener('beforeinput', this._onBeforeInput, {
       signal,
@@ -86,9 +82,15 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     rootElement
       .querySelectorAll('[data-virgo-text="true"]')
       .forEach(textNode => {
-        textNode.addEventListener('dragstart', event => {
-          event.preventDefault();
-        });
+        textNode.addEventListener(
+          'dragstart',
+          event => {
+            event.preventDefault();
+          },
+          {
+            signal,
+          }
+        );
       });
 
     rootElement.addEventListener('compositionstart', this._onCompositionStart, {
@@ -97,13 +99,20 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     rootElement.addEventListener('compositionend', this._onCompositionEnd, {
       signal,
     });
-    rootElement.addEventListener('scroll', this._onScroll);
+    rootElement.addEventListener('scroll', this._onScroll, {
+      signal,
+    });
+    rootElement.addEventListener('keydown', this._onKeyDown, {
+      signal,
+    });
+    rootElement.addEventListener('click', this._onClick, {
+      signal,
+    });
 
     this.bindHandlers();
   };
 
   unmount = () => {
-    document.removeEventListener('selectionchange', this._onSelectionChange);
     if (this._mountAbortController) {
       this._mountAbortController.abort();
       this._mountAbortController = null;
@@ -191,9 +200,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
 
-    if (this._handleEmbedRange(selection)) {
-      return;
-    }
     const vRange = this._editor.toVRange(selection);
     if (vRange) {
       this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
@@ -341,55 +347,61 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     );
   };
 
-  private _onScroll = (event: Event) => {
+  private _onScroll = () => {
     this._editor.slots.scrollUpdated.emit(this._editor.rootElement.scrollLeft);
   };
 
-  private _handleEmbedRange = (selection: Selection) => {
-    const vRange = this._editor.toVRange(selection);
-    if (!vRange) return false;
-    let newVRange: VRange | null = null;
-    const deltaEntrys = this._editor.deltaService.getDeltasByVRange(vRange);
-    for (const [delta, deltaVRange] of deltaEntrys) {
-      if (this._editor.isEmbed(delta)) {
-        if (isVRangeContain(deltaVRange, vRange)) {
-          if (isPoint(vRange) && isVRangeEdge(vRange.index, deltaVRange)) {
-            continue;
-          }
-          newVRange = deltaVRange;
-        } else if (!isVRangeContain(vRange, deltaVRange)) {
-          const iVRange = intersectVRange(deltaVRange, vRange);
-          if (!iVRange || isPoint(iVRange)) return false;
-          // aaa[bb|b]cc|c -> aaa[bbb]|cc|c
-          if (deltaVRange.index < vRange.index) {
-            newVRange = {
-              index: deltaVRange.index + deltaVRange.length,
-              length:
-                vRange.index +
-                vRange.length -
-                deltaVRange.index -
-                deltaVRange.length,
-            };
+  private _onKeyDown = (event: KeyboardEvent) => {
+    if (!event.shiftKey) {
+      const selectionRoot = findDocumentOrShadowRoot(this._editor);
+      const selection = selectionRoot.getSelection();
+      if (!selection) return;
+      if (selection.rangeCount === 0) return;
 
-            // a|aa[b|bb]ccc -> a|aa|[bbb]ccc
-          } else if (deltaVRange.index > vRange.index) {
-            newVRange = {
+      const range = selection.getRangeAt(0);
+      if (range.collapsed) {
+        if (
+          range.startContainer === range.endContainer &&
+          isInEmbedGap(range.startContainer)
+        ) {
+          const vRange = this._editor.getVRange();
+          if (!vRange) return;
+
+          // native behavior may not work well in embed gap so
+          // we need to handle it manually
+          if (event.key === 'ArrowLeft') {
+            this._editor.setVRange({
+              index: vRange.index - 1,
+              length: 1,
+            });
+          } else if (event.key === 'ArrowRight') {
+            this._editor.setVRange({
               index: vRange.index,
-              length: deltaVRange.index - vRange.index,
-            };
+              length: 1,
+            });
           }
         }
       }
     }
+  };
 
-    if (newVRange && !isVRangeEqual(newVRange, vRange)) {
-      const newRange = this._editor.toDomRange(newVRange);
-      if (!newRange) return false;
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-      return true;
-    } else {
-      return false;
+  private _onClick = (event: MouseEvent) => {
+    // select embed element when click on it
+    if (event.target instanceof Node && isInEmbedElement(event.target)) {
+      const selectionRoot = findDocumentOrShadowRoot(this._editor);
+      const selection = selectionRoot.getSelection();
+      if (!selection) return;
+      if (event.target instanceof HTMLElement) {
+        const vElement = event.target.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      } else {
+        const vElement = event.target.parentElement?.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      }
     }
   };
 }
