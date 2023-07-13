@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { IBound } from '@blocksuite/phasor';
+import type { SurfaceElement } from '@blocksuite/phasor/elements/surface-element.js';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
@@ -14,6 +15,7 @@ import {
   getPageBlock,
   isPageMode,
   type SerializedBlock,
+  type TopLevelBlockModel,
 } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
@@ -107,9 +109,11 @@ export class ContentParser {
     return await promise;
   }
 
-  private async _edgelessToCanvas(
+  public async edgelessToCanvas(
     edgeless: EdgelessPageBlockComponent,
-    bound: IBound
+    bound: IBound,
+    nodes?: TopLevelBlockModel[],
+    surfaces?: SurfaceElement[]
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
@@ -149,13 +153,17 @@ export class ContentParser {
       onclone: function (documentClone: Document, element: HTMLElement) {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
+        const layer = documentClone.querySelector('.affine-edgeless-layer');
+        if (layer && layer instanceof HTMLElement) {
+          layer.style.setProperty('transform', 'none');
+        }
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
       proxy: this._imageProxyEndpoint,
     };
 
-    const nodeElements = edgeless.getSortedElementsByBound(bound);
+    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
     for (const nodeElement of nodeElements) {
       const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
       const blockBound = xywhArrayToObject(nodeElement);
@@ -172,7 +180,10 @@ export class ContentParser {
       );
     }
 
-    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(bound);
+    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
+      bound,
+      surfaces
+    );
     ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 
     return canvas;
@@ -234,7 +245,7 @@ export class ContentParser {
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      return await this._edgelessToCanvas(edgeless, bound);
+      return await this.edgelessToCanvas(edgeless, bound);
     }
   }
 
