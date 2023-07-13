@@ -1,4 +1,4 @@
-import type { SurfaceManager } from '@blocksuite/phasor';
+import type { IBound, SurfaceManager } from '@blocksuite/phasor';
 import {
   Bound,
   compare,
@@ -8,31 +8,23 @@ import {
   getCommonBound,
   type PhasorElement,
   type PhasorElementType,
-  Renderer,
   serializeXYWH,
 } from '@blocksuite/phasor';
 import { assertExists, type Page } from '@blocksuite/store';
 
-import type { NoteBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
 } from '../../page-block/edgeless/utils/consts.js';
 import {
-  getSelectedRect,
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
-import {
-  type BlockComponentElement,
-  getBlockElementById,
-  getEditorContainer,
-  type SerializedBlock,
-  type TopLevelBlockModel,
-} from '../index.js';
+import { ContentParser } from '../content-parser/index.js';
+import { type SerializedBlock, type TopLevelBlockModel } from '../index.js';
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
@@ -418,130 +410,55 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(notes: NoteBlockModel[], shapes: PhasorElement[]) {
+  async copyAsPng(notes: TopLevelBlockModel[], shapes: PhasorElement[]) {
     const notesLen = notes.length;
     const shapesLen = shapes.length;
 
     if (notesLen + shapesLen === 0) return;
 
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
-
     // sort by `index`
     notes.sort(compare);
     shapes.sort(compare);
 
-    const { _edgeless } = this;
-    const { surface } = _edgeless;
-    const { zoom } = surface.viewport;
-    const rect = getSelectedRect([...notes, ...shapes]);
-    const cx = (rect.left + rect.right) / 2;
-    const cy = (rect.top + rect.bottom) / 2;
-    const vx = cx - rect.width / 2;
-    const vy = cy - rect.height / 2;
-    const width = rect.width * zoom;
-    const height = rect.height * zoom;
-
-    const container = document.createElement('div');
-    container.style.position = 'relative';
-    container.style.width = `${width}px`;
-    container.style.height = `${height}px`;
-    _edgeless.appendChild(container);
-
-    // FIXME: if multiple notes are selected, the image in the second note is lost.
-    if (notesLen) {
-      const fragment = document.createDocumentFragment();
-      const layer = document.createElement('div');
-      layer.style.position = 'absolute';
-      layer.style.zIndex = '-1';
-      layer.style.transform = `scale(${zoom})`;
-      for (let i = 0; i < notesLen; i++) {
-        const element = notes[i];
-        const note = getBlockElementById(element.id) as BlockComponentElement;
-        assertExists(note);
-        const parent = note.parentElement;
-        assertExists(parent);
-
-        const [x, y] = deserializeXYWH(element.xywh);
-        const div = document.createElement('div');
-        div.className = parent.className;
-        div.setAttribute('style', parent.getAttribute('style') || '');
-        div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
-        // render(note.render(), div);
-        const canvas: HTMLCanvasElement = await html2canvas(note, {
-          allowTaint: true,
-          useCORS: true,
-          ignoreElements: (element: Element) =>
-            element.tagName === 'AFFINE-BLOCK-HUB' ||
-            element.tagName === 'EDGELESS-TOOLBAR' ||
-            element.classList.contains('dg'),
-          onclone: (documentClone: Document, element: HTMLElement) => {
-            (
-              documentClone.querySelector(
-                '.affine-edgeless-layer'
-              ) as HTMLElement
-            ).style.transform = 'scale(1)';
-            element.style.setProperty('transform', 'none');
-          },
-          backgroundColor: window.getComputedStyle(note).backgroundColor,
-        });
-        div.appendChild(canvas);
-        layer.appendChild(div);
-      }
-      fragment.appendChild(layer);
-      container.appendChild(fragment);
+    const bounds: IBound[] = [];
+    notes.forEach(note => {
+      bounds.push(Bound.deserialize(note.xywh));
+    });
+    shapes.forEach(shape => {
+      bounds.push(Bound.deserialize(shape.xywh));
+    });
+    const bound = getCommonBound(bounds);
+    if (!bound) {
+      return;
     }
 
-    if (shapesLen) {
-      const renderer = new Renderer();
-      renderer.load(shapes);
-      renderer.setCenter(cx, cy);
-      renderer.setZoom(zoom);
-      renderer.attach(container);
-    }
+    const parser = new ContentParser(this._page);
+    const canvas = await parser.edgelessToCanvas(
+      this._edgeless,
+      bound,
+      notes,
+      shapes
+    );
 
-    try {
-      // waiting for canvas to render
-      await new Promise(requestAnimationFrame);
+    assertExists(canvas);
 
-      const editorContainer = getEditorContainer(this._page);
-      const canvas: HTMLCanvasElement = await html2canvas(container, {
-        ignoreElements: (element: Element) =>
-          element.tagName === 'AFFINE-BLOCK-HUB' ||
-          element.tagName === 'EDGELESS-TOOLBAR' ||
-          element.classList.contains('dg'),
-        onclone: (documentClone: Document, element: HTMLElement) => {
-          // html2canvas can't support transform feature
-          element.style.setProperty('transform', 'none');
-        },
-        backgroundColor:
-          window.getComputedStyle(editorContainer).backgroundColor,
-      });
-      assertExists(canvas);
-
+    // @ts-ignore
+    if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore
-      if (window.apis?.clipboard?.copyAsImageFromString) {
-        // @ts-ignore
-        await window.apis.clipboard?.copyAsImageFromString(
-          canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
-        );
-      } else {
-        const blob: Blob = await new Promise((resolve, reject) =>
-          canvas.toBlob(
-            blob =>
-              blob ? resolve(blob) : reject('Canvas can not export blob'),
-            CLIPBOARD_MIMETYPE.IMAGE_PNG
-          )
-        );
-        assertExists(blob);
-        await navigator.clipboard.write([
-          new ClipboardItem({ [blob.type]: blob }),
-        ]);
-      }
-    } catch (error) {
-      console.error(error);
+      await window.apis.clipboard?.copyAsImageFromString(
+        canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
+      );
+    } else {
+      const blob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob(
+          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
+          CLIPBOARD_MIMETYPE.IMAGE_PNG
+        )
+      );
+      assertExists(blob);
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob }),
+      ]);
     }
-
-    container.remove();
   }
 }

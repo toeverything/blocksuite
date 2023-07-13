@@ -37,7 +37,10 @@ export interface SurfaceViewport {
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
 
-  getCanvasByBound(bound: IBound): HTMLCanvasElement;
+  getCanvasByBound(
+    bound: IBound,
+    surfaceElements?: SurfaceElement[]
+  ): HTMLCanvasElement;
 }
 
 /**
@@ -291,12 +294,13 @@ export class Renderer implements SurfaceViewport {
     ctx: CanvasRenderingContext2D | null,
     matrix: DOMMatrix,
     rc: RoughCanvas,
-    bound: IBound
+    bound: IBound,
+    surfaceElements?: SurfaceElement[]
   ) {
     if (!ctx) return;
 
     const { gridManager } = this;
-    const elements = gridManager.search(bound);
+    const elements = surfaceElements ?? gridManager.search(bound);
     for (const element of elements) {
       ctx.save();
 
@@ -323,7 +327,10 @@ export class Renderer implements SurfaceViewport {
     ctx.restore();
   }
 
-  public getCanvasByBound(bound: IBound): HTMLCanvasElement {
+  public getCanvasByBound(
+    bound: IBound,
+    surfaceElements?: SurfaceElement[]
+  ): HTMLCanvasElement {
     const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
     canvas.width = bound.w * dpr;
@@ -335,7 +342,7 @@ export class Renderer implements SurfaceViewport {
 
     ctx.setTransform(matrix);
 
-    this._renderByBound(ctx, matrix, rc, bound);
+    this._renderByBound(ctx, matrix, rc, bound, surfaceElements);
 
     return canvas;
   }
