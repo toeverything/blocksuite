@@ -116,6 +116,9 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   @state()
   showChildren = true;
 
+  @state()
+  private _isSelected = false;
+
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
     textRenderer: attributeRenderer,
@@ -152,6 +155,15 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:list', LegacyListBlockService);
+    this._disposables.add(
+      this.root.selectionManager.on(selections => {
+        const selection = selections.find(
+          selection => selection.blockId === this.model.id
+        );
+
+        this._isSelected = selection?.type === 'block';
+      })
+    );
   }
 
   override render() {
@@ -166,6 +178,8 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       return html`${nothing}`;
     }
 
+    const selected = this._isSelected ? 'selected' : '';
+
     const children = html`<div
       class="affine-block-children-container"
       style="padding-left: ${BLOCK_CHILDREN_CONTAINER_PADDING_LEFT}px"
@@ -175,7 +189,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
     return html`
       <div
-        class=${`affine-list-block-container ${
+        class=${`affine-list-block-container ${selected} ${
           shouldAddMarginTop ? 'affine-list-block-container--first' : ''
         }`}
       >

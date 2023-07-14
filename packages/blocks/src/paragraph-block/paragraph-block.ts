@@ -301,12 +301,10 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       return html`${nothing}`;
     }
 
+    const selected = this._isSelected ? 'selected' : '';
+
     return html`
-      <div
-        class="affine-paragraph-block-container ${type} ${this._isSelected
-          ? 'selected'
-          : ''}"
-      >
+      <div class="affine-paragraph-block-container ${type} ${selected}">
         ${when(!this._isInDatabase(), () => this._tipsPlaceholderTemplate)}
         <rich-text
           .model=${this.model}

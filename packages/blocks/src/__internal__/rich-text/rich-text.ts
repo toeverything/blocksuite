@@ -16,6 +16,7 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { throttle } from '../../__internal__/utils/index.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { isValidUrl } from '../utils/url.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
@@ -202,7 +203,9 @@ export class RichText extends ShadowlessElement {
 
     const vRangeUpdated = this._vEditor.slots.vRangeUpdated;
     this._disposables.add(vRangeUpdated.on(this._onRangeUpdated));
-    this._disposables.add(this.selection.on(this._onSelectionChanged));
+    this._disposables.add(
+      this.selection.on(throttle(this._onSelectionChanged, 100))
+    );
   }
 
   override disconnectedCallback() {
@@ -239,7 +242,7 @@ export class RichText extends ShadowlessElement {
     this.selection.set(selections);
   };
 
-  private _onSelectionChanged = async (selections: BaseSelection[]) => {
+  private _onSelectionChanged = (selections: BaseSelection[]) => {
     if (!this._vEditor) {
       return;
     }
@@ -258,8 +261,6 @@ export class RichText extends ShadowlessElement {
       index: selection.index,
       length: selection.length,
     };
-
-    await this.vEditor?.waitForUpdate();
 
     const currentVRange = this._vEditor.getVRange();
     const rangesEqual =
