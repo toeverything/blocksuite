@@ -22,7 +22,7 @@ const bypassEventNames = [
   'wheel',
 ] as const;
 
-const globalEventNames = ['selectionChange', 'virgo-vrange-updated'] as const;
+const globalEventNames = ['selectionChange'] as const;
 
 const eventNames = [
   'click',

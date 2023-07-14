@@ -25,7 +25,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
-    document.dispatchEvent(new CustomEvent('virgo-vrange-updated'));
 
     if (this._editor.mounted && !isVRangeEqual(this._prevVRange, newVRange)) {
       // no need to sync and native selection behavior about shift+arrow will
@@ -42,11 +41,9 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
       // There may be multiple range update events in one frame,
       // so we need to obtain the latest vRange.
       // see https://github.com/toeverything/blocksuite/issues/2982
-      if (this._vRange) {
-        // when using input method _vRange will return to the starting point,
-        // so we need to re-sync
-        this._applyVRange(this._vRange);
-      }
+      // when using input method _vRange will return to the starting point,
+      // so we need to re-sync
+      this.syncVRange();
     };
 
     // updates in lit are performed asynchronously

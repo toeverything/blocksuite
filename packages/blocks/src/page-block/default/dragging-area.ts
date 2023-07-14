@@ -38,9 +38,19 @@ export class DraggingAreaWidget extends WidgetElement {
   @state()
   rect: Rect | null = null;
 
+  private _rafID = 0;
+
   static excludeFlavours: string[] = ['affine:note'];
 
   private _dragging = false;
+
+  private _offset: {
+    top: number;
+    left: number;
+  } = {
+    top: 0,
+    left: 0,
+  };
 
   private _addEvent = (name: EventName, handler: UIEventHandler) =>
     this._disposables.add(this.root.uiEventDispatcher.add(name, handler));
@@ -96,45 +106,103 @@ export class DraggingAreaWidget extends WidgetElement {
     this.root.selectionManager.set(selections);
   }
 
+  private _clearRaf() {
+    if (this._rafID) {
+      cancelAnimationFrame(this._rafID);
+      this._rafID = 0;
+    }
+  }
+
+  private _autoScroll = (y: number): boolean => {
+    const { scrollHeight, clientHeight, scrollTop } = this._viewportElement;
+    let _scrollTop = scrollTop;
+    const threshold = 50;
+    const max = scrollHeight - clientHeight;
+
+    let d = 0;
+    let flag = false;
+
+    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
+      // ↓
+      d = threshold - (clientHeight - y);
+      flag = Math.ceil(_scrollTop) < max;
+    } else if (scrollTop > 0 && y < threshold) {
+      // ↑
+      d = y - threshold;
+      flag = _scrollTop > 0;
+    }
+
+    _scrollTop += d * 0.25;
+
+    if (this._viewportElement && flag && scrollTop !== _scrollTop) {
+      this._viewportElement.scrollTop = _scrollTop;
+      return true;
+    }
+    return false;
+  };
+
   override connectedCallback() {
     super.connectedCallback();
     this._addEvent('dragStart', ctx => {
       const state = ctx.get('pointerState');
       if (isBlankArea(state)) {
         this._dragging = true;
+        const viewportElement = this._viewportElement;
+        this._offset = {
+          left: viewportElement.scrollLeft,
+          top: viewportElement.scrollTop,
+        };
         return true;
       }
       return;
     });
 
     this._addEvent('dragMove', ctx => {
+      this._clearRaf();
       if (!this._dragging) {
         return;
       }
 
-      const viewportElement = this._viewportElement;
-      const state = ctx.get('pointerState');
-      const { x, y } = state;
-      const { x: startX, y: startY } = state.start;
-      const userRect = {
-        left: viewportElement.scrollLeft + Math.min(x, startX),
-        top: viewportElement.scrollTop + Math.min(y, startY),
-        width: Math.abs(x - startX),
-        height: Math.abs(y - startY),
+      const runner = () => {
+        const state = ctx.get('pointerState');
+        const { x, y } = state;
+
+        const { scrollTop, scrollLeft } = this._viewportElement;
+        const { x: startX, y: startY } = state.start;
+        const left = Math.min(this._offset.left + startX, scrollLeft + x);
+        const top = Math.min(this._offset.top + startY, scrollTop + y);
+        const right = Math.max(this._offset.left + startX, scrollLeft + x);
+        const bottom = Math.max(this._offset.top + startY, scrollTop + y);
+        const userRect = {
+          left,
+          top,
+          width: right - left,
+          height: bottom - top,
+        };
+        this.rect = userRect;
+        this._selectBlocksByRect(userRect);
+
+        const result = this._autoScroll(y);
+        if (!result) {
+          this._clearRaf();
+          return;
+        }
+        this._rafID = requestAnimationFrame(runner);
       };
-      this.rect = userRect;
-      this._selectBlocksByRect(userRect);
+
+      this._rafID = requestAnimationFrame(runner);
 
       return true;
     });
 
     this._addEvent('dragEnd', () => {
-      if (!this._dragging) {
-        return;
-      }
+      this._clearRaf();
       this._dragging = false;
       this.rect = null;
-      return true;
+      this._offset = {
+        top: 0,
+        left: 0,
+      };
     });
   }
 

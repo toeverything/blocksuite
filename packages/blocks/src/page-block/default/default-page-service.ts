@@ -134,7 +134,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
   private _dragMoveHandler: UIEventHandler = ctx => {
     this._clearRaf();
     if (!this._isNativeSelection) {
-      // TODO:
       return;
     }
     this._nativeDragMoveHandler(ctx);
@@ -163,7 +162,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
   private _dragEndHandler: UIEventHandler = ctx => {
     this._clearRaf();
     if (!this._isNativeSelection) {
-      // TODO:
       return;
     }
     this._nativeDragEndHandler(ctx);
