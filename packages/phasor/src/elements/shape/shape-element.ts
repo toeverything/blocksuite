@@ -112,6 +112,17 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return textVerticalAlign;
   }
 
+  get isBold() {
+    const isTextBold = (this.yMap.get('isBold') as IShape['isBold']) ?? false;
+    return isTextBold;
+  }
+
+  get isItalic() {
+    const isTextItalic =
+      (this.yMap.get('isItalic') as IShape['isItalic']) ?? false;
+    return isTextItalic;
+  }
+
   override hitTest(x: number, y: number, options: HitTestOptions) {
     const pierce = options.pierce ?? true;
     if (!pierce) {
@@ -165,6 +176,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       textVerticalAlign,
       textAlign,
       textHorizontalAlign,
+      isBold,
+      isItalic,
     } = this;
     if (!text) return;
 
@@ -173,6 +186,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontSize: fontSize,
       lineHeight: `${lineHeight}px`,
       fontFamily: fontFamily,
+      isBold: isBold,
+      isItalic: isItalic,
     });
 
     const yText = text;

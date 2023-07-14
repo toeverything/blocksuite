@@ -68,7 +68,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
             this._onSelect(SCIBBLED_CANVAS_FONT_FANILY);
           }}
         >
-          <div class="font-family-button">Scibbled</div>
+          <div class="font-family-button">Scribbled</div>
         </edgeless-tool-icon-button>
       </div>
     `;
