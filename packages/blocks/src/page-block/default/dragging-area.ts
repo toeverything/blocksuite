@@ -1,4 +1,5 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -45,6 +46,7 @@ export class DraggingAreaWidget extends WidgetElement {
     this._disposables.add(this.root.uiEventDispatcher.add(name, handler));
 
   private get _allBlocksRect() {
+    const viewportElement = this._viewportElement;
     return [...this.root.blockViewMap.entries()]
       .filter(([id]) => {
         const model = this.page.getBlockById(id);
@@ -57,11 +59,27 @@ export class DraggingAreaWidget extends WidgetElement {
         );
       })
       .map(([id, element]) => {
+        const bounding = element.getBoundingClientRect();
         return {
           id,
-          rect: element.getBoundingClientRect(),
+          rect: {
+            left: bounding.left + viewportElement.scrollLeft,
+            top: bounding.top + viewportElement.scrollTop,
+            width: bounding.width,
+            height: bounding.height,
+          },
         };
       });
+  }
+
+  private get _viewportElement() {
+    const pageBlock = this.root.blockViewMap.get(this.model.id) as
+      | DefaultPageBlockComponent
+      | undefined;
+
+    assertExists(pageBlock);
+
+    return pageBlock.viewportElement;
   }
 
   private _selectBlocksByRect(userRect: Rect) {
@@ -94,19 +112,13 @@ export class DraggingAreaWidget extends WidgetElement {
         return;
       }
 
-      const pageBlock = this.root.blockViewMap.get(this.model.id) as
-        | DefaultPageBlockComponent
-        | undefined;
-      if (!pageBlock) {
-        return;
-      }
-
+      const viewportElement = this._viewportElement;
       const state = ctx.get('pointerState');
       const { x, y } = state;
       const { x: startX, y: startY } = state.start;
       const userRect = {
-        left: pageBlock.viewportElement.scrollLeft + Math.min(x, startX),
-        top: pageBlock.viewportElement.scrollTop + Math.min(y, startY),
+        left: viewportElement.scrollLeft + Math.min(x, startX),
+        top: viewportElement.scrollTop + Math.min(y, startY),
         width: Math.abs(x - startX),
         height: Math.abs(y - startY),
       };
