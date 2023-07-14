@@ -92,6 +92,12 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return fontFamily;
   }
 
+  get textAlign() {
+    const textAlign =
+      (this.yMap.get('textAlign') as IShape['textAlign']) ?? 'center';
+    return textAlign;
+  }
+
   get textHorizontalAlign() {
     const textHorizontalAlign =
       (this.yMap.get('textHorizontalAlign') as IShape['textHorizontalAlign']) ??
@@ -157,6 +163,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontSize,
       fontFamily,
       textVerticalAlign,
+      textAlign,
       textHorizontalAlign,
     } = this;
     if (!text) return;
@@ -181,8 +188,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       textHorizontalAlign === 'center'
         ? w / 2
         : textHorizontalAlign === 'right'
-        ? w
-        : 0;
+        ? w - SHAPE_TEXT_PADDING
+        : SHAPE_TEXT_PADDING;
     const verticalOffset =
       textVerticalAlign === 'center'
         ? (this.h - lineHeight * lines.length) / 2
@@ -205,7 +212,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
         ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
         ctx.font = font;
         ctx.fillStyle = this.computedValue(color);
-        ctx.textAlign = textHorizontalAlign;
+        ctx.textAlign = textAlign;
 
         ctx.textBaseline = 'ideographic';
 

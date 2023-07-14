@@ -142,6 +142,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           ? `var(${this._element.color})`
           : this._element.color,
         zIndex: '10',
+        textAlign: this._element.textAlign,
       });
     }
 

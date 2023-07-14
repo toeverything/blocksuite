@@ -1,6 +1,8 @@
 import type * as Y from 'yjs';
 
+import { VirgoElement } from '../components/virgo-element.js';
 import type { VRange } from '../types.js';
+import { isInEmbedElement } from './guard.js';
 import {
   nativePointToTextPoint,
   textPointToDomPoint,
@@ -239,6 +241,26 @@ export function domRangeToVirgoRange(
 
   if (!context) return null;
 
+  // handle embed
+  if (
+    context.anchorNode &&
+    context.anchorNode === context.focusNode &&
+    isInEmbedElement(context.anchorNode)
+  ) {
+    const anchorDomPoint = textPointToDomPoint(
+      context.anchorText,
+      context.anchorTextOffset,
+      rootElement
+    );
+
+    if (anchorDomPoint) {
+      return {
+        index: anchorDomPoint.index,
+        length: 1,
+      };
+    }
+  }
+
   // case 1
   if (rangeHasAnchorAndFocus(context)) {
     return rangeHasAnchorAndFocusHandler(context);
@@ -309,6 +331,50 @@ export function virgoRangeToDomRange(
 
   if (!anchorText || !focusText) {
     return null;
+  }
+
+  if (isInEmbedElement(anchorText)) {
+    const anchorVElement = anchorText.parentElement?.closest('v-element');
+    if (!anchorVElement) {
+      throw new Error(
+        'failed to find vElement for a text note in an embed element'
+      );
+    }
+    const nextSibling = anchorVElement.nextElementSibling;
+    if (!nextSibling) {
+      throw new Error('failed to find nextSibling sibling of an embed element');
+    }
+    if (nextSibling instanceof VirgoElement) {
+      const texts = getTextNodesFromElement(nextSibling);
+      anchorText = texts[texts.length - 1];
+      anchorOffset = calculateTextLength(anchorText);
+    } else {
+      // nextSibling is a gap
+      anchorText = nextSibling.childNodes.item(1) as Text;
+      anchorOffset = 0;
+    }
+  }
+  if (isInEmbedElement(focusText)) {
+    const focusVElement = focusText.parentElement?.closest('v-element');
+    if (!focusVElement) {
+      throw new Error(
+        'failed to find vElement for a text note in an embed element'
+      );
+    }
+    const nextSibling = focusVElement.nextElementSibling;
+    if (!nextSibling) {
+      throw new Error('failed to find nextSibling sibling of an embed element');
+    }
+
+    if (nextSibling instanceof VirgoElement) {
+      const texts = getTextNodesFromElement(nextSibling);
+      focusText = texts[0];
+      focusOffset = 0;
+    } else {
+      // nextSibling is a gap
+      focusText = nextSibling.childNodes.item(1) as Text;
+      focusOffset = 0;
+    }
   }
 
   const range = document.createRange();

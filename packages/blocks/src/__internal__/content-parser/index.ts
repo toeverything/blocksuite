@@ -54,6 +54,15 @@ export class ContentParser {
   ) {
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
+    // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
+    if (
+      !this._imageProxyEndpoint &&
+      location.protocol === 'https:' &&
+      location.hostname.split('.').includes('affine')
+    ) {
+      this._imageProxyEndpoint =
+        'https://workers.toeverything.workers.dev/proxy/image';
+    }
     this._htmlParser = new HtmlParser(
       this,
       page,
