@@ -202,7 +202,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     if (!selection || selection.databaseId !== this.databaseId) {
       return;
     }
-    console.log(selection.focus.rowIndex, this.view.rows.length);
     if (selection.focus.rowIndex > this.view.rows.length - 1) {
       this.selection = undefined;
       return;
