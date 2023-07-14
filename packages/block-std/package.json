@@ -16,8 +16,7 @@
     "@blocksuite/store": "workspace:*"
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
-    "lib0": "^0.2.74"
+    "@blocksuite/global": "workspace:*"
   },
   "devDependencies": {
     "@blocksuite/store": "workspace:*"

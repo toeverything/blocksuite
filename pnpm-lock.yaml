@@ -139,9 +139,6 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
-      lib0:
-        specifier: ^0.2.74
-        version: 0.2.74
     devDependencies:
       '@blocksuite/store':
         specifier: workspace:*
