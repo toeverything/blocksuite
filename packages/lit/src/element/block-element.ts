@@ -67,6 +67,16 @@ export class BlockElement<
   @property({ attribute: false })
   page!: Page;
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this.root.blockViewMap.set(this.model.id, this);
+  }
+
+  override disconnectedCallback() {
+    this.root.blockViewMap.delete(this.model.id);
+    super.disconnectedCallback();
+  }
+
   get service(): Service | undefined {
     return this.root.blockStore.getService(this.model.flavour) as
       | Service

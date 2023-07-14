@@ -113,7 +113,12 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
       // TODO: area drag handler
       return;
     }
+    this._nativeDragStartHandler(ctx);
+  };
 
+  private _nativeDragStartHandler: UIEventHandler = ctx => {
+    this._isNativeSelection = true;
+    const state = ctx.get('pointerState');
     const caret = caretFromPoint(state.raw.clientX, state.raw.clientY);
     if (!caret) {
       return;
@@ -124,42 +129,53 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this._startRange = range;
 
     this.selectionManager.rangeController.add(range);
-    this._isNativeSelection = true;
   };
 
   private _dragMoveHandler: UIEventHandler = ctx => {
-    const state = ctx.get('pointerState');
     this._clearRaf();
-    if (this._isNativeSelection) {
-      const runner = () => {
-        if (!this._rafID) {
-          return;
-        }
-
-        this._updateRange(state);
-
-        const result = this._autoScroll(state.y);
-        if (result) {
-          this._rafID = requestAnimationFrame(runner);
-          return;
-        }
-
-        this._clearRaf();
-      };
-
-      this._rafID = requestAnimationFrame(runner);
+    if (!this._isNativeSelection) {
+      // TODO:
+      return;
     }
+    this._nativeDragMoveHandler(ctx);
+  };
+
+  private _nativeDragMoveHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+    const runner = () => {
+      if (!this._rafID) return;
+
+      this._updateRange(state);
+
+      const result = this._autoScroll(state.y);
+      if (result) {
+        this._rafID = requestAnimationFrame(runner);
+        return;
+      }
+
+      this._clearRaf();
+    };
+
+    this._rafID = requestAnimationFrame(runner);
+    return;
   };
 
   private _dragEndHandler: UIEventHandler = ctx => {
-    const state = ctx.get('pointerState');
-    if (this._isNativeSelection) {
-      requestAnimationFrame(() => {
-        this._showFormatBar(state);
-      });
-      this._startRange = null;
-      this._isNativeSelection = false;
+    this._clearRaf();
+    if (!this._isNativeSelection) {
+      // TODO:
+      return;
     }
+    this._nativeDragEndHandler(ctx);
+  };
+
+  private _nativeDragEndHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+    requestAnimationFrame(() => {
+      this._showFormatBar(state);
+    });
+    this._startRange = null;
+    this._isNativeSelection = false;
   };
 
   private _clearRaf() {

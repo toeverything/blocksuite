@@ -202,13 +202,13 @@ export class RichText extends ShadowlessElement {
 
     const vRangeUpdated = this._vEditor.slots.vRangeUpdated;
     this._disposables.add(vRangeUpdated.on(this._onRangeUpdated));
-    this._disposables.add(this.selection.subscribe(this._onSelectionChanged));
+    this._disposables.add(this.selection.on(this._onSelectionChanged));
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     const selections = this._removeCurrentSelection();
-    this.selection.set(selections, false);
+    this.selection.set(selections);
 
     this._vEditor?.unmount();
     this._disposables.dispose();
@@ -223,7 +223,9 @@ export class RichText extends ShadowlessElement {
   };
 
   private _onRangeUpdated = ([range]: VRangeUpdatedProp) => {
-    const selections = this._removeCurrentSelection();
+    const selections = this._removeCurrentSelection().filter(
+      selection => selection.type === 'text'
+    );
 
     if (range) {
       const instance = this.selection.getInstance('text', {
@@ -234,7 +236,7 @@ export class RichText extends ShadowlessElement {
       selections.push(instance);
     }
 
-    this.selection.set(selections, false);
+    this.selection.set(selections);
   };
 
   private _onSelectionChanged = async (selections: BaseSelection[]) => {
@@ -259,7 +261,16 @@ export class RichText extends ShadowlessElement {
 
     await this.vEditor?.waitForUpdate();
 
-    this._vEditor.setVRange(vRange);
+    const currentVRange = this._vEditor.getVRange();
+    const rangesEqual =
+      currentVRange &&
+      currentVRange.index === vRange.index &&
+      currentVRange.length === vRange.length;
+
+    if (rangesEqual) {
+      return;
+    }
+
     const range = this._vEditor.toDomRange(vRange);
 
     if (!range) {

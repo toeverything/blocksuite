@@ -37,6 +37,9 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   blockStore!: BlockStore<StaticValue>;
 
+  blockViewMap = new Map<string, HTMLElement>();
+  widgetViewMap = new Map<string, HTMLElement>();
+
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
       this.blockStore.applySpecs(this.blocks);
@@ -95,7 +98,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
     const tag = view.component;
     const widgets = view.widgets
       ? html`${repeat(view.widgets, widget => {
-          return html`<${widget} .root=${this} .model=${model}></${widget}>`;
+          return html`<${widget} .root=${this} .page=${this.page} .model=${model}></${widget}>`;
         })}`
       : html`${nothing}`;
 

@@ -44,7 +44,6 @@ import {
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import {
   calcCurrentSelectionPosition,
-  getNativeSelectionMouseDragInfo,
   repairContextMenuRange,
 } from '../../utils/position.js';
 import type {
@@ -204,7 +203,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     this.clear();
 
     if (isBlankArea(e)) {
-      BlockDragHandlers.onStart(this, e);
+      // BlockDragHandlers.onStart(this, e);
     } else {
       // NativeDragHandlers.onStart(this, e);
     }
@@ -212,10 +211,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
   private _onContainerDragMove = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
-    if (this.state.type === 'native') {
-      // NativeDragHandlers.onMove(this, e);
-      return;
-    }
 
     if (this.page.readonly) return;
 
@@ -246,20 +241,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     if (this.page.readonly) return;
 
-    if (this.state.type === 'native') {
-      const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
-      // If nothing is selected, we should not show the format bar
-      if (selectedType === 'Caret') return;
-      showFormatQuickBar({
-        page: this.page,
-        direction,
-        anchorEl: {
-          getBoundingClientRect: () => {
-            return calcCurrentSelectionPosition(direction, this.state);
-          },
-        },
-      });
-    } else if (this.state.type === 'block') {
+    if (this.state.type === 'block') {
       if (
         !this.page.awarenessStore.getFlag('enable_block_selection_format_bar')
       ) {

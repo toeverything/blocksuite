@@ -7,6 +7,7 @@ import { DefaultPageService } from './default/default-page-service.js';
 import { EdgelessPageService } from './edgeless/edgeless-page-service.js';
 import { PageBlockSchema } from './page-model.js';
 export * from './default/default-page-block.js';
+export * from './default/dragging-area.js';
 export { getAllowSelectedBlocks } from './default/utils.js';
 export {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -26,6 +27,7 @@ export const pageBlockSpec: LitBlockSpec = {
     widgets: [
       literal`affine-slash-menu-widget`,
       literal`affine-linked-page-widget`,
+      literal`affine-dragging-area-widget`,
     ],
   },
 };

@@ -1,14 +1,12 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
+import { WidgetElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import {
   assertExists,
   DisposableGroup,
   matchFlavours,
 } from '@blocksuite/store';
-import { LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import {
   getCurrentNativeRange,
@@ -101,7 +99,7 @@ function showSlashMenu({
 }
 
 @customElement('affine-slash-menu-widget')
-export class SlashMenuWidget extends WithDisposable(LitElement) {
+export class SlashMenuWidget extends WidgetElement {
   static DEFAULT_OPTIONS: SlashMenuOptions = {
     triggerKeys: [
       '/',
@@ -112,9 +110,6 @@ export class SlashMenuWidget extends WithDisposable(LitElement) {
   };
 
   options = SlashMenuWidget.DEFAULT_OPTIONS;
-
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
 
   override connectedCallback() {
     super.connectedCallback();

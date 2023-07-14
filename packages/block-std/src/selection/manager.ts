@@ -1,6 +1,5 @@
 import type { Page, StackItem, Workspace } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/store';
-import { createMutex } from 'lib0/mutex.js';
 
 import type { BaseSelection } from './base.js';
 import { RangeController } from './range-controller.js';
@@ -15,7 +14,6 @@ interface SelectionConstructor {
 }
 
 export class SelectionManager {
-  private _mutex = createMutex();
   private _selectionConstructors: Record<string, SelectionConstructor> = {};
   private _changedSlot = new Slot<BaseSelection[]>();
   private _oldSelections: BaseSelection[] = [];
@@ -42,8 +40,10 @@ export class SelectionManager {
     this.register([TextSelection, BlockSelection]);
   }
 
-  subscribe = (fn: (selections: BaseSelection[]) => void) =>
-    this._changedSlot.on(selections => this._mutex(() => fn(selections)));
+  on = (fn: (selections: BaseSelection[]) => void) =>
+    this._changedSlot.on(selections => {
+      fn(selections);
+    });
 
   getInstance<T extends BlockSuiteSelectionType>(
     type: T,
@@ -66,28 +66,19 @@ export class SelectionManager {
     });
   }
 
-  set(selections: BaseSelection[], needSync = true) {
-    const setter = (): void => {
-      this._oldSelections = this.selections;
-      this._store.setLocalSelection(selections.map(s => s.toJSON()));
-      this._changedSlot.emit(selections);
-    };
-    if (needSync) {
-      return setter();
-    }
-    this._mutex(setter);
+  set(selections: BaseSelection[]) {
+    this._oldSelections = this.selections;
+    this._store.setLocalSelection(selections.map(s => s.toJSON()));
+    this._changedSlot.emit(selections);
   }
 
-  update(
-    fn: (currentSelections: BaseSelection[]) => BaseSelection[],
-    needSync = true
-  ) {
+  update(fn: (currentSelections: BaseSelection[]) => BaseSelection[]) {
     const selections = fn(this.selections);
-    this.set(selections, needSync);
+    this.set(selections);
   }
 
-  clear(needSync = true) {
-    this.set([], needSync);
+  clear() {
+    this.set([]);
   }
 
   get remoteSelections() {
