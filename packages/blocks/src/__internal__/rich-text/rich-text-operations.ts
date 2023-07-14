@@ -7,6 +7,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
+import { getService } from '../service.js';
 import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import { supportsChildren } from '../utils/common.js';
 import {
@@ -55,6 +56,9 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
     if (index === childrenLength - 1 && model.text?.yText.length === 0) {
       if (childrenLength !== 1) {
         page.deleteBlock(model);
+
+        const service = getService('affine:database');
+        service.select(undefined);
       }
 
       const nextModel = page.getNextSibling(newParent);

@@ -66,6 +66,11 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     });
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.selectCurrentCell(false);
+  }
+
   override focusCell() {
     this.querySelector('rich-text')?.vEditor?.focusEnd();
   }
