@@ -425,7 +425,9 @@ export class DatabaseTitleColumnManager implements ColumnManager {
 
   getValue(rowId: string): unknown | undefined {
     const block = this._model.page.getBlockById(rowId);
-    assertExists(block);
+    if (!block) {
+      return;
+    }
     return this._root.renderModel(block);
   }
 
