@@ -197,7 +197,7 @@ export async function assertListPrefix(
   predict: (string | RegExp)[],
   range?: [number, number]
 ) {
-  const prefixs = await page.locator('.affine-list-block__prefix');
+  const prefixs = page.locator('.affine-list-block__prefix');
 
   let start = 0;
   let end = await prefixs.count();

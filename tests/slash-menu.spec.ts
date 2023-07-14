@@ -395,7 +395,7 @@ test.describe('slash menu with code block', () => {
     await page.waitForTimeout(500);
     await type(page, '111');
     await page.waitForTimeout(500);
-    await assertRichTexts(page, ['111000']);
+    await assertRichTexts(page, ['000111']);
   });
 });
 

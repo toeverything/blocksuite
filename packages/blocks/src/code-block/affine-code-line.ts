@@ -1,6 +1,6 @@
 import { ShadowlessElement } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
-import { type DeltaInsert, VText, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -37,10 +37,7 @@ export class AffineCodeLine extends ShadowlessElement {
     const { lang, highlighter } = this.highlightOptionsGetter();
 
     if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
-      const vText = new VText();
-      vText.str = this.delta.insert;
-      vText.styles = styleMap({});
-      return html`<span>${vText}</span>`;
+      return html`<span><v-text .str=${this.delta.insert}></v-text></span>`;
     }
 
     const mode = queryCurrentMode();
@@ -64,13 +61,12 @@ export class AffineCodeLine extends ShadowlessElement {
     }
 
     const vTexts = tokens.map(token => {
-      const vText = new VText();
-      vText.str = token.content;
-      vText.styles = styleMap({
-        color: token.color,
-      });
-
-      return vText;
+      return html`<v-text
+        .str=${token.content}
+        style=${styleMap({
+          color: token.color,
+        })}
+      ></v-text>`;
     });
 
     return html`<span>${vTexts}</span>`;

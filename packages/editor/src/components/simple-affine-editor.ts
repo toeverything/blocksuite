@@ -20,13 +20,13 @@ export class SimpleAffineEditor extends LitElement {
 
   constructor() {
     super();
-
     this.workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
     this.page = this.workspace.createPage({ id: 'page0' });
-
-    const pageBlockId = this.page.addBlock('affine:page');
-    const noteId = this.page.addBlock('affine:note', {}, pageBlockId);
-    this.page.addBlock('affine:paragraph', {}, noteId);
+    this.page.waitForLoaded().then(() => {
+      const pageBlockId = this.page.addBlock('affine:page');
+      const noteId = this.page.addBlock('affine:note', {}, pageBlockId);
+      this.page.addBlock('affine:paragraph', {}, noteId);
+    });
   }
 
   override connectedCallback() {
