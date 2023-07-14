@@ -73,8 +73,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
   }
 
   get color() {
-    const color =
-      (this.yMap.get('color') as IShape['color']) ?? this.strokeColor;
+    const color = (this.yMap.get('color') as IShape['color']) ?? '#000000';
     return color;
   }
 
@@ -168,7 +167,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     } = this;
     if (!text) return;
 
-    const lineHeight = getLineHeight(fontFamily, fontSize.toString());
+    const lineHeight = getLineHeight(fontFamily, fontSize);
     const font = getFontString({
       fontSize: fontSize,
       lineHeight: `${lineHeight}px`,
@@ -219,7 +218,9 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
         ctx.fillText(
           str,
           horizontalOffset - 2,
-          (lineIndex + 1) * lineHeight + verticalOffset
+          // 1.5 is a "magic number" used to align the text rendered on the canvas with the text in the DOM.
+          // This approach is employed until a better or proper handling method is discovered.
+          (lineIndex + 1) * lineHeight + verticalOffset - 1.5
         );
 
         if (shouldTemporarilyAttach) {
