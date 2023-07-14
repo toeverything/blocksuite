@@ -16,7 +16,6 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { throttle } from '../../__internal__/utils/index.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { isValidUrl } from '../utils/url.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
@@ -203,9 +202,7 @@ export class RichText extends ShadowlessElement {
 
     const vRangeUpdated = this._vEditor.slots.vRangeUpdated;
     this._disposables.add(vRangeUpdated.on(this._onRangeUpdated));
-    this._disposables.add(
-      this.selection.on(throttle(this._onSelectionChanged, 100))
-    );
+    this._disposables.add(this.selection.on(this._onSelectionChanged));
   }
 
   override disconnectedCallback() {
@@ -217,18 +214,36 @@ export class RichText extends ShadowlessElement {
     this._disposables.dispose();
   }
 
+  private _isCurrentSelection = (
+    selection: BaseSelection
+  ): selection is TextSelection => {
+    return Boolean(
+      selection.type === 'text' && selection.blockId === this.model.id
+    );
+  };
+
   private _removeCurrentSelection = () => {
-    return this.selection.selections.filter(selection => {
-      const toBeRemoved =
-        selection.type === 'text' && selection.blockId === this.model.id;
-      return !toBeRemoved;
-    });
+    return this.selection.selections.filter(
+      selection => !this._isCurrentSelection(selection)
+    );
   };
 
   private _onRangeUpdated = ([range]: VRangeUpdatedProp) => {
-    const selections = this._removeCurrentSelection().filter(
-      selection => selection.type === 'text'
-    );
+    const current = this.selection.selections.find(this._isCurrentSelection);
+    if (
+      current &&
+      range &&
+      current.index === range.index &&
+      current.length === range.length
+    ) {
+      return;
+    }
+
+    let selections = this._removeCurrentSelection();
+
+    if (range) {
+      selections = selections.filter(selection => selection.type === 'text');
+    }
 
     if (range) {
       const instance = this.selection.getInstance('text', {
