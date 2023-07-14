@@ -90,40 +90,39 @@ export class DraggingAreaWidget extends WidgetElement {
     });
 
     this._addEvent('dragMove', ctx => {
-      if (this._dragging) {
-        const pageBlock = this.root.blockViewMap.get(this.model.id) as
-          | DefaultPageBlockComponent
-          | undefined;
-        if (!pageBlock) {
-          return;
-        }
-
-        const state = ctx.get('pointerState');
-        const { x, y } = state;
-        const { x: startX, y: startY } = state.start;
-        const userRect = {
-          left: pageBlock.viewportElement.scrollLeft + Math.min(x, startX),
-          top: pageBlock.viewportElement.scrollTop + Math.min(y, startY),
-          width: Math.abs(x - startX),
-          height: Math.abs(y - startY),
-        };
-        this.rect = userRect;
-        this._selectBlocksByRect(userRect);
-
-        return true;
+      if (!this._dragging) {
+        return;
       }
 
-      return;
+      const pageBlock = this.root.blockViewMap.get(this.model.id) as
+        | DefaultPageBlockComponent
+        | undefined;
+      if (!pageBlock) {
+        return;
+      }
+
+      const state = ctx.get('pointerState');
+      const { x, y } = state;
+      const { x: startX, y: startY } = state.start;
+      const userRect = {
+        left: pageBlock.viewportElement.scrollLeft + Math.min(x, startX),
+        top: pageBlock.viewportElement.scrollTop + Math.min(y, startY),
+        width: Math.abs(x - startX),
+        height: Math.abs(y - startY),
+      };
+      this.rect = userRect;
+      this._selectBlocksByRect(userRect);
+
+      return true;
     });
 
     this._addEvent('dragEnd', () => {
-      if (this._dragging) {
-        this._dragging = false;
-        this.rect = null;
-        return true;
+      if (!this._dragging) {
+        return;
       }
-
-      return;
+      this._dragging = false;
+      this.rect = null;
+      return true;
     });
   }
 
