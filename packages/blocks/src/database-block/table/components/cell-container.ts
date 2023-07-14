@@ -52,10 +52,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   column!: ColumnManager;
   private _selectCurrentCell = (editing: boolean) => {
-    const table = this.closest('affine-database-table');
-    if (!table) {
-      return;
-    }
     const selection = this.closest('affine-database-table')?.selection;
     if (selection) {
       selection.selection = {
