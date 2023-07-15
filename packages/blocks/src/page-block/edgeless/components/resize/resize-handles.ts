@@ -69,7 +69,7 @@ function ResizeHandle(
   </div>`;
 }
 
-export type ResizeMode = 'corner' | 'edge' | 'none';
+export type ResizeMode = 'corner' | 'edge' | 'all' | 'none';
 export function ResizeHandles(
   resizeMode: ResizeMode,
   onPointerDown: (e: PointerEvent, direction: HandleDirection) => void,
@@ -82,28 +82,55 @@ export function ResizeHandles(
     }
   ) => void
 ) {
+  const getCornerHandles = () => {
+    const handleTopLeft = ResizeHandle(
+      HandleDirection.TopLeft,
+      onPointerDown,
+      updateCursor
+    );
+    const handleTopRight = ResizeHandle(
+      HandleDirection.TopRight,
+      onPointerDown,
+      updateCursor
+    );
+    const handleBottomLeft = ResizeHandle(
+      HandleDirection.BottomLeft,
+      onPointerDown,
+      updateCursor
+    );
+    const handleBottomRight = ResizeHandle(
+      HandleDirection.BottomRight,
+      onPointerDown,
+      updateCursor
+    );
+    return {
+      handleTopLeft,
+      handleTopRight,
+      handleBottomLeft,
+      handleBottomRight,
+    };
+  };
+  const getEdgeHandles = () => {
+    const handleLeft = ResizeHandle(
+      HandleDirection.Left,
+      onPointerDown,
+      updateCursor
+    );
+    const handleRight = ResizeHandle(
+      HandleDirection.Right,
+      onPointerDown,
+      updateCursor
+    );
+    return { handleLeft, handleRight };
+  };
   switch (resizeMode) {
     case 'corner': {
-      const handleTopLeft = ResizeHandle(
-        HandleDirection.TopLeft,
-        onPointerDown,
-        updateCursor
-      );
-      const handleTopRight = ResizeHandle(
-        HandleDirection.TopRight,
-        onPointerDown,
-        updateCursor
-      );
-      const handleBottomLeft = ResizeHandle(
-        HandleDirection.BottomLeft,
-        onPointerDown,
-        updateCursor
-      );
-      const handleBottomRight = ResizeHandle(
-        HandleDirection.BottomRight,
-        onPointerDown,
-        updateCursor
-      );
+      const {
+        handleTopLeft,
+        handleTopRight,
+        handleBottomLeft,
+        handleBottomRight,
+      } = getCornerHandles();
 
       // prettier-ignore
       return html`
@@ -114,18 +141,27 @@ export function ResizeHandles(
       `;
     }
     case 'edge': {
-      const handleLeft = ResizeHandle(
-        HandleDirection.Left,
-        onPointerDown,
-        updateCursor
-      );
-      const handleRight = ResizeHandle(
-        HandleDirection.Right,
-        onPointerDown,
-        updateCursor
-      );
-
+      const { handleLeft, handleRight } = getEdgeHandles();
       return html`${handleLeft} ${handleRight}`;
+    }
+    case 'all': {
+      const {
+        handleTopLeft,
+        handleTopRight,
+        handleBottomLeft,
+        handleBottomRight,
+      } = getCornerHandles();
+      const { handleLeft, handleRight } = getEdgeHandles();
+
+      // prettier-ignore
+      return html`
+        ${handleTopLeft}
+        ${handleTopRight}
+        ${handleBottomLeft}
+        ${handleBottomRight}
+        ${handleLeft}
+        ${handleRight}
+      `;
     }
     case 'none': {
       return nothing;
