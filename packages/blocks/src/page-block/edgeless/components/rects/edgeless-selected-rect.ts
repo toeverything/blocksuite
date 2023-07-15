@@ -264,10 +264,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get resizeMode(): ResizeMode {
-    if (
-      this.state.selected.length === 1 &&
-      this.state.selected[0].type === 'connector'
-    ) {
+    if (this.state.selected.every(element => element.type === 'connector')) {
       return 'none';
     }
     const hasBlockElement = this.state.selected.find(isTopLevelBlock);
