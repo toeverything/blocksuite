@@ -356,7 +356,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       .translateSelf(-center.x, -center.y);
 
     const elements = selected.filter(
-      element => !isTopLevelBlock(element)
+      element => !isTopLevelBlock(element) && element.type !== 'connector'
     ) as PhasorElement[];
 
     elements.forEach(element => {
