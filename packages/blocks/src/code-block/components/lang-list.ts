@@ -1,5 +1,6 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/store/index.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
@@ -8,9 +9,7 @@ import {
   type Lang,
 } from 'shiki';
 
-import { createEvent } from '../../__internal__/index.js';
 import { scrollbarStyle } from '../../components/utils.js';
-import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -111,11 +110,12 @@ export class LangList extends ShadowlessElement {
   @property({ attribute: false })
   delay = 150;
 
+  slots = {
+    selectedLanguageChanged: new Slot<{ language: string | null }>(),
+  };
+
   override async connectedCallback() {
     super.connectedCallback();
-    // Avoid triggering click away listener on initial render
-    document.addEventListener('click', this._clickAwayListener);
-
     setTimeout(() => {
       this.filterInput?.focus();
     }, 0);
@@ -123,43 +123,28 @@ export class LangList extends ShadowlessElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener('click', this._clickAwayListener);
+    this.slots.selectedLanguageChanged.dispose();
   }
 
-  private _clickAwayListener = (e: Event) => {
-    if (this.renderRoot.parentElement?.contains(e.target as Node)) {
-      return;
-    }
-    this.dispatchEvent(createEvent('dispose', null));
-  };
-
   private _onLanguageClicked(language: ILanguageRegistration | null) {
-    // TODO use slot instead
-    this.dispatchEvent(
-      createEvent('selected-language-changed', {
-        language: language?.id ?? null,
-      })
-    );
+    this.slots.selectedLanguageChanged.emit({ language: language?.id ?? null });
   }
 
   override render() {
-    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
-      .filter(language => {
-        if (!this._filterText) {
-          return true;
-        }
-        return (
-          language.id.startsWith(this._filterText.toLowerCase()) ||
-          language.aliases?.some(alias =>
-            alias.startsWith(this._filterText.toLowerCase())
-          )
-        );
-      })
-      .sort(
-        (a, b) =>
-          getLanguagePriority(a.id as Lang, this.currentLanguageId === a.id) -
-          getLanguagePriority(b.id as Lang, this.currentLanguageId === b.id)
+    const filteredLanguages = [
+      PLAIN_TEXT_REGISTRATION,
+      ...BUNDLED_LANGUAGES,
+    ].filter(language => {
+      if (!this._filterText) {
+        return true;
+      }
+      return (
+        language.id.startsWith(this._filterText.toLowerCase()) ||
+        language.aliases?.some(alias =>
+          alias.startsWith(this._filterText.toLowerCase())
+        )
       );
+    });
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
@@ -208,7 +193,7 @@ export class LangList extends ShadowlessElement {
                 height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
-                ?hover=${index === this._currentSelectedIndex}
+                ?hover=${language.id === this.currentLanguageId}
               >
                 ${language.displayName ?? language.id}
               </icon-button>
@@ -223,13 +208,5 @@ export class LangList extends ShadowlessElement {
 declare global {
   interface HTMLElementTagNameMap {
     'lang-list': LangList;
-  }
-
-  interface HTMLElementEventMap {
-    /**
-     * @deprecated Use slot instead
-     */
-    'selected-language-changed': CustomEvent<{ language: string | null }>;
-    dispose: CustomEvent<null>;
   }
 }
