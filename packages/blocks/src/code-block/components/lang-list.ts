@@ -187,7 +187,7 @@ export class LangList extends ShadowlessElement {
         </div>
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
-            (language, index) => html`
+            language => html`
               <icon-button
                 width="100%"
                 height="32px"
