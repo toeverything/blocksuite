@@ -265,6 +265,15 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override updated() {
+    const langList = this.querySelector('lang-list');
+
+    if (langList) {
+      langList.slots.selectedLanguageChanged.on(({ language }) => {
+        getService('affine:code').setLang(this.model, language);
+        this._showLangList = false;
+      });
+    }
+
     if (this.model.language !== this._curLanguage.id) {
       const lang = getStandardLanguage(this.model.language);
       this._curLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
