@@ -17,8 +17,8 @@ export type LinkedPageItem = {
   key: string;
   name: string;
   icon: TemplateResult<1>;
-  suffix?: TemplateResult<1>;
-  disabled?: boolean;
+  // suffix?: TemplateResult<1>;
+  // disabled?: boolean;
   action: () => void;
 };
 

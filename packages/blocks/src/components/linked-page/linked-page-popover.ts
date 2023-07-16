@@ -1,9 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type PageMeta,
-} from '@blocksuite/store';
+import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -30,22 +26,22 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   @state()
   private _activatedItemIndex = 0;
 
-  private _actionList: LinkedPageGroup[] = [];
+  private _actionGroup: LinkedPageGroup[] = [];
 
   private get _flattenActionList() {
-    return this._actionList
+    return this._actionGroup
       .map(group =>
         group.items.map(item => ({ ...item, groupName: group.name }))
       )
       .flat();
   }
 
-  private _updateActionList(pageMetas: PageMeta[]) {
-    this._actionList = getMenus({
+  private _updateActionList() {
+    this._actionGroup = getMenus({
       query: this._query,
       page: this._page,
       model: this.model,
-      pageMetas,
+      pageMetas: this._page.workspace.meta.pageMetas,
     });
   }
 
@@ -68,9 +64,11 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const richText = getRichTextByModel(this.model);
     assertExists(richText, 'RichText not found');
 
+    // init
+    this._updateActionList();
     this._disposables.add(
       this.model.page.workspace.slots.pagesUpdated.on(() => {
-        this._updateActionList(this._page.workspace.meta.pageMetas);
+        this._updateActionList();
       })
     );
     this._disposables.addFromEvent(this, 'mousedown', e => {
@@ -78,13 +76,12 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       e.preventDefault();
     });
 
-    this._updateActionList(this._page.workspace.meta.pageMetas);
     createKeydownObserver({
       target: richText,
       onUpdateQuery: str => {
         this._query = str;
         this._activatedItemIndex = 0;
-        this._updateActionList(this._page.workspace.meta.pageMetas);
+        this._updateActionList();
       },
       abortController: this.abortController,
       onMove: step => {
@@ -139,7 +136,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     // XXX This is a side effect
     let accIdx = 0;
     return html`<div class="linked-page-popover" style="${style}">
-      ${this._actionList
+      ${this._actionGroup
         .filter(group => group.items.length)
         .map((group, idx) => {
           return html`
