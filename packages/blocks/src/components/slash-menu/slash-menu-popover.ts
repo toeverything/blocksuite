@@ -9,7 +9,7 @@ import {
   isControlledKeyboardEvent,
   isFuzzyMatch,
 } from '../../__internal__/utils/index.js';
-import { createKeydownObserver } from '../utils.js';
+import { cleanSpecifiedTail, createKeydownObserver } from '../utils.js';
 import { styles } from './styles.js';
 import {
   collectGroupNames,
@@ -240,7 +240,8 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Need to remove the search string
     // We must to do clean the slash string before we do the action
     // Otherwise, the action may change the model and cause the slash string to be changed
-    this.abortController.abort(this._searchString);
+    cleanSpecifiedTail(this.model, '/' + this._searchString);
+    this.abortController.abort();
 
     const { action } = this._filterItems[index];
     action({ page: this.model.page, model: this.model });

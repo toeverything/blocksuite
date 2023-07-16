@@ -18,36 +18,11 @@ import {
   throttle,
 } from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
-import { cleanSpecifiedTail } from '../utils.js';
 import { menuGroups } from './config.js';
 import { SlashMenu } from './slash-menu-popover.js';
 import type { SlashMenuOptions } from './utils.js';
 
 let globalAbortController = new AbortController();
-
-function cleanSlashTextAfterAbort(e: Event, model: BaseBlockModel) {
-  if (!e.target || !(e.target instanceof AbortSignal)) {
-    throw new Error('Failed to clean slash search text! Unknown abort event');
-  }
-  // If not explicitly set in those methods, it defaults to "AbortError" DOMException.
-  if (e.target.reason instanceof DOMException) {
-    // Should not clean slash text when click away or abort
-    return;
-  }
-  if (typeof e.target.reason !== 'string') {
-    throw new Error('Failed to clean slash search text! Unknown abort reason');
-  }
-  const searchStr = '/' + e.target.reason;
-  const vEditor = getVirgoByModel(model);
-  if (!vEditor) {
-    console.warn(
-      'Failed to clean slash search text! No vEditor found for model, model:',
-      model
-    );
-    return;
-  }
-  cleanSpecifiedTail(vEditor, searchStr);
-}
 
 function showSlashMenu({
   model,
@@ -91,12 +66,6 @@ function showSlashMenu({
   container.appendChild(slashMenu);
   // Wait for the Node to be mounted
   setTimeout(updatePosition);
-
-  // Handle dispose
-  abortController.signal.addEventListener('abort', e => {
-    cleanSlashTextAfterAbort(e, model);
-  });
-
   return slashMenu;
 }
 
