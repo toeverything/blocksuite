@@ -10,7 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRichTextByModel } from '../../__internal__/utils/query.js';
 import { cleanSpecifiedTail, createKeydownObserver } from '../utils.js';
-import { getMenus, type LinkedPageItem } from './config.js';
+import { getMenus, type LinkedPageGroup } from './config.js';
 import { styles } from './styles.js';
 
 @customElement('affine-linked-page-popover')
@@ -30,7 +30,15 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   @state()
   private _activatedItemIndex = 0;
 
-  private _actionList: LinkedPageItem[] = [];
+  private _actionList: LinkedPageGroup[] = [];
+
+  private get _flattenActionList() {
+    return this._actionList
+      .map(group =>
+        group.items.map(item => ({ ...item, groupName: group.name }))
+      )
+      .flat();
+  }
 
   private _updateActionList(pageMetas: PageMeta[]) {
     this._actionList = getMenus({
@@ -80,12 +88,12 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       },
       abortController: this.abortController,
       onMove: step => {
+        const itemLen = this._flattenActionList.length;
         this._activatedItemIndex =
-          (this._actionList.length + this._activatedItemIndex + step) %
-          this._actionList.length;
+          (itemLen + this._activatedItemIndex + step) % itemLen;
 
         // Scroll to the active item
-        const item = this._actionList[this._activatedItemIndex];
+        const item = this._flattenActionList[this._activatedItemIndex];
         const shadowRoot = this.shadowRoot;
         if (!shadowRoot) {
           console.warn('Failed to find the shadow root!', this);
@@ -105,7 +113,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       onConfirm: () => {
         this.abortController.abort();
         cleanSpecifiedTail(this.model, '@' + this._query);
-        this._actionList[this._activatedItemIndex].action();
+        this._flattenActionList[this._activatedItemIndex].action();
       },
       onEsc: () => {
         this.abortController.abort();
@@ -128,34 +136,40 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
+    // XXX This is a side effect
+    let accIdx = 0;
     return html`<div class="linked-page-popover" style="${style}">
-      ${this._actionList.map(
-        ({ key, name, icon, groupName, action }, index) => {
-          const showDivider =
-            index !== 0 && this._actionList[index - 1].groupName !== groupName;
-          return html`<div class="divider" ?hidden=${!showDivider}></div>
-            <div class="group-title" ?hidden=${!showDivider && index !== 0}>
-              ${groupName}
+      ${this._actionList
+        .filter(group => group.items.length)
+        .map((group, idx) => {
+          return html`
+            <div class="divider" ?hidden=${idx === 0}></div>
+            <div class="group-title">${group.name}</div>
+            <div class="group" style=${group.styles}>
+              ${group.items.map(({ key, name, icon, action }) => {
+                accIdx++;
+                const curIdx = accIdx - 1;
+                return html`<icon-button
+                  width="280px"
+                  height="32px"
+                  data-id=${key}
+                  text=${name}
+                  ?hover=${this._activatedItemIndex === curIdx}
+                  @click=${() => {
+                    this.abortController.abort();
+                    cleanSpecifiedTail(this.model, '@' + this._query);
+                    action();
+                  }}
+                  @mousemove=${() => {
+                    // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
+                    this._activatedItemIndex = curIdx;
+                  }}
+                  >${icon}</icon-button
+                >`;
+              })}
             </div>
-            <icon-button
-              width="280px"
-              height="32px"
-              data-id=${key}
-              text=${name}
-              ?hover=${this._activatedItemIndex === index}
-              @click=${() => {
-                this.abortController.abort();
-                cleanSpecifiedTail(this.model, '@' + this._query);
-                action();
-              }}
-              @mousemove=${() => {
-                // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
-                this._activatedItemIndex = index;
-              }}
-              >${icon}</icon-button
-            >`;
-        }
-      )}
+          `;
+        })}
     </div>`;
   }
 }

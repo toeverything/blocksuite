@@ -16,11 +16,16 @@ import { showImportModal } from '../import-page/index.js';
 export type LinkedPageItem = {
   key: string;
   name: string;
-  groupName: string;
   icon: TemplateResult<1>;
   suffix?: TemplateResult<1>;
   disabled?: boolean;
   action: () => void;
+};
+
+export type LinkedPageGroup = {
+  name: string;
+  styles?: string;
+  items: LinkedPageItem[];
 };
 
 const DEFAULT_PAGE_NAME = 'Untitled';
@@ -51,7 +56,7 @@ export const getMenus: (ctx: {
   page: Page;
   pageMetas: PageMeta[];
   model: BaseBlockModel;
-}) => LinkedPageItem[] = ({ query, page, model, pageMetas }) => {
+}) => LinkedPageGroup[] = ({ query, page, model, pageMetas }) => {
   const pageName = query || DEFAULT_PAGE_NAME;
   const displayPageName =
     pageName.slice(0, DISPLAY_NAME_LENGTH) +
@@ -61,12 +66,10 @@ export const getMenus: (ctx: {
     .filter(({ id }) => id !== page.id)
     .filter(({ title }) => isFuzzyMatch(title, query));
 
-  const menuGroups: {
-    name: string;
-    items: Omit<LinkedPageItem, 'groupName'>[];
-  }[] = [
+  return [
     {
       name: 'Link to Page',
+      styles: 'overflow-y: scroll; max-height: 224px;',
       items: filteredPageList.map(page => ({
         key: page.id,
         name: page.title || DEFAULT_PAGE_NAME,
@@ -120,8 +123,5 @@ export const getMenus: (ctx: {
         },
       ],
     },
-  ];
-  return menuGroups
-    .map(group => group.items.map(item => ({ ...item, groupName: group.name })))
-    .flat();
+  ] satisfies LinkedPageGroup[];
 };
