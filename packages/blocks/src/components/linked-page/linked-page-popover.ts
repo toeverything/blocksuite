@@ -142,7 +142,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           return html`
             <div class="divider" ?hidden=${idx === 0}></div>
             <div class="group-title">${group.name}</div>
-            <div class="group" style=${group.styles}>
+            <div class="group" style=${group.styles ?? ''}>
               ${group.items.map(({ key, name, icon, action }) => {
                 accIdx++;
                 const curIdx = accIdx - 1;
