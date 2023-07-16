@@ -15,7 +15,7 @@ export const isChrome =
 export const isSafari =
   !isChrome && globalThis.navigator?.userAgent.indexOf('Safari') !== -1;
 
-export function getLineHeight(fontFamily: string, fontSize: string) {
+export function getLineHeight(fontFamily: string, fontSize: number) {
   const span = document.createElement('span');
   span.style.fontFamily = fontFamily;
   span.style.fontSize = fontSize + 'px';
