@@ -12,7 +12,8 @@ async function getImageBlob(model: BaseBlockModel) {
   if (!blob) return null;
 
   // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
-  const FileType = await import('file-type');
+  // @ts-ignore
+  const FileType = await import('file-type/browser');
   if (window.Buffer === undefined) {
     window.Buffer = Buffer;
   }
