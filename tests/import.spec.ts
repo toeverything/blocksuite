@@ -844,7 +844,6 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
-          caption: '',
           flavour: 'affine:image',
           sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
           children: [],
@@ -879,7 +878,6 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
-          caption: '',
           flavour: 'affine:image',
           sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
           children: [],
