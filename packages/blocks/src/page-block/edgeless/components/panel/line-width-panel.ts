@@ -322,40 +322,22 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       class="line-width-panel has-tool-tip"
       @mousedown="${(e: Event) => e.preventDefault()}"
     >
-      <div
-        class="line-width-button"
-        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_TWELVE}
-      >
+      <div class="line-width-button">
         <div class="line-width-icon"></div>
       </div>
-      <div
-        class="line-width-button"
-        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_TEN}
-      >
+      <div class="line-width-button">
         <div class="line-width-icon"></div>
       </div>
-      <div
-        class="line-width-button"
-        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_EIGHT}
-      >
+      <div class="line-width-button">
         <div class="line-width-icon"></div>
       </div>
-      <div
-        class="line-width-button"
-        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_SIX}
-      >
+      <div class="line-width-button">
         <div class="line-width-icon"></div>
       </div>
-      <div
-        class="line-width-button"
-        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_FOUR}
-      >
+      <div class="line-width-button">
         <div class="line-width-icon"></div>
       </div>
-      <div
-        class="line-width-button"
-        ?active=${this.selectedSize === BrushSize.LINE_WIDTH_TWO}
-      >
+      <div class="line-width-button">
         <div class="line-width-icon"></div>
       </div>
       <div class="drag-handle"></div>

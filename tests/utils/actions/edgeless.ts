@@ -753,22 +753,20 @@ export async function resizeConnectorByStartCapitalHandler(
   );
 }
 
-export function locatorShapeStrokeWidthButton(
-  page: Page,
-  buttonPosition: number
-) {
+export function getEdgelessLineWidthPanel(page: Page) {
   return page
     .locator('edgeless-change-shape-button')
     .locator('.line-style-panel')
-    .locator(`edgeless-line-width-panel`)
-    .locator(`.line-width-button:nth-child(${buttonPosition})`);
+    .locator(`edgeless-line-width-panel`);
 }
-export async function changeShapeStrokeWidth(
-  page: Page,
-  buttonPosition: number
-) {
-  const button = locatorShapeStrokeWidthButton(page, buttonPosition);
-  await button.click();
+export async function changeShapeStrokeWidth(page: Page) {
+  const lineWidthPanel = getEdgelessLineWidthPanel(page);
+  const lineWidthPanelRect = await lineWidthPanel.boundingBox();
+  assertExists(lineWidthPanelRect);
+  // click line width panel by position
+  const x = lineWidthPanelRect.x + 40;
+  const y = lineWidthPanelRect.y + 10;
+  await page.mouse.click(x, y);
 }
 
 export function locatorShapeStrokeStyleButton(
