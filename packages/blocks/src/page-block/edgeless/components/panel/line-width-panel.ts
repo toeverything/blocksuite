@@ -292,7 +292,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this._dragConfig = null;
   };
 
-  private _onPoniterOut = (e: PointerEvent) => {
+  private _onPointerOut = (e: PointerEvent) => {
     // If the pointer is out of the line width panel
     // Stop dragging and update the selected size by nearest size.
     e.preventDefault();
@@ -310,7 +310,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this._disposables.addFromEvent(this, 'pointerdown', this._onPoinetrDown);
     this._disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
     this._disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
-    this._disposables.addFromEvent(this, 'pointerout', this._onPoniterOut);
+    this._disposables.addFromEvent(this, 'pointerout', this._onPointerOut);
   }
 
   override disconnectedCallback(): void {
