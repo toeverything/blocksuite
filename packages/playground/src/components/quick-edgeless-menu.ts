@@ -40,6 +40,7 @@ import {
   generateRoomId,
   initCollaborationSocket,
 } from '../providers/websocket-channel';
+import { notify } from '../utils/notify';
 import { createViewer } from './doc-inspector';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
@@ -410,11 +411,20 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   };
 
   private _startCollaboration = async () => {
+    if (
+      this.workspace.providers.find(
+        provider => provider.flavour === 'websocket-channel'
+      )
+    ) {
+      notify('There is already a websocket provider exists', 'neutral');
+      return;
+    }
+
     this._initws = true;
     const id = await generateRoomId();
     const success = await this.initWebsocketProvider(id);
 
-    if (success) history.replaceState({}, '', `?room=${id}&providers=ws`);
+    if (success) history.replaceState({}, '', `?room=${id}`);
   };
 
   async initWebsocketProvider(room?: string): Promise<boolean> {

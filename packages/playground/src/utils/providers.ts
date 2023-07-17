@@ -5,9 +5,8 @@ import { params } from '../utils';
 
 export function getProviderCreators() {
   const providerCreators: DocProviderCreator[] = [];
-  const providerArgs = (params.get('providers') ?? '').split(',');
 
-  if (!providerArgs.includes('room')) {
+  if (!params.get('room')) {
     providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
   }
 
