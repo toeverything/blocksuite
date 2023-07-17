@@ -72,11 +72,28 @@ function showSlashMenu({
 @customElement('affine-slash-menu-widget')
 export class SlashMenuWidget extends WithDisposable(LitElement) {
   static DEFAULT_OPTIONS: SlashMenuOptions = {
-    triggerKeys: [
-      '/',
-      // Compatible with CJK IME
-      '、',
-    ],
+    isTriggerKey: (event: KeyboardEvent) => {
+      const triggerKeys = [
+        '/',
+        // Compatible with CJK IME
+        '、',
+      ];
+
+      if (event.key === 'Process' && event.code === 'Slash') {
+        // Ad-hoc for https://github.com/toeverything/blocksuite/issues/3485
+        // This key can be triggered by pressing the slash key while using CJK IME in Windows.
+        //
+        // Description: The `Process` key. Instructs the IME to process the conversion.
+        // See also https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values#common_ime_keys
+        // https://stackoverflow.com/questions/71961563/keyboard-event-has-key-process-on-chromebook
+        return true;
+      }
+      return (
+        !isControlledKeyboardEvent(event) &&
+        event.key.length === 1 &&
+        triggerKeys.includes(event.key)
+      );
+    },
     menus: menuGroups,
   };
 
@@ -98,12 +115,7 @@ export class SlashMenuWidget extends WithDisposable(LitElement) {
 
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
-    if (
-      isControlledKeyboardEvent(event) ||
-      event.key.length !== 1 ||
-      !this.options.triggerKeys.includes(event.key)
-    )
-      return;
+    if (!this.options.isTriggerKey(event)) return;
 
     // Fixme @Saul-Mirone get model from getCurrentSelection
     const target = event.target;
