@@ -162,7 +162,7 @@ export class Workspace {
   }
 
   registerProvider(providerCreator: DocProviderCreator, id?: string) {
-    this._store.registerProvider(providerCreator, id);
+    return this._store.registerProvider(providerCreator, id);
   }
 
   register(blockSchema: BlockSchemaType[]) {

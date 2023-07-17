@@ -147,6 +147,7 @@ export class WorkspaceMeta {
       return;
     }
     this.doc.transact(() => {
+      console.log(this.pages);
       assertExists(this.pages);
       this.pages.splice(index, 1);
     });

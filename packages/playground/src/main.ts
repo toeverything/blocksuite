@@ -1,27 +1,27 @@
 /// <reference types="./env" />
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
-import './components/start-panel';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import '@blocksuite/editor/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
-import type { DocProvider, Page } from '@blocksuite/store';
+import type { DocProviderCreator, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
-import { DebugMenu } from './components/debug-menu.js';
-import type { InitFn } from './data';
+import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
+import { INDEXED_DB_NAME } from './providers/indexdb-provider.js';
+import { initCollaborationSocket } from './providers/websocket-channel.js';
 import {
   createEditor,
   createWorkspaceOptions,
   defaultMode,
   initDebugConfig,
-  initParam,
-  isE2E,
-  tryInitExternalContent,
+  params,
 } from './utils.js';
+import { loadPresets } from './utils/preset.js';
+import { getProviderCreators } from './utils/providers.js';
 
 const options = createWorkspaceOptions();
 initDebugConfig();
@@ -43,52 +43,94 @@ function subscribePage(workspace: Workspace) {
 
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
-    const debugMenu = new DebugMenu();
-    debugMenu.workspace = workspace;
-    debugMenu.editor = editor;
-    debugMenu.mode = defaultMode;
-    debugMenu.contentParser = contentParser;
-    document.body.appendChild(debugMenu);
+    const quickEdgelessMenu = new QuickEdgelessMenu();
+    quickEdgelessMenu.workspace = workspace;
+    quickEdgelessMenu.editor = editor;
+    quickEdgelessMenu.mode = defaultMode;
+    quickEdgelessMenu.contentParser = contentParser;
+    document.body.appendChild(quickEdgelessMenu);
 
     window.editor = editor;
     window.page = page;
   });
 }
 
-export async function initPageContentByParam(
+export async function initContentByInitParam(
   workspace: Workspace,
   param: string,
   pageId: string
 ) {
-  const functionMap = new Map<
-    string,
-    (workspace: Workspace, id: string) => void
-  >();
-  Object.values(
-    (await import('./data/index.js')) as Record<string, InitFn>
-  ).forEach(fn => functionMap.set(fn.id, fn));
-  // Load the preset playground documentation when `?init` param provided
-  if (param === '') {
-    param = 'preset';
-  }
+  const presetsMap = await loadPresets();
+
+  if (!presetsMap.has(param)) param = 'empty';
 
   // Load built-in init function when `?init=heavy` param provided
-  if (functionMap.has(param)) {
-    functionMap.get(param)?.(workspace, pageId);
+  if (presetsMap.has(param)) {
+    presetsMap.get(param)?.(workspace, pageId);
     const page = workspace.getPage(pageId);
     await page?.waitForLoaded();
     page?.resetHistory();
-    return;
+  }
+}
+
+const syncProviders = async (
+  workspace: Workspace,
+  providerCreators: DocProviderCreator[]
+) => {
+  if (params.get('room')) {
+    await initCollaborationSocket(workspace, params.get('room') as string);
   }
 
-  // Try to load base64 content or markdown content from url
-  await tryInitExternalContent(workspace, param, pageId);
+  providerCreators.forEach(fn => workspace.registerProvider(fn));
+  const providers = workspace.providers;
+
+  for (const provider of providers) {
+    if ('active' in provider) {
+      provider.sync();
+      await provider.whenReady;
+    } else if ('passive' in provider) {
+      provider.connect();
+    }
+  }
+
+  workspace.slots.pageAdded.on(async pageId => {
+    const page = workspace.getPage(pageId) as Page;
+    await page.waitForLoaded();
+  });
+};
+
+async function initWorkspace(workspace: Workspace) {
+  const shouldInit =
+    (!(await indexedDB.databases()).find(db => db.name === INDEXED_DB_NAME) &&
+      !params.get('room')) ||
+    params.get('init');
+
+  if (shouldInit) {
+    const deleteResult = await new Promise(resovle => {
+      const req = indexedDB.deleteDatabase(INDEXED_DB_NAME);
+      req.onerror = resovle;
+      req.onblocked = resovle;
+      req.onsuccess = resovle;
+    });
+
+    console.info('Delete database: ', deleteResult);
+
+    await syncProviders(workspace, getProviderCreators());
+    await initContentByInitParam(
+      workspace,
+      params.get('init') ?? 'empty',
+      'page0'
+    );
+  } else {
+    await syncProviders(workspace, getProviderCreators());
+  }
 }
 
 async function main() {
   if (window.workspace) {
     return;
   }
+
   const workspace = new Workspace(options)
     .register(AffineSchemas)
     .register(__unstableSchemas);
@@ -98,38 +140,9 @@ async function main() {
   window.std = std;
   window.ContentParser = ContentParser;
   workspace.awarenessStore.setFlag('enable_page_tags', true);
-  const syncProviders = async (providers: DocProvider[]) => {
-    for (const provider of providers) {
-      if ('active' in provider) {
-        provider.sync();
-        await provider.whenReady;
-      } else if ('passive' in provider) {
-        provider.connect();
-      }
-    }
-  };
-
-  await syncProviders(workspace.providers);
-
-  workspace.slots.pageAdded.on(async pageId => {
-    const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded();
-  });
-
-  // In E2E environment, initial state should be generated by test case,
-  // instead of using this default setup.
-  if (isE2E) return;
 
   subscribePage(workspace);
-  if (initParam !== null) {
-    await initPageContentByParam(workspace, initParam, 'page0');
-    return;
-  }
-
-  // Open default examples list when no `?init` param is provided
-  const exampleList = document.createElement('start-panel');
-  workspace.slots.pageAdded.once(() => exampleList.remove());
-  document.body.prepend(exampleList);
+  initWorkspace(workspace);
 }
 
 main();

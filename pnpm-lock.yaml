@@ -341,6 +341,9 @@ importers:
       '@toeverything/y-indexeddb':
         specifier: 0.7.0-canary.16
         version: 0.7.0-canary.16(yjs@13.6.6)
+      async-call-rpc:
+        specifier: ^6.3.1
+        version: 6.3.1
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
@@ -350,12 +353,18 @@ importers:
       lit:
         specifier: ^2.7.3
         version: 2.7.3
+      merge:
+        specifier: ^2.1.1
+        version: 2.1.1
       react:
         specifier: ^18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      y-protocols:
+        specifier: ^1.0.5
+        version: 1.0.5
       yjs:
         specifier: ^13.6.6
         version: 13.6.6
@@ -2508,7 +2517,6 @@ packages:
 
   /async-call-rpc@6.3.1:
     resolution: {integrity: sha512-i9R46goYZIi0WPkd5X12O6rOsA1GFUiZ/71GOafdQaZtbytXjQ6VevODXDu5hAI5vn2/BQqbC6NznHV+TAC1QA==}
-    dev: true
 
   /atob@2.1.2:
     resolution: {integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==}
