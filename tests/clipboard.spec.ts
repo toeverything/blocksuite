@@ -42,6 +42,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitEmbedLoaded,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -115,7 +116,7 @@ test(
       'text/html': `<p>符合 Markdown 格式的 URL 放到笔记中，此时需要的格式如下：</p>
     <pre><code>md [任务管理这件事 - 少数派](https://sspai.com/post/61092)</code></pre>
     <p>（将一段文字包裹在<code >[[]]</code>中）此时需要的格式如下：</p>
-    <figure ><img src="https://cdn.sspai.com/editor/u_5b3wva6y/15988547134164.png"></figure>
+    <figure ><img src="https://placehold.co/600x400"></figure>
     <p>上图中，当我们处在 Obsidian 的「预览模式」时，点击这个「双向链接」</p>
     `,
     };
@@ -132,7 +133,8 @@ test(
       },
       { clipData }
     );
-    await page.waitForTimeout(500);
+    await waitEmbedLoaded(page);
+    // await page.waitForTimeout(500);
     await assertRichImage(page, 1);
   }
 );
