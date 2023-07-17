@@ -141,6 +141,14 @@ export class Store {
     );
   }
 
+  registerProvider(providerCreator: DocProviderCreator, id?: string) {
+    this.providers.push(
+      providerCreator(id ?? this.id, this.doc, {
+        awareness: this.awarenessStore.awareness,
+      })
+    );
+  }
+
   addSpace(space: Space) {
     this.spaces.set(space.prefixedId, space);
   }
