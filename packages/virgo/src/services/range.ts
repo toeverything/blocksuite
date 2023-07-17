@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
-
 import { VirgoLine } from '../components/index.js';
 import type { VRange } from '../types.js';
 import type { VRangeUpdatedProp } from '../types.js';
@@ -109,20 +107,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    *    the vRange of first Editor is {index: 2, length: 4},
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
-  toVRange = (selection?: Selection): VRange | null => {
+  toVRange = (selection: Selection): VRange | null => {
     const { rootElement, yText } = this._editor;
-    let _selection: Selection | null | undefined = selection;
-    if (!selection) {
-      const selectionRoot = findDocumentOrShadowRoot(this._editor);
-      _selection = selectionRoot.getSelection();
-    }
 
-    assertExists(
-      _selection,
-      'Selection is null or undefined and cannot be used to calculate vRange'
-    );
-
-    return domRangeToVirgoRange(_selection, rootElement, yText);
+    return domRangeToVirgoRange(selection, rootElement, yText);
   };
 
   onScrollUpdated = (scrollLeft: number) => {

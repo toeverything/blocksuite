@@ -1,3 +1,4 @@
+import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
@@ -16,6 +17,9 @@ export class WidgetElement<
 
   @property({ attribute: false })
   page!: Page;
+
+  protected _addEvent = (name: EventName, handler: UIEventHandler) =>
+    this._disposables.add(this.root.uiEventDispatcher.add(name, handler));
 
   override render(): unknown {
     return null;

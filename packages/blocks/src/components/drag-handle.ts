@@ -305,6 +305,7 @@ export class DragHandle extends WithDisposable(LitElement) {
     event: PointerEventState,
     modelState: EditingState | null
   ) {
+    return;
     const noteBlock = this._container.querySelector(
       '.affine-note-block-container'
     );
@@ -425,27 +426,28 @@ export class DragHandle extends WithDisposable(LitElement) {
     // event bindings
 
     // document
-    if (isFirefox) {
-      disposables.addFromEvent(
-        this._container,
-        'dragover',
-        this._onDragOverDocument
-      );
-    }
-
-    // document.body
-    disposables.addFromEvent(
-      document.body,
-      'dragover',
-      handlePreventDocumentDragOverDelay,
-      false
-    );
+    // if (isFirefox) {
+    //   disposables.addFromEvent(
+    //     this._container,
+    //     'dragover',
+    //     this._onDragOverDocument
+    //   );
+    // }
+    //
+    // // document.body
+    // disposables.addFromEvent(
+    //   document.body,
+    //   'dragover',
+    //   handlePreventDocumentDragOverDelay,
+    //   false
+    // );
 
     // host
-    disposables.addFromEvent(this, 'mousemove', this._onMouseMoveOnHost);
+    // disposables.addFromEvent(this, 'mousemove', this._onMouseMoveOnHost);
 
     // drag handle
-    disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
+    // disposables.addFromEvent(this._dragHandle, 'click', this._onClick);
+
     // 1. In edgeless, native DnD will work fine.
     // 2. In page, hosted with editor-container mouse events and scroll wheel support.
     disposables.addFromEvent(this._dragHandle, 'dragstart', this.onDragStart);
@@ -568,6 +570,7 @@ export class DragHandle extends WithDisposable(LitElement) {
   // - select current block
   // - trigger slash menu
   private _onClick = (e: MouseEvent) => {
+    return;
     const { selectedBlocks } = this;
     let { _handleAnchorState: modelState } = this;
     const element = modelState?.element;

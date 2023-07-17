@@ -8,12 +8,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import {
-  type BaseBlockModel,
-  matchFlavours,
-  Slot,
-  Utils,
-} from '@blocksuite/store';
+import { matchFlavours, Slot } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -40,7 +35,6 @@ import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { DraggingArea } from './components.js';
 import type { DefaultPageService } from './default-page-service.js';
-import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
 export interface DefaultSelectionSlots {
   draggingAreaUpdated: Slot<DOMRect | null>;
@@ -378,58 +372,7 @@ export class DefaultPageBlockComponent
     }
   }
 
-  private _initDragHandle = () => {
-    const createHandle = () => {
-      this.components.dragHandle = createDragHandle(this);
-      this.components.dragHandle.getDropAllowedBlocks = draggingBlockIds => {
-        if (
-          draggingBlockIds &&
-          draggingBlockIds.length === 1 &&
-          Utils.isInsideBlockByFlavour(
-            this.page,
-            draggingBlockIds[0],
-            'affine:database'
-          )
-        ) {
-          return getAllowSelectedBlocks(
-            this.page.getParent(draggingBlockIds[0]) as BaseBlockModel
-          );
-        }
-
-        if (!draggingBlockIds || draggingBlockIds.length === 1) {
-          return getAllowSelectedBlocks(this.model);
-        } else {
-          return getAllowSelectedBlocks(this.model).filter(block => {
-            return !draggingBlockIds?.includes(block.id);
-          });
-        }
-      };
-    };
-    if (
-      this.page.awarenessStore.getFlag('enable_drag_handle') &&
-      !this.components.dragHandle
-    ) {
-      createHandle();
-    }
-    this._disposables.add(
-      this.page.awarenessStore.slots.update.subscribe(
-        msg => msg.state?.flags.enable_drag_handle,
-        enable => {
-          if (enable) {
-            if (!this.components.dragHandle) {
-              createHandle();
-            }
-          } else {
-            this.components.dragHandle?.remove();
-            this.components.dragHandle = null;
-          }
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
-  };
+  private _initDragHandle = () => {};
 
   private _initSlotEffects() {
     const { slots } = this;

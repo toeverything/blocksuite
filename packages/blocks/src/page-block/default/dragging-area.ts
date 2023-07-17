@@ -1,4 +1,3 @@
-import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
@@ -51,9 +50,6 @@ export class DraggingAreaWidget extends WidgetElement {
     top: 0,
     left: 0,
   };
-
-  private _addEvent = (name: EventName, handler: UIEventHandler) =>
-    this._disposables.add(this.root.uiEventDispatcher.add(name, handler));
 
   private get _allBlocksRect() {
     const viewportElement = this._viewportElement;

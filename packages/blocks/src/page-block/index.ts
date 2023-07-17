@@ -28,6 +28,7 @@ export const pageBlockSpec: LitBlockSpec = {
       literal`affine-slash-menu-widget`,
       literal`affine-linked-page-widget`,
       literal`affine-dragging-area-widget`,
+      literal`affine-drag-handle-widget`,
     ],
   },
 };
@@ -40,6 +41,7 @@ export const edgelessBlockSpec: LitBlockSpec = {
     widgets: [
       literal`affine-slash-menu-widget`,
       literal`affine-linked-page-widget`,
+      literal`affine-drag-handle-widget`,
     ],
   },
 };
