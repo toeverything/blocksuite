@@ -294,7 +294,7 @@ test('change shape stroke width', async ({ page }) => {
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
   await changeShapeStrokeWidth(page);
   await page.mouse.move(start.x + 5, start.y + 5);
-  await assertEdgelessHoverRect(page, [100, 150, 100, 1000]);
+  await assertEdgelessHoverRect(page, [100, 150, 100, 100]);
 
   await waitNextFrame(page);
 
