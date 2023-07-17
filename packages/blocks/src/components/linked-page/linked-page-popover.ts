@@ -14,7 +14,7 @@ import { styles } from './styles.js';
 export class LinkedPagePopover extends WithDisposable(LitElement) {
   static override styles = styles;
 
-  @property()
+  @property({ attribute: false })
   options!: LinkedPageOptions;
 
   @state()
