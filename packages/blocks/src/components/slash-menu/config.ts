@@ -151,6 +151,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         action: ({ model }) => {
           insertContent(model, '@');
           const pageBlock = getPageBlock(model);
+          // FIXME not work when customize element
           const linkedPageWidget = pageBlock?.querySelector<LinkedPageWidget>(
             'affine-linked-page-widget'
           );
