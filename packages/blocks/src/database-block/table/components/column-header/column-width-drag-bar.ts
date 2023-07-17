@@ -36,6 +36,10 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
     .column-width-drag-bar:hover .preview-bar {
       opacity: 1;
     }
+
+    .show-preview-bar .preview-bar {
+      opacity: 1;
+    }
   `;
   @property({ attribute: false })
   left!: number;
@@ -57,6 +61,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
     const scale = rect.width / dragBarWidth;
     const tableRect = tableContainer.getBoundingClientRect();
     const left = rect.left + rect.width / 2 - this.column.width * scale - scale;
+    const startLeft = bar.offsetLeft;
 
     const preview = createWidthAdjustPreview(
       database,
@@ -78,11 +83,17 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
           )
         );
         preview.display(width);
+
+        if (!bar.classList.contains('show-preview-bar')) {
+          bar.classList.add('show-preview-bar');
+        }
+        bar.style.left = `${startLeft + width - this.column.width}px`;
         return {
           width,
         };
       },
       onDrop: ({ width }) => {
+        bar.classList.remove('show-preview-bar');
         tableContainer.style.pointerEvents = 'auto';
         this.column.updateWidth(width);
         preview.remove();
