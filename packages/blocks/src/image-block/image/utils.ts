@@ -11,16 +11,20 @@ async function getImageBlob(model: BaseBlockModel) {
 
   if (!blob) return null;
 
-  // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
-  // @ts-ignore
-  const FileType = await import('file-type/browser');
-  if (window.Buffer === undefined) {
-    window.Buffer = Buffer;
-  }
-  const buffer = await blob.arrayBuffer();
-  const fileType = await FileType.fromBuffer(buffer);
+  if (!blob.type) {
+    // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
+    // @ts-ignore
+    const FileType = await import('file-type/browser');
+    if (window.Buffer === undefined) {
+      window.Buffer = Buffer;
+    }
+    const buffer = await blob.arrayBuffer();
+    const fileType = await FileType.fromBuffer(buffer);
 
-  if (!fileType?.mime.match(/^image\/(gif|png|jpe?g)$/)) return null;
+    if (!fileType?.mime.match(/^image\/(gif|png|jpe?g)$/)) return null;
+
+    return new Blob([buffer], { type: fileType.mime });
+  }
 
   return blob;
 }
