@@ -16,7 +16,7 @@ import {
   type SurfaceManager,
   type TextElement,
 } from '@blocksuite/phasor';
-import { normalizeTextBound } from '@blocksuite/phasor/elements/text/utils.js';
+import { normalizeTextBound } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
