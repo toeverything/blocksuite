@@ -26,6 +26,7 @@ import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { CANVAS_TEXT_FONT } from '../../utils/text.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
 import {
   type ColorEvent,
@@ -59,11 +60,11 @@ function getMostCommonFontFamily(
 }
 
 function areAllTextsBold(texts: TextElement[]): boolean {
-  return texts.every(text => text.isBold);
+  return texts.every(text => text.bold);
 }
 
 function areAllTextsItalic(texts: TextElement[]): boolean {
-  return texts.every(text => text.isItalic);
+  return texts.every(text => text.italic);
 }
 
 @customElement('edgeless-change-text-button')
@@ -150,6 +151,17 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   private _textFontFamilyPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  // the bound of the text element may change when the text styles changes
+  private _normalizeTextBound(text: TextElement) {
+    const newBound = normalizeTextBound(
+      text,
+      new Bound(text.x, text.y, text.w, text.h)
+    );
+    this.surface.updateElement<'text'>(text.id, {
+      xywh: newBound.serialize(),
+    });
+  }
+
   private _setTextColor(color: CssVariableName) {
     this.texts.forEach(text => {
       this.surface.updateElement<'text'>(text.id, {
@@ -173,32 +185,24 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
       this.surface.updateElement<'text'>(text.id, {
         fontFamily,
       });
+      this._normalizeTextBound(text);
+    });
+    this.slots.selectionUpdated.emit({ ...this.selectionState });
+  }
 
-      // the change of font family will change the bound of the text
-      const newBound = normalizeTextBound(
-        text,
-        new Bound(text.x, text.y, text.w, text.h)
-      );
+  private _setTextsBold(bold: boolean) {
+    this.texts.forEach(text => {
       this.surface.updateElement<'text'>(text.id, {
-        xywh: newBound.serialize(),
+        bold,
       });
     });
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
-  private _setTextsBold(isBold: boolean) {
+  private _setTextsItalic(italic: boolean) {
     this.texts.forEach(text => {
       this.surface.updateElement<'text'>(text.id, {
-        isBold: isBold,
-      });
-    });
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
-  }
-
-  private _setTextsItalic(isItalic: boolean) {
-    this.texts.forEach(text => {
-      this.surface.updateElement<'text'>(text.id, {
-        isItalic: isItalic,
+        italic,
       });
     });
     this.slots.selectionUpdated.emit({ ...this.selectionState });
@@ -279,7 +283,7 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <div class="font-family-panel-container text-font-family">
         <edgeless-font-family-panel
-          .value=${selectedFontFamily}
+          .value=${selectedFontFamily as CANVAS_TEXT_FONT}
           .onSelect=${(value: EdgelessFontFamilyPanel['value']) => {
             this._setFontFamily(value);
           }}

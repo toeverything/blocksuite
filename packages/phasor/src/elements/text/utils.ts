@@ -33,17 +33,17 @@ export function getFontString({
   fontSize,
   fontFamily,
   lineHeight,
-  isBold = false,
-  isItalic = false,
+  bold = false,
+  italic = false,
 }: {
-  isBold?: boolean;
-  isItalic?: boolean;
+  bold?: boolean;
+  italic?: boolean;
   fontSize: number;
   lineHeight: string;
   fontFamily: string;
 }): string {
-  return `${isItalic ? 'italic' : ''} ${
-    isBold ? 'bold' : ''
+  return `${italic ? 'italic' : ''} ${
+    bold ? 'bold' : ''
   } ${fontSize}px/${lineHeight} ${fontFamily}`.trim();
 }
 
@@ -323,6 +323,8 @@ export function normalizeTextBound(text: TextElement, bound: Bound): Bound {
     fontSize: fontSize,
     lineHeight: `${lineHeightPx}px`,
     fontFamily: fontFamily,
+    bold: text.bold,
+    italic: text.italic,
   });
 
   const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
