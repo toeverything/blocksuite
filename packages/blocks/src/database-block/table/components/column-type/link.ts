@@ -6,11 +6,10 @@ import { query } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
 import {
-  isValidLink,
+  isValidUrl,
   normalizeUrl,
-} from '../../../../components/link-popover/link-popover.js';
+} from '../../../../__internal__/utils/url.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
-
 export class LinkCell extends DatabaseCellElement<string> {
   static override tag = literal`affine-database-link-cell`;
 
@@ -63,12 +62,12 @@ export class LinkCell extends DatabaseCellElement<string> {
     event.stopPropagation();
     const value = this.value ?? '';
 
-    if (!value || !isValidLink(value)) {
+    if (!value || !isValidUrl(value)) {
       this.selectCurrentCell(true);
       return;
     }
 
-    if (isValidLink(value)) {
+    if (isValidUrl(value)) {
       const target = event.target as HTMLElement;
       const link = target.querySelector<HTMLAnchorElement>('.link-node');
       if (link) {
@@ -150,7 +149,7 @@ export class LinkCellEditing extends DatabaseCellElement<string> {
 
   private _setValue = (value: string = this._container.value) => {
     let url = value;
-    if (isValidLink(value)) {
+    if (isValidUrl(value)) {
       url = normalizeUrl(value);
     }
 

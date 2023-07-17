@@ -103,6 +103,15 @@ export class PageMetaData extends WithDisposable(LitElement) {
       align-items: center;
     }
 
+    @media print {
+      .meta-data-expanded-title .close {
+        display: none;
+      }
+      .expand {
+        display: none;
+      }
+    }
+
     .meta-data-expanded-title .close:hover {
       background-color: var(--affine-hover-color);
     }

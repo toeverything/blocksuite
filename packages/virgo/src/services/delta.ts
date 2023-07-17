@@ -1,7 +1,7 @@
-import type { TemplateResult } from 'lit';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { VirgoLine } from '../index.js';
 import type { DeltaInsert } from '../types.js';
 import type { DeltaEntry, VRange } from '../types.js';
 import type { BaseTextAttributes } from '../utils/index.js';
@@ -19,32 +19,81 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     return this._editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
   }
 
+  get normalizedDeltas() {
+    // According to our regulations, the length of each "embed" node should only be 1.
+    // Therefore, if the length of an "embed" type node is greater than 1,
+    // we will divide it into multiple parts.
+    const result: DeltaInsert<TextAttributes>[] = [];
+    for (const delta of this.deltas) {
+      if (this._editor.isEmbed(delta)) {
+        const dividedDeltas = [...delta.insert].map(subInsert => ({
+          insert: subInsert,
+          attributes: delta.attributes,
+        }));
+        result.push(...dividedDeltas);
+      } else {
+        result.push(delta);
+      }
+    }
+    return result;
+  }
+
   mapDeltasInVRange = <Result>(
     vRange: VRange,
-    callback: (delta: DeltaInsert<TextAttributes>, index: number) => Result
+    callback: (
+      delta: DeltaInsert<TextAttributes>,
+      rangeIndex: number,
+      deltaIndex: number
+    ) => Result,
+    normalize = false
   ) => {
-    const deltas = this.deltas;
+    const deltas = normalize ? this.normalizedDeltas : this.deltas;
     const result: Result[] = [];
 
-    deltas.reduce((index, delta) => {
+    deltas.reduce((rangeIndex, delta, deltaIndex) => {
       const length = delta.insert.length;
       const from = vRange.index - length;
       const to = vRange.index + vRange.length;
 
       const deltaInRange =
-        index >= from &&
-        (index < to || (vRange.length === 0 && index === vRange.index));
+        rangeIndex >= from &&
+        (rangeIndex < to ||
+          (vRange.length === 0 && rangeIndex === vRange.index));
 
       if (deltaInRange) {
-        const value = callback(delta, index);
+        const value = callback(delta, rangeIndex, deltaIndex);
         result.push(value);
       }
 
-      return index + length;
+      return rangeIndex + length;
     }, 0);
 
     return result;
   };
+
+  isNormalizedDeltaSelected(
+    normalizedDeltaIndex: number,
+    vRange: VRange
+  ): boolean {
+    let result = false;
+    if (vRange.length >= 1) {
+      this._editor.mapDeltasInVRange(
+        vRange,
+        (a, rangeIndex, deltaIndex) => {
+          if (
+            deltaIndex === normalizedDeltaIndex &&
+            rangeIndex >= vRange.index
+          ) {
+            result = true;
+          }
+        },
+        // we need to normalize the delta here,
+        true
+      );
+    }
+
+    return result;
+  }
 
   /**
    * Here are examples of how this function computes and gets the delta.
@@ -152,27 +201,48 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
   };
 
   // render current deltas to VLines
-  render = async () => {
+  render = async (syncVRange = true) => {
     const rootElement = this._editor.rootElement;
 
-    const deltas = this.deltas;
-    const chunks = deltaInsertsToChunks(deltas);
+    const normalizedDeltas = this.normalizedDeltas;
+    const chunks = deltaInsertsToChunks(normalizedDeltas);
 
+    let normalizedDeltaIndex = 0;
     // every chunk is a line
     const lines = chunks.map(chunk => {
-      const elementTs: TemplateResult<1>[] = [];
       if (chunk.length > 0) {
+        const lineDeltas: [DeltaInsert<TextAttributes>, number][] = [];
         chunk.forEach(delta => {
-          const element = renderElement(
-            delta,
-            this._editor.attributeService.normalizeAttributes
-          );
-
-          elementTs.push(element);
+          lineDeltas.push([delta, normalizedDeltaIndex]);
+          normalizedDeltaIndex++;
         });
-      }
 
-      return html`<v-line .elements=${elementTs}></v-line>`;
+        const elements: VirgoLine['elements'] = lineDeltas.map(
+          ([delta, normalizedDeltaIndex]) => {
+            let selected = false;
+            const vRange = this._editor.getVRange();
+            if (vRange) {
+              selected = this.isNormalizedDeltaSelected(
+                normalizedDeltaIndex,
+                vRange
+              );
+            }
+
+            return [
+              renderElement(
+                delta,
+                this._editor.attributeService.normalizeAttributes,
+                selected
+              ),
+              delta,
+            ];
+          }
+        );
+
+        return html`<v-line .elements=${elements}></v-line>`;
+      } else {
+        return html`<v-line .elements=${[]}></v-line>`;
+      }
     });
 
     try {
@@ -193,9 +263,11 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     const vLines = Array.from(rootElement.querySelectorAll('v-line'));
     await Promise.all(vLines.map(line => line.updateComplete));
 
-    // We need to synchronize the selection immediately after rendering is completed,
-    // otherwise there is a possibility of an error in the cursor position
-    this._editor.rangeService.syncVRange();
+    if (syncVRange) {
+      // We need to synchronize the selection immediately after rendering is completed,
+      // otherwise there is a possibility of an error in the cursor position
+      this._editor.rangeService.syncVRange();
+    }
 
     this._editor.slots.updated.emit();
   };

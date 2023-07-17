@@ -15,7 +15,7 @@ export function normalizeShapeBound(shape: ShapeElement, bound: Bound): Bound {
 
   const yText = shape.text;
   const { fontFamily, fontSize } = shape;
-  const lineHeight = getLineHeight(fontFamily, fontSize.toString());
+  const lineHeight = getLineHeight(fontFamily, fontSize);
   const font = getFontString({
     fontSize: fontSize,
     lineHeight: `${lineHeight}px`,

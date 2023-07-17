@@ -44,7 +44,11 @@ export function CodeOptionTemplate({
         z-index: var(--affine-z-index-popover);
         background: var(--affine-background-overlay-panel-color);
       }
-
+      .has-tool-tip.delete-code-button:hover {
+        background: var(--affine-background-error-color);
+        fill: var(--affine-error-color);
+        color: var(--affine-error-color);
+      }
       ${tooltipStyle}
     </style>
 
@@ -80,7 +84,7 @@ export function CodeOptionTemplate({
         : html`<icon-button
             size="32px"
             data-testid="delete-button"
-            class="has-tool-tip"
+            class="has-tool-tip delete-code-button"
             @click=${() => {
               if (readonly) return;
               model.page.deleteBlock(model);

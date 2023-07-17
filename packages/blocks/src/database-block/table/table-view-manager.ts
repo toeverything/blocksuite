@@ -137,7 +137,10 @@ export class DatabaseTableViewManager implements TableViewManager {
       .filter(v => {
         if (searchString) {
           const containsSearchString = this.columns.some(column => {
-            return column.getStringValue(v.id).includes(searchString);
+            return column
+              .getStringValue(v.id)
+              ?.toLowerCase()
+              .includes(searchString?.toLowerCase());
           });
           if (!containsSearchString) {
             return false;
@@ -422,7 +425,9 @@ export class DatabaseTitleColumnManager implements ColumnManager {
 
   getValue(rowId: string): unknown | undefined {
     const block = this._model.page.getBlockById(rowId);
-    assertExists(block);
+    if (!block) {
+      return;
+    }
     return this._root.renderModel(block);
   }
 

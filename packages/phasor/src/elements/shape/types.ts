@@ -31,6 +31,7 @@ export interface IShape extends ISurfaceElement {
   color?: string;
   fontSize?: SHAPE_TEXT_FONT_SIZE;
   fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right';
   textHorizontalAlign?: 'left' | 'center' | 'right';
   textVerticalAlign?: 'top' | 'center' | 'bottom';
 }

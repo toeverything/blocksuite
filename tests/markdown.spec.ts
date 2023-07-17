@@ -187,74 +187,152 @@ test('markdown shortcut', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('markdown inline-text', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await resetHistory(page);
+test.describe('markdown inline-text', async () => {
+  test.beforeEach(async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await resetHistory(page);
+  });
 
-  await type(page, '***test*** ');
-  await assertTextFormat(page, 0, 0, { bold: true, italic: true });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 6, { bold: true, italic: true });
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['***test*** ']);
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['']);
+  test('bolditalic', async ({ page }) => {
+    await type(page, '***test*** ');
+    await assertTextFormat(page, 0, 0, { bold: true, italic: true });
+    await type(page, 'test');
+    await assertTextFormat(page, 0, 6, { bold: true, italic: true });
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['***test*** ']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
 
-  await waitNextFrame(page);
-  await type(page, '**test** ');
-  await assertTextFormat(page, 0, 0, { bold: true });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 6, { bold: true });
-  await undoByClick(page);
-  await assertRichTexts(page, ['**test** ']);
-  await undoByClick(page);
-  await assertRichTexts(page, ['']);
+    // '*** ' will be converted to divider, so needn't test this case here
 
-  await waitNextFrame(page);
-  await type(page, '*test* ');
-  await assertTextFormat(page, 0, 0, { italic: true });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 6, { italic: true });
-  await undoByClick(page);
-  await assertRichTexts(page, ['*test* ']);
-  await undoByClick(page);
-  await assertRichTexts(page, ['']);
+    await waitNextFrame(page);
+    await type(page, '***test *** ');
+    await assertRichTexts(page, ['***test *** ']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
+  });
 
-  await waitNextFrame(page);
-  await type(page, '~~test~~ ');
-  await assertTextFormat(page, 0, 0, { strike: true });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 6, { strike: true });
-  await undoByClick(page);
-  await waitNextFrame(page);
-  await assertRichTexts(page, ['~~test~~ ']);
-  await undoByClick(page);
-  await assertRichTexts(page, ['']);
+  test('bold', async ({ page }) => {
+    await type(page, '**test** ');
+    await assertTextFormat(page, 0, 0, { bold: true });
+    await type(page, 'test');
+    await assertTextFormat(page, 0, 6, { bold: true });
+    await undoByClick(page);
+    await assertRichTexts(page, ['**test** ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
 
-  await waitNextFrame(page);
-  await type(page, '~test~ ');
-  await assertTextFormat(page, 0, 0, { underline: true });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 6, { underline: true });
-  await undoByClick(page);
-  await assertRichTexts(page, ['~test~ ']);
-  await undoByClick(page);
-  await assertRichTexts(page, ['']);
+    await waitNextFrame(page);
+    await type(page, '** test** ');
+    await assertRichTexts(page, ['** test** ']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
 
-  await waitNextFrame(page);
-  await type(page, '`test` ');
-  await assertTextFormat(page, 0, 0, { code: true });
-  await type(page, 'test');
-  await assertTextFormat(page, 0, 6, {});
-  await undoByClick(page);
-  await assertRichTexts(page, ['`test` ']);
-  await undoByClick(page);
-  await assertRichTexts(page, ['']);
+    await waitNextFrame(page);
+    await type(page, '**test ** ');
+    await assertRichTexts(page, ['**test ** ']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
 
-  // TODO
-  // await assertRichTexts(page, ['\n']);
+    await waitNextFrame(page);
+    await type(page, '** test ** ');
+    await assertRichTexts(page, ['** test ** ']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
+  });
+
+  test('italic', async ({ page }) => {
+    await type(page, '*test* ');
+    await assertTextFormat(page, 0, 0, { italic: true });
+    await type(page, 'test');
+    await assertTextFormat(page, 0, 6, { italic: true });
+    await undoByClick(page);
+    await assertRichTexts(page, ['*test* ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+
+    // '* ' will be converted to bulleted list, so needn't test this case here
+
+    await waitNextFrame(page);
+    await type(page, '*test * ');
+    await assertRichTexts(page, ['*test * ']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
+  });
+
+  test('strike', async ({ page }) => {
+    await type(page, '~~test~~ ');
+    await assertTextFormat(page, 0, 0, { strike: true });
+    await type(page, 'test');
+    await assertTextFormat(page, 0, 6, { strike: true });
+    await undoByClick(page);
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['~~test~~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+
+    await waitNextFrame(page);
+    await type(page, '~~ test~~ ');
+    await assertRichTexts(page, ['~~ test~~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+
+    await waitNextFrame(page);
+    await type(page, '~~test ~~ ');
+    await assertRichTexts(page, ['~~test ~~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+
+    await waitNextFrame(page);
+    await type(page, '~~ test ~~ ');
+    await assertRichTexts(page, ['~~ test ~~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+  });
+
+  test('underline', async ({ page }) => {
+    await type(page, '~test~ ');
+    await assertTextFormat(page, 0, 0, { underline: true });
+    await type(page, 'test');
+    await assertTextFormat(page, 0, 6, { underline: true });
+    await undoByClick(page);
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['~test~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+
+    await waitNextFrame(page);
+    await type(page, '~ test~ ');
+    await assertRichTexts(page, ['~ test~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+
+    await waitNextFrame(page);
+    await type(page, '~test ~ ');
+    await assertRichTexts(page, ['~test ~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+
+    await waitNextFrame(page);
+    await type(page, '~ test ~ ');
+    await assertRichTexts(page, ['~ test ~ ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+  });
+
+  test('code', async ({ page }) => {
+    await waitNextFrame(page);
+    await type(page, '`test` ');
+    await assertTextFormat(page, 0, 0, { code: true });
+    await type(page, 'test');
+    await assertTextFormat(page, 0, 6, {});
+    await undoByClick(page);
+    await assertRichTexts(page, ['`test` ']);
+    await undoByClick(page);
+    await assertRichTexts(page, ['']);
+  });
 });
 
 test('inline code should work when pressing Enter followed by Backspace twice', async ({

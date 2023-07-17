@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/phasor';
+import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
@@ -14,6 +14,7 @@ import {
   getPageBlock,
   isPageMode,
   type SerializedBlock,
+  type TopLevelBlockModel,
 } from '../utils/index.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
@@ -53,6 +54,15 @@ export class ContentParser {
   ) {
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
+    // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
+    if (
+      !this._imageProxyEndpoint &&
+      location.protocol === 'https:' &&
+      location.hostname.split('.').includes('affine')
+    ) {
+      this._imageProxyEndpoint =
+        'https://workers.toeverything.workers.dev/proxy/image';
+    }
     this._htmlParser = new HtmlParser(
       this,
       page,
@@ -107,9 +117,11 @@ export class ContentParser {
     return await promise;
   }
 
-  private async _edgelessToCanvas(
+  public async edgelessToCanvas(
     edgeless: EdgelessPageBlockComponent,
-    bound: IBound
+    bound: IBound,
+    nodes?: TopLevelBlockModel[],
+    surfaces?: PhasorElement[]
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
     if (!root) return;
@@ -149,13 +161,17 @@ export class ContentParser {
       onclone: function (documentClone: Document, element: HTMLElement) {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
+        const layer = documentClone.querySelector('.affine-edgeless-layer');
+        if (layer && layer instanceof HTMLElement) {
+          layer.style.setProperty('transform', 'none');
+        }
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
       proxy: this._imageProxyEndpoint,
     };
 
-    const nodeElements = edgeless.getSortedElementsByBound(bound);
+    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
     for (const nodeElement of nodeElements) {
       const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
       const blockBound = xywhArrayToObject(nodeElement);
@@ -172,7 +188,10 @@ export class ContentParser {
       );
     }
 
-    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(bound);
+    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
+      bound,
+      surfaces
+    );
     ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 
     return canvas;
@@ -195,6 +214,16 @@ export class ContentParser {
           element.tagName === 'EDGELESS-TOOLBAR' ||
           element.classList.contains('dg')
         ) {
+          return true;
+        } else if (
+          (element.classList.contains('close') &&
+            element.parentElement?.classList.contains(
+              'meta-data-expanded-title'
+            )) ||
+          (element.classList.contains('expand') &&
+            element.parentElement?.classList.contains('meta-data'))
+        ) {
+          // the close and expand buttons in affine-page-meta-data is not needed to be showed
           return true;
         } else {
           return false;
@@ -224,7 +253,7 @@ export class ContentParser {
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      return await this._edgelessToCanvas(edgeless, bound);
+      return await this.edgelessToCanvas(edgeless, bound);
     }
   }
 

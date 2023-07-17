@@ -148,8 +148,11 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
     }
     .menu-item:hover {
       background: var(--affine-hover-color);
-      fill: var(--affine-primary-color);
-      color: var(--affine-primary-color);
+    }
+    .menu-item:hover.delete {
+      background: var(--affine-background-error-color);
+      fill: var(--affine-error-color);
+      color: var(--affine-error-color);
     }
     .menu-item svg {
       margin: 0 8px;

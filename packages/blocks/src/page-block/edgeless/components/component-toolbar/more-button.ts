@@ -42,7 +42,7 @@ function Actions(onClick: (action: Action) => void) {
     action => action.type,
     action =>
       html`<div
-        class="action-item"
+        class="action-item ${action.type}"
         @click=${() => onClick(action)}
         ?data-disabled=${action.disabled}
       >
@@ -91,6 +91,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
     .action-item:hover {
       background-color: var(--affine-hover-color);
+    }
+    .action-item:hover.delete {
+      background-color: var(--affine-background-error-color);
+      color: var(--affine-error-color);
     }
 
     .action-item[data-disabled] {
