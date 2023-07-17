@@ -30,6 +30,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _isComposing = false;
 
+  private _ctrlDelete = false;
+
   private _handlers: {
     keydown?: (event: KeyboardEvent) => void;
     paste?: (event: ClipboardEvent) => void;
@@ -337,9 +339,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (ctx.skipDefault) return;
 
     const { event: newEvent, data, vRange: newVRange } = ctx;
-
+    let inputType = newEvent.inputType;
+    if (inputType === 'deleteContentBackward' && this._ctrlDelete) {
+      inputType = 'deleteWordBackward';
+    }
     transformInput<TextAttributes>(
-      newEvent.inputType,
+      inputType,
       data,
       ctx.attributes ?? ({} as TextAttributes),
       newVRange,
@@ -352,6 +357,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _onKeyDown = (event: KeyboardEvent) => {
+    this._ctrlDelete = event.key === 'Backspace' && event.ctrlKey;
     if (!event.shiftKey) {
       const selectionRoot = findDocumentOrShadowRoot(this._editor);
       const selection = selectionRoot.getSelection();
