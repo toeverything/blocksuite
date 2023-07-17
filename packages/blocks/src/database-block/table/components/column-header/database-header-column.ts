@@ -238,7 +238,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'sub-menu',
             name: 'Column type',
             icon: TextIcon,
-            hide: () => !this.column.updateType,
+            hide: () => !this.column.updateType || this.column.type === 'title',
             options: {
               input: {
                 search: true,
@@ -259,7 +259,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Duplicate column',
             icon: DatabaseDuplicate,
-            hide: () => !this.column.duplicate,
+            hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
               this.column.duplicate?.();
               Promise.resolve().then(() => {
@@ -311,7 +311,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Move left',
             icon: DatabaseMoveLeft,
-            hide: () => this.column.isFirst || this.column.index === 1,
+            hide: () => this.column.isFirst,
             select: () => {
               const preId = this.tableViewManager.columnGetPreColumn(
                 this.column.id
@@ -329,7 +329,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Move Right',
             icon: DatabaseMoveRight,
-            hide: () => this.column.isLast || this.column.type === 'title',
+            hide: () => this.column.isLast,
             select: () => {
               const nextId = this.tableViewManager.columnGetNextColumn(
                 this.column.id
@@ -351,7 +351,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 type: 'action',
                 name: 'Delete column',
                 icon: DeleteIcon,
-                hide: () => !this.column.delete,
+                hide: () => !this.column.delete || this.column.type === 'title',
                 select: () => {
                   this.column.delete?.();
                 },
