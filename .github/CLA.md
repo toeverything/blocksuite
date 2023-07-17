@@ -82,3 +82,4 @@ Example:
 - Yukiniro, @Yukiniro, 2023/07/04
 - AliceLanniste @AliceLanniste 2023/07/10
 - Youhua Tang @youhua 2023/07/14
+- Rakesh Joshi @joshirakesh 2023/07/17

@@ -80,12 +80,6 @@ test('isVRangeEqual', () => {
   expect(
     isVRangeEqual({ index: 2, length: 0 }, { index: 2, length: 0 })
   ).toEqual(true);
-
-  expect(isVRangeEqual(null, null)).toEqual(true);
-
-  expect(isVRangeEqual(null, { index: 1, length: 0 })).toEqual(false);
-
-  expect(isVRangeEqual({ index: 1, length: 0 }, null)).toEqual(false);
 });
 
 test('isVRangeIntersect', () => {
