@@ -199,7 +199,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   checkSelection() {
     const selection = this.selection;
-    if (!selection || selection.databaseId !== this.databaseId) {
+    if (!selection || selection.databaseId !== this.blockId) {
       return;
     }
     if (selection.focus.rowIndex > this.view.rows.length - 1) {

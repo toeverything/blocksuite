@@ -180,6 +180,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       this.tableViewManager.slots.update.on(() => {
         this.requestUpdate();
+        this.selection.requestUpdate();
       })
     );
 
