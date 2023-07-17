@@ -1,17 +1,21 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRichTextByModel } from '../../__internal__/utils/query.js';
 import { cleanSpecifiedTail, createKeydownObserver } from '../utils.js';
-import { getMenus, type LinkedPageGroup } from './config.js';
+import type { LinkedPageOptions } from './config.js';
+import { type LinkedPageGroup } from './config.js';
 import { styles } from './styles.js';
 
 @customElement('affine-linked-page-popover')
 export class LinkedPagePopover extends WithDisposable(LitElement) {
   static override styles = styles;
+
+  @property()
+  options!: LinkedPageOptions;
 
   @state()
   private _position: {
@@ -37,7 +41,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   }
 
   private _updateActionList() {
-    this._actionGroup = getMenus({
+    this._actionGroup = this.options.getMenus({
       query: this._query,
       page: this._page,
       model: this.model,

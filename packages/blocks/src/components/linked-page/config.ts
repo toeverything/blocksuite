@@ -13,6 +13,18 @@ import { createPage } from '../../__internal__/utils/common-operations.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 import { showImportModal } from '../import-page/index.js';
 
+export type LinkedPageOptions = {
+  triggerKeys: string[];
+  ignoreBlockTypes: string[];
+  convertTriggerKey: boolean;
+  getMenus: (ctx: {
+    query: string;
+    page: Page;
+    pageMetas: PageMeta[];
+    model: BaseBlockModel;
+  }) => LinkedPageGroup[];
+};
+
 export type LinkedPageItem = {
   key: string;
   name: string;
