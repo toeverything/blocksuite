@@ -1,30 +1,21 @@
-import { ImportIcon, NewPageIcon, PageIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type PageMeta,
-} from '@blocksuite/store';
+import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createPage } from '../../__internal__/index.js';
-import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
-import { isFuzzyMatch } from '../../__internal__/utils/common.js';
-import {
-  getRichTextByModel,
-  getVirgoByModel,
-} from '../../__internal__/utils/query.js';
-import { showImportModal } from '../import-page/index.js';
+import { getRichTextByModel } from '../../__internal__/utils/query.js';
 import { cleanSpecifiedTail, createKeydownObserver } from '../utils.js';
+import type { LinkedPageOptions } from './config.js';
+import { type LinkedPageGroup } from './config.js';
 import { styles } from './styles.js';
-
-const DEFAULT_PAGE_NAME = 'Untitled';
 
 @customElement('affine-linked-page-popover')
 export class LinkedPagePopover extends WithDisposable(LitElement) {
   static override styles = styles;
+
+  @property({ attribute: false })
+  options!: LinkedPageOptions;
 
   @state()
   private _position: {
@@ -37,53 +28,25 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   private _query = '';
 
   @state()
-  private _pageList: PageMeta[] = [];
-
-  @state()
   private _activatedItemIndex = 0;
 
-  private get _actionList() {
-    const DISPLAY_LENGTH = 8;
-    const pageName = this._query || DEFAULT_PAGE_NAME;
-    const displayPageName =
-      pageName.slice(0, DISPLAY_LENGTH) +
-      (pageName.length > DISPLAY_LENGTH ? '..' : '');
-    const filteredPageList = this._pageList
-      .filter(({ id }) => id !== this._page.id)
-      .filter(({ title }) => isFuzzyMatch(title, this._query));
+  private _actionGroup: LinkedPageGroup[] = [];
 
-    return [
-      ...filteredPageList.map((page, idx) => ({
-        key: page.id,
-        name: page.title || DEFAULT_PAGE_NAME,
-        active: idx === this._activatedItemIndex,
-        icon: PageIcon,
-        action: () => this._insertLinkedNode('LinkedPage', page.id),
-      })),
+  private get _flattenActionList() {
+    return this._actionGroup
+      .map(group =>
+        group.items.map(item => ({ ...item, groupName: group.name }))
+      )
+      .flat();
+  }
 
-      // XXX The active condition is a bit tricky here
-      {
-        key: 'create-linked-page',
-        name: `Create "${displayPageName}" page`,
-        active: filteredPageList.length === this._activatedItemIndex,
-        icon: NewPageIcon,
-        action: () => this._createPage(),
-      },
-      // {
-      //   key: 'create-subpage',
-      //   name: `Create "${displayPageName}" subpage`,
-      //   active: filteredPageList.length + 1 === this._activatedItemIndex,
-      //   icon: NewPageIcon,
-      //   action: () => this._createSubpage(),
-      // },
-      {
-        key: 'import-linked-page',
-        name: `Import`,
-        active: filteredPageList.length + 1 === this._activatedItemIndex,
-        icon: ImportIcon,
-        action: () => this._importPage(),
-      },
-    ];
+  private _updateActionList() {
+    this._actionGroup = this.options.getMenus({
+      query: this._query,
+      page: this._page,
+      model: this.model,
+      pageMetas: this._page.workspace.meta.pageMetas,
+    });
   }
 
   @query('.linked-page-popover')
@@ -105,26 +68,33 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
     const richText = getRichTextByModel(this.model);
     assertExists(richText, 'RichText not found');
 
+    // init
+    this._updateActionList();
+    this._disposables.add(
+      this.model.page.workspace.slots.pagesUpdated.on(() => {
+        this._updateActionList();
+      })
+    );
+    this._disposables.addFromEvent(this, 'mousedown', e => {
+      // Prevent input from losing focus
+      e.preventDefault();
+    });
+
     createKeydownObserver({
       target: richText,
       onUpdateQuery: str => {
         this._query = str;
         this._activatedItemIndex = 0;
+        this._updateActionList();
       },
       abortController: this.abortController,
       onMove: step => {
+        const itemLen = this._flattenActionList.length;
         this._activatedItemIndex =
-          (this._actionList.length + this._activatedItemIndex + step) %
-          this._actionList.length;
+          (itemLen + this._activatedItemIndex + step) % itemLen;
 
         // Scroll to the active item
-        const item = this._actionList[this._activatedItemIndex];
-        if (
-          item.key === 'create-linked-page' ||
-          item.key === 'import-linked-page'
-        ) {
-          return;
-        }
+        const item = this._flattenActionList[this._activatedItemIndex];
         const shadowRoot = this.shadowRoot;
         if (!shadowRoot) {
           console.warn('Failed to find the shadow root!', this);
@@ -142,65 +112,18 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
         });
       },
       onConfirm: () => {
-        this._actionList[this._activatedItemIndex].action();
+        this.abortController.abort();
+        cleanSpecifiedTail(this.model, '@' + this._query);
+        this._flattenActionList[this._activatedItemIndex].action();
       },
       onEsc: () => {
         this.abortController.abort();
       },
     });
-    this._disposables.addFromEvent(this, 'mousedown', e => {
-      // Prevent input from losing focus
-      e.preventDefault();
-    });
-
-    this._pageList = this._page.workspace.meta.pageMetas;
-    this._disposables.add(
-      this.model.page.workspace.slots.pagesUpdated.on(() => {
-        this._pageList = this._page.workspace.meta.pageMetas;
-      })
-    );
   }
 
   updatePosition(position: { height: number; x: string; y: string }) {
     this._position = position;
-  }
-
-  private _insertLinkedNode(type: 'Subpage' | 'LinkedPage', pageId: string) {
-    this.abortController.abort();
-    const vEditor = getVirgoByModel(this.model);
-    assertExists(vEditor, 'Editor not found');
-    cleanSpecifiedTail(vEditor, '@' + this._query);
-    const vRange = vEditor.getVRange();
-    assertExists(vRange);
-    vEditor.insertText(vRange, REFERENCE_NODE, { reference: { type, pageId } });
-    vEditor.setVRange({
-      index: vRange.index + 1,
-      length: 0,
-    });
-  }
-
-  private async _createPage() {
-    const pageName = this._query;
-
-    const page = await createPage(this._page.workspace, { title: pageName });
-
-    this._insertLinkedNode('LinkedPage', page.id);
-  }
-
-  private _importPage() {
-    this.abortController.abort();
-    const onSuccess = (pageIds: string[]) => {
-      if (pageIds.length === 0) {
-        return;
-      }
-      const pageId = pageIds[0];
-      this._insertLinkedNode('LinkedPage', pageId);
-    };
-    showImportModal({
-      workspace: this._page.workspace,
-      multiple: false,
-      onSuccess,
-    });
   }
 
   override render() {
@@ -214,49 +137,40 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
           visibility: 'hidden',
         });
 
-    const pageList = this._actionList.slice(0, -2).map(
-      ({ key, name, action, active, icon }, index) => html`<icon-button
-        width="280px"
-        height="32px"
-        data-id=${key}
-        text=${name}
-        ?hover=${active}
-        @click=${action}
-        @mousemove=${() => {
-          // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
-          this._activatedItemIndex = index;
-        }}
-        >${icon}</icon-button
-      >`
-    );
-
-    const createList = this._actionList.slice(-2).map(
-      ({ key, name, action, active, icon }, index) => html`<icon-button
-        width="280px"
-        height="32px"
-        data-id=${key}
-        text=${name}
-        ?hover=${active}
-        @click=${action}
-        @mousemove=${() => {
-          // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
-          this._activatedItemIndex = this._actionList.length + index;
-        }}
-        >${icon}</icon-button
-      >`
-    );
-
+    // XXX This is a side effect
+    let accIdx = 0;
     return html`<div class="linked-page-popover" style="${style}">
-      ${pageList.length
-        ? html`<div class="group-title">Link to page</div>
-            <div class="group" style="overflow-y: scroll; max-height: 224px;">
-              ${pageList}
+      ${this._actionGroup
+        .filter(group => group.items.length)
+        .map((group, idx) => {
+          return html`
+            <div class="divider" ?hidden=${idx === 0}></div>
+            <div class="group-title">${group.name}</div>
+            <div class="group" style=${group.styles ?? ''}>
+              ${group.items.map(({ key, name, icon, action }) => {
+                accIdx++;
+                const curIdx = accIdx - 1;
+                return html`<icon-button
+                  width="280px"
+                  height="32px"
+                  data-id=${key}
+                  text=${name}
+                  ?hover=${this._activatedItemIndex === curIdx}
+                  @click=${() => {
+                    this.abortController.abort();
+                    cleanSpecifiedTail(this.model, '@' + this._query);
+                    action();
+                  }}
+                  @mousemove=${() => {
+                    // Use `mousemove` instead of `mouseover` to avoid navigate conflict with keyboard
+                    this._activatedItemIndex = curIdx;
+                  }}
+                  >${icon}</icon-button
+                >`;
+              })}
             </div>
-            <div class="divider"></div>`
-        : null}
-
-      <div class="group-title">New page</div>
-      ${createList}
+          `;
+        })}
     </div>`;
   }
 }

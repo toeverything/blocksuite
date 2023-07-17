@@ -109,13 +109,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             old.focus.rowIndex,
             old.focus.columnIndex
           );
-          const cell = container?.cell;
-          if (old.isEditing) {
-            cell?.onExitEditMode();
-            cell?.blurCell();
-            container.isEditing = false;
-          } else {
-            container.blur();
+          if (container) {
+            const cell = container.cell;
+            if (old.isEditing) {
+              cell?.onExitEditMode();
+              cell?.blurCell();
+              container.isEditing = false;
+            } else {
+              container.blur();
+            }
           }
         }
 
@@ -124,13 +126,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             selection.focus.rowIndex,
             selection.focus.columnIndex
           );
-          const cell = container?.cell;
-          if (selection.isEditing) {
-            cell?.onEnterEditMode();
-            container.isEditing = true;
-            cell?.focusCell();
-          } else {
-            container.focus();
+          if (container) {
+            const cell = container.cell;
+            if (selection.isEditing) {
+              cell?.onEnterEditMode();
+              container.isEditing = true;
+              cell?.focusCell();
+            } else {
+              container.focus();
+            }
           }
         }
       })
@@ -187,6 +191,25 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         return false;
       }),
     });
+  }
+
+  protected override updated() {
+    this.checkSelection();
+  }
+
+  checkSelection() {
+    const selection = this.selection;
+    if (!selection || selection.databaseId !== this.databaseId) {
+      return;
+    }
+    if (selection.focus.rowIndex > this.view.rows.length - 1) {
+      this.selection = undefined;
+      return;
+    }
+    if (selection.focus.columnIndex > this.view.columns.length - 1) {
+      this.selection = undefined;
+      return;
+    }
   }
 
   get selection(): DatabaseSelection | undefined {
@@ -444,10 +467,13 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     };
   }
 
-  getCellContainer(rowIndex: number, columnIndex: number) {
+  getCellContainer(
+    rowIndex: number,
+    columnIndex: number
+  ): DatabaseCellContainer | undefined {
     const row = this.rows().item(rowIndex);
     return row
-      .querySelectorAll('affine-database-cell-container')
+      ?.querySelectorAll('affine-database-cell-container')
       .item(columnIndex);
   }
 

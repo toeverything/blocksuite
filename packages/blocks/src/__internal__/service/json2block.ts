@@ -184,7 +184,20 @@ export async function addSerializedBlocks(
       image: json.image,
       crawled: json.crawled,
     };
-    const id = page.addBlock(flavour, blockProps, parent, index + i);
+
+    let id: string;
+    try {
+      page.schema.validate(flavour, parent.flavour);
+      id = page.addBlock(flavour, blockProps, parent, index + i);
+    } catch {
+      id = page.addBlock(
+        'affine:paragraph',
+        { type: 'text' },
+        parent,
+        index + i
+      );
+    }
+
     addedBlockIds.push(id);
     const model = page.getBlockById(id);
     assertExists(model);

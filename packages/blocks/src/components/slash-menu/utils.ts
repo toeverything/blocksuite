@@ -6,7 +6,7 @@ import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/ty
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 
 export type SlashMenuOptions = {
-  triggerKeys: string[];
+  isTriggerKey: (e: KeyboardEvent) => boolean;
   menus: {
     name: string;
     items: SlashItem[];

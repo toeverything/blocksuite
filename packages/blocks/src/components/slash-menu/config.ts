@@ -21,6 +21,7 @@ import { getServiceOrRegister } from '../../__internal__/service.js';
 import {
   createPage,
   getCurrentNativeRange,
+  getPageBlock,
   getVirgoByModel,
   resetNativeSelection,
   uploadImageFromLocal,
@@ -33,7 +34,7 @@ import {
   onModelTextUpdated,
   updateBlockType,
 } from '../../page-block/utils/index.js';
-import { showLinkedPagePopover } from '../linked-page/index.js';
+import type { LinkedPageWidget } from '../linked-page/index.js';
 import { toast } from '../toast.js';
 import {
   formatDate,
@@ -149,7 +150,16 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           !!model.page.awarenessStore.getFlag('enable_linked_page'),
         action: ({ model }) => {
           insertContent(model, '@');
-          showLinkedPagePopover({ model, range: getCurrentNativeRange() });
+          const pageBlock = getPageBlock(model);
+          // FIXME not work when customize element
+          const linkedPageWidget = pageBlock?.querySelector<LinkedPageWidget>(
+            'affine-linked-page-widget'
+          );
+          assertExists(linkedPageWidget);
+          // Wait for range to be updated
+          setTimeout(() => {
+            linkedPageWidget.showLinkedPage(model);
+          });
         },
       },
     ],

@@ -13,6 +13,7 @@ import type { IText, ITextDelta } from './types.js';
 import {
   deltaInsertsToChunks,
   getFontString,
+  getLineHeight,
   getTextWidth,
   isRTL,
 } from './utils.js';
@@ -84,7 +85,7 @@ export class TextElement extends SurfaceElement<IText> {
     const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
     const lines = deltaInsertsToChunks(deltas);
 
-    const lineHeightPx = h / lines.length;
+    const lineHeightPx = getLineHeight(fontFamily, fontSize);
     const font = getFontString({
       isBold,
       isItalic,
@@ -92,8 +93,6 @@ export class TextElement extends SurfaceElement<IText> {
       lineHeight: `${lineHeightPx}px`,
       fontFamily: fontFamily,
     });
-    const horizontalOffset =
-      textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
     for (const [lineIndex, line] of lines.entries()) {
       let beforeTextWidth = 0;
@@ -116,13 +115,16 @@ export class TextElement extends SurfaceElement<IText> {
 
         ctx.textBaseline = 'ideographic';
 
+        // 0.5 is a "magic number" used to align the text rendered on the canvas with the text in the DOM.
+        // This approach is employed until a better or proper handling method is discovered.
         ctx.fillText(
           str,
-          horizontalOffset + beforeTextWidth,
-          (lineIndex + 1) * lineHeightPx
+          // 1 comes from v-line padding
+          beforeTextWidth + 1,
+          (lineIndex + 1) * lineHeightPx + 0.5
         );
 
-        beforeTextWidth += getTextWidth(str, fontFamily);
+        beforeTextWidth += getTextWidth(str, font);
 
         if (shouldTemporarilyAttach) {
           ctx.canvas.remove();
