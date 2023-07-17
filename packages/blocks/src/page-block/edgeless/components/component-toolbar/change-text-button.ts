@@ -11,7 +11,12 @@ import {
   SmallArrowDownIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { SurfaceManager, TextElement } from '@blocksuite/phasor';
+import {
+  Bound,
+  type SurfaceManager,
+  type TextElement,
+} from '@blocksuite/phasor';
+import { normalizeTextBound } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -166,7 +171,16 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   private _setFontFamily(fontFamily: TextElement['fontFamily']) {
     this.texts.forEach(text => {
       this.surface.updateElement<'text'>(text.id, {
-        fontFamily: fontFamily,
+        fontFamily,
+      });
+
+      // the change of font family will change the bound of the text
+      const newBound = normalizeTextBound(
+        text,
+        new Bound(text.x, text.y, text.w, text.h)
+      );
+      this.surface.updateElement<'text'>(text.id, {
+        xywh: newBound.serialize(),
       });
     });
     this.slots.selectionUpdated.emit({ ...this.selectionState });

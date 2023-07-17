@@ -11,7 +11,10 @@ import {
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertEdgelessCanvasText } from '../utils/asserts.js';
+import {
+  assertEdgelessCanvasText,
+  assertEdgelessSelectedRect,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test('add text element in default mode', async ({ page }) => {
@@ -105,4 +108,34 @@ test('copy and paste', async ({ page }) => {
 
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertEdgelessCanvasText(page, 'hdddello');
+});
+
+test('normalize text element rect after change its font', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setEdgelessTool(page, 'text');
+
+  await page.mouse.click(130, 160);
+  await waitNextFrame(page);
+
+  await type(page, 'aaa\nbbbbbbbb\n\ncc');
+  await assertEdgelessCanvasText(page, 'aaa\nbbbbbbbb\n\ncc');
+  await assertEdgelessTool(page, 'default');
+  await page.mouse.click(120, 160);
+
+  await page.mouse.click(145, 175);
+  await assertEdgelessSelectedRect(page, [130, 160, 106, 156]);
+
+  const fontButton = page.locator('.text-font-family-button');
+  await fontButton.click();
+  const generalTextFont = page.getByText('General');
+  await generalTextFont.click();
+  await assertEdgelessSelectedRect(page, [130, 160, 106.7, 108]);
+
+  await fontButton.click();
+  const scibbledTextFont = page.getByText('Scibbled');
+  await scibbledTextFont.click();
+  await assertEdgelessSelectedRect(page, [130, 160, 104, 156]);
 });
