@@ -246,17 +246,19 @@ export class NoteCut extends WithDisposable(LitElement) {
 
     const page = this.edgelessPage.page;
 
-    const index = this._noteModel.children.findIndex(
+    const { index: originIndex, xywh, background, children } = this._noteModel;
+    const sliceIndex = children.findIndex(
       block => block.id === this._blockModel?.id
     );
-    const resetBlocks = this._noteModel.children.slice(index + 1);
+    const resetBlocks = children.slice(sliceIndex + 1);
     const { transformY: y } = this._lastPosition;
-    const [x, , width] = deserializeXYWH(this._noteModel.xywh);
+    const [x, , width] = deserializeXYWH(xywh);
     const newNoteId = page.addBlock(
       'affine:note',
       {
+        background,
         xywh: serializeXYWH(x, y + 30, width, DEFAULT_NOTE_HEIGHT),
-        index: this._noteModel.index + 1,
+        index: originIndex + 1,
       },
       page.root?.id
     );
