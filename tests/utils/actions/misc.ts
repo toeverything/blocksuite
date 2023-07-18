@@ -28,7 +28,9 @@ declare global {
   }
 }
 
-export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+export const defaultPlaygroundURL = new URL(
+  `http://localhost:5173/examples/examples/index.html`
+);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
