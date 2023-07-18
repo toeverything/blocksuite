@@ -513,7 +513,7 @@ export function calcPointToPointWithAngle(
   const nextY =
     (x1 - x2) * Math.sin(radian) + (y1 - y2) * Math.cos(radian) + y2;
   return {
-    x: nextX,
-    y: nextY,
+    x: Number(nextX.toFixed(6)),
+    y: Number(nextY.toFixed(6)),
   };
 }

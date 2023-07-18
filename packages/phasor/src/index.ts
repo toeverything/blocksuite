@@ -22,6 +22,7 @@ export { AStarRunner } from './utils/a-star.js';
 export * from './utils/bound.js';
 export {
   almostEqual,
+  calcPointToPointWithAngle,
   clamp,
   getBoundsWithRotation,
   getPointFromBoundsWithRotation,

@@ -1,5 +1,8 @@
-import { Bound, getQuadBoundsWithRotation } from '@blocksuite/phasor';
-import { calcPointToPointWithAngle } from '@blocksuite/phasor/utils/math-utils.js';
+import {
+  Bound,
+  calcPointToPointWithAngle,
+  getQuadBoundsWithRotation,
+} from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 
 import type { IPoint } from '../../../../__internal__/utils/types.js';
