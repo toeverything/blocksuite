@@ -161,8 +161,10 @@ export async function clipboardData2Blocks(
 
   const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
 
+  const isHTMLContainCode = /<code/.test(HTMLClipboardData);
   const shouldConvertMarkdown =
-    markdownUtils.checkIfTextContainsMd(textClipData);
+    !isHTMLContainCode && markdownUtils.checkIfTextContainsMd(textClipData);
+
   if (HTMLClipboardData && !shouldConvertMarkdown) {
     return await contentParser.htmlText2Block(
       removeFragmentFromHtmlClipboardString(HTMLClipboardData)

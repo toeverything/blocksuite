@@ -10,7 +10,6 @@ import {
   clickComponentToolbarMoreMenuButton,
   locatorEdgelessToolButton,
   locatorShapeStrokeStyleButton,
-  locatorShapeStrokeWidthButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
   resizeElementByHandle,
@@ -293,7 +292,7 @@ test('change shape stroke width', async ({ page }) => {
   await changeShapeStrokeColor(page, '--affine-palette-line-navy');
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  await changeShapeStrokeWidth(page, 5);
+  await changeShapeStrokeWidth(page);
   await page.mouse.move(start.x + 5, start.y + 5);
   await assertEdgelessHoverRect(page, [100, 150, 100, 100]);
 

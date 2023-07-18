@@ -304,14 +304,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   get resizeMode(): ResizeMode {
-    if (this.state.selected.length === 1) {
-      switch (this.state.selected[0].type) {
-        case 'connector':
-          return 'none';
-        case 'shape':
-          return 'all';
-      }
+    if (this.state.selected.every(element => element.type === 'connector')) {
+      return 'none';
     }
+
+    if (this.state.selected.every(element => element.type === 'shape')) {
+      return 'all';
+    }
+
     const hasBlockElement = this.state.selected.find(isTopLevelBlock);
     return hasBlockElement ? 'edge' : 'corner';
   }
@@ -398,7 +398,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       .translateSelf(-center.x, -center.y);
 
     const elements = selected.filter(
-      element => !isTopLevelBlock(element)
+      element => !isTopLevelBlock(element) && element.type !== 'connector'
     ) as PhasorElement[];
 
     elements.forEach(element => {

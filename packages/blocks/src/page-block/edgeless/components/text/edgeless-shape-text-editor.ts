@@ -178,6 +178,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
             : 'start',
         alignContent: 'center',
         gap: '0',
+        zIndex: '1',
       });
     }
 

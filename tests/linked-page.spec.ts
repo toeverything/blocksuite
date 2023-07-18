@@ -480,7 +480,7 @@ test.describe('linked page popover', () => {
     await focusRichText(page);
     await type(page, '@');
     await expect(linkedPagePopover).toBeVisible();
-    await expect(pageBtn).toHaveCount(2);
+    await expect(pageBtn).toHaveCount(4);
 
     await assertActivePageIdx(0);
     await page.keyboard.press('ArrowDown');
@@ -493,12 +493,17 @@ test.describe('linked page popover', () => {
     await page.keyboard.press('Shift+Tab');
     await assertActivePageIdx(0);
 
-    await expect(pageBtn).toHaveText(['page1', 'page2']);
+    await expect(pageBtn).toHaveText([
+      'page1',
+      'page2',
+      'Create "Untitled" page',
+      'Import',
+    ]);
     // page2
     //  ^  ^
     await type(page, 'a2');
-    await expect(pageBtn).toHaveCount(1);
-    await expect(pageBtn).toHaveText(['page2']);
+    await expect(pageBtn).toHaveCount(3);
+    await expect(pageBtn).toHaveText(['page2', 'Create "a2" page', 'Import']);
     await pressEnter(page);
     await expect(linkedPagePopover).toBeHidden();
     await assertExistRefText('page2');
