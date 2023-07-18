@@ -89,10 +89,10 @@ export interface DatasourceDocAdapter {
     }
   ) => Promise<Uint8Array | false>;
 
-  // send update to other clients
+  // send update to the datasource
   sendDocUpdate: (guid: string, update: Uint8Array) => Promise<void>;
 
-  // listen to update from other clients. Returns a function to unsubscribe.
+  // listen to update from the datasource. Returns a function to unsubscribe.
   // this is optional because some datasource might not support it
   onDocUpdate?(
     callback: (guid: string, update: Uint8Array) => void

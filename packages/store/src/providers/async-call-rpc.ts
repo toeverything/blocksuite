@@ -44,17 +44,6 @@ type Impl = {
   //#endregion
 };
 
-const createAsyncCallRPCDatasource = (impl: Impl): DatasourceDocAdapter => {
-  return {
-    queryDocState: (guid, opts) => {
-      return impl.queryDocState(guid, opts?.targetClientId);
-    },
-    sendDocUpdate: (guid, update) => {
-      return impl.sendDocUpdate(guid, update);
-    },
-  };
-};
-
 export const createAsyncCallRPCProviderCreator = (
   flavour: string,
   channel: AsyncCallOptions['channel'],
@@ -65,7 +54,10 @@ export const createAsyncCallRPCProviderCreator = (
 ): DocProviderCreator => {
   return (id, rootDoc, config): LazyDocProvider => {
     const awareness = config.awareness;
-    const cache = new Map<string, Uint8Array[]>();
+
+    const updateHandlers = new Set<
+      (guid: string, update: Uint8Array) => void
+    >();
 
     const impl = {
       queryDocState: async (guid, targetClientId) => {
@@ -79,32 +71,9 @@ export const createAsyncCallRPCProviderCreator = (
         return Y.encodeStateAsUpdate(doc);
       },
       sendDocUpdate: async (guid, update) => {
-        const doc = getDoc(rootDoc, guid);
-        if (!doc) {
-          // This case happens when the father doc is not yet updated,
-          //  so that the child doc is not yet created.
-          //  We need to put it into cache so that it can be applied later.
-          if (!cache.has(guid)) {
-            cache.set(guid, [update]);
-          } else {
-            (cache.get(guid) as Uint8Array[]).push(update);
-          }
-          return;
-        }
-        if (cache.has(guid)) {
-          const updates = cache.get(guid) as Uint8Array[];
-          updates.forEach(update => Y.applyUpdate(doc, update, channel));
-          cache.delete(guid);
-        }
-        Y.applyUpdate(doc, update, channel);
-        if (doc.store.pendingStructs) {
-          for (const clientId of doc.store.pendingStructs.missing.keys()) {
-            const update = await rpc.queryDocState(doc.guid, clientId);
-            if (update) {
-              Y.applyUpdate(doc, update, channel);
-            }
-          }
-        }
+        updateHandlers.forEach(handler => {
+          handler(guid, update);
+        });
       },
       queryAwareness: async () => {
         return encodeAwarenessUpdate(awareness, [awareness.clientID]);
@@ -130,6 +99,21 @@ export const createAsyncCallRPCProviderCreator = (
       ),
     });
 
+    const datasource: DatasourceDocAdapter = {
+      queryDocState: (guid, opts) => {
+        return rpc.queryDocState(guid, opts?.targetClientId);
+      },
+      sendDocUpdate: (guid, update) => {
+        return rpc.sendDocUpdate(guid, update);
+      },
+      onDocUpdate: callback => {
+        updateHandlers.add(callback);
+        return () => {
+          updateHandlers.delete(callback);
+        };
+      },
+    };
+
     const awarenessUpdateHandler = (
       changes: AwarenessChanges,
       origin: unknown
@@ -153,10 +137,7 @@ export const createAsyncCallRPCProviderCreator = (
       }
     }
 
-    const lazyProvider = createLazyProvider(
-      rootDoc,
-      createAsyncCallRPCDatasource(impl)
-    );
+    const lazyProvider = createLazyProvider(rootDoc, datasource);
 
     return {
       flavour,

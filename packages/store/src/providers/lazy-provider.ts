@@ -74,8 +74,15 @@ export const createLazyProvider = (
       const doc = getDoc(rootDoc, guid);
       if (doc) {
         applyUpdate(doc, update);
+        //
+        if (pendingMap.has(guid)) {
+          pendingMap.get(guid)?.forEach(update => applyUpdate(doc, update));
+          pendingMap.delete(guid);
+        }
       } else {
-        // doc is not found, we may need to store it temporarily
+        // This case happens when the father doc is not yet updated,
+        //  so that the child doc is not yet created.
+        //  We need to put it into cache so that it can be applied later.
         console.warn('idb: doc not found', guid);
         pendingMap.set(guid, (pendingMap.get(guid) ?? []).concat(update));
       }
@@ -86,9 +93,11 @@ export const createLazyProvider = (
     let refcount = refCountMap.get(guid) ?? 0;
     refcount++;
     totalRefCount++;
+    const _refcount = refcount;
+    const _totalRefCount = totalRefCount;
     refCountMap.set(guid, refcount);
     // console.log('idb: connect', guid, refcount);
-    if (refcount === 1) {
+    if (_refcount === 1) {
       const doc = getDoc(rootDoc, guid);
       if (doc) {
         await syncDoc(doc);
@@ -98,7 +107,7 @@ export const createLazyProvider = (
       }
     }
 
-    if (totalRefCount === 1) {
+    if (_totalRefCount === 1) {
       setupDatasourceListeners();
     }
   }
@@ -108,8 +117,10 @@ export const createLazyProvider = (
     refcount--;
     totalRefCount--;
     refCountMap.set(guid, refcount);
+    const _refcount = refcount;
+    const _totalRefCount = totalRefCount;
     // console.log('idb: disconnect', guid, refcount);
-    if (refcount === 0) {
+    if (_refcount === 0) {
       const doc = getDoc(rootDoc, guid);
       if (doc) {
         removeDocListener(doc);
@@ -118,7 +129,7 @@ export const createLazyProvider = (
       }
     }
 
-    if (totalRefCount === 0) {
+    if (_totalRefCount === 0) {
       datasourceUnsub?.();
       datasourceUnsub = undefined;
     }
