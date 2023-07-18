@@ -1,4 +1,5 @@
 import { Bound, getQuadBoundsWithRotation } from '@blocksuite/phasor';
+import { calcPointToPointWithAngle } from '@blocksuite/phasor/utils/math-utils.js';
 import { assertExists } from '@blocksuite/store';
 
 import type { IPoint } from '../../../../__internal__/utils/types.js';
@@ -276,6 +277,46 @@ export class HandleResizeManager {
 
       dp.x += deltaX;
       dp.y += deltaY;
+
+      if (
+        _dragDirection === HandleDirection.Left ||
+        _dragDirection === HandleDirection.Right ||
+        _dragDirection === HandleDirection.Top ||
+        _dragDirection === HandleDirection.Bottom
+      ) {
+        const dpo = draggingPoint.matrixTransform(m0);
+        const coorPoint = { x: 0, y: 0 };
+        const { x: x1, y: y1 } = calcPointToPointWithAngle(
+          { x: dpo.x, y: dpo.y },
+          coorPoint,
+          _rotate
+        );
+        const { x: x2, y: y2 } = calcPointToPointWithAngle(
+          { x: dp.x, y: dp.y },
+          coorPoint,
+          _rotate
+        );
+        const point = { x: 0, y: 0 };
+        if (
+          _dragDirection === HandleDirection.Left ||
+          _dragDirection === HandleDirection.Right
+        ) {
+          point.x = x2;
+          point.y = y1;
+        } else {
+          point.x = x1;
+          point.y = y2;
+        }
+
+        const { x: x3, y: y3 } = calcPointToPointWithAngle(
+          { x: point.x, y: point.y },
+          coorPoint,
+          -_rotate
+        );
+
+        dp.x = x3;
+        dp.y = y3;
+      }
 
       const cx = (fp.x + dp.x) / 2;
       const cy = (fp.y + dp.y) / 2;
