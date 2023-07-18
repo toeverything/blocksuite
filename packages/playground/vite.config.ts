@@ -30,6 +30,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: {
+        main: resolve(__dirname, 'index.html'),
         'examples/examples': resolve(__dirname, 'examples/examples/index.html'),
         'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
         'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
