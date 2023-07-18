@@ -243,10 +243,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     };
 
     const currentVRange = this._vEditor.getVRange();
-    const rangesEqual =
-      currentVRange &&
-      currentVRange.index === vRange.index &&
-      currentVRange.length === vRange.length;
+    const rangesEqual = this._vRangeEqual(currentVRange, vRange);
 
     if (rangesEqual) {
       return;
