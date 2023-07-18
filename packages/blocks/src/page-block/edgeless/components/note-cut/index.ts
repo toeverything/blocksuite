@@ -246,6 +246,7 @@ export class NoteCut extends WithDisposable(LitElement) {
 
     const page = this.edgelessPage.page;
 
+    const { background } = this._noteModel;
     const index = this._noteModel.children.findIndex(
       block => block.id === this._blockModel?.id
     );
@@ -255,6 +256,7 @@ export class NoteCut extends WithDisposable(LitElement) {
     const newNoteId = page.addBlock(
       'affine:note',
       {
+        background,
         xywh: serializeXYWH(x, y + 30, width, DEFAULT_NOTE_HEIGHT),
         index: this._noteModel.index + 1,
       },
