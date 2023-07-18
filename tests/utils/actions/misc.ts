@@ -965,7 +965,7 @@ export async function transformHtml(page: Page, data: string) {
   const promiseResult = await page.evaluate(
     ({ data }) => {
       const contentParser = new window.ContentParser(window.page);
-      return contentParser.htmlText2Block(data);
+      return contentParser.htmlText2Block(data, 'NotionHtml');
     },
     { data }
   );

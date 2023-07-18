@@ -155,7 +155,8 @@ export async function assertEdgelessCanvasText(page: Page, text: string) {
 }
 
 export async function assertRichImage(page: Page, count: number) {
-  const actual = await page.locator('.resizable-img').count();
+  const editor = getEditorLocator(page);
+  const actual = await editor.locator('.resizable-img').count();
   expect(actual).toEqual(count);
 }
 

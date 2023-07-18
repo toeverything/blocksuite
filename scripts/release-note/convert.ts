@@ -50,7 +50,7 @@ function analyzeReleaseNotes(filePath: string): string {
 
   let output = '';
   for (const pr of prs) {
-    output += `- ${pr.type}: ${pr.description} (#${pr.prNumber})\n`;
+    output += `- ${pr.type}: ${pr.description} @${pr.contributor} (#${pr.prNumber})\n`;
   }
 
   const result = `This release contains ${prCount} PRs and ${newContributorCount} new contributors.\n\n${output}`;

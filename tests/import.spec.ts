@@ -4,6 +4,7 @@ import { expect } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  transformHtml,
   transformMarkdown,
 } from './utils/actions/index.js';
 import { scoped, test } from './utils/playwright.js';
@@ -182,7 +183,7 @@ test(scoped`import notion html-format text todo head`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -316,7 +317,7 @@ test(scoped`import notion html-format list`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -382,7 +383,7 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -772,7 +773,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   const blocksString = JSON.stringify(blocks, null, 2);
   const matches = blocksString.matchAll(
     /("[A-Za-z0-9-_]{10}")|("var\(--affine-tag-[a-z]{3,10}\)")/g
@@ -839,7 +840,6 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
-          caption: '',
           flavour: 'affine:image',
           sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
           children: [],
@@ -874,7 +874,6 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
-          caption: '',
           flavour: 'affine:image',
           sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
           children: [],
@@ -1027,7 +1026,7 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
 //     },
 //   ];
 
-//   const blocks = await transformMarkdown(page, tempText);
+//   const blocks = await transformHtml(page, tempText);
 //   expect(blocks).toEqual(expectedValue);
 // });
 
@@ -1142,7 +1141,7 @@ test(scoped`import notion html-format toggle list`, async ({ page }) => {
     },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -1320,7 +1319,7 @@ test(scoped`import notion html-format inline`, async ({ page }) => {
     { flavour: 'affine:paragraph', type: 'text', text: [], children: [] },
   ];
 
-  const blocks = await transformMarkdown(page, tempText);
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });
 
@@ -1421,5 +1420,254 @@ test(scoped`import notion markdown-format todo`, async ({ page }) => {
   ];
 
   const blocks = await transformMarkdown(page, tempText);
+  expect(blocks).toEqual(expectedValue);
+});
+
+test(scoped`import notion html-format todo list`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  const tempText = `
+  <html>
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <title>demo</title>
+    </head>
+    <body>
+      <article id="041bd128-3d2c-47ff-a383-3cfdc54ed674" class="page sans">
+        <header>
+          <h1 class="page-title"></h1>
+          <p class="page-description"></p>
+        </header>
+        <div class="page-body">
+          <ul id="50fce132-57a7-4cc6-852e-aba5d9440bac" class="to-do-list">
+            <li>
+              <div class="checkbox checkbox-off"></div>
+              <span class="to-do-children-unchecked">1.</span>
+              <div class="indented"></div>
+            </li>
+          </ul>
+          <ul id="9e59bb39-1881-4ff5-a926-3d2779915df8" class="to-do-list">
+            <li>
+              <div class="checkbox checkbox-off"></div>
+              <span class="to-do-children-unchecked">2.</span>
+              <div class="indented"></div>
+            </li>
+          </ul>
+          <ul id="f5cb71b2-e890-48c9-bcaf-dd7777d2371c" class="to-do-list">
+            <li>
+              <div class="checkbox checkbox-off"></div>
+              <span class="to-do-children-unchecked">3.</span>
+              <div class="indented"></div>
+            </li>
+          </ul>
+          <ul id="c72b5284-b2e6-44ab-b649-bcc979f7c517" class="to-do-list">
+            <li>
+              <div class="checkbox checkbox-on"></div>
+              <span class="to-do-children-checked">4.</span>
+              <div class="indented"></div>
+            </li>
+          </ul>
+          <ul id="ba800944-e519-4537-85ae-79b273a9d179" class="to-do-list">
+            <li>
+              <div class="checkbox checkbox-off"></div>
+              <span class="to-do-children-unchecked">5.</span>
+              <div class="indented"></div>
+            </li>
+          </ul>
+          <ul id="135812d8-0f21-46d1-9545-aa46d2f32429" class="to-do-list">
+            <li>
+              <div class="checkbox checkbox-on"></div>
+              <span class="to-do-children-checked"></span>
+              <div class="indented">
+                <ol
+                  type="1"
+                  id="55f9ad83-e60e-4bd0-a3f0-dd4dba70d24b"
+                  class="numbered-list"
+                  start="1"
+                >
+                  <li></li>
+                </ol>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+    </body>
+  </html>
+`;
+
+  const expectedValue = [
+    {
+      flavour: 'affine:page',
+      type: 'h1',
+      text: [],
+      children: [],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '1.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '2.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '3.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: true,
+      text: [
+        {
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '4.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: false,
+      text: [
+        {
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [
+            {
+              insert: '5.',
+              attributes: {},
+            },
+          ],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      checked: true,
+      text: [
+        {
+          insert: '',
+          attributes: {},
+        },
+        {
+          insert: '              ',
+          attributes: {},
+        },
+      ],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'numbered',
+          text: [],
+          children: [],
+        },
+      ],
+    },
+  ];
+
+  const blocks = await transformHtml(page, tempText);
   expect(blocks).toEqual(expectedValue);
 });

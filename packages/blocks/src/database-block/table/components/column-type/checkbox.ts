@@ -1,4 +1,5 @@
 import { css, html } from 'lit';
+import { query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
 import {
@@ -36,7 +37,7 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
       left: 0px;
       border-radius: 50%;
     }
-    .affine-database-checkbox.checked .affine-database-checkbox-animation {
+    .animation {
       animation: sparking 0.6s ease forwards;
     }
     @keyframes sparking {
@@ -65,8 +66,23 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
     }
   `;
 
+  @query('.affine-database-checkbox-animation')
+  private _animation!: HTMLDivElement;
+
+  protected override firstUpdated() {
+    this._animation.addEventListener('animationend', () => {
+      this._animation.classList.remove('animation');
+    });
+  }
+
   override beforeEnterEditMode() {
-    this.onChange(!this.value);
+    const checked = !this.value;
+
+    if (checked) {
+      this._animation.classList.add('animation');
+    }
+
+    this.onChange(checked);
     return false;
   }
 
