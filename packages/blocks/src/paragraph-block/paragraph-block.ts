@@ -13,6 +13,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
 import { isPageMode } from '../__internal__/index.js';
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
@@ -201,7 +202,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   private _placeholderDisposables = new DisposableGroup();
 
   @query('rich-text')
-  private _richTextElement?: HTMLElement;
+  private _richTextElement?: RichText;
 
   override connectedCallback() {
     super.connectedCallback();

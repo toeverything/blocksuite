@@ -8,7 +8,6 @@ import { css, html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { Rect } from '../../__internal__/index.js';
 import {
   getClosestBlockElementByPoint,
   Point,
@@ -325,6 +324,15 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
+    const selection = this.selectedBlocks.filter(
+      selection => selection.type === 'block'
+    );
+    if (selection.length === 0) {
+      this.root.selectionManager.set([
+        this.root.selectionManager.getInstance('block', this._hoveredBlockId),
+      ]);
+    }
+
     this._dragging = true;
 
     const { left, top, width } = blockElement.getBoundingClientRect();
@@ -337,9 +345,6 @@ export class DragHandleWidget extends WidgetElement {
 
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
 
-    while (this._dragPreview.firstChild) {
-      this._dragPreview.removeChild(this._dragPreview.firstChild);
-    }
     this._dragPreview.appendChild(fragment);
 
     return true;
@@ -391,9 +396,12 @@ export class DragHandleWidget extends WidgetElement {
     return true;
   };
 
-  private _dragEndHandler: UIEventHandler = ctx => {
+  private _dragEndHandler: UIEventHandler = () => {
     if (!this._dragging) {
       return;
+    }
+    while (this._dragPreview.firstChild) {
+      this._dragPreview.firstChild.remove();
     }
     const target = this._dropBlockId;
     this._dragging = false;

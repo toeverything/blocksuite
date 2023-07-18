@@ -1,20 +1,17 @@
 import type { SelectionManager } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
-import { ShadowlessElement } from '@blocksuite/lit';
-import {
-  assertExists,
-  type BaseBlockModel,
-  DisposableGroup,
-} from '@blocksuite/store';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import type {
   BaseTextAttributes,
   VHandlerContext,
+  VRange,
   VRangeUpdatedProp,
 } from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
-import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { css, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { isValidUrl } from '../utils/url.js';
@@ -146,7 +143,7 @@ const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
 };
 
 @customElement('rich-text')
-export class RichText extends ShadowlessElement {
+export class RichText extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-rich-text {
       height: 100%;
@@ -161,9 +158,6 @@ export class RichText extends ShadowlessElement {
     }
   `;
 
-  @query('.affine-rich-text')
-  private _virgoContainer!: HTMLDivElement;
-
   @property({ attribute: false })
   model!: BaseBlockModel;
 
@@ -173,45 +167,21 @@ export class RichText extends ShadowlessElement {
   @property({ attribute: false })
   textSchema?: AffineTextSchema;
 
-  get virgoContainer() {
-    return this._virgoContainer;
-  }
-
   private _vEditor: AffineVEditor | null = null;
-  private _disposables = new DisposableGroup();
+
+  private _prevVRange: VRange | null = null;
+
+  private _virgoContainer: HTMLDivElement | null = null;
 
   get vEditor() {
     return this._vEditor;
   }
 
-  override connectedCallback() {
-    super.connectedCallback();
-    assertExists(this.model.text, 'Rich text need text to init');
-    this._vEditor = new VEditor(this.model.text.yText, {
-      active: () => activeEditorManager.isActive(this),
-    });
-    setupVirgoScroll(this, this._vEditor);
-    const textSchema = this.textSchema;
-    assertExists(
-      textSchema,
-      'Failed to render rich-text! textSchema not found'
+  private _vRangeEqual(a: VRange | null, b: VRange | null) {
+    return (
+      a === b ||
+      (a !== null && b !== null && a.index === b.index && a.length === b.length)
     );
-    this._vEditor.setAttributeSchema(textSchema.attributesSchema);
-    this._vEditor.setAttributeRenderer(textSchema.textRenderer());
-    autoIdentifyReference(this._vEditor, this.model.text.yText.toString());
-
-    const vRangeUpdated = this._vEditor.slots.vRangeUpdated;
-    this._disposables.add(vRangeUpdated.on(this._onRangeUpdated));
-    this._disposables.add(this.selection.on(this._onSelectionChanged));
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    const selections = this._removeCurrentSelection();
-    this.selection.set(selections);
-
-    this._vEditor?.unmount();
-    this._disposables.dispose();
   }
 
   private _isCurrentSelection = (
@@ -229,15 +199,10 @@ export class RichText extends ShadowlessElement {
   };
 
   private _onRangeUpdated = ([range]: VRangeUpdatedProp) => {
-    const current = this.selection.selections.find(this._isCurrentSelection);
-    if (
-      current &&
-      range &&
-      current.index === range.index &&
-      current.length === range.length
-    ) {
+    if (this._vRangeEqual(this._prevVRange, range)) {
       return;
     }
+    this._prevVRange = range;
 
     let selections = this._removeCurrentSelection();
 
@@ -378,25 +343,61 @@ export class RichText extends ShadowlessElement {
         return ctx;
       },
     });
+
+    this._disposables.add(
+      this._vEditor.slots.vRangeUpdated.on(this._onRangeUpdated)
+    );
+    this._disposables.add(this.selection.on(this._onSelectionChanged));
   }
 
-  override firstUpdated() {
-    assertExists(this._vEditor, 'virgo editor is not initialized.');
+  override connectedCallback() {
+    this._disposables.dispose();
+    super.connectedCallback();
 
-    this._vEditor.mount(this._virgoContainer);
+    assertExists(this.model.text, 'Rich text need text to init');
+    this._vEditor = new VEditor(this.model.text.yText, {
+      active: () => activeEditorManager.isActive(this),
+    });
+    setupVirgoScroll(this, this._vEditor);
+    const textSchema = this.textSchema;
+    assertExists(
+      textSchema,
+      'Failed to render rich-text! textSchema not found'
+    );
+    this._vEditor.setAttributeSchema(textSchema.attributesSchema);
+    this._vEditor.setAttributeRenderer(textSchema.textRenderer());
+    autoIdentifyReference(this._vEditor, this.model.text.yText.toString());
+
+    const container = document.createElement('div');
+    container.className = 'affine-rich-text virgo-editor';
+    this._virgoContainer = container;
+    this.appendChild(container);
+
+    this._vEditor.mount(container);
     this._bindVirgoEvents();
+  }
 
-    this._vEditor.setReadonly(this.model.page.readonly);
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    const selections = this._removeCurrentSelection();
+    this.selection.set(selections);
+
+    this._vEditor?.unmount();
+    this._vEditor = null;
+
+    this._virgoContainer?.remove();
+    this._virgoContainer = null;
   }
 
   override updated() {
-    if (this._vEditor) {
-      this._vEditor.setReadonly(this.model.page.readonly);
+    if (!this._vEditor) {
+      return;
     }
+    this._vEditor.setReadonly(this.model.page.readonly);
   }
 
   override render() {
-    return html`<div class="affine-rich-text virgo-editor"></div>`;
+    return nothing;
   }
 }
 
