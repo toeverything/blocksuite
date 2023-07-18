@@ -4,7 +4,7 @@ import type { Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import { WithDisposable } from '../width-disposable.js';
+import { WithDisposable } from '../with-disposable.js';
 import type { BlockSuiteRoot } from './lit-root.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
