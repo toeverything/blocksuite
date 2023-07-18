@@ -5,29 +5,14 @@
       2,
       "always",
       [
-        "blocks",
-        "docs",
-        "editor",
+        "page",
         "edgeless",
-        "global",
-        "phasor",
-        "playground",
-        "store",
-        "virgo",
-        "paragraph",
-        "list",
-        "link",
-        "code",
         "database",
-        "divider",
-        "embed",
-        "selection",
-        "block-hub",
-        "slash-menu",
-        "drag-handle",
-        "format-bar",
-        "lit",
-        "block-std"
+        "virgo",
+        "phasor",
+        "store",
+        "block-std",
+        "playground"
       ]
     ]
   }

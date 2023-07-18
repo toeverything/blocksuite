@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/phasor",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Hybrid canvas renderer.",
   "main": "src/index.ts",
   "type": "module",
