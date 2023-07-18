@@ -99,8 +99,6 @@ async function main() {
   window.ContentParser = ContentParser;
   workspace.awarenessStore.setFlag('enable_page_tags', true);
 
-  subscribePage(workspace);
-
   const syncProviders = async (providers: DocProvider[]) => {
     for (const provider of providers) {
       if ('active' in provider) {
@@ -123,6 +121,7 @@ async function main() {
   // instead of using this default setup.
   if (isE2E) return;
 
+  subscribePage(workspace);
   if (initParam !== null) {
     await initPageContentByParam(workspace, initParam, 'page0');
     return;
