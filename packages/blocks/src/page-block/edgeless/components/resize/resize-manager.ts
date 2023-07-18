@@ -134,7 +134,9 @@ export class HandleResizeManager {
 
     assertExists(_target);
 
-    const isEdge = _resizeMode === 'edge';
+    const isAll = _resizeMode === 'all';
+    const isCorner = _resizeMode === 'corner';
+
     const {
       start: { x: startX, y: startY },
       end: { x: endX, y: endY },
@@ -161,36 +163,7 @@ export class HandleResizeManager {
       .rotateSelf(_rotate)
       .translateSelf(-original.cx, -original.cy);
 
-    if (isEdge) {
-      // handle notes
-      switch (_dragDirection) {
-        case HandleDirection.Left: {
-          direction.x = -1;
-          fixedPoint.x = maxX;
-          draggingPoint.x = minX + deltaX;
-          rect.w = fixedPoint.x - draggingPoint.x;
-          break;
-        }
-        case HandleDirection.Right: {
-          direction.x = 1;
-          fixedPoint.x = minX;
-          draggingPoint.x = maxX + deltaX;
-          rect.w = draggingPoint.x - fixedPoint.x;
-          break;
-        }
-      }
-
-      scale.x = rect.w / original.w;
-      flip.x = scale.x < 0 ? -1 : 1;
-
-      if (Math.abs(rect.w) < NOTE_MIN_WIDTH) {
-        rect.w = NOTE_MIN_WIDTH * flip.x;
-        scale.x = rect.w / original.w;
-        draggingPoint.x = fixedPoint.x + rect.w * direction.x;
-      }
-
-      rect.cx = (draggingPoint.x + fixedPoint.x) / 2;
-    } else {
+    if (isCorner || isAll) {
       switch (_dragDirection) {
         case HandleDirection.TopLeft: {
           direction.x = -1;
@@ -399,6 +372,35 @@ export class HandleResizeManager {
         rect.cx = (fp.x + dp.x) / 2;
         rect.cy = (fp.y + dp.y) / 2;
       }
+    } else {
+      // handle notes
+      switch (_dragDirection) {
+        case HandleDirection.Left: {
+          direction.x = -1;
+          fixedPoint.x = maxX;
+          draggingPoint.x = minX + deltaX;
+          rect.w = fixedPoint.x - draggingPoint.x;
+          break;
+        }
+        case HandleDirection.Right: {
+          direction.x = 1;
+          fixedPoint.x = minX;
+          draggingPoint.x = maxX + deltaX;
+          rect.w = draggingPoint.x - fixedPoint.x;
+          break;
+        }
+      }
+
+      scale.x = rect.w / original.w;
+      flip.x = scale.x < 0 ? -1 : 1;
+
+      if (Math.abs(rect.w) < NOTE_MIN_WIDTH) {
+        rect.w = NOTE_MIN_WIDTH * flip.x;
+        scale.x = rect.w / original.w;
+        draggingPoint.x = fixedPoint.x + rect.w * direction.x;
+      }
+
+      rect.cx = (draggingPoint.x + fixedPoint.x) / 2;
     }
 
     // const { x: flipX, y: flipY } = flip;
@@ -422,7 +424,43 @@ export class HandleResizeManager {
 
     let process: (value: { bound: Bound; rotate: number }, key: string) => void;
 
-    if (isEdge) {
+    if (isCorner || isAll) {
+      if (this._bounds.size === 1) {
+        process = (_, id) => {
+          newBounds.set(id, {
+            bound: new Bound(x, y, width, height),
+          });
+        };
+      } else {
+        const fp = fixedPoint.matrixTransform(m0);
+        const m2 = new DOMMatrix()
+          .translateSelf(fp.x, fp.y)
+          .rotateSelf(_rotate)
+          .translateSelf(-fp.x, -fp.y)
+          .scaleSelf(scale.x, scale.y, 1, fp.x, fp.y, 0)
+          .translateSelf(fp.x, fp.y)
+          .rotateSelf(-_rotate)
+          .translateSelf(-fp.x, -fp.y);
+
+        // TODO: on same rotate
+        process = ({ bound: { x, y, w, h } }, id) => {
+          const cx = x + w / 2;
+          const cy = y + h / 2;
+          const center = new DOMPoint(cx, cy).matrixTransform(m2);
+          const newWidth = Math.abs(w * scale.x);
+          const newHeight = Math.abs(h * scale.y);
+
+          newBounds.set(id, {
+            bound: new Bound(
+              center.x - newWidth / 2,
+              center.y - newHeight / 2,
+              newWidth,
+              newHeight
+            ),
+          });
+        };
+      }
+    } else {
       // include notes, <---->
       const m2 = new DOMMatrix().scaleSelf(
         scale.x,
@@ -476,42 +514,6 @@ export class HandleResizeManager {
           ),
         });
       };
-    } else {
-      if (this._bounds.size === 1) {
-        process = (_, id) => {
-          newBounds.set(id, {
-            bound: new Bound(x, y, width, height),
-          });
-        };
-      } else {
-        const fp = fixedPoint.matrixTransform(m0);
-        const m2 = new DOMMatrix()
-          .translateSelf(fp.x, fp.y)
-          .rotateSelf(_rotate)
-          .translateSelf(-fp.x, -fp.y)
-          .scaleSelf(scale.x, scale.y, 1, fp.x, fp.y, 0)
-          .translateSelf(fp.x, fp.y)
-          .rotateSelf(-_rotate)
-          .translateSelf(-fp.x, -fp.y);
-
-        // TODO: on same rotate
-        process = ({ bound: { x, y, w, h } }, id) => {
-          const cx = x + w / 2;
-          const cy = y + h / 2;
-          const center = new DOMPoint(cx, cy).matrixTransform(m2);
-          const newWidth = Math.abs(w * scale.x);
-          const newHeight = Math.abs(h * scale.y);
-
-          newBounds.set(id, {
-            bound: new Bound(
-              center.x - newWidth / 2,
-              center.y - newHeight / 2,
-              newWidth,
-              newHeight
-            ),
-          });
-        };
-      }
     }
 
     this._bounds.forEach(process);
