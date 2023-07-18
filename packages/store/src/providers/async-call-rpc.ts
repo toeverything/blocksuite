@@ -8,8 +8,13 @@ import {
 import type { Doc } from 'yjs';
 
 import { Workspace } from '../workspace/index.js';
-import type { SubdocEvent } from '../yjs/index.js';
-import type { DocProviderCreator, PassiveDocProvider } from './type.js';
+import { createLazyProvider } from './lazy-provider.js';
+import type {
+  DatasourceDocAdapter,
+  DocProviderCreator,
+  LazyDocProvider,
+} from './type.js';
+import { getDoc } from './utils.js';
 
 const Y = Workspace.Y;
 
@@ -39,6 +44,17 @@ type Impl = {
   //#endregion
 };
 
+const createAsyncCallRPCDatasource = (impl: Impl): DatasourceDocAdapter => {
+  return {
+    queryDocState: (guid, opts) => {
+      return impl.queryDocState(guid, opts?.targetClientId);
+    },
+    sendDocUpdate: (guid, update) => {
+      return impl.sendDocUpdate(guid, update);
+    },
+  };
+};
+
 export const createAsyncCallRPCProviderCreator = (
   flavour: string,
   channel: AsyncCallOptions['channel'],
@@ -47,14 +63,13 @@ export const createAsyncCallRPCProviderCreator = (
     asyncCallOptions?: Omit<AsyncCallOptions, 'channel'>;
   }
 ): DocProviderCreator => {
-  return (id, doc, config): PassiveDocProvider => {
+  return (id, rootDoc, config): LazyDocProvider => {
     const awareness = config.awareness;
-    const docMap = new Map<string, Doc>();
     const cache = new Map<string, Uint8Array[]>();
 
     const impl = {
       queryDocState: async (guid, targetClientId) => {
-        const doc = docMap.get(guid);
+        const doc = getDoc(rootDoc, guid);
         if (!doc) {
           return false;
         }
@@ -64,7 +79,7 @@ export const createAsyncCallRPCProviderCreator = (
         return Y.encodeStateAsUpdate(doc);
       },
       sendDocUpdate: async (guid, update) => {
-        const doc = docMap.get(guid);
+        const doc = getDoc(rootDoc, guid);
         if (!doc) {
           // This case happens when the father doc is not yet updated,
           //  so that the child doc is not yet created.
@@ -115,69 +130,6 @@ export const createAsyncCallRPCProviderCreator = (
       ),
     });
 
-    type UpdateHandler = (update: Uint8Array, origin: unknown) => void;
-
-    type SubdocsHandler = (event: SubdocEvent) => void;
-    type DestroyHandler = () => void;
-
-    const updateHandlerWeakMap = new WeakMap<Doc, UpdateHandler>();
-    const subdocsHandlerWeakMap = new WeakMap<Doc, SubdocsHandler>();
-    const destroyHandlerWeakMap = new WeakMap<Doc, DestroyHandler>();
-
-    const createOrGetUpdateHandler = (doc: Doc): UpdateHandler => {
-      if (updateHandlerWeakMap.has(doc)) {
-        return updateHandlerWeakMap.get(doc) as UpdateHandler;
-      }
-      const handler: UpdateHandler = (update, origin) => {
-        if (origin === channel) {
-          // not self update, ignore
-          return;
-        }
-
-        rpc.sendDocUpdate(doc.guid, update).catch(console.error);
-      };
-      updateHandlerWeakMap.set(doc, handler);
-      return handler;
-    };
-
-    const createOrGetSubdocsHandler = (doc: Doc): SubdocsHandler => {
-      if (subdocsHandlerWeakMap.has(doc)) {
-        return subdocsHandlerWeakMap.get(doc) as SubdocsHandler;
-      }
-
-      const handler: SubdocsHandler = event => {
-        event.added.forEach(doc => docMap.set(doc.guid, doc));
-        event.added.forEach(doc => {
-          rpc.queryDocState(doc.guid).then(update => {
-            if (!update) {
-              return;
-            }
-            Y.applyUpdate(doc, update, channel);
-            doc.emit('load', []);
-          });
-          doc.on('update', createOrGetUpdateHandler(doc));
-        });
-
-        event.removed.forEach(unregisterDoc);
-      };
-
-      subdocsHandlerWeakMap.set(doc, handler);
-      return handler;
-    };
-
-    const createOrGetDestroyHandler = (doc: Doc): DestroyHandler => {
-      if (destroyHandlerWeakMap.has(doc)) {
-        return destroyHandlerWeakMap.get(doc) as DestroyHandler;
-      }
-
-      const handler: DestroyHandler = () => {
-        unregisterDoc(doc);
-      };
-
-      destroyHandlerWeakMap.set(doc, handler);
-      return handler;
-    };
-
     const awarenessUpdateHandler = (
       changes: AwarenessChanges,
       origin: unknown
@@ -193,70 +145,37 @@ export const createAsyncCallRPCProviderCreator = (
       rpc.sendAwareness(update).catch(console.error);
     };
 
-    function registerDoc(doc: Doc) {
-      initDocMap(doc);
-      // register subdocs
-      doc.on('subdocs', createOrGetSubdocsHandler(doc));
-      doc.subdocs.forEach(registerDoc);
-      // register update
-      doc.on('update', createOrGetUpdateHandler(doc));
-      doc.on('destroy', createOrGetDestroyHandler(doc));
-    }
-
     async function initDoc(doc: Doc) {
       // query diff update
       const update = await rpc.queryDocState(doc.guid);
-      if (!connected) {
-        return;
-      }
       if (update !== false) {
         Y.applyUpdate(doc, update, channel);
       }
-      doc.subdocs.forEach(initDoc);
     }
 
-    function unregisterDoc(doc: Doc) {
-      docMap.delete(doc.guid);
-      doc.subdocs.forEach(unregisterDoc);
-      doc.off('update', createOrGetUpdateHandler(doc));
-      doc.off('subdocs', createOrGetSubdocsHandler(doc));
-      doc.off('destroy', createOrGetDestroyHandler(doc));
-    }
+    const lazyProvider = createLazyProvider(
+      rootDoc,
+      createAsyncCallRPCDatasource(impl)
+    );
 
-    // recursively register all doc into map
-    function initDocMap(doc: Doc) {
-      // register all doc into map
-      docMap.set(doc.guid, doc);
-      doc.subdocs.forEach(initDocMap);
-    }
-
-    let connected = false;
-    const apis = {
+    return {
       flavour,
-      passive: true,
-      connect() {
-        connected = true;
-        registerDoc(doc);
-        initDoc(doc).catch(console.error);
-        rpc
-          .queryAwareness()
-          .then(update => applyAwarenessUpdate(awareness, update, channel));
-        awareness.on('update', awarenessUpdateHandler);
+      lazy: true,
+      connect(guid: string) {
+        lazyProvider.connect(guid);
+        if (guid === rootDoc.guid) {
+          initDoc(rootDoc).catch(console.error);
+          rpc
+            .queryAwareness()
+            .then(update => applyAwarenessUpdate(awareness, update, channel));
+          awareness.on('update', awarenessUpdateHandler);
+        }
       },
-      disconnect() {
-        unregisterDoc(doc);
-        awareness.off('update', awarenessUpdateHandler);
-        connected = false;
+      disconnect(guid: string) {
+        if (guid === rootDoc.guid) {
+          awareness.off('update', awarenessUpdateHandler);
+        }
       },
-      get connected(): boolean {
-        return connected;
-      },
-      cleanup: () => {
-        apis.disconnect();
-        cache.clear();
-        options.cleanup();
-      },
-    } as const;
-    return apis;
+    };
   };
 };
