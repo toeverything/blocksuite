@@ -388,6 +388,11 @@ export class DebugMenu extends ShadowlessElement {
     registerFormatBarCustomElement();
   }
 
+  private _notifyPageChanged() {
+    const e = new CustomEvent('page-changed');
+    this.dispatchEvent(e);
+  }
+
   override firstUpdated() {
     this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     this.workspace.slots.pageAdded.on(() => {
@@ -693,6 +698,7 @@ export class DebugMenu extends ShadowlessElement {
                 workspace: this.workspace,
                 editor: this.editor,
                 requestUpdate: () => this.requestUpdate(),
+                notifyPageChanged: () => this._notifyPageChanged(),
               })
             : null}
         </div>
@@ -710,10 +716,12 @@ function getTabGroupTemplate({
   workspace,
   editor,
   requestUpdate,
+  notifyPageChanged,
 }: {
   workspace: Workspace;
   editor: EditorContainer;
   requestUpdate: () => void;
+  notifyPageChanged: () => void;
 }) {
   workspace.meta.pageMetasUpdated.on(requestUpdate);
   const pageList = workspace.meta.pageMetas;
@@ -730,6 +738,7 @@ function getTabGroupTemplate({
       const otherPage = workspace.getPage(e.detail.name);
       if (otherPage) {
         editor.page = otherPage;
+        notifyPageChanged();
       }
     }}
   >
