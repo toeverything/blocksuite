@@ -5,7 +5,7 @@ import {
   disableDebuglog,
   enableDebugLog,
 } from '@blocksuite/global/debug';
-import type { BlobStorage, DocProviderCreator, Page } from '@blocksuite/store';
+import type { BlobStorage, Page } from '@blocksuite/store';
 import type { Y } from '@blocksuite/store';
 import {
   assertExists,
@@ -104,7 +104,7 @@ async function initWithMarkdownContent(
   url: URL,
   pageId: string
 ) {
-  const { empty: emptyInit } = await import('./presets/index.js');
+  const { edgelessEmpty: emptyInit } = await import('./presets/index.js');
 
   emptyInit(workspace, pageId);
   const page = workspace.getPage(pageId);
