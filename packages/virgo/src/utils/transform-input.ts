@@ -33,7 +33,7 @@ function handleInsertParagraph(vRange: VRange, editor: VEditor) {
   }
 }
 
-function handleDelete(vRange: VRange, editor: VEditor) {
+function handleDeleteBackward(vRange: VRange, editor: VEditor) {
   if (vRange.index >= 0) {
     if (vRange.length > 0) {
       editor.slots.vRangeUpdated.emit([
@@ -66,60 +66,7 @@ function handleDelete(vRange: VRange, editor: VEditor) {
   }
 }
 
-function handleWordDelete(editor: VEditor, vRange: VRange) {
-  const matches = /\S+\s*$/.exec(
-    editor.yText.toString().slice(0, vRange.index)
-  );
-  if (matches) {
-    const deleteLength = matches[0].length;
-
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index - deleteLength,
-        length: 0,
-      },
-      'input',
-    ]);
-    editor.deleteText({
-      index: vRange.index - deleteLength,
-      length: deleteLength,
-    });
-  }
-}
-
-function handleLineDelete(editor: VEditor, vRange: VRange) {
-  if (vRange.length > 0) {
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index,
-        length: 0,
-      },
-      'input',
-    ]);
-    editor.deleteText(vRange);
-    return;
-  }
-
-  if (vRange.index > 0) {
-    const str = editor.yText.toString();
-    const deleteLength =
-      vRange.index - Math.max(0, str.slice(0, vRange.index).lastIndexOf('\n'));
-
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index - deleteLength,
-        length: 0,
-      },
-      'input',
-    ]);
-    editor.deleteText({
-      index: vRange.index - deleteLength,
-      length: deleteLength,
-    });
-  }
-}
-
-function handleForwardDelete(editor: VEditor, vRange: VRange) {
+function handleDeleteForward(editor: VEditor, vRange: VRange) {
   if (vRange.index < editor.yText.length) {
     if (vRange.length > 0) {
       editor.slots.vRangeUpdated.emit([
@@ -151,6 +98,63 @@ function handleForwardDelete(editor: VEditor, vRange: VRange) {
   }
 }
 
+function handleDeleteWordBackward(editor: VEditor, vRange: VRange) {
+  const matches = /\S+\s*$/.exec(
+    editor.yText.toString().slice(0, vRange.index)
+  );
+  if (matches) {
+    const deleteLength = matches[0].length;
+
+    editor.slots.vRangeUpdated.emit([
+      {
+        index: vRange.index - deleteLength,
+        length: 0,
+      },
+      'input',
+    ]);
+    editor.deleteText({
+      index: vRange.index - deleteLength,
+      length: deleteLength,
+    });
+  }
+}
+
+function handleDeleteWordForward(editor: VEditor, vRange: VRange) {
+  // TODO: will be implemented in https://github.com/toeverything/blocksuite/pull/3584
+}
+
+function handleDeleteLine(editor: VEditor, vRange: VRange) {
+  if (vRange.length > 0) {
+    editor.slots.vRangeUpdated.emit([
+      {
+        index: vRange.index,
+        length: 0,
+      },
+      'input',
+    ]);
+    editor.deleteText(vRange);
+    return;
+  }
+
+  if (vRange.index > 0) {
+    const str = editor.yText.toString();
+    const deleteLength =
+      vRange.index - Math.max(0, str.slice(0, vRange.index).lastIndexOf('\n'));
+
+    editor.slots.vRangeUpdated.emit([
+      {
+        index: vRange.index - deleteLength,
+        length: 0,
+      },
+      'input',
+    ]);
+    editor.deleteText({
+      index: vRange.index - deleteLength,
+      length: deleteLength,
+    });
+  }
+}
+
 export function transformInput<TextAttributes extends BaseTextAttributes>(
   inputType: string,
   data: string | null,
@@ -174,14 +178,26 @@ export function transformInput<TextAttributes extends BaseTextAttributes>(
     // Chrome and Safari on Mac: Backspace or Ctrl + H
     case 'deleteContentBackward':
     case 'deleteByCut': {
-      handleDelete(vRange, editor);
+      handleDeleteBackward(vRange, editor);
+      return;
+    }
+
+    // Chrome on Mac: Fn + Backspace or Ctrl + D
+    // Safari on Mac: Ctrl + K or Ctrl + D
+    case 'deleteContentForward': {
+      handleDeleteForward(editor, vRange);
       return;
     }
 
     // On Mac: Option + Backspace
     // On iOS: Hold the backspace for a while and the whole words will start to disappear
     case 'deleteWordBackward': {
-      handleWordDelete(editor, vRange);
+      handleDeleteWordBackward(editor, vRange);
+      return;
+    }
+
+    case 'deleteWordForward': {
+      handleDeleteWordForward(editor, vRange);
       return;
     }
 
@@ -189,14 +205,7 @@ export function transformInput<TextAttributes extends BaseTextAttributes>(
     // deleteSoftLineBackward: Chrome on Mac: Cmd + Backspace
     case 'deleteHardLineBackward':
     case 'deleteSoftLineBackward': {
-      handleLineDelete(editor, vRange);
-      return;
-    }
-
-    // Chrome on Mac: Fn + Backspace or Ctrl + D
-    // Safari on Mac: Ctrl + K or Ctrl + D
-    case 'deleteContentForward': {
-      handleForwardDelete(editor, vRange);
+      handleDeleteLine(editor, vRange);
       return;
     }
   }
