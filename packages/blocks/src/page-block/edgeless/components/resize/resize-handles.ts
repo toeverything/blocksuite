@@ -3,7 +3,9 @@ import { html, nothing } from 'lit';
 
 export enum HandleDirection {
   Left = 'left',
+  Top = 'top',
   Right = 'right',
+  Bottom = 'bottom',
   TopLeft = 'top-left',
   BottomLeft = 'bottom-left',
   TopRight = 'top-right',
@@ -46,6 +48,8 @@ function ResizeHandle(
   };
 
   const rotationTpl =
+    handleDirection === HandleDirection.Top ||
+    handleDirection === HandleDirection.Bottom ||
     handleDirection === HandleDirection.Left ||
     handleDirection === HandleDirection.Right
       ? nothing
@@ -123,6 +127,19 @@ export function ResizeHandles(
     );
     return { handleLeft, handleRight };
   };
+  const getEdgeVerticalHandles = () => {
+    const handleTop = ResizeHandle(
+      HandleDirection.Top,
+      onPointerDown,
+      updateCursor
+    );
+    const handleBottom = ResizeHandle(
+      HandleDirection.Bottom,
+      onPointerDown,
+      updateCursor
+    );
+    return { handleTop, handleBottom };
+  };
   switch (resizeMode) {
     case 'corner': {
       const {
@@ -152,15 +169,18 @@ export function ResizeHandles(
         handleBottomRight,
       } = getCornerHandles();
       const { handleLeft, handleRight } = getEdgeHandles();
+      const { handleTop, handleBottom } = getEdgeVerticalHandles();
 
       // prettier-ignore
       return html`
         ${handleTopLeft}
+        ${handleTop}
         ${handleTopRight}
-        ${handleBottomLeft}
-        ${handleBottomRight}
-        ${handleLeft}
         ${handleRight}
+        ${handleBottomRight}
+        ${handleBottom}
+        ${handleBottomLeft}
+        ${handleLeft}
       `;
     }
     case 'none': {

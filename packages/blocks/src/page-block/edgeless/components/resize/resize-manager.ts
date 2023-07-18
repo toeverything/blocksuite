@@ -133,7 +133,7 @@ export class HandleResizeManager {
 
     assertExists(_target);
 
-    const isCorner = _resizeMode === 'corner';
+    const isEdge = _resizeMode === 'edge';
     const {
       start: { x: startX, y: startY },
       end: { x: endX, y: endY },
@@ -160,7 +160,36 @@ export class HandleResizeManager {
       .rotateSelf(_rotate)
       .translateSelf(-original.cx, -original.cy);
 
-    if (isCorner) {
+    if (isEdge) {
+      // handle notes
+      switch (_dragDirection) {
+        case HandleDirection.Left: {
+          direction.x = -1;
+          fixedPoint.x = maxX;
+          draggingPoint.x = minX + deltaX;
+          rect.w = fixedPoint.x - draggingPoint.x;
+          break;
+        }
+        case HandleDirection.Right: {
+          direction.x = 1;
+          fixedPoint.x = minX;
+          draggingPoint.x = maxX + deltaX;
+          rect.w = draggingPoint.x - fixedPoint.x;
+          break;
+        }
+      }
+
+      scale.x = rect.w / original.w;
+      flip.x = scale.x < 0 ? -1 : 1;
+
+      if (Math.abs(rect.w) < NOTE_MIN_WIDTH) {
+        rect.w = NOTE_MIN_WIDTH * flip.x;
+        scale.x = rect.w / original.w;
+        draggingPoint.x = fixedPoint.x + rect.w * direction.x;
+      }
+
+      rect.cx = (draggingPoint.x + fixedPoint.x) / 2;
+    } else {
       switch (_dragDirection) {
         case HandleDirection.TopLeft: {
           direction.x = -1;
@@ -195,6 +224,44 @@ export class HandleResizeManager {
           fixedPoint.x = maxX;
           fixedPoint.y = minY;
           draggingPoint.x = minX;
+          draggingPoint.y = maxY;
+          break;
+        }
+        case HandleDirection.Left: {
+          direction.x = -1;
+          direction.y = 1;
+          fixedPoint.x = maxX;
+          fixedPoint.y = original.cy;
+          draggingPoint.x = minX;
+          draggingPoint.y = original.cy;
+          break;
+        }
+        case HandleDirection.Right: {
+          direction.x = 1;
+          direction.y = 1;
+          fixedPoint.x = minX;
+          fixedPoint.y = original.cy;
+          draggingPoint.x = maxX;
+          draggingPoint.y = original.cy;
+          break;
+        }
+        case HandleDirection.Top: {
+          const cx = (minX + maxX) / 2;
+          direction.x = 1;
+          direction.y = -1;
+          fixedPoint.x = cx;
+          fixedPoint.y = maxY;
+          draggingPoint.x = cx;
+          draggingPoint.y = minY;
+          break;
+        }
+        case HandleDirection.Bottom: {
+          const cx = (minX + maxX) / 2;
+          direction.x = 1;
+          direction.y = 1;
+          fixedPoint.x = cx;
+          fixedPoint.y = minY;
+          draggingPoint.x = cx;
           draggingPoint.y = maxY;
           break;
         }
@@ -242,6 +309,22 @@ export class HandleResizeManager {
           rect.h = d.y - f.y;
           break;
         }
+        case HandleDirection.Left: {
+          rect.w = f.x - d.x;
+          break;
+        }
+        case HandleDirection.Right: {
+          rect.w = d.x - f.x;
+          break;
+        }
+        case HandleDirection.Top: {
+          rect.h = f.y - d.y;
+          break;
+        }
+        case HandleDirection.Bottom: {
+          rect.h = d.y - f.y;
+          break;
+        }
       }
 
       rect.cx = (d.x + f.x) / 2;
@@ -251,8 +334,14 @@ export class HandleResizeManager {
       flip.x = scale.x < 0 ? -1 : 1;
       flip.y = scale.y < 0 ? -1 : 1;
 
+      const isDraggingCorner =
+        _dragDirection === HandleDirection.TopLeft ||
+        _dragDirection === HandleDirection.TopRight ||
+        _dragDirection === HandleDirection.BottomRight ||
+        _dragDirection === HandleDirection.BottomLeft;
+
       // lock aspect ratio
-      if (shiftKey) {
+      if (shiftKey && isDraggingCorner) {
         const newAspectRatio = Math.abs(rect.w / rect.h);
         if (_aspectRatio < newAspectRatio) {
           scale.y = Math.abs(scale.x) * flip.y;
@@ -269,35 +358,6 @@ export class HandleResizeManager {
         rect.cx = (fp.x + dp.x) / 2;
         rect.cy = (fp.y + dp.y) / 2;
       }
-    } else {
-      // handle notes
-      switch (_dragDirection) {
-        case HandleDirection.Left: {
-          direction.x = -1;
-          fixedPoint.x = maxX;
-          draggingPoint.x = minX + deltaX;
-          rect.w = fixedPoint.x - draggingPoint.x;
-          break;
-        }
-        case HandleDirection.Right: {
-          direction.x = 1;
-          fixedPoint.x = minX;
-          draggingPoint.x = maxX + deltaX;
-          rect.w = draggingPoint.x - fixedPoint.x;
-          break;
-        }
-      }
-
-      scale.x = rect.w / original.w;
-      flip.x = scale.x < 0 ? -1 : 1;
-
-      if (Math.abs(rect.w) < NOTE_MIN_WIDTH) {
-        rect.w = NOTE_MIN_WIDTH * flip.x;
-        scale.x = rect.w / original.w;
-        draggingPoint.x = fixedPoint.x + rect.w * direction.x;
-      }
-
-      rect.cx = (draggingPoint.x + fixedPoint.x) / 2;
     }
 
     // const { x: flipX, y: flipY } = flip;
@@ -321,43 +381,7 @@ export class HandleResizeManager {
 
     let process: (value: { bound: Bound; rotate: number }, key: string) => void;
 
-    if (isCorner) {
-      if (this._bounds.size === 1) {
-        process = (_, id) => {
-          newBounds.set(id, {
-            bound: new Bound(x, y, width, height),
-          });
-        };
-      } else {
-        const fp = fixedPoint.matrixTransform(m0);
-        const m2 = new DOMMatrix()
-          .translateSelf(fp.x, fp.y)
-          .rotateSelf(_rotate)
-          .translateSelf(-fp.x, -fp.y)
-          .scaleSelf(scale.x, scale.y, 1, fp.x, fp.y, 0)
-          .translateSelf(fp.x, fp.y)
-          .rotateSelf(-_rotate)
-          .translateSelf(-fp.x, -fp.y);
-
-        // TODO: on same rotate
-        process = ({ bound: { x, y, w, h } }, id) => {
-          const cx = x + w / 2;
-          const cy = y + h / 2;
-          const center = new DOMPoint(cx, cy).matrixTransform(m2);
-          const newWidth = Math.abs(w * scale.x);
-          const newHeight = Math.abs(h * scale.y);
-
-          newBounds.set(id, {
-            bound: new Bound(
-              center.x - newWidth / 2,
-              center.y - newHeight / 2,
-              newWidth,
-              newHeight
-            ),
-          });
-        };
-      }
-    } else {
+    if (isEdge) {
       // include notes, <---->
       const m2 = new DOMMatrix().scaleSelf(
         scale.x,
@@ -411,6 +435,42 @@ export class HandleResizeManager {
           ),
         });
       };
+    } else {
+      if (this._bounds.size === 1) {
+        process = (_, id) => {
+          newBounds.set(id, {
+            bound: new Bound(x, y, width, height),
+          });
+        };
+      } else {
+        const fp = fixedPoint.matrixTransform(m0);
+        const m2 = new DOMMatrix()
+          .translateSelf(fp.x, fp.y)
+          .rotateSelf(_rotate)
+          .translateSelf(-fp.x, -fp.y)
+          .scaleSelf(scale.x, scale.y, 1, fp.x, fp.y, 0)
+          .translateSelf(fp.x, fp.y)
+          .rotateSelf(-_rotate)
+          .translateSelf(-fp.x, -fp.y);
+
+        // TODO: on same rotate
+        process = ({ bound: { x, y, w, h } }, id) => {
+          const cx = x + w / 2;
+          const cy = y + h / 2;
+          const center = new DOMPoint(cx, cy).matrixTransform(m2);
+          const newWidth = Math.abs(w * scale.x);
+          const newHeight = Math.abs(h * scale.y);
+
+          newBounds.set(id, {
+            bound: new Bound(
+              center.x - newWidth / 2,
+              center.y - newHeight / 2,
+              newWidth,
+              newHeight
+            ),
+          });
+        };
+      }
     }
 
     this._bounds.forEach(process);
