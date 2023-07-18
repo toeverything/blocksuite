@@ -3,6 +3,8 @@ import { DisposableGroup } from '@blocksuite/store';
 
 import { ImportPage, type OnSuccessHandler } from './import-page.js';
 
+export { importHtml, importMarkDown, importNotion } from './import-page.js';
+
 export function showImportModal({
   workspace,
   onSuccess,
