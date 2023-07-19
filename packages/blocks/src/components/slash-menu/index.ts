@@ -18,36 +18,11 @@ import {
   throttle,
 } from '../../__internal__/utils/index.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
-import { cleanSpecifiedTail } from '../utils.js';
 import { menuGroups } from './config.js';
 import { SlashMenu } from './slash-menu-popover.js';
 import type { SlashMenuOptions } from './utils.js';
 
 let globalAbortController = new AbortController();
-
-function cleanSlashTextAfterAbort(e: Event, model: BaseBlockModel) {
-  if (!e.target || !(e.target instanceof AbortSignal)) {
-    throw new Error('Failed to clean slash search text! Unknown abort event');
-  }
-  // If not explicitly set in those methods, it defaults to "AbortError" DOMException.
-  if (e.target.reason instanceof DOMException) {
-    // Should not clean slash text when click away or abort
-    return;
-  }
-  if (typeof e.target.reason !== 'string') {
-    throw new Error('Failed to clean slash search text! Unknown abort reason');
-  }
-  const searchStr = '/' + e.target.reason;
-  const vEditor = getVirgoByModel(model);
-  if (!vEditor) {
-    console.warn(
-      'Failed to clean slash search text! No vEditor found for model, model:',
-      model
-    );
-    return;
-  }
-  cleanSpecifiedTail(vEditor, searchStr);
-}
 
 function showSlashMenu({
   model,
@@ -91,23 +66,34 @@ function showSlashMenu({
   container.appendChild(slashMenu);
   // Wait for the Node to be mounted
   setTimeout(updatePosition);
-
-  // Handle dispose
-  abortController.signal.addEventListener('abort', e => {
-    cleanSlashTextAfterAbort(e, model);
-  });
-
   return slashMenu;
 }
 
 @customElement('affine-slash-menu-widget')
 export class SlashMenuWidget extends WithDisposable(LitElement) {
   static DEFAULT_OPTIONS: SlashMenuOptions = {
-    triggerKeys: [
-      '/',
-      // Compatible with CJK IME
-      '、',
-    ],
+    isTriggerKey: (event: KeyboardEvent) => {
+      const triggerKeys = [
+        '/',
+        // Compatible with CJK IME
+        '、',
+      ];
+
+      if (event.key === 'Process' && event.code === 'Slash') {
+        // Ad-hoc for https://github.com/toeverything/blocksuite/issues/3485
+        // This key can be triggered by pressing the slash key while using CJK IME in Windows.
+        //
+        // Description: The `Process` key. Instructs the IME to process the conversion.
+        // See also https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values#common_ime_keys
+        // https://stackoverflow.com/questions/71961563/keyboard-event-has-key-process-on-chromebook
+        return true;
+      }
+      return (
+        !isControlledKeyboardEvent(event) &&
+        event.key.length === 1 &&
+        triggerKeys.includes(event.key)
+      );
+    },
     menus: menuGroups,
   };
 
@@ -129,12 +115,7 @@ export class SlashMenuWidget extends WithDisposable(LitElement) {
 
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
-    if (
-      isControlledKeyboardEvent(event) ||
-      event.key.length !== 1 ||
-      !this.options.triggerKeys.includes(event.key)
-    )
-      return;
+    if (!this.options.isTriggerKey(event)) return;
 
     // Fixme @Saul-Mirone get model from getCurrentSelection
     const target = event.target;

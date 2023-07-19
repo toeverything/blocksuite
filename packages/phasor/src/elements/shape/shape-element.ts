@@ -73,8 +73,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
   }
 
   get color() {
-    const color =
-      (this.yMap.get('color') as IShape['color']) ?? this.strokeColor;
+    const color = (this.yMap.get('color') as IShape['color']) ?? '#000000';
     return color;
   }
 
@@ -90,6 +89,12 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       (this.yMap.get('fontFamily') as IShape['fontFamily']) ??
       "'Kalam', cursive";
     return fontFamily;
+  }
+
+  get textAlign() {
+    const textAlign =
+      (this.yMap.get('textAlign') as IShape['textAlign']) ?? 'center';
+    return textAlign;
   }
 
   get textHorizontalAlign() {
@@ -157,11 +162,12 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontSize,
       fontFamily,
       textVerticalAlign,
+      textAlign,
       textHorizontalAlign,
     } = this;
     if (!text) return;
 
-    const lineHeight = getLineHeight(fontFamily, fontSize.toString());
+    const lineHeight = getLineHeight(fontFamily, fontSize);
     const font = getFontString({
       fontSize: fontSize,
       lineHeight: `${lineHeight}px`,
@@ -181,8 +187,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       textHorizontalAlign === 'center'
         ? w / 2
         : textHorizontalAlign === 'right'
-        ? w
-        : 0;
+        ? w - SHAPE_TEXT_PADDING
+        : SHAPE_TEXT_PADDING;
     const verticalOffset =
       textVerticalAlign === 'center'
         ? (this.h - lineHeight * lines.length) / 2
@@ -205,14 +211,16 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
         ctx.canvas.setAttribute('dir', rtl ? 'rtl' : 'ltr');
         ctx.font = font;
         ctx.fillStyle = this.computedValue(color);
-        ctx.textAlign = textHorizontalAlign;
+        ctx.textAlign = textAlign;
 
         ctx.textBaseline = 'ideographic';
 
         ctx.fillText(
           str,
           horizontalOffset - 2,
-          (lineIndex + 1) * lineHeight + verticalOffset
+          // 1.5 is a "magic number" used to align the text rendered on the canvas with the text in the DOM.
+          // This approach is employed until a better or proper handling method is discovered.
+          (lineIndex + 1) * lineHeight + verticalOffset - 1.5
         );
 
         if (shouldTemporarilyAttach) {

@@ -275,7 +275,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       if (selectedType === 'Caret') return;
       showFormatQuickBar({
         page: this.page,
-        container: this.container,
         direction,
         anchorEl: {
           getBoundingClientRect: () => {
@@ -298,7 +297,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
       const direction = e.start.y < e.point.y ? 'center-bottom' : 'center-top';
       showFormatQuickBar({
         page: this.page,
-        container: this.container,
         direction,
         anchorEl: {
           // After update block type, the block selection will be cleared and refreshed.
@@ -601,7 +599,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     // Show quick bar when user select text by keyboard(Shift + Arrow)
     showFormatQuickBar({
       page: this.page,
-      container: this.container,
       direction,
       anchorEl: {
         getBoundingClientRect: () => {
@@ -859,7 +856,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     const direction = pos ? 'center-bottom' : 'center-top';
     showFormatQuickBar({
       page: this.page,
-      container: this.container,
       direction,
       anchorEl: {
         // After update block type, the block selection will be cleared and refreshed.

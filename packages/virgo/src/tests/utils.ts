@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { DeltaInsert, VEditor, VRange } from '@blocksuite/virgo';
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
 
@@ -10,6 +10,7 @@ export async function type(page: Page, content: string) {
 
 export async function press(page: Page, content: string) {
   await page.keyboard.press(content, { delay: 50 });
+  await page.waitForTimeout(100);
 }
 
 export async function enterVirgoPlayground(page: Page) {
@@ -117,4 +118,54 @@ export async function getVirgoRichTextLine(
     },
     [index, i]
   );
+}
+
+export async function getVRangeIndexRect(
+  page: Page,
+  [richTextIndex, vIndex]: [number, number],
+  coordOffSet: { x: number; y: number } = { x: 0, y: 0 }
+) {
+  const rect = await page.evaluate(
+    ({ richTextIndex, vIndex, coordOffSet }) => {
+      const richText = document.querySelectorAll('virgo-test-rich-text')[
+        richTextIndex
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any;
+      const domRange = richText.vEditor.toDomRange({
+        index: vIndex,
+        length: 0,
+      });
+      const pointBound = domRange.getBoundingClientRect();
+      return {
+        x: pointBound.left + coordOffSet.x,
+        y: pointBound.top + pointBound.height / 2 + coordOffSet.y,
+      };
+    },
+    {
+      richTextIndex,
+      vIndex,
+      coordOffSet,
+    }
+  );
+  return rect;
+}
+
+export async function assertSelection(
+  page: Page,
+  richTextIndex: number,
+  rangeIndex: number,
+  rangeLength = 0
+) {
+  const actual = await page.evaluate(
+    ([richTextIndex]) => {
+      const richText = document?.querySelectorAll('virgo-test-rich-text')[
+        richTextIndex
+      ];
+      // @ts-ignore
+      const vEditor = richText.vEditor;
+      return vEditor?.getVRange();
+    },
+    [richTextIndex]
+  );
+  expect(actual).toEqual({ index: rangeIndex, length: rangeLength });
 }

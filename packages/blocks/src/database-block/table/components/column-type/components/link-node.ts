@@ -3,7 +3,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { isValidLink } from '../../../../../components/link-popover/link-popover.js';
+import { isValidUrl } from '../../../../../__internal__/utils/url.js';
 
 @customElement('affine-database-link-node')
 export class LinkNode extends ShadowlessElement {
@@ -24,7 +24,7 @@ export class LinkNode extends ShadowlessElement {
   link!: string;
 
   protected override render() {
-    if (!isValidLink(this.link)) {
+    if (!isValidUrl(this.link)) {
       return html`<span class="normal-text">${this.link}</span>`;
     }
 

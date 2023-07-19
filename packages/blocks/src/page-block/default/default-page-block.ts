@@ -84,8 +84,11 @@ export class DefaultPageBlockComponent
       padding-bottom: ${PAGE_BLOCK_PADDING_BOTTOM}px;
 
       /* Leave a place for drag-handle */
-      padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
-      padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
+      /* Do not use prettier format this style, or it will be broken */
+      /* prettier-ignore */
+      padding-left: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
+      /* prettier-ignore */
+      padding-right: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
     }
 
     .affine-default-page-block-title {

@@ -29,7 +29,7 @@ type Match = {
 const matches: Match[] = [
   {
     name: 'bolditalic',
-    pattern: /(?:\*){3}(.+?)(?:\*){3}$/g,
+    pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
     action: (
       model: BaseBlockModel,
       vEditor: AffineVEditor,
@@ -44,10 +44,6 @@ const matches: Match[] = [
 
       const annotatedText = match[0];
       const startIndex = selection.index - annotatedText.length;
-
-      if (text.match(/^([* \n]+)$/g)) {
-        return false;
-      }
 
       vEditor.insertText(
         {
@@ -93,7 +89,7 @@ const matches: Match[] = [
   },
   {
     name: 'bold',
-    pattern: /(?:\*){2}(.+?)(?:\*){2}$/g,
+    pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
     action: (
       model: BaseBlockModel,
       vEditor: AffineVEditor,
@@ -107,10 +103,6 @@ const matches: Match[] = [
       }
       const annotatedText = match[0];
       const startIndex = selection.index - annotatedText.length;
-
-      if (text.match(/^([* \n]+)$/g)) {
-        return false;
-      }
 
       vEditor.insertText(
         {
@@ -153,7 +145,7 @@ const matches: Match[] = [
   },
   {
     name: 'italic',
-    pattern: /(?:\*){1}(.+?)(?:\*){1}$/g,
+    pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
     action: (
       model: BaseBlockModel,
       vEditor: AffineVEditor,
@@ -167,10 +159,6 @@ const matches: Match[] = [
       }
       const annotatedText = match[0];
       const startIndex = selection.index - annotatedText.length;
-
-      if (text.match(/^([* \n]+)$/g)) {
-        return false;
-      }
 
       vEditor.insertText(
         {
@@ -213,7 +201,7 @@ const matches: Match[] = [
   },
   {
     name: 'strikethrough',
-    pattern: /(?:~~)(.+?)(?:~~)$/g,
+    pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
     action: (
       model: BaseBlockModel,
       vEditor: AffineVEditor,
@@ -227,10 +215,6 @@ const matches: Match[] = [
       }
       const annotatedText = match[0];
       const startIndex = selection.index - annotatedText.length;
-
-      if (text.match(/^([* \n]+)$/g)) {
-        return false;
-      }
 
       vEditor.insertText(
         {
@@ -273,7 +257,7 @@ const matches: Match[] = [
   },
   {
     name: 'underthrough',
-    pattern: /(?:~)(.+?)(?:~)$/g,
+    pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
     action: (
       model: BaseBlockModel,
       vEditor: AffineVEditor,
@@ -287,10 +271,6 @@ const matches: Match[] = [
       }
       const annotatedText = match[0];
       const startIndex = selection.index - annotatedText.length;
-
-      if (text.match(/^([* \n]+)$/g)) {
-        return false;
-      }
 
       vEditor.insertText(
         {

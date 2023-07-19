@@ -77,6 +77,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
             Infinity
           )
         );
+        this.dragLeft = width - this.column.width;
         preview.display(width);
         return {
           width,
@@ -84,6 +85,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
       },
       onDrop: ({ width }) => {
         tableContainer.style.pointerEvents = 'auto';
+        this.dragLeft = 0;
         this.column.updateWidth(width);
         preview.remove();
       },

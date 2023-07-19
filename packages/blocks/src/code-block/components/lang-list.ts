@@ -25,7 +25,7 @@ export class LangList extends ShadowlessElement {
         background: var(--affine-background-overlay-panel-color);
         border-radius: 12px;
         top: 24px;
-        z-index: 1;
+        z-index: var(--affine-z-index-popover);
       }
 
       .lang-list-container {

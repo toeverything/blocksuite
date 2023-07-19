@@ -620,16 +620,24 @@ export const EdgelessPenIcon = html`<svg
     />
   </mask>
   <g mask="url(#mask0_5690_125889)">
-    <rect x="6" y="-1" width="11" height="11" fill="none" class="pen-color" />
+    <rect
+      x="6"
+      y="-1"
+      width="11"
+      height="11"
+      fill="none"
+      class="brush-head-rect"
+    />
   </g>
-  <rect y="48" width="22" height="2" fill="none" class="pen-color" />
+  <rect y="48" width="22" height="2" fill="none" class="brush-midline-rect" />
   <rect
     x="0.5"
     y="48.5"
     width="21"
     height="1"
-    stroke="black"
+    stroke="none"
     stroke-opacity="0.1"
+    class="brush-midline-stroke"
   />
   <defs>
     <linearGradient
@@ -1727,6 +1735,21 @@ export const MoreIcon = html` <svg
   />
   <path
     d="M19 11.0498C18.1716 11.0498 17.5 11.7214 17.5 12.5498C17.5 13.3782 18.1716 14.0498 19 14.0498C19.8284 14.0498 20.5 13.3782 20.5 12.5498C20.5 11.7214 19.8284 11.0498 19 11.0498Z"
+    fill="#77757D"
+  />
+</svg>`;
+
+export const SmallArrowDownIcon = html`<svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M4.31344 6.31295C4.5087 6.11769 4.82528 6.11769 5.02055 6.31295L7.76462 9.05703C7.8948 9.1872 8.10585 9.1872 8.23603 9.05703L10.9801 6.31295C11.1754 6.11769 11.492 6.11769 11.6872 6.31295C11.8825 6.50821 11.8825 6.8248 11.6872 7.02006L8.94313 9.76414C8.42244 10.2848 7.57822 10.2848 7.05752 9.76414L4.31344 7.02006C4.11818 6.8248 4.11818 6.50821 4.31344 6.31295Z"
     fill="#77757D"
   />
 </svg>`;

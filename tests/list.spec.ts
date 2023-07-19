@@ -545,3 +545,23 @@ test('delete list item with nested children items', async ({ page }) => {
 
   await assertBlockChildrenIds(page, '1', ['2', '4', '5']);
 });
+
+test('add number prefix to a todo item should not forcefully change it into numbered list, vice versa', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page, 0);
+  await type(page, '1. numberList');
+  await assertListPrefix(page, ['1']);
+  await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
+  await type(page, '[] ');
+  await assertListPrefix(page, ['1']);
+  await initEmptyParagraphState(page);
+  await focusRichText(page, 0);
+  await type(page, '[] todoList');
+  await assertListPrefix(page, ['']);
+  await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
+  await type(page, '1. ');
+  await assertListPrefix(page, ['']);
+});

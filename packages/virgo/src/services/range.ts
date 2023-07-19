@@ -1,17 +1,19 @@
 import { VirgoLine } from '../components/index.js';
 import type { VRange } from '../types.js';
 import type { VRangeUpdatedProp } from '../types.js';
+import type { BaseTextAttributes } from '../utils/base-attributes.js';
+import { findDocumentOrShadowRoot } from '../utils/query.js';
 import {
-  type BaseTextAttributes,
   domRangeToVirgoRange,
-  findDocumentOrShadowRoot,
   virgoRangeToDomRange,
-} from '../utils/index.js';
+} from '../utils/range-conversion.js';
+import { isVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private readonly _editor: VEditor<TextAttributes>;
 
+  private _prevVRange: VRange | null = null;
   private _vRange: VRange | null = null;
   private _lastScrollLeft = 0;
 
@@ -22,6 +24,18 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
     document.dispatchEvent(new CustomEvent('virgo-vrange-updated'));
+
+    if (
+      this._editor.mounted &&
+      !(this._prevVRange && newVRange
+        ? isVRangeEqual(this._prevVRange, newVRange)
+        : this._prevVRange === newVRange)
+    ) {
+      // no need to sync and native selection behavior about shift+arrow will
+      // be broken if we sync
+      this._editor.requestUpdate(false);
+    }
+    this._prevVRange = newVRange;
 
     if (origin !== 'other') {
       return;

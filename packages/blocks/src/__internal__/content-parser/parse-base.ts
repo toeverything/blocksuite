@@ -1,5 +1,4 @@
 import type { BlockSchemas } from '@blocksuite/global/types';
-import { assertExists } from '@blocksuite/global/utils';
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
@@ -11,7 +10,7 @@ import {
 } from '../../database-block/common/column-manager.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
-import type { ContentParser } from './index.js';
+import type { ContentParser, ContextedContentParser } from './index.js';
 
 export type FetchFileHandler = (
   fileName: string
@@ -31,6 +30,7 @@ export type ColumnMeta = {
   title: string;
   optionsMap: Map<string, string>;
 };
+
 export type TableTitleColumnHandler = (
   element: Element
 ) => Promise<string[] | null>;
@@ -59,13 +59,14 @@ const INLINE_TAGS = [
   'TIME',
 ];
 
-export class HtmlParser {
-  private _contentParser: ContentParser;
-  private _page: Page;
-  private _customFetchFileHandler?: FetchFileHandler;
-  private _customTextStyleHandler?: TextStyleHandler;
-  private _customTableParserHandler?: TableParseHandler;
-  private _customTableTitleColumnHandler?: TableTitleColumnHandler;
+export abstract class BaseParser {
+  protected _contentParser: ContentParser;
+  protected _page: Page;
+  protected _customFetchFileHandler?: FetchFileHandler;
+  protected _customTextStyleHandler?: TextStyleHandler;
+  protected _customTableParserHandler?: TableParseHandler;
+  protected _customTableTitleColumnHandler?: TableTitleColumnHandler;
+  protected abstract _contextedContentParser: ContextedContentParser;
 
   constructor(
     contentParser: ContentParser,
@@ -83,7 +84,7 @@ export class HtmlParser {
     this._customTableTitleColumnHandler = tableTitleColumnHandler;
   }
 
-  private _fetchFileHandler = async (
+  protected _fetchFileHandler = async (
     fileName: string
   ): Promise<Blob | null | undefined> => {
     if (this._customFetchFileHandler) {
@@ -113,51 +114,16 @@ export class HtmlParser {
     return imgBlob;
   };
 
-  public registerParsers() {
-    this._contentParser.registerParserHtmlText2Block(
-      'nodeParser',
-      this._nodeParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'commonParser',
-      this._commonParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'listItemParser',
-      this._listItemParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'blockQuoteParser',
-      this._blockQuoteParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'codeBlockParser',
-      this._codeBlockParser
-    );
-    this._contentParser.registerParserHtmlText2Block(
-      'embedItemParser',
-      this._embedItemParser
-    );
-
-    this._contentParser.registerParserHtmlText2Block(
-      'tableParser',
-      this._tableParser
-    );
-
-    this._contentParser.registerParserHtmlText2Block(
-      'headerParser',
-      this._headerParser
-    );
-  }
+  public abstract registerParsers(): void;
 
   // TODO parse children block
-  private _nodeParser = async (
+  protected _nodeParser = async (
     node: Element
   ): Promise<SerializedBlock[] | null> => {
     let result;
     // custom parser
-    result = await this._contentParser.getParserHtmlText2Block(
-      'customNodeParser'
+    result = await this._contextedContentParser.getParserHtmlText2Block(
+      'CustomNodeParser'
     )?.(node);
     if (result && result.length > 0) {
       return result;
@@ -167,8 +133,8 @@ export class HtmlParser {
     const isInlineOrLeaf =
       node instanceof Text || INLINE_TAGS.includes(tagName);
     if (isInlineOrLeaf && node.textContent?.length) {
-      result = await this._contentParser.getParserHtmlText2Block(
-        'commonParser'
+      result = await this._contextedContentParser.getParserHtmlText2Block(
+        'CommonParser'
       )?.({
         element: node,
         flavour: 'affine:paragraph',
@@ -182,8 +148,8 @@ export class HtmlParser {
         case 'H4':
         case 'H5':
         case 'H6':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'commonParser'
+          result = await this._contextedContentParser.getParserHtmlText2Block(
+            'CommonParser'
           )?.({
             element: node,
             flavour: 'affine:paragraph',
@@ -191,34 +157,35 @@ export class HtmlParser {
           });
           break;
         case 'BLOCKQUOTE':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'blockQuoteParser'
+          result = await this._contextedContentParser.getParserHtmlText2Block(
+            'BlockQuoteParser'
           )?.(node);
           break;
         case 'P':
           if (
+            this._contextedContentParser.context === 'Markdown' &&
             node.firstChild instanceof Text &&
             (node.firstChild.textContent?.startsWith('[] ') ||
               node.firstChild.textContent?.startsWith('[ ] ') ||
               node.firstChild.textContent?.startsWith('[x] '))
           ) {
-            result = await this._contentParser.getParserHtmlText2Block(
-              'listItemParser'
+            result = await this._contextedContentParser.getParserHtmlText2Block(
+              'ListItemParser'
             )?.(node);
           } else if (node.firstChild instanceof HTMLImageElement) {
-            result = await this._contentParser.getParserHtmlText2Block(
-              'embedItemParser'
+            result = await this._contextedContentParser.getParserHtmlText2Block(
+              'EmbedItemParser'
             )?.(node.firstChild);
           } else if (
             node.firstElementChild?.tagName === 'A' ||
             node.firstElementChild?.getAttribute('href')?.endsWith('.csv')
           ) {
-            result = await this._contentParser.getParserHtmlText2Block(
-              'tableParser'
+            result = await this._contextedContentParser.getParserHtmlText2Block(
+              'TableParser'
             )?.(node.firstChild);
           } else {
-            result = await this._contentParser.getParserHtmlText2Block(
-              'commonParser'
+            result = await this._contextedContentParser.getParserHtmlText2Block(
+              'CommonParser'
             )?.({
               element: node,
               flavour: 'affine:paragraph',
@@ -227,39 +194,39 @@ export class HtmlParser {
           }
           break;
         case 'LI':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'listItemParser'
+          result = await this._contextedContentParser.getParserHtmlText2Block(
+            'ListItemParser'
           )?.(node);
           break;
         case 'HR':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'commonParser'
+          result = await this._contextedContentParser.getParserHtmlText2Block(
+            'CommonParser'
           )?.({
             element: node,
             flavour: 'affine:divider',
           });
           break;
         case 'PRE':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'codeBlockParser'
+          result = await this._contextedContentParser.getParserHtmlText2Block(
+            'CodeBlockParser'
           )?.(node);
           break;
         case 'FIGURE':
         case 'IMG':
           {
-            result = await this._contentParser.getParserHtmlText2Block(
-              'embedItemParser'
+            result = await this._contextedContentParser.getParserHtmlText2Block(
+              'EmbedItemParser'
             )?.(node);
           }
           break;
         case 'HEADER':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'headerParser'
+          result = await this._contextedContentParser.getParserHtmlText2Block(
+            'HeaderParser'
           )?.(node);
           break;
         case 'TABLE':
-          result = await this._contentParser.getParserHtmlText2Block(
-            'tableParser'
+          result = await this._contextedContentParser.getParserHtmlText2Block(
+            'TableParser'
           )?.(node);
           break;
         default:
@@ -291,13 +258,16 @@ export class HtmlParser {
       });
 
       if (!hasNonInlineOrNonLeaf) {
-        const allInlineResult = await this._commonHTML2Block(
-          node,
-          'affine:paragraph',
-          'text'
-        );
+        const allInlineResult =
+          await this._contextedContentParser.getParserHtmlText2Block(
+            'CommonParser'
+          )?.({
+            element: node,
+            flavour: 'affine:paragraph',
+            type: 'text',
+          });
         if (allInlineResult) {
-          return [allInlineResult];
+          return allInlineResult;
         }
       }
     }
@@ -305,9 +275,9 @@ export class HtmlParser {
     const openBlockPromises = Array.from(node.children).map(
       async childElement => {
         const clipBlockInfos =
-          (await this._contentParser.getParserHtmlText2Block('nodeParser')?.(
-            childElement
-          )) || [];
+          (await this._contextedContentParser.getParserHtmlText2Block(
+            'NodeParser'
+          )?.(childElement)) || [];
         return clipBlockInfos;
       }
     );
@@ -319,30 +289,7 @@ export class HtmlParser {
     return results.flat().filter(v => v);
   };
 
-  private _commonParser = async ({
-    element,
-    flavour,
-    type,
-    checked,
-    ignoreEmptyElement = true,
-  }: {
-    element: Element;
-    flavour: string;
-    type: string;
-    checked?: boolean;
-    ignoreEmptyElement?: boolean;
-  }): Promise<SerializedBlock[] | null> => {
-    const res = await this._commonHTML2Block(
-      element,
-      flavour,
-      type,
-      checked,
-      ignoreEmptyElement
-    );
-    return res ? [res] : null;
-  };
-
-  private async _commonHTML2Block(
+  protected async _commonHTML2Block(
     element: Element,
     flavour: string,
     type: string,
@@ -378,7 +325,10 @@ export class HtmlParser {
         }
       }
       if (node instanceof Element) {
-        const childNode = await this._nodeParser(node);
+        const childNode =
+          await this._contextedContentParser.getParserHtmlText2Block(
+            'NodeParser'
+          )?.(node);
         childNode && children.push(...childNode);
       }
       isChildNode = true;
@@ -417,7 +367,7 @@ export class HtmlParser {
     };
   }
 
-  private _commonHTML2Text(
+  protected _commonHTML2Text(
     element: Element | Node,
     textStyle: { [key: string]: unknown } = {},
     ignoreEmptyText = true
@@ -472,90 +422,7 @@ export class HtmlParser {
       .filter(v => v);
   }
 
-  private _listItemParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    const tagName = element.parentElement?.tagName;
-    let type = tagName === 'OL' ? 'numbered' : 'bulleted';
-    if (
-      element.firstElementChild?.tagName === 'DETAIL' ||
-      element.firstElementChild?.firstElementChild?.tagName === 'SUMMARY'
-    ) {
-      const summary = await this._contentParser.getParserHtmlText2Block(
-        'commonParser'
-      )?.({
-        element: element.firstElementChild.firstElementChild,
-        flavour: 'affine:list',
-        type: type,
-      });
-      const childNodes = element.firstElementChild.childNodes;
-      const children = [];
-      for (let i = 1; i < childNodes.length; i++) {
-        const node = childNodes.item(i);
-        if (!node) continue;
-        if (node instanceof Element) {
-          const childNode = await this._nodeParser(node);
-          childNode && children.push(...childNode);
-        }
-      }
-      if (summary && summary.length > 0) {
-        summary[0].children = [...(summary[0].children || []), ...children];
-      }
-      return summary;
-    }
-    if (element.parentElement?.classList?.contains('toggle')) {
-      type = 'toggle';
-    }
-    let checked;
-    let inputEl;
-    if (
-      (inputEl = element.firstElementChild)?.tagName === 'INPUT' ||
-      (inputEl = element.firstElementChild?.firstElementChild)?.tagName ===
-        'INPUT'
-    ) {
-      type = 'todo';
-      checked = inputEl?.getAttribute('checked') !== null;
-    }
-    if (element.firstChild instanceof Text) {
-      if (element.firstChild.textContent?.startsWith('[] ')) {
-        element.firstChild.textContent =
-          element.firstChild.textContent.slice(3);
-        type = 'todo';
-        checked = false;
-      } else if (element.firstChild.textContent?.startsWith('[ ] ')) {
-        element.firstChild.textContent =
-          element.firstChild.textContent.slice(4);
-        type = 'todo';
-        checked = false;
-      } else if (element.firstChild.textContent?.startsWith('[x] ')) {
-        element.firstChild.textContent =
-          element.firstChild.textContent.slice(4);
-        type = 'todo';
-        checked = true;
-      }
-    }
-    let checkBoxEl;
-    if (
-      (checkBoxEl = element.firstElementChild)?.classList.contains(
-        'checkbox'
-      ) ||
-      (checkBoxEl =
-        element.firstElementChild?.firstElementChild)?.classList.contains(
-        'checkbox'
-      )
-    ) {
-      type = 'todo';
-      checked = checkBoxEl?.classList.contains('checked') ?? false;
-    }
-    return this._contentParser.getParserHtmlText2Block('commonParser')?.({
-      element: element,
-      flavour: 'affine:list',
-      type: type,
-      checked: checked,
-    });
-  };
-
-  private _blockQuoteParser = async (
+  protected _blockQuoteParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     const getText = (list: SerializedBlock[]): SerializedBlock['text'] => {
@@ -576,13 +443,14 @@ export class HtmlParser {
       return result;
     };
 
-    const commonResult = await this._contentParser.getParserHtmlText2Block(
-      'commonParser'
-    )?.({
-      element: element,
-      flavour: 'affine:paragraph',
-      type: 'text',
-    });
+    const commonResult =
+      await this._contextedContentParser.getParserHtmlText2Block(
+        'CommonParser'
+      )?.({
+        element: element,
+        flavour: 'affine:paragraph',
+        type: 'text',
+      });
     if (!commonResult) {
       return null;
     }
@@ -597,7 +465,7 @@ export class HtmlParser {
     ];
   };
 
-  private _codeBlockParser = async (
+  protected _codeBlockParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     // code block doesn't parse other nested Markdown syntax, thus is always one layer deep, example:
@@ -628,262 +496,78 @@ export class HtmlParser {
     ];
   };
 
-  private _embedItemParser = async (
-    element: Element
-  ): Promise<SerializedBlock[] | null> => {
-    let imgElement = null;
-    const texts = [];
-    if (element.tagName === 'FIGURE') {
-      imgElement = element.querySelector('img');
-      const figcaptionElement = element.querySelector('figcaption');
-      if (figcaptionElement) {
-        const captionResult = await this._contentParser.getParserHtmlText2Block(
-          'commonParser'
-        )?.({
-          element: figcaptionElement,
-          flavour: 'affine:paragraph',
-          type: 'text',
-        });
-        if (captionResult && captionResult.length > 0) {
-          texts.push(...(captionResult[0].text || []));
-        }
-      }
-      const bookmarkUrlElement = element.querySelector('.bookmark.source');
-      if (bookmarkUrlElement) {
-        const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
-        return [
-          {
-            flavour: 'affine:bookmark',
-            children: [],
-            url: bookmarkUrl,
-          },
-        ];
-      }
-    } else if (element instanceof HTMLImageElement) {
-      imgElement = element;
-      texts.push({ insert: '' });
-    }
-    let caption = '';
-    if (imgElement) {
-      // TODO: use the real bookmark instead.
-      if (imgElement.classList.contains('bookmark-icon')) {
-        const linkElement = element.querySelector('a');
-        if (linkElement) {
-          caption = linkElement.getAttribute('href') || '';
-        }
-        imgElement = element.querySelector('.bookmark-image');
-      }
-      const imgUrl = imgElement?.getAttribute('src') || '';
-      const imgBlob = await this._fetchFileHandler(imgUrl);
-      if (!imgBlob || imgBlob.size === 0) {
-        const texts = [
-          {
-            insert: imgUrl,
-            attributes: {
-              link: imgUrl,
-            },
-          },
-        ];
-        return [
-          {
-            flavour: 'affine:paragraph',
-            type: 'text',
-            children: [],
-            text: texts,
-          },
-        ];
-      } else {
-        const storage = this._page.blobs;
-        assertExists(storage);
-        const id = await storage.set(imgBlob);
-        return [
-          {
-            flavour: 'affine:image',
-            sourceId: id,
-            children: [],
-            text: texts,
-            caption,
-          },
-        ];
-      }
-    }
-
-    return [
-      {
-        flavour: 'affine:paragraph',
-        type: 'text',
-        children: [],
-        text: texts,
-      },
-    ];
-  };
-
   // TODO parse children block, this is temporary solution
-  private _tableParser = async (
+  protected _tableParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
-    let result: SerializedBlock[] | null = [];
     if (this._customTableParserHandler) {
-      result = await this._customTableParserHandler(element);
+      const result = await this._customTableParserHandler(element);
       if (result && result.length > 0) {
         return result;
       }
     }
-    if (element.tagName === 'TABLE') {
-      const theadElement = element.querySelector('thead');
-      const tbodyElement = element.querySelector('tbody');
-      const titleTrEle = theadElement?.querySelector('tr');
-      let id = 1;
-      const columnMeta: ColumnMeta[] = [];
-      titleTrEle?.querySelectorAll('th').forEach(ele => {
-        columnMeta.push({
-          title: ele.textContent?.trim() || '',
-          type: getCorrespondingTableColumnType(
-            ele.querySelector('svg') ?? undefined
-          ),
-          optionsMap: new Map<string, string>(),
-        });
-      });
-      const rows: (string | string[])[][] = [];
-      tbodyElement?.querySelectorAll('tr').forEach(ele => {
-        const row: (string | string[])[] = [];
-        ele.querySelectorAll('td').forEach((ele, index) => {
-          const cellContent: string[] = [];
-          if (ele.children.length === 0) {
-            cellContent.push(ele.textContent || '');
-          }
-          Array.from(ele.children).map(child => {
-            if (child.classList.contains('checkbox-on')) {
-              cellContent.push('on');
-            } else {
-              cellContent.push(child.textContent || '');
-            }
-          });
-          row.push(
-            columnMeta[index]?.type !== 'multi-select'
-              ? cellContent.join('')
-              : cellContent
-          );
-        });
-        rows.push(row);
-      });
-      if (this._customTableTitleColumnHandler) {
-        const titleColumn = await this._customTableTitleColumnHandler(element);
-        if (titleColumn) {
-          for (let i = 1; i < rows.length; i++) {
-            const originalContent = rows[i].shift();
-            rows[i].unshift(titleColumn[i] || originalContent || '');
-          }
-        }
-      }
-      const columns: Column[] = columnMeta.slice(1).map((value, index) => {
-        if (['select', 'multi-select'].includes(value.type)) {
-          const options = rows
-            .map(row => row[index + 1])
-            .flat()
-            .filter((value, index, array) => array.indexOf(value) === index)
-            .map(uniqueValue => {
-              return {
-                id: nanoid(),
-                value: uniqueValue,
-                color: getTagColor(),
-              };
-            });
-          options.map(option =>
-            columnMeta[index + 1].optionsMap.set(option.value, option.id)
-          );
-          return columnManager
-            .getColumn(value.type)
-            .createWithId('' + id++, value.title, {
-              options,
-            });
-        }
-        return columnManager
-          .getColumn(value.type)
-          .createWithId('' + id++, value.title);
-      });
-      if (rows.length > 0) {
-        let maxLen = rows[0].length;
-        for (let i = 1; i < rows.length; i++) {
-          maxLen = Math.max(maxLen, rows[i].length);
-        }
-        const addNum = maxLen - columns.length;
-        for (let i = 0; i < addNum; i++) {
-          columns.push(richTextHelper.createWithId('' + id++, ''));
-        }
-      }
-      const databasePropsId = id++;
-      const cells: Record<string, Record<string, Cell>> = {};
-      const children: SerializedBlock[] = [];
-      rows.forEach(row => {
-        children.push({
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
-          children: [],
-        });
-        const rowId = '' + id++;
-        cells[rowId] = {};
-        row.slice(1).forEach((value, index) => {
-          if (
-            columnMeta[index + 1]?.type === 'multi-select' &&
-            Array.isArray(value)
-          ) {
-            cells[rowId][columns[index].id] = {
-              columnId: columns[index].id,
-              value: value.map(
-                v => columnMeta[index + 1]?.optionsMap.get(v) || ''
-              ),
-            };
-            return;
-          }
-          if (
-            columnMeta[index + 1]?.type === 'select' &&
-            !Array.isArray(value)
-          ) {
-            cells[rowId][columns[index].id] = {
-              columnId: columns[index].id,
-              value: columnMeta[index + 1]?.optionsMap.get(value) || '',
-            };
-            return;
-          }
-          cells[rowId][columns[index].id] = {
-            columnId: columns[index].id,
-            value,
-          };
-        });
-      });
-
-      result = [
-        {
-          flavour: 'affine:database',
-          databaseProps: {
-            id: '' + databasePropsId,
-            title: 'Database',
-            titleColumnName: columnMeta[0]?.title,
-            titleColumnWidth: 432,
-            rowIds: Object.keys(cells),
-            cells: cells,
-            columns: columns,
-          },
-          children: children,
-        },
-      ];
+    if (element.tagName !== 'TABLE') {
+      return [];
     }
-    return result;
+    const theadElement = element.querySelector('thead');
+    const tbodyElement = element.querySelector('tbody');
+    const titleTrEle = theadElement?.querySelector('tr');
+    const makeIdCounter = () => {
+      let id = 1;
+      return {
+        next: () => id++,
+      };
+    };
+    const idCounter = makeIdCounter();
+    const columnMeta: ColumnMeta[] = getTableColumnMeta(titleTrEle);
+    const rows: (string | string[])[][] = getTableRows(
+      tbodyElement,
+      columnMeta
+    );
+    if (this._customTableTitleColumnHandler) {
+      const titleColumn = await this._customTableTitleColumnHandler(element);
+      if (titleColumn) {
+        for (let i = 1; i < rows.length; i++) {
+          const originalContent = rows[i].shift();
+          rows[i].unshift(titleColumn[i] || originalContent || '');
+        }
+      }
+    }
+    const columns: Column[] = getTableColumns(columnMeta, rows, idCounter);
+    const databasePropsId = idCounter.next();
+    const { cells, children } = getTableCellsAndChildren(
+      rows,
+      idCounter,
+      columnMeta,
+      columns
+    );
+    return [
+      {
+        flavour: 'affine:database',
+        databaseProps: {
+          id: '' + databasePropsId,
+          title: 'Database',
+          titleColumnName: columnMeta[0]?.title,
+          titleColumnWidth: 432,
+          rowIds: Object.keys(cells),
+          cells: cells,
+          columns: columns,
+        },
+        children: children,
+      },
+    ];
   };
 
-  private _headerParser = async (
+  protected _headerParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     let node = element;
     if (element.getElementsByClassName('page-title').length > 0) {
       node = element.getElementsByClassName('page-title')[0];
     }
-
     const tagName = node.tagName;
-    const result = await this._contentParser.getParserHtmlText2Block(
-      'commonParser'
+    const result = await this._contextedContentParser.getParserHtmlText2Block(
+      'CommonParser'
     )?.({
       element: node,
       flavour: 'affine:page',
@@ -981,4 +665,138 @@ const checkWebComponentIfInline = (element: Element) => {
     style.display.includes('inline') ||
     (element as HTMLElement).style.display.includes('inline')
   );
+};
+
+const getTableCellsAndChildren = (
+  rows: (string | string[])[][],
+  idCounter: { next: () => number },
+  columnMeta: ColumnMeta[],
+  columns: Column<Record<string, unknown>>[]
+) => {
+  const cells: Record<string, Record<string, Cell>> = {};
+  const children: SerializedBlock[] = [];
+  rows.forEach(row => {
+    children.push({
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
+      children: [],
+    });
+    const rowId = '' + idCounter.next();
+    cells[rowId] = {};
+    row.slice(1).forEach((value, index) => {
+      if (
+        columnMeta[index + 1]?.type === 'multi-select' &&
+        Array.isArray(value)
+      ) {
+        cells[rowId][columns[index].id] = {
+          columnId: columns[index].id,
+          value: value.map(v => columnMeta[index + 1]?.optionsMap.get(v) || ''),
+        };
+        return;
+      }
+      if (columnMeta[index + 1]?.type === 'select' && !Array.isArray(value)) {
+        cells[rowId][columns[index].id] = {
+          columnId: columns[index].id,
+          value: columnMeta[index + 1]?.optionsMap.get(value) || '',
+        };
+        return;
+      }
+      cells[rowId][columns[index].id] = {
+        columnId: columns[index].id,
+        value,
+      };
+    });
+  });
+  return { cells, children };
+};
+
+const getTableColumns = (
+  columnMeta: ColumnMeta[],
+  rows: (string | string[])[][],
+  idCounter: { next: () => number }
+): Column<Record<string, unknown>>[] => {
+  const columns: Column[] = columnMeta.slice(1).map((value, index) => {
+    if (['select', 'multi-select'].includes(value.type)) {
+      const options = rows
+        .map(row => row[index + 1])
+        .flat()
+        .filter((value, index, array) => array.indexOf(value) === index)
+        .map(uniqueValue => {
+          return {
+            id: nanoid(),
+            value: uniqueValue,
+            color: getTagColor(),
+          };
+        });
+      options.map(option =>
+        columnMeta[index + 1].optionsMap.set(option.value, option.id)
+      );
+      return columnManager
+        .getColumn(value.type)
+        .createWithId('' + idCounter.next(), value.title, {
+          options,
+        });
+    }
+    return columnManager
+      .getColumn(value.type)
+      .createWithId('' + idCounter.next(), value.title);
+  });
+  if (rows.length > 0) {
+    let maxLen = rows[0].length;
+    for (let i = 1; i < rows.length; i++) {
+      maxLen = Math.max(maxLen, rows[i].length);
+    }
+    const addNum = maxLen - columns.length;
+    for (let i = 0; i < addNum; i++) {
+      columns.push(richTextHelper.createWithId('' + idCounter.next(), ''));
+    }
+  }
+  return columns;
+};
+
+const getTableRows = (
+  tbodyElement: HTMLTableSectionElement | null,
+  columnMeta: ColumnMeta[]
+) => {
+  const rows: (string | string[])[][] = [];
+  tbodyElement?.querySelectorAll('tr').forEach(ele => {
+    const row: (string | string[])[] = [];
+    ele.querySelectorAll('td').forEach((ele, index) => {
+      const cellContent: string[] = [];
+      if (ele.children.length === 0) {
+        cellContent.push(ele.textContent || '');
+      }
+      Array.from(ele.children).map(child => {
+        if (child.classList.contains('checkbox-on')) {
+          cellContent.push('on');
+        } else {
+          cellContent.push(child.textContent || '');
+        }
+      });
+      row.push(
+        columnMeta[index]?.type !== 'multi-select'
+          ? cellContent.join('')
+          : cellContent
+      );
+    });
+    rows.push(row);
+  });
+  return rows;
+};
+
+const getTableColumnMeta = (
+  titleTrEle: HTMLTableRowElement | null | undefined
+) => {
+  const columnMeta: ColumnMeta[] = [];
+  titleTrEle?.querySelectorAll('th').forEach(ele => {
+    columnMeta.push({
+      title: ele.textContent?.trim() || '',
+      type: getCorrespondingTableColumnType(
+        ele.querySelector('svg') ?? undefined
+      ),
+      optionsMap: new Map<string, string>(),
+    });
+  });
+  return columnMeta;
 };

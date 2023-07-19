@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/blocks",
@@ -37,6 +37,8 @@
     "build": "pnpm -r build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "clean": "./scripts/clean.sh",
+    "release-note:draft": "node --loader ts-node/esm ./scripts/release-note/convert.ts",
+    "release-note:validate": "node --loader ts-node/esm ./scripts/release-note/validate.ts",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "husky install"
   },

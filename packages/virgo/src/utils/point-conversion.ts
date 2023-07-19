@@ -1,31 +1,35 @@
 import type { VirgoElement, VirgoLine } from '../components/index.js';
 import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DomPoint, TextPoint } from '../types.js';
-import { isVElement, isVLine, isVRoot, isVText } from './guard.js';
+import { isNativeTextInVText, isVElement, isVLine, isVRoot } from './guard.js';
 import { calculateTextLength, getTextNodesFromElement } from './text.js';
 
 export function nativePointToTextPoint(
   node: unknown,
   offset: number
 ): TextPoint | null {
-  if (isVText(node)) {
+  if (isNativeTextInVText(node)) {
     return [node, offset];
   }
 
   if (isVElement(node)) {
     const texts = getTextNodesFromElement(node);
-    let textOffset = offset;
-    for (const text of texts) {
-      if (offset <= text.length) {
-        return [text, textOffset];
+    if (texts.length === 1) {
+      const vElement = texts[0].parentElement?.closest(
+        '[data-virgo-element="true"]'
+      );
+      if (
+        vElement instanceof HTMLElement &&
+        vElement.dataset.virgoEmbed === 'true'
+      ) {
+        return [texts[0], 0];
       }
-      textOffset -= text.length;
     }
-    return null;
+    return texts[offset] ? [texts[offset], 0] : null;
   }
 
   if (isVLine(node) || isVRoot(node)) {
-    return getTextPointFromElementByOffset(node, offset, true);
+    return getTextPointRoughlyFromElementByOffset(node, offset, true);
   }
 
   if (!(node instanceof Node)) {
@@ -111,40 +115,40 @@ function getTextPointFromVNodes(
 ): TextPoint | null {
   const first = vNodes[0];
   for (let i = 0; i < vNodes.length; i++) {
-    const vLine = vNodes[i];
+    const vNode = vNodes[i];
 
-    if (i === 0 && AFollowedByB(node, vLine)) {
-      return getTextPointFromElementByOffset(first, offset, true);
+    if (i === 0 && AFollowedByB(node, vNode)) {
+      return getTextPointRoughlyFromElementByOffset(first, offset, true);
     }
 
-    if (AInsideB(node, vLine)) {
-      return getTextPointFromElementByOffset(first, offset, false);
+    if (AInsideB(node, vNode)) {
+      return getTextPointRoughlyFromElementByOffset(first, offset, false);
     }
 
-    if (i === vNodes.length - 1 && APrecededByB(node, vLine)) {
-      return getTextPointFromElement(vLine);
+    if (i === vNodes.length - 1 && APrecededByB(node, vNode)) {
+      return getTextPointRoughlyFromElement(vNode);
     }
 
     if (
       i < vNodes.length - 1 &&
-      APrecededByB(node, vLine) &&
+      APrecededByB(node, vNode) &&
       AFollowedByB(node, vNodes[i + 1])
     ) {
-      return getTextPointFromElement(vLine);
+      return getTextPointRoughlyFromElement(vNode);
     }
   }
 
   return null;
 }
 
-function getTextPointFromElement(element: Element): TextPoint | null {
+function getTextPointRoughlyFromElement(element: Element): TextPoint | null {
   const texts = getTextNodesFromElement(element);
   if (texts.length === 0) return null;
   const text = texts[texts.length - 1];
   return [text, calculateTextLength(text)];
 }
 
-function getTextPointFromElementByOffset(
+function getTextPointRoughlyFromElementByOffset(
   element: Element,
   offset: number,
   fromStart: boolean

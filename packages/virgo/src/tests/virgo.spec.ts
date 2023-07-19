@@ -3,15 +3,16 @@ import { expect, test } from '@playwright/test';
 import { ZERO_WIDTH_SPACE } from '../consts.js';
 import type { VEditor } from '../virgo.js';
 import {
+  assertSelection,
   enterVirgoPlayground,
   focusVirgoRichText,
   getDeltaFromVirgoRichText,
   getVirgoRichTextLine,
-  getVRangeFromVirgoRichText,
+  getVRangeIndexRect,
   press,
   setVirgoRichTextRange,
   type,
-} from './utils/misc.js';
+} from './utils.js';
 
 test('basic input', async ({ page }) => {
   await enterVirgoPlayground(page);
@@ -727,6 +728,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
+  assertSelection(page, 0, 8);
 
   /**
    * |abc
@@ -736,6 +738,7 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
   await page.keyboard.down('Shift');
   await press(page, 'ArrowUp');
   await press(page, 'ArrowUp');
+  assertSelection(page, 0, 0, 8);
 
   /**
    * a|bc
@@ -743,7 +746,9 @@ test('select from the start of line using shift+arrow', async ({ page }) => {
    * |ghi
    */
   await press(page, 'ArrowRight');
+  assertSelection(page, 0, 1, 7);
   await press(page, 'Backspace');
+  await page.waitForTimeout(100);
 
   expect(await editorA.innerText()).toBe('aghi');
   expect(await editorB.innerText()).toBe('aghi');
@@ -821,43 +826,70 @@ test('yText should not contain \r', async ({ page }) => {
   );
 });
 
-test('embed element in virgo', async ({ page }) => {
+test('embed', async ({ page }) => {
   await enterVirgoPlayground(page);
   await focusVirgoRichText(page);
 
   const editorA = page.locator('[data-virgo-root="true"]').nth(0);
-
-  const editorACode = page.getByText('code').nth(0);
+  const editorAEmbed = page.getByText('embed').nth(0);
 
   expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
 
   await page.waitForTimeout(100);
 
-  await type(page, 'abcdefg');
+  await type(page, 'abc');
 
-  expect(await editorA.innerText()).toBe('abcdefg');
+  expect(await editorA.innerText()).toBe('abc');
 
-  await setVirgoRichTextRange(page, { index: 2, length: 3 });
-
-  editorACode.click();
+  page.keyboard.down('Shift');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  await press(page, 'ArrowLeft');
+  page.keyboard.up('Shift');
   await page.waitForTimeout(100);
+  await assertSelection(page, 0, 0, 3);
 
-  await page.keyboard.press('ArrowLeft');
-  let vRange = await getVRangeFromVirgoRichText(page);
-  expect(vRange).toEqual({ index: 2, length: 0 });
-  await page.keyboard.press('ArrowLeft');
-  vRange = await getVRangeFromVirgoRichText(page);
-  expect(vRange).toEqual({ index: 1, length: 0 });
-  await page.keyboard.press('ArrowRight');
-  vRange = await getVRangeFromVirgoRichText(page);
-  expect(vRange).toEqual({ index: 2, length: 0 });
-  await page.keyboard.press('ArrowRight');
-  vRange = await getVRangeFromVirgoRichText(page);
-  expect(vRange).toEqual({ index: 2, length: 3 });
-  await page.keyboard.press('ArrowRight');
-  vRange = await getVRangeFromVirgoRichText(page);
-  expect(vRange).toEqual({ index: 5, length: 0 });
-  await page.keyboard.press('ArrowRight');
-  vRange = await getVRangeFromVirgoRichText(page);
-  expect(vRange).toEqual({ index: 6, length: 0 });
+  await editorAEmbed.click();
+  const embedCount = await page.locator('[data-virgo-embed="true"]').count();
+  expect(embedCount).toBe(3);
+
+  // try to update cursor position using arrow keys
+  await assertSelection(page, 0, 0, 3);
+  await press(page, 'ArrowLeft');
+  await assertSelection(page, 0, 0, 0);
+  await press(page, 'ArrowRight');
+  await assertSelection(page, 0, 0, 1);
+  await press(page, 'ArrowRight');
+  await assertSelection(page, 0, 1, 0);
+  await press(page, 'ArrowRight');
+  await assertSelection(page, 0, 1, 1);
+  await press(page, 'ArrowRight');
+  await assertSelection(page, 0, 2, 0);
+  await press(page, 'ArrowRight');
+  await assertSelection(page, 0, 2, 1);
+  await press(page, 'ArrowRight');
+  await assertSelection(page, 0, 3, 0);
+
+  // try to update cursor position and select embed element using mouse click
+  let rect = await getVRangeIndexRect(page, [0, 0]);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 0, 0);
+  await page.mouse.click(rect.x + 3, rect.y);
+  await assertSelection(page, 0, 0, 1);
+
+  rect = await getVRangeIndexRect(page, [0, 1]);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 1, 0);
+  await page.mouse.click(rect.x + 3, rect.y);
+  await assertSelection(page, 0, 1, 1);
+
+  rect = await getVRangeIndexRect(page, [0, 2]);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 2, 0);
+  await page.mouse.click(rect.x + 3, rect.y);
+  await assertSelection(page, 0, 2, 1);
+
+  rect = await getVRangeIndexRect(page, [0, 3]);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 3, 0);
 });

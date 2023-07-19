@@ -21,6 +21,7 @@ import {
 } from '../../__internal__/utils/query.js';
 import { getCurrentNativeRange } from '../../__internal__/utils/selection.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
+import { getMenus, type LinkedPageOptions } from './config.js';
 import { LinkedPagePopover } from './linked-page-popover.js';
 
 export function showLinkedPagePopover({
@@ -28,16 +29,19 @@ export function showLinkedPagePopover({
   range,
   container = document.body,
   abortController = new AbortController(),
+  options,
 }: {
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
+  options: LinkedPageOptions;
 }) {
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
   const linkedPage = new LinkedPagePopover(model, abortController);
+  linkedPage.options = options;
   // Mount
   container.appendChild(linkedPage);
   disposables.add(() => linkedPage.remove());
@@ -72,12 +76,6 @@ export function showLinkedPagePopover({
   return linkedPage;
 }
 
-type LinkedPageOptions = {
-  triggerKeys: string[];
-  ignoreBlockTypes: string[];
-  convertTriggerKey: boolean;
-};
-
 @customElement('affine-linked-page-widget')
 export class LinkedPageWidget extends WithDisposable(LitElement) {
   static DEFAULT_OPTIONS: LinkedPageOptions = {
@@ -90,6 +88,7 @@ export class LinkedPageWidget extends WithDisposable(LitElement) {
      * Convert trigger key to primary key (the first item of the trigger keys)
      */
     convertTriggerKey: true,
+    getMenus,
   };
 
   options = LinkedPageWidget.DEFAULT_OPTIONS;
@@ -102,6 +101,11 @@ export class LinkedPageWidget extends WithDisposable(LitElement) {
     this._disposables.add(
       this.root.uiEventDispatcher.add('keyDown', this._onKeyDown)
     );
+  }
+
+  public showLinkedPage(model: BaseBlockModel) {
+    const curRange = getCurrentNativeRange();
+    showLinkedPagePopover({ model, range: curRange, options: this.options });
   }
 
   private _onKeyDown = (ctx: UIEventStateContext) => {
@@ -157,13 +161,11 @@ export class LinkedPageWidget extends WithDisposable(LitElement) {
           length: 0,
         });
         vEditor.slots.rangeUpdated.once(() => {
-          const curRange = getCurrentNativeRange();
-          showLinkedPagePopover({ model, range: curRange });
+          this.showLinkedPage(model);
         });
         return;
       }
-      const curRange = getCurrentNativeRange();
-      showLinkedPagePopover({ model, range: curRange });
+      this.showLinkedPage(model);
     });
   };
 }
