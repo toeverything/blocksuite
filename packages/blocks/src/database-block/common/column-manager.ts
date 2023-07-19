@@ -198,6 +198,12 @@ export const linkHelper = columnManager.register<string>('link', {
   configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
+export const dateHelper = columnManager.register<string>('date', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  configRender: () => html``,
+  cellToString: data => data?.toString() ?? '',
+});
 
 columnManager.registerConvert(selectHelper, multiSelectHelper, column => [
   column,

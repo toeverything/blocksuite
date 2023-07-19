@@ -1,5 +1,6 @@
 import { ColumnRendererHelper } from '../../register.js';
 import { CheckboxColumnRenderer } from './checkbox.js';
+import { DateColumnRenderer } from './date.js';
 import { LinkColumnRenderer } from './link.js';
 import { MultiSelectColumnRenderer } from './multi-select.js';
 import { NumberColumnRenderer } from './number.js';
@@ -19,6 +20,7 @@ export function registerInternalRenderer() {
   columnRenderer.register(ProgressColumnRenderer);
   columnRenderer.register(CheckboxColumnRenderer);
   columnRenderer.register(LinkColumnRenderer);
+  columnRenderer.register(DateColumnRenderer);
 
   return columnRenderer;
 }

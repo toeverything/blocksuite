@@ -9,6 +9,7 @@ import {
   DatabaseNumber,
   DatabaseProgress,
   DatabaseSelect,
+  DateTime,
   DeleteIcon,
   LinkIcon,
   TextIcon,
@@ -472,6 +473,7 @@ const columnTypeIconMap: ColumnTypeIcon = {
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,
   link: LinkIcon,
+  date: DateTime,
 };
 
 declare global {
@@ -514,5 +516,10 @@ const columnTypes: ColumnHeader[] = [
     type: 'link',
     text: 'Link',
     icon: LinkIcon,
+  },
+  {
+    type: 'date',
+    text: 'Date',
+    icon: DateTime,
   },
 ];
