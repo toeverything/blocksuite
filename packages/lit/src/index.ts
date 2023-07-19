@@ -1,2 +1,2 @@
 export * from './element/index.js';
-export * from './width-disposable.js';
+export * from './with-disposable.js';

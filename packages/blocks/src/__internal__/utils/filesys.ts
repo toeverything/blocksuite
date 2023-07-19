@@ -73,24 +73,52 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
       ],
     },
   },
+  {
+    description: 'Markdown',
+    accept: {
+      'text/markdown': ['.md', '.markdwon'],
+    },
+  },
+  {
+    description: 'Html',
+    accept: {
+      'text/html': ['.html', '.htm'],
+    },
+  },
+  {
+    description: 'Zip',
+    accept: {
+      'application/zip': ['.zip'],
+    },
+  },
 ];
 
 /**
  * See https://web.dev/patterns/files/open-one-or-multiple-files/
  */
-type AcceptTypes = 'Any' | 'Images' | 'Videos' | 'Audios';
-function openFileOrFiles(options: {
-  accept?: AcceptTypes;
+type AcceptTypes =
+  | 'Any'
+  | 'Images'
+  | 'Videos'
+  | 'Audios'
+  | 'Markdown'
+  | 'Html'
+  | 'Zip';
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
 }): Promise<File | null>;
-function openFileOrFiles(options: {
-  accept?: AcceptTypes;
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
   multiple: false;
 }): Promise<File | null>;
-function openFileOrFiles(options: {
-  accept?: AcceptTypes;
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
   multiple: true;
 }): Promise<File[] | null>;
-async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
+export async function openFileOrFiles({
+  acceptType = 'Any',
+  multiple = false,
+} = {}) {
   // Feature detection. The API needs to be supported
   // and the app not run in an iframe.
   const supportsFileSystemAccess =
@@ -105,7 +133,9 @@ async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
   // If the File System Access API is supported…
   if (supportsFileSystemAccess && window.showOpenFilePicker) {
     try {
-      const fileType = FileTypes.find(i => i.description === accept);
+      const fileType = FileTypes.find(i => i.description === acceptType);
+      if (acceptType !== 'Any' && !fileType)
+        throw new Error(`Unexpected acceptType "${acceptType}"`);
       const pickerOpts = {
         types: fileType ? [fileType] : undefined,
         multiple,
@@ -146,10 +176,10 @@ async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
     if (multiple) {
       input.multiple = true;
     }
-    if (accept !== 'Any') {
+    if (acceptType !== 'Any') {
       // For example, `accept="image/*"` or `accept="video/*,audio/*"`.
       input.accept = Object.keys(
-        FileTypes.find(i => i.description === accept)?.accept ?? ''
+        FileTypes.find(i => i.description === acceptType)?.accept ?? ''
       ).join(',');
     }
     document.body.append(input);
@@ -180,7 +210,7 @@ async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
 
 export const uploadImageFromLocal = async (storage: BlobManager) => {
   const imageFiles = await openFileOrFiles({
-    accept: 'Images',
+    acceptType: 'Images',
     multiple: true,
   });
   if (!imageFiles) return [];

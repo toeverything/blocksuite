@@ -202,7 +202,7 @@ export class FileDropManager {
     if (type.endsWith('/*')) return this.get('*');
 
     // `image/png`
-    return this.get(type.replace(/\/(.*)$/, '/*'));
+    return this.get(type.substring(0, type.indexOf('/')) + '/*');
   }
 
   /**
