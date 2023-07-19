@@ -175,6 +175,10 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._input.addEventListener('pointerup', (e: Event) => {
       e.stopPropagation();
     });
+
+    this._input.addEventListener('paste', (e: Event) => {
+      e.stopPropagation();
+    });
   }
 
   override focusBlock(ctx: FocusContext) {
