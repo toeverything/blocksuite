@@ -170,6 +170,7 @@ export class NotionHtmlParser extends BaseParser {
   ): Promise<SerializedBlock[] | null> => {
     const texts = [];
     let imgElement = null;
+    let caption = '';
     if (element.tagName === 'FIGURE') {
       imgElement = element.querySelector('img');
       const captionText = await getCaptionText(
@@ -177,6 +178,9 @@ export class NotionHtmlParser extends BaseParser {
         this._contextedContentParser
       );
       texts.push(...(captionText || []));
+      if (captionText) {
+        caption = captionText[0].insert || '';
+      }
       const bookmarkUrlElement = element.querySelector('.bookmark.source');
       if (bookmarkUrlElement) {
         const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
@@ -192,7 +196,7 @@ export class NotionHtmlParser extends BaseParser {
       imgElement = element;
       texts.push({ insert: '' });
     }
-    let caption = '';
+
     if (imgElement) {
       // TODO: use the real bookmark instead.
       if (imgElement.classList.contains('bookmark-icon')) {
