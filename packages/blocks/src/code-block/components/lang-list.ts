@@ -1,6 +1,6 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { Slot } from '@blocksuite/store/index.js';
+import { Slot } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
