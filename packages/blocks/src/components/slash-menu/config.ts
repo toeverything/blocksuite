@@ -198,9 +198,6 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           if (!model.page.awarenessStore.getFlag('enable_bookmark_operation')) {
             return false;
           }
-          if (!model.page.schema.flavourSchemaMap.has('affine:image')) {
-            return false;
-          }
           return !insideDatabase(model);
         },
         async action({ page, model }) {
