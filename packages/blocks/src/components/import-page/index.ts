@@ -3,10 +3,11 @@ import { DisposableGroup } from '@blocksuite/store';
 
 import { ImportPage, type OnSuccessHandler } from './import-page.js';
 
+export { importHtml, importMarkDown, importNotion } from './import-page.js';
+
 export function showImportModal({
   workspace,
   onSuccess,
-  multiple = true,
   container = document.body,
   abortController = new AbortController(),
 }: {
@@ -16,12 +17,7 @@ export function showImportModal({
   container?: HTMLElement;
   abortController?: AbortController;
 }) {
-  const importPage = new ImportPage(
-    workspace,
-    multiple,
-    onSuccess,
-    abortController
-  );
+  const importPage = new ImportPage(workspace, onSuccess, abortController);
   container.appendChild(importPage);
 
   const disposables = new DisposableGroup();
