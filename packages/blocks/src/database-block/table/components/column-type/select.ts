@@ -8,7 +8,10 @@ import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
 import type { SelectColumnData } from '../../../common/column-manager.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-class SelectCell extends DatabaseCellElement<string[], SelectColumnData> {
+export class SelectCell extends DatabaseCellElement<
+  string[],
+  SelectColumnData
+> {
   static override tag = literal`affine-database-select-cell`;
 
   override render() {

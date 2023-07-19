@@ -80,7 +80,7 @@ type DragConfig = {
   boundLeft: number;
 };
 
-class ProgressCell extends DatabaseCellElement<number> {
+export class ProgressCell extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-progress-cell`;
 
   static override styles = styles;
@@ -123,7 +123,7 @@ class ProgressCell extends DatabaseCellElement<number> {
   }
 }
 
-class ProgressCellEditing extends DatabaseCellElement<number> {
+export class ProgressCellEditing extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-progress-cell-editing`;
 
   static override styles = styles;

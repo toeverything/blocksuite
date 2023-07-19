@@ -8,7 +8,7 @@ import {
 } from '../../../../list-block/utils/icons.js';
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-class CheckboxCell extends DatabaseCellElement<boolean> {
+export class CheckboxCell extends DatabaseCellElement<boolean> {
   static override tag = literal`affine-database-checkbox-cell`;
 
   static override styles = css`

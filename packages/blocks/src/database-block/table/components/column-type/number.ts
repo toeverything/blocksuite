@@ -4,7 +4,7 @@ import { literal } from 'lit/static-html.js';
 
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-class NumberCell extends DatabaseCellElement<number> {
+export class NumberCell extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-number-cell`;
 
   static override styles = css`
