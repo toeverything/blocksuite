@@ -1,6 +1,7 @@
-import { SHAPE_TEXT_FONT_SIZE } from '@blocksuite/phasor/elements/shape/constants.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import { TEXT_FONT_SIZE } from '../text/types.js';
 
 const MIN_FONT_SIZE = 1;
 const MAX_FONT_SIZE = 200;
@@ -114,9 +115,9 @@ export class EdgelessFontSizePanel extends LitElement {
         <div
           class="font-size-button"
           role="button"
-          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.SMALL}
+          ?active=${this.fontSize === TEXT_FONT_SIZE.SMALL}
           @click=${() => {
-            this._onSelect(SHAPE_TEXT_FONT_SIZE.SMALL);
+            this._onSelect(TEXT_FONT_SIZE.SMALL);
           }}
         >
           Small
@@ -124,9 +125,9 @@ export class EdgelessFontSizePanel extends LitElement {
         <div
           class="font-size-button"
           role="button"
-          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.MEDIUM}
+          ?active=${this.fontSize === TEXT_FONT_SIZE.MEDIUM}
           @click=${() => {
-            this._onSelect(SHAPE_TEXT_FONT_SIZE.MEDIUM);
+            this._onSelect(TEXT_FONT_SIZE.MEDIUM);
           }}
         >
           Middle
@@ -134,9 +135,9 @@ export class EdgelessFontSizePanel extends LitElement {
         <div
           class="font-size-button"
           role="button"
-          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.LARGE}
+          ?active=${this.fontSize === TEXT_FONT_SIZE.LARGE}
           @click=${() => {
-            this._onSelect(SHAPE_TEXT_FONT_SIZE.LARGE);
+            this._onSelect(TEXT_FONT_SIZE.LARGE);
           }}
         >
           Large
@@ -144,9 +145,9 @@ export class EdgelessFontSizePanel extends LitElement {
         <div
           class="font-size-button"
           role="button"
-          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.XLARGE}
+          ?active=${this.fontSize === TEXT_FONT_SIZE.XLARGE}
           @click=${() => {
-            this._onSelect(SHAPE_TEXT_FONT_SIZE.XLARGE);
+            this._onSelect(TEXT_FONT_SIZE.XLARGE);
           }}
         >
           Huge

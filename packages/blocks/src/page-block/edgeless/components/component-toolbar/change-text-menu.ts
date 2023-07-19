@@ -17,7 +17,6 @@ import {
   type SurfaceManager,
   type TextElement,
 } from '@blocksuite/phasor';
-import { SHAPE_TEXT_FONT_SIZE } from '@blocksuite/phasor/elements/shape/constants.js';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -35,9 +34,10 @@ import {
 } from '../panel/color-panel.js';
 import type { EdgelessFontFamilyPanel } from '../panel/font-family-panel.js';
 import type { EdgelessFontSizePanel } from '../panel/font-size-panel.js';
-import type {
-  EdgelessCanvasTextElement,
-  EdgelessCanvasTextElementType,
+import {
+  type EdgelessCanvasTextElement,
+  type EdgelessCanvasTextElementType,
+  TEXT_FONT_SIZE,
 } from '../text/types.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -180,7 +180,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const max = maxBy(Object.entries(fontSizes), ([k, count]) => count);
     return max
       ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize'])
-      : SHAPE_TEXT_FONT_SIZE.MEDIUM;
+      : TEXT_FONT_SIZE.MEDIUM;
   };
 
   private _getMostCommonColor = (
@@ -294,13 +294,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _getFontSizeLabel = (fontSize: number) => {
     switch (fontSize) {
-      case SHAPE_TEXT_FONT_SIZE.SMALL:
+      case TEXT_FONT_SIZE.SMALL:
         return 'Small';
-      case SHAPE_TEXT_FONT_SIZE.MEDIUM:
+      case TEXT_FONT_SIZE.MEDIUM:
         return 'Middle';
-      case SHAPE_TEXT_FONT_SIZE.LARGE:
+      case TEXT_FONT_SIZE.LARGE:
         return 'Large';
-      case SHAPE_TEXT_FONT_SIZE.XLARGE:
+      case TEXT_FONT_SIZE.XLARGE:
         return 'Huge';
       default:
         return Math.trunc(fontSize);
