@@ -103,6 +103,33 @@ export function copyBlocks(range: BlockRange) {
   }
 }
 
+export async function textedClipboardData2Blocks(
+  page: Page,
+  clipboardData: ClipboardEvent['clipboardData']
+) {
+  if (!clipboardData) {
+    return [];
+  }
+
+  const contentParser = new ContentParser(page);
+  const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+
+  if (HTMLClipboardData) {
+    const blockSuiteClipboardData = extractCustomDataFromHTMLString(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
+      HTMLClipboardData
+    );
+
+    if (blockSuiteClipboardData) {
+      return JSON.parse(blockSuiteClipboardData) as SerializedBlock[];
+    }
+  }
+
+  const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+
+  return contentParser.text2blocks(textClipData);
+}
+
 export async function clipboardData2Blocks(
   page: Page,
   clipboardData: ClipboardEvent['clipboardData']
