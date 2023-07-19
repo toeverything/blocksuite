@@ -198,8 +198,8 @@ export const linkHelper = columnManager.register<string>('link', {
   configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
-export const dateHelper = columnManager.register<string>('date', {
-  type: () => tString.create(),
+export const dateHelper = columnManager.register<number>('date', {
+  type: () => tNumber.create(),
   defaultData: () => ({}),
   configRender: () => html``,
   cellToString: data => data?.toString() ?? '',

@@ -1,10 +1,11 @@
+import format from 'date-fns/format';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
 import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
 
-class DateCell extends DatabaseCellElement<string> {
+class DateCell extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-date-cell`;
 
   static override styles = css`
@@ -31,13 +32,12 @@ class DateCell extends DatabaseCellElement<string> {
   `;
 
   override render() {
-    return html` <div class="affine-database-date date">
-      ${this.value ?? ''}
-    </div>`;
+    const value = this.value ? format(new Date(this.value), 'yyyy/MM/dd') : '';
+    return html` <div class="affine-database-date date">${value}</div>`;
   }
 }
 
-export class DateCellEditing extends DatabaseCellElement<string> {
+export class DateCellEditing extends DatabaseCellElement<number> {
   static override tag = literal`affine-database-date-cell-editing`;
 
   static override styles = css`
@@ -75,9 +75,17 @@ export class DateCellEditing extends DatabaseCellElement<string> {
     this._setValue();
   }
 
-  private _setValue = (value: string = this._inputEle.value) => {
-    this.onChange(value);
-    this._inputEle.value = `${this.value ?? ''}`;
+  private _setValue = (str: string = this._inputEle.value) => {
+    if (str === '') {
+      this.onChange(undefined);
+      this._inputEle.value = '';
+      return;
+    }
+
+    const date = new Date(str);
+    const value = format(date, 'yyyy-MM-dd');
+    this.onChange(date.getTime());
+    this._inputEle.value = `${value ?? ''}`;
   };
 
   override firstUpdated() {
@@ -89,10 +97,11 @@ export class DateCellEditing extends DatabaseCellElement<string> {
   };
 
   override render() {
+    const value = this.value ? format(this.value, 'yyyy-MM-dd') : '';
     return html`<input
       type="date"
       class="affine-database-date date"
-      .value="${this.value ?? ''}"
+      .value="${value}"
       @focus=${this._onFocus}
     />`;
   }

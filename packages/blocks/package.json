@@ -27,6 +27,7 @@
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.2.9",
     "buffer": "^6.0.3",
+    "date-fns": "^2.30.0",
     "file-type": "^16.5.4",
     "hotkeys-js": "^3.10.1",
     "html2canvas": "^1.4.1",
