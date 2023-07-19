@@ -40,6 +40,7 @@ import {
   generateRoomId,
   initCollaborationSocket,
 } from '../providers/websocket-channel';
+import { params } from '../utils';
 import { notify } from '../utils/notify';
 import { createViewer } from './doc-inspector';
 
@@ -421,7 +422,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     }
 
     this._initws = true;
-    const id = await generateRoomId();
+    const id = params.get('room') || (await generateRoomId());
     const success = await this.initWebsocketProvider(id);
 
     if (success) history.replaceState({}, '', `?room=${id}`);
