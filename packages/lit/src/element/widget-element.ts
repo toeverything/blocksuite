@@ -2,7 +2,7 @@ import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
-import { WithDisposable } from '../width-disposable.js';
+import { WithDisposable } from '../with-disposable.js';
 import type { BlockSuiteRoot } from './lit-root.js';
 import { ShadowlessElement } from './shadowless-element.js';
 

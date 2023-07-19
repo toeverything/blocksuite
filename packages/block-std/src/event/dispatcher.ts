@@ -20,9 +20,8 @@ const bypassEventNames = [
   'drop',
   'contextMenu',
   'wheel',
+  'selectionchange',
 ] as const;
-
-const globalEventNames = ['selectionChange'] as const;
 
 const eventNames = [
   'click',
@@ -44,7 +43,6 @@ const eventNames = [
   'keyUp',
 
   ...bypassEventNames,
-  ...globalEventNames,
 ] as const;
 
 export type EventName = (typeof eventNames)[number];
@@ -101,11 +99,6 @@ export class UIEventDispatcher {
   private _bindEvents() {
     bypassEventNames.forEach(eventName => {
       this.disposables.addFromEvent(this.root, toLowerCase(eventName), e => {
-        this.run(eventName, UIEventStateContext.from(new UIEventState(e)));
-      });
-    });
-    globalEventNames.forEach(eventName => {
-      this.disposables.addFromEvent(document, toLowerCase(eventName), e => {
         this.run(eventName, UIEventStateContext.from(new UIEventState(e)));
       });
     });

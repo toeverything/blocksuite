@@ -265,9 +265,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       const event = ctx.get('pointerState');
       this._onContainerContextMenu(event);
     });
-    this._add('selectionChange', () => {
-      this._onSelectionChangeWithoutDebounce();
-    });
     this._add('wheel', ctx => {
       const state = ctx.get('defaultState');
       const e = state.event;
