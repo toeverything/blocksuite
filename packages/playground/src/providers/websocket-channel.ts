@@ -147,7 +147,7 @@ export class WebsocketMessageChannel implements EventBasedChannel {
 
     if (isPlainObject(data)) {
       const entires = Object.entries(data);
-      const object: Record<string, any> = {};
+      const object: Record<string, unknown> = {};
 
       for (const [key, value] of entires) {
         object[key] = this.normalize(value);
