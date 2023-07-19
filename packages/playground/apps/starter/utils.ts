@@ -236,6 +236,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_linked_page: true,
       enable_bookmark_operation: true,
       enable_note_index: true,
+      enable_attachment_block: true,
       readonly: {
         'space:page0': false,
       },
