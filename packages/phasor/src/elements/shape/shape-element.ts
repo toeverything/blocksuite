@@ -199,9 +199,9 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     const lines = deltaInsertsToChunks(deltas);
 
     const horizontalOffset =
-      textHorizontalAlign === 'center'
+      textAlign === 'center'
         ? w / 2
-        : textHorizontalAlign === 'right'
+        : textAlign === 'right'
         ? w - SHAPE_TEXT_PADDING
         : SHAPE_TEXT_PADDING;
     const verticalOffset =
