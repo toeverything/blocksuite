@@ -29,7 +29,7 @@ declare global {
 }
 
 export const defaultPlaygroundURL = new URL(
-  `http://localhost:5173/examples/examples/index.html`
+  `http://localhost:5173/start/index.html`
 );
 
 const NEXT_FRAME_TIMEOUT = 100;
