@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   almostEqual,
-  calcPointToPointWithAngle,
   isPointOnLineSegment,
   lineEllipseIntersects,
   lineIntersects,
@@ -147,17 +146,5 @@ describe('Line', () => {
     expect(toRadian(90)).toBe(Math.PI / 2);
     expect(toRadian(0)).toBe(0);
     expect(toRadian(360)).toBe(Math.PI * 2);
-  });
-
-  it('calcPointToPointWithAngle', () => {
-    expect(
-      calcPointToPointWithAngle({ x: 10, y: 0 }, { x: 0, y: 0 }, 90)
-    ).toEqual({ x: 0, y: -10 });
-    expect(
-      calcPointToPointWithAngle({ x: 10, y: 10 }, { x: 0, y: 0 }, 90)
-    ).toEqual({ x: 10, y: -10 });
-    expect(
-      calcPointToPointWithAngle({ x: 0, y: 0 }, { x: 10, y: 10 }, 180)
-    ).toEqual({ x: 20, y: 20 });
   });
 });

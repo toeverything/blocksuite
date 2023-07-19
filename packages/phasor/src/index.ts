@@ -22,7 +22,6 @@ export { AStarRunner } from './utils/a-star.js';
 export * from './utils/bound.js';
 export {
   almostEqual,
-  calcPointToPointWithAngle,
   clamp,
   getBoundsWithRotation,
   getPointFromBoundsWithRotation,
@@ -39,6 +38,7 @@ export {
   polygonNearestPoint,
   polygonPointDistance,
   polyLineNearestPoint,
+  rotatePoints,
   sign,
   toRadian,
 } from './utils/math-utils.js';

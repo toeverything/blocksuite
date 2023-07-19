@@ -1,7 +1,7 @@
 import {
   Bound,
-  calcPointToPointWithAngle,
   getQuadBoundsWithRotation,
+  rotatePoints,
 } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 
@@ -261,17 +261,9 @@ export class HandleResizeManager {
         _dragDirection === HandleDirection.Bottom
       ) {
         const dpo = draggingPoint.matrixTransform(m0);
-        const coorPoint = { x: 0, y: 0 };
-        const { x: x1, y: y1 } = calcPointToPointWithAngle(
-          { x: dpo.x, y: dpo.y },
-          coorPoint,
-          _rotate
-        );
-        const { x: x2, y: y2 } = calcPointToPointWithAngle(
-          { x: dp.x, y: dp.y },
-          coorPoint,
-          _rotate
-        );
+        const coorPoint = [0, 0];
+        const [[x1, y1]] = rotatePoints([[dpo.x, dpo.y]], coorPoint, -_rotate);
+        const [[x2, y2]] = rotatePoints([[dp.x, dp.y]], coorPoint, -_rotate);
         const point = { x: 0, y: 0 };
         if (
           _dragDirection === HandleDirection.Left ||
@@ -284,10 +276,10 @@ export class HandleResizeManager {
           point.y = y2;
         }
 
-        const { x: x3, y: y3 } = calcPointToPointWithAngle(
-          { x: point.x, y: point.y },
+        const [[x3, y3]] = rotatePoints(
+          [[point.x, point.y]],
           coorPoint,
-          -_rotate
+          _rotate
         );
 
         dp.x = x3;

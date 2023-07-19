@@ -499,21 +499,3 @@ export function isOverlap(
     )
   );
 }
-
-export function calcPointToPointWithAngle(
-  point1: { x: number; y: number },
-  point2: { x: number; y: number },
-  angle: number
-) {
-  const { x: x1, y: y1 } = point1;
-  const { x: x2, y: y2 } = point2;
-  const radian = toRadian(-angle);
-  const nextX =
-    (x1 - x2) * Math.cos(radian) - (y1 - y2) * Math.sin(radian) + x2;
-  const nextY =
-    (x1 - x2) * Math.sin(radian) + (y1 - y2) * Math.cos(radian) + y2;
-  return {
-    x: Number(nextX.toFixed(6)),
-    y: Number(nextY.toFixed(6)),
-  };
-}
