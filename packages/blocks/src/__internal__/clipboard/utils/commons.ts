@@ -136,9 +136,12 @@ export async function clipboardData2Blocks(
     !isHTMLContainCode && markdownUtils.checkIfTextContainsMd(textClipData);
 
   if (HTMLClipboardData && !shouldConvertMarkdown) {
-    return await contentParser.htmlText2Block(
+    const htmlSerializedBlocks = await contentParser.htmlText2Block(
       removeFragmentFromHtmlClipboardString(HTMLClipboardData)
     );
+    if (htmlSerializedBlocks.length) {
+      return htmlSerializedBlocks;
+    }
   }
 
   if (shouldConvertMarkdown) {
