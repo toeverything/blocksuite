@@ -120,7 +120,8 @@ export class Workspace {
     let flag = false;
     if (this.doc.store.clients.size === 1) {
       const items = [...this.doc.store.clients.values()][0];
-      if (items.length <= 1) {
+      // workspaceVersion and pageVersion were set when we init the workspace
+      if (items.length <= 2) {
         flag = true;
       }
     }
