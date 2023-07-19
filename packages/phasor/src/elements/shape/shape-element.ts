@@ -174,7 +174,6 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontFamily,
       textVerticalAlign,
       textAlign,
-      textHorizontalAlign,
       isBold,
       isItalic,
     } = this;
