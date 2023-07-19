@@ -120,7 +120,8 @@ export class Workspace {
     let flag = false;
     if (this.doc.store.clients.size === 1) {
       const items = [...this.doc.store.clients.values()][0];
-      if (items.length <= 1) {
+      // workspaceVersion and pageVersion were set when we init the workspace
+      if (items.length <= 2) {
         flag = true;
       }
     }
@@ -380,6 +381,45 @@ export class Workspace {
 
   exportSnapshot() {
     return serializeYDoc(this.doc);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  exportWorkspaceYDoc() {
+    const binary = Y.encodeStateAsUpdate(this.doc);
+    const file = new Blob([binary], { type: 'application/octet-stream' });
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'workspace.ydoc';
+    link.click();
+
+    URL.revokeObjectURL(fileUrl);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  exportPageYDoc(pageId: string) {
+    const pages = this.doc.getMap('spaces');
+    const pageDoc = pages.get(`space:${pageId}`);
+
+    if (!(pageDoc instanceof Y.Doc)) {
+      throw new Error(`Page ${pageId} not found or not a Y.Doc`);
+    }
+
+    const binary = Y.encodeStateAsUpdate(pageDoc);
+    const file = new Blob([binary], { type: 'application/octet-stream' });
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'workspace.ydoc';
+    link.click();
+
+    URL.revokeObjectURL(fileUrl);
   }
 
   /** @internal Only for testing */

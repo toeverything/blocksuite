@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/components/card/card.js';
 
-import { tryMigrate } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -48,40 +47,6 @@ export class StartPanel extends LitElement {
             </sl-card>
           `
         )}
-        <sl-card
-          class="card"
-          @click=${() => {
-            const input = document.createElement('input');
-            input.setAttribute('type', 'file');
-            input.setAttribute('accept', '.json');
-            input.multiple = false;
-            input.onchange = async () => {
-              const file = input.files?.item(0);
-              if (!file) {
-                return;
-              }
-              try {
-                const json = await file.text();
-                await window.workspace.importPageSnapshot(
-                  JSON.parse(json),
-                  window.page.id
-                );
-                tryMigrate(window.workspace.doc);
-                this.requestUpdate();
-              } catch (e) {
-                console.error('Invalid snapshot.');
-                console.error(e);
-              } finally {
-                input.remove();
-              }
-            };
-            input.click();
-          }}
-        >
-          <div slot="header">Import YDoc</div>
-          Import a YDoc from a binary file. It will run migration after import
-          and we can use it to test migration.
-        </sl-card>
       </div>
     `;
   }
