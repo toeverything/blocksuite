@@ -103,25 +103,6 @@ export function copyBlocks(range: BlockRange) {
   }
 }
 
-function isChildBlock(blocks: BaseBlockModel[], block: BaseBlockModel) {
-  for (let i = 0; i < blocks.length; i++) {
-    const parentBlock = blocks[i];
-    if (parentBlock.children) {
-      if (
-        parentBlock.children.findIndex(
-          childBlock => childBlock.id === block.id
-        ) > -1
-      ) {
-        return true;
-      }
-      if (isChildBlock(parentBlock.children, block)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 export async function clipboardData2Blocks(
   page: Page,
   clipboardData: ClipboardEvent['clipboardData']
