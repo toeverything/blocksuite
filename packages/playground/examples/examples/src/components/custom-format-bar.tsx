@@ -17,7 +17,6 @@ export function registerFormatBarCustomElement() {
         data-testid="custom-format-bar-element"
         onClick={() => {
           const range = getBlockRange();
-          console.log('range', range);
         }}
       >
         <div>X</div>
