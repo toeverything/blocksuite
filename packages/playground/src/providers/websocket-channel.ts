@@ -2,7 +2,6 @@ import type { PassiveDocProvider, Workspace } from '@blocksuite/store';
 import type { EventBasedChannel } from 'async-call-rpc';
 import { isPlainObject } from 'merge';
 
-import { params } from '../utils.js';
 import { notify } from '../utils/notify.js';
 import { createAsyncCallRPCProviderCreator } from './async-call-rpc.js';
 import type { DocProviderCreator } from './type.js';
@@ -32,12 +31,8 @@ export function createCollaborationSocket(room?: string) {
 
 export async function initCollaborationSocket(
   workspace: Workspace,
-  room?: string
+  room: string
 ) {
-  if (!room && !params.get('room')) return false;
-
-  room = room ?? (params.get('room') as string);
-
   const ws = createCollaborationSocket(room);
 
   if (!ws) {

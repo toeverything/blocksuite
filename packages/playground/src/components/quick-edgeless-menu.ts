@@ -18,7 +18,6 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
   COLOR_VARIABLES,
-  createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   SelectionUtils,
@@ -40,7 +39,6 @@ import {
   generateRoomId,
   initCollaborationSocket,
 } from '../providers/websocket-channel';
-import { params } from '../utils';
 import { notify } from '../utils/notify';
 import { createViewer } from './doc-inspector';
 
@@ -119,11 +117,6 @@ function init_css_debug_menu(styleMenu: GUI, style: CSSStyleDeclaration) {
       style.setProperty(plateKey, color);
     });
   }
-}
-
-function createPageBlock(workspace: Workspace) {
-  const id = workspace.idGenerator();
-  createPage(workspace, { id }).catch(console.error);
 }
 
 function getTabGroupTemplate({
@@ -422,13 +415,15 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     }
 
     this._initws = true;
+
+    const params = new URLSearchParams(location.search);
     const id = params.get('room') || (await generateRoomId());
-    const success = await this.initWebsocketProvider(id);
+    const success = await this._initWebsocketProvider(id);
 
     if (success) history.replaceState({}, '', `?room=${id}`);
   };
 
-  async initWebsocketProvider(room?: string): Promise<boolean> {
+  private async _initWebsocketProvider(room: string): Promise<boolean> {
     this._initws = true;
     const result = await initCollaborationSocket(this.workspace, room);
     this._initws = false;
@@ -519,22 +514,43 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       </style>
       <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
-          <sl-dropdown placement="bottom" .stayOpenOnSelect=${true} hoist>
-            <sl-button class="dots-menu" variant="text" size="small" slot="trigger">
-              <sl-icon style="font-size: 14px" name="three-dots-vertical" label="Menu">
+          <sl-dropdown placement="bottom" hoist>
+            <sl-button
+              class="dots-menu"
+              variant="text"
+              size="small"
+              slot="trigger"
+            >
+              <sl-icon
+                style="font-size: 14px"
+                name="three-dots-vertical"
+                label="Menu"
+              ></sl-icon>
             </sl-button>
             <sl-menu>
-              <sl-menu-item>
-                <sl-icon slot="prefix" name="terminal" label="Test operations"></sl-icon>
-                <sl-dropdown id="block-type-dropdown" placement="right-start" .distance=${45} hoist>
+              <sl-menu-item
+                @mouseenter=${() => this.blockTypeDropdown.show()}
+                @mouseleave=${() => this.blockTypeDropdown.hide()}
+              >
+                <sl-icon
+                  slot="prefix"
+                  name="terminal"
+                  label="Test operations"
+                ></sl-icon>
+                <sl-dropdown
+                  id="block-type-dropdown"
+                  placement="right-start"
+                  .distance=${55}
+                  hoist
+                >
                   <span slot="trigger">Test operations</span>
                   <sl-menu>
                     <sl-menu-item @click=${this._toggleConnection}>
                       ${this._connected ? 'Disconnect' : 'Connect'}
                     </sl-menu-item>
-                    <sl-menu-item @click=${
-                      this._addNote
-                    }> Add Note</sl-menu-item>
+                    <sl-menu-item @click=${this._addNote}>
+                      Add Note</sl-menu-item
+                    >
                     <sl-menu-item @click=${this._exportMarkDown}>
                       Export Markdown
                     </sl-menu-item>
@@ -553,45 +569,36 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     <sl-menu-item @click=${this._importSnapshot}>
                       Import Snapshot
                     </sl-menu-item>
-                    <sl-menu-item @click=${
-                      this._shareUrl
-                    }> Share URL</sl-menu-item>
+                    <sl-menu-item @click=${this._shareUrl}>
+                      Share URL</sl-menu-item
+                    >
                     <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                       Toggle CSS Debug Menu
                     </sl-menu-item>
-                    <sl-menu-item @click=${
-                      this._inspect
-                    }> Inspect Doc</sl-menu-item>
+                    <sl-menu-item @click=${this._inspect}>
+                      Inspect Doc</sl-menu-item
+                    >
                   </sl-menu>
                 </sl-dropdown>
               </sl-menu-item>
-              <sl-menu-item
-                @click=${this._switchEditorMode}
-              >
+              <sl-menu-item @click=${this._switchEditorMode}>
                 Switch to ${this.mode === 'page' ? 'Edgeless' : 'Page'} Mode
-                <sl-icon slot="prefix" name=${
-                  this.mode === 'page' ? 'bounding-box-circles' : 'filetype-doc'
-                }></sl-icon>
+                <sl-icon
+                  slot="prefix"
+                  name=${this.mode === 'page'
+                    ? 'bounding-box-circles'
+                    : 'filetype-doc'}
+                ></sl-icon>
               </sl-menu-item>
-              <sl-menu-item
-                @click=${this._toggleDarkMode}
-              >
+              <sl-menu-item @click=${this._toggleDarkMode}>
                 Toggle Dark Mode
                 <sl-icon
                   slot="prefix"
                   name=${this._dark ? 'moon' : 'brightness-high'}
                 ></sl-icon>
               </sl-menu-item>
-              <sl-menu-item
-                @click=${() => createPageBlock(this.workspace)}
-              >
-                Add New Page
-                <sl-icon slot="prefix" name="file-earmark-plus"></sl-icon>
-              </sl-menu-item>
               <sl-divider></sl-divider>
-              <sl-menu-item
-                @click=${this._startCollaboration}
-              >
+              <sl-menu-item @click=${this._startCollaboration}>
                 Collaboration
                 <sl-icon slot="prefix" name="people"></sl-icon>
               </sl-menu-item>
@@ -632,24 +639,19 @@ export class QuickEdgelessMenu extends ShadowlessElement {
             </sl-tooltip>
           </sl-button-group>
 
-          ${
-            this._initws
-              ? html`<div class="ws-indicator">
-                  <sl-icon name="people" label="Collaboration"></sl-icon>
-                  <sl-spinner></sl-spinner>
-                </div>`
-              : nothing
-          }
-
-          ${
-            this._showTabMenu
-              ? getTabGroupTemplate({
-                  workspace: this.workspace,
-                  editor: this.editor,
-                  requestUpdate: () => this.requestUpdate(),
-                })
-              : null
-          }
+          ${this._initws
+            ? html`<div class="ws-indicator">
+                <sl-icon name="people" label="Collaboration"></sl-icon>
+                <sl-spinner></sl-spinner>
+              </div>`
+            : nothing}
+          ${this._showTabMenu
+            ? getTabGroupTemplate({
+                workspace: this.workspace,
+                editor: this.editor,
+                requestUpdate: () => this.requestUpdate(),
+              })
+            : null}
         </div>
       </div>
     `;

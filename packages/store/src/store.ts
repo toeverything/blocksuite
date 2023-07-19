@@ -4,7 +4,11 @@ import { Awareness } from 'y-protocols/awareness.js';
 
 import { AwarenessStore, type RawAwarenessState } from './awareness.js';
 import type { BlobStorage } from './persistence/blob/types.js';
-import type { DocProvider, DocProviderCreator } from './providers/type.js';
+import type {
+  DocProvider,
+  DocProviderCreator,
+  PassiveDocProvider,
+} from './providers/type.js';
 import type { Space } from './space.js';
 import type { IdGenerator } from './utils/id-generator.js';
 import {
