@@ -64,7 +64,7 @@ export async function initCollaborationSocket(
     notify('Collaboration socket has connected', 'success');
     return true;
   } else {
-    notify('Collaboration socket connection failed', 'success');
+    notify('Collaboration socket connection failed', 'warning');
   }
 
   return false;
