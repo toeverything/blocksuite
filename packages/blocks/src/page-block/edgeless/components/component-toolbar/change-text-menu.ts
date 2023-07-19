@@ -15,6 +15,7 @@ import {
   Bound,
   normalizeTextBound,
   type SurfaceManager,
+  type TextElement,
 } from '@blocksuite/phasor';
 import { SHAPE_TEXT_FONT_SIZE } from '@blocksuite/phasor/elements/shape/constants.js';
 import { css, html, LitElement } from 'lit';
@@ -250,7 +251,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       if (this.elementType === 'text') {
         // the change of font family will change the bound of the text
         const newBound = normalizeTextBound(
-          element,
+          element as TextElement,
           new Bound(element.x, element.y, element.w, element.h)
         );
         this.surface.updateElement<typeof elementType>(element.id, {
