@@ -200,6 +200,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     });
     this.model.childrenUpdated.on(() => {
       this.requestUpdate();
+      this.selection.requestUpdate();
       // TODO: optimize performance here
       this.querySelectorAll('affine-database-cell-container').forEach(cell => {
         cell.requestUpdate();

@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
@@ -26,6 +26,8 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.2.9",
+    "buffer": "^6.0.3",
+    "file-type": "^16.5.4",
     "hotkeys-js": "^3.10.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",

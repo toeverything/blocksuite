@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
+import { Buffer } from 'buffer';
 
 import { getBlockElementByModel } from '../../__internal__/index.js';
 import { toast } from '../../components/toast.js';
@@ -10,7 +11,20 @@ async function getImageBlob(model: BaseBlockModel) {
 
   if (!blob) return null;
 
-  if (!blob.type.match(/^image\/(gif|png|jpe?g)$/)) return null;
+  if (!blob.type) {
+    // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
+    // @ts-ignore
+    const FileType = await import('file-type/browser');
+    if (window.Buffer === undefined) {
+      window.Buffer = Buffer;
+    }
+    const buffer = await blob.arrayBuffer();
+    const fileType = await FileType.fromBuffer(buffer);
+
+    if (!fileType?.mime.match(/^image\/(gif|png|jpe?g)$/)) return null;
+
+    return new Blob([buffer], { type: fileType.mime });
+  }
 
   return blob;
 }
@@ -104,6 +118,6 @@ export function focusCaption(model: BaseBlockModel) {
 async function getBlobByModel(model: BaseBlockModel) {
   assertExists(model.sourceId);
   const store = await model.page.blobs;
-  const blob = store?.get(model.sourceId);
+  const blob = await store?.get(model.sourceId);
   return blob;
 }

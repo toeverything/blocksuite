@@ -937,6 +937,8 @@ export class EdgelessPageBlockComponent
       }
     }
 
+    const { zoom } = this.surface.viewport;
+
     if (!point) point = new Point(0, 0);
 
     if (point.x === 0 && point.y === 0) {
@@ -948,8 +950,15 @@ export class EdgelessPageBlockComponent
     const cx = point.x;
     const cy = point.y;
 
-    const x = cx - options.width / 2;
-    const y = cy - options.height / 2;
+    let x = 0;
+    let y = 0;
+    if (zoom > 1) {
+      x = cx - options.width / 2;
+      y = cy - options.height / 2;
+    } else {
+      x = cx - (options.width * zoom) / 2;
+      y = cy - (options.height * zoom) / 2;
+    }
 
     return this.addNewNote([model], new Point(x, y), options);
   }
