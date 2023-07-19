@@ -1,4 +1,5 @@
 import {
+  AttachmentIcon,
   BookmarkIcon,
   CopyIcon,
   DatabaseKanbanViewIcon20,
@@ -210,6 +211,29 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const props = {
             flavour: 'affine:bookmark',
             url,
+          } as const;
+          page.addSiblingBlocks(model, [props]);
+        },
+      },
+      {
+        name: 'File',
+        icon: AttachmentIcon,
+        alias: ['attachment'],
+        showWhen: model => {
+          if (!model.page.awarenessStore.getFlag('enable_attachment_block')) {
+            return false;
+          }
+          return !insideDatabase(model);
+        },
+        action: ({ page, model }) => {
+          const parent = page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          // TODO show file picker
+          const props = {
+            flavour: 'affine:attachment',
+            // TODO other props
           } as const;
           page.addSiblingBlocks(model, [props]);
         },
