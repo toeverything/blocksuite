@@ -1,7 +1,7 @@
 import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../toolbar/shape/shape-menu.js';
-import './change-shape-text-button-group.js';
+import './change-text-menu.js';
 
 import { LineStyleIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -459,12 +459,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       })}
       ${doesAllShapesContainText(this.elements)
         ? html` <menu-divider .vertical=${true}></menu-divider>
-            <edgeless-change-shape-text-button-group
-              .shapes=${this.elements}
+            <edgeless-change-text-menu
+              .elements=${this.elements}
+              .elementType=${'shape'}
               .surface=${this.surface}
               .selectionState=${this.selectionState}
               .slots=${this.slots}
-            ></edgeless-change-shape-text-button-group>`
+            ></edgeless-change-text-menu>`
         : nothing}
     `;
   }

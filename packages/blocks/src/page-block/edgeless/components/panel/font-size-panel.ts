@@ -2,6 +2,8 @@ import { SHAPE_TEXT_FONT_SIZE } from '@blocksuite/phasor/elements/shape/constant
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+const MIN_FONT_SIZE = 1;
+const MAX_FONT_SIZE = 200;
 @customElement('edgeless-font-size-panel')
 export class EdgelessFontSizePanel extends LitElement {
   static override styles = css`
@@ -18,58 +20,154 @@ export class EdgelessFontSizePanel extends LitElement {
     }
 
     .font-size-button {
-      font-size: 16px;
+      text-align: start;
+      font-size: var(--affine-font-base);
+      width: 48px;
+      height: 24px;
+      font-weight: 400;
+      padding: 4px 8px;
+      line-height: 24px;
+    }
+
+    .font-size-button:hover {
+      cursor: pointer;
+      background: var(--affine-hover-color);
+    }
+
+    .font-size-button[active] {
+      color: var(--affine-primary-color);
+    }
+
+    .font-size-input-container {
+      display: flex;
+      padding: 4px 8px;
+    }
+
+    .font-size-input {
+      width: 48px;
+      border: 1px solid var(--affine-border-color);
+      border-radius: 4px;
+    }
+
+    .font-size-input::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .font-size-input:focus {
+      outline-color: var(--affine-primary-color);
+    }
+
+    menu-divider {
+      width: 100%;
     }
   `;
 
   @property({ attribute: false })
   fontSize!: number;
 
-  private _onSelect(fontSize: EdgelessFontSizePanel['fontSize']) {
-    this.fontSize = fontSize;
-    if (this.onSelect) {
-      this.onSelect(fontSize);
-    }
-  }
-
   @property({ attribute: false })
   onSelect?: (fontSize: EdgelessFontSizePanel['fontSize']) => void;
+
+  @property({ attribute: false })
+  onPopperCose?: () => void;
+
+  @property({ attribute: false })
+  minFontSize: number = MIN_FONT_SIZE;
+
+  @property({ attribute: false })
+  maxFontSize: number = MAX_FONT_SIZE;
+
+  private _onSelect(fontSize: EdgelessFontSizePanel['fontSize']) {
+    if (this.onSelect) this.onSelect(fontSize);
+  }
+
+  private _onPopperClose() {
+    if (this.onPopperCose) this.onPopperCose();
+  }
+
+  private _onInputKeyPress = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const input = e.target as HTMLInputElement;
+      // Handle edge case where user enters a non-number
+      if (isNaN(parseInt(input.value))) {
+        input.value = '';
+        return;
+      }
+
+      let fontSize = parseInt(input.value);
+      // Handle edge case when user enters a number that is out of range
+      if (fontSize < this.minFontSize) {
+        fontSize = this.minFontSize;
+      } else if (fontSize > this.maxFontSize) {
+        fontSize = this.maxFontSize;
+      }
+
+      this._onSelect(fontSize);
+      input.value = '';
+      this._onPopperClose();
+    }
+  };
 
   override render() {
     return html`
       <div class="font-size-container">
-        <edgeless-tool-icon-button
-          .active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.SMALL}
+        <div
+          class="font-size-button"
+          role="button"
+          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.SMALL}
           @click=${() => {
             this._onSelect(SHAPE_TEXT_FONT_SIZE.SMALL);
           }}
         >
-          <div class="font-size-button">Small</div>
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.MEDIUM}
+          Small
+        </div>
+        <div
+          class="font-size-button"
+          role="button"
+          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.MEDIUM}
           @click=${() => {
             this._onSelect(SHAPE_TEXT_FONT_SIZE.MEDIUM);
           }}
         >
-          <div class="font-size-button">Middle</div>
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.LARGE}
+          Middle
+        </div>
+        <div
+          class="font-size-button"
+          role="button"
+          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.LARGE}
           @click=${() => {
             this._onSelect(SHAPE_TEXT_FONT_SIZE.LARGE);
           }}
         >
-          <div class="font-size-button">Large</div>
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.XLARGE}
+          Large
+        </div>
+        <div
+          class="font-size-button"
+          role="button"
+          ?active=${this.fontSize === SHAPE_TEXT_FONT_SIZE.XLARGE}
           @click=${() => {
             this._onSelect(SHAPE_TEXT_FONT_SIZE.XLARGE);
           }}
         >
-          <div class="font-size-button">Huge</div>
-        </edgeless-tool-icon-button>
+          Huge
+        </div>
+
+        <div
+          class="font-size-input-container"
+          @click=${(e: MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          <input
+            class="font-size-input"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            placeholder=${Math.trunc(this.fontSize)}
+            @keypress=${this._onInputKeyPress}
+          />
+        </div>
       </div>
     `;
   }

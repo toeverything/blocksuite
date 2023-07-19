@@ -35,9 +35,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value:
-    | typeof GENERAL_CANVAS_FONT_FAMILY
-    | typeof SCIBBLED_CANVAS_FONT_FANILY = GENERAL_CANVAS_FONT_FAMILY;
+  value = GENERAL_CANVAS_FONT_FAMILY;
 
   private _onSelect(value: EdgelessFontFamilyPanel['value']) {
     this.value = value;
