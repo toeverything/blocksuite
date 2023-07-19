@@ -61,18 +61,7 @@ function createPageClipboardItems(range: BlockRange) {
   });
 
   const stringifiesData = JSON.stringify(
-    clipGroups
-      .filter(group => {
-        if (!group.json) {
-          return false;
-        }
-        // XXX: should handle this issue here?
-        // Children json info is collected by its parent,
-        // but getCurrentBlockRange.models return parent and children at same time,
-        // children should be deleted from group
-        return !isChildBlock(range.models, group.model);
-      })
-      .map(group => group.json)
+    clipGroups.filter(group => group.json).map(group => group.json)
   );
 
   // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
@@ -112,25 +101,6 @@ export function copyBlocks(range: BlockRange) {
   if (savedRange) {
     resetNativeSelection(savedRange);
   }
-}
-
-function isChildBlock(blocks: BaseBlockModel[], block: BaseBlockModel) {
-  for (let i = 0; i < blocks.length; i++) {
-    const parentBlock = blocks[i];
-    if (parentBlock.children) {
-      if (
-        parentBlock.children.findIndex(
-          childBlock => childBlock.id === block.id
-        ) > -1
-      ) {
-        return true;
-      }
-      if (isChildBlock(parentBlock.children, block)) {
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 export async function clipboardData2Blocks(

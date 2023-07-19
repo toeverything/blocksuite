@@ -171,14 +171,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         document.activeElement.blur();
       }
     });
-
-    this._input.addEventListener('pointerup', (e: Event) => {
-      e.stopPropagation();
-    });
-
-    this._input.addEventListener('paste', (e: Event) => {
-      e.stopPropagation();
-    });
   }
 
   override focusBlock(ctx: FocusContext) {
@@ -434,6 +426,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
             @input=${this._onInputChange}
             @blur=${this._onInputBlur}
             @click=${stopPropagation}
+            @pointerup=${stopPropagation}
+            @paste=${stopPropagation}
           />
         </div>
       </div>
