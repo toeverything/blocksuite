@@ -41,4 +41,5 @@ export const PAGE_BLOCK_PADDING_BOTTOM = 150;
 export const PAGE_BLOCK_CHILD_PADDING = 24;
 export const DRAG_HANDLE_OFFSET_LEFT = 1;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;
-export const WORKSPACE_VERSION = 1;
+export const WORKSPACE_VERSION = 2;
+export const PAGE_VERSION = 1;

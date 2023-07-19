@@ -664,7 +664,6 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
-      // tryMigrate(this.doc);
       this._handleVersion();
     }
 

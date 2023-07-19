@@ -382,6 +382,45 @@ export class Workspace {
     return serializeYDoc(this.doc);
   }
 
+  /**
+   * @internal Only for testing
+   */
+  exportWorkspaceYDoc() {
+    const binary = Y.encodeStateAsUpdate(this.doc);
+    const file = new Blob([binary], { type: 'application/octet-stream' });
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'workspace.ydoc';
+    link.click();
+
+    URL.revokeObjectURL(fileUrl);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  exportPageYDoc(pageId: string) {
+    const pages = this.doc.getMap('spaces');
+    const pageDoc = pages.get(`space:${pageId}`);
+
+    if (!(pageDoc instanceof Y.Doc)) {
+      throw new Error(`Page ${pageId} not found or not a Y.Doc`);
+    }
+
+    const binary = Y.encodeStateAsUpdate(pageDoc);
+    const file = new Blob([binary], { type: 'application/octet-stream' });
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'workspace.ydoc';
+    link.click();
+
+    URL.revokeObjectURL(fileUrl);
+  }
+
   /** @internal Only for testing */
   exportJSX(blockId?: string, pageId = this.meta.pageMetas.at(0)?.id) {
     assertExists(pageId);
