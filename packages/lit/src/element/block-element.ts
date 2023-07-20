@@ -78,15 +78,15 @@ export class BlockElement<
     return this.path.slice(0, -1);
   }
 
-  parentBlockElement<Block extends BlockElement>(): Block | undefined {
+  parentBlockElement = <Block extends BlockElement>(): Block | undefined => {
     return this.root.blockViewMap.get(this.parentPath.join('|')) as
       | Block
       | undefined;
-  }
+  };
 
-  renderModel(model: BaseBlockModel): TemplateResult {
+  renderModel = (model: BaseBlockModel): TemplateResult => {
     return this.root.renderModel(model, this.path);
-  }
+  };
 
   get service(): Service | undefined {
     return this.root.blockStore.getService(this.model.flavour) as
