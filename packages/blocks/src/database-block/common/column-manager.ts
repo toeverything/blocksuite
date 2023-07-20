@@ -44,8 +44,15 @@ interface CellRenderProps<
   selectCurrentCell: (editing: boolean) => void;
 }
 
+export type CellRenderer<
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
+  Value = unknown
+> = {
+  view: UniComponent<CellRenderProps<Data, Value>>;
+  edit?: UniComponent<CellRenderProps<Data, Value>>;
+};
 type ColumnOps<
-  Data extends Record<string, unknown> = Record<string, never>,
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown
 > = {
   defaultData: () => Data;
@@ -53,10 +60,7 @@ type ColumnOps<
   configRenderer?: UniComponent<{
     data: Data;
   }>;
-  cellRenderer: {
-    view: UniComponent<CellRenderProps<Data, Value>>;
-    edit?: UniComponent<CellRenderProps<Data, Value>>;
-  };
+  cellRenderer: CellRenderer<Data, Value>;
   cellToString: (data: Value, colData: Data) => string;
 };
 
