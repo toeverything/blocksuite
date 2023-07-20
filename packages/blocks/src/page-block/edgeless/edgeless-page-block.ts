@@ -321,7 +321,7 @@ export class EdgelessPageBlockComponent
     return this.page.awarenessStore.getFlag('enable_note_cut');
   }
 
-  get dispacher() {
+  get dispatcher() {
     return this.service?.uiEventDispatcher;
   }
 
