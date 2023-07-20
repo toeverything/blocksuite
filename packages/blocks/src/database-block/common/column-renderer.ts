@@ -24,6 +24,10 @@ import {
   SelectCell,
   SelectCellEditing,
 } from '../table/components/column-type/select.js';
+import {
+  TextCell,
+  TextCellEditing,
+} from '../table/components/column-type/text.js';
 import { TitleCell } from '../table/components/column-type/title.js';
 import type { CellRenderer } from './column-manager.js';
 import {
@@ -34,6 +38,7 @@ import {
   progressHelper,
   richTextHelper,
   selectHelper,
+  textHelper,
   titleHelper,
 } from './column-manager.js';
 
@@ -126,5 +131,13 @@ columnRenderer.register({
   cellRenderer: {
     view: createUniComponentFromWebComponent(LinkCell),
     edit: createUniComponentFromWebComponent(LinkCellEditing),
+  },
+});
+
+columnRenderer.register({
+  type: textHelper.type,
+  cellRenderer: {
+    view: createUniComponentFromWebComponent(TextCell),
+    edit: createUniComponentFromWebComponent(TextCellEditing),
   },
 });

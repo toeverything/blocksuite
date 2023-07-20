@@ -2,17 +2,19 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { DatabaseCellElement } from '../../register.js';
-
-@customElement('affine-database-number-cell')
-export class NumberCell extends DatabaseCellElement<number> {
+@customElement('affine-database-text-cell')
+export class TextCell extends DatabaseCellElement<string> {
   static override styles = css`
-    affine-database-number-cell {
+    affine-database-text-cell {
       display: block;
       width: 100%;
       height: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .affine-database-number {
+    .affine-database-text {
       display: flex;
       align-items: center;
       height: 100%;
@@ -29,23 +31,23 @@ export class NumberCell extends DatabaseCellElement<number> {
   `;
 
   override render() {
-    return html` <div class="affine-database-number number">
-      ${this.value ?? ''}
-    </div>`;
+    return html` <div class="affine-database-text">${this.value ?? ''}</div>`;
   }
 }
-
-@customElement('affine-database-number-cell-editing')
-export class NumberCellEditing extends DatabaseCellElement<number> {
+@customElement('affine-database-text-cell-editing')
+export class TextCellEditing extends DatabaseCellElement<string> {
   static override styles = css`
-    affine-database-number-cell-editing {
+    affine-database-text-cell-editing {
       display: block;
       width: 100%;
       height: 100%;
       cursor: text;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .affine-database-number {
+    .affine-database-text {
       display: flex;
       align-items: center;
       height: 100%;
@@ -60,7 +62,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
       background-color: transparent;
     }
 
-    .affine-database-number:focus {
+    .affine-database-text:focus {
       outline: none;
     }
   `;
@@ -79,17 +81,8 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
   }
 
   private _setValue = (str: string = this._inputEle.value) => {
-    if (!str) {
-      this.onChange(undefined);
-      return;
-    }
-    const value = Number.parseFloat(str);
-    if (Object.is(value, NaN)) {
-      this._inputEle.value = `${this.value ?? ''}`;
-      return;
-    }
     this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(value, { captureSync: true });
+    this.onChange(str, { captureSync: true });
   };
 
   private _keydown = (e: KeyboardEvent) => {
@@ -109,7 +102,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     return html`<input
       .value="${this.value ?? ''}"
       @keydown="${this._keydown}"
-      class="affine-database-number number"
+      class="affine-database-text"
     />`;
   }
 }

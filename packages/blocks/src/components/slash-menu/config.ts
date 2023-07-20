@@ -10,7 +10,6 @@ import {
   NewPageIcon,
   NowIcon,
   paragraphConfig,
-  // PasteIcon,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -41,6 +40,7 @@ import {
   formatDate,
   insertContent,
   insideDatabase,
+  insideDataView,
   type SlashItem,
 } from './utils.js';
 
@@ -319,6 +319,40 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         action: ({ model }) => {},
+      },
+    ],
+  },
+  {
+    name: 'Data View',
+    items: [
+      {
+        name: 'Data View Table',
+        alias: ['table'],
+        icon: DatabaseKanbanViewIcon20,
+        showWhen: model => {
+          if (!model.page.awarenessStore.getFlag('enable_data_view')) {
+            return false;
+          }
+          if (!model.page.schema.flavourSchemaMap.has('affine:data-view')) {
+            return false;
+          }
+          if (insideDataView(model)) {
+            return false;
+          }
+          return true;
+        },
+        action: async ({ page, model }) => {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+
+          page.addBlock(
+            'affine:data-view',
+            {},
+            page.getParent(model),
+            index + 1
+          );
+        },
       },
     ],
   },

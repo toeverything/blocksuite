@@ -392,7 +392,6 @@ export async function initEmptyDatabaseWithParagraphState(
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumnName: 'Title',
       },
       noteId
     );

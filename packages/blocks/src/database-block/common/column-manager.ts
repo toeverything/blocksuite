@@ -1,11 +1,22 @@
-import { assertExists, Text } from '@blocksuite/store';
+import { assertExists, nanoid, Text } from '@blocksuite/store';
 
+import { getTagColor } from '../../components/tags/colors.js';
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
 import type { ColumnManager } from '../table/table-view-manager.js';
+
+type JSON =
+  | null
+  | number
+  | string
+  | boolean
+  | JSON[]
+  | {
+      [k: string]: JSON;
+    };
 
 interface CellRenderProps<
   Data extends Record<string, unknown> = Record<string, never>,
@@ -31,6 +42,20 @@ type ColumnOps<
   defaultData: () => Data;
   type: (data: Data) => TType;
   cellToString: (data: Value, colData: Data) => string;
+  cellToJson: (data: Value, colData: Data) => JSON;
+};
+
+type ConvertFunction<
+  FromColumn extends Record<string, unknown>,
+  FromCell,
+  ToColumn extends Record<string, unknown>,
+  ToCell
+> = (
+  column: FromColumn,
+  cells: (FromCell | undefined)[]
+) => {
+  column: ToColumn;
+  cells: (ToCell | undefined)[];
 };
 
 class ColumnHelperContainer {
@@ -38,8 +63,13 @@ class ColumnHelperContainer {
   private map = new Map<string, ColumnHelper<any, any>>();
   private convert = new Map<
     string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (columnData: any) => [any, (cell: any) => any]
+    (
+      column: Record<string, unknown>,
+      cells: unknown[]
+    ) => {
+      column: Record<string, unknown>;
+      cells: unknown[];
+    }
   >();
 
   getColumn(type: string) {
@@ -50,10 +80,10 @@ class ColumnHelperContainer {
     return column;
   }
 
-  register<
-    CellData,
-    T extends Record<string, unknown> = Record<string, unknown>
-  >(type: string, ops: ColumnOps<T, CellData>) {
+  register<CellData, T extends Record<string, unknown> = Record<string, never>>(
+    type: string,
+    ops: ColumnOps<T, CellData>
+  ) {
     const helper = new ColumnHelper(type, ops);
     this.map.set(type, helper);
     return helper;
@@ -71,20 +101,25 @@ class ColumnHelperContainer {
   >(
     from: ColumnHelper<FromColumn, FromCell>,
     to: ColumnHelper<ToColumn, ToCell>,
-    convert: (column: FromColumn) => [ToColumn, (cell: FromCell) => ToCell]
+    convert: ConvertFunction<FromColumn, FromCell, ToColumn, ToCell>
   ) {
-    this.convert.set(`${from.type}|${to.type}`, convert);
+    this.convert.set(`${from.type}|${to.type}`, convert as never);
   }
 
-  convertCell(from: string, to: string, column: Record<string, unknown>) {
-    return this.convert.get(`${from}|${to}`)?.(column);
+  convertCell(
+    from: string,
+    to: string,
+    column: Record<string, unknown>,
+    cells: unknown[]
+  ) {
+    return this.convert.get(`${from}|${to}`)?.(column, cells);
   }
 
   create(targetType: string, name: string, data?: unknown) {
     return this.getColumn(targetType)?.create(name, data);
   }
 
-  defaultData(type: string) {
+  defaultData(type: string): Record<string, unknown> {
     return this.getColumn(type)?.defaultData();
   }
 
@@ -148,6 +183,10 @@ class ColumnHelper<
   toString(cellData: CellData, colData: T): string {
     return this.ops.cellToString(cellData, colData);
   }
+
+  toJson(cellData: CellData, colData: T): JSON {
+    return this.ops.cellToJson(cellData, colData);
+  }
 }
 
 export const columnManager = new ColumnHelperContainer();
@@ -155,6 +194,7 @@ export const titleHelper = columnManager.register<Text['yText']>('title', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
+  cellToJson: data => data?.toString() ?? null,
 });
 export const richTextHelper = columnManager.register<Text['yText']>(
   'rich-text',
@@ -162,6 +202,7 @@ export const richTextHelper = columnManager.register<Text['yText']>(
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
+    cellToJson: data => data?.toString() ?? null,
   }
 );
 export type SelectColumnData = {
@@ -176,6 +217,7 @@ export const selectHelper = columnManager.register<string, SelectColumnData>(
     }),
     cellToString: (data, colData) =>
       colData.options.find(v => v.id === data)?.value ?? '',
+    cellToJson: data => data ?? null,
   }
 );
 export const multiSelectHelper = columnManager.register<
@@ -188,6 +230,7 @@ export const multiSelectHelper = columnManager.register<
   }),
   cellToString: (data, colData) =>
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
+  cellToJson: data => data ?? null,
 });
 export const numberHelper = columnManager.register<
   number,
@@ -198,49 +241,140 @@ export const numberHelper = columnManager.register<
   type: () => tNumber.create(),
   defaultData: () => ({ decimal: 0 }),
   cellToString: data => data?.toString() ?? '',
+  cellToJson: data => data ?? null,
 });
 export const checkboxHelper = columnManager.register<boolean>('checkbox', {
   type: () => tBoolean.create(),
   defaultData: () => ({}),
   cellToString: data => '',
+  cellToJson: data => data ?? null,
 });
 export const progressHelper = columnManager.register<number>('progress', {
   type: () => tNumber.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
+  cellToJson: data => data ?? null,
 });
 export const linkHelper = columnManager.register<string>('link', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
+  cellToJson: data => data ?? null,
 });
 
-columnManager.registerConvert(selectHelper, multiSelectHelper, column => [
-  column,
-  cell => [cell],
-]);
-columnManager.registerConvert(selectHelper, richTextHelper, column => [
-  column,
-  cell => new Text(column.options.find(v => v.id === cell)?.value ?? '').yText,
-]);
-columnManager.registerConvert(multiSelectHelper, selectHelper, column => [
-  column,
-  cell => cell?.[0],
-]);
-columnManager.registerConvert(multiSelectHelper, richTextHelper, column => [
-  column,
-  cell =>
-    new Text(
-      cell
-        ?.map(id => column.options.find(v => v.id === id)?.value ?? '')
-        .join(',')
-    ).yText,
-]);
-columnManager.registerConvert(numberHelper, richTextHelper, column => [
-  {},
-  cell => new Text(cell?.toString()).yText,
-]);
-columnManager.registerConvert(progressHelper, richTextHelper, column => [
-  {},
-  cell => new Text(cell?.toString()).yText,
-]);
+export const textHelper = columnManager.register<string>('text', {
+  type: () => tString.create(),
+  defaultData: () => ({}),
+  cellToString: data => data ?? '',
+  cellToJson: data => data ?? null,
+});
+
+columnManager.registerConvert(
+  selectHelper,
+  multiSelectHelper,
+  (column, cells) => ({
+    column,
+    cells: cells.map(v => (v ? [v] : undefined)),
+  })
+);
+columnManager.registerConvert(selectHelper, richTextHelper, (column, cells) => {
+  const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
+  return {
+    column: {},
+    cells: cells.map(v => new Text(v ? optionMap[v]?.value : '').yText),
+  };
+});
+columnManager.registerConvert(
+  multiSelectHelper,
+  selectHelper,
+  (column, cells) => ({
+    column,
+    cells: cells.map(v => v?.[0]),
+  })
+);
+columnManager.registerConvert(
+  multiSelectHelper,
+  richTextHelper,
+  (column, cells) => {
+    const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
+    return {
+      column: {},
+      cells: cells.map(
+        arr =>
+          new Text(arr?.map(v => optionMap[v]?.value ?? '').join(',')).yText
+      ),
+    };
+  }
+);
+columnManager.registerConvert(
+  numberHelper,
+  richTextHelper,
+  (column, cells) => ({
+    column: {},
+    cells: cells.map(v => new Text(v?.toString()).yText),
+  })
+);
+columnManager.registerConvert(
+  progressHelper,
+  richTextHelper,
+  (column, cells) => ({
+    column: {},
+    cells: cells.map(v => new Text(v?.toString()).yText),
+  })
+);
+
+columnManager.registerConvert(richTextHelper, selectHelper, (column, cells) => {
+  const options: Record<string, SelectTag> = {};
+  const getTag = (name: string) => {
+    if (options[name]) return options[name];
+    const tag: SelectTag = { id: nanoid(), value: name, color: getTagColor() };
+    options[name] = tag;
+    return tag;
+  };
+  return {
+    cells: cells.map(v => {
+      const tags = v?.toString().split(',');
+      const value = tags?.[0]?.trim();
+      if (value) {
+        return getTag(value).id;
+      }
+      return undefined;
+    }),
+    column: {
+      options: Object.values(options),
+    },
+  };
+});
+columnManager.registerConvert(
+  richTextHelper,
+  multiSelectHelper,
+  (column, cells) => {
+    const options: Record<string, SelectTag> = {};
+    const getTag = (name: string) => {
+      if (options[name]) return options[name];
+      const tag: SelectTag = {
+        id: nanoid(),
+        value: name,
+        color: getTagColor(),
+      };
+      options[name] = tag;
+      return tag;
+    };
+    return {
+      cells: cells.map(v => {
+        const result: string[] = [];
+        const values = v?.toString().split(',');
+        values?.forEach(value => {
+          value = value.trim();
+          if (value) {
+            result.push(getTag(value).id);
+          }
+        });
+        return result;
+      }),
+      column: {
+        options: Object.values(options),
+      },
+    };
+  }
+);

@@ -1,7 +1,7 @@
-import type { DatabaseBlockModel, InsertPosition } from '../database-model.js';
-import { insertPositionToIndex } from '../database-model.js';
+import type { DatabaseBlockModel } from '../database-model.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
-import type { Column } from '../types.js';
+import type { Column, InsertPosition } from '../types.js';
+import { insertPositionToIndex } from '../utils/insert.js';
 import type { FilterGroup } from './ast.js';
 
 export type TableViewColumn = {
@@ -33,8 +33,8 @@ export type DatabaseViewDataMap = {
     mode: K;
   };
 };
-
-export type TableViewData = DatabaseViewDataMap['table'];
+type Pretty<T> = { [K in keyof T]: T[K] };
+export type TableViewData = Pretty<DatabaseViewDataMap['table']>;
 
 export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
@@ -74,11 +74,7 @@ export const ViewOperationMap: {
         id,
         name,
         mode: 'table',
-        columns: model.columns.map(v => ({
-          id: v.id,
-          hide: false,
-          width: DEFAULT_COLUMN_WIDTH,
-        })),
+        columns: [],
         filter: {
           type: 'group',
           op: 'and',
