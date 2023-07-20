@@ -9,11 +9,8 @@ import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../../components/uni-component/uni-component.js';
 import { columnManager } from '../../common/column-manager.js';
-import type { DatabaseCellElement } from '../register.js';
+import type { DataViewCellLifeCycle } from '../register.js';
 import type { ColumnManager } from '../table-view-manager.js';
-
-/** affine-database-cell-container padding */
-const CELL_PADDING = 8;
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
@@ -30,6 +27,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
     affine-database-cell-container * {
       box-sizing: border-box;
+    }
+    affine-database-cell-container uni-lit > *:first-child {
+      padding: 0 8px;
     }
 
     affine-database-multi-select-cell,
@@ -77,9 +77,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return table;
   }
 
-  private _cell = createRef<UniLit<DatabaseCellElement<unknown>>>();
+  private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
 
-  public get cell(): DatabaseCellElement<unknown> | undefined {
+  public get cell(): DataViewCellLifeCycle | undefined {
     return this._cell.value?.expose;
   }
 
@@ -89,7 +89,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     assertExists(column);
 
     const uni =
-      !this.readonly && this.isEditing && column.cellRenderer.edit !== null
+      !this.readonly && this.isEditing && column.cellRenderer.edit != null
         ? column.cellRenderer.edit
         : column.cellRenderer.view;
     const style = styleMap({
@@ -101,9 +101,10 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       isEditing: this.isEditing,
       selectCurrentCell: this._selectCurrentCell,
     };
+    const isEditView = column.cellRenderer.view === uni;
     return html`${keyed(
-      this.isEditing,
-      html` <uni-lit
+      `${isEditView} ${this.column.type}`,
+      html`<uni-lit
         ${ref(this._cell)}
         style=${style}
         .uni="${uni}"

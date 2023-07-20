@@ -68,9 +68,11 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
 
   override focusCell() {
     this.querySelector('rich-text')?.vEditor?.focusEnd();
+    return false;
   }
   override blurCell() {
     getSelection()?.removeAllRanges();
+    return false;
   }
 
   override render() {

@@ -4,27 +4,27 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 type UniComponentReturn<
-  Props = Record<string, unknown>,
-  Expose extends Record<string, unknown> = Record<string, never>
+  Props = NonNullable<unknown>,
+  Expose extends NonNullable<unknown> = NonNullable<unknown>
 > = {
   update: (props: Props) => void;
   unmount: () => void;
   expose: Expose;
 };
 export type UniComponent<
-  Props = Record<string, unknown>,
-  Expose extends Record<string, unknown> = Record<string, never>
+  Props = NonNullable<unknown>,
+  Expose extends NonNullable<unknown> = NonNullable<unknown>
 > = (ele: HTMLElement, props: Props) => UniComponentReturn<Props, Expose>;
 
 @customElement('uni-lit')
 export class UniLit<
-  Expose extends Record<string, unknown>
+  Expose extends NonNullable<unknown>
 > extends ShadowlessElement {
   @property()
   uni!: UniComponent<unknown, Expose>;
 
   @property()
-  props!: Record<string, unknown>;
+  props!: NonNullable<unknown>;
 
   uniReturn?: UniComponentReturn<unknown, Expose>;
 

@@ -5,10 +5,25 @@ import type { literal } from 'lit/static-html.js';
 import type { ColumnManager } from './table-view-manager.js';
 import type { ColumnType, SetValueOption } from './types.js';
 
+export interface DataViewCellLifeCycle {
+  beforeEnterEditMode(): boolean;
+
+  onEnterEditMode(): void;
+
+  onExitEditMode(): void;
+
+  focusCell(): boolean;
+
+  blurCell(): boolean;
+}
+
 export abstract class DatabaseCellElement<
-  Value,
-  Data extends Record<string, unknown> = Record<string, unknown>
-> extends WithDisposable(ShadowlessElement) {
+    Value,
+    Data extends Record<string, unknown> = Record<string, unknown>
+  >
+  extends WithDisposable(ShadowlessElement)
+  implements DataViewCellLifeCycle
+{
   static tag: ReturnType<typeof literal>;
   @property({ attribute: false })
   column!: ColumnManager<Value, Data>;
@@ -43,6 +58,14 @@ export abstract class DatabaseCellElement<
     // do nothing
   }
 
+  public focusCell() {
+    return true;
+  }
+
+  public blurCell() {
+    return true;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.style.width = '100%';
@@ -50,14 +73,6 @@ export abstract class DatabaseCellElement<
     this._disposables.addFromEvent(this, 'click', e => {
       this.selectCurrentCell(true);
     });
-  }
-
-  public focusCell() {
-    this.parentElement?.focus();
-  }
-
-  public blurCell() {
-    this.parentElement?.blur();
   }
 }
 
