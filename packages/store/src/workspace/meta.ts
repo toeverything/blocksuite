@@ -89,13 +89,13 @@ export class WorkspaceMeta {
   setName(name: string) {
     this.doc.transact(() => {
       this._proxy.name = name;
-    });
+    }, this.doc.clientID);
   }
 
   setAvatar(avatar: string) {
     this.doc.transact(() => {
       this._proxy.avatar = avatar;
-    });
+    }, this.doc.clientID);
   }
 
   get pageMetas() {
@@ -120,7 +120,7 @@ export class WorkspaceMeta {
       } else {
         pages.splice(index, 0, page);
       }
-    });
+    }, this.doc.clientID);
   }
 
   /**
@@ -141,7 +141,7 @@ export class WorkspaceMeta {
       Object.entries(props).forEach(([key, value]) => {
         page[key] = value;
       });
-    });
+    }, this.doc.clientID);
   }
 
   removePageMeta(id: string) {
@@ -155,7 +155,7 @@ export class WorkspaceMeta {
     this.doc.transact(() => {
       assertExists(this.pages);
       this.pages.splice(index, 1);
-    });
+    }, this.doc.clientID);
   }
 
   get hasVersion() {
