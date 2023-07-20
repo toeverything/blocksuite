@@ -268,6 +268,8 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
       this._editor.rangeService.syncVRange();
     }
 
-    this._editor.slots.updated.emit();
+    if (this._editor.getVRange()) {
+      this._editor.slots.updated.emit();
+    }
   };
 }
