@@ -38,10 +38,7 @@ test.describe('column operations', () => {
 
     await initDatabaseColumn(page, 'abc');
 
-    const { textElement, inputElement } = await getDatabaseHeaderColumn(
-      page,
-      1
-    );
+    const { textElement } = await getDatabaseHeaderColumn(page, 1);
     expect(await textElement.innerText()).toBe('abc');
     await textElement.click();
     await type(page, '123');
