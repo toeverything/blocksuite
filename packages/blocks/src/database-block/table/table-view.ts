@@ -22,7 +22,7 @@ import { insertPositionToIndex } from '../utils/insert.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection/selection.js';
-import type { TableViewManager } from './table-view-manager.js';
+import type { DataViewTableManager } from './table-view-manager.js';
 
 const styles = css`
   affine-database-table {
@@ -149,7 +149,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  tableViewManager!: TableViewManager;
+  tableViewManager!: DataViewTableManager;
 
   @property({ attribute: false })
   blockOperation!: BlockOperation;
@@ -199,7 +199,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   private _addRow = (
-    tableViewManager: TableViewManager,
+    tableViewManager: DataViewTableManager,
     position: InsertPosition
   ) => {
     if (this.readonly) return;

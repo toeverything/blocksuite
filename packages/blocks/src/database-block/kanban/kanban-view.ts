@@ -1,59 +1,58 @@
 // related component
 
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { type BlockHost } from '../../__internal__/index.js';
-import type { DatabaseBlockModel } from '../database-model.js';
+import type { BlockOperation } from '../types.js';
+import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
-const styles = css`
-  affine-database-kanban {
-    position: relative;
-  }
-`;
+const styles = css``;
 
-@customElement('affine-database-kanban')
-export class DatabaseKanban
-  extends WithDisposable(ShadowlessElement)
-  implements BlockHost
-{
-  flavour = 'affine:database' as const;
-
+@customElement('affine-data-view-kanban')
+export class DataViewKanban extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
-  get slots() {
-    return this.host.slots;
-  }
-
-  get page() {
-    return this.host.page;
-  }
-  get clipboard() {
-    return this.host.clipboard;
-  }
-  get getService() {
-    return this.host.getService;
-  }
+  @property({ attribute: false })
+  view!: DataViewKanbanManager;
 
   @property({ attribute: false })
-  model!: DatabaseBlockModel;
+  blockOperation!: BlockOperation;
 
   @property({ attribute: false })
-  host!: BlockHost;
+  titleText!: Text;
 
-  override connectedCallback() {
-    super.connectedCallback();
+  @property({ attribute: false })
+  root!: BlockSuiteRoot;
+
+  @property({ attribute: false })
+  modalMode?: boolean;
+
+  override firstUpdated() {
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   override render() {
-    return html`<div class="affine-database-kanban">kanban view</div>`;
+    const rows = this.view.rows;
+    const column = this.view.columnManagerList.find(v => {
+      return v.type === 'select' || v.type === 'multi-select';
+    });
+    if (!column) {
+      return;
+    }
+    return html` <div class="affine-database-table"></div> `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-kanban': DatabaseKanban;
+    'affine-data-view-kanban': DataViewKanban;
   }
 }

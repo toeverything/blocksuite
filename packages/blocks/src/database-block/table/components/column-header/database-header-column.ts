@@ -29,10 +29,8 @@ import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import { getTableContainer } from '../../table-view.js';
-import type {
-  ColumnManager,
-  TableViewManager,
-} from '../../table-view-manager.js';
+import type { DataViewTableColumnManager } from '../../table-view-manager.js';
+import type { DataViewTableManager } from '../../table-view-manager.js';
 import type { ColumnHeader, ColumnTypeIcon } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 
@@ -44,10 +42,18 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  tableViewManager!: TableViewManager;
+  tableViewManager!: DataViewTableManager;
 
   @property({ attribute: false })
-  column!: ColumnManager;
+  column!: DataViewTableColumnManager;
+
+  override firstUpdated() {
+    this._disposables.add(
+      this.tableViewManager.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   override firstUpdated() {
     this._disposables.add(

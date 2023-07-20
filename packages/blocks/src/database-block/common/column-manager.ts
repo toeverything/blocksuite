@@ -6,7 +6,17 @@ import type { UniComponent } from '../../components/uni-component/uni-component.
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
-import type { ColumnManager } from '../table/table-view-manager.js';
+import type { DataViewColumnManager } from './data-view-manager.js';
+
+type JSON =
+  | null
+  | number
+  | string
+  | boolean
+  | JSON[]
+  | {
+      [k: string]: JSON;
+    };
 
 type JSON =
   | null
@@ -22,7 +32,7 @@ interface CellRenderProps<
   Data extends Record<string, unknown> = Record<string, never>,
   Value = unknown
 > {
-  column: ColumnManager<Value, Data>;
+  column: DataViewColumnManager<Value, Data>;
   rowId: string;
   isEditing: boolean;
   selectCurrentCell: (editing: boolean) => void;
@@ -136,7 +146,7 @@ class ColumnHelper<
 > {
   constructor(
     public readonly type: string,
-    private ops: ColumnOps<T, CellData>
+    public ops: ColumnOps<T, CellData>
   ) {}
 
   create(

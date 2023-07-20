@@ -3,7 +3,7 @@ import {
   numberHelper,
   richTextHelper,
   selectHelper,
-} from '@blocksuite/blocks/database-block/common/column-manager';
+} from '@blocksuite/blocks/database-block/common/columns/define';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 

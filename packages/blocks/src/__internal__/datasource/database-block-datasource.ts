@@ -1,10 +1,8 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import {
-  columnManager,
-  multiSelectHelper,
-} from '../../database-block/common/column-manager.js';
+import { columnManager } from '../../database-block/common/column-manager.js';
+import { multiSelectHelper } from '../../database-block/common/columns/define.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';

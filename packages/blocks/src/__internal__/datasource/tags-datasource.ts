@@ -11,7 +11,7 @@ import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import {
   selectHelper,
   textHelper,
-} from '../../database-block/common/column-manager.js';
+} from '../../database-block/common/columns/define.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';

@@ -1,7 +1,7 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
-import type { ColumnManager } from './table-view-manager.js';
+import type { DataViewColumnManager } from '../common/data-view-manager.js';
 import type { SetValueOption } from './types.js';
 
 export interface DataViewCellLifeCycle {
@@ -24,7 +24,7 @@ export abstract class DatabaseCellElement<
   implements DataViewCellLifeCycle
 {
   @property({ attribute: false })
-  column!: ColumnManager<Value, Data>;
+  column!: DataViewColumnManager<Value, Data>;
   @property()
   rowId!: string;
   @property({ attribute: false })

@@ -9,9 +9,7 @@ export type TableViewColumn = {
   width: number;
   hide?: boolean;
 };
-export type TableMixColumn<
-  Data extends Record<string, unknown> = Record<string, unknown>
-> = TableViewColumn & Column<Data>;
+
 export type KanbanViewColumn = {
   id: string;
   hide?: boolean;
@@ -35,6 +33,7 @@ export type DatabaseViewDataMap = {
 };
 type Pretty<T> = { [K in keyof T]: T[K] };
 export type TableViewData = Pretty<DatabaseViewDataMap['table']>;
+export type KanbanViewData = Pretty<DatabaseViewDataMap['kanban']>;
 
 export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 

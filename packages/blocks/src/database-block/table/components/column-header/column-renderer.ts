@@ -5,10 +5,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type {
-  ColumnManager,
-  TableViewManager,
-} from '../../table-view-manager.js';
+import type { DataViewColumnManager } from '../../../common/data-view-manager.js';
+import type { DataViewTableManager } from '../../table-view-manager.js';
 
 @customElement('affine-data-view-column-preview')
 export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
@@ -20,9 +18,9 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  tableViewManager!: TableViewManager;
+  tableViewManager!: DataViewTableManager;
   @property({ attribute: false })
-  column!: ColumnManager;
+  column!: DataViewColumnManager;
   @property({ attribute: false })
   table!: HTMLElement;
 

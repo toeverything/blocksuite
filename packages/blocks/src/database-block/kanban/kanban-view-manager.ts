@@ -6,20 +6,20 @@ import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
-import type { TableViewData } from '../common/view-manager.js';
+import type { KanbanViewData } from '../common/view-manager.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 
-export class DataViewTableManager extends BaseDataViewManager {
+export class DataViewKanbanManager extends BaseDataViewManager {
   private readonly updateView: (
-    updater: (view: TableViewData) => Partial<TableViewData>
+    updater: (view: KanbanViewData) => Partial<KanbanViewData>
   ) => void;
 
   constructor(
-    private getView: () => TableViewData,
+    private getView: () => KanbanViewData,
     private ____updateView: (
-      updater: (view: TableViewData) => Partial<TableViewData>
+      updater: (view: KanbanViewData) => Partial<KanbanViewData>
     ) => void,
     viewUpdatedSlot: Slot,
     dataSource: DataSource
@@ -68,22 +68,14 @@ export class DataViewTableManager extends BaseDataViewManager {
       return {
         columns: this.columnManagerList.map((column, i) => ({
           id: column.id,
-          width: column.width,
           hide: column.hide,
         })),
       };
     });
   }
 
-  public columnGet(columnId: string): DataViewTableColumnManager {
-    return new DataViewTableColumnManager(columnId, this);
-  }
-
-  public columnGetWidth(columnId: string): number {
-    return (
-      this.getView().columns.find(v => v.id === columnId)?.width ??
-      this.dataSource.propertyGetDefaultWidth(columnId)
-    );
+  public columnGet(columnId: string): DataViewKanbanColumnManager {
+    return new DataViewKanbanColumnManager(columnId, this);
   }
 
   public columnMove(columnId: string, toAfterOfColumn: InsertPosition): void {
@@ -98,16 +90,6 @@ export class DataViewTableManager extends BaseDataViewManager {
       columns.splice(index, 0, column);
       return {
         columns,
-      };
-    });
-  }
-
-  public columnUpdateWidth(columnId: string, width: number): void {
-    this.updateView(view => {
-      return {
-        columns: view.columns.map(v =>
-          v.id === columnId ? { ...v, width: width } : v
-        ),
       };
     });
   }
@@ -137,18 +119,17 @@ export class DataViewTableManager extends BaseDataViewManager {
     }
     return true;
   }
+
+  public get groups(): {
+    type: string;
+    value: unknown;
+  }[] {
+    return [];
+  }
 }
 
-export class DataViewTableColumnManager extends BaseDataViewColumnManager {
-  constructor(propertyId: string, override viewManager: DataViewTableManager) {
+export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {
+  constructor(propertyId: string, override viewManager: DataViewKanbanManager) {
     super(propertyId, viewManager);
-  }
-
-  get width(): number {
-    return this.viewManager.columnGetWidth(this.id);
-  }
-
-  updateWidth(width: number): void {
-    this.viewManager.columnUpdateWidth(this.id, width);
   }
 }

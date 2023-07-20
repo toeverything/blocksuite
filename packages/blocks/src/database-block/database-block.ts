@@ -11,10 +11,10 @@ import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
+import type { DataViewManager } from './common/data-view-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
-import type { TableViewManager } from './table/table-view-manager.js';
-import { DatabaseTableViewManager } from './table/table-view-manager.js';
+import { DataViewTableManager } from './table/table-view-manager.js';
 import type { BlockOperation } from './types.js';
 
 @customElement('affine-database')
@@ -46,11 +46,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return this._dataSource;
   }
 
-  private viewMap: Record<string, TableViewManager> = {};
+  private viewMap: Record<string, DataViewManager> = {};
 
-  private getView(id: string): TableViewManager {
+  private getView(id: string): DataViewManager {
     if (!this.viewMap[id]) {
-      this.viewMap[id] = new DatabaseTableViewManager(
+      this.viewMap[id] = new DataViewTableManager(
         () => {
           const view = this.model.views.find(v => v.id === id);
           if (!view || view.mode !== 'table') {

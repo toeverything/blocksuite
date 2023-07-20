@@ -24,7 +24,7 @@ import { columnManager } from '../../../common/column-manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type { InsertPosition } from '../../../types.js';
-import type { TableViewManager } from '../../table-view-manager.js';
+import type { DataViewTableManager } from '../../table-view-manager.js';
 import { initAddNewRecordHandlers } from './index.js';
 
 const styles = css`
@@ -191,7 +191,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   deleteSelf!: () => void;
 
   @property({ attribute: false })
-  view!: TableViewManager;
+  view!: DataViewTableManager;
 
   @property({ attribute: false })
   addRow!: (position: InsertPosition) => void;

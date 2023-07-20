@@ -6,7 +6,7 @@ import {
   multiSelectHelper,
   numberHelper,
   textHelper,
-} from '../../database-block/common/column-manager.js';
+} from '../../database-block/common/columns/define.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import type { AllPageDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';

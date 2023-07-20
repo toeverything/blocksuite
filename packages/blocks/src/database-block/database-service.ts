@@ -14,7 +14,7 @@ import type {
   DatabaseSelectionState,
   SerializedBlock,
 } from '../__internal__/utils/types.js';
-import { multiSelectHelper } from './common/column-manager.js';
+import { multiSelectHelper } from './common/columns/define.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Cell, Column } from './table/types.js';
 

@@ -17,10 +17,10 @@ import {
   getDatasourceTitle,
 } from '../__internal__/datasource/datasource-manager.js';
 import { registerService } from '../__internal__/service.js';
+import type { DataViewManager } from '../database-block/common/data-view-manager.js';
 import type { BlockOperation } from '../database-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/index.js';
-import type { TableViewManager } from '../database-block/table/table-view-manager.js';
-import { DatabaseTableViewManager } from '../database-block/table/table-view-manager.js';
+import { DataViewTableManager } from '../database-block/table/table-view-manager.js';
 import type { DataViewBlockModel } from './data-view-model.js';
 import { DataViewBlockService } from './data-view-service.js';
 
@@ -44,14 +44,14 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
     this.currentView = viewId;
   };
 
-  private viewMap: Record<string, TableViewManager> = {};
+  private viewMap: Record<string, DataViewManager> = {};
 
-  private getView(id: string): TableViewManager {
+  private getView(id: string): DataViewManager {
     if (!this.viewMap[id]) {
       const view = this.model.views.find(v => v.id === id);
       assertExists(view);
       assertExists(view.dataSource);
-      this.viewMap[id] = new DatabaseTableViewManager(
+      this.viewMap[id] = new DataViewTableManager(
         () => {
           const view = this.model.views.find(v => v.id === id);
           if (!view || view.mode !== 'table') {
