@@ -1,12 +1,9 @@
 import { css, html } from 'lit';
-import { query } from 'lit/decorators.js';
-import { literal } from 'lit/static-html.js';
+import { customElement, query } from 'lit/decorators.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
-
-class TextCell extends DatabaseCellElement<string> {
-  static override tag = literal`affine-database-text-cell`;
-
+import { DatabaseCellElement } from '../../register.js';
+@customElement('affine-database-text-cell')
+export class TextCell extends DatabaseCellElement<string> {
   static override styles = css`
     affine-database-text-cell {
       display: block;
@@ -37,10 +34,8 @@ class TextCell extends DatabaseCellElement<string> {
     return html` <div class="affine-database-text">${this.value ?? ''}</div>`;
   }
 }
-
+@customElement('affine-database-text-cell-editing')
 export class TextCellEditing extends DatabaseCellElement<string> {
-  static override tag = literal`affine-database-text-cell-editing`;
-
   static override styles = css`
     affine-database-text-cell-editing {
       display: block;
@@ -111,14 +106,3 @@ export class TextCellEditing extends DatabaseCellElement<string> {
     />`;
   }
 }
-
-export const TextColumnRenderer = defineColumnRenderer(
-  'text',
-  {
-    Cell: TextCell,
-    CellEditing: TextCellEditing,
-  },
-  {
-    displayName: 'Text',
-  }
-);
