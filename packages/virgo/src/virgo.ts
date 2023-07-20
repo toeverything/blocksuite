@@ -194,6 +194,11 @@ export class VEditor<
     });
   }
 
+  async waitForUpdate() {
+    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
+    await Promise.all(vLines.map(line => line.updateComplete));
+  }
+
   getNativeSelection(): Selection | null {
     const selectionRoot = findDocumentOrShadowRoot(this);
     const selection = selectionRoot.getSelection();

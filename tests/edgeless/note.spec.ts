@@ -397,6 +397,7 @@ test('format quick bar should show up when double-clicking on text', async ({
     .nth(1)
     .dblclick({
       position: { x: 10, y: 10 },
+      delay: 20,
     });
   await page.waitForTimeout(200);
   const formatQuickBar = page.locator('.format-quick-bar');

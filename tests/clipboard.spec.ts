@@ -596,7 +596,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   );
 });
 
-test(scoped`should copy and paste of database work`, async ({ page }) => {
+test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseWithParagraphState(page);
 

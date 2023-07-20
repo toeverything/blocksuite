@@ -260,8 +260,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
       this._editor.requestUpdate();
     }
 
-    const vLines = Array.from(rootElement.querySelectorAll('v-line'));
-    await Promise.all(vLines.map(line => line.updateComplete));
+    await this._editor.waitForUpdate();
 
     if (syncVRange) {
       // We need to synchronize the selection immediately after rendering is completed,

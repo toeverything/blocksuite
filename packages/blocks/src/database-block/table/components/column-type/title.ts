@@ -59,7 +59,9 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     setTimeout(() => {
       this.querySelector('rich-text')?.vEditor?.slots.vRangeUpdated.on(
         range => {
-          this.selectCurrentCell(true);
+          if (range) {
+            this.selectCurrentCell(true);
+          }
         }
       );
     });
