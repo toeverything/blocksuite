@@ -337,7 +337,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (ctx.skipDefault) return;
 
     const { event: newEvent, data, vRange: newVRange } = ctx;
-
     transformInput<TextAttributes>(
       newEvent.inputType,
       data,
