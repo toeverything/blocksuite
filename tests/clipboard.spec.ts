@@ -42,6 +42,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitEmbedLoaded,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -50,6 +51,7 @@ import {
   assertClipItems,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
+  assertRichImage,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -97,6 +99,45 @@ test(scoped`clipboard paste html`, async ({ page }) => {
   );
   await assertText(page, 'aaabbbcccddd');
 });
+
+test(
+  scoped`clipboard paste HTML containing Markdown syntax code and image `,
+  async ({ page }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2855',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    // set up clipboard data using html
+    const clipData = {
+      'text/html': `<p>符合 Markdown 格式的 URL 放到笔记中，此时需要的格式如下：</p>
+    <pre><code>md [任务管理这件事 - 少数派](https://sspai.com/post/61092)</code></pre>
+    <p>（将一段文字包裹在<code >[[]]</code>中）此时需要的格式如下：</p>
+    <figure ><img src="https://placehold.co/600x400"></figure>
+    <p>上图中，当我们处在 Obsidian 的「预览模式」时，点击这个「双向链接」</p>
+    `,
+    };
+    await page.evaluate(
+      ({ clipData }) => {
+        const dT = new DataTransfer();
+        const e = new ClipboardEvent('paste', { clipboardData: dT });
+        Object.defineProperty(e, 'target', {
+          writable: false,
+          value: document.body,
+        });
+        e.clipboardData?.setData('text/html', clipData['text/html']);
+        document.body.dispatchEvent(e);
+      },
+      { clipData }
+    );
+    await waitEmbedLoaded(page);
+    // await page.waitForTimeout(500);
+    await assertRichImage(page, 1);
+  }
+);
 
 test(scoped`markdown format parse`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -606,6 +647,9 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     <affine:paragraph
       prop:type="text"
     />
+    <affine:paragraph
+      prop:type="text"
+    />
   </affine:note>
 </affine:page>`
   );
@@ -924,4 +968,30 @@ test(scoped`auto identify url`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test(scoped`paste parent block`, async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/3153',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'This is parent');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 1');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 2');
+  await setVirgoSelection(page, 0, 3);
+  await copyByKeyboard(page);
+  await focusRichText(page, 2);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, [
+    'This is parent',
+    'This is child 1',
+    'This is child 2Thi',
+  ]);
 });

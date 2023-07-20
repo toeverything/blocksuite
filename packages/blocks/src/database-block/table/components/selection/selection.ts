@@ -113,7 +113,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             const cell = container.cell;
             if (old.isEditing) {
               cell?.onExitEditMode();
-              cell?.blurCell();
+              if (cell?.blurCell()) {
+                container.blur();
+              }
               container.isEditing = false;
             } else {
               container.blur();
@@ -131,7 +133,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             if (selection.isEditing) {
               cell?.onEnterEditMode();
               container.isEditing = true;
-              cell?.focusCell();
+              if (cell?.focusCell()) {
+                container.focus();
+              }
             } else {
               container.focus();
             }

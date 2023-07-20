@@ -9,7 +9,11 @@ import type {
   NoteBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
+import {
+  EDITOR_WIDTH,
+  PAGE_VERSION,
+  WORKSPACE_VERSION,
+} from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -72,6 +76,7 @@ export const defaultStore: SerializedStore = {
       'affine:bookmark': 1,
     },
     workspaceVersion: WORKSPACE_VERSION,
+    pageVersion: PAGE_VERSION,
   },
   spaces: {
     'space:page0': {
@@ -154,7 +159,8 @@ export async function assertEdgelessCanvasText(page: Page, text: string) {
 }
 
 export async function assertRichImage(page: Page, count: number) {
-  const actual = await page.locator('.resizable-img').count();
+  const editor = getEditorLocator(page);
+  const actual = await editor.locator('.resizable-img').count();
   expect(actual).toEqual(count);
 }
 

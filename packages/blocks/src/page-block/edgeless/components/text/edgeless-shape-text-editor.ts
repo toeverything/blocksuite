@@ -11,6 +11,7 @@ import * as Y from 'yjs';
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
+import { GET_DEFAULT_LINE_COLOR } from '../panel/color-panel.js';
 
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
@@ -63,6 +64,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       const text = new Y.Text();
       edgeless.surface.updateElement<'shape'>(element.id, {
         text,
+        color: GET_DEFAULT_LINE_COLOR(),
       });
       const updatedElement = edgeless.surface.pickById(element.id);
       if (updatedElement instanceof ShapeElement && updatedElement.text) {

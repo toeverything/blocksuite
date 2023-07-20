@@ -1,15 +1,14 @@
 import { css, html } from 'lit';
-import { literal } from 'lit/static-html.js';
+import { customElement, query } from 'lit/decorators.js';
 
 import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../../list-block/utils/icons.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
-class CheckboxCell extends DatabaseCellElement<boolean> {
-  static override tag = literal`affine-database-checkbox-cell`;
-
+@customElement('affine-database-checkbox-cell')
+export class CheckboxCell extends DatabaseCellElement<boolean> {
   static override styles = css`
     affine-database-checkbox-cell {
       display: block;
@@ -29,6 +28,7 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
       width: 100%;
       position: relative;
     }
+
     .affine-database-checkbox-animation {
       width: 20px;
       height: 20px;
@@ -36,9 +36,11 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
       left: 0px;
       border-radius: 50%;
     }
-    .affine-database-checkbox.checked .affine-database-checkbox-animation {
+
+    .animation {
       animation: sparking 0.6s ease forwards;
     }
+
     @keyframes sparking {
       0% {
         width: 14px;
@@ -65,8 +67,23 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
     }
   `;
 
+  @query('.affine-database-checkbox-animation')
+  private _animation!: HTMLDivElement;
+
+  protected override firstUpdated() {
+    this._animation.addEventListener('animationend', () => {
+      this._animation.classList.remove('animation');
+    });
+  }
+
   override beforeEnterEditMode() {
-    this.onChange(!this.value);
+    const checked = !this.value;
+
+    if (checked) {
+      this._animation.classList.add('animation');
+    }
+
+    this.onChange(checked);
     return false;
   }
 
@@ -82,14 +99,3 @@ class CheckboxCell extends DatabaseCellElement<boolean> {
     </div>`;
   }
 }
-
-export const CheckboxColumnRenderer = defineColumnRenderer(
-  'checkbox',
-  {
-    Cell: CheckboxCell,
-    CellEditing: null,
-  },
-  {
-    displayName: 'Checkbox',
-  }
-);
