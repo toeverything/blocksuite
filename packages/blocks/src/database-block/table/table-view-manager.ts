@@ -5,6 +5,7 @@ import { assertExists } from '@blocksuite/store';
 import type { FilterGroup } from '../common/ast.js';
 import type { CellRenderer } from '../common/column-manager.js';
 import { columnManager, multiSelectHelper } from '../common/column-manager.js';
+import { columnRenderer } from '../common/column-renderer.js';
 import type {
   TableMixColumn,
   TableViewColumn,
@@ -271,7 +272,7 @@ export class DatabaseColumnManager implements ColumnManager {
   }
 
   get renderer(): CellRenderer {
-    return columnManager.getColumn(this.type).cellRenderer;
+    return columnRenderer.get(this.type).cellRenderer;
   }
 
   get type(): string {
@@ -492,7 +493,7 @@ export class DatabaseTitleColumnManager implements ColumnManager {
   }
 
   get renderer(): CellRenderer {
-    return columnManager.getColumn(this.type).cellRenderer;
+    return columnRenderer.get(this.type).cellRenderer;
   }
 
   updateData(updater: ColumnDataUpdater<Record<string, unknown>>): void {

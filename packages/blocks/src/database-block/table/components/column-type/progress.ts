@@ -1,9 +1,8 @@
 import { css, html } from 'lit';
-import { query } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { literal } from 'lit/static-html.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -80,9 +79,8 @@ type DragConfig = {
   boundLeft: number;
 };
 
+@customElement('affine-database-progress-cell')
 export class ProgressCell extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-progress-cell`;
-
   static override styles = styles;
 
   _bgClick(e: MouseEvent) {
@@ -123,9 +121,8 @@ export class ProgressCell extends DatabaseCellElement<number> {
   }
 }
 
+@customElement('affine-database-progress-cell-editing')
 export class ProgressCellEditing extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-progress-cell-editing`;
-
   static override styles = styles;
 
   @query('.affine-database-progress-bg')
@@ -228,14 +225,3 @@ export class ProgressCellEditing extends DatabaseCellElement<number> {
     </div>`;
   }
 }
-
-export const ProgressColumnRenderer = defineColumnRenderer(
-  'progress',
-  {
-    Cell: ProgressCell,
-    CellEditing: ProgressCellEditing,
-  },
-  {
-    displayName: 'Progress',
-  }
-);

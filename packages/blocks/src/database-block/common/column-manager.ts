@@ -2,36 +2,9 @@ import { assertExists, Text } from '@blocksuite/store';
 
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
-import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
-import { CheckboxCell } from '../table/components/column-type/checkbox.js';
-import {
-  LinkCell,
-  LinkCellEditing,
-} from '../table/components/column-type/link.js';
-import {
-  MultiSelectCell,
-  MultiSelectCellEditing,
-} from '../table/components/column-type/multi-select.js';
-import {
-  NumberCell,
-  NumberCellEditing,
-} from '../table/components/column-type/number.js';
-import {
-  ProgressCell,
-  ProgressCellEditing,
-} from '../table/components/column-type/progress.js';
-import {
-  RichTextCell,
-  RichTextCellEditing,
-} from '../table/components/column-type/rich-text.js';
-import {
-  SelectCell,
-  SelectCellEditing,
-} from '../table/components/column-type/select.js';
-import { TitleCell } from '../table/components/column-type/title.js';
 import type { ColumnManager } from '../table/table-view-manager.js';
 
 interface CellRenderProps<
@@ -57,10 +30,6 @@ type ColumnOps<
 > = {
   defaultData: () => Data;
   type: (data: Data) => TType;
-  configRenderer?: UniComponent<{
-    data: Data;
-  }>;
-  cellRenderer: CellRenderer<Data, Value>;
   cellToString: (data: Value, colData: Data) => string;
 };
 
@@ -179,9 +148,6 @@ class ColumnHelper<
   toString(cellData: CellData, colData: T): string {
     return this.ops.cellToString(cellData, colData);
   }
-  get cellRenderer() {
-    return this.ops.cellRenderer;
-  }
 }
 
 export const columnManager = new ColumnHelperContainer();
@@ -189,9 +155,6 @@ export const titleHelper = columnManager.register<Text['yText']>('title', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
-  cellRenderer: {
-    view: createUniComponentFromWebComponent(TitleCell),
-  },
 });
 export const richTextHelper = columnManager.register<Text['yText']>(
   'rich-text',
@@ -199,10 +162,6 @@ export const richTextHelper = columnManager.register<Text['yText']>(
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
-    cellRenderer: {
-      view: createUniComponentFromWebComponent(RichTextCell),
-      edit: createUniComponentFromWebComponent(RichTextCellEditing),
-    },
   }
 );
 export type SelectColumnData = {
@@ -217,10 +176,6 @@ export const selectHelper = columnManager.register<string, SelectColumnData>(
     }),
     cellToString: (data, colData) =>
       colData.options.find(v => v.id === data)?.value ?? '',
-    cellRenderer: {
-      view: createUniComponentFromWebComponent(SelectCell),
-      edit: createUniComponentFromWebComponent(SelectCellEditing),
-    },
   }
 );
 export const multiSelectHelper = columnManager.register<
@@ -233,10 +188,6 @@ export const multiSelectHelper = columnManager.register<
   }),
   cellToString: (data, colData) =>
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
-  cellRenderer: {
-    view: createUniComponentFromWebComponent(MultiSelectCell),
-    edit: createUniComponentFromWebComponent(MultiSelectCellEditing),
-  },
 });
 export const numberHelper = columnManager.register<
   number,
@@ -247,36 +198,21 @@ export const numberHelper = columnManager.register<
   type: () => tNumber.create(),
   defaultData: () => ({ decimal: 0 }),
   cellToString: data => data?.toString() ?? '',
-  cellRenderer: {
-    view: createUniComponentFromWebComponent(NumberCell),
-    edit: createUniComponentFromWebComponent(NumberCellEditing),
-  },
 });
 export const checkboxHelper = columnManager.register<boolean>('checkbox', {
   type: () => tBoolean.create(),
   defaultData: () => ({}),
   cellToString: data => '',
-  cellRenderer: {
-    view: createUniComponentFromWebComponent(CheckboxCell),
-  },
 });
 export const progressHelper = columnManager.register<number>('progress', {
   type: () => tNumber.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
-  cellRenderer: {
-    view: createUniComponentFromWebComponent(ProgressCell),
-    edit: createUniComponentFromWebComponent(ProgressCellEditing),
-  },
 });
 export const linkHelper = columnManager.register<string>('link', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
-  cellRenderer: {
-    view: createUniComponentFromWebComponent(LinkCell),
-    edit: createUniComponentFromWebComponent(LinkCellEditing),
-  },
 });
 
 columnManager.registerConvert(selectHelper, multiSelectHelper, column => [

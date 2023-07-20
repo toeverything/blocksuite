@@ -8,7 +8,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../../components/uni-component/uni-component.js';
-import { columnManager } from '../../common/column-manager.js';
 import type { DataViewCellLifeCycle } from '../register.js';
 import type { ColumnManager } from '../table-view-manager.js';
 
@@ -28,6 +27,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     affine-database-cell-container * {
       box-sizing: border-box;
     }
+
     affine-database-cell-container uni-lit > *:first-child {
       padding: 0 8px;
     }
@@ -85,13 +85,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
-    const column = columnManager.getColumn(this.column.type);
-    assertExists(column);
+    const { edit, view } = this.column.renderer;
 
-    const uni =
-      !this.readonly && this.isEditing && column.cellRenderer.edit != null
-        ? column.cellRenderer.edit
-        : column.cellRenderer.view;
+    const uni = !this.readonly && this.isEditing && edit != null ? edit : view;
     const style = styleMap({
       display: 'contents',
     });
@@ -101,10 +97,10 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       isEditing: this.isEditing,
       selectCurrentCell: this._selectCurrentCell,
     };
-    const isEditView = column.cellRenderer.view === uni;
+    const isEditView = view === uni;
     return html`${keyed(
       `${isEditView} ${this.column.type}`,
-      html`<uni-lit
+      html` <uni-lit
         ${ref(this._cell)}
         style=${style}
         .uni="${uni}"

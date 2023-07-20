@@ -1,19 +1,19 @@
 import '../../../../components/tags/multi-tag-select.js';
 import '../../../../components/tags/multi-tag-view.js';
 
-import { html, literal } from 'lit/static-html.js';
+import { customElement } from 'lit/decorators.js';
+import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
 import type { SelectColumnData } from '../../../common/column-manager.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
+@customElement('affine-database-multi-select-cell')
 export class MultiSelectCell extends DatabaseCellElement<
   string[],
   SelectColumnData
 > {
-  static override tag = literal`affine-database-multi-select-cell`;
-
   override render() {
     return html`
       <affine-multi-tag-view
@@ -23,13 +23,11 @@ export class MultiSelectCell extends DatabaseCellElement<
     `;
   }
 }
-
+@customElement('affine-database-multi-select-cell-editing')
 export class MultiSelectCellEditing extends DatabaseCellElement<
   string[],
   SelectColumnData
 > {
-  static override tag = literal`affine-database-multi-select-cell-editing`;
-
   get _options(): SelectTag[] {
     return this.column.data.options;
   }
@@ -79,14 +77,3 @@ export class MultiSelectCellEditing extends DatabaseCellElement<
     `;
   }
 }
-
-export const MultiSelectColumnRenderer = defineColumnRenderer(
-  'multi-select',
-  {
-    Cell: MultiSelectCell,
-    CellEditing: MultiSelectCellEditing,
-  },
-  {
-    displayName: 'Multi Select',
-  }
-);
