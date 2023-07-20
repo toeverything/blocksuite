@@ -4,7 +4,7 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
-import type { AwarenessStore } from '../awareness.js';
+import type { AwarenessStore, UserRange } from '../awareness.js';
 import { BaseBlockModel, internalPrimitives } from '../base.js';
 import { Space, type StackItem } from '../space.js';
 import { Text } from '../text-adapter.js';
@@ -738,7 +738,7 @@ export class Page extends Space<FlatBlockMap> {
       return;
     }
 
-    this.awarenessStore.setLocalRange(this, range);
+    this.awarenessStore.setLocalRange(this, range as UserRange);
     this._historyObserver();
   };
 
