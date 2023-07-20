@@ -180,7 +180,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
     if (!range) return;
     if (!range.intersectsNode(rootElement)) {
-      if (
+      const isContainerSelected =
         range.endContainer.contains(rootElement) &&
         Array.from(range.endContainer.childNodes).filter(
           node => node instanceof HTMLElement
@@ -188,10 +188,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         range.startContainer.contains(rootElement) &&
         Array.from(range.startContainer.childNodes).filter(
           node => node instanceof HTMLElement
-        ).length === 1
-      ) {
+        ).length === 1;
+      if (isContainerSelected) {
         this._editor.focusEnd();
       } else {
+        this._editor.slots.vRangeUpdated.emit([null, 'native']);
         return;
       }
     }
@@ -199,10 +200,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
 
-    const vRange = this._editor.toVRange(selection);
-    if (vRange) {
-      this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
-    }
+    const vRange = this._editor.toVRange(selection.getRangeAt(0));
+    this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
 
     // avoid infinite syncVRange
     if (
