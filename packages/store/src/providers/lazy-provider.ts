@@ -5,25 +5,24 @@ import {
   encodeStateVectorFromUpdate,
 } from 'yjs';
 
-import type { DatasourceDocAdapter } from './type.js';
+import type { DatasourceDocAdapter, PassiveDocProvider } from './type.js';
 import { getDoc } from './utils.js';
 
-const selfUpdateOrigin = Symbol('self-origin');
-
+const selfUpdateOrigin = 'lazy-provider-self-origin';
+/**
+ * Creates a lazy provider that connects to a datasource and synchronizes a root document.
+ */
 export const createLazyProvider = (
   rootDoc: Doc,
   datasource: DatasourceDocAdapter
-) => {
-  let totalRefCount = 0;
-  const refCountMap = new Map<string, number>();
+): Omit<PassiveDocProvider, 'flavour'> => {
+  let connected = false;
   const pendingMap = new Map<string, Uint8Array[]>(); // guid -> pending-updates
-  const updateHandlerMap = new Map<string, () => void>();
+  const disposableMap = new Map<string, Set<() => void>>();
   let datasourceUnsub: (() => void) | undefined;
 
   async function syncDoc(doc: Doc) {
     const guid = doc.guid;
-    const start = performance.now();
-
     // perf: optimize me
     const currentUpdate = encodeStateAsUpdate(doc);
 
@@ -31,7 +30,7 @@ export const createLazyProvider = (
       stateVector: encodeStateVectorFromUpdate(currentUpdate),
     });
 
-    const updates = [currentUpdate]; // setUpdatesCache(guid, [currentUpdate]);
+    const updates = [currentUpdate];
     pendingMap.set(guid, []);
 
     if (remoteUpdate) {
@@ -43,30 +42,31 @@ export const createLazyProvider = (
       updates.push(newUpdate);
       await datasource.sendDocUpdate(guid, newUpdate);
     }
-
-    console.log(
-      'idb: downloadAndApply',
-      guid,
-      (performance.now() - start).toFixed(2),
-      'ms'
-    );
   }
 
   function setupDocListener(doc: Doc) {
-    const handler = async (update: Uint8Array, origin: unknown) => {
+    const disposables = new Set<() => void>();
+    disposableMap.set(doc.guid, disposables);
+    const updateHandler = async (update: Uint8Array, origin: unknown) => {
       if (origin === selfUpdateOrigin) {
         return;
       }
       datasource.sendDocUpdate(doc.guid, update).catch(console.error);
     };
-    doc.on('update', handler);
-    updateHandlerMap.set(doc.guid, () => {
-      doc.off('update', handler);
-    });
-  }
 
-  function removeDocListener(doc: Doc) {
-    updateHandlerMap.get(doc.guid)?.();
+    const subdocLoadHandler = (event: { loaded: Set<Doc> }) => {
+      event.loaded.forEach(subdoc => {
+        connectDoc(subdoc).catch(console.error);
+      });
+    };
+
+    doc.on('update', updateHandler);
+    doc.on('subdocs', subdocLoadHandler);
+    // todo: handle destroy?
+    disposables.add(() => {
+      doc.off('update', updateHandler);
+      doc.off('subdocs', subdocLoadHandler);
+    });
   }
 
   function setupDatasourceListeners() {
@@ -89,53 +89,45 @@ export const createLazyProvider = (
     });
   }
 
-  async function connect(guid: string) {
-    let refcount = refCountMap.get(guid) ?? 0;
-    refcount++;
-    totalRefCount++;
-    const _refcount = refcount;
-    const _totalRefCount = totalRefCount;
-    refCountMap.set(guid, refcount);
-    // console.log('idb: connect', guid, refcount);
-    if (_refcount === 1) {
-      const doc = getDoc(rootDoc, guid);
-      if (doc) {
-        await syncDoc(doc);
-        setupDocListener(doc);
-      } else {
-        console.warn('idb: doc not found', guid);
-      }
-    }
-
-    if (_totalRefCount === 1) {
-      setupDatasourceListeners();
-    }
+  // when a subdoc is loaded, we need to sync it with the datasource and setup listeners
+  async function connectDoc(doc: Doc) {
+    setupDocListener(doc);
+    await syncDoc(doc);
+    await Promise.all(
+      [...doc.subdocs]
+        .filter(subdoc => subdoc.shouldLoad)
+        .map(subdoc => connectDoc(subdoc))
+    );
   }
 
-  async function disconnect(guid: string) {
-    let refcount = refCountMap.get(guid) ?? 0;
-    refcount--;
-    totalRefCount--;
-    refCountMap.set(guid, refcount);
-    const _refcount = refcount;
-    const _totalRefCount = totalRefCount;
-    // console.log('idb: disconnect', guid, refcount);
-    if (_refcount === 0) {
-      const doc = getDoc(rootDoc, guid);
-      if (doc) {
-        removeDocListener(doc);
-      } else {
-        console.warn('idb: doc not found', guid);
-      }
-    }
+  function disposeAll() {
+    disposableMap.forEach(disposables => {
+      disposables.forEach(dispose => dispose());
+    });
+    disposableMap.clear();
+  }
 
-    if (_totalRefCount === 0) {
-      datasourceUnsub?.();
-      datasourceUnsub = undefined;
-    }
+  function connect() {
+    connected = true;
+
+    // root doc should be already loaded,
+    // but we want to populate the cache for later update events
+    connectDoc(rootDoc).catch(console.error);
+    setupDatasourceListeners();
+  }
+
+  async function disconnect() {
+    connected = false;
+    disposeAll();
+    datasourceUnsub?.();
+    datasourceUnsub = undefined;
   }
 
   return {
+    get connected() {
+      return connected;
+    },
+    passive: true,
     connect,
     disconnect,
   };

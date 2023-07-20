@@ -68,10 +68,7 @@ export interface LazyDocProvider extends BaseDocProvider {
   disconnect(guid: string): void;
 }
 
-export type DocProvider =
-  | PassiveDocProvider
-  | ActiveDocProvider
-  | LazyDocProvider;
+export type DocProvider = PassiveDocProvider | ActiveDocProvider;
 
 export type DocProviderCreator = (
   id: string,

@@ -5,14 +5,13 @@ import {
   applyAwarenessUpdate,
   encodeAwarenessUpdate,
 } from 'y-protocols/awareness';
-import type { Doc } from 'yjs';
 
 import { Workspace } from '../workspace/index.js';
 import { createLazyProvider } from './lazy-provider.js';
 import type {
   DatasourceDocAdapter,
   DocProviderCreator,
-  LazyDocProvider,
+  PassiveDocProvider,
 } from './type.js';
 import { getDoc } from './utils.js';
 
@@ -52,7 +51,7 @@ export const createAsyncCallRPCProviderCreator = (
     asyncCallOptions?: Omit<AsyncCallOptions, 'channel'>;
   }
 ): DocProviderCreator => {
-  return (id, rootDoc, config): LazyDocProvider => {
+  return (id, rootDoc, config): PassiveDocProvider => {
     const awareness = config.awareness;
 
     const updateHandlers = new Set<
@@ -129,33 +128,27 @@ export const createAsyncCallRPCProviderCreator = (
       rpc.sendAwareness(update).catch(console.error);
     };
 
-    async function initDoc(doc: Doc) {
-      // query diff update
-      const update = await rpc.queryDocState(doc.guid);
-      if (update !== false) {
-        Y.applyUpdate(doc, update, channel);
-      }
-    }
-
     const lazyProvider = createLazyProvider(rootDoc, datasource);
 
     return {
       flavour,
-      lazy: true,
-      connect(guid: string) {
-        lazyProvider.connect(guid);
-        if (guid === rootDoc.guid) {
-          initDoc(rootDoc).catch(console.error);
-          rpc
-            .queryAwareness()
-            .then(update => applyAwarenessUpdate(awareness, update, channel));
-          awareness.on('update', awarenessUpdateHandler);
-        }
+      passive: true,
+      get connected() {
+        return lazyProvider.connected;
       },
-      disconnect(guid: string) {
-        if (guid === rootDoc.guid) {
-          awareness.off('update', awarenessUpdateHandler);
+      connect() {
+        if (lazyProvider.connected) {
+          return; // only need to connect once
         }
+        lazyProvider.connect();
+        rpc
+          .queryAwareness()
+          .then(update => applyAwarenessUpdate(awareness, update, channel));
+        awareness.on('update', awarenessUpdateHandler);
+      },
+      disconnect() {
+        lazyProvider.disconnect();
+        awareness.off('update', awarenessUpdateHandler);
       },
     };
   };
