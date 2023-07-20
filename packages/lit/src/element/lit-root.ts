@@ -79,6 +79,8 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
+    const currentPath = path.concat(model.id);
+
     const tag = view.component;
     const widgets = view.widgets
       ? html`${repeat(view.widgets, widget => {
@@ -94,11 +96,11 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
-      .path=${path.concat(model.id)}
+      .path=${currentPath}
       .content=${html`${repeat(
         children,
         child => child.id,
-        child => this.renderModel(child, path.concat(model.id))
+        child => this.renderModel(child, currentPath)
       )}`}
     ></${tag}>`;
   };
