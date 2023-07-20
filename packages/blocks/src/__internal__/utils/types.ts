@@ -228,8 +228,6 @@ export type SerializedBlock = {
   databaseProps?: {
     id: string;
     title: string;
-    titleColumnName: string;
-    titleColumnWidth: number;
     rowIds: string[];
     cells: Record<string, Record<string, Cell>>;
     columns: Column[];

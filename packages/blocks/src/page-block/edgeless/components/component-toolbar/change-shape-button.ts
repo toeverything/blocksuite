@@ -1,6 +1,7 @@
 import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../toolbar/shape/shape-menu.js';
+import './change-text-menu.js';
 
 import { LineStyleIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -10,7 +11,7 @@ import {
   type SurfaceManager,
 } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
@@ -94,6 +95,10 @@ function getMostCommonLineStyle(
   });
   const max = maxBy(Object.entries(sizes), ([k, count]) => count);
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
+}
+
+function doesAllShapesContainText(elements: ShapeElement[]): boolean {
+  return elements.every(ele => ele.text);
 }
 
 const FILL_COLORS: CssVariableName[] = [
@@ -452,6 +457,16 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           this._setShapeStyles(event);
         },
       })}
+      ${doesAllShapesContainText(this.elements)
+        ? html` <menu-divider .vertical=${true}></menu-divider>
+            <edgeless-change-text-menu
+              .elements=${this.elements}
+              .elementType=${'shape'}
+              .surface=${this.surface}
+              .selectionState=${this.selectionState}
+              .slots=${this.slots}
+            ></edgeless-change-text-menu>`
+        : nothing}
     `;
   }
 }

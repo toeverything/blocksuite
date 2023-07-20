@@ -73,7 +73,7 @@ test.describe('column operations', () => {
 
     await initDatabaseColumn(page);
     const { text: title3 } = await getDatabaseHeaderColumn(page, 3);
-    expect(title3).toBe('Column 3');
+    expect(title3).toBe('Column 2');
   });
 
   test('should support right insert column', async ({ page }) => {

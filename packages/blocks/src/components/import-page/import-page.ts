@@ -217,8 +217,6 @@ export async function importNotion(workspace: Workspace, file: File) {
                 databaseProps: {
                   id: '' + databasePropsId,
                   title: element.textContent || 'Database',
-                  titleColumnName: titles[0],
-                  titleColumnWidth: 432,
                   rowIds: Object.keys(cells),
                   cells: cells,
                   columns: columns,
@@ -293,7 +291,10 @@ export async function importNotion(workspace: Workspace, file: File) {
   // });
   return pageIds;
 }
-
+/**
+ * @deprecated Waiting for migration
+ * See https://github.com/toeverything/blocksuite/issues/3316
+ */
 @customElement('import-page')
 export class ImportPage extends WithDisposable(LitElement) {
   static override styles = styles;

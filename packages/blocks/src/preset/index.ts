@@ -3,6 +3,7 @@ import { literal } from 'lit/static-html.js';
 
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
+import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
@@ -36,6 +37,12 @@ export const pagePreset: LitBlockSpec[] = [
     schema: DatabaseBlockSchema,
     view: {
       component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
     },
   },
   {
@@ -94,6 +101,12 @@ export const edgelessPreset: LitBlockSpec[] = [
     schema: DatabaseBlockSchema,
     view: {
       component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
     },
   },
   {

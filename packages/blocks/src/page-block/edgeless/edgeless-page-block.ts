@@ -321,7 +321,7 @@ export class EdgelessPageBlockComponent
     return this.page.awarenessStore.getFlag('enable_note_cut');
   }
 
-  get dispacher() {
+  get dispatcher() {
     return this.service?.uiEventDispatcher;
   }
 
@@ -1203,7 +1203,6 @@ export class EdgelessPageBlockComponent
 
     const {
       _rectsOfSelectedBlocks,
-      root,
       selection,
       showGrid,
       sortedNotes,
@@ -1215,7 +1214,7 @@ export class EdgelessPageBlockComponent
     const notesContainer = EdgelessNotesContainer(
       sortedNotes,
       state.active,
-      root.renderModel
+      this.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;

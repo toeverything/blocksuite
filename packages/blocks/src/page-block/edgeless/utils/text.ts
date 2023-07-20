@@ -8,6 +8,14 @@ import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type {
+  GENERAL_CANVAS_FONT_FAMILY,
+  SCIBBLED_CANVAS_FONT_FANILY,
+} from './consts.js';
+
+export type CANVAS_TEXT_FONT =
+  | typeof GENERAL_CANVAS_FONT_FAMILY
+  | typeof SCIBBLED_CANVAS_FONT_FANILY;
 
 export function mountTextEditor(
   textElement: TextElement,
@@ -57,8 +65,8 @@ export function addText(
       textAlign: 'left',
       fontSize: 24,
       color: GET_DEFAULT_LINE_COLOR(),
-      isBold: false,
-      isItalic: false,
+      bold: false,
+      italic: false,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);

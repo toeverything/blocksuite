@@ -144,7 +144,7 @@ test('when the selection is always a note, it should remain in an active state',
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [46, 410, 448, 112]);
+  await assertEdgelessSelectedRect(page, [46, 408.5, 448, 110]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInNote(page, ids.noteId);

@@ -412,8 +412,6 @@ test(scoped`import notion markdown-format table`, async ({ page }) => {
       databaseProps: {
         id: '3',
         title: 'Database',
-        titleColumnName: 'table-title1',
-        titleColumnWidth: 432,
         rowIds: ['4', '5'],
         cells: {
           '4': { '1': { columnId: '1', value: 'table-content2' } },
@@ -604,8 +602,6 @@ test(scoped`import notion html-format table`, async ({ page }) => {
       databaseProps: {
         id: '7',
         title: 'Database',
-        titleColumnName: 'Name',
-        titleColumnWidth: 432,
         rowIds: ['8', '9', '10'],
         cells: {
           '8': {
@@ -748,7 +744,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
           type: 'text',
           text: [
             {
-              insert: '@Untitled\n            ',
+              insert: '@Untitled',
             },
           ],
           children: [],
