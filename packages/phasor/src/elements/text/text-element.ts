@@ -93,6 +93,8 @@ export class TextElement extends SurfaceElement<IText> {
       lineHeight: `${lineHeightPx}px`,
       fontFamily: fontFamily,
     });
+    const horizontalOffset =
+      textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
     for (const [lineIndex, line] of lines.entries()) {
       let beforeTextWidth = 0;
@@ -120,7 +122,7 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.fillText(
           str,
           // 1 comes from v-line padding
-          beforeTextWidth + 1,
+          horizontalOffset + beforeTextWidth + 1,
           (lineIndex + 1) * lineHeightPx + 0.5
         );
 
