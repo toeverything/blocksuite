@@ -39,6 +39,7 @@ import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
 import {
   calcAngle,
+  calcAngleEdgeWithRotation,
   calcAngleWithRotation,
   generateCursorUrl,
   rotateResizeCursor,
@@ -227,6 +228,21 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       border: 2px var(--affine-blue) solid;
       content: '';
       background: white;
+    }
+
+    .affine-edgeless-selected-rect
+      .handle[aria-label='top']
+      .transparent-handle:after,
+    .affine-edgeless-selected-rect
+      .handle[aria-label='bottom']
+      .transparent-handle:after,
+    .affine-edgeless-selected-rect
+      .handle[aria-label='left']
+      .transparent-handle:after,
+    .affine-edgeless-selected-rect
+      .handle[aria-label='right']
+      .transparent-handle:after {
+      opacity: 0;
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after,
@@ -458,6 +474,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         if (this.resizeMode === 'edge') {
           cursor = 'ew';
+        } else if (this.resizeMode === 'all' && target && point) {
+          cursor = rotateResizeCursor((this._rotate * Math.PI) / 180);
+          const angle = calcAngleEdgeWithRotation(target, this._rotate);
+          cursor = rotateResizeCursor((angle * Math.PI) / 180);
         } else if (target && point) {
           angle = calcAngleWithRotation(
             target,

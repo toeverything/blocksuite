@@ -22,7 +22,8 @@ function ResizeHandle(
       target?: HTMLElement;
       point?: IVec;
     }
-  ) => void
+  ) => void,
+  hideEdgeHandle?: boolean
 ) {
   const handlerPointerDown = (e: PointerEvent) => {
     e.stopPropagation();
@@ -66,7 +67,7 @@ function ResizeHandle(
   >
     ${rotationTpl}
     <div
-      class="resize"
+      class="resize${hideEdgeHandle && ' transparent-handle'}"
       @pointerenter=${pointerEnter('resize')}
       @pointerleave=${pointerLeave}
     ></div>
@@ -114,29 +115,33 @@ export function ResizeHandles(
       handleBottomRight,
     };
   };
-  const getEdgeHandles = () => {
+  const getEdgeHandles = (hideEdgeHandle?: boolean) => {
     const handleLeft = ResizeHandle(
       HandleDirection.Left,
       onPointerDown,
-      updateCursor
+      updateCursor,
+      hideEdgeHandle
     );
     const handleRight = ResizeHandle(
       HandleDirection.Right,
       onPointerDown,
-      updateCursor
+      updateCursor,
+      hideEdgeHandle
     );
     return { handleLeft, handleRight };
   };
-  const getEdgeVerticalHandles = () => {
+  const getEdgeVerticalHandles = (hideEdgeHandle?: boolean) => {
     const handleTop = ResizeHandle(
       HandleDirection.Top,
       onPointerDown,
-      updateCursor
+      updateCursor,
+      hideEdgeHandle
     );
     const handleBottom = ResizeHandle(
       HandleDirection.Bottom,
       onPointerDown,
-      updateCursor
+      updateCursor,
+      hideEdgeHandle
     );
     return { handleTop, handleBottom };
   };
@@ -168,8 +173,8 @@ export function ResizeHandles(
         handleBottomLeft,
         handleBottomRight,
       } = getCornerHandles();
-      const { handleLeft, handleRight } = getEdgeHandles();
-      const { handleTop, handleBottom } = getEdgeVerticalHandles();
+      const { handleLeft, handleRight } = getEdgeHandles(true);
+      const { handleTop, handleBottom } = getEdgeVerticalHandles(true);
 
       // prettier-ignore
       return html`
