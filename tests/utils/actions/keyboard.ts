@@ -187,3 +187,11 @@ export async function pressForwardDelete(page: Page) {
     await page.keyboard.press('Delete', { delay: 50 });
   }
 }
+
+export async function pressForwardDeleteWord(page: Page) {
+  if (IS_MAC) {
+    await page.keyboard.press('Alt+Delete', { delay: 50 });
+  } else {
+    await page.keyboard.press('Control+Delete', { delay: 50 });
+  }
+}

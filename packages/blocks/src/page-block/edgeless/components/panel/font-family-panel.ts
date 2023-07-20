@@ -5,6 +5,7 @@ import {
   GENERAL_CANVAS_FONT_FAMILY,
   SCIBBLED_CANVAS_FONT_FANILY,
 } from '../../utils/consts.js';
+import type { CANVAS_TEXT_FONT } from '../../utils/text.js';
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
@@ -35,9 +36,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value:
-    | typeof GENERAL_CANVAS_FONT_FAMILY
-    | typeof SCIBBLED_CANVAS_FONT_FANILY = GENERAL_CANVAS_FONT_FAMILY;
+  value: CANVAS_TEXT_FONT = GENERAL_CANVAS_FONT_FAMILY;
 
   private _onSelect(value: EdgelessFontFamilyPanel['value']) {
     this.value = value;
@@ -68,7 +67,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
             this._onSelect(SCIBBLED_CANVAS_FONT_FANILY);
           }}
         >
-          <div class="font-family-button">Scibbled</div>
+          <div class="font-family-button">Scribbled</div>
         </edgeless-tool-icon-button>
       </div>
     `;

@@ -177,8 +177,6 @@ export async function addSerializedBlocks(
       height: json.height,
       language: json.language,
       title: json.databaseProps?.title || json.title,
-      titleColumnName: json.databaseProps?.titleColumnName,
-      titleColumnWidth: json.databaseProps?.titleColumnWidth,
       // bookmark
       url: json.url,
       description: json.description,

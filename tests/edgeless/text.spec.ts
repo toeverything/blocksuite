@@ -135,7 +135,7 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [130, 160, 106.7, 108]);
 
   await fontButton.click();
-  const scibbledTextFont = page.getByText('Scibbled');
-  await scibbledTextFont.click();
+  const scribbledTextFont = page.getByText('Scribbled');
+  await scribbledTextFont.click();
   await assertEdgelessSelectedRect(page, [130, 160, 104, 156]);
 });

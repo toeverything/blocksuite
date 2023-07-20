@@ -16,8 +16,8 @@ export interface IText {
   fontSize: number;
   fontFamily: string;
   textAlign: 'left' | 'center' | 'right';
-  isBold: boolean;
-  isItalic: boolean;
+  bold: boolean;
+  italic: boolean;
 }
 
 export interface ITextDelta {

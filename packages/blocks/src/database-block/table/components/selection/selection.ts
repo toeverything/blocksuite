@@ -53,7 +53,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   `;
 
   @property()
-  databaseId!: string;
+  blockId!: string;
   @property({ attribute: false })
   view!: TableViewManager;
   @property({ attribute: false })
@@ -89,7 +89,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         if (!activeEditorManager.isActive(this)) {
           return;
         }
-        if (selection?.databaseId !== this.databaseId) {
+        if (selection?.databaseId !== this.blockId) {
           selection = undefined;
         }
         this.updateSelectionStyle(
@@ -104,7 +104,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           isRowSelection,
           selection?.isEditing
         );
-        if (old && old.databaseId === this.databaseId) {
+        if (old && old.databaseId === this.blockId) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
             old.focus.columnIndex
@@ -113,7 +113,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             const cell = container.cell;
             if (old.isEditing) {
               cell?.onExitEditMode();
-              cell?.blurCell();
+              if (cell?.blurCell()) {
+                container.blur();
+              }
               container.isEditing = false;
             } else {
               container.blur();
@@ -121,7 +123,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           }
         }
 
-        if (selection && selection.databaseId === this.databaseId) {
+        if (selection && selection.databaseId === this.blockId) {
           const container = this.getCellContainer(
             selection.focus.rowIndex,
             selection.focus.columnIndex
@@ -131,7 +133,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             if (selection.isEditing) {
               cell?.onEnterEditMode();
               container.isEditing = true;
-              cell?.focusCell();
+              if (cell?.focusCell()) {
+                container.focus();
+              }
             } else {
               container.focus();
             }
@@ -183,7 +187,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         const selection = this.selection;
         if (
           selection &&
-          selection.databaseId === this.databaseId &&
+          selection.databaseId === this.blockId &&
           event instanceof KeyboardEvent
         ) {
           return this.onKeydown(selection, event);
@@ -199,7 +203,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   checkSelection() {
     const selection = this.selection;
-    if (!selection || selection.databaseId !== this.databaseId) {
+    if (!selection || selection.databaseId !== this.blockId) {
       return;
     }
     if (selection.focus.rowIndex > this.view.rows.length - 1) {
@@ -217,9 +221,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   set selection(data: Omit<DatabaseSelection, 'databaseId'> | undefined) {
-    const selection = data
-      ? { ...data, databaseId: this.databaseId }
-      : undefined;
+    const selection = data ? { ...data, databaseId: this.blockId } : undefined;
     if (selection && selection.isEditing) {
       const focus = selection.focus;
       const container = this.getCellContainer(
@@ -348,7 +350,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         const rows = this.view.rows.filter(
           (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
         );
-        this.view.deleteRow(rows);
+        this.view.rowDelete(rows);
         this.focusTo(rowsSelection.start - 1, selection.focus.columnIndex);
       }
     }
@@ -408,7 +410,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       }
     }
     if (evt.key === hotkeys.Tab || evt.key === hotkeys.ArrowRight) {
-      const length = this.view.columns.length;
+      const length = this.view.columnManagerList.length;
       const column = selection.focus.columnIndex + 1;
       this.focusTo(
         selection.focus.rowIndex + (column >= length ? 1 : 0),
@@ -417,7 +419,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       return true;
     }
     if (evt.key === hotkeys.ArrowLeft) {
-      const length = this.view.columns.length;
+      const length = this.view.columnManagerList.length;
       const column = selection.focus.columnIndex - 1;
       this.focusTo(
         selection.focus.rowIndex + (column < 0 ? -1 : 0),
@@ -440,7 +442,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     if (rowIndex < 0 || rowIndex >= this.view.rows.length) {
       return;
     }
-    if (columnIndex < 0 || columnIndex >= this.view.columns.length) {
+    if (columnIndex < 0 || columnIndex >= this.view.columnManagerList.length) {
       return;
     }
     this.selection = {
@@ -498,7 +500,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       rowSelection?.start ?? 0,
       rowSelection?.end ?? this.view.rows.length - 1,
       columnSelection?.start ?? 0,
-      columnSelection?.end ?? this.view.columns.length - 1
+      columnSelection?.end ?? this.view.columnManagerList.length - 1
     );
     div.style.left = `${left - tableRect.left / scale}px`;
     div.style.top = `${top - tableRect.top / scale}px`;

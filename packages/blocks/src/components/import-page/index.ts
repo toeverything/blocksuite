@@ -5,6 +5,10 @@ import { ImportPage, type OnSuccessHandler } from './import-page.js';
 
 export { importHtml, importMarkDown, importNotion } from './import-page.js';
 
+/**
+ * @deprecated Waiting for migration
+ * See https://github.com/toeverything/blocksuite/issues/3316
+ */
 export function showImportModal({
   workspace,
   onSuccess,
