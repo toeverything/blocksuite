@@ -744,7 +744,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
           type: 'text',
           text: [
             {
-              insert: '@Untitled\n            ',
+              insert: '@Untitled',
             },
           ],
           children: [],

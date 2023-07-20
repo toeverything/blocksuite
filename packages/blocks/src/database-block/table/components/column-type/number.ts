@@ -1,12 +1,10 @@
 import { css, html } from 'lit';
-import { query } from 'lit/decorators.js';
-import { literal } from 'lit/static-html.js';
+import { customElement, query } from 'lit/decorators.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
-class NumberCell extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-number-cell`;
-
+@customElement('affine-database-number-cell')
+export class NumberCell extends DatabaseCellElement<number> {
   static override styles = css`
     affine-database-number-cell {
       display: block;
@@ -37,9 +35,8 @@ class NumberCell extends DatabaseCellElement<number> {
   }
 }
 
+@customElement('affine-database-number-cell-editing')
 export class NumberCellEditing extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-number-cell-editing`;
-
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
@@ -116,14 +113,3 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     />`;
   }
 }
-
-export const NumberColumnRenderer = defineColumnRenderer(
-  'number',
-  {
-    Cell: NumberCell,
-    CellEditing: NumberCellEditing,
-  },
-  {
-    displayName: 'Number',
-  }
-);

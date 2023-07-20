@@ -2,16 +2,16 @@ import { Slot } from '@blocksuite/store';
 
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
+import type { CellRenderer } from '../common/column-manager.js';
 import { columnManager } from '../common/column-manager.js';
+import { columnRenderer } from '../common/column-renderer.js';
 import type { TableViewData } from '../common/view-manager.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { ColumnDataUpdater, InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { registerInternalRenderer } from './components/column-type/index.js';
 import type { ColumnRenderer } from './register.js';
-import type { SetValueOption } from './types.js';
-
-const renderer = registerInternalRenderer();
+import type { Column, SetValueOption } from './types.js';
 
 export interface TableViewManager {
   get id(): string;
@@ -114,7 +114,7 @@ export interface ColumnManager<
 
   get readonly(): boolean;
 
-  get renderer(): ColumnRenderer;
+  get renderer(): CellRenderer<Data, Value>;
 
   get isFirst(): boolean;
 
@@ -460,8 +460,8 @@ export class DatabaseColumnManager implements ColumnManager {
     return this.viewManager.columnGetName(this.id);
   }
 
-  get renderer(): ColumnRenderer {
-    return renderer.get(this.type);
+  get renderer(): CellRenderer {
+    return columnRenderer.get(this.type).cellRenderer;
   }
 
   get type(): string {

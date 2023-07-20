@@ -1,4 +1,4 @@
-import { WORKSPACE_VERSION } from '@blocksuite/global/config';
+import { PAGE_VERSION, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 
@@ -27,6 +27,7 @@ type WorkspaceMetaState = {
   pages?: unknown[];
   properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
+  pageVersion?: number;
   blockVersions?: Record<string, number>;
   name?: string;
   avatar?: string;
@@ -54,6 +55,7 @@ export class WorkspaceMeta {
     });
     this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
     this._proxy.workspaceVersion = WORKSPACE_VERSION;
+    this._proxy.pageVersion = PAGE_VERSION;
   }
 
   get yPages() {
@@ -78,6 +80,10 @@ export class WorkspaceMeta {
 
   get workspaceVersion() {
     return this._proxy.workspaceVersion;
+  }
+
+  get pageVersion() {
+    return this._proxy.pageVersion;
   }
 
   setName(name: string) {

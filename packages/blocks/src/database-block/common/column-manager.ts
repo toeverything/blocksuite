@@ -1,12 +1,12 @@
 import { assertExists, nanoid, Text } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
-import { html } from 'lit';
 
 import { getTagColor } from '../../components/tags/colors.js';
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
+import type { ColumnManager } from '../table/table-view-manager.js';
 
 type JSON =
   | null
@@ -18,15 +18,31 @@ type JSON =
       [k: string]: JSON;
     };
 
-type ColumnOps<
-  ColumnData extends Record<string, unknown> = Record<string, never>,
-  CellData = unknown
+interface CellRenderProps<
+  Data extends Record<string, unknown> = Record<string, never>,
+  Value = unknown
+> {
+  column: ColumnManager<Value, Data>;
+  rowId: string;
+  isEditing: boolean;
+  selectCurrentCell: (editing: boolean) => void;
+}
+
+export type CellRenderer<
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
+  Value = unknown
 > = {
-  defaultData: () => ColumnData;
-  type: (data: ColumnData) => TType;
-  configRender: (data: ColumnData) => TemplateResult<1>;
-  cellToString: (data: CellData, colData: ColumnData) => string;
-  cellToJson: (data: CellData, colData: ColumnData) => JSON;
+  view: UniComponent<CellRenderProps<Data, Value>>;
+  edit?: UniComponent<CellRenderProps<Data, Value>>;
+};
+type ColumnOps<
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
+  Value = unknown
+> = {
+  defaultData: () => Data;
+  type: (data: Data) => TType;
+  cellToString: (data: Value, colData: Data) => string;
+  cellToJson: (data: Value, colData: Data) => JSON;
 };
 
 type ConvertFunction<
@@ -42,7 +58,7 @@ type ConvertFunction<
   cells: (ToCell | undefined)[];
 };
 
-class ColumnManager {
+class ColumnHelperContainer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private map = new Map<string, ColumnHelper<any, any>>();
   private convert = new Map<
@@ -160,10 +176,6 @@ class ColumnHelper<
     };
   }
 
-  render(data: T) {
-    return this.ops.configRender(data);
-  }
-
   dataType(data: T) {
     return this.ops.type(data);
   }
@@ -177,11 +189,10 @@ class ColumnHelper<
   }
 }
 
-export const columnManager = new ColumnManager();
+export const columnManager = new ColumnHelperContainer();
 export const titleHelper = columnManager.register<Text['yText']>('title', {
   type: () => tString.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
   cellToJson: data => data?.toString() ?? null,
 });
@@ -190,7 +201,6 @@ export const richTextHelper = columnManager.register<Text['yText']>(
   {
     type: () => tString.create(),
     defaultData: () => ({}),
-    configRender: () => html``,
     cellToString: data => data?.toString() ?? '',
     cellToJson: data => data?.toString() ?? null,
   }
@@ -205,7 +215,6 @@ export const selectHelper = columnManager.register<string, SelectColumnData>(
     defaultData: () => ({
       options: [],
     }),
-    configRender: () => html``,
     cellToString: (data, colData) =>
       colData.options.find(v => v.id === data)?.value ?? '',
     cellToJson: data => data ?? null,
@@ -219,7 +228,6 @@ export const multiSelectHelper = columnManager.register<
   defaultData: () => ({
     options: [],
   }),
-  configRender: () => html``,
   cellToString: (data, colData) =>
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
   cellToJson: data => data ?? null,
@@ -232,28 +240,24 @@ export const numberHelper = columnManager.register<
 >('number', {
   type: () => tNumber.create(),
   defaultData: () => ({ decimal: 0 }),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
   cellToJson: data => data ?? null,
 });
 export const checkboxHelper = columnManager.register<boolean>('checkbox', {
   type: () => tBoolean.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => '',
   cellToJson: data => data ?? null,
 });
 export const progressHelper = columnManager.register<number>('progress', {
   type: () => tNumber.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
   cellToJson: data => data ?? null,
 });
 export const linkHelper = columnManager.register<string>('link', {
   type: () => tString.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
   cellToJson: data => data ?? null,
 });
@@ -261,7 +265,6 @@ export const linkHelper = columnManager.register<string>('link', {
 export const textHelper = columnManager.register<string>('text', {
   type: () => tString.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data ?? '',
   cellToJson: data => data ?? null,
 });

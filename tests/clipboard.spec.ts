@@ -643,6 +643,9 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     <affine:paragraph
       prop:type="text"
     />
+    <affine:paragraph
+      prop:type="text"
+    />
   </affine:note>
 </affine:page>`
   );
@@ -959,4 +962,30 @@ test(scoped`auto identify url`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test(scoped`paste parent block`, async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/3153',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'This is parent');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 1');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 2');
+  await setVirgoSelection(page, 0, 3);
+  await copyByKeyboard(page);
+  await focusRichText(page, 2);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, [
+    'This is parent',
+    'This is child 1',
+    'This is child 2Thi',
+  ]);
 });

@@ -128,7 +128,6 @@ export const getMenus: (ctx: {
             };
             showImportModal({
               workspace: page.workspace,
-              multiple: false,
               onSuccess,
             });
           },
