@@ -150,9 +150,9 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
   constructor(
     container: EdgelessPageBlockComponent,
-    dispacher: UIEventDispatcher
+    dispatcher: UIEventDispatcher
   ) {
-    super(container, dispacher);
+    super(container, dispatcher);
 
     this._controllers = {
       default: new DefaultToolController(this.container),
