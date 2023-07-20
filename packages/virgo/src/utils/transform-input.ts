@@ -211,6 +211,8 @@ export function transformInput<TextAttributes extends BaseTextAttributes>(
       return;
     }
 
+    // onMac: Fn + Option + Backspace
+    // onWindows: Control + Delete
     case 'deleteWordForward': {
       handleDeleteWordForward(editor, vRange);
       return;
