@@ -270,6 +270,13 @@ export class VEditor<
     });
   }
 
+  focusByIndex(index: number): void {
+    this.rangeService.setVRange({
+      index: index,
+      length: 0,
+    });
+  }
+
   deleteText(vRange: VRange): void {
     this._transact(() => {
       this.yText.delete(vRange.index, vRange.length);

@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { ShapeElement } from '@blocksuite/phasor';
+import type { IModelCoord, ShapeElement } from '@blocksuite/phasor';
 import { Bound, TextElement } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import * as Y from 'yjs';
@@ -19,14 +19,18 @@ export type CANVAS_TEXT_FONT =
 
 export function mountTextEditor(
   textElement: TextElement,
-  edgeless: EdgelessPageBlockComponent
+  edgeless: EdgelessPageBlockComponent,
+  focusCoord?: IModelCoord
 ) {
+  const cursorIndex = focusCoord
+    ? textElement.getCursorByCoord(focusCoord)
+    : textElement.text.length;
   const textEditor = new EdgelessTextEditor();
   const pageBlockContainer = edgeless.pageBlockContainer;
 
   pageBlockContainer.appendChild(textEditor);
   textEditor.mount(textElement, edgeless);
-  textEditor.vEditor?.focusEnd();
+  textEditor.vEditor?.focusByIndex(cursorIndex);
   edgeless.selection.switchToDefaultMode({
     selected: [textElement],
     active: true,
