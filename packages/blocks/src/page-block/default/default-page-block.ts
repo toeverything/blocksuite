@@ -547,7 +547,7 @@ export class DefaultPageBlockComponent
         child => !(matchFlavours(child, ['affine:note']) && child.hidden)
       ),
       child => child.id,
-      child => this.root.renderModel(child)
+      child => this.renderModel(child)
     )}`;
 
     return html`
