@@ -40,11 +40,11 @@ test('add text element in default mode', async ({ page }) => {
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessCanvasText(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hhelloello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessCanvasText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
 test('add text element in text mode', async ({ page }) => {
@@ -70,11 +70,11 @@ test('add text element in text mode', async ({ page }) => {
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessCanvasText(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hhelloello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessCanvasText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
 test('copy and paste', async ({ page }) => {
