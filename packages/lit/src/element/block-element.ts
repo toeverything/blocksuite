@@ -78,11 +78,9 @@ export class BlockElement<
     return this.path.slice(0, -1);
   }
 
-  parentBlockElement = <Block extends BlockElement>(): Block | undefined => {
-    return this.root.blockViewMap.get(this.parentPath.join('|')) as
-      | Block
-      | undefined;
-  };
+  get parentBlockElement() {
+    return this.root.blockViewMap.get(this.parentPath.join('|'));
+  }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {
     return this.root.renderModel(model, this.path);
