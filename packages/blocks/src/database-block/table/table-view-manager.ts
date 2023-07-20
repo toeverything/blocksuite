@@ -9,9 +9,7 @@ import type { TableViewData } from '../common/view-manager.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { ColumnDataUpdater, InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
-import { registerInternalRenderer } from './components/column-type/index.js';
-import type { ColumnRenderer } from './register.js';
-import type { Column, SetValueOption } from './types.js';
+import type { SetValueOption } from './types.js';
 
 export interface TableViewManager {
   get id(): string;
