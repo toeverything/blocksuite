@@ -210,13 +210,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _areAllelementsBold = (
     elements: EdgelessCanvasTextElement[]
   ): boolean => {
-    return elements.every(element => element.isBold);
+    return elements.every(element => element.bold);
   };
 
   private _areAllelementsItalic = (
     elements: EdgelessCanvasTextElement[]
   ): boolean => {
-    return elements.every(element => element.isItalic);
+    return elements.every(element => element.italic);
   };
 
   private _setTextColor = (color: CssVariableName) => {
@@ -272,21 +272,21 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
-  private _setTextBold = (isBold: boolean) => {
+  private _setTextBold = (bold: boolean) => {
     const elementType = this.elementType;
     this.elements.forEach(element => {
       this.surface.updateElement<typeof elementType>(element.id, {
-        isBold: isBold,
+        bold,
       });
     });
     this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
-  private _setTextItalic = (isItalic: boolean) => {
+  private _setTextItalic = (italic: boolean) => {
     const elementType = this.elementType;
     this.elements.forEach(element => {
       this.surface.updateElement<typeof elementType>(element.id, {
-        isItalic: isItalic,
+        italic,
       });
     });
     this.slots.selectionUpdated.emit({ ...this.selectionState });
@@ -354,8 +354,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const selectedAlign = this._getMostCommonAlign(this.elements);
     const selectedFontFamily = this._getMostCommonFontFamily(this.elements);
     const selectedFontSize = this._getMostCommonFontSize(this.elements);
-    const isBold = this._areAllelementsBold(this.elements);
-    const isItalic = this._areAllelementsItalic(this.elements);
+    const bold = this._areAllelementsBold(this.elements);
+    const italic = this._areAllelementsItalic(this.elements);
 
     return html`
       <edgeless-tool-icon-button
@@ -428,16 +428,16 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${'Bold'}
         .tipPosition=${'bottom'}
-        .active=${isBold}
-        @click=${() => this._setTextBold(!isBold)}
+        .active=${bold}
+        @click=${() => this._setTextBold(!bold)}
       >
         ${BoldIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .tooltip=${'Italic'}
         .tipPosition=${'bottom'}
-        .active=${isItalic}
-        @click=${() => this._setTextItalic(!isItalic)}
+        .active=${italic}
+        @click=${() => this._setTextItalic(!italic)}
       >
         ${ItalicIcon}
       </edgeless-tool-icon-button>
