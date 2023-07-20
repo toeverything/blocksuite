@@ -1,4 +1,4 @@
-import { StrokeStyle } from '../../../consts.js';
+import { ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -36,6 +36,7 @@ export const RectMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
+      shapeStyle,
     } = element;
     const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -53,35 +54,73 @@ export const RectMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    rc.path(
-      `
-      M${r} 0
-      L${renderWidth - r} 0
-      C ${renderWidth - kRect * r} 0 ${renderWidth} ${
-        kRect * r
-      } ${renderWidth} ${r}
-      L${renderWidth} ${renderHeight - r}
-      C ${renderWidth} ${renderHeight - kRect * r} ${
-        renderWidth - kRect * r
-      } ${renderHeight} ${renderWidth - r} ${renderHeight}
-      L${r} ${renderHeight}
-      C ${kRect * r} ${renderHeight} 0 ${renderHeight - kRect * r} 0 ${
-        renderHeight - r
+    if (shapeStyle === ShapeStyle.General) {
+      ctx.beginPath();
+      ctx.moveTo(0 + r, 0);
+      ctx.lineTo(0 + renderWidth - r, 0);
+      ctx.arcTo(0 + renderWidth, 0, 0 + renderWidth, 0 + r, r);
+      ctx.lineTo(0 + renderWidth, 0 + renderHeight - r);
+      ctx.arcTo(
+        0 + renderWidth,
+        0 + renderHeight,
+        0 + renderWidth - r,
+        0 + renderHeight,
+        r
+      );
+      ctx.lineTo(0 + r, 0 + renderHeight);
+      ctx.arcTo(0, 0 + renderHeight, 0, 0 + renderHeight - r, r);
+      ctx.lineTo(0, 0 + r);
+      ctx.arcTo(0, 0, 0 + r, 0, r);
+      ctx.closePath();
+
+      ctx.fillStyle = realFillColor;
+      ctx.fill();
+
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeStyle = realStrokeColor;
+      switch (strokeStyle) {
+        case StrokeStyle.None:
+          ctx.strokeStyle = 'transparent';
+          break;
+        case StrokeStyle.Dashed:
+          ctx.setLineDash([12, 12]);
+          ctx.strokeStyle = strokeStyle;
+          break;
+        default:
+          ctx.strokeStyle = strokeStyle;
       }
-      L0 ${r}
-      C 0 ${kRect * r} ${kRect * r} 0 ${r} 0
-      Z
-      `,
-      {
-        seed,
-        roughness,
-        strokeLineDash:
-          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
-        strokeWidth,
-        fill: filled ? realFillColor : undefined,
-      }
-    );
+      ctx.stroke();
+    } else {
+      rc.path(
+        `
+        M ${r} 0
+        L ${renderWidth - r} 0
+        C ${renderWidth - kRect * r} 0 ${renderWidth} ${
+          kRect * r
+        } ${renderWidth} ${r}
+        L ${renderWidth} ${renderHeight - r}
+        C ${renderWidth} ${renderHeight - kRect * r} ${
+          renderWidth - kRect * r
+        } ${renderHeight} ${renderWidth - r} ${renderHeight}
+        L ${r} ${renderHeight}
+        C ${kRect * r} ${renderHeight} 0 ${renderHeight - kRect * r} 0 ${
+          renderHeight - r
+        }
+        L 0 ${r}
+        C 0 ${kRect * r} ${kRect * r} 0 ${r} 0
+        Z
+        `,
+        {
+          seed,
+          roughness,
+          strokeLineDash:
+            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+          stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+          strokeWidth,
+          fill: filled ? realFillColor : undefined,
+        }
+      );
+    }
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {

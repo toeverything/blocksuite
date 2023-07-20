@@ -1,6 +1,7 @@
 /// <reference types="@blocksuite/global" />
 export {
   type IBound,
+  ShapeStyle,
   StrokeStyle,
   ZOOM_MAX,
   ZOOM_MIN,

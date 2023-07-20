@@ -21,10 +21,6 @@ export class EdgelessFontFamilyPanel extends LitElement {
       background: var(--affine-background-overlay-panel-color);
     }
 
-    .ont-family-button {
-      font-size: 12px;
-    }
-
     .general-button {
       font-family: sans-serif;
     }
@@ -37,15 +33,15 @@ export class EdgelessFontFamilyPanel extends LitElement {
   @property({ attribute: false })
   value = GENERAL_CANVAS_FONT_FAMILY;
 
+  @property({ attribute: false })
+  onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
+
   private _onSelect(value: EdgelessFontFamilyPanel['value']) {
     this.value = value;
     if (this.onSelect) {
       this.onSelect(value);
     }
   }
-
-  @property({ attribute: false })
-  onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
 
   override render() {
     return html`

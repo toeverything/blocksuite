@@ -1,4 +1,4 @@
-import { type IBound, StrokeStyle } from '../../../consts.js';
+import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -40,6 +40,7 @@ export const TriangleMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
+      shapeStyle,
     } = element;
     const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -56,22 +57,48 @@ export const TriangleMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    rc.polygon(
-      [
-        [renderWidth / 2, 0],
-        [renderWidth, renderHeight],
-        [0, renderHeight],
-      ],
-      {
-        seed,
-        roughness,
-        strokeLineDash:
-          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
-        strokeWidth,
-        fill: filled ? realFillColor : undefined,
+    if (shapeStyle === ShapeStyle.General) {
+      ctx.beginPath();
+      ctx.moveTo(renderWidth / 2, 0);
+      ctx.lineTo(renderWidth, renderHeight);
+      ctx.lineTo(0, renderHeight);
+      ctx.closePath();
+
+      ctx.fillStyle = realFillColor;
+      ctx.fill();
+
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeStyle = realStrokeColor;
+      switch (strokeStyle) {
+        case StrokeStyle.None:
+          ctx.strokeStyle = 'transparent';
+          break;
+        case StrokeStyle.Dashed:
+          ctx.setLineDash([12, 12]);
+          ctx.strokeStyle = strokeStyle;
+          break;
+        default:
+          ctx.strokeStyle = strokeStyle;
       }
-    );
+      ctx.stroke();
+    } else {
+      rc.polygon(
+        [
+          [renderWidth / 2, 0],
+          [renderWidth, renderHeight],
+          [0, renderHeight],
+        ],
+        {
+          seed,
+          roughness,
+          strokeLineDash:
+            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+          stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+          strokeWidth,
+          fill: filled ? realFillColor : undefined,
+        }
+      );
+    }
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {

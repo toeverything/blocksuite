@@ -20,3 +20,8 @@ export enum StrokeStyle {
   Dashed = 'dash',
   None = 'none',
 }
+
+export enum ShapeStyle {
+  General = 'General',
+  Scribbled = 'Scribbled',
+}
