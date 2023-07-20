@@ -888,7 +888,13 @@ export async function shamefullyBlurActiveElement(page: Page) {
  *
  */
 export async function waitForVirgoStateUpdated(page: Page) {
-  await page.waitForTimeout(50);
+  return await page.evaluate(async () => {
+    const selection = window.getSelection() as Selection;
+
+    const range = selection.getRangeAt(0);
+    const component = range.startContainer.parentElement?.closest('rich-text');
+    await component?.vEditor?.waitForUpdate();
+  });
 }
 
 export async function initImageState(page: Page) {

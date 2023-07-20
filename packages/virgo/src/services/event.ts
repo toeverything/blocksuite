@@ -8,6 +8,7 @@ import {
   isInEmbedElement,
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
+import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export interface VHandlerContext<
@@ -156,6 +157,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onSelectionChange = () => {
     const rootElement = this._editor.rootElement;
+    const previousVRange = this._editor.getVRange();
     if (this._isComposing) {
       return;
     }
@@ -191,8 +193,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         ).length === 1;
       if (isContainerSelected) {
         this._editor.focusEnd();
+        return;
       } else {
-        this._editor.slots.vRangeUpdated.emit([null, 'native']);
+        if (previousVRange !== null) {
+          this._editor.slots.vRangeUpdated.emit([null, 'native']);
+        }
         return;
       }
     }
@@ -201,7 +206,9 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousFocus = [range.endContainer, range.endOffset];
 
     const vRange = this._editor.toVRange(selection.getRangeAt(0));
-    this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
+    if (!isMaybeVRangeEqual(previousVRange, vRange)) {
+      this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
+    }
 
     // avoid infinite syncVRange
     if (
