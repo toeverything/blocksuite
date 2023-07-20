@@ -129,7 +129,7 @@ export class VEditor<
     yText: VEditor['yText'],
     ops?: {
       active?: VEditor['isActive'];
-      embed?: VEditor['isEmbed'];
+      embed?: (delta: DeltaInsert<TextAttributes>) => boolean;
     }
   ) {
     if (!yText.doc) {
