@@ -55,14 +55,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  override firstUpdated() {
-    this._disposables.add(
-      this.tableViewManager.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
   private _columnsOffset = (header: Element, scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
     const left: ColumnOffset[] = [];

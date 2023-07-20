@@ -20,7 +20,7 @@ import { popFilterableSimpleMenu } from '../../../../components/menu/menu.js';
 import { toast } from '../../../../components/toast.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
-import { columnManager } from '../../../common/column-manager.js';
+import { columnManager } from '../../../common/columns/manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type { InsertPosition } from '../../../types.js';

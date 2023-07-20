@@ -2,7 +2,6 @@ import { nanoid, Text } from '@blocksuite/store';
 
 import { getTagColor } from '../../../components/tags/colors.js';
 import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
-import { columnManager } from '../column-manager.js';
 import {
   multiSelectHelper,
   numberHelper,
@@ -10,6 +9,7 @@ import {
   richTextHelper,
   selectHelper,
 } from './define.js';
+import { columnManager } from './manager.js';
 
 columnManager.registerConvert(
   selectHelper,

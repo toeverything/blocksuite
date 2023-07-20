@@ -40,7 +40,7 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const rows = this.view.rows;
+    // const rows = this.view.rows;
     const column = this.view.columnManagerList.find(v => {
       return v.type === 'select' || v.type === 'multi-select';
     });

@@ -6,9 +6,9 @@ import type {
   InsertPosition,
   SetValueOption,
 } from '../types.js';
-import type { CellRenderer } from './column-manager.js';
-import { columnManager } from './column-manager.js';
-import { columnRenderer } from './column-renderer.js';
+import type { CellRenderer } from './columns/manager.js';
+import { columnManager } from './columns/manager.js';
+import { columnRenderer } from './columns/renderer.js';
 
 export interface DataViewManager {
   get readonly(): boolean;
