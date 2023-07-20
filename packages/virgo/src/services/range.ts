@@ -7,7 +7,7 @@ import {
   domRangeToVirgoRange,
   virgoRangeToDomRange,
 } from '../utils/range-conversion.js';
-import { isVRangeEqual } from '../utils/v-range.js';
+import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
@@ -27,13 +27,12 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     if (
       this._editor.mounted &&
-      !(this._prevVRange && newVRange
-        ? isVRangeEqual(this._prevVRange, newVRange)
-        : this._prevVRange === newVRange)
+      newVRange &&
+      !isMaybeVRangeEqual(this._prevVRange, newVRange)
     ) {
       // no need to sync and native selection behavior about shift+arrow will
       // be broken if we sync
-      this._editor.requestUpdate(false);
+      this._editor.requestUpdate();
     }
     this._prevVRange = newVRange;
 

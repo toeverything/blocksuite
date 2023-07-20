@@ -186,11 +186,11 @@ export class VEditor<
     this.slots.unmounted.emit();
   }
 
-  requestUpdate(syncVRange = true): void {
+  requestUpdate(): void {
     Promise.resolve().then(() => {
       assertExists(this._rootElement);
 
-      this._deltaService.render(syncVRange);
+      this._deltaService.render();
     });
   }
 
