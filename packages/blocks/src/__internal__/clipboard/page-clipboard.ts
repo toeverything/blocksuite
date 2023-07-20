@@ -6,7 +6,11 @@ import { deleteModelsByRange } from '../../page-block/index.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
-import { clipboardData2Blocks, copyBlocks } from './utils/commons.js';
+import {
+  clipboardData2Blocks,
+  copyBlocks,
+  textedClipboardData2Blocks,
+} from './utils/commons.js';
 
 // TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 
@@ -39,17 +43,22 @@ export class PageClipboard implements Clipboard {
     }
     e.preventDefault();
 
-    const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
+    let blocks = [];
+    const focusedBlockModel = deleteModelsByRange(this._page, range);
+    // This assert is unreliable
+    // but it's reasonable to paste nothing when focus block is not found
+    assertExists(focusedBlockModel);
+    if (['affine:code'].includes(focusedBlockModel?.flavour ?? '')) {
+      blocks = await textedClipboardData2Blocks(this._page, e.clipboardData);
+    } else {
+      blocks = await clipboardData2Blocks(this._page, e.clipboardData);
+    }
 
     if (!blocks.length) {
       return;
     }
     this._page.captureSync();
 
-    const focusedBlockModel = deleteModelsByRange(this._page, range);
-    // This assert is unreliable
-    // but it's reasonable to paste nothing when focus block is not found
-    assertExists(focusedBlockModel);
     const service = getService(focusedBlockModel.flavour);
     assertExists(range);
     await service.json2Block(focusedBlockModel, blocks, range);

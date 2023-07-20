@@ -61,18 +61,7 @@ function createPageClipboardItems(range: BlockRange) {
   });
 
   const stringifiesData = JSON.stringify(
-    clipGroups
-      .filter(group => {
-        if (!group.json) {
-          return false;
-        }
-        // XXX: should handle this issue here?
-        // Children json info is collected by its parent,
-        // but getCurrentBlockRange.models return parent and children at same time,
-        // children should be deleted from group
-        return !isChildBlock(range.models, group.model);
-      })
-      .map(group => group.json)
+    clipGroups.filter(group => group.json).map(group => group.json)
   );
 
   // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
@@ -114,23 +103,31 @@ export function copyBlocks(range: BlockRange) {
   }
 }
 
-function isChildBlock(blocks: BaseBlockModel[], block: BaseBlockModel) {
-  for (let i = 0; i < blocks.length; i++) {
-    const parentBlock = blocks[i];
-    if (parentBlock.children) {
-      if (
-        parentBlock.children.findIndex(
-          childBlock => childBlock.id === block.id
-        ) > -1
-      ) {
-        return true;
-      }
-      if (isChildBlock(parentBlock.children, block)) {
-        return true;
-      }
+export async function textedClipboardData2Blocks(
+  page: Page,
+  clipboardData: ClipboardEvent['clipboardData']
+) {
+  if (!clipboardData) {
+    return [];
+  }
+
+  const contentParser = new ContentParser(page);
+  const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+
+  if (HTMLClipboardData) {
+    const blockSuiteClipboardData = extractCustomDataFromHTMLString(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
+      HTMLClipboardData
+    );
+
+    if (blockSuiteClipboardData) {
+      return JSON.parse(blockSuiteClipboardData) as SerializedBlock[];
     }
   }
-  return false;
+
+  const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+
+  return contentParser.text2blocks(textClipData);
 }
 
 export async function clipboardData2Blocks(
@@ -161,13 +158,17 @@ export async function clipboardData2Blocks(
 
   const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
 
-  const isHTMLContianCode = /<code/.test(HTMLClipboardData);
+  const isHTMLContainCode = /<code/.test(HTMLClipboardData);
   const shouldConvertMarkdown =
-    markdownUtils.checkIfTextContainsMd(textClipData);
-  if (HTMLClipboardData && (isHTMLContianCode || !shouldConvertMarkdown)) {
-    return await contentParser.htmlText2Block(
+    !isHTMLContainCode && markdownUtils.checkIfTextContainsMd(textClipData);
+
+  if (HTMLClipboardData && !shouldConvertMarkdown) {
+    const htmlSerializedBlocks = await contentParser.htmlText2Block(
       removeFragmentFromHtmlClipboardString(HTMLClipboardData)
     );
+    if (htmlSerializedBlocks.length) {
+      return htmlSerializedBlocks;
+    }
   }
 
   if (shouldConvertMarkdown) {

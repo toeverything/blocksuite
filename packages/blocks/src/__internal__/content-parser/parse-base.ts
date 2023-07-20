@@ -764,20 +764,16 @@ const getTableRows = (
     const row: (string | string[])[] = [];
     ele.querySelectorAll('td').forEach((ele, index) => {
       const cellContent: string[] = [];
-      if (ele.children.length === 0) {
-        cellContent.push(ele.textContent || '');
-      }
+      let textContent = ele.textContent?.trim() ?? '';
       Array.from(ele.children).map(child => {
         if (child.classList.contains('checkbox-on')) {
-          cellContent.push('on');
+          textContent = 'on';
         } else {
           cellContent.push(child.textContent || '');
         }
       });
       row.push(
-        columnMeta[index]?.type !== 'multi-select'
-          ? cellContent.join('')
-          : cellContent
+        columnMeta[index]?.type !== 'multi-select' ? textContent : cellContent
       );
     });
     rows.push(row);
