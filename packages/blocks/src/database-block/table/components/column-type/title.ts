@@ -1,12 +1,12 @@
 import type { TemplateResult } from 'lit';
 import { css } from 'lit';
-import { html, literal } from 'lit/static-html.js';
+import { customElement } from 'lit/decorators.js';
+import { html } from 'lit/static-html.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
+@customElement('affine-database-title-cell')
 export class TitleCell extends DatabaseCellElement<TemplateResult> {
-  static override tag = literal`affine-database-title-cell`;
-
   static override styles = css`
     affine-database-title-cell {
       background-color: var(--affine-hover-color);
@@ -68,9 +68,11 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
 
   override focusCell() {
     this.querySelector('rich-text')?.vEditor?.focusEnd();
+    return false;
   }
   override blurCell() {
     getSelection()?.removeAllRanges();
+    return false;
   }
 
   override render() {
@@ -80,15 +82,3 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     `;
   }
 }
-
-export const TitleColumnRenderer = defineColumnRenderer(
-  'title',
-  {
-    Cell: TitleCell,
-    // TODO
-    CellEditing: null,
-  },
-  {
-    displayName: 'Title',
-  }
-);

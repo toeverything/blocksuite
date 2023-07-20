@@ -3,7 +3,9 @@ import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import type { FilterGroup } from '../common/ast.js';
+import type { CellRenderer } from '../common/column-manager.js';
 import { columnManager, multiSelectHelper } from '../common/column-manager.js';
+import { columnRenderer } from '../common/column-renderer.js';
 import type {
   TableMixColumn,
   TableViewColumn,
@@ -16,11 +18,7 @@ import type {
 } from '../database-model.js';
 import { insertPositionToIndex } from '../database-model.js';
 import { evalFilter } from '../logical/eval-filter.js';
-import { registerInternalRenderer } from './components/column-type/index.js';
-import type { ColumnRenderer } from './register.js';
 import type { Column, SetValueOption } from './types.js';
-
-const renderer = registerInternalRenderer();
 
 export interface TableViewManager {
   get name(): string;
@@ -70,7 +68,7 @@ export interface ColumnManager<
 
   get readonly(): boolean;
 
-  get renderer(): ColumnRenderer;
+  get renderer(): CellRenderer<Data, Value>;
 
   get isFirst(): boolean;
 
@@ -273,8 +271,8 @@ export class DatabaseColumnManager implements ColumnManager {
     return this._dataColumn.name;
   }
 
-  get renderer(): ColumnRenderer {
-    return renderer.get(this.type);
+  get renderer(): CellRenderer {
+    return columnRenderer.get(this.type).cellRenderer;
   }
 
   get type(): string {
@@ -298,7 +296,10 @@ export class DatabaseColumnManager implements ColumnManager {
     if (captureSync) {
       this._model.page.captureSync();
     }
-    this._model.updateCell(rowId, { columnId: this.id, value });
+    this._model.updateCell(rowId, {
+      columnId: this.id,
+      value,
+    });
     this._model.applyColumnUpdate();
   }
 
@@ -349,7 +350,13 @@ export class DatabaseColumnManager implements ColumnManager {
       assertExists(currentSchema);
       const { id: copyId, ...nonIdProps } = currentSchema;
       const schema = { ...nonIdProps };
-      const id = this._model.addColumn({ before: false, id: this.id }, schema);
+      const id = this._model.addColumn(
+        {
+          before: false,
+          id: this.id,
+        },
+        schema
+      );
       this._model.applyColumnUpdate();
       this._model.copyCellsByColumn(copyId, id);
     };
@@ -485,8 +492,8 @@ export class DatabaseTitleColumnManager implements ColumnManager {
     return this._model.page.readonly;
   }
 
-  get renderer(): ColumnRenderer {
-    return renderer.get(this.type);
+  get renderer(): CellRenderer {
+    return columnRenderer.get(this.type).cellRenderer;
   }
 
   updateData(updater: ColumnDataUpdater<Record<string, unknown>>): void {
