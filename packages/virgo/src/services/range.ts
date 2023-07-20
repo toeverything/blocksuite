@@ -107,10 +107,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    *    the vRange of first Editor is {index: 2, length: 4},
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
-  toVRange = (selection: Selection): VRange | null => {
+  toVRange = (range: Range): VRange | null => {
     const { rootElement, yText } = this._editor;
 
-    return domRangeToVirgoRange(selection, rootElement, yText);
+    return domRangeToVirgoRange(range, rootElement, yText);
   };
 
   onScrollUpdated = (scrollLeft: number) => {

@@ -19,7 +19,7 @@ export class SelectionManager {
   private _oldSelections: BaseSelection[] = [];
 
   disposables = new DisposableGroup();
-  readonly rangeController = new RangeController();
+  readonly rangeController = new RangeController(this.root);
 
   constructor(public root: HTMLElement, public workspace: Workspace) {
     this._setupDefaultSelections();

@@ -128,7 +128,13 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
 
     this._startRange = range;
 
-    this.selectionManager.rangeController.add(range);
+    const element =
+      caret.node instanceof Element ? caret.node : caret.node.parentElement;
+    if (!element) {
+      return;
+    }
+
+    this.selectionManager.rangeController.render(range);
   };
 
   private _dragMoveHandler: UIEventHandler = ctx => {
@@ -196,8 +202,9 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     }
 
     const range = rangeFromCaret(caret);
-    this.selectionManager.rangeController.add(this._startRange);
-    this.selectionManager.rangeController.add(range);
+
+    this.selectionManager.rangeController.render(this._startRange, range);
+    // this.selectionManager.rangeController.add(range);
   };
 
   private _autoScroll = (y: number): boolean => {

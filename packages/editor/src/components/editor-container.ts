@@ -173,7 +173,6 @@ export class EditorContainer
   override disconnectedCallback() {
     super.disconnectedCallback();
     activeEditorManager.clearActive();
-    this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
   override firstUpdated() {

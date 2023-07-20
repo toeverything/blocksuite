@@ -255,7 +255,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       return;
     }
 
-    this.selection.rangeController.add(range);
+    this.selection.rangeController.render(range);
   };
 
   private _bindVirgoEvents() {
@@ -341,14 +341,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       },
     });
 
-    this._disposables.add(
-      this._vEditor.slots.vRangeUpdated.on(this._onRangeUpdated)
-    );
+    const { vRangeUpdated } = this._vEditor.slots;
+    this._disposables.add(vRangeUpdated.on(this._onRangeUpdated));
     this._disposables.add(this.selection.on(this._onSelectionChanged));
   }
 
   override connectedCallback() {
-    this._disposables.dispose();
     super.connectedCallback();
 
     assertExists(this.model.text, 'Rich text need text to init');
