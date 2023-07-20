@@ -37,7 +37,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDatasource(this.root, {
+      this._dataSource = new DatabaseBlockDatasource(this, {
         type: 'database-block',
         pageId: this.root.page.id,
         blockId: this.model.id,

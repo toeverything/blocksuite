@@ -1,5 +1,4 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 
 import {
   columnManager,
@@ -7,6 +6,7 @@ import {
 } from '../../database-block/common/column-manager.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
+import type { DatabaseBlockComponent } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';
 import type { DatabaseBlockDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
@@ -19,11 +19,11 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   constructor(
-    private root: BlockSuiteRoot,
+    private litInstance: DatabaseBlockComponent,
     config: DatabaseBlockDatasourceConfig
   ) {
     super();
-    this._model = root.page.workspace
+    this._model = litInstance.root.page.workspace
       .getPage(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
@@ -68,7 +68,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     if (type === 'title') {
       const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
       if (model) {
-        return this.root.renderModel(model);
+        return this.litInstance.renderModel(model);
       }
       return;
     }

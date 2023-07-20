@@ -48,7 +48,7 @@ export type FocusContext<
   );
 
 export class BlockElement<
-  Model extends BaseBlockModel,
+  Model extends BaseBlockModel = BaseBlockModel,
   Service extends BlockService = BlockService,
   FocusCtx extends FocusContext<Model, Service> = FocusContext<Model, Service>
 > extends WithDisposable(ShadowlessElement) {
@@ -67,6 +67,27 @@ export class BlockElement<
   @property({ attribute: false })
   page!: Page;
 
+  @property({ attribute: false })
+  path!: string[];
+
+  get pathname(): string {
+    return this.path.join('|');
+  }
+
+  get parentPath(): string[] {
+    return this.path.slice(0, -1);
+  }
+
+  parentBlockElement<Block extends BlockElement>(): Block | undefined {
+    return this.root.blockViewMap.get(this.parentPath.join('|')) as
+      | Block
+      | undefined;
+  }
+
+  renderModel(model: BaseBlockModel): TemplateResult {
+    return this.root.renderModel(model, this.path);
+  }
+
   get service(): Service | undefined {
     return this.root.blockStore.getService(this.model.flavour) as
       | Service
@@ -83,6 +104,16 @@ export class BlockElement<
   blurBlock(focusContext: FocusCtx): boolean {
     // Return false to prevent default focus behavior
     return true;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.root.blockViewMap.set(this.pathname, this);
+  }
+
+  override disconnectedCallback() {
+    this.root.blockViewMap.delete(this.pathname);
+    super.disconnectedCallback();
   }
 
   override render(): unknown {

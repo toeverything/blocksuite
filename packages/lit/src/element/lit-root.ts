@@ -10,6 +10,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
 export type LitBlockSpec = BlockSpec<StaticValue>;
@@ -30,6 +31,8 @@ export class BlockSuiteRoot extends ShadowlessElement {
   uiEventDispatcher = new UIEventDispatcher(this);
 
   blockStore!: BlockStore<StaticValue>;
+
+  blockViewMap = new Map<string, BlockElement>();
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
@@ -59,10 +62,10 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return null;
     }
 
-    return this.renderModel(root);
+    return this.renderModel(root, []);
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BaseBlockModel, path: string[]): TemplateResult => {
     const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
@@ -91,10 +94,11 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
+      .path=${path.concat(model.id)}
       .content=${html`${repeat(
         children,
         child => child.id,
-        child => this.renderModel(child)
+        child => this.renderModel(child, path.concat(model.id))
       )}`}
     ></${tag}>`;
   };
