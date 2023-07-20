@@ -1,6 +1,10 @@
 import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
 import { CheckboxCell } from '../table/components/column-type/checkbox.js';
 import {
+  DateCell,
+  DateCellEditing,
+} from '../table/components/column-type/date.js';
+import {
   LinkCell,
   LinkCellEditing,
 } from '../table/components/column-type/link.js';
@@ -28,6 +32,7 @@ import { TitleCell } from '../table/components/column-type/title.js';
 import type { CellRenderer } from './column-manager.js';
 import {
   checkboxHelper,
+  dateHelper,
   linkHelper,
   multiSelectHelper,
   numberHelper,
@@ -126,5 +131,13 @@ columnRenderer.register({
   cellRenderer: {
     view: createUniComponentFromWebComponent(LinkCell),
     edit: createUniComponentFromWebComponent(LinkCellEditing),
+  },
+});
+
+columnRenderer.register({
+  type: dateHelper.type,
+  cellRenderer: {
+    view: createUniComponentFromWebComponent(DateCell),
+    edit: createUniComponentFromWebComponent(DateCellEditing),
   },
 });

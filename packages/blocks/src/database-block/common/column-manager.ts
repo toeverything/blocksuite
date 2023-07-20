@@ -2,7 +2,13 @@ import { assertExists, Text } from '@blocksuite/store';
 
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
-import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
+import {
+  tBoolean,
+  tDate,
+  tNumber,
+  tString,
+  tTag,
+} from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
 import type { ColumnManager } from '../table/table-view-manager.js';
@@ -215,9 +221,8 @@ export const linkHelper = columnManager.register<string>('link', {
   cellToString: data => data?.toString() ?? '',
 });
 export const dateHelper = columnManager.register<number>('date', {
-  type: () => tNumber.create(),
+  type: () => tDate.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
 
