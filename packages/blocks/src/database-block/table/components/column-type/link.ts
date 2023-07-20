@@ -2,17 +2,17 @@ import './components/link-node.js';
 
 import { PenIcon } from '@blocksuite/global/config';
 import { css } from 'lit';
-import { query } from 'lit/decorators.js';
-import { html, literal } from 'lit/static-html.js';
+import { customElement, query } from 'lit/decorators.js';
+import { html } from 'lit/static-html.js';
 
 import {
   isValidUrl,
   normalizeUrl,
 } from '../../../../__internal__/utils/url.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
-export class LinkCell extends DatabaseCellElement<string> {
-  static override tag = literal`affine-database-link-cell`;
+import { DatabaseCellElement } from '../../register.js';
 
+@customElement('affine-database-link-cell')
+export class LinkCell extends DatabaseCellElement<string> {
   static override styles = css`
     affine-database-link-cell {
       display: flex;
@@ -87,11 +87,11 @@ export class LinkCell extends DatabaseCellElement<string> {
     const linkText = this.value ?? '';
 
     return html`
-      <div class="affine-database-link" @click=${this._onClick}>
+      <div class="affine-database-link" @click="${this._onClick}">
         <affine-database-link-node
-          .link=${linkText}
+          .link="${linkText}"
         ></affine-database-link-node>
-        <div class="affine-database-link-icon" @click=${this._onEdit}>
+        <div class="affine-database-link-icon" @click="${this._onEdit}">
           ${PenIcon}
         </div>
       </div>
@@ -99,9 +99,8 @@ export class LinkCell extends DatabaseCellElement<string> {
   }
 }
 
+@customElement('affine-database-link-cell-editing')
 export class LinkCellEditing extends DatabaseCellElement<string> {
-  static override tag = literal`affine-database-link-cell-editing`;
-
   static override styles = css`
     affine-database-link-cell-editing {
       display: block;
@@ -176,14 +175,3 @@ export class LinkCellEditing extends DatabaseCellElement<string> {
     />`;
   }
 }
-
-export const LinkColumnRenderer = defineColumnRenderer(
-  'link',
-  {
-    Cell: LinkCell,
-    CellEditing: LinkCellEditing,
-  },
-  {
-    displayName: 'Link',
-  }
-);

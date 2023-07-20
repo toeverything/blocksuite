@@ -1,23 +1,39 @@
 import { assertExists, Text } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
-import { html } from 'lit';
 
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
+import type { ColumnManager } from '../table/table-view-manager.js';
 
-type ColumnOps<
-  ColumnData extends Record<string, unknown> = Record<string, never>,
-  CellData = unknown
+interface CellRenderProps<
+  Data extends Record<string, unknown> = Record<string, never>,
+  Value = unknown
+> {
+  column: ColumnManager<Value, Data>;
+  rowId: string;
+  isEditing: boolean;
+  selectCurrentCell: (editing: boolean) => void;
+}
+
+export type CellRenderer<
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
+  Value = unknown
 > = {
-  defaultData: () => ColumnData;
-  type: (data: ColumnData) => TType;
-  configRender: (data: ColumnData) => TemplateResult<1>;
-  cellToString: (data: CellData, colData: ColumnData) => string;
+  view: UniComponent<CellRenderProps<Data, Value>>;
+  edit?: UniComponent<CellRenderProps<Data, Value>>;
+};
+type ColumnOps<
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
+  Value = unknown
+> = {
+  defaultData: () => Data;
+  type: (data: Data) => TType;
+  cellToString: (data: Value, colData: Data) => string;
 };
 
-class ColumnManager {
+class ColumnHelperContainer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private map = new Map<string, ColumnHelper<any, any>>();
   private convert = new Map<
@@ -88,7 +104,14 @@ class ColumnHelper<
     private ops: ColumnOps<T, CellData>
   ) {}
 
-  create(name: string, data?: T): { type: string; name: string; data: T } {
+  create(
+    name: string,
+    data?: T
+  ): {
+    type: string;
+    name: string;
+    data: T;
+  } {
     return {
       type: this.type,
       name,
@@ -104,17 +127,18 @@ class ColumnHelper<
     id: string,
     name: string,
     data?: T
-  ): { type: string; name: string; data: T; id: string } {
+  ): {
+    type: string;
+    name: string;
+    data: T;
+    id: string;
+  } {
     return {
       id,
       type: this.type,
       name,
       data: data ?? this.ops.defaultData(),
     };
-  }
-
-  render(data: T) {
-    return this.ops.configRender(data);
   }
 
   dataType(data: T) {
@@ -126,11 +150,10 @@ class ColumnHelper<
   }
 }
 
-export const columnManager = new ColumnManager();
+export const columnManager = new ColumnHelperContainer();
 export const titleHelper = columnManager.register<Text['yText']>('title', {
   type: () => tString.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
 export const richTextHelper = columnManager.register<Text['yText']>(
@@ -138,7 +161,6 @@ export const richTextHelper = columnManager.register<Text['yText']>(
   {
     type: () => tString.create(),
     defaultData: () => ({}),
-    configRender: () => html``,
     cellToString: data => data?.toString() ?? '',
   }
 );
@@ -152,7 +174,6 @@ export const selectHelper = columnManager.register<string, SelectColumnData>(
     defaultData: () => ({
       options: [],
     }),
-    configRender: () => html``,
     cellToString: (data, colData) =>
       colData.options.find(v => v.id === data)?.value ?? '',
   }
@@ -165,7 +186,6 @@ export const multiSelectHelper = columnManager.register<
   defaultData: () => ({
     options: [],
   }),
-  configRender: () => html``,
   cellToString: (data, colData) =>
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
 });
@@ -177,25 +197,21 @@ export const numberHelper = columnManager.register<
 >('number', {
   type: () => tNumber.create(),
   defaultData: () => ({ decimal: 0 }),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
 export const checkboxHelper = columnManager.register<boolean>('checkbox', {
   type: () => tBoolean.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => '',
 });
 export const progressHelper = columnManager.register<number>('progress', {
   type: () => tNumber.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
 export const linkHelper = columnManager.register<string>('link', {
   type: () => tString.create(),
   defaultData: () => ({}),
-  configRender: () => html``,
   cellToString: data => data?.toString() ?? '',
 });
 export const dateHelper = columnManager.register<number>('date', {

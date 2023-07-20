@@ -3,8 +3,8 @@ import type { Y } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
-import { query } from 'lit/decorators.js';
-import { html, literal } from 'lit/static-html.js';
+import { customElement, query } from 'lit/decorators.js';
+import { html } from 'lit/static-html.js';
 import { Text as YText } from 'yjs';
 
 import type {
@@ -13,7 +13,7 @@ import type {
 } from '../../../../__internal__/rich-text/virgo/types.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
 function toggleStyle(
   vEditor: AffineVEditor,
@@ -62,9 +62,8 @@ function toggleStyle(
 
   vEditor.syncVRange();
 }
+@customElement('affine-database-rich-text-cell')
 export class RichTextCell extends DatabaseCellElement<Y.Text> {
-  static override tag = literal`affine-database-rich-text-cell`;
-
   static override styles = css`
     affine-database-rich-text-cell {
       display: flex;
@@ -138,9 +137,8 @@ export class RichTextCell extends DatabaseCellElement<Y.Text> {
   }
 }
 
+@customElement('affine-database-rich-text-cell-editing')
 export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
-  static override tag = literal`affine-database-rich-text-cell-editing`;
-
   static override styles = css`
     affine-database-rich-text-cell-editing {
       display: flex;
@@ -306,14 +304,3 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     return html` <div class="affine-database-rich-text virgo-editor"></div>`;
   }
 }
-
-export const RichTextColumnRenderer = defineColumnRenderer(
-  'rich-text',
-  {
-    Cell: RichTextCell,
-    CellEditing: RichTextCellEditing,
-  },
-  {
-    displayName: 'Rich Text',
-  }
-);
