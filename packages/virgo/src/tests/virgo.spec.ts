@@ -837,29 +837,28 @@ test('embed', async ({ page }) => {
 
   await page.waitForTimeout(100);
 
-  await type(page, 'abcde');
+  await type(page, 'abc');
 
-  expect(await editorA.innerText()).toBe('abcde');
+  expect(await editorA.innerText()).toBe('abc');
 
-  await press(page, 'ArrowLeft');
   page.keyboard.down('Shift');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   page.keyboard.up('Shift');
   await page.waitForTimeout(100);
-  await assertSelection(page, 0, 1, 3);
+  await assertSelection(page, 0, 0, 3);
 
   await editorAEmbed.click();
   const embedCount = await page.locator('[data-virgo-embed="true"]').count();
   expect(embedCount).toBe(3);
 
   // try to update cursor position using arrow keys
-  await assertSelection(page, 0, 1, 3);
-  await press(page, 'ArrowLeft');
-  await assertSelection(page, 0, 1, 0);
+  await assertSelection(page, 0, 0, 3);
   await press(page, 'ArrowLeft');
   await assertSelection(page, 0, 0, 0);
+  await press(page, 'ArrowRight');
+  await assertSelection(page, 0, 0, 1);
   await press(page, 'ArrowRight');
   await assertSelection(page, 0, 1, 0);
   await press(page, 'ArrowRight');
@@ -870,27 +869,27 @@ test('embed', async ({ page }) => {
   await assertSelection(page, 0, 2, 1);
   await press(page, 'ArrowRight');
   await assertSelection(page, 0, 3, 0);
-  await press(page, 'ArrowRight');
-  await assertSelection(page, 0, 3, 1);
-  await press(page, 'ArrowRight');
-  await assertSelection(page, 0, 4, 0);
-  await press(page, 'ArrowRight');
-  await assertSelection(page, 0, 5, 0);
-  await press(page, 'ArrowLeft');
-  await assertSelection(page, 0, 4, 0);
-  await press(page, 'ArrowLeft');
-  await assertSelection(page, 0, 3, 1);
 
   // try to update cursor position and select embed element using mouse click
-  let rect = await getVRangeIndexRect(page, [0, 1]);
+  let rect = await getVRangeIndexRect(page, [0, 0]);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 0, 0);
+  await page.mouse.click(rect.x + 3, rect.y);
+  await assertSelection(page, 0, 0, 1);
+
+  rect = await getVRangeIndexRect(page, [0, 1]);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 1, 0);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 1, 1);
 
   rect = await getVRangeIndexRect(page, [0, 2]);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 2, 0);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 2, 1);
 
   rect = await getVRangeIndexRect(page, [0, 3]);
-  await page.mouse.click(rect.x + 3, rect.y);
-  await assertSelection(page, 0, 3, 1);
+  await page.mouse.click(rect.x, rect.y);
+  await assertSelection(page, 0, 3, 0);
 });

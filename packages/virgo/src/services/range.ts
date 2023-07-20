@@ -45,9 +45,11 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
       // There may be multiple range update events in one frame,
       // so we need to obtain the latest vRange.
       // see https://github.com/toeverything/blocksuite/issues/2982
-      // when using input method _vRange will return to the starting point,
-      // so we need to re-sync
-      this.syncVRange();
+      if (this._vRange) {
+        // when using input method _vRange will return to the starting point,
+        // so we need to re-sync
+        this._applyVRange(this._vRange);
+      }
     };
 
     // updates in lit are performed asynchronously
@@ -108,10 +110,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    *    the vRange of first Editor is {index: 2, length: 4},
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
-  toVRange = (range: Range): VRange | null => {
+  toVRange = (selection: Selection): VRange | null => {
     const { rootElement, yText } = this._editor;
 
-    return domRangeToVirgoRange(range, rootElement, yText);
+    return domRangeToVirgoRange(selection, rootElement, yText);
   };
 
   onScrollUpdated = (scrollLeft: number) => {

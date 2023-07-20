@@ -129,7 +129,7 @@ export class VEditor<
     yText: VEditor['yText'],
     ops?: {
       active?: VEditor['isActive'];
-      embed?: (delta: DeltaInsert<TextAttributes>) => boolean;
+      embed?: VEditor['isEmbed'];
     }
   ) {
     if (!yText.doc) {
@@ -192,11 +192,6 @@ export class VEditor<
 
       this._deltaService.render(syncVRange);
     });
-  }
-
-  async waitForUpdate() {
-    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
-    await Promise.all(vLines.map(line => line.updateComplete));
   }
 
   getNativeSelection(): Selection | null {

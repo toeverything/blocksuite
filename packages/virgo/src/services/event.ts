@@ -6,6 +6,7 @@ import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
   isInEmbedElement,
+  isInEmbedGap,
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
 import type { VEditor } from '../virgo.js';
@@ -180,7 +181,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
     if (!range) return;
     if (!range.intersectsNode(rootElement)) {
-      const isContainerSelected =
+      if (
         range.endContainer.contains(rootElement) &&
         Array.from(range.endContainer.childNodes).filter(
           node => node instanceof HTMLElement
@@ -188,11 +189,10 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         range.startContainer.contains(rootElement) &&
         Array.from(range.startContainer.childNodes).filter(
           node => node instanceof HTMLElement
-        ).length === 1;
-      if (isContainerSelected) {
+        ).length === 1
+      ) {
         this._editor.focusEnd();
       } else {
-        this._editor.slots.vRangeUpdated.emit([null, 'native']);
         return;
       }
     }
@@ -200,8 +200,10 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
 
-    const vRange = this._editor.toVRange(selection.getRangeAt(0));
-    this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
+    const vRange = this._editor.toVRange(selection);
+    if (vRange) {
+      this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
+    }
 
     // avoid infinite syncVRange
     if (
@@ -350,28 +352,22 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onKeyDown = (event: KeyboardEvent) => {
     if (!event.shiftKey) {
-      const vRange = this._editor.getVRange();
-      if (!vRange || vRange.length !== 0) return;
+      const selectionRoot = findDocumentOrShadowRoot(this._editor);
+      const selection = selectionRoot.getSelection();
+      if (!selection) return;
+      if (selection.rangeCount === 0) return;
 
-      const deltas = this._editor.getDeltasByVRange(vRange);
-      if (deltas.length === 2) {
-        if (event.key === 'ArrowLeft' && this._editor.isEmbed(deltas[0][0])) {
-          this._editor.setVRange({
-            index: vRange.index - 1,
-            length: 1,
-          });
-        } else if (
-          event.key === 'ArrowRight' &&
-          this._editor.isEmbed(deltas[1][0])
+      const range = selection.getRangeAt(0);
+      if (range.collapsed) {
+        if (
+          range.startContainer === range.endContainer &&
+          isInEmbedGap(range.startContainer)
         ) {
-          this._editor.setVRange({
-            index: vRange.index,
-            length: 1,
-          });
-        }
-      } else if (deltas.length === 1) {
-        const delta = deltas[0][0];
-        if (this._editor.isEmbed(delta)) {
+          const vRange = this._editor.getVRange();
+          if (!vRange) return;
+
+          // native behavior may not work well in embed gap so
+          // we need to handle it manually
           if (event.key === 'ArrowLeft') {
             this._editor.setVRange({
               index: vRange.index - 1,

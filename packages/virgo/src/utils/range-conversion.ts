@@ -7,20 +7,21 @@ import {
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './point-conversion.js';
+import { isSelectionBackwards } from './selection.js';
 import { calculateTextLength, getTextNodesFromElement } from './text.js';
 
 type VRangeRunnerContext = {
   rootElement: HTMLElement;
-  range: Range;
+  selection: Selection;
   yText: Y.Text;
-  startNode: Node | null;
-  startOffset: number;
-  startText: Text;
-  startTextOffset: number;
-  endNode: Node | null;
-  endOffset: number;
-  endText: Text;
-  endTextOffset: number;
+  anchorNode: Node | null;
+  anchorOffset: number;
+  anchorText: Text;
+  anchorTextOffset: number;
+  focusNode: Node | null;
+  focusOffset: number;
+  focusText: Text;
+  focusTextOffset: number;
 };
 
 type Predict = (context: VRangeRunnerContext) => boolean;
@@ -28,27 +29,27 @@ type Handler = (context: VRangeRunnerContext) => VRange | null;
 
 const rangeHasAnchorAndFocus: Predict = ({
   rootElement,
-  startText,
-  endText,
+  anchorText,
+  focusText,
 }) => {
-  return rootElement.contains(startText) && rootElement.contains(endText);
+  return rootElement.contains(anchorText) && rootElement.contains(focusText);
 };
 
 const rangeHasAnchorAndFocusHandler: Handler = ({
   rootElement,
-  startText,
-  endText,
-  startTextOffset,
-  endTextOffset,
+  anchorText,
+  focusText,
+  anchorTextOffset,
+  focusTextOffset,
 }) => {
   const anchorDomPoint = textPointToDomPoint(
-    startText,
-    startTextOffset,
+    anchorText,
+    anchorTextOffset,
     rootElement
   );
   const focusDomPoint = textPointToDomPoint(
-    endText,
-    endTextOffset,
+    focusText,
+    focusTextOffset,
     rootElement
   );
 
@@ -62,68 +63,108 @@ const rangeHasAnchorAndFocusHandler: Handler = ({
   };
 };
 
-const rangeOnlyHasFocus: Predict = ({ rootElement, startText, endText }) => {
-  return !rootElement.contains(startText) && rootElement.contains(endText);
+const rangeOnlyHasFocus: Predict = ({ rootElement, anchorText, focusText }) => {
+  return !rootElement.contains(anchorText) && rootElement.contains(focusText);
 };
 
 const rangeOnlyHasFocusHandler: Handler = ({
+  selection,
+  yText,
   rootElement,
-  endText,
-  endTextOffset,
+  anchorText,
+  focusText,
+  anchorTextOffset,
+  focusTextOffset,
 }) => {
-  const focusDomPoint = textPointToDomPoint(
-    endText,
-    endTextOffset,
-    rootElement
-  );
+  if (isSelectionBackwards(selection)) {
+    const anchorDomPoint = textPointToDomPoint(
+      anchorText,
+      anchorTextOffset,
+      rootElement
+    );
 
-  if (!focusDomPoint) {
-    return null;
+    if (!anchorDomPoint) {
+      return null;
+    }
+
+    return {
+      index: anchorDomPoint.index,
+      length: yText.length - anchorDomPoint.index,
+    };
+  } else {
+    const focusDomPoint = textPointToDomPoint(
+      focusText,
+      focusTextOffset,
+      rootElement
+    );
+
+    if (!focusDomPoint) {
+      return null;
+    }
+
+    return {
+      index: 0,
+      length: focusDomPoint.index,
+    };
   }
-
-  return {
-    index: 0,
-    length: focusDomPoint.index,
-  };
 };
 
-const rangeOnlyHasAnchor: Predict = ({ rootElement, startText, endText }) => {
-  return rootElement.contains(startText) && !rootElement.contains(endText);
+const rangeOnlyHasAnchor: Predict = ({
+  rootElement,
+  anchorText,
+  focusText,
+}) => {
+  return rootElement.contains(anchorText) && !rootElement.contains(focusText);
 };
 
 const rangeOnlyHasAnchorHandler: Handler = ({
+  selection,
   yText,
   rootElement,
-  startText,
-  startTextOffset,
+  anchorText,
+  focusText,
+  anchorTextOffset,
+  focusTextOffset,
 }) => {
-  const startDomPoint = textPointToDomPoint(
-    startText,
-    startTextOffset,
-    rootElement
-  );
+  if (isSelectionBackwards(selection)) {
+    const focusDomPoint = textPointToDomPoint(
+      focusText,
+      focusTextOffset,
+      rootElement
+    );
 
-  if (!startDomPoint) {
-    return null;
+    if (!focusDomPoint) {
+      return null;
+    }
+
+    return {
+      index: 0,
+      length: focusDomPoint.index,
+    };
+  } else {
+    const anchorDomPoint = textPointToDomPoint(
+      anchorText,
+      anchorTextOffset,
+      rootElement
+    );
+
+    if (!anchorDomPoint) {
+      return null;
+    }
+
+    return {
+      index: anchorDomPoint.index,
+      length: yText.length - anchorDomPoint.index,
+    };
   }
-
-  return {
-    index: startDomPoint.index,
-    length: yText.length - startDomPoint.index,
-  };
 };
 
 const rangeHasNoAnchorAndFocus: Predict = ({
   rootElement,
-  startText,
-  endText,
-  range,
+  anchorText,
+  focusText,
 }) => {
-  return (
-    !rootElement.contains(startText) &&
-    !rootElement.contains(endText) &&
-    range.intersectsNode(rootElement)
-  );
+  return !rootElement.contains(anchorText) && !rootElement.contains(focusText);
 };
 
 const rangeHasNoAnchorAndFocusHandler: Handler = ({ yText }) => {
@@ -134,34 +175,34 @@ const rangeHasNoAnchorAndFocusHandler: Handler = ({ yText }) => {
 };
 
 const buildContext = (
-  range: Range,
+  selection: Selection,
   rootElement: HTMLElement,
   yText: Y.Text
 ): VRangeRunnerContext | null => {
-  const { startContainer, startOffset, endContainer, endOffset } = range;
+  const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
 
-  const startTextPoint = nativePointToTextPoint(startContainer, startOffset);
-  const endTextPoint = nativePointToTextPoint(endContainer, endOffset);
+  const anchorTextPoint = nativePointToTextPoint(anchorNode, anchorOffset);
+  const focusTextPoint = nativePointToTextPoint(focusNode, focusOffset);
 
-  if (!startTextPoint || !endTextPoint) {
+  if (!anchorTextPoint || !focusTextPoint) {
     return null;
   }
 
-  const [startText, startTextOffset] = startTextPoint;
-  const [endText, endTextOffset] = endTextPoint;
+  const [anchorText, anchorTextOffset] = anchorTextPoint;
+  const [focusText, focusTextOffset] = focusTextPoint;
 
   return {
     rootElement,
-    range,
+    selection,
     yText,
-    startNode: startContainer,
-    startOffset,
-    endNode: endContainer,
-    endOffset,
-    startText,
-    startTextOffset,
-    endText,
-    endTextOffset,
+    anchorNode,
+    anchorOffset,
+    focusNode,
+    focusOffset,
+    anchorText,
+    anchorTextOffset,
+    focusText,
+    focusTextOffset,
   };
 };
 
@@ -192,23 +233,23 @@ const buildContext = (
  *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
  */
 export function domRangeToVirgoRange(
-  range: Range,
+  selection: Selection,
   rootElement: HTMLElement,
   yText: Y.Text
 ): VRange | null {
-  const context = buildContext(range, rootElement, yText);
+  const context = buildContext(selection, rootElement, yText);
 
   if (!context) return null;
 
   // handle embed
   if (
-    context.startNode &&
-    context.startNode === context.endNode &&
-    isInEmbedElement(context.startNode)
+    context.anchorNode &&
+    context.anchorNode === context.focusNode &&
+    isInEmbedElement(context.anchorNode)
   ) {
     const anchorDomPoint = textPointToDomPoint(
-      context.startText,
-      context.startTextOffset,
+      context.anchorText,
+      context.anchorTextOffset,
       rootElement
     );
 
@@ -253,14 +294,14 @@ export function virgoRangeToDomRange(
   const lineElements = Array.from(rootElement.querySelectorAll('v-line'));
 
   // calculate anchorNode and focusNode
-  let startText: Text | null = null;
-  let endText: Text | null = null;
+  let anchorText: Text | null = null;
+  let focusText: Text | null = null;
   let anchorOffset = 0;
   let focusOffset = 0;
   let index = 0;
 
   for (let i = 0; i < lineElements.length; i++) {
-    if (startText && endText) {
+    if (anchorText && focusText) {
       break;
     }
 
@@ -268,16 +309,16 @@ export function virgoRangeToDomRange(
     for (const text of texts) {
       const textLength = calculateTextLength(text);
 
-      if (!startText && index + textLength >= vRange.index) {
-        startText = text;
+      if (!anchorText && index + textLength >= vRange.index) {
+        anchorText = text;
         anchorOffset = vRange.index - index;
       }
-      if (!endText && index + textLength >= vRange.index + vRange.length) {
-        endText = text;
+      if (!focusText && index + textLength >= vRange.index + vRange.length) {
+        focusText = text;
         focusOffset = vRange.index + vRange.length - index;
       }
 
-      if (startText && endText) {
+      if (anchorText && focusText) {
         break;
       }
 
@@ -288,12 +329,12 @@ export function virgoRangeToDomRange(
     index += 1;
   }
 
-  if (!startText || !endText) {
+  if (!anchorText || !focusText) {
     return null;
   }
 
-  if (isInEmbedElement(startText)) {
-    const anchorVElement = startText.parentElement?.closest('v-element');
+  if (isInEmbedElement(anchorText)) {
+    const anchorVElement = anchorText.parentElement?.closest('v-element');
     if (!anchorVElement) {
       throw new Error(
         'failed to find vElement for a text note in an embed element'
@@ -305,16 +346,16 @@ export function virgoRangeToDomRange(
     }
     if (nextSibling instanceof VirgoElement) {
       const texts = getTextNodesFromElement(nextSibling);
-      startText = texts[texts.length - 1];
-      anchorOffset = calculateTextLength(startText);
+      anchorText = texts[texts.length - 1];
+      anchorOffset = calculateTextLength(anchorText);
     } else {
       // nextSibling is a gap
-      startText = nextSibling.childNodes.item(1) as Text;
+      anchorText = nextSibling.childNodes.item(1) as Text;
       anchorOffset = 0;
     }
   }
-  if (isInEmbedElement(endText)) {
-    const focusVElement = endText.parentElement?.closest('v-element');
+  if (isInEmbedElement(focusText)) {
+    const focusVElement = focusText.parentElement?.closest('v-element');
     if (!focusVElement) {
       throw new Error(
         'failed to find vElement for a text note in an embed element'
@@ -327,18 +368,18 @@ export function virgoRangeToDomRange(
 
     if (nextSibling instanceof VirgoElement) {
       const texts = getTextNodesFromElement(nextSibling);
-      endText = texts[0];
+      focusText = texts[0];
       focusOffset = 0;
     } else {
       // nextSibling is a gap
-      endText = nextSibling.childNodes.item(1) as Text;
+      focusText = nextSibling.childNodes.item(1) as Text;
       focusOffset = 0;
     }
   }
 
   const range = document.createRange();
-  range.setStart(startText, anchorOffset);
-  range.setEnd(endText, focusOffset);
+  range.setStart(anchorText, anchorOffset);
+  range.setEnd(focusText, focusOffset);
 
   return range;
 }
