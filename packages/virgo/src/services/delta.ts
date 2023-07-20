@@ -201,7 +201,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
   };
 
   // render current deltas to VLines
-  render = async () => {
+  render = async (syncVRange = true) => {
     const rootElement = this._editor.rootElement;
 
     const normalizedDeltas = this.normalizedDeltas;
@@ -262,9 +262,11 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
 
     await this._editor.waitForUpdate();
 
-    // We need to synchronize the selection immediately after rendering is completed,
-    // otherwise there is a possibility of an error in the cursor position
-    this._editor.rangeService.syncVRange();
+    if (syncVRange) {
+      // We need to synchronize the selection immediately after rendering is completed,
+      // otherwise there is a possibility of an error in the cursor position
+      this._editor.rangeService.syncVRange();
+    }
 
     this._editor.slots.updated.emit();
   };

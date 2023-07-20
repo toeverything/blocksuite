@@ -32,7 +32,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     ) {
       // no need to sync and native selection behavior about shift+arrow will
       // be broken if we sync
-      this._editor.requestUpdate();
+      this._editor.requestUpdate(false);
     }
     this._prevVRange = newVRange;
 
