@@ -433,9 +433,9 @@ export async function initDatabaseDynamicRowWithData(
   if (addRow) {
     await initDatabaseRow(page);
   }
+  await focusDatabaseTitle(page);
   const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
-  await cell.click();
   await cell.click();
   await type(page, data);
   await pressEnter(page);
