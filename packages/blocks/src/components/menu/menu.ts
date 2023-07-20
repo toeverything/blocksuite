@@ -333,7 +333,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     this.focusInput();
   };
 
-  private get selectedItem() {
+  private get selectedItem(): Item | undefined {
     return this.items[this.selectedIndex];
   }
 
@@ -344,7 +344,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     if (index !== this.selectedIndex) {
       this.selectedIndex = index;
       this.clearSubMenu();
-      this.selectedItem.mouseEnter?.();
+      this.selectedItem?.mouseEnter?.();
     }
   };
 
@@ -366,7 +366,10 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     return html`
       <div class="affine-menu" @click="${this._clickContainer}">
         ${this.options.input
-          ? html` <div class="affine-menu-header">
+          ? html` <div
+                class="affine-menu-header"
+                @mouseenter="${() => this._mouseEnter(-1)}"
+              >
                 <input
                   ${ref(this.inputRef)}
                   type="text"

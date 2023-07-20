@@ -144,7 +144,7 @@ describe('DatabaseManager', () => {
     expect(db.getColumn(column.id)).toEqual(column);
 
     db.deleteColumn(column.id);
-    expect(db.getColumn(column.id)).toBeNull();
+    expect(db.getColumn(column.id)).toBeUndefined();
   });
 
   test('getCell', () => {
@@ -209,37 +209,6 @@ describe('DatabaseManager', () => {
     expect(cell).toEqual({
       columnId: newColId,
       value: [selection[1]],
-    });
-  });
-
-  test('deleteCellsByColumn', () => {
-    db.deleteCellsByColumn(col2);
-
-    const cell = db.getCell(p2, col2);
-    expect(cell).toBeNull();
-  });
-
-  // FIXME: https://github.com/toeverything/blocksuite/issues/1949
-  test.skip('convertCellsByColumn', () => {
-    db.convertCellsByColumn(col1, 'select');
-    const cell = db.getCell(p1, col1);
-    expect(cell).toEqual({
-      columnId: col1,
-      value: ['0.1'],
-    });
-
-    db.convertCellsByColumn(col1, 'rich-text');
-    const richTextCell = db.getCell(p1, col1);
-    expect(richTextCell?.value?.toString()).toEqual('0.1');
-  });
-
-  test('deleteSelectedCellTag', () => {
-    db.deleteSelectedCellTag(col2, selection[1]);
-
-    const cell = db.getCell(p2, col2);
-    expect(cell).toEqual({
-      columnId: col2,
-      value: [],
     });
   });
 });

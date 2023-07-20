@@ -9,7 +9,6 @@ import { DatabaseCellElement } from '../../register.js';
 export class TitleCell extends DatabaseCellElement<TemplateResult> {
   static override styles = css`
     affine-database-title-cell {
-      background-color: var(--affine-hover-color);
       position: relative;
     }
     affine-database-title-cell .mask {
