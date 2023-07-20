@@ -70,7 +70,7 @@ export class BlockElement<
   @property({ attribute: false })
   path!: string[];
 
-  get pathname(): string {
+  get pathName(): string {
     return this.path.join('|');
   }
 
@@ -108,11 +108,11 @@ export class BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.blockViewMap.set(this.pathname, this);
+    this.root.blockViewMap.set(this.pathName, this);
   }
 
   override disconnectedCallback() {
-    this.root.blockViewMap.delete(this.pathname);
+    this.root.blockViewMap.delete(this.pathName);
     super.disconnectedCallback();
   }
 
