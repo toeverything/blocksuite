@@ -54,7 +54,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       align-items: center;
       justify-content: flex-start;
       align-self: flex-start;
-      color: var(--affine-list-color);
+      color: var(--affine-blue-700);
       font-size: 14px;
       line-height: var(--affine-line-height);
       user-select: none;
