@@ -28,6 +28,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
+import { toast } from '../../components/toast.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
@@ -35,7 +36,6 @@ import {
   updateBlockType,
 } from '../../page-block/utils/index.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
-import { toast } from '../toast.js';
 import {
   formatDate,
   insertContent,
