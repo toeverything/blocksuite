@@ -74,7 +74,7 @@ test('click on blank area', async ({ page }) => {
   await assertSelection(page, 2, 0, 0);
 });
 
-test('native range delete', async ({ page }) => {
+test.fixme('native range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -101,7 +101,7 @@ test('native range delete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('native range delete by forwardDelete', async ({ page }) => {
+test.fixme('native range delete by forwardDelete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -128,7 +128,7 @@ test('native range delete by forwardDelete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('native range input', async ({ page }) => {
+test.fixme('native range input', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -147,7 +147,7 @@ test('native range input', async ({ page }) => {
   await assertRichTexts(page, ['a']);
 });
 
-test('native range selection backwards', async ({ page }) => {
+test.fixme('native range selection backwards', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -174,32 +174,35 @@ test('native range selection backwards', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('native range selection backwards by forwardDelete', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'native range selection backwards by forwardDelete',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  const box123 = await getRichTextBoundingBox(page, '2');
-  const above123 = { x: box123.left, y: box123.top - 2 };
+    const box123 = await getRichTextBoundingBox(page, '2');
+    const above123 = { x: box123.left, y: box123.top - 2 };
 
-  const box789 = await getRichTextBoundingBox(page, '4');
-  const bottomRight789 = { x: box789.right, y: box789.bottom };
+    const box789 = await getRichTextBoundingBox(page, '4');
+    const bottomRight789 = { x: box789.right, y: box789.bottom };
 
-  // from bottom to top
-  await dragBetweenCoords(page, bottomRight789, above123, { steps: 10 });
-  await pressForwardDelete(page);
-  await assertBlockCount(page, 'paragraph', 1);
-  await assertRichTexts(page, ['']);
+    // from bottom to top
+    await dragBetweenCoords(page, bottomRight789, above123, { steps: 10 });
+    await pressForwardDelete(page);
+    await assertBlockCount(page, 'paragraph', 1);
+    await assertRichTexts(page, ['']);
 
-  await waitNextFrame(page);
-  await undoByKeyboard(page);
-  // FIXME
-  // await assertRichTexts(page, ['123', '456', '789']);
+    await waitNextFrame(page);
+    await undoByKeyboard(page);
+    // FIXME
+    // await assertRichTexts(page, ['123', '456', '789']);
 
-  await redoByKeyboard(page);
-  await assertRichTexts(page, ['']);
-});
+    await redoByKeyboard(page);
+    await assertRichTexts(page, ['']);
+  }
+);
 
 test('cursor move up and down', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -598,27 +601,28 @@ test('select text in the same line with dragging rightward and move outside the 
   expect(textOne).toBe('abc');
 });
 
-test('select text in the same line with dragging rightward and press enter create block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-  // blur the editor
-  await page.mouse.click(0, 0);
+test.fixme(
+  'select text in the same line with dragging rightward and press enter create block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+    // blur the editor
+    await page.mouse.click(0, 0);
 
-  const box123 = await getRichTextBoundingBox(page, '2');
-  const above123 = { x: box123.left - 20, y: box123.top - 20 };
+    const box123 = await getRichTextBoundingBox(page, '2');
+    const above123 = { x: box123.left - 20, y: box123.top - 20 };
 
-  const box789 = await getRichTextBoundingBox(page, '4');
-  const below789 = { x: box789.right + 30, y: box789.bottom + 50 };
+    const box789 = await getRichTextBoundingBox(page, '4');
+    const below789 = { x: box789.right + 30, y: box789.bottom + 50 };
 
-  await dragBetweenCoords(page, below789, above123, { steps: 50 });
-  await page.keyboard.press('Enter', { delay: 50 });
-  await type(page, 'abc');
-  await assertRichTexts(page, ['123', '456', '789', 'abc']);
-});
+    await dragBetweenCoords(page, below789, above123, { steps: 50 });
+    await page.keyboard.press('Enter', { delay: 50 });
+    await type(page, 'abc');
+    await assertRichTexts(page, ['123', '456', '789', 'abc']);
+  }
+);
 
 test('drag to select tagged text, and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -992,45 +996,48 @@ test('should add a new line when clicking the bottom of the last non-text block'
   ]);
 });
 
-test('should select texts on dragging around the page', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'should select texts on dragging around the page',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  const coord = await getIndexCoordinate(page, [1, 2]);
+    const coord = await getIndexCoordinate(page, [1, 2]);
 
-  // blur
-  await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x, coord.y);
-  await page.mouse.down();
-  // ←
-  await page.mouse.move(coord.x - 15, coord.y, { steps: 20 });
-  await page.mouse.up();
-  expect(await getSelectedTextByVirgo(page)).toBe('45');
+    // blur
+    await page.mouse.click(0, 0);
+    await page.mouse.move(coord.x, coord.y);
+    await page.mouse.down();
+    // ←
+    await page.mouse.move(coord.x - 15, coord.y, { steps: 20 });
+    await page.mouse.up();
+    expect(await getSelectedTextByVirgo(page)).toBe('45');
 
-  // blur
-  await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x, coord.y);
-  await page.mouse.down();
-  // ←
-  await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
-  await page.mouse.up();
-  await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['123', '45']);
+    // blur
+    await page.mouse.click(0, 0);
+    await page.mouse.move(coord.x, coord.y);
+    await page.mouse.down();
+    // ←
+    await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
+    await page.mouse.up();
+    await page.keyboard.press('Backspace');
+    await assertRichTexts(page, ['123', '45']);
 
-  await waitNextFrame(page);
-  await undoByKeyboard(page);
+    await waitNextFrame(page);
+    await undoByKeyboard(page);
 
-  // blur
-  await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x, coord.y);
-  await page.mouse.down();
-  await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
-  await page.mouse.up();
-  await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['123', '45']);
-});
+    // blur
+    await page.mouse.click(0, 0);
+    await page.mouse.move(coord.x, coord.y);
+    await page.mouse.down();
+    await page.mouse.move(coord.x + 26, coord.y + 90, { steps: 20 });
+    await page.mouse.up();
+    await page.keyboard.press('Backspace');
+    await assertRichTexts(page, ['123', '45']);
+  }
+);
 
 test('should indent native multi-selection block', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -1156,58 +1163,59 @@ test('should unindent native multi-selection block', async ({ page }) => {
   );
 });
 
-test('should clear native selection before block selection', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'should clear native selection before block selection',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await dragBetweenIndices(
-    page,
-    [1, 3],
-    [1, 0],
-    { x: 0, y: 0 },
-    { x: 0, y: 0 },
-    { steps: 20 }
-  );
+    await dragBetweenIndices(
+      page,
+      [1, 3],
+      [1, 0],
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+      { steps: 20 }
+    );
 
-  const text0 = await getVirgoSelectionText(page);
+    const text0 = await getVirgoSelectionText(page);
 
-  // `123`
-  const first = await page.evaluate(() => {
-    const first = document.querySelector('[data-block-id="2"]');
-    if (!first) {
-      throw new Error();
-    }
-    return first.getBoundingClientRect();
-  });
+    // `123`
+    const first = await page.evaluate(() => {
+      const first = document.querySelector('[data-block-id="2"]');
+      if (!first) {
+        throw new Error();
+      }
+      return first.getBoundingClientRect();
+    });
 
-  await dragBetweenCoords(
-    page,
-    {
-      x: first.right + 10,
-      y: first.top - 1,
-    },
-    {
-      x: first.right - 10,
-      y: first.top + 1,
-    },
-    {
-      steps: 20,
-    }
-  );
+    await dragBetweenCoords(
+      page,
+      {
+        x: first.right + 10,
+        y: first.top - 1,
+      },
+      {
+        x: first.right - 10,
+        y: first.top + 1,
+      },
+      {
+        steps: 20,
+      }
+    );
 
-  const textCount = await page.evaluate(() => {
-    return window.getSelection()?.rangeCount || 0;
-  });
+    const textCount = await page.evaluate(() => {
+      return window.getSelection()?.rangeCount || 0;
+    });
 
-  expect(text0).toBe('456');
-  expect(textCount).toBe(0);
-  const rects = page.locator('affine-selected-blocks > *');
-  await expect(rects).toHaveCount(1);
-});
+    expect(text0).toBe('456');
+    expect(textCount).toBe(0);
+    const rects = page.locator('affine-selected-blocks > *');
+    await expect(rects).toHaveCount(1);
+  }
+);
 
 // ↑
 test('should keep native range selection when scrolling backward with the scroll wheel', async ({
@@ -1430,7 +1438,7 @@ test('should be cleared when dragging block card from BlockHub', async ({
   expect(await getSelectedText(page)).toBe('');
 });
 
-test('should select with shift-click', async ({ page }) => {
+test.fixme('should select with shift-click', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);

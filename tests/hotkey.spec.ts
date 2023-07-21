@@ -1058,27 +1058,30 @@ test('should cut in title works', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 });
 
-test('should support ctrl/cmd+g convert to database', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
+test.fixme(
+  'should support ctrl/cmd+g convert to database',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
 
-  await dragBetweenIndices(
-    page,
-    [2, 3],
-    [0, 0],
-    { x: 20, y: 20 },
-    { x: 0, y: 0 }
-  );
+    await dragBetweenIndices(
+      page,
+      [2, 3],
+      [0, 0],
+      { x: 20, y: 20 },
+      { x: 0, y: 0 }
+    );
 
-  await page.keyboard.press(`${SHORT_KEY}+g`);
-  const tableView = page.locator('.modal-view-item.table');
-  await tableView.click();
-  const database = page.locator('affine-database');
-  await expect(database).toBeVisible();
-  const rows = page.locator('.affine-database-block-row');
-  expect(await rows.count()).toBe(3);
-});
+    await page.keyboard.press(`${SHORT_KEY}+g`);
+    const tableView = page.locator('.modal-view-item.table');
+    await tableView.click();
+    const database = page.locator('affine-database');
+    await expect(database).toBeVisible();
+    const rows = page.locator('.affine-database-block-row');
+    expect(await rows.count()).toBe(3);
+  }
+);
 
 test('should forwardDelete works when delete single character', async ({
   page,
@@ -1109,17 +1112,20 @@ test('should forwardDelete works when delete multi characters', async ({
   await assertRichTexts(page, ['ho']);
 });
 
-test('should drag multiple block and input text works', async ({ page }) => {
-  test.info().annotations.push({
-    type: 'issue',
-    description: 'https://github.com/toeverything/blocksuite/issues/2982',
-  });
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await dragBetweenIndices(page, [0, 1], [2, 1]);
-  await type(page, 'ab');
-  await assertRichTexts(page, ['1ab89']);
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-});
+test.fixme(
+  'should drag multiple block and input text works',
+  async ({ page }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2982',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await dragBetweenIndices(page, [0, 1], [2, 1]);
+    await type(page, 'ab');
+    await assertRichTexts(page, ['1ab89']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+  }
+);

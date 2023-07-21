@@ -18,9 +18,13 @@ export { type PageBlockModel, PageBlockSchema } from './page-model.js';
 export * from './page-service.js';
 export * from './utils/index.js';
 
-export type PageBlockWidgetName = 'slashMenu' | 'linkedPage';
+export type DocPageBlockWidgetName =
+  | 'slashMenu'
+  | 'linkedPage'
+  | 'draggingArea';
+export type EdgelessPageBlockWidgetName = 'slashMenu' | 'linkedPage';
 
-export const pageBlockSpec: LitBlockSpec<PageBlockWidgetName> = {
+export const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: DefaultPageService,
   view: {
@@ -28,11 +32,12 @@ export const pageBlockSpec: LitBlockSpec<PageBlockWidgetName> = {
     widgets: {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
+      draggingArea: literal`affine-doc-dragging-area-widget`,
     },
   },
 };
 
-export const edgelessBlockSpec: LitBlockSpec<PageBlockWidgetName> = {
+export const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: EdgelessPageService,
   view: {

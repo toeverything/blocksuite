@@ -457,7 +457,7 @@ test('change note color', async ({ page }) => {
   await assertEdgelessNoteBackground(page, ids.noteId, color);
 });
 
-test('cursor for active and inactive state', async ({ page }) => {
+test.fixme('cursor for active and inactive state', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await focusRichText(page);

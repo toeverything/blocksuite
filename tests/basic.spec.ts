@@ -370,6 +370,7 @@ test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await focusRichText(page);
   await waitNextFrame(page);
   await undoByKeyboard(page);
+  await waitNextFrame(page);
   await redoByKeyboard(page);
   await waitNextFrame(page);
   await type(page, '4');

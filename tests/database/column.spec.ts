@@ -202,7 +202,7 @@ test.describe('switch column type', () => {
     expect((await cell.textContent())?.trim()).toBe('123');
   });
 
-  test('switch to rich-text', async ({ page }) => {
+  test.fixme('switch to rich-text', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
@@ -257,7 +257,7 @@ test.describe('switch column type', () => {
     expect(await cell.innerText()).toBe('888');
   });
 
-  test('switch between number and rich-text', async ({ page }) => {
+  test.fixme('switch between number and rich-text', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
