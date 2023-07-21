@@ -64,6 +64,7 @@ import type {
   ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
+  PageBlockWidgetName,
   SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
@@ -133,7 +134,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends BlockElement<PageBlockModel, EdgelessPageService>
+  extends BlockElement<PageBlockModel, EdgelessPageService, PageBlockWidgetName>
   implements EdgelessContainer, BlockHost
 {
   static override styles = css`
@@ -1273,7 +1274,8 @@ export class EdgelessPageBlockComponent
               ></edgeless-selected-rect>
             `
           : nothing}
-        ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets}
+        ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets.slashMenu}
+        ${this.widgets.linkedPage}
       </div>
     `;
   }
