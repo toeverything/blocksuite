@@ -1,6 +1,6 @@
 import type { DocProviderCreator } from '@blocksuite/store';
 
-import { IndexedDBProviderWrapper } from '../providers/indexdb-provider';
+import { IndexedDBProviderWrapper } from '../providers/indexeddb-provider';
 import { params } from '../utils';
 
 export function getProviderCreators() {

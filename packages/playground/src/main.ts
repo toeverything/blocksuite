@@ -12,7 +12,7 @@ import type { DocProviderCreator, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
-import { INDEXED_DB_NAME } from './providers/indexdb-provider.js';
+import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 import { initCollaborationSocket } from './providers/websocket-channel.js';
 import {
   createEditor,
