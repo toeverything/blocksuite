@@ -78,7 +78,7 @@ export class TextElement extends SurfaceElement<IText> {
     let charIndex = 0;
     while (currentStringWidth < offsetX) {
       index += 1;
-      if (string === '') {
+      if (charIndex === string.length) {
         break;
       }
       currentStringWidth += charWidth.calculate(string[charIndex], this.font);
