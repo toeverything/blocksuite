@@ -1,5 +1,3 @@
-import type { Slot } from '@blocksuite/store';
-
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
 import {
@@ -7,6 +5,7 @@ import {
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
 import type { TableViewData } from '../common/view-manager.js';
+import type { ViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
@@ -17,31 +16,30 @@ export class DataViewTableManager extends BaseDataViewManager {
   ) => void;
 
   constructor(
-    private getView: () => TableViewData,
-    private ____updateView: (
-      updater: (view: TableViewData) => Partial<TableViewData>
-    ) => void,
-    viewUpdatedSlot: Slot,
+    private viewSource: ViewSource<TableViewData>,
     dataSource: DataSource
   ) {
     super(dataSource);
     this.updateView = updater => {
       this.syncView();
-      ____updateView(updater);
+      viewSource.updateView(updater);
     };
-    viewUpdatedSlot.pipe(this.slots.update);
+    viewSource.updateSlot.pipe(this.slots.update);
   }
 
+  get view() {
+    return this.viewSource.view;
+  }
   get filter(): FilterGroup {
-    return this.getView().filter;
+    return this.view.filter;
   }
 
   get id() {
-    return this.getView().id;
+    return this.view.id;
   }
 
   get name(): string {
-    return this.getView().name;
+    return this.view.name;
   }
 
   updateFilter(filter: FilterGroup): void {
@@ -61,10 +59,10 @@ export class DataViewTableManager extends BaseDataViewManager {
   }
 
   private syncView() {
-    if (this.getView().columns.length === this.columns.length) {
+    if (this.view.columns.length === this.columns.length) {
       return;
     }
-    this.____updateView(view => {
+    this.viewSource.updateView(view => {
       return {
         columns: this.columnManagerList.map((column, i) => ({
           id: column.id,
@@ -81,7 +79,7 @@ export class DataViewTableManager extends BaseDataViewManager {
 
   public columnGetWidth(columnId: string): number {
     return (
-      this.getView().columns.find(v => v.id === columnId)?.width ??
+      this.view.columns.find(v => v.id === columnId)?.width ??
       this.dataSource.propertyGetDefaultWidth(columnId)
     );
   }
@@ -115,7 +113,7 @@ export class DataViewTableManager extends BaseDataViewManager {
   public get columns(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
-    this.getView().columns.forEach(v => {
+    this.view.columns.forEach(v => {
       if (needShow.has(v.id)) {
         result.push(v.id);
         needShow.delete(v.id);

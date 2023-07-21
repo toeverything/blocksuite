@@ -8,6 +8,11 @@ export interface DataSource {
   rows: string[];
   cellGetValue: (rowId: string, propertyId: string) => unknown;
   cellGetRenderValue: (rowId: string, propertyId: string) => unknown;
+  cellChangeRenderValue: (
+    rowId: string,
+    propertyId: string,
+    value: unknown
+  ) => unknown;
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
   rowAdd: (insertPosition: InsertPosition) => string;
   rowDelete: (ids: string[]) => void;
@@ -42,10 +47,17 @@ export abstract class BaseDataSource implements DataSource {
     value: unknown
   ): void;
 
-  public abstract cellGetRenderValue(
+  public cellChangeRenderValue(
     rowId: string,
-    propertyId: string
-  ): unknown;
+    propertyId: string,
+    value: unknown
+  ): void {
+    this.cellChangeValue(rowId, propertyId, value);
+  }
+
+  public cellGetRenderValue(rowId: string, propertyId: string): unknown {
+    return this.cellGetValue(rowId, propertyId);
+  }
 
   public abstract cellGetValue(rowId: string, propertyId: string): unknown;
 

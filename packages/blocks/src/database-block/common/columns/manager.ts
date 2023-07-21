@@ -37,6 +37,7 @@ type ColumnOps<
 > = {
   defaultData: () => Data;
   type: (data: Data) => TType;
+  formatValue?: (value: unknown, colData: Data) => Value;
   cellToString: (data: Value, colData: Data) => string;
   cellToJson: (data: Value, colData: Data) => JSON;
 };
@@ -182,6 +183,12 @@ class ColumnHelper<
 
   toJson(cellData: CellData, colData: T): JSON {
     return this.ops.cellToJson(cellData, colData);
+  }
+
+  formatValue(cellData: CellData, colData: T): CellData | undefined {
+    return cellData === undefined
+      ? undefined
+      : this.ops.formatValue?.(cellData, colData) ?? cellData;
   }
 }
 

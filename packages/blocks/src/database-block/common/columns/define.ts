@@ -43,6 +43,12 @@ export const multiSelectHelper = columnManager.register<
   defaultData: () => ({
     options: [],
   }),
+  formatValue: v => {
+    if (Array.isArray(v)) {
+      return v.filter(v => v != null);
+    }
+    return [];
+  },
   cellToString: (data, colData) =>
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
   cellToJson: data => data ?? null,

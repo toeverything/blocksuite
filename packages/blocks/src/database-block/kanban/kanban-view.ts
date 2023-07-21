@@ -16,9 +16,9 @@ const styles = css`
     display: flex;
     padding: 20px 0;
     gap: 20px;
+    overflow-x: auto;
   }
 `;
-
 @customElement('affine-data-view-kanban')
 export class DataViewKanban extends WithDisposable(ShadowlessElement) {
   static override styles = styles;

@@ -20,6 +20,8 @@ export interface DataViewManager {
 
   get rows(): string[];
 
+  cellGetValue(rowId: string, columnId: string): unknown;
+
   cellGetRenderValue(rowId: string, columnId: string): unknown;
 
   cellGetFilterValue(rowId: string, columnId: string): unknown;
@@ -27,6 +29,8 @@ export interface DataViewManager {
   cellGetStringValue(rowId: string, columnId: string): string;
 
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void;
+
+  cellUpdateValue(rowId: string, columnId: string, value: unknown): void;
 
   rowDelete(ids: string[]): void;
 
@@ -174,11 +178,20 @@ export abstract class BaseDataViewManager implements DataViewManager {
     update: new Slot(),
   };
 
+  public cellGetValue(rowId: string, columnId: string): unknown {
+    return columnManager
+      .getColumn(this.columnGetType(columnId))
+      .formatValue(
+        this.dataSource.cellGetValue(rowId, columnId),
+        this.columnGetData(columnId)
+      );
+  }
+
   public cellGetFilterValue(rowId: string, columnId: string): unknown {
     return columnManager
       .getColumn(this.columnGetType(columnId))
       .toJson(
-        this.cellGetRenderValue(rowId, columnId),
+        this.dataSource.cellGetValue(rowId, columnId),
         this.columnGetData(columnId)
       );
   }
@@ -198,6 +211,13 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   public cellUpdateRenderValue(
+    rowId: string,
+    columnId: string,
+    value: unknown
+  ): void {
+    this.dataSource.cellChangeValue(rowId, columnId, value);
+  }
+  public cellUpdateValue(
     rowId: string,
     columnId: string,
     value: unknown

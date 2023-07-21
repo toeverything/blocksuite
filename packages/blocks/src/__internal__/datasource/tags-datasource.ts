@@ -94,7 +94,10 @@ export class TagsDatasource extends BaseDataSource {
     }
   }
 
-  public cellGetRenderValue(rowId: string, propertyId: string): unknown {
+  public override cellGetRenderValue(
+    rowId: string,
+    propertyId: string
+  ): unknown {
     return this.cellGetValue(rowId, propertyId);
   }
 

@@ -12,6 +12,7 @@ import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
 import type { DataViewManager } from './common/data-view-manager.js';
+import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
@@ -52,21 +53,30 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return this.model.views.find(v => v.id === id);
   };
 
+  private viewSource(id: string): ViewSource {
+    const getViewDataById = this.getViewDataById;
+    return {
+      get view() {
+        const view = getViewDataById(id);
+        if (!view) {
+          throw new Error(`view ${id} not found`);
+        }
+        return view as never;
+      },
+      updateView: updater => {
+        this.model.updateView(id, updater as never);
+      },
+      updateSlot: this.model.propsUpdated,
+    };
+  }
+
   private getView(id: string): DataViewManager {
     if (!this.viewMap[id]) {
       this.viewMap[id] = new {
         table: DataViewTableManager,
         kanban: DataViewKanbanManager,
       }[this.getViewDataById(id)?.mode ?? 'table'](
-        () => {
-          const view = this.getViewDataById(id);
-          if (!view) {
-            throw new Error(`view ${id} not found`);
-          }
-          return view as never;
-        },
-        update => this.model.updateView(id, update as never),
-        this.model.propsUpdated,
+        this.viewSource(id) as never,
         this.dataSource
       );
     }

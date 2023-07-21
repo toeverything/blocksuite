@@ -40,7 +40,7 @@ import {
   textHelper,
   titleHelper,
 } from './define.js';
-import type { CellRenderer } from './manager.js';
+import type { CellRenderer, GroupRenderer } from './manager.js';
 
 export interface Renderer<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
@@ -48,6 +48,7 @@ export interface Renderer<
 > {
   type: string;
   cellRenderer: CellRenderer<Data, Value>;
+  groupRenderer?: GroupRenderer<Data, Value>;
   // dataRenderer: UniComponent<{
   //   value
   // }>;

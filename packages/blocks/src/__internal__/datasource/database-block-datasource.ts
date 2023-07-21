@@ -61,7 +61,10 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return this._model.getCell(rowId, propertyId)?.value;
   }
 
-  public cellGetRenderValue(rowId: string, propertyId: string): unknown {
+  public override cellGetRenderValue(
+    rowId: string,
+    propertyId: string
+  ): unknown {
     const type = this.propertyGetType(propertyId);
     if (type === 'title') {
       const model = this._model.children[this._model.childMap.get(rowId) ?? -1];

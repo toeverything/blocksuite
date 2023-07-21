@@ -1,4 +1,4 @@
-// related component
+import './cell.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
@@ -15,6 +15,7 @@ const styles = css`
     gap: 8px;
     border: 1px solid var(--affine-border-color);
     border-radius: 8px;
+    padding: 4px;
   }
 `;
 
@@ -33,19 +34,12 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       ${repeat(
         columns,
         v => v.id,
-        v => {
-          const props = {
-            column: v,
-            rowId: this.cardId,
-            isEditing: false,
-            selectCurrentCell: () => {
-              //
-            },
-          };
-          return html`<uni-lit
-            .uni=${v.renderer.view}
-            .props=${props}
-          ></uni-lit>`;
+        column => {
+          return html` <affine-data-view-kanban-cell
+            .view="${this.view}"
+            .column="${column}"
+            .cardId="${this.cardId}"
+          ></affine-data-view-kanban-cell>`;
         }
       )}
     </div>`;

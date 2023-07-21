@@ -18,6 +18,7 @@ import {
 } from '../__internal__/datasource/datasource-manager.js';
 import { registerService } from '../__internal__/service.js';
 import type { DataViewManager } from '../database-block/common/data-view-manager.js';
+import type { ViewSource } from '../database-block/common/view-source.js';
 import type { BlockOperation } from '../database-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/index.js';
 import { DataViewTableManager } from '../database-block/table/table-view-manager.js';
@@ -46,21 +47,34 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
 
   private viewMap: Record<string, DataViewManager> = {};
 
+  private getViewDataById = (id: string) => {
+    return this.model.views.find(v => v.id === id);
+  };
+
+  private viewSource(id: string): ViewSource {
+    const getViewDataById = this.getViewDataById;
+    return {
+      get view() {
+        const view = getViewDataById(id);
+        if (!view) {
+          throw new Error(`view ${id} not found`);
+        }
+        return view as never;
+      },
+      updateView: updater => {
+        this.model.updateView(id, updater as never);
+      },
+      updateSlot: this.model.propsUpdated,
+    };
+  }
+
   private getView(id: string): DataViewManager {
     if (!this.viewMap[id]) {
       const view = this.model.views.find(v => v.id === id);
       assertExists(view);
       assertExists(view.dataSource);
       this.viewMap[id] = new DataViewTableManager(
-        () => {
-          const view = this.model.views.find(v => v.id === id);
-          if (!view || view.mode !== 'table') {
-            throw new Error(`view ${id} not found`);
-          }
-          return view;
-        },
-        update => this.model.updateView(id, update as never),
-        this.model.propsUpdated,
+        this.viewSource(id) as never,
         createDatasource(this.root, view.dataSource)
       );
     }
