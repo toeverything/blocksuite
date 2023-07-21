@@ -40,6 +40,7 @@ export {
   polygonNearestPoint,
   polygonPointDistance,
   polyLineNearestPoint,
+  rotatePoints,
   sign,
   toRadian,
 } from './utils/math-utils.js';

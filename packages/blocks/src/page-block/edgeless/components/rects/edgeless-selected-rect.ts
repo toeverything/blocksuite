@@ -39,6 +39,7 @@ import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
 import {
   calcAngle,
+  calcAngleEdgeWithRotation,
   calcAngleWithRotation,
   generateCursorUrl,
   rotateResizeCursor,
@@ -168,15 +169,30 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       top: 6px;
     }
 
+    .affine-edgeless-selected-rect .handle[aria-label='top'],
+    .affine-edgeless-selected-rect .handle[aria-label='bottom'],
+    .affine-edgeless-selected-rect .handle[aria-label='left'],
+    .affine-edgeless-selected-rect .handle[aria-label='right'] {
+      border: 0;
+      background: transparent;
+    }
+
     .affine-edgeless-selected-rect .handle[aria-label='left'],
     .affine-edgeless-selected-rect .handle[aria-label='right'] {
       top: 0;
       bottom: 0;
       height: 100%;
       width: 6px;
-      border: 0;
-      background: transparent;
     }
+
+    .affine-edgeless-selected-rect .handle[aria-label='top'],
+    .affine-edgeless-selected-rect .handle[aria-label='bottom'] {
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: 6px;
+    }
+
     /* calc(-1px - (6px - 1px) / 2) = -3.5px */
     .affine-edgeless-selected-rect .handle[aria-label='left'] {
       left: -3.5px;
@@ -184,13 +200,23 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label='right'] {
       right: -3.5px;
     }
+    .affine-edgeless-selected-rect .handle[aria-label='top'] {
+      top: -3.5px;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='bottom'] {
+      bottom: -3.5px;
+    }
 
+    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize,
+    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize,
     .affine-edgeless-selected-rect .handle[aria-label='left'] .resize,
     .affine-edgeless-selected-rect .handle[aria-label='right'] .resize {
       width: 100%;
       height: 100%;
     }
 
+    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize:after,
+    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after,
     .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after,
     .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
       position: absolute;
@@ -201,8 +227,32 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       z-index: 10;
       border: 2px var(--affine-blue) solid;
       content: '';
-      top: calc(50% - 6px);
       background: white;
+    }
+
+    .affine-edgeless-selected-rect
+      .handle[aria-label='top']
+      .transparent-handle:after,
+    .affine-edgeless-selected-rect
+      .handle[aria-label='bottom']
+      .transparent-handle:after,
+    .affine-edgeless-selected-rect
+      .handle[aria-label='left']
+      .transparent-handle:after,
+    .affine-edgeless-selected-rect
+      .handle[aria-label='right']
+      .transparent-handle:after {
+      opacity: 0;
+    }
+
+    .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after,
+    .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
+      top: calc(50% - 6px);
+    }
+
+    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize:after,
+    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after {
+      left: calc(50% - 6px);
     }
 
     .affine-edgeless-selected-rect .handle[aria-label='left'] .resize:after {
@@ -210,6 +260,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
     .affine-edgeless-selected-rect .handle[aria-label='right'] .resize:after {
       right: -0.5px;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='top'] .resize:after {
+      top: -0.5px;
+    }
+    .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after {
+      bottom: -0.5px;
     }
 
     edgeless-component-toolbar {
@@ -267,6 +323,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     if (this.state.selected.every(element => element.type === 'connector')) {
       return 'none';
     }
+
+    if (this.state.selected.every(element => element.type === 'shape')) {
+      return 'all';
+    }
+
     const hasBlockElement = this.state.selected.find(isTopLevelBlock);
     return hasBlockElement ? 'edge' : 'corner';
   }
@@ -413,6 +474,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         if (this.resizeMode === 'edge') {
           cursor = 'ew';
+        } else if (this.resizeMode === 'all' && target && point) {
+          cursor = rotateResizeCursor((this._rotate * Math.PI) / 180);
+          const angle = calcAngleEdgeWithRotation(target, this._rotate);
+          cursor = rotateResizeCursor((angle * Math.PI) / 180);
         } else if (target && point) {
           angle = calcAngleWithRotation(
             target,
