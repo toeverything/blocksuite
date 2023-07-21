@@ -110,8 +110,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
     const tag = view.component;
     const widgets: Record<string, TemplateResult> = view.widgets
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
-          const id = `${flavour}:${key}`;
-          const path = currentPath.concat(id);
+          const path = currentPath.concat(key);
 
           return {
             ...mapping,
