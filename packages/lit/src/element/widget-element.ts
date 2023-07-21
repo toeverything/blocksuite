@@ -28,7 +28,7 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
     return this.path.slice(0, -1);
   }
 
-  get widgetHostElement() {
+  get hostElement() {
     return this.root.blockViewMap.get(this.hostPath.join('|'));
   }
 

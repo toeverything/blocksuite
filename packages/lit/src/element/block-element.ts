@@ -7,6 +7,7 @@ import { property } from 'lit/decorators.js';
 import { WithDisposable } from '../with-disposable.js';
 import type { BlockSuiteRoot } from './lit-root.js';
 import { ShadowlessElement } from './shadowless-element.js';
+import type { WidgetElement } from './widget-element.js';
 
 // TODO: remove this
 export type FocusContext<
@@ -81,6 +82,15 @@ export class BlockElement<
 
   get parentBlockElement() {
     return this.root.blockViewMap.get(this.parentPath.join('|'));
+  }
+
+  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
+    return Object.keys(this.widgets).reduce((mapping, key) => {
+      return {
+        ...mapping,
+        [key]: this.root.widgetViewMap.get([...this.path, key].join('|')),
+      };
+    }, {}) as Partial<Record<WidgetName, WidgetElement>>;
   }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {
