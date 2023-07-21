@@ -50,6 +50,7 @@ export type FocusContext<
 export class BlockElement<
   Model extends BaseBlockModel = BaseBlockModel,
   Service extends BlockService = BlockService,
+  WidgetName extends string = string,
   FocusCtx extends FocusContext<Model, Service> = FocusContext<Model, Service>
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
@@ -62,7 +63,7 @@ export class BlockElement<
   content!: TemplateResult;
 
   @property({ attribute: false })
-  widgets!: TemplateResult;
+  widgets!: Record<WidgetName, TemplateResult>;
 
   @property({ attribute: false })
   page!: Page;
