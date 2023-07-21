@@ -84,7 +84,7 @@ export class BlockElement<
     return this.root.blockViewMap.get(this.parentPath.join('|'));
   }
 
-  get widgetInstances(): Record<string, WidgetElement> {
+  get widgetElements(): Record<string, WidgetElement> {
     return Object.keys(this.widgets).reduce((mapping, key) => {
       return {
         ...mapping,
