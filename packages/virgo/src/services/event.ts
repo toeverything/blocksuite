@@ -227,10 +227,19 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onCompositionStart = () => {
     this._isComposing = true;
+    // embeds is not editable and it will break IME
+    const embeds = this._editor.rootElement.querySelectorAll(
+      '[data-virgo-embed="true"]'
+    );
+    embeds.forEach(embed => {
+      embed.removeAttribute('contenteditable');
+    });
   };
 
-  private _onCompositionEnd = (event: CompositionEvent) => {
+  private _onCompositionEnd = async (event: CompositionEvent) => {
     this._isComposing = false;
+    this._editor.rerenderWholeEditor();
+    await this._editor.waitForUpdate();
 
     if (this._editor.isReadonly) return;
 
