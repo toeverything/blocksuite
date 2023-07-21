@@ -34,6 +34,7 @@ import {
 import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DragHandle } from '../../components/index.js';
+import type { PageBlockWidgetName } from '../index.js';
 import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
@@ -57,7 +58,7 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends BlockElement<PageBlockModel, DefaultPageService>
+  extends BlockElement<PageBlockModel, DefaultPageService, PageBlockWidgetName>
   implements BlockHost
 {
   static override styles = css`
@@ -575,7 +576,7 @@ export class DefaultPageBlockComponent
           }}"
           .offset="${viewportOffset}"
         ></affine-selected-blocks>
-        ${this.widgets} ${draggingArea}
+        ${this.widgets.slashMenu} ${this.widgets.linkedPage} ${draggingArea}
       </div>
     `;
   }

@@ -16,8 +16,12 @@ import { html, unsafeStatic } from 'lit/static-html.js';
 
 import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
+import type { WidgetElement } from './widget-element.js';
 
-export type LitBlockSpec = BlockSpec<StaticValue>;
+export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
+  StaticValue,
+  WidgetNames
+>;
 
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
@@ -39,6 +43,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
   blockStore!: BlockStore<StaticValue>;
 
   blockViewMap = new Map<string, BlockElement>();
+  widgetViewMap = new Map<string, WidgetElement>();
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
@@ -103,11 +108,17 @@ export class BlockSuiteRoot extends ShadowlessElement {
     const currentPath = path.concat(model.id);
 
     const tag = view.component;
-    const widgets = view.widgets
-      ? html`${repeat(view.widgets, widget => {
-          return html`<${widget} .root=${this} .model=${model}></${widget}>`;
-        })}`
-      : html`${nothing}`;
+    const widgets: Record<string, TemplateResult> = view.widgets
+      ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
+          const id = `${flavour}:${key}`;
+          const path = currentPath.concat(id);
+
+          return {
+            ...mapping,
+            [key]: html`<${tag} .path=${path} .root=${this} .page=${this.page}></${tag}>`,
+          };
+        }, {})
+      : {};
 
     this._onLoadModel(model);
 
