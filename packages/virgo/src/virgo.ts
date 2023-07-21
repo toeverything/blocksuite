@@ -1,5 +1,6 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import { html, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
@@ -395,6 +396,11 @@ export class VEditor<
       this.deltaService.render();
     });
   };
+
+  rerenderWholeEditor() {
+    render(html`<div></div>`, this.rootElement);
+    this._deltaService.render();
+  }
 
   private _transact(fn: () => void): void {
     const doc = this.yText.doc;
