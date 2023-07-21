@@ -458,6 +458,8 @@ test('should format quick bar be able to link text', async ({ page }) => {
     noteId
   );
 
+  // FIXME: remove this
+  await focusRichText(page);
   await setSelection(page, 3, 0, 3, 3);
   // The link button should be active after click
   await expect(linkBtn).toHaveAttribute('active', '');

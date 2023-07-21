@@ -322,7 +322,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return;
     } else {
       if (selected instanceof TextElement) {
-        mountTextEditor(selected, this._edgeless);
+        const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
+          e.x,
+          e.y
+        );
+        mountTextEditor(selected, this._edgeless, { x: modelX, y: modelY });
         return;
       }
       if (selected instanceof ShapeElement) {

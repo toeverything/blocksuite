@@ -1,4 +1,4 @@
-import { WORKSPACE_VERSION } from '@blocksuite/global/config';
+import { PAGE_VERSION, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 
@@ -27,6 +27,7 @@ type WorkspaceMetaState = {
   pages?: unknown[];
   properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
+  pageVersion?: number;
   blockVersions?: Record<string, number>;
   name?: string;
   avatar?: string;
@@ -54,6 +55,7 @@ export class WorkspaceMeta {
     });
     this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
     this._proxy.workspaceVersion = WORKSPACE_VERSION;
+    this._proxy.pageVersion = PAGE_VERSION;
   }
 
   get yPages() {
@@ -80,16 +82,20 @@ export class WorkspaceMeta {
     return this._proxy.workspaceVersion;
   }
 
+  get pageVersion() {
+    return this._proxy.pageVersion;
+  }
+
   setName(name: string) {
     this.doc.transact(() => {
       this._proxy.name = name;
-    });
+    }, this.doc.clientID);
   }
 
   setAvatar(avatar: string) {
     this.doc.transact(() => {
       this._proxy.avatar = avatar;
-    });
+    }, this.doc.clientID);
   }
 
   get pageMetas() {
@@ -114,7 +120,7 @@ export class WorkspaceMeta {
       } else {
         pages.splice(index, 0, page);
       }
-    });
+    }, this.doc.clientID);
   }
 
   /**
@@ -135,7 +141,7 @@ export class WorkspaceMeta {
       Object.entries(props).forEach(([key, value]) => {
         page[key] = value;
       });
-    });
+    }, this.doc.clientID);
   }
 
   removePageMeta(id: string) {
@@ -149,7 +155,7 @@ export class WorkspaceMeta {
     this.doc.transact(() => {
       assertExists(this.pages);
       this.pages.splice(index, 1);
-    });
+    }, this.doc.clientID);
   }
 
   get hasVersion() {
@@ -275,5 +281,6 @@ export class WorkspaceMeta {
 
   setProperties(meta: PagesPropertiesMeta) {
     this._proxy.properties = meta;
+    this.pageMetasUpdated.emit();
   }
 }

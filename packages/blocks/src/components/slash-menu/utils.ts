@@ -1,5 +1,4 @@
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { Page } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
@@ -71,4 +70,8 @@ export function formatDate(date: Date) {
 
 export function insideDatabase(model: BaseBlockModel) {
   return Utils.isInsideBlockByFlavour(model.page, model, 'affine:database');
+}
+
+export function insideDataView(model: BaseBlockModel) {
+  return Utils.isInsideBlockByFlavour(model.page, model, 'affine:data-view');
 }

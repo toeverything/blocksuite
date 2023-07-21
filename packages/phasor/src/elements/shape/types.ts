@@ -34,6 +34,8 @@ export interface IShape extends ISurfaceElement {
   textAlign?: 'left' | 'center' | 'right';
   textHorizontalAlign?: 'left' | 'center' | 'right';
   textVerticalAlign?: 'top' | 'center' | 'bottom';
+  bold?: boolean;
+  italic?: boolean;
 }
 
 export interface IShapeLocalRecord extends ISurfaceElementLocalRecord {

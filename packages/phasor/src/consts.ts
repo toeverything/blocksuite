@@ -20,3 +20,8 @@ export enum StrokeStyle {
   Dashed = 'dash',
   None = 'none',
 }
+
+export interface IModelCoord {
+  x: number;
+  y: number;
+}

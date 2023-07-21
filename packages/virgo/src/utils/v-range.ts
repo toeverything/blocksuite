@@ -1,5 +1,12 @@
 import type { VRange } from '../types.js';
 
+export function isMaybeVRangeEqual(
+  a: VRange | null,
+  b: VRange | null
+): boolean {
+  return a === b || (a && b ? isVRangeEqual(a, b) : false);
+}
+
 export function isVRangeContain(a: VRange, b: VRange): boolean {
   return a.index <= b.index && a.index + a.length >= b.index + b.length;
 }

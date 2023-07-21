@@ -1,7 +1,11 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
 import type { BlockSpec } from '@blocksuite/block-std';
-import { BlockStore, UIEventDispatcher } from '@blocksuite/block-std';
+import {
+  BlockStore,
+  SelectionManager,
+  UIEventDispatcher,
+} from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
@@ -10,9 +14,14 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
+import type { WidgetElement } from './widget-element.js';
 
-export type LitBlockSpec = BlockSpec<StaticValue>;
+export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
+  StaticValue,
+  WidgetNames
+>;
 
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
@@ -27,30 +36,50 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   modelSubscribed = new Set<string>();
 
-  uiEventDispatcher = new UIEventDispatcher(this);
+  uiEventDispatcher!: UIEventDispatcher;
+
+  selectionManager!: SelectionManager;
 
   blockStore!: BlockStore<StaticValue>;
+
+  blockViewMap = new Map<string, BlockElement>();
+  widgetViewMap = new Map<string, WidgetElement>();
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
       this.blockStore.applySpecs(this.blocks);
+    }
+    if (changedProperties.has('page')) {
+      this.blockStore.page = this.page;
     }
     super.willUpdate(changedProperties);
   }
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.uiEventDispatcher = new UIEventDispatcher(this);
+    this.selectionManager = new SelectionManager(this, this.page.workspace);
     this.blockStore = new BlockStore<StaticValue>({
       uiEventDispatcher: this.uiEventDispatcher,
+      selectionManager: this.selectionManager,
+      workspace: this.page.workspace,
+      page: this.page,
     });
+
     this.uiEventDispatcher.mount();
+    this.selectionManager.mount(this.page);
+
     this.blockStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+
     this.blockStore.dispose();
+
     this.uiEventDispatcher.unmount();
+    this.selectionManager.unmount();
   }
 
   override render() {
@@ -59,10 +88,10 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return null;
     }
 
-    return this.renderModel(root);
+    return this.renderModel(root, []);
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BaseBlockModel, path: string[]): TemplateResult => {
     const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
@@ -76,12 +105,20 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
+    const currentPath = path.concat(model.id);
+
     const tag = view.component;
-    const widgets = view.widgets
-      ? html`${repeat(view.widgets, widget => {
-          return html`<${widget} .root=${this} .model=${model}></${widget}>`;
-        })}`
-      : html`${nothing}`;
+    const widgets: Record<string, TemplateResult> = view.widgets
+      ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
+          const id = `${flavour}:${key}`;
+          const path = currentPath.concat(id);
+
+          return {
+            ...mapping,
+            [key]: html`<${tag} .path=${path} .root=${this} .page=${this.page}></${tag}>`,
+          };
+        }, {})
+      : {};
 
     this._onLoadModel(model);
 
@@ -91,10 +128,11 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
+      .path=${currentPath}
       .content=${html`${repeat(
         children,
         child => child.id,
-        child => this.renderModel(child)
+        child => this.renderModel(child, currentPath)
       )}`}
     ></${tag}>`;
   };

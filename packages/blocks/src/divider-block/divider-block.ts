@@ -13,14 +13,16 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
   static override styles = css`
     .affine-divider-block-container {
       width: 100%;
-      height: 20px;
+      height: 1px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
-      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+      padding: 18px 8px;
+      margin-top: var(--affine-paragraph-space);
     }
     hr {
+      border: none;
+      border-top: 1px solid var(--affine-divider-color);
       width: 100%;
     }
   `;

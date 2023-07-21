@@ -64,6 +64,7 @@ import type {
   ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
+  PageBlockWidgetName,
   SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
@@ -133,7 +134,7 @@ export interface EdgelessContainer extends HTMLElement {
 
 @customElement('affine-edgeless-page')
 export class EdgelessPageBlockComponent
-  extends BlockElement<PageBlockModel, EdgelessPageService>
+  extends BlockElement<PageBlockModel, EdgelessPageService, PageBlockWidgetName>
   implements EdgelessContainer, BlockHost
 {
   static override styles = css`
@@ -321,7 +322,7 @@ export class EdgelessPageBlockComponent
     return this.page.awarenessStore.getFlag('enable_note_cut');
   }
 
-  get dispacher() {
+  get dispatcher() {
     return this.service?.uiEventDispatcher;
   }
 
@@ -1203,7 +1204,6 @@ export class EdgelessPageBlockComponent
 
     const {
       _rectsOfSelectedBlocks,
-      root,
       selection,
       showGrid,
       sortedNotes,
@@ -1215,7 +1215,7 @@ export class EdgelessPageBlockComponent
     const notesContainer = EdgelessNotesContainer(
       sortedNotes,
       state.active,
-      root.renderModel
+      this.renderModel
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
@@ -1274,7 +1274,8 @@ export class EdgelessPageBlockComponent
               ></edgeless-selected-rect>
             `
           : nothing}
-        ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets}
+        ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets.slashMenu}
+        ${this.widgets.linkedPage}
       </div>
     `;
   }

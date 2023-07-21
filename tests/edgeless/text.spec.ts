@@ -40,11 +40,11 @@ test('add text element in default mode', async ({ page }) => {
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessCanvasText(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hhelloello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessCanvasText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
 test('add text element in text mode', async ({ page }) => {
@@ -70,11 +70,11 @@ test('add text element in text mode', async ({ page }) => {
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessCanvasText(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hhelloello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessCanvasText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
 test('copy and paste', async ({ page }) => {
@@ -135,7 +135,7 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [130, 160, 106.7, 108]);
 
   await fontButton.click();
-  const scibbledTextFont = page.getByText('Scibbled');
-  await scibbledTextFont.click();
+  const scribbledTextFont = page.getByText('Scribbled');
+  await scribbledTextFont.click();
   await assertEdgelessSelectedRect(page, [130, 160, 104, 156]);
 });

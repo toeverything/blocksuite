@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { ShapeElement } from '@blocksuite/phasor';
+import type { IModelCoord, ShapeElement } from '@blocksuite/phasor';
 import { Bound, TextElement } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import * as Y from 'yjs';
@@ -8,17 +8,29 @@ import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type {
+  GENERAL_CANVAS_FONT_FAMILY,
+  SCIBBLED_CANVAS_FONT_FANILY,
+} from './consts.js';
+
+export type CANVAS_TEXT_FONT =
+  | typeof GENERAL_CANVAS_FONT_FAMILY
+  | typeof SCIBBLED_CANVAS_FONT_FANILY;
 
 export function mountTextEditor(
   textElement: TextElement,
-  edgeless: EdgelessPageBlockComponent
+  edgeless: EdgelessPageBlockComponent,
+  focusCoord?: IModelCoord
 ) {
+  const cursorIndex = focusCoord
+    ? textElement.getCursorByCoord(focusCoord)
+    : textElement.text.length;
   const textEditor = new EdgelessTextEditor();
   const pageBlockContainer = edgeless.pageBlockContainer;
 
   pageBlockContainer.appendChild(textEditor);
   textEditor.mount(textElement, edgeless);
-  textEditor.vEditor?.focusEnd();
+  textEditor.vEditor?.focusByIndex(cursorIndex);
   edgeless.selection.switchToDefaultMode({
     selected: [textElement],
     active: true,
@@ -57,8 +69,8 @@ export function addText(
       textAlign: 'left',
       fontSize: 24,
       color: GET_DEFAULT_LINE_COLOR(),
-      isBold: false,
-      isItalic: false,
+      bold: false,
+      italic: false,
     });
     edgeless.page.captureSync();
     const textElement = edgeless.surface.pickById(id);
