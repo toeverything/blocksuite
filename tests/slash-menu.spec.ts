@@ -596,10 +596,8 @@ test.describe('slash menu with customize menu', () => {
       const pagePreset = window.$blocksuite.blocks.pagePreset;
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
-      pageBlockSpec.view.widgets = [
-        fakeLiteral`affine-custom-slash-menu`,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any;
+      // @ts-ignore
+      pageBlockSpec.view.widgets.slashMenu = fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });
@@ -658,10 +656,8 @@ test.describe('slash menu with customize menu', () => {
       const pagePreset = window.$blocksuite.blocks.pagePreset;
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
-      pageBlockSpec.view.widgets = [
-        fakeLiteral`affine-custom-slash-menu`,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any;
+      // @ts-ignore
+      pageBlockSpec.view.widgets.slashMenu = fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });
