@@ -41,16 +41,16 @@ class IndexedDBProviderWrapper implements PassiveDocProvider {
   public readonly flavour = 'blocksuite-indexeddb';
   public readonly passive = true as const;
   private _connected = false;
-  #provider: IndexedDBProvider;
+  private _provider: IndexedDBProvider;
   constructor(id: string, doc: Y.Doc) {
-    this.#provider = createIndexedDBProvider(id, doc);
+    this._provider = createIndexedDBProvider(id, doc);
   }
   connect() {
-    this.#provider.connect();
+    this._provider.connect();
     this._connected = true;
   }
   disconnect() {
-    this.#provider.disconnect();
+    this._provider.disconnect();
     this._connected = false;
   }
   get connected() {
