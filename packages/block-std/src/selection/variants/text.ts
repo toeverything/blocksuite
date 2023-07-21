@@ -7,7 +7,7 @@ type TextSelectionProps = {
 };
 
 export class TextSelection extends BaseSelection {
-  static override readonly type = 'text';
+  static override type = 'text';
 
   index: number;
 
@@ -48,5 +48,11 @@ export class TextSelection extends BaseSelection {
       index: json.index as number,
       length: json.length as number,
     });
+  }
+}
+
+declare global {
+  interface BlockSuiteSelection {
+    text: typeof TextSelection;
   }
 }

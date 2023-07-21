@@ -1,6 +1,5 @@
 type SelectionConstructor<T = unknown> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  new (...args: any[]): T;
+  new (...args: unknown[]): T;
   type: string;
 };
 
@@ -11,10 +10,15 @@ export abstract class BaseSelection {
     this.blockId = blockId;
   }
 
-  is<T extends BaseSelection>(
-    selection: SelectionConstructor<T>['type']
-  ): this is T {
-    return (this.constructor as SelectionConstructor).type === selection;
+  is<T extends BlockSuiteSelectionType>(
+    type: T
+  ): this is BlockSuiteSelectionInstance[T] {
+    return this.type === type;
+  }
+
+  get type(): BlockSuiteSelectionType {
+    return (this.constructor as SelectionConstructor)
+      .type as BlockSuiteSelectionType;
   }
 
   abstract equals(other: BaseSelection): boolean;
