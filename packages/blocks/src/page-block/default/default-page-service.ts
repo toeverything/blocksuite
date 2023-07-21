@@ -8,7 +8,6 @@ import type {
 import { BlockService } from '@blocksuite/block-std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import { throttle } from '../../__internal__/utils/index.js';
 import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import {
@@ -178,6 +177,14 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this._nativeDragEndHandler(ctx);
   };
 
+  private _pointerMoveHandler: UIEventHandler = ctx => {
+    if (!this._isNativeSelection) {
+      return;
+    }
+    const state = ctx.get('defaultState');
+    state.event.preventDefault();
+  };
+
   private _nativeDragEndHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     requestAnimationFrame(() => {
@@ -239,7 +246,7 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     return false;
   };
 
-  private _showFormatBar = throttle((event: PointerEventState) => {
+  private _showFormatBar = (event: PointerEventState) => {
     const selection = window.getSelection();
     if (!selection) return;
 
@@ -253,7 +260,7 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
         },
       },
     });
-  }, 100);
+  };
 
   override mounted() {
     super.mounted();
@@ -261,6 +268,8 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this._addEvent('dragStart', this._dragStartHandler);
     this._addEvent('dragMove', this._dragMoveHandler);
     this._addEvent('dragEnd', this._dragEndHandler);
+    this._addEvent('pointerMove', this._pointerMoveHandler);
+
     this._addEvent('selectionChange', () => {
       const selection = window.getSelection();
       if (!selection) {

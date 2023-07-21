@@ -14,7 +14,6 @@ type RangeSnapshot = {
 };
 
 export class RangeController {
-  private _pending: RangeSnapshot[] = [];
   private _reusedRange: Range | null = null;
 
   constructor(public root: BlockSuiteRoot) {}
@@ -26,22 +25,13 @@ export class RangeController {
     return this._reusedRange;
   }
 
-  add(range: Range) {
-    this._pending.push({
-      startContainer: range.startContainer,
-      endContainer: range.endContainer,
-      startOffset: range.startOffset,
-      endOffset: range.endOffset,
-    });
-  }
-
   render(start: Range, end?: Range | null) {
-    this._pending = [start];
+    const ranges = [start];
     if (end) {
-      this._pending.push(end);
+      ranges.push(end);
     }
 
-    this._mergeRanges(this._pending);
+    this._mergeRanges(ranges);
     this._renderRange();
   }
 
@@ -59,7 +49,9 @@ export class RangeController {
     const startRange = this._pointToRange(from);
     const endRange = to ? this._pointToRange(to) : null;
 
-    assertExists(startRange);
+    if (!startRange) {
+      return;
+    }
     this.render(startRange, endRange);
   }
 
@@ -107,6 +99,11 @@ export class RangeController {
       startVirgoElement,
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
     );
+
+    startVirgoElement.virgoEditor.setVRange({
+      index: point.index,
+      length: point.length,
+    });
 
     return startVirgoElement.virgoEditor.toDomRange({
       index: point.index,
