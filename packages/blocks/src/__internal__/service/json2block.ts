@@ -9,6 +9,7 @@ import { getServiceOrRegister } from '../service.js';
 import {
   asyncGetVirgoByModel,
   type BlockRange,
+  focusBlockByModel,
   type SerializedBlock,
 } from '../utils/index.js';
 
@@ -82,7 +83,10 @@ export async function json2block(
           length: 0,
         });
       } else {
-        // TODO: set embed block selection
+        requestAnimationFrame(() => {
+          // TODO: wait block ready
+          focusBlockByModel(model);
+        });
       }
     }
 
@@ -119,9 +123,9 @@ export async function json2block(
   isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
 
   const lastModel = page.getBlockById(ids[ids.length - 1]);
+  assertExists(lastModel);
 
   if (shouldMergeLastBlock) {
-    assertExists(lastModel);
     const rangeOffset = lastModel.text?.length || 0;
     const nextSiblingModel = page.getNextSibling(lastModel);
     lastModel.text?.join(nextSiblingModel?.text as Text);
@@ -141,7 +145,10 @@ export async function json2block(
         length: 0,
       });
     } else {
-      // TODO: set embed block selection
+      requestAnimationFrame(() => {
+        // TODO: wait block ready
+        focusBlockByModel(lastModel);
+      });
     }
   }
 }
