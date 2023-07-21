@@ -1,4 +1,3 @@
-import { FontLinkIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -16,7 +15,7 @@ export class LinkNode extends ShadowlessElement {
       cursor: pointer;
       font-weight: normal;
       font-style: normal;
-      text-decoration: underline;
+      text-decoration: none;
     }
   `;
 
@@ -33,7 +32,7 @@ export class LinkNode extends ShadowlessElement {
       href=${this.link}
       rel="noopener noreferrer"
       target="_blank"
-      >${FontLinkIcon}<span class="link-node-text">${this.link}</span></a
+      ><span class="link-node-text">${this.link}</span></a
     >`;
   }
 }

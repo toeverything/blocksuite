@@ -1,3 +1,4 @@
+import type { IModelCoord } from '../../consts.js';
 import { Bound } from '../../utils/bound.js';
 import {
   getPointFromBoundsWithRotation,
@@ -11,11 +12,13 @@ import { type IVec } from '../../utils/vec.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
 import {
+  charWidth,
   deltaInsertsToChunks,
   getFontString,
   getLineHeight,
   getTextWidth,
   isRTL,
+  splitIntoLines,
 } from './utils.js';
 
 export class TextElement extends SurfaceElement<IText> {
@@ -39,16 +42,49 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('textAlign') as IText['textAlign'];
   }
 
-  get isBold() {
-    return this.yMap.get('isBold') as IText['isBold'];
+  get bold() {
+    return this.yMap.get('bold') as IText['bold'];
   }
 
-  get isItalic() {
-    return this.yMap.get('isItalic') as IText['isItalic'];
+  get italic() {
+    return this.yMap.get('italic') as IText['italic'];
+  }
+
+  get font() {
+    const { bold, italic, fontSize, fontFamily } = this;
+    const lineHeight = getLineHeight(fontFamily, fontSize);
+    return getFontString({
+      bold,
+      italic,
+      fontSize,
+      lineHeight: `${lineHeight}px`,
+      fontFamily: fontFamily,
+    });
   }
 
   getNearestPoint(point: IVec): IVec {
     return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
+  }
+
+  getCursorByCoord(coord: IModelCoord) {
+    const { x, y, fontSize, fontFamily, text } = this;
+    const lineHeight = getLineHeight(fontFamily, fontSize);
+    const lineIndex = Math.floor((coord.y - y) / lineHeight);
+    const lines = splitIntoLines(text.toString());
+    const string = lines[lineIndex];
+    const offsetX = coord.x - x;
+    let index = lines.slice(0, lineIndex).join('').length + lineIndex - 1;
+    let currentStringWidth = 0;
+    let charIndex = 0;
+    while (currentStringWidth < offsetX) {
+      index += 1;
+      if (charIndex === string.length) {
+        break;
+      }
+      currentStringWidth += charWidth.calculate(string[charIndex], this.font);
+      charIndex += 1;
+    }
+    return index;
   }
 
   override containedByBounds(bounds: Bound): boolean {
@@ -70,8 +106,6 @@ export class TextElement extends SurfaceElement<IText> {
       textAlign,
       rotate,
       computedValue,
-      isBold,
-      isItalic,
     } = this;
     const [, , w, h] = this.deserializeXYWH();
     const cx = w / 2;
@@ -86,13 +120,9 @@ export class TextElement extends SurfaceElement<IText> {
     const lines = deltaInsertsToChunks(deltas);
 
     const lineHeightPx = getLineHeight(fontFamily, fontSize);
-    const font = getFontString({
-      isBold,
-      isItalic,
-      fontSize: fontSize,
-      lineHeight: `${lineHeightPx}px`,
-      fontFamily: fontFamily,
-    });
+    const font = this.font;
+    const horizontalOffset =
+      textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 
     for (const [lineIndex, line] of lines.entries()) {
       let beforeTextWidth = 0;
@@ -120,7 +150,7 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.fillText(
           str,
           // 1 comes from v-line padding
-          beforeTextWidth + 1,
+          horizontalOffset + beforeTextWidth + 1,
           (lineIndex + 1) * lineHeightPx + 0.5
         );
 

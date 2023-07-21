@@ -10,7 +10,6 @@ import {
   NewPageIcon,
   NowIcon,
   paragraphConfig,
-  // PasteIcon,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -29,6 +28,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
+import { toast } from '../../components/toast.js';
 import { copyBlock } from '../../page-block/default/utils.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
@@ -36,11 +36,11 @@ import {
   updateBlockType,
 } from '../../page-block/utils/index.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
-import { toast } from '../toast.js';
 import {
   formatDate,
   insertContent,
   insideDatabase,
+  insideDataView,
   type SlashItem,
 } from './utils.js';
 
@@ -319,6 +319,40 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         action: ({ model }) => {},
+      },
+    ],
+  },
+  {
+    name: 'Data View',
+    items: [
+      {
+        name: 'Data View Table',
+        alias: ['table'],
+        icon: DatabaseKanbanViewIcon20,
+        showWhen: model => {
+          if (!model.page.awarenessStore.getFlag('enable_data_view')) {
+            return false;
+          }
+          if (!model.page.schema.flavourSchemaMap.has('affine:data-view')) {
+            return false;
+          }
+          if (insideDataView(model)) {
+            return false;
+          }
+          return true;
+        },
+        action: async ({ page, model }) => {
+          const parent = page.getParent(model);
+          assertExists(parent);
+          const index = parent.children.indexOf(model);
+
+          page.addBlock(
+            'affine:data-view',
+            {},
+            page.getParent(model),
+            index + 1
+          );
+        },
       },
     ],
   },

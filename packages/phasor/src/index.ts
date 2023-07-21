@@ -2,6 +2,7 @@
 export {
   type IBound,
   ShapeStyle,
+  type IModelCoord,
   StrokeStyle,
   ZOOM_MAX,
   ZOOM_MIN,

@@ -1,14 +1,12 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { WithDisposable } from '@blocksuite/lit';
+import { WidgetElement } from '@blocksuite/lit';
 import {
   assertExists,
   type BaseBlockModel,
   DisposableGroup,
   matchFlavours,
 } from '@blocksuite/store';
-import { LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import {
   isControlledKeyboardEvent,
@@ -77,7 +75,7 @@ export function showLinkedPagePopover({
 }
 
 @customElement('affine-linked-page-widget')
-export class LinkedPageWidget extends WithDisposable(LitElement) {
+export class LinkedPageWidget extends WidgetElement {
   static DEFAULT_OPTIONS: LinkedPageOptions = {
     /**
      * The first item of the trigger keys will be the primary key
@@ -93,14 +91,9 @@ export class LinkedPageWidget extends WithDisposable(LitElement) {
 
   options = LinkedPageWidget.DEFAULT_OPTIONS;
 
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
-      this.root.uiEventDispatcher.add('keyDown', this._onKeyDown)
-    );
+    this._addEvent('keyDown', this._onKeyDown);
   }
 
   public showLinkedPage(model: BaseBlockModel) {

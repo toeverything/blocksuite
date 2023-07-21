@@ -25,3 +25,8 @@ export enum ShapeStyle {
   General = 'General',
   Scribbled = 'Scribbled',
 }
+
+export interface IModelCoord {
+  x: number;
+  y: number;
+}

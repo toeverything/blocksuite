@@ -116,14 +116,13 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return textVerticalAlign;
   }
 
-  get isBold() {
-    const isTextBold = (this.yMap.get('isBold') as IShape['isBold']) ?? false;
+  get bold() {
+    const isTextBold = (this.yMap.get('bold') as IShape['bold']) ?? false;
     return isTextBold;
   }
 
-  get isItalic() {
-    const isTextItalic =
-      (this.yMap.get('isItalic') as IShape['isItalic']) ?? false;
+  get italic() {
+    const isTextItalic = (this.yMap.get('italic') as IShape['italic']) ?? false;
     return isTextItalic;
   }
 
@@ -179,8 +178,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontFamily,
       textVerticalAlign,
       textAlign,
-      isBold,
-      isItalic,
+      bold,
+      italic,
     } = this;
     if (!text) return;
 
@@ -189,8 +188,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontSize: fontSize,
       lineHeight: `${lineHeight}px`,
       fontFamily: fontFamily,
-      isBold: isBold,
-      isItalic: isItalic,
+      bold,
+      italic,
     });
 
     const yText = text;

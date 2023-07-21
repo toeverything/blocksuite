@@ -129,7 +129,7 @@ export class VEditor<
     yText: VEditor['yText'],
     ops?: {
       active?: VEditor['isActive'];
-      embed?: VEditor['isEmbed'];
+      embed?: (delta: DeltaInsert<TextAttributes>) => boolean;
     }
   ) {
     if (!yText.doc) {
@@ -192,6 +192,11 @@ export class VEditor<
 
       this._deltaService.render(syncVRange);
     });
+  }
+
+  async waitForUpdate() {
+    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
+    await Promise.all(vLines.map(line => line.updateComplete));
   }
 
   getNativeSelection(): Selection | null {
@@ -266,6 +271,13 @@ export class VEditor<
   focusEnd(): void {
     this.rangeService.setVRange({
       index: this.yText.length,
+      length: 0,
+    });
+  }
+
+  focusByIndex(index: number): void {
+    this.rangeService.setVRange({
+      index: index,
       length: 0,
     });
   }
