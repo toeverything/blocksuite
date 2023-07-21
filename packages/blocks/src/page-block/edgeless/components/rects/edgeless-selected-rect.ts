@@ -42,6 +42,7 @@ import {
   calcAngleEdgeWithRotation,
   calcAngleWithRotation,
   generateCursorUrl,
+  getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
 
@@ -474,19 +475,24 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         if (this.resizeMode === 'edge') {
           cursor = 'ew';
-        } else if (this.resizeMode === 'all' && target && point) {
-          cursor = rotateResizeCursor((this._rotate * Math.PI) / 180);
-          const angle = calcAngleEdgeWithRotation(target, this._rotate);
-          cursor = rotateResizeCursor((angle * Math.PI) / 180);
         } else if (target && point) {
-          angle = calcAngleWithRotation(
-            target,
-            point,
-            this._resizeManager.currentRect,
-            this._rotate,
-            this.surface
-          );
-
+          const label = getResizeLabel(target);
+          if (
+            label === 'top' ||
+            label === 'bottom' ||
+            label === 'left' ||
+            label === 'right'
+          ) {
+            angle = calcAngleEdgeWithRotation(target, this._rotate);
+          } else {
+            angle = calcAngleWithRotation(
+              target,
+              point,
+              this._resizeManager.currentRect,
+              this._rotate,
+              this.surface
+            );
+          }
           cursor = rotateResizeCursor((angle * Math.PI) / 180);
         }
         cursor += '-resize';

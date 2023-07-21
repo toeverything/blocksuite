@@ -255,3 +255,11 @@ export function calcAngleEdgeWithRotation(target: HTMLElement, rotate: number) {
 
   return angleWithEdge + rotate;
 }
+
+export function getResizeLabel(target: HTMLElement) {
+  const handle = target.parentElement;
+  assertExists(handle);
+  const ariaLabel = handle.getAttribute('aria-label');
+  assertExists(ariaLabel);
+  return ariaLabel;
+}
