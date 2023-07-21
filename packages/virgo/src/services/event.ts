@@ -227,6 +227,9 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onCompositionStart = () => {
     this._isComposing = true;
+    const vRange = this._editor.getVRange();
+    if (!vRange) return;
+    this._editor.deleteText(vRange);
   };
 
   private _onCompositionEnd = (event: CompositionEvent) => {
