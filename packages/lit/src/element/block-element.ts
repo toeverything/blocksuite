@@ -84,13 +84,13 @@ export class BlockElement<
     return this.root.blockViewMap.get(this.parentPath.join('|'));
   }
 
-  get widgetElements(): Record<string, WidgetElement> {
+  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
     return Object.keys(this.widgets).reduce((mapping, key) => {
       return {
         ...mapping,
         [key]: this.root.widgetViewMap.get([...this.path, key].join('|')),
       };
-    }, {});
+    }, {}) as Partial<Record<WidgetName, WidgetElement>>;
   }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {
