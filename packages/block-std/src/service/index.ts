@@ -5,9 +5,6 @@ import type { EventName, UIEventHandler } from '../event/index.js';
 import type { BlockStore } from '../store/index.js';
 
 export interface BlockServiceOptions {
-  // TODO: add these
-  // transformer;
-
   store: BlockStore;
 }
 

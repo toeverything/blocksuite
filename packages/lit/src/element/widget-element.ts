@@ -16,10 +16,6 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   path!: string[];
 
-  get pathName(): string {
-    return this.path.join('|');
-  }
-
   get widgetName(): string {
     return this.path[this.path.length - 1];
   }
@@ -29,16 +25,16 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
   }
 
   get hostElement() {
-    return this.root.blockViewMap.get(this.hostPath.join('|'));
+    return this.root.blockViewMap.get(this.hostPath);
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.widgetViewMap.set(this.pathName, this);
+    this.root.widgetViewMap.set(this.path, this);
   }
 
   override disconnectedCallback() {
-    this.root.widgetViewMap.delete(this.pathName);
+    this.root.widgetViewMap.delete(this.path);
     super.disconnectedCallback();
   }
 

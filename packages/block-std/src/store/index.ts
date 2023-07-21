@@ -6,6 +6,7 @@ import type { BlockService, BlockServiceOptions } from '../service/index.js';
 import type { BlockSpec } from '../spec/index.js';
 
 export interface BlockStoreOptions {
+  root: HTMLElement;
   uiEventDispatcher: UIEventDispatcher;
   selectionManager: SelectionManager;
   workspace: Workspace;
@@ -17,10 +18,12 @@ export class BlockStore<ComponentType = unknown> {
   readonly workspace: Workspace;
   readonly uiEventDispatcher: UIEventDispatcher;
   readonly selectionManager: SelectionManager;
+  readonly root: HTMLElement;
 
   private _specs: Map<string, BlockSpec<ComponentType>> = new Map();
   private _services: Map<string, BlockService> = new Map();
   constructor(options: BlockStoreOptions) {
+    this.root = options.root;
     this.workspace = options.workspace;
     this.page = options.page;
     this.uiEventDispatcher = options.uiEventDispatcher;

@@ -102,24 +102,6 @@ export class PageSelectionState {
     this.lastPoint = new Point(clientX, clientY);
   }
 
-  resetDraggingArea(
-    e: PointerEventState,
-    offset: { scrollLeft: number; scrollTop: number } = {
-      scrollLeft: 0,
-      scrollTop: 0,
-    }
-  ) {
-    const { scrollLeft, scrollTop } = offset;
-    let { x, y } = e.point;
-    x += scrollLeft;
-    y += scrollTop;
-    const end = new Point(x, y);
-    this.draggingArea = {
-      start: end.clone(),
-      end,
-    };
-  }
-
   refreshBlockRectCache() {
     this._blockCache.clear();
     // find all blocks from the document
