@@ -44,7 +44,9 @@ export class RangeController {
 
     const { from, to } = selection;
     const fromBlock = this.root.blockViewMap.get(from.path);
-    assertExists(fromBlock);
+    if (!fromBlock) {
+      return;
+    }
 
     const startRange = this._pointToRange(from);
     const endRange = to ? this._pointToRange(to) : null;
