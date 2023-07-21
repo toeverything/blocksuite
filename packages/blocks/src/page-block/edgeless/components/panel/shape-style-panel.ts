@@ -42,6 +42,7 @@ export class EdgelessShapeStylePanel extends LitElement {
     return html`
       <div class="shape-style-container">
         <edgeless-tool-icon-button
+          class="general-shape-button"
           .tooltip=${'General'}
           .tipPosition=${'top'}
           .active=${this.value === ShapeStyle.General}
@@ -53,6 +54,7 @@ export class EdgelessShapeStylePanel extends LitElement {
           ${GeneralShapeStyleIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
+          class="scribbled-shape-button"
           .tooltip=${'Scribbled'}
           .tipPosition=${'top'}
           .active=${this.value === ShapeStyle.Scribbled}

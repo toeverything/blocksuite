@@ -15,6 +15,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+import { drawGeneralShpae } from '../utils.js';
 
 function diamondPoints({ x, y, w, h }: IBound): IVec[] {
   return [
@@ -58,49 +59,37 @@ export const DiamondMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    if (shapeStyle === ShapeStyle.General) {
-      ctx.beginPath();
-      ctx.moveTo(renderWidth / 2, 0);
-      ctx.lineTo(renderWidth, renderHeight / 2);
-      ctx.lineTo(renderWidth / 2, renderHeight);
-      ctx.lineTo(0, renderHeight / 2);
-      ctx.closePath();
-
-      ctx.fillStyle = realFillColor;
-      ctx.fill();
-
-      ctx.lineWidth = strokeWidth;
-      ctx.strokeStyle = realStrokeColor;
-      switch (strokeStyle) {
-        case StrokeStyle.None:
-          ctx.strokeStyle = 'transparent';
-          break;
-        case StrokeStyle.Dashed:
-          ctx.setLineDash([12, 12]);
-          ctx.strokeStyle = strokeStyle;
-          break;
-        default:
-          ctx.strokeStyle = strokeStyle;
+    rc.polygon(
+      [
+        [renderWidth / 2, 0],
+        [renderWidth, renderHeight / 2],
+        [renderWidth / 2, renderHeight],
+        [0, renderHeight / 2],
+      ],
+      {
+        seed,
+        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
+        strokeLineDash:
+          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+        stroke:
+          strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
+            ? 'none'
+            : realStrokeColor,
+        strokeWidth,
+        fill: filled ? realFillColor : undefined,
       }
-      ctx.stroke();
-    } else {
-      rc.polygon(
-        [
-          [renderWidth / 2, 0],
-          [renderWidth, renderHeight / 2],
-          [renderWidth / 2, renderHeight],
-          [0, renderHeight / 2],
-        ],
-        {
-          seed,
-          roughness,
-          strokeLineDash:
-            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-          stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
-          strokeWidth,
-          fill: filled ? realFillColor : undefined,
-        }
-      );
+    );
+
+    if (shapeStyle === ShapeStyle.General) {
+      drawGeneralShpae(ctx, 'diamond', {
+        x: 0,
+        y: 0,
+        width: renderWidth,
+        height: renderHeight,
+        strokeWidth,
+        strokeColor: realStrokeColor,
+        strokeStyle: strokeStyle,
+      });
     }
   },
 

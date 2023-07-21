@@ -15,6 +15,7 @@ import type { IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+import { drawGeneralShpae } from '../utils.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -54,72 +55,50 @@ export const RectMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    if (shapeStyle === ShapeStyle.General) {
-      ctx.beginPath();
-      ctx.moveTo(0 + r, 0);
-      ctx.lineTo(0 + renderWidth - r, 0);
-      ctx.arcTo(0 + renderWidth, 0, 0 + renderWidth, 0 + r, r);
-      ctx.lineTo(0 + renderWidth, 0 + renderHeight - r);
-      ctx.arcTo(
-        0 + renderWidth,
-        0 + renderHeight,
-        0 + renderWidth - r,
-        0 + renderHeight,
-        r
-      );
-      ctx.lineTo(0 + r, 0 + renderHeight);
-      ctx.arcTo(0, 0 + renderHeight, 0, 0 + renderHeight - r, r);
-      ctx.lineTo(0, 0 + r);
-      ctx.arcTo(0, 0, 0 + r, 0, r);
-      ctx.closePath();
-
-      ctx.fillStyle = realFillColor;
-      ctx.fill();
-
-      ctx.lineWidth = strokeWidth;
-      ctx.strokeStyle = realStrokeColor;
-      switch (strokeStyle) {
-        case StrokeStyle.None:
-          ctx.strokeStyle = 'transparent';
-          break;
-        case StrokeStyle.Dashed:
-          ctx.setLineDash([12, 12]);
-          ctx.strokeStyle = strokeStyle;
-          break;
-        default:
-          ctx.strokeStyle = strokeStyle;
+    rc.path(
+      `
+      M ${r} 0
+      L ${renderWidth - r} 0
+      C ${renderWidth - kRect * r} 0 ${renderWidth} ${
+        kRect * r
+      } ${renderWidth} ${r}
+      L ${renderWidth} ${renderHeight - r}
+      C ${renderWidth} ${renderHeight - kRect * r} ${
+        renderWidth - kRect * r
+      } ${renderHeight} ${renderWidth - r} ${renderHeight}
+      L ${r} ${renderHeight}
+      C ${kRect * r} ${renderHeight} 0 ${renderHeight - kRect * r} 0 ${
+        renderHeight - r
       }
-      ctx.stroke();
-    } else {
-      rc.path(
-        `
-        M ${r} 0
-        L ${renderWidth - r} 0
-        C ${renderWidth - kRect * r} 0 ${renderWidth} ${
-          kRect * r
-        } ${renderWidth} ${r}
-        L ${renderWidth} ${renderHeight - r}
-        C ${renderWidth} ${renderHeight - kRect * r} ${
-          renderWidth - kRect * r
-        } ${renderHeight} ${renderWidth - r} ${renderHeight}
-        L ${r} ${renderHeight}
-        C ${kRect * r} ${renderHeight} 0 ${renderHeight - kRect * r} 0 ${
-          renderHeight - r
-        }
-        L 0 ${r}
-        C 0 ${kRect * r} ${kRect * r} 0 ${r} 0
-        Z
-        `,
-        {
-          seed,
-          roughness,
-          strokeLineDash:
-            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-          stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
-          strokeWidth,
-          fill: filled ? realFillColor : undefined,
-        }
-      );
+      L 0 ${r}
+      C 0 ${kRect * r} ${kRect * r} 0 ${r} 0
+      Z
+      `,
+      {
+        seed,
+        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
+        strokeLineDash:
+          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+        stroke:
+          strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
+            ? 'none'
+            : realStrokeColor,
+        strokeWidth,
+        fill: filled ? realFillColor : undefined,
+      }
+    );
+
+    if (shapeStyle === ShapeStyle.General) {
+      drawGeneralShpae(ctx, 'rect', {
+        x: 0,
+        y: 0,
+        width: renderWidth,
+        height: renderHeight,
+        strokeWidth,
+        strokeColor: realStrokeColor,
+        strokeStyle: strokeStyle,
+        radius,
+      });
     }
   },
 

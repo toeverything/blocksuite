@@ -11,6 +11,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+import { drawGeneralShpae } from '../utils.js';
 
 function ellipsePoints({ x, y, w, h }: IBound): IVec[] {
   return [
@@ -54,38 +55,28 @@ export const EllipseMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
+    rc.ellipse(cx, cy, renderWidth, renderHeight, {
+      seed,
+      roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
+      strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+      stroke:
+        strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
+          ? 'none'
+          : realStrokeColor,
+      strokeWidth,
+      fill: filled ? realFillColor : undefined,
+      curveFitting: 1,
+    });
+
     if (shapeStyle === ShapeStyle.General) {
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, renderWidth / 2, renderHeight / 2, 0, 0, 2 * Math.PI);
-      ctx.closePath();
-
-      ctx.fillStyle = realFillColor;
-      ctx.fill();
-
-      ctx.lineWidth = strokeWidth;
-      ctx.strokeStyle = realStrokeColor;
-      switch (strokeStyle) {
-        case StrokeStyle.None:
-          ctx.strokeStyle = 'transparent';
-          break;
-        case StrokeStyle.Dashed:
-          ctx.setLineDash([12, 12]);
-          ctx.strokeStyle = strokeStyle;
-          break;
-        default:
-          ctx.strokeStyle = strokeStyle;
-      }
-      ctx.stroke();
-    } else {
-      rc.ellipse(cx, cy, renderWidth, renderHeight, {
-        seed,
-        roughness,
-        strokeLineDash:
-          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+      drawGeneralShpae(ctx, 'ellipse', {
+        x: 0,
+        y: 0,
+        width: renderWidth,
+        height: renderHeight,
         strokeWidth,
-        fill: filled ? realFillColor : undefined,
-        curveFitting: 1,
+        strokeColor: realStrokeColor,
+        strokeStyle: strokeStyle,
       });
     }
   },
