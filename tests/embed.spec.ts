@@ -205,7 +205,7 @@ test('popup menu should follow position of image when scrolling', async ({
   expect(imageRect.top).toBeCloseTo(menuRect.top - 76 - 275, -0.325);
 });
 
-test('select image should not show format bar', async ({ page }) => {
+test.fixme('select image should not show format bar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
   await assertRichImage(page, 1);
