@@ -132,7 +132,9 @@ export class RemoteSelection extends LitElement {
     this.page.history.on(
       'stack-item-popped',
       (event: { stackItem: StackItem }) => {
-        const userRange = event.stackItem.meta.get('cursor-location');
+        const userRange = event.stackItem.meta.get(
+          'cursor-location'
+        ) as UserRange;
         if (!userRange) {
           return;
         }
