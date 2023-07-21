@@ -1,16 +1,23 @@
-// related component
+import './group.js';
 
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { BlockOperation } from '../types.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
-const styles = css``;
+const styles = css`
+  .affine-data-view-kanban-groups {
+    display: flex;
+    padding: 20px 0;
+    gap: 20px;
+  }
+`;
 
 @customElement('affine-data-view-kanban')
 export class DataViewKanban extends WithDisposable(ShadowlessElement) {
@@ -40,14 +47,20 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    // const rows = this.view.rows;
-    const column = this.view.columnManagerList.find(v => {
-      return v.type === 'select' || v.type === 'multi-select';
-    });
-    if (!column) {
-      return;
+    const groups = this.view.groups;
+    if (!groups) {
+      return html``;
     }
-    return html` <div class="affine-database-table"></div> `;
+    return html`
+      <div class="affine-data-view-kanban-groups">
+        ${repeat(groups, group => {
+          return html`<affine-data-view-kanban-group
+            .view=${this.view}
+            .group=${group}
+          ></affine-data-view-kanban-group>`;
+        })}
+      </div>
+    `;
   }
 }
 

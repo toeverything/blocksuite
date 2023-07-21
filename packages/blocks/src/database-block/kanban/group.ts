@@ -1,14 +1,23 @@
-// related component
+import './card.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import type {
+  DataViewKanbanManager,
+  KanbanGroupData,
+} from './kanban-view-manager.js';
 
 const styles = css`
   affine-data-view-kanban-group {
+    width: 200px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 `;
 
@@ -18,9 +27,27 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   view!: DataViewKanbanManager;
+  @property({ attribute: false })
+  group!: KanbanGroupData;
 
   override render() {
-    return html` <div></div> `;
+    const cards = this.group.rows;
+    return html`
+      <div>
+        ${repeat(
+          cards,
+          id => id,
+          id => {
+            return html`
+              <affine-data-view-kanban-card
+                .view="${this.view}"
+                .cardId="${id}"
+              ></affine-data-view-kanban-card>
+            `;
+          }
+        )}
+      </div>
+    `;
   }
 }
 

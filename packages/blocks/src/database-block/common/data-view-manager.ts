@@ -1,6 +1,7 @@
 import { Slot } from '@blocksuite/global/utils';
 
 import type { DataSource } from '../../__internal__/datasource/base.js';
+import type { TType } from '../logical/typesystem.js';
 import type {
   ColumnDataUpdater,
   InsertPosition,
@@ -50,6 +51,8 @@ export interface DataViewManager {
   columnGetHide(columnId: string): boolean;
 
   columnGetData(columnId: string): Record<string, unknown>;
+
+  columnGetDataType(columnId: string): TType;
 
   columnGetIndex(columnId: string): number;
 
@@ -218,6 +221,12 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public columnGetData(columnId: string): Record<string, unknown> {
     return this.dataSource.propertyGetData(columnId);
+  }
+
+  public columnGetDataType(columnId: string): TType {
+    return columnManager
+      .getColumn(this.columnGetType(columnId))
+      .dataType(this.columnGetData(columnId));
   }
 
   public columnGetHide(columnId: string): boolean {

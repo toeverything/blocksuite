@@ -8,8 +8,16 @@ import {
 } from '../common/data-view-manager.js';
 import type { KanbanViewData } from '../common/view-manager.js';
 import { evalFilter } from '../logical/eval-filter.js';
+import type { TType } from '../logical/typesystem.js';
+import { value2key } from '../logical/value2key.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
+
+export type KanbanGroupData = {
+  type: TType;
+  value: unknown;
+  rows: string[];
+};
 
 export class DataViewKanbanManager extends BaseDataViewManager {
   private readonly updateView: (
@@ -120,10 +128,31 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     return true;
   }
 
-  public get groups(): {
-    type: string;
-    value: unknown;
-  }[] {
+  public get groups(): KanbanGroupData[] | undefined {
+    const groupBy = this.getView().groupBy;
+    if (!groupBy) {
+      return;
+    }
+    if (groupBy.type === 'ref') {
+      const groupMap: Record<string, KanbanGroupData> = {};
+      const type = this.columnGetDataType(groupBy.name);
+      this.rows.forEach(id => {
+        const columnId = groupBy.name;
+        const value = this.cellGetFilterValue(id, columnId);
+        const keys = value2key(value, type);
+        keys.forEach(key => {
+          if (!groupMap[key]) {
+            groupMap[key] = {
+              value,
+              rows: [],
+              type,
+            };
+          }
+          groupMap[key].rows.push(id);
+        });
+      });
+      return Object.values(groupMap);
+    }
     return [];
   }
 }

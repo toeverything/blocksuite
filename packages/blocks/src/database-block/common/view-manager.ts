@@ -1,8 +1,11 @@
 import type { DatabaseBlockModel } from '../database-model.js';
+import { tTag } from '../logical/data-type.js';
+import { isTArray } from '../logical/typesystem.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column, InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
-import type { FilterGroup } from './ast.js';
+import type { FilterGroup, VariableOrProperty } from './ast.js';
+import { columnManager } from './columns/manager.js';
 
 export type TableViewColumn = {
   id: string;
@@ -22,6 +25,7 @@ export type DatabaseModeMap = {
   kanban: {
     columns: KanbanViewColumn[];
     filter: FilterGroup;
+    groupBy?: VariableOrProperty;
   };
 };
 export type DatabaseViewDataMap = {
@@ -52,12 +56,30 @@ export const ViewOperationMap: {
 } = {
   kanban: {
     init(model, id, name) {
+      const column = model.columns.find(column => {
+        const type = columnManager.getColumn(column.type).dataType(column.data);
+        return !!(tTag.is(type) || (isTArray(type) && tTag.is(type.ele)));
+      });
+      if (!column) {
+        throw new Error('not implement yet');
+      }
       return {
         id,
         name,
         mode: 'kanban',
-        columns: model.columns.map(v => ({ id: v.id, hide: false })),
-        filter: { type: 'group', op: 'and', conditions: [] },
+        columns: model.columns.map(v => ({
+          id: v.id,
+          hide: false,
+        })),
+        filter: {
+          type: 'group',
+          op: 'and',
+          conditions: [],
+        },
+        groupBy: {
+          type: 'ref',
+          name: column.id,
+        },
       };
     },
     addColumn(model, view, newColumn) {

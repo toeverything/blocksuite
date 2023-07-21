@@ -26,7 +26,7 @@ export type SelectColumnData = {
 export const selectHelper = columnManager.register<string, SelectColumnData>(
   'select',
   {
-    type: data => tArray(tTag.create({ tags: data.options })),
+    type: data => tTag.create({ tags: data.options }),
     defaultData: () => ({
       options: [],
     }),

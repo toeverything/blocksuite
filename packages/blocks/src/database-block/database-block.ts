@@ -5,7 +5,7 @@ import './common/database-view-header.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { html, literal, unsafeStatic } from 'lit/static-html.js';
+import { html, literal } from 'lit/static-html.js';
 
 import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
@@ -14,6 +14,7 @@ import { registerService } from '../__internal__/service.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockService } from './database-service.js';
+import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
 import type { BlockOperation } from './types.js';
 
@@ -47,16 +48,22 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   }
 
   private viewMap: Record<string, DataViewManager> = {};
+  private getViewDataById = (id: string) => {
+    return this.model.views.find(v => v.id === id);
+  };
 
   private getView(id: string): DataViewManager {
     if (!this.viewMap[id]) {
-      this.viewMap[id] = new DataViewTableManager(
+      this.viewMap[id] = new {
+        table: DataViewTableManager,
+        kanban: DataViewKanbanManager,
+      }[this.getViewDataById(id)?.mode ?? 'table'](
         () => {
-          const view = this.model.views.find(v => v.id === id);
-          if (!view || view.mode !== 'table') {
+          const view = this.getViewDataById(id);
+          if (!view) {
             throw new Error(`view ${id} not found`);
           }
-          return view;
+          return view as never;
         },
         update => this.model.updateView(id, update as never),
         this.model.propsUpdated,
@@ -69,7 +76,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override render() {
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
-    const databaseTag = literal`affine-database-${unsafeStatic(current.mode)}`;
+    const databaseTag = {
+      table: literal`affine-database-table`,
+      kanban: literal`affine-data-view-kanban`,
+    }[current.mode];
     const view = this.root.page.awarenessStore.getFlag('enable_database_filter')
       ? html` <database-view-header
           .currentView="${current.id}"
@@ -100,7 +110,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           .titleText='${this.model.title}'
           .root='${this.root}'
           .blockOperation='${blockOperation}'
-          .tableViewManager='${currentViewManager}'
+          .view='${currentViewManager}'
           .modalMode='${this.modalMode}'
           class='affine-block-element'
         ></${databaseTag}>
