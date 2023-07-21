@@ -48,6 +48,7 @@ export class RangeController {
   syncRange(selection: TextSelection | null) {
     if (!selection) {
       this._reusedRange = null;
+      window.getSelection()?.removeAllRanges();
       return;
     }
 
@@ -64,12 +65,16 @@ export class RangeController {
 
   writeRange(range: Range | null) {
     const selectionManager = this.root.selectionManager;
+    const hasTextSelection =
+      selectionManager.value.filter(sel => sel.is('text')).length > 0;
     if (range !== undefined) {
       this._reusedRange = range;
     }
 
     if (!this._range) {
-      selectionManager.clear();
+      if (hasTextSelection) {
+        selectionManager.clear();
+      }
       return null;
     }
 
@@ -78,7 +83,9 @@ export class RangeController {
     const to = range?.collapsed ? null : this._nodeToPoint(endContainer);
 
     if (!from) {
-      selectionManager.clear();
+      if (hasTextSelection) {
+        selectionManager.clear();
+      }
       return null;
     }
 
