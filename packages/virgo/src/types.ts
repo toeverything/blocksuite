@@ -22,7 +22,7 @@ export interface VRange {
 }
 
 export type VRangeUpdatedProp = [
-  range: VRange,
+  range: VRange | null,
   type: 'native' | 'input' | 'other'
 ];
 

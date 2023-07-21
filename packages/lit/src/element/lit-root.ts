@@ -1,7 +1,11 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
 import type { BlockSpec } from '@blocksuite/block-std';
-import { BlockStore, UIEventDispatcher } from '@blocksuite/block-std';
+import {
+  BlockStore,
+  SelectionManager,
+  UIEventDispatcher,
+} from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
@@ -28,7 +32,9 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   modelSubscribed = new Set<string>();
 
-  uiEventDispatcher = new UIEventDispatcher(this);
+  uiEventDispatcher!: UIEventDispatcher;
+
+  selectionManager!: SelectionManager;
 
   blockStore!: BlockStore<StaticValue>;
 
@@ -38,22 +44,37 @@ export class BlockSuiteRoot extends ShadowlessElement {
     if (changedProperties.has('blocks')) {
       this.blockStore.applySpecs(this.blocks);
     }
+    if (changedProperties.has('page')) {
+      this.blockStore.page = this.page;
+    }
     super.willUpdate(changedProperties);
   }
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.uiEventDispatcher = new UIEventDispatcher(this);
+    this.selectionManager = new SelectionManager(this, this.page.workspace);
     this.blockStore = new BlockStore<StaticValue>({
       uiEventDispatcher: this.uiEventDispatcher,
+      selectionManager: this.selectionManager,
+      workspace: this.page.workspace,
+      page: this.page,
     });
+
     this.uiEventDispatcher.mount();
+    this.selectionManager.mount(this.page);
+
     this.blockStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
+
     this.blockStore.dispose();
+
     this.uiEventDispatcher.unmount();
+    this.selectionManager.unmount();
   }
 
   override render() {

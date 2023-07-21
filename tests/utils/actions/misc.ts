@@ -433,6 +433,7 @@ export async function initDatabaseDynamicRowWithData(
   if (addRow) {
     await initDatabaseRow(page);
   }
+  await focusDatabaseTitle(page);
   const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
@@ -574,8 +575,10 @@ export async function getSelectedTextByVirgo(page: Page) {
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { index, length } = component!.vEditor!.getVRange()!;
+    const vRange = component?.vEditor?.getVRange();
+    if (!vRange) return '';
+
+    const { index, length } = vRange;
     return component?.vEditor?.yText.toString().slice(index, length) || '';
   });
 }
@@ -594,8 +597,9 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { index, length } = component!.vEditor!.getVRange()!;
+      const vRange = component.vEditor?.getVRange();
+      if (!vRange) return;
+      const { index, length } = vRange;
       content +=
         component?.vEditor?.yText.toString().slice(index, index + length) || '';
     });
@@ -885,7 +889,13 @@ export async function shamefullyBlurActiveElement(page: Page) {
  *
  */
 export async function waitForVirgoStateUpdated(page: Page) {
-  await page.waitForTimeout(50);
+  return await page.evaluate(async () => {
+    const selection = window.getSelection() as Selection;
+
+    const range = selection.getRangeAt(0);
+    const component = range.startContainer.parentElement?.closest('rich-text');
+    await component?.vEditor?.waitForUpdate();
+  });
 }
 
 export async function initImageState(page: Page) {

@@ -154,9 +154,11 @@ export class RichText extends ShadowlessElement {
       const el = this.querySelector('.v-range');
       if (el) {
         const vRange = this.vEditor.getVRange();
-        const span = document.createElement('span');
-        span.innerHTML = JSON.stringify(vRange);
-        el.replaceChildren(span);
+        if (vRange) {
+          const span = document.createElement('span');
+          span.innerHTML = JSON.stringify(vRange);
+          el.replaceChildren(span);
+        }
       }
     });
   }
