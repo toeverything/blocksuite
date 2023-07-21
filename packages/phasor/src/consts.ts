@@ -15,15 +15,15 @@ export interface IBound {
   rotate?: number;
 }
 
+export enum ShapeStyle {
+  General = 'General',
+  Scribbled = 'Scribbled',
+}
+
 export enum StrokeStyle {
   Solid = 'solid',
   Dashed = 'dash',
   None = 'none',
-}
-
-export enum ShapeStyle {
-  General = 'General',
-  Scribbled = 'Scribbled',
 }
 
 export interface IModelCoord {
