@@ -587,6 +587,7 @@ type Action =
   | 'sendToBack'
   | 'copyAsPng'
   | 'changeNoteColor'
+  | 'changeShapeStyle'
   | 'changeShapeFillColor'
   | 'changeShapeStrokeColor'
   | 'changeShapeStrokeStyles'
@@ -686,6 +687,13 @@ export async function triggerComponentToolbarAction(
       await button.click();
       break;
     }
+    case 'changeShapeStyle': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-shape-button')
+        .locator('.shape-style-button');
+      await button.click();
+      break;
+    }
     case 'changeConnectorStrokeColor': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-connector-button')
@@ -778,11 +786,30 @@ export function locatorShapeStrokeStyleButton(
     .locator('.line-style-panel')
     .locator(`.edgeless-component-line-style-button.mode-${mode}`);
 }
+
 export async function changeShapeStrokeStyle(
   page: Page,
   mode: 'solid' | 'dash' | 'none'
 ) {
   const button = locatorShapeStrokeStyleButton(page, mode);
+  await button.click();
+}
+
+export function locatorShapeStyleButton(
+  page: Page,
+  style: 'general' | 'scribbled'
+) {
+  return page
+    .locator('edgeless-change-shape-button')
+    .locator('edgeless-shape-style-panel')
+    .locator(`edgeless-tool-icon-button.${style}-shape-button`);
+}
+
+export async function changeShapeStyle(
+  page: Page,
+  style: 'general' | 'scribbled'
+) {
+  const button = locatorShapeStyleButton(page, style);
   await button.click();
 }
 

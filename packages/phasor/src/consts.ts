@@ -15,6 +15,11 @@ export interface IBound {
   rotate?: number;
 }
 
+export enum ShapeStyle {
+  General = 'General',
+  Scribbled = 'Scribbled',
+}
+
 export enum StrokeStyle {
   Solid = 'solid',
   Dashed = 'dash',
