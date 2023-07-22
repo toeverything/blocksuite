@@ -10,8 +10,13 @@ import { isValidUrl } from '../utils/url.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { REFERENCE_NODE } from './reference-node.js';
-import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
-const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
+import {
+  type AffineTextAttributes,
+  type AffineTextSchema,
+  type AffineVEditor,
+} from './virgo/types.js';
+const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
+const GLOBAL_IGNORED_ATTRIBUTES = ['reference'] as const;
 
 const autoIdentifyLink = (
   editor: AffineVEditor,
@@ -169,8 +174,9 @@ export class RichText extends ShadowlessElement {
 
   override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
-    this._vEditor = new VEditor(this.model.text.yText, {
+    this._vEditor = new VEditor<AffineTextAttributes>(this.model.text.yText, {
       active: () => activeEditorManager.isActive(this),
+      embed: delta => !!delta.attributes?.reference,
     });
     setupVirgoScroll(this, this._vEditor);
     const textSchema = this.textSchema;
@@ -222,10 +228,14 @@ export class RichText extends ShadowlessElement {
           ) {
             const { attributes } = deltas[0][0];
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-              IGNORED_ATTRIBUTES.forEach(attr => {
+              EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
                 delete attributes?.[attr];
               });
             }
+
+            GLOBAL_IGNORED_ATTRIBUTES.forEach(attr => {
+              delete attributes?.[attr];
+            });
 
             ctx.attributes = attributes ?? null;
           }
@@ -251,10 +261,14 @@ export class RichText extends ShadowlessElement {
           ) {
             const attributes = deltas[0][0].attributes;
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-              IGNORED_ATTRIBUTES.forEach(attr => {
+              EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
                 delete attributes?.[attr];
               });
             }
+
+            GLOBAL_IGNORED_ATTRIBUTES.forEach(attr => {
+              delete attributes?.[attr];
+            });
 
             ctx.attributes = attributes ?? null;
           }
