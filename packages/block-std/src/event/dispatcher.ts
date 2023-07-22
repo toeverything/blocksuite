@@ -4,6 +4,7 @@ import type { UIEventHandler } from './base.js';
 import { UIEventStateContext } from './base.js';
 import { UIEventState } from './base.js';
 import { KeyboardControl } from './keyboard.js';
+import { bindKeymap } from './keymap.js';
 import { PointerControl } from './pointer.js';
 import { toLowerCase } from './utils.js';
 
@@ -94,6 +95,10 @@ export class UIEventDispatcher {
         );
       }
     };
+  }
+
+  bindHotkey(keymap: Record<string, UIEventHandler>) {
+    return this.add('keyDown', bindKeymap(keymap));
   }
 
   private _bindEvents() {
