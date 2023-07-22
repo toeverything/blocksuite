@@ -155,8 +155,11 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       class="affine-reference"
       style=${style}
       @click=${this._onClick}
-      >${type === 'LinkedPage' ? FontLinkedPageIcon : FontPageIcon}${title ||
-      DEFAULT_PAGE_NAME}<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+      >${type === 'LinkedPage' ? FontLinkedPageIcon : FontPageIcon}<span
+        data-title=${title || DEFAULT_PAGE_NAME}
+        class="affine-reference-title"
+        >${title || DEFAULT_PAGE_NAME}</span
+      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
     ></span>`;
   }
 }
