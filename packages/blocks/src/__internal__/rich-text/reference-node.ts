@@ -150,6 +150,8 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         : {}
     );
 
+    // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
+    // embed element to make sure virgo range calculation is correct
     return html`<span
       data-selected=${this.selected}
       class="affine-reference"
