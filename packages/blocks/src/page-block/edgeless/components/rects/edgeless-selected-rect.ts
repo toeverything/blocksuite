@@ -445,6 +445,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
     this._lock = false;
 
+    if (this._rotate !== 0 && this.state.selected.length > 1) {
+      this._updateSelectedRect();
+      this._resizeManager.updateState(
+        this.resizeMode,
+        this._rotate,
+        this.zoom,
+        getSelectedRect(this.state.selected)
+      );
+    }
+
     this._resizeManager.updateBounds(getSelectableBounds(this.state.selected));
 
     this._updateCursor(false);
