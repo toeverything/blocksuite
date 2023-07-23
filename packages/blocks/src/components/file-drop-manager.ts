@@ -215,19 +215,4 @@ export class FileDropManager {
   register(type: string, handler: ImportHandler) {
     this._handlers.set(type, handler);
   }
-
-  /**
-   * Unregisters the processing function for the specified type.
-   *
-   * @param type - MIME type
-   * @param handler - A processing handler
-   */
-  unregister(type: string, handler: ImportHandler) {
-    const current = this._handlers.get(type);
-    if (current === handler) {
-      this._handlers.delete(type);
-    } else {
-      console.warn('The specified handler is not registered.');
-    }
-  }
 }
