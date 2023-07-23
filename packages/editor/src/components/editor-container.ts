@@ -266,7 +266,7 @@ export class EditorContainer
 
   override render() {
     if (!this.page) return null;
-    assertExists(this.model);
+    if (!this.model) return null;
 
     const rootContainer = keyed(
       this.model.id,
