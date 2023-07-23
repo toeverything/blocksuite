@@ -223,16 +223,23 @@ export class RichText extends ShadowlessElement {
 
         if (data && data.length > 0 && data !== '\n') {
           if (
-            deltas.length > 1 ||
-            (deltas.length === 1 && vRange.index !== 0)
+            deltas.length > 1 || // cursor is in the between of two deltas
+            (deltas.length === 1 && vRange.index !== 0) // cursor is in the end of line or in the middle of a delta
           ) {
+            // each new text inserted by virgo will not contain any attributes,
+            // but we want to keep the attributes of previous text or current text where the cursor is in
+            // here are two cases:
+            // 1. aaa**b|bb**ccc --input 'd'--> aaa**bdbb**ccc, d should extend the bold attribute
+            // 2. aaa**bbb|**ccc --input 'd'--> aaa**bbbd**ccc, d should extend the bold attribute
             const { attributes } = deltas[0][0];
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
+              // `EDGE_IGNORED_ATTRIBUTES` is which attributes should be ignored in case 2
               EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
                 delete attributes?.[attr];
               });
             }
 
+            // `GLOBAL_IGNORED_ATTRIBUTES` is which attributes should be ignored in case 1, 2
             GLOBAL_IGNORED_ATTRIBUTES.forEach(attr => {
               delete attributes?.[attr];
             });
