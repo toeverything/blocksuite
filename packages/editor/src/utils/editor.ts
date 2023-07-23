@@ -35,6 +35,7 @@ export const createBlockHub: (
     onClickCard: async (data: { flavour: string; type?: string }) => {
       // To make sure get the current page
       const page = editor.page;
+      assertExists(page);
       const models = [];
 
       const isDatabase = data.flavour === 'affine:database';
@@ -83,6 +84,7 @@ export const createBlockHub: (
     onDrop: async (e, point, end, type) => {
       // To make sure get the current page
       const page = editor.page;
+      assertExists(page);
       const dataTransfer = e.dataTransfer;
       assertExists(dataTransfer);
       const data = dataTransfer.getData('affine/block-hub');
