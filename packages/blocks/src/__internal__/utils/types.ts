@@ -109,7 +109,7 @@ type EditorMode = 'page' | 'edgeless';
 type EditorSlots = { pageModeSwitched: Slot<EditorMode> };
 
 export type AbstractEditor = {
-  page: Page;
+  page: Page | null;
   mode: EditorMode;
   readonly slots: CommonSlots & EditorSlots;
 } & HTMLElement;

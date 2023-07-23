@@ -24,7 +24,7 @@ import type {
 import type { DragIndicator } from './index.js';
 
 export type GetPageInfo = () => {
-  page: Page;
+  page: Page | null;
   mode: 'page' | 'edgeless';
   pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent | undefined;
 };
@@ -123,6 +123,7 @@ export class FileDropManager {
     if (!len) return;
 
     const { page, mode, pageBlock } = this._getPageInfo();
+    assertExists(page);
     assertExists(pageBlock);
 
     page.captureSync();
@@ -213,5 +214,20 @@ export class FileDropManager {
    */
   register(type: string, handler: ImportHandler) {
     this._handlers.set(type, handler);
+  }
+
+  /**
+   * Unregisters the processing function for the specified type.
+   *
+   * @param type - MIME type
+   * @param handler - A processing handler
+   */
+  unregister(type: string, handler: ImportHandler) {
+    const current = this._handlers.get(type);
+    if (current === handler) {
+      this._handlers.delete(type);
+    } else {
+      console.warn('The specified handler is not registered.');
+    }
   }
 }

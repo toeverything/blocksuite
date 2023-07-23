@@ -19,7 +19,13 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
+import {
+  assertExists,
+  DisposableGroup,
+  isFirefox,
+  type Page,
+  Slot,
+} from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -47,7 +53,7 @@ export class EditorContainer
   implements AbstractEditor
 {
   @property({ attribute: false })
-  page!: Page;
+  page: Page | null = null;
 
   @property({ attribute: false })
   mode: 'page' | 'edgeless' = 'page';
@@ -68,10 +74,12 @@ export class EditorContainer
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   readonly themeObserver = new ThemeObserver();
+  private _pageDisposables = new DisposableGroup();
 
   fileDropManager = new FileDropManager(this._getPageInfo.bind(this));
 
   get model(): PageBlockModel | null {
+    assertExists(this.page);
     return this.page.root as PageBlockModel | null;
   }
 
@@ -125,10 +133,6 @@ export class EditorContainer
       this._disposables.addFromEvent(window, 'keydown', keydown);
     }
 
-    if (!this.page) {
-      throw new Error('Missing page for EditorContainer!');
-    }
-
     // connect mouse mode event changes
     // this._disposables.addFromEvent(
     //   window,
@@ -137,27 +141,6 @@ export class EditorContainer
     //     this.edgelessTool = detail;
     //   }
     // );
-
-    // subscribe store
-    this._disposables.add(
-      this.page.slots.rootAdded.on(() => {
-        // add the 'page' as requesting property to
-        // make sure the `forwardSlot` is called in `updated` lifecycle
-        this.requestUpdate('page');
-      })
-    );
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(async ({ type, id }) => {
-        const block = this.page.getBlockById(id);
-
-        if (!block) return;
-
-        if (type === 'update') {
-          const service = await getServiceOrRegister(block.flavour);
-          service.updateEffect(block);
-        }
-      })
-    );
 
     this._disposables.addFromEvent(
       this,
@@ -168,6 +151,37 @@ export class EditorContainer
 
     this.themeObserver.observer(document.documentElement);
     this._disposables.add(this.themeObserver);
+  }
+
+  override willUpdate(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('page')) {
+      this._pageDisposables.dispose();
+      this._pageDisposables = new DisposableGroup();
+      if (this.page) {
+        const page = this.page;
+        // subscribe store
+        this._pageDisposables.add(
+          page.slots.rootAdded.on(() => {
+            // add the 'page' as requesting property to
+            // make sure the `forwardSlot`
+            // is called in `updated` lifecycle
+            this.requestUpdate('page');
+          })
+        );
+        this._pageDisposables.add(
+          page.slots.blockUpdated.on(async ({ type, id }) => {
+            const block = page.getBlockById(id);
+
+            if (!block) return;
+
+            if (type === 'update') {
+              const service = await getServiceOrRegister(block.flavour);
+              service.updateEffect(block);
+            }
+          })
+        );
+      }
+    }
   }
 
   override disconnectedCallback() {
@@ -188,6 +202,7 @@ export class EditorContainer
 
     // adds files from outside by dragging and dropping
     this.fileDropManager.register('image/*', async (file: File) => {
+      assertExists(this.page);
       const storage = this.page.blobs;
       assertExists(storage);
       const sourceId = await storage.set(file);
@@ -224,13 +239,16 @@ export class EditorContainer
 
   async createBlockHub() {
     await this.updateComplete;
-    if (!this.page.root) {
-      await new Promise(res => this.page.slots.rootAdded.once(res));
+    assertExists(this.page);
+    const page = this.page;
+    if (!page.root) {
+      await new Promise(res => page.slots.rootAdded.once(res));
     }
     return createBlockHub(this, this.page);
   }
 
   private _saveViewportLocalRecord() {
+    if (!this.page) return;
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;
@@ -242,11 +260,13 @@ export class EditorContainer
   }
 
   createContentParser() {
+    assertExists(this.page);
     return new ContentParser(this.page);
   }
 
   override render() {
-    if (!this.model) return null;
+    if (!this.page) return null;
+    assertExists(this.model);
 
     const rootContainer = keyed(
       this.model.id,
