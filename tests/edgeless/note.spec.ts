@@ -55,7 +55,7 @@ import {
 import { test } from '../utils/playwright.js';
 
 const CENTER_X = 450;
-const CENTER_Y = 300;
+const CENTER_Y = 450;
 
 test('can drag selected non-active note', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -65,7 +65,7 @@ test('can drag selected non-active note', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 79]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -74,7 +74,7 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertNoteXYWH(page, [0, 100, EDITOR_WIDTH, 79]);
+  await assertNoteXYWH(page, [0, 100, EDITOR_WIDTH, 91]);
 });
 
 test('resize note in edgeless mode', async ({ page }) => {
@@ -122,11 +122,11 @@ test('add Note', async ({ page }) => {
   await switchEditorMode(page);
   await setEdgelessTool(page, 'note');
 
-  await addNote(page, 'hello', 30, 40);
+  await addNote(page, 'hello', 300, 300);
 
   await assertEdgelessTool(page, 'default');
   await assertRichTexts(page, ['', 'hello']);
-  await assertEdgelessSelectedRect(page, [0, 0, 448, 79]);
+  await assertEdgelessSelectedRect(page, [270, 260, 448, 91]);
 });
 
 test('add empty Note', async ({ page }) => {
@@ -136,22 +136,22 @@ test('add empty Note', async ({ page }) => {
   await switchEditorMode(page);
   await setEdgelessTool(page, 'note');
 
-  // add note at 30,40
-  await page.mouse.click(30, 40);
+  // add note at 300,300
+  await page.mouse.click(300, 300);
   await waitForVirgoStateUpdated(page);
   await pressEnter(page);
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
 
   // assert add note success
-  await page.mouse.move(30, 40);
-  await assertEdgelessSelectedRect(page, [0, 0, 448, 110]);
+  await page.mouse.move(320, 320);
+  await assertEdgelessSelectedRect(page, [270, 260, 448, 91]);
 
   // click out of note
-  await page.mouse.click(0, 200);
+  await page.mouse.click(250, 200);
 
   // assert empty note is removed
-  await page.mouse.move(30, 40);
+  await page.mouse.move(320, 320);
   await assertEdgelessNonSelectedRect(page);
 });
 
