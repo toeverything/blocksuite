@@ -125,8 +125,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
         this.surface.updateElement<'brush'>(element.id, { lineWidth: size });
       }
     });
-    // FIXME: force update selection, because brush size changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setBrushColor(color: CssVariableName) {

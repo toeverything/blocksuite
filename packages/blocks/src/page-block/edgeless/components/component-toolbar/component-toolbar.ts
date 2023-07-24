@@ -6,14 +6,17 @@ import './change-note-button.js';
 import './change-text-button.js';
 import './more-button.js';
 
+import type { SurfaceSelection } from '@blocksuite/block-std';
+import { WithDisposable } from '@blocksuite/lit';
 import type {
   BrushElement,
   ConnectorElement,
+  PhasorElement,
   ShapeElement,
   TextElement,
 } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import {
@@ -22,9 +25,10 @@ import {
 } from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
+import type { NoteBlockModel } from '../../../../models.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
+import type { Selectable } from '../../utils/selection-manager.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
@@ -35,7 +39,7 @@ type CategorizedElements = {
 };
 
 @customElement('edgeless-component-toolbar')
-export class EdgelessComponentToolbar extends LitElement {
+export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: none;
@@ -61,8 +65,8 @@ export class EdgelessComponentToolbar extends LitElement {
     }
   `;
 
-  @property({ type: Object })
-  selectionState!: EdgelessSelectionState;
+  @state()
+  selectionState!: SurfaceSelection;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -72,7 +76,7 @@ export class EdgelessComponentToolbar extends LitElement {
   }
 
   get selected() {
-    return this.selectionState.selected;
+    return this.selectionState.elements;
   }
 
   get slots() {
@@ -83,13 +87,23 @@ export class EdgelessComponentToolbar extends LitElement {
     return this.edgeless.surface;
   }
 
+  private _getModel(id: string): Selectable {
+    return (
+      (this.page.getBlockById(id) as NoteBlockModel) ??
+      (this.surface.pickById(id) as PhasorElement)
+    );
+  }
+
   private _groupSelected(): CategorizedElements {
-    const result = groupBy(this.selected, s => {
-      if (isTopLevelBlock(s)) {
-        return 'note';
+    const result = groupBy(
+      this.selected.map(id => this._getModel(id)),
+      model => {
+        if (isTopLevelBlock(model)) {
+          return 'note';
+        }
+        return model.type;
       }
-      return s.type;
-    });
+    );
     return result as CategorizedElements;
   }
 
@@ -100,7 +114,6 @@ export class EdgelessComponentToolbar extends LitElement {
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
-          .selectionState=${this.selectionState}
         >
         </edgeless-change-shape-button>`
       : nothing;
@@ -157,6 +170,15 @@ export class EdgelessComponentToolbar extends LitElement {
         >
         </edgeless-change-text-button>`
       : nothing;
+  }
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this._disposables.add(
+      this.edgeless.selection.slots.update.on(() => {
+        this.selectionState = this.edgeless.selection.state;
+      })
+    );
   }
 
   override render() {

@@ -169,11 +169,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
   private _popperShow = false;
 
-  private _forceUpdateSelection() {
-    // FIXME: force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
-  }
-
   private _setConnectorMode(mode: ConnectorMode) {
     this.page.captureSync();
     this.elements.forEach(element => {
@@ -183,7 +178,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         });
       }
     });
-    this._forceUpdateSelection();
   }
 
   private _setConnectorColor(stroke: CssVariableName) {
@@ -205,7 +199,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         strokeWidth,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
@@ -214,7 +207,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         strokeStyle,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {

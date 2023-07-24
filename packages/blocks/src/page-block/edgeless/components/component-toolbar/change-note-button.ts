@@ -171,8 +171,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       this.page.updateBlock(note, { background: color });
     });
-    // force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
@@ -191,8 +189,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
     this.requestUpdate();
-    // force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   override updated(changedProperties: Map<string, unknown>) {

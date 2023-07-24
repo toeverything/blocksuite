@@ -477,7 +477,7 @@ export class EdgelessPageBlockComponent
     // this.model.children.forEach(note => {
     //   note.propsUpdated.on(() => this.selection.syncDraggingArea());
     // });
-    const { _disposables, slots, page } = this;
+    const { _disposables, slots, selection, page } = this;
     _disposables.add(
       page.slots.blockUpdated.on(e => {
         if (e.type === 'update') {
@@ -529,8 +529,7 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
     _disposables.add(
-      slots.selectionUpdated.on(state => {
-        this.selection.state = state;
+      selection.slots.selectionUpdated.on(() => {
         this._clearSelection();
         this.requestUpdate();
       })
@@ -686,6 +685,10 @@ export class EdgelessPageBlockComponent
     }
 
     callback(keys);
+  }
+
+  getElementModel(id: string) {
+    return this.page.getBlockById(id) ?? this.surface.pickById(id) ?? null;
   }
 
   getSortedElementsWithViewportBounds(elements: Selectable[]) {
@@ -988,8 +991,8 @@ export class EdgelessPageBlockComponent
     assertExists(note);
 
     this.selection.switchToDefaultMode({
-      selected: [note],
-      active: false,
+      elements: [note.id],
+      editing: false,
     });
   }
 
@@ -1003,9 +1006,9 @@ export class EdgelessPageBlockComponent
 
     requestAnimationFrame(() => {
       this.slots.selectedBlocksUpdated.emit([]);
-      this.slots.selectionUpdated.emit({
-        selected: [noteBlock as TopLevelBlockModel],
-        active,
+      this.selection.slots.selectionUpdated.emit({
+        elements: [noteBlock.id],
+        editing: false,
       });
       // Waiting dom updated, `note mask` is removed
       this.updateComplete.then(() => {
@@ -1062,7 +1065,7 @@ export class EdgelessPageBlockComponent
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
       this.slots.selectedBlocksUpdated.emit([...this.selection.selectedBlocks]);
-      this.slots.selectionUpdated.emit({ ...this.selection.state });
+      this.selection.slots.selectionUpdated.emit(this.selection.state);
     });
     resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
@@ -1214,7 +1217,7 @@ export class EdgelessPageBlockComponent
 
     const notesContainer = EdgelessNotesContainer(
       sortedNotes,
-      state.active,
+      state.editing,
       this.renderModel
     );
 
@@ -1266,14 +1269,7 @@ export class EdgelessPageBlockComponent
           }}
         ></affine-selected-blocks>
         ${hoverRectTpl} ${draggingAreaTpl}
-        ${state.selected.length > 0
-          ? html`
-              <edgeless-selected-rect
-                .state=${state}
-                .edgeless=${this}
-              ></edgeless-selected-rect>
-            `
-          : nothing}
+        <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
         ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets.slashMenu}
         ${this.widgets.linkedPage}
       </div>

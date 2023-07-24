@@ -1,10 +1,13 @@
-import type {
-  EventName,
-  PointerEventState,
-  UIEventDispatcher,
-  UIEventHandler,
+import {
+  type EventName,
+  type PointerEventState,
+  SurfaceSelection,
+  type UIEventDispatcher,
+  type UIEventHandler,
 } from '@blocksuite/block-std';
 import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
+import type { AwarenessEvent } from '@blocksuite/store';
+import { Slot } from '@blocksuite/store';
 
 import {
   AbstractSelectionManager,
@@ -64,10 +67,16 @@ export interface EdgelessHoverState {
 
 export interface EdgelessSelectionState {
   /* The selected note or phasor element */
-  selected: Selectable[];
+  elements: string[];
   /* True if the selected content is active (like after double click) */
-  active: boolean;
+  editing: boolean;
+  // wait for explain
   by?: 'selecting';
+}
+
+export interface EdgelessSelection {
+  elements: string[];
+  editing: boolean;
 }
 
 export interface SelectionArea {
@@ -91,6 +100,11 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     timeStamp: number;
   } | null = null;
 
+  slots = {
+    selectionUpdated: new Slot<EdgelessSelectionState | SurfaceSelection>(),
+    update: new Slot<AwarenessEvent>(),
+  };
+
   // pressed shift key
   private _shiftKey = false;
 
@@ -98,16 +112,28 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   selectedBlocks: BlockComponentElement[] = [];
 
   // Cache the last edited elements.
-  lastState: EdgelessSelectionState | null = null;
+  lastState: SurfaceSelection | null = null;
 
   // Holds the state of the current selected elements.
-  state: EdgelessSelectionState = {
-    selected: [],
-    active: false,
-  };
+  state: SurfaceSelection = SurfaceSelection.fromJSON({
+    editing: false,
+    elements: [],
+  });
+
+  get awareness() {
+    return this.page.awarenessStore;
+  }
+
+  get surface() {
+    return this.container.surface;
+  }
 
   get isActive() {
-    return this.state.active;
+    return this.isEditing;
+  }
+
+  get isEditing() {
+    return this.state?.editing;
   }
 
   get lastMousePos() {
@@ -166,6 +192,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     };
 
     this._initMouseAndWheelEvents();
+    this._initSlot();
   }
 
   private _updateLastMousePos(e: PointerEventState) {
@@ -173,6 +200,30 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       x: e.x,
       y: e.y,
     };
+  }
+
+  private _initSlot() {
+    this._disposables.add(
+      this.slots.selectionUpdated.on(state => {
+        this.setSelection(state);
+      })
+    );
+
+    this._disposables.add(
+      this.awareness.slots.update.on(state => {
+        if (this.awareness.awareness.clientID === state.id) {
+          console.log('awareness update', state);
+          this.lastState = this.state;
+          this.state = state.state?.selection?.[0]
+            ? SurfaceSelection.fromJSON(state.state?.selection[0])
+            : SurfaceSelection.fromJSON({ elements: [], editing: false });
+          console.log(this.state);
+        }
+
+        console.log('emit');
+        this.slots.update.emit(state);
+      })
+    );
   }
 
   private async _initMouseAndWheelEvents() {
@@ -416,6 +467,14 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     updateLocalSelectionRange(this.page);
   };
 
+  setSelection(selection: EdgelessSelectionState | SurfaceSelection) {
+    const awareness =
+      selection instanceof SurfaceSelection
+        ? selection.toJSON()
+        : (selection as Record<string, any>);
+    this.awareness.setLocalSelection([awareness]);
+  }
+
   refreshRemoteSelection() {
     const element = document.querySelector('remote-selection');
     if (element) {
@@ -444,14 +503,14 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       // if in other mouse mode
       this.edgelessTool.type !== 'default' ||
       // if current selection is not active
-      !this.state.active ||
+      !this.state?.editing ||
       // if current selected block is not the hovered block
-      this.state.selected[0].id !== hovered.id
+      this.state.elements[0] !== hovered.id
     ) {
       this.container.components.dragHandle?.hide();
     }
 
-    if (!hovered || this.state.active) {
+    if (!hovered || this.state?.editing) {
       return null;
     }
 
@@ -464,28 +523,34 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
   setEdgelessTool = (
     edgelessTool: EdgelessTool,
-    state: EdgelessSelectionState = {
-      selected: [],
-      active: false,
+    state: EdgelessSelectionState | SurfaceSelection = {
+      elements: [],
+      editing: false,
     }
   ) => {
     if (this.edgelessTool === edgelessTool) return;
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].beforeModeSwitch(edgelessTool);
+
     if (edgelessTool.type === 'default') {
-      if (!state.selected.length && this.lastState) {
+      if (!state['elements'].length && this.lastState) {
         state = this.lastState;
         this.lastState = null;
       } else {
-        this.lastState = state;
+        this.lastState =
+          state instanceof SurfaceSelection
+            ? state
+            : SurfaceSelection.fromJSON(
+                state as unknown as Record<string, unknown>
+              );
       }
-    } else if (this.state.selected.length) {
+    } else if (this.state?.elements.length) {
       this.lastState = this.state;
     }
 
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
-    this.container.slots.selectionUpdated.emit(state);
+    this.slots.selectionUpdated.emit(state);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
@@ -497,10 +562,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   clear() {
     this.selectedBlocks = [];
     this.lastState = null;
-    this.state = {
-      selected: [],
-      active: false,
-    };
+    this.state = SurfaceSelection.fromJSON({ elements: [], editing: false });
   }
 
   dispose() {

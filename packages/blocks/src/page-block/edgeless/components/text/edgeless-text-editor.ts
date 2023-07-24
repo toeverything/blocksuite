@@ -46,10 +46,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           (vLines.length / edgeless.surface.viewport.zoom) * lineHeight
         ).serialize(),
       });
-      edgeless.slots.selectionUpdated.emit({
-        selected: [element],
-        active: true,
-      });
     }
   }
 
@@ -113,9 +109,9 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.remove();
     assertExists(this._edgeless);
-    this._edgeless.slots.selectionUpdated.emit({
-      selected: [],
-      active: false,
+    this._edgeless.selection.slots.selectionUpdated.emit({
+      elements: [],
+      editing: false,
     });
   }
 

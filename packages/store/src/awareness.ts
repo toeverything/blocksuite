@@ -27,7 +27,7 @@ export type RawAwarenessState<
   selection: Array<Record<string, unknown>>;
 };
 
-interface AwarenessEvent<
+export interface AwarenessEvent<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > {
   id: number;

@@ -91,6 +91,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return null;
   }
 
+  get selection() {
+    return this._edgeless.selection;
+  }
+
   get selectedBlocks() {
     return this._edgeless.selection.selectedBlocks;
   }
@@ -100,7 +104,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get isActive() {
-    return this._edgeless.selection.state.active;
+    return this._edgeless.selection.state.editing;
+  }
+
+  private _getModelById(id: string) {
+    return this._edgeless.getElementModel(id) as Selectable;
   }
 
   private _pick(x: number, y: number, options?: HitTestOptions) {
@@ -113,46 +121,40 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _setNoneSelectionState() {
-    this._edgeless.slots.selectionUpdated.emit({ selected: [], active: false });
+    this.selection.slots.selectionUpdated.emit({
+      elements: [],
+      editing: false,
+    });
     resetNativeSelection(null);
   }
 
-  private _setSelectionState(
-    selected: Selectable[],
-    active: boolean,
-    by = false
-  ) {
-    const state: {
-      selected: Selectable[];
-      active: boolean;
-      by?: 'selecting';
-    } = {
-      selected,
-      active,
-    };
-    if (by) state.by = 'selecting';
-    this._edgeless.slots.selectionUpdated.emit(state);
+  private _setSelectionState(elements: string[], editing: boolean, by = false) {
+    this.selection.slots.selectionUpdated.emit({
+      elements,
+      editing,
+      by: by ? 'selecting' : undefined,
+    });
   }
 
   private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
-    const { selected, active } = this.state;
+    const { elements, editing } = this.state;
     this._edgeless.clearSelectedBlocks();
     // click the inner area of active text and note element
-    if (active && selected.length === 1 && selected[0] === element) {
+    if (editing && elements.length === 1 && elements[0] === element.id) {
       handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
       return;
     }
 
     // handle single note block click
-    if (!e.keys.shift && selected.length === 1 && isTopLevelBlock(element)) {
+    if (!e.keys.shift && elements.length === 1 && isTopLevelBlock(element)) {
       if (
-        (selected[0] === element && !active) ||
-        (active && selected[0] !== element)
+        (elements[0] === element.id && !editing) ||
+        (editing && elements[0] !== element.id)
       ) {
         // issue #1809
         // If the previously selected element is a noteBlock and is in an active state,
         // then the currently clicked noteBlock should also be in an active state when selected.
-        this._setSelectionState([element], true);
+        this._setSelectionState([element.id], true);
         handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
         this._edgeless.slots.selectedBlocksUpdated.emit([]);
         return;
@@ -161,17 +163,17 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     // hold shift key to multi select or de-select element
     if (e.keys.shift) {
-      const selections = [...selected];
-      if (selected.includes(element)) {
+      const selections = [...elements];
+      if (elements.includes(element.id)) {
         this._setSelectionState(
-          selections.filter(item => item !== element),
+          selections.filter(id => id !== element.id),
           false
         );
       } else {
-        this._setSelectionState([...selections, element], false);
+        this._setSelectionState([...selections, element.id], false);
       }
     } else {
-      this._setSelectionState([element], false);
+      this._setSelectionState([element.id], false);
     }
   }
 
@@ -215,7 +217,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
-    const { selected } = this.state;
+    const selected = this.state.elements.map(id => this._getModelById(id));
     if (!selected.length) return false;
 
     const commonBound = getCommonBound(
@@ -242,7 +244,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDraggable(element: Selectable) {
     return !(
       element instanceof ConnectorElement &&
-      !isConnectorAndBindingsAllSelected(element, this.state.selected)
+      !isConnectorAndBindingsAllSelected(
+        element,
+        this.state.elements.map(id => this._getModelById(id))
+      )
     );
   }
 
@@ -260,7 +265,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   /** Update drag handle by closest block elements */
   private _updateDragHandle(e: PointerEventState) {
-    const block = this.state.selected[0];
+    const block = this._getModelById(this.state.elements[0]);
     if (!block || !isTopLevelBlock(block)) return;
     const noteBlockElement = getBlockElementByModel(block);
     assertExists(noteBlockElement);
@@ -356,13 +361,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _determineDragType(e: PointerEventState): DefaultModeDragType {
     // Is dragging started from current selected rect
     if (this._isInSelectedRect(e.x, e.y)) {
-      return this.state.active
+      return this.state.editing
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
     } else {
       const selected = this._pick(e.x, e.y);
       if (selected) {
-        this._setSelectionState([selected], false);
+        this._setSelectionState([selected.id], false);
         return DefaultModeDragType.ContentMoving;
       } else {
         return DefaultModeDragType.Selecting;
@@ -374,12 +379,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._lock = true;
     const { surface } = this._edgeless;
     const elements = (await Promise.all(
-      this.state.selected.map(async selected => {
-        return await this._cloneSelected(selected, surface);
+      this.state.elements.map(async selected => {
+        return await this._cloneSelected(this._getModelById(selected), surface);
       })
     )) as Selectable[];
 
-    this._setSelectionState(elements, false);
+    this._setSelectionState(
+      elements.map(el => el.id),
+      false
+    );
   }
 
   private async _cloneSelected(selected: Selectable, surface: SurfaceManager) {
@@ -428,10 +436,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = { x, y };
     this._dragLastPos = { x, y };
 
-    this._alignBound = this._edgeless.snap.setupAlignables(this.state.selected);
+    this._alignBound = this._edgeless.snap.setupAlignables(
+      this.state.elements.map(id => this._getModelById(id))
+    );
 
-    this._selectedBounds = this.state.selected.map(element =>
-      Bound.deserialize(element.xywh)
+    this._selectedBounds = this.state.elements.map(id =>
+      Bound.deserialize(this._getModelById(id).xywh)
     );
   }
 
@@ -452,7 +462,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
         const blocks = pickBlocksByBound(this._blocks, bound);
         const elements = this._surface.pickByBound(bound);
-        this._setSelectionState([...blocks, ...elements], false, true);
+        this._setSelectionState(
+          [
+            ...blocks.map(block => block.id),
+            ...elements.map(element => element.id),
+          ],
+          false,
+          true
+        );
 
         this._forceUpdateSelection(this.dragType, true);
         break;
@@ -460,8 +477,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
         if (
-          this.state.selected.every(ele => {
-            return !this._isDraggable(ele);
+          this.state.elements.every(ele => {
+            return !this._isDraggable(this._getModelById(ele));
           })
         ) {
           return;
@@ -479,7 +496,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           y: dy + alignRst.dy,
         };
 
-        this.state.selected.forEach((element, index) => {
+        this.state.elements.forEach((id, index) => {
+          const element = this._getModelById(id);
           if (isPhasorElement(element)) {
             if (!this._isDraggable(element)) return;
             this._handleSurfaceDragMove(

@@ -1,4 +1,5 @@
 export * from './block.js';
+export * from './surface.js';
 export * from './text.js';
 
 declare global {

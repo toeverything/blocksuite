@@ -101,7 +101,9 @@ export class NoteCut extends WithDisposable(LitElement) {
   }
 
   private _updateVisiblity(e: PointerEventState) {
-    const block = this.selection.state.selected[0];
+    const block = this.edgelessPage.getElementModel(
+      this.selection.state.elements[0]
+    );
     if (this._notHovering || !block || !isTopLevelBlock(block)) {
       this._hide();
       return;
