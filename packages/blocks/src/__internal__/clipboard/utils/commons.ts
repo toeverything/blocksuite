@@ -27,7 +27,7 @@ import {
 
 export function getBlockClipboardInfo(
   model: BaseBlockModel,
-  selectedModels: Map<string, number>,
+  selectedModels?: Map<string, number>,
   begin?: number,
   end?: number
 ) {
