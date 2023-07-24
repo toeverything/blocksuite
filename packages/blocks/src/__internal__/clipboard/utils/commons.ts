@@ -27,6 +27,7 @@ import {
 
 export function getBlockClipboardInfo(
   model: BaseBlockModel,
+  selectedModels: Map<string, number>,
   begin?: number,
   end?: number
 ) {
@@ -35,7 +36,7 @@ export function getBlockClipboardInfo(
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered
   // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
-  const json = service.block2Json(model, begin, end);
+  const json = service.block2Json(model, selectedModels, begin, end);
 
   return {
     html,
@@ -46,19 +47,46 @@ export function getBlockClipboardInfo(
 }
 
 function createPageClipboardItems(range: BlockRange) {
-  const clipGroups = range.models.map((model, index) => {
-    if (index === 0) {
-      return getBlockClipboardInfo(
-        model,
-        range.startOffset,
-        index === range.models.length - 1 ? range.endOffset : undefined
-      );
-    }
-    if (index === range.models.length - 1) {
-      return getBlockClipboardInfo(model, undefined, range.endOffset);
-    }
-    return getBlockClipboardInfo(model);
+  const uniqueModelsFilter = new Map();
+  const addToFilter = (model: BaseBlockModel, index: number) => {
+    uniqueModelsFilter.set(model.id, index);
+    model.children?.forEach(child => addToFilter(child, index));
+  };
+
+  const selectedModels = new Map();
+
+  range.models.forEach((model, index) => {
+    selectedModels.set(model.id, index);
   });
+
+  const clipGroups = range.models
+    .filter((model, index) => {
+      if (uniqueModelsFilter.has(model.id)) {
+        uniqueModelsFilter.set(model.id, index);
+        return false;
+      }
+      addToFilter(model, index);
+      return true;
+    })
+    .map((model, index, array) => {
+      if (index === 0) {
+        return getBlockClipboardInfo(
+          model,
+          selectedModels,
+          range.startOffset,
+          index === array.length - 1 ? range.endOffset : undefined
+        );
+      }
+      if (index === array.length - 1) {
+        return getBlockClipboardInfo(
+          model,
+          selectedModels,
+          undefined,
+          range.endOffset
+        );
+      }
+      return getBlockClipboardInfo(model, selectedModels);
+    });
 
   const stringifiesData = JSON.stringify(
     clipGroups.filter(group => group.json).map(group => group.json)

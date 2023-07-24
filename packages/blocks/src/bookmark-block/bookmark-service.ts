@@ -24,6 +24,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
 
   override block2Json(
     block: BookmarkBlockModel,
+    selectedModels?: Map<string, number>,
     begin?: number,
     end?: number
   ): SerializedBlock {
