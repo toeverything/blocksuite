@@ -35,12 +35,12 @@ import { GUI } from 'dat.gui';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { createViewer } from '../../starter/components/doc-inspector';
 import {
   generateRoomId,
   initCollaborationSocket,
 } from '../providers/websocket-channel';
 import { notify } from '../utils/notify';
-import { createViewer } from './doc-inspector';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};

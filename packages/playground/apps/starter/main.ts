@@ -1,4 +1,4 @@
-/// <reference types="./env" />
+/// <reference types="./env.d.ts" />
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import './components/start-panel';
