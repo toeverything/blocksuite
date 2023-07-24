@@ -1,4 +1,4 @@
-import { type IBound, StrokeStyle } from '../../../consts.js';
+import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -15,6 +15,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+import { drawGeneralShpae } from '../utils.js';
 
 function trianglePoints({ x, y, w, h }: IBound) {
   return [
@@ -40,6 +41,7 @@ export const TriangleMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
+      shapeStyle,
     } = element;
     const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -64,14 +66,29 @@ export const TriangleMethods: ShapeMethods = {
       ],
       {
         seed,
-        roughness,
+        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
         strokeLineDash:
           strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+        stroke:
+          strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
+            ? 'none'
+            : realStrokeColor,
         strokeWidth,
         fill: filled ? realFillColor : undefined,
       }
     );
+
+    if (shapeStyle === ShapeStyle.General) {
+      drawGeneralShpae(ctx, 'triangle', {
+        x: 0,
+        y: 0,
+        width: renderWidth,
+        height: renderHeight,
+        strokeWidth,
+        strokeColor: realStrokeColor,
+        strokeStyle: strokeStyle,
+      });
+    }
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {

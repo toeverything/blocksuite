@@ -139,6 +139,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      w3c-keyname:
+        specifier: ^2.2.8
+        version: 2.2.8
     devDependencies:
       '@blocksuite/store':
         specifier: workspace:*
@@ -7842,6 +7845,10 @@ packages:
       '@vue/server-renderer': 3.3.4(vue@3.3.4)
       '@vue/shared': 3.3.4
     dev: true
+
+  /w3c-keyname@2.2.8:
+    resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
+    dev: false
 
   /walkdir@0.4.1:
     resolution: {integrity: sha512-3eBwRyEln6E1MSzcxcVpQIhRG8Q1jLvEqRmCZqS3dsfXEDR/AhOF4d+jHg1qvDCpYaVRZjENPQyrVxAkQqxPgQ==}

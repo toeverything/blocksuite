@@ -3,7 +3,9 @@ import { html, nothing } from 'lit';
 
 export enum HandleDirection {
   Left = 'left',
+  Top = 'top',
   Right = 'right',
+  Bottom = 'bottom',
   TopLeft = 'top-left',
   BottomLeft = 'bottom-left',
   TopRight = 'top-right',
@@ -20,7 +22,8 @@ function ResizeHandle(
       target?: HTMLElement;
       point?: IVec;
     }
-  ) => void
+  ) => void,
+  hideEdgeHandle?: boolean
 ) {
   const handlerPointerDown = (e: PointerEvent) => {
     e.stopPropagation();
@@ -46,6 +49,8 @@ function ResizeHandle(
   };
 
   const rotationTpl =
+    handleDirection === HandleDirection.Top ||
+    handleDirection === HandleDirection.Bottom ||
     handleDirection === HandleDirection.Left ||
     handleDirection === HandleDirection.Right
       ? nothing
@@ -62,14 +67,14 @@ function ResizeHandle(
   >
     ${rotationTpl}
     <div
-      class="resize"
+      class="resize${hideEdgeHandle && ' transparent-handle'}"
       @pointerenter=${pointerEnter('resize')}
       @pointerleave=${pointerLeave}
     ></div>
   </div>`;
 }
 
-export type ResizeMode = 'corner' | 'edge' | 'none';
+export type ResizeMode = 'corner' | 'edge' | 'all' | 'none';
 export function ResizeHandles(
   resizeMode: ResizeMode,
   onPointerDown: (e: PointerEvent, direction: HandleDirection) => void,
@@ -82,28 +87,72 @@ export function ResizeHandles(
     }
   ) => void
 ) {
+  const getCornerHandles = () => {
+    const handleTopLeft = ResizeHandle(
+      HandleDirection.TopLeft,
+      onPointerDown,
+      updateCursor
+    );
+    const handleTopRight = ResizeHandle(
+      HandleDirection.TopRight,
+      onPointerDown,
+      updateCursor
+    );
+    const handleBottomLeft = ResizeHandle(
+      HandleDirection.BottomLeft,
+      onPointerDown,
+      updateCursor
+    );
+    const handleBottomRight = ResizeHandle(
+      HandleDirection.BottomRight,
+      onPointerDown,
+      updateCursor
+    );
+    return {
+      handleTopLeft,
+      handleTopRight,
+      handleBottomLeft,
+      handleBottomRight,
+    };
+  };
+  const getEdgeHandles = (hideEdgeHandle?: boolean) => {
+    const handleLeft = ResizeHandle(
+      HandleDirection.Left,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    const handleRight = ResizeHandle(
+      HandleDirection.Right,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    return { handleLeft, handleRight };
+  };
+  const getEdgeVerticalHandles = (hideEdgeHandle?: boolean) => {
+    const handleTop = ResizeHandle(
+      HandleDirection.Top,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    const handleBottom = ResizeHandle(
+      HandleDirection.Bottom,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    return { handleTop, handleBottom };
+  };
   switch (resizeMode) {
     case 'corner': {
-      const handleTopLeft = ResizeHandle(
-        HandleDirection.TopLeft,
-        onPointerDown,
-        updateCursor
-      );
-      const handleTopRight = ResizeHandle(
-        HandleDirection.TopRight,
-        onPointerDown,
-        updateCursor
-      );
-      const handleBottomLeft = ResizeHandle(
-        HandleDirection.BottomLeft,
-        onPointerDown,
-        updateCursor
-      );
-      const handleBottomRight = ResizeHandle(
-        HandleDirection.BottomRight,
-        onPointerDown,
-        updateCursor
-      );
+      const {
+        handleTopLeft,
+        handleTopRight,
+        handleBottomLeft,
+        handleBottomRight,
+      } = getCornerHandles();
 
       // prettier-ignore
       return html`
@@ -114,18 +163,30 @@ export function ResizeHandles(
       `;
     }
     case 'edge': {
-      const handleLeft = ResizeHandle(
-        HandleDirection.Left,
-        onPointerDown,
-        updateCursor
-      );
-      const handleRight = ResizeHandle(
-        HandleDirection.Right,
-        onPointerDown,
-        updateCursor
-      );
-
+      const { handleLeft, handleRight } = getEdgeHandles();
       return html`${handleLeft} ${handleRight}`;
+    }
+    case 'all': {
+      const {
+        handleTopLeft,
+        handleTopRight,
+        handleBottomLeft,
+        handleBottomRight,
+      } = getCornerHandles();
+      const { handleLeft, handleRight } = getEdgeHandles(true);
+      const { handleTop, handleBottom } = getEdgeVerticalHandles(true);
+
+      // prettier-ignore
+      return html`
+        ${handleTopLeft}
+        ${handleTop}
+        ${handleTopRight}
+        ${handleRight}
+        ${handleBottomRight}
+        ${handleBottom}
+        ${handleBottomLeft}
+        ${handleLeft}
+      `;
     }
     case 'none': {
       return nothing;

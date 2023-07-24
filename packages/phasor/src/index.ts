@@ -2,6 +2,7 @@
 export {
   type IBound,
   type IModelCoord,
+  ShapeStyle,
   StrokeStyle,
   ZOOM_MAX,
   ZOOM_MIN,
@@ -39,6 +40,7 @@ export {
   polygonNearestPoint,
   polygonPointDistance,
   polyLineNearestPoint,
+  rotatePoints,
   sign,
   toRadian,
 } from './utils/math-utils.js';

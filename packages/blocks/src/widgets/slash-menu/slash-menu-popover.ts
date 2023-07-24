@@ -9,7 +9,10 @@ import {
   isControlledKeyboardEvent,
   isFuzzyMatch,
 } from '../../__internal__/utils/index.js';
-import { cleanSpecifiedTail, createKeydownObserver } from '../utils.js';
+import {
+  cleanSpecifiedTail,
+  createKeydownObserver,
+} from '../../components/utils.js';
 import { styles } from './styles.js';
 import {
   collectGroupNames,

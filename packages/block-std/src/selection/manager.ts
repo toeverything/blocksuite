@@ -51,7 +51,7 @@ export class SelectionManager {
     return new ctor(...args) as BlockSuiteSelectionInstance[T];
   }
 
-  get selections() {
+  get value() {
     return this._store.getLocalSelection().map(json => {
       const ctor = this._selectionConstructors[json.type as string];
       if (!ctor) {
@@ -62,13 +62,13 @@ export class SelectionManager {
   }
 
   set(selections: BaseSelection[]) {
-    this._oldSelections = this.selections;
+    this._oldSelections = this.value;
     this._store.setLocalSelection(selections.map(s => s.toJSON()));
     this.slots.changed.emit(selections);
   }
 
   update(fn: (currentSelections: BaseSelection[]) => BaseSelection[]) {
-    const selections = fn(this.selections);
+    const selections = fn(this.value);
     this.set(selections);
   }
 

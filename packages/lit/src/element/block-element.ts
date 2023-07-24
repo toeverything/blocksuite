@@ -7,6 +7,7 @@ import { property } from 'lit/decorators.js';
 import { WithDisposable } from '../with-disposable.js';
 import type { BlockSuiteRoot } from './lit-root.js';
 import { ShadowlessElement } from './shadowless-element.js';
+import type { WidgetElement } from './widget-element.js';
 
 // TODO: remove this
 export type FocusContext<
@@ -71,16 +72,21 @@ export class BlockElement<
   @property({ attribute: false })
   path!: string[];
 
-  get pathName(): string {
-    return this.path.join('|');
-  }
-
   get parentPath(): string[] {
     return this.path.slice(0, -1);
   }
 
   get parentBlockElement() {
-    return this.root.blockViewMap.get(this.parentPath.join('|'));
+    return this.root.blockViewMap.get(this.parentPath);
+  }
+
+  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
+    return Object.keys(this.widgets).reduce((mapping, key) => {
+      return {
+        ...mapping,
+        [key]: this.root.widgetViewMap.get([...this.path, key]),
+      };
+    }, {}) as Partial<Record<WidgetName, WidgetElement>>;
   }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {
@@ -107,11 +113,11 @@ export class BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.blockViewMap.set(this.pathName, this);
+    this.root.blockViewMap.set(this.path, this);
   }
 
   override disconnectedCallback() {
-    this.root.blockViewMap.delete(this.pathName);
+    this.root.blockViewMap.delete(this.path);
     super.disconnectedCallback();
   }
 

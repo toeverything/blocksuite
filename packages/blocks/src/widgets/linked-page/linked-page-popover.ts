@@ -5,7 +5,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getRichTextByModel } from '../../__internal__/utils/query.js';
-import { cleanSpecifiedTail, createKeydownObserver } from '../utils.js';
+import {
+  cleanSpecifiedTail,
+  createKeydownObserver,
+} from '../../components/utils.js';
 import type { LinkedPageOptions } from './config.js';
 import { type LinkedPageGroup } from './config.js';
 import { styles } from './styles.js';

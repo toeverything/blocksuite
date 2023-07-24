@@ -1,4 +1,8 @@
-import { Bound, getQuadBoundsWithRotation } from '@blocksuite/phasor';
+import {
+  Bound,
+  getQuadBoundsWithRotation,
+  rotatePoints,
+} from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 
 import type { IPoint } from '../../../../__internal__/utils/types.js';
@@ -133,7 +137,9 @@ export class HandleResizeManager {
 
     assertExists(_target);
 
+    const isAll = _resizeMode === 'all';
     const isCorner = _resizeMode === 'corner';
+
     const {
       start: { x: startX, y: startY },
       end: { x: endX, y: endY },
@@ -160,7 +166,7 @@ export class HandleResizeManager {
       .rotateSelf(_rotate)
       .translateSelf(-original.cx, -original.cy);
 
-    if (isCorner) {
+    if (isCorner || isAll) {
       switch (_dragDirection) {
         case HandleDirection.TopLeft: {
           direction.x = -1;
@@ -198,6 +204,44 @@ export class HandleResizeManager {
           draggingPoint.y = maxY;
           break;
         }
+        case HandleDirection.Left: {
+          direction.x = -1;
+          direction.y = 1;
+          fixedPoint.x = maxX;
+          fixedPoint.y = original.cy;
+          draggingPoint.x = minX;
+          draggingPoint.y = original.cy;
+          break;
+        }
+        case HandleDirection.Right: {
+          direction.x = 1;
+          direction.y = 1;
+          fixedPoint.x = minX;
+          fixedPoint.y = original.cy;
+          draggingPoint.x = maxX;
+          draggingPoint.y = original.cy;
+          break;
+        }
+        case HandleDirection.Top: {
+          const cx = (minX + maxX) / 2;
+          direction.x = 1;
+          direction.y = -1;
+          fixedPoint.x = cx;
+          fixedPoint.y = maxY;
+          draggingPoint.x = cx;
+          draggingPoint.y = minY;
+          break;
+        }
+        case HandleDirection.Bottom: {
+          const cx = (minX + maxX) / 2;
+          direction.x = 1;
+          direction.y = 1;
+          fixedPoint.x = cx;
+          fixedPoint.y = minY;
+          draggingPoint.x = cx;
+          draggingPoint.y = maxY;
+          break;
+        }
       }
 
       // force adjustment by aspect ratio
@@ -209,6 +253,38 @@ export class HandleResizeManager {
 
       dp.x += deltaX;
       dp.y += deltaY;
+
+      if (
+        _dragDirection === HandleDirection.Left ||
+        _dragDirection === HandleDirection.Right ||
+        _dragDirection === HandleDirection.Top ||
+        _dragDirection === HandleDirection.Bottom
+      ) {
+        const dpo = draggingPoint.matrixTransform(m0);
+        const coorPoint = [0, 0];
+        const [[x1, y1]] = rotatePoints([[dpo.x, dpo.y]], coorPoint, -_rotate);
+        const [[x2, y2]] = rotatePoints([[dp.x, dp.y]], coorPoint, -_rotate);
+        const point = { x: 0, y: 0 };
+        if (
+          _dragDirection === HandleDirection.Left ||
+          _dragDirection === HandleDirection.Right
+        ) {
+          point.x = x2;
+          point.y = y1;
+        } else {
+          point.x = x1;
+          point.y = y2;
+        }
+
+        const [[x3, y3]] = rotatePoints(
+          [[point.x, point.y]],
+          coorPoint,
+          _rotate
+        );
+
+        dp.x = x3;
+        dp.y = y3;
+      }
 
       const cx = (fp.x + dp.x) / 2;
       const cy = (fp.y + dp.y) / 2;
@@ -242,6 +318,22 @@ export class HandleResizeManager {
           rect.h = d.y - f.y;
           break;
         }
+        case HandleDirection.Left: {
+          rect.w = f.x - d.x;
+          break;
+        }
+        case HandleDirection.Right: {
+          rect.w = d.x - f.x;
+          break;
+        }
+        case HandleDirection.Top: {
+          rect.h = f.y - d.y;
+          break;
+        }
+        case HandleDirection.Bottom: {
+          rect.h = d.y - f.y;
+          break;
+        }
       }
 
       rect.cx = (d.x + f.x) / 2;
@@ -251,8 +343,14 @@ export class HandleResizeManager {
       flip.x = scale.x < 0 ? -1 : 1;
       flip.y = scale.y < 0 ? -1 : 1;
 
+      const isDraggingCorner =
+        _dragDirection === HandleDirection.TopLeft ||
+        _dragDirection === HandleDirection.TopRight ||
+        _dragDirection === HandleDirection.BottomRight ||
+        _dragDirection === HandleDirection.BottomLeft;
+
       // lock aspect ratio
-      if (shiftKey) {
+      if (shiftKey && isDraggingCorner) {
         const newAspectRatio = Math.abs(rect.w / rect.h);
         if (_aspectRatio < newAspectRatio) {
           scale.y = Math.abs(scale.x) * flip.y;
@@ -321,7 +419,7 @@ export class HandleResizeManager {
 
     let process: (value: { bound: Bound; rotate: number }, key: string) => void;
 
-    if (isCorner) {
+    if (isCorner || isAll) {
       if (this._bounds.size === 1) {
         process = (_, id) => {
           newBounds.set(id, {

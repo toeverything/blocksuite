@@ -29,7 +29,6 @@ import {
   handleNativeRangeClick,
   handleNativeRangeDragMove,
   type IPoint,
-  isBlankArea,
   isDatabaseInput,
   isDragHandle,
   isElement,
@@ -53,8 +52,7 @@ import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
 } from '../default-page-block.js';
-import { BlockDragHandlers } from './block-drag-handlers.js';
-import { NativeDragHandlers } from './native-drag-handlers.js';
+// import { NativeDragHandlers } from './native-drag-handlers.js';
 import { PreviewDragHandlers } from './preview-drag-handlers.js';
 import { PageSelectionState } from './selection-state.js';
 import {
@@ -225,18 +223,12 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     // clear selection first
     this.clear();
-
-    if (isBlankArea(e)) {
-      BlockDragHandlers.onStart(this, e);
-    } else {
-      NativeDragHandlers.onStart(this, e);
-    }
   };
 
   private _onContainerDragMove = (ctx: UIEventStateContext) => {
     const e = ctx.get('pointerState');
     if (this.state.type === 'native') {
-      NativeDragHandlers.onMove(this, e);
+      // NativeDragHandlers.onMove(this, e);
       return;
     }
 
@@ -248,7 +240,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     }
 
     if (this.state.type === 'block') {
-      BlockDragHandlers.onMove(this, e);
       return;
     }
   };
@@ -260,11 +251,6 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     if (this.state.type === 'block:drag') {
       PreviewDragHandlers.onEnd(this, e);
       return;
-    }
-    if (this.state.type === 'native') {
-      NativeDragHandlers.onEnd(this, e);
-    } else if (this.state.type === 'block') {
-      BlockDragHandlers.onEnd(this, e);
     }
 
     if (this.page.readonly) return;
@@ -438,7 +424,7 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
     this.clear();
 
     // switch native selection
-    NativeDragHandlers.onStart(this, e);
+    // NativeDragHandlers.onStart(this, e);
 
     // The following code is for the fullscreen image modal
     // fixme:

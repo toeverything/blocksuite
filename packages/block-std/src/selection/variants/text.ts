@@ -1,34 +1,53 @@
 import { BaseSelection } from '../base.js';
 
-type TextSelectionProps = {
+export type TextRangePoint = {
   blockId: string;
+  path: string[];
   index: number;
   length: number;
+};
+
+export type TextSelectionProps = {
+  from: TextRangePoint;
+  to: TextRangePoint | null;
 };
 
 export class TextSelection extends BaseSelection {
   static override type = 'text';
 
-  index: number;
+  from: TextRangePoint;
 
-  length: number;
+  to: TextRangePoint | null;
 
-  constructor({ blockId, index, length }: TextSelectionProps) {
-    super(blockId);
-    this.index = index;
-    this.length = length;
+  constructor({ from, to }: TextSelectionProps) {
+    super(from.blockId);
+    this.from = from;
+    this.to = to;
   }
 
   empty(): boolean {
-    return this.length === 0;
+    return !!this.to;
+  }
+
+  private _equalPoint(
+    a: TextRangePoint | null,
+    b: TextRangePoint | null
+  ): boolean {
+    if (a && b) {
+      return (
+        a.blockId === b.blockId && a.index === b.index && a.length === b.length
+      );
+    }
+
+    return a === b;
   }
 
   override equals(other: BaseSelection): boolean {
     if (other instanceof TextSelection) {
       return (
         other.blockId === this.blockId &&
-        other.index === this.index &&
-        other.length === this.length
+        this._equalPoint(other.from, this.from) &&
+        this._equalPoint(other.to, this.to)
       );
     }
     return false;
@@ -36,17 +55,15 @@ export class TextSelection extends BaseSelection {
   override toJSON(): Record<string, unknown> {
     return {
       type: 'text',
-      blockId: this.blockId,
-      index: this.index,
-      length: this.length,
+      from: this.from,
+      to: this.to,
     };
   }
 
   static override fromJSON(json: Record<string, unknown>): TextSelection {
     return new TextSelection({
-      blockId: json.blockId as string,
-      index: json.index as number,
-      length: json.length as number,
+      from: json.from as TextRangePoint,
+      to: json.to as TextRangePoint | null,
     });
   }
 }

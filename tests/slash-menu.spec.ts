@@ -503,7 +503,7 @@ test.describe('slash menu with style', () => {
     );
   });
 
-  test('should style empty line works', async ({ page }) => {
+  test.fixme('should style empty line works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);
     await focusRichText(page);

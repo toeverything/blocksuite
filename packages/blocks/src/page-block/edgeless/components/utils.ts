@@ -227,3 +227,39 @@ export function calcAngleWithRotation(
 
   return normalizeDegAngle((Vec.angle([c.x, c.y], p) * 180) / Math.PI);
 }
+
+export function calcAngleEdgeWithRotation(target: HTMLElement, rotate: number) {
+  let angleWithEdge = 0;
+  const handle = target.parentElement;
+  assertExists(handle);
+  const ariaLabel = handle.getAttribute('aria-label');
+  assertExists(ariaLabel);
+  switch (ariaLabel) {
+    case 'top': {
+      angleWithEdge = 270;
+      break;
+    }
+    case 'bottom': {
+      angleWithEdge = 90;
+      break;
+    }
+    case 'left': {
+      angleWithEdge = 180;
+      break;
+    }
+    case 'right': {
+      angleWithEdge = 0;
+      break;
+    }
+  }
+
+  return angleWithEdge + rotate;
+}
+
+export function getResizeLabel(target: HTMLElement) {
+  const handle = target.parentElement;
+  assertExists(handle);
+  const ariaLabel = handle.getAttribute('aria-label');
+  assertExists(ariaLabel);
+  return ariaLabel;
+}

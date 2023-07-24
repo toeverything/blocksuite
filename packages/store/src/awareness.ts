@@ -92,23 +92,6 @@ export class AwarenessStore<
     }
   }
 
-  setLocalRange(space: Space, range: UserRange | null) {
-    const rangeMap = this.awareness.getLocalState()?.rangeMap ?? {};
-    if (range === null) {
-      delete rangeMap[space.prefixedId];
-      this.awareness.setLocalStateField('rangeMap', rangeMap);
-    } else {
-      this.awareness.setLocalStateField('rangeMap', {
-        ...rangeMap,
-        [space.prefixedId]: range,
-      });
-    }
-  }
-
-  getLocalRange(space: Space): UserRange | undefined {
-    return this.awareness.getLocalState()?.['rangeMap']?.[space.prefixedId];
-  }
-
   setLocalSelection(selection: Array<Record<string, unknown>>) {
     this.awareness.setLocalStateField('selection', selection);
   }

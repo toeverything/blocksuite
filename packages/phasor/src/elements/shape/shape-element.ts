@@ -67,6 +67,11 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return this.computedValue(this.fillColor);
   }
 
+  get shapeStyle() {
+    const shapeStyle = this.yMap.get('shapeStyle') as IShape['shapeStyle'];
+    return shapeStyle;
+  }
+
   get text() {
     const text = this.yMap.get('text') as IShape['text'];
     return text;

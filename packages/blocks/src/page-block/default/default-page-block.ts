@@ -34,12 +34,11 @@ import {
 import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DragHandle } from '../../components/index.js';
-import type { PageBlockWidgetName } from '../index.js';
+import type { DocPageBlockWidgetName } from '../index.js';
 import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { bindHotkeys, removeHotkeys } from '../utils/bind-hotkey.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
-import { DraggingArea } from './components.js';
 import type { DefaultPageService } from './default-page-service.js';
 import { createDragHandle, getAllowSelectedBlocks } from './utils.js';
 
@@ -58,7 +57,11 @@ export interface DefaultSelectionSlots {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends BlockElement<PageBlockModel, DefaultPageService, PageBlockWidgetName>
+  extends BlockElement<
+    PageBlockModel,
+    DefaultPageService,
+    DocPageBlockWidgetName
+  >
   implements BlockHost
 {
   static override styles = css`
@@ -147,12 +150,6 @@ export class DefaultPageBlockComponent
   get selection() {
     return this.service?.selection;
   }
-
-  @state()
-  private _draggingArea: DOMRect | null = null;
-
-  @state()
-  private _selectedRects: DOMRect[] = [];
 
   @state()
   private _isComposing = false;
@@ -433,18 +430,6 @@ export class DefaultPageBlockComponent
   };
 
   private _initSlotEffects() {
-    const { slots } = this;
-
-    this._disposables.add(
-      slots.draggingAreaUpdated.on(rect => {
-        this._draggingArea = rect;
-      })
-    );
-    this._disposables.add(
-      slots.selectedRectsUpdated.on(rects => {
-        this._selectedRects = rects;
-      })
-    );
     this._disposables.add(
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
@@ -467,10 +452,16 @@ export class DefaultPageBlockComponent
             this.selection?.updateRects();
             break;
           }
+
+          if (target === this.pageBlockContainer) {
+            this.selection?.updateViewport();
+            break;
+          }
         }
       }
     );
     resizeObserver.observe(this.viewportElement);
+    resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
   }
 
@@ -503,6 +494,7 @@ export class DefaultPageBlockComponent
     this.viewportElement.addEventListener('scroll', this._onScroll);
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
+    this.service?.bindViewport(this.viewportElement);
   }
 
   override connectedCallback() {
@@ -536,10 +528,6 @@ export class DefaultPageBlockComponent
       this.service?.selection?.refreshRemoteSelection();
     });
 
-    const { selection } = this;
-    const viewportOffset = selection?.state.viewportOffset;
-
-    const draggingArea = DraggingArea(this._draggingArea);
     const isEmpty =
       (!this.model.title || !this.model.title.length) && !this._isComposing;
 
@@ -568,15 +556,8 @@ export class DefaultPageBlockComponent
           </div>
           ${content}
         </div>
-        <affine-selected-blocks
-          .mouseRoot="${this.mouseRoot}"
-          .state="${{
-            rects: this._selectedRects,
-            grab: !draggingArea,
-          }}"
-          .offset="${viewportOffset}"
-        ></affine-selected-blocks>
-        ${this.widgets.slashMenu} ${this.widgets.linkedPage} ${draggingArea}
+        ${this.widgets.slashMenu} ${this.widgets.linkedPage}
+        ${this.widgets.draggingArea}
       </div>
     `;
   }

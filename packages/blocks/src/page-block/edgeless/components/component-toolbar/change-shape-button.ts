@@ -1,12 +1,18 @@
 import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
+import '../panel/shape-style-panel.js';
 import '../toolbar/shape/shape-menu.js';
 import './change-text-menu.js';
 
-import { LineStyleIcon } from '@blocksuite/global/config';
+import {
+  GeneralShapeStyleIcon,
+  LineStyleIcon,
+  ScribbledShapeStyleIcon,
+} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   type ShapeElement,
+  ShapeStyle,
   StrokeStyle,
   type SurfaceManager,
 } from '@blocksuite/phasor';
@@ -32,6 +38,7 @@ import {
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
 } from '../panel/line-styles-panel.js';
+import type { EdgelessShapeStylePanel } from '../panel/shape-style-panel.js';
 import type { EdgelessShapeMenu } from '../toolbar/shape/shape-menu.js';
 import { ShapeComponentConfigMap } from '../toolbar/shape/shape-menu-config.js';
 import { createButtonPopper } from '../utils.js';
@@ -100,6 +107,14 @@ function doesAllShapesContainText(elements: ShapeElement[]): boolean {
   return elements.every(ele => ele.text);
 }
 
+function getMostCommonShapeStyle(elements: ShapeElement[]): ShapeStyle {
+  const roughnesses = countBy(elements, (ele: ShapeElement) => {
+    return ele.shapeStyle;
+  });
+  const max = maxBy(Object.entries(roughnesses), ([k, count]) => count);
+  return max ? (max[0] as ShapeStyle) : ShapeStyle.Scribbled;
+}
+
 const FILL_COLORS: CssVariableName[] = [
   '--affine-palette-shape-yellow',
   '--affine-palette-shape-orange',
@@ -166,7 +181,12 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         margin-left: 8px;
       }
 
-      .color-panel-container {
+      .shape-style-button svg {
+        fill: var(--affine-icon-color);
+      }
+
+      .color-panel-container,
+      .shape-style-panel-container {
         display: none;
         padding: 4px;
         justify-content: center;
@@ -176,7 +196,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         border-radius: 8px;
       }
 
-      .color-panel-container[data-show] {
+      .color-panel-container[data-show],
+      .shape-style-panel-container[data-show] {
         display: block;
       }
 
@@ -226,6 +247,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   @query('edgeless-shape-menu')
   private _shapeMenu!: EdgelessShapeMenu;
   private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
+
+  @query('.shape-style-button')
+  private _shapeStyleButton!: EdgelessToolIconButton;
+  @query('.shape-style-panel-container')
+  private _shapeStyleMenu!: HTMLDivElement;
+  private _shapeStyleMenuPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
 
   @query('.fill-color-button')
   private _fillColorButton!: EdgelessToolIconButton;
@@ -304,6 +332,15 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     }
   }
 
+  private _setShapeStyle(shapeStyle: ShapeStyle) {
+    this.elements.forEach(ele => {
+      this.surface.updateElement<'shape'>(ele.id, {
+        shapeStyle: shapeStyle,
+      });
+    });
+    this._forceUpdateSelection();
+  }
+
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
@@ -356,6 +393,15 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     );
     _disposables.add(this._lineStylesPanelPopper);
 
+    this._shapeStyleMenuPopper = createButtonPopper(
+      this._shapeStyleButton,
+      this._shapeStyleMenu,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._shapeStyleMenuPopper);
+
     super.firstUpdated(changedProperties);
   }
 
@@ -372,6 +418,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const selectedLineSize =
       getMostCommonLineSize(this.elements) ?? BrushSize.LINE_WIDTH_FOUR;
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
+    const selectedShapeStyle =
+      getMostCommonShapeStyle(this.elements) ?? ShapeStyle.Scribbled;
 
     return html`
       <edgeless-tool-icon-button
@@ -385,6 +433,29 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <edgeless-shape-menu .selectedShape=${selectedShape}>
       </edgeless-shape-menu>
+
+      <menu-divider .vertical=${true}></menu-divider>
+
+      <edgeless-tool-icon-button
+        class="shape-style-button"
+        .tooltip=${this._popperShow ? '' : 'Style'}
+        .tipPosition=${'bottom'}
+        .active=${false}
+        @click=${() => this._shapeStyleMenuPopper?.toggle()}
+      >
+        ${selectedShapeStyle === ShapeStyle.General
+          ? GeneralShapeStyleIcon
+          : ScribbledShapeStyleIcon}
+      </edgeless-tool-icon-button>
+      <div class="shape-style-panel-container">
+        <edgeless-shape-style-panel
+          .value=${selectedShapeStyle}
+          .onSelect=${(value: EdgelessShapeStylePanel['value']) => {
+            this._setShapeStyle(value);
+          }}
+        >
+        </edgeless-shape-style-panel>
+      </div>
 
       <menu-divider .vertical=${true}></menu-divider>
 
