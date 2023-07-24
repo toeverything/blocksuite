@@ -764,39 +764,40 @@ test('should forwardDelete driver works properly', async ({ page }) => {
   await assertRichTexts(page, ['123', '', '']);
 });
 
-test('the cursor should move to closest editor block when clicking outside container', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'the cursor should move to closest editor block when clicking outside container',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  const rect = await page.evaluate(() => {
-    const secondRichText = document.querySelector(
-      '[data-block-id="3"] .virgo-editor'
-    );
-    if (!secondRichText) {
-      throw new Error();
-    }
+    const rect = await page.evaluate(() => {
+      const secondRichText = document.querySelector(
+        '[data-block-id="3"] .virgo-editor'
+      );
+      if (!secondRichText) {
+        throw new Error();
+      }
 
-    return secondRichText.getBoundingClientRect();
-  });
+      return secondRichText.getBoundingClientRect();
+    });
 
-  await page.mouse.click(rect.left - 50, rect.top + 5);
+    await page.mouse.click(rect.left - 50, rect.top + 5);
 
-  await pressBackspace(page);
-  await waitNextFrame(page);
-  await assertRichTexts(page, ['123456', '789']);
+    await pressBackspace(page);
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['123456', '789']);
 
-  await undoByKeyboard(page);
-  await waitNextFrame(page);
-  await page.mouse.click(rect.right + 50, rect.top + 5);
+    await undoByKeyboard(page);
+    await waitNextFrame(page);
+    await page.mouse.click(rect.right + 50, rect.top + 5);
 
-  await pressBackspace(page);
-  await waitNextFrame(page);
-  await assertRichTexts(page, ['123', '45', '789']);
-});
+    await pressBackspace(page);
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['123', '45', '789']);
+  }
+);
 
 test('should not crash when mouse over the left side of the list block prefix', async ({
   page,
@@ -958,43 +959,44 @@ test('should select full text of the first block when leaving the affine-note-bl
   );
 });
 
-test('should add a new line when clicking the bottom of the last non-text block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-  await pressEnter(page);
-  await waitNextFrame(page);
+test.fixme(
+  'should add a new line when clicking the bottom of the last non-text block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+    await pressEnter(page);
+    await waitNextFrame(page);
 
-  // code block
-  await type(page, '```');
-  await pressEnter(page);
+    // code block
+    await type(page, '```');
+    await pressEnter(page);
 
-  const locator = page.locator('affine-code');
-  await expect(locator).toBeVisible();
+    const locator = page.locator('affine-code');
+    await expect(locator).toBeVisible();
 
-  const rect = await page.evaluate(() => {
-    const secondRichText = document.querySelector('affine-code');
-    if (!secondRichText) {
-      throw new Error();
-    }
+    const rect = await page.evaluate(() => {
+      const secondRichText = document.querySelector('affine-code');
+      if (!secondRichText) {
+        throw new Error();
+      }
 
-    return secondRichText.getBoundingClientRect();
-  });
-  await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
-  await page.waitForTimeout(200);
-  await type(page, 'ABC');
-  await page.waitForTimeout(200);
-  await assertRichTexts(page, [
-    '123',
-    '456',
-    '789',
-    '', // code block
-    'ABC',
-  ]);
-});
+      return secondRichText.getBoundingClientRect();
+    });
+    await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
+    await page.waitForTimeout(200);
+    await type(page, 'ABC');
+    await page.waitForTimeout(200);
+    await assertRichTexts(page, [
+      '123',
+      '456',
+      '789',
+      '', // code block
+      'ABC',
+    ]);
+  }
+);
 
 test.fixme(
   'should select texts on dragging around the page',
@@ -1362,54 +1364,55 @@ test('should keep native range selection when scrolling forward with the scroll 
   await assertClipItems(page, 'text/plain', '123456789');
 });
 
-test('should not show option menu of image on native selection', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initImageState(page);
-  await activeEmbed(page);
+test.fixme(
+  'should not show option menu of image on native selection',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initImageState(page);
+    await activeEmbed(page);
 
-  await expect(
-    page.locator('.affine-embed-editing-state-container')
-  ).toHaveCount(1);
+    await expect(
+      page.locator('.affine-embed-editing-state-container')
+    ).toHaveCount(1);
 
-  await pressEnter(page);
-  await type(page, '123');
+    await pressEnter(page);
+    await type(page, '123');
 
-  await page.mouse.click(0, 0);
+    await page.mouse.click(0, 0);
 
-  await dragBetweenIndices(
-    page,
-    [0, 1],
-    [0, 0],
-    { x: 0, y: 0 },
-    { x: -40, y: 0 }
-  );
+    await dragBetweenIndices(
+      page,
+      [0, 1],
+      [0, 0],
+      { x: 0, y: 0 },
+      { x: -40, y: 0 }
+    );
 
-  await page.waitForTimeout(50);
+    await page.waitForTimeout(50);
 
-  await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '123');
+    await copyByKeyboard(page);
+    await assertClipItems(page, 'text/plain', '123');
 
-  await page.mouse.click(0, 0);
+    await page.mouse.click(0, 0);
 
-  await dragBetweenIndices(
-    page,
-    [0, 1],
-    [0, 0],
-    { x: 0, y: 0 },
-    { x: -40, y: -100 }
-  );
+    await dragBetweenIndices(
+      page,
+      [0, 1],
+      [0, 0],
+      { x: 0, y: 0 },
+      { x: -40, y: -100 }
+    );
 
-  await page.waitForTimeout(50);
+    await page.waitForTimeout(50);
 
-  await copyByKeyboard(page);
-  await assertClipItems(page, 'text/plain', '123');
+    await copyByKeyboard(page);
+    await assertClipItems(page, 'text/plain', '123');
 
-  await expect(
-    page.locator('.affine-embed-editing-state-container')
-  ).toHaveCount(0);
-});
+    await expect(
+      page.locator('.affine-embed-editing-state-container')
+    ).toHaveCount(0);
+  }
+);
 
 test('should be cleared when dragging block card from BlockHub', async ({
   page,

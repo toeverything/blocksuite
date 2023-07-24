@@ -195,6 +195,13 @@ export class DocDraggingAreaWidget extends WidgetElement {
         left: 0,
       };
     });
+
+    this._addEvent('pointerMove', ctx => {
+      if (this._dragging) {
+        const state = ctx.get('pointerState');
+        state.raw.preventDefault();
+      }
+    });
   }
 
   override render() {

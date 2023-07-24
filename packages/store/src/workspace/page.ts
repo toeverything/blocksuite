@@ -687,8 +687,10 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.dispose();
     this.slots.onYEvent.dispose();
 
-    this._yBlocks.unobserveDeep(this._handleYEvents);
-    this._yBlocks.clear();
+    if (this._synced) {
+      this._yBlocks.unobserveDeep(this._handleYEvents);
+      this._yBlocks.clear();
+    }
   }
 
   private _initYBlocks() {
