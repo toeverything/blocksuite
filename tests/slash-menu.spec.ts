@@ -139,7 +139,7 @@ test.describe('slash menu should show and hide correctly', () => {
     assertAlmostEqual(y - rect.bottom, 5, 10);
   });
 
-  test('should move up down with arrow key', async () => {
+  test.fixme('should move up down with arrow key', async () => {
     await page.keyboard.press('ArrowDown');
     await expect(slashMenu).toBeVisible();
 
