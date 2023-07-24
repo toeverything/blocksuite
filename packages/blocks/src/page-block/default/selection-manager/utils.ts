@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import { matchFlavours, type Page, type UserRange } from '@blocksuite/store';
+import { matchFlavours, type Page } from '@blocksuite/store';
 
 import type {
   BlockComponentElement,
@@ -120,12 +120,12 @@ export function updateLocalSelectionRange(page: Page) {
   if (!blockRange || blockRange.type === 'Block') {
     return;
   }
-  const userRange: UserRange = {
-    startOffset: blockRange.startOffset,
-    endOffset: blockRange.endOffset,
-    blockIds: blockRange.models.map(m => m.id),
-  };
-  page.awarenessStore.setLocalRange(page, userRange);
+  // const userRange: UserRange = {
+  //   startOffset: blockRange.startOffset,
+  //   endOffset: blockRange.endOffset,
+  //   blockIds: blockRange.models.map(m => m.id),
+  // };
+  // page.awarenessStore.setLocalRange(page, userRange);
 }
 
 export function setSelectedBlocks(

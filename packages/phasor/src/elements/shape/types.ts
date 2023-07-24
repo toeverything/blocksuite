@@ -1,6 +1,6 @@
 import type * as Y from 'yjs';
 
-import type { StrokeStyle } from '../../consts.js';
+import type { ShapeStyle, StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
@@ -24,6 +24,7 @@ export interface IShape extends ISurfaceElement {
   strokeWidth: number;
   strokeColor: string;
   strokeStyle: StrokeStyle;
+  shapeStyle: ShapeStyle;
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
 
@@ -34,8 +35,8 @@ export interface IShape extends ISurfaceElement {
   textAlign?: 'left' | 'center' | 'right';
   textHorizontalAlign?: 'left' | 'center' | 'right';
   textVerticalAlign?: 'top' | 'center' | 'bottom';
-  isBold?: boolean;
-  isItalic?: boolean;
+  bold?: boolean;
+  italic?: boolean;
 }
 
 export interface IShapeLocalRecord extends ISurfaceElementLocalRecord {

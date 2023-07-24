@@ -7,9 +7,11 @@ import {
   changeShapeStrokeColor,
   changeShapeStrokeStyle,
   changeShapeStrokeWidth,
+  changeShapeStyle,
   clickComponentToolbarMoreMenuButton,
   locatorEdgelessToolButton,
   locatorShapeStrokeStyleButton,
+  locatorShapeStyleButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
   resizeElementByHandle,
@@ -432,4 +434,28 @@ test('auto wrap text in shape', async ({ page }) => {
   await resizeElementByHandle(page, { x: -120, y: 0 }, 'bottom-right');
   // you can't decrease width after text can't wrap (each line just has 1 char)
   await assertEdgelessSelectedRect(page, [200, 150, 51, 552]);
+});
+
+test('change shape style', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 150 };
+  const end = { x: 200, y: 250 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeStyle');
+  await changeShapeStyle(page, 'general');
+  await waitNextFrame(page);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
+  const color = '--affine-palette-line-navy';
+  await changeShapeStrokeColor(page, color);
+  await page.waitForTimeout(50);
+  const [picked] = await pickColorAtPoints(page, [[start.x + 2, start.y + 2]]);
+
+  await assertEdgelessColorSameWithHexColor(page, color, picked);
 });

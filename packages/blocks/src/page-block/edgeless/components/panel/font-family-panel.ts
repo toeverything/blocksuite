@@ -5,6 +5,7 @@ import {
   GENERAL_CANVAS_FONT_FAMILY,
   SCIBBLED_CANVAS_FONT_FANILY,
 } from '../../utils/consts.js';
+import type { CANVAS_TEXT_FONT } from '../../utils/text.js';
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
@@ -21,10 +22,6 @@ export class EdgelessFontFamilyPanel extends LitElement {
       background: var(--affine-background-overlay-panel-color);
     }
 
-    .ont-family-button {
-      font-size: 12px;
-    }
-
     .general-button {
       font-family: sans-serif;
     }
@@ -35,7 +32,10 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value = GENERAL_CANVAS_FONT_FAMILY;
+  value: CANVAS_TEXT_FONT = GENERAL_CANVAS_FONT_FAMILY;
+
+  @property({ attribute: false })
+  onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
 
   private _onSelect(value: EdgelessFontFamilyPanel['value']) {
     this.value = value;
@@ -43,9 +43,6 @@ export class EdgelessFontFamilyPanel extends LitElement {
       this.onSelect(value);
     }
   }
-
-  @property({ attribute: false })
-  onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
 
   override render() {
     return html`

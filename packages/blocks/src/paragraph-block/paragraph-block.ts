@@ -139,19 +139,23 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     }
     .quote {
       line-height: 26px;
-      padding-left: 12px;
+      padding-left: 17px;
       margin-top: var(--affine-paragraph-space);
+      padding-top: 10px;
+      padding-bottom: 10px;
       position: relative;
     }
     .quote::after {
       content: '';
-      width: 4px;
-      height: 100%;
+      width: 2px;
+      height: calc(100% - 20px);
+      margin-top: 10px;
+      margin-bottom: 10px;
       position: absolute;
       left: 0;
       top: 0;
       background: var(--affine-quote-color);
-      border-radius: 4px;
+      border-radius: 18px;
     }
     .text {
       margin-top: var(--affine-paragraph-space);
@@ -189,6 +193,9 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @state()
   private _isFocus = false;
 
+  @state()
+  private _isSelected = false;
+
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
     textRenderer: attributeRenderer,
@@ -204,6 +211,15 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     // Initial placeholder state
     this._updatePlaceholder();
     registerService('affine:paragraph', paragraphService);
+    this._disposables.add(
+      this.root.selectionManager.slots.changed.on(selections => {
+        const selection = selections.find(
+          selection => selection.blockId === this.model.id
+        );
+
+        this._isSelected = selection?.type === 'block';
+      })
+    );
   }
 
   override firstUpdated() {
@@ -283,6 +299,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
   override render() {
     const { type } = this.model;
+    const selected = this._isSelected ? 'selected' : '';
 
     // hide placeholder in database
     const tipsPlaceholderTemplate = this.isInDatabase()
@@ -297,7 +314,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     </div>`;
 
     return html`
-      <div class="affine-paragraph-block-container ${type}">
+      <div class="affine-paragraph-block-container ${type} ${selected}">
         ${tipsPlaceholderTemplate}
         <rich-text
           .model=${this.model}

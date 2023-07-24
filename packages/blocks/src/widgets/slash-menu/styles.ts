@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-import { scrollbarStyle } from '../utils.js';
+import { scrollbarStyle } from '../../components/utils.js';
 
 export const styles = css`
   .overlay-mask {

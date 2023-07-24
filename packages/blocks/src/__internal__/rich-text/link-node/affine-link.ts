@@ -1,4 +1,3 @@
-import { FontLinkIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { type DeltaInsert, VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
@@ -244,7 +243,7 @@ export class AffineLink extends ShadowlessElement {
       target="_blank"
       style=${style}
       @mouseup=${this._onMouseUp}
-      >${FontLinkIcon}<v-text .str=${this.delta.insert}></v-text
+      ><v-text .str=${this.delta.insert}></v-text
     ></a>`;
   }
 }

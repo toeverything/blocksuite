@@ -1,7 +1,8 @@
-import type { Workspace } from '@blocksuite/store';
+import type { Page, StackItem, Workspace } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/store';
 
 import type { BaseSelection } from './base.js';
+import { BlockSelection, TextSelection } from './variants/index.js';
 
 interface SelectionConstructor {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,25 +13,31 @@ interface SelectionConstructor {
 }
 
 export class SelectionManager {
-  private _workspace: Workspace;
-
   disposables = new DisposableGroup();
-  _selectionConstructors: Record<string, SelectionConstructor> = {};
+  private _selectionConstructors: Record<string, SelectionConstructor> = {};
+  private _oldSelections: BaseSelection[] = [];
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
   };
 
-  constructor(workspace: Workspace) {
-    this._workspace = workspace;
+  constructor(public root: HTMLElement, public workspace: Workspace) {
+    this._setupDefaultSelections();
   }
 
-  register(ctor: SelectionConstructor) {
-    this._selectionConstructors[ctor.type] = ctor;
+  register(ctor: SelectionConstructor | SelectionConstructor[]) {
+    [ctor].flat().forEach(ctor => {
+      this._selectionConstructors[ctor.type] = ctor;
+    });
+    return this;
   }
 
   private get _store() {
-    return this._workspace.awarenessStore;
+    return this.workspace.awarenessStore;
+  }
+
+  private _setupDefaultSelections() {
+    this.register([TextSelection, BlockSelection]);
   }
 
   getInstance<T extends BlockSuiteSelectionType>(
@@ -44,7 +51,7 @@ export class SelectionManager {
     return new ctor(...args) as BlockSuiteSelectionInstance[T];
   }
 
-  get selections() {
+  get value() {
     return this._store.getLocalSelection().map(json => {
       const ctor = this._selectionConstructors[json.type as string];
       if (!ctor) {
@@ -54,9 +61,19 @@ export class SelectionManager {
     });
   }
 
-  setSelections(selections: BaseSelection[]) {
+  set(selections: BaseSelection[]) {
+    this._oldSelections = this.value;
     this._store.setLocalSelection(selections.map(s => s.toJSON()));
     this.slots.changed.emit(selections);
+  }
+
+  update(fn: (currentSelections: BaseSelection[]) => BaseSelection[]) {
+    const selections = fn(this.value);
+    this.set(selections);
+  }
+
+  clear() {
+    this.set([]);
   }
 
   get remoteSelections() {
@@ -65,6 +82,27 @@ export class SelectionManager {
         .filter(([key]) => key !== this._store.awareness.clientID)
         .map(([key, value]) => [key, value.selection] as const)
     );
+  }
+
+  mount(page: Page) {
+    if (this.disposables.disposed) {
+      this.disposables = new DisposableGroup();
+    }
+    page.history.on('stack-item-added', (event: { stackItem: StackItem }) => {
+      event.stackItem.meta.set('selection-state', this._oldSelections);
+    });
+    page.history.on('stack-item-popped', (event: { stackItem: StackItem }) => {
+      const selection = event.stackItem.meta.get('selection-state');
+      if (selection) {
+        this.set(selection as BaseSelection[]);
+      }
+    });
+  }
+
+  unmount() {
+    this.clear();
+    this.slots.changed.dispose();
+    this.disposables.dispose();
   }
 
   dispose() {

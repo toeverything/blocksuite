@@ -18,26 +18,33 @@ export { type PageBlockModel, PageBlockSchema } from './page-model.js';
 export * from './page-service.js';
 export * from './utils/index.js';
 
-export const pageBlockSpec: LitBlockSpec = {
+export type DocPageBlockWidgetName =
+  | 'slashMenu'
+  | 'linkedPage'
+  | 'draggingArea';
+export type EdgelessPageBlockWidgetName = 'slashMenu' | 'linkedPage';
+
+export const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: DefaultPageService,
   view: {
     component: literal`affine-default-page`,
-    widgets: [
-      literal`affine-slash-menu-widget`,
-      literal`affine-linked-page-widget`,
-    ],
+    widgets: {
+      slashMenu: literal`affine-slash-menu-widget`,
+      linkedPage: literal`affine-linked-page-widget`,
+      draggingArea: literal`affine-doc-dragging-area-widget`,
+    },
   },
 };
 
-export const edgelessBlockSpec: LitBlockSpec = {
+export const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: EdgelessPageService,
   view: {
     component: literal`affine-edgeless-page`,
-    widgets: [
-      literal`affine-slash-menu-widget`,
-      literal`affine-linked-page-widget`,
-    ],
+    widgets: {
+      slashMenu: literal`affine-slash-menu-widget`,
+      linkedPage: literal`affine-linked-page-widget`,
+    },
   },
 };

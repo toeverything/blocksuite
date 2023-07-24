@@ -256,12 +256,11 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
       );
     } catch (error) {
       // Lit may be crashed by IME input and we need to rerender whole editor for it
-      render(html`<div></div>`, rootElement);
-      this._editor.requestUpdate();
+      this._editor.rerenderWholeEditor();
+      await this._editor.waitForUpdate();
     }
 
-    const vLines = Array.from(rootElement.querySelectorAll('v-line'));
-    await Promise.all(vLines.map(line => line.updateComplete));
+    await this._editor.waitForUpdate();
 
     if (syncVRange) {
       // We need to synchronize the selection immediately after rendering is completed,

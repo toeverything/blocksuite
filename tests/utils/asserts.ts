@@ -92,7 +92,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
-          'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
+          'prop:xywh': `[0,0,${EDITOR_WIDTH},79]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
