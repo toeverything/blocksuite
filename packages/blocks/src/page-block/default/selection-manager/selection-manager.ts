@@ -95,94 +95,94 @@ export class DefaultSelectionManager extends AbstractSelectionManager<DefaultPag
 
     this.slots = slots;
 
-    let isDragging = false;
-    this._add('dragStart', ctx => {
-      const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
-      isDragging = true;
-      this._onContainerDragStart(ctx);
-    });
-    this._add('dragMove', ctx => {
-      if (!isDragging) return;
-      const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
-      this._onContainerDragMove(ctx);
-    });
-    this._dispatcher.add('dragEnd', ctx => {
-      if (!isDragging) return;
-      const event = ctx.get('pointerState');
-      if (
-        !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
-      isDragging = false;
-      this._onContainerDragEnd(ctx);
-    });
-    this._add('click', ctx => {
-      const event = ctx.get('pointerState');
-      if (
-        !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
-      this._onContainerClick(ctx);
-    });
-    this._add('doubleClick', ctx => {
-      const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      this._onContainerDblClick(ctx);
-    });
-    this._add('tripleClick', ctx => {
-      const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      this._onContainerTripleClick(ctx);
-    });
-    this._add('pointerDown', this._onContainerPointerDown);
-    this._add('pointerMove', ctx => {
-      const event = ctx.get('pointerState');
-      if (shouldFilterMouseEvent(event.raw)) return;
-      if (
-        !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
-      if (this.page.hasFlavour('affine:note')) {
-        this._onContainerPointerMove(ctx);
-      }
-    });
-    this._add('contextMenu', this._onContainerContextMenu);
-    this._add('virgo-vrange-updated', () => {
-      this._onSelectionChangeWithoutDebounce();
-    });
-    this._add(
-      'virgo-vrange-updated',
-      debounce((ctx: UIEventStateContext) => {
-        const { event } = ctx.get('defaultState');
-
-        if (shouldFilterMouseEvent(event)) return;
-        if (isDragging) {
-          return;
-        }
-
-        this._onSelectionChangeWithDebounce();
-      }, 300)
-    );
+    const isDragging = false;
+    // this._add('dragStart', ctx => {
+    //   const event = ctx.get('pointerState');
+    //   if (shouldFilterMouseEvent(event.raw)) return;
+    //   if (
+    //     !isInsidePageTitle(event.raw.target) &&
+    //     !isDatabaseInput(event.raw.target)
+    //   ) {
+    //     event.raw.preventDefault();
+    //   }
+    //   isDragging = true;
+    //   this._onContainerDragStart(ctx);
+    // });
+    // this._add('dragMove', ctx => {
+    //   if (!isDragging) return;
+    //   const event = ctx.get('pointerState');
+    //   if (shouldFilterMouseEvent(event.raw)) return;
+    //   if (
+    //     !isInsidePageTitle(event.raw.target) &&
+    //     !isDatabaseInput(event.raw.target)
+    //   ) {
+    //     event.raw.preventDefault();
+    //   }
+    //   this._onContainerDragMove(ctx);
+    // });
+    // this._dispatcher.add('dragEnd', ctx => {
+    //   if (!isDragging) return;
+    //   const event = ctx.get('pointerState');
+    //   if (
+    //     !isInsidePageTitle(event.raw.target) &&
+    //     !isDatabaseInput(event.raw.target)
+    //   ) {
+    //     event.raw.preventDefault();
+    //   }
+    //   isDragging = false;
+    //   this._onContainerDragEnd(ctx);
+    // });
+    // this._add('click', ctx => {
+    //   const event = ctx.get('pointerState');
+    //   if (
+    //     !isInsidePageTitle(event.raw.target) &&
+    //     !isDatabaseInput(event.raw.target)
+    //   ) {
+    //     event.raw.preventDefault();
+    //   }
+    //   this._onContainerClick(ctx);
+    // });
+    // this._add('doubleClick', ctx => {
+    //   const event = ctx.get('pointerState');
+    //   if (shouldFilterMouseEvent(event.raw)) return;
+    //   this._onContainerDblClick(ctx);
+    // });
+    // this._add('tripleClick', ctx => {
+    //   const event = ctx.get('pointerState');
+    //   if (shouldFilterMouseEvent(event.raw)) return;
+    //   this._onContainerTripleClick(ctx);
+    // });
+    // this._add('pointerDown', this._onContainerPointerDown);
+    // this._add('pointerMove', ctx => {
+    //   const event = ctx.get('pointerState');
+    //   if (shouldFilterMouseEvent(event.raw)) return;
+    //   if (
+    //     !isInsidePageTitle(event.raw.target) &&
+    //     !isDatabaseInput(event.raw.target)
+    //   ) {
+    //     event.raw.preventDefault();
+    //   }
+    //   if (this.page.hasFlavour('affine:note')) {
+    //     this._onContainerPointerMove(ctx);
+    //   }
+    // });
+    // this._add('contextMenu', this._onContainerContextMenu);
+    // this._add('virgo-vrange-updated', () => {
+    //   this._onSelectionChangeWithoutDebounce();
+    // });
+    // this._add(
+    //   'virgo-vrange-updated',
+    //   debounce((ctx: UIEventStateContext) => {
+    //     const { event } = ctx.get('defaultState');
+    //
+    //     if (shouldFilterMouseEvent(event)) return;
+    //     if (isDragging) {
+    //       return;
+    //     }
+    //
+    //     this._onSelectionChangeWithDebounce();
+    //   }, 300)
+    // );
   }
 
   private _ensureVisibleNoteExists() {

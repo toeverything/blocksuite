@@ -18,6 +18,10 @@ export class RangeController {
 
   constructor(public root: BlockSuiteRoot) {}
 
+  get value() {
+    return this._range;
+  }
+
   private get _range() {
     if (!this._reusedRange) {
       this._reusedRange = document.createRange();
