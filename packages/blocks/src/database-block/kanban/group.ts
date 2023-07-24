@@ -21,7 +21,7 @@ const styles = css`
     border-radius: 8px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 4px;
   }
 
   .add-card {

@@ -8,7 +8,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { KanbanCard } from './card.js';
+import { columnTypeIconMap } from '../table/components/column-header/database-header-column.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
@@ -17,13 +17,24 @@ import type {
 const styles = css`
   affine-data-view-kanban-cell {
     border-radius: 4px;
-    display: block;
+    display: flex;
     padding: 2px 4px;
     min-height: 28px;
   }
 
   affine-data-view-kanban-cell:hover {
     background-color: var(--affine-hover-color);
+  }
+  affine-data-view-kanban-cell .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+  }
+  affine-data-view-kanban-cell .icon svg {
+    width: 14px;
+    height: 14px;
+    fill: var(--affine-icon-color);
   }
 `;
 
@@ -59,25 +70,27 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     };
     const { view, edit } = this.column.renderer;
     const style = styleMap({
+      flex: 1,
       display: 'block',
       borderRadius: '4px',
       boxShadow: this.editing
         ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
         : undefined,
     });
-    return html`${keyed(
-      `${this.editing} ${this.column.type}`,
-      html` <uni-lit
-        .uni="${this.editing && edit ? edit : view}"
-        .props="${props}"
-        style="${style}"
-      ></uni-lit>`
-    )}`;
+    return html` <div class="icon">${columnTypeIconMap[this.column.type]}</div>
+      ${keyed(
+        `${this.editing} ${this.column.type}`,
+        html`<uni-lit
+          .uni="${this.editing && edit ? edit : view}"
+          .props="${props}"
+          style="${style}"
+        ></uni-lit>`
+      )}`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-data-view-kanban-cell': KanbanCard;
+    'affine-data-view-kanban-cell': KanbanCell;
   }
 }

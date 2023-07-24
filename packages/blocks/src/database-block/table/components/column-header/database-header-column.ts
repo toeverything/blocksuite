@@ -29,8 +29,10 @@ import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import { getTableContainer } from '../../table-view.js';
-import type { DataViewTableColumnManager } from '../../table-view-manager.js';
-import type { DataViewTableManager } from '../../table-view-manager.js';
+import type {
+  DataViewTableColumnManager,
+  DataViewTableManager,
+} from '../../table-view-manager.js';
 import type { ColumnHeader, ColumnTypeIcon } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 
@@ -478,7 +480,7 @@ const createDropPreview = (container: Element, height: number) => {
   };
 };
 
-const columnTypeIconMap: ColumnTypeIcon = {
+export const columnTypeIconMap: ColumnTypeIcon = {
   select: DatabaseSelect,
   number: DatabaseNumber,
   checkbox: TodoIcon,

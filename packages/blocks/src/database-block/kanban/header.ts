@@ -12,7 +12,7 @@ const styles = css`
   affine-data-view-kanban-header {
     display: flex;
     justify-content: space-between;
-    padding: 10px;
+    padding: 4px;
   }
 
   .select-group {
@@ -32,28 +32,30 @@ export class KanbanHeader extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   view!: DataViewKanbanManager;
-  private clickGroup = () => {
-    popMenu(this, {
+  private clickGroup = (e: MouseEvent) => {
+    popMenu(e.target as HTMLElement, {
       options: {
         input: {
           search: true,
         },
-        items: this.view.columnManagerList.map(column => {
-          return {
-            type: 'action',
-            name: column.name,
-            select: () => {
-              this.view.changeGroup(column.id);
-            },
-          };
-        }),
+        items: this.view.columnManagerList
+          .filter(column => column.id !== this.view.view.groupBy?.columnId)
+          .map(column => {
+            return {
+              type: 'action',
+              name: column.name,
+              select: () => {
+                this.view.changeGroup(column.id);
+              },
+            };
+          }),
       },
     });
   };
 
   override render() {
     return html`
-      <div>title</div>
+      <div></div>
       <div>
         <div class="select-group" @click="${this.clickGroup}">Group</div>
       </div>

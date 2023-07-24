@@ -1,5 +1,6 @@
 import './group.js';
 import './header.js';
+import './drag.js';
 
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -68,6 +69,10 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
           ></affine-data-view-kanban-group>`;
         })}
       </div>
+      <affine-data-view-kanban-drag
+        .view="${this.view}"
+        .dispatcher="${this.root.uiEventDispatcher}"
+      ></affine-data-view-kanban-drag>
     `;
   }
 }
