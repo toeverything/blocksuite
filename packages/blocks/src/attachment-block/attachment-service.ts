@@ -6,22 +6,18 @@ import { BaseService } from '../__internal__/service/index.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { cloneAttachmentProperties } from './utils.js';
 
-const DEFAULT_NAME = 'Attachment';
-
 export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {
   override block2html(
     block: AttachmentBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    return `<p><a href="${block.url}">${
-      block.title ? block.title : DEFAULT_NAME
-    }</a></p>`;
+    return `<p>Attachment-${block.name}</a></p>`;
   }
   override block2Text(
     block: AttachmentBlockModel,
     { childText = '', begin = 0, end }: BlockTransformContext = {}
   ): string {
-    return block.url;
+    return block.name;
   }
 
   override block2Json(
