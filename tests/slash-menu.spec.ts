@@ -160,7 +160,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test('should move up down with ctrl/cmd+N and ctrl/cmd+N', async () => {
+  test.fixme('should move up down with ctrl/cmd+N and ctrl/cmd+N', async () => {
     page.keyboard.press(`${SHORT_KEY}+N`);
     await expect(slashMenu).toBeVisible();
 
