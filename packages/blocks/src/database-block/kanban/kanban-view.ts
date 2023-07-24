@@ -1,4 +1,5 @@
 import './group.js';
+import './header.js';
 
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -19,6 +20,7 @@ const styles = css`
     overflow-x: auto;
   }
 `;
+
 @customElement('affine-data-view-kanban')
 export class DataViewKanban extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
@@ -42,6 +44,9 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
     this._disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
+        this.querySelectorAll('affine-data-view-kanban-cell').forEach(v =>
+          v.requestUpdate()
+        );
       })
     );
   }
@@ -52,11 +57,14 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
       return html``;
     }
     return html`
+      <affine-data-view-kanban-header
+        .view="${this.view}"
+      ></affine-data-view-kanban-header>
       <div class="affine-data-view-kanban-groups">
         ${repeat(groups, group => {
-          return html`<affine-data-view-kanban-group
-            .view=${this.view}
-            .group=${group}
+          return html` <affine-data-view-kanban-group
+            .view="${this.view}"
+            .group="${group}"
           ></affine-data-view-kanban-group>`;
         })}
       </div>

@@ -75,7 +75,10 @@ export class AllPageDatasource extends BaseDataSource {
     this.propertiesMap[propertyId]?.setValue?.(page, value);
   }
 
-  public cellGetRenderValue(rowId: string, propertyId: string): unknown {
+  public override cellGetRenderValue(
+    rowId: string,
+    propertyId: string
+  ): unknown {
     return this.cellGetValue(rowId, propertyId);
   }
 

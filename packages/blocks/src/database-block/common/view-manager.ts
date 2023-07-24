@@ -4,7 +4,8 @@ import { isTArray } from '../logical/typesystem.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column, InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
-import type { FilterGroup, VariableOrProperty } from './ast.js';
+import type { FilterGroup } from './ast.js';
+import { groupByMatcher } from './columns/group.js';
 import { columnManager } from './columns/manager.js';
 
 export type TableViewColumn = {
@@ -17,6 +18,11 @@ export type KanbanViewColumn = {
   id: string;
   hide?: boolean;
 };
+export type GroupBy = {
+  type: 'groupBy';
+  columnId: string;
+  name: string;
+};
 export type DatabaseModeMap = {
   table: {
     columns: TableViewColumn[];
@@ -25,7 +31,7 @@ export type DatabaseModeMap = {
   kanban: {
     columns: KanbanViewColumn[];
     filter: FilterGroup;
-    groupBy?: VariableOrProperty;
+    groupBy?: GroupBy;
   };
 };
 export type DatabaseViewDataMap = {
@@ -50,6 +56,23 @@ type ViewOperation<Data> = {
     position: InsertPosition
   ): void;
   deleteColumn(model: DatabaseBlockModel, view: Data, id: string): void;
+};
+
+export const defaultGroupBy = (
+  columnId: string,
+  type: string,
+  data: NonNullable<unknown>
+): GroupBy | undefined => {
+  const name = groupByMatcher.match(
+    columnManager.getColumn(type).dataType(data)
+  )?.name;
+  return name != null
+    ? {
+        type: 'groupBy',
+        columnId: columnId,
+        name: name,
+      }
+    : undefined;
 };
 export const ViewOperationMap: {
   [K in keyof DatabaseViewDataMap]: ViewOperation<DatabaseViewDataMap[K]>;
@@ -76,10 +99,7 @@ export const ViewOperationMap: {
           op: 'and',
           conditions: [],
         },
-        groupBy: {
-          type: 'ref',
-          name: column.id,
-        },
+        groupBy: defaultGroupBy(column.id, column.type, column.data),
       };
     },
     addColumn(model, view, newColumn) {

@@ -1,20 +1,21 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
-import type { FilterGroup, VariableOrProperty } from '../common/ast.js';
+import type { FilterGroup } from '../common/ast.js';
+import { groupByMatcher } from '../common/columns/group.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
 import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
-import type { KanbanViewData } from '../common/view-manager.js';
+import type { GroupBy, KanbanViewData } from '../common/view-manager.js';
+import { defaultGroupBy } from '../common/view-manager.js';
 import type { ViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { TType } from '../logical/typesystem.js';
-import { isTArray } from '../logical/typesystem.js';
-import { defaultKey, value2key } from '../logical/value2key.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 
 export type KanbanGroupData = {
+  helper: GroupHelper;
   type: TType;
   value: unknown;
   rows: string[];
@@ -129,20 +130,21 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     return true;
   }
 
-  cache?: {
-    groupBy?: VariableOrProperty;
-    helper?: GroupHelper;
-  };
-
-  private get groupHelper() {
-    const groupBy = this.view.groupBy;
-    if (this.cache?.groupBy !== groupBy) {
-      this.cache = {
-        groupBy,
-        helper: groupBy ? new GroupHelper(groupBy, this) : undefined,
-      };
+  checkGroup(columnId: string, type: TType, target: TType): boolean {
+    if (!groupByMatcher.isMatched(type, target)) {
+      this.changeGroup(columnId);
+      return false;
     }
-    return this.cache?.helper;
+    return true;
+  }
+
+  changeGroup(columnId: string) {
+    const column = this.columnGet(columnId);
+    this.updateView(view => {
+      return {
+        groupBy: defaultGroupBy(column.id, column.type, column.data),
+      };
+    });
   }
 
   public get groups(): KanbanGroupData[] | undefined {
@@ -150,42 +152,49 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     if (!groupBy) {
       return;
     }
-    if (groupBy.type === 'ref') {
-      const type = this.columnGetDataType(groupBy.name);
-      const groupMap: Record<string, KanbanGroupData> = Object.fromEntries(
-        defaultKey(type).map(([key, value]) => [
-          key,
-          {
-            type,
+    const helper = new GroupHelper(groupBy, this);
+    const result = groupByMatcher.find(v => v.data.name === groupBy.name);
+    if (!result) {
+      return;
+    }
+    const groupByConfig = result.data;
+    const type = this.columnGetDataType(groupBy.columnId);
+    if (!this.checkGroup(groupBy.columnId, result.type, type)) {
+      // reset groupBy config
+      return this.groups;
+    }
+    const groupMap: Record<string, KanbanGroupData> = Object.fromEntries(
+      groupByConfig.defaultKeys(type).map(({ key, value }) => [
+        key,
+        {
+          helper,
+          type,
+          value,
+          rows: [],
+        },
+      ])
+    );
+    this.rows.forEach(id => {
+      const value = this.cellGetFilterValue(id, groupBy.columnId);
+      const keys = groupByConfig.valuesGroup(value, type);
+      keys.forEach(({ key, value }) => {
+        if (!groupMap[key]) {
+          groupMap[key] = {
+            helper,
             value,
             rows: [],
-          },
-        ])
-      );
-      this.rows.forEach(id => {
-        const columnId = groupBy.name;
-        const value = this.cellGetValue(id, columnId);
-        const keys = value2key(value, type);
-        keys.forEach(([key, value]) => {
-          if (!groupMap[key]) {
-            groupMap[key] = {
-              value,
-              rows: [],
-              type,
-            };
-          }
-          groupMap[key].rows.push(id);
-        });
+            type,
+          };
+        }
+        groupMap[key].rows.push(id);
       });
-      console.log(groupMap);
-      return Object.values(groupMap);
-    }
-    return [];
+    });
+    return Object.values(groupMap);
   }
 
   public addCard(position: InsertPosition, group: KanbanGroupData) {
     const id = this.rowAdd(position);
-    this.groupHelper?.addToGroup(id, group.value);
+    group.helper.addToGroup(id, group.value);
   }
 }
 
@@ -196,31 +205,44 @@ export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {
 }
 
 class GroupHelper {
-  private getVarType(variable: VariableOrProperty) {
-    if (variable?.type === 'ref') {
-      return this.viewManager.columnGetDataType(variable.name);
-    }
-    throw new Error('not implement yet');
+  get dataType() {
+    return this.viewManager.columnGetDataType(this.groupBy.columnId);
   }
 
   get columnId() {
-    if (this.groupBy.type === 'ref') {
-      return this.groupBy.name;
-    } else {
-      throw new Error('not implement yet');
-    }
+    return this.groupBy.columnId;
   }
 
-  constructor(
-    private groupBy: VariableOrProperty,
-    private viewManager: DataViewManager
-  ) {}
+  get type() {
+    return this.viewManager.columnGetType(this.columnId);
+  }
+
+  get data() {
+    return this.viewManager.columnGetData(this.columnId);
+  }
+
+  updateData = (data: NonNullable<unknown>) => {
+    this.viewManager.columnUpdateData(this.columnId, data);
+  };
+
+  updateValue(rows: string[], value: unknown) {
+    rows.forEach(id => {
+      this.viewManager.cellUpdateValue(id, this.columnId, value);
+    });
+  }
+
+  constructor(private groupBy: GroupBy, private viewManager: DataViewManager) {}
+
+  groupData() {
+    return groupByMatcher.findData(v => v.name === this.groupBy.name);
+  }
 
   addToGroup(rowId: string, value: unknown) {
     const columnId = this.columnId;
-    const newValue = methodByType(this.getVarType(this.groupBy))?.addToGroup(
-      this.viewManager.cellGetFilterValue(rowId, columnId),
-      value
+    const addTo = this.groupData()?.addToGroup ?? (value => value);
+    const newValue = addTo(
+      value,
+      this.viewManager.cellGetFilterValue(rowId, columnId)
     );
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
@@ -228,46 +250,9 @@ class GroupHelper {
   removeFromGroup(rowId: string, value: unknown) {
     //
   }
-}
 
-export interface GroupByMethod {
-  addToGroup(oldValue: unknown, groupValue: unknown): unknown;
-
-  removeFromGroup(oldValue: unknown, groupValue: unknown): unknown;
-}
-
-export const methodByType = (type: TType): GroupByMethod | undefined => {
-  if (isTArray(type)) {
-    const ele = methodByType(type.ele);
-    if (!ele) {
-      throw new Error('this is a bug');
-    }
-    return new TArrayMethod(ele);
-  }
-  return new DefaultMethod();
-};
-
-class TArrayMethod implements GroupByMethod {
-  public addToGroup(oldValue: unknown, groupValue: unknown): unknown {
-    console.log(groupValue);
-    const old = Array.isArray(oldValue) ? oldValue : [];
-    return [...old, groupValue];
-  }
-
-  public removeFromGroup(oldValue: unknown, groupValue: unknown): unknown {
-    const old = Array.isArray(oldValue) ? oldValue : [];
-    return old.filter(v => v !== groupValue);
-  }
-
-  constructor(private eleMethod: GroupByMethod) {}
-}
-
-class DefaultMethod implements GroupByMethod {
-  public addToGroup(oldValue: unknown, groupValue: unknown): unknown {
-    return groupValue;
-  }
-
-  public removeFromGroup(oldValue: unknown, groupValue: unknown): unknown {
-    return undefined;
+  moveTo(rowId: string, fromGroupValue: unknown, toGroupValue: unknown) {
+    this.removeFromGroup(rowId, fromGroupValue);
+    this.addToGroup(rowId, toGroupValue);
   }
 }

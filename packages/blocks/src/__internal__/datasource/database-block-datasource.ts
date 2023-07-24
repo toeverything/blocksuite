@@ -48,6 +48,18 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     value: unknown
   ): void {
     this.page.captureSync();
+    if (
+      this.propertyGetType(propertyId) === 'title' &&
+      typeof value === 'string'
+    ) {
+      const text =
+        this._model.children[this._model.childMap.get(rowId) ?? 0].text;
+      if (text) {
+        text.replace(0, text.length, value);
+      }
+      this.slots.update.emit();
+      return;
+    }
     this._model.updateCell(rowId, { columnId: propertyId, value });
   }
 
