@@ -116,8 +116,7 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this._nativeDragStartHandler(ctx);
   };
 
-  private _nativeDragStartHandler: UIEventHandler = ctx => {
-    this._isNativeSelection = true;
+  private _selectByCaret: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const caret = caretFromPoint(state.raw.clientX, state.raw.clientY);
     if (!caret) {
@@ -135,6 +134,11 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     }
 
     this.rangeController.render(range);
+  };
+
+  private _nativeDragStartHandler: UIEventHandler = ctx => {
+    this._isNativeSelection = true;
+    this._selectByCaret(ctx);
   };
 
   private _dragMoveHandler: UIEventHandler = ctx => {
@@ -225,17 +229,15 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
       ) ?? null;
 
     if (state.keys.shift) {
-      if (this._isNativeSelection) {
-        this._updateRange(state);
-        return;
-      }
+      this._updateRange(state);
+      return;
     }
 
     if (!text) {
       return;
     }
 
-    this._nativeDragStartHandler(ctx);
+    this._selectByCaret(ctx);
   };
 
   private _doubleClickHandler: UIEventHandler = ctx => {
@@ -330,49 +332,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     return false;
   };
 
-  override mounted() {
-    super.mounted();
-
-    this._addEvent('dragStart', this._dragStartHandler);
-    this._addEvent('dragMove', this._dragMoveHandler);
-    this._addEvent('dragEnd', this._dragEndHandler);
-    this._addEvent('pointerMove', this._pointerMoveHandler);
-    this._addEvent('click', this._clickHandler);
-    this._addEvent('doubleClick', this._doubleClickHandler);
-    this._addEvent('tripleClick', this._tripleClickHandler);
-
-    this._addEvent('selectionChange', () => {
-      const selection = window.getSelection();
-      if (!selection) {
-        return;
-      }
-      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-      this._prevSelection = this.rangeController.writeRange(range);
-    });
-
-    this.disposables.add(
-      this.selectionManager.slots.changed.on(selections => {
-        if (this._isNativeSelection) {
-          return;
-        }
-        const text =
-          selections.find((selection): selection is TextSelection =>
-            selection.is('text')
-          ) ?? null;
-        const eq =
-          text && this._prevSelection
-            ? text.equals(this._prevSelection)
-            : text === this._prevSelection;
-        if (eq) {
-          return;
-        }
-
-        this._prevSelection = text;
-        this.rangeController.syncRange(text);
-      })
-    );
-  }
-
   bindViewport(viewportElement: HTMLElement) {
     this._viewportElement = viewportElement;
   }
@@ -400,6 +359,52 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this.selection.clear();
     this.selection.dispose();
     this.selection = null;
+  }
+
+  override mounted() {
+    super.mounted();
+
+    this._addEvent('dragStart', this._dragStartHandler);
+    this._addEvent('dragMove', this._dragMoveHandler);
+    this._addEvent('dragEnd', this._dragEndHandler);
+    this._addEvent('pointerMove', this._pointerMoveHandler);
+    this._addEvent('click', this._clickHandler);
+    this._addEvent('doubleClick', this._doubleClickHandler);
+    this._addEvent('tripleClick', this._tripleClickHandler);
+
+    this._addEvent('selectionChange', () => {
+      const selection = window.getSelection();
+      if (!selection) {
+        return;
+      }
+      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+      this._prevSelection = this.rangeController.writeRange(range);
+    });
+
+    this.disposables.add(
+      this.selectionManager.slots.changed.on(selections => {
+        if (this._isNativeSelection) {
+          return;
+        }
+        // wait for lit updated
+        requestAnimationFrame(() => {
+          const text =
+            selections.find((selection): selection is TextSelection =>
+              selection.is('text')
+            ) ?? null;
+          const eq =
+            text && this._prevSelection
+              ? text.equals(this._prevSelection)
+              : text === this._prevSelection;
+          if (eq) {
+            return;
+          }
+
+          this._prevSelection = text;
+          this.rangeController.syncRange(text);
+        });
+      })
+    );
   }
 
   override unmounted() {

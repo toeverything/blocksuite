@@ -106,10 +106,13 @@ export class RangeController {
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
     );
 
-    startVirgoElement.virgoEditor.setVRange({
-      index: point.index,
-      length: point.length,
-    });
+    startVirgoElement.virgoEditor.setVRange(
+      {
+        index: point.index,
+        length: point.length,
+      },
+      false
+    );
 
     return startVirgoElement.virgoEditor.toDomRange({
       index: point.index,
