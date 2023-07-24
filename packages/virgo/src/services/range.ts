@@ -59,9 +59,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
   /**
    * the vRange is synced to the native selection asynchronically
+   * if sync is true, the native selection will be synced immediately
    */
-  setVRange = (vRange: VRange): void => {
-    this._editor.slots.vRangeUpdated.emit([vRange, 'other']);
+  setVRange = (vRange: VRange, sync = true): void => {
+    this._editor.slots.vRangeUpdated.emit([vRange, sync ? 'other' : 'silent']);
   };
 
   /**

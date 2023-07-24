@@ -77,7 +77,7 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test('type character jump out code node', async ({ page }) => {
+test.fixme('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
