@@ -222,3 +222,21 @@ export const uploadImageFromLocal = async (storage: BlobManager) => {
   }
   return res;
 };
+
+export const uploadFileFromLocal = async (storage: BlobManager) => {
+  const file = await openFileOrFiles({
+    acceptType: 'Any',
+  });
+  if (!file) return;
+  // The original file name can not be modified after the file is uploaded to the storage,
+  // so we create a new file with a fixed name to prevent privacy leaks.
+  const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
+    type: file.type,
+  });
+  const sourceId = await storage.set(anonymousFile);
+  return {
+    // Notice: we return the original file here, not the anonymous file.
+    file,
+    sourceId,
+  };
+};

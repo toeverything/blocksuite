@@ -897,3 +897,4 @@ const AttachmentSVG = svg`<path
 />`;
 
 export const AttachmentIcon = icon(AttachmentSVG, 20);
+export const AttachmentIcon16 = icon(AttachmentSVG, 16);

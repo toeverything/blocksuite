@@ -25,9 +25,11 @@ import {
   getPageBlock,
   getVirgoByModel,
   resetNativeSelection,
+  uploadFileFromLocal,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
 import { copyBlock } from '../../page-block/default/utils.js';
@@ -223,18 +225,25 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           if (!model.page.awarenessStore.getFlag('enable_attachment_block')) {
             return false;
           }
+          if (!model.page.schema.flavourSchemaMap.has('affine:attachment')) {
+            return false;
+          }
           return !insideDatabase(model);
         },
-        action: ({ page, model }) => {
+        action: async ({ page, model }) => {
           const parent = page.getParent(model);
           if (!parent) {
             return;
           }
-          // TODO show file picker
-          const props = {
+          const fileInfo = await uploadFileFromLocal(page.blobs);
+          if (!fileInfo) return;
+          const { file, sourceId } = fileInfo;
+          const props: AttachmentProps & { flavour: 'affine:attachment' } = {
             flavour: 'affine:attachment',
-            // TODO other props
-          } as const;
+            name: file.name,
+            size: file.size,
+            sourceId,
+          };
           page.addSiblingBlocks(model, [props]);
         },
       },
