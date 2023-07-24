@@ -203,3 +203,26 @@ export async function moveToImage(page: Page) {
   });
   await page.mouse.move(x, y);
 }
+
+export async function clickBlockDragHandle(page: Page, blockId: string) {
+  const blockBox = await page
+    .locator(`[data-block-id="${blockId}"]`)
+    .boundingBox();
+
+  if (!blockBox) {
+    throw new Error();
+  }
+  await page.mouse.move(
+    blockBox.x + blockBox.width / 2,
+    blockBox.y + blockBox.height / 2
+  );
+
+  const handleBox = await page.locator('affine-drag-handle').boundingBox();
+  if (!handleBox) {
+    throw new Error();
+  }
+  await page.mouse.click(
+    handleBox.x + handleBox.width / 2,
+    handleBox.y + handleBox.height / 2
+  );
+}
