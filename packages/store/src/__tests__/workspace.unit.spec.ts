@@ -348,6 +348,16 @@ describe('addBlock', () => {
     assert.equal(workspace._pages.size, 0);
   });
 
+  it('can remove page that has not been loaded', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+
+    const page0 = workspace.createPage({ id: 'page0' });
+
+    workspace.removePage(page0.id);
+    assert.equal(workspace.pages.size, 0);
+  });
+
   it('can set page state', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options).register(BlockSchemas);
