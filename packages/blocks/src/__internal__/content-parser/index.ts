@@ -183,6 +183,15 @@ export class ContentParser {
         if (layer && layer instanceof HTMLElement) {
           layer.style.setProperty('transform', 'none');
         }
+
+        const childNodes = documentClone.querySelectorAll(
+          '.affine-edgeless-child-note'
+        );
+        childNodes.forEach(childNode => {
+          if (childNode instanceof HTMLElement) {
+            childNode.style.setProperty('box-shadow', 'none');
+          }
+        });
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,

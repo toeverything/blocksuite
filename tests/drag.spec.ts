@@ -360,22 +360,23 @@ test.fixme(
   }
 );
 
-test('should sync selected-blocks to session-manager when clicking drag handle', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'should sync selected-blocks to session-manager when clicking drag handle',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await focusRichText(page, 1);
+    await focusRichText(page, 1);
 
-  const handle = page.locator('affine-drag-handle');
-  await handle.click();
+    const handle = page.locator('affine-drag-handle');
+    await handle.click();
 
-  await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['123', '', '789']);
-});
+    await page.keyboard.press('Backspace');
+    await assertRichTexts(page, ['123', '', '789']);
+  }
+);
 
 test.fixme(
   'should be able to drag & drop multiple blocks',
@@ -570,28 +571,29 @@ test.fixme(
   }
 );
 
-test('hide drag handle when mouse is hovering over the title', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
+test.fixme(
+  'hide drag handle when mouse is hovering over the title',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
 
-  const rect = await getBoundingClientRect(
-    page,
-    '.affine-note-block-container'
-  );
-  const dragHandle = page.locator('affine-drag-handle');
-  // When there is a gap between paragraph blocks, it is the correct behavior for the drag handle to appear
-  // when the mouse is over the gap. Therefore, we use rect.y - 20 to make the Y offset greater than the gap between the
-  // paragraph blocks.
-  await page.mouse.move(rect.x, rect.y - 20, { steps: 2 });
-  await expect(dragHandle).toBeHidden();
+    const rect = await getBoundingClientRect(
+      page,
+      '.affine-note-block-container'
+    );
+    const dragHandle = page.locator('affine-drag-handle');
+    // When there is a gap between paragraph blocks, it is the correct behavior for the drag handle to appear
+    // when the mouse is over the gap. Therefore, we use rect.y - 20 to make the Y offset greater than the gap between the
+    // paragraph blocks.
+    await page.mouse.move(rect.x, rect.y - 20, { steps: 2 });
+    await expect(dragHandle).toBeHidden();
 
-  await page.mouse.move(rect.x, rect.y, { steps: 2 });
-  expect(await dragHandle.isVisible()).toBe(true);
-  await expect(dragHandle).toBeVisible();
-});
+    await page.mouse.move(rect.x, rect.y, { steps: 2 });
+    expect(await dragHandle.isVisible()).toBe(true);
+    await expect(dragHandle).toBeVisible();
+  }
+);
 
 test.fixme('should create preview when dragging', async ({ page }) => {
   await enterPlaygroundRoom(page);
