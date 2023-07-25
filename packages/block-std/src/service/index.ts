@@ -5,14 +5,17 @@ import type { EventName, UIEventHandler } from '../event/index.js';
 import type { BlockStore } from '../store/index.js';
 
 export interface BlockServiceOptions {
+  flavour: string;
   store: BlockStore;
 }
 
 export class BlockService<Model extends BaseBlockModel = BaseBlockModel> {
   readonly store: BlockStore;
+  readonly flavour: string;
   readonly disposables = new DisposableGroup();
 
   constructor(options: BlockServiceOptions) {
+    this.flavour = options.flavour;
     this.store = options.store;
   }
 
@@ -47,8 +50,16 @@ export class BlockService<Model extends BaseBlockModel = BaseBlockModel> {
   // life cycle end
 
   // event handlers start
-  handleEvent(name: EventName, fn: UIEventHandler) {
-    this.disposables.add(this.uiEventDispatcher.add(name, fn));
+  handleEvent(
+    name: EventName,
+    fn: UIEventHandler,
+    options?: { global: boolean }
+  ) {
+    this.disposables.add(
+      this.uiEventDispatcher.add(name, fn, {
+        flavour: options?.global ? undefined : this.flavour,
+      })
+    );
   }
   // event handlers end
 }

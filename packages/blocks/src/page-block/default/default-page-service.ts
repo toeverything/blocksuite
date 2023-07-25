@@ -1,6 +1,5 @@
 import type {
   BaseSelection,
-  EventName,
   PointerEventState,
   TextSelection,
   UIEventHandler,
@@ -101,10 +100,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
       scrollLeft,
       scrollTop,
     };
-  }
-
-  private _addEvent(name: EventName, handler: UIEventHandler) {
-    this.disposables.add(this.uiEventDispatcher.add(name, handler));
   }
 
   private _dragStartHandler: UIEventHandler = ctx => {
@@ -364,22 +359,26 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
   override mounted() {
     super.mounted();
 
-    this._addEvent('dragStart', this._dragStartHandler);
-    this._addEvent('dragMove', this._dragMoveHandler);
-    this._addEvent('dragEnd', this._dragEndHandler);
-    this._addEvent('pointerMove', this._pointerMoveHandler);
-    this._addEvent('click', this._clickHandler);
-    this._addEvent('doubleClick', this._doubleClickHandler);
-    this._addEvent('tripleClick', this._tripleClickHandler);
+    this.handleEvent('dragStart', this._dragStartHandler, { global: true });
+    this.handleEvent('dragMove', this._dragMoveHandler, { global: true });
+    this.handleEvent('dragEnd', this._dragEndHandler, { global: true });
+    this.handleEvent('pointerMove', this._pointerMoveHandler, { global: true });
+    this.handleEvent('click', this._clickHandler, { global: true });
+    this.handleEvent('doubleClick', this._doubleClickHandler, { global: true });
+    this.handleEvent('tripleClick', this._tripleClickHandler, { global: true });
 
-    this._addEvent('selectionChange', () => {
-      const selection = window.getSelection();
-      if (!selection) {
-        return;
-      }
-      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-      this._prevSelection = this.rangeController.writeRange(range);
-    });
+    this.handleEvent(
+      'selectionChange',
+      () => {
+        const selection = window.getSelection();
+        if (!selection) {
+          return;
+        }
+        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        this._prevSelection = this.rangeController.writeRange(range);
+      },
+      { global: true }
+    );
 
     this.disposables.add(
       this.selectionManager.slots.changed.on(selections => {

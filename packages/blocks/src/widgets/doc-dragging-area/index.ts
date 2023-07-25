@@ -65,6 +65,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
         const bounding = element.getBoundingClientRect();
         return {
           id: element.model.id,
+          path: element.path,
           rect: {
             left: bounding.left + viewportElement.scrollLeft,
             top: bounding.top + viewportElement.scrollTop,
@@ -89,9 +90,11 @@ export class DocDraggingAreaWidget extends WidgetElement {
         ({ rect }) =>
           rectIntersects(rect, userRect) && !rectIncludes(rect, userRect)
       )
-      .map(rectWithId => rectWithId.id)
-      .map(blockId => {
-        return this.root.selectionManager.getInstance('block', blockId);
+      .map(rectWithId => {
+        return this.root.selectionManager.getInstance('block', {
+          blockId: rectWithId.id,
+          path: rectWithId.path,
+        });
       });
 
     this.root.selectionManager.set(selections);

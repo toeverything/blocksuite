@@ -1,5 +1,6 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
@@ -38,8 +39,18 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
     super.disconnectedCallback();
   }
 
-  protected _addEvent = (name: EventName, handler: UIEventHandler) =>
-    this._disposables.add(this.root.uiEventDispatcher.add(name, handler));
+  protected _addEvent = (
+    name: EventName,
+    handler: UIEventHandler,
+    options?: { global?: boolean }
+  ) => {
+    assertExists(this.hostElement);
+    this._disposables.add(
+      this.root.uiEventDispatcher.add(name, handler, {
+        flavour: options?.global ? undefined : this.hostElement.model.flavour,
+      })
+    );
+  };
 
   override render(): unknown {
     return null;
