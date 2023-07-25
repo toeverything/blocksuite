@@ -10,9 +10,40 @@ import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
-import { edgelessBlockSpec, pageBlockSpec } from '../page-block/index.js';
+import { DefaultPageService } from '../page-block/default/default-page-service.js';
+import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
+import {
+  type DocPageBlockWidgetName,
+  type EdgelessPageBlockWidgetName,
+} from '../page-block/index.js';
+import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+
+const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
+  schema: PageBlockSchema,
+  service: DefaultPageService,
+  view: {
+    component: literal`affine-default-page`,
+    widgets: {
+      slashMenu: literal`affine-slash-menu-widget`,
+      linkedPage: literal`affine-linked-page-widget`,
+      draggingArea: literal`affine-doc-dragging-area-widget`,
+    },
+  },
+};
+
+const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
+  schema: PageBlockSchema,
+  service: EdgelessPageService,
+  view: {
+    component: literal`affine-edgeless-page`,
+    widgets: {
+      slashMenu: literal`affine-slash-menu-widget`,
+      linkedPage: literal`affine-linked-page-widget`,
+    },
+  },
+};
 
 export const pagePreset: LitBlockSpec[] = [
   pageBlockSpec,

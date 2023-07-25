@@ -31,6 +31,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        'starter/': resolve(__dirname, 'starter/index.html'),
         'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
         'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
         'examples/counter': resolve(__dirname, 'examples/counter/index.html'),

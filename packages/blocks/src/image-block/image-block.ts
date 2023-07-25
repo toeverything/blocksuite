@@ -27,7 +27,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     }
     .affine-embed-wrapper {
       text-align: center;
-      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+      margin-bottom: 18px;
     }
     .affine-embed-wrapper-caption {
       width: 100%;
@@ -49,7 +49,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     }
 
     .affine-image-wrapper {
-      padding: 8px;
+      padding: 8px 8px 0 8px;
       width: 100%;
       text-align: center;
       line-height: 0;
@@ -57,7 +57,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-top: 18px;
     }
 
     .affine-image-wrapper img {
@@ -69,6 +69,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     .resizable-img {
       position: relative;
       border: 1px solid var(--affine-white-90);
+      border-radius: 8px;
+      overflow: hidden;
     }
 
     .resizable-img img {

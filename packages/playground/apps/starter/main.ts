@@ -1,4 +1,4 @@
-/// <reference types="./env" />
+/// <reference types="./env.d.ts" />
 import '@blocksuite/blocks';
 import '@blocksuite/editor';
 import './components/start-panel';
@@ -104,6 +104,7 @@ async function main() {
     },
   });
   workspace.awarenessStore.setFlag('enable_page_tags', true);
+
   const syncProviders = async (providers: DocProvider[]) => {
     for (const provider of providers) {
       if ('active' in provider) {

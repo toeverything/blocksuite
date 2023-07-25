@@ -92,7 +92,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .h1 {
       font-size: var(--affine-font-h-1);
       line-height: calc(1em + 12px);
-      margin-top: calc(var(--affine-paragraph-space) + 24px);
+      margin-top: 18px;
+      margin-bottom: 10px;
     }
     .h1 code {
       font-size: calc(var(--affine-font-base) + 8px);
@@ -100,7 +101,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .h2 {
       font-size: var(--affine-font-h-2);
       line-height: calc(1em + 10px);
-      margin-top: calc(var(--affine-paragraph-space) + 20px);
+      margin-top: 14px;
+      margin-bottom: 10px;
     }
     .h2 code {
       font-size: calc(var(--affine-font-base) + 6px);
@@ -108,7 +110,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .h3 {
       font-size: var(--affine-font-h-3);
       line-height: calc(1em + 8px);
-      margin-top: calc(var(--affine-paragraph-space) + 16px);
+      margin-top: 12px;
+      margin-bottom: 10px;
     }
     .h3 code {
       font-size: calc(var(--affine-font-base) + 4px);
@@ -116,7 +119,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .h4 {
       font-size: var(--affine-font-h-4);
       line-height: calc(1em + 10px);
-      margin-top: calc(var(--affine-paragraph-space) + 12px);
+      margin-top: 12px;
+      margin-bottom: 10px;
     }
     .h4 code {
       font-size: calc(var(--affine-font-base) + 2px);
@@ -124,7 +128,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .h5 {
       font-size: var(--affine-font-h-5);
       line-height: calc(1em + 8px);
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-top: 12px;
+      margin-bottom: 10px;
     }
     .h5 code {
       font-size: calc(var(--affine-font-base));
@@ -132,7 +137,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .h6 {
       font-size: var(--affine-font-h-6);
       line-height: calc(1em + 8px);
-      margin-top: calc(var(--affine-paragraph-space) + 4px);
+      margin-top: 12px;
+      margin-bottom: 10px;
     }
     .h6 code {
       font-size: calc(var(--affine-font-base) - 2px);
@@ -158,7 +164,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       border-radius: 18px;
     }
     .text {
-      margin-top: var(--affine-paragraph-space);
+      margin-top: 10px;
+      margin-bottom: 10px;
       font-size: var(--affine-font-base);
     }
 
