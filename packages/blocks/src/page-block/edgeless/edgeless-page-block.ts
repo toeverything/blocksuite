@@ -619,10 +619,17 @@ export class EdgelessPageBlockComponent
       slots.copyAsPng.on(({ notes, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
-        this.clipboard.copyAsPng(notes, shapes).finally(() => {
-          canCopyAsPng = true;
-          toast('Copied to clipboard');
-        });
+        this.clipboard
+          .copyAsPng(notes, shapes)
+          .then(() => {
+            toast('Copied to clipboard');
+          })
+          .catch(() => {
+            toast('Failed to copy as PNG');
+          })
+          .finally(() => {
+            canCopyAsPng = true;
+          });
       })
     );
   }
