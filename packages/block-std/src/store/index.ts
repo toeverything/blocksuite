@@ -2,7 +2,7 @@ import type { Page, Workspace } from '@blocksuite/store';
 
 import type { UIEventDispatcher } from '../event/index.js';
 import type { SelectionManager } from '../selection/index.js';
-import type { BlockService, BlockServiceOptions } from '../service/index.js';
+import type { BlockService } from '../service/index.js';
 import type { BlockSpec } from '../spec/index.js';
 
 export interface BlockStoreOptions {
@@ -86,16 +86,13 @@ export class BlockStore<ComponentType = unknown> {
         return;
       }
 
-      const service = new newSpec.service(this._serviceOptions);
+      const service = new newSpec.service({
+        flavour,
+        store: this,
+      });
       this._services.set(flavour, service);
       service.mounted();
     });
-  }
-
-  private get _serviceOptions(): BlockServiceOptions {
-    return {
-      store: this,
-    };
   }
 
   private _buildSpecMap(specs: Array<BlockSpec<ComponentType>>) {

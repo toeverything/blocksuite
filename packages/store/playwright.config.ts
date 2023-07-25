@@ -11,7 +11,7 @@ const config: PlaywrightTestConfig = {
     browserName:
       (process.env.BROWSER as PlaywrightWorkerOptions['browserName']) ??
       'chromium',
-    viewport: { width: 900, height: 600 },
+    viewport: { width: 900, height: 900 },
     actionTimeout: 1000,
   },
 };

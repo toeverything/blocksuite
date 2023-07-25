@@ -20,7 +20,10 @@ export class TextSelection extends BaseSelection {
   to: TextRangePoint | null;
 
   constructor({ from, to }: TextSelectionProps) {
-    super(from.blockId);
+    super({
+      blockId: from.blockId,
+      path: from.path,
+    });
     this.from = from;
     this.to = to;
   }

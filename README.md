@@ -46,7 +46,7 @@ Check out [blocksuite.affine.pro](https://blocksuite.affine.pro/blocksuite-overv
 ## Resources
 
 - 🎁 Examples
-  - [Nightly Playground](https://blocksuite-toeverything.vercel.app/?init) ([🔗 source](./packages/playground/src/main.ts))
+  - [Nightly Playground](https://blocksuite-toeverything.vercel.app/starter/?init) ([🔗 source](./packages/playground/src/main.ts))
   - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/) ([🔗 source](./packages/playground/examples/basic/index.html))
   - [AFFiNE Alpha Editor](https://app.affine.pro/) ([🔗 source](https://github.com/toeverything/AFFiNE/tree/master/apps/web))
   - [CodeSandbox Starter Template](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
