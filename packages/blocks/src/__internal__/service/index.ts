@@ -50,28 +50,38 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     return `${text}${childText}`;
   }
 
-  block2Json(block: BlockModel, begin?: number, end?: number): SerializedBlock {
-    const delta = block.text?.sliceToDelta(begin ?? 0, end) ?? [];
-    let sumOfLength = block.text?.length ?? 0;
+  block2Json(
+    block: BlockModel,
+    selectedModels?: Map<string, number>,
+    begin?: number,
+    end?: number
+  ): SerializedBlock {
+    const lastBlockId = selectedModels
+      ? [...selectedModels.entries()].reduce((p, c) => (c[1] > p[1] ? c : p))[0]
+      : '';
+    const delta =
+      block.text?.sliceToDelta(
+        begin ?? 0,
+        lastBlockId === block.id ? end : undefined
+      ) ?? [];
     return {
       flavour: block.flavour,
       type: block.type as string,
       text: delta,
       children: block.children
-        ?.filter(child => {
-          if (end === undefined) {
-            return false;
-          }
-          sumOfLength += child.text?.length ?? 0;
-          return sumOfLength <= end;
-        })
-        .map((child, index) => {
-          if (index === block.children.length - 1) {
+        ?.filter(child => selectedModels?.has(child.id) ?? true)
+        .map((child, index, array) => {
+          if (index === array.length - 1) {
             // @ts-ignore
-            return getService(child.flavour).block2Json(child, 0, end);
+            return getService(child.flavour).block2Json(
+              child,
+              selectedModels,
+              0,
+              end
+            );
           }
           // @ts-ignore
-          return getService(child.flavour).block2Json(child);
+          return getService(child.flavour).block2Json(child, selectedModels);
         }),
     };
   }

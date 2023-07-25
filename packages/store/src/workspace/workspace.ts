@@ -7,6 +7,7 @@ import { BlockSchema } from '../base.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
+import type { DocProviderCreator } from '../providers/type.js';
 import { Store, type StoreOptions } from '../store.js';
 import { Text } from '../text-adapter.js';
 import { serializeYDoc } from '../utils/jsx.js';
@@ -159,6 +160,10 @@ export class Workspace {
 
   get schema() {
     return this._schema;
+  }
+
+  registerProvider(providerCreator: DocProviderCreator, id?: string) {
+    return this._store.registerProvider(providerCreator, id);
   }
 
   register(blockSchema: BlockSchemaType[]) {
