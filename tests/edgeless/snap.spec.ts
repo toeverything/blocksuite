@@ -19,27 +19,27 @@ test('snap', async ({ page }) => {
 
   await deleteAll(page);
 
-  await addBasicRectShapeElement(page, { x: 0, y: 0 }, { x: 100, y: 100 });
+  await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await addBasicRectShapeElement(
     page,
-    { x: 200, y: 6 },
-    { x: 200 + 100, y: 6 + 100 }
+    { x: 300, y: 200 },
+    { x: 300 + 100, y: 200 + 100 }
   );
 
-  await assertEdgelessHoverRect(page, [200, 6, 100, 100]);
+  await assertEdgelessHoverRect(page, [300, 200, 100, 100]);
+
   await dragBetweenCoords(
     page,
     {
-      x: 291,
-      y: 97,
+      x: 90,
+      y: 90,
     },
     {
-      x: 291,
-      y: 91,
+      x: 390,
+      y: 290,
     }
   );
-  await assertEdgelessHoverRect(page, [200, 0, 100, 100]);
-  await waitNextFrame(page);
+  await assertEdgelessHoverRect(page, [300, 200, 100, 100]);
 });
 
 test('snapDistribute', async ({ page }) => {

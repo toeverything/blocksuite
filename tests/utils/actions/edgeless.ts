@@ -291,7 +291,7 @@ export async function addBasicRectShapeElement(
   end: Point
 ) {
   await setEdgelessTool(page, 'shape');
-  await dragBetweenCoords(page, start, end, { steps: 20 });
+  await dragBetweenCoords(page, start, end, { steps: 50 });
 }
 
 export async function addBasicShapeElement(
@@ -301,7 +301,7 @@ export async function addBasicShapeElement(
   shape: Shape
 ) {
   await setEdgelessTool(page, 'shape', shape);
-  await dragBetweenCoords(page, start, end, { steps: 20 });
+  await dragBetweenCoords(page, start, end, { steps: 50 });
 }
 
 export async function addBasicConnectorElement(

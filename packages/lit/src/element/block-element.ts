@@ -1,4 +1,5 @@
 import type { BlockService } from '@blocksuite/block-std';
+import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -79,6 +80,24 @@ export class BlockElement<
   get parentBlockElement() {
     return this.root.blockViewMap.get(this.parentPath);
   }
+
+  handleEvent = (
+    name: EventName,
+    handler: UIEventHandler,
+    options?: { global?: boolean; flavour?: boolean }
+  ) => {
+    const config = {
+      flavour: options?.global
+        ? undefined
+        : options?.flavour
+        ? this.model.flavour
+        : undefined,
+      path: options?.global || options?.flavour ? undefined : this.path,
+    };
+    this._disposables.add(
+      this.root.uiEventDispatcher.add(name, handler, config)
+    );
+  };
 
   get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
     return Object.keys(this.widgets).reduce((mapping, key) => {
