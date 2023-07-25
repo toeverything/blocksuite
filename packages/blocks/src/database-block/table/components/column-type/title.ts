@@ -59,6 +59,22 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
   }
 
   override focusCell() {
+    const block = this.querySelector('affine-paragraph');
+    const selectionManager = block?.root.selectionManager;
+    if (selectionManager) {
+      const length =
+        block?.querySelector('rich-text')?.vEditor?.yText.length ?? 0;
+      const selection = selectionManager.getInstance('text', {
+        from: {
+          blockId: block.model.id,
+          path: block.path,
+          index: length,
+          length: 0,
+        },
+        to: null,
+      });
+      selectionManager.set([selection]);
+    }
     return false;
   }
 

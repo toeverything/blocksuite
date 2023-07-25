@@ -275,32 +275,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       );
       selections.push(selectionManager);
 
-      if (focus.columnIndex === 0) {
-        const rows = this.rows();
-        const cell = rows
-          .item(focus.rowIndex)
-          .querySelectorAll('affine-database-cell-container')
-          .item(0);
-
-        const paragraph = cell.querySelector('affine-paragraph');
-
-        const length =
-          paragraph?.querySelector('rich-text')?.vEditor?.yText.length ?? 0;
-        const blockId = paragraph?.dataset.blockId;
-        const path = paragraph?.path;
-        assertExists(blockId);
-        assertExists(path);
-        const selection = this.root.selectionManager.getInstance('text', {
-          from: {
-            blockId,
-            path,
-            index: length,
-            length: 0,
-          },
-          to: null,
-        });
-        selections.push(selection);
-      }
       this.root.selectionManager.set(selections);
     }
 
