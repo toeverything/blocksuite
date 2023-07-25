@@ -510,18 +510,22 @@ export async function zoomByMouseWheel(
 
 export async function zoomFitByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function zoomOutByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function zoomResetByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+0`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function zoomInByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+=`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function getZoomLevel(page: Page) {
