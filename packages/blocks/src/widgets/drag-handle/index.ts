@@ -1,8 +1,4 @@
-import type {
-  BlockSelection,
-  TextSelection,
-  UIEventHandler,
-} from '@blocksuite/block-std';
+import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
@@ -17,8 +13,8 @@ import {
   Point,
 } from '../../__internal__/index.js';
 
-const DRAG_HANDLE_HEIGHT = 16; // px FIXME
-const DRAG_HANDLE_WIDTH = 24; // px
+const DRAG_HANDLE_HEIGHT = 12; // px
+const DRAG_HANDLE_WIDTH = 4; // px
 
 @customElement('affine-drag-handle-widget')
 export class DragHandleWidget extends WidgetElement {
@@ -69,6 +65,7 @@ export class DragHandleWidget extends WidgetElement {
       justify-content: center;
       width: ${DRAG_HANDLE_WIDTH}px;
       height: ${DRAG_HANDLE_HEIGHT}px;
+      border-radius: 1px;
       pointer-events: auto;
       color: var(--affine-icon-color);
     }
@@ -82,14 +79,9 @@ export class DragHandleWidget extends WidgetElement {
     }
     .affine-drag-handle-normal {
       display: flex;
-      stroke: currentcolor;
     }
     .affine-drag-handle-hover {
-      fill: currentcolor;
       transition: opacity ease-in-out 300ms;
-    }
-    .affine-drag-handle-hover path.ok {
-      stroke: var(--affine-white-90);
     }
     .affine-drag-handle-hover {
       display: none;
@@ -221,17 +213,18 @@ export class DragHandleWidget extends WidgetElement {
     this._dragHandleContainer.style.height = `${height / this._scale}px`;
     this._dragHandleContainer.style.width = `${DRAG_HANDLE_WIDTH}px`;
 
+    // TODO: update drag handle position
     const posX =
       left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
     const posY = top;
-    const offsetY = this._calcDragHandleY(state.y, top, height, this._scale);
+    const offsetY = 50;
 
     this._dragHandleContainer.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
     this._dragHandleContainer.style.opacity = `${(
       1 -
       (state.x - left) / width
     ).toFixed(2)}`;
-    this._dragHandle.style.transform = `translateY(${offsetY}px)`;
+    this._dragHandle.style.transform = `translateY(${offsetY}%)`;
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
@@ -284,11 +277,11 @@ export class DragHandleWidget extends WidgetElement {
     console.log(selections);
     selections
       .filter(selection => {
-        return selection.type === 'text';
+        return selection.type === 'block';
       })
       .map(selection => {
-        const textSelection = selection as TextSelection;
-        return this.root.blockViewMap.get(textSelection.from.path);
+        // TODO: should use block path
+        return this.root.blockViewMap.get(selection.blockId);
       })
       .filter((element): element is BlockElement<BaseBlockModel> => !!element)
       .forEach(element => {
@@ -311,6 +304,7 @@ export class DragHandleWidget extends WidgetElement {
 
     const fragment = this._createDragPreview();
 
+    // TODO: should use block path
     const blockElement = this.root.blockViewMap.get(this._hoveredBlockId);
     if (!blockElement) {
       return;
@@ -331,6 +325,7 @@ export class DragHandleWidget extends WidgetElement {
     this._dragPreview.style.display = 'block';
     this._dragPreview.style.width = `${width}px`;
 
+    // TODO: update drag handle position
     const posX =
       left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
     const posY = top;
@@ -369,6 +364,7 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     const state = ctx.get('pointerState');
+    // TODO: should use block path
     const blockElement = this.root.blockViewMap.get(this._hoveredBlockId);
     if (!blockElement) {
       return;
@@ -444,40 +440,23 @@ export class DragHandleWidget extends WidgetElement {
         <div class="affine-drag-handle">
           <svg
             class="affine-drag-handle-normal"
-            width="16"
-            height="18"
-            viewBox="0 0 16 12"
+            width="4"
+            height="12"
+            viewBox="0 0 4 12"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <rect
-              x="7.7782"
-              y="0.707107"
-              width="10"
-              height="10"
-              rx="2.5"
-              transform="rotate(45 7.7782 0.707107)"
-            />
+            <rect width="4" height="12" rx="1" fill="#C0BFC1" />
           </svg>
           <svg
             class="affine-drag-handle-hover"
-            width="16"
-            height="18"
-            viewBox="0 0 16 12"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            width="3"
+            height="16"
+            viewBox="0 0 3 16"
+            fill="none"
           >
-            <path
-              d="M2.41421 6.58579L6.58579 2.41421C7.36684 1.63317 8.63316 1.63316 9.41421 2.41421L13.5858 6.58579C14.3668 7.36684 14.3668 8.63316 13.5858 9.41421L9.41421 13.5858C8.63316 14.3668 7.36684 14.3668 6.58579 13.5858L2.41421 9.41421C1.63317 8.63316 1.63316 7.36684 2.41421 6.58579Z"
-              stroke-width="1.5"
-            />
-            <path
-              class="ok"
-              d="M5 8.5L7.5 10.5L10.5 7"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
+            <rect width="3" height="16" rx="1" fill="#C0BFC1" />
           </svg>
         </div>
       </div>
