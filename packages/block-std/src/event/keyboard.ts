@@ -14,16 +14,8 @@ export class KeyboardControl {
   }
 
   listen() {
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.root,
-      'keydown',
-      this._down
-    );
-    this._dispatcher.disposables.addFromEvent(
-      this._dispatcher.root,
-      'keyup',
-      this._up
-    );
+    this._dispatcher.disposables.addFromEvent(document, 'keydown', this._down);
+    this._dispatcher.disposables.addFromEvent(document, 'keyup', this._up);
   }
 
   private _down = (event: KeyboardEvent) => {

@@ -1,8 +1,6 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
 
-import type { SelectionManager } from '../selection/index.js';
-import type { ViewStore } from '../store/index.js';
+import type { BlockStore } from '../store/index.js';
 import { PathMap } from '../store/index.js';
 import type { UIEventHandler } from './base.js';
 import { UIEventStateContext } from './base.js';
@@ -72,12 +70,7 @@ export class UIEventDispatcher {
   private _pointerControl: PointerControl;
   private _keyboardControl: KeyboardControl;
 
-  constructor(
-    public root: HTMLElement,
-    private selection: SelectionManager,
-    private page: Page,
-    private viewStore: ViewStore
-  ) {
+  constructor(public blockStore: BlockStore) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
   }
@@ -93,8 +86,12 @@ export class UIEventDispatcher {
     this.disposables.dispose();
   }
 
+  get root() {
+    return this.blockStore.root;
+  }
+
   run(name: EventName, context: UIEventStateContext) {
-    const runners = this._buildEventRunner(name);
+    const runners = this.getEventScope(name, context.get('defaultState').event);
     if (!runners) {
       return;
     }
@@ -129,14 +126,32 @@ export class UIEventDispatcher {
   }
 
   private get _currentSelections() {
-    return this.selection.value;
+    return this.blockStore.selectionManager.value;
+  }
+
+  getEventScope(name: EventName, event: Event) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    if (
+      !event.target ||
+      event.target === this.root ||
+      event.target === document ||
+      event.target === window ||
+      event.target === document.body ||
+      !(event.target instanceof Node)
+    ) {
+      return this._buildEventScopeBySelection(name);
+    }
+
+    return this._buildEventScopeByTarget(name, event.target);
   }
 
   createEventBlockState(event: Event) {
     const targetMap = new PathMap();
     this._currentSelections.forEach(selection => {
       const _path = selection.path as string[];
-      const instance = this.viewStore.blockViewMap.get(_path);
+      const instance = this.blockStore.viewStore.blockViewMap.get(_path);
       if (instance) {
         targetMap.set(_path, instance);
       }
@@ -148,28 +163,13 @@ export class UIEventDispatcher {
     });
   }
 
-  private _buildEventRunner(name: EventName) {
+  private _buildEventScope(
+    name: EventName,
+    flavours: string[],
+    paths: string[][]
+  ) {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
-
-    const selections = this._currentSelections;
-    const seen: Record<string, boolean> = {};
-
-    const flavours = selections
-      .flatMap(selection => {
-        return selection.path.map(blockId => {
-          return this.page.getBlockById(blockId)?.flavour;
-        });
-      })
-      .filter((flavour): flavour is string => {
-        if (!flavour) return false;
-        if (seen[flavour]) return false;
-        seen[flavour] = true;
-        return true;
-      })
-      .reverse();
-
-    const paths = selections.map(selection => selection.path);
 
     const globalEvents = handlers.filter(
       handler => handler.flavour === undefined && handler.path === undefined
@@ -187,6 +187,52 @@ export class UIEventDispatcher {
     });
 
     return pathEvents.concat(flavourEvents).concat(globalEvents);
+  }
+
+  private _buildEventScopeByTarget(name: EventName, target: Node) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    const blockView = this.blockStore.config.getBlockViewByNode(target);
+    const path = this.blockStore.viewStore.blockViewMap.getPath(blockView);
+    if (!path) return;
+
+    const flavours = path
+      .map(blockId => {
+        return this.blockStore.page.getBlockById(blockId)?.flavour;
+      })
+      .filter((flavour): flavour is string => {
+        return !!flavour;
+      });
+
+    return this._buildEventScope(name, flavours, [path]);
+  }
+
+  private _buildEventScopeBySelection(name: EventName) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    const selections = this._currentSelections;
+    const seen: Record<string, boolean> = {};
+
+    const flavours = selections
+      .map(selection => selection.path)
+      .flatMap(path => {
+        return path.map(blockId => {
+          return this.blockStore.page.getBlockById(blockId)?.flavour;
+        });
+      })
+      .filter((flavour): flavour is string => {
+        if (!flavour) return false;
+        if (seen[flavour]) return false;
+        seen[flavour] = true;
+        return true;
+      })
+      .reverse();
+
+    const paths = selections.map(selection => selection.path);
+
+    return this._buildEventScope(name, flavours, paths as string[][]);
   }
 
   private _bindEvents() {

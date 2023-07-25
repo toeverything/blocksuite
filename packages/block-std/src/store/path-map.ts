@@ -26,6 +26,16 @@ export class PathMap<Value = unknown> {
     return this._map.get(PathMap.pathToKey(path));
   }
 
+  getPath(value: Value) {
+    const key = Array.from(this._map.keys()).find(
+      key => this._map.get(key) === value
+    );
+    if (!key) {
+      return null;
+    }
+    return PathMap.keyToPath(key);
+  }
+
   set(path: string[], value: Value) {
     this._map.set(PathMap.pathToKey(path), value);
   }

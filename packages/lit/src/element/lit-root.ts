@@ -1,12 +1,12 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type { BlockSpec } from '@blocksuite/block-std';
-import {
-  BlockStore,
+import type {
+  BlockSpec,
   SelectionManager,
   UIEventDispatcher,
   ViewStore,
 } from '@blocksuite/block-std';
+import { BlockStore } from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
@@ -37,13 +37,19 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   modelSubscribed = new Set<string>();
 
-  uiEventDispatcher!: UIEventDispatcher;
+  blockStore!: BlockStore<StaticValue, BlockElement, WidgetElement>;
 
-  selectionManager!: SelectionManager;
+  get uiEventDispatcher(): UIEventDispatcher {
+    return this.blockStore.uiEventDispatcher;
+  }
 
-  blockStore!: BlockStore<StaticValue, ShadowlessElement>;
+  get selectionManager(): SelectionManager {
+    return this.blockStore.selectionManager;
+  }
 
-  viewStore!: ViewStore<BlockElement, WidgetElement>;
+  get viewStore(): ViewStore<BlockElement, WidgetElement> {
+    return this.blockStore.viewStore;
+  }
 
   get blockViewMap() {
     return this.viewStore.blockViewMap;
@@ -66,36 +72,29 @@ export class BlockSuiteRoot extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.viewStore = new ViewStore<BlockElement, WidgetElement>();
-    this.selectionManager = new SelectionManager(this, this.page.workspace);
-    this.uiEventDispatcher = new UIEventDispatcher(
-      this,
-      this.selectionManager,
-      this.page,
-      this.viewStore
-    );
-    this.blockStore = new BlockStore<StaticValue, ShadowlessElement>({
+    this.blockStore = new BlockStore<StaticValue, BlockElement, WidgetElement>({
       root: this,
-      uiEventDispatcher: this.uiEventDispatcher,
-      selectionManager: this.selectionManager,
       workspace: this.page.workspace,
       page: this.page,
+      config: {
+        getBlockViewByNode: node => {
+          const element =
+            node && node instanceof HTMLElement ? node : node.parentElement;
+          if (!element) return null;
+
+          return element.closest(`[${this.blockIdAttr}]`);
+        },
+      },
     });
 
-    this.selectionManager.mount(this.page);
-    this.uiEventDispatcher.mount();
-
+    this.blockStore.mount();
     this.blockStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.blockStore.dispose();
-
-    this.uiEventDispatcher.unmount();
-    this.selectionManager.unmount();
-    this.viewStore.clear();
+    this.blockStore.unmount();
   }
 
   override render() {
