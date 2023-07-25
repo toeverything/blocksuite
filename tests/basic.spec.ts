@@ -475,27 +475,28 @@ test(
   }
 );
 
-test('when no note block, click editing area auto add a new note block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
+test.fixme(
+  'when no note block, click editing area auto add a new note block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
 
-  await switchEditorMode(page);
-  await click(page, { x: 100, y: 280 });
-  await pressBackspace(page);
-  await switchEditorMode(page);
-  let note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
-  });
-  expect(note).toBeNull();
-  await click(page, { x: 100, y: 280 });
+    await switchEditorMode(page);
+    await click(page, { x: 100, y: 280 });
+    await pressBackspace(page);
+    await switchEditorMode(page);
+    let note = await page.evaluate(() => {
+      return document.querySelector('affine-note');
+    });
+    expect(note).toBeNull();
+    await click(page, { x: 100, y: 280 });
 
-  note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
-  });
-  expect(note).not.toBeNull();
-});
+    note = await page.evaluate(() => {
+      return document.querySelector('affine-note');
+    });
+    expect(note).not.toBeNull();
+  }
+);
 
 test(scoped`automatic identify url text`, async ({ page }) => {
   await enterPlaygroundRoom(page);

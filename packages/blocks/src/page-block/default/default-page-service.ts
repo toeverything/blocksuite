@@ -7,13 +7,9 @@ import type {
 } from '@blocksuite/block-std';
 import { BlockService } from '@blocksuite/block-std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { PageBlockModel } from '../page-model.js';
-import {
-  calcCurrentSelectionPosition,
-  getDragDirection,
-} from '../utils/position.js';
 import type {
   DefaultPageBlockComponent,
   DefaultSelectionSlots,
@@ -120,8 +116,7 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this._nativeDragStartHandler(ctx);
   };
 
-  private _nativeDragStartHandler: UIEventHandler = ctx => {
-    this._isNativeSelection = true;
+  private _selectByCaret: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const caret = caretFromPoint(state.raw.clientX, state.raw.clientY);
     if (!caret) {
@@ -139,6 +134,11 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     }
 
     this.rangeController.render(range);
+  };
+
+  private _nativeDragStartHandler: UIEventHandler = ctx => {
+    this._isNativeSelection = true;
+    this._selectByCaret(ctx);
   };
 
   private _dragMoveHandler: UIEventHandler = ctx => {
@@ -186,12 +186,98 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
   };
 
   private _nativeDragEndHandler: UIEventHandler = ctx => {
-    const state = ctx.get('pointerState');
-    requestAnimationFrame(() => {
-      this._showFormatBar(state);
-    });
     this._startRange = null;
     this._isNativeSelection = false;
+  };
+
+  private _tripleClickHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+    const caret = caretFromPoint(state.raw.clientX, state.raw.clientY);
+    if (!caret) {
+      return;
+    }
+    const element =
+      caret.node instanceof Element ? caret.node : caret.node.parentElement;
+    if (!element) {
+      return;
+    }
+
+    const editor = document
+      .elementFromPoint(state.x, state.y)
+      ?.closest('[data-virgo-root="true"]');
+
+    if (!editor) return;
+
+    const textNodes = getTextNodesFromElement(editor);
+    const first = textNodes[0];
+    const last = textNodes[textNodes.length - 1];
+    const range = document.createRange();
+    range.setStart(first, 0);
+    range.setEnd(last, Number(last.textContent?.length));
+    this.rangeController.render(range);
+  };
+
+  private _clickHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+    if (state.button > 0) {
+      return;
+    }
+
+    const text =
+      this.selectionManager.value.find(
+        (selection): selection is TextSelection => selection.is('text')
+      ) ?? null;
+
+    if (state.keys.shift) {
+      this._updateRange(state);
+      return;
+    }
+
+    if (!text) {
+      return;
+    }
+
+    this._selectByCaret(ctx);
+  };
+
+  private _doubleClickHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+    const caret = caretFromPoint(state.x, state.y);
+    if (!caret) {
+      return;
+    }
+    const { node, offset } = caret;
+
+    if (node.nodeType !== Node.TEXT_NODE) {
+      return;
+    }
+
+    const content = node.textContent;
+    if (!content || !content[offset]) {
+      return;
+    }
+
+    let left: number;
+    let right: number;
+    if (/\W/.test(content[offset])) {
+      left = offset;
+      right = offset + 1;
+    } else {
+      left = content.slice(0, offset + 1).search(/\w+$/);
+      right = content.slice(offset).search(/\W/);
+
+      if (right < 0) {
+        right = content.length;
+      } else {
+        right = right + offset;
+      }
+    }
+
+    const range = document.createRange();
+    range.setStart(node, left);
+    range.setEnd(node, right);
+
+    this.rangeController.render(range);
   };
 
   private _clearRaf() {
@@ -246,63 +332,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     return false;
   };
 
-  private _showFormatBar = (event: PointerEventState) => {
-    const selection = window.getSelection();
-    if (!selection) return;
-
-    const direction = getDragDirection(event);
-    showFormatQuickBar({
-      page: this.page,
-      direction,
-      anchorEl: {
-        getBoundingClientRect: () => {
-          return calcCurrentSelectionPosition(direction);
-        },
-      },
-    });
-  };
-
-  override mounted() {
-    super.mounted();
-
-    this._addEvent('dragStart', this._dragStartHandler);
-    this._addEvent('dragMove', this._dragMoveHandler);
-    this._addEvent('dragEnd', this._dragEndHandler);
-    this._addEvent('pointerMove', this._pointerMoveHandler);
-
-    this._addEvent('selectionChange', () => {
-      const selection = window.getSelection();
-      if (!selection) {
-        return;
-      }
-      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-      this._prevSelection = this.rangeController.writeRange(range);
-    });
-
-    this.disposables.add(
-      this.selectionManager.slots.changed.on(selections => {
-        if (this._isNativeSelection) {
-          return;
-        }
-        const text =
-          selections.find((selection): selection is TextSelection =>
-            selection.is('text')
-          ) ?? null;
-        const eq =
-          text && this._prevSelection
-            ? text.equals(this._prevSelection)
-            : text === this._prevSelection;
-        if (eq) {
-          return;
-        }
-
-        this._prevSelection = text;
-        this.rangeController.syncRange(text);
-        return;
-      })
-    );
-  }
-
   bindViewport(viewportElement: HTMLElement) {
     this._viewportElement = viewportElement;
   }
@@ -330,6 +359,52 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this.selection.clear();
     this.selection.dispose();
     this.selection = null;
+  }
+
+  override mounted() {
+    super.mounted();
+
+    this._addEvent('dragStart', this._dragStartHandler);
+    this._addEvent('dragMove', this._dragMoveHandler);
+    this._addEvent('dragEnd', this._dragEndHandler);
+    this._addEvent('pointerMove', this._pointerMoveHandler);
+    this._addEvent('click', this._clickHandler);
+    this._addEvent('doubleClick', this._doubleClickHandler);
+    this._addEvent('tripleClick', this._tripleClickHandler);
+
+    this._addEvent('selectionChange', () => {
+      const selection = window.getSelection();
+      if (!selection) {
+        return;
+      }
+      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+      this._prevSelection = this.rangeController.writeRange(range);
+    });
+
+    this.disposables.add(
+      this.selectionManager.slots.changed.on(selections => {
+        if (this._isNativeSelection) {
+          return;
+        }
+        // wait for lit updated
+        requestAnimationFrame(() => {
+          const text =
+            selections.find((selection): selection is TextSelection =>
+              selection.is('text')
+            ) ?? null;
+          const eq =
+            text && this._prevSelection
+              ? text.equals(this._prevSelection)
+              : text === this._prevSelection;
+          if (eq) {
+            return;
+          }
+
+          this._prevSelection = text;
+          this.rangeController.syncRange(text);
+        });
+      })
+    );
   }
 
   override unmounted() {

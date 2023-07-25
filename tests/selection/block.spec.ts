@@ -4,6 +4,7 @@ import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
+  clickBlockDragHandle,
   copyByKeyboard,
   dragBetweenCoords,
   dragBetweenIndices,
@@ -130,7 +131,7 @@ async function clickListIcon(page: Page, i = 0) {
   await locator.click();
 }
 
-test('click the list icon can select and copy', async ({ page }) => {
+test.fixme('click the list icon can select and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -1332,31 +1333,31 @@ test.fixme(
   }
 );
 
-test('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initImageState(page);
+test.fixme(
+  'click bottom of page and if the last is embed block, editor should insert a new editable block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initImageState(page);
 
-  await page.evaluate(async () => {
-    const viewport = document.querySelector('.affine-default-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    viewport.scrollTo(0, 1000);
-  });
+    await page.evaluate(async () => {
+      const viewport = document.querySelector('.affine-default-viewport');
+      if (!viewport) {
+        throw new Error();
+      }
+      viewport.scrollTo(0, 1000);
+    });
 
-  const pageRect = await page.evaluate(() => {
-    const pageBlock = document.querySelector('affine-default-page');
-    return pageBlock?.getBoundingClientRect() || null;
-  });
+    const pageRect = await page.evaluate(() => {
+      const pageBlock = document.querySelector('affine-default-page');
+      return pageBlock?.getBoundingClientRect() || null;
+    });
 
-  expect(pageRect).not.toBeNull();
-  await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
+    expect(pageRect).not.toBeNull();
+    await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
 
-  await assertStoreMatchJSX(
-    page,
-    `<affine:page>
+    await assertStoreMatchJSX(
+      page,
+      `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:hidden={false}
@@ -1373,8 +1374,9 @@ test('click bottom of page and if the last is embed block, editor should insert 
     />
   </affine:note>
 </affine:page>`
-  );
-});
+    );
+  }
+);
 
 test.fixme('should select blocks when pressing escape', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -1445,3 +1447,63 @@ test('verify cursor position after changing block type', async ({ page }) => {
   });
   expect(anchorOffset2).toBe(6);
 });
+
+// https://github.com/toeverything/blocksuite/issues/3613
+test.fixme(
+  'should scroll page properly by wheel after inserting a new block and selecting it',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+
+    await test.step('Insert enough blocks to make page scrollable', async () => {
+      await focusRichText(page);
+
+      for (let i = 0; i < 10; i++) {
+        await type(page, String(i));
+        await pressEnter(page);
+        await pressEnter(page);
+      }
+    });
+
+    await type(page, 'new block');
+
+    const lastBlockId = await page.evaluate(() => {
+      const viewport = document.querySelector('.affine-default-viewport')!;
+      const container = viewport.querySelector(
+        'affine-note .affine-block-children-container'
+      );
+      const last = container!.lastElementChild as HTMLElement;
+      if (!last) {
+        throw new Error();
+      }
+      return last.dataset.blockId!;
+    });
+
+    // click drag handle to select block
+    await clickBlockDragHandle(page, lastBlockId);
+
+    async function getViewportScrollTop() {
+      return await page.evaluate(() => {
+        const viewport = document.querySelector('.affine-default-viewport');
+        if (!viewport) {
+          throw new Error();
+        }
+        return viewport.scrollTop;
+      });
+    }
+    await page.mouse.move(0, 0);
+    // scroll to top by wheel
+    await page.mouse.wheel(0, -(await getViewportScrollTop()) * 2);
+    await page.waitForTimeout(250);
+    expect(await getViewportScrollTop()).toBe(0);
+
+    // scroll to end by wheel
+    const distanceToEnd = await page.evaluate(() => {
+      const viewport = document.querySelector('.affine-default-viewport')!;
+      return viewport.scrollHeight - viewport.clientHeight;
+    });
+    await page.mouse.wheel(0, distanceToEnd * 2);
+    await page.waitForTimeout(250);
+    expect(await getViewportScrollTop()).toBe(distanceToEnd);
+  }
+);

@@ -23,7 +23,7 @@ export interface VRange {
 
 export type VRangeUpdatedProp = [
   range: VRange | null,
-  type: 'native' | 'input' | 'other'
+  type: 'native' | 'input' | 'other' | 'silent'
 ];
 
 export type DeltaEntry<

@@ -342,8 +342,8 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     const targetPos = await getCenterPosition(page, '[data-block-id="1"]');
     await dragBetweenCoords(
       page,
-      { x: blankMenuRect.x, y: blankMenuRect.y },
-      { x: targetPos.x, y: targetPos.y + 200 },
+      { x: blankMenuRect.x + 5, y: blankMenuRect.y + 5 },
+      { x: targetPos.x, y: targetPos.y + 5 },
       { steps: 50 }
     );
 

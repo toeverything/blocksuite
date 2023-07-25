@@ -55,7 +55,7 @@ const OTHER_CSS_VARIABLES = VARIABLES.filter(
 );
 
 const basePath = import.meta.env.DEV
-  ? 'node_modules/@shoelace-style/shoelace/dist'
+  ? '/node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 

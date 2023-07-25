@@ -452,10 +452,16 @@ export class DefaultPageBlockComponent
             this.selection?.updateRects();
             break;
           }
+
+          if (target === this.pageBlockContainer) {
+            this.selection?.updateViewport();
+            break;
+          }
         }
       }
     );
     resizeObserver.observe(this.viewportElement);
+    resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
   }
 

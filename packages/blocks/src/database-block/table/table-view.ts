@@ -27,6 +27,7 @@ import type { DataViewTableManager } from './table-view-manager.js';
 const styles = css`
   affine-database-table {
     position: relative;
+    margin-top: 32px;
   }
   affine-database-table * {
     box-sizing: border-box;
