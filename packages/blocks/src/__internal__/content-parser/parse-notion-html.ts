@@ -234,7 +234,6 @@ export class NotionHtmlParser extends BaseParser {
             flavour: 'affine:image',
             sourceId: id,
             children: [],
-            text: texts,
             caption,
           },
         ];
