@@ -116,10 +116,15 @@ export class ContentParser {
     const pathname = location.pathname;
     const pageMode = isPageMode(this._page);
 
-    const promise = new Promise(resolve => {
+    const promise = new Promise((resolve, reject) => {
       let count = 0;
       const checkReactRender = setInterval(async () => {
-        this.checkCanContinueToCanvas(pathname, pageMode);
+        try {
+          this.checkCanContinueToCanvas(pathname, pageMode);
+        } catch (e) {
+          clearInterval(checkReactRender);
+          reject(e);
+        }
         const root = this._page.root;
         const pageBlock = root ? getPageBlock(root) : null;
         const imageLoadingComponent = document.querySelector(
@@ -148,11 +153,11 @@ export class ContentParser {
     const root = this._page.root;
     if (!root) return;
 
-    const pathname = location.pathname;
-    const pageMode = isPageMode(this._page);
-
     const html2canvas = (await import('html2canvas')).default;
     if (!(html2canvas instanceof Function)) return;
+
+    const pathname = location.pathname;
+    const pageMode = isPageMode(this._page);
 
     const editorContainer = getEditorContainer(this._page);
     const container = document.querySelector(
@@ -233,6 +238,9 @@ export class ContentParser {
   }
 
   private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
     const pathname = location.pathname;
     const pageMode = isPageMode(this._page);
 
@@ -241,9 +249,6 @@ export class ContentParser {
       '.affine-default-page-block-container'
     );
     if (!pageContainer) return;
-
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
 
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
