@@ -5,10 +5,12 @@ import type { PropertyValues } from 'lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
+import type { UniLit } from '../../components/uni-component/uni-component.js';
 import { columnTypeIconMap } from '../table/components/column-header/database-header-column.js';
+import type { DataViewCellLifeCycle } from '../table/register.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
@@ -25,16 +27,23 @@ const styles = css`
   affine-data-view-kanban-cell:hover {
     background-color: var(--affine-hover-color);
   }
+
   affine-data-view-kanban-cell .icon {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 4px;
   }
+
   affine-data-view-kanban-cell .icon svg {
     width: 14px;
     height: 14px;
     fill: var(--affine-icon-color);
+  }
+
+  .kanban-cell {
+    flex: 1;
+    display: block;
   }
 `;
 
@@ -45,18 +54,47 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   view!: DataViewKanbanManager;
   @property({ attribute: false })
+  groupKey!: string;
+  @property({ attribute: false })
   cardId!: string;
   @property({ attribute: false })
   column!: DataViewKanbanColumnManager;
   @state()
   editing = false;
 
+  private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
+
+  public get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value?.expose;
+  }
+
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     this._disposables.addFromEvent(this, 'click', e => {
-      this.editing = true;
+      if (!this.editing) {
+        this.selectCurrentCell(true);
+      }
     });
     this.tabIndex = 1;
+  }
+
+  selectCurrentCell = (editing: boolean) => {
+    const selection = this.closest('affine-data-view-kanban')?.selection;
+    if (!selection) {
+      return;
+    }
+    selection.selection = {
+      groupKey: this.groupKey,
+      cardId: this.cardId,
+      focus: {
+        columnId: this.column.id,
+        isEditing: editing,
+      },
+    };
+  };
+
+  get selection() {
+    return this.closest('affine-data-view-kanban')?.selection;
   }
 
   override render() {
@@ -69,21 +107,17 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       },
     };
     const { view, edit } = this.column.renderer;
-    const style = styleMap({
-      flex: 1,
-      display: 'block',
-      borderRadius: '4px',
-      boxShadow: this.editing
-        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
-        : undefined,
-    });
+    this.style.boxShadow = this.editing
+      ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
+      : '';
     return html` <div class="icon">${columnTypeIconMap[this.column.type]}</div>
       ${keyed(
         `${this.editing} ${this.column.type}`,
-        html`<uni-lit
+        html` <uni-lit
+          ${ref(this._cell)}
+          class="kanban-cell"
           .uni="${this.editing && edit ? edit : view}"
           .props="${props}"
-          style="${style}"
         ></uni-lit>`
       )}`;
   }

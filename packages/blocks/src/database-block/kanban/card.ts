@@ -26,6 +26,8 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   view!: DataViewKanbanManager;
   @property({ attribute: false })
+  groupKey!: string;
+  @property({ attribute: false })
   cardId!: string;
 
   override render() {
@@ -36,7 +38,9 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
         v => v.id,
         column => {
           return html` <affine-data-view-kanban-cell
+            data-column-id="${column.id}"
             .view="${this.view}"
+            .groupKey="${this.groupKey}"
             .column="${column}"
             .cardId="${this.cardId}"
           ></affine-data-view-kanban-cell>`;

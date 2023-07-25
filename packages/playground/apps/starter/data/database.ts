@@ -85,7 +85,7 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
 
   // Add a paragraph after database
   page.addBlock('affine:paragraph', {}, noteId);
-  database.addView('table');
+  database.addView('kanban');
   page.resetHistory();
 };
 

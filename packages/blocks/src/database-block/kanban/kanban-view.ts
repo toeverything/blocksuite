@@ -12,6 +12,7 @@ import { html } from 'lit/static-html.js';
 
 import type { BlockOperation } from '../types.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import { KanbanSelection } from './selection.js';
 
 const styles = css`
   .affine-data-view-kanban-groups {
@@ -41,6 +42,8 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   modalMode?: boolean;
 
+  selection = new KanbanSelection(this);
+
   override firstUpdated() {
     this._disposables.add(
       this.view.slots.update.on(() => {
@@ -50,6 +53,12 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
         );
       })
     );
+
+    this._disposables.add({
+      dispose: this.root.uiEventDispatcher.add('keyDown', () => {
+        //
+      }),
+    });
   }
 
   override render() {
@@ -64,6 +73,7 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
       <div class="affine-data-view-kanban-groups">
         ${repeat(groups, group => {
           return html` <affine-data-view-kanban-group
+            data-key="${group.key}"
             .view="${this.view}"
             .group="${group}"
           ></affine-data-view-kanban-group>`;

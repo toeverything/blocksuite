@@ -78,6 +78,8 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
         id => {
           return html`
             <affine-data-view-kanban-card
+              data-card-id="${id}"
+              .groupKey="${this.group.key}"
               .view="${this.view}"
               .cardId="${id}"
             ></affine-data-view-kanban-card>

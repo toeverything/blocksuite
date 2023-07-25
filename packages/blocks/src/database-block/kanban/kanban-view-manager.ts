@@ -15,6 +15,7 @@ import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 
 export type KanbanGroupData = {
+  key: string;
   helper: GroupHelper;
   type: TType;
   value: unknown;
@@ -167,6 +168,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       groupByConfig.defaultKeys(type).map(({ key, value }) => [
         key,
         {
+          key,
           helper,
           type,
           value,
@@ -180,6 +182,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       keys.forEach(({ key, value }) => {
         if (!groupMap[key]) {
           groupMap[key] = {
+            key,
             helper,
             value,
             rows: [],
