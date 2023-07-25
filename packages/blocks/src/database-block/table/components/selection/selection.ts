@@ -148,20 +148,17 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
-        const old = this._databaseSelection;
-        console.log('data changed', selections);
+        if (!activeEditorManager.isActive(this)) {
+          return;
+        }
 
+        const old = this._databaseSelection;
         const databaseManager = selections.find(
           (selection): selection is DatabaseSelectionManager =>
             selection.type === 'database'
         );
 
         let selection = databaseManager?.selection;
-
-        if (!activeEditorManager.isActive(this)) {
-          return;
-        }
-
         if (selection?.databaseId !== this.blockId) {
           selection = undefined;
         }
