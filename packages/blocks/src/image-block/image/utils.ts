@@ -2,7 +2,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
-import { getBlockElementByModel } from '../../__internal__/index.js';
+import { downloadBlob } from '../../__internal__/utils/filesys.js';
+import { getBlockElementByModel } from '../../__internal__/utils/query.js';
 import { toast } from '../../components/toast.js';
 import type { ImageBlockModel } from '../image-model.js';
 
@@ -92,17 +93,7 @@ export async function copyImage(model: ImageBlockModel) {
 export async function downloadImage(model: BaseBlockModel) {
   const blob = await getImageBlob(model);
   if (!blob) return;
-
-  const dataURL = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const event = new MouseEvent('click');
-  a.download = 'image';
-  a.href = dataURL;
-  a.dispatchEvent(event);
-
-  // cleanup
-  a.remove();
-  URL.revokeObjectURL(dataURL);
+  downloadBlob(blob, 'image');
 }
 
 export function focusCaption(model: BaseBlockModel) {
