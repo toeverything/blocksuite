@@ -105,8 +105,12 @@ export class BlockSuiteRoot extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.uiEventDispatcher = new UIEventDispatcher(this);
     this.selectionManager = new SelectionManager(this, this.page.workspace);
+    this.uiEventDispatcher = new UIEventDispatcher(
+      this,
+      this.selectionManager,
+      this.page
+    );
     this.blockStore = new BlockStore<StaticValue>({
       root: this,
       uiEventDispatcher: this.uiEventDispatcher,
@@ -115,8 +119,8 @@ export class BlockSuiteRoot extends ShadowlessElement {
       page: this.page,
     });
 
-    this.uiEventDispatcher.mount();
     this.selectionManager.mount(this.page);
+    this.uiEventDispatcher.mount();
 
     this.blockStore.applySpecs(this.blocks);
   }
