@@ -840,10 +840,11 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
+          caption:
+            'https://images.unsplash.com/photo-1662321979743-3d0a327397bb?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb',
           flavour: 'affine:image',
           sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
           children: [],
-          text: [{ insert: '' }],
         },
       ],
     },
@@ -874,10 +875,11 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
+          caption:
+            'https://media1.giphy.com/media/HJZblxmxHb7CbZtmNy/giphy.gif?cid=7941fdc629znta1bnwp46vdn5ex496a0ra92or1smz7xwfo6&ep=v1_gifs_trending&rid=giphy.gif&ct=g',
           flavour: 'affine:image',
           sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
           children: [],
-          text: [{ insert: '' }],
         },
       ],
     },
