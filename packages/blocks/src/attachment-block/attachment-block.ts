@@ -4,10 +4,11 @@ import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
+import { humanFileSize } from '../__internal__/utils/math.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
 import { styles } from './styles.js';
-import { getAttachment, humanFileSize } from './utils.js';
+import { getAttachment } from './utils.js';
 
 // 30MB
 const MAX_LOAD_SIZE = 30 * 1024 * 1024;

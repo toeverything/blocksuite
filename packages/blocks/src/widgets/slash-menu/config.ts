@@ -28,6 +28,7 @@ import {
   uploadFileFromLocal,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
+import { humanFileSize } from '../../__internal__/utils/math.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
@@ -222,12 +223,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: AttachmentIcon,
         alias: ['attachment'],
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_attachment_block')) {
+          if (!model.page.awarenessStore.getFlag('enable_attachment_block'))
             return false;
-          }
-          if (!model.page.schema.flavourSchemaMap.has('affine:attachment')) {
+          if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
             return false;
-          }
           return !insideDatabase(model);
         },
         action: async ({ page, model }) => {
@@ -235,7 +234,20 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           if (!parent) {
             return;
           }
-          const fileInfo = await uploadFileFromLocal(page.blobs);
+          const MAX_SIZE = 10 * 1000 * 1000; // 10MB
+          const fileInfo = await uploadFileFromLocal(page.blobs, file => {
+            if (file.size > MAX_SIZE) {
+              toast(
+                `You can only upload files less than ${humanFileSize(
+                  MAX_SIZE,
+                  true,
+                  0
+                )}`
+              );
+              return false;
+            }
+            return true;
+          });
           if (!fileInfo) return;
           const { file, sourceId } = fileInfo;
           const props: AttachmentProps & { flavour: 'affine:attachment' } = {
