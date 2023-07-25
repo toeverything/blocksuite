@@ -22,11 +22,11 @@ export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {
 
   override block2Json(
     block: AttachmentBlockModel,
-    begin?: number,
-    end?: number
+    selectedModels?: Map<string, number> | undefined,
+    begin?: number | undefined,
+    end?: number | undefined
   ): SerializedBlock {
     const clonedProps = cloneAttachmentProperties(block);
-
     return {
       flavour: block.flavour,
       children: [],
