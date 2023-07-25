@@ -80,13 +80,14 @@ test('can drag selected non-active note', async ({ page }) => {
 test('resize note in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
   await activeNoteInEdgeless(page, ids.noteId);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page, 400);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
-  await switchEditorMode(page);
-  await page.mouse.move(100, 100); // FIXME: no update until mousemove
+  // unselect note
+  await page.mouse.click(50, 50);
 
   expect(ids.noteId).toBe('2'); // 0 for page, 1 for surface
   await selectNoteInEdgeless(page, ids.noteId);
@@ -172,17 +173,15 @@ test('always keep at least 1 note block', async ({ page }) => {
 test('edgeless arrow up/down', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
-
+  await switchEditorMode(page);
   await activeNoteInEdgeless(page, ids.noteId);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page, 400);
 
   await type(page, 'hello');
   await pressEnter(page);
   await type(page, 'world');
   await pressEnter(page);
   await type(page, 'foo');
-
-  await switchEditorMode(page);
 
   await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
@@ -299,8 +298,8 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await setEdgelessTool(page, 'note');
 
-  await page.mouse.click(30, 40);
-  await waitForVirgoStateUpdated(page);
+  await page.mouse.click(300, 300);
+  await waitNextFrame(page);
 
   // 7
   await type(page, '000');
@@ -311,7 +310,7 @@ test('drag handle should work across multiple notes', async ({ page }) => {
   await waitNextFrame(page);
   await assertRichTexts(page, ['456', '789', '000', '123']);
 
-  await page.mouse.dblclick(30, 40);
+  await page.mouse.dblclick(305, 305);
   await dragHandleFromBlockToBlockBottomById(page, '7', '4');
   await waitNextFrame(page);
   await expect(page.locator('affine-drag-handle')).toBeHidden();
@@ -493,7 +492,7 @@ test('continuous undo and redo (note blcok add operation) should work', async ({
   await type(page, 'hello');
   await switchEditorMode(page);
   await page.pause();
-  await click(page, { x: 60, y: 270 });
+  await click(page, { x: 60, y: 450 });
   await copyByKeyboard(page);
 
   let count = await countBlock(page, 'affine-note');
