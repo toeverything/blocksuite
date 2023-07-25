@@ -4,10 +4,13 @@ import { html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
+import { downloadBlob } from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
+import { queryCurrentMode } from '../__internal__/utils/query.js';
+import { toast } from '../components/toast.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
-import { styles } from './styles.js';
+import { AttachmentBanner, styles } from './styles.js';
 import { getAttachment } from './utils.js';
 
 // 30MB
@@ -20,9 +23,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   loading = true;
 
-  @state()
-  attachment: Blob | null = null;
-
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:attachment', AttachmentBlockService);
@@ -33,23 +33,25 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.model.size > MAX_LOAD_SIZE) {
       return;
     }
-    this.loadPreview();
   }
 
-  async loadPreview() {
-    const attachment = await getAttachment(
-      this.model.page.blobs,
-      this.model.sourceId
-    );
+  async downloadAttachment() {
+    const attachment = await getAttachment(this.model);
     if (!attachment) {
-      console.error('attachment load failed! sourceId:', this.model.sourceId);
+      toast('Failed to download attachment!');
+      console.error(
+        'attachment load failed! sourceId:',
+        this.model.sourceId,
+        'BlobManager:',
+        this.model.page.blobs
+      );
       return;
     }
-    this.attachment = attachment;
-    // TODO preview
+    downloadBlob(attachment, this.model.name);
   }
 
   override render() {
+    const mode = queryCurrentMode();
     // if (this.loading) {
     //   return html`<div class="attachment-container">Loading...</div>`;
     // }
@@ -58,9 +60,18 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     //     Error: Attachment not found
     //   </div>`;
     // }
-    return html`<div class="attachment-container">
+    return html`<div
+      class="attachment-container"
+      @click=${this.downloadAttachment}
+    >
       <div class="attachment-name">${AttachmentIcon16}${this.model.name}</div>
       <div class="attachment-size">${humanFileSize(this.model.size)}</div>
+      <div class="attachment-banner">
+        ${mode === 'light'
+          ? AttachmentBanner
+          : // TODO dark mode
+            AttachmentBanner}
+      </div>
     </div>`;
   }
 }

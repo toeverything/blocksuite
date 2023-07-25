@@ -246,3 +246,13 @@ export const uploadFileFromLocal = async (
     sourceId,
   };
 };
+
+export function downloadBlob(blob: Blob, name: string) {
+  const dataURL = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const event = new MouseEvent('click');
+  a.download = name;
+  a.href = dataURL;
+  a.dispatchEvent(event);
+  URL.revokeObjectURL(dataURL);
+}

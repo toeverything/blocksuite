@@ -19,12 +19,13 @@ export function cloneAttachmentProperties(
 }
 
 export async function getAttachment(
-  blobManager: BlobManager,
-  sourceId: string
+  model: BaseBlockModel<AttachmentBlockModel>
 ) {
+  const blobManager = model.page.blobs;
+  const sourceId = model.sourceId;
+  if (!sourceId) return null;
+
   const blob = await blobManager.get(sourceId);
-  if (!blob) {
-    return null;
-  }
+  if (!blob) return null;
   return blob;
 }
