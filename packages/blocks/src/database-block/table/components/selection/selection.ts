@@ -254,7 +254,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   set selection(data: Omit<DatabaseSelection, 'databaseId'> | undefined) {
-    console.log(this.path);
     const selection = data ? { ...data, databaseId: this.blockId } : undefined;
     if (selection && selection.isEditing) {
       const focus = selection.focus;
