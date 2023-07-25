@@ -1,4 +1,4 @@
-import type { BaseBlockModel, BlobManager } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import type {
   AttachmentBlockModel,

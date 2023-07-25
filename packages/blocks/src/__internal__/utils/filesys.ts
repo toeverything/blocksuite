@@ -223,6 +223,9 @@ export const uploadImageFromLocal = async (storage: BlobManager) => {
   return res;
 };
 
+/**
+ * See https://gist.github.com/davalapar/d0a5ba7cce4bc599f54800da22926da2
+ */
 export const uploadFileFromLocal = async (
   storage: BlobManager,
   beforeUpload?: (file: File) => boolean | Promise<boolean>
@@ -249,10 +252,12 @@ export const uploadFileFromLocal = async (
 
 export function downloadBlob(blob: Blob, name: string) {
   const dataURL = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const tmpLink = document.createElement('a');
   const event = new MouseEvent('click');
-  a.download = name;
-  a.href = dataURL;
-  a.dispatchEvent(event);
+  tmpLink.download = name;
+  tmpLink.href = dataURL;
+  tmpLink.dispatchEvent(event);
+
+  tmpLink.remove();
   URL.revokeObjectURL(dataURL);
 }
