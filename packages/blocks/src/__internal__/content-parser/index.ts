@@ -120,7 +120,7 @@ export class ContentParser {
       let count = 0;
       const checkReactRender = setInterval(async () => {
         try {
-          this.checkCanContinueToCanvas(pathname, pageMode);
+          this._checkCanContinueToCanvas(pathname, pageMode);
         } catch (e) {
           clearInterval(checkReactRender);
           reject(e);
@@ -225,7 +225,7 @@ export class ContentParser {
         blockBound.w,
         blockBound.h
       );
-      this.checkCanContinueToCanvas(pathname, pageMode);
+      this._checkCanContinueToCanvas(pathname, pageMode);
     }
 
     const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
@@ -281,13 +281,13 @@ export class ContentParser {
       pageContainer as HTMLElement,
       html2canvasOption
     );
-    this.checkCanContinueToCanvas(pathname, pageMode);
+    this._checkCanContinueToCanvas(pathname, pageMode);
     return data;
   }
 
-  private checkCanContinueToCanvas(pathname: string, pageMode: boolean) {
-    if (location.pathname !== pathname || isPageMode(this._page) !== pageMode) {
-      throw new Error('failed to canvas');
+  private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
+    if (location.pathname !== pathName || isPageMode(this._page) !== pageMode) {
+      throw new Error('Unable to export content to canvas');
     }
   }
 
