@@ -61,6 +61,17 @@ export class BlockService<Model extends BaseBlockModel = BaseBlockModel> {
       })
     );
   }
+
+  bindHotKey(
+    keymap: Record<string, UIEventHandler>,
+    options?: { global: boolean }
+  ) {
+    this.disposables.add(
+      this.uiEventDispatcher.bindHotkey(keymap, {
+        flavour: options?.global ? undefined : this.flavour,
+      })
+    );
+  }
   // event handlers end
 }
 

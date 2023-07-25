@@ -137,7 +137,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._addEvent('dragStart', ctx => {
+    this.handleEvent('dragStart', ctx => {
       const state = ctx.get('pointerState');
       if (isBlankArea(state)) {
         this._dragging = true;
@@ -151,7 +151,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
       return;
     });
 
-    this._addEvent('dragMove', ctx => {
+    this.handleEvent('dragMove', ctx => {
       this._clearRaf();
       if (!this._dragging) {
         return;
@@ -189,7 +189,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
       return true;
     });
 
-    this._addEvent('dragEnd', () => {
+    this.handleEvent('dragEnd', () => {
       this._clearRaf();
       this._dragging = false;
       this.rect = null;
@@ -199,7 +199,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
       };
     });
 
-    this._addEvent('pointerMove', ctx => {
+    this.handleEvent('pointerMove', ctx => {
       if (this._dragging) {
         const state = ctx.get('pointerState');
         state.raw.preventDefault();

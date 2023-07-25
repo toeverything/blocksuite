@@ -29,6 +29,11 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
     return this.root.blockViewMap.get(this.hostPath);
   }
 
+  get flavour(): string {
+    assertExists(this.hostElement);
+    return this.hostElement.model.flavour;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.root.widgetViewMap.set(this.path, this);
@@ -39,18 +44,28 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
     super.disconnectedCallback();
   }
 
-  protected _addEvent = (
+  handleEvent = (
     name: EventName,
     handler: UIEventHandler,
     options?: { global?: boolean }
   ) => {
-    assertExists(this.hostElement);
     this._disposables.add(
       this.root.uiEventDispatcher.add(name, handler, {
-        flavour: options?.global ? undefined : this.hostElement.model.flavour,
+        flavour: options?.global ? undefined : this.flavour,
       })
     );
   };
+
+  bindHotKey(
+    keymap: Record<string, UIEventHandler>,
+    options?: { global: boolean }
+  ) {
+    this._disposables.add(
+      this.root.uiEventDispatcher.bindHotkey(keymap, {
+        flavour: options?.global ? undefined : this.flavour,
+      })
+    );
+  }
 
   override render(): unknown {
     return null;

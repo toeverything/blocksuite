@@ -117,8 +117,8 @@ export class UIEventDispatcher {
     };
   }
 
-  bindHotkey(keymap: Record<string, UIEventHandler>) {
-    return this.add('keyDown', bindKeymap(keymap));
+  bindHotkey(keymap: Record<string, UIEventHandler>, options?: EventOptions) {
+    return this.add('keyDown', bindKeymap(keymap), options);
   }
 
   private get _currentSelections() {

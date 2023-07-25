@@ -93,7 +93,7 @@ export class LinkedPageWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._addEvent('keyDown', this._onKeyDown);
+    this.handleEvent('keyDown', this._onKeyDown);
   }
 
   public showLinkedPage(model: BaseBlockModel) {
