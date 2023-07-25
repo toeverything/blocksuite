@@ -20,7 +20,7 @@ import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseSelectionManager } from './table/components/selection/selection.js';
 import type { Cell, Column } from './table/types.js';
 
-export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
+export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> {
   private _databaseSelection?: DatabaseSelection;
 
   slots = {
@@ -170,7 +170,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
   }
 }
 
-export class NewDatabaseService extends BlockService<DatabaseBlockModel> {
+export class DatabaseService extends BlockService<DatabaseBlockModel> {
   override mounted(): void {
     super.mounted();
     this.selectionManager.register(DatabaseSelectionManager);

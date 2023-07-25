@@ -5,7 +5,7 @@ import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
-import { NewDatabaseService } from '../database-block/database-service.js';
+import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
@@ -67,7 +67,7 @@ export const pagePreset: LitBlockSpec[] = [
   },
   {
     schema: DatabaseBlockSchema,
-    service: NewDatabaseService,
+    service: DatabaseService,
     view: {
       component: literal`affine-database`,
     },

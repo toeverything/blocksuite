@@ -54,6 +54,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
+  path!: string[];
+
+  @property({ attribute: false })
   root!: BlockSuiteRoot;
 
   @property()
@@ -254,6 +257,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   set selection(data: Omit<DatabaseSelection, 'databaseId'> | undefined) {
+    console.log(this.path);
     const selection = data ? { ...data, databaseId: this.blockId } : undefined;
     if (selection && selection.isEditing) {
       const focus = selection.focus;
@@ -270,6 +274,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         {
           ...selection,
           isEditing,
+          path: this.path,
         }
       );
       selections.push(selectionManager);
@@ -306,7 +311,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     if (selection && !selection.isEditing) {
       const selectionManager = this.root.selectionManager.getInstance(
         'database',
-        selection
+        {
+          ...selection,
+          path: this.path,
+        }
       );
       this.root.selectionManager.set([selectionManager]);
     }
@@ -685,13 +693,18 @@ declare global {
 
 export class DatabaseSelectionManager extends BaseSelection {
   static override type = 'database';
+  override path: string[];
 
-  selection: DatabaseSelectionState;
+  selection: DatabaseSelection | undefined;
 
-  constructor(props: DatabaseSelection) {
-    super(props.databaseId);
+  constructor({ path, ...props }: DatabaseSelection & { path: string[] }) {
+    super({
+      blockId: props.databaseId,
+      path,
+    });
 
     this.selection = props;
+    this.path = path;
   }
 
   override equals(other: BaseSelection): boolean {
@@ -704,6 +717,7 @@ export class DatabaseSelectionManager extends BaseSelection {
   override toJSON(): Record<string, unknown> {
     return {
       type: 'database',
+      path: this.path,
       ...this.selection,
     };
   }
@@ -712,6 +726,7 @@ export class DatabaseSelectionManager extends BaseSelection {
     json: Record<string, unknown>
   ): DatabaseSelectionManager {
     return new DatabaseSelectionManager({
+      path: json.path as string[],
       databaseId: json.databaseId as string,
       rowsSelection: json.rowsSelection as MultiSelection,
       columnsSelection: json.columnSelection as MultiSelection,

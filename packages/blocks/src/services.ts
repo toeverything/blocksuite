@@ -3,7 +3,7 @@ import type { UnionToIntersection } from '@blocksuite/global/types';
 import type { BaseService } from './__internal__/service/index.js';
 import { BookmarkBlockService } from './bookmark-block/index.js';
 import { CodeBlockService } from './code-block/index.js';
-import { DatabaseBlockService } from './database-block/database-service.js';
+import { LegacyDatabaseBlockService } from './database-block/database-service.js';
 import { DividerBlockService } from './divider-block/index.js';
 import { ImageBlockService } from './image-block/index.js';
 import { ListBlockService } from './list-block/index.js';
@@ -13,7 +13,7 @@ import { ParagraphBlockService } from './paragraph-block/index.js';
 
 export const blockService = {
   'affine:code': CodeBlockService,
-  'affine:database': DatabaseBlockService,
+  'affine:database': LegacyDatabaseBlockService,
   'affine:paragraph': ParagraphBlockService,
   'affine:list': ListBlockService,
   'affine:image': ImageBlockService,

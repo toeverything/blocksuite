@@ -12,7 +12,7 @@ import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { DatabaseBlockService } from './database-service.js';
+import { LegacyDatabaseBlockService } from './database-service.js';
 import type { TableViewManager } from './table/table-view-manager.js';
 import { DatabaseTableViewManager } from './table/table-view-manager.js';
 import type { BlockOperation } from './types.js';
@@ -21,7 +21,7 @@ import type { BlockOperation } from './types.js';
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:database', DatabaseBlockService);
+    registerService('affine:database', LegacyDatabaseBlockService);
     this.currentView = this.model.getViewList()[0].id;
   }
 

@@ -1,5 +1,4 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -53,9 +52,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   public readonly columnIndex!: number;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
-  @property({ attribute: false })
   column!: ColumnManager;
   private _selectCurrentCell = (editing: boolean) => {
     const selection = this.closest('affine-database-table')?.selection;
@@ -99,7 +95,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       rowId: this.rowId,
       isEditing: this.isEditing,
       selectCurrentCell: this._selectCurrentCell,
-      root: this.root,
     };
     const isEditView = view === uni;
 
