@@ -4,6 +4,7 @@ import { assertExists } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
+import type { BlockElement } from './block-element.js';
 import type { BlockSuiteRoot } from './lit-root.js';
 import { ShadowlessElement } from './shadowless-element.js';
 
@@ -26,7 +27,9 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
   }
 
   get hostElement() {
-    return this.root.blockViewMap.get(this.hostPath);
+    return this.root.blockViewMap.get(this.hostPath) as
+      | BlockElement
+      | undefined;
   }
 
   get flavour(): string {

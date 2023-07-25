@@ -1,9 +1,17 @@
-import { UIEventStateContext } from './base.js';
+import { UIEventState, UIEventStateContext } from './base.js';
 import type { UIEventDispatcher } from './dispatcher.js';
 import { KeyboardEventState } from './state.js';
 
 export class KeyboardControl {
   constructor(private _dispatcher: UIEventDispatcher) {}
+
+  private _createContext(event: Event, keyboardState: KeyboardEventState) {
+    return UIEventStateContext.from(
+      new UIEventState(event),
+      this._dispatcher.createEventBlockState(event),
+      keyboardState
+    );
+  }
 
   listen() {
     this._dispatcher.disposables.addFromEvent(
@@ -25,7 +33,7 @@ export class KeyboardControl {
 
     this._dispatcher.run(
       'keyDown',
-      UIEventStateContext.from(keyboardEventState)
+      this._createContext(event, keyboardEventState)
     );
   };
 
@@ -34,6 +42,9 @@ export class KeyboardControl {
       event,
     });
 
-    this._dispatcher.run('keyUp', UIEventStateContext.from(keyboardEventState));
+    this._dispatcher.run(
+      'keyUp',
+      this._createContext(event, keyboardEventState)
+    );
   };
 }
