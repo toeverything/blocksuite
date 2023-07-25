@@ -154,7 +154,7 @@ test(
 
     // set up clipboard data using html
     const clipData = {
-      'text/html': `<p>符合 Markdown 格式的 URL 放到笔记中，此时需要的格式如下：</p>
+      'text/html': `<p>Lorem Ipsum placeholder text.</p>
     <figure ><img src='/test-card-1.png' /></figure>
     `,
     };
@@ -178,16 +178,12 @@ test(
     await assertRichImage(page, 2);
     await assertText(
       page,
-      '符合 Markdown 格式的 URL 放到笔记中，此时需要的格式如下：符合 Markdown 格式的 URL 放到笔记中，此时需要的格式如下：'
+      'Lorem Ipsum placeholder text.Lorem Ipsum placeholder text.'
     );
     await pressArrowDown(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 3);
-    await assertText(
-      page,
-      '符合 Markdown 格式的 URL 放到笔记中，此时需要的格式如下：',
-      1
-    );
+    await assertText(page, 'Lorem Ipsum placeholder text.', 1);
   }
 );
 
