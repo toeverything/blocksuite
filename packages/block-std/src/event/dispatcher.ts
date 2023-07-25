@@ -62,7 +62,7 @@ export type EventHandlerRunner = {
   path?: string[];
 };
 
-export class UIEventDispatcher<BlockView = unknown> {
+export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
   private _handlersMap = Object.fromEntries(
@@ -76,7 +76,7 @@ export class UIEventDispatcher<BlockView = unknown> {
     public root: HTMLElement,
     private selection: SelectionManager,
     private page: Page,
-    private viewStore: ViewStore<BlockView>
+    private viewStore: ViewStore
   ) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
@@ -133,7 +133,7 @@ export class UIEventDispatcher<BlockView = unknown> {
   }
 
   createEventBlockState(event: Event) {
-    const targetMap = new PathMap<BlockView>();
+    const targetMap = new PathMap();
     this._currentSelections.forEach(selection => {
       const _path = selection.path as string[];
       const instance = this.viewStore.blockViewMap.get(_path);
