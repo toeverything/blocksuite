@@ -1,15 +1,16 @@
-import type { UIEventDispatcher } from '@blocksuite/block-std';
+import { BaseSelection, type UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { getService } from '../../../../__internal__/service.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import type {
   CellFocus,
   DatabaseSelection,
+  DatabaseSelectionState,
   MultiSelection,
 } from '../../../../__internal__/utils/types.js';
 import { startDrag } from '../../../utils/drag.js';
@@ -52,6 +53,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     }
   `;
 
+  @property({ attribute: false })
+  root!: BlockSuiteRoot;
+
   @property()
   blockId!: string;
   @property({ attribute: false })
@@ -59,8 +63,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   eventDispatcher!: UIEventDispatcher;
 
-  private service = getService('affine:database');
-
+  private _databaseSelection?: DatabaseSelection;
   private focusRef = createRef<HTMLDivElement>();
   private selectionRef = createRef<HTMLDivElement>();
 
@@ -84,14 +87,82 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   isStartInDatabase = false;
 
   override firstUpdated() {
+    this._disposables.add({
+      dispose: this.eventDispatcher.add('dragStart', context => {
+        const event = context.get('pointerState').event;
+        const target = event.target;
+        if (
+          event instanceof MouseEvent &&
+          target instanceof Element &&
+          this.isCurrentDatabase(target)
+        ) {
+          const cell = target.closest('affine-database-cell-container');
+          if (cell) {
+            const selection = this.selection;
+            if (
+              selection &&
+              selection.isEditing &&
+              selection.focus.rowIndex === cell.rowIndex &&
+              selection.focus.columnIndex === cell.columnIndex
+            ) {
+              return false;
+            }
+            this.startDrag(event, cell);
+          }
+          return true;
+        }
+        return false;
+      }),
+    });
+
+    this._disposables.addFromEvent(window, 'mousedown', event => {
+      const target = event.target as Element;
+      if (this.isInTableBody(target)) {
+        return;
+      }
+      // TODO: refactor hardcoded here
+      if (target.closest('affine-drag-handle')) {
+        return;
+      }
+
+      this._clearSelection();
+    });
+
+    this._disposables.add({
+      dispose: this.eventDispatcher.add('keyDown', context => {
+        const event = context.get('keyboardState').event;
+        const selection = this.selection;
+        if (
+          selection &&
+          selection.databaseId === this.blockId &&
+          event instanceof KeyboardEvent
+        ) {
+          return this.onKeydown(selection, event);
+        }
+        return false;
+      }),
+    });
+
     this._disposables.add(
-      this.service.slots.databaseSelectionUpdated.on(({ selection, old }) => {
+      this.root.selectionManager.slots.changed.on(selections => {
+        const old = this._databaseSelection;
+        console.log('data changed', selections);
+
+        const databaseManager = selections.find(
+          (selection): selection is DatabaseSelectionManager =>
+            selection.type === 'database'
+        );
+
+        let selection = databaseManager?.selection;
+
         if (!activeEditorManager.isActive(this)) {
           return;
         }
+
         if (selection?.databaseId !== this.blockId) {
           selection = undefined;
         }
+
         this.updateSelectionStyle(
           selection?.rowsSelection,
           selection?.columnsSelection
@@ -104,6 +175,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           isRowSelection,
           selection?.isEditing
         );
+
         if (old && old.databaseId === this.blockId) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
@@ -141,60 +213,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             }
           }
         }
+
+        this._databaseSelection = selection;
       })
     );
-    this._disposables.add({
-      dispose: this.eventDispatcher.add('dragStart', context => {
-        const event = context.get('pointerState').event;
-        const target = event.target;
-        if (
-          event instanceof MouseEvent &&
-          target instanceof Element &&
-          this.isCurrentDatabase(target)
-        ) {
-          const cell = target.closest('affine-database-cell-container');
-          if (cell) {
-            const selection = this.selection;
-            if (
-              selection &&
-              selection.isEditing &&
-              selection.focus.rowIndex === cell.rowIndex &&
-              selection.focus.columnIndex === cell.columnIndex
-            ) {
-              return false;
-            }
-            this.startDrag(event, cell);
-          }
-          return true;
-        }
-        return false;
-      }),
-    });
-    this._disposables.addFromEvent(window, 'mousedown', event => {
-      const target = event.target as Element;
-      if (this.isInTableBody(target)) {
-        return;
-      }
-      // TODO: refactor hardcoded here
-      if (target.closest('affine-drag-handle')) {
-        return;
-      }
-      this.selection = undefined;
-    });
-    this._disposables.add({
-      dispose: this.eventDispatcher.add('keyDown', context => {
-        const event = context.get('keyboardState').event;
-        const selection = this.selection;
-        if (
-          selection &&
-          selection.databaseId === this.blockId &&
-          event instanceof KeyboardEvent
-        ) {
-          return this.onKeydown(selection, event);
-        }
-        return false;
-      }),
-    });
   }
 
   protected override updated() {
@@ -216,8 +238,19 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     }
   }
 
-  get selection(): DatabaseSelection | undefined {
-    return this.service.getSelection();
+  private _clearSelection() {
+    this.root.selectionManager.update(selections => {
+      return selections.filter(selection => selection.type !== 'database');
+    });
+  }
+
+  get selection(): DatabaseSelectionState {
+    const selectionManager = this.root.selectionManager.value.find(
+      (selection): selection is DatabaseSelectionManager =>
+        selection.type === 'database'
+    );
+
+    return selectionManager?.selection;
   }
 
   set selection(data: Omit<DatabaseSelection, 'databaseId'> | undefined) {
@@ -230,13 +263,57 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       );
       const cell = container?.cell;
       const isEditing = cell ? cell.beforeEnterEditMode() : true;
-      this.service.select({
-        ...selection,
-        isEditing,
-      });
-      return;
+
+      const selections: BaseSelection[] = [];
+      const selectionManager = this.root.selectionManager.getInstance(
+        'database',
+        {
+          ...selection,
+          isEditing,
+        }
+      );
+      selections.push(selectionManager);
+
+      if (focus.columnIndex === 0) {
+        const rows = this.rows();
+        const cell = rows
+          .item(focus.rowIndex)
+          .querySelectorAll('affine-database-cell-container')
+          .item(0);
+
+        const paragraph = cell.querySelector('affine-paragraph');
+
+        const length =
+          paragraph?.querySelector('rich-text')?.vEditor?.yText.length ?? 0;
+        const blockId = paragraph?.dataset.blockId;
+        const path = paragraph?.path;
+        assertExists(blockId);
+        assertExists(path);
+        const selection = this.root.selectionManager.getInstance('text', {
+          from: {
+            blockId,
+            path,
+            index: length,
+            length: 0,
+          },
+          to: null,
+        });
+        selections.push(selection);
+      }
+      this.root.selectionManager.set(selections);
     }
-    this.service.select(selection);
+
+    if (selection && !selection.isEditing) {
+      const selectionManager = this.root.selectionManager.getInstance(
+        'database',
+        selection
+      );
+      this.root.selectionManager.set([selectionManager]);
+    }
+
+    if (!selection) {
+      this._clearSelection();
+    }
   }
 
   cellPosition(left: number, top: number) {
@@ -603,5 +680,49 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 declare global {
   interface HTMLElementTagNameMap {
     'affine-database-selection': DatabaseSelectionView;
+  }
+}
+
+export class DatabaseSelectionManager extends BaseSelection {
+  static override type = 'database';
+
+  selection: DatabaseSelectionState;
+
+  constructor(props: DatabaseSelection) {
+    super(props.databaseId);
+
+    this.selection = props;
+  }
+
+  override equals(other: BaseSelection): boolean {
+    if (other instanceof DatabaseSelectionManager) {
+      return other.blockId === this.blockId;
+    }
+    return false;
+  }
+
+  override toJSON(): Record<string, unknown> {
+    return {
+      type: 'database',
+      ...this.selection,
+    };
+  }
+
+  static override fromJSON(
+    json: Record<string, unknown>
+  ): DatabaseSelectionManager {
+    return new DatabaseSelectionManager({
+      databaseId: json.databaseId as string,
+      rowsSelection: json.rowsSelection as MultiSelection,
+      columnsSelection: json.columnSelection as MultiSelection,
+      focus: json.focus as CellFocus,
+      isEditing: json.isEditing as boolean,
+    });
+  }
+}
+
+declare global {
+  interface BlockSuiteSelection {
+    database: typeof DatabaseSelectionManager;
   }
 }

@@ -1,3 +1,4 @@
+import { BlockService } from '@blocksuite/block-std';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
@@ -16,6 +17,7 @@ import type {
 } from '../__internal__/utils/types.js';
 import { multiSelectHelper } from './common/column-manager.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import { DatabaseSelectionManager } from './table/components/selection/selection.js';
 import type { Cell, Column } from './table/types.js';
 
 export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
@@ -157,5 +159,14 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
   getSelection() {
     return this._databaseSelection;
+  }
+}
+
+export class NewDatabaseService extends BlockService<DatabaseBlockModel> {
+  override mounted(): void {
+    super.mounted();
+    this.selectionManager.register(DatabaseSelectionManager);
+
+    this.handleEvent('selectionChange', () => true);
   }
 }

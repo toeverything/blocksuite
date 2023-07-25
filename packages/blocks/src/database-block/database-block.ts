@@ -103,6 +103,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           .blockOperation='${blockOperation}'
           .tableViewManager='${currentViewManager}'
           .modalMode='${this.modalMode}'
+          .path='${this.path}'
           class='affine-block-element'
         ></${databaseTag}>
       </div>

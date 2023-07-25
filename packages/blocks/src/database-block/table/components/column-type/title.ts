@@ -56,21 +56,12 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
       },
       true
     );
-    setTimeout(() => {
-      this.querySelector('rich-text')?.vEditor?.slots.vRangeUpdated.on(
-        range => {
-          if (range) {
-            this.selectCurrentCell(true);
-          }
-        }
-      );
-    });
   }
 
   override focusCell() {
-    this.querySelector('rich-text')?.vEditor?.focusEnd();
     return false;
   }
+
   override blurCell() {
     getSelection()?.removeAllRanges();
     return false;

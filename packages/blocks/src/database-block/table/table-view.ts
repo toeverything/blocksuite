@@ -163,6 +163,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   modalMode?: boolean;
 
+  @property({ attribute: false })
+  path!: string[];
+
   @query('.affine-database-table-container')
   private _tableContainer!: HTMLDivElement;
 
@@ -238,7 +241,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    const rowsTemplate = DataBaseRowContainer(this.tableViewManager);
+    const rowsTemplate = DataBaseRowContainer(this.tableViewManager, this.root);
     const addRow = (position: InsertPosition) => {
       this._addRow(this.tableViewManager, position);
     };
@@ -268,6 +271,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
               .blockId="${this.tableViewManager.id}"
               .eventDispatcher="${this.root.uiEventDispatcher}"
               .view="${this.tableViewManager}"
+              .root="${this.root}"
             ></affine-database-selection>
           </div>
         </div>

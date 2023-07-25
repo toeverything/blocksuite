@@ -1,5 +1,6 @@
 import './cell-container.js';
 
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -7,7 +8,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { TableViewManager } from '../table-view-manager.js';
 
-export function DataBaseRowContainer(view: TableViewManager) {
+export function DataBaseRowContainer(
+  view: TableViewManager,
+  root: BlockSuiteRoot
+) {
   return html`
     <style>
       .affine-database-block-rows {
@@ -72,6 +76,7 @@ export function DataBaseRowContainer(view: TableViewManager) {
                         .columnIndex="${i}"
                         data-column-index=${i}
                         tabindex="0"
+                        .root=${root}
                       >
                       </affine-database-cell-container>
                     </div>
