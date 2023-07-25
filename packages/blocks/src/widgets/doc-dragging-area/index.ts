@@ -65,6 +65,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
         const bounding = element.getBoundingClientRect();
         return {
           id: element.model.id,
+          path: element.path,
           rect: {
             left: bounding.left + viewportElement.scrollLeft,
             top: bounding.top + viewportElement.scrollTop,
@@ -89,9 +90,11 @@ export class DocDraggingAreaWidget extends WidgetElement {
         ({ rect }) =>
           rectIntersects(rect, userRect) && !rectIncludes(rect, userRect)
       )
-      .map(rectWithId => rectWithId.id)
-      .map(blockId => {
-        return this.root.selectionManager.getInstance('block', blockId);
+      .map(rectWithId => {
+        return this.root.selectionManager.getInstance('block', {
+          blockId: rectWithId.id,
+          path: rectWithId.path,
+        });
       });
 
     this.root.selectionManager.set(selections);
@@ -134,74 +137,94 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._addEvent('dragStart', ctx => {
-      const state = ctx.get('pointerState');
-      if (isBlankArea(state)) {
-        this._dragging = true;
-        const viewportElement = this._viewportElement;
-        this._offset = {
-          left: viewportElement.scrollLeft,
-          top: viewportElement.scrollTop,
-        };
-        return true;
-      }
-      return;
-    });
-
-    this._addEvent('dragMove', ctx => {
-      this._clearRaf();
-      if (!this._dragging) {
-        return;
-      }
-
-      const runner = () => {
+    this.handleEvent(
+      'dragStart',
+      ctx => {
         const state = ctx.get('pointerState');
-        const { x, y } = state;
+        if (isBlankArea(state)) {
+          this._dragging = true;
+          const viewportElement = this._viewportElement;
+          this._offset = {
+            left: viewportElement.scrollLeft,
+            top: viewportElement.scrollTop,
+          };
+          return true;
+        }
+        return;
+      },
+      { global: true }
+    );
 
-        const { scrollTop, scrollLeft } = this._viewportElement;
-        const { x: startX, y: startY } = state.start;
-        const left = Math.min(this._offset.left + startX, scrollLeft + x);
-        const top = Math.min(this._offset.top + startY, scrollTop + y);
-        const right = Math.max(this._offset.left + startX, scrollLeft + x);
-        const bottom = Math.max(this._offset.top + startY, scrollTop + y);
-        const userRect = {
-          left,
-          top,
-          width: right - left,
-          height: bottom - top,
-        };
-        this.rect = userRect;
-        this._selectBlocksByRect(userRect);
-
-        const result = this._autoScroll(y);
-        if (!result) {
-          this._clearRaf();
+    this.handleEvent(
+      'dragMove',
+      ctx => {
+        this._clearRaf();
+        if (!this._dragging) {
           return;
         }
+
+        const runner = () => {
+          const state = ctx.get('pointerState');
+          const { x, y } = state;
+
+          const { scrollTop, scrollLeft } = this._viewportElement;
+          const { x: startX, y: startY } = state.start;
+          const left = Math.min(this._offset.left + startX, scrollLeft + x);
+          const top = Math.min(this._offset.top + startY, scrollTop + y);
+          const right = Math.max(this._offset.left + startX, scrollLeft + x);
+          const bottom = Math.max(this._offset.top + startY, scrollTop + y);
+          const userRect = {
+            left,
+            top,
+            width: right - left,
+            height: bottom - top,
+          };
+          this.rect = userRect;
+          this._selectBlocksByRect(userRect);
+
+          const result = this._autoScroll(y);
+          if (!result) {
+            this._clearRaf();
+            return;
+          }
+          this._rafID = requestAnimationFrame(runner);
+        };
+
         this._rafID = requestAnimationFrame(runner);
-      };
 
-      this._rafID = requestAnimationFrame(runner);
+        return true;
+      },
+      { global: true }
+    );
 
-      return true;
-    });
-
-    this._addEvent('dragEnd', () => {
-      this._clearRaf();
-      this._dragging = false;
-      this.rect = null;
-      this._offset = {
-        top: 0,
-        left: 0,
-      };
-    });
-
-    this._addEvent('pointerMove', ctx => {
-      if (this._dragging) {
-        const state = ctx.get('pointerState');
-        state.raw.preventDefault();
+    this.handleEvent(
+      'dragEnd',
+      () => {
+        this._clearRaf();
+        this._dragging = false;
+        this.rect = null;
+        this._offset = {
+          top: 0,
+          left: 0,
+        };
+      },
+      {
+        global: true,
       }
-    });
+    );
+
+    this.handleEvent(
+      'pointerMove',
+      ctx => {
+        if (this._dragging) {
+          const state = ctx.get('pointerState');
+          state.raw.preventDefault();
+        }
+      },
+      {
+        global: true,
+      }
+    );
   }
 
   override render() {
