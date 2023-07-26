@@ -229,7 +229,8 @@ export class Renderer implements SurfaceViewport {
         this.smoothZoom(newZoom, Vec.toPoint(focusPoint));
       }
     } else {
-      this.setCenter(newCenter[0], newCenter[1]);
+      this._center.x = newCenter[0];
+      this._center.y = newCenter[1];
       this.setZoom(newZoom);
     }
   }
