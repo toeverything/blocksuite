@@ -395,7 +395,7 @@ export function copyCode(codeBlockModel: CodeBlockModel) {
     type: 'Block',
     models: [codeBlockModel],
     startOffset: 0,
-    endOffset: 0,
+    endOffset: Infinity,
   });
 
   toast('Copied to clipboard');
