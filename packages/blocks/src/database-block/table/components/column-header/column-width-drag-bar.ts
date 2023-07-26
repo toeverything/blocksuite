@@ -45,7 +45,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
   dragLeft = 0;
 
   private _bar = createRef<HTMLElement>();
-  private _startDrag = (evt: MouseEvent) => {
+  private _startDrag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const database = this.closest('affine-database-table');
     const offsetParent = database?.offsetParent;

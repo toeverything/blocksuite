@@ -130,7 +130,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     };
   };
-  private _drag = (evt: MouseEvent) => {
+  private _drag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const scrollContainer = tableContainer?.parentElement;
     assertExists(tableContainer);
