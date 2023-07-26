@@ -157,9 +157,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     const { deep, index } = getListInfo(this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
-    const selected = this.selected.find(sel => sel.is('block'))
-      ? 'selected'
-      : '';
+    const selected = this.selected?.is('block') ? 'selected' : '';
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;

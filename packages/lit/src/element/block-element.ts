@@ -76,7 +76,7 @@ export class BlockElement<
   path!: string[];
 
   @state()
-  selected: BaseSelection[] = [];
+  selected: BaseSelection | null = null;
 
   get parentPath(): string[] {
     return this.path.slice(0, -1);
@@ -141,9 +141,18 @@ export class BlockElement<
 
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
-        const selection = selections.filter(selection =>
+        const selection = selections.find(selection =>
           PathMap.equals(selection.path, this.path)
         );
+
+        if (!selection) {
+          this.selected = null;
+          return;
+        }
+
+        if (this.selected && this.selected.equals(selection)) {
+          return;
+        }
 
         this.selected = selection;
       })
