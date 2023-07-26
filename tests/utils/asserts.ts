@@ -9,7 +9,11 @@ import type {
   NoteBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
+import {
+  EDITOR_WIDTH,
+  PAGE_VERSION,
+  WORKSPACE_VERSION,
+} from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -63,6 +67,7 @@ export const defaultStore: SerializedStore = {
       'affine:paragraph': 1,
       'affine:page': 2,
       'affine:database': 2,
+      'affine:data-view': 1,
       'affine:list': 1,
       'affine:note': 1,
       'affine:divider': 1,
@@ -72,6 +77,7 @@ export const defaultStore: SerializedStore = {
       'affine:bookmark': 1,
     },
     workspaceVersion: WORKSPACE_VERSION,
+    pageVersion: PAGE_VERSION,
   },
   spaces: {
     'space:page0': {
@@ -86,7 +92,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
-          'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
+          'prop:xywh': `[0,0,${EDITOR_WIDTH},91]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,

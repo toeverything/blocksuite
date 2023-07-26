@@ -26,10 +26,9 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     .affine-list-block-container {
       box-sizing: border-box;
       border-radius: 5px;
-      margin-top: 2px;
     }
     .affine-list-block-container--first {
-      margin-top: var(--affine-paragraph-space);
+      margin-top: 14px;
     }
     .affine-list-block-container .affine-list-block-container {
       margin-top: 0;
@@ -54,7 +53,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       align-items: center;
       justify-content: flex-start;
       align-self: flex-start;
-      color: var(--affine-list-color);
+      color: var(--affine-blue-700);
       font-size: 14px;
       line-height: var(--affine-line-height);
       user-select: none;

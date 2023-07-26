@@ -66,6 +66,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
   override block2Json(
     block: BlockModels['affine:database'],
+    selectedModels?: Map<string, number>,
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -77,18 +78,23 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       databaseProps: {
         id: block.id,
         title: block.title.toString(),
-        titleColumnName: block.titleColumnName,
-        titleColumnWidth: block.titleColumnWidth,
         rowIds,
         cells: block.cells,
         columns,
       },
-      children: block.children?.map((child, index) => {
-        if (index === block.children.length - 1) {
-          return getService(child.flavour).block2Json(child, 0, end);
-        }
-        return getService(child.flavour).block2Json(child);
-      }),
+      children: block.children
+        ?.filter(child => selectedModels?.has(child.id) ?? true)
+        .map((child, index, array) => {
+          if (index === array.length - 1) {
+            return getService(child.flavour).block2Json(
+              child,
+              selectedModels,
+              0,
+              end
+            );
+          }
+          return getService(child.flavour).block2Json(child, selectedModels);
+        }),
     };
   }
 
@@ -101,9 +107,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
   ) {
     const { rowIds, columns, cells } = props;
-
     const columnIds = columns.map(column => column.id);
-
+    model.deleteColumn(model.id);
     const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
       return model.addColumn('end', nonIdProps);

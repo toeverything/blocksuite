@@ -46,7 +46,11 @@ export class PointerControl {
   };
 
   private _createContext(event: Event, pointerState: PointerEventState) {
-    return UIEventStateContext.from(new UIEventState(event), pointerState);
+    return UIEventStateContext.from(
+      new UIEventState(event),
+      this._dispatcher.createEventBlockState(event),
+      pointerState
+    );
   }
 
   private _down = (event: PointerEvent) => {

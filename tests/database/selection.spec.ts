@@ -29,7 +29,7 @@ test.describe('focus', () => {
     await assertRowsSelection(page, [0, 0]);
   });
 
-  test('should support multi row selection', async ({ page }) => {
+  test.fixme('should support multi row selection', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 

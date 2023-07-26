@@ -14,9 +14,6 @@ export const styles = css`
     border-bottom: 1px solid var(--affine-border-color);
     box-sizing: border-box;
   }
-  .affine-database-column-header > .affine-database-column:first-child {
-    background: var(--affine-hover-color);
-  }
 
   .affine-database-column {
     cursor: pointer;
@@ -41,10 +38,6 @@ export const styles = css`
     height: 100%;
     padding: 8px;
     box-sizing: border-box;
-    border-right: 1px solid var(--affine-border-color);
-  }
-  .affine-database-column:last-child .affine-database-column-content {
-    border-right: none;
   }
   .affine-database-column-content:hover,
   .affine-database-column-content.edit {

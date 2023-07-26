@@ -10,26 +10,27 @@ import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { asyncFocusRichText } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import type { DatabaseViewDataMap } from '../common/view-manager.js';
-import type { DatabaseBlockModel, InsertPosition } from '../database-model.js';
-import { onClickOutside } from '../utils/utils.js';
+import type { BlockOperation, InsertPosition } from '../types.js';
+import { insertPositionToIndex } from '../utils/insert.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection/selection.js';
-import type { ColumnManager, TableViewManager } from './table-view-manager.js';
-import { DatabaseTableViewManager } from './table-view-manager.js';
-import { SearchState } from './types.js';
+import type { TableViewManager } from './table-view-manager.js';
 
 const styles = css`
   affine-database-table {
     position: relative;
+    margin-top: 32px;
+  }
+  affine-database-table * {
+    box-sizing: border-box;
   }
 
   .affine-database-block-title-container {
@@ -135,6 +136,10 @@ const styles = css`
     height: 16px;
   }
 
+  .database-cell {
+    border-left: 1px solid var(--affine-border-color);
+  }
+
   ${tooltipStyle}
 `;
 
@@ -145,10 +150,13 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  model!: DatabaseBlockModel;
+  tableViewManager!: TableViewManager;
 
   @property({ attribute: false })
-  view!: DatabaseViewDataMap['table'];
+  blockOperation!: BlockOperation;
+
+  @property({ attribute: false })
+  titleText!: Text;
 
   @property({ attribute: false })
   root!: BlockSuiteRoot;
@@ -165,49 +173,17 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   @query('affine-database-selection')
   public selection!: DatabaseSelectionView;
 
-  @state()
-  private _searchState: SearchState = SearchState.SearchIcon;
-
-  @state()
-  private _searchString = '';
-
-  @state()
-  private _hoverState = false;
-
   private get readonly() {
-    return this.model.page.readonly;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-
-    this._updateHoverState();
-
-    const disposables = this._disposables;
-    disposables.addFromEvent(this, 'mouseover', this._onMouseOver);
-    disposables.addFromEvent(this, 'mouseleave', this._onMouseLeave);
-    disposables.addFromEvent(this, 'click', this._onClick);
+    return this.root.page.readonly;
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => {
-      this.requestUpdate();
-      // TODO: optimize performance here
-      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
-        cell.requestUpdate();
-      });
-      this.querySelector('affine-database-column-header')?.requestUpdate();
-    });
-    this.model.childrenUpdated.on(() => {
-      this.requestUpdate();
-      this.selection.requestUpdate();
-      // TODO: optimize performance here
-      this.querySelectorAll('affine-database-cell-container').forEach(cell => {
-        cell.requestUpdate();
-      });
-      this.querySelector('affine-database-column-header')?.requestUpdate();
-      this._updateHoverState();
-    });
+    this._disposables.add(
+      this.tableViewManager.slots.update.on(() => {
+        this.requestUpdate();
+        this.selection.requestUpdate();
+      })
+    );
 
     if (this.readonly) return;
     const tableContent = this._tableContainer.parentElement;
@@ -219,71 +195,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  private _updateHoverState() {
-    if (this.model.children.length === 0) {
-      this._hoverState = true;
-      return;
-    }
-
-    this._resetHoverState();
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-  }
-
-  private _setSearchState = (state: SearchState) => {
-    this._searchState = state;
-  };
-  private _setSearchString = (search: string) => {
-    this._searchString = search;
-  };
-
-  private _resetSearchState() {
-    this._searchState = SearchState.SearchIcon;
-  }
-
-  private _resetHoverState() {
-    this._hoverState = false;
-  }
-
   private _onDatabaseScroll = (event: Event) => {
     this._columnHeaderComponent.showAddColumnButton();
   };
-
-  private _onMouseOver = () => {
-    this._hoverState = true;
-  };
-
-  private _onMouseLeave = () => {
-    if (this._searchState === SearchState.SearchIcon) {
-      this._updateHoverState();
-    }
-  };
-
-  private _onClick = () => {
-    setTimeout(() => {
-      onClickOutside(
-        this,
-        () => {
-          if (this._searchState !== SearchState.Searching) {
-            this._resetHoverState();
-            this._resetSearchState();
-          }
-        },
-        'mousedown'
-      );
-    });
-  };
-
-  private _tableViewManager(): TableViewManager {
-    return new DatabaseTableViewManager(
-      this.model,
-      this.view,
-      this.root,
-      this._searchString
-    );
-  }
 
   private _addRow = (
     tableViewManager: TableViewManager,
@@ -291,22 +205,28 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   ) => {
     if (this.readonly) return;
 
-    const currentSearchState = this._searchState;
-    this._resetSearchState();
-    this._resetHoverState();
-
-    const page = this.model.page;
+    const page = this.root.page;
     page.captureSync();
-    const id = tableViewManager.addRow(position);
-    asyncFocusRichText(page, id);
-    // save the search state
-    this._setSearchState(currentSearchState);
+    const index = insertPositionToIndex(
+      position,
+      this.tableViewManager.rows.map(id => ({ id }))
+    );
+    tableViewManager.rowAdd(position);
+    setTimeout(() => {
+      this.selection.selection = {
+        focus: {
+          rowIndex: index,
+          columnIndex: 0,
+        },
+        isEditing: true,
+      };
+    });
   };
 
-  private _renderColumnWidthDragBar = (columns: ColumnManager[]) => {
+  private _renderColumnWidthDragBar = () => {
     let left = 0;
     return repeat(
-      columns,
+      this.tableViewManager.columnManagerList,
       v => v.id,
       column => {
         left += column.width;
@@ -319,42 +239,36 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    const tableViewManager = this._tableViewManager();
-    const rowsTemplate = DataBaseRowContainer(tableViewManager);
+    const rowsTemplate = DataBaseRowContainer(this.tableViewManager);
     const addRow = (position: InsertPosition) => {
-      this._addRow(tableViewManager, position);
+      this._addRow(this.tableViewManager, position);
     };
     return html`
       <div class="affine-database-table">
         <div class="affine-database-block-title-container">
           <affine-database-title
+            .titleText="${this.titleText}"
             .addRow="${() => addRow('start')}"
-            .targetModel="${this.model}"
+            .root="${this.root}"
           ></affine-database-title>
           <affine-database-toolbar
-            .root=${this.root}
-            .modalMode=${this.modalMode}
-            .view="${tableViewManager}"
+            .root="${this.root}"
+            .copyBlock="${this.blockOperation.copy}"
+            .deleteSelf="${this.blockOperation.delete}"
+            .view="${this.tableViewManager}"
             .addRow="${addRow}"
-            .targetModel="${this.model}"
-            .hoverState="${this._hoverState}"
-            .searchState="${this._searchState}"
-            .setSearchState="${this._setSearchState}"
-            .setSearchString="${this._setSearchString}"
           ></affine-database-toolbar>
         </div>
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">
             <affine-database-column-header
-              .tableViewManager="${tableViewManager}"
-              .targetModel="${this.model}"
+              .tableViewManager="${this.tableViewManager}"
             ></affine-database-column-header>
-            ${rowsTemplate}
-            ${this._renderColumnWidthDragBar(tableViewManager.columns)}
+            ${rowsTemplate} ${this._renderColumnWidthDragBar()}
             <affine-database-selection
-              .databaseId="${this.model.id}"
+              .blockId="${this.tableViewManager.id}"
               .eventDispatcher="${this.root.uiEventDispatcher}"
-              .view="${tableViewManager}"
+              .view="${this.tableViewManager}"
             ></affine-database-selection>
           </div>
         </div>

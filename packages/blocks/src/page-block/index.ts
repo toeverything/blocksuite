@@ -1,11 +1,4 @@
 import './default/meta-data/backlink/backlink-popover.js';
-
-import type { LitBlockSpec } from '@blocksuite/lit';
-import { literal } from 'lit/static-html.js';
-
-import { DefaultPageService } from './default/default-page-service.js';
-import { EdgelessPageService } from './edgeless/edgeless-page-service.js';
-import { PageBlockSchema } from './page-model.js';
 export * from './default/default-page-block.js';
 export { getAllowSelectedBlocks } from './default/utils.js';
 export {
@@ -18,26 +11,8 @@ export { type PageBlockModel, PageBlockSchema } from './page-model.js';
 export * from './page-service.js';
 export * from './utils/index.js';
 
-export const pageBlockSpec: LitBlockSpec = {
-  schema: PageBlockSchema,
-  service: DefaultPageService,
-  view: {
-    component: literal`affine-default-page`,
-    widgets: [
-      literal`affine-slash-menu-widget`,
-      literal`affine-linked-page-widget`,
-    ],
-  },
-};
-
-export const edgelessBlockSpec: LitBlockSpec = {
-  schema: PageBlockSchema,
-  service: EdgelessPageService,
-  view: {
-    component: literal`affine-edgeless-page`,
-    widgets: [
-      literal`affine-slash-menu-widget`,
-      literal`affine-linked-page-widget`,
-    ],
-  },
-};
+export type DocPageBlockWidgetName =
+  | 'slashMenu'
+  | 'linkedPage'
+  | 'draggingArea';
+export type EdgelessPageBlockWidgetName = 'slashMenu' | 'linkedPage';

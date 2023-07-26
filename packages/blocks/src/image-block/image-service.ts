@@ -21,6 +21,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
 
   override block2Json(
     block: ImageBlockModel,
+    selectedModels?: Map<string, number>,
     begin?: number,
     end?: number
   ): SerializedBlock {

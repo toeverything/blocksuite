@@ -7,7 +7,7 @@ import {
   domRangeToVirgoRange,
   virgoRangeToDomRange,
 } from '../utils/range-conversion.js';
-import { isVRangeEqual } from '../utils/v-range.js';
+import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
@@ -27,9 +27,8 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     if (
       this._editor.mounted &&
-      !(this._prevVRange && newVRange
-        ? isVRangeEqual(this._prevVRange, newVRange)
-        : this._prevVRange === newVRange)
+      newVRange &&
+      !isMaybeVRangeEqual(this._prevVRange, newVRange)
     ) {
       // no need to sync and native selection behavior about shift+arrow will
       // be broken if we sync
@@ -45,11 +44,9 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
       // There may be multiple range update events in one frame,
       // so we need to obtain the latest vRange.
       // see https://github.com/toeverything/blocksuite/issues/2982
-      if (this._vRange) {
-        // when using input method _vRange will return to the starting point,
-        // so we need to re-sync
-        this._applyVRange(this._vRange);
-      }
+      // when using input method _vRange will return to the starting point,
+      // so we need to re-sync
+      this.syncVRange();
     };
 
     // updates in lit are performed asynchronously
@@ -62,9 +59,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
   /**
    * the vRange is synced to the native selection asynchronically
+   * if sync is true, the native selection will be synced immediately
    */
-  setVRange = (vRange: VRange): void => {
-    this._editor.slots.vRangeUpdated.emit([vRange, 'other']);
+  setVRange = (vRange: VRange, sync = true): void => {
+    this._editor.slots.vRangeUpdated.emit([vRange, sync ? 'other' : 'silent']);
   };
 
   /**
@@ -110,10 +108,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    *    the vRange of first Editor is {index: 2, length: 4},
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
-  toVRange = (selection: Selection): VRange | null => {
+  toVRange = (range: Range): VRange | null => {
     const { rootElement, yText } = this._editor;
 
-    return domRangeToVirgoRange(selection, rootElement, yText);
+    return domRangeToVirgoRange(range, rootElement, yText);
   };
 
   onScrollUpdated = (scrollLeft: number) => {

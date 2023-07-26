@@ -10,7 +10,7 @@ export default defineConfig({
     nav: [
       {
         text: 'Playground',
-        link: 'https://blocksuite-toeverything.vercel.app/?init',
+        link: 'https://blocksuite-toeverything.vercel.app/starter/?init',
       },
       { text: 'Docs', link: '/blocksuite-overview' },
       // { text: 'API', link: '' },

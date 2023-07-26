@@ -67,6 +67,11 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return this.computedValue(this.fillColor);
   }
 
+  get shapeStyle() {
+    const shapeStyle = this.yMap.get('shapeStyle') as IShape['shapeStyle'];
+    return shapeStyle;
+  }
+
   get text() {
     const text = this.yMap.get('text') as IShape['text'];
     return text;
@@ -109,6 +114,16 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       (this.yMap.get('textVerticalAlign') as IShape['textVerticalAlign']) ??
       'center';
     return textVerticalAlign;
+  }
+
+  get bold() {
+    const isTextBold = (this.yMap.get('bold') as IShape['bold']) ?? false;
+    return isTextBold;
+  }
+
+  get italic() {
+    const isTextItalic = (this.yMap.get('italic') as IShape['italic']) ?? false;
+    return isTextItalic;
   }
 
   override hitTest(x: number, y: number, options: HitTestOptions) {
@@ -163,7 +178,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontFamily,
       textVerticalAlign,
       textAlign,
-      textHorizontalAlign,
+      bold,
+      italic,
     } = this;
     if (!text) return;
 
@@ -172,6 +188,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontSize: fontSize,
       lineHeight: `${lineHeight}px`,
       fontFamily: fontFamily,
+      bold,
+      italic,
     });
 
     const yText = text;
@@ -184,9 +202,9 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     const lines = deltaInsertsToChunks(deltas);
 
     const horizontalOffset =
-      textHorizontalAlign === 'center'
+      textAlign === 'center'
         ? w / 2
-        : textHorizontalAlign === 'right'
+        : textAlign === 'right'
         ? w - SHAPE_TEXT_PADDING
         : SHAPE_TEXT_PADDING;
     const verticalOffset =

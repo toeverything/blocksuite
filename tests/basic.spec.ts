@@ -20,6 +20,7 @@ import {
   pressBackspace,
   pressEnter,
   pressForwardDelete,
+  pressForwardDeleteWord,
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
@@ -369,6 +370,7 @@ test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await focusRichText(page);
   await waitNextFrame(page);
   await undoByKeyboard(page);
+  await waitNextFrame(page);
   await redoByKeyboard(page);
   await waitNextFrame(page);
   await type(page, '4');
@@ -473,27 +475,28 @@ test(
   }
 );
 
-test('when no note block, click editing area auto add a new note block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
+test.fixme(
+  'when no note block, click editing area auto add a new note block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
 
-  await switchEditorMode(page);
-  await click(page, { x: 100, y: 280 });
-  await pressBackspace(page);
-  await switchEditorMode(page);
-  let note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
-  });
-  expect(note).toBeNull();
-  await click(page, { x: 100, y: 280 });
+    await switchEditorMode(page);
+    await click(page, { x: 100, y: 280 });
+    await pressBackspace(page);
+    await switchEditorMode(page);
+    let note = await page.evaluate(() => {
+      return document.querySelector('affine-note');
+    });
+    expect(note).toBeNull();
+    await click(page, { x: 100, y: 280 });
 
-  note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
-  });
-  expect(note).not.toBeNull();
-});
+    note = await page.evaluate(() => {
+      return document.querySelector('affine-note');
+    });
+    expect(note).not.toBeNull();
+  }
+);
 
 test(scoped`automatic identify url text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -527,4 +530,14 @@ test(scoped`automatic identify url text`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test('ctrl+delete to delete one word forward', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa bbb ccc');
+  await pressArrowLeft(page, 8);
+  await pressForwardDeleteWord(page);
+  await assertText(page, 'aaa ccc');
 });

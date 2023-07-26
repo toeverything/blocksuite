@@ -1,4 +1,4 @@
-import { StrokeStyle } from '../../../consts.js';
+import { ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -15,6 +15,7 @@ import type { IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+import { drawGeneralShpae } from '../utils.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -36,6 +37,7 @@ export const RectMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
+      shapeStyle,
     } = element;
     const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -55,33 +57,49 @@ export const RectMethods: ShapeMethods = {
 
     rc.path(
       `
-      M${r} 0
-      L${renderWidth - r} 0
+      M ${r} 0
+      L ${renderWidth - r} 0
       C ${renderWidth - kRect * r} 0 ${renderWidth} ${
         kRect * r
       } ${renderWidth} ${r}
-      L${renderWidth} ${renderHeight - r}
+      L ${renderWidth} ${renderHeight - r}
       C ${renderWidth} ${renderHeight - kRect * r} ${
         renderWidth - kRect * r
       } ${renderHeight} ${renderWidth - r} ${renderHeight}
-      L${r} ${renderHeight}
+      L ${r} ${renderHeight}
       C ${kRect * r} ${renderHeight} 0 ${renderHeight - kRect * r} 0 ${
         renderHeight - r
       }
-      L0 ${r}
+      L 0 ${r}
       C 0 ${kRect * r} ${kRect * r} 0 ${r} 0
       Z
       `,
       {
         seed,
-        roughness,
+        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
         strokeLineDash:
           strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+        stroke:
+          strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
+            ? 'none'
+            : realStrokeColor,
         strokeWidth,
         fill: filled ? realFillColor : undefined,
       }
     );
+
+    if (shapeStyle === ShapeStyle.General) {
+      drawGeneralShpae(ctx, 'rect', {
+        x: 0,
+        y: 0,
+        width: renderWidth,
+        height: renderHeight,
+        strokeWidth,
+        strokeColor: realStrokeColor,
+        strokeStyle: strokeStyle,
+        radius,
+      });
+    }
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {

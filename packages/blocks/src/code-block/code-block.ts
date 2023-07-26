@@ -53,8 +53,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       padding: 32px 0px 12px 0px;
       background: var(--affine-background-code-block);
       border-radius: 10px;
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
-      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+      margin-top: 24px;
+      margin-bottom: 24px;
     }
 
     /* hover area */

@@ -139,6 +139,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      w3c-keyname:
+        specifier: ^2.2.8
+        version: 2.2.8
     devDependencies:
       '@blocksuite/store':
         specifier: workspace:*
@@ -239,8 +242,8 @@ importers:
         specifier: workspace:*
         version: link:../global
       '@toeverything/theme':
-        specifier: 0.7.1
-        version: 0.7.1
+        specifier: 0.7.7
+        version: 0.7.7
       lit:
         specifier: ^2.7.3
         version: 2.7.3
@@ -350,6 +353,9 @@ importers:
       '@toeverything/y-indexeddb':
         specifier: 0.7.0-canary.16
         version: 0.7.0-canary.16(yjs@13.6.6)
+      async-call-rpc:
+        specifier: ^6.3.1
+        version: 6.3.1
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
@@ -359,12 +365,18 @@ importers:
       lit:
         specifier: ^2.7.3
         version: 2.7.3
+      merge:
+        specifier: ^2.1.1
+        version: 2.1.1
       react:
         specifier: ^18.2.0
         version: 18.2.0
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      y-protocols:
+        specifier: ^1.0.5
+        version: 1.0.5
       yjs:
         specifier: ^13.6.6
         version: 13.6.6
@@ -1539,8 +1551,8 @@ packages:
     resolution: {integrity: sha512-3bqWTxFOFkrld+hx0nDSgwGWPrP2NeB9ySCAqWjXMN0hwewXYnNPpDKkOYtDfUDRtB+iiR/0FyW+kki6tu6qkQ==}
     dev: false
 
-  /@toeverything/theme@0.7.1:
-    resolution: {integrity: sha512-bIg4TVn7os/60u+TAorFLBZ2EOD8yfxNoedrqkXKTgtVoDOpkn3O5lToVIhX1qxGkNOf/U/s9pAKoLbz/oSjIg==}
+  /@toeverything/theme@0.7.7:
+    resolution: {integrity: sha512-yGk1GiPnaDmm0uUqg/zzEVKahl1GusRZb+wy+wnVu+yjOmiD/3NlvdoSNdJC64iHYL1wH6dqxuw23oIGEmE6RQ==}
     dev: false
 
   /@toeverything/y-indexeddb@0.7.0-canary.16(yjs@13.6.6):
@@ -2524,7 +2536,6 @@ packages:
 
   /async-call-rpc@6.3.1:
     resolution: {integrity: sha512-i9R46goYZIi0WPkd5X12O6rOsA1GFUiZ/71GOafdQaZtbytXjQ6VevODXDu5hAI5vn2/BQqbC6NznHV+TAC1QA==}
-    dev: true
 
   /atob@2.1.2:
     resolution: {integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==}
@@ -7852,6 +7863,10 @@ packages:
       '@vue/server-renderer': 3.3.4(vue@3.3.4)
       '@vue/shared': 3.3.4
     dev: true
+
+  /w3c-keyname@2.2.8:
+    resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
+    dev: false
 
   /walkdir@0.4.1:
     resolution: {integrity: sha512-3eBwRyEln6E1MSzcxcVpQIhRG8Q1jLvEqRmCZqS3dsfXEDR/AhOF4d+jHg1qvDCpYaVRZjENPQyrVxAkQqxPgQ==}

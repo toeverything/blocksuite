@@ -412,8 +412,6 @@ test(scoped`import notion markdown-format table`, async ({ page }) => {
       databaseProps: {
         id: '3',
         title: 'Database',
-        titleColumnName: 'table-title1',
-        titleColumnWidth: 432,
         rowIds: ['4', '5'],
         cells: {
           '4': { '1': { columnId: '1', value: 'table-content2' } },
@@ -604,8 +602,6 @@ test(scoped`import notion html-format table`, async ({ page }) => {
       databaseProps: {
         id: '7',
         title: 'Database',
-        titleColumnName: 'Name',
-        titleColumnWidth: 432,
         rowIds: ['8', '9', '10'],
         cells: {
           '8': {
@@ -748,7 +744,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
           type: 'text',
           text: [
             {
-              insert: '@Untitled\n            ',
+              insert: '@Untitled',
             },
           ],
           children: [],
@@ -844,10 +840,11 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
+          caption:
+            'https://images.unsplash.com/photo-1662321979743-3d0a327397bb?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb',
           flavour: 'affine:image',
           sourceId: 'A-Bc3g7vFANwRhy2VdNLoJQGMLfSjAAYD_jCJKxEVgs=',
           children: [],
-          text: [{ insert: '' }],
         },
       ],
     },
@@ -878,10 +875,11 @@ test(scoped`import notion markdown-format image`, async ({ page }) => {
       text: [{ insert: '  ', attributes: {} }],
       children: [
         {
+          caption:
+            'https://media1.giphy.com/media/HJZblxmxHb7CbZtmNy/giphy.gif?cid=7941fdc629znta1bnwp46vdn5ex496a0ra92or1smz7xwfo6&ep=v1_gifs_trending&rid=giphy.gif&ct=g',
           flavour: 'affine:image',
           sourceId: 'lz7uFN73qjI6JbjHqpflMRU4YZmFG63Bn_trPJygbRo=',
           children: [],
-          text: [{ insert: '' }],
         },
       ],
     },

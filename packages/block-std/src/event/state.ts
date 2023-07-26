@@ -1,3 +1,4 @@
+import type { PathMap } from '../store/index.js';
 import { UIEventState } from './base.js';
 
 type PointerEventStateOptions = {
@@ -11,7 +12,7 @@ type PointerEventStateOptions = {
 type Point = { x: number; y: number };
 
 export class PointerEventState extends UIEventState {
-  override readonly type = 'pointerState';
+  override type = 'pointerState';
 
   raw: PointerEvent;
   point: Point;
@@ -62,7 +63,7 @@ type KeyboardEventStateOptions = {
 };
 
 export class KeyboardEventState extends UIEventState {
-  override readonly type = 'keyboardState';
+  override type = 'keyboardState';
 
   raw: KeyboardEvent;
 
@@ -73,14 +74,26 @@ export class KeyboardEventState extends UIEventState {
   }
 }
 
-declare global {
-  interface BlockSuiteUIEventState {
-    pointerState: PointerEventState;
+type BlockEventStateOptions = {
+  event: Event;
+  target: PathMap;
+};
+
+export class BlockEventState extends UIEventState {
+  override type = 'blockState';
+
+  readonly target: PathMap;
+
+  constructor({ event, target }: BlockEventStateOptions) {
+    super(event);
+    this.target = target;
   }
 }
 
 declare global {
   interface BlockSuiteUIEventState {
+    pointerState: PointerEventState;
     keyboardState: KeyboardEventState;
+    blockState: BlockEventState;
   }
 }

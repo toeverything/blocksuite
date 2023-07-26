@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
-import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
+import {
+  EDITOR_WIDTH,
+  PAGE_VERSION,
+  WORKSPACE_VERSION,
+} from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
@@ -95,6 +99,7 @@ describe('basic', () => {
           },
         ],
         workspaceVersion: WORKSPACE_VERSION,
+        pageVersion: PAGE_VERSION,
         blockVersions: {},
       },
       spaces: {
@@ -341,6 +346,16 @@ describe('addBlock', () => {
     workspace.removePage(page1.id);
     // @ts-expect-error
     assert.equal(workspace._pages.size, 0);
+  });
+
+  it('can remove page that has not been loaded', async () => {
+    const options = createTestOptions();
+    const workspace = new Workspace(options).register(BlockSchemas);
+
+    const page0 = workspace.createPage({ id: 'page0' });
+
+    workspace.removePage(page0.id);
+    assert.equal(workspace.pages.size, 0);
   });
 
   it('can set page state', () => {

@@ -74,6 +74,7 @@ const flagsPreset = {
 
   enable_database: true,
   enable_database_filter: false,
+  enable_data_view: false,
   enable_page_tags: false,
   enable_toggle_block: false,
   enable_block_selection_format_bar: true,
@@ -139,6 +140,15 @@ export class Store {
         awareness: this.awarenessStore.awareness,
       })
     );
+  }
+
+  registerProvider(providerCreator: DocProviderCreator, id?: string) {
+    const provider = providerCreator(id ?? this.id, this.doc, {
+      awareness: this.awarenessStore.awareness,
+    });
+
+    this.providers.push(provider);
+    return provider;
   }
 
   addSpace(space: Space) {

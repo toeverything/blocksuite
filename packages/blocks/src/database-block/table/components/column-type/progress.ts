@@ -1,9 +1,8 @@
 import { css, html } from 'lit';
-import { query } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { literal } from 'lit/static-html.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -80,9 +79,8 @@ type DragConfig = {
   boundLeft: number;
 };
 
-class ProgressCell extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-progress-cell`;
-
+@customElement('affine-database-progress-cell')
+export class ProgressCell extends DatabaseCellElement<number> {
   static override styles = styles;
 
   _bgClick(e: MouseEvent) {
@@ -123,10 +121,24 @@ class ProgressCell extends DatabaseCellElement<number> {
   }
 }
 
-class ProgressCellEditing extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-progress-cell-editing`;
-
+@customElement('affine-database-progress-cell-editing')
+export class ProgressCellEditing extends DatabaseCellElement<number> {
   static override styles = styles;
+
+  @state()
+  private tempValue?: number;
+
+  override onExitEditMode() {
+    this.onChange(this._value);
+  }
+
+  get _value() {
+    return this.tempValue ?? this.value ?? 0;
+  }
+
+  _onChange(value?: number) {
+    this.tempValue = value;
+  }
 
   @query('.affine-database-progress-bg')
   private _progressBg!: HTMLElement;
@@ -145,11 +157,11 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
     disposables.addFromEvent(document, 'pointerup', this._onPointerUp);
     disposables.addFromEvent(window, 'keydown', evt => {
       if (evt.key === 'ArrowDown') {
-        this.onChange(Math.max(0, (this.value ?? 0) - 1));
+        this._onChange(Math.max(0, this._value - 1));
         return;
       }
       if (evt.key === 'ArrowUp') {
-        this.onChange(Math.min(100, (this.value ?? 0) + 1));
+        this._onChange(Math.min(100, this._value + 1));
         return;
       }
     });
@@ -164,7 +176,6 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       boundLeft: left,
       containerWidth: visibleWidth,
     };
-    this.column.captureSync();
     this._onPointerMove(event);
   };
 
@@ -183,18 +194,17 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
       steps = Math.floor((x - boundLeft) / stepWidth);
     }
 
-    if (this.value !== steps) {
-      this.onChange(steps, { captureSync: false });
+    if (this._value !== steps) {
+      this._onChange(steps);
     }
   };
 
   private _onPointerUp = () => {
     this._dragConfig = null;
-    this.column.captureSync();
   };
 
   protected override render() {
-    const progress = this.value ?? 0;
+    const progress = this._value;
     let backgroundColor = progressColors.processing;
     if (progress === 100) {
       backgroundColor = progressColors.success;
@@ -228,14 +238,3 @@ class ProgressCellEditing extends DatabaseCellElement<number> {
     </div>`;
   }
 }
-
-export const ProgressColumnRenderer = defineColumnRenderer(
-  'progress',
-  {
-    Cell: ProgressCell,
-    CellEditing: ProgressCellEditing,
-  },
-  {
-    displayName: 'Progress',
-  }
-);

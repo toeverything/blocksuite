@@ -183,9 +183,9 @@ export class MarkdownParser extends BaseParser {
         return [
           {
             flavour: 'affine:image',
+            caption: element.alt,
             sourceId: id,
             children: [],
-            text: texts,
           },
         ];
       }

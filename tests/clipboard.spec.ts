@@ -25,6 +25,8 @@ import {
   initThreeParagraphs,
   pasteByKeyboard,
   pasteContent,
+  pressArrowDown,
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -136,6 +138,52 @@ test(
     await waitEmbedLoaded(page);
     // await page.waitForTimeout(500);
     await assertRichImage(page, 1);
+  }
+);
+
+test(
+  scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
+  async ({ page }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/3639',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    // set up clipboard data using html
+    const clipData = {
+      'text/html': `<p>Lorem Ipsum placeholder text.</p>
+    <figure ><img src='/test-card-1.png' /></figure>
+    `,
+    };
+    await page.evaluate(
+      ({ clipData }) => {
+        const dT = new DataTransfer();
+        const e = new ClipboardEvent('paste', { clipboardData: dT });
+        Object.defineProperty(e, 'target', {
+          writable: false,
+          value: document.body,
+        });
+        e.clipboardData?.setData('text/html', clipData['text/html']);
+        document.body.dispatchEvent(e);
+      },
+      { clipData }
+    );
+    await waitEmbedLoaded(page);
+    await assertRichImage(page, 1);
+    await pressArrowUp(page, 1);
+    await pasteContent(page, clipData);
+    await assertRichImage(page, 2);
+    await assertText(
+      page,
+      'Lorem Ipsum placeholder text.Lorem Ipsum placeholder text.'
+    );
+    await pressArrowDown(page, 1);
+    await pasteContent(page, clipData);
+    await assertRichImage(page, 3);
+    await assertText(page, 'Lorem Ipsum placeholder text.', 1);
   }
 );
 
@@ -620,10 +668,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:database
-      prop:columns="Array [1]"
+      prop:columns="Array [2]"
       prop:title="Database 1"
-      prop:titleColumnName="Title"
-      prop:titleColumnWidth={432}
       prop:views="Array [1]"
     >
       <affine:paragraph
@@ -634,10 +680,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
       prop:type="text"
     />
     <affine:database
-      prop:columns="Array [1]"
+      prop:columns="Array [2]"
       prop:title="Database 1"
-      prop:titleColumnName="Title"
-      prop:titleColumnWidth={432}
       prop:views="Array [1]"
     >
       <affine:paragraph
@@ -662,10 +706,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:database
-      prop:columns="Array [1]"
+      prop:columns="Array [2]"
       prop:title="Database 1"
-      prop:titleColumnName="Title"
-      prop:titleColumnWidth={432}
       prop:views="Array [1]"
     >
       <affine:paragraph
@@ -965,4 +1007,30 @@ test(scoped`auto identify url`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test(scoped`paste parent block`, async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/3153',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'This is parent');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 1');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 2');
+  await setVirgoSelection(page, 0, 3);
+  await copyByKeyboard(page);
+  await focusRichText(page, 2);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, [
+    'This is parent',
+    'This is child 1',
+    'This is child 2Thi',
+  ]);
 });

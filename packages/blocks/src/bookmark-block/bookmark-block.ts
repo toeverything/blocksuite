@@ -9,8 +9,9 @@ import { Slot } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { queryCurrentMode } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
+import { stopPropagation } from '../__internal__/utils/event.js';
+import { queryCurrentMode } from '../__internal__/utils/query.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import { BookmarkBlockService } from './bookmark-service.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
@@ -28,7 +29,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   static override styles = css`
     .affine-bookmark-block-container {
       width: 100%;
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-top: 18px;
+      margin-bottom: 18px;
       position: relative;
     }
     .affine-bookmark-link {
@@ -375,9 +377,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           value=${this._caption}
           @input=${this._onInputChange}
           @blur=${this._onInputBlur}
-          @click=${(e: Event) => {
-            e.stopPropagation();
-          }}
+          @click=${stopPropagation}
         />
       </div>
     `;
