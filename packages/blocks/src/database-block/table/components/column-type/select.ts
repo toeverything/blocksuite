@@ -6,7 +6,7 @@ import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
-import type { SelectColumnData } from '../../../common/column-manager.js';
+import type { SelectColumnData } from '../../../common/columns/define.js';
 import { DatabaseCellElement } from '../../register.js';
 
 @customElement('affine-database-select-cell')

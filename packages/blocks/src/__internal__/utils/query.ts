@@ -737,7 +737,12 @@ export function getClosestBlockElementByPoint(
   let n = 1;
 
   if (state) {
-    const { snapToEdge = { x: true, y: false } } = state;
+    const {
+      snapToEdge = {
+        x: true,
+        y: false,
+      },
+    } = state;
     container = state.container;
     const rect = state.rect || container?.getBoundingClientRect();
     if (rect) {
@@ -769,16 +774,17 @@ export function getClosestBlockElementByPoint(
     if (isDatabase(element)) {
       bounds = element.getBoundingClientRect();
       const rows = getDatabaseBlockRowsElement(element);
-      assertExists(rows);
-      childBounds = rows.getBoundingClientRect();
+      if (rows) {
+        childBounds = rows.getBoundingClientRect();
 
-      if (childBounds.height) {
-        if (point.y < childBounds.top || point.y > childBounds.bottom) {
+        if (childBounds.height) {
+          if (point.y < childBounds.top || point.y > childBounds.bottom) {
+            return element;
+          }
+          childBounds = null;
+        } else {
           return element;
         }
-        childBounds = null;
-      } else {
-        return element;
       }
     } else {
       // Indented paragraphs or list

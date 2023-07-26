@@ -1,39 +1,38 @@
-import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
-import { CheckboxCell } from '../table/components/column-type/checkbox.js';
+import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
+import { CheckboxCell } from '../../table/components/column-type/checkbox.js';
 import {
   DateCell,
   DateCellEditing,
-} from '../table/components/column-type/date.js';
+} from '../../table/components/column-type/date.js';
 import {
   LinkCell,
   LinkCellEditing,
-} from '../table/components/column-type/link.js';
+} from '../../table/components/column-type/link.js';
 import {
   MultiSelectCell,
   MultiSelectCellEditing,
-} from '../table/components/column-type/multi-select.js';
+} from '../../table/components/column-type/multi-select.js';
 import {
   NumberCell,
   NumberCellEditing,
-} from '../table/components/column-type/number.js';
+} from '../../table/components/column-type/number.js';
 import {
   ProgressCell,
   ProgressCellEditing,
-} from '../table/components/column-type/progress.js';
+} from '../../table/components/column-type/progress.js';
 import {
   RichTextCell,
   RichTextCellEditing,
-} from '../table/components/column-type/rich-text.js';
+} from '../../table/components/column-type/rich-text.js';
 import {
   SelectCell,
   SelectCellEditing,
-} from '../table/components/column-type/select.js';
+} from '../../table/components/column-type/select.js';
 import {
   TextCell,
   TextCellEditing,
-} from '../table/components/column-type/text.js';
-import { TitleCell } from '../table/components/column-type/title.js';
-import type { CellRenderer } from './column-manager.js';
+} from '../../table/components/column-type/text.js';
+import { TitleCell } from '../../table/components/column-type/title.js';
 import {
   checkboxHelper,
   dateHelper,
@@ -45,23 +44,21 @@ import {
   selectHelper,
   textHelper,
   titleHelper,
-} from './column-manager.js';
+} from './define.js';
+import type { CellRenderer } from './manager.js';
 
-export interface ColumnRenderer<
+export interface Renderer<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown
 > {
   type: string;
   cellRenderer: CellRenderer<Data, Value>;
-  // dataRenderer: UniComponent<{
-  //   value
-  // }>;
 }
 
 export class ColumnRendererHelper {
-  private _columns = new Map<string, ColumnRenderer>();
+  private _columns = new Map<string, Renderer>();
 
-  register(renderer: ColumnRenderer) {
+  register(renderer: Renderer) {
     const columns = this._columns;
     if (columns.has(renderer.type)) {
       throw new Error('cannot register twice for ' + renderer.type);
@@ -69,7 +66,7 @@ export class ColumnRendererHelper {
     columns.set(renderer.type, renderer);
   }
 
-  get(type: ColumnRenderer['type']): ColumnRenderer {
+  get(type: Renderer['type']): Renderer {
     const renderer = this._columns.get(type);
     if (!renderer) {
       throw new Error('cannot find renderer');
@@ -77,7 +74,7 @@ export class ColumnRendererHelper {
     return renderer;
   }
 
-  list(): ColumnRenderer[] {
+  list(): Renderer[] {
     return [...this._columns.values()];
   }
 }

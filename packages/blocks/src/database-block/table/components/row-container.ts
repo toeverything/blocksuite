@@ -5,9 +5,9 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
-import type { TableViewManager } from '../table-view-manager.js';
+import type { DataViewTableManager } from '../table-view-manager.js';
 
-export function DataBaseRowContainer(view: TableViewManager) {
+export function DataBaseRowContainer(view: DataViewTableManager) {
   return html`
     <style>
       .affine-database-block-rows {

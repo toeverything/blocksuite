@@ -12,7 +12,7 @@ import {
   getCurrentBlockRange,
   getDefaultPage,
 } from '../../__internal__/index.js';
-import { multiSelectHelper } from '../../database-block/common/column-manager.js';
+import { multiSelectHelper } from '../../database-block/common/columns/define.js';
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import { styles } from './styles.js';
 

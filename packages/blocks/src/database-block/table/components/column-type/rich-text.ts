@@ -46,7 +46,12 @@ function toggleStyle(
     Object.entries(attrs).map(([k, v]) => {
       if (
         typeof v === 'boolean' &&
-        v === (oldAttributes as { [k: string]: unknown })[k]
+        v ===
+          (
+            oldAttributes as {
+              [k: string]: unknown;
+            }
+          )[k]
       ) {
         return [k, !v];
       } else {
@@ -62,6 +67,7 @@ function toggleStyle(
 
   vEditor.syncVRange();
 }
+
 @customElement('affine-database-rich-text-cell')
 export class RichTextCell extends DatabaseCellElement<Y.Text> {
   static override styles = css`
@@ -209,6 +215,17 @@ export class RichTextCellEditing extends DatabaseCellElement<Y.Text> {
     });
     this.vEditor.focusEnd();
     this.vEditor.setReadonly(this.readonly);
+    this._disposables.add(
+      this.vEditor.slots.vRangeUpdated.on(([range]) => {
+        if (range) {
+          if (!this.isEditing) {
+            this.selectCurrentCell(true);
+          }
+        } else {
+          this.selectCurrentCell(false);
+        }
+      })
+    );
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {

@@ -2,7 +2,11 @@ import { filterMatcher } from '../logical/filter-matcher.js';
 import { propertyMatcher } from '../logical/property-matcher.js';
 import type { TType } from '../logical/typesystem.js';
 
-export type Variable = { name: string; type: TType; id: string };
+export type Variable = {
+  name: string;
+  type: TType;
+  id: string;
+};
 export type FilterGroup = {
   type: 'group';
   op: 'and' | 'or';

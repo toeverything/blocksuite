@@ -22,7 +22,7 @@ import { insertPositionToIndex } from '../utils/insert.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection/selection.js';
-import type { TableViewManager } from './table-view-manager.js';
+import type { DataViewTableManager } from './table-view-manager.js';
 
 const styles = css`
   affine-database-table {
@@ -150,7 +150,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  tableViewManager!: TableViewManager;
+  view!: DataViewTableManager;
 
   @property({ attribute: false })
   blockOperation!: BlockOperation;
@@ -179,7 +179,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     this._disposables.add(
-      this.tableViewManager.slots.update.on(() => {
+      this.view.slots.update.on(() => {
         this.requestUpdate();
         this.selection.requestUpdate();
       })
@@ -200,7 +200,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   private _addRow = (
-    tableViewManager: TableViewManager,
+    tableViewManager: DataViewTableManager,
     position: InsertPosition
   ) => {
     if (this.readonly) return;
@@ -209,7 +209,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
     page.captureSync();
     const index = insertPositionToIndex(
       position,
-      this.tableViewManager.rows.map(id => ({ id }))
+      this.view.rows.map(id => ({ id }))
     );
     tableViewManager.rowAdd(position);
     setTimeout(() => {
@@ -226,7 +226,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   private _renderColumnWidthDragBar = () => {
     let left = 0;
     return repeat(
-      this.tableViewManager.columnManagerList,
+      this.view.columnManagerList,
       v => v.id,
       column => {
         left += column.width;
@@ -239,9 +239,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    const rowsTemplate = DataBaseRowContainer(this.tableViewManager);
+    const rowsTemplate = DataBaseRowContainer(this.view);
     const addRow = (position: InsertPosition) => {
-      this._addRow(this.tableViewManager, position);
+      this._addRow(this.view, position);
     };
     return html`
       <div class="affine-database-table">
@@ -255,20 +255,20 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
             .root="${this.root}"
             .copyBlock="${this.blockOperation.copy}"
             .deleteSelf="${this.blockOperation.delete}"
-            .view="${this.tableViewManager}"
+            .view="${this.view}"
             .addRow="${addRow}"
           ></affine-database-toolbar>
         </div>
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">
             <affine-database-column-header
-              .tableViewManager="${this.tableViewManager}"
+              .tableViewManager="${this.view}"
             ></affine-database-column-header>
             ${rowsTemplate} ${this._renderColumnWidthDragBar()}
             <affine-database-selection
-              .blockId="${this.tableViewManager.id}"
+              .blockId="${this.view.id}"
               .eventDispatcher="${this.root.uiEventDispatcher}"
-              .view="${this.tableViewManager}"
+              .view="${this.view}"
             ></affine-database-selection>
           </div>
         </div>

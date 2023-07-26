@@ -11,6 +11,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     affine-database-title-cell {
       position: relative;
     }
+
     affine-database-title-cell .mask {
       position: absolute;
       width: 100%;
@@ -58,9 +59,13 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     );
     setTimeout(() => {
       this.querySelector('rich-text')?.vEditor?.slots.vRangeUpdated.on(
-        range => {
+        ([range]) => {
           if (range) {
-            this.selectCurrentCell(true);
+            if (!this.isEditing) {
+              this.selectCurrentCell(true);
+            }
+          } else {
+            this.selectCurrentCell(false);
           }
         }
       );
@@ -71,6 +76,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     this.querySelector('rich-text')?.vEditor?.focusEnd();
     return false;
   }
+
   override blurCell() {
     getSelection()?.removeAllRanges();
     return false;
@@ -79,7 +85,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
   override render() {
     return html`
       <div class="affine-database-block-row-cell-content">${this.value}</div>
-      ${this.isEditing ? '' : html`<div class="mask"></div>`}
+      ${this.isEditing ? '' : html` <div class="mask"></div>`}
     `;
   }
 }

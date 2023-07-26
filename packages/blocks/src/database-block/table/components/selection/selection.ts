@@ -13,7 +13,7 @@ import type {
   MultiSelection,
 } from '../../../../__internal__/utils/types.js';
 import { startDrag } from '../../../utils/drag.js';
-import type { TableViewManager } from '../../table-view-manager.js';
+import type { DataViewTableManager } from '../../table-view-manager.js';
 import type { DatabaseCellContainer } from '../cell-container.js';
 
 const hotkeys = {
@@ -55,7 +55,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   @property()
   blockId!: string;
   @property({ attribute: false })
-  view!: TableViewManager;
+  view!: DataViewTableManager;
   @property({ attribute: false })
   eventDispatcher!: UIEventDispatcher;
 
@@ -148,7 +148,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         const event = context.get('pointerState').event;
         const target = event.target;
         if (
-          event instanceof MouseEvent &&
+          event instanceof PointerEvent &&
           target instanceof Element &&
           this.isCurrentDatabase(target)
         ) {
@@ -280,7 +280,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     };
   }
 
-  startDrag(evt: MouseEvent, cell: DatabaseCellContainer) {
+  startDrag(evt: PointerEvent, cell: DatabaseCellContainer) {
     const table = this.tableContainer;
     const tableRect = table.getBoundingClientRect();
     const startOffsetX = evt.x - tableRect.left;
