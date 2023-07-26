@@ -98,13 +98,11 @@ export class UIEventDispatcher {
     return this.blockStore.root;
   }
 
-  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+  run(name: EventName, context: UIEventStateContext) {
     const event = context.get('defaultState').event;
+    const scope = this._getEventScope(name, event);
     if (!scope) {
-      scope = this._getEventScope(name, event);
-      if (!scope) {
-        return;
-      }
+      return;
     }
 
     if (!context.has('blockState')) {
@@ -181,7 +179,7 @@ export class UIEventDispatcher {
     });
   }
 
-  buildEventScope(
+  private _buildEventScope(
     name: EventName,
     flavours: string[],
     paths: string[][]
@@ -237,7 +235,7 @@ export class UIEventDispatcher {
       )
     ).reverse();
 
-    return this.buildEventScope(name, flavours, paths);
+    return this._buildEventScope(name, flavours, paths);
   }
 
   private _buildEventScopeByTarget(name: EventName, target: Node) {
@@ -257,7 +255,7 @@ export class UIEventDispatcher {
       })
       .reverse();
 
-    return this.buildEventScope(name, flavours, [path]);
+    return this._buildEventScope(name, flavours, [path]);
   }
 
   private _buildEventScopeBySelection(name: EventName) {
@@ -284,7 +282,7 @@ export class UIEventDispatcher {
 
     const paths = selections.map(selection => selection.path);
 
-    return this.buildEventScope(name, flavours, paths);
+    return this._buildEventScope(name, flavours, paths);
   }
 
   private _bindEvents() {
