@@ -98,7 +98,9 @@ export abstract class BaseParser {
     try {
       resp = await fetch(fileName, {
         cache: 'no-cache',
-        mode: 'cors',
+        // TODO: mode: 'no-cors' won’t magically make things work.
+        // Waiting for affine:netimage online.
+        mode: 'no-cors',
         headers: {
           Origin: window.location.origin,
         },
