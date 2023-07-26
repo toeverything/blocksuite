@@ -214,9 +214,6 @@ export class UIEventDispatcher {
       return;
     }
     const range = selection.getRangeAt(0);
-    if (name === 'keyDown') {
-      console.log(range);
-    }
     const blocks = this._findBlockElement(range);
     const paths = blocks
       .map(blockView => {
