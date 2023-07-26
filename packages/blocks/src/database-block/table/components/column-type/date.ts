@@ -1,13 +1,11 @@
 import format from 'date-fns/format';
 import { css, html } from 'lit';
-import { query } from 'lit/decorators.js';
-import { literal } from 'lit/static-html.js';
+import { customElement, query } from 'lit/decorators.js';
 
-import { DatabaseCellElement, defineColumnRenderer } from '../../register.js';
+import { DatabaseCellElement } from '../../register.js';
 
-class DateCell extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-date-cell`;
-
+@customElement('affine-database-date-cell')
+export class DateCell extends DatabaseCellElement<number> {
   static override styles = css`
     affine-database-date-cell {
       display: block;
@@ -37,9 +35,8 @@ class DateCell extends DatabaseCellElement<number> {
   }
 }
 
+@customElement('affine-database-date-cell-editing')
 export class DateCellEditing extends DatabaseCellElement<number> {
-  static override tag = literal`affine-database-date-cell-editing`;
-
   static override styles = css`
     affine-database-date-cell-editing {
       display: block;
@@ -106,14 +103,3 @@ export class DateCellEditing extends DatabaseCellElement<number> {
     />`;
   }
 }
-
-export const DateColumnRenderer = defineColumnRenderer(
-  'date',
-  {
-    Cell: DateCell,
-    CellEditing: DateCellEditing,
-  },
-  {
-    displayName: 'Date',
-  }
-);
