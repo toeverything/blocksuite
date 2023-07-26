@@ -1,6 +1,7 @@
-import type { Page, StackItem, Workspace } from '@blocksuite/store';
+import type { StackItem } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/store';
 
+import type { BlockStore } from '../store/index.js';
 import type { BaseSelection } from './base.js';
 import { BlockSelection, TextSelection } from './variants/index.js';
 
@@ -21,7 +22,7 @@ export class SelectionManager {
     changed: new Slot<BaseSelection[]>(),
   };
 
-  constructor(public root: HTMLElement, public workspace: Workspace) {
+  constructor(public blockStore: BlockStore) {
     this._setupDefaultSelections();
   }
 
@@ -33,7 +34,7 @@ export class SelectionManager {
   }
 
   private get _store() {
-    return this.workspace.awarenessStore;
+    return this.blockStore.workspace.awarenessStore;
   }
 
   private _setupDefaultSelections() {
@@ -84,19 +85,25 @@ export class SelectionManager {
     );
   }
 
-  mount(page: Page) {
+  mount() {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();
     }
-    page.history.on('stack-item-added', (event: { stackItem: StackItem }) => {
-      event.stackItem.meta.set('selection-state', this._oldSelections);
-    });
-    page.history.on('stack-item-popped', (event: { stackItem: StackItem }) => {
-      const selection = event.stackItem.meta.get('selection-state');
-      if (selection) {
-        this.set(selection as BaseSelection[]);
+    this.blockStore.page.history.on(
+      'stack-item-added',
+      (event: { stackItem: StackItem }) => {
+        event.stackItem.meta.set('selection-state', this._oldSelections);
       }
-    });
+    );
+    this.blockStore.page.history.on(
+      'stack-item-popped',
+      (event: { stackItem: StackItem }) => {
+        const selection = event.stackItem.meta.get('selection-state');
+        if (selection) {
+          this.set(selection as BaseSelection[]);
+        }
+      }
+    );
   }
 
   unmount() {

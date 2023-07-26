@@ -3,7 +3,13 @@ import { assertExists, nanoid, Text } from '@blocksuite/store';
 import { getTagColor } from '../../components/tags/colors.js';
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
-import { tBoolean, tNumber, tString, tTag } from '../logical/data-type.js';
+import {
+  tBoolean,
+  tDate,
+  tNumber,
+  tString,
+  tTag,
+} from '../logical/data-type.js';
 import type { TType } from '../logical/typesystem.js';
 import { tArray } from '../logical/typesystem.js';
 import type { ColumnManager } from '../table/table-view-manager.js';
@@ -266,6 +272,12 @@ export const textHelper = columnManager.register<string>('text', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data ?? '',
+  cellToJson: data => data ?? null,
+});
+export const dateHelper = columnManager.register<number>('date', {
+  type: () => tDate.create(),
+  defaultData: () => ({}),
+  cellToString: data => data?.toString() ?? '',
   cellToJson: data => data ?? null,
 });
 
