@@ -17,6 +17,7 @@ import {
   getCommonBound,
   type IBound,
   intersects,
+  type IVec,
   type PhasorElement,
   serializeXYWH,
   SurfaceManager,
@@ -104,7 +105,7 @@ import { EdgelessSnapManager } from './utils/snap-manager.js';
 NoteCut;
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
-  viewportUpdated: Slot;
+  viewportUpdated: Slot<{ zoom: number; center: IVec }>;
   selectionUpdated: Slot<EdgelessSelectionState>;
   selectedRectUpdated: Slot<{
     type: 'move' | 'select' | 'resize';
@@ -264,7 +265,7 @@ export class EdgelessPageBlockComponent
   clipboard = new EdgelessClipboard(this.page, this);
 
   slots = {
-    viewportUpdated: new Slot(),
+    viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
     selectedBlocksUpdated: new Slot<BlockComponentElement[]>(),
     selectionUpdated: new Slot<EdgelessSelectionState>(),
     selectedRectUpdated: new Slot<{
@@ -481,7 +482,7 @@ export class EdgelessPageBlockComponent
     // this.model.children.forEach(note => {
     //   note.propsUpdated.on(() => this.selection.syncDraggingArea());
     // });
-    const { _disposables, slots, page } = this;
+    const { _disposables, slots, page, surface } = this;
     _disposables.add(
       page.slots.blockUpdated.on(e => {
         if (e.type === 'update') {
@@ -501,6 +502,12 @@ export class EdgelessPageBlockComponent
         if (element) {
           this.connector.syncConnectorPos([element]);
         }
+      })
+    );
+
+    _disposables.add(
+      surface.viewport.slots.viewportUpdated.on(({ zoom, center }) => {
+        this.slots.viewportUpdated.emit({ zoom, center });
       })
     );
 
@@ -1129,9 +1136,7 @@ export class EdgelessPageBlockComponent
     if (viewportData) {
       try {
         const { x, y, zoom } = JSON.parse(viewportData);
-        viewport.setCenter(x, y);
-        viewport.setZoom(zoom);
-        this.slots.viewportUpdated.emit();
+        viewport.setViewport(zoom, [x, y]);
         return true;
       } catch (e) {
         return false;
@@ -1172,12 +1177,11 @@ export class EdgelessPageBlockComponent
     }
     return { zoom, centerX, centerY };
   }
+
   private _initViewport() {
-    const viewData = this.getFitToScreenData();
+    const { zoom, centerX, centerY } = this.getFitToScreenData();
     const { viewport } = this.surface;
-    viewport.setCenter(viewData.centerX, viewData.centerY);
-    viewport.setZoom(viewData.zoom);
-    this.slots.viewportUpdated.emit();
+    viewport.setViewport(zoom, [centerX, centerY]);
   }
 
   override updated(changedProperties: Map<string, unknown>) {
