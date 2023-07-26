@@ -294,7 +294,9 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
   override render() {
     const { type } = this.model;
-    const selected = this.selected?.is('block') ? 'selected' : '';
+    const selected = this.selected.find(sel => sel.is('block'))
+      ? 'selected'
+      : '';
 
     // hide placeholder in database
     const tipsPlaceholderTemplate = this.isInDatabase()

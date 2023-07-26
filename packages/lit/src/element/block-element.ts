@@ -1,6 +1,7 @@
 import type { BlockService } from '@blocksuite/block-std';
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
+import { PathMap } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -75,7 +76,7 @@ export class BlockElement<
   path!: string[];
 
   @state()
-  selected: BaseSelection | null = null;
+  selected: BaseSelection[] = [];
 
   get parentPath(): string[] {
     return this.path.slice(0, -1);
@@ -140,14 +141,9 @@ export class BlockElement<
 
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
-        const selection = selections.find(
-          selection => selection.blockId === this.model.id
+        const selection = selections.filter(selection =>
+          PathMap.equals(selection.path, this.path)
         );
-
-        if (!selection) {
-          this.selected = null;
-          return;
-        }
 
         this.selected = selection;
       })
