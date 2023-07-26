@@ -1,6 +1,7 @@
 import type { BlockService } from '@blocksuite/block-std';
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
+import { PathMap } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -140,12 +141,16 @@ export class BlockElement<
 
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
-        const selection = selections.find(
-          selection => selection.blockId === this.model.id
+        const selection = selections.find(selection =>
+          PathMap.equals(selection.path, this.path)
         );
 
         if (!selection) {
           this.selected = null;
+          return;
+        }
+
+        if (this.selected && this.selected.equals(selection)) {
           return;
         }
 
