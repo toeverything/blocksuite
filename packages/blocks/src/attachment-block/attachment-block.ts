@@ -7,6 +7,7 @@ import { registerService } from '../__internal__/service.js';
 import { downloadBlob } from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
+import { focusBlockByModel } from '../__internal__/utils/selection.js';
 import { toast } from '../components/toast.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
@@ -35,7 +36,11 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     }
   }
 
-  async downloadAttachment() {
+  private _focusAttachment() {
+    focusBlockByModel(this.model);
+  }
+
+  private async _downloadAttachment() {
     const attachment = await getAttachment(this.model);
     if (!attachment) {
       toast('Failed to download attachment!');
@@ -62,7 +67,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     // }
     return html`<div
       class="attachment-container"
-      @click=${this.downloadAttachment}
+      @click=${this._focusAttachment}
+      @dblclick=${this._downloadAttachment}
     >
       <div class="attachment-name">${AttachmentIcon16}${this.model.name}</div>
       <div class="attachment-size">${humanFileSize(this.model.size)}</div>
