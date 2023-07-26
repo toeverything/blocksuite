@@ -83,14 +83,14 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     if (!selection) {
       return;
     }
-    selection.selection = {
-      groupKey: this.groupKey,
-      cardId: this.cardId,
-      focus: {
-        columnId: this.column.id,
-        isEditing: editing,
-      },
-    };
+    // selection.selection = {
+    //   groupKey: this.groupKey,
+    //   cardId: this.cardId,
+    //   focus: {
+    //     columnId: this.column.id,
+    //     isEditing: editing,
+    //   },
+    // };
   };
 
   get selection() {
