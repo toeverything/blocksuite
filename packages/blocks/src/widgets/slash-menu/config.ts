@@ -150,16 +150,29 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         name: 'Link Page',
         alias: ['dual link'],
         icon: DualLinkIcon,
-        showWhen: model =>
-          !!model.page.awarenessStore.getFlag('enable_linked_page'),
+        showWhen: model => {
+          if (!model.page.awarenessStore.getFlag('enable_linked_page')) {
+            return false;
+          }
+          const pageBlock = getPageBlock(model);
+          assertExists(pageBlock);
+          const linkedPageWidgetEle = pageBlock.widgetElements.linkedPage;
+          if (!linkedPageWidgetEle) return false;
+          if (!('showLinkedPage' in linkedPageWidgetEle)) {
+            console.warn(
+              'You may not have correctly implemented the linkedPage widget! "showLinkedPage(model)" method not found on widget'
+            );
+            return false;
+          }
+          return true;
+        },
         action: ({ model }) => {
           insertContent(model, '@');
           const pageBlock = getPageBlock(model);
-          // FIXME not work when customize element
-          const linkedPageWidget = pageBlock?.querySelector<LinkedPageWidget>(
-            'affine-linked-page-widget'
-          );
-          assertExists(linkedPageWidget);
+          const widgetEle = pageBlock?.widgetElements.linkedPage;
+          assertExists(widgetEle);
+          // We have checked the existence of showLinkedPage method in the showWhen
+          const linkedPageWidget = widgetEle as LinkedPageWidget;
           // Wait for range to be updated
           setTimeout(() => {
             linkedPageWidget.showLinkedPage(model);
