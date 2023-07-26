@@ -36,6 +36,7 @@ export const NoteBlockSchema = defineBlockSchema({
       'affine:image',
       'affine:note-block-*',
       'affine:bookmark',
+      'affine:attachment',
     ],
   },
 });

@@ -21,6 +21,7 @@ declare type BlockSuiteFlags = {
   enable_linked_page: boolean;
   enable_bookmark_operation: boolean;
   enable_note_index: boolean;
+  enable_attachment_block: boolean;
 
   readonly: Record<string, boolean>;
 

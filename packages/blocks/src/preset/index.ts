@@ -1,6 +1,7 @@
 import type { LitBlockSpec } from '@blocksuite/lit';
 import { literal } from 'lit/static-html.js';
 
+import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
@@ -108,6 +109,12 @@ export const pagePreset: LitBlockSpec[] = [
       component: literal`affine-bookmark`,
     },
   },
+  {
+    schema: AttachmentBlockSchema,
+    view: {
+      component: literal`affine-attachment`,
+    },
+  },
 ];
 
 export const edgelessPreset: LitBlockSpec[] = [
@@ -170,6 +177,12 @@ export const edgelessPreset: LitBlockSpec[] = [
     schema: BookmarkBlockSchema,
     view: {
       component: literal`affine-bookmark`,
+    },
+  },
+  {
+    schema: AttachmentBlockSchema,
+    view: {
+      component: literal`affine-attachment`,
     },
   },
 ];

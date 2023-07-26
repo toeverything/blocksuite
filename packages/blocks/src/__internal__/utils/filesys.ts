@@ -222,3 +222,42 @@ export const uploadImageFromLocal = async (storage: BlobManager) => {
   }
   return res;
 };
+
+/**
+ * See https://gist.github.com/davalapar/d0a5ba7cce4bc599f54800da22926da2
+ */
+export const uploadFileFromLocal = async (
+  storage: BlobManager,
+  beforeUpload?: (file: File) => boolean | Promise<boolean>
+) => {
+  const file = await openFileOrFiles({
+    acceptType: 'Any',
+  });
+  if (!file) return;
+  const allowUpload = beforeUpload ? await beforeUpload(file) : true;
+  if (!allowUpload) return;
+
+  // The original file name can not be modified after the file is uploaded to the storage,
+  // so we create a new file with a fixed name to prevent privacy leaks.
+  const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
+    type: file.type,
+  });
+  const sourceId = await storage.set(anonymousFile);
+  return {
+    // Notice: we return the original file here, not the anonymous file.
+    file,
+    sourceId,
+  };
+};
+
+export function downloadBlob(blob: Blob, name: string) {
+  const dataURL = URL.createObjectURL(blob);
+  const tmpLink = document.createElement('a');
+  const event = new MouseEvent('click');
+  tmpLink.download = name;
+  tmpLink.href = dataURL;
+  tmpLink.dispatchEvent(event);
+
+  tmpLink.remove();
+  URL.revokeObjectURL(dataURL);
+}

@@ -170,6 +170,7 @@ export function focusBlockByModel(
       'affine:code',
       'affine:database',
       'affine:bookmark',
+      'affine:attachment',
     ])
   ) {
     assertExists(pageBlock.selection);
