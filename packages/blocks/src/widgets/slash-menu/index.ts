@@ -99,19 +99,12 @@ export class SlashMenuWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.handleEvent('keyDown', this._onKeyDown, { global: true });
+    this.handleEvent('keyDown', this._onKeyDown);
   }
 
   private _onKeyDown = (ctx: UIEventStateContext) => {
     const flag = this.root.page.awarenessStore.getFlag('enable_slash_menu');
     if (!flag) return;
-
-    const text = this.root.selectionManager.value.find(selection =>
-      selection.is('text')
-    );
-    if (!text) {
-      return;
-    }
 
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
