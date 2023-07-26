@@ -699,7 +699,7 @@ export class DatabaseSelectionManager extends BaseSelection {
       path: json.path as string[],
       databaseId: json.databaseId as string,
       rowsSelection: json.rowsSelection as MultiSelection,
-      columnsSelection: json.columnSelection as MultiSelection,
+      columnsSelection: json.columnsSelection as MultiSelection,
       focus: json.focus as CellFocus,
       isEditing: json.isEditing as boolean,
     });
