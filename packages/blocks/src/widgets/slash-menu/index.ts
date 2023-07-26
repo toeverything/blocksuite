@@ -106,6 +106,13 @@ export class SlashMenuWidget extends WidgetElement {
     const flag = this.root.page.awarenessStore.getFlag('enable_slash_menu');
     if (!flag) return;
 
+    const text = this.root.selectionManager.value.find(selection =>
+      selection.is('text')
+    );
+    if (!text) {
+      return;
+    }
+
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
     if (!this.options.isTriggerKey(event)) return;
