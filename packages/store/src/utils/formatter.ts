@@ -33,13 +33,21 @@ function initCustomFormatter() {
       if (!isBaseBlockModel(obj) || config.expand) {
         return null;
       }
+      if (obj.text) {
+        return [
+          'div',
+          {},
+          ['span', bannerStyle, 'BaseBlockModel'],
+          ['span', typeStyle, obj.flavour],
+          obj.text.toString(),
+        ];
+      }
 
       return [
         'div',
         {},
         ['span', bannerStyle, 'BaseBlockModel'],
         ['span', typeStyle, obj.flavour],
-        obj.text?.toString(),
       ];
     },
     hasBody(obj: unknown) {
