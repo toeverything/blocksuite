@@ -1,6 +1,10 @@
 import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
 import { CheckboxCell } from '../../table/components/column-type/checkbox.js';
 import {
+  DateCell,
+  DateCellEditing,
+} from '../../table/components/column-type/date.js';
+import {
   LinkCell,
   LinkCellEditing,
 } from '../../table/components/column-type/link.js';
@@ -29,10 +33,6 @@ import {
   TextCellEditing,
 } from '../../table/components/column-type/text.js';
 import { TitleCell } from '../../table/components/column-type/title.js';
-import {
-  DateCell,
-  DateCellEditing,
-} from '../table/components/column-type/date.js';
 import {
   checkboxHelper,
   dateHelper,
