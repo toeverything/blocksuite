@@ -499,110 +499,101 @@ function handleListBlockForwardDelete(page: Page, model: ExtendedModel) {
     }
   }
 }
+
+function handleParagraphOrListSibling(
+  page: Page,
+  model: ExtendedModel,
+  previousSibling: ExtendedModel,
+  parent: ExtendedModel
+) {
+  if (!matchFlavours(previousSibling, ['affine:paragraph', 'affine:list']))
+    return false;
+
+  page.captureSync();
+  const preTextLength = previousSibling.text?.length || 0;
+  model.text?.length && previousSibling.text?.join(model.text as Text);
+  page.deleteBlock(model, {
+    bringChildrenTo: parent,
+  });
+  const vEditor = getVirgoByModel(previousSibling);
+  vEditor?.setVRange({
+    index: preTextLength,
+    length: 0,
+  });
+  return true;
+}
+
+function handleEmbedDividerCodeSibling(
+  page: Page,
+  model: ExtendedModel,
+  previousSibling: ExtendedModel
+) {
+  if (
+    !matchFlavours(previousSibling, [
+      'affine:image',
+      'affine:divider',
+      'affine:code',
+      'affine:bookmark',
+    ] as const)
+  )
+    return false;
+
+  focusBlockByModel(previousSibling);
+  if (!model.text?.length) {
+    page.captureSync();
+    page.deleteBlock(model);
+  }
+  return true;
+}
+
+function handleNoPreviousSibling(page: Page, model: ExtendedModel) {
+  const text = model.text;
+  const titleElement = document.querySelector(
+    '.affine-default-page-block-title'
+  ) as HTMLTextAreaElement | null;
+  // Probably no title, e.g. in edgeless mode
+  if (!titleElement) return false;
+
+  const pageModel = getModelByElement(titleElement) as PageBlockModel;
+  const title = pageModel.title;
+
+  page.captureSync();
+  let textLength = 0;
+  if (text) {
+    textLength = text.length;
+    title.join(text);
+  }
+
+  // Preserve at least one block to be able to focus on container click
+  if (page.getNextSibling(model)) {
+    page.deleteBlock(model);
+  } else {
+    text?.clear();
+  }
+  focusTitle(page, title.length - textLength);
+  return true;
+}
+
 function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
-  function handleParagraphOrListSibling(
-    page: Page,
-    model: ExtendedModel,
-    previousSibling: ExtendedModel | null,
-    parent: ExtendedModel
-  ) {
-    if (
-      !previousSibling ||
-      !matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
-    )
-      return false;
-
-    page.captureSync();
-    const preTextLength = previousSibling.text?.length || 0;
-    model.text?.length && previousSibling.text?.join(model.text as Text);
-    page.deleteBlock(model, {
-      bringChildrenTo: parent,
-    });
-    const vEditor = getVirgoByModel(previousSibling);
-    vEditor?.setVRange({
-      index: preTextLength,
-      length: 0,
-    });
-    return true;
-  }
-
-  function handleEmbedDividerCodeSibling(
-    page: Page,
-    model: ExtendedModel,
-    previousSibling: ExtendedModel | null
-  ) {
-    if (
-      !previousSibling ||
-      !matchFlavours(previousSibling, [
-        'affine:image',
-        'affine:divider',
-        'affine:code',
-      ] as const)
-    )
-      return false;
-
-    focusBlockByModel(previousSibling);
-    if (!model.text?.length) {
-      page.captureSync();
-      page.deleteBlock(model);
-    }
-    return true;
-  }
-
-  function handleNoPreviousSibling(
-    page: Page,
-    model: ExtendedModel,
-    previousSibling: ExtendedModel | null
-  ) {
-    if (previousSibling) return false;
-
-    const text = model.text;
-    const titleElement = document.querySelector(
-      '.affine-default-page-block-title'
-    ) as HTMLTextAreaElement | null;
-    // Probably no title, e.g. in edgeless mode
-    if (!titleElement) return false;
-
-    const pageModel = getModelByElement(titleElement) as PageBlockModel;
-    const title = pageModel.title;
-
-    page.captureSync();
-    let textLength = 0;
-    if (text) {
-      textLength = text.length;
-      title.join(text);
-    }
-
-    // Preserve at least one block to be able to focus on container click
-    if (page.getNextSibling(model)) {
-      page.deleteBlock(model);
-    } else {
-      text?.clear();
-    }
-    focusTitle(page, title.length - textLength);
-    return true;
-  }
-
   const parent = page.getParent(model);
   if (!parent) return false;
   const previousSibling = getPreviousBlock(model);
+  if (!previousSibling) {
+    return handleNoPreviousSibling(page, model);
+  }
 
+  // TODO handle in block service
   if (matchFlavours(parent, ['affine:database'])) {
-    if (previousSibling) {
-      page.deleteBlock(model);
-      focusBlockByModel(previousSibling);
-      return true;
-    } else {
-      return handleNoPreviousSibling(page, model, previousSibling);
-    }
+    page.deleteBlock(model);
+    focusBlockByModel(previousSibling);
+    return true;
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
       handleEmbedDividerCodeSibling(page, model, previousSibling) ||
-      handleNoPreviousSibling(page, model, previousSibling)
+      handleUnknownBlockBackspace(previousSibling)
     );
   }
-
   return false;
 }
 
