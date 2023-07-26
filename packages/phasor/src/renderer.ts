@@ -210,6 +210,39 @@ export class Renderer implements SurfaceViewport {
     this._emitViewportUpdatedSlot();
   }
 
+  setViewport(
+    newZoom: number,
+    newCenter = Vec.toVec(this.center),
+    smooth = false
+  ) {
+    const preZoom = this._zoom;
+    if (smooth) {
+      const cofficient = preZoom / newZoom;
+      if (cofficient === 1) {
+        this.smoothTranslate(newCenter[0], newCenter[1]);
+      } else {
+        const center = [this.centerX, this.centerY];
+        const focusPoint = Vec.mul(
+          Vec.sub(newCenter, Vec.mul(center, cofficient)),
+          1 / (1 - cofficient)
+        );
+        this.smoothZoom(newZoom, Vec.toPoint(focusPoint));
+      }
+    } else {
+      this.setCenter(newCenter[0], newCenter[1]);
+      this.setZoom(newZoom);
+    }
+  }
+
+  setViewportByBound(bound: Bound, padding = [0, 0], smooth = false) {
+    const zoom = Math.min(
+      (this.width - padding[0]) / bound.w,
+      (this.height - padding[1]) / bound.h
+    );
+    const center = bound.center;
+    this.setViewport(zoom, center, smooth);
+  }
+
   smoothZoom(zoom: number, focusPoint?: IPoint) {
     const delta = zoom - this.zoom;
 

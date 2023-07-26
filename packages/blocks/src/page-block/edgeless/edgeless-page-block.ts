@@ -1136,8 +1136,7 @@ export class EdgelessPageBlockComponent
     if (viewportData) {
       try {
         const { x, y, zoom } = JSON.parse(viewportData);
-        viewport.setCenter(x, y);
-        viewport.setZoom(zoom);
+        viewport.setViewport(zoom, [x, y]);
         return true;
       } catch (e) {
         return false;
@@ -1180,10 +1179,9 @@ export class EdgelessPageBlockComponent
   }
 
   private _initViewport() {
-    const viewData = this.getFitToScreenData();
+    const { zoom, centerX, centerY } = this.getFitToScreenData();
     const { viewport } = this.surface;
-    viewport.setCenter(viewData.centerX, viewData.centerY);
-    viewport.setZoom(viewData.zoom);
+    viewport.setViewport(zoom, [centerX, centerY]);
   }
 
   override updated(changedProperties: Map<string, unknown>) {

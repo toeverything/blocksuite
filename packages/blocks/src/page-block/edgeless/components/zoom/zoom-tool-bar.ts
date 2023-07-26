@@ -112,20 +112,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
 
   private _zoomToFit() {
     const { centerX, centerY, zoom } = this.edgeless.getFitToScreenData();
-    const { viewport } = this;
-    const preZoom = this.zoom;
-    const newZoom = zoom;
-    const cofficient = preZoom / newZoom;
-    if (cofficient === 1) {
-      viewport.smoothTranslate(centerX, centerY);
-    } else {
-      const center = new Point(viewport.centerX, viewport.centerY);
-      const newCenter = new Point(centerX, centerY);
-      const focusPoint = newCenter
-        .subtract(center.scale(cofficient))
-        .scale(1 / (1 - cofficient));
-      viewport.smoothZoom(zoom, focusPoint);
-    }
+    this.viewport.setViewport(zoom, [centerX, centerY], true);
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
