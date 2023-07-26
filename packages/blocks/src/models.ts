@@ -3,6 +3,10 @@
 import type { BlockSchema } from '@blocksuite/store';
 import type { z } from 'zod';
 
+import {
+  type AttachmentBlockModel,
+  AttachmentBlockSchema,
+} from './attachment-block/attachment-model.js';
 import type { BookmarkBlockModel } from './bookmark-block/bookmark-model.js';
 import { BookmarkBlockSchema } from './bookmark-block/bookmark-model.js';
 import {
@@ -58,6 +62,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
 export const __unstableSchemas = [
   DatabaseBlockSchema,
   DataViewBlockSchema,
+  AttachmentBlockSchema,
 ] satisfies z.infer<typeof BlockSchema>[];
 
 // TODO support dynamic register
@@ -73,6 +78,7 @@ export type BlockSchemas = {
   'affine:database': DatabaseBlockModel;
   'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
+  'affine:attachment': AttachmentBlockModel;
 };
 
 export type Flavour = keyof BlockSchemas;
