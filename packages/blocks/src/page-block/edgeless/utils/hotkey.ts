@@ -24,16 +24,13 @@ import {
 } from '../components/component-toolbar/change-shape-button.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type { Selectable } from '../services/tools-manager.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from './consts.js';
 import { isTopLevelBlock } from './query.js';
-import type {
-  EdgelessSelectionState,
-  Selectable,
-} from './selection-manager.js';
 
 function setEdgelessTool(
   edgeless: EdgelessPageBlockComponent,
@@ -41,10 +38,10 @@ function setEdgelessTool(
   ignoreActiveState = false
 ) {
   // when editing, should not update mouse mode by shortcut
-  if (!ignoreActiveState && edgeless.selection.isActive) {
+  if (!ignoreActiveState && edgeless.selection.editing) {
     return;
   }
-  edgeless.selection.setEdgelessTool(edgelessTool);
+  edgeless.tools.setEdgelessTool(edgelessTool);
 }
 
 function bindSpace(edgeless: EdgelessPageBlockComponent) {
@@ -55,7 +52,8 @@ function bindSpace(edgeless: EdgelessPageBlockComponent) {
   hotkey.addListener(
     HOTKEYS.SPACE,
     (event: KeyboardEvent) => {
-      const { edgelessTool: edgelessTool, state } = edgeless.selection;
+      const { edgelessTool: edgelessTool } = edgeless.tools;
+      const { state } = edgeless.selection;
       if (event.type === 'keydown') {
         if (edgelessTool.type === 'pan') {
           return;
@@ -90,28 +88,24 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
     // TODO: add `selection-state` to handle `block`, `native`, `note`, `shape`, etc.
     deleteModelsByRange(edgeless.page);
 
-    if (edgeless.selection.isActive) return;
+    if (edgeless.selection.editing) return;
 
-    const { elements } = edgeless.selection.state;
-    elements.forEach(id => {
-      const model = edgeless.page.getBlockById(id);
-
-      if (!model) return;
-
-      if (isTopLevelBlock(model as Selectable)) {
+    const { elements } = edgeless.selection;
+    elements.forEach(element => {
+      if (isTopLevelBlock(element)) {
         const children = edgeless.page.root?.children ?? [];
         // FIXME: should always keep at least 1 note
         if (children.length > 1) {
-          edgeless.page.deleteBlock(model);
+          edgeless.page.deleteBlock(element);
         }
       } else {
-        edgeless.connector.detachConnectors([model as Connectable]);
-        edgeless.surface.removeElement(model.id);
+        edgeless.connector.detachConnectors([element as Connectable]);
+        edgeless.surface.removeElement(element.id);
       }
     });
 
-    edgeless.selection.clear();
-    edgeless.selection.slots.selectionUpdated.emit(edgeless.selection.state);
+    edgeless.tools.clear();
+    edgeless.selection.setSelection(edgeless.selection.state);
   }
   hotkey.addListener(HOTKEYS.BACKSPACE, backspace);
   hotkey.addListener(HOTKEYS.DELETE, backspace);
@@ -206,15 +200,15 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
 
     // issue #1814
     hotkey.addListener(HOTKEYS.ESC, () => {
-      edgeless.slots.selectionUpdated.emit({ elements: [], editing: false });
+      edgeless.selection.setSelection({ elements: [], editing: false });
       setEdgelessTool(edgeless, { type: 'default' }, true);
     });
 
     hotkey.addListener(HOTKEYS.SELECT_ALL, keyboardEvent => {
-      if (edgeless.selection.isActive) return;
+      if (edgeless.selection.editing) return;
 
       keyboardEvent.preventDefault();
-      edgeless.slots.selectionUpdated.emit({
+      edgeless.selection.setSelection({
         elements: [
           ...edgeless.notes.map(note => note.id),
           ...edgeless.surface.getElements().map(el => el.id),

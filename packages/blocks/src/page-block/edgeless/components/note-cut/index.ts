@@ -93,10 +93,8 @@ export class NoteCut extends WithDisposable(LitElement) {
   private get _notHovering() {
     return (
       this.edgelessPage.edgelessTool.type !== 'default' ||
-      (
-        this.edgelessPage.service?.selection
-          ?.currentController as DefaultToolController
-      ).dragType !== DefaultModeDragType.None
+      (this.edgelessPage.tools.currentController as DefaultToolController)
+        .dragType !== DefaultModeDragType.None
     );
   }
 
@@ -270,7 +268,7 @@ export class NoteCut extends WithDisposable(LitElement) {
       page.getBlockById(newNoteId) as NoteBlockModel
     );
 
-    this.edgelessPage.slots.selectedBlocksUpdated.emit([]);
+    this.edgelessPage.clearSelectedBlocks();
     this._hide();
   }
 

@@ -2,7 +2,11 @@ import type { Page, StackItem, Workspace } from '@blocksuite/store';
 import { DisposableGroup, Slot } from '@blocksuite/store';
 
 import type { BaseSelection } from './base.js';
-import { BlockSelection, TextSelection } from './variants/index.js';
+import {
+  BlockSelection,
+  SurfaceSelection,
+  TextSelection,
+} from './variants/index.js';
 
 interface SelectionConstructor {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,7 +41,7 @@ export class SelectionManager {
   }
 
   private _setupDefaultSelections() {
-    this.register([TextSelection, BlockSelection]);
+    this.register([TextSelection, BlockSelection, SurfaceSelection]);
   }
 
   getInstance<T extends BlockSuiteSelectionType>(

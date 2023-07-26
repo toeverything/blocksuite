@@ -27,8 +27,8 @@ import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import type { Selectable } from '../../services/tools-manager.js';
 import { isTopLevelBlock } from '../../utils/query.js';
-import type { Selectable } from '../../utils/selection-manager.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
@@ -174,16 +174,18 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+
     this._disposables.add(
-      this.edgeless.selection.slots.update.on(() => {
+      this.edgeless.selection.slots.updated.on(() => {
         this.selectionState = this.edgeless.selection.state;
       })
     );
+    this.selectionState = this.edgeless.selection.state;
   }
 
   override render() {
     const groupedSelected = this._groupSelected();
-    const { edgeless, selected } = this;
+    const { edgeless } = this;
     const { shape, brush, connector, note, text } = groupedSelected;
 
     // when selected types more than two, only show `more` button
@@ -209,8 +211,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
     return html`<div class="container" @pointerdown=${stopPropagation}>
       ${join(buttons, () => '')} ${divider}
-      <edgeless-more-button .elements=${selected} .edgeless=${edgeless}>
-      </edgeless-more-button>
+      <edgeless-more-button .edgeless=${edgeless}></edgeless-more-button>
     </div>`;
   }
 }

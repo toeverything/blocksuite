@@ -13,6 +13,7 @@ import {
 import { assertExists, type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
@@ -21,7 +22,6 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
-import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
@@ -101,6 +101,10 @@ export class EdgelessClipboard implements Clipboard {
     document.body.addEventListener('paste', this._onPaste);
   }
 
+  get toolMgr() {
+    return this._edgeless.tools;
+  }
+
   get selection() {
     return this._edgeless.selection;
   }
@@ -148,7 +152,7 @@ export class EdgelessClipboard implements Clipboard {
       });
     });
 
-    this.selection.slots.selectionUpdated.emit({
+    this.selection.setSelection({
       editing: false,
       elements: [],
     });
@@ -159,10 +163,10 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const { state } = this.selection;
+    const { state, elements } = this.selection;
     // when note active, handle copy like page mode
     if (state.editing) {
-      if (isPhasorElementWithText(state.selected[0])) {
+      if (isPhasorElementWithText(elements[0])) {
         copyOnPhasorElementWithText(this._edgeless);
       } else {
         const range = getCurrentBlockRange(this._page);
@@ -171,7 +175,7 @@ export class EdgelessClipboard implements Clipboard {
       }
       return;
     }
-    const data = prepareClipboardData(state.selected, this.surface);
+    const data = prepareClipboardData(elements, this.surface);
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
@@ -189,9 +193,9 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    const { state } = this.selection;
-    if (state.active) {
-      if (!isPhasorElementWithText(state.selected[0])) {
+    const { state, elements } = this.selection;
+    if (state.editing) {
+      if (!isPhasorElementWithText(elements[0])) {
         this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element
@@ -358,7 +362,7 @@ export class EdgelessClipboard implements Clipboard {
       }),
     ];
 
-    this.selection.slots.selectionUpdated.emit({
+    this.selection.setSelection({
       editing: false,
       elements: newSelected,
     });
@@ -381,7 +385,7 @@ export class EdgelessClipboard implements Clipboard {
       groupedByType.notes || []
     );
 
-    const { lastMousePos } = this.selection;
+    const { lastMousePos } = this.toolMgr;
     const [modelX, modelY] = this.surface.toModelCoord(
       lastMousePos.x,
       lastMousePos.y

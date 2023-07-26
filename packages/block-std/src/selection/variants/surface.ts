@@ -1,7 +1,7 @@
 import { BaseSelection } from '../base.js';
 
 export class SurfaceSelection extends BaseSelection {
-  static override readonly type = 'surface';
+  static override type = 'surface';
 
   readonly elements: string[];
   readonly editing: boolean;
@@ -17,6 +17,10 @@ export class SurfaceSelection extends BaseSelection {
     this.elements = elements;
     this.editing = editing;
     this.by = by;
+  }
+
+  isEmpty() {
+    return this.elements.length === 0 && !this.editing;
   }
 
   override equals(other: BaseSelection): boolean {
@@ -53,5 +57,11 @@ export class SurfaceSelection extends BaseSelection {
       json.editing as boolean,
       json.by as string
     );
+  }
+}
+
+declare global {
+  interface BlockSuiteSelection {
+    surface: typeof SurfaceSelection;
   }
 }

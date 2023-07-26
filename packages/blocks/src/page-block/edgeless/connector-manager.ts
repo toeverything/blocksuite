@@ -30,8 +30,8 @@ import {
   type TopLevelBlockModel,
 } from '../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import type { Selectable } from './services/tools-manager.js';
 import { isTopLevelBlock } from './utils/query.js';
-import type { Selectable } from './utils/selection-manager.js';
 
 function rBound(ele: Connectable, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);

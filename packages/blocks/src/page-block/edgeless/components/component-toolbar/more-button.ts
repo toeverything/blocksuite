@@ -9,6 +9,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  groupBy,
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
@@ -132,24 +133,12 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return this.edgeless.surface;
   }
 
-  private _splitElements(): {
-    notes: TopLevelBlockModel[];
-    shapes: PhasorElement[];
-  } {
-    const notes: TopLevelBlockModel[] = [];
-    const shapes: PhasorElement[] = [];
-    this.elements.forEach(id => {
-      const element = this.edgeless.getElementModel(id);
-
-      if (isTopLevelBlock(element)) {
-        notes.push(element);
-      } else {
-        shapes.push(element as PhasorElement);
-      }
-    });
-    return {
-      notes: notes,
-      shapes,
+  private _splitElements() {
+    return groupBy(this.selection.elements, element => {
+      return isTopLevelBlock(element) ? 'notes' : 'shapes';
+    }) as {
+      notes: TopLevelBlockModel[];
+      shapes: PhasorElement[];
     };
   }
 
@@ -167,7 +156,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         this.surface.removeElement(element.id);
       }
     });
-    this.selection.slots.selectionUpdated.emit({
+    this.selection.setSelection({
       elements: [],
       editing: false,
     });

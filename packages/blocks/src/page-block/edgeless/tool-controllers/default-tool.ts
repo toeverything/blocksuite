@@ -38,6 +38,7 @@ import {
   getNativeSelectionMouseDragInfo,
 } from '../../utils/position.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
+import type { Selectable } from '../services/tools-manager.js';
 import {
   getXYWH,
   isPhasorElement,
@@ -45,7 +46,6 @@ import {
   pickBlocksByBound,
   pickTopBlock,
 } from '../utils/query.js';
-import type { Selectable } from '../utils/selection-manager.js';
 import { addText, mountShapeEditor, mountTextEditor } from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
@@ -96,15 +96,15 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get selectedBlocks() {
-    return this._edgeless.selection.selectedBlocks;
+    return this.selection.selectedBlocks;
   }
 
   get state() {
-    return this._edgeless.selection.state;
+    return this.selection.state;
   }
 
   get isActive() {
-    return this._edgeless.selection.state.editing;
+    return this.selection.state.editing;
   }
 
   private _getModelById(id: string) {
@@ -121,7 +121,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _setNoneSelectionState() {
-    this.selection.slots.selectionUpdated.emit({
+    if (this.selection.isEmpty) return;
+
+    this.selection.setSelection({
       elements: [],
       editing: false,
     });
@@ -129,7 +131,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _setSelectionState(elements: string[], editing: boolean, by = false) {
-    this.selection.slots.selectionUpdated.emit({
+    this.selection.setSelection({
       elements,
       editing,
       by: by ? 'selecting' : undefined,
@@ -156,7 +158,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         // then the currently clicked noteBlock should also be in an active state when selected.
         this._setSelectionState([element.id], true);
         handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
-        this._edgeless.slots.selectedBlocksUpdated.emit([]);
+        this.selection.setSelectedBlock([]);
         return;
       }
     }
@@ -212,7 +214,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     // TODO: refactor
     if (this.selectedBlocks.length) {
-      this._edgeless.slots.selectedBlocksUpdated.emit(this.selectedBlocks);
+      this.selection.setSelectedBlock(this.selectedBlocks);
     }
   }
 

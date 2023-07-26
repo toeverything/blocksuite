@@ -1,17 +1,15 @@
 import {
   type EventName,
-  type PointerEventState,
+  PointerEventState,
   SurfaceSelection,
   type UIEventDispatcher,
   type UIEventHandler,
+  type UIEventState,
 } from '@blocksuite/block-std';
 import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
-import type { AwarenessEvent } from '@blocksuite/store';
-import { Slot } from '@blocksuite/store';
 
 import {
   AbstractSelectionManager,
-  type BlockComponentElement,
   type EdgelessTool,
   getEditorContainerByElement,
   isDatabaseInput,
@@ -39,7 +37,7 @@ import {
   getXYWH,
   isTopLevelBlock,
   pickTopBlock,
-} from './query.js';
+} from '../utils/query.js';
 
 export type Selectable = TopLevelBlockModel | PhasorElement;
 
@@ -66,6 +64,7 @@ export interface EdgelessHoverState {
 }
 
 export interface EdgelessSelectionState {
+  blockId?: string;
   /* The selected note or phasor element */
   elements: string[];
   /* True if the selected content is active (like after double click) */
@@ -74,17 +73,12 @@ export interface EdgelessSelectionState {
   by?: 'selecting';
 }
 
-export interface EdgelessSelection {
-  elements: string[];
-  editing: boolean;
-}
-
 export interface SelectionArea {
   start: DOMPoint;
   end: DOMPoint;
 }
 
-export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
+export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
   private _edgelessTool: EdgelessTool = {
     type: 'default',
   };
@@ -100,19 +94,8 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     timeStamp: number;
   } | null = null;
 
-  slots = {
-    selectionUpdated: new Slot<EdgelessSelectionState | SurfaceSelection>(),
-    update: new Slot<AwarenessEvent>(),
-  };
-
   // pressed shift key
   private _shiftKey = false;
-
-  // selected blocks
-  selectedBlocks: BlockComponentElement[] = [];
-
-  // Cache the last edited elements.
-  lastState: SurfaceSelection | null = null;
 
   // Holds the state of the current selected elements.
   state: SurfaceSelection = SurfaceSelection.fromJSON({
@@ -120,20 +103,12 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     elements: [],
   });
 
-  get awareness() {
-    return this.page.awarenessStore;
+  get selection() {
+    return this.container.selection;
   }
 
   get surface() {
     return this.container.surface;
-  }
-
-  get isActive() {
-    return this.isEditing;
-  }
-
-  get isEditing() {
-    return this.state?.editing;
   }
 
   get lastMousePos() {
@@ -192,7 +167,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     };
 
     this._initMouseAndWheelEvents();
-    this._initSlot();
   }
 
   private _updateLastMousePos(e: PointerEventState) {
@@ -200,30 +174,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       x: e.x,
       y: e.y,
     };
-  }
-
-  private _initSlot() {
-    this._disposables.add(
-      this.slots.selectionUpdated.on(state => {
-        this.setSelection(state);
-      })
-    );
-
-    this._disposables.add(
-      this.awareness.slots.update.on(state => {
-        if (this.awareness.awareness.clientID === state.id) {
-          console.log('awareness update', state);
-          this.lastState = this.state;
-          this.state = state.state?.selection?.[0]
-            ? SurfaceSelection.fromJSON(state.state?.selection[0])
-            : SurfaceSelection.fromJSON({ elements: [], editing: false });
-          console.log(this.state);
-        }
-
-        console.log('emit');
-        this.slots.update.emit(state);
-      })
-    );
   }
 
   private async _initMouseAndWheelEvents() {
@@ -313,7 +263,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       this._onContainerPointerOut(event);
     });
     this._add('contextMenu', ctx => {
-      const event = ctx.get('pointerState');
+      const event = ctx.get('defaultState');
       this._onContainerContextMenu(event);
     });
     this._add('selectionChange', () => {
@@ -403,15 +353,23 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     return this._controllers[this.edgelessTool.type].onContainerMouseOut(e);
   };
 
-  private _onContainerContextMenu = (e: PointerEventState) => {
-    e.raw.preventDefault();
+  private _onContainerContextMenu = (e: UIEventState) => {
+    e.event.preventDefault();
+    const pointerEventState = new PointerEventState({
+      event: e.event as PointerEvent,
+      rect: this._dispatcher.root.getBoundingClientRect(),
+      startX: 0,
+      startY: 0,
+      last: null,
+    });
+
     const edgelessTool = this.edgelessTool;
     if (edgelessTool.type !== 'pan' && !this._rightClickTimer) {
       this._rightClickTimer = {
         edgelessTool: edgelessTool,
-        timeStamp: e.raw.timeStamp,
+        timeStamp: e.event.timeStamp,
         timer: window.setTimeout(() => {
-          this._controllers['pan'].onContainerDragStart(e);
+          this._controllers['pan'].onContainerDragStart(pointerEventState);
         }, 233),
       };
     }
@@ -467,14 +425,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     updateLocalSelectionRange(this.page);
   };
 
-  setSelection(selection: EdgelessSelectionState | SurfaceSelection) {
-    const awareness =
-      selection instanceof SurfaceSelection
-        ? selection.toJSON()
-        : (selection as Record<string, any>);
-    this.awareness.setLocalSelection([awareness]);
-  }
-
   refreshRemoteSelection() {
     const element = document.querySelector('remote-selection');
     if (element) {
@@ -524,6 +474,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   setEdgelessTool = (
     edgelessTool: EdgelessTool,
     state: EdgelessSelectionState | SurfaceSelection = {
+      blockId: '',
       elements: [],
       editing: false,
     }
@@ -533,24 +484,16 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].beforeModeSwitch(edgelessTool);
 
-    if (edgelessTool.type === 'default') {
-      if (!state['elements'].length && this.lastState) {
-        state = this.lastState;
-        this.lastState = null;
-      } else {
-        this.lastState =
-          state instanceof SurfaceSelection
-            ? state
-            : SurfaceSelection.fromJSON(
-                state as unknown as Record<string, unknown>
-              );
-      }
-    } else if (this.state?.elements.length) {
-      this.lastState = this.state;
+    if (
+      edgelessTool.type === 'default' &&
+      !state['elements'].length &&
+      this.selection.lastState
+    ) {
+      state = this.selection.lastState;
     }
 
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
-    this.slots.selectionUpdated.emit(state);
+    this.selection.setSelection(state);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
@@ -560,8 +503,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   }
 
   clear() {
-    this.selectedBlocks = [];
-    this.lastState = null;
     this.state = SurfaceSelection.fromJSON({ elements: [], editing: false });
   }
 

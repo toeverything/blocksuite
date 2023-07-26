@@ -31,9 +31,10 @@ export function mountTextEditor(
   pageBlockContainer.appendChild(textEditor);
   textEditor.mount(textElement, edgeless);
   textEditor.vEditor?.focusByIndex(cursorIndex);
-  edgeless.selection.switchToDefaultMode({
-    selected: [textElement],
-    active: true,
+
+  edgeless.tools.switchToDefaultMode({
+    elements: [textElement.id],
+    editing: true,
   });
 }
 
@@ -47,9 +48,9 @@ export function mountShapeEditor(
   pageBlockContainer.appendChild(shapeEditor);
   shapeEditor.mount(shapeElement, edgeless);
   shapeEditor.vEditor?.focusEnd();
-  edgeless.selection.switchToDefaultMode({
-    selected: [shapeElement],
-    active: true,
+  edgeless.tools.switchToDefaultMode({
+    elements: [shapeElement.id],
+    editing: true,
   });
 }
 

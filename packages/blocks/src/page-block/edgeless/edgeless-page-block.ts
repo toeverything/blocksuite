@@ -35,7 +35,6 @@ import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   almostEqual,
   asyncFocusRichText,
-  type BlockComponentElement,
   bringForward,
   getRectByBlockElement,
   handleNativeRangeAtPoint,
@@ -84,6 +83,7 @@ import {
 } from './components/zoom/zoom-tool-bar.js';
 import { EdgelessConnectorManager } from './connector-manager.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
+import { type Selectable } from './services/tools-manager.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -95,17 +95,12 @@ import { xywhArrayToObject } from './utils/convert.js';
 import { bindEdgelessHotkeys } from './utils/hotkey.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid, getCursorMode } from './utils/query.js';
-import {
-  type EdgelessSelectionState,
-  type Selectable,
-} from './utils/selection-manager.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 
 NoteCut;
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot;
-  selectionUpdated: Slot<EdgelessSelectionState>;
   selectedRectUpdated: Slot<{
     type: 'move' | 'select' | 'resize';
     delta?: {
@@ -114,7 +109,6 @@ export interface EdgelessSelectionSlots {
     };
     dragging?: boolean;
   }>;
-  surfaceUpdated: Slot;
   edgelessToolUpdated: Slot<EdgelessTool>;
   reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
@@ -265,8 +259,6 @@ export class EdgelessPageBlockComponent
 
   slots = {
     viewportUpdated: new Slot(),
-    selectedBlocksUpdated: new Slot<BlockComponentElement[]>(),
-    selectionUpdated: new Slot<EdgelessSelectionState>(),
     selectedRectUpdated: new Slot<{
       type: 'move' | 'select' | 'resize';
       delta?: {
@@ -276,7 +268,6 @@ export class EdgelessPageBlockComponent
       dragging?: boolean;
     }>(),
     hoverUpdated: new Slot(),
-    surfaceUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
     reorderingNotesUpdated: new Slot<ReorderingAction<Selectable>>(),
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
@@ -304,6 +295,12 @@ export class EdgelessPageBlockComponent
     const selection = this.service?.selection;
     assertExists(selection, 'Selection should be initialized before used');
     return selection;
+  }
+
+  get tools() {
+    const toolsMgr = this.service?.tools;
+    assertExists(toolsMgr, 'ToolsManager should be initialized before used');
+    return toolsMgr;
   }
 
   snap!: EdgelessSnapManager;
@@ -336,7 +333,7 @@ export class EdgelessPageBlockComponent
 
   private _clearSelection() {
     requestAnimationFrame(() => {
-      if (!this.selection.isActive) {
+      if (!this.selection.editing) {
         resetNativeSelection(null);
       }
     });
@@ -514,13 +511,15 @@ export class EdgelessPageBlockComponent
         }
         this.components.dragHandle?.hide();
         if (this.selection.selectedBlocks.length) {
-          slots.selectedBlocksUpdated.emit([...this.selection.selectedBlocks]);
+          this.selection.setSelectedBlock(
+            this.selection.selectedBlocks.slice()
+          );
         }
         this.requestUpdate();
       })
     );
     _disposables.add(
-      slots.selectedBlocksUpdated.on(selectedBlocks => {
+      selection.slots.blocksUpdated.on(selectedBlocks => {
         this.selection.selectedBlocks = selectedBlocks;
         // TODO: remove `requestAnimationFrame`
         requestAnimationFrame(() => {
@@ -533,12 +532,11 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
     _disposables.add(
-      selection.slots.selectionUpdated.on(() => {
+      selection.slots.updated.on(() => {
         this._clearSelection();
         this.requestUpdate();
       })
     );
-    _disposables.add(slots.surfaceUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         if (edgelessTool.type !== 'default') {
@@ -555,6 +553,7 @@ export class EdgelessPageBlockComponent
         this.requestUpdate();
       })
     );
+    _disposables.add(this.tools);
     _disposables.add(this.selection);
     _disposables.add(this.surface);
     _disposables.add(bindEdgelessHotkeys(this));
@@ -601,7 +600,7 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(
       slots.pressShiftKeyUpdated.on(pressed => {
-        this.selection.shiftKey = pressed;
+        this.tools.shiftKey = pressed;
         this.requestUpdate();
       })
     );
@@ -994,7 +993,8 @@ export class EdgelessPageBlockComponent
     const note = this.notes.find(note => note.id === noteId);
     assertExists(note);
 
-    this.selection.switchToDefaultMode({
+    this.tools.switchToDefaultMode({
+      blockId: '',
       elements: [note.id],
       editing: false,
     });
@@ -1009,8 +1009,8 @@ export class EdgelessPageBlockComponent
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
-      this.slots.selectedBlocksUpdated.emit([]);
-      this.selection.slots.selectionUpdated.emit({
+      this.selection.setSelectedBlock([]);
+      this.selection.setSelection({
         elements: [noteBlock.id],
         editing: false,
       });
@@ -1032,7 +1032,7 @@ export class EdgelessPageBlockComponent
    */
   clearSelectedBlocks() {
     if (this.selection.selectedBlocks.length) {
-      this.slots.selectedBlocksUpdated.emit([]);
+      this.selection.setSelectedBlock([]);
     }
   }
 
@@ -1060,7 +1060,7 @@ export class EdgelessPageBlockComponent
       this.surface.init();
     }
     if (changedProperties.has('edgelessTool')) {
-      this.selection.edgelessTool = this.edgelessTool;
+      this.tools.edgelessTool = this.edgelessTool;
     }
     super.update(changedProperties);
   }
@@ -1068,8 +1068,8 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.slots.selectedBlocksUpdated.emit([...this.selection.selectedBlocks]);
-      this.selection.slots.selectionUpdated.emit(this.selection.state);
+      this.selection.setSelectedBlock(this.selection.selectedBlocks.slice());
+      this.selection.setSelection(this.selection.state);
     });
     resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
@@ -1204,7 +1204,7 @@ export class EdgelessPageBlockComponent
 
   override render() {
     requestAnimationFrame(() => {
-      this.selection.refreshRemoteSelection();
+      this.tools.refreshRemoteSelection();
     });
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
@@ -1215,8 +1215,10 @@ export class EdgelessPageBlockComponent
       showGrid,
       sortedNotes,
       surface,
+      tools,
     } = this;
-    const { state, draggingArea } = selection;
+    const { draggingArea } = tools;
+    const { state } = selection;
     const { viewport } = surface;
 
     const notesContainer = EdgelessNotesContainer(
@@ -1228,7 +1230,7 @@ export class EdgelessPageBlockComponent
     const { zoom, viewportX, viewportY, left, top } = viewport;
     const draggingAreaTpl = EdgelessDraggingAreaRect(draggingArea);
 
-    const hoverState = selection.getHoverState();
+    const hoverState = tools.getHoverState();
     const hoverRectTpl = EdgelessHoverRect(hoverState);
 
     const { grid, gap, translateX, translateY } = getBackgroundGrid(

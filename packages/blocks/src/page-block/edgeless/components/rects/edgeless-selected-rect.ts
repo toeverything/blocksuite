@@ -22,6 +22,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import type { Selectable } from '../../services/tools-manager.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
@@ -29,7 +30,6 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../utils/query.js';
-import type { Selectable } from '../../utils/selection-manager.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
@@ -301,8 +301,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.addEventListener('pointerdown', stopPropagation);
   }
 
+  get selection() {
+    return this.edgeless.selection;
+  }
+
   get state() {
-    return this.edgeless.selection.state;
+    return this.selection.state;
   }
 
   get page() {
@@ -345,6 +349,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     return hasBlockElement ? 'edge' : 'corner';
   }
 
+  private _getElementModel(id: string) {
+    return this.edgeless.getElementModel(id);
+  }
+
   private _onDragStart = () => {
     this._hideToolbar();
     this.requestUpdate();
@@ -358,7 +366,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     >
   ) => {
-    const { page, state, surface, _rotate, zoom } = this;
+    const { page, state, selection, surface, _rotate, zoom } = this;
     const selectedMap = new Map<string, Selectable>(
       state.elements.map(id => [
         id,
@@ -407,9 +415,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     });
 
-    const currentRect = getSelectedRect(
-      state.elements.map(id => this._getModel(id))
-    );
+    const currentRect = getSelectedRect(selection.elements);
     const [x, y] = surface.viewport.toViewCoord(currentRect.x, currentRect.y);
 
     // notes resize observer
@@ -421,22 +427,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragRotate = (center: IPoint, delta: number) => {
-    const {
-      surface,
-      state: { elements: selectedElements },
-      _rotate,
-      _resizeManager,
-    } = this;
+    const { surface, _rotate, _resizeManager, selection } = this;
     const m = new DOMMatrix()
       .translateSelf(center.x, center.y)
       .rotateSelf(delta)
       .translateSelf(-center.x, -center.y);
 
-    const elements = selectedElements
-      .map(id => this._getModel(id))
-      .filter(
-        element => !isTopLevelBlock(element) && element.type !== 'connector'
-      ) as PhasorElement[];
+    const elements = selection.elements.filter(
+      element => !isTopLevelBlock(element) && element.type !== 'connector'
+    ) as PhasorElement[];
 
     elements.forEach(element => {
       const { id, rotate } = element;
@@ -551,12 +550,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     if (!_selectedRect) return;
 
     const {
-      state: { elements: ids, editing },
+      state: { editing },
       surface,
       zoom,
+      selection,
     } = this;
 
-    const elements = ids.map(id => this._getModel(id));
+    const elements = selection.elements;
     // in surface
     const rect = getSelectedRect(elements);
 
@@ -708,14 +708,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
 
-    console.log('disposables');
     this._disposables.add(
-      this.edgeless.selection.slots.update.on(() => {
-        console.log('recive update', this.state.elements);
-        console.log(this.state.elements);
-        this._selectedElements = this.state.elements.map(id =>
-          this._getModel(id)
-        );
+      this.edgeless.selection.slots.updated.on(() => {
+        this._selectedElements = this.state.elements.reduce((pre, id) => {
+          const el = this._getElementModel(id) as Selectable;
+          this._getElementModel(id) && pre.push(el);
+          return pre;
+        }, [] as Selectable[]);
       })
     );
   }
@@ -748,8 +747,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         ? html` <edgeless-connector-handle
             .connector=${selected[0]}
             .edgeless=${edgeless}
-            .refresh=${() =>
-              edgeless.selection.slots.selectionUpdated.emit(state)}
+            .refresh=${() => edgeless.selection.setSelection(state)}
           ></edgeless-connector-handle>`
         : nothing;
 
@@ -757,10 +755,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       <div class="affine-edgeless-selected-rect" disabled="true">
         ${resizeHandles} ${connectorHandle}
       </div>
-      <edgeless-component-toolbar
-        .selectionState=${state}
-        .edgeless=${edgeless}
-      >
+      <edgeless-component-toolbar .edgeless=${edgeless}>
       </edgeless-component-toolbar>
     `;
   }

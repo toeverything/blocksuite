@@ -184,7 +184,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.selection.setEdgelessTool(edgelessTool);
+    this.edgeless.tools.setEdgelessTool(edgelessTool);
   };
 
   setZoomByAction(action: ZoomAction) {

@@ -26,7 +26,7 @@ import {
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { Selectable } from './selection-manager.js';
+import type { Selectable } from '../services/tools-manager.js';
 
 export function isTopLevelBlock(
   selectable: Selectable | BaseBlockModel | null

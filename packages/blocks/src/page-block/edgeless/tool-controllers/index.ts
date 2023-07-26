@@ -5,7 +5,7 @@ import type {
   TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { SelectionArea } from '../utils/selection-manager.js';
+import type { SelectionArea } from '../services/tools-manager.js';
 
 export abstract class EdgelessToolController<
   Tool extends EdgelessTool = EdgelessTool
