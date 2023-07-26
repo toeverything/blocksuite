@@ -200,9 +200,6 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @state()
   private _isFocus = false;
 
-  @state()
-  private _isSelected = false;
-
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
     textRenderer: attributeRenderer,
@@ -218,15 +215,6 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     // Initial placeholder state
     this._updatePlaceholder();
     registerService('affine:paragraph', paragraphService);
-    this._disposables.add(
-      this.root.selectionManager.slots.changed.on(selections => {
-        const selection = selections.find(
-          selection => selection.blockId === this.model.id
-        );
-
-        this._isSelected = selection?.type === 'block';
-      })
-    );
   }
 
   override firstUpdated() {
@@ -306,7 +294,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
   override render() {
     const { type } = this.model;
-    const selected = this._isSelected ? 'selected' : '';
+    const selected = this.selected?.is('block') ? 'selected' : '';
 
     // hide placeholder in database
     const tipsPlaceholderTemplate = this.isInDatabase()

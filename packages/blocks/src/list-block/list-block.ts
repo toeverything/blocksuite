@@ -157,9 +157,11 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     const { deep, index } = getListInfo(this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
+    const selected = this.selected?.is('block') ? 'selected' : '';
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
+    const top = shouldAddMarginTop ? 'affine-list-block-container--first' : '';
 
     const children = html`<div
       class="affine-block-children-container"
@@ -169,11 +171,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     </div>`;
 
     return html`
-      <div
-        class=${`affine-list-block-container ${
-          shouldAddMarginTop ? 'affine-list-block-container--first' : ''
-        }`}
-      >
+      <div class=${`affine-list-block-container ${top} ${selected}`}>
         <div
           class=${`affine-list-rich-text-wrapper ${
             this.model.checked ? 'affine-list--checked' : ''

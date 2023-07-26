@@ -1,11 +1,12 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type { BlockSpec } from '@blocksuite/block-std';
-import {
-  BlockStore,
+import type {
+  BlockSpec,
   SelectionManager,
   UIEventDispatcher,
+  ViewStore,
 } from '@blocksuite/block-std';
+import { BlockStore } from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
@@ -23,52 +24,6 @@ export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
   WidgetNames
 >;
 
-export class PathMap<Value = unknown> {
-  private _map = new Map<string, Value>();
-
-  constructor() {
-    this._map = new Map();
-  }
-
-  static pathToKey = (path: string[]) => {
-    return path.join('|');
-  };
-
-  static keyToPath = (key: string) => {
-    return key.split('|');
-  };
-
-  get(path: string[]) {
-    return this._map.get(PathMap.pathToKey(path));
-  }
-
-  set(path: string[], value: Value) {
-    this._map.set(PathMap.pathToKey(path), value);
-  }
-
-  delete(path: string[]) {
-    this._map.delete(PathMap.pathToKey(path));
-  }
-
-  has(path: string[]) {
-    return this._map.has(PathMap.pathToKey(path));
-  }
-
-  entries() {
-    return Array.from(this._map.entries()).map(value => {
-      return [PathMap.keyToPath(value[0]), value[1]] as const;
-    });
-  }
-
-  values() {
-    return Array.from(this._map.values());
-  }
-
-  clear() {
-    this._map.clear();
-  }
-}
-
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
   @property({ attribute: false })
@@ -82,19 +37,31 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   modelSubscribed = new Set<string>();
 
-  uiEventDispatcher!: UIEventDispatcher;
+  blockStore!: BlockStore<StaticValue, BlockElement, WidgetElement>;
 
-  selectionManager!: SelectionManager;
+  get uiEventDispatcher(): UIEventDispatcher {
+    return this.blockStore.uiEventDispatcher;
+  }
 
-  blockStore!: BlockStore<StaticValue>;
+  get selectionManager(): SelectionManager {
+    return this.blockStore.selectionManager;
+  }
 
-  blockViewMap = new PathMap<BlockElement>();
+  get viewStore(): ViewStore<BlockElement, WidgetElement> {
+    return this.blockStore.viewStore;
+  }
 
-  widgetViewMap = new PathMap<WidgetElement>();
+  get blockViewMap() {
+    return this.viewStore.blockViewMap;
+  }
+
+  get widgetViewMap() {
+    return this.viewStore.widgetViewMap;
+  }
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
-      this.blockStore.applySpecs(this.blocks);
+      this.blockStore.specStore.applySpecs(this.blocks);
     }
     if (changedProperties.has('page')) {
       this.blockStore.page = this.page;
@@ -105,35 +72,29 @@ export class BlockSuiteRoot extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.selectionManager = new SelectionManager(this, this.page.workspace);
-    this.uiEventDispatcher = new UIEventDispatcher(
-      this,
-      this.selectionManager,
-      this.page
-    );
-    this.blockStore = new BlockStore<StaticValue>({
+    this.blockStore = new BlockStore<StaticValue, BlockElement, WidgetElement>({
       root: this,
-      uiEventDispatcher: this.uiEventDispatcher,
-      selectionManager: this.selectionManager,
       workspace: this.page.workspace,
       page: this.page,
+      config: {
+        getBlockViewByNode: node => {
+          const element =
+            node && node instanceof HTMLElement ? node : node.parentElement;
+          if (!element) return null;
+
+          return element.closest(`[${this.blockIdAttr}]`);
+        },
+      },
     });
 
-    this.selectionManager.mount(this.page);
-    this.uiEventDispatcher.mount();
-
-    this.blockStore.applySpecs(this.blocks);
+    this.blockStore.mount();
+    this.blockStore.specStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.blockStore.dispose();
-
-    this.uiEventDispatcher.unmount();
-    this.selectionManager.unmount();
-    this.blockViewMap.clear();
-    this.widgetViewMap.clear();
+    this.blockStore.unmount();
   }
 
   override render() {
@@ -153,7 +114,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
-    const view = this.blockStore.getView(flavour);
+    const view = this.blockStore.specStore.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);
       return html`${nothing}`;

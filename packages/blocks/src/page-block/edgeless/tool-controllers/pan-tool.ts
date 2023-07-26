@@ -55,8 +55,6 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     this._lastPoint = [e.x, e.y];
 
     viewport.applyDeltaCenter(deltaX / zoom, deltaY / zoom);
-
-    this._edgeless.slots.viewportUpdated.emit();
   }
 
   onContainerDragEnd() {

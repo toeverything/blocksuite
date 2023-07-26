@@ -84,3 +84,4 @@ Example:
 - Youhua Tang @youhua 2023/07/14
 - Rakesh Joshi @joshirakesh 2023/07/17
 - he-he zhe-he@qq.com 2023/07/24
+- as-shura @as-shura 2023/07/24

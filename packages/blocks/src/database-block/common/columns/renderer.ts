@@ -30,7 +30,12 @@ import {
 } from '../../table/components/column-type/text.js';
 import { TitleCell } from '../../table/components/column-type/title.js';
 import {
+  DateCell,
+  DateCellEditing,
+} from '../table/components/column-type/date.js';
+import {
   checkboxHelper,
+  dateHelper,
   linkHelper,
   multiSelectHelper,
   numberHelper,
@@ -136,5 +141,13 @@ columnRenderer.register({
   cellRenderer: {
     view: createUniComponentFromWebComponent(TextCell),
     edit: createUniComponentFromWebComponent(TextCellEditing),
+  },
+});
+
+columnRenderer.register({
+  type: dateHelper.type,
+  cellRenderer: {
+    view: createUniComponentFromWebComponent(DateCell),
+    edit: createUniComponentFromWebComponent(DateCellEditing),
   },
 });
