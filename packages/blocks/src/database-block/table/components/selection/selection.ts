@@ -426,7 +426,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           },
           Enter: () => {
             const selection = this.selection;
-            if (!selection) {
+            if (!selection || selection.isEditing) {
               return false;
             }
             this.selection = {
@@ -439,7 +439,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           },
           Tab: () => {
             const selection = this.selection;
-            if (!selection) {
+            if (!selection || selection.isEditing) {
               return false;
             }
             const length = this.view.columnManagerList.length;
@@ -452,7 +452,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           },
           ArrowLeft: () => {
             const selection = this.selection;
-            if (!selection) {
+            if (!selection || selection.isEditing) {
               return false;
             }
             const length = this.view.columnManagerList.length;
@@ -465,7 +465,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           },
           ArrowRight: () => {
             const selection = this.selection;
-            if (!selection) {
+            if (!selection || selection.isEditing) {
               return false;
             }
             const length = this.view.columnManagerList.length;
@@ -478,7 +478,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           },
           ArrowUp: () => {
             const selection = this.selection;
-            if (!selection) {
+            if (!selection || selection.isEditing) {
               return false;
             }
             this.focusTo(
@@ -489,7 +489,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           },
           ArrowDown: () => {
             const selection = this.selection;
-            if (!selection) {
+            if (!selection || selection.isEditing) {
               return false;
             }
             this.focusTo(
