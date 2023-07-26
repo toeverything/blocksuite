@@ -61,7 +61,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
-      this.blockStore.applySpecs(this.blocks);
+      this.blockStore.specStore.applySpecs(this.blocks);
     }
     if (changedProperties.has('page')) {
       this.blockStore.page = this.page;
@@ -88,7 +88,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
     });
 
     this.blockStore.mount();
-    this.blockStore.applySpecs(this.blocks);
+    this.blockStore.specStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
@@ -114,7 +114,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
-    const view = this.blockStore.getView(flavour);
+    const view = this.blockStore.specStore.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);
       return html`${nothing}`;
