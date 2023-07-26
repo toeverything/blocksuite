@@ -1,4 +1,4 @@
-import { assertNotExists } from '@blocksuite/global/utils';
+import { assertNotExists, Slot } from '@blocksuite/global/utils';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
@@ -8,7 +8,7 @@ import { Bound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
-import { Vec } from './utils/vec.js';
+import { type IVec, Vec } from './utils/vec.js';
 
 export interface SurfaceViewport {
   readonly left: number;
@@ -43,6 +43,12 @@ export interface SurfaceViewport {
   ): HTMLCanvasElement;
 }
 
+function cutoff(value: number, ref: number, sign: number) {
+  if (sign > 0 && value > ref) return ref;
+  if (sign < 0 && value < ref) return ref;
+  return value;
+}
+
 /**
  * An overlay is a layer covered on top of elements,
  * can be used for rendering non-CRDT state indicators.
@@ -57,8 +63,11 @@ export class Renderer implements SurfaceViewport {
   rc: RoughCanvas;
   gridManager = new GridManager();
 
-  private _overlays: Set<Overlay> = new Set();
+  slots = {
+    viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
+  };
 
+  private _overlays: Set<Overlay> = new Set();
   private _container!: HTMLElement;
   private _left = 0;
   private _top = 0;
@@ -68,12 +77,20 @@ export class Renderer implements SurfaceViewport {
   private _zoom = 1.0;
   private _center = { x: 0, y: 0 };
   private _shouldUpdate = false;
+  private _rafId: number | null = null;
 
   constructor() {
     const canvas = document.createElement('canvas');
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.rc = new RoughCanvas(canvas);
+  }
+
+  private _emitViewportUpdatedSlot() {
+    this.slots.viewportUpdated.emit({
+      zoom: this._zoom,
+      center: Vec.toVec(this._center),
+    });
   }
 
   get left() {
@@ -169,6 +186,7 @@ export class Renderer implements SurfaceViewport {
     this._center.x = centerX;
     this._center.y = centerY;
     this._shouldUpdate = true;
+    this._emitViewportUpdatedSlot();
   }
 
   /**
@@ -189,10 +207,53 @@ export class Renderer implements SurfaceViewport {
     );
     this.setCenter(newCenter[0], newCenter[1]);
     this._shouldUpdate = true;
+    this._emitViewportUpdatedSlot();
+  }
+
+  smoothZoom(zoom: number, focusPoint?: IPoint) {
+    const delta = zoom - this.zoom;
+
+    const innerSmoothZoom = () => {
+      if (this._rafId) cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => {
+        const sign = delta > 0 ? 1 : -1;
+        const total = 10;
+        const step = delta / total;
+        const nextZoom = cutoff(this.zoom + step, zoom, sign);
+
+        this.setZoom(nextZoom, focusPoint);
+        if (nextZoom != zoom) innerSmoothZoom();
+      });
+    };
+    innerSmoothZoom();
+  }
+
+  smoothTranslate(x: number, y: number) {
+    const { center } = this;
+    const delta = { x: x - center.x, y: y - center.y };
+    const innerSmoothTranslate = () => {
+      if (this._rafId) cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => {
+        const rate = 10;
+        const step = { x: delta.x / rate, y: delta.y / rate };
+        const nextCenter = {
+          x: this.centerX + step.x,
+          y: this.centerY + step.y,
+        };
+        const signX = delta.x > 0 ? 1 : -1;
+        const signY = delta.y > 0 ? 1 : -1;
+        nextCenter.x = cutoff(nextCenter.x, x, signX);
+        nextCenter.y = cutoff(nextCenter.y, y, signY);
+        this.setCenter(nextCenter.x, nextCenter.y);
+        if (nextCenter.x != x || nextCenter.y != y) innerSmoothTranslate();
+      });
+    };
+    innerSmoothTranslate();
   }
 
   applyDeltaCenter = (deltaX: number, deltaY: number) => {
     this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
+    this._emitViewportUpdatedSlot();
   };
 
   addElement(element: SurfaceElement) {

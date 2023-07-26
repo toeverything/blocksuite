@@ -18,7 +18,6 @@ import type {
   SurfaceElement,
 } from './elements/surface-element.js';
 import { compare } from './grid.js';
-import type { SurfaceViewport } from './renderer.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import { Bound, getCommonBound } from './utils/bound.js';
@@ -70,7 +69,7 @@ export class SurfaceManager {
     this._syncFromExistingContainer();
   }
 
-  get viewport(): SurfaceViewport {
+  get viewport(): Renderer {
     return this._renderer;
   }
 
