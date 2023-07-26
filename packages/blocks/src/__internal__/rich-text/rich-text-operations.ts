@@ -534,6 +534,7 @@ function handleEmbedDividerCodeSibling(
       'affine:divider',
       'affine:code',
       'affine:bookmark',
+      'affine:attachment',
     ] as const)
   )
     return false;
