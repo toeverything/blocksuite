@@ -133,24 +133,23 @@ export class UIEventDispatcher {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    if (
-      !event.target ||
-      event.target === this.root ||
-      event.target === document ||
-      event.target === window ||
-      event.target === document.body ||
-      !(event.target instanceof Node)
-    ) {
-      return this._buildEventScopeBySelection(name);
+    let output: EventHandlerRunner[] | undefined;
+
+    if (event.target && event.target instanceof Node) {
+      output = this._buildEventScopeByTarget(name, event.target);
     }
 
-    return this._buildEventScopeByTarget(name, event.target);
+    if (!output) {
+      output = this._buildEventScopeBySelection(name);
+    }
+
+    return output;
   }
 
   createEventBlockState(event: Event) {
     const targetMap = new PathMap();
     this._currentSelections.forEach(selection => {
-      const _path = selection.path as string[];
+      const _path = selection.path;
       const instance = this.blockStore.viewStore.blockViewMap.get(_path);
       if (instance) {
         targetMap.set(_path, instance);
@@ -178,7 +177,7 @@ export class UIEventDispatcher {
     const pathEvents = paths.flatMap(path => {
       return handlers.filter(handler => {
         if (handler.path === undefined) return false;
-        return PathMap.includes(path as string[], handler.path);
+        return PathMap.includes(path, handler.path);
       });
     });
 
@@ -232,7 +231,7 @@ export class UIEventDispatcher {
 
     const paths = selections.map(selection => selection.path);
 
-    return this._buildEventScope(name, flavours, paths as string[][]);
+    return this._buildEventScope(name, flavours, paths);
   }
 
   private _bindEvents() {
