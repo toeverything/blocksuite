@@ -75,15 +75,20 @@ export type CellFocus = {
   rowIndex: number;
   columnIndex: number;
 };
-export type MultiSelection = { start: number; end: number };
-export type DatabaseSelection = {
-  databaseId: string;
+export type MultiSelection = {
+  start: number;
+  end: number;
+};
+export type TableViewSelection = {
+  viewId: string;
+  type: 'table';
   rowsSelection?: MultiSelection;
   columnsSelection?: MultiSelection;
   focus: CellFocus;
   isEditing: boolean;
 };
-export type DatabaseSelectionState = DatabaseSelection | undefined;
+export type DatabaseViewSelection = TableViewSelection;
+export type DatabaseSelectionState = TableViewSelection | undefined;
 
 /** Common context interface definition for block models. */
 
@@ -106,7 +111,9 @@ export interface BlockHost extends BlockHostContext {
 }
 
 type EditorMode = 'page' | 'edgeless';
-type EditorSlots = { pageModeSwitched: Slot<EditorMode> };
+type EditorSlots = {
+  pageModeSwitched: Slot<EditorMode>;
+};
 
 export type AbstractEditor = {
   page: Page;
