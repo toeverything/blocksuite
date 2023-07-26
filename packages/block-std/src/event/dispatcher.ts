@@ -133,18 +133,17 @@ export class UIEventDispatcher {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    if (
-      !event.target ||
-      event.target === this.root ||
-      event.target === document ||
-      event.target === window ||
-      event.target === document.body ||
-      !(event.target instanceof Node)
-    ) {
-      return this._buildEventScopeBySelection(name);
+    let output: EventHandlerRunner[] | undefined;
+
+    if (event.target && event.target instanceof Node) {
+      output = this._buildEventScopeByTarget(name, event.target);
     }
 
-    return this._buildEventScopeByTarget(name, event.target);
+    if (!output) {
+      output = this._buildEventScopeBySelection(name);
+    }
+
+    return output;
   }
 
   createEventBlockState(event: Event) {

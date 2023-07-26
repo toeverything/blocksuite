@@ -21,7 +21,7 @@ export class BlockSelection extends BaseSelection {
   static override fromJSON(json: Record<string, unknown>): BlockSelection {
     return new BlockSelection({
       blockId: json.blockId as string,
-      path: json.path as readonly string[],
+      path: json.path as string[],
     });
   }
 }
