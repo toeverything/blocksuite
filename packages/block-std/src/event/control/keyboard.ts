@@ -1,16 +1,12 @@
-import { UIEventState, UIEventStateContext } from './base.js';
-import type { UIEventDispatcher } from './dispatcher.js';
-import { KeyboardEventState } from './state.js';
+import { UIEventState, UIEventStateContext } from '../base.js';
+import type { UIEventDispatcher } from '../dispatcher.js';
+import { KeyboardEventState } from '../state/index.js';
 
 export class KeyboardControl {
   constructor(private _dispatcher: UIEventDispatcher) {}
 
   private _createContext(event: Event, keyboardState: KeyboardEventState) {
-    return UIEventStateContext.from(
-      new UIEventState(event),
-      this._dispatcher.createEventBlockState(event),
-      keyboardState
-    );
+    return UIEventStateContext.from(new UIEventState(event), keyboardState);
   }
 
   listen() {
