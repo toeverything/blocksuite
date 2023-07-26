@@ -118,19 +118,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       }),
     });
 
-    this._disposables.addFromEvent(window, 'mousedown', event => {
-      const target = event.target as Element;
-      if (this.isInTableBody(target)) {
-        return;
-      }
-      // TODO: refactor hardcoded here
-      if (target.closest('affine-drag-handle')) {
-        return;
-      }
-
-      this._clearSelection();
-    });
-
     this._disposables.add({
       dispose: this.eventDispatcher.add('keyDown', context => {
         const event = context.get('keyboardState').event;

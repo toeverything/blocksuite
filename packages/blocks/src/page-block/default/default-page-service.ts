@@ -1,5 +1,4 @@
 import type {
-  BaseSelection,
   PointerEventState,
   TextSelection,
   UIEventHandler,
@@ -69,10 +68,10 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
   selection: DefaultSelectionManager | null = null;
   rangeController = new RangeController(this.store.root as BlockSuiteRoot);
 
-  private _isNativeSelection = false;
+  public _isNativeSelection = false;
   private _startRange: Range | null = null;
   private _viewportElement: HTMLElement | null = null;
-  private _prevSelection: BaseSelection | null = null;
+
   private _rafID = 0;
 
   private get _viewport(): PageViewport {
@@ -366,44 +365,6 @@ export class DefaultPageService extends BlockService<PageBlockModel> {
     this.handleEvent('click', this._clickHandler, { global: true });
     this.handleEvent('doubleClick', this._doubleClickHandler, { global: true });
     this.handleEvent('tripleClick', this._tripleClickHandler, { global: true });
-
-    this.handleEvent(
-      'selectionChange',
-      () => {
-        const selection = window.getSelection();
-        if (!selection) {
-          return;
-        }
-        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        this._prevSelection = this.rangeController.writeRange(range);
-      },
-      { global: true }
-    );
-
-    this.disposables.add(
-      this.selectionManager.slots.changed.on(selections => {
-        if (this._isNativeSelection) {
-          return;
-        }
-        // wait for lit updated
-        requestAnimationFrame(() => {
-          const text =
-            selections.find((selection): selection is TextSelection =>
-              selection.is('text')
-            ) ?? null;
-          const eq =
-            text && this._prevSelection
-              ? text.equals(this._prevSelection)
-              : text === this._prevSelection;
-          if (eq) {
-            return;
-          }
-
-          this._prevSelection = text;
-          this.rangeController.syncRange(text);
-        });
-      })
-    );
   }
 
   override unmounted() {
