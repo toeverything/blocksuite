@@ -1,9 +1,10 @@
 import type { BlockService } from '@blocksuite/block-std';
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
+import type { BaseSelection } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
-import { property } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
 import type { BlockSuiteRoot } from './lit-root.js';
@@ -73,6 +74,9 @@ export class BlockElement<
   @property({ attribute: false })
   path!: string[];
 
+  @state()
+  selected: BaseSelection | null = null;
+
   get parentPath(): string[] {
     return this.path.slice(0, -1);
   }
@@ -113,7 +117,7 @@ export class BlockElement<
   };
 
   get service(): Service | undefined {
-    return this.root.blockStore.getService(this.model.flavour) as
+    return this.root.blockStore.specStore.getService(this.model.flavour) as
       | Service
       | undefined;
   }
@@ -133,6 +137,21 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
     this.root.blockViewMap.set(this.path, this);
+
+    this._disposables.add(
+      this.root.selectionManager.slots.changed.on(selections => {
+        const selection = selections.find(
+          selection => selection.blockId === this.model.id
+        );
+
+        if (!selection) {
+          this.selected = null;
+          return;
+        }
+
+        this.selected = selection;
+      })
+    );
   }
 
   override disconnectedCallback() {
