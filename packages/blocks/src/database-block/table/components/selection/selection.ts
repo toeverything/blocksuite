@@ -79,6 +79,15 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   private handleSelectionChange() {
     this._disposables.add(
+      this.eventDispatcher.add(
+        'selectionChange',
+        () => {
+          return true;
+        },
+        { path: this.path }
+      )
+    );
+    this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
         if (!activeEditorManager.isActive(this)) {
           return;
