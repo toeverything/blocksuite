@@ -102,7 +102,9 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
   };
 
   override firstUpdated() {
-    this.focusEnd();
+    requestAnimationFrame(() => {
+      this.focusEnd();
+    });
   }
 
   override render() {
