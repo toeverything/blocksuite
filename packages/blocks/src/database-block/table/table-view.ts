@@ -8,16 +8,15 @@ import './components/selection/selection.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import type { TableViewSelection } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import type { BlockOperation, InsertPosition } from '../types.js';
+import { BaseDataView } from '../common/base-data-view.js';
+import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
@@ -29,6 +28,7 @@ const styles = css`
     position: relative;
     margin-top: 32px;
   }
+
   affine-database-table * {
     box-sizing: border-box;
   }
@@ -144,28 +144,11 @@ const styles = css`
 `;
 
 @customElement('affine-database-table')
-export class DatabaseTable extends WithDisposable(ShadowlessElement) {
-  flavour = 'affine:database' as const;
-
+export class DatabaseTable extends BaseDataView<
+  DataViewTableManager,
+  TableViewSelection
+> {
   static override styles = styles;
-
-  @property({ attribute: false })
-  view!: DataViewTableManager;
-
-  @property({ attribute: false })
-  blockOperation!: BlockOperation;
-
-  @property({ attribute: false })
-  titleText!: Text;
-
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
-  @property({ attribute: false })
-  modalMode?: boolean;
-
-  @property({ attribute: false })
-  path!: string[];
 
   @query('.affine-database-table-container')
   private _tableContainer!: HTMLDivElement;
@@ -269,8 +252,8 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
             ></affine-database-column-header>
             ${rowsTemplate} ${this._renderColumnWidthDragBar()}
             <affine-database-selection
-              .blockId="${this.view.id}"
-              .eventDispatcher="${this.root.uiEventDispatcher}"
+              .blockId="${this.blockId}"
+              .eventDispatcher="${this.uiEventDispatcher}"
               .view="${this.view}"
               .root="${this.root}"
               .path="${this.path}"

@@ -1,26 +1,21 @@
+import type {
+  KanbanFocusData,
+  KanbanViewSelection,
+} from '../../__internal__/index.js';
 import type { KanbanCard } from './card.js';
 import type { KanbanCell } from './cell.js';
-
-export type KanbanFocusData = {
-  columnId: string;
-  isEditing: boolean;
-};
-export type KanbanSelectionData = {
-  groupKey: string;
-  cardId: string;
-  focus?: KanbanFocusData;
-};
+import type { DataViewKanban } from './kanban-view.js';
 
 export class KanbanSelection {
-  _selection?: KanbanSelectionData;
+  _selection?: KanbanViewSelection;
 
-  constructor(private ele: HTMLElement) {}
+  constructor(private viewEle: DataViewKanban) {}
 
   get selection() {
     return this._selection;
   }
 
-  set selection(state: KanbanSelectionData | undefined) {
+  set selection(state: KanbanViewSelection | undefined) {
     if (state && state.focus && state.focus.isEditing) {
       const cell = this.getFocusCellContainer(state);
       if (!cell?.cell?.beforeEnterEditMode()) {
@@ -37,7 +32,7 @@ export class KanbanSelection {
     }
   }
 
-  blur(selection: KanbanSelectionData) {
+  blur(selection: KanbanViewSelection) {
     if (!selection.focus) {
       return;
     }
@@ -57,7 +52,7 @@ export class KanbanSelection {
     }
   }
 
-  focus(selection: KanbanSelectionData) {
+  focus(selection: KanbanViewSelection) {
     if (!selection.focus) {
       return;
     }
@@ -77,8 +72,8 @@ export class KanbanSelection {
     }
   }
 
-  getSelectCard(selection: KanbanSelectionData) {
-    return this.ele
+  getSelectCard(selection: KanbanViewSelection) {
+    return this.viewEle
       .querySelector(
         `affine-data-view-kanban-group[data-key="${selection.groupKey}"]`
       )
@@ -93,7 +88,7 @@ export class KanbanSelection {
     ) as KanbanCell | undefined;
   }
 
-  getFocusCellContainer(selection: KanbanSelectionData) {
+  getFocusCellContainer(selection: KanbanViewSelection) {
     if (!selection.focus) {
       return;
     }

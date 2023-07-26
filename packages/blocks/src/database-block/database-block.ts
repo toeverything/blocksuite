@@ -120,6 +120,8 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         <${databaseTag}
           .titleText='${this.model.title}'
           .root='${this.root}'
+          .blockId='${this.model.id}'
+          .uiEventDispatcher='${this.root.uiEventDispatcher}'
           .blockOperation='${blockOperation}'
           .view='${currentViewManager}'
           .modalMode='${this.modalMode}'

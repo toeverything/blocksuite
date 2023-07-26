@@ -11,8 +11,8 @@ import { BaseService } from '../__internal__/service/index.js';
 import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import type { SerializedBlock } from '../__internal__/utils/types.js';
 import { multiSelectHelper } from './common/columns/define.js';
+import { DatabaseSelection } from './common/selection.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { DatabaseSelection } from './table/components/selection/selection.js';
 import type { Cell, Column } from './table/types.js';
 
 export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> {

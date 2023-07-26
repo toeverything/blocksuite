@@ -1,8 +1,5 @@
-import {
-  BaseSelection,
-  PathMap,
-  type UIEventDispatcher,
-} from '@blocksuite/block-std';
+import type { BaseSelection } from '@blocksuite/block-std';
+import { PathMap, type UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -13,11 +10,10 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import type {
   CellFocus,
-  DatabaseSelectionState,
-  DatabaseViewSelection,
   MultiSelection,
   TableViewSelection,
 } from '../../../../__internal__/utils/types.js';
+import { DatabaseSelection } from '../../../common/selection.js';
 import { startDrag } from '../../../utils/drag.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import type { DatabaseCellContainer } from '../cell-container.js';
@@ -99,7 +95,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             if (!(selection instanceof DatabaseSelection)) {
               return false;
             }
-            if (selection.viewSelection.viewId !== this.view.id) {
+            if (selection.viewId !== this.view.id) {
               return false;
             }
             return true;
@@ -110,7 +106,8 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           return;
         }
 
-        const tableSelection = databaseManager?.viewSelection;
+        const tableSelection = databaseManager?.getSelection('table');
+
         if (!this.isValidSelection(tableSelection)) {
           this.selection = undefined;
           return;
@@ -140,12 +137,8 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             const cell = container.cell;
             if (old.isEditing) {
               cell?.onExitEditMode();
-              if (cell?.blurCell()) {
-                container.blur();
-              }
+              cell?.blurCell();
               container.isEditing = false;
-            } else {
-              container.blur();
             }
           }
         }
@@ -160,11 +153,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             if (tableSelection.isEditing) {
               cell?.onEnterEditMode();
               container.isEditing = true;
-              if (cell?.focusCell()) {
-                container.focus();
-              }
-            } else {
-              container.focus();
+              cell?.focusCell();
             }
           }
         }
@@ -224,7 +213,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     this.root.selectionManager.clear();
   }
 
-  get selection(): DatabaseSelectionState {
+  get selection(): TableViewSelection | undefined {
     return this._databaseSelection;
   }
 
@@ -248,7 +237,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       const isEditing = cell ? cell.beforeEnterEditMode() : true;
 
       const selections: BaseSelection[] = [];
-      const selectionManager = this.root.selectionManager.getInstance(
+      const databaseSelection = this.root.selectionManager.getInstance(
         'database',
         {
           blockId: this.blockId,
@@ -259,7 +248,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           },
         }
       );
-      selections.push(selectionManager);
+      selections.push(databaseSelection);
 
       this.root.selectionManager.set(selections);
     } else {
@@ -668,58 +657,5 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 declare global {
   interface HTMLElementTagNameMap {
     'affine-database-selection': DatabaseSelectionView;
-  }
-}
-
-export class DatabaseSelection extends BaseSelection {
-  static override type = 'database';
-
-  viewSelection: DatabaseViewSelection;
-
-  constructor({
-    path,
-    blockId,
-    viewSelection,
-  }: {
-    blockId: string;
-    path: string[];
-    viewSelection: DatabaseViewSelection;
-  }) {
-    super({
-      blockId,
-      path,
-    });
-
-    this.viewSelection = viewSelection;
-  }
-
-  override equals(other: BaseSelection): boolean {
-    if (!(other instanceof DatabaseSelection)) {
-      return false;
-    }
-    return this.blockId === other.blockId;
-  }
-
-  override toJSON(): Record<string, unknown> {
-    return {
-      type: 'database',
-      path: this.path,
-      blockId: this.blockId,
-      viewSelection: this.viewSelection,
-    };
-  }
-
-  static override fromJSON(json: Record<string, unknown>): DatabaseSelection {
-    return new DatabaseSelection({
-      path: json.path as string[],
-      blockId: json.blockId as string,
-      viewSelection: json.viewSelection as DatabaseViewSelection,
-    });
-  }
-}
-
-declare global {
-  interface BlockSuiteSelection {
-    database: typeof DatabaseSelection;
   }
 }

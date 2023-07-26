@@ -87,8 +87,30 @@ export type TableViewSelection = {
   focus: CellFocus;
   isEditing: boolean;
 };
-export type DatabaseViewSelection = TableViewSelection;
-export type DatabaseSelectionState = TableViewSelection | undefined;
+
+export type KanbanFocusData = {
+  columnId: string;
+  isEditing: boolean;
+};
+
+export type KanbanViewSelection = {
+  viewId: string;
+  type: 'kanban';
+  groupKey: string;
+  cardId: string;
+  focus?: KanbanFocusData;
+};
+
+export type DataViewSelection = TableViewSelection | KanbanViewSelection;
+export type GetDataViewSelection<
+  K extends DataViewSelection['type'],
+  T = DataViewSelection
+> = T extends {
+  type: K;
+}
+  ? T
+  : never;
+export type DataViewSelectionState = DataViewSelection | undefined;
 
 /** Common context interface definition for block models. */
 

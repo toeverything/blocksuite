@@ -2,7 +2,7 @@ import { Slot } from '@blocksuite/store';
 
 import { BaseService } from '../__internal__/service/index.js';
 import type {
-  DatabaseSelectionState,
+  DataViewSelectionState,
   TableViewSelection,
 } from '../__internal__/utils/types.js';
 import type { DataViewBlockModel } from './data-view-model.js';
@@ -11,7 +11,7 @@ export class DataViewBlockService extends BaseService<DataViewBlockModel> {
   private _databaseSelection?: TableViewSelection;
 
   slots = {
-    databaseSelectionUpdated: new Slot<DatabaseSelectionState>(),
+    databaseSelectionUpdated: new Slot<DataViewSelectionState>(),
   };
 
   constructor() {
@@ -21,7 +21,7 @@ export class DataViewBlockService extends BaseService<DataViewBlockModel> {
     });
   }
 
-  select(state: DatabaseSelectionState) {
+  select(state: DataViewSelectionState) {
     this._databaseSelection = state;
     this.slots.databaseSelectionUpdated.emit(state);
   }
