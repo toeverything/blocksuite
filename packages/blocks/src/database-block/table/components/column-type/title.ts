@@ -12,6 +12,7 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
     affine-database-title-cell {
       position: relative;
     }
+
     affine-database-title-cell .mask {
       position: absolute;
       width: 100%;

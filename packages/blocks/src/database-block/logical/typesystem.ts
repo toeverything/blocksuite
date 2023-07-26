@@ -24,6 +24,9 @@ export const tArray = <const T extends TType>(ele: T): TArray<T> => {
     ele,
   };
 };
+export const isTArray = (type: TType): type is TArray => {
+  return type.type === 'array';
+};
 export type TTypeVar = {
   type: 'typeVar';
   title: 'typeVar';

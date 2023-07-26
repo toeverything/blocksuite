@@ -107,10 +107,21 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
     });
   }
 
+  _blur() {
+    this.selectCurrentCell(false);
+  }
+  _focus() {
+    if (!this.isEditing) {
+      this.selectCurrentCell(true);
+    }
+  }
+
   override render() {
     return html`<input
       .value="${this.value ?? ''}"
       @keydown="${this._keydown}"
+      @blur="${this._blur}"
+      @focus="${this._focus}"
       class="affine-database-number number"
     />`;
   }

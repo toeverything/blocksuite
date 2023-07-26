@@ -17,7 +17,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { ContentParser } from '../../__internal__/content-parser/index.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
 import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
-import { richTextHelper } from '../../database-block/common/column-manager.js';
+import { richTextHelper } from '../../database-block/common/columns/define.js';
 import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';

@@ -5,16 +5,18 @@ import './common/database-view-header.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { html, literal, unsafeStatic } from 'lit/static-html.js';
+import { html, literal } from 'lit/static-html.js';
 
 import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import { registerService } from '../__internal__/service.js';
+import type { DataViewManager } from './common/data-view-manager.js';
+import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { LegacyDatabaseBlockService } from './database-service.js';
-import type { TableViewManager } from './table/table-view-manager.js';
-import { DatabaseTableViewManager } from './table/table-view-manager.js';
+import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
+import { DataViewTableManager } from './table/table-view-manager.js';
 import type { BlockOperation } from './types.js';
 
 @customElement('affine-database')
@@ -47,20 +49,35 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return this._dataSource;
   }
 
-  private viewMap: Record<string, TableViewManager> = {};
+  private viewMap: Record<string, DataViewManager> = {};
+  private getViewDataById = (id: string) => {
+    return this.model.views.find(v => v.id === id);
+  };
 
-  private getView(id: string): TableViewManager {
+  private viewSource(id: string): ViewSource {
+    const getViewDataById = this.getViewDataById;
+    return {
+      get view() {
+        const view = getViewDataById(id);
+        if (!view) {
+          throw new Error(`view ${id} not found`);
+        }
+        return view as never;
+      },
+      updateView: updater => {
+        this.model.updateView(id, updater as never);
+      },
+      updateSlot: this.model.propsUpdated,
+    };
+  }
+
+  private getView(id: string): DataViewManager {
     if (!this.viewMap[id]) {
-      this.viewMap[id] = new DatabaseTableViewManager(
-        () => {
-          const view = this.model.views.find(v => v.id === id);
-          if (!view || view.mode !== 'table') {
-            throw new Error(`view ${id} not found`);
-          }
-          return view;
-        },
-        update => this.model.updateView(id, update as never),
-        this.model.propsUpdated,
+      this.viewMap[id] = new {
+        table: DataViewTableManager,
+        kanban: DataViewKanbanManager,
+      }[this.getViewDataById(id)?.mode ?? 'table'](
+        this.viewSource(id) as never,
         this.dataSource
       );
     }
@@ -70,7 +87,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override render() {
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
-    const databaseTag = literal`affine-database-${unsafeStatic(current.mode)}`;
+    const databaseTag = {
+      table: literal`affine-database-table`,
+      kanban: literal`affine-data-view-kanban`,
+    }[current.mode];
     const view = this.root.page.awarenessStore.getFlag('enable_database_filter')
       ? html` <database-view-header
           .currentView="${current.id}"
@@ -101,7 +121,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           .titleText='${this.model.title}'
           .root='${this.root}'
           .blockOperation='${blockOperation}'
-          .tableViewManager='${currentViewManager}'
+          .view='${currentViewManager}'
           .modalMode='${this.modalMode}'
           .path='${this.path}'
           class='affine-block-element'
