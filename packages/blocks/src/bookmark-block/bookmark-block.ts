@@ -29,7 +29,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   static override styles = css`
     .affine-bookmark-block-container {
       width: 100%;
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-top: 18px;
+      margin-bottom: 18px;
       position: relative;
     }
     .affine-bookmark-link {

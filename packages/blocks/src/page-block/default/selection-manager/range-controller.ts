@@ -18,6 +18,10 @@ export class RangeController {
 
   constructor(public root: BlockSuiteRoot) {}
 
+  get value() {
+    return this._range;
+  }
+
   private get _range() {
     if (!this._reusedRange) {
       this._reusedRange = document.createRange();
@@ -102,10 +106,13 @@ export class RangeController {
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
     );
 
-    startVirgoElement.virgoEditor.setVRange({
-      index: point.index,
-      length: point.length,
-    });
+    startVirgoElement.virgoEditor.setVRange(
+      {
+        index: point.index,
+        length: point.length,
+      },
+      false
+    );
 
     return startVirgoElement.virgoEditor.toDomRange({
       index: point.index,

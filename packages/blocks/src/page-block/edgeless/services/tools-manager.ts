@@ -283,7 +283,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
         const dx = e.deltaX / viewport.zoom;
         const dy = e.deltaY / viewport.zoom;
         viewport.applyDeltaCenter(dx, dy);
-        container.slots.viewportUpdated.emit();
       }
       // zoom
       else {
@@ -296,7 +295,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
 
         const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
         viewport.setZoom(zoom, new Point(baseX, baseY));
-        container.slots.viewportUpdated.emit();
       }
     });
   }

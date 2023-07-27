@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
@@ -891,6 +891,8 @@ export async function shamefullyBlurActiveElement(page: Page) {
 export async function waitForVirgoStateUpdated(page: Page) {
   return await page.evaluate(async () => {
     const selection = window.getSelection() as Selection;
+
+    if (selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');

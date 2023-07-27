@@ -9,6 +9,7 @@ import {
   DatabaseNumber,
   DatabaseProgress,
   DatabaseSelect,
+  DateTime,
   DeleteIcon,
   LinkIcon,
   TextIcon,
@@ -30,8 +31,8 @@ import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import { getTableContainer } from '../../table-view.js';
 import type {
-  ColumnManager,
-  TableViewManager,
+  DataViewTableColumnManager,
+  DataViewTableManager,
 } from '../../table-view-manager.js';
 import type { ColumnHeader, ColumnTypeIcon } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
@@ -44,10 +45,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  tableViewManager!: TableViewManager;
+  tableViewManager!: DataViewTableManager;
 
   @property({ attribute: false })
-  column!: ColumnManager;
+  column!: DataViewTableColumnManager;
 
   override firstUpdated() {
     this._disposables.add(
@@ -129,7 +130,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     };
   };
-  private _drag = (evt: MouseEvent) => {
+  private _drag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const scrollContainer = tableContainer?.parentElement;
     assertExists(tableContainer);
@@ -480,7 +481,7 @@ const createDropPreview = (container: Element, height: number) => {
   };
 };
 
-const columnTypeIconMap: ColumnTypeIcon = {
+export const columnTypeIconMap: ColumnTypeIcon = {
   select: DatabaseSelect,
   number: DatabaseNumber,
   checkbox: TodoIcon,
@@ -488,6 +489,7 @@ const columnTypeIconMap: ColumnTypeIcon = {
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,
   link: LinkIcon,
+  date: DateTime,
 };
 
 declare global {
@@ -530,5 +532,10 @@ const columnTypes: ColumnHeader[] = [
     type: 'link',
     text: 'Link',
     icon: LinkIcon,
+  },
+  {
+    type: 'date',
+    text: 'Date',
+    icon: DateTime,
   },
 ];

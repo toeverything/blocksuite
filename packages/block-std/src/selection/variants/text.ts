@@ -1,3 +1,4 @@
+import { PathMap } from '../../store/path-map.js';
 import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
@@ -20,7 +21,10 @@ export class TextSelection extends BaseSelection {
   to: TextRangePoint | null;
 
   constructor({ from, to }: TextSelectionProps) {
-    super(from.blockId);
+    super({
+      blockId: from.blockId,
+      path: from.path,
+    });
     this.from = from;
     this.to = to;
   }
@@ -65,6 +69,14 @@ export class TextSelection extends BaseSelection {
       from: json.from as TextRangePoint,
       to: json.to as TextRangePoint | null,
     });
+  }
+
+  isCollapsed(): boolean {
+    return this.to === null;
+  }
+
+  isInSameBlock(): boolean {
+    return this.to === null || PathMap.equals(this.from.path, this.to.path);
   }
 }
 

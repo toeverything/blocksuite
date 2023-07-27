@@ -1,4 +1,6 @@
 import type {
+  AttachmentBlockModel,
+  AttachmentBlockSchema,
   BookmarkBlockModel,
   BookmarkBlockSchema,
   CodeBlockSchema,
@@ -37,6 +39,7 @@ export type BlockSchemas = {
   'affine:database': typeof DatabaseBlockSchema;
   'affine:data-view': typeof DataViewBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;
+  'affine:attachment': typeof AttachmentBlockSchema;
 };
 
 export type BlockModels = {
@@ -51,6 +54,7 @@ export type BlockModels = {
   'affine:database': DatabaseBlockModel;
   'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
+  'affine:attachment': AttachmentBlockModel;
 };
 
 export type BlockModelProps = {

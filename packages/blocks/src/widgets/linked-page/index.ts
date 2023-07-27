@@ -93,7 +93,7 @@ export class LinkedPageWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._addEvent('keyDown', this._onKeyDown);
+    this.handleEvent('keyDown', this._onKeyDown, { global: true });
   }
 
   public showLinkedPage(model: BaseBlockModel) {
@@ -107,6 +107,12 @@ export class LinkedPageWidget extends WidgetElement {
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
     if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
+    const text = this.root.selectionManager.value.find(selection =>
+      selection.is('text')
+    );
+    if (!text) {
+      return;
+    }
 
     // Fixme @Saul-Mirone get model from getCurrentSelection
     const target = event.target;

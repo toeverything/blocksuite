@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { PropertyValues } from 'lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -9,7 +10,7 @@ import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../../components/uni-component/uni-component.js';
 import type { DataViewCellLifeCycle } from '../register.js';
-import type { ColumnManager } from '../table-view-manager.js';
+import type { DataViewTableColumnManager } from '../table-view-manager.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
@@ -52,7 +53,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   public readonly columnIndex!: number;
 
   @property({ attribute: false })
-  column!: ColumnManager;
+  column!: DataViewTableColumnManager;
   private _selectCurrentCell = (editing: boolean) => {
     const selection = this.closest('affine-database-table')?.selection;
     if (selection) {
@@ -82,6 +83,13 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this._cell.value?.expose;
   }
 
+  protected override firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    this._disposables.addFromEvent(this, 'click', e => {
+      this._selectCurrentCell(true);
+    });
+  }
+
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
     const { edit, view } = this.column.renderer;
@@ -99,7 +107,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     const isEditView = view === uni;
     return html`${keyed(
       `${isEditView} ${this.column.type}`,
-      html` <uni-lit
+      html`<uni-lit
         ${ref(this._cell)}
         style=${style}
         .uni="${uni}"

@@ -83,6 +83,7 @@ const flagsPreset = {
   enable_note_index: false,
 
   enable_note_cut: true,
+  enable_attachment_block: false,
 
   readonly: {},
 } satisfies BlockSuiteFlags;
@@ -140,6 +141,15 @@ export class Store {
         awareness: this.awarenessStore.awareness,
       })
     );
+  }
+
+  registerProvider(providerCreator: DocProviderCreator, id?: string) {
+    const provider = providerCreator(id ?? this.id, this.doc, {
+      awareness: this.awarenessStore.awareness,
+    });
+
+    this.providers.push(provider);
+    return provider;
   }
 
   addSpace(space: Space) {

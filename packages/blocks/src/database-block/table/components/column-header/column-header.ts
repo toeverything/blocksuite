@@ -10,7 +10,7 @@ import { html } from 'lit/static-html.js';
 
 import { getDefaultPageByElement } from '../../../../__internal__/index.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type { TableViewManager } from '../../table-view-manager.js';
+import type { DataViewTableManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
 
 @customElement('affine-database-column-header')
@@ -18,7 +18,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  tableViewManager!: TableViewManager;
+  tableViewManager!: DataViewTableManager;
 
   @query('.affine-database-column-header')
   private _headerContainer!: HTMLElement;

@@ -3,11 +3,18 @@ type SelectionConstructor<T = unknown> = {
   type: string;
 };
 
+export type BaseSelectionOptions = {
+  blockId: string;
+  path: string[];
+};
+
 export abstract class BaseSelection {
   static readonly type: string;
   readonly blockId: string;
-  constructor(blockId: string) {
+  readonly path: string[];
+  constructor({ blockId, path }: BaseSelectionOptions) {
     this.blockId = blockId;
+    this.path = path;
   }
 
   is<T extends BlockSuiteSelectionType>(

@@ -26,7 +26,7 @@ import {
   waitNextFrame,
 } from './misc.js';
 
-const AWAIT_TIMEOUT = 260;
+const AWAIT_TIMEOUT = 500;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
@@ -291,7 +291,7 @@ export async function addBasicRectShapeElement(
   end: Point
 ) {
   await setEdgelessTool(page, 'shape');
-  await dragBetweenCoords(page, start, end, { steps: 20 });
+  await dragBetweenCoords(page, start, end, { steps: 50 });
 }
 
 export async function addBasicShapeElement(
@@ -301,7 +301,7 @@ export async function addBasicShapeElement(
   shape: Shape
 ) {
   await setEdgelessTool(page, 'shape', shape);
-  await dragBetweenCoords(page, start, end, { steps: 20 });
+  await dragBetweenCoords(page, start, end, { steps: 50 });
 }
 
 export async function addBasicConnectorElement(
@@ -510,18 +510,22 @@ export async function zoomByMouseWheel(
 
 export async function zoomFitByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function zoomOutByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function zoomResetByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+0`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function zoomInByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+=`, { delay: 50 });
+  await waitNextFrame(page);
 }
 
 export async function getZoomLevel(page: Page) {

@@ -1,10 +1,8 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import {
-  columnManager,
-  multiSelectHelper,
-} from '../../database-block/common/column-manager.js';
+import { multiSelectHelper } from '../../database-block/common/columns/define.js';
+import { columnManager } from '../../database-block/common/columns/manager.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';
@@ -50,6 +48,18 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     value: unknown
   ): void {
     this.page.captureSync();
+    if (
+      this.propertyGetType(propertyId) === 'title' &&
+      typeof value === 'string'
+    ) {
+      const text =
+        this._model.children[this._model.childMap.get(rowId) ?? 0].text;
+      if (text) {
+        text.replace(0, text.length, value);
+      }
+      this.slots.update.emit();
+      return;
+    }
     this._model.updateCell(rowId, { columnId: propertyId, value });
   }
 
@@ -65,7 +75,10 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return this._model.getCell(rowId, propertyId)?.value;
   }
 
-  public cellGetRenderValue(rowId: string, propertyId: string): unknown {
+  public override cellGetRenderValue(
+    rowId: string,
+    propertyId: string
+  ): unknown {
     const type = this.propertyGetType(propertyId);
     if (type === 'title') {
       const model = this._model.children[this._model.childMap.get(rowId) ?? -1];

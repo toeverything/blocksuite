@@ -1,14 +1,17 @@
 import type { TType } from './typesystem.js';
 import { typesystem } from './typesystem.js';
 
-type MatcherData<Data, Type extends TType = TType> = { type: Type; data: Data };
+type MatcherData<Data, Type extends TType = TType> = {
+  type: Type;
+  data: Data;
+};
 
 export class Matcher<Data, Type extends TType = TType> {
   private list: MatcherData<Data, Type>[] = [];
 
   constructor(
     private _match: (
-      type: TType,
+      type: Type,
       target: TType
     ) => boolean = typesystem.isSubtype.bind(typesystem)
   ) {}
@@ -58,5 +61,9 @@ export class Matcher<Data, Type extends TType = TType> {
 
   all(): MatcherData<Data, Type>[] {
     return this.list;
+  }
+
+  isMatched(type: Type, target: TType) {
+    return this._match(type, target);
   }
 }

@@ -15,7 +15,7 @@ hero:
       link: /blocksuite-overview
     - theme: alt
       text: Visit Playground
-      link: https://blocksuite-toeverything.vercel.app/?init
+      link: https://blocksuite-toeverything.vercel.app/starter/?init
 
 features:
   - title: 📝 Block-Based Editing
