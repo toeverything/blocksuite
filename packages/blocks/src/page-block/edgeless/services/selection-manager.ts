@@ -48,7 +48,9 @@ export class EdgelessSelectionManager {
 
   selectedBlocks: BlockComponentElement[] = [];
 
-  get isEmpty() {
+  private _selectedElements: Set<string> = new Set();
+
+  get empty() {
     return this.state.isEmpty();
   }
 
@@ -75,6 +77,7 @@ export class EdgelessSelectionManager {
   private _setState(selection: SurfaceSelection) {
     this.lastState = this.state;
     this.state = selection;
+    this._selectedElements = new Set(selection.elements);
   }
 
   private _init() {
@@ -101,6 +104,10 @@ export class EdgelessSelectionManager {
   constructor(container: EdgelessPageBlockComponent) {
     this.container = container;
     this._init();
+  }
+
+  has(element: string) {
+    return this._selectedElements.has(element);
   }
 
   setSelection(selection: SurfaceSelection | EdgelessSelectionState) {

@@ -218,13 +218,10 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     }
   >();
   for (const s of selected) {
-    let bound: Bound;
+    const bound = Bound.deserialize(s.xywh);
     let rotate = 0;
 
-    if (isTopLevelBlock(s)) {
-      bound = Bound.deserialize(s.xywh);
-    } else {
-      bound = new Bound(s.x, s.y, s.w, s.h);
+    if (!isTopLevelBlock(s)) {
       rotate = s.rotate ?? 0;
     }
 

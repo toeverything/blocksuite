@@ -11,7 +11,6 @@ import { WithDisposable } from '@blocksuite/lit';
 import type {
   BrushElement,
   ConnectorElement,
-  PhasorElement,
   ShapeElement,
   TextElement,
 } from '@blocksuite/phasor';
@@ -25,9 +24,7 @@ import {
 } from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
-import type { NoteBlockModel } from '../../../../models.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { Selectable } from '../../services/tools-manager.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 
 type CategorizedElements = {
@@ -42,13 +39,9 @@ type CategorizedElements = {
 export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      display: none;
+      display: block;
       position: absolute;
       user-select: none;
-    }
-
-    :host([data-show]) {
-      display: block;
     }
 
     .container {
@@ -75,8 +68,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return this.edgeless.page;
   }
 
-  get selected() {
-    return this.selectionState.elements;
+  get selection() {
+    return this.edgeless.selection;
   }
 
   get slots() {
@@ -87,23 +80,13 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return this.edgeless.surface;
   }
 
-  private _getModel(id: string): Selectable {
-    return (
-      (this.page.getBlockById(id) as NoteBlockModel) ??
-      (this.surface.pickById(id) as PhasorElement)
-    );
-  }
-
   private _groupSelected(): CategorizedElements {
-    const result = groupBy(
-      this.selected.map(id => this._getModel(id)),
-      model => {
-        if (isTopLevelBlock(model)) {
-          return 'note';
-        }
-        return model.type;
+    const result = groupBy(this.selection.elements, model => {
+      if (isTopLevelBlock(model)) {
+        return 'note';
       }
-    );
+      return model.type;
+    });
     return result as CategorizedElements;
   }
 

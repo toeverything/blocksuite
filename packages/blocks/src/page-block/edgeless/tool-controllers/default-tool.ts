@@ -121,7 +121,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   private _setNoneSelectionState() {
-    if (this.selection.isEmpty) return;
+    if (this.selection.empty) return;
 
     this.selection.setSelection({
       elements: [],

@@ -74,7 +74,16 @@ function ResizeHandle(
   </div>`;
 }
 
-export type ResizeMode = 'corner' | 'edge' | 'all' | 'none';
+/**
+ * Indicate how selected elements can be resized.
+ *
+ * - edge: The selected elements can only be resized dragging edge, usually when note element is selected
+ * - all: The selected elements can be resize both dragging edge or corner, usually when all elements are `shape`
+ * - none: The selected elements can't be resized, usually when all elements are `connector`
+ * - corner: The selected elements can only be resize dragging corner, this is by default mode
+ */
+export type ResizeMode = 'edge' | 'all' | 'none' | 'corner';
+
 export function ResizeHandles(
   resizeMode: ResizeMode,
   onPointerDown: (e: PointerEvent, direction: HandleDirection) => void,
