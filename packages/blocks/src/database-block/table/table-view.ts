@@ -160,7 +160,7 @@ export class DatabaseTable extends BaseDataView<
   public selection!: DatabaseSelectionView;
 
   private get readonly() {
-    return this.root.page.readonly;
+    return this.view.readonly;
   }
 
   override firstUpdated() {
@@ -189,15 +189,12 @@ export class DatabaseTable extends BaseDataView<
     position: InsertPosition
   ) => {
     if (this.readonly) return;
-
-    const page = this.root.page;
-    page.captureSync();
     const index = insertPositionToIndex(
       position,
       this.view.rows.map(id => ({ id }))
     );
     tableViewManager.rowAdd(position);
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       this.selection.selection = {
         focus: {
           rowIndex: index,
@@ -234,10 +231,10 @@ export class DatabaseTable extends BaseDataView<
           <affine-database-title
             .titleText="${this.titleText}"
             .addRow="${() => addRow('start')}"
-            .root="${this.root}"
+            .readonly="${this.readonly}"
           ></affine-database-title>
           <affine-database-toolbar
-            .root="${this.root}"
+            .tableView="${this}"
             .copyBlock="${this.blockOperation.copy}"
             .deleteSelf="${this.blockOperation.delete}"
             .view="${this.view}"
@@ -251,11 +248,7 @@ export class DatabaseTable extends BaseDataView<
             ></affine-database-column-header>
             ${rowsTemplate} ${this._renderColumnWidthDragBar()}
             <affine-database-selection
-              .blockId="${this.blockId}"
-              .eventDispatcher="${this.uiEventDispatcher}"
-              .view="${this.view}"
-              .root="${this.root}"
-              .path="${this.path}"
+              .tableView="${this}"
             ></affine-database-selection>
           </div>
         </div>

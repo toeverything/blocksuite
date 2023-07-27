@@ -11,6 +11,10 @@ import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 
 export class DataViewTableManager extends BaseDataViewManager {
+  public override get type(): string {
+    return this.view.mode;
+  }
+
   private readonly updateView: (
     updater: (view: TableViewData) => Partial<TableViewData>
   ) => void;
@@ -30,6 +34,7 @@ export class DataViewTableManager extends BaseDataViewManager {
   get view() {
     return this.viewSource.view;
   }
+
   get filter(): FilterGroup {
     return this.view.filter;
   }

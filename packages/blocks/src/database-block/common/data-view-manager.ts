@@ -12,6 +12,10 @@ import { columnManager } from './columns/manager.js';
 import { columnRenderer } from './columns/renderer.js';
 
 export interface DataViewManager {
+  get id(): string;
+
+  get type(): string;
+
   get readonly(): boolean;
 
   get columnManagerList(): DataViewColumnManager[];
@@ -217,6 +221,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   ): void {
     this.dataSource.cellChangeValue(rowId, columnId, value);
   }
+
   public cellUpdateValue(
     rowId: string,
     columnId: string,
@@ -317,7 +322,12 @@ export abstract class BaseDataViewManager implements DataViewManager {
   public captureSync(): void {
     this.dataSource.captureSync();
   }
+
+  public abstract get id(): string;
+
+  public abstract get type(): string;
 }
+
 export abstract class BaseDataViewColumnManager
   implements DataViewColumnManager
 {

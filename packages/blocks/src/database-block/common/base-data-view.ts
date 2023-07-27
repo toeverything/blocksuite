@@ -1,7 +1,7 @@
-import type { UIEventDispatcher } from '@blocksuite/block-std';
-import type { Slot } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { EventName, UIEventHandler } from '@blocksuite/block-std';
+import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
@@ -9,13 +9,11 @@ import type { BlockOperation } from '../types.js';
 import type { DataViewManager } from './data-view-manager.js';
 
 export class BaseDataView<
-  T extends DataViewManager,
-  Selection extends DataViewSelection
+  T extends DataViewManager = DataViewManager,
+  Selection extends DataViewSelection = DataViewSelection
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   view!: T;
-  @property({ attribute: false })
-  blockId!: string;
 
   @property({ attribute: false })
   blockOperation!: BlockOperation;
@@ -24,19 +22,20 @@ export class BaseDataView<
   titleText!: Text;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  bindHotkey!: (hotkeys: Record<string, UIEventHandler>) => Disposable;
 
   @property({ attribute: false })
-  uiEventDispatcher!: UIEventDispatcher;
+  handleEvent!: (name: EventName, handler: UIEventHandler) => Disposable;
 
   @property({ attribute: false })
   modalMode?: boolean;
 
   @property({ attribute: false })
-  path!: string[];
+  setSelection!: (selection?: Selection) => void;
 
   @property({ attribute: false })
-  setSelection!: (selection?: Selection) => void;
-  @property({ attribute: false })
   selectionUpdated!: Slot<Selection | undefined>;
+
+  @property({ attribute: false })
+  getFlag!: Page['awarenessStore']['getFlag'];
 }

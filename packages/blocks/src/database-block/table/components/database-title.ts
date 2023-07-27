@@ -1,4 +1,3 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -63,7 +62,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   titleText!: Text;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  readonly!: boolean;
 
   @property({ attribute: false })
   addRow!: (rowIndex?: number) => void;
@@ -93,7 +92,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       maxLength: DATABASE_TITLE_LENGTH,
     });
     setupVirgoScroll(this, this._titleVInput.vEditor);
-    this._titleVInput.vEditor.setReadonly(this.root.page.readonly);
+    this._titleVInput.vEditor.setReadonly(this.readonly);
     this._titleContainer.addEventListener('keydown', this._handleKeyDown);
 
     // for title placeholder

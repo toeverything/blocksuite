@@ -8,7 +8,6 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -24,6 +23,7 @@ import { columnManager } from '../../../common/columns/manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type { InsertPosition } from '../../../types.js';
+import type { DatabaseTable } from '../../table-view.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import { initAddNewRecordHandlers } from './index.js';
 
@@ -182,7 +182,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  tableView!: DatabaseTable;
 
   @property({ attribute: false })
   copyBlock!: () => void;
@@ -355,9 +355,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const filter = this.root.page.awarenessStore.getFlag(
-      'enable_database_filter'
-    )
+    const filter = this.tableView.getFlag('enable_database_filter')
       ? html` <div
           @click="${this._showFilter}"
           class="affine-database-filter-button"

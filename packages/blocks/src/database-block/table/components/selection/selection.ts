@@ -1,21 +1,16 @@
-import type { BaseSelection } from '@blocksuite/block-std';
-import { PathMap, type UIEventDispatcher } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 
-import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import type {
   CellFocus,
   MultiSelection,
   TableViewSelection,
 } from '../../../../__internal__/utils/types.js';
-import { DatabaseSelection } from '../../../common/selection.js';
 import { startDrag } from '../../../utils/drag.js';
-import type { DataViewTableManager } from '../../table-view-manager.js';
+import type { DatabaseTable } from '../../table-view.js';
 import type { DatabaseCellContainer } from '../cell-container.js';
 
 @customElement('affine-database-selection')
@@ -44,17 +39,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  path!: string[];
-
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
-  @property()
-  blockId!: string;
-  @property({ attribute: false })
-  view!: DataViewTableManager;
-  @property({ attribute: false })
-  eventDispatcher!: UIEventDispatcher;
+  tableView!: DatabaseTable;
 
   private _databaseSelection?: TableViewSelection;
   private focusRef = createRef<HTMLDivElement>();
@@ -74,40 +59,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   private handleSelectionChange() {
     this._disposables.add(
-      this.eventDispatcher.add(
-        'selectionChange',
-        () => {
-          return true;
-        },
-        { path: this.path }
-      )
-    );
-    this._disposables.add(
-      this.root.selectionManager.slots.changed.on(selections => {
-        if (!activeEditorManager.isActive(this)) {
-          return;
-        }
-        const databaseManager = selections.find(
-          (selection): selection is DatabaseSelection => {
-            if (!PathMap.equals(selection.path, this.path)) {
-              return false;
-            }
-            if (!(selection instanceof DatabaseSelection)) {
-              return false;
-            }
-            if (selection.viewId !== this.view.id) {
-              return false;
-            }
-            return true;
-          }
-        );
-
-        if (!databaseManager && !this.selection) {
-          return;
-        }
-
-        const tableSelection = databaseManager?.getSelection('table');
-
+      this.tableView.selectionUpdated.on(tableSelection => {
         if (!this.isValidSelection(tableSelection)) {
           this.selection = undefined;
           return;
@@ -164,45 +116,41 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private handleDragEvent() {
-    this._disposables.add({
-      dispose: this.eventDispatcher.add(
-        'dragStart',
-        context => {
-          const event = context.get('pointerState').raw;
-          const target = event.target;
-          if (target instanceof Element) {
-            const cell = target.closest('affine-database-cell-container');
-            if (cell) {
-              const selection = this.selection;
-              if (
-                selection &&
-                selection.isEditing &&
-                selection.focus.rowIndex === cell.rowIndex &&
-                selection.focus.columnIndex === cell.columnIndex
-              ) {
-                return false;
-              }
-              this.startDrag(event, cell);
+    this._disposables.add(
+      this.tableView.handleEvent('dragStart', context => {
+        const event = context.get('pointerState').raw;
+        const target = event.target;
+        if (target instanceof Element) {
+          const cell = target.closest('affine-database-cell-container');
+          if (cell) {
+            const selection = this.selection;
+            if (
+              selection &&
+              selection.isEditing &&
+              selection.focus.rowIndex === cell.rowIndex &&
+              selection.focus.columnIndex === cell.columnIndex
+            ) {
+              return false;
             }
-            event.preventDefault();
-            return true;
+            this.startDrag(event, cell);
           }
-          return false;
-        },
-        { path: this.path }
-      ),
-    });
+          event.preventDefault();
+          return true;
+        }
+        return false;
+      })
+    );
   }
 
   isValidSelection(selection?: TableViewSelection): boolean {
     if (!selection) {
       return true;
     }
-    if (selection.focus.rowIndex > this.view.rows.length - 1) {
+    if (selection.focus.rowIndex > this.tableView.view.rows.length - 1) {
       this.selection = undefined;
       return false;
     }
-    if (selection.focus.columnIndex > this.view.columns.length - 1) {
+    if (selection.focus.columnIndex > this.tableView.view.columns.length - 1) {
       this.selection = undefined;
       return false;
     }
@@ -210,7 +158,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private clearSelection() {
-    this.root.selectionManager.clear();
+    this.tableView.setSelection();
   }
 
   get selection(): TableViewSelection | undefined {
@@ -224,7 +172,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     }
     const selection: TableViewSelection = {
       ...data,
-      viewId: this.view.id,
+      viewId: this.tableView.view.id,
       type: 'table',
     };
     if (selection.isEditing) {
@@ -235,32 +183,12 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       );
       const cell = container?.cell;
       const isEditing = cell ? cell.beforeEnterEditMode() : true;
-
-      const selections: BaseSelection[] = [];
-      const databaseSelection = this.root.selectionManager.getInstance(
-        'database',
-        {
-          blockId: this.blockId,
-          path: this.path,
-          viewSelection: {
-            ...selection,
-            isEditing,
-          },
-        }
-      );
-      selections.push(databaseSelection);
-
-      this.root.selectionManager.set(selections);
+      this.tableView.setSelection({
+        ...selection,
+        isEditing,
+      });
     } else {
-      const selectionManager = this.root.selectionManager.getInstance(
-        'database',
-        {
-          blockId: this.blockId,
-          path: this.path,
-          viewSelection: selection,
-        }
-      );
-      this.root.selectionManager.set([selectionManager]);
+      this.tableView.setSelection(selection);
     }
   }
 
@@ -360,143 +288,140 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private bindKeyMap() {
-    this._disposables.add({
-      dispose: this.eventDispatcher.bindHotkey(
-        {
-          Backspace: ctx => {
-            const selection = this.selection;
-            if (!selection) {
-              return;
-            }
-            const rowsSelection = selection.rowsSelection;
-            if (rowsSelection && !selection.columnsSelection) {
-              const rows = this.view.rows.filter(
-                (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
-              );
-              this.view.rowDelete(rows);
-              this.focusTo(
-                rowsSelection.start - 1,
-                selection.focus.columnIndex
-              );
-            }
-          },
-          Escape: () => {
-            const selection = this.selection;
-            if (!selection) {
-              return false;
-            }
-            const rowsSelection = selection.rowsSelection;
-            if (selection.isEditing) {
-              this.selection = {
-                ...selection,
-                isEditing: false,
-              };
-              return true;
-            } else {
-              if (rowsSelection && !selection.columnsSelection) {
-                this.selection = {
-                  ...selection,
-                  rowsSelection: undefined,
-                  columnsSelection: undefined,
-                };
-              } else {
-                this.selection = {
-                  ...selection,
-                  rowsSelection: {
-                    start: rowsSelection?.start ?? selection.focus.rowIndex,
-                    end: rowsSelection?.end ?? selection.focus.rowIndex,
-                  },
-                  columnsSelection: undefined,
-                };
-              }
-            }
+    this._disposables.add(
+      this.tableView.bindHotkey({
+        Backspace: ctx => {
+          const selection = this.selection;
+          if (!selection) {
+            return;
+          }
+          const rowsSelection = selection.rowsSelection;
+          if (rowsSelection && !selection.columnsSelection) {
+            const rows = this.tableView.view.rows.filter(
+              (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
+            );
+            this.tableView.view.rowDelete(rows);
+            this.focusTo(rowsSelection.start - 1, selection.focus.columnIndex);
+          }
+        },
+        Escape: () => {
+          const selection = this.selection;
+          if (!selection) {
             return false;
-          },
-          Enter: () => {
-            const selection = this.selection;
-            if (!selection || selection.isEditing) {
-              return false;
-            }
+          }
+          const rowsSelection = selection.rowsSelection;
+          if (selection.isEditing) {
             this.selection = {
               ...selection,
-              rowsSelection: undefined,
-              columnsSelection: undefined,
-              isEditing: true,
+              isEditing: false,
             };
             return true;
-          },
-          Tab: () => {
-            const selection = this.selection;
-            if (!selection || selection.isEditing) {
-              return false;
+          } else {
+            if (rowsSelection && !selection.columnsSelection) {
+              this.selection = {
+                ...selection,
+                rowsSelection: undefined,
+                columnsSelection: undefined,
+              };
+            } else {
+              this.selection = {
+                ...selection,
+                rowsSelection: {
+                  start: rowsSelection?.start ?? selection.focus.rowIndex,
+                  end: rowsSelection?.end ?? selection.focus.rowIndex,
+                },
+                columnsSelection: undefined,
+              };
             }
-            const length = this.view.columnManagerList.length;
-            const column = selection.focus.columnIndex + 1;
-            this.focusTo(
-              selection.focus.rowIndex + (column >= length ? 1 : 0),
-              column % length
-            );
-            return true;
-          },
-          ArrowLeft: () => {
-            const selection = this.selection;
-            if (!selection || selection.isEditing) {
-              return false;
-            }
-            const length = this.view.columnManagerList.length;
-            const column = selection.focus.columnIndex - 1;
-            this.focusTo(
-              selection.focus.rowIndex + (column < 0 ? -1 : 0),
-              column < 0 ? length - 1 : column
-            );
-            return true;
-          },
-          ArrowRight: () => {
-            const selection = this.selection;
-            if (!selection || selection.isEditing) {
-              return false;
-            }
-            const length = this.view.columnManagerList.length;
-            const column = selection.focus.columnIndex + 1;
-            this.focusTo(
-              selection.focus.rowIndex + (column >= length ? 1 : 0),
-              column % length
-            );
-            return true;
-          },
-          ArrowUp: () => {
-            const selection = this.selection;
-            if (!selection || selection.isEditing) {
-              return false;
-            }
-            this.focusTo(
-              selection.focus.rowIndex - 1,
-              selection.focus.columnIndex
-            );
-            return true;
-          },
-          ArrowDown: () => {
-            const selection = this.selection;
-            if (!selection || selection.isEditing) {
-              return false;
-            }
-            this.focusTo(
-              selection.focus.rowIndex + 1,
-              selection.focus.columnIndex
-            );
-            return true;
-          },
+          }
+          return false;
         },
-        { path: this.path }
-      ),
-    });
+        Enter: () => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+          this.selection = {
+            ...selection,
+            rowsSelection: undefined,
+            columnsSelection: undefined,
+            isEditing: true,
+          };
+          return true;
+        },
+        Tab: () => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+          const length = this.tableView.view.columnManagerList.length;
+          const column = selection.focus.columnIndex + 1;
+          this.focusTo(
+            selection.focus.rowIndex + (column >= length ? 1 : 0),
+            column % length
+          );
+          return true;
+        },
+        ArrowLeft: () => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+          const length = this.tableView.view.columnManagerList.length;
+          const column = selection.focus.columnIndex - 1;
+          this.focusTo(
+            selection.focus.rowIndex + (column < 0 ? -1 : 0),
+            column < 0 ? length - 1 : column
+          );
+          return true;
+        },
+        ArrowRight: () => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+          const length = this.tableView.view.columnManagerList.length;
+          const column = selection.focus.columnIndex + 1;
+          this.focusTo(
+            selection.focus.rowIndex + (column >= length ? 1 : 0),
+            column % length
+          );
+          return true;
+        },
+        ArrowUp: () => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+          this.focusTo(
+            selection.focus.rowIndex - 1,
+            selection.focus.columnIndex
+          );
+          return true;
+        },
+        ArrowDown: () => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+          this.focusTo(
+            selection.focus.rowIndex + 1,
+            selection.focus.columnIndex
+          );
+          return true;
+        },
+      })
+    );
   }
 
   focusTo(rowIndex: number, columnIndex: number) {
-    if (rowIndex < 0 || rowIndex >= this.view.rows.length) {
+    if (rowIndex < 0 || rowIndex >= this.tableView.view.rows.length) {
       return;
     }
-    if (columnIndex < 0 || columnIndex >= this.view.columnManagerList.length) {
+    if (
+      columnIndex < 0 ||
+      columnIndex >= this.tableView.view.columnManagerList.length
+    ) {
       return;
     }
     this.selection = {
@@ -552,9 +477,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     const tableRect = this.tableContainer.getBoundingClientRect();
     const { left, top, width, height, scale } = this.getRect(
       rowSelection?.start ?? 0,
-      rowSelection?.end ?? this.view.rows.length - 1,
+      rowSelection?.end ?? this.tableView.view.rows.length - 1,
       columnSelection?.start ?? 0,
-      columnSelection?.end ?? this.view.columnManagerList.length - 1
+      columnSelection?.end ?? this.tableView.view.columnManagerList.length - 1
     );
     div.style.left = `${left - tableRect.left / scale}px`;
     div.style.top = `${top - tableRect.top / scale}px`;

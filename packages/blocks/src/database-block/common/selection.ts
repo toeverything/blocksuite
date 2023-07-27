@@ -8,7 +8,7 @@ import type {
 export class DatabaseSelection extends BaseSelection {
   static override type = 'database';
 
-  private readonly viewSelection: DataViewSelection;
+  readonly viewSelection: DataViewSelection;
 
   constructor({
     path,
