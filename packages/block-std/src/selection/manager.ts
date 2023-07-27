@@ -92,7 +92,7 @@ export class SelectionManager {
     this.blockStore.page.history.on(
       'stack-item-added',
       (event: { stackItem: StackItem }) => {
-        event.stackItem.meta.set('selection-state', this._oldSelections);
+        event.stackItem.meta.set('selection-state', this.value);
       }
     );
     this.blockStore.page.history.on(
