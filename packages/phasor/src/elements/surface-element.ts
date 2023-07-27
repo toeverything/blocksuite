@@ -43,6 +43,9 @@ export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement,
   L extends ISurfaceElementLocalRecord = ISurfaceElementLocalRecord
 > {
+  static layer = 1;
+  readonly layer: number = 1;
+
   abstract containedByBounds(bounds: Bound): boolean;
 
   abstract getNearestPoint(point: IVec): IVec;

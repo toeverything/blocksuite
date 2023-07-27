@@ -18,6 +18,7 @@ import type {
   SurfaceElement,
 } from './elements/surface-element.js';
 import { compare } from './grid.js';
+import { Layer } from './Layer.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import { Bound, getCommonBound } from './utils/bound.js';
@@ -41,7 +42,8 @@ export class SurfaceManager {
 
   private _computedValue: ComputedValue;
 
-  indexes = { min: 'a0', max: 'a0' };
+  layers = [new Layer('0'), new Layer('1')];
+
   slots = {
     elementUpdated: new Slot<{
       id: id;
@@ -83,14 +85,8 @@ export class SurfaceManager {
         const element = new ElementCtor(yElement, this);
         element.computedValue = this._computedValue;
         element.mount(this._renderer);
-
         this._elements.set(element.id, element);
-
-        if (element.index > this.indexes.max) {
-          this.indexes.max = element.index;
-        } else if (element.index < this.indexes.min) {
-          this.indexes.min = element.index;
-        }
+        this.layers[ElementCtor.layer].addElement(element);
         this.slots.elementAdded.emit(id);
       });
     });
@@ -118,9 +114,7 @@ export class SurfaceManager {
 
         this._elements.set(element.id, element);
 
-        if (element.index > this.indexes.max) {
-          this.indexes.max = element.index;
-        }
+        this.layers[ElementCtor.layer].addElement(element);
         this.slots.elementAdded.emit(id);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
@@ -132,9 +126,7 @@ export class SurfaceManager {
         this._elements.delete(id);
         this.deleteElementLocalRecord(id);
 
-        if (element.index === this.indexes.min) {
-          this.indexes.min = generateKeyBetween(element.index, null);
-        }
+        this.layers[element.layer].deleteElement(element);
         this.slots.elementRemoved.emit(id);
       }
     });
@@ -191,11 +183,13 @@ export class SurfaceManager {
     const yMap = new Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
+    const ElementCtor = ElementCtors[type];
+    const layer = this.layers[ElementCtor.layer];
     const props: IElementCreateProps<T> = {
       ...defaultProps,
       ...properties,
       id,
-      index: generateKeyBetween(this.indexes.max, null),
+      index: generateKeyBetween(layer.indexes.max, null),
       seed: randomSeed(),
     };
 
