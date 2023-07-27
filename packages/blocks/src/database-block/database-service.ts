@@ -13,7 +13,8 @@ import type { SerializedBlock } from '../__internal__/utils/types.js';
 import { multiSelectHelper } from './common/columns/define.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import type { Cell, Column } from './table/types.js';
+import type { Column } from './table/types.js';
+import type { Cell } from './types.js';
 
 export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> {
   initDatabaseBlock(

@@ -4,7 +4,7 @@ import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/toolbar/toolbar.js';
 import './components/database-title.js';
-import './components/selection/selection.js';
+import './components/selection.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
@@ -20,7 +20,7 @@ import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
-import type { DatabaseSelectionView } from './components/selection/selection.js';
+import type { DatabaseSelectionView } from './components/selection.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
 const styles = css`

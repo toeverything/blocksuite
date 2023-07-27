@@ -6,26 +6,24 @@ import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
-import type { SelectColumnData } from '../../../common/columns/define.js';
-import { DatabaseCellElement } from '../../register.js';
+import type { SelectColumnData } from '../define.js';
+import { BaseCellRenderer } from './base-cell.js';
 
-@customElement('affine-database-multi-select-cell')
-export class MultiSelectCell extends DatabaseCellElement<
-  string[],
-  SelectColumnData
-> {
+@customElement('affine-database-select-cell')
+export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {
   override render() {
+    const value = this.value ? [this.value] : [];
     return html`
       <affine-multi-tag-view
-        .value="${this.value ?? []}"
+        .value="${value}"
         .options="${this.column.data.options}"
       ></affine-multi-tag-view>
     `;
   }
 }
-@customElement('affine-database-multi-select-cell-editing')
-export class MultiSelectCellEditing extends DatabaseCellElement<
-  string[],
+@customElement('affine-database-select-cell-editing')
+export class SelectCellEditing extends BaseCellRenderer<
+  string,
   SelectColumnData
 > {
   get _options(): SelectTag[] {
@@ -33,17 +31,17 @@ export class MultiSelectCellEditing extends DatabaseCellElement<
   }
 
   get _value() {
-    return this.value ?? [];
+    const value = this.value;
+    return value ? [value] : [];
   }
 
-  _onChange = (ids: string[]) => {
-    this.onChange(ids);
+  _onChange = ([id]: string[]) => {
+    this.onChange(id);
   };
 
   _editComplete = () => {
     this.selectCurrentCell(false);
   };
-
   _onOptionsChange = (options: SelectTag[]) => {
     this.column.updateData(data => {
       return {
@@ -59,6 +57,7 @@ export class MultiSelectCellEditing extends DatabaseCellElement<
 
   private popTagSelect = () => {
     popTagSelect(this, {
+      mode: 'single',
       options: this._options,
       onOptionsChange: this._onOptionsChange,
       value: this._value,

@@ -2,10 +2,10 @@ import format from 'date-fns/format';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { DatabaseCellElement } from '../../register.js';
+import { BaseCellRenderer } from './base-cell.js';
 
 @customElement('affine-database-date-cell')
-export class DateCell extends DatabaseCellElement<number> {
+export class DateCell extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell {
       display: block;
@@ -36,7 +36,7 @@ export class DateCell extends DatabaseCellElement<number> {
 }
 
 @customElement('affine-database-date-cell-editing')
-export class DateCellEditing extends DatabaseCellElement<number> {
+export class DateCellEditing extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell-editing {
       display: block;

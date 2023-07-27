@@ -7,8 +7,8 @@ import type {
 } from './common/view-manager.js';
 import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
-import type { Cell, Column } from './table/types.js';
-import type { ColumnUpdater, InsertPosition } from './types.js';
+import type { Column } from './table/types.js';
+import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
 import { insertPositionToIndex } from './utils/insert.js';
 
 type Props = {

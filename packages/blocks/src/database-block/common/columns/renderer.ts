@@ -1,38 +1,17 @@
 import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
-import { CheckboxCell } from '../../table/components/column-type/checkbox.js';
-import {
-  DateCell,
-  DateCellEditing,
-} from '../../table/components/column-type/date.js';
-import {
-  LinkCell,
-  LinkCellEditing,
-} from '../../table/components/column-type/link.js';
+import { CheckboxCell } from './cellRenderer/checkbox.js';
+import { DateCell, DateCellEditing } from './cellRenderer/date.js';
+import { LinkCell, LinkCellEditing } from './cellRenderer/link.js';
 import {
   MultiSelectCell,
   MultiSelectCellEditing,
-} from '../../table/components/column-type/multi-select.js';
-import {
-  NumberCell,
-  NumberCellEditing,
-} from '../../table/components/column-type/number.js';
-import {
-  ProgressCell,
-  ProgressCellEditing,
-} from '../../table/components/column-type/progress.js';
-import {
-  RichTextCell,
-  RichTextCellEditing,
-} from '../../table/components/column-type/rich-text.js';
-import {
-  SelectCell,
-  SelectCellEditing,
-} from '../../table/components/column-type/select.js';
-import {
-  TextCell,
-  TextCellEditing,
-} from '../../table/components/column-type/text.js';
-import { TitleCell } from '../../table/components/column-type/title.js';
+} from './cellRenderer/multi-select.js';
+import { NumberCell, NumberCellEditing } from './cellRenderer/number.js';
+import { ProgressCell, ProgressCellEditing } from './cellRenderer/progress.js';
+import { RichTextCell, RichTextCellEditing } from './cellRenderer/rich-text.js';
+import { SelectCell, SelectCellEditing } from './cellRenderer/select.js';
+import { TextCell, TextCellEditing } from './cellRenderer/text.js';
+import { TitleCell } from './cellRenderer/title.js';
 import {
   checkboxHelper,
   dateHelper,
