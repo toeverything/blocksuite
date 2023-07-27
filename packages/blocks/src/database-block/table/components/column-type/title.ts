@@ -65,6 +65,10 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
           e.stopPropagation();
           this.selectCurrentCell(false);
         }
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
       },
       true
     );

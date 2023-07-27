@@ -94,8 +94,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
 
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      this._setValue();
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         this.selectCurrentCell(false);
       });
     }

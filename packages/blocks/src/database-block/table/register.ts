@@ -73,5 +73,10 @@ export abstract class DatabaseCellElement<
         e.stopPropagation();
       }
     });
+    this._disposables.addFromEvent(this, 'pointerdown', e => {
+      if (this.isEditing) {
+        e.stopPropagation();
+      }
+    });
   }
 }
