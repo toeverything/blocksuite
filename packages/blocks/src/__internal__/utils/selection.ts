@@ -261,7 +261,9 @@ export function resetNativeSelection(range: Range | null) {
 
 export function clearSelection(page: Page) {
   if (!page.root) return;
-  getPageBlock(page.root)?.selection?.clear();
+  const pageBlock = getPageBlock(page.root);
+  if (!pageBlock || pageBlock.flavour === 'edgeless') return;
+  pageBlock.selection?.clear();
 }
 
 /**
