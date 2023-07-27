@@ -189,16 +189,15 @@ export class UIEventDispatcher {
       handler => handler.flavour === undefined && handler.path === undefined
     );
 
-    const pathEvents = paths.flatMap(path => {
-      return handlers.filter(handler => {
-        if (handler.path === undefined) return false;
-        return PathMap.includes(path, handler.path);
-      });
+    const pathEvents = handlers.filter(handler => {
+      const _path = handler.path;
+      if (_path === undefined) return false;
+      return paths.some(path => PathMap.includes(path, _path));
     });
 
-    const flavourEvents = flavours.flatMap(flavour => {
-      return handlers.filter(handler => handler.flavour === flavour);
-    });
+    const flavourEvents = handlers.filter(
+      handler => handler.flavour && flavours.includes(handler.flavour)
+    );
 
     return {
       runners: pathEvents.concat(flavourEvents).concat(globalEvents),
