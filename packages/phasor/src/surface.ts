@@ -189,7 +189,7 @@ export class SurfaceManager {
       ...defaultProps,
       ...properties,
       id,
-      index: generateKeyBetween(layer.indexes.max, null),
+      index: generateKeyBetween(layer.max, null),
       seed: randomSeed(),
     };
 
