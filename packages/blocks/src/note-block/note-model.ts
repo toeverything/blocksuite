@@ -22,6 +22,7 @@ export const NoteBlockSchema = defineBlockSchema({
     index: 'a0',
     hidden: false,
     frame: null,
+    layer: 1,
   }),
   metadata: {
     version: 1,
@@ -42,6 +43,4 @@ export const NoteBlockSchema = defineBlockSchema({
   },
 });
 
-export type NoteBlockModel = SchemaToModel<typeof NoteBlockSchema> & {
-  layer: number;
-};
+export type NoteBlockModel = SchemaToModel<typeof NoteBlockSchema>;
