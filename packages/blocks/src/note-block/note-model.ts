@@ -21,8 +21,6 @@ export const NoteBlockSchema = defineBlockSchema({
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
-    frame: null,
-    layer: 1,
   }),
   metadata: {
     version: 1,

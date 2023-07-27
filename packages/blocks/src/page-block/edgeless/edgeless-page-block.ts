@@ -72,7 +72,6 @@ import { PageBlockService } from '../../index.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
-import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
 import { EdgelessHoverRect } from './components/rects/hover-rect.js';
@@ -102,7 +101,6 @@ import {
 } from './utils/selection-manager.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 
-NoteCut;
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot<{ zoom: number; center: IVec }>;
@@ -786,12 +784,12 @@ export class EdgelessPageBlockComponent
     const updateIndexes = (keys: string[], elements: Selectable[]) => {
       this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
         const min = keys[0];
-        if (min < layer.indexes.min) {
-          layer.indexes.min = min;
+        if (min < layer.min) {
+          layer.min = min;
         }
         const max = keys[keys.length - 1];
-        if (max > layer.indexes.max) {
-          layer.indexes.max = max;
+        if (max > layer.max) {
+          layer.max = max;
         }
       });
     };
@@ -801,7 +799,7 @@ export class EdgelessPageBlockComponent
         this._reorderTo(
           elements,
           () => ({
-            start: layer.indexes.max,
+            start: layer.max,
             end: null,
           }),
           updateIndexes
@@ -836,7 +834,7 @@ export class EdgelessPageBlockComponent
           elements,
           () => ({
             start: null,
-            end: layer.indexes.min,
+            end: layer.min,
           }),
           updateIndexes
         );
