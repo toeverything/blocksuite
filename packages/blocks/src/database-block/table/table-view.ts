@@ -114,6 +114,12 @@ const styles = css`
     opacity: 0;
   }
 
+  @media print {
+    .affine-database-block-footer {
+      display: none;
+    }
+  }
+
   .affine-database-block-footer:hover {
     opacity: 1;
   }
