@@ -4,7 +4,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, render } from 'lit';
+import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -12,95 +12,11 @@ import {
   getClosestBlockElementByPoint,
   Point,
 } from '../../__internal__/index.js';
-
-const DRAG_HANDLE_HEIGHT = 12; // px
-const DRAG_HANDLE_WIDTH = 4; // px
+import { DRAG_HANDLE_HEIGHT, DRAG_HANDLE_WIDTH, styles } from './styles.js';
 
 @customElement('affine-drag-handle-widget')
 export class DragHandleWidget extends WidgetElement {
-  static override styles = css`
-    .affine-drag-indicator {
-      position: fixed;
-      top: 0;
-      left: 0;
-      background: var(--affine-primary-color);
-      transition-property: width, height, transform;
-      transition-duration: 100ms;
-      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-      transition-delay: 0s;
-      transform-origin: 0 0;
-      pointer-events: none;
-      z-index: 2;
-    }
-    .affine-drag-preview {
-      top: 0;
-      left: 0;
-      position: fixed;
-      overflow: hidden;
-    }
-    .affine-drag-handle-container {
-      top: 0;
-      left: 0;
-      position: fixed;
-      overflow: hidden;
-      width: ${DRAG_HANDLE_WIDTH + 8}px;
-      transform-origin: 0 0;
-      pointer-events: none;
-      user-select: none;
-    }
-    .affine-drag-handle-line {
-      opacity: 0;
-      width: 1px;
-      height: 100%;
-      position: absolute;
-      left: ${(DRAG_HANDLE_WIDTH - 1) / 2}px;
-      background-color: var(--affine-icon-color);
-      transition: opacity ease-in-out 300ms;
-      pointer-events: none;
-    }
-    .affine-drag-handle {
-      position: absolute;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: ${DRAG_HANDLE_WIDTH}px;
-      height: ${DRAG_HANDLE_HEIGHT}px;
-      border-radius: 1px;
-      pointer-events: auto;
-      color: var(--affine-icon-color);
-    }
-    @media print {
-      .affine-drag-handle-line {
-        display: none;
-      }
-      .affine-drag-handle {
-        display: none;
-      }
-    }
-    .affine-drag-handle-normal {
-      display: flex;
-    }
-    .affine-drag-handle-hover {
-      transition: opacity ease-in-out 300ms;
-    }
-    .affine-drag-handle-hover {
-      display: none;
-    }
-    .affine-drag-handle-container:hover > .affine-drag-handle {
-      cursor: grab;
-    }
-    .affine-drag-handle-container:hover > .affine-drag-handle-line {
-      opacity: 1;
-    }
-    .affine-drag-handle-container:hover .affine-drag-handle-normal,
-    .affine-drag-handle-container[data-selected] .affine-drag-handle-normal {
-      display: none !important;
-    }
-    .affine-drag-handle-container:hover .affine-drag-handle-hover,
-    .affine-drag-handle-container[data-selected] .affine-drag-handle-hover {
-      display: flex !important;
-    }
-  `;
+  static override styles = styles;
 
   @query('.affine-drag-handle-container')
   private _dragHandleContainer!: HTMLDivElement;
@@ -122,6 +38,7 @@ export class DragHandleWidget extends WidgetElement {
   private _scale = 1;
 
   private _hoveredBlockId = '';
+  private _hoveredBlockPath: string[] | null = null;
   private _dropBlockId = '';
 
   private _dragging = false;
@@ -140,6 +57,7 @@ export class DragHandleWidget extends WidgetElement {
     this._indicatorRect = null;
     this._dragPreview.style.display = 'none';
     this._hoveredBlockId = '';
+    this._hoveredBlockPath = null;
   }
 
   setPointerEvents(value: 'auto' | 'none') {
@@ -196,16 +114,21 @@ export class DragHandleWidget extends WidgetElement {
   private _pointerMoveOnBlock: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const point = new Point(state.point.x, state.point.y);
-    const blockElement = getClosestBlockElementByPoint(point.clone());
+    const blockElement = getClosestBlockElementByPoint(
+      point.clone()
+    ) as BlockElement;
     if (!blockElement) {
       this._hoveredBlockId = '';
+      this._hoveredBlockPath = null;
       return;
     }
 
     const blockId = blockElement.getAttribute(this.root.blockIdAttr);
+    const blockPath = blockElement.path;
     assertExists(blockId);
 
     this._hoveredBlockId = blockId;
+    this._hoveredBlockPath = blockPath;
     const { height, left, top, width } = blockElement.getBoundingClientRect();
     const block = this._findBlockSelection(blockId);
     this.toggleAttribute('data-selected', !!block);
@@ -217,14 +140,14 @@ export class DragHandleWidget extends WidgetElement {
     const posX =
       left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
     const posY = top;
-    const offsetY = 50;
+    const offsetY = this._calcDragHandleY(state.y, top, height, this._scale);
 
     this._dragHandleContainer.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
     this._dragHandleContainer.style.opacity = `${(
       1 -
       (state.x - left) / width
     ).toFixed(2)}`;
-    this._dragHandle.style.transform = `translateY(${offsetY}%)`;
+    this._dragHandle.style.transform = `translateY(${offsetY}px)`;
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
@@ -233,20 +156,22 @@ export class DragHandleWidget extends WidgetElement {
     const element = this._captureEventTarget(target);
 
     if (!element || this._dragging) {
-      return;
+      return true;
     }
 
     if (element.closest('.affine-drag-handle-container')) {
-      return;
+      return true;
     }
 
     if (!element.closest('affine-note')) {
       this.hide();
       this._hoveredBlockId = '';
+      this._hoveredBlockPath = null;
       return;
     }
 
     this._pointerMoveOnBlock(ctx);
+    return true;
   };
 
   private _clickHandler: UIEventHandler = ctx => {
@@ -256,6 +181,7 @@ export class DragHandleWidget extends WidgetElement {
 
     if (
       !this._hoveredBlockId ||
+      !this._hoveredBlockPath ||
       !element ||
       !element.closest('.affine-drag-handle-container')
     ) {
@@ -265,7 +191,10 @@ export class DragHandleWidget extends WidgetElement {
     const { selectionManager } = this.root;
 
     selectionManager.set([
-      selectionManager.getInstance('block', this._hoveredBlockId),
+      selectionManager.getInstance('block', {
+        blockId: this._hoveredBlockId,
+        path: this._hoveredBlockPath,
+      }),
     ]);
 
     return true;
@@ -276,12 +205,9 @@ export class DragHandleWidget extends WidgetElement {
     const selections = this.root.selectionManager.value;
     console.log(selections);
     selections
-      .filter(selection => {
-        return selection.type === 'block';
-      })
       .map(selection => {
         // TODO: should use block path
-        return this.root.blockViewMap.get(selection.blockId);
+        return this.root.blockViewMap.get(selection.path as string[]);
       })
       .filter((element): element is BlockElement<BaseBlockModel> => !!element)
       .forEach(element => {
@@ -298,24 +224,30 @@ export class DragHandleWidget extends WidgetElement {
     const element = this._captureEventTarget(target);
 
     const inside = !!element?.closest('.affine-drag-handle-container');
-    if (!inside || !this._dragPreview || !this._hoveredBlockId) {
+    if (
+      !inside ||
+      !this._dragPreview ||
+      !this._hoveredBlockId ||
+      !this._hoveredBlockPath
+    ) {
       return;
     }
 
     const fragment = this._createDragPreview();
 
     // TODO: should use block path
-    const blockElement = this.root.blockViewMap.get(this._hoveredBlockId);
+    const blockElement = this.root.blockViewMap.get(this._hoveredBlockPath);
     if (!blockElement) {
       return;
     }
 
-    const selection = this.selectedBlocks.filter(
-      selection => selection.type === 'block'
-    );
+    const selection = this.selectedBlocks;
     if (selection.length === 0) {
       this.root.selectionManager.set([
-        this.root.selectionManager.getInstance('block', this._hoveredBlockId),
+        this.root.selectionManager.getInstance('block', {
+          blockId: this._hoveredBlockId,
+          path: this._hoveredBlockPath,
+        }),
       ]);
     }
 
@@ -333,6 +265,7 @@ export class DragHandleWidget extends WidgetElement {
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
 
     this._dragPreview.appendChild(fragment);
+    return true;
   };
 
   private _updateIndicator: UIEventHandler = ctx => {
@@ -359,13 +292,13 @@ export class DragHandleWidget extends WidgetElement {
   };
 
   private _dragMoveHandler: UIEventHandler = ctx => {
-    if (!this._dragging) {
+    if (!this._dragging || !this._hoveredBlockPath) {
       return;
     }
 
     const state = ctx.get('pointerState');
     // TODO: should use block path
-    const blockElement = this.root.blockViewMap.get(this._hoveredBlockId);
+    const blockElement = this.root.blockViewMap.get(this._hoveredBlockPath);
     if (!blockElement) {
       return;
     }
@@ -379,6 +312,7 @@ export class DragHandleWidget extends WidgetElement {
     const posY = state.y;
 
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
+    return true;
   };
 
   private _dragEndHandler: UIEventHandler = () => {
@@ -395,7 +329,6 @@ export class DragHandleWidget extends WidgetElement {
     this._dropBlockId = '';
 
     const selectedBlocks = this.selectedBlocks
-      .filter(x => x.type === 'block')
       .map(x => x.blockId)
       .map(id => this.page.getBlockById(id))
       .filter((x): x is BaseBlockModel => !!x);
@@ -404,15 +337,19 @@ export class DragHandleWidget extends WidgetElement {
     if (targetBlock && parent && selectedBlocks.length > 0) {
       this.page.moveBlocks(selectedBlocks, parent, targetBlock, false);
     }
+
+    return true;
   };
 
   override connectedCallback() {
     super.connectedCallback();
-    this._addEvent('pointerMove', this._pointerMoveHandler);
-    this._addEvent('click', this._clickHandler);
-    this._addEvent('dragStart', this._dragStartHandler);
-    this._addEvent('dragMove', this._dragMoveHandler);
-    this._addEvent('dragEnd', this._dragEndHandler);
+    this.handleEvent('pointerMove', this._pointerMoveHandler);
+    this.handleEvent('click', this._clickHandler);
+    this.handleEvent('dragStart', this._dragStartHandler);
+    this.handleEvent('dragMove', this._dragMoveHandler, {
+      global: true,
+    });
+    this.handleEvent('dragEnd', this._dragEndHandler);
   }
 
   override disconnectedCallback() {
