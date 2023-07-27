@@ -76,7 +76,7 @@ export class TextSelection extends BaseSelection {
   }
 
   isInSameBlock(): boolean {
-    return !!this.to && PathMap.equals(this.from.path, this.to.path);
+    return this.to === null || PathMap.equals(this.from.path, this.to.path);
   }
 }
 
