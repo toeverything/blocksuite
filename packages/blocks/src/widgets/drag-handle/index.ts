@@ -1,4 +1,8 @@
-import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
+import type {
+  BaseSelection,
+  BlockSelection,
+  UIEventHandler,
+} from '@blocksuite/block-std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
@@ -69,10 +73,36 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _findBlockSelection(blockId: string) {
-    const selections = this.root.selectionManager.value;
+    const selections = this.selectedBlocks;
     return selections.find((selection): selection is BlockSelection => {
       return selection.blockId === blockId && selection.type === 'block';
     });
+  }
+
+  private _containBlock(selections: BaseSelection[], blockId: string) {
+    return selections.some(selection => {
+      return selection.blockId === blockId;
+    });
+  }
+
+  private _containChildBlock(selections: BaseSelection[], childPath: string[]) {
+    return selections.some(selection => {
+      const { path } = selection;
+      if (path.length > childPath.length) {
+        return false;
+      }
+      return path.join('|') === childPath.slice(0, -1).join('|');
+    });
+  }
+
+  private _setSelectedBlock(blockId: string, path: string[]) {
+    const { selectionManager } = this.root;
+    selectionManager.set([
+      selectionManager.getInstance('block', {
+        blockId,
+        path,
+      }),
+    ]);
   }
 
   override firstUpdated() {
@@ -111,6 +141,11 @@ export class DragHandleWidget extends WidgetElement {
     return element;
   };
 
+  /**
+   * When pointer move on block, should show drag handle
+   * @param ctx
+   * @returns
+   */
   private _pointerMoveOnBlock: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const point = new Point(state.point.x, state.point.y);
@@ -126,6 +161,7 @@ export class DragHandleWidget extends WidgetElement {
     const blockId = blockElement.getAttribute(this.root.blockIdAttr);
     const blockPath = blockElement.path;
     assertExists(blockId);
+    assertExists(blockPath);
 
     this._hoveredBlockId = blockId;
     this._hoveredBlockPath = blockPath;
@@ -150,19 +186,28 @@ export class DragHandleWidget extends WidgetElement {
     this._dragHandle.style.transform = `translateY(${offsetY}px)`;
   };
 
+  /**
+   * When pointer move on page, should hide the drag handle if not on block
+   * When pointer move on block, should show drag handle
+   * @param ctx
+   * @returns
+   */
   private _pointerMoveHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const { target } = state.raw;
     const element = this._captureEventTarget(target);
 
+    // WHen pointer not on block or on dragging, should do nothing
     if (!element || this._dragging) {
-      return true;
+      return;
     }
 
+    // When pointer on drag handle, should do nothing
     if (element.closest('.affine-drag-handle-container')) {
-      return true;
+      return;
     }
 
+    // When pointer not on note block, should hide drag handle
     if (!element.closest('affine-note')) {
       this.hide();
       this._hoveredBlockId = '';
@@ -174,6 +219,11 @@ export class DragHandleWidget extends WidgetElement {
     return true;
   };
 
+  /**
+   * When click on drag handle
+   * Should select the block and show slash menu if current block is not selected
+   * Should clear selection if current block is the first selected block
+   */
   private _clickHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const { target } = state.raw;
@@ -190,23 +240,33 @@ export class DragHandleWidget extends WidgetElement {
 
     const { selectionManager } = this.root;
 
-    selectionManager.set([
-      selectionManager.getInstance('block', {
-        blockId: this._hoveredBlockId,
-        path: this._hoveredBlockPath,
-      }),
-    ]);
+    // Should clear selection if current block is the first selected block
+    if (
+      this.selectedBlocks.length > 0 &&
+      this.selectedBlocks[0].blockId === this._hoveredBlockId
+    ) {
+      selectionManager.clear();
+      return;
+    }
+
+    // Should select the block if current block is not selected
+    this._setSelectedBlock(this._hoveredBlockId, this._hoveredBlockPath);
+
+    // TODO: show slash menu
 
     return true;
   };
 
+  /**
+   * WHen drag start, should create drag preview
+   * When dragging, should update drag preview position
+   * @returns
+   */
   private _createDragPreview() {
     const fragment = document.createDocumentFragment();
     const selections = this.root.selectionManager.value;
-    console.log(selections);
     selections
       .map(selection => {
-        // TODO: should use block path
         return this.root.blockViewMap.get(selection.path as string[]);
       })
       .filter((element): element is BlockElement<BaseBlockModel> => !!element)
@@ -218,6 +278,11 @@ export class DragHandleWidget extends WidgetElement {
     return fragment;
   }
 
+  /**
+   * When start dragging, should create drag preview
+   * @param ctx
+   * @returns
+   */
   private _dragStartHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const { target } = state.raw;
@@ -233,31 +298,34 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
-    const fragment = this._createDragPreview();
-
-    // TODO: should use block path
+    // Get current hover block eleemnt by path
     const blockElement = this.root.blockViewMap.get(this._hoveredBlockPath);
     if (!blockElement) {
       return;
     }
 
-    const selection = this.selectedBlocks;
-    if (selection.length === 0) {
-      this.root.selectionManager.set([
-        this.root.selectionManager.getInstance('block', {
-          blockId: this._hoveredBlockId,
-          path: this._hoveredBlockPath,
-        }),
-      ]);
+    // When there is no selected blocks
+    // Or selected blocks not include current hover block
+    // Set current hover block as selected
+    const selections = this.selectedBlocks;
+    if (
+      selections.length === 0 ||
+      !this._containBlock(selections, this._hoveredBlockId)
+    ) {
+      this._setSelectedBlock(this._hoveredBlockId, this._hoveredBlockPath);
     }
+
+    // Create drag preview fragment and append it to drag preview element
+    const fragment = this._createDragPreview();
 
     this._dragging = true;
 
     const { left, top, width } = blockElement.getBoundingClientRect();
+    this._dragPreview.classList.add('grabbing');
     this._dragPreview.style.display = 'block';
     this._dragPreview.style.width = `${width}px`;
 
-    // TODO: update drag handle position
+    // TODO: update drag preview div position
     const posX =
       left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
     const posY = top;
@@ -268,6 +336,11 @@ export class DragHandleWidget extends WidgetElement {
     return true;
   };
 
+  /**
+   * When dragging, should update indicator position
+   * @param ctx
+   * @returns
+   */
   private _updateIndicator: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const point = new Point(state.point.x, state.point.y);
@@ -277,8 +350,19 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
+    const currentBlockElement = closestBlockElement as BlockElement;
     const blockId = closestBlockElement.getAttribute(this.root.blockIdAttr);
+    const blockPath = currentBlockElement.path;
     assertExists(blockId);
+
+    // Should make sure drop block id is not in selected blocks
+    // Or in the children of selected blocks
+    if (
+      this._containBlock(this.selectedBlocks, blockId) ||
+      this._containChildBlock(this.selectedBlocks, blockPath)
+    ) {
+      return;
+    }
 
     this._dropBlockId = blockId;
 
@@ -291,6 +375,13 @@ export class DragHandleWidget extends WidgetElement {
     };
   };
 
+  /**
+   * When dragging, should update drag preview position
+   * When dragging, should update indicator position
+   * When dragging, should update drop block id
+   * @param ctx
+   * @returns
+   */
   private _dragMoveHandler: UIEventHandler = ctx => {
     if (!this._dragging || !this._hoveredBlockPath) {
       return;
@@ -315,25 +406,34 @@ export class DragHandleWidget extends WidgetElement {
     return true;
   };
 
+  /**
+   * When drag end, should move blocks to drop position
+   * @returns
+   */
   private _dragEndHandler: UIEventHandler = () => {
     if (!this._dragging) {
       return;
     }
-    while (this._dragPreview.firstChild) {
-      this._dragPreview.firstChild.remove();
-    }
-    const target = this._dropBlockId;
+    // Before drop blocks, should clear drag preview
+    this._dragPreview.textContent = '';
+
+    const targetBlockId = this._dropBlockId;
     this._dragging = false;
     this._dragPreview.style.display = 'none';
     this._indicatorRect = null;
     this._dropBlockId = '';
 
+    // Should make sure drop block id is not in selected blocks
+    if (this._containBlock(this.selectedBlocks, targetBlockId)) {
+      return;
+    }
+
     const selectedBlocks = this.selectedBlocks
       .map(x => x.blockId)
       .map(id => this.page.getBlockById(id))
       .filter((x): x is BaseBlockModel => !!x);
-    const targetBlock = this.page.getBlockById(target);
-    const parent = this.page.getParent(target);
+    const targetBlock = this.page.getBlockById(targetBlockId);
+    const parent = this.page.getParent(targetBlockId);
     if (targetBlock && parent && selectedBlocks.length > 0) {
       this.page.moveBlocks(selectedBlocks, parent, targetBlock, false);
     }
