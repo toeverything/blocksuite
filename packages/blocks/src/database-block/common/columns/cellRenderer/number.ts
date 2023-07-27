@@ -1,10 +1,10 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { DatabaseCellElement } from '../../register.js';
+import { BaseCellRenderer } from './base-cell.js';
 
 @customElement('affine-database-number-cell')
-export class NumberCell extends DatabaseCellElement<number> {
+export class NumberCell extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-number-cell {
       display: block;
@@ -36,7 +36,7 @@ export class NumberCell extends DatabaseCellElement<number> {
 }
 
 @customElement('affine-database-number-cell-editing')
-export class NumberCellEditing extends DatabaseCellElement<number> {
+export class NumberCellEditing extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-number-cell-editing {
       display: block;
@@ -89,7 +89,7 @@ export class NumberCellEditing extends DatabaseCellElement<number> {
       return;
     }
     this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(value, { captureSync: true });
+    this.onChange(value);
   };
 
   private _keydown = (e: KeyboardEvent) => {

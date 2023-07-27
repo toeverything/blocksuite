@@ -1,9 +1,10 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { DatabaseCellElement } from '../../register.js';
+import { BaseCellRenderer } from './base-cell.js';
+
 @customElement('affine-database-text-cell')
-export class TextCell extends DatabaseCellElement<string> {
+export class TextCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-text-cell {
       display: block;
@@ -35,7 +36,7 @@ export class TextCell extends DatabaseCellElement<string> {
   }
 }
 @customElement('affine-database-text-cell-editing')
-export class TextCellEditing extends DatabaseCellElement<string> {
+export class TextCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-text-cell-editing {
       display: block;
@@ -82,7 +83,7 @@ export class TextCellEditing extends DatabaseCellElement<string> {
 
   private _setValue = (str: string = this._inputEle.value) => {
     this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(str, { captureSync: true });
+    this.onChange(str);
   };
 
   private _keydown = (e: KeyboardEvent) => {

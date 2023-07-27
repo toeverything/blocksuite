@@ -8,10 +8,10 @@ import type {
   CellFocus,
   MultiSelection,
   TableViewSelection,
-} from '../../../../__internal__/utils/types.js';
-import { startDrag } from '../../../utils/drag.js';
-import type { DatabaseTable } from '../../table-view.js';
-import type { DatabaseCellContainer } from '../cell-container.js';
+} from '../../../__internal__/utils/types.js';
+import { startDrag } from '../../utils/drag.js';
+import type { DatabaseTable } from '../table-view.js';
+import type { DatabaseCellContainer } from './cell-container.js';
 
 @customElement('affine-database-selection')
 export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {

@@ -14,7 +14,8 @@ import {
   type Slot,
 } from '@blocksuite/store';
 
-import type { Cell, Column } from '../../database-block/table/types.js';
+import type { Cell } from '../../database-block/index.js';
+import type { Column } from '../../database-block/table/types.js';
 import type { PageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type {
