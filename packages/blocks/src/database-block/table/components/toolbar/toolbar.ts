@@ -175,6 +175,12 @@ const styles = css`
   .show-toolbar {
     display: flex;
   }
+
+  @media print {
+    affine-database-toolbar {
+      display: none;
+    }
+  }
 `;
 
 @customElement('affine-database-toolbar')

@@ -129,6 +129,12 @@ export class DefaultPageBlockComponent
     .affine-block-element {
       display: block;
     }
+
+    @media print {
+      .selected {
+        background-color: transparent !important;
+      }
+    }
   `;
 
   flavour = 'affine:page' as const;

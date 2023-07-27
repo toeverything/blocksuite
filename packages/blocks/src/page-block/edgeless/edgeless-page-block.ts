@@ -230,6 +230,12 @@ export class EdgelessPageBlockComponent
         display: none;
       }
     }
+
+    @media print {
+      .selected {
+        background-color: transparent !important;
+      }
+    }
   `;
 
   flavour = 'edgeless' as const;

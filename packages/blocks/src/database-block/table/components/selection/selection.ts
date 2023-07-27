@@ -36,6 +36,12 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       display: none;
       outline: none;
     }
+
+    @media print {
+      affine-database-selection {
+        display: none;
+      }
+    }
   `;
 
   @property({ attribute: false })

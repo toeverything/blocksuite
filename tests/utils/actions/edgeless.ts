@@ -26,7 +26,7 @@ import {
   waitNextFrame,
 } from './misc.js';
 
-const AWAIT_TIMEOUT = 260;
+const AWAIT_TIMEOUT = 500;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
