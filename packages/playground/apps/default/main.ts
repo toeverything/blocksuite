@@ -101,10 +101,33 @@ const syncProviders = async (
 };
 
 async function initWorkspace(workspace: Workspace) {
+  let databaseExists = false;
+  try {
+    databaseExists =
+      (await indexedDB.databases()).find(db => db.name === INDEXED_DB_NAME) !==
+      undefined;
+  } catch (e) {
+    const request = indexedDB.open(INDEXED_DB_NAME);
+    databaseExists = await new Promise(resolve => {
+      const unlisten = () => {
+        request.removeEventListener('success', success);
+        request.removeEventListener('error', error);
+      };
+      const success = () => {
+        resolve(true);
+        unlisten();
+      };
+      const error = () => {
+        resolve(false);
+        unlisten();
+      };
+      request.addEventListener('success', success);
+      request.addEventListener('error', error);
+    });
+  }
+
   const shouldInit =
-    (!(await indexedDB.databases()).find(db => db.name === INDEXED_DB_NAME) &&
-      !params.get('room')) ||
-    params.get('init');
+    (!databaseExists && !params.get('room')) || params.get('init');
 
   if (shouldInit) {
     const deleteResult = await new Promise(resovle => {
