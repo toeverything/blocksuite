@@ -1,4 +1,4 @@
-export class Layer<T extends { index: string }> {
+export class Batch<T extends { index: string }> {
   private elements = new Set<T>();
   private _min = 'a0';
   private _max = 'a0';

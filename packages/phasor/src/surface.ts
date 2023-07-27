@@ -1,6 +1,7 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
+import { Batch } from './batch.js';
 import type { IBound } from './consts.js';
 import {
   ElementCtors,
@@ -18,7 +19,6 @@ import type {
   SurfaceElement,
 } from './elements/surface-element.js';
 import { compare } from './grid.js';
-import { Layer } from './Layer.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import { Bound, getCommonBound } from './utils/bound.js';
@@ -41,8 +41,8 @@ export class SurfaceManager {
   >();
 
   private _computedValue: ComputedValue;
-
-  layers = [new Layer('0'), new Layer('1')];
+  private _defaultBatch = 'a1';
+  private _batches = new Map<string, Batch<SurfaceElement>>();
 
   slots = {
     elementUpdated: new Slot<{
@@ -75,6 +75,24 @@ export class SurfaceManager {
     return this._renderer;
   }
 
+  private _getBatch(id: string) {
+    const batch = this._batches.get(id);
+    if (batch) return batch;
+    const newBatch = new Batch<SurfaceElement>(id);
+    this._batches.set(id, newBatch);
+    return newBatch;
+  }
+
+  private _addToBatch(element: SurfaceElement) {
+    const batch = element.batch ?? this._defaultBatch;
+    this._getBatch(batch).addElement(element);
+  }
+
+  private _removeFromBatch(element: SurfaceElement) {
+    const batch = element.batch ?? this._defaultBatch;
+    this._getBatch(batch).deleteElement(element);
+  }
+
   private _syncFromExistingContainer() {
     this._transact(() => {
       this._yContainer.forEach(yElement => {
@@ -86,7 +104,7 @@ export class SurfaceManager {
         element.computedValue = this._computedValue;
         element.mount(this._renderer);
         this._elements.set(element.id, element);
-        this.layers[ElementCtor.layer].addElement(element);
+        this._addToBatch(element);
         this.slots.elementAdded.emit(id);
       });
     });
@@ -111,10 +129,9 @@ export class SurfaceManager {
         const element = new ElementCtor(yElement, this);
         element.computedValue = this._computedValue;
         element.mount(this._renderer);
-
         this._elements.set(element.id, element);
 
-        this.layers[ElementCtor.layer].addElement(element);
+        this._addToBatch(element);
         this.slots.elementAdded.emit(id);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
@@ -125,8 +142,7 @@ export class SurfaceManager {
         element.unmount();
         this._elements.delete(id);
         this.deleteElementLocalRecord(id);
-
-        this.layers[element.layer].deleteElement(element);
+        this._removeFromBatch(element);
         this.slots.elementRemoved.emit(id);
       }
     });
@@ -183,13 +199,12 @@ export class SurfaceManager {
     const yMap = new Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
-    const ElementCtor = ElementCtors[type];
-    const layer = this.layers[ElementCtor.layer];
+    const batch = this._getBatch(properties.batch ?? this._defaultBatch);
     const props: IElementCreateProps<T> = {
       ...defaultProps,
       ...properties,
       id,
-      index: generateKeyBetween(layer.max, null),
+      index: generateKeyBetween(batch.max, null),
       seed: randomSeed(),
     };
 
@@ -222,6 +237,10 @@ export class SurfaceManager {
     this.updateElement(id, {
       xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
     });
+  }
+
+  setDefaultBatch(batch: string) {
+    this._defaultBatch = batch;
   }
 
   removeElement(id: string) {
