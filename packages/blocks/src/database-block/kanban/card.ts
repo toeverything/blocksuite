@@ -2,7 +2,7 @@ import './cell.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
@@ -29,9 +29,14 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   groupKey!: string;
   @property({ attribute: false })
   cardId!: string;
+  @state()
+  isFocus = false;
 
   override render() {
     const columns = this.view.columnManagerList;
+    this.style.border = this.isFocus
+      ? '1px solid var(--affine-primary-color)'
+      : '';
     return html` <div>
       ${repeat(
         columns,

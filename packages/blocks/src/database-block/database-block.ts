@@ -3,6 +3,8 @@ import './table/table-view.js';
 import './kanban/kanban-view.js';
 import './common/database-view-header.js';
 
+import { PathMap } from '@blocksuite/block-std';
+import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
@@ -10,21 +12,54 @@ import { html, literal } from 'lit/static-html.js';
 import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
+import type { DataViewSelectionState } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
+import type { BaseDataView } from './common/base-data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
+import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { DatabaseBlockService } from './database-service.js';
+import { LegacyDatabaseBlockService } from './database-service.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
 import type { BlockOperation } from './types.js';
+
+type ViewData = {
+  view: DataViewManager;
+  selectionUpdated: Slot<DataViewSelectionState>;
+  setSelection: (selection: DataViewSelectionState) => void;
+  bindHotkey: BaseDataView['bindHotkey'];
+  handleEvent: BaseDataView['handleEvent'];
+};
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:database', DatabaseBlockService);
+    registerService('affine:database', LegacyDatabaseBlockService);
     this.currentView = this.model.getViewList()[0].id;
+    this._disposables.add(
+      this.root.selectionManager.slots.changed.on(selections => {
+        const databaseSelection = selections.find(
+          (selection): selection is DatabaseSelection => {
+            if (!PathMap.equals(selection.path, this.path)) {
+              return false;
+            }
+            return selection instanceof DatabaseSelection;
+          }
+        );
+        Object.entries(this.viewMap).forEach(([id, v]) => {
+          if (!databaseSelection || databaseSelection.viewId !== id) {
+            v.selectionUpdated.emit(undefined);
+            return;
+          }
+          v.selectionUpdated.emit(databaseSelection?.viewSelection);
+        });
+      })
+    );
+    this.handleEvent('selectionChange', () => {
+      return true;
+    });
   }
 
   @property({ attribute: false })
@@ -49,7 +84,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return this._dataSource;
   }
 
-  private viewMap: Record<string, DataViewManager> = {};
+  private viewMap: Record<string, ViewData> = {};
   private getViewDataById = (id: string) => {
     return this.model.views.find(v => v.id === id);
   };
@@ -71,15 +106,57 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     };
   }
 
-  private getView(id: string): DataViewManager {
+  private getView(id: string): ViewData {
     if (!this.viewMap[id]) {
-      this.viewMap[id] = new {
+      const view = new {
         table: DataViewTableManager,
         kanban: DataViewKanbanManager,
       }[this.getViewDataById(id)?.mode ?? 'table'](
         this.viewSource(id) as never,
         this.dataSource
       );
+      this.viewMap[id] = {
+        view: view,
+        selectionUpdated: new Slot<DataViewSelectionState>(),
+        setSelection: selection => {
+          const data = this.root.selectionManager.getInstance('database', {
+            blockId: this.model.id,
+            path: this.path,
+            viewSelection: selection as never,
+          });
+          this.root.selectionManager.set([data]);
+        },
+        handleEvent: (name, handler) => {
+          return {
+            dispose: this.root.uiEventDispatcher.add(
+              name,
+              context => {
+                if (this.currentView === id) {
+                  return handler(context);
+                }
+              },
+              { path: this.path }
+            ),
+          };
+        },
+        bindHotkey: hotkeys => {
+          return {
+            dispose: this.root.uiEventDispatcher.bindHotkey(
+              Object.fromEntries(
+                Object.entries(hotkeys).map(([key, fn]) => [
+                  key,
+                  ctx => {
+                    if (this.currentView === id) {
+                      return fn(ctx);
+                    }
+                  },
+                ])
+              ),
+              { path: this.path }
+            ),
+          };
+        },
+      };
     }
     return this.viewMap[id];
   }
@@ -98,7 +175,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           .model="${this.model}"
         ></database-view-header>`
       : '';
-    const currentViewManager = this.getView(current.id);
+    const viewData = this.getView(current.id);
     const blockOperation: BlockOperation = {
       copy: () => {
         copyBlocks({
@@ -119,10 +196,16 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         ${view}
         <${databaseTag}
           .titleText='${this.model.title}'
-          .root='${this.root}'
+          .selectionUpdated='${viewData.selectionUpdated}'
+          .setSelection='${viewData.setSelection}'
+          .bindHotkey='${viewData.bindHotkey}'
+          .handleEvent='${viewData.handleEvent}'
           .blockOperation='${blockOperation}'
-          .view='${currentViewManager}'
+          .view='${viewData.view}'
           .modalMode='${this.modalMode}'
+          .getFlag='${this.page.awarenessStore.getFlag.bind(
+            this.page.awarenessStore
+          )}'
           class='affine-block-element'
         ></${databaseTag}>
       </div>

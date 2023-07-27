@@ -13,7 +13,6 @@ import {
   throttle,
 } from '../../__internal__/utils/common.js';
 import {
-  getModelByElement,
   getViewportElement,
   getVirgoByModel,
 } from '../../__internal__/utils/query.js';
@@ -113,12 +112,10 @@ export class LinkedPageWidget extends WidgetElement {
     if (!text) {
       return;
     }
-
-    // Fixme @Saul-Mirone get model from getCurrentSelection
-    const target = event.target;
-    if (!target || !(target instanceof HTMLElement)) return;
-    const model = getModelByElement(target);
-
+    const model = this.root.page.getBlockById(text.blockId);
+    if (!model) {
+      return;
+    }
     if (matchFlavours(model, this.options.ignoreBlockTypes)) return;
     const vEditor = getVirgoByModel(model);
     if (!vEditor) return;

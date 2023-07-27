@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import './meta-data/meta-data.js';
 
+import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
 import {
   PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
@@ -148,7 +149,9 @@ export class DefaultPageBlockComponent
       pageId: string;
       blockId?: string;
     }>(),
-    tagClicked: new Slot<{ tagId: string }>(),
+    tagClicked: new Slot<{
+      tagId: string;
+    }>(),
   };
 
   @query('.affine-default-page-block-title')

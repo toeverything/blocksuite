@@ -221,10 +221,7 @@ export class ProgressCellEditing extends DatabaseCellElement<number> {
       left: `calc(${progress}% - 3px)`,
     });
 
-    return html` <div
-      class="affine-database-progress"
-      @mousedown="${(e: Event) => e.preventDefault()}"
-    >
+    return html` <div class="affine-database-progress">
       <div class="affine-database-progress-bar">
         <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>

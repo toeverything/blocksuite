@@ -18,7 +18,6 @@ export class KeyboardControl {
     const keyboardEventState = new KeyboardEventState({
       event,
     });
-
     this._dispatcher.run(
       'keyDown',
       this._createContext(event, keyboardEventState)

@@ -75,15 +75,42 @@ export type CellFocus = {
   rowIndex: number;
   columnIndex: number;
 };
-export type MultiSelection = { start: number; end: number };
-export type DatabaseSelection = {
-  databaseId: string;
+export type MultiSelection = {
+  start: number;
+  end: number;
+};
+export type TableViewSelection = {
+  viewId: string;
+  type: 'table';
   rowsSelection?: MultiSelection;
   columnsSelection?: MultiSelection;
   focus: CellFocus;
   isEditing: boolean;
 };
-export type DatabaseSelectionState = DatabaseSelection | undefined;
+
+export type KanbanFocusData = {
+  columnId: string;
+  isEditing: boolean;
+};
+
+export type KanbanViewSelection = {
+  viewId: string;
+  type: 'kanban';
+  groupKey: string;
+  cardId: string;
+  focus?: KanbanFocusData;
+};
+
+export type DataViewSelection = TableViewSelection | KanbanViewSelection;
+export type GetDataViewSelection<
+  K extends DataViewSelection['type'],
+  T = DataViewSelection
+> = T extends {
+  type: K;
+}
+  ? T
+  : never;
+export type DataViewSelectionState = DataViewSelection | undefined;
 
 /** Common context interface definition for block models. */
 
@@ -106,7 +133,9 @@ export interface BlockHost extends BlockHostContext {
 }
 
 type EditorMode = 'page' | 'edgeless';
-type EditorSlots = { pageModeSwitched: Slot<EditorMode> };
+type EditorSlots = {
+  pageModeSwitched: Slot<EditorMode>;
+};
 
 export type AbstractEditor = {
   page: Page;

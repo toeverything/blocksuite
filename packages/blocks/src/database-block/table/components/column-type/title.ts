@@ -1,6 +1,7 @@
 import type { TemplateResult } from 'lit';
 import { css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { html } from 'lit/static-html.js';
 
 import { DatabaseCellElement } from '../../register.js';
@@ -43,7 +44,17 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
       width: 100%;
       margin-top: unset;
     }
+
+    .mock-focus {
+      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+      border: 2px solid var(--affine-primary-color) !important;
+      pointer-events: none;
+      box-sizing: border-box;
+    }
   `;
+
+  @state()
+  realEditing = false;
 
   protected override firstUpdated() {
     this._disposables.addFromEvent(
@@ -54,38 +65,67 @@ export class TitleCell extends DatabaseCellElement<TemplateResult> {
           e.stopPropagation();
           this.selectCurrentCell(false);
         }
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
       },
       true
     );
-    setTimeout(() => {
-      this.querySelector('rich-text')?.vEditor?.slots.vRangeUpdated.on(
-        ([range]) => {
-          if (range) {
-            if (!this.isEditing) {
-              this.selectCurrentCell(true);
-            }
-          } else {
-            this.selectCurrentCell(false);
-          }
+    this._disposables.addFromEvent(
+      this,
+      'click',
+      e => {
+        if (this.realEditing) {
+          e.stopPropagation();
         }
-      );
+      },
+      true
+    );
+    requestAnimationFrame(() => {
+      const editor = this.querySelector('rich-text')?.vEditor;
+      if (editor) {
+        this._disposables.add(
+          editor.slots.vRangeUpdated.on(([range]) => {
+            this.realEditing = !!range;
+          })
+        );
+      }
     });
   }
 
   override focusCell() {
-    this.querySelector('rich-text')?.vEditor?.focusEnd();
+    const block = this.querySelector('affine-paragraph');
+    const selectionManager = block?.root.selectionManager;
+    if (selectionManager) {
+      const length =
+        block?.querySelector('rich-text')?.vEditor?.yText.length ?? 0;
+      const selection = selectionManager.getInstance('text', {
+        from: {
+          blockId: block.model.id,
+          path: block.path,
+          index: length,
+          length: 0,
+        },
+        to: null,
+      });
+      selectionManager.set([selection]);
+    }
     return false;
   }
 
   override blurCell() {
-    getSelection()?.removeAllRanges();
     return false;
   }
 
   override render() {
+    const className = classMap({
+      'mock-focus': this.realEditing,
+      mask: true,
+    });
     return html`
       <div class="affine-database-block-row-cell-content">${this.value}</div>
-      ${this.isEditing ? '' : html` <div class="mask"></div>`}
+      <div class="${className}"></div>
     `;
   }
 }
