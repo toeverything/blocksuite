@@ -68,5 +68,10 @@ export abstract class DatabaseCellElement<
     super.connectedCallback();
     this.style.width = '100%';
     this.style.height = '100%';
+    this._disposables.addFromEvent(this, 'click', e => {
+      if (this.isEditing) {
+        e.stopPropagation();
+      }
+    });
   }
 }
