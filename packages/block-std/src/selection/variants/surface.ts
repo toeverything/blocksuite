@@ -13,7 +13,7 @@ export class SurfaceSelection extends BaseSelection {
     editing: boolean,
     by?: string
   ) {
-    super(blockId);
+    super({ blockId, path: [] });
     this.elements = elements;
     this.editing = editing;
     this.by = by;

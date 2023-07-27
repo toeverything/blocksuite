@@ -338,7 +338,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         shapeStyle: shapeStyle,
       });
     });
-    this._forceUpdateSelection();
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
