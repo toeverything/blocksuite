@@ -22,7 +22,6 @@ import {
   handleMultiBlockIndent,
   handleMultiBlockUnindent,
 } from '../../__internal__/rich-text/rich-text-operations.js';
-import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
@@ -522,23 +521,11 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   hotkey.addListener(UP, e => {
     const blockRange = getCurrentBlockRange(page);
     if (!blockRange) return;
-
-    const parent = page.getParent(blockRange.models[0]);
-    if (parent && matchFlavours(parent, ['affine:database'])) {
-      const service = getService('affine:database');
-      if (service.getSelection()) return;
-    }
     handleUp(e, page, { selection });
   });
   hotkey.addListener(DOWN, e => {
     const blockRange = getCurrentBlockRange(page);
     if (!blockRange) return;
-
-    const parent = page.getParent(blockRange.models[0]);
-    if (parent && matchFlavours(parent, ['affine:database'])) {
-      const service = getService('affine:database');
-      if (service.getSelection()) return;
-    }
     handleDown(e, page, { selection });
   });
   hotkey.addListener(LEFT, e => {
@@ -564,11 +551,6 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
   hotkey.addListener(RIGHT, e => {
     const blockRange = getCurrentBlockRange(page);
     if (!blockRange) return;
-
-    if (matchFlavours(blockRange.models[0], ['affine:database'])) {
-      const service = getService('affine:database');
-      if (service.getSelection()) return;
-    }
     // Do nothing
     if (blockRange.type === 'Block') return;
     // See https://github.com/toeverything/blocksuite/issues/2260

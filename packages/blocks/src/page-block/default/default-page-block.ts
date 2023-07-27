@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import './meta-data/meta-data.js';
 
+import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
 import {
   BLOCK_ID_ATTR,
   PAGE_BLOCK_CHILD_PADDING,
@@ -162,6 +163,8 @@ export class DefaultPageBlockComponent
 
   private _resizeObserver: ResizeObserver | null = null;
 
+  private _prevSelection: BaseSelection | null = null;
+
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
@@ -177,7 +180,9 @@ export class DefaultPageBlockComponent
       pageId: string;
       blockId?: string;
     }>(),
-    tagClicked: new Slot<{ tagId: string }>(),
+    tagClicked: new Slot<{
+      tagId: string;
+    }>(),
   };
 
   @query('.affine-default-page-block-title')
@@ -501,6 +506,40 @@ export class DefaultPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     this.service?.bindViewport(this.viewportElement);
+    this.handleEvent('selectionChange', () => {
+      const selection = window.getSelection();
+      if (!selection) {
+        return;
+      }
+      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+      if (this.service) {
+        this._prevSelection = this.service.rangeController.writeRange(range);
+      }
+    });
+    this._disposables.add(
+      this.root.selectionManager.slots.changed.on(selections => {
+        if (this.service?._isNativeSelection) {
+          return;
+        }
+        // wait for lit updated
+        requestAnimationFrame(() => {
+          const text =
+            selections.find((selection): selection is TextSelection =>
+              selection.is('text')
+            ) ?? null;
+          const eq =
+            text && this._prevSelection
+              ? text.equals(this._prevSelection)
+              : text === this._prevSelection;
+          if (eq) {
+            return;
+          }
+
+          this._prevSelection = text;
+          this.service?.rangeController.syncRange(text);
+        });
+      })
+    );
   }
 
   override connectedCallback() {

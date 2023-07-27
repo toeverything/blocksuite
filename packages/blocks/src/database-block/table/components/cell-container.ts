@@ -105,6 +105,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       selectCurrentCell: this._selectCurrentCell,
     };
     const isEditView = view === uni;
+
     return html`${keyed(
       `${isEditView} ${this.column.type}`,
       html`<uni-lit
