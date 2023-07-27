@@ -1,4 +1,5 @@
 import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
+import type { BaseCellRenderer } from './cellRenderer/base-cell.js';
 import { CheckboxCell } from './cellRenderer/checkbox.js';
 import { DateCell, DateCellEditing } from './cellRenderer/date.js';
 import { LinkCell, LinkCellEditing } from './cellRenderer/link.js';
@@ -24,7 +25,7 @@ import {
   textHelper,
   titleHelper,
 } from './define.js';
-import type { CellRenderer } from './manager.js';
+import type { CellRenderer, DataViewCellComponent } from './manager.js';
 
 export interface Renderer<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
@@ -60,73 +61,82 @@ export class ColumnRendererHelper {
 
 export const columnRenderer = new ColumnRendererHelper();
 
+const createFromBaseCellRenderer = <
+  Value,
+  Data extends Record<string, unknown> = Record<string, unknown>
+>(
+  renderer: typeof BaseCellRenderer<Value, Data>
+): DataViewCellComponent => {
+  return createUniComponentFromWebComponent(renderer as never) as never;
+};
+
 columnRenderer.register({
   type: titleHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(TitleCell),
+    view: createFromBaseCellRenderer(TitleCell),
   },
 });
 columnRenderer.register({
   type: richTextHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(RichTextCell),
-    edit: createUniComponentFromWebComponent(RichTextCellEditing),
+    view: createFromBaseCellRenderer(RichTextCell),
+    edit: createFromBaseCellRenderer(RichTextCellEditing),
   },
 });
 columnRenderer.register({
   type: selectHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(SelectCell),
-    edit: createUniComponentFromWebComponent(SelectCellEditing),
+    view: createFromBaseCellRenderer(SelectCell),
+    edit: createFromBaseCellRenderer(SelectCellEditing),
   },
 });
 columnRenderer.register({
   type: multiSelectHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(MultiSelectCell),
-    edit: createUniComponentFromWebComponent(MultiSelectCellEditing),
+    view: createFromBaseCellRenderer(MultiSelectCell),
+    edit: createFromBaseCellRenderer(MultiSelectCellEditing),
   },
 });
 columnRenderer.register({
   type: numberHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(NumberCell),
-    edit: createUniComponentFromWebComponent(NumberCellEditing),
+    view: createFromBaseCellRenderer(NumberCell),
+    edit: createFromBaseCellRenderer(NumberCellEditing),
   },
 });
 columnRenderer.register({
   type: checkboxHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(CheckboxCell),
+    view: createFromBaseCellRenderer(CheckboxCell),
   },
 });
 columnRenderer.register({
   type: progressHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(ProgressCell),
-    edit: createUniComponentFromWebComponent(ProgressCellEditing),
+    view: createFromBaseCellRenderer(ProgressCell),
+    edit: createFromBaseCellRenderer(ProgressCellEditing),
   },
 });
 columnRenderer.register({
   type: linkHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(LinkCell),
-    edit: createUniComponentFromWebComponent(LinkCellEditing),
+    view: createFromBaseCellRenderer(LinkCell),
+    edit: createFromBaseCellRenderer(LinkCellEditing),
   },
 });
 
 columnRenderer.register({
   type: textHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(TextCell),
-    edit: createUniComponentFromWebComponent(TextCellEditing),
+    view: createFromBaseCellRenderer(TextCell),
+    edit: createFromBaseCellRenderer(TextCellEditing),
   },
 });
 
 columnRenderer.register({
   type: dateHelper.type,
   cellRenderer: {
-    view: createUniComponentFromWebComponent(DateCell),
-    edit: createUniComponentFromWebComponent(DateCellEditing),
+    view: createFromBaseCellRenderer(DateCell),
+    edit: createFromBaseCellRenderer(DateCellEditing),
   },
 });
