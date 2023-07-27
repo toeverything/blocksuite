@@ -24,7 +24,6 @@ import {
 } from '../components/component-toolbar/change-shape-button.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { Selectable } from '../services/tools-manager.js';
 import {
   DEFAULT_NOTE_CHILD_FLAVOUR,
   DEFAULT_NOTE_CHILD_TYPE,
