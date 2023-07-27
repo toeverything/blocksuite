@@ -75,7 +75,11 @@ export class SurfaceManager {
     return this._renderer;
   }
 
-  private _getBatch(id: string) {
+  get defaultBatch() {
+    return this._defaultBatch;
+  }
+
+  getBatch(id: string) {
     const batch = this._batches.get(id);
     if (batch) return batch;
     const newBatch = new Batch<SurfaceElement>(id);
@@ -85,12 +89,12 @@ export class SurfaceManager {
 
   private _addToBatch(element: SurfaceElement) {
     const batch = element.batch ?? this._defaultBatch;
-    this._getBatch(batch).addElement(element);
+    this.getBatch(batch).addElement(element);
   }
 
   private _removeFromBatch(element: SurfaceElement) {
     const batch = element.batch ?? this._defaultBatch;
-    this._getBatch(batch).deleteElement(element);
+    this.getBatch(batch).deleteElement(element);
   }
 
   private _syncFromExistingContainer() {
@@ -199,7 +203,7 @@ export class SurfaceManager {
     const yMap = new Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
-    const batch = this._getBatch(properties.batch ?? this._defaultBatch);
+    const batch = this.getBatch(properties.batch ?? this._defaultBatch);
     const props: IElementCreateProps<T> = {
       ...defaultProps,
       ...properties,

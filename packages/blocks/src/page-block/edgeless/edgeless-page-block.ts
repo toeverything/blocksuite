@@ -780,16 +780,17 @@ export class EdgelessPageBlockComponent
 
   // Just update `index`, we don't change the order of the shapes in the children.
   reorderShapes = ({ elements, type }: ReorderingAction<Selectable>) => {
-    const layer = this.surface.layers[1];
+    const { surface } = this;
+    const batch = surface.getBatch(surface.defaultBatch);
     const updateIndexes = (keys: string[], elements: Selectable[]) => {
       this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
         const min = keys[0];
-        if (min < layer.min) {
-          layer.min = min;
+        if (min < batch.min) {
+          batch.min = min;
         }
         const max = keys[keys.length - 1];
-        if (max > layer.max) {
-          layer.max = max;
+        if (max > batch.max) {
+          batch.max = max;
         }
       });
     };
@@ -799,7 +800,7 @@ export class EdgelessPageBlockComponent
         this._reorderTo(
           elements,
           () => ({
-            start: layer.max,
+            start: batch.max,
             end: null,
           }),
           updateIndexes
@@ -834,7 +835,7 @@ export class EdgelessPageBlockComponent
           elements,
           () => ({
             start: null,
-            end: layer.min,
+            end: batch.min,
           }),
           updateIndexes
         );
