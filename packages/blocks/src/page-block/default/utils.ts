@@ -489,7 +489,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
         return;
       }
       if (!modelState) {
-        pageBlock.selection.selectOneBlock();
+        // pageBlock.selection.selectOneBlock();
         return;
       }
       const model = modelState.model;
@@ -503,7 +503,7 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
         }
         return;
       }
-      pageBlock.selection.selectOneBlock(modelState.element, modelState.rect);
+      // pageBlock.selection.selectOneBlock(modelState.element, modelState.rect);
 
       formatBar = showFormatQuickBar({
         page: pageBlock.page,

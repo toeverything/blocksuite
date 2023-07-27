@@ -12,8 +12,7 @@ import {
   getRectByBlockElement,
 } from '../../../__internal__/index.js';
 import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js';
-import type { DefaultSelectionSlots } from '../default-page-block.js';
-import type { DefaultSelectionManager, PageSelectionState } from './index.js';
+import type { PageSelectionState } from './index.js';
 
 // distance to the upper and lower boundaries of the viewport
 const threshold = SCROLL_THRESHOLD / 2;
@@ -128,27 +127,6 @@ export function updateLocalSelectionRange(page: Page) {
   // page.awarenessStore.setLocalRange(page, userRange);
 }
 
-export function setSelectedBlocks(
-  state: PageSelectionState,
-  slots: DefaultSelectionSlots,
-  selectedBlocks: BlockComponentElement[],
-  rects?: DOMRect[]
-) {
-  state.selectedBlocks = selectedBlocks;
-
-  if (rects) {
-    slots.selectedRectsUpdated.emit(rects);
-    return;
-  }
-
-  const calculatedRects = [] as DOMRect[];
-  for (const block of getBlockElementsExcludeSubtrees(selectedBlocks)) {
-    calculatedRects.push(getRectByBlockElement(block));
-  }
-
-  slots.selectedRectsUpdated.emit(calculatedRects);
-}
-
 export interface AutoScrollHooks {
   /**
    * @deprecated This hook is meaningless.
@@ -166,7 +144,7 @@ export function autoScroll(
   const { state } = selection;
   const { y } = e.point;
 
-  const { viewportElement } = selection;
+  // const { viewportElement } = selection;
   const { viewport } = state;
   const { scrollHeight, clientHeight } = viewport;
   let { scrollTop } = viewport;
@@ -190,7 +168,7 @@ export function autoScroll(
       const d = (threshold - (clientHeight - y)) * 0.25;
       scrollTop += d;
       auto = Math.ceil(scrollTop) < max;
-      viewportElement.scrollTop = scrollTop;
+      // viewportElement.scrollTop = scrollTop;
 
       hooks.onScroll(d);
     } else if (scrollTop > 0 && y < threshold) {
@@ -198,7 +176,7 @@ export function autoScroll(
       const d = (y - threshold) * 0.25;
       scrollTop += d;
       auto = scrollTop > 0;
-      viewportElement.scrollTop = scrollTop;
+      // viewportElement.scrollTop = scrollTop;
 
       hooks.onScroll(d);
     } else {

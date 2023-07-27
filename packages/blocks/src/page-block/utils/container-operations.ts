@@ -510,11 +510,11 @@ export function handleSelectAll(selection: DefaultSelectionManager) {
     selection.state.selectedBlocks.length === 0 &&
     currentSelection?.focusNode?.nodeName === '#text'
   ) {
-    selection.selectOneBlock(
-      getClosestBlockElementByElement(currentSelection.focusNode.parentElement)
-    );
+    // selection.selectOneBlock(
+    //   getClosestBlockElementByElement(currentSelection.focusNode.parentElement)
+    // );
   } else {
-    selection.selectAllBlocks();
+    // selection.selectAllBlocks();
   }
 
   resetNativeSelection(null);

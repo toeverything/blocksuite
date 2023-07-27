@@ -206,9 +206,9 @@ export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
     if (defaultPageBlock) {
       assertExists(defaultPageBlock.selection);
       defaultPageBlock.selection.state.type = 'block';
-      defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
-        blockRange.models
-      );
+      // defaultPageBlock.selection.refreshSelectedBlocksRectsByModels(
+      //   blockRange.models
+      // );
     }
     // Try clean native selection
     resetNativeSelection(null);

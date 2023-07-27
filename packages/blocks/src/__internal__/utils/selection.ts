@@ -200,7 +200,7 @@ export function focusBlockByModel(
     if (isPageMode) {
       assertExists(pageBlock.selection);
       pageBlock.selection.state.clearSelection();
-      pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
+      // pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
     }
     focusRichText(editableContainer, position, zoom);
   }

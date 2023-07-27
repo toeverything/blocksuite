@@ -14,7 +14,6 @@ import {
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
 import { registerService } from '../__internal__/service.js';
-import { DefaultPageBlockComponent } from '../index.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListBlockService } from './list-service.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -123,9 +122,9 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   private _select() {
     const pageBlock = getPageBlock(this.model);
     assertExists(pageBlock);
-    if (pageBlock instanceof DefaultPageBlockComponent) {
-      pageBlock.selection?.selectOneBlock(this);
-    }
+    // if (pageBlock instanceof DefaultPageBlockComponent) {
+    //   pageBlock.selection?.selectOneBlock(this);
+    // }
   }
 
   private _onClickIcon = (e: MouseEvent) => {

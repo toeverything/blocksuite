@@ -106,17 +106,22 @@ export class RangeController {
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
     );
 
+    const maxLength = startVirgoElement.virgoEditor.yText.length;
+    const index = point.index >= maxLength ? maxLength : point.index;
+    const length =
+      index + point.length >= maxLength ? maxLength - index : point.length;
+
     startVirgoElement.virgoEditor.setVRange(
       {
-        index: point.index,
-        length: point.length,
+        index,
+        length,
       },
       false
     );
 
     return startVirgoElement.virgoEditor.toDomRange({
-      index: point.index,
-      length: point.length,
+      index,
+      length,
     });
   }
 

@@ -38,7 +38,7 @@ import {
   getVirgoByModel,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
+// import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import {
   handleKeydownAfterSelectBlocks,
   handleSelectAll,
@@ -335,7 +335,7 @@ function handleTab(
   if (blockRange.type === 'Block') {
     requestAnimationFrame(() => {
       // TODO update model is not elegant
-      selection.refreshSelectedBlocksRectsByModels(models);
+      // selection.refreshSelectedBlocksRectsByModels(models);
     });
   }
 }
@@ -353,7 +353,7 @@ function handleShiftTab(
 
   if (blockRange.type === 'Block') {
     requestAnimationFrame(() => {
-      selection.refreshSelectedBlocksRectsByModels(models);
+      // selection.refreshSelectedBlocksRectsByModels(models);
     });
   }
 }
