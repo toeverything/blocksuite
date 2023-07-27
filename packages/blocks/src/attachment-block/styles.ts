@@ -27,11 +27,13 @@ export const styles = css`
     overflow: hidden;
     text-overflow: ellipsis;
     fill: var(--affine-icon-color);
+    user-select: none;
   }
 
-  .attachment-size {
+  .attachment-desc {
     color: var(--affine-text-secondary-color);
     font-size: var(--affine-font-xs);
+    user-select: none;
   }
 
   .attachment-banner {
@@ -40,7 +42,47 @@ export const styles = css`
     right: 24px;
     bottom: 0;
   }
+
+  .attachment-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    color: var(--affine-placeholder-color);
+    font-size: var(--affine-font-sm);
+    font-weight: 600;
+    fill: var(--affine-icon-color);
+    user-select: none;
+  }
 `;
+
+export const LoadingIcon = html`<svg
+  width="16"
+  height="16"
+  viewBox="0 0 16 16"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <style xmlns="http://www.w3.org/2000/svg">
+    .spinner {
+      transform-origin: center;
+      animation: spinner_animate 0.75s infinite linear;
+    }
+    @keyframes spinner_animate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <path
+    d="M14.6666 7.99992C14.6666 11.6818 11.6818 14.6666 7.99992 14.6666C4.31802 14.6666 1.33325 11.6818 1.33325 7.99992C1.33325 4.31802 4.31802 1.33325 7.99992 1.33325C11.6818 1.33325 14.6666 4.31802 14.6666 7.99992ZM3.30003 7.99992C3.30003 10.5956 5.40424 12.6998 7.99992 12.6998C10.5956 12.6998 12.6998 10.5956 12.6998 7.99992C12.6998 5.40424 10.5956 3.30003 7.99992 3.30003C5.40424 3.30003 3.30003 5.40424 3.30003 7.99992Z"
+    fill-opacity="0.1"
+  />
+  <path
+    d="M13.6833 7.99992C14.2263 7.99992 14.674 7.55732 14.5942 7.02014C14.5142 6.48171 14.3684 5.95388 14.1591 5.4487C13.8241 4.63986 13.333 3.90493 12.714 3.28587C12.0949 2.66682 11.36 2.17575 10.5511 1.84072C10.046 1.63147 9.51812 1.48564 8.9797 1.40564C8.44251 1.32583 7.99992 1.77351 7.99992 2.31659C7.99992 2.85967 8.44486 3.28962 8.9761 3.40241C9.25681 3.46201 9.53214 3.54734 9.79853 3.65768C10.3688 3.89388 10.8869 4.24008 11.3233 4.67652C11.7598 5.11295 12.106 5.63108 12.3422 6.20131C12.4525 6.4677 12.5378 6.74303 12.5974 7.02374C12.7102 7.55498 13.1402 7.99992 13.6833 7.99992Z"
+    fill="#1E96EB"
+    class="spinner"
+  />
+</svg>`;
 
 export const AttachmentBanner = html`<svg
   width="90"

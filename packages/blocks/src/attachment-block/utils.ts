@@ -6,6 +6,9 @@ import type {
 } from './attachment-model.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 
+// 10MB
+export const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+
 export function cloneAttachmentProperties(
   model: BaseBlockModel<AttachmentBlockModel>
 ) {
@@ -18,9 +21,7 @@ export function cloneAttachmentProperties(
   return clonedProps;
 }
 
-export async function getAttachment(
-  model: BaseBlockModel<AttachmentBlockModel>
-) {
+export async function getAttachment(model: AttachmentBlockModel) {
   const blobManager = model.page.blobs;
   const sourceId = model.sourceId;
   if (!sourceId) return null;
@@ -28,4 +29,17 @@ export async function getAttachment(
   const blob = await blobManager.get(sourceId);
   if (!blob) return null;
   return blob;
+}
+
+const attachmentLoadingMap = new Set<string>();
+export function setAttachmentLoading(loadingKey: string, loading: boolean) {
+  if (loading) {
+    attachmentLoadingMap.add(loadingKey);
+  } else {
+    attachmentLoadingMap.delete(loadingKey);
+  }
+}
+
+export function isAttachmentLoading(loadingKey: string) {
+  return attachmentLoadingMap.has(loadingKey);
 }
