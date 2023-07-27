@@ -16,7 +16,6 @@ interface SelectionConstructor {
 export class SelectionManager {
   disposables = new DisposableGroup();
   private _selectionConstructors: Record<string, SelectionConstructor> = {};
-  private _oldSelections: BaseSelection[] = [];
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
@@ -63,7 +62,6 @@ export class SelectionManager {
   }
 
   set(selections: BaseSelection[]) {
-    this._oldSelections = this.value;
     this._store.setLocalSelection(selections.map(s => s.toJSON()));
     this.slots.changed.emit(selections);
   }

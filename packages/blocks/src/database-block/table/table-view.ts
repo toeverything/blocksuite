@@ -167,7 +167,6 @@ export class DatabaseTable extends BaseDataView<
     this._disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
-        this.selection.requestUpdate();
       })
     );
 
