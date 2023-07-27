@@ -1,5 +1,5 @@
 import type { UIEventDispatcher } from '@blocksuite/block-std';
-import type { Slot } from '@blocksuite/global/utils.js';
+import type { Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
