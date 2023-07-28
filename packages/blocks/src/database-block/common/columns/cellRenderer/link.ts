@@ -9,10 +9,10 @@ import {
   isValidUrl,
   normalizeUrl,
 } from '../../../../__internal__/utils/url.js';
-import { DatabaseCellElement } from '../../register.js';
+import { BaseCellRenderer } from './base-cell.js';
 
 @customElement('affine-database-link-cell')
-export class LinkCell extends DatabaseCellElement<string> {
+export class LinkCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell {
       display: flex;
@@ -100,7 +100,7 @@ export class LinkCell extends DatabaseCellElement<string> {
 }
 
 @customElement('affine-database-link-cell-editing')
-export class LinkCellEditing extends DatabaseCellElement<string> {
+export class LinkCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell-editing {
       display: block;
@@ -152,7 +152,7 @@ export class LinkCellEditing extends DatabaseCellElement<string> {
       url = normalizeUrl(value);
     }
 
-    this.onChange(url, { captureSync: true });
+    this.onChange(url);
     this._container.value = url;
   };
 

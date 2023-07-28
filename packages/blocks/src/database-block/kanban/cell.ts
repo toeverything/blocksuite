@@ -9,8 +9,8 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../components/uni-component/uni-component.js';
+import type { DataViewCellLifeCycle } from '../common/columns/manager.js';
 import { columnTypeIconMap } from '../table/components/column-header/database-header-column.js';
-import type { DataViewCellLifeCycle } from '../table/register.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,

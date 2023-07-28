@@ -5,10 +5,10 @@ import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../../list-block/utils/icons.js';
-import { DatabaseCellElement } from '../../register.js';
+import { BaseCellRenderer } from './base-cell.js';
 
 @customElement('affine-database-checkbox-cell')
-export class CheckboxCell extends DatabaseCellElement<boolean> {
+export class CheckboxCell extends BaseCellRenderer<boolean> {
   static override styles = css`
     affine-database-checkbox-cell {
       display: block;

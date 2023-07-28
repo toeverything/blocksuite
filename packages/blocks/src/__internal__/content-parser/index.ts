@@ -388,7 +388,10 @@ export class ContentParser {
         // XXX: should use blob storage here?
         const storage = this._page.blobs;
         assertExists(storage);
-        const id = await storage.set(file);
+        // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
+        const id = await storage.set(
+          new File([file], file.name, { type: file.type })
+        );
         return [
           {
             flavour: 'affine:image',

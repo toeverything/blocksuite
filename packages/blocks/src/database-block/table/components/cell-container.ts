@@ -9,7 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../../components/uni-component/uni-component.js';
-import type { DataViewCellLifeCycle } from '../register.js';
+import type { DataViewCellLifeCycle } from '../../common/columns/manager.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
 
 @customElement('affine-database-cell-container')
