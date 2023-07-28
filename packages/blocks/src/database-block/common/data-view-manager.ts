@@ -202,11 +202,12 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public cellGetStringValue(rowId: string, columnId: string): string {
     return (
-      columnManager.toString(
-        this.columnGetType(columnId),
-        this.dataSource.cellGetValue(rowId, columnId),
-        this.columnGetData(columnId)
-      ) ?? ''
+      columnManager
+        .getColumn(this.columnGetType(columnId))
+        .toString(
+          this.dataSource.cellGetValue(rowId, columnId),
+          this.columnGetData(columnId)
+        ) ?? ''
     );
   }
 

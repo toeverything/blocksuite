@@ -12,7 +12,8 @@ import {
   getCurrentBlockRange,
   getDefaultPage,
 } from '../../__internal__/index.js';
-import { multiSelectHelper } from '../../database-block/common/columns/define.js';
+import { columnManager } from '../../database-block/common/columns/manager.js';
+import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import { styles } from './styles.js';
 
@@ -82,7 +83,9 @@ export class DatabaseModal extends LitElement {
     // default column
     databaseModel.addColumn(
       'end',
-      multiSelectHelper.create('Tag', { options: [] })
+      columnManager
+        .getColumn(multiSelectColumnTypeName)
+        .create('Tag', { options: [] })
     );
     databaseModel.applyColumnUpdate();
 

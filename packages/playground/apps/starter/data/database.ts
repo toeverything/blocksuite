@@ -1,9 +1,8 @@
 import type { SelectTag } from '@blocksuite/blocks/components/tags/multi-tag-select';
-import {
-  numberHelper,
-  richTextHelper,
-  selectHelper,
-} from '@blocksuite/blocks/database-block/common/columns/define';
+import { columnManager } from '@blocksuite/blocks/database-block/common/columns/manager';
+import { numberColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/number/type';
+import { richTextColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/rich-text/type';
+import { selectColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/select/type';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
@@ -41,12 +40,20 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
     noteId
   );
   const database = page.getBlockById(databaseId) as DatabaseBlockModel;
-  const col1 = database.addColumn('end', numberHelper.create('Number'));
+  const col1 = database.addColumn(
+    'end',
+    columnManager.getColumn(numberColumnTypeName).create('Number')
+  );
   const col2 = database.addColumn(
     'end',
-    selectHelper.create('Single Select', { options: selection })
+    columnManager
+      .getColumn(selectColumnTypeName)
+      .create('Single Select', { options: selection })
   );
-  const col3 = database.addColumn('end', richTextHelper.create('Rich Text'));
+  const col3 = database.addColumn(
+    'end',
+    columnManager.getColumn(richTextColumnTypeName).create('Rich Text')
+  );
 
   database.applyColumnUpdate();
 

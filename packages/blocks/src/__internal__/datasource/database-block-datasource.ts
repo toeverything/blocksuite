@@ -1,8 +1,18 @@
+import '../../database-block/common/columns/title/define.js';
+import '../../database-block/common/columns/number/define.js';
+import '../../database-block/common/columns/link/define.js';
+import '../../database-block/common/columns/select/define.js';
+import '../../database-block/common/columns/multi-select/define.js';
+import '../../database-block/common/columns/progress/define.js';
+import '../../database-block/common/columns/rich-text/define.js';
+import '../../database-block/common/columns/date/define.js';
+import '../../database-block/common/columns/checkbox/define.js';
+
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import { multiSelectHelper } from '../../database-block/common/columns/define.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
+import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';
@@ -102,7 +112,9 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     this.page.captureSync();
     return this._model.addColumn(
       insertPosition,
-      multiSelectHelper.create(this.newColumnName())
+      columnManager
+        .getColumn(multiSelectColumnTypeName)
+        .create(this.newColumnName())
     );
   }
 
@@ -126,13 +138,10 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     const currentCells = rows.map(rowId =>
       this.cellGetValue(rowId, propertyId)
     );
-    const result = columnManager.convertCell(
-      currentType,
-      toType,
-      currentData,
-      currentCells
-    ) ?? {
-      column: columnManager.defaultData(toType),
+    const result = columnManager
+      .getColumn(currentType)
+      ?.convertCell(toType, currentData, currentCells) ?? {
+      column: columnManager.getColumn(toType).defaultData(),
       cells: currentCells.map(() => undefined),
     };
     this.page.captureSync();
@@ -205,5 +214,9 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       return 432;
     }
     return super.propertyGetDefaultWidth(propertyId);
+  }
+
+  public override get columnManager() {
+    return columnManager;
   }
 }

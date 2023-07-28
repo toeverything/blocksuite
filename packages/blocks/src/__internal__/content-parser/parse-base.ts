@@ -4,8 +4,8 @@ import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 import { getTagColor } from '../../components/tags/colors.js';
-import { richTextHelper } from '../../database-block/common/columns/define.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
+import { richTextColumnTypeName } from '../../database-block/common/columns/rich-text/type.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
@@ -745,7 +745,11 @@ const getTableColumns = (
     }
     const addNum = maxLen - columns.length;
     for (let i = 0; i < addNum; i++) {
-      columns.push(richTextHelper.createWithId('' + idCounter.next(), ''));
+      columns.push(
+        columnManager
+          .getColumn(richTextColumnTypeName)
+          .createWithId('' + idCounter.next(), '')
+      );
     }
   }
   return columns;

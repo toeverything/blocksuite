@@ -7,11 +7,11 @@ import { tNumber, tString, tTag } from '../../logical/data-type.js';
 import { Matcher } from '../../logical/matcher.js';
 import type { TType } from '../../logical/typesystem.js';
 import { tArray, tUnknown } from '../../logical/typesystem.js';
-import { ArrayLiteral } from './array-literal.js';
-import type { LiteralElement } from './literal-element.js';
-import { NumberLiteral } from './number-literal.js';
-import { StringLiteral } from './string-literal.js';
-import { TagLiteral } from './tag-literal.js';
+import { ArrayLiteral } from './renderer/array-literal.js';
+import type { LiteralElement } from './renderer/literal-element.js';
+import { NumberLiteral } from './renderer/number-literal.js';
+import { StringLiteral } from './renderer/string-literal.js';
+import { TagLiteral } from './renderer/tag-literal.js';
 
 export const renderLiteral = (
   type: TType,

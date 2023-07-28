@@ -2,11 +2,10 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store';
 
-import {
-  multiSelectHelper,
-  numberHelper,
-  textHelper,
-} from '../../database-block/common/columns/define.js';
+import { columnManager } from '../../database-block/common/columns/manager.js';
+import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
+import { numberColumnTypeName } from '../../database-block/common/columns/number/type.js';
+import { textColumnTypeName } from '../../database-block/common/columns/text/type.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import type { AllPageDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
@@ -29,14 +28,14 @@ export class AllPageDatasource extends BaseDataSource {
     }
   > = {
     title: {
-      type: textHelper.type,
+      type: textColumnTypeName,
       getValue: page => page.meta.title,
       setValue: (page, value) => {
         page.meta.title = `${value ?? ''}`;
       },
     },
     tags: {
-      type: multiSelectHelper.type,
+      type: multiSelectColumnTypeName,
       getValue: page => page.meta.tags,
       setValue: (page, value) => {
         page.meta.tags = value as string[];
@@ -50,7 +49,7 @@ export class AllPageDatasource extends BaseDataSource {
       },
     },
     createDate: {
-      type: numberHelper.type,
+      type: numberColumnTypeName,
       getValue: page => page.meta.createDate,
     },
   };
@@ -138,4 +137,7 @@ export class AllPageDatasource extends BaseDataSource {
   public slots = {
     update: new Slot(),
   };
+  public override get columnManager() {
+    return columnManager;
+  }
 }
