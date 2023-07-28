@@ -2,11 +2,17 @@ import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { DefaultPageBlockComponent } from '../../default-page-block.js';
+import { BlockNavigation } from './block-navigation.js';
 import { TextNavigation } from './text-navigation.js';
 
 export class Keyboard {
   constructor(public host: DefaultPageBlockComponent) {
     const textNavigation = new TextNavigation(host);
+    const blockNavigation = new BlockNavigation(host);
+    this.host.handleEvent('keyDown', ctx => {
+      textNavigation.keyDown(ctx);
+      blockNavigation.keyDown(ctx);
+    });
     this.host.bindHotKey({
       'Mod-z': ctx => {
         ctx.get('defaultState').event.preventDefault();
@@ -32,11 +38,7 @@ export class Keyboard {
         }
 
         if (current.is('block')) {
-          const model = this.page.getBlockById(current.blockId);
-          if (!model) return;
-          const previous = this.page.getPreviousSibling(model);
-          if (!previous) return;
-          this._focusBlock(previous.id, current.path.slice(0, -1));
+          blockNavigation.ArrowUp(ctx);
           return;
         }
       },
@@ -51,11 +53,7 @@ export class Keyboard {
           return;
         }
         if (current.is('block')) {
-          const model = this.page.getBlockById(current.blockId);
-          if (!model) return;
-          const previous = this.page.getNextSibling(model);
-          if (!previous) return;
-          this._focusBlock(previous.id, current.path.slice(0, -1));
+          blockNavigation.ArrowDown(ctx);
           return;
         }
       },
@@ -70,6 +68,10 @@ export class Keyboard {
           textNavigation.ShiftArrowUp(ctx);
           return true;
         }
+        if (current.is('block')) {
+          blockNavigation.ShiftArrowUp(ctx);
+          return true;
+        }
         return;
       },
       'Shift-ArrowDown': ctx => {
@@ -81,6 +83,10 @@ export class Keyboard {
         if (current.is('text')) {
           event.preventDefault();
           textNavigation.ShiftArrowDown(ctx);
+          return true;
+        }
+        if (current.is('block')) {
+          blockNavigation.ShiftArrowDown(ctx);
           return true;
         }
         return;
@@ -167,22 +173,5 @@ export class Keyboard {
       blockId,
       path: parentPath.concat(blockId),
     };
-  }
-
-  private _focusBlock(id: string, parentPath: string[]) {
-    const block = this.page.getBlockById(id);
-    if (!block) return;
-    const blockId = block.id;
-    const path = parentPath.concat(blockId);
-    this._selection.set([
-      this._selection.getInstance('block', {
-        blockId,
-        path,
-      }),
-    ]);
-    requestAnimationFrame(() => {
-      const view = this.host.root.blockViewMap.get(path);
-      view?.scrollIntoView({ block: 'nearest' });
-    });
   }
 }

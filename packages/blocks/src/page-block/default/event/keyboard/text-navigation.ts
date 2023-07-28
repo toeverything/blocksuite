@@ -136,12 +136,12 @@ export class TextNavigation {
     return true;
   };
 
-  constructor(public host: DefaultPageBlockComponent) {
-    this.host.handleEvent('keyDown', () => {
-      this._anchorRange = null;
-      this._focusRange = null;
-    });
-  }
+  keyDown: UIEventHandler = () => {
+    this._anchorRange = null;
+    this._focusRange = null;
+  };
+
+  constructor(public host: DefaultPageBlockComponent) {}
 
   private _autoScroll = (y: number): boolean => {
     const { scrollHeight, clientHeight, scrollTop } = this._viewport;
