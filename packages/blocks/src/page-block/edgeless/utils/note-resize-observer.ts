@@ -17,7 +17,7 @@ export class NoteResizeObserver {
   private _lastRects = new Map<string, DOMRectReadOnly>();
 
   slots = {
-    resize: new Slot<Map<string, DOMRectReadOnly>>(),
+    resize: new Slot<Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>>(),
   };
 
   constructor() {
@@ -30,25 +30,27 @@ export class NoteResizeObserver {
   }
 
   private _onResize = (entries: ResizeObserverEntry[]) => {
-    const resizedNotes = new Map<string, DOMRect>();
+    const resizedNotes = new Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>();
     entries.forEach(entry => {
       const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
       const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
       if (!id) return;
-      if (this._lastRects.has(id)) {
-        const rect = this._lastRects.get(id);
+      const lastRect = this._lastRects.has(id)
+        ? this._lastRects.get(id)
+        : undefined;
+      if (lastRect) {
         if (
-          rect &&
-          almostEqual(rect.x, entry.contentRect.x) &&
-          almostEqual(rect.y, entry.contentRect.y) &&
-          almostEqual(rect.width, entry.contentRect.width) &&
-          almostEqual(rect.height, entry.contentRect.height)
+          lastRect &&
+          almostEqual(lastRect.x, entry.contentRect.x) &&
+          almostEqual(lastRect.y, entry.contentRect.y) &&
+          almostEqual(lastRect.width, entry.contentRect.width) &&
+          almostEqual(lastRect.height, entry.contentRect.height)
         ) {
           return;
         }
       }
+      resizedNotes.set(id, [entry.contentRect, lastRect]);
       this._lastRects.set(id, entry.contentRect);
-      resizedNotes.set(id, entry.contentRect);
     });
 
     if (resizedNotes.size) {
@@ -77,6 +79,7 @@ export class NoteResizeObserver {
       }
 
       if (!container) return;
+      this._lastRects.set(blockId, container.getBoundingClientRect());
       this._observer.observe(container);
       this._cachedElements.set(blockId, container);
     });
