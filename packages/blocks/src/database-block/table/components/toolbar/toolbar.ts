@@ -328,7 +328,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     return this.view.columnManagerList.map(v => ({
       id: v.id,
       name: v.name,
-      type: columnManager.typeOf(v.type, v.data),
+      type: columnManager.getColumn(v.type).dataType(v.data),
     }));
   }
 

@@ -3,8 +3,8 @@ import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { TType } from '../../logical/typesystem.js';
-import { createDatabasePopup } from '../popup.js';
+import type { TType } from '../../../logical/typesystem.js';
+import { createDatabasePopup } from '../../popup.js';
 
 export abstract class LiteralElement<
   T = unknown,

@@ -3,7 +3,7 @@ import type { PropertyValues } from 'lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-type UniComponentReturn<
+export type UniComponentReturn<
   Props = NonNullable<unknown>,
   Expose extends NonNullable<unknown> = NonNullable<unknown>
 > = {

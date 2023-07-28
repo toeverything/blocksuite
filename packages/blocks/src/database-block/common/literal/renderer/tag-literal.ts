@@ -1,6 +1,6 @@
-import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
-import type { tTag } from '../../logical/data-type.js';
-import type { TypeOfData } from '../../logical/typesystem.js';
+import { popFilterableSimpleMenu } from '../../../../components/menu/menu.js';
+import type { tTag } from '../../../logical/data-type.js';
+import type { TypeOfData } from '../../../logical/typesystem.js';
 import { LiteralElement } from './literal-element.js';
 
 export class TagLiteral extends LiteralElement<

@@ -1,10 +1,10 @@
 import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
 import { tNumber, tString, tTag } from '../../logical/data-type.js';
 import { isTArray, tArray } from '../../logical/typesystem.js';
-import { groupByMatcher } from './group.js';
-import { NumberGroupView } from './groupRenderer/number-group.js';
-import { SelectGroupView } from './groupRenderer/select-group.js';
-import { StringGroupView } from './groupRenderer/string-group.js';
+import { groupByMatcher } from './matcher.js';
+import { NumberGroupView } from './renderer/number-group.js';
+import { SelectGroupView } from './renderer/select-group.js';
+import { StringGroupView } from './renderer/string-group.js';
 
 groupByMatcher.register(tTag.create(), {
   name: 'select',

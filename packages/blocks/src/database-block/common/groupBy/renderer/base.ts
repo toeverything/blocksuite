@@ -1,7 +1,7 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
-import type { GroupRenderProps } from '../group.js';
+import type { GroupRenderProps } from '../matcher.js';
 
 export class BaseGroup<Data extends NonNullable<unknown>, Value>
   extends WithDisposable(ShadowlessElement)

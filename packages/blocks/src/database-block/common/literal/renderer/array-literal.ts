@@ -1,8 +1,8 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { TArray } from '../../logical/typesystem.js';
-import { popLiteralEdit, renderLiteral } from './index.js';
+import type { TArray } from '../../../logical/typesystem.js';
+import { popLiteralEdit, renderLiteral } from '../matcher.js';
 import { LiteralElement } from './literal-element.js';
 
 export class ArrayLiteral extends LiteralElement<unknown[], TArray> {
