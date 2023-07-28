@@ -1,8 +1,8 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
-import type { DataViewColumnManager } from '../../data-view-manager.js';
-import type { DataViewCellLifeCycle } from '../manager.js';
+import type { DataViewColumnManager } from '../data-view-manager.js';
+import type { DataViewCellLifeCycle } from './manager.js';
 
 export abstract class BaseCellRenderer<
     Value,

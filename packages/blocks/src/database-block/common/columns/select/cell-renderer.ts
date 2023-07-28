@@ -6,8 +6,8 @@ import { html } from 'lit/static-html.js';
 
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
-import type { SelectColumnData } from '../define.js';
-import { BaseCellRenderer } from './base-cell.js';
+import { BaseCellRenderer } from '../base-cell.js';
+import type { SelectColumnData } from '../types.js';
 
 @customElement('affine-database-select-cell')
 export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {

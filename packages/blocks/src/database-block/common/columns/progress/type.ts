@@ -1,0 +1,1 @@
+export const progressColumnTypeName = 'progress';

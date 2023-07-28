@@ -2,7 +2,7 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BaseCellRenderer } from './base-cell.js';
+import { BaseCellRenderer } from '../base-cell.js';
 
 const styles = css`
   affine-database-progress-cell-editing {

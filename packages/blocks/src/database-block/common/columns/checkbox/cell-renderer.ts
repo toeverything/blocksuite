@@ -5,7 +5,7 @@ import {
   checkboxChecked,
   checkboxUnchecked,
 } from '../../../../list-block/utils/icons.js';
-import { BaseCellRenderer } from './base-cell.js';
+import { BaseCellRenderer } from '../base-cell.js';
 
 @customElement('affine-database-checkbox-cell')
 export class CheckboxCell extends BaseCellRenderer<boolean> {

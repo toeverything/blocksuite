@@ -9,7 +9,7 @@ import {
   isValidUrl,
   normalizeUrl,
 } from '../../../../__internal__/utils/url.js';
-import { BaseCellRenderer } from './base-cell.js';
+import { BaseCellRenderer } from '../base-cell.js';
 
 @customElement('affine-database-link-cell')
 export class LinkCell extends BaseCellRenderer<string> {

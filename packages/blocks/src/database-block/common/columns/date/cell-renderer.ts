@@ -2,7 +2,7 @@ import format from 'date-fns/format';
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { BaseCellRenderer } from './base-cell.js';
+import { BaseCellRenderer } from '../base-cell.js';
 
 @customElement('affine-database-date-cell')
 export class DateCell extends BaseCellRenderer<number> {
