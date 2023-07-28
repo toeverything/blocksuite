@@ -20,7 +20,7 @@ export class TextNavigation {
       return;
     }
     const range = selection.getRangeAt(0);
-    const rect = Array.from(range.getClientRects()).at(0);
+    const rect = Array.from((this._focusRange ?? range).getClientRects()).at(0);
     if (!rect) {
       return;
     }
@@ -45,7 +45,9 @@ export class TextNavigation {
       return;
     }
     const range = selection.getRangeAt(0);
-    const rect = Array.from(range.getClientRects()).at(-1);
+    const rect = Array.from((this._focusRange ?? range).getClientRects()).at(
+      -1
+    );
     if (!rect) {
       return;
     }
