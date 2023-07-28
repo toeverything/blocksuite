@@ -70,61 +70,6 @@ export class Synchronizer {
     });
   }
 
-  private _findBlockElement(range: Range): BlockElement[] {
-    const start = range.startContainer;
-    const end = range.endContainer;
-    const ancestor = range.commonAncestorContainer;
-    const getBlockView = this.host.root.blockStore.config.getBlockViewByNode;
-    if (ancestor.nodeType === Node.TEXT_NODE) {
-      const block = getBlockView(ancestor);
-      if (!block) return [];
-      return [block];
-    }
-    const nodes = new Set<Node>();
-
-    let startRecorded = false;
-    const dfsDOMSearch = (current: Node | null, ancestor: Node) => {
-      if (!current) {
-        return;
-      }
-      if (current === ancestor) {
-        return;
-      }
-      if (current === end) {
-        nodes.add(current);
-        startRecorded = false;
-        return;
-      }
-      if (current === start) {
-        startRecorded = true;
-      }
-      if (startRecorded) {
-        if (
-          current.nodeType === Node.TEXT_NODE ||
-          current.nodeType === Node.ELEMENT_NODE
-        ) {
-          nodes.add(current);
-        }
-      }
-      dfsDOMSearch(current.firstChild, ancestor);
-      dfsDOMSearch(current.nextSibling, ancestor);
-    };
-    dfsDOMSearch(ancestor.firstChild, ancestor);
-
-    const blocks = new Set<BlockElement>();
-    nodes.forEach(node => {
-      const blockView = getBlockView(node);
-      if (!blockView) {
-        return;
-      }
-      if (blocks.has(blockView)) {
-        return;
-      }
-      blocks.add(blockView);
-    });
-    return Array.from(blocks);
-  }
-
   private _beforeTextInput(selection: TextSelection, composing: boolean) {
     const { from, to } = selection;
     if (!to || PathMap.equals(from.path, to.path)) return;
@@ -132,7 +77,7 @@ export class Synchronizer {
     const range = this.host.rangeController.value;
     if (!range) return;
 
-    const blocks = this._findBlockElement(range);
+    const blocks = this.host.rangeController.findBlockElement(range);
     const start = blocks.at(0);
     const end = blocks.at(-1);
     if (!start || !end) return;

@@ -128,10 +128,7 @@ export class BlockNavigation {
         start = !start;
         return true;
       }
-      if (start) {
-        return true;
-      }
-      return false;
+      return start;
     });
 
     this._selection.set(sel);

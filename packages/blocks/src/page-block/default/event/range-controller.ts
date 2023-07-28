@@ -96,6 +96,61 @@ export class RangeController {
     return selection;
   }
 
+  findBlockElement(range: Range): BlockElement[] {
+    const start = range.startContainer;
+    const end = range.endContainer;
+    const ancestor = range.commonAncestorContainer;
+    const getBlockView = this.root.blockStore.config.getBlockViewByNode;
+    if (ancestor.nodeType === Node.TEXT_NODE) {
+      const block = getBlockView(ancestor);
+      if (!block) return [];
+      return [block];
+    }
+    const nodes = new Set<Node>();
+
+    let startRecorded = false;
+    const dfsDOMSearch = (current: Node | null, ancestor: Node) => {
+      if (!current) {
+        return;
+      }
+      if (current === ancestor) {
+        return;
+      }
+      if (current === end) {
+        nodes.add(current);
+        startRecorded = false;
+        return;
+      }
+      if (current === start) {
+        startRecorded = true;
+      }
+      if (startRecorded) {
+        if (
+          current.nodeType === Node.TEXT_NODE ||
+          current.nodeType === Node.ELEMENT_NODE
+        ) {
+          nodes.add(current);
+        }
+      }
+      dfsDOMSearch(current.firstChild, ancestor);
+      dfsDOMSearch(current.nextSibling, ancestor);
+    };
+    dfsDOMSearch(ancestor.firstChild, ancestor);
+
+    const blocks = new Set<BlockElement>();
+    nodes.forEach(node => {
+      const blockView = getBlockView(node);
+      if (!blockView) {
+        return;
+      }
+      if (blocks.has(blockView)) {
+        return;
+      }
+      blocks.add(blockView);
+    });
+    return Array.from(blocks);
+  }
+
   private _pointToRange(point: TextRangePoint): Range | null {
     const fromBlock = this.root.blockViewMap.get(point.path);
     assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);

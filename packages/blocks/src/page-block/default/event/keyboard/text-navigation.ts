@@ -14,6 +14,25 @@ export class TextNavigation {
     return this.host.viewport;
   }
 
+  Escape: UIEventHandler = () => {
+    const selection = document.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    const blocks = this.host.rangeController.findBlockElement(range);
+
+    const manager = this.host.root.selectionManager;
+    manager.set(
+      blocks.map(block => {
+        return manager.getInstance('block', {
+          path: block.path,
+          blockId: block.model.id,
+        });
+      })
+    );
+  };
+
   ArrowUp: UIEventHandler = () => {
     const selection = document.getSelection();
     if (!selection || selection.rangeCount === 0) {

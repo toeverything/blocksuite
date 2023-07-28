@@ -93,6 +93,18 @@ export class Keyboard {
       },
       Backspace: this._handleDelete,
       Delete: this._handleDelete,
+      Escape: ctx => {
+        const current = this._currentSelection.at(0);
+        if (!current) {
+          return;
+        }
+        if (current.is('text')) {
+          textNavigation.Escape(ctx);
+          return;
+        }
+
+        this._selection.set([]);
+      },
     });
   }
 
