@@ -273,7 +273,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
               flavour: 'affine:attachment',
               name: file.name,
               size: file.size,
-              loadingKey: loadingKey,
+              loadingKey,
             };
             const [newBlockId] = page.addSiblingBlocks(model, [props]);
             assertExists(newBlockId);

@@ -433,6 +433,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           </rich-text>
         </div>
         ${this.content}
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : null}
       </div>
       ${this._codeOptionTemplate()}`;
   }
