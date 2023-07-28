@@ -7,6 +7,7 @@ import {
 import type { Page } from '@blocksuite/store';
 
 import {
+  asyncSetVRange,
   type BlockComponentElement,
   blockRangeToNativeRange,
   focusBlockByModel,
@@ -21,6 +22,7 @@ import {
 import {
   handleMultiBlockIndent,
   handleMultiBlockUnindent,
+  handleUnindent,
 } from '../../__internal__/rich-text/rich-text-operations.js';
 import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
@@ -450,10 +452,38 @@ export function bindHotkeys(page: Page, selection: DefaultSelectionManager) {
     TAB,
     SPACE,
     DELETE,
+    DElETE_INDENT,
     ESC,
   } = HOTKEYS;
 
   bindCommonHotkey(page);
+  hotkey.addListener(DElETE_INDENT, e => {
+    const blockRange = getCurrentBlockRange(page);
+    if (!blockRange) return;
+    const model = blockRange.models[0];
+    const siblings = page.getNextSiblings(model);
+    const parent = page.root?.children[1]; // get the affine:note block
+    if (parent) {
+      let sibling = page.getParent(model);
+      while (sibling && !matchFlavours(sibling, ['affine:note'])) {
+        const siblingParent = page.getParent(sibling);
+        if (!siblingParent || matchFlavours(siblingParent, ['affine:note']))
+          break;
+        const waitmoveSibling = page.getNextSiblings(sibling);
+        page.moveBlocks(
+          waitmoveSibling,
+          model,
+          model?.children[model.children.length - 1],
+          false
+        );
+        sibling = siblingParent;
+      }
+      page.moveBlocks([model, ...siblings], parent, sibling, false);
+      asyncSetVRange(model, { index: 0, length: 0 });
+    }
+    handleUnindent(page, model);
+    e.preventDefault();
+  });
 
   hotkey.addListener(SELECT_ALL, e => {
     e.preventDefault();
