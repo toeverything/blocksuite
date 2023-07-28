@@ -32,7 +32,7 @@ function ResizeHandle(
 
   const pointerEnter = (type: 'resize' | 'rotate') => (e: PointerEvent) => {
     e.stopPropagation();
-    if ((type === 'rotate' && e.buttons === 1) || !updateCursor) return;
+    if (e.buttons === 1 || !updateCursor) return;
 
     const { clientX, clientY } = e;
     const target = e.target as HTMLElement;
@@ -56,8 +56,8 @@ function ResizeHandle(
       ? nothing
       : html`<div
           class="rotate"
-          @pointerenter=${pointerEnter('rotate')}
-          @pointerleave=${pointerLeave}
+          @pointerover=${pointerEnter('rotate')}
+          @pointerout=${pointerLeave}
         ></div>`;
 
   return html`<div
@@ -68,8 +68,8 @@ function ResizeHandle(
     ${rotationTpl}
     <div
       class="resize${hideEdgeHandle && ' transparent-handle'}"
-      @pointerenter=${pointerEnter('resize')}
-      @pointerleave=${pointerLeave}
+      @pointerover=${pointerEnter('resize')}
+      @pointerout=${pointerLeave}
     ></div>
   </div>`;
 }
