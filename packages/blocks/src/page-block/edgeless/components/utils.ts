@@ -1,9 +1,4 @@
-import {
-  type IVec,
-  normalizeDegAngle,
-  type SurfaceManager,
-  Vec,
-} from '@blocksuite/phasor';
+import { type IVec, normalizeDegAngle, Vec } from '@blocksuite/phasor';
 import { assertExists, type Disposable } from '@blocksuite/store';
 import { computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
