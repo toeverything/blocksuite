@@ -87,13 +87,25 @@ export class RangeController {
       return null;
     }
 
+    const selectedBlocksPath = this._getSelectedBlocksPath(this._range);
     const selection = selectionManager.getInstance('text', {
       from,
       to,
+      selectedBlocksPath,
     });
 
     selectionManager.set([selection]);
     return selection;
+  }
+
+  private _getSelectedBlocksPath(range: Range): readonly string[][] {
+    const selectedBlockElementsPath = Array.from(
+      this.root.querySelectorAll('[data-block-id]')
+    )
+      .filter(el => range.intersectsNode(el))
+      .map(el => (el as BlockElement).path);
+
+    return selectedBlockElementsPath;
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {

@@ -9,6 +9,7 @@ export type TextRangePoint = {
 };
 
 export type TextSelectionProps = {
+  selectedBlocksPath: readonly string[][];
   from: TextRangePoint;
   to: TextRangePoint | null;
 };
@@ -20,13 +21,16 @@ export class TextSelection extends BaseSelection {
 
   to: TextRangePoint | null;
 
-  constructor({ from, to }: TextSelectionProps) {
+  selectedBlocksPath: readonly string[][];
+
+  constructor({ from, to, selectedBlocksPath }: TextSelectionProps) {
     super({
       blockId: from.blockId,
       path: from.path,
     });
     this.from = from;
     this.to = to;
+    this.selectedBlocksPath = selectedBlocksPath;
   }
 
   empty(): boolean {
@@ -68,6 +72,7 @@ export class TextSelection extends BaseSelection {
     return new TextSelection({
       from: json.from as TextRangePoint,
       to: json.to as TextRangePoint | null,
+      selectedBlocksPath: json.selectedBlocksPath as readonly string[][],
     });
   }
 
