@@ -86,6 +86,10 @@ export class BlockElement<
     return this.root.blockViewMap.get(this.parentPath);
   }
 
+  get flavour(): string {
+    return this.model.flavour;
+  }
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,

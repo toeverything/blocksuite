@@ -137,8 +137,6 @@ export class DefaultPageBlockComponent
     }
   `;
 
-  flavour = 'affine:page' as const;
-
   clipboard = new PageClipboard(this);
 
   getService = getService;
