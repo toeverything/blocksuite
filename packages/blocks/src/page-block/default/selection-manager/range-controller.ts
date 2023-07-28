@@ -4,6 +4,7 @@ import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
 type RangeSnapshot = {
@@ -65,16 +66,7 @@ export class RangeController {
     const selectionManager = this.root.selectionManager;
     const hasTextSelection =
       selectionManager.value.filter(sel => sel.is('text')).length > 0;
-    if (range !== undefined) {
-      this._reusedRange = range;
-    }
-
-    if (!this._range) {
-      if (hasTextSelection) {
-        selectionManager.clear();
-      }
-      return null;
-    }
+    this._reusedRange = range;
 
     const { startContainer, endContainer } = this._range;
     const from = this._nodeToPoint(startContainer);
@@ -94,6 +86,18 @@ export class RangeController {
 
     selectionManager.set([selection]);
     return selection;
+  }
+
+  getSelectedBlocks(range: Range): BaseBlockModel['id'][] {
+    const blocksId = Array.from(
+      range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
+    ).map(block => {
+      const id = block.getAttribute(BLOCK_ID_ATTR);
+      assertExists(id, 'Cannot find block id');
+      return id;
+    });
+
+    return blocksId;
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {
