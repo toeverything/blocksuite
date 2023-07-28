@@ -483,6 +483,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           cursor = 'ew';
         } else if (target && point) {
           const label = getResizeLabel(target);
+          const { width, height, left, top } = this._selectedRect;
           if (
             label === 'top' ||
             label === 'bottom' ||
@@ -497,9 +498,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             angle = calcAngleWithRotation(
               target,
               point,
-              this._resizeManager.currentRect,
-              this._selectedRect.rotate,
-              this.surface
+              new DOMRect(left, top, width, height),
+              this._selectedRect.rotate
             );
           }
           cursor = rotateResizeCursor((angle * Math.PI) / 180);

@@ -169,8 +169,7 @@ export function calcAngleWithRotation(
   target: HTMLElement,
   point: IVec,
   rect: DOMRect,
-  rotate: number,
-  surface: SurfaceManager
+  rotate: number
 ) {
   const handle = target.parentElement;
   assertExists(handle);
@@ -223,9 +222,7 @@ export function calcAngleWithRotation(
 
   const c = new DOMPoint(...center).matrixTransform(m);
 
-  const p = surface.toModelCoord(point[0], point[1]);
-
-  return normalizeDegAngle((Vec.angle([c.x, c.y], p) * 180) / Math.PI);
+  return normalizeDegAngle((Vec.angle([c.x, c.y], point) * 180) / Math.PI);
 }
 
 export function calcAngleEdgeWithRotation(target: HTMLElement, rotate: number) {
