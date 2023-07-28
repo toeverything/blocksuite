@@ -235,6 +235,20 @@ export class DefaultPageBlockComponent
     this._titleVEditor.setReadonly(this.page.readonly);
   }
 
+  private _createDefaultNoteBlock() {
+    const { page } = this;
+
+    const noteId = page.addBlock('affine:note', {}, page.root?.id);
+    return page.getBlockById(noteId);
+  }
+
+  private _getDefaultNoteBlock() {
+    return (
+      this.page.root?.children.find(child => child.flavour === 'affine:note') ??
+      this._createDefaultNoteBlock()
+    );
+  }
+
   private _updateTitleInMeta = () => {
     this.page.workspace.setPageMeta(this.page.id, {
       title: this.model.title.toString(),
@@ -245,9 +259,6 @@ export class DefaultPageBlockComponent
     if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
-    const defaultNote = model.children.find(
-      child => child.flavour === 'affine:note'
-    );
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();
@@ -258,13 +269,14 @@ export class DefaultPageBlockComponent
       const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
-        defaultNote,
+        this._getDefaultNoteBlock(),
         0
       );
       asyncFocusRichText(page, newFirstParagraphId);
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
+      const defaultNote = this._getDefaultNoteBlock();
       const firstText = defaultNote?.children.find(block =>
         matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
       );
