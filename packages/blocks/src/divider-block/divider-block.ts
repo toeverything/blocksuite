@@ -47,7 +47,7 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     </div>`;
 
     return html`
-      <div class="affine-divider-block-container" }>
+      <div class="affine-divider-block-container">
         <hr />
         ${children}
         ${this.selected?.is('block')
