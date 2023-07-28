@@ -4,7 +4,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { html } from 'lit/static-html.js';
 
-import { BaseCellRenderer } from './base-cell.js';
+import { BaseCellRenderer } from '../base-cell.js';
 
 @customElement('affine-database-title-cell')
 export class TitleCell extends BaseCellRenderer<TemplateResult> {

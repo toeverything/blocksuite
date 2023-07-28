@@ -1,18 +1,21 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { BaseCellRenderer } from './base-cell.js';
+import { BaseCellRenderer } from '../base-cell.js';
 
-@customElement('affine-database-number-cell')
-export class NumberCell extends BaseCellRenderer<number> {
+@customElement('affine-database-text-cell')
+export class TextCell extends BaseCellRenderer<string> {
   static override styles = css`
-    affine-database-number-cell {
+    affine-database-text-cell {
       display: block;
       width: 100%;
       height: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .affine-database-number {
+    .affine-database-text {
       display: flex;
       align-items: center;
       height: 100%;
@@ -29,23 +32,23 @@ export class NumberCell extends BaseCellRenderer<number> {
   `;
 
   override render() {
-    return html` <div class="affine-database-number number">
-      ${this.value ?? ''}
-    </div>`;
+    return html` <div class="affine-database-text">${this.value ?? ''}</div>`;
   }
 }
-
-@customElement('affine-database-number-cell-editing')
-export class NumberCellEditing extends BaseCellRenderer<number> {
+@customElement('affine-database-text-cell-editing')
+export class TextCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
-    affine-database-number-cell-editing {
+    affine-database-text-cell-editing {
       display: block;
       width: 100%;
       height: 100%;
       cursor: text;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .affine-database-number {
+    .affine-database-text {
       display: flex;
       align-items: center;
       height: 100%;
@@ -60,7 +63,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
       background-color: transparent;
     }
 
-    .affine-database-number:focus {
+    .affine-database-text:focus {
       outline: none;
     }
   `;
@@ -79,49 +82,28 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   }
 
   private _setValue = (str: string = this._inputEle.value) => {
-    if (!str) {
-      this.onChange(undefined);
-      return;
-    }
-    const value = Number.parseFloat(str);
-    if (Object.is(value, NaN)) {
-      this._inputEle.value = `${this.value ?? ''}`;
-      return;
-    }
     this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(value);
+    this.onChange(str);
   };
 
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      requestAnimationFrame(() => {
+      this._setValue();
+      setTimeout(() => {
         this.selectCurrentCell(false);
       });
     }
   };
 
   override firstUpdated() {
-    requestAnimationFrame(() => {
-      this.focusEnd();
-    });
-  }
-
-  _blur() {
-    this.selectCurrentCell(false);
-  }
-  _focus() {
-    if (!this.isEditing) {
-      this.selectCurrentCell(true);
-    }
+    this.focusEnd();
   }
 
   override render() {
     return html`<input
       .value="${this.value ?? ''}"
       @keydown="${this._keydown}"
-      @blur="${this._blur}"
-      @focus="${this._focus}"
-      class="affine-database-number number"
+      class="affine-database-text"
     />`;
   }
 }
