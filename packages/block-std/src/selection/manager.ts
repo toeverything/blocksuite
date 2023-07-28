@@ -19,6 +19,7 @@ export class SelectionManager {
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
+    remoteChanged: new Slot<Record<string, BaseSelection[]>>(),
   };
 
   constructor(public blockStore: BlockStore) {
@@ -40,6 +41,14 @@ export class SelectionManager {
     this.register([TextSelection, BlockSelection]);
   }
 
+  private _jsonToSelection = (json: Record<string, unknown>) => {
+    const ctor = this._selectionConstructors[json.type as string];
+    if (!ctor) {
+      throw new Error(`Unknown selection type: ${json.type}`);
+    }
+    return ctor.fromJSON(json);
+  };
+
   getInstance<T extends BlockSuiteSelectionType>(
     type: T,
     ...args: ConstructorParameters<BlockSuiteSelection[T]>
@@ -53,11 +62,7 @@ export class SelectionManager {
 
   get value() {
     return this._store.getLocalSelection().map(json => {
-      const ctor = this._selectionConstructors[json.type as string];
-      if (!ctor) {
-        throw new Error(`Unknown selection type: ${json.type}`);
-      }
-      return ctor.fromJSON(json);
+      return this._jsonToSelection(json);
     });
   }
 
@@ -79,32 +84,41 @@ export class SelectionManager {
     return Object.fromEntries(
       Array.from(this._store.getStates().entries())
         .filter(([key]) => key !== this._store.awareness.clientID)
-        .map(([key, value]) => [key, value.selection] as const)
+        .map(
+          ([key, value]) =>
+            [key, value.selection.map(this._jsonToSelection)] as const
+        )
     );
   }
+
+  private _itemAdded = (event: { stackItem: StackItem }) => {
+    event.stackItem.meta.set('selection-state', this.value);
+  };
+
+  private _itemPopped = (event: { stackItem: StackItem }) => {
+    const selection = event.stackItem.meta.get('selection-state');
+    if (selection) {
+      this.set(selection as BaseSelection[]);
+    }
+  };
 
   mount() {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();
     }
-    this.blockStore.page.history.on(
-      'stack-item-added',
-      (event: { stackItem: StackItem }) => {
-        event.stackItem.meta.set('selection-state', this.value);
-      }
-    );
-    this.blockStore.page.history.on(
-      'stack-item-popped',
-      (event: { stackItem: StackItem }) => {
-        const selection = event.stackItem.meta.get('selection-state');
-        if (selection) {
-          this.set(selection as BaseSelection[]);
-        }
-      }
+    this.blockStore.page.history.on('stack-item-added', this._itemAdded);
+    this.blockStore.page.history.on('stack-item-popped', this._itemPopped);
+    this.disposables.add(
+      this._store.slots.update.on(({ id }) => {
+        if (id === this._store.awareness.clientID) return;
+        this.slots.remoteChanged.emit(this.remoteSelections);
+      })
     );
   }
 
   unmount() {
+    this.blockStore.page.history.off('stack-item-added', this._itemAdded);
+    this.blockStore.page.history.off('stack-item-popped', this._itemPopped);
     this.clear();
     this.slots.changed.dispose();
     this.disposables.dispose();
