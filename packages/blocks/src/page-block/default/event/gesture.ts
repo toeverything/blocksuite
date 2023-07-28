@@ -8,46 +8,13 @@ import { getTextNodesFromElement } from '@blocksuite/virgo';
 import type { DefaultPageBlockComponent } from '../default-page-block.js';
 import { caretFromPoint, pointIsNotText, rangeFromCaret } from './utils.js';
 
-export interface PageViewport {
-  left: number;
-  top: number;
-  scrollLeft: number;
-  scrollTop: number;
-  scrollHeight: number;
-  clientHeight: number;
-  clientWidth: number;
-}
-
 export class Gesture {
   isNativeSelection = false;
 
   private _startRange: Range | null = null;
   private _rafID = 0;
-  private get _viewport(): PageViewport {
-    if (!this.host.viewportElement) {
-      return {
-        left: 0,
-        top: 0,
-        scrollLeft: 0,
-        scrollTop: 0,
-        scrollHeight: 0,
-        clientHeight: 0,
-        clientWidth: 0,
-      };
-    }
-
-    const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
-      this.host.viewportElement;
-    const { top, left } = this.host.viewportElement.getBoundingClientRect();
-    return {
-      top,
-      left,
-      clientHeight,
-      clientWidth,
-      scrollHeight,
-      scrollLeft,
-      scrollTop,
-    };
+  private get _viewport() {
+    return this.host.viewport;
   }
 
   private get _selection() {

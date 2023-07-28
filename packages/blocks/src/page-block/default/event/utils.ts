@@ -37,7 +37,7 @@ export function rangeFromCaret(caret: { node: Node; offset: number }): Range {
   return range;
 }
 
-export function horizontalMoveCursorToNextText(
+export function horizontalGetNextCaret(
   point: { x: number; y: number },
   root: HTMLElement,
   forward = false
@@ -79,12 +79,39 @@ export function horizontalMoveCursorToNextText(
   if (!move) {
     return;
   }
-  const { node, offset } = move;
+
+  move.node.parentElement?.scrollIntoView({ block: 'nearest' });
+
+  return move;
+}
+
+export function horizontalMoveCursorToNextText(
+  point: { x: number; y: number },
+  root: HTMLElement,
+  forward = false
+) {
+  const selection = document.getSelection();
+  if (!selection) {
+    return;
+  }
+  const caret = horizontalGetNextCaret(point, root, forward);
+  if (!caret) {
+    return;
+  }
+  const { node, offset } = caret;
 
   const nextRange = document.createRange();
   nextRange.setStart(node, offset);
   selection.removeAllRanges();
   selection.addRange(nextRange);
+
+  const element = node.parentElement;
+  element?.scrollIntoView({ block: 'nearest' });
+
+  return {
+    caret,
+    range: nextRange,
+  };
 }
 
 export function isControlledKeyboardEvent(e: KeyboardEvent) {

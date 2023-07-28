@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 import './meta-data/meta-data.js';
 
-import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
 import {
   PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
@@ -33,6 +32,16 @@ import {
   RangeController,
   Synchronizer,
 } from './event/index.js';
+
+export interface PageViewport {
+  left: number;
+  top: number;
+  scrollLeft: number;
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+  clientWidth: number;
+}
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
@@ -165,6 +174,33 @@ export class DefaultPageBlockComponent
   get titleVEditor() {
     assertExists(this._titleVEditor);
     return this._titleVEditor;
+  }
+
+  get viewport(): PageViewport {
+    if (!this.viewportElement) {
+      return {
+        left: 0,
+        top: 0,
+        scrollLeft: 0,
+        scrollTop: 0,
+        scrollHeight: 0,
+        clientHeight: 0,
+        clientWidth: 0,
+      };
+    }
+
+    const { clientHeight, clientWidth, scrollHeight, scrollLeft, scrollTop } =
+      this.viewportElement;
+    const { top, left } = this.viewportElement.getBoundingClientRect();
+    return {
+      top,
+      left,
+      clientHeight,
+      clientWidth,
+      scrollHeight,
+      scrollLeft,
+      scrollTop,
+    };
   }
 
   private _initTitleVEditor() {

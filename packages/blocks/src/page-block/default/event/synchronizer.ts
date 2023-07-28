@@ -1,7 +1,8 @@
-import type { TextSelection } from '@blocksuite/block-std';
+import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathMap } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
+import type { Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import type { DefaultPageBlockComponent } from '../default-page-block.js';
@@ -142,23 +143,8 @@ export class Synchronizer {
     const endIsSelectedAll = to.length === endText.length;
 
     this.host.page.transact(() => {
-      // This is a workaround to fix:
-      // 1. select texts cross blocks
-      // 2. last block should be all selected
-      // 3. input text with IME
       if (endIsSelectedAll && composing) {
-        startText.delete(from.index, startText.length - from.index);
-        const texts = getTextNodesFromElement(start);
-        const last = texts.at(-1);
-        const selection = document.getSelection();
-        if (last && selection) {
-          const _range = document.createRange();
-          _range.selectNode(last);
-          _range.setStart(last, last.length);
-          _range.collapse();
-          selection.removeAllRanges();
-          selection.addRange(_range);
-        }
+        this._shamefullyResetIMERangeBeforeInput(startText, start, from);
       }
       if (!endIsSelectedAll) {
         endText.delete(0, to.length);
@@ -170,5 +156,28 @@ export class Synchronizer {
     });
 
     return;
+  }
+
+  // This is a workaround to fix:
+  // 1. select texts cross blocks
+  // 2. last block should be all selected
+  // 3. input text with IME
+  private _shamefullyResetIMERangeBeforeInput(
+    startText: Text,
+    startElement: BlockElement,
+    from: TextRangePoint
+  ) {
+    startText.delete(from.index, startText.length - from.index);
+    const texts = getTextNodesFromElement(startElement);
+    const last = texts.at(-1);
+    const selection = document.getSelection();
+    if (last && selection) {
+      const _range = document.createRange();
+      _range.selectNode(last);
+      _range.setStart(last, last.length);
+      _range.collapse();
+      selection.removeAllRanges();
+      selection.addRange(_range);
+    }
   }
 }
