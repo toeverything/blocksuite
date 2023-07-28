@@ -24,12 +24,29 @@ interface CellRenderProps<
   selectCurrentCell: (editing: boolean) => void;
 }
 
+export interface DataViewCellLifeCycle {
+  beforeEnterEditMode(): boolean;
+
+  onEnterEditMode(): void;
+
+  onExitEditMode(): void;
+
+  focusCell(): boolean;
+
+  blurCell(): boolean;
+}
+
+export type DataViewCellComponent<
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
+  Value = unknown
+> = UniComponent<CellRenderProps<Data, Value>, DataViewCellLifeCycle>;
+
 export type CellRenderer<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown
 > = {
-  view: UniComponent<CellRenderProps<Data, Value>>;
-  edit?: UniComponent<CellRenderProps<Data, Value>>;
+  view: DataViewCellComponent<Data, Value>;
+  edit?: DataViewCellComponent<Data, Value>;
 };
 type ColumnOps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,

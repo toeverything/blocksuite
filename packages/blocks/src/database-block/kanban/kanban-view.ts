@@ -2,19 +2,21 @@ import './group.js';
 import './header.js';
 import './drag.js';
 
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { BlockOperation } from '../types.js';
+import type { KanbanViewSelection } from '../../__internal__/index.js';
+import { BaseDataView } from '../common/base-data-view.js';
+import { KanbanHotkeys } from './hotkeys.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 import { KanbanSelection } from './selection.js';
 
 const styles = css`
+  affine-data-view-kanban {
+    user-select: none;
+  }
   .affine-data-view-kanban-groups {
     display: flex;
     padding: 20px 0;
@@ -24,25 +26,14 @@ const styles = css`
 `;
 
 @customElement('affine-data-view-kanban')
-export class DataViewKanban extends WithDisposable(ShadowlessElement) {
+export class DataViewKanban extends BaseDataView<
+  DataViewKanbanManager,
+  KanbanViewSelection
+> {
   static override styles = styles;
 
-  @property({ attribute: false })
-  view!: DataViewKanbanManager;
-
-  @property({ attribute: false })
-  blockOperation!: BlockOperation;
-
-  @property({ attribute: false })
-  titleText!: Text;
-
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
-  @property({ attribute: false })
-  modalMode?: boolean;
-
   selection = new KanbanSelection(this);
+  hotkeys = new KanbanHotkeys(this);
 
   override firstUpdated() {
     this._disposables.add(
@@ -53,12 +44,8 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
         );
       })
     );
-
-    this._disposables.add({
-      dispose: this.root.uiEventDispatcher.add('keyDown', () => {
-        //
-      }),
-    });
+    this._disposables.add(this.selection.run());
+    this._disposables.add(this.hotkeys.run());
   }
 
   override render() {
@@ -80,8 +67,7 @@ export class DataViewKanban extends WithDisposable(ShadowlessElement) {
         })}
       </div>
       <affine-data-view-kanban-drag
-        .view="${this.view}"
-        .dispatcher="${this.root.uiEventDispatcher}"
+        .kanbanView="${this}"
       ></affine-data-view-kanban-drag>
     `;
   }

@@ -1,20 +1,18 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { DatabaseCellElement } from '../../register.js';
-@customElement('affine-database-text-cell')
-export class TextCell extends DatabaseCellElement<string> {
+import { BaseCellRenderer } from './base-cell.js';
+
+@customElement('affine-database-number-cell')
+export class NumberCell extends BaseCellRenderer<number> {
   static override styles = css`
-    affine-database-text-cell {
+    affine-database-number-cell {
       display: block;
       width: 100%;
       height: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    .affine-database-text {
+    .affine-database-number {
       display: flex;
       align-items: center;
       height: 100%;
@@ -31,23 +29,23 @@ export class TextCell extends DatabaseCellElement<string> {
   `;
 
   override render() {
-    return html` <div class="affine-database-text">${this.value ?? ''}</div>`;
+    return html` <div class="affine-database-number number">
+      ${this.value ?? ''}
+    </div>`;
   }
 }
-@customElement('affine-database-text-cell-editing')
-export class TextCellEditing extends DatabaseCellElement<string> {
+
+@customElement('affine-database-number-cell-editing')
+export class NumberCellEditing extends BaseCellRenderer<number> {
   static override styles = css`
-    affine-database-text-cell-editing {
+    affine-database-number-cell-editing {
       display: block;
       width: 100%;
       height: 100%;
       cursor: text;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    .affine-database-text {
+    .affine-database-number {
       display: flex;
       align-items: center;
       height: 100%;
@@ -62,7 +60,7 @@ export class TextCellEditing extends DatabaseCellElement<string> {
       background-color: transparent;
     }
 
-    .affine-database-text:focus {
+    .affine-database-number:focus {
       outline: none;
     }
   `;
@@ -81,28 +79,49 @@ export class TextCellEditing extends DatabaseCellElement<string> {
   }
 
   private _setValue = (str: string = this._inputEle.value) => {
+    if (!str) {
+      this.onChange(undefined);
+      return;
+    }
+    const value = Number.parseFloat(str);
+    if (Object.is(value, NaN)) {
+      this._inputEle.value = `${this.value ?? ''}`;
+      return;
+    }
     this._inputEle.value = `${this.value ?? ''}`;
-    this.onChange(str, { captureSync: true });
+    this.onChange(value);
   };
 
   private _keydown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      this._setValue();
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         this.selectCurrentCell(false);
       });
     }
   };
 
   override firstUpdated() {
-    this.focusEnd();
+    requestAnimationFrame(() => {
+      this.focusEnd();
+    });
+  }
+
+  _blur() {
+    this.selectCurrentCell(false);
+  }
+  _focus() {
+    if (!this.isEditing) {
+      this.selectCurrentCell(true);
+    }
   }
 
   override render() {
     return html`<input
       .value="${this.value ?? ''}"
       @keydown="${this._keydown}"
-      class="affine-database-text"
+      @blur="${this._blur}"
+      @focus="${this._focus}"
+      class="affine-database-number number"
     />`;
   }
 }

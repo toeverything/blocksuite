@@ -9,8 +9,8 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../components/uni-component/uni-component.js';
+import type { DataViewCellLifeCycle } from '../common/columns/manager.js';
 import { columnTypeIconMap } from '../table/components/column-header/database-header-column.js';
-import type { DataViewCellLifeCycle } from '../table/register.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
@@ -22,6 +22,7 @@ const styles = css`
     display: flex;
     padding: 2px 4px;
     min-height: 28px;
+    border: 2px solid transparent;
   }
 
   affine-data-view-kanban-cell:hover {
@@ -60,6 +61,9 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   column!: DataViewKanbanColumnManager;
   @state()
+  isFocus = false;
+
+  @state()
   editing = false;
 
   private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
@@ -75,7 +79,6 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
         this.selectCurrentCell(true);
       }
     });
-    this.tabIndex = 1;
   }
 
   selectCurrentCell = (editing: boolean) => {
@@ -102,11 +105,12 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       column: this.column,
       rowId: this.cardId,
       isEditing: this.editing,
-      selectCurrentCell: (editing: boolean) => {
-        this.editing = editing;
-      },
+      selectCurrentCell: this.selectCurrentCell,
     };
     const { view, edit } = this.column.renderer;
+    this.style.border = this.isFocus
+      ? '2px solid var(--affine-primary-color)'
+      : '';
     this.style.boxShadow = this.editing
       ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
       : '';

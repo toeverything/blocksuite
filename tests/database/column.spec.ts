@@ -148,9 +148,8 @@ test.describe('column operations', () => {
     await initDatabaseDynamicRowWithData(page, 'abc', false, 1);
     await pressEscape(page);
     await assertDatabaseColumnOrder(page, ['1', '2']);
-
+    await waitNextFrame(page, 350);
     await performColumnAction(page, '1', 'Move right');
-    await waitNextFrame(page, 100);
     await assertDatabaseColumnOrder(page, ['2', '1']);
 
     await undoByClick(page);
@@ -363,7 +362,7 @@ test.describe('switch column type', () => {
       { x: endX, y: dragCenterY }
     );
     expect(await progress.textContent()).toBe('100');
-
+    await pressEscape(page);
     await undoByClick(page);
     expect(await progress.textContent()).toBe('0');
   });
