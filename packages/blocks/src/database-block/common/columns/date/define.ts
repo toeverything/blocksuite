@@ -1,3 +1,4 @@
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tDate } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -10,6 +11,8 @@ declare global {
   }
 }
 const dateHelper = columnManager.register<number>(dateColumnTypeName, {
+  name: 'Date',
+  icon: createIcon('DateTime'),
   type: () => tDate.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',

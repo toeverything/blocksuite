@@ -1,10 +1,15 @@
 import type { Slot } from '@blocksuite/global/utils';
 
-import type { ColumnConfigManager } from '../../database-block/common/columns/manager.js';
+import type {
+  ColumnConfig,
+  ColumnConfigManager,
+} from '../../database-block/common/columns/manager.js';
+import { columnManager } from '../../database-block/common/columns/manager.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../database-block/table/consts.js';
 
 export interface DataSource {
+  allPropertyConfig: ColumnConfig[];
   properties: string[];
   rows: string[];
   cellGetValue: (rowId: string, propertyId: string) => unknown;
@@ -31,7 +36,7 @@ export interface DataSource {
   propertyDelete: (id: string) => void;
   propertyDuplicate: (columnId: string) => string;
 
-  columnManager: ColumnConfigManager;
+  columnConfigManager: ColumnConfigManager;
 
   /**
    * @deprecated
@@ -104,7 +109,8 @@ export abstract class BaseDataSource implements DataSource {
     //
   }
 
-  public abstract columnManager: ColumnConfigManager;
+  public columnConfigManager: ColumnConfigManager = columnManager;
+  public abstract allPropertyConfig: ColumnConfig[];
 }
 
 export type DatabaseBlockDatasourceConfig = {

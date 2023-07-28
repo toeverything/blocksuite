@@ -1,5 +1,6 @@
 import { Text } from '@blocksuite/store';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tNumber } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -13,6 +14,8 @@ declare global {
   }
 }
 const progressHelper = columnManager.register<number>(progressColumnTypeName, {
+  name: 'Progress',
+  icon: createIcon('DatabaseProgress'),
   type: () => tNumber.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',

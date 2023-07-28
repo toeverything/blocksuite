@@ -1,5 +1,6 @@
 import { Text } from '@blocksuite/store';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tTag } from '../../../logical/data-type.js';
 import { tArray } from '../../../logical/typesystem.js';
 import { columnManager } from '../manager.js';
@@ -18,6 +19,8 @@ declare global {
 const multiSelectHelper = columnManager.register<string[], SelectColumnData>(
   multiSelectColumnTypeName,
   {
+    name: 'Multi-Select',
+    icon: createIcon('DatabaseMultiSelect'),
     type: data => tArray(tTag.create({ tags: data.options })),
     defaultData: () => ({
       options: [],

@@ -1,6 +1,7 @@
 import type { Text } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { getTagColor } from '../../../../components/tags/colors.js';
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { tString } from '../../../logical/data-type.js';
@@ -19,6 +20,8 @@ declare global {
 const richTextHelper = columnManager.register<Text['yText']>(
   richTextColumnTypeName,
   {
+    name: 'Text',
+    icon: createIcon('TextIcon'),
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
