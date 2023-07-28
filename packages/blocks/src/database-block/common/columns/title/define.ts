@@ -12,6 +12,7 @@ declare global {
   }
 }
 const titleHelper = columnManager.register<Text['yText']>(titleColumnTypeName, {
+  name: 'Title',
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',

@@ -10,12 +10,13 @@ import '../../database-block/common/columns/checkbox/define.js';
 
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { undefined } from 'zod';
 
 import { columnManager } from '../../database-block/common/columns/manager.js';
 import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
-import { insertPositionToIndex } from '../../database-block/utils/insert.js';
+import { insertPositionToIndex } from '../../database-block/index.js';
 import type { DatabaseBlockDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
@@ -218,5 +219,9 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
   public override get columnManager() {
     return columnManager;
+  }
+
+  public get allPropertyConfig() {
+    return [];
   }
 }

@@ -1,5 +1,6 @@
 import { Text } from '@blocksuite/store';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tNumber } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -18,6 +19,8 @@ const numberHelper = columnManager.register<
     decimal: number;
   }
 >(numberColumnTypeName, {
+  name: 'Number',
+  icon: createIcon('DatabaseNumber'),
   type: () => tNumber.create(),
   defaultData: () => ({ decimal: 0 }),
   cellToString: data => data?.toString() ?? '',

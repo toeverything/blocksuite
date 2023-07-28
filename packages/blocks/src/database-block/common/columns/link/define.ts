@@ -1,3 +1,4 @@
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tString } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -10,6 +11,8 @@ declare global {
   }
 }
 const linkHelper = columnManager.register<string>(linkColumnTypeName, {
+  name: 'Link',
+  icon: createIcon('LinkIcon'),
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',

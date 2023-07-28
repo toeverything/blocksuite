@@ -1,9 +1,14 @@
 import { Slot } from '@blocksuite/global/utils';
 
 import type { DataSource } from '../../__internal__/datasource/base.js';
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { TType } from '../logical/typesystem.js';
 import type { ColumnDataUpdater, InsertPosition } from '../types.js';
-import type { CellRenderer } from './columns/manager.js';
+import type {
+  CellRenderer,
+  ColumnConfig,
+  ColumnConfigManager,
+} from './columns/manager.js';
 import { columnManager } from './columns/manager.js';
 import { columnRenderer } from './columns/renderer.js';
 
@@ -70,6 +75,10 @@ export interface DataViewManager {
 
   columnUpdateData(columnId: string, data: Record<string, unknown>): void;
 
+  get allColumnConfig(): ColumnConfig[];
+
+  get columnConfigManager(): ColumnConfigManager;
+
   /**
    * @deprecated
    */
@@ -123,6 +132,8 @@ export interface DataViewColumnManager<
   get delete(): undefined | (() => void);
 
   get duplicate(): undefined | (() => void);
+
+  get icon(): UniComponent | undefined;
 
   /**
    * @deprecated
@@ -323,6 +334,14 @@ export abstract class BaseDataViewManager implements DataViewManager {
   public abstract get id(): string;
 
   public abstract get type(): string;
+
+  public get allColumnConfig(): ColumnConfig[] {
+    return this.dataSource.allPropertyConfig;
+  }
+
+  public get columnConfigManager(): ColumnConfigManager {
+    return this.dataSource.columnConfigManager;
+  }
 }
 
 export abstract class BaseDataViewColumnManager
@@ -419,5 +438,9 @@ export abstract class BaseDataViewColumnManager
 
   getStringValue(rowId: string): string {
     return this.viewManager.cellGetStringValue(rowId, this.id);
+  }
+
+  public get icon(): UniComponent | undefined {
+    return this.viewManager.columnConfigManager.getColumn(this.type).icon;
   }
 }

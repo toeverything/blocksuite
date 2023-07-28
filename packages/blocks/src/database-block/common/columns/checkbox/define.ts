@@ -1,3 +1,4 @@
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tBoolean } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -9,9 +10,12 @@ declare global {
     [checkboxColumnTypeName]: typeof checkboxColumnHelper;
   }
 }
+
 const checkboxColumnHelper = columnManager.register<boolean>(
   checkboxColumnTypeName,
   {
+    name: 'Checkbox',
+    icon: createIcon('TodoIcon'),
     type: () => tBoolean.create(),
     defaultData: () => ({}),
     cellToString: data => '',
