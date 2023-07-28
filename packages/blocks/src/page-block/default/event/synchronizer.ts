@@ -77,7 +77,7 @@ export class Synchronizer {
     const range = this.host.rangeController.value;
     if (!range) return;
 
-    const blocks = this.host.rangeController.findBlockElement(range);
+    const blocks = this.host.rangeController.findBlockElementByDFS(range);
     const start = blocks.at(0);
     const end = blocks.at(-1);
     if (!start || !end) return;

@@ -96,7 +96,7 @@ export class RangeController {
     return selection;
   }
 
-  findBlockElement(range: Range): BlockElement[] {
+  findBlockElementByDFS(range: Range): BlockElement[] {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
