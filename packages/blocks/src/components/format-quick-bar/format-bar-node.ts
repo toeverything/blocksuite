@@ -9,8 +9,8 @@ import {
   type BaseBlockModel,
   matchFlavours,
   type Page,
+  Slot,
 } from '@blocksuite/store';
-import { Slot } from '@blocksuite/store';
 import type { PropertyValues } from 'lit';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
