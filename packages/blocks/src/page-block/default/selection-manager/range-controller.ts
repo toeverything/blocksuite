@@ -88,16 +88,14 @@ export class RangeController {
     return selection;
   }
 
-  getSelectedBlocks(range: Range): BaseBlockModel['id'][] {
-    const blocksId = Array.from(
-      range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
-    ).map(block => {
-      const id = block.getAttribute(BLOCK_ID_ATTR);
-      assertExists(id, 'Cannot find block id');
-      return id;
-    });
+  getSelectedBlocks(range: Range): BaseBlockModel[] {
+    const selectedBlocks = Array.from<BlockElement>(
+      this.root.querySelectorAll('[data-block-id]')
+    )
+      .filter(el => range.intersectsNode(el))
+      .map(el => el.model);
 
-    return blocksId;
+    return selectedBlocks;
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {
