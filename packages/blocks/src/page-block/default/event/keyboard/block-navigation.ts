@@ -19,9 +19,7 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const model = this.page.getBlockById(
-      this._focusBlock?.blockId || selection.blockId
-    );
+    const model = this.page.getBlockById(selection.blockId);
     if (!model) return;
     const previousSibling = this.page.getPreviousSibling(model);
     if (!previousSibling) return;
@@ -33,9 +31,7 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const model = this.page.getBlockById(
-      this._focusBlock?.blockId || selection.blockId
-    );
+    const model = this.page.getBlockById(selection.blockId);
     if (!model) return;
     const nextSibling = this.page.getNextSibling(model);
     if (!nextSibling) return;

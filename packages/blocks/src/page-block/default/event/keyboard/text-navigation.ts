@@ -39,7 +39,7 @@ export class TextNavigation {
       return;
     }
     const range = selection.getRangeAt(0);
-    const rect = Array.from((this._focusRange ?? range).getClientRects()).at(0);
+    const rect = Array.from(range.getClientRects()).at(0);
     if (!rect) {
       return;
     }
@@ -64,9 +64,7 @@ export class TextNavigation {
       return;
     }
     const range = selection.getRangeAt(0);
-    const rect = Array.from((this._focusRange ?? range).getClientRects()).at(
-      -1
-    );
+    const rect = Array.from(range.getClientRects()).at(-1);
     if (!rect) {
       return;
     }
@@ -82,6 +80,20 @@ export class TextNavigation {
       this._autoScroll(nextRect.bottom);
     }
     return;
+  };
+
+  ArrowRight: UIEventHandler = () => {
+    const selection = this.host.root.selectionManager.value.at(0);
+    if (!selection || !selection.is('text')) {
+      return;
+    }
+
+    const { from, to } = selection;
+    const focus = to ?? from;
+    const focusBlock = this.host.page.getBlockById(focus.blockId);
+    if (!focusBlock) {
+      return;
+    }
   };
 
   ShiftArrowUp: UIEventHandler = () => {

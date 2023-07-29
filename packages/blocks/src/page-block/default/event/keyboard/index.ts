@@ -57,6 +57,17 @@ export class Keyboard {
           return;
         }
       },
+      ArrowRight: ctx => {
+        const current = this._currentSelection.at(-1);
+        if (!current) {
+          return;
+        }
+        ctx.get('keyboardState').raw.preventDefault();
+        if (current.is('text')) {
+          textNavigation.ArrowRight(ctx);
+          return;
+        }
+      },
       'Shift-ArrowUp': ctx => {
         const event = ctx.get('keyboardState').raw;
         const current = this._currentSelection.at(0);
