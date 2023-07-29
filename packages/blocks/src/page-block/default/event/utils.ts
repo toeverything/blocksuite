@@ -40,12 +40,14 @@ export function rangeFromCaret(caret: { node: Node; offset: number }): Range {
 export function horizontalGetNextCaret(
   point: { x: number; y: number },
   root: HTMLElement,
-  forward = false
+  forward = false,
+  span = 10
 ) {
   const selection = document.getSelection();
   if (!selection) {
     return;
   }
+  let _point = { ...point };
   let move = caretFromPoint(point.x, point.y);
   const anchor = caretFromPoint(point.x, point.y);
   const needContinue = () => {
@@ -70,13 +72,13 @@ export function horizontalGetNextCaret(
     return true;
   };
   while (needContinue()) {
-    point = {
-      x: point.x,
-      y: point.y + (forward ? -8 : 8),
+    _point = {
+      x: _point.x,
+      y: _point.y + (forward ? -1 * span : span),
     };
-    move = caretFromPoint(point.x, point.y);
+    move = caretFromPoint(_point.x, _point.y);
   }
-  if (!move) {
+  if (!move || !move.node.parentElement?.closest('[data-virgo-root]')) {
     return;
   }
 

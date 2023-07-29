@@ -1,4 +1,5 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 
 import type { DefaultPageBlockComponent } from '../../default-page-block.js';
 import {
@@ -83,17 +84,79 @@ export class TextNavigation {
   };
 
   ArrowRight: UIEventHandler = () => {
-    const selection = this.host.root.selectionManager.value.at(0);
-    if (!selection || !selection.is('text')) {
+    const selection = document.getSelection();
+    if (!selection || selection.rangeCount === 0) {
       return;
     }
+    const range = selection.getRangeAt(0);
+    const rect = Array.from(range.getClientRects()).at(-1);
+    if (!rect) {
+      return;
+    }
+    const caret = horizontalGetNextCaret(
+      {
+        x: rect.right,
+        y: rect.top,
+      },
+      this.host,
+      false
+    );
+    if (!caret) return;
+    const { node } = caret;
+    const blockElement = node.parentElement?.closest(
+      '[data-block-id]'
+    ) as BlockElement;
+    if (!blockElement) return;
 
-    const { from, to } = selection;
-    const focus = to ?? from;
-    const focusBlock = this.host.page.getBlockById(focus.blockId);
-    if (!focusBlock) {
+    this._selection.set([
+      this._selection.getInstance('text', {
+        from: {
+          index: 0,
+          length: 0,
+          blockId: blockElement.model.id,
+          path: blockElement.path,
+        },
+        to: null,
+      }),
+    ]);
+  };
+
+  ArrowLeft: UIEventHandler = () => {
+    const selection = document.getSelection();
+    if (!selection || selection.rangeCount === 0) {
       return;
     }
+    const range = selection.getRangeAt(0);
+    const rect = Array.from(range.getClientRects()).at(0);
+    if (!rect) {
+      return;
+    }
+    const caret = horizontalGetNextCaret(
+      {
+        x: rect.right,
+        y: rect.top,
+      },
+      this.host,
+      true
+    );
+    if (!caret) return;
+    const { node } = caret;
+    const blockElement = node.parentElement?.closest(
+      '[data-block-id]'
+    ) as BlockElement;
+    if (!blockElement) return;
+
+    this._selection.set([
+      this._selection.getInstance('text', {
+        from: {
+          index: blockElement.model.text?.length ?? 0,
+          length: 0,
+          blockId: blockElement.model.id,
+          path: blockElement.path,
+        },
+        to: null,
+      }),
+    ]);
   };
 
   ShiftArrowUp: UIEventHandler = () => {
@@ -201,4 +264,8 @@ export class TextNavigation {
     }
     return false;
   };
+
+  private get _selection() {
+    return this.host.root.selectionManager;
+  }
 }
