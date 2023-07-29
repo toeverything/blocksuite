@@ -88,7 +88,7 @@ export class RangeController {
     return selection;
   }
 
-  findBlockElementByDFS(range: Range): BlockElement[] {
+  findBlockElementsByRange = (range: Range): BlockElement[] => {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
@@ -141,7 +141,7 @@ export class RangeController {
       blocks.add(blockView);
     });
     return Array.from(blocks);
-  }
+  };
 
   getSelectedBlocks(range: Range): BaseBlockModel['id'][] {
     const blocksId = Array.from(

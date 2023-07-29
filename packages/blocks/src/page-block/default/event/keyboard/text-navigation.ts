@@ -20,7 +20,7 @@ export class TextNavigation {
       return;
     }
     const range = selection.getRangeAt(0);
-    const blocks = this.host.rangeController.findBlockElementByDFS(range);
+    const blocks = this.host.rangeController.findBlockElementsByRange(range);
 
     const manager = this.host.root.selectionManager;
     manager.set(
