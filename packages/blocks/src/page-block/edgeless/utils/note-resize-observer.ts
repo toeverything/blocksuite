@@ -35,19 +35,15 @@ export class NoteResizeObserver {
       const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
       const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
       if (!id) return;
-      const lastRect = this._lastRects.has(id)
-        ? this._lastRects.get(id)
-        : undefined;
-      if (lastRect) {
-        if (
-          lastRect &&
-          almostEqual(lastRect.x, entry.contentRect.x) &&
-          almostEqual(lastRect.y, entry.contentRect.y) &&
-          almostEqual(lastRect.width, entry.contentRect.width) &&
-          almostEqual(lastRect.height, entry.contentRect.height)
-        ) {
-          return;
-        }
+      const lastRect = this._lastRects.get(id);
+      if (
+        lastRect &&
+        almostEqual(lastRect.x, entry.contentRect.x) &&
+        almostEqual(lastRect.y, entry.contentRect.y) &&
+        almostEqual(lastRect.width, entry.contentRect.width) &&
+        almostEqual(lastRect.height, entry.contentRect.height)
+      ) {
+        return;
       }
       resizedNotes.set(id, [entry.contentRect, lastRect]);
       this._lastRects.set(id, entry.contentRect);
