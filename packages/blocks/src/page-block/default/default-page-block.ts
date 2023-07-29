@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import './meta-data/meta-data.js';
 
+import type { BlockService } from '@blocksuite/block-std';
 import {
   PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
@@ -25,7 +26,6 @@ import { activeEditorManager } from '../../__internal__/utils/active-editor-mana
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageBlockService } from '../index.js';
 import type { PageBlockModel } from '../page-model.js';
-import type { DefaultPageService } from './default-page-service.js';
 import {
   Gesture,
   Keyboard,
@@ -45,11 +45,7 @@ export interface PageViewport {
 
 @customElement('affine-default-page')
 export class DefaultPageBlockComponent
-  extends BlockElement<
-    PageBlockModel,
-    DefaultPageService,
-    DocPageBlockWidgetName
-  >
+  extends BlockElement<PageBlockModel, BlockService, DocPageBlockWidgetName>
   implements BlockHost
 {
   static override styles = css`
@@ -125,8 +121,6 @@ export class DefaultPageBlockComponent
   `;
 
   rangeController!: RangeController;
-
-  flavour = 'affine:page' as const;
 
   clipboard = new PageClipboard(this);
 
