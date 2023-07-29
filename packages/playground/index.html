@@ -38,7 +38,8 @@
   </head>
 
   <body>
-    <script type="module" src="./apps/default/main.ts"></script>
+    <script type="module" src="./polyfill/ses.ts"></script>
+    <script type="module" defer src="./apps/default/main.ts"></script>
     <div
       id="app"
       style="margin: 0; overflow: initial; height: 100%; box-shadow: initial"
