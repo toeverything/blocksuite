@@ -34,7 +34,7 @@ export class TextNavigation {
     );
   };
 
-  ArrowUp: UIEventHandler = () => {
+  ArrowUp: UIEventHandler = ctx => {
     const selection = document.getSelection();
     if (!selection || selection.rangeCount === 0) {
       return;
@@ -54,12 +54,13 @@ export class TextNavigation {
     );
     const nextRect = result?.caret.node.parentElement?.getBoundingClientRect();
     if (nextRect) {
+      ctx.get('keyboardState').raw.preventDefault();
       this._autoScroll(nextRect.top);
     }
     return;
   };
 
-  ArrowDown: UIEventHandler = () => {
+  ArrowDown: UIEventHandler = ctx => {
     const selection = document.getSelection();
     if (!selection || selection.rangeCount === 0) {
       return;
@@ -78,6 +79,7 @@ export class TextNavigation {
     );
     const nextRect = result?.caret.node.parentElement?.getBoundingClientRect();
     if (nextRect) {
+      ctx.get('keyboardState').raw.preventDefault();
       this._autoScroll(nextRect.bottom);
     }
     return;

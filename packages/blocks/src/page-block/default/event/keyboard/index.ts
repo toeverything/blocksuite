@@ -31,7 +31,6 @@ export class Keyboard {
         if (!current) {
           return;
         }
-        ctx.get('keyboardState').raw.preventDefault();
         if (current.is('text')) {
           textNavigation.ArrowUp(ctx);
           return;
@@ -47,7 +46,6 @@ export class Keyboard {
         if (!current) {
           return;
         }
-        ctx.get('keyboardState').raw.preventDefault();
         if (current.is('text')) {
           textNavigation.ArrowDown(ctx);
           return;

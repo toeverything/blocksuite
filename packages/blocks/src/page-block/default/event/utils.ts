@@ -51,7 +51,8 @@ function getNearestText(
     rect &&
     anchorBlock &&
     block !== anchorBlock &&
-    Math.abs(anchorBlock.getBoundingClientRect().top - rect.top) > rect.height
+    Math.abs(anchorBlock.getBoundingClientRect().top - rect.top) >
+      rect.height * 1.5
   ) {
     const range = document.createRange();
     range.selectNodeContents(block);
