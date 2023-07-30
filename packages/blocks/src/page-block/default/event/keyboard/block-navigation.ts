@@ -1,5 +1,7 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import type { UIEventHandler } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
+import type { VirgoRootElement } from '@blocksuite/virgo';
 
 import type { DefaultPageBlockComponent } from '../../default-page-block.js';
 
@@ -12,6 +14,56 @@ export class BlockNavigation {
   keyDown: UIEventHandler = () => {
     this._anchorBlock = null;
     this._focusBlock = null;
+  };
+
+  Enter: UIEventHandler = () => {
+    const selection = this._currentSelection.at(0);
+    if (!selection) {
+      return;
+    }
+    const view = this.host.root.blockViewMap.get(selection.path);
+    if (!view) return;
+
+    if (view.model.text) {
+      const virgoRoot = view.querySelector(
+        '[data-virgo-root]'
+      ) as VirgoRootElement;
+      assertExists(virgoRoot);
+      const sel = this._selection.getInstance('text', {
+        from: {
+          blockId: selection.blockId,
+          path: selection.path,
+          index: virgoRoot.virgoEditor.yText.length,
+          length: 0,
+        },
+        to: null,
+      });
+      this._selection.set([sel]);
+      return;
+    }
+
+    const parentPath = view.parentPath;
+    const block = this.page.getBlockById(selection.blockId);
+    assertExists(block);
+    const parent = this.page.getParent(block);
+    const index = parent?.children.indexOf(block);
+    const blockId = this.page.addBlock(
+      'affine:paragraph',
+      {},
+      parent,
+      index ? index + 1 : undefined
+    );
+    const sel = this._selection.getInstance('text', {
+      from: {
+        blockId,
+        path: parentPath.concat(blockId),
+        index: 0,
+        length: 0,
+      },
+      to: null,
+    });
+    this._selection.set([sel]);
+    return;
   };
 
   ArrowUp: UIEventHandler = () => {

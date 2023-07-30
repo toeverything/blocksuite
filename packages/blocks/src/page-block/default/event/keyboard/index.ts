@@ -127,6 +127,16 @@ export class Keyboard {
 
         this._selection.set([]);
       },
+      Enter: ctx => {
+        const current = this._currentSelection.at(0);
+        if (!current) {
+          return;
+        }
+        if (current.is('block')) {
+          blockNavigation.Enter(ctx);
+          return;
+        }
+      },
     });
   }
 
