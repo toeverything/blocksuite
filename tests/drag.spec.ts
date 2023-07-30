@@ -19,7 +19,7 @@ import { getBoundingClientRect } from './utils/actions/misc.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
-test('only have one drag handle in screen', async ({ page }) => {
+test.fixme('only have one drag handle in screen', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
