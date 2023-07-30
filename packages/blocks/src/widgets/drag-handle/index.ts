@@ -166,6 +166,7 @@ export class DragHandleWidget extends WidgetElement {
     const blockElement = getClosestBlockElementByPoint(
       point.clone()
     ) as BlockElement;
+    console.log(blockElement);
     if (!blockElement) {
       this._hoveredBlockId = '';
       this._hoveredBlockPath = null;
@@ -227,6 +228,11 @@ export class DragHandleWidget extends WidgetElement {
     const { target } = state.raw;
     const element = this._captureEventTarget(target);
 
+    // console.log('click on handle', element);
+    // console.log('hovered block id', this._hoveredBlockId);
+    // console.log('hovered block path', this._hoveredBlockPath);
+    // assertExists(element);
+    // console.log(element.closest('.affine-drag-handle-container'));
     if (
       !this._hoveredBlockId ||
       !this._hoveredBlockPath ||
