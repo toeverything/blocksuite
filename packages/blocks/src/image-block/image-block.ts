@@ -49,7 +49,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     }
 
     .affine-image-wrapper {
-      padding: 8px 8px 0 8px;
+      padding: 8px;
       width: 100%;
       text-align: center;
       line-height: 0;
@@ -410,14 +410,18 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     }[this._imageState];
 
     return html`
-      <div>
+      <div style="position: relative;">
         <div class="affine-image-wrapper">
           <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
             ${img} ${this._imageOptionsTemplate()}
             ${this._imageResizeBoardTemplate()}
           </div>
         </div>
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : null}
       </div>
+
       <div class="affine-embed-block-container">
         <div class="affine-embed-wrapper">
           <input
