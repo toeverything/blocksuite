@@ -5,7 +5,7 @@ export class PathMap<Value = unknown> {
     this._map = new Map();
   }
 
-  static pathToKey = (path: string[]) => {
+  static pathToKey = (path: readonly string[]) => {
     return path.join('|');
   };
 
@@ -13,7 +13,7 @@ export class PathMap<Value = unknown> {
     return key.split('|');
   };
 
-  static equals = (path1: string[], path2: string[]) => {
+  static equals = (path1: readonly string[], path2: readonly string[]) => {
     return PathMap.pathToKey(path1) === PathMap.pathToKey(path2);
   };
 

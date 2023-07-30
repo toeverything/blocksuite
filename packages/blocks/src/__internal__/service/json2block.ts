@@ -82,11 +82,6 @@ export async function json2block(
           index: textLength,
           length: 0,
         });
-      } else {
-        requestAnimationFrame(() => {
-          // TODO: wait block ready
-          focusBlockByModel(model);
-        });
       }
     }
 

@@ -19,6 +19,9 @@ export type SlashItem = {
    * search alias
    */
   alias?: string[];
+  /**
+   * size 20x20
+   */
   icon: TemplateResult<1>;
   suffix?: TemplateResult<1>;
   showWhen?: (model: BaseBlockModel) => boolean;

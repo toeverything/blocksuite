@@ -4,31 +4,31 @@ import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/toolbar/toolbar.js';
 import './components/database-title.js';
-import './components/selection/selection.js';
+import './components/selection.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Text } from '@blocksuite/store';
 import { css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import type { TableViewSelection } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import type { BlockOperation, InsertPosition } from '../types.js';
+import { BaseDataView } from '../common/base-data-view.js';
+import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
-import type { DatabaseSelectionView } from './components/selection/selection.js';
-import type { TableViewManager } from './table-view-manager.js';
+import type { DatabaseSelectionView } from './components/selection.js';
+import type { DataViewTableManager } from './table-view-manager.js';
 
 const styles = css`
   affine-database-table {
     position: relative;
     margin-top: 32px;
   }
+
   affine-database-table * {
     box-sizing: border-box;
   }
@@ -114,6 +114,12 @@ const styles = css`
     opacity: 0;
   }
 
+  @media print {
+    .affine-database-block-footer {
+      display: none;
+    }
+  }
+
   .affine-database-block-footer:hover {
     opacity: 1;
   }
@@ -144,25 +150,11 @@ const styles = css`
 `;
 
 @customElement('affine-database-table')
-export class DatabaseTable extends WithDisposable(ShadowlessElement) {
-  flavour = 'affine:database' as const;
-
+export class DatabaseTable extends BaseDataView<
+  DataViewTableManager,
+  TableViewSelection
+> {
   static override styles = styles;
-
-  @property({ attribute: false })
-  tableViewManager!: TableViewManager;
-
-  @property({ attribute: false })
-  blockOperation!: BlockOperation;
-
-  @property({ attribute: false })
-  titleText!: Text;
-
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
-  @property({ attribute: false })
-  modalMode?: boolean;
 
   @query('.affine-database-table-container')
   private _tableContainer!: HTMLDivElement;
@@ -174,14 +166,13 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   public selection!: DatabaseSelectionView;
 
   private get readonly() {
-    return this.root.page.readonly;
+    return this.view.readonly;
   }
 
   override firstUpdated() {
     this._disposables.add(
-      this.tableViewManager.slots.update.on(() => {
+      this.view.slots.update.on(() => {
         this.requestUpdate();
-        this.selection.requestUpdate();
       })
     );
 
@@ -200,19 +191,16 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   private _addRow = (
-    tableViewManager: TableViewManager,
+    tableViewManager: DataViewTableManager,
     position: InsertPosition
   ) => {
     if (this.readonly) return;
-
-    const page = this.root.page;
-    page.captureSync();
     const index = insertPositionToIndex(
       position,
-      this.tableViewManager.rows.map(id => ({ id }))
+      this.view.rows.map(id => ({ id }))
     );
     tableViewManager.rowAdd(position);
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       this.selection.selection = {
         focus: {
           rowIndex: index,
@@ -226,7 +214,7 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   private _renderColumnWidthDragBar = () => {
     let left = 0;
     return repeat(
-      this.tableViewManager.columnManagerList,
+      this.view.columnManagerList,
       v => v.id,
       column => {
         left += column.width;
@@ -239,9 +227,9 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    const rowsTemplate = DataBaseRowContainer(this.tableViewManager);
+    const rowsTemplate = DataBaseRowContainer(this.view);
     const addRow = (position: InsertPosition) => {
-      this._addRow(this.tableViewManager, position);
+      this._addRow(this.view, position);
     };
     return html`
       <div class="affine-database-table">
@@ -249,26 +237,24 @@ export class DatabaseTable extends WithDisposable(ShadowlessElement) {
           <affine-database-title
             .titleText="${this.titleText}"
             .addRow="${() => addRow('start')}"
-            .root="${this.root}"
+            .readonly="${this.readonly}"
           ></affine-database-title>
           <affine-database-toolbar
-            .root="${this.root}"
+            .tableView="${this}"
             .copyBlock="${this.blockOperation.copy}"
             .deleteSelf="${this.blockOperation.delete}"
-            .view="${this.tableViewManager}"
+            .view="${this.view}"
             .addRow="${addRow}"
           ></affine-database-toolbar>
         </div>
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">
             <affine-database-column-header
-              .tableViewManager="${this.tableViewManager}"
+              .tableViewManager="${this.view}"
             ></affine-database-column-header>
             ${rowsTemplate} ${this._renderColumnWidthDragBar()}
             <affine-database-selection
-              .blockId="${this.tableViewManager.id}"
-              .eventDispatcher="${this.root.uiEventDispatcher}"
-              .view="${this.tableViewManager}"
+              .tableView="${this}"
             ></affine-database-selection>
           </div>
         </div>

@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import './meta-data/meta-data.js';
 
+import type { BaseSelection, TextSelection } from '@blocksuite/block-std';
 import {
   BLOCK_ID_ATTR,
   PAGE_BLOCK_CHILD_PADDING,
@@ -128,9 +129,13 @@ export class DefaultPageBlockComponent
     .affine-block-element {
       display: block;
     }
-  `;
 
-  flavour = 'affine:page' as const;
+    @media print {
+      .selected {
+        background-color: transparent !important;
+      }
+    }
+  `;
 
   clipboard = new PageClipboard(this);
 
@@ -156,6 +161,8 @@ export class DefaultPageBlockComponent
 
   private _resizeObserver: ResizeObserver | null = null;
 
+  private _prevSelection: BaseSelection | null = null;
+
   @query('.affine-default-viewport')
   viewportElement!: HTMLDivElement;
 
@@ -171,7 +178,9 @@ export class DefaultPageBlockComponent
       pageId: string;
       blockId?: string;
     }>(),
-    tagClicked: new Slot<{ tagId: string }>(),
+    tagClicked: new Slot<{
+      tagId: string;
+    }>(),
   };
 
   @query('.affine-default-page-block-title')
@@ -227,6 +236,20 @@ export class DefaultPageBlockComponent
     this._titleVEditor.setReadonly(this.page.readonly);
   }
 
+  private _createDefaultNoteBlock() {
+    const { page } = this;
+
+    const noteId = page.addBlock('affine:note', {}, page.root?.id);
+    return page.getBlockById(noteId);
+  }
+
+  private _getDefaultNoteBlock() {
+    return (
+      this.page.root?.children.find(child => child.flavour === 'affine:note') ??
+      this._createDefaultNoteBlock()
+    );
+  }
+
   private _updateTitleInMeta = () => {
     this.page.workspace.setPageMeta(this.page.id, {
       title: this.model.title.toString(),
@@ -237,9 +260,6 @@ export class DefaultPageBlockComponent
     if (e.isComposing || this.page.readonly) return;
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
-    const defaultNote = model.children.find(
-      child => child.flavour === 'affine:note'
-    );
 
     if (e.key === 'Enter' && hasContent) {
       e.preventDefault();
@@ -250,13 +270,14 @@ export class DefaultPageBlockComponent
       const newFirstParagraphId = page.addBlock(
         'affine:paragraph',
         { text: right },
-        defaultNote,
+        this._getDefaultNoteBlock(),
         0
       );
       asyncFocusRichText(page, newFirstParagraphId);
       return;
     } else if (e.key === 'ArrowDown' && hasContent) {
       e.preventDefault();
+      const defaultNote = this._getDefaultNoteBlock();
       const firstText = defaultNote?.children.find(block =>
         matchFlavours(block, ['affine:paragraph', 'affine:list', 'affine:code'])
       );
@@ -495,6 +516,40 @@ export class DefaultPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
     this.service?.bindViewport(this.viewportElement);
+    this.handleEvent('selectionChange', () => {
+      const selection = window.getSelection();
+      if (!selection) {
+        return;
+      }
+      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+      if (this.service) {
+        this._prevSelection = this.service.rangeController.writeRange(range);
+      }
+    });
+    this._disposables.add(
+      this.root.selectionManager.slots.changed.on(selections => {
+        if (this.service?._isNativeSelection) {
+          return;
+        }
+        // wait for lit updated
+        requestAnimationFrame(() => {
+          const text =
+            selections.find((selection): selection is TextSelection =>
+              selection.is('text')
+            ) ?? null;
+          const eq =
+            text && this._prevSelection
+              ? text.equals(this._prevSelection)
+              : text === this._prevSelection;
+          if (eq) {
+            return;
+          }
+
+          this._prevSelection = text;
+          this.service?.rangeController.syncRange(text);
+        });
+      })
+    );
   }
 
   override connectedCallback() {

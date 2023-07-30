@@ -5,13 +5,13 @@ type SelectionConstructor<T = unknown> = {
 
 export type BaseSelectionOptions = {
   blockId: string;
-  path: readonly string[];
+  path: string[];
 };
 
 export abstract class BaseSelection {
   static readonly type: string;
   readonly blockId: string;
-  readonly path: readonly string[];
+  readonly path: string[];
   constructor({ blockId, path }: BaseSelectionOptions) {
     this.blockId = blockId;
     this.path = path;

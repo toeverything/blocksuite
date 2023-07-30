@@ -17,14 +17,18 @@ import {
 } from '@blocksuite/store';
 import { fileOpen } from 'browser-fs-access';
 
+import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
+
 export const params = new URLSearchParams(location.search);
 export const defaultMode = params.get('mode') === 'page' ? 'page' : 'edgeless';
 
 const featureArgs = (params.get('features') ?? '').split(',');
 
-export const getOptions = (
+export function getOptions(
   fn: (params: URLSearchParams) => Record<string, string | number>
-) => fn(params);
+) {
+  return fn(params);
+}
 
 declare global {
   // eslint-disable-next-line no-var
@@ -168,6 +172,34 @@ export function isValidUrl(urlLike: string) {
     return false;
   }
   return url.protocol === 'http:' || url.protocol === 'https:';
+}
+
+export async function testIDBExistence() {
+  let databaseExists = false;
+  try {
+    databaseExists =
+      (await indexedDB.databases()).find(db => db.name === INDEXED_DB_NAME) !==
+      undefined;
+  } catch (e) {
+    const request = indexedDB.open(INDEXED_DB_NAME);
+    databaseExists = await new Promise(resolve => {
+      const unlisten = () => {
+        request.removeEventListener('success', success);
+        request.removeEventListener('error', error);
+      };
+      const success = () => {
+        resolve(true);
+        unlisten();
+      };
+      const error = () => {
+        resolve(false);
+        unlisten();
+      };
+      request.addEventListener('success', success);
+      request.addEventListener('error', error);
+    });
+  }
+  return databaseExists;
 }
 
 export const createEditor = (page: Page, element: HTMLElement) => {

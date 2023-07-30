@@ -5,7 +5,7 @@ import {
   numberHelper,
   richTextHelper,
   selectHelper,
-} from '../../../blocks/src/database-block/common/column-manager';
+} from '../../../blocks/src/database-block/common/columns/define';
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
 import type { Cell, Column } from '../../../blocks/src/database-block/types.js';

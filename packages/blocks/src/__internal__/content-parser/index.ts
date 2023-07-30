@@ -328,25 +328,23 @@ export class ContentParser {
     if (!canvasImage) {
       return;
     }
-    const jspdf = await import('jspdf');
-    const pdf = new jspdf.jsPDF(
-      canvasImage.width < canvasImage.height ? 'p' : 'l',
-      'pt',
-      [canvasImage.width, canvasImage.height]
-    );
-    pdf.addImage(
-      canvasImage.toDataURL('PNG'),
-      'PNG',
-      0,
-      0,
-      canvasImage.width,
-      canvasImage.height,
-      '',
-      'FAST'
-    );
+
+    const PDFLib = await import('pdf-lib');
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const page = pdfDoc.addPage([canvasImage.width, canvasImage.height]);
+    const imageEmbed = await pdfDoc.embedPng(canvasImage.toDataURL('PNG'));
+    const { width, height } = imageEmbed.scale(1);
+    page.drawImage(imageEmbed, {
+      x: 0,
+      y: 0,
+      width,
+      height,
+    });
+    const pdfBase64 = await pdfDoc.saveAsBase64({ dataUri: true });
+
     FileExporter.exportFile(
       (root as PageBlockModel).title.toString() + '.pdf',
-      pdf.output('dataurlstring')
+      pdfBase64
     );
   }
 
@@ -388,7 +386,10 @@ export class ContentParser {
         // XXX: should use blob storage here?
         const storage = this._page.blobs;
         assertExists(storage);
-        const id = await storage.set(file);
+        // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
+        const id = await storage.set(
+          new File([file], file.name, { type: file.type })
+        );
         return [
           {
             flavour: 'affine:image',

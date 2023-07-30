@@ -8,7 +8,6 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -20,11 +19,12 @@ import { popFilterableSimpleMenu } from '../../../../components/menu/menu.js';
 import { toast } from '../../../../components/toast.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
-import { columnManager } from '../../../common/column-manager.js';
+import { columnManager } from '../../../common/columns/manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type { InsertPosition } from '../../../types.js';
-import type { TableViewManager } from '../../table-view-manager.js';
+import type { DatabaseTable } from '../../table-view.js';
+import type { DataViewTableManager } from '../../table-view-manager.js';
 import { initAddNewRecordHandlers } from './index.js';
 
 const styles = css`
@@ -175,6 +175,12 @@ const styles = css`
   .show-toolbar {
     display: flex;
   }
+
+  @media print {
+    affine-database-toolbar {
+      display: none;
+    }
+  }
 `;
 
 @customElement('affine-database-toolbar')
@@ -182,7 +188,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  tableView!: DatabaseTable;
 
   @property({ attribute: false })
   copyBlock!: () => void;
@@ -191,7 +197,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   deleteSelf!: () => void;
 
   @property({ attribute: false })
-  view!: TableViewManager;
+  view!: DataViewTableManager;
 
   @property({ attribute: false })
   addRow!: (position: InsertPosition) => void;
@@ -355,9 +361,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const filter = this.root.page.awarenessStore.getFlag(
-      'enable_database_filter'
-    )
+    const filter = this.tableView.getFlag('enable_database_filter')
       ? html` <div
           @click="${this._showFilter}"
           class="affine-database-filter-button"

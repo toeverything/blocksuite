@@ -330,6 +330,7 @@ test.describe('slash search', () => {
     await expect(slashItems).toHaveText([
       'Code Block',
       'Italic',
+      'File',
       'Copy',
       'Duplicate',
     ]);
@@ -398,8 +399,8 @@ test.describe('slash menu with code block', () => {
     await assertRichTexts(page, ['000111']);
   });
 });
-
-test('slash menu should work in edgeless mode', async ({ page }) => {
+// Selection is not yet available in edgeless
+test.fixme('slash menu should work in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 

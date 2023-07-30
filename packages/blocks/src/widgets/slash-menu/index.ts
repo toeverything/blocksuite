@@ -10,7 +10,6 @@ import { customElement } from 'lit/decorators.js';
 
 import {
   getCurrentNativeRange,
-  getModelByElement,
   getVirgoByModel,
   isControlledKeyboardEvent,
   throttle,
@@ -99,7 +98,7 @@ export class SlashMenuWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.handleEvent('keyDown', this._onKeyDown, { global: true });
+    this.handleEvent('keyDown', this._onKeyDown);
   }
 
   private _onKeyDown = (ctx: UIEventStateContext) => {
@@ -109,11 +108,16 @@ export class SlashMenuWidget extends WidgetElement {
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
     if (!this.options.isTriggerKey(event)) return;
-
-    // Fixme @Saul-Mirone get model from getCurrentSelection
-    const target = event.target;
-    if (!target || !(target instanceof HTMLElement)) return;
-    const model = getModelByElement(target);
+    const text = this.root.selectionManager.value.find(selection =>
+      selection.is('text')
+    );
+    if (!text) {
+      return;
+    }
+    const model = this.root.page.getBlockById(text.blockId);
+    if (!model) {
+      return;
+    }
 
     if (matchFlavours(model, ['affine:code'])) return;
     const vEditor = getVirgoByModel(model);

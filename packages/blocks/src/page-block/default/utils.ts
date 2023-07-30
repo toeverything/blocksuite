@@ -18,7 +18,6 @@ import {
   type Point,
   type SerializedBlock,
 } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { DragHandle } from '../../components/drag-handle.js';
 import type { FormatQuickBar } from '../../components/format-quick-bar/index.js';
@@ -395,7 +394,7 @@ export function copyCode(codeBlockModel: CodeBlockModel) {
     type: 'Block',
     models: [codeBlockModel],
     startOffset: 0,
-    endOffset: 0,
+    endOffset: Infinity,
   });
 
   toast('Copied to clipboard');
@@ -440,7 +439,6 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       page.captureSync();
 
       const parent = page.getParent(model);
-      const dragBlockParent = page.getParent(models[0]);
       if (type === 'database') {
         page.moveBlocks(models, model);
       } else {
@@ -453,19 +451,6 @@ export function createDragHandle(pageBlock: DefaultPageBlockComponent) {
       // pageBlock.selection.state.type = 'block';
 
       pageBlock.updateComplete.then(() => {
-        if (
-          dragBlockParent &&
-          matchFlavours(dragBlockParent, ['affine:database'])
-        ) {
-          const service = getService('affine:database');
-          service.select(undefined);
-        }
-
-        if (parent && matchFlavours(parent, ['affine:database'])) {
-          pageBlock.selection?.clear();
-          return;
-        }
-
         // update selection rects
         // block may change its flavour after moved.
         requestAnimationFrame(() => {

@@ -599,7 +599,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-divider></sl-divider>
               <sl-menu-item @click=${this._startCollaboration}>
-                Collaboration
+                Start Collaboration
                 <sl-icon slot="prefix" name="people"></sl-icon>
               </sl-menu-item>
             </sl-menu>

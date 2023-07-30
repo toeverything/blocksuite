@@ -165,9 +165,16 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     const selectionRoot = findDocumentOrShadowRoot(this._editor);
     const selection = selectionRoot.getSelection();
     if (!selection) return;
-    if (selection.rangeCount === 0) return;
+    if (selection.rangeCount === 0) {
+      if (previousVRange !== null) {
+        this._editor.slots.vRangeUpdated.emit([null, 'native']);
+      }
+
+      return;
+    }
 
     const range = selection.getRangeAt(0);
+
     if (
       range.startContainer === range.endContainer &&
       range.startContainer.textContent === ZERO_WIDTH_SPACE &&
@@ -180,7 +187,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       return;
     }
 
-    if (!range) return;
     if (!range.intersectsNode(rootElement)) {
       const isContainerSelected =
         range.endContainer.contains(rootElement) &&

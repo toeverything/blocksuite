@@ -379,6 +379,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           @blur=${this._onInputBlur}
           @click=${stopPropagation}
         />
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : null}
       </div>
     `;
   }

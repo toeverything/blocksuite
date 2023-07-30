@@ -1,4 +1,5 @@
 import {
+  AttachmentIcon,
   BookmarkIcon,
   CopyIcon,
   DatabaseKanbanViewIcon20,
@@ -24,9 +25,19 @@ import {
   getPageBlock,
   getVirgoByModel,
   resetNativeSelection,
+  uploadFileFromLocal,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
+import { humanFileSize } from '../../__internal__/utils/math.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import type {
+  AttachmentBlockModel,
+  AttachmentProps,
+} from '../../attachment-block/attachment-model.js';
+import {
+  MAX_ATTACHMENT_SIZE,
+  setAttachmentLoading,
+} from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
 import { copyBlock } from '../../page-block/default/utils.js';
@@ -146,16 +157,29 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         name: 'Link Page',
         alias: ['dual link'],
         icon: DualLinkIcon,
-        showWhen: model =>
-          !!model.page.awarenessStore.getFlag('enable_linked_page'),
+        showWhen: model => {
+          if (!model.page.awarenessStore.getFlag('enable_linked_page')) {
+            return false;
+          }
+          const pageBlock = getPageBlock(model);
+          assertExists(pageBlock);
+          const linkedPageWidgetEle = pageBlock.widgetElements.linkedPage;
+          if (!linkedPageWidgetEle) return false;
+          if (!('showLinkedPage' in linkedPageWidgetEle)) {
+            console.warn(
+              'You may not have correctly implemented the linkedPage widget! "showLinkedPage(model)" method not found on widget'
+            );
+            return false;
+          }
+          return true;
+        },
         action: ({ model }) => {
           insertContent(model, '@');
           const pageBlock = getPageBlock(model);
-          // FIXME not work when customize element
-          const linkedPageWidget = pageBlock?.querySelector<LinkedPageWidget>(
-            'affine-linked-page-widget'
-          );
-          assertExists(linkedPageWidget);
+          const widgetEle = pageBlock?.widgetElements.linkedPage;
+          assertExists(widgetEle);
+          // We have checked the existence of showLinkedPage method in the showWhen
+          const linkedPageWidget = widgetEle as LinkedPageWidget;
           // Wait for range to be updated
           setTimeout(() => {
             linkedPageWidget.showLinkedPage(model);
@@ -212,6 +236,63 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             url,
           } as const;
           page.addSiblingBlocks(model, [props]);
+        },
+      },
+      {
+        name: 'File',
+        icon: AttachmentIcon,
+        alias: ['attachment'],
+        showWhen: model => {
+          if (!model.page.awarenessStore.getFlag('enable_attachment_block'))
+            return false;
+          if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
+            return false;
+          return !insideDatabase(model);
+        },
+        action: async ({ page, model }) => {
+          const parent = page.getParent(model);
+          if (!parent) {
+            return;
+          }
+          let attachmentModel: AttachmentBlockModel | null = null;
+          const fileInfo = await uploadFileFromLocal(page.blobs, file => {
+            if (file.size > MAX_ATTACHMENT_SIZE) {
+              toast(
+                `You can only upload files less than ${humanFileSize(
+                  MAX_ATTACHMENT_SIZE,
+                  true,
+                  0
+                )}`
+              );
+              return false;
+            }
+
+            const loadingKey = page.generateId();
+            setAttachmentLoading(loadingKey, true);
+            const props: AttachmentProps & { flavour: 'affine:attachment' } = {
+              flavour: 'affine:attachment',
+              name: file.name,
+              size: file.size,
+              loadingKey,
+            };
+            const [newBlockId] = page.addSiblingBlocks(model, [props]);
+            assertExists(newBlockId);
+            attachmentModel = page.getBlockById(
+              newBlockId
+            ) as AttachmentBlockModel;
+
+            return true;
+          });
+          if (!fileInfo || !attachmentModel) return;
+          const { sourceId } = fileInfo;
+          // FIXME: I think it is a bug of TypeScript
+          const realAttachmentModel: AttachmentBlockModel = attachmentModel;
+          // await new Promise(resolve => setTimeout(resolve, 1000));
+          setAttachmentLoading(realAttachmentModel.loadingKey ?? '', false);
+          page.updateBlock(realAttachmentModel, {
+            sourceId,
+            loadingKey: null,
+          });
         },
       },
     ],

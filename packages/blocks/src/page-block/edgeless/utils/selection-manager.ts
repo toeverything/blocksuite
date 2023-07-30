@@ -282,7 +282,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
         const dx = e.deltaX / viewport.zoom;
         const dy = e.deltaY / viewport.zoom;
         viewport.applyDeltaCenter(dx, dy);
-        container.slots.viewportUpdated.emit();
       }
       // zoom
       else {
@@ -295,7 +294,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
         const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
         viewport.setZoom(zoom, new Point(baseX, baseY));
-        container.slots.viewportUpdated.emit();
       }
     });
   }
