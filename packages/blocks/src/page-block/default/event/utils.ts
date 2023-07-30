@@ -37,6 +37,40 @@ export function rangeFromCaret(caret: { node: Node; offset: number }): Range {
   return range;
 }
 
+function getNearestText(
+  anchor: Node,
+  node: Element,
+  point: { x: number; y: number }
+) {
+  const block = node.querySelector('[data-virgo-root]');
+  const anchorBlock = anchor.parentElement?.closest('[data-virgo-root]');
+  const rect = block?.getBoundingClientRect();
+
+  if (
+    block &&
+    rect &&
+    anchorBlock &&
+    block !== anchorBlock &&
+    Math.abs(anchorBlock.getBoundingClientRect().top - rect.top) > rect.height
+  ) {
+    const range = document.createRange();
+    range.selectNodeContents(block);
+    let result = rect;
+    Array.from(range.getClientRects()).reduce((d, rect) => {
+      const y = Math.abs(rect.top - point.y);
+      const x = Math.abs(rect.left - point.x);
+      const distance = y ** 2 + x ** 2;
+      if (distance < d) {
+        result = rect;
+        return distance;
+      }
+      return d;
+    }, Infinity);
+    return caretFromPoint(result.left, result.top);
+  }
+  return undefined;
+}
+
 export function horizontalGetNextCaret(
   point: { x: number; y: number },
   root: HTMLElement,
@@ -61,6 +95,12 @@ export function horizontalGetNextCaret(
       return false;
     }
     if (move.node.nodeType !== Node.TEXT_NODE) {
+      if (move.node instanceof Element) {
+        move = getNearestText(anchor.node, move.node, _point);
+        if (move) {
+          return false;
+        }
+      }
       return true;
     }
     if (move.node !== anchor.node) {
