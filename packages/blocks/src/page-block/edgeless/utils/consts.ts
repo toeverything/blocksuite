@@ -1,3 +1,5 @@
+import { DEFAULT_ROUGHNESS } from '@blocksuite/phasor';
+
 export const NOTE_MIN_WIDTH = 200;
 export const NOTE_MIN_HEIGHT = 20;
 
@@ -21,7 +23,7 @@ export const SHAPE_OVERLAY_OFFSET_X = 6;
 export const SHAPE_OVERLAY_OFFSET_Y = 6;
 export const SHAPE_OVERLAY_OPTIONS = {
   seed: 666,
-  roughness: 2,
+  roughness: DEFAULT_ROUGHNESS,
   strokeLineDash: [0, 0],
   stroke: 'black',
   strokeWidth: 4,

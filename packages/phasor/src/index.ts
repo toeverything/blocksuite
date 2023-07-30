@@ -8,7 +8,7 @@ export {
   ZOOM_MIN,
   ZOOM_STEP,
 } from './consts.js';
-export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
+export { DEFAULT_ROUGHNESS, GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export type { Controller } from './elements/connector/types.js';
 export { type Connection, ConnectorMode } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';

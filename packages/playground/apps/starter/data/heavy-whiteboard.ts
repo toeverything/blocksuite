@@ -2,7 +2,12 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '@blocksuite/blocks';
-import { serializeXYWH, type ShapeType, StrokeStyle } from '@blocksuite/phasor';
+import {
+  DEFAULT_ROUGHNESS,
+  serializeXYWH,
+  type ShapeType,
+  StrokeStyle,
+} from '@blocksuite/phasor';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 
 import { getOptions } from '../utils';
@@ -55,7 +60,7 @@ export const heavyWhiteboard: InitFn = async (
       strokeWidth: 4,
       strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
       strokeStyle: StrokeStyle.Solid,
-      roughness: 2,
+      roughness: DEFAULT_ROUGHNESS,
     };
   }
 
