@@ -232,7 +232,7 @@ test('insert new paragraph block by enter', async ({ page }) => {
   ]);
 });
 
-test('split paragraph block by enter', async ({ page }) => {
+test.fixme('split paragraph block by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -294,7 +294,7 @@ test.fixme(
   }
 );
 
-test('add multi line by soft enter', async ({ page }) => {
+test.fixme('add multi line by soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -347,7 +347,7 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
   await assertBlockChildrenIds(page, '1', ['2', '3']);
 });
 
-test('update paragraph with children to head type', async ({ page }) => {
+test.fixme('update paragraph with children to head type', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);

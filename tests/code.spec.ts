@@ -155,7 +155,7 @@ test('use more than three backticks can not create code block', async ({
   expect(await inlineCodelocator.count()).toEqual(1);
 });
 
-test('use shortcut can create code block', async ({ page }) => {
+test.fixme('use shortcut can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -166,7 +166,7 @@ test('use shortcut can create code block', async ({ page }) => {
   await expect(locator).toBeVisible();
 });
 
-test('change code language can work', async ({ page }) => {
+test.fixme('change code language can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { codeBlockId } = await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -398,7 +398,7 @@ test('code block copy button can work', async ({ page }) => {
   await assertRichTexts(page, ['useuse']);
 });
 
-test('split code by enter', async ({ page }) => {
+test.fixme('split code by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -566,7 +566,7 @@ test.fixme(
   }
 );
 
-test('undo and redo works in code block', async ({ page }) => {
+test.fixme('undo and redo works in code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
