@@ -7,6 +7,7 @@ import { PathMap } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { html, literal } from 'lit/static-html.js';
 
 import { copyBlocks } from '../__internal__/clipboard/index.js';
@@ -15,6 +16,7 @@ import { DatabaseBlockDatasource } from '../__internal__/datasource/database-blo
 import type { DataViewSelectionState } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { BaseDataView } from './common/base-data-view.js';
+import { DatabaseClipboard } from './common/clipboard.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
@@ -62,11 +64,26 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     });
   }
 
+  // first mounted
+  override firstUpdated() {
+    const clipboard = new DatabaseClipboard(this.root, {
+      path: this.path,
+      model: this.model,
+      view: this.view,
+    });
+    clipboard.init();
+  }
+
   @property({ attribute: false })
   modalMode?: boolean;
 
   @state()
   currentView?: string;
+
+  private _view = createRef<BaseDataView>();
+  get view() {
+    return this._view.value;
+  }
 
   _setViewId = (viewId: string) => {
     this.currentView = viewId;
@@ -195,6 +212,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       <div class='toolbar-hover-container data-view-root'>
         ${view}
         <${databaseTag}
+          ${ref(this._view)}
           .titleText='${this.model.title}'
           .selectionUpdated='${viewData.selectionUpdated}'
           .setSelection='${viewData.setSelection}'

@@ -321,3 +321,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     return html` <div class="affine-database-rich-text virgo-editor"></div>`;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-database-rich-text-cell-editing': RichTextCellEditing;
+  }
+}

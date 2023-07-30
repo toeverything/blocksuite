@@ -1,7 +1,9 @@
+import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
+import type { DefaultPageBlockComponent } from '../../page-block/index.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/index.js';
@@ -16,24 +18,28 @@ import {
 
 export class PageClipboard implements Clipboard {
   _page!: Page;
-  _ele: Element;
-  constructor(pageEle: Element) {
+  _ele: DefaultPageBlockComponent;
+  constructor(pageEle: DefaultPageBlockComponent) {
     this._ele = pageEle;
   }
+
   init(page: Page) {
     this._page = page;
-    document.body.addEventListener('cut', this._onCut);
-    document.body.addEventListener('copy', this._onCopy);
-    document.body.addEventListener('paste', this._onPaste);
+
+    this._ele.handleEvent('cut', this._onCut);
+    this._ele.handleEvent('copy', this._onCopy);
+    this._ele.handleEvent('paste', ctx => {
+      this._onPaste(ctx);
+    });
   }
 
   dispose() {
-    document.body.removeEventListener('cut', this._onCut);
-    document.body.removeEventListener('copy', this._onCopy);
-    document.body.removeEventListener('paste', this._onPaste);
+    // Empty
   }
 
-  private _onPaste = async (e: ClipboardEvent) => {
+  private _onPaste = async (ctx: UIEventStateContext) => {
+    const e = ctx.get('clipboardState').raw;
+
     if (!activeEditorManager.isActive(this._ele)) {
       return;
     }
@@ -69,9 +75,11 @@ export class PageClipboard implements Clipboard {
   };
 
   private _onCopy = (
-    e: ClipboardEvent,
+    ctx: UIEventStateContext,
     range = getCurrentBlockRange(this._page)
   ) => {
+    const e = ctx.get('clipboardState').raw;
+
     if (!activeEditorManager.isActive(this._ele)) {
       return;
     }
@@ -88,7 +96,9 @@ export class PageClipboard implements Clipboard {
     this._page.slots.copied.emit();
   };
 
-  private _onCut = (e: ClipboardEvent) => {
+  private _onCut = (ctx: UIEventStateContext) => {
+    const e = ctx.get('clipboardState').raw;
+
     if (!activeEditorManager.isActive(this._ele)) {
       return;
     }
@@ -97,7 +107,7 @@ export class PageClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    this._onCopy(e, range);
+    this._onCopy(ctx, range);
     deleteModelsByRange(this._page, range);
   };
 }

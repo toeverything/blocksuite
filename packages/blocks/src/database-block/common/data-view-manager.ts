@@ -24,7 +24,7 @@ export interface DataViewManager {
 
   cellGetRenderValue(rowId: string, columnId: string): unknown;
 
-  cellGetFilterValue(rowId: string, columnId: string): unknown;
+  cellGetJsonValue(rowId: string, columnId: string): unknown;
 
   cellGetStringValue(rowId: string, columnId: string): string;
 
@@ -106,7 +106,7 @@ export interface DataViewColumnManager<
 
   getStringValue(rowId: string): string;
 
-  getFilterValue(rowId: string): unknown;
+  getJsonValue(rowId: string): unknown;
 
   getValue(rowId: string): Value | undefined;
 
@@ -187,7 +187,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
       );
   }
 
-  public cellGetFilterValue(rowId: string, columnId: string): unknown {
+  public cellGetJsonValue(rowId: string, columnId: string): unknown {
     return columnManager
       .getColumn(this.columnGetType(columnId))
       .toJson(
@@ -412,8 +412,8 @@ export abstract class BaseDataViewColumnManager
     this.viewManager.captureSync();
   }
 
-  getFilterValue(rowId: string): unknown {
-    return this.viewManager.cellGetFilterValue(rowId, this.id);
+  getJsonValue(rowId: string): unknown {
+    return this.viewManager.cellGetJsonValue(rowId, this.id);
   }
 
   getStringValue(rowId: string): string {
