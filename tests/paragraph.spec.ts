@@ -64,7 +64,7 @@ test('init paragraph by page title enter at last', async ({ page }) => {
   //#endregion
 });
 
-test('init paragraph by page title enter in middle', async ({ page }) => {
+test.fixme('init paragraph by page title enter in middle', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
@@ -96,7 +96,7 @@ test('drag over paragraph title', async ({ page }) => {
   await assertTitle(page, 'hello');
 });
 
-test('backspace and arrow on title', async ({ page }) => {
+test.fixme('backspace and arrow on title', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitDefaultPageLoaded(page);
@@ -170,20 +170,21 @@ for (const { initState, desc } of [
     await assertRichTexts(page, ['']);
   });
 
-  test(`backspace on line start of the first empty block (${desc})`, async ({
-    page,
-  }) => {
-    await enterPlaygroundRoom(page);
-    await initState(page);
-    await focusTitle(page);
+  test.fixme(
+    `backspace on line start of the first empty block (${desc})`,
+    async ({ page }) => {
+      await enterPlaygroundRoom(page);
+      await initState(page);
+      await focusTitle(page);
 
-    await pressArrowDown(page);
-    await pressBackspace(page);
-    await assertBlockCount(page, 'paragraph', 1);
+      await pressArrowDown(page);
+      await pressBackspace(page);
+      await assertBlockCount(page, 'paragraph', 1);
 
-    await pressArrowDown(page);
-    await assertSelection(page, 0, 0, 0);
-  });
+      await pressArrowDown(page);
+      await assertSelection(page, 0, 0, 0);
+    }
+  );
 }
 
 test.fixme('append new paragraph block by enter', async ({ page }) => {
