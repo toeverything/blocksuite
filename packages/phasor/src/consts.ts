@@ -5,7 +5,7 @@ export const GRID_SIZE = 3000;
 export const GRID_GAP_MIN = 10;
 export const GRID_GAP_MAX = 50;
 
-export const DEFAULT_ROUGHNESS = 2;
+export const DEFAULT_ROUGHNESS = 1.4;
 
 export interface IBound {
   x: number;
