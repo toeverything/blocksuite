@@ -16,13 +16,14 @@ import { DatabaseBlockDatasource } from '../__internal__/datasource/database-blo
 import type { DataViewSelectionState } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { BaseDataView } from './common/base-data-view.js';
-import { DatabaseClipboard } from './common/clipboard.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { LegacyDatabaseBlockService } from './database-service.js';
+import { KanbanViewClipboard } from './kanban/clipboard.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
+import { TableViewClipboard } from './table/clipboard.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
 import type { BlockOperation } from './types.js';
 
@@ -64,16 +65,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     });
   }
 
-  // first mounted
-  override firstUpdated() {
-    const clipboard = new DatabaseClipboard(this.root, {
-      path: this.path,
-      model: this.model,
-      view: this.view,
-    });
-    clipboard.init();
-  }
-
   @property({ attribute: false })
   modalMode?: boolean;
 
@@ -81,13 +72,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   currentView?: string;
 
   private _view = createRef<BaseDataView>();
-  get view() {
-    return this._view.value;
-  }
 
   _setViewId = (viewId: string) => {
     this.currentView = viewId;
   };
+
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
@@ -174,6 +163,17 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           };
         },
       };
+
+      // init clipboard
+      const clipboard = new {
+        table: TableViewClipboard,
+        kanban: KanbanViewClipboard,
+      }[this.getViewDataById(id)?.mode ?? 'table'](this.root, {
+        path: this.path,
+        model: this.model,
+        view: this._view,
+      });
+      clipboard.init();
     }
     return this.viewMap[id];
   }
