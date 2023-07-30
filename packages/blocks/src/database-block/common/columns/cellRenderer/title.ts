@@ -61,10 +61,6 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
       this,
       'keydown',
       e => {
-        if (e.key === 'Escape') {
-          e.stopPropagation();
-          this.selectCurrentCell(false);
-        }
         if (e.key === 'Enter' && !e.shiftKey) {
           e.stopPropagation();
           e.preventDefault();
