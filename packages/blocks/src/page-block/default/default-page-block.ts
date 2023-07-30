@@ -612,7 +612,7 @@ export class DefaultPageBlockComponent
           ${content}
         </div>
         ${this.widgets.slashMenu} ${this.widgets.linkedPage}
-        ${this.widgets.draggingArea}
+        ${this.widgets.draggingArea} ${this.widgets.formatBar}
       </div>
     `;
   }

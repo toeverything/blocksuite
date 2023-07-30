@@ -30,6 +30,7 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
+      formatBar: literal`affine-format-bar-widget`,
     },
   },
 };
