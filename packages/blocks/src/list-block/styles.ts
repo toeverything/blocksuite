@@ -30,6 +30,28 @@ const listPrefix = css`
   }
 `;
 
+const toggleStyles = css`
+  .toggle-icon {
+    display: flex;
+    position: absolute;
+    left: 0;
+    transform: translateX(-100%);
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+  .toggle-icon:hover {
+    background: var(--affine-hover-color);
+  }
+  .affine-list-block-container:hover .toggle-icon {
+    opacity: 1;
+  }
+  .toggle-icon__collapsed {
+    opacity: 1;
+  }
+`;
+
 export const styles = css`
   .affine-list-block-container {
     box-sizing: border-box;
@@ -56,4 +78,5 @@ export const styles = css`
   }
 
   ${listPrefix}
+  ${toggleStyles}
 `;

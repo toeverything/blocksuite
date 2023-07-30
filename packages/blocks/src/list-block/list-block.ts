@@ -21,6 +21,7 @@ import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { playCheckAnimation } from './utils/icons.js';
+import { toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<ListBlockModel> {
@@ -91,6 +92,21 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
 
+    const toggleChildren = () => (this.showChildren = !this.showChildren);
+    const toggleIcon =
+      this.model.children.length > 0
+        ? this.showChildren
+          ? html`<div class="toggle-icon" @click=${toggleChildren}>
+              ${toggleDown()}
+            </div>`
+          : html`<div
+              class="toggle-icon toggle-icon__collapsed"
+              @click=${toggleChildren}
+            >
+              ${toggleRight()}
+            </div>`
+        : nothing;
+
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
     const top = shouldAddMarginTop ? 'affine-list-block-container--first' : '';
@@ -109,7 +125,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     return html`
       <div class=${`affine-list-block-container ${top}`}>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
-          ${listIcon}
+          ${listIcon} ${toggleIcon}
           <rich-text
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}
