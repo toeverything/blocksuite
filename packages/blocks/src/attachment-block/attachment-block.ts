@@ -71,6 +71,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           : // TODO dark mode
             AttachmentBanner}
       </div>
+      ${this.selected?.is('block')
+        ? html`<affine-block-selection></affine-block-selection>`
+        : null}
     </div>`;
   }
 }

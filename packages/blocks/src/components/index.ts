@@ -1,4 +1,5 @@
 export * from './block-hub.js';
+export * from './block-selection.js';
 export * from './drag-handle.js';
 export * from './file-drop-manager.js';
 export { FormatQuickBar } from './format-quick-bar/format-bar-node.js';

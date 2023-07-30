@@ -238,8 +238,6 @@ export class EdgelessPageBlockComponent
     }
   `;
 
-  flavour = 'edgeless' as const;
-
   /**
    * Shared components
    */
