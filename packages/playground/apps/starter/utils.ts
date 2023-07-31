@@ -42,8 +42,8 @@ class IndexedDBProviderWrapper implements PassiveDocProvider {
   public readonly passive = true as const;
   private _connected = false;
   private _provider: IndexedDBProvider;
-  constructor(id: string, doc: Y.Doc) {
-    this._provider = createIndexedDBProvider(id, doc);
+  constructor(doc: Y.Doc) {
+    this._provider = createIndexedDBProvider(doc);
   }
   connect() {
     this._provider.connect();
@@ -193,7 +193,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
   if (providerArgs.includes('idb')) {
-    providerCreators.push((id, doc) => new IndexedDBProviderWrapper(id, doc));
+    providerCreators.push((_id, doc) => new IndexedDBProviderWrapper(doc));
     idGenerator = Generator.NanoID; // works in production
   }
 
