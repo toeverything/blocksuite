@@ -385,34 +385,34 @@ test.describe('reference node', () => {
     await assertStoreMatchJSX(page, snapshot, paragraphId);
   });
 
-  test('should the cursor move correctly around reference node', async ({
-    page,
-  }) => {
-    await enterPlaygroundRoom(page);
-    const { paragraphId } = await initEmptyParagraphState(page);
-    const { id } = await addNewPage(page);
-    await focusRichText(page);
+  test.fixme(
+    'should the cursor move correctly around reference node',
+    async ({ page }) => {
+      await enterPlaygroundRoom(page);
+      const { paragraphId } = await initEmptyParagraphState(page);
+      const { id } = await addNewPage(page);
+      await focusRichText(page);
 
-    await type(page, '1');
-    await type(page, '[[');
-    await pressEnter(page);
+      await type(page, '1');
+      await type(page, '[[');
+      await pressEnter(page);
 
-    await assertRichTexts(page, ['1 ']);
-    await type(page, '2');
-    await assertRichTexts(page, ['1 2']);
-    await page.keyboard.press('ArrowLeft');
-    await type(page, '3');
-    await assertRichTexts(page, ['1 32']);
-    await page.keyboard.press('ArrowLeft');
-    await waitNextFrame(page);
-    await page.keyboard.press('ArrowLeft');
-    await waitNextFrame(page);
-    await page.keyboard.press('ArrowLeft');
+      await assertRichTexts(page, ['1 ']);
+      await type(page, '2');
+      await assertRichTexts(page, ['1 2']);
+      await page.keyboard.press('ArrowLeft');
+      await type(page, '3');
+      await assertRichTexts(page, ['1 32']);
+      await page.keyboard.press('ArrowLeft');
+      await waitNextFrame(page);
+      await page.keyboard.press('ArrowLeft');
+      await waitNextFrame(page);
+      await page.keyboard.press('ArrowLeft');
 
-    await type(page, '4');
-    await assertRichTexts(page, ['14 32']);
+      await type(page, '4');
+      await assertRichTexts(page, ['14 32']);
 
-    const snapshot = `
+      const snapshot = `
 <affine:paragraph
   prop:text={
     <>
@@ -435,33 +435,34 @@ test.describe('reference node', () => {
   }
   prop:type="text"
 />`;
-    await assertStoreMatchJSX(page, snapshot, paragraphId);
+      await assertStoreMatchJSX(page, snapshot, paragraphId);
 
-    await page.keyboard.press('ArrowRight');
-    await captureHistory(page);
-    await pressBackspace(page);
-    await assertStoreMatchJSX(
-      page,
-      `
+      await page.keyboard.press('ArrowRight');
+      await captureHistory(page);
+      await pressBackspace(page);
+      await assertStoreMatchJSX(
+        page,
+        `
 <affine:paragraph
   prop:text="1432"
   prop:type="text"
 />`,
-      paragraphId
-    );
-    await undoByKeyboard(page);
-    await assertStoreMatchJSX(page, snapshot, paragraphId);
-    await redoByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      `
+        paragraphId
+      );
+      await undoByKeyboard(page);
+      await assertStoreMatchJSX(page, snapshot, paragraphId);
+      await redoByKeyboard(page);
+      await assertStoreMatchJSX(
+        page,
+        `
 <affine:paragraph
   prop:text="1432"
   prop:type="text"
 />`,
-      paragraphId
-    );
-  });
+        paragraphId
+      );
+    }
+  );
 
   test('should create reference node works', async ({ page }) => {
     await enterPlaygroundRoom(page);

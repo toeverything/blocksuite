@@ -1,4 +1,4 @@
-import { ShapeStyle, StrokeStyle } from '../../consts.js';
+import { DEFAULT_ROUGHNESS, ShapeStyle, StrokeStyle } from '../../consts.js';
 import type { IElementDefaultProps } from '../index.js';
 
 export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
@@ -15,7 +15,7 @@ export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
   strokeWidth: 4,
   strokeColor: '#000000',
   strokeStyle: StrokeStyle.Solid,
-  roughness: 2,
+  roughness: DEFAULT_ROUGHNESS,
 };
 
 export enum SHAPE_TEXT_FONT_SIZE {

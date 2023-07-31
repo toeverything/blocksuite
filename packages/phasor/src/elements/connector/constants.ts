@@ -1,4 +1,4 @@
-import { StrokeStyle } from '../../consts.js';
+import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import type { IElementDefaultProps } from '../index.js';
 import { ConnectorMode } from './types.js';
 
@@ -8,7 +8,7 @@ export const ConnectorElementDefaultProps: IElementDefaultProps<'connector'> = {
   strokeWidth: 4,
   stroke: '#000000',
   strokeStyle: StrokeStyle.Solid,
-  roughness: 2,
+  roughness: DEFAULT_ROUGHNESS,
   source: {},
   target: {},
 };

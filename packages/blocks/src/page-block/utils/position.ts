@@ -1,38 +1,11 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { caretRangeFromPoint } from '@blocksuite/global/utils';
 
 import {
   clamp,
   getCurrentNativeRange,
-  hasNativeSelection,
   isMultiLineRange,
-  resetNativeSelection,
 } from '../../__internal__/index.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
-import type { PageSelectionState } from '../default/selection-manager/index.js';
-
-export function repairContextMenuRange(e: MouseEvent) {
-  const selection = window.getSelection() as Selection;
-  const currentRange =
-    selection && selection.rangeCount && selection.getRangeAt(0);
-  const pointRange = caretRangeFromPoint(e.x, e.y);
-  // repair browser context menu change selection can not go through blocks
-  if (
-    currentRange &&
-    pointRange &&
-    currentRange.isPointInRange(
-      pointRange.startContainer,
-      pointRange.startOffset
-    ) &&
-    currentRange.isPointInRange(pointRange.endContainer, pointRange.endOffset)
-  ) {
-    requestAnimationFrame(() => {
-      resetNativeSelection(currentRange);
-    });
-  } else {
-    e.preventDefault();
-  }
-}
 
 export type DragDirection =
   | 'right-bottom'
@@ -171,31 +144,13 @@ export function calcPositionPointByRange(
  * So we need to get the targe block's rect dynamic.
  */
 export function calcCurrentSelectionPosition(
-  direction: DragDirection,
+  direction: DragDirection
   // Edgeless mode not have pageSelectionState
-  pageSelectionState?: PageSelectionState
 ) {
-  if (!pageSelectionState || !pageSelectionState.selectedBlocks.length) {
-    if (!hasNativeSelection()) {
-      throw new Error(
-        "Failed to get anchor element! There's no block selection or native selection."
-      );
-    }
-    // Native selection
-    const range = getCurrentNativeRange();
-    const positioningPoint = calcPositionPointByRange(range, direction);
-    return positioningPoint;
-  }
-  // Block selection
-  const blocks = pageSelectionState.selectedBlocks;
-  const firstBlock = blocks[0];
-  const lastBlock = blocks[blocks.length - 1];
-  const targetBlock = direction.includes('bottom') ? lastBlock : firstBlock;
-  // Block selection always use the center of the block
-  const rect = targetBlock.getBoundingClientRect();
-  const x = rect.x + rect.width / 2;
-  const y = direction.includes('bottom') ? rect.bottom : rect.top;
-  return { x, y };
+  // Native selection
+  const range = getCurrentNativeRange();
+  const positioningPoint = calcPositionPointByRange(range, direction);
+  return positioningPoint;
 }
 
 type CollisionBox = {

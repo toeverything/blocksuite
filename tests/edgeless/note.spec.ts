@@ -24,6 +24,7 @@ import {
   dragBetweenCoords,
   dragHandleFromBlockToBlockBottomById,
   enterPlaygroundRoom,
+  fillLine,
   focusRichText,
   initEmptyEdgelessState,
   initThreeParagraphs,
@@ -378,6 +379,49 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await redoByKeyboard(page);
   await waitNextFrame(page);
   await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+});
+
+test('undo/redo should work correctly after resizing', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await activeNoteInEdgeless(page, ids.noteId);
+  await waitNextFrame(page, 400);
+  // current implementation may be a little inefficient
+  await fillLine(page, true);
+
+  await page.mouse.click(0, 0);
+  await waitNextFrame(page, 400);
+  await selectNoteInEdgeless(page, ids.noteId);
+
+  const initRect = await getNoteRect(page, ids);
+  const rightHandle = page.locator('.handle[aria-label="right"] .resize');
+  const box = await rightHandle.boundingBox();
+  if (box === null) throw new Error();
+
+  await dragBetweenCoords(
+    page,
+    { x: box.x + 5, y: box.y + 5 },
+    { x: box.x + 105, y: box.y + 5 }
+  );
+  const draggedRect = await getNoteRect(page, ids);
+  assertRectEqual(draggedRect, {
+    x: initRect.x,
+    y: initRect.y,
+    w: initRect.w + 100,
+    h: draggedRect.h, // not assert `h` here
+  });
+  expect(draggedRect.h).toBeLessThan(initRect.h);
+
+  await undoByKeyboard(page);
+  await waitNextFrame(page);
+  const undoRect = await getNoteRect(page, ids);
+  assertRectEqual(undoRect, initRect);
+
+  await redoByKeyboard(page);
+  await waitNextFrame(page);
+  const redoRect = await getNoteRect(page, ids);
+  assertRectEqual(redoRect, draggedRect);
 });
 
 test('format quick bar should show up when double-clicking on text', async ({

@@ -13,9 +13,6 @@ import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
   'beforeInput',
-  'compositionStart',
-  'compositionUpdate',
-  'compositionEnd',
 
   'paste',
   'copy',
@@ -44,6 +41,9 @@ const eventNames = [
   'keyUp',
 
   'selectionChange',
+  'compositionStart',
+  'compositionUpdate',
+  'compositionEnd',
 
   ...bypassEventNames,
 ] as const;

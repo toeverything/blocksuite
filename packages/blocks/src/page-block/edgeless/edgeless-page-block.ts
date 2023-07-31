@@ -575,7 +575,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
         const page = this.page;
-        resizedNotes.forEach((domRect, id) => {
+        resizedNotes.forEach(([domRect, prevDomRect], id) => {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const { index, xywh } = model;
           const [x, y, w, h] = deserializeXYWH(xywh);
@@ -591,12 +591,23 @@ export class EdgelessPageBlockComponent
             domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
 
           if (!almostEqual(newModelHeight, h)) {
-            page.withoutTransact(() => {
+            const updateBlock = () => {
               page.updateBlock(model, {
                 xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
               });
               this.requestUpdate();
-            });
+            };
+
+            // Assume it's user-triggered resizing if both width and height change,
+            // otherwise we don't add the size updating into history.
+            // See https://github.com/toeverything/blocksuite/issues/3671
+            const isResize =
+              prevDomRect && !almostEqual(domRect.width, prevDomRect.width);
+            if (isResize) {
+              updateBlock();
+            } else {
+              page.withoutTransact(updateBlock);
+            }
           }
         });
 
@@ -786,15 +797,17 @@ export class EdgelessPageBlockComponent
 
   // Just update `index`, we don't change the order of the shapes in the children.
   reorderShapes = ({ elements, type }: ReorderingAction<Selectable>) => {
+    const { surface } = this;
+    const batch = surface.getBatch(surface.defaultBatch);
     const updateIndexes = (keys: string[], elements: Selectable[]) => {
       this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
         const min = keys[0];
-        if (min < this.surface.indexes.min) {
-          this.surface.indexes.min = min;
+        if (min < batch.min) {
+          batch.min = min;
         }
         const max = keys[keys.length - 1];
-        if (max > this.surface.indexes.max) {
-          this.surface.indexes.max = max;
+        if (max > batch.max) {
+          batch.max = max;
         }
       });
     };
@@ -804,7 +817,7 @@ export class EdgelessPageBlockComponent
         this._reorderTo(
           elements,
           () => ({
-            start: this.surface.indexes.max,
+            start: batch.max,
             end: null,
           }),
           updateIndexes
@@ -839,7 +852,7 @@ export class EdgelessPageBlockComponent
           elements,
           () => ({
             start: null,
-            end: this.surface.indexes.min,
+            end: batch.min,
           }),
           updateIndexes
         );

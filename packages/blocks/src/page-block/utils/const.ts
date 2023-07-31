@@ -53,9 +53,9 @@ export const actionConfig = [
       ) {
         return false;
       }
-      const range = getCurrentBlockRange(page);
-      const isShow = range?.type === 'Block';
-      return isShow;
+      // const range = getCurrentBlockRange(page);
+      // const isShow = range?.type === 'Block';
+      return false;
     },
     enabledWhen: (page: Page) => {
       const range = getCurrentBlockRange(page);
