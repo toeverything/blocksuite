@@ -5,7 +5,7 @@ import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 import { getTagColor } from '../../components/tags/colors.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
-import { richTextColumnTypeName } from '../../database-block/common/columns/rich-text/type.js';
+import { richTextColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
@@ -367,7 +367,9 @@ export abstract class BaseParser {
 
   protected _commonHTML2Text(
     element: Element | Node,
-    textStyle: { [key: string]: unknown } = {},
+    textStyle: {
+      [key: string]: unknown;
+    } = {},
     ignoreEmptyText = true
   ): DeltaOperation[] {
     if (element instanceof Text) {
@@ -597,18 +599,28 @@ const getIsLink = (htmlElement: HTMLElement) => {
 const getTextStyle = (htmlElement: HTMLElement) => {
   const tagName = htmlElement.tagName;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const textStyle: { [key: string]: any } = {};
+  const textStyle: {
+    [key: string]: any;
+  } = {};
 
   const style = (htmlElement.getAttribute('style') || '')
     .split(';')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .reduce((style: { [key: string]: any }, styleString) => {
-      const [key, value] = styleString.split(':');
-      if (key && value) {
-        style[key] = value;
-      }
-      return style;
-    }, {});
+    .reduce(
+      (
+        style: {
+          [key: string]: any;
+        },
+        styleString
+      ) => {
+        const [key, value] = styleString.split(':');
+        if (key && value) {
+          style[key] = value;
+        }
+        return style;
+      },
+      {}
+    );
 
   if (
     style['font-weight'] === 'bold' ||
@@ -665,7 +677,9 @@ const checkWebComponentIfInline = (element: Element) => {
 
 const getTableCellsAndChildren = (
   rows: (string | string[])[][],
-  idCounter: { next: () => number },
+  idCounter: {
+    next: () => number;
+  },
   columnMeta: ColumnMeta[],
   columns: Column<Record<string, unknown>>[]
 ) => {
@@ -710,7 +724,9 @@ const getTableCellsAndChildren = (
 const getTableColumns = (
   columnMeta: ColumnMeta[],
   rows: (string | string[])[][],
-  idCounter: { next: () => number }
+  idCounter: {
+    next: () => number;
+  }
 ): Column<Record<string, unknown>>[] => {
   const columns: Column[] = columnMeta.slice(1).map((value, index) => {
     if (['select', 'multi-select'].includes(value.type)) {
@@ -746,9 +762,7 @@ const getTableColumns = (
     const addNum = maxLen - columns.length;
     for (let i = 0; i < addNum; i++) {
       columns.push(
-        columnManager
-          .getColumn(richTextColumnTypeName)
-          .createWithId('' + idCounter.next(), '')
+        richTextColumnConfig.createWithId('' + idCounter.next(), '')
       );
     }
   }

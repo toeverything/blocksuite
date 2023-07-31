@@ -13,6 +13,7 @@ import { numberColumnConfig } from '../../database-block/common/columns/number/d
 import { progressColumnConfig } from '../../database-block/common/columns/progress/define.js';
 import { richTextColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import { selectColumnConfig } from '../../database-block/common/columns/select/define.js';
+import { titleColumnConfig } from '../../database-block/common/columns/title/define.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/index.js';
@@ -230,3 +231,4 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     ];
   }
 }
+export const hiddenColumn = [titleColumnConfig];
