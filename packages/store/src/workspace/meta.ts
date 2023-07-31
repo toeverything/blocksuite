@@ -167,18 +167,28 @@ export class WorkspaceMeta {
    * @internal Only for page initialization
    */
   writeVersion(workspace: Workspace) {
-    const { blockVersions } = this._proxy;
-    if (!blockVersions) {
+    const { blockVersions, pageVersion, workspaceVersion } = this._proxy;
+
+    if (!workspaceVersion) {
+      this._proxy.workspaceVersion = WORKSPACE_VERSION;
+    } else {
+      console.error(`Workspace version already set.`);
+    }
+
+    if (!pageVersion) {
+      this._proxy.pageVersion = PAGE_VERSION;
+    } else {
+      console.error(`Page version already set.`);
+    }
+
+    if (blockVersions) {
       const _versions: Record<string, number> = {};
       workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
         _versions[flavour] = schema.version;
       });
       this._proxy.blockVersions = _versions;
-      this._proxy.pageVersion = PAGE_VERSION;
-      this._proxy.workspaceVersion = WORKSPACE_VERSION;
-      return;
     } else {
-      console.error(`Workspace versions already set.`);
+      console.error(`Block versions already set.`);
     }
   }
 
