@@ -79,6 +79,8 @@ export interface DataViewManager {
 
   get columnConfigManager(): ColumnConfigManager;
 
+  getIcon(type: string): UniComponent | undefined;
+
   /**
    * @deprecated
    */
@@ -342,6 +344,10 @@ export abstract class BaseDataViewManager implements DataViewManager {
   public get columnConfigManager(): ColumnConfigManager {
     return this.dataSource.columnConfigManager;
   }
+
+  public getIcon(type: string): UniComponent | undefined {
+    return columnRenderer.get(type).icon;
+  }
 }
 
 export abstract class BaseDataViewColumnManager
@@ -441,6 +447,6 @@ export abstract class BaseDataViewColumnManager
   }
 
   public get icon(): UniComponent | undefined {
-    return this.viewManager.columnConfigManager.getColumn(this.type).icon;
+    return this.viewManager.getIcon(this.type);
   }
 }

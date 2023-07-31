@@ -4,6 +4,7 @@ import '../../../../components/tags/multi-tag-view.js';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
 import { BaseCellRenderer } from '../base-cell.js';
@@ -82,6 +83,7 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
 
 columnRenderer.register({
   type: multiSelectPureColumnConfig.type,
+  icon: createIcon('DatabaseMultiSelect'),
   cellRenderer: {
     view: createFromBaseCellRenderer(MultiSelectCell),
     edit: createFromBaseCellRenderer(MultiSelectCellEditing),

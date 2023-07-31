@@ -248,7 +248,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 return {
                   type: 'action',
                   name: config.name,
-                  icon: html`<uni-lit .uni="${config.icon}"></uni-lit>`,
+                  icon: html`<uni-lit
+                    .uni="${this.tableViewManager.getIcon(config.type)}"
+                  ></uni-lit>`,
                   select: () => {
                     this.column.updateType?.(config.type);
                   },
@@ -377,7 +379,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           return {
             type: 'action',
             name: config.name,
-            icon: html`<uni-lit .uni="${config.icon}"></uni-lit>`,
+            icon: html`<uni-lit
+              .uni="${this.tableViewManager.getIcon(config.type)}"
+            ></uni-lit>`,
             select: () => {
               this.column.updateType?.(config.type);
             },

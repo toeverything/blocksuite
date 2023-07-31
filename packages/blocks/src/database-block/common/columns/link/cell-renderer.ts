@@ -9,6 +9,7 @@ import {
   isValidUrl,
   normalizeUrl,
 } from '../../../../__internal__/utils/url.js';
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { linkPureColumnConfig } from './define.js';
@@ -180,6 +181,7 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
 
 columnRenderer.register({
   type: linkPureColumnConfig.type,
+  icon: createIcon('LinkIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(LinkCell),
     edit: createFromBaseCellRenderer(LinkCellEditing),

@@ -1,6 +1,7 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { numberPureColumnConfig } from './define.js';
@@ -130,6 +131,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
 
 columnRenderer.register({
   type: numberPureColumnConfig.type,
+  icon: createIcon('DatabaseNumber'),
   cellRenderer: {
     view: createFromBaseCellRenderer(NumberCell),
     edit: createFromBaseCellRenderer(NumberCellEditing),

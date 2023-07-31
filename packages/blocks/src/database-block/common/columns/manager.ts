@@ -50,7 +50,6 @@ type ColumnOps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown
 > = {
-  icon?: UniComponent;
   name: string;
   defaultData: () => Data;
   type: (data: Data) => TType;
@@ -181,10 +180,6 @@ export class ColumnConfig<
     convert: ConvertFunction<this, ColumnConfigMap[ToCellName]>
   ) {
     this.convertMap.set(to, convert);
-  }
-
-  get icon() {
-    return this.ops.icon;
   }
 
   get name() {

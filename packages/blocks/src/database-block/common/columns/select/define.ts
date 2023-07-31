@@ -1,10 +1,7 @@
 import { Text } from '@blocksuite/store';
 
-import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tTag } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-import { multiSelectColumnTypeName } from '../multi-select/define.js';
-import { richTextColumnTypeName } from '../rich-text/define.js';
 import type { SelectColumnData } from '../types.js';
 
 export const selectColumnTypeName = 'select';
@@ -19,7 +16,6 @@ export const selectPureColumnConfig = columnManager.register<
   SelectColumnData
 >(selectColumnTypeName, {
   name: 'Select',
-  icon: createIcon('DatabaseSelect'),
   type: data => tTag.create({ tags: data.options }),
   defaultData: () => ({
     options: [],
@@ -29,21 +25,15 @@ export const selectPureColumnConfig = columnManager.register<
   cellToJson: data => data ?? null,
 });
 
-selectPureColumnConfig.registerConvert(
-  multiSelectColumnTypeName,
-  (column, cells) => ({
-    column,
-    cells: cells.map(v => (v ? [v] : undefined)),
-  })
-);
+selectPureColumnConfig.registerConvert('multiSelect', (column, cells) => ({
+  column,
+  cells: cells.map(v => (v ? [v] : undefined)),
+}));
 
-selectPureColumnConfig.registerConvert(
-  richTextColumnTypeName,
-  (column, cells) => {
-    const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
-    return {
-      column: {},
-      cells: cells.map(v => new Text(v ? optionMap[v]?.value : '').yText),
-    };
-  }
-);
+selectPureColumnConfig.registerConvert('richText', (column, cells) => {
+  const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
+  return {
+    column: {},
+    cells: cells.map(v => new Text(v ? optionMap[v]?.value : '').yText),
+  };
+});

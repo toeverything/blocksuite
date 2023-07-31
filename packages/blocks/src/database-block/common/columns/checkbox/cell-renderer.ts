@@ -1,6 +1,7 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import {
   checkboxChecked,
   checkboxUnchecked,
@@ -104,6 +105,7 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
 
 columnRenderer.register({
   type: checkboxPureColumnConfig.type,
+  icon: createIcon('TodoIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(CheckboxCell),
   },

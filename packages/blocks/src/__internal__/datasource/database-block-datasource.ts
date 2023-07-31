@@ -1,6 +1,5 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { undefined } from 'zod';
 
 import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/cell-renderer.js';
 import { dateColumnConfig } from '../../database-block/common/columns/date/cell-renderer.js';

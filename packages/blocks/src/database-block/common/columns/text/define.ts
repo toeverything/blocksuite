@@ -1,4 +1,3 @@
-import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tString } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 
@@ -13,7 +12,6 @@ export const textPureColumnConfig = columnManager.register<string>(
   textColumnTypeName,
   {
     name: 'Plain-Text',
-    icon: createIcon('TextIcon'),
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data ?? '',

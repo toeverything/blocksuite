@@ -2,6 +2,7 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { progressPureColumnConfig } from './define.js';
@@ -240,6 +241,7 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
 
 columnRenderer.register({
   type: progressPureColumnConfig.type,
+  icon: createIcon('DatabaseProgress'),
   cellRenderer: {
     view: createFromBaseCellRenderer(ProgressCell),
     edit: createFromBaseCellRenderer(ProgressCellEditing),

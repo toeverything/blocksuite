@@ -12,6 +12,7 @@ import type {
 } from '../../../../__internal__/rich-text/virgo/types.js';
 import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
@@ -325,6 +326,8 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
 
 columnRenderer.register({
   type: richTextColumnTypeName,
+  icon: createIcon('TextIcon'),
+
   cellRenderer: {
     view: createFromBaseCellRenderer(RichTextCell),
     edit: createFromBaseCellRenderer(RichTextCellEditing),
