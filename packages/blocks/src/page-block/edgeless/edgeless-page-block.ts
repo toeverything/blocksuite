@@ -575,7 +575,7 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
         const page = this.page;
-        resizedNotes.forEach((domRect, id) => {
+        resizedNotes.forEach(([domRect, prevDomRect], id) => {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const { index, xywh } = model;
           const [x, y, w, h] = deserializeXYWH(xywh);
@@ -591,12 +591,23 @@ export class EdgelessPageBlockComponent
             domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
 
           if (!almostEqual(newModelHeight, h)) {
-            page.withoutTransact(() => {
+            const updateBlock = () => {
               page.updateBlock(model, {
                 xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
               });
               this.requestUpdate();
-            });
+            };
+
+            // Assume it's user-triggered resizing if both width and height change,
+            // otherwise we don't add the size updating into history.
+            // See https://github.com/toeverything/blocksuite/issues/3671
+            const isResize =
+              prevDomRect && !almostEqual(domRect.width, prevDomRect.width);
+            if (isResize) {
+              updateBlock();
+            } else {
+              page.withoutTransact(updateBlock);
+            }
           }
         });
 
