@@ -36,6 +36,7 @@ export class EdgelessSelectionManager {
   slots = {
     updated: new Slot<SurfaceSelection>(),
     blocksUpdated: new Slot<BlockComponentElement[]>(),
+    remoteUpdated: new Slot(),
   };
 
   lastState: SurfaceSelection | null = null;
@@ -46,9 +47,12 @@ export class EdgelessSelectionManager {
     elements: [],
   });
 
+  remoteSelection: Record<string, SurfaceSelection> = {};
+
   selectedBlocks: BlockComponentElement[] = [];
 
   private _selectedElements: Set<string> = new Set();
+  private _remoteSelectedElements: Set<string> = new Set();
 
   get empty() {
     return this.state.isEmpty();
@@ -80,7 +84,7 @@ export class EdgelessSelectionManager {
     this._selectedElements = new Set(selection.elements);
   }
 
-  private _init() {
+  mount() {
     this.disposable.add(
       this._selection.slots.changed.on(selections => {
         const selection = selections.find(
@@ -99,11 +103,39 @@ export class EdgelessSelectionManager {
         }
       })
     );
+
+    this.disposable.add(
+      this._selection.slots.remoteChanged.on(states => {
+        const result: Record<string, SurfaceSelection> = {};
+        const remoteSelectedElements = new Set<string>();
+
+        Object.keys(states).forEach(id => {
+          const selections = states[id];
+
+          selections.forEach(selection => {
+            if (selection.type === 'surface') {
+              result[id] = selection as SurfaceSelection;
+              (selection as SurfaceSelection).elements.forEach(id =>
+                remoteSelectedElements.add(id)
+              );
+            }
+          });
+        });
+
+        this.remoteSelection = result;
+        this._remoteSelectedElements = remoteSelectedElements;
+        this.slots.remoteUpdated.emit();
+      })
+    );
   }
 
   constructor(container: EdgelessPageBlockComponent) {
     this.container = container;
-    this._init();
+    this.mount();
+  }
+
+  hasRemote(element: string) {
+    return this._remoteSelectedElements.has(element);
   }
 
   has(element: string) {

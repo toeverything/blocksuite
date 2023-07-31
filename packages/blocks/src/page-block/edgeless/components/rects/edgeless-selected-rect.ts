@@ -20,7 +20,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { pick } from '../../../../__internal__/utils/common.js';
+import { noop, pick } from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -44,6 +44,9 @@ import {
   getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
+import { EdgelessRemoteSelection } from './edgeless-remote-selection.js';
+
+noop(EdgelessRemoteSelection);
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
@@ -309,6 +312,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     x: 0,
     y: 0,
   };
+
+  // TODO:
+  // should be manager in global awareness state
+  private _remoteColorMap: Map<string, string> = new Map();
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
@@ -604,18 +611,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   };
 
-  private _updateOnSurfaceChange = (element: string | { id: string }) => {
-    if (!this.selection.has(typeof element === 'string' ? element : element.id))
-      return;
+  private _updateOnElementChange = (element: string | { id: string }) => {
+    const id = typeof element === 'string' ? element : element.id;
 
-    this._updateSelectedRect();
-  };
-
-  private _updateOnNoteBlockChange = (element: { id: string }) => {
-    if (!this.selection.has(typeof element === 'string' ? element : element.id))
-      return;
-
-    this._updateSelectedRect();
+    if (this.selection.has(id)) this._updateSelectedRect();
   };
 
   override firstUpdated() {
@@ -629,7 +628,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     Object.values(
       pick(surface.slots, ['elementAdded', 'elementRemoved', 'elementUpdated'])
     ).forEach(slot => {
-      _disposables.add(slot.on(this._updateOnSurfaceChange));
+      _disposables.add(slot.on(this._updateOnElementChange));
     });
 
     _disposables.add(
@@ -639,7 +638,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
 
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
-    _disposables.add(page.slots.blockUpdated.on(this._updateOnNoteBlockChange));
+    _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
   }
 
   protected override updated(
@@ -654,10 +653,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { selection } = this;
+    const { selection, _remoteColorMap } = this;
     const elements = selection.elements;
 
-    if (!this._shouldRenderSelection(elements)) return nothing;
+    if (!this._shouldRenderSelection(elements))
+      return html`<edgeless-remote-selection
+        .edgeless=${this.edgeless}
+        .remoteColorMap=${_remoteColorMap}
+      ></edgeless-remote-selection>`;
 
     const {
       edgeless,
@@ -688,6 +691,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     return html`
+      <edgeless-remote-selection
+        .edgeless=${edgeless}
+        .remoteColorMap=${_remoteColorMap}
+      ></edgeless-remote-selection>
       <div
         class="affine-edgeless-selected-rect"
         style=${styleMap({
