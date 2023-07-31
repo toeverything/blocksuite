@@ -103,8 +103,9 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
         | 'absolutePath'
         | 'controllers'
         | 'rotate'
+        | 'batch'
       >
-    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>;
+    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;
 
 export type PhasorElementWithText = ShapeElement | TextElement;
 

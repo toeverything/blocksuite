@@ -22,6 +22,7 @@ export interface ISurfaceElement {
 
   // degree: [0, 360]
   rotate: number;
+  batch: string | null;
 }
 
 export interface ISurfaceElementLocalRecord {
@@ -104,6 +105,10 @@ export abstract class SurfaceElement<
   get rotate() {
     const rotate = this.yMap.get('rotate') as T['rotate'];
     return rotate ?? 0;
+  }
+
+  get batch() {
+    return (this.yMap.get('batch') as T['batch']) ?? null;
   }
 
   get x() {
