@@ -20,7 +20,6 @@ interface SelectionConstructor {
 export class SelectionManager {
   disposables = new DisposableGroup();
   private _selectionConstructors: Record<string, SelectionConstructor> = {};
-  private _oldSelections: BaseSelection[] = [];
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
