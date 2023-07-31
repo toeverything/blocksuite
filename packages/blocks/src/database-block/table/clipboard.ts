@@ -1,6 +1,6 @@
 import type { TextSelection, UIEventStateContext } from '@blocksuite/block-std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { assertExists, DisposableGroup } from '@blocksuite/store';
+import { assertExists, DisposableGroup, Text } from '@blocksuite/store';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';
@@ -67,10 +67,7 @@ export class TableViewClipboard implements BaseViewClipboard {
         focus.columnIndex
       );
 
-      if (column.type === 'number') {
-        // Execute browser default behavior
-        return true;
-      } else {
+      if (column.type !== 'number') {
         const data = (selectionValueMap[column.type]?.(container) ??
           '') as string;
         const textClipboardItem = new ClipboardItem(
@@ -78,8 +75,11 @@ export class TableViewClipboard implements BaseViewClipboard {
           data
         );
         performNativeCopy([textClipboardItem]);
-        return true;
+      } else {
+        // type === 'number'
+        // Execute browser default behavior
       }
+      return true;
     }
 
     // copy cells
@@ -114,12 +114,47 @@ export class TableViewClipboard implements BaseViewClipboard {
     // When the title column is edited, it is the `TextSelection`.
     const titleSelection = getTextSelection(this._root, this._path);
     if (titleSelection) {
-      // todo
+      // paste text
+      const textClipboardData = event.clipboardData?.getData(
+        CLIPBOARD_MIMETYPE.TEXT
+      );
+      if (!textClipboardData) return true;
+
+      pasteToTitleColumn(this._root, titleSelection, textClipboardData);
     } else if (tableSelection) {
-      const { isEditing } = tableSelection;
+      const {
+        isEditing,
+        focus: { rowIndex, columnIndex },
+      } = tableSelection;
 
       // paste cells' content
       if (isEditing) {
+        const column = model.columns[columnIndex];
+        if (column.type !== 'number') {
+          const textClipboardData = event.clipboardData?.getData(
+            CLIPBOARD_MIMETYPE.TEXT
+          );
+          if (!textClipboardData) return true;
+
+          const targetContainer = view.selection.getCellContainer(
+            rowIndex,
+            columnIndex
+          );
+          const rowId = targetContainer?.dataset.rowId;
+          const columnId = targetContainer?.dataset.columnId;
+          assertExists(rowId);
+          assertExists(columnId);
+
+          if (column.type === 'rich-text') {
+            pasteToRichText(targetContainer, textClipboardData);
+          } else {
+            data.cellUpdateValue(rowId, columnId, textClipboardData);
+          }
+        } else {
+          // type === 'number'
+          // Execute browser default behavior
+        }
+
         return true;
       }
 
@@ -370,6 +405,46 @@ function getTargetRangeFromSelection(
     };
   }
   return range;
+}
+
+function pasteToTitleColumn(
+  root: BlockSuiteRoot,
+  titleSelection: TextSelection,
+  data: string
+) {
+  const view = root.viewStore.blockViewMap.get(titleSelection.path);
+  const text = view?.model.text;
+  if (text) {
+    const {
+      from: { index },
+    } = titleSelection;
+    text.insert(data, index);
+    const richText = view.querySelector('rich-text');
+    richText?.vEditor?.setVRange({
+      index: index + data.length,
+      length: 0,
+    });
+  }
+}
+
+function pasteToRichText(
+  container: DatabaseCellContainer | undefined,
+  data: string
+) {
+  const cell = container?.querySelector(
+    'affine-database-rich-text-cell-editing'
+  );
+  const range = cell?.vEditor?.getVRange();
+  const yText = cell?.vEditor?.yText;
+  if (yText) {
+    const text = new Text(yText);
+    const index = range?.index ?? yText.length;
+    text.insert(data, index);
+    cell?.vEditor?.setVRange({
+      index: index + data.length,
+      length: 0,
+    });
+  }
 }
 
 const selectionValueMap: Record<
