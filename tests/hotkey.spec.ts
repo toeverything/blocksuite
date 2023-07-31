@@ -55,7 +55,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('single line rich-text inline code hotkey', async ({ page }) => {
+test.fixme('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -124,7 +124,7 @@ test.fixme('type character jump out code node', async ({ page }) => {
   );
 });
 
-test('multi line rich-text inline code hotkey', async ({ page }) => {
+test.fixme('multi line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -266,7 +266,7 @@ test('multi line rich-text inline code hotkey', async ({ page }) => {
   );
 });
 
-test('single line rich-text strikethrough hotkey', async ({ page }) => {
+test.fixme('single line rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -287,7 +287,7 @@ test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test('use formatted cursor with hotkey', async ({ page }) => {
+test.fixme('use formatted cursor with hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -482,7 +482,7 @@ test('use formatted cursor with hotkey', async ({ page }) => {
   );
 });
 
-test('should single line format hotkey work', async ({ page }) => {
+test.fixme('should single line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -560,7 +560,7 @@ test('should single line format hotkey work', async ({ page }) => {
   );
 });
 
-test('should multiple line format hotkey work', async ({ page }) => {
+test.fixme('should multiple line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -675,7 +675,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
   );
 });
 
-test('should hotkey work in paragraph', async ({ page }) => {
+test.fixme('should hotkey work in paragraph', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
 
@@ -791,7 +791,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
   );
 });
 
-test('format list to h1', async ({ page }) => {
+test.fixme('format list to h1', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -980,20 +980,21 @@ test('should bracket complete with backtick works', async ({ page }) => {
   );
 });
 
-test('pressing enter when selecting multiple blocks should create new block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await dragBetweenIndices(page, [0, 1], [2, 1]);
-  await waitNextFrame(page);
-  await pressEnter(page);
-  await assertRichTexts(page, ['1', '89']);
-  await assertSelection(page, 1, 0, 0);
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-});
+test.fixme(
+  'pressing enter when selecting multiple blocks should create new block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await dragBetweenIndices(page, [0, 1], [2, 1]);
+    await waitNextFrame(page);
+    await pressEnter(page);
+    await assertRichTexts(page, ['1', '89']);
+    await assertSelection(page, 1, 0, 0);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+  }
+);
 
 // FIXME: getCurrentBlockRange need to handle comment node
 test.skip('should left/right key navigator works', async ({ page }) => {

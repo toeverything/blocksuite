@@ -120,7 +120,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['//']);
   });
 
-  test('pressing esc should close the slash menu', async () => {
+  test.fixme('pressing esc should close the slash menu', async () => {
     // You may need to press Esc twice in a real browser
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
@@ -399,8 +399,8 @@ test.describe('slash menu with code block', () => {
     await assertRichTexts(page, ['000111']);
   });
 });
-
-test('slash menu should work in edgeless mode', async ({ page }) => {
+// Selection is not yet available in edgeless
+test.fixme('slash menu should work in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 

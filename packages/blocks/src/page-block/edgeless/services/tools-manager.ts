@@ -21,7 +21,6 @@ import {
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
-import { updateLocalSelectionRange } from '../../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
@@ -266,9 +265,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
       const event = ctx.get('defaultState');
       this._onContainerContextMenu(event);
     });
-    this._add('selectionChange', () => {
-      this._onSelectionChangeWithoutDebounce();
-    });
     this._add('wheel', ctx => {
       const state = ctx.get('defaultState');
       const e = state.event;
@@ -417,10 +413,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
       }
       this._rightClickTimer = null;
     }
-  };
-
-  private _onSelectionChangeWithoutDebounce = () => {
-    updateLocalSelectionRange(this.page);
   };
 
   getHoverState(): EdgelessHoverState | null {

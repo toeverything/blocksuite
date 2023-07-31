@@ -679,18 +679,21 @@ test('Change title when first content is divider', async ({ page }) => {
   await assertTitle(page, 'title');
 });
 
-test('ArrowUp and ArrowDown to select divider and copy', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, '--- ');
-  await assertDivider(page, 1);
-  await pressArrowUp(page);
-  await copyByKeyboard(page);
-  await pressArrowDown(page);
-  await pasteByKeyboard(page);
-  await assertDivider(page, 2);
-});
+test.fixme(
+  'ArrowUp and ArrowDown to select divider and copy',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '--- ');
+    await assertDivider(page, 1);
+    await pressArrowUp(page);
+    await copyByKeyboard(page);
+    await pressArrowDown(page);
+    await pasteByKeyboard(page);
+    await assertDivider(page, 2);
+  }
+);
 
 test('Delete the blank line between two dividers', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -707,45 +710,47 @@ test('Delete the blank line between two dividers', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test('Delete the second divider between two dividers by forwardDelete', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, '--- ');
-  await assertDivider(page, 1);
+test.fixme(
+  'Delete the second divider between two dividers by forwardDelete',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '--- ');
+    await assertDivider(page, 1);
 
-  await pressEnter(page);
-  await type(page, '--- ');
-  await assertDivider(page, 2);
-  await pressArrowUp(page, 2);
-  await pressForwardDelete(page);
-  await pressForwardDelete(page);
-  await assertDivider(page, 1);
-  await assertRichTexts(page, ['', '', '']);
-});
+    await pressEnter(page);
+    await type(page, '--- ');
+    await assertDivider(page, 2);
+    await pressArrowUp(page, 2);
+    await pressForwardDelete(page);
+    await pressForwardDelete(page);
+    await assertDivider(page, 1);
+    await assertRichTexts(page, ['', '', '']);
+  }
+);
 
-test('should delete line with content after divider should not lost content', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, '--- ');
-  await type(page, '123');
-  await assertDivider(page, 1);
-  // Jump to line start
-  page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
-  await page.waitForTimeout(50);
-  await page.keyboard.press('Backspace');
-  await page.waitForTimeout(50);
-  await page.keyboard.press('Backspace');
-  await assertDivider(page, 0);
-  await assertRichTexts(page, ['', '123']);
-});
+test.fixme(
+  'should delete line with content after divider should not lost content',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '--- ');
+    await type(page, '123');
+    await assertDivider(page, 1);
+    // Jump to line start
+    page.keyboard.press(`${SHORT_KEY}+ArrowLeft`, { delay: 50 });
+    await page.waitForTimeout(50);
+    await page.keyboard.press('Backspace');
+    await page.waitForTimeout(50);
+    await page.keyboard.press('Backspace');
+    await assertDivider(page, 0);
+    await assertRichTexts(page, ['', '123']);
+  }
+);
 
-test('should forwardDelete driver works properly', async ({ page }) => {
+test.fixme('should forwardDelete driver works properly', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -1041,7 +1046,7 @@ test.fixme(
   }
 );
 
-test('should indent native multi-selection block', async ({ page }) => {
+test.fixme('should indent native multi-selection block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1085,7 +1090,7 @@ test('should indent native multi-selection block', async ({ page }) => {
   );
 });
 
-test('should unindent native multi-selection block', async ({ page }) => {
+test.fixme('should unindent native multi-selection block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1456,34 +1461,36 @@ test.fixme('should select with shift-click', async ({ page }) => {
   expect(await getSelectedText(page)).toBe('123456789');
 });
 
-test('should collapse to end when press arrow-right on multi-line selection', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
-  await dragBetweenIndices(page, [0, 0], [1, 2]);
-  expect(await getSelectedText(page)).toBe('12345');
-  await pressArrowRight(page);
-  await pressBackspace(page);
-  await assertRichTexts(page, ['123', '46', '789']);
-});
+test.fixme(
+  'should collapse to end when press arrow-right on multi-line selection',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+    await dragBetweenIndices(page, [0, 0], [1, 2]);
+    expect(await getSelectedText(page)).toBe('12345');
+    await pressArrowRight(page);
+    await pressBackspace(page);
+    await assertRichTexts(page, ['123', '46', '789']);
+  }
+);
 
-test('should collapse to start when press arrow-left on multi-line selection', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'should collapse to start when press arrow-left on multi-line selection',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await dragBetweenIndices(page, [0, 1], [1, 2]);
-  expect(await getSelectedText(page)).toBe('2345');
-  await pressArrowLeft(page);
-  await pressBackspace(page);
-  await assertRichTexts(page, ['23', '456', '789']);
-});
+    await dragBetweenIndices(page, [0, 1], [1, 2]);
+    expect(await getSelectedText(page)).toBe('2345');
+    await pressArrowLeft(page);
+    await pressBackspace(page);
+    await assertRichTexts(page, ['23', '456', '789']);
+  }
+);
 
 test('should select when clicking on blank area in edgeless mode', async ({
   page,

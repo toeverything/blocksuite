@@ -86,6 +86,10 @@ export class BlockElement<
     return this.root.blockViewMap.get(this.parentPath);
   }
 
+  get flavour(): string {
+    return this.model.flavour;
+  }
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,
@@ -103,6 +107,23 @@ export class BlockElement<
       this.root.uiEventDispatcher.add(name, handler, config)
     );
   };
+
+  bindHotKey(
+    keymap: Record<string, UIEventHandler>,
+    options?: { global?: boolean; flavour?: boolean }
+  ) {
+    const config = {
+      flavour: options?.global
+        ? undefined
+        : options?.flavour
+        ? this.model.flavour
+        : undefined,
+      path: options?.global || options?.flavour ? undefined : this.path,
+    };
+    this._disposables.add(
+      this.root.uiEventDispatcher.bindHotkey(keymap, config)
+    );
+  }
 
   get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
     return Object.keys(this.widgets).reduce((mapping, key) => {

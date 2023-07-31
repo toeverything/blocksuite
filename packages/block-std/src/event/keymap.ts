@@ -75,7 +75,6 @@ export function bindKeymap(
     if (direct && direct(ctx)) {
       return true;
     }
-
     if (name.length !== 1 || name === ' ') {
       return false;
     }

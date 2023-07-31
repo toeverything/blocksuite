@@ -1,6 +1,5 @@
 // related component
 
-import type { UIEventDispatcher } from '@blocksuite/block-std';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { PropertyValues } from 'lit';
 import { css } from 'lit';
@@ -9,7 +8,7 @@ import { html } from 'lit/static-html.js';
 
 import { startDrag } from '../utils/drag.js';
 import { KanbanCard } from './card.js';
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import type { DataViewKanban } from './kanban-view.js';
 
 const styles = css`
   affine-data-view-kanban-drag {
@@ -22,29 +21,26 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  view!: DataViewKanbanManager;
-  @property({ attribute: false })
-  dispatcher!: UIEventDispatcher;
+  kanbanView!: DataViewKanban;
 
   @query('.drag-preview')
   dragPreview!: HTMLDivElement;
 
   protected override firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
-    this._disposables.add({
-      dispose: this.dispatcher.add('dragStart', context => {
+    this._disposables.add(
+      this.kanbanView.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
           const card = target.closest('affine-data-view-kanban-card');
           if (card) {
             this.dragStart(card, event);
-            return true;
           }
         }
-        return false;
-      }),
-    });
+        return true;
+      })
+    );
   }
 
   dragStart = (ele: KanbanCard, evt: PointerEvent) => {

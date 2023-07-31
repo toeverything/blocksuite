@@ -17,11 +17,6 @@ export interface Column<
   data: Data;
 }
 
-export type Cell<ValueType = unknown> = {
-  columnId: Column['id'];
-  value: ValueType;
-};
-
 export type ColumnHeader = {
   type: ColumnType;
   text: string;

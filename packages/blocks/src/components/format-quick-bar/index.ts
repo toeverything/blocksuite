@@ -9,7 +9,6 @@ import {
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { throttle } from '../../__internal__/utils/common.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
-import type { PageSelectionState } from '../../page-block/default/selection-manager/index.js';
 import { onModelElementUpdated } from '../../page-block/index.js';
 import {
   calcCurrentSelectionPosition,
@@ -163,9 +162,7 @@ export const showFormatQuickBar = ({
 export function showFormatQuickBarByClicks(
   type: 'double' | 'triple',
   e: PointerEventState,
-  page: Page,
-  container?: HTMLElement,
-  state?: PageSelectionState
+  page: Page
 ) {
   const range =
     type === 'double'
@@ -181,7 +178,7 @@ export function showFormatQuickBarByClicks(
     direction,
     anchorEl: {
       getBoundingClientRect: () => {
-        return calcCurrentSelectionPosition(direction, state);
+        return calcCurrentSelectionPosition(direction);
       },
     },
   });

@@ -14,16 +14,11 @@ import {
   asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
   type BlockComponentElement,
-  type ExtendedModel,
-  focusBlockByModel,
   getBlockElementByModel,
-  getClosestBlockElementByElement,
-  getDefaultPage,
   getVirgoByModel,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
-  resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -37,35 +32,6 @@ import {
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import type { BlockSchemas } from '../../models.js';
-import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
-
-export function handleBlockSelectionBatchDelete(
-  page: Page,
-  models: ExtendedModel[]
-) {
-  const parentModel = page.getParent(models[0]);
-  assertExists(parentModel);
-  const index = parentModel.children.indexOf(models[0]);
-  page.captureSync();
-  models.forEach(model => page.deleteBlock(model));
-  const id = page.addBlock(
-    'affine:paragraph',
-    { type: 'text' },
-    parentModel,
-    index
-  );
-  const newBlock = page.getBlockById(id);
-
-  // Try clean block selection
-  const defaultPageBlock = getDefaultPage(models[0].page);
-  if (!defaultPageBlock) {
-    // In the edgeless mode
-    return null;
-  }
-  defaultPageBlock.selection?.clear();
-  asyncFocusRichText(page, id);
-  return newBlock;
-}
 
 export function deleteModelsByRange(
   page: Page,
@@ -73,10 +39,6 @@ export function deleteModelsByRange(
 ) {
   if (!blockRange) return null;
 
-  if (blockRange.type === 'Block') {
-    const newBlock = handleBlockSelectionBatchDelete(page, blockRange.models);
-    return newBlock;
-  }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
   // TODO handle database
@@ -502,58 +464,6 @@ export function handleFormat(
   if (!blockRange) return;
   page.captureSync();
   formatBlockRange(blockRange, key);
-}
-
-export function handleSelectAll(selection: DefaultSelectionManager) {
-  const currentSelection = window.getSelection();
-  if (
-    selection.state.selectedBlocks.length === 0 &&
-    currentSelection?.focusNode?.nodeName === '#text'
-  ) {
-    selection.selectOneBlock(
-      getClosestBlockElementByElement(currentSelection.focusNode.parentElement)
-    );
-  } else {
-    selection.selectAllBlocks();
-  }
-
-  resetNativeSelection(null);
-}
-
-export function handleKeydownAfterSelectBlocks({
-  page,
-  keyboardEvent,
-  selectedBlocks,
-}: {
-  page: Page;
-  keyboardEvent: KeyboardEvent;
-  selectedBlocks: BaseBlockModel[];
-}) {
-  const { key } = keyboardEvent;
-
-  const parent = page.getParent(selectedBlocks[0]);
-  const index = parent?.children.indexOf(selectedBlocks[0]);
-  selectedBlocks.forEach(block => {
-    page.deleteBlock(block);
-  });
-  // TODO:
-  //  1. should add block which has same flavour as the parent?
-  //  2. If use Chinese input method, the input method state cannot be retained
-  const id = page.addBlock(
-    'affine:paragraph',
-    {
-      text: new page.Text(key),
-    },
-    parent,
-    index
-  );
-  // Wait block inserted to dom
-  requestAnimationFrame(() => {
-    const defaultPage = getDefaultPage(page);
-    const newBlock = page.getBlockById(id) as BaseBlockModel;
-    defaultPage?.selection?.clear();
-    focusBlockByModel(newBlock, 'end');
-  });
 }
 
 export async function onModelTextUpdated(

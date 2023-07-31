@@ -3,8 +3,7 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockStore } from '../store/index.js';
 import { PathMap } from '../store/index.js';
 import type { UIEventHandler } from './base.js';
-import { UIEventStateContext } from './base.js';
-import { UIEventState } from './base.js';
+import { UIEventState, UIEventStateContext } from './base.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
@@ -14,9 +13,6 @@ import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
   'beforeInput',
-  'compositionStart',
-  'compositionUpdate',
-  'compositionEnd',
 
   'paste',
   'copy',
@@ -45,6 +41,9 @@ const eventNames = [
   'keyUp',
 
   'selectionChange',
+  'compositionStart',
+  'compositionUpdate',
+  'compositionEnd',
 
   ...bypassEventNames,
 ] as const;

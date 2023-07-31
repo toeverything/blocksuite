@@ -30,7 +30,14 @@ import {
 } from '../../__internal__/utils/index.js';
 import { humanFileSize } from '../../__internal__/utils/math.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
+import type {
+  AttachmentBlockModel,
+  AttachmentProps,
+} from '../../attachment-block/attachment-model.js';
+import {
+  MAX_ATTACHMENT_SIZE,
+  setAttachmentLoading,
+} from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
 import { copyBlock } from '../../page-block/default/utils.js';
@@ -247,29 +254,45 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           if (!parent) {
             return;
           }
-          const MAX_SIZE = 10 * 1000 * 1000; // 10MB
+          let attachmentModel: AttachmentBlockModel | null = null;
           const fileInfo = await uploadFileFromLocal(page.blobs, file => {
-            if (file.size > MAX_SIZE) {
+            if (file.size > MAX_ATTACHMENT_SIZE) {
               toast(
                 `You can only upload files less than ${humanFileSize(
-                  MAX_SIZE,
+                  MAX_ATTACHMENT_SIZE,
                   true,
                   0
                 )}`
               );
               return false;
             }
+
+            const loadingKey = page.generateId();
+            setAttachmentLoading(loadingKey, true);
+            const props: AttachmentProps & { flavour: 'affine:attachment' } = {
+              flavour: 'affine:attachment',
+              name: file.name,
+              size: file.size,
+              loadingKey,
+            };
+            const [newBlockId] = page.addSiblingBlocks(model, [props]);
+            assertExists(newBlockId);
+            attachmentModel = page.getBlockById(
+              newBlockId
+            ) as AttachmentBlockModel;
+
             return true;
           });
-          if (!fileInfo) return;
-          const { file, sourceId } = fileInfo;
-          const props: AttachmentProps & { flavour: 'affine:attachment' } = {
-            flavour: 'affine:attachment',
-            name: file.name,
-            size: file.size,
+          if (!fileInfo || !attachmentModel) return;
+          const { sourceId } = fileInfo;
+          // FIXME: I think it is a bug of TypeScript
+          const realAttachmentModel: AttachmentBlockModel = attachmentModel;
+          // await new Promise(resolve => setTimeout(resolve, 1000));
+          setAttachmentLoading(realAttachmentModel.loadingKey ?? '', false);
+          page.updateBlock(realAttachmentModel, {
             sourceId,
-          };
-          page.addSiblingBlocks(model, [props]);
+            loadingKey: null,
+          });
         },
       },
     ],

@@ -1,7 +1,7 @@
 import { AttachmentIcon16 } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import { html } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
 import { downloadBlob } from '../__internal__/utils/filesys.js';
@@ -11,29 +11,16 @@ import { focusBlockByModel } from '../__internal__/utils/selection.js';
 import { toast } from '../components/toast.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
-import { AttachmentBanner, styles } from './styles.js';
-import { getAttachment } from './utils.js';
-
-// 30MB
-const MAX_LOAD_SIZE = 30 * 1024 * 1024;
+import { AttachmentBanner, LoadingIcon, styles } from './styles.js';
+import { getAttachment, isAttachmentLoading } from './utils.js';
 
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
   static override styles = styles;
 
-  @state()
-  loading = true;
-
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:attachment', AttachmentBlockService);
-    if (!this.model.sourceId) {
-      console.error('sourceId is not defined');
-      return;
-    }
-    if (this.model.size > MAX_LOAD_SIZE) {
-      return;
-    }
   }
 
   private _focusAttachment() {
@@ -41,7 +28,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private async _downloadAttachment() {
-    const attachment = await getAttachment(this.model);
+    const attachmentModel = this.model;
+    const attachment = await getAttachment(attachmentModel);
     if (!attachment) {
       toast('Failed to download attachment!');
       console.error(
@@ -52,32 +40,40 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       );
       return;
     }
-    downloadBlob(attachment, this.model.name);
+    downloadBlob(attachment, attachmentModel.name);
   }
 
   override render() {
     const mode = queryCurrentMode();
-    // if (this.loading) {
-    //   return html`<div class="attachment-container">Loading...</div>`;
-    // }
-    // if (!this.attachment) {
-    //   return html`<div class="attachment-container">
-    //     Error: Attachment not found
-    //   </div>`;
-    // }
+    if (this.model.loadingKey && isAttachmentLoading(this.model.loadingKey)) {
+      return html`<div class="attachment-container">
+        <div class="attachment-loading">${LoadingIcon}Loading...</div>
+        <div class="attachment-desc">${humanFileSize(this.model.size)}</div>
+      </div>`;
+    }
+    if (!this.model.sourceId) {
+      return html`<div class="attachment-container">
+        <div class="attachment-name">${AttachmentIcon16}${this.model.name}</div>
+        <div class="attachment-desc">Unable to upload</div>
+      </div>`;
+    }
+
     return html`<div
       class="attachment-container"
       @click=${this._focusAttachment}
       @dblclick=${this._downloadAttachment}
     >
       <div class="attachment-name">${AttachmentIcon16}${this.model.name}</div>
-      <div class="attachment-size">${humanFileSize(this.model.size)}</div>
+      <div class="attachment-desc">${humanFileSize(this.model.size)}</div>
       <div class="attachment-banner">
         ${mode === 'light'
           ? AttachmentBanner
           : // TODO dark mode
             AttachmentBanner}
       </div>
+      ${this.selected?.is('block')
+        ? html`<affine-block-selection></affine-block-selection>`
+        : null}
     </div>`;
   }
 }

@@ -199,6 +199,10 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     const id = this.rowAdd(position);
     group.helper.addToGroup(id, group.value);
   }
+
+  public get type(): string {
+    return this.view.mode;
+  }
 }
 
 export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {

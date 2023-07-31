@@ -2,7 +2,7 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { DatabaseCellElement } from '../../register.js';
+import { BaseCellRenderer } from './base-cell.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -80,7 +80,7 @@ type DragConfig = {
 };
 
 @customElement('affine-database-progress-cell')
-export class ProgressCell extends DatabaseCellElement<number> {
+export class ProgressCell extends BaseCellRenderer<number> {
   static override styles = styles;
 
   _bgClick(e: MouseEvent) {
@@ -122,7 +122,7 @@ export class ProgressCell extends DatabaseCellElement<number> {
 }
 
 @customElement('affine-database-progress-cell-editing')
-export class ProgressCellEditing extends DatabaseCellElement<number> {
+export class ProgressCellEditing extends BaseCellRenderer<number> {
   static override styles = styles;
 
   @state()
@@ -221,10 +221,7 @@ export class ProgressCellEditing extends DatabaseCellElement<number> {
       left: `calc(${progress}% - 3px)`,
     });
 
-    return html` <div
-      class="affine-database-progress"
-      @mousedown="${(e: Event) => e.preventDefault()}"
-    >
+    return html` <div class="affine-database-progress">
       <div class="affine-database-progress-bar">
         <div class="affine-database-progress-bg" style=${bgStyles}>
           <div class="affine-database-progress-fg" style=${fgStyles}></div>

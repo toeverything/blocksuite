@@ -6,11 +6,11 @@ import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
+import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
-import { DefaultPageService } from '../page-block/default/default-page-service.js';
 import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
 import {
   type DocPageBlockWidgetName,
@@ -22,7 +22,6 @@ import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
-  service: DefaultPageService,
   view: {
     component: literal`affine-default-page`,
     widgets: {
@@ -67,6 +66,7 @@ export const pagePreset: LitBlockSpec[] = [
   },
   {
     schema: DatabaseBlockSchema,
+    service: DatabaseService,
     view: {
       component: literal`affine-database`,
     },

@@ -20,6 +20,7 @@ import {
   defaultMode,
   initDebugConfig,
   params,
+  testIDBExistence,
 } from './utils.js';
 import { loadPresets } from './utils/preset.js';
 import { getProviderCreators } from './utils/providers.js';
@@ -101,10 +102,10 @@ const syncProviders = async (
 };
 
 async function initWorkspace(workspace: Workspace) {
+  const databaseExists = await testIDBExistence();
+
   const shouldInit =
-    (!(await indexedDB.databases()).find(db => db.name === INDEXED_DB_NAME) &&
-      !params.get('room')) ||
-    params.get('init');
+    (!databaseExists && !params.get('room')) || params.get('init');
 
   if (shouldInit) {
     const deleteResult = await new Promise(resovle => {

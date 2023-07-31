@@ -2,16 +2,16 @@ import { Slot } from '@blocksuite/global/utils';
 
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { TType } from '../logical/typesystem.js';
-import type {
-  ColumnDataUpdater,
-  InsertPosition,
-  SetValueOption,
-} from '../types.js';
+import type { ColumnDataUpdater, InsertPosition } from '../types.js';
 import type { CellRenderer } from './columns/manager.js';
 import { columnManager } from './columns/manager.js';
 import { columnRenderer } from './columns/renderer.js';
 
 export interface DataViewManager {
+  get id(): string;
+
+  get type(): string;
+
   get readonly(): boolean;
 
   get columnManagerList(): DataViewColumnManager[];
@@ -110,7 +110,7 @@ export interface DataViewColumnManager<
 
   getValue(rowId: string): Value | undefined;
 
-  setValue(rowId: string, value: Value | undefined, ops?: SetValueOption): void;
+  setValue(rowId: string, value: Value | undefined): void;
 
   updateData(updater: ColumnDataUpdater<Data>): void;
 
@@ -217,6 +217,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   ): void {
     this.dataSource.cellChangeValue(rowId, columnId, value);
   }
+
   public cellUpdateValue(
     rowId: string,
     columnId: string,
@@ -317,7 +318,12 @@ export abstract class BaseDataViewManager implements DataViewManager {
   public captureSync(): void {
     this.dataSource.captureSync();
   }
+
+  public abstract get id(): string;
+
+  public abstract get type(): string;
 }
+
 export abstract class BaseDataViewColumnManager
   implements DataViewColumnManager
 {

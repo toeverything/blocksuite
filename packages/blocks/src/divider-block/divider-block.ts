@@ -12,6 +12,7 @@ import { DividerBlockService } from './divider-service.js';
 export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
   static override styles = css`
     .affine-divider-block-container {
+      position: relative;
       width: 100%;
       height: 1px;
       display: flex;
@@ -46,9 +47,12 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
     </div>`;
 
     return html`
-      <div class=${`affine-divider-block-container`}>
+      <div class="affine-divider-block-container">
         <hr />
         ${children}
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : null}
       </div>
     `;
   }

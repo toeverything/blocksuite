@@ -9,7 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../../components/uni-component/uni-component.js';
-import type { DataViewCellLifeCycle } from '../register.js';
+import type { DataViewCellLifeCycle } from '../../common/columns/manager.js';
 import type { DataViewTableColumnManager } from '../table-view-manager.js';
 
 @customElement('affine-database-cell-container')
@@ -105,6 +105,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       selectCurrentCell: this._selectCurrentCell,
     };
     const isEditView = view === uni;
+
     return html`${keyed(
       `${isEditView} ${this.column.type}`,
       html`<uni-lit

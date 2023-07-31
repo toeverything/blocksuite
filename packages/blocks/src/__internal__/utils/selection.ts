@@ -13,7 +13,6 @@ import type { NoteBlockComponent } from '../../note-block/index.js';
 import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
-  type BlockComponentElement,
   getBlockElementByModel,
   getDefaultPage,
   getElementFromEventTarget,
@@ -159,49 +158,11 @@ export function focusBlockByModel(
 
   const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
   assertExists(pageBlock);
-  const isPageMode = pageBlock.tagName === 'AFFINE-DEFAULT-PAGE';
 
-  // If focus on a follow block, we should select the block
-  if (
-    isPageMode &&
-    matchFlavours(model, [
-      'affine:image',
-      'affine:divider',
-      'affine:code',
-      'affine:database',
-      'affine:bookmark',
-      'affine:attachment',
-    ])
-  ) {
-    assertExists(pageBlock.selection);
-    pageBlock.selection.state.clearSelection();
-    const rect = getBlockElementByModel(model)?.getBoundingClientRect();
-    rect && pageBlock.slots.selectedRectsUpdated.emit([rect]);
-    const element = getBlockElementByModel(model);
-    assertExists(element);
-    pageBlock.selection.state.selectedBlocks.push(element);
-    if (matchFlavours(model, ['affine:database'])) {
-      const elements = model.children
-        .map(child => getBlockElementByModel(child))
-        .filter(
-          (element): element is BlockComponentElement => element !== null
-        );
-      pageBlock.selection.state.selectedBlocks.push(...elements);
-    }
-    pageBlock.selection.state.type = 'block';
-    resetNativeSelection(null);
-    (document.activeElement as HTMLTextAreaElement).blur();
-    return;
-  }
   const element = getBlockElementByModel(model);
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
-    if (isPageMode) {
-      assertExists(pageBlock.selection);
-      pageBlock.selection.state.clearSelection();
-      pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
-    }
     focusRichText(editableContainer, position, zoom);
   }
 }
@@ -259,11 +220,9 @@ export function resetNativeSelection(range: Range | null) {
   range && selection.addRange(range);
 }
 
+// FIXME(mirone): remove this
 export function clearSelection(page: Page) {
-  if (!page.root) return;
-  const pageBlock = getPageBlock(page.root);
-  if (!pageBlock || pageBlock.flavour === 'edgeless') return;
-  pageBlock.selection?.clear();
+  return;
 }
 
 /**

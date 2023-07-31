@@ -5,7 +5,6 @@ import {
   type EdgelessPageBlockComponent,
   edgelessPreset,
   FileDropManager,
-  getPageBlock,
   getServiceOrRegister,
   noop,
   type PageBlockModel,
@@ -108,7 +107,8 @@ export class EditorContainer
       if (!pageModel) return;
 
       if (this.mode === 'page') {
-        getPageBlock(pageModel)?.selection?.clear();
+        // FIXME(mirone)
+        // getPageBlock(pageModel)?.selection?.clear();
       }
 
       const selection = getSelection();

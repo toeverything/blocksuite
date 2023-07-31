@@ -1,22 +1,10 @@
-import type { PointerEventState } from '@blocksuite/block-std';
-import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import { matchFlavours, type Page } from '@blocksuite/store';
+import { matchFlavours } from '@blocksuite/store';
 
 import type {
   BlockComponentElement,
   IPoint,
 } from '../../../__internal__/index.js';
-import {
-  contains,
-  getBlockElementsExcludeSubtrees,
-  getRectByBlockElement,
-} from '../../../__internal__/index.js';
-import { getExtendBlockRange } from '../../../__internal__/utils/block-range.js';
-import type { DefaultSelectionSlots } from '../default-page-block.js';
-import type { DefaultSelectionManager, PageSelectionState } from './index.js';
-
-// distance to the upper and lower boundaries of the viewport
-const threshold = SCROLL_THRESHOLD / 2;
+import { contains } from '../../../__internal__/index.js';
 
 function intersects(a: DOMRect, b: DOMRect, offset: IPoint) {
   return (
@@ -113,101 +101,4 @@ export function filterBlocksExcludeSubtrees(
   }
 
   return results;
-}
-
-export function updateLocalSelectionRange(page: Page) {
-  const blockRange = getExtendBlockRange(page);
-  if (!blockRange || blockRange.type === 'Block') {
-    return;
-  }
-  // const userRange: UserRange = {
-  //   startOffset: blockRange.startOffset,
-  //   endOffset: blockRange.endOffset,
-  //   blockIds: blockRange.models.map(m => m.id),
-  // };
-  // page.awarenessStore.setLocalRange(page, userRange);
-}
-
-export function setSelectedBlocks(
-  state: PageSelectionState,
-  slots: DefaultSelectionSlots,
-  selectedBlocks: BlockComponentElement[],
-  rects?: DOMRect[]
-) {
-  state.selectedBlocks = selectedBlocks;
-
-  if (rects) {
-    slots.selectedRectsUpdated.emit(rects);
-    return;
-  }
-
-  const calculatedRects = [] as DOMRect[];
-  for (const block of getBlockElementsExcludeSubtrees(selectedBlocks)) {
-    calculatedRects.push(getRectByBlockElement(block));
-  }
-
-  slots.selectedRectsUpdated.emit(calculatedRects);
-}
-
-export interface AutoScrollHooks {
-  /**
-   * @deprecated This hook is meaningless.
-   */
-  init(): void;
-  onMove(): void;
-  onScroll(val: number): void;
-}
-
-export function autoScroll(
-  selection: DefaultSelectionManager,
-  e: PointerEventState,
-  hooks: AutoScrollHooks
-) {
-  const { state } = selection;
-  const { y } = e.point;
-
-  const { viewportElement } = selection;
-  const { viewport } = state;
-  const { scrollHeight, clientHeight } = viewport;
-  let { scrollTop } = viewport;
-  const max = scrollHeight - clientHeight;
-
-  hooks.init();
-
-  let auto = true;
-  const autoScroll = () => {
-    if (!auto) {
-      state.clearRaf();
-      return;
-    } else {
-      state.rafID = requestAnimationFrame(autoScroll);
-    }
-
-    // TODO: for the behavior of scrolling, see the native selection
-    // speed easeOutQuad + easeInQuad
-    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
-      // ↓
-      const d = (threshold - (clientHeight - y)) * 0.25;
-      scrollTop += d;
-      auto = Math.ceil(scrollTop) < max;
-      viewportElement.scrollTop = scrollTop;
-
-      hooks.onScroll(d);
-    } else if (scrollTop > 0 && y < threshold) {
-      // ↑
-      const d = (y - threshold) * 0.25;
-      scrollTop += d;
-      auto = scrollTop > 0;
-      viewportElement.scrollTop = scrollTop;
-
-      hooks.onScroll(d);
-    } else {
-      auto = false;
-
-      hooks.onMove();
-    }
-  };
-
-  state.clearRaf();
-  state.rafID = requestAnimationFrame(autoScroll);
 }
