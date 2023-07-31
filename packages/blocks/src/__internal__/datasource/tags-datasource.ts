@@ -8,7 +8,7 @@ import {
   selectOptionColors,
 } from '../../components/tags/colors.js';
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
-import { columnManager } from '../../database-block/common/columns/manager.js';
+import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
 import { selectColumnTypeName } from '../../database-block/common/columns/select/type.js';
 import { textColumnTypeName } from '../../database-block/common/columns/text/type.js';
 import type { InsertPosition } from '../../database-block/index.js';
@@ -179,7 +179,5 @@ export class TagsDatasource extends BaseDataSource {
   private changeTag = (tag: SelectTag) => {
     this.changeTags(this.tags.map(v => (v.id === tag.id ? tag : v)));
   };
-  public override get columnManager() {
-    return columnManager;
-  }
+  public allPropertyConfig: ColumnConfig[] = [];
 }

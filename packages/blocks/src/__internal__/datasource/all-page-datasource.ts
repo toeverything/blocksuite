@@ -2,7 +2,7 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store';
 
-import { columnManager } from '../../database-block/common/columns/manager.js';
+import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
 import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
 import { numberColumnTypeName } from '../../database-block/common/columns/number/type.js';
 import { textColumnTypeName } from '../../database-block/common/columns/text/type.js';
@@ -137,7 +137,6 @@ export class AllPageDatasource extends BaseDataSource {
   public slots = {
     update: new Slot(),
   };
-  public override get columnManager() {
-    return columnManager;
-  }
+
+  public allPropertyConfig: ColumnConfig[] = [];
 }

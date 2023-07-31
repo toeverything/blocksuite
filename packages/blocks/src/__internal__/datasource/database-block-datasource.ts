@@ -217,10 +217,6 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return super.propertyGetDefaultWidth(propertyId);
   }
 
-  public override get columnManager() {
-    return columnManager;
-  }
-
   public get allPropertyConfig() {
     return [];
   }
