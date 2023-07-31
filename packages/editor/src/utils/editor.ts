@@ -186,7 +186,8 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
-        defaultPageBlock.selection?.clear();
+        // FIXME:
+        // defaultPageBlock.selection?.clear();
       }
     },
     getAllowedBlocks: () => {

@@ -88,14 +88,71 @@ export class RangeController {
     return selection;
   }
 
-  getSelectedBlocks(range: Range): BaseBlockModel[] {
-    const selectedBlocks = Array.from<BlockElement>(
-      this.root.querySelectorAll('[data-block-id]')
-    )
-      .filter(el => range.intersectsNode(el))
-      .map(el => el.model);
+  findBlockElementsByRange = (range: Range): BlockElement[] => {
+    const start = range.startContainer;
+    const end = range.endContainer;
+    const ancestor = range.commonAncestorContainer;
+    const getBlockView = this.root.blockStore.config.getBlockViewByNode;
+    if (ancestor.nodeType === Node.TEXT_NODE) {
+      const block = getBlockView(ancestor);
+      if (!block) return [];
+      return [block];
+    }
+    const nodes = new Set<Node>();
 
-    return selectedBlocks;
+    let startRecorded = false;
+    const dfsDOMSearch = (current: Node | null, ancestor: Node) => {
+      if (!current) {
+        return;
+      }
+      if (current === ancestor) {
+        return;
+      }
+      if (current === end) {
+        nodes.add(current);
+        startRecorded = false;
+        return;
+      }
+      if (current === start) {
+        startRecorded = true;
+      }
+      if (startRecorded) {
+        if (
+          current.nodeType === Node.TEXT_NODE ||
+          current.nodeType === Node.ELEMENT_NODE
+        ) {
+          nodes.add(current);
+        }
+      }
+      dfsDOMSearch(current.firstChild, ancestor);
+      dfsDOMSearch(current.nextSibling, ancestor);
+    };
+    dfsDOMSearch(ancestor.firstChild, ancestor);
+
+    const blocks = new Set<BlockElement>();
+    nodes.forEach(node => {
+      const blockView = getBlockView(node);
+      if (!blockView) {
+        return;
+      }
+      if (blocks.has(blockView)) {
+        return;
+      }
+      blocks.add(blockView);
+    });
+    return Array.from(blocks);
+  };
+
+  getSelectedBlocks(range: Range): BaseBlockModel['id'][] {
+    const blocksId = Array.from(
+      range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
+    ).map(block => {
+      const id = block.getAttribute(BLOCK_ID_ATTR);
+      assertExists(id, 'Cannot find block id');
+      return id;
+    });
+
+    return blocksId;
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {
@@ -108,17 +165,22 @@ export class RangeController {
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
     );
 
+    const maxLength = startVirgoElement.virgoEditor.yText.length;
+    const index = point.index >= maxLength ? maxLength : point.index;
+    const length =
+      index + point.length >= maxLength ? maxLength - index : point.length;
+
     startVirgoElement.virgoEditor.setVRange(
       {
-        index: point.index,
-        length: point.length,
+        index,
+        length,
       },
       false
     );
 
     return startVirgoElement.virgoEditor.toDomRange({
-      index: point.index,
-      length: point.length,
+      index,
+      length,
     });
   }
 

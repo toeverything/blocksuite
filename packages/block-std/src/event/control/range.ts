@@ -15,25 +15,68 @@ export class RangeControl {
       'selectionchange',
       this._selectionChange
     );
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'compositionstart',
+      this._compositionStart
+    );
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'compositionend',
+      this._compositionEnd
+    );
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'compositionupdate',
+      this._compositionUpdate
+    );
   }
+
+  private _compositionUpdate = (event: Event) => {
+    const scope = this._buildScope('compositionUpdate');
+
+    this._dispatcher.run(
+      'compositionUpdate',
+      this._createContext(event),
+      scope
+    );
+  };
+
+  private _compositionStart = (event: Event) => {
+    const scope = this._buildScope('compositionStart');
+
+    this._dispatcher.run('compositionStart', this._createContext(event), scope);
+  };
+
+  private _compositionEnd = (event: Event) => {
+    const scope = this._buildScope('compositionEnd');
+
+    this._dispatcher.run('compositionEnd', this._createContext(event), scope);
+  };
+
+  private _selectionChange = (event: Event) => {
+    const scope = this._buildScope('selectionChange');
+
+    this._dispatcher.run('selectionChange', this._createContext(event), scope);
+  };
 
   private _createContext(event: Event) {
     return UIEventStateContext.from(new UIEventState(event));
   }
 
-  private _selectionChange = (event: Event) => {
+  private _buildScope = (eventName: EventName) => {
     let scope: EventScope | undefined;
     const selection = document.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
-      scope = this._buildEventScopeByNativeRange('selectionChange', range);
+      scope = this._buildEventScopeByNativeRange(eventName, range);
       this._prev = range;
     } else if (this._prev !== null) {
-      scope = this._buildEventScopeByNativeRange('selectionChange', this._prev);
+      scope = this._buildEventScopeByNativeRange(eventName, this._prev);
       this._prev = null;
     }
 
-    this._dispatcher.run('selectionChange', this._createContext(event), scope);
+    return scope;
   };
 
   private _buildEventScopeByNativeRange(name: EventName, range: Range) {

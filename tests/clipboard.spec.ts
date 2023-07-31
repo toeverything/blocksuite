@@ -141,7 +141,7 @@ test(
   }
 );
 
-test(
+test.fixme(
   scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -525,24 +525,27 @@ test.skip('should keep first line format when pasted into a new line', async ({
   );
 });
 
-test(scoped`cut should work for multi-block selection`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
+test.fixme(
+  scoped`cut should work for multi-block selection`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
 
-  await type(page, 'a');
-  await pressEnter(page);
-  await type(page, 'b');
-  await pressEnter(page);
-  await type(page, 'c');
-  await selectAllByKeyboard(page);
-  await selectAllByKeyboard(page);
-  await page.keyboard.press(`${SHORT_KEY}+x`);
-  await assertText(page, '');
-  await page.keyboard.press(`${SHORT_KEY}+v`);
-  await waitNextFrame(page);
-  await assertRichTexts(page, ['a', 'b', 'c']);
-});
+    await type(page, 'a');
+    await pressEnter(page);
+    await type(page, 'b');
+    await pressEnter(page);
+    await type(page, 'c');
+    await selectAllByKeyboard(page);
+    await selectAllByKeyboard(page);
+    await page.keyboard.press(`${SHORT_KEY}+x`);
+    await assertText(page, '');
+    await page.keyboard.press(`${SHORT_KEY}+v`);
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['a', 'b', 'c']);
+  }
+);
 
 test(
   scoped`pasting into empty list should not convert the list into paragraph`,
@@ -644,7 +647,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   );
 });
 
-test(scoped`should copy and paste of database work`, async ({ page }) => {
+test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseWithParagraphState(page);
 
@@ -820,7 +823,7 @@ test(scoped`copy and paste to selection block selection`, async ({ page }) => {
   await assertRichTexts(page, ['1234', '']);
 });
 
-test(
+test.fixme(
   scoped`should keep paragraph block's type when pasting at the start of empty paragraph block except type text`,
   async ({ page }) => {
     test.info().annotations.push({

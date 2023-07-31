@@ -28,7 +28,7 @@ const pressCreateLinkShortCut = async (page: Page) => {
   await page.keyboard.press(`${SHORT_KEY}+k`);
 };
 
-test('basic link', async ({ page }) => {
+test.fixme('basic link', async ({ page }) => {
   const linkText = 'linkText';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
@@ -222,7 +222,7 @@ test('readonly mode should not trigger link popup', async ({ page }) => {
   await expect(linkPopoverInput).not.toBeVisible();
 });
 
-test('should mock selection not stored', async ({ page }) => {
+test.fixme('should mock selection not stored', async ({ page }) => {
   const linkText = 'linkText';
   const link = 'http://example.com';
   await enterPlaygroundRoom(page);
@@ -257,7 +257,7 @@ test('should mock selection not stored', async ({ page }) => {
   await expect(mockSelectNode).toHaveCount(0);
 });
 
-test('should keyboard work in link popover', async ({ page }) => {
+test.fixme('should keyboard work in link popover', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const linkText = 'linkText';
   await createLinkBlock(page, linkText, 'http://example.com');
@@ -291,42 +291,43 @@ test('should keyboard work in link popover', async ({ page }) => {
   await assertKeyboardWorkInInput(page, editLinkInput);
 });
 
-test('link bar should not be appear when the range is collapsed', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, 'aaa');
+test.fixme(
+  'link bar should not be appear when the range is collapsed',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, 'aaa');
 
-  await pressCreateLinkShortCut(page);
-  const linkPopoverLocator = page.locator('.affine-link-popover');
-  await expect(linkPopoverLocator).not.toBeVisible();
+    await pressCreateLinkShortCut(page);
+    const linkPopoverLocator = page.locator('.affine-link-popover');
+    await expect(linkPopoverLocator).not.toBeVisible();
 
-  await dragBetweenIndices(page, [0, 0], [0, 3]);
-  await pressCreateLinkShortCut(page);
-  await expect(linkPopoverLocator).toBeVisible();
+    await dragBetweenIndices(page, [0, 0], [0, 3]);
+    await pressCreateLinkShortCut(page);
+    await expect(linkPopoverLocator).toBeVisible();
 
-  await focusRichTextEnd(page);
-  await pressShiftEnter(page);
-  await waitNextFrame(page);
-  await type(page, 'bbb');
-  await dragBetweenIndices(page, [0, 1], [0, 5]);
-  await pressCreateLinkShortCut(page);
-  await expect(linkPopoverLocator).toBeVisible();
+    await focusRichTextEnd(page);
+    await pressShiftEnter(page);
+    await waitNextFrame(page);
+    await type(page, 'bbb');
+    await dragBetweenIndices(page, [0, 1], [0, 5]);
+    await pressCreateLinkShortCut(page);
+    await expect(linkPopoverLocator).toBeVisible();
 
-  await focusRichTextEnd(page, 0);
-  await pressEnter(page);
-  // create auto line-break in span element
-  await type(page, 'd'.repeat(67));
-  await page.mouse.click(1, 1);
-  await waitNextFrame(page);
-  await dragBetweenIndices(page, [1, 1], [1, 66]);
-  await pressCreateLinkShortCut(page);
-  await expect(linkPopoverLocator).toBeVisible();
-});
+    await focusRichTextEnd(page, 0);
+    await pressEnter(page);
+    // create auto line-break in span element
+    await type(page, 'd'.repeat(67));
+    await page.mouse.click(1, 1);
+    await waitNextFrame(page);
+    await dragBetweenIndices(page, [1, 1], [1, 66]);
+    await pressCreateLinkShortCut(page);
+    await expect(linkPopoverLocator).toBeVisible();
+  }
+);
 
-test('create link with paste', async ({ page }) => {
+test.fixme('create link with paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);

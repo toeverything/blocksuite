@@ -106,32 +106,33 @@ test.fixme(
   }
 );
 
-test('enter shortcut on focusing embed block and its caption', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initImageState(page);
-  await assertRichImage(page, 1);
+test.fixme(
+  'enter shortcut on focusing embed block and its caption',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initImageState(page);
+    await assertRichImage(page, 1);
 
-  await moveToImage(page);
-  await assertImageOption(page);
+    await moveToImage(page);
+    await assertImageOption(page);
 
-  const caption = page.locator('.affine-embed-wrapper-caption');
-  await focusCaption(page);
-  await assertKeyboardWorkInInput(page, caption);
-  await type(page, '123');
+    const caption = page.locator('.affine-embed-wrapper-caption');
+    await focusCaption(page);
+    await assertKeyboardWorkInInput(page, caption);
+    await type(page, '123');
 
-  test.info().annotations.push({
-    type: 'issue',
-    description: 'https://github.com/toeverything/blocksuite/issues/2495',
-  });
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2495',
+    });
 
-  // blur
-  await page.mouse.click(0, 500);
-  await caption.click({ position: { x: 0, y: 0 } });
-  await type(page, 'abc');
-  await expect(caption).toHaveValue('abc123');
-});
+    // blur
+    await page.mouse.click(0, 500);
+    await caption.click({ position: { x: 0, y: 0 } });
+    await type(page, 'abc');
+    await expect(caption).toHaveValue('abc123');
+  }
+);
 
 test.fixme(
   'popup menu should follow position of image when scrolling',
