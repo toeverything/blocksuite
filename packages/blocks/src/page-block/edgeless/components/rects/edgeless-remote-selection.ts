@@ -81,9 +81,9 @@ export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
     Object.entries(remoteSelection).forEach(([clientId, selection]) => {
       if (selection.elements.length === 0) return;
 
-      const elements = selection.elements.map(id =>
-        this.edgeless.getElementModel(id)
-      ) as Selectable[];
+      const elements = selection.elements
+        .map(id => this.edgeless.getElementModel(id))
+        .filter(element => element) as Selectable[];
       const rect = getSelectedRect(elements);
 
       if (rect.width === 0 || rect.height === 0) return;
