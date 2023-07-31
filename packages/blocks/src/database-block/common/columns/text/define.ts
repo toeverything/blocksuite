@@ -1,16 +1,15 @@
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tString } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
-import { TextCell, TextCellEditing } from './cell-renderer.js';
-import { textColumnTypeName } from './type.js';
+
+export const textColumnTypeName = 'text';
 
 declare global {
   interface ColumnConfigMap {
-    [textColumnTypeName]: typeof textColumnConfig;
+    [textColumnTypeName]: typeof textPureColumnConfig;
   }
 }
-export const textColumnConfig = columnManager.register<string>(
+export const textPureColumnConfig = columnManager.register<string>(
   textColumnTypeName,
   {
     name: 'Plain-Text',
@@ -21,10 +20,3 @@ export const textColumnConfig = columnManager.register<string>(
     cellToJson: data => data ?? null,
   }
 );
-columnRenderer.register({
-  type: textColumnTypeName,
-  cellRenderer: {
-    view: createFromBaseCellRenderer(TextCell),
-    edit: createFromBaseCellRenderer(TextCellEditing),
-  },
-});

@@ -6,6 +6,8 @@ import {
   checkboxUnchecked,
 } from '../../../../list-block/utils/icons.js';
 import { BaseCellRenderer } from '../base-cell.js';
+import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
+import { checkboxPureColumnConfig } from './define.js';
 
 @customElement('affine-database-checkbox-cell')
 export class CheckboxCell extends BaseCellRenderer<boolean> {
@@ -99,3 +101,11 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     </div>`;
   }
 }
+
+columnRenderer.register({
+  type: checkboxPureColumnConfig.type,
+  cellRenderer: {
+    view: createFromBaseCellRenderer(CheckboxCell),
+  },
+});
+export const checkboxColumnConfig = checkboxPureColumnConfig;

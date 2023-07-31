@@ -11,7 +11,7 @@ import { BaseService } from '../__internal__/service/index.js';
 import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import type { SerializedBlock } from '../__internal__/utils/types.js';
 import { columnManager } from './common/columns/manager.js';
-import { multiSelectColumnTypeName } from './common/columns/multi-select/type.js';
+import { multiSelectColumnTypeName } from './common/columns/multi-select/define.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Column } from './table/types.js';

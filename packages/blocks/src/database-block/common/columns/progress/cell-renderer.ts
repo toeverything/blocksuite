@@ -3,6 +3,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { BaseCellRenderer } from '../base-cell.js';
+import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
+import { progressPureColumnConfig } from './define.js';
 
 const styles = css`
   affine-database-progress-cell-editing {
@@ -235,3 +237,13 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     </div>`;
   }
 }
+
+columnRenderer.register({
+  type: progressPureColumnConfig.type,
+  cellRenderer: {
+    view: createFromBaseCellRenderer(ProgressCell),
+    edit: createFromBaseCellRenderer(ProgressCellEditing),
+  },
+});
+
+export const progressColumnConfig = progressPureColumnConfig;

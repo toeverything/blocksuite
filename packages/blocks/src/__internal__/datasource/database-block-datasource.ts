@@ -2,18 +2,18 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { undefined } from 'zod';
 
-import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/define.js';
-import { dateColumnConfig } from '../../database-block/common/columns/date/define.js';
-import { linkColumnConfig } from '../../database-block/common/columns/link/define.js';
+import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/cell-renderer.js';
+import { dateColumnConfig } from '../../database-block/common/columns/date/cell-renderer.js';
+import { linkColumnConfig } from '../../database-block/common/columns/link/cell-renderer.js';
 import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
-import { multiSelectColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
-import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
-import { numberColumnConfig } from '../../database-block/common/columns/number/define.js';
-import { progressColumnConfig } from '../../database-block/common/columns/progress/define.js';
-import { richTextColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
-import { selectColumnConfig } from '../../database-block/common/columns/select/define.js';
-import { titleColumnConfig } from '../../database-block/common/columns/title/define.js';
+import { multiSelectColumnConfig } from '../../database-block/common/columns/multi-select/cell-renderer.js';
+import { multiSelectPureColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
+import { numberColumnConfig } from '../../database-block/common/columns/number/cell-renderer.js';
+import { progressColumnConfig } from '../../database-block/common/columns/progress/cell-renderer.js';
+import { richTextColumnConfig } from '../../database-block/common/columns/rich-text/cell-renderer.js';
+import { selectColumnConfig } from '../../database-block/common/columns/select/cell-renderer.js';
+import { titleColumnConfig } from '../../database-block/common/columns/title/cell-renderer.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/index.js';
@@ -114,7 +114,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return this._model.addColumn(
       insertPosition,
       columnManager
-        .getColumn(multiSelectColumnTypeName)
+        .getColumn(multiSelectPureColumnConfig.type)
         .create(this.newColumnName())
     );
   }

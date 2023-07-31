@@ -10,6 +10,8 @@ import {
   normalizeUrl,
 } from '../../../../__internal__/utils/url.js';
 import { BaseCellRenderer } from '../base-cell.js';
+import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
+import { linkPureColumnConfig } from './define.js';
 
 @customElement('affine-database-link-cell')
 export class LinkCell extends BaseCellRenderer<string> {
@@ -175,3 +177,13 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
     />`;
   }
 }
+
+columnRenderer.register({
+  type: linkPureColumnConfig.type,
+  cellRenderer: {
+    view: createFromBaseCellRenderer(LinkCell),
+    edit: createFromBaseCellRenderer(LinkCellEditing),
+  },
+});
+
+export const linkColumnConfig = linkPureColumnConfig;

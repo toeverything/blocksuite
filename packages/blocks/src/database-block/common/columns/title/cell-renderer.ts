@@ -5,6 +5,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { html } from 'lit/static-html.js';
 
 import { BaseCellRenderer } from '../base-cell.js';
+import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
+import { titleColumnTypeName, titlePureColumnConfig } from './define.js';
 
 @customElement('affine-database-title-cell')
 export class TitleCell extends BaseCellRenderer<TemplateResult> {
@@ -125,3 +127,12 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
     `;
   }
 }
+
+columnRenderer.register({
+  type: titleColumnTypeName,
+  cellRenderer: {
+    view: createFromBaseCellRenderer(TitleCell),
+  },
+});
+
+export const titleColumnConfig = titlePureColumnConfig;

@@ -9,8 +9,8 @@ import {
 } from '../../components/tags/colors.js';
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
 import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
-import { selectColumnTypeName } from '../../database-block/common/columns/select/type.js';
-import { textColumnTypeName } from '../../database-block/common/columns/text/type.js';
+import { selectPureColumnConfig } from '../../database-block/common/columns/select/define.js';
+import { textPureColumnConfig } from '../../database-block/common/columns/text/define.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
@@ -33,7 +33,7 @@ export class TagsDatasource extends BaseDataSource {
     }
   > = {
     value: {
-      type: textColumnTypeName,
+      type: textPureColumnConfig.type,
       getValue: tag => tag.value,
       setValue: (tag, value) => {
         this.changeTag({
@@ -43,7 +43,7 @@ export class TagsDatasource extends BaseDataSource {
       },
     },
     color: {
-      type: selectColumnTypeName,
+      type: selectPureColumnConfig.type,
       getValue: tag => tag.color,
       setValue: (tag, value) => {
         this.changeTag({
@@ -60,7 +60,7 @@ export class TagsDatasource extends BaseDataSource {
       }),
     },
     parent: {
-      type: selectColumnTypeName,
+      type: selectPureColumnConfig.type,
       getData: () => ({ options: this.meta.properties.tags.options }),
       getValue: tag => tag.parentId,
       setValue: (tag, value) => {

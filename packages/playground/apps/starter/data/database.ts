@@ -1,8 +1,8 @@
 import type { SelectTag } from '@blocksuite/blocks/components/tags/multi-tag-select';
 import { columnManager } from '@blocksuite/blocks/database-block/common/columns/manager';
-import { numberColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/number/type';
-import { richTextColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/rich-text/type';
-import { selectColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/select/type';
+import { numberColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/number/define';
+import { richTextColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/rich-text/define';
+import { selectColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/select/define';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
 import { nanoid, Text, type Workspace } from '@blocksuite/store';
 

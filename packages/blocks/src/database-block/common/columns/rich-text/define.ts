@@ -6,18 +6,17 @@ import { getTagColor } from '../../../../components/tags/colors.js';
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { tString } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-import { multiSelectColumnTypeName } from '../multi-select/type.js';
-import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
-import { selectColumnTypeName } from '../select/type.js';
-import { RichTextCell, RichTextCellEditing } from './cell-renderer.js';
-import { richTextColumnTypeName } from './type.js';
+import { multiSelectColumnTypeName } from '../multi-select/define.js';
+import { selectColumnTypeName } from '../select/define.js';
+
+export const richTextColumnTypeName = 'richText';
 
 declare global {
   interface ColumnConfigMap {
-    [richTextColumnTypeName]: typeof richTextColumnConfig;
+    [richTextColumnTypeName]: typeof richTextPureColumnConfig;
   }
 }
-export const richTextColumnConfig = columnManager.register<Text['yText']>(
+export const richTextPureColumnConfig = columnManager.register<Text['yText']>(
   richTextColumnTypeName,
   {
     name: 'Text',
@@ -28,37 +27,37 @@ export const richTextColumnConfig = columnManager.register<Text['yText']>(
     cellToJson: data => data?.toString() ?? null,
   }
 );
-columnRenderer.register({
-  type: richTextColumnTypeName,
-  cellRenderer: {
-    view: createFromBaseCellRenderer(RichTextCell),
-    edit: createFromBaseCellRenderer(RichTextCellEditing),
-  },
-});
-richTextColumnConfig.registerConvert(selectColumnTypeName, (column, cells) => {
-  const options: Record<string, SelectTag> = {};
-  const getTag = (name: string) => {
-    if (options[name]) return options[name];
-    const tag: SelectTag = { id: nanoid(), value: name, color: getTagColor() };
-    options[name] = tag;
-    return tag;
-  };
-  return {
-    cells: cells.map(v => {
-      const tags = v?.toString().split(',');
-      const value = tags?.[0]?.trim();
-      if (value) {
-        return getTag(value).id;
-      }
-      return undefined;
-    }),
-    column: {
-      options: Object.values(options),
-    },
-  };
-});
+richTextPureColumnConfig.registerConvert(
+  selectColumnTypeName,
+  (column, cells) => {
+    const options: Record<string, SelectTag> = {};
+    const getTag = (name: string) => {
+      if (options[name]) return options[name];
+      const tag: SelectTag = {
+        id: nanoid(),
+        value: name,
+        color: getTagColor(),
+      };
+      options[name] = tag;
+      return tag;
+    };
+    return {
+      cells: cells.map(v => {
+        const tags = v?.toString().split(',');
+        const value = tags?.[0]?.trim();
+        if (value) {
+          return getTag(value).id;
+        }
+        return undefined;
+      }),
+      column: {
+        options: Object.values(options),
+      },
+    };
+  }
+);
 
-richTextColumnConfig.registerConvert(
+richTextPureColumnConfig.registerConvert(
   multiSelectColumnTypeName,
   (column, cells) => {
     const options: Record<string, SelectTag> = {};

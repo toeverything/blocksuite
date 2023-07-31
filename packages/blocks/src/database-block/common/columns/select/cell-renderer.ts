@@ -7,7 +7,9 @@ import { html } from 'lit/static-html.js';
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
 import { BaseCellRenderer } from '../base-cell.js';
+import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import type { SelectColumnData } from '../types.js';
+import { selectPureColumnConfig } from './define.js';
 
 @customElement('affine-database-select-cell')
 export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {
@@ -76,3 +78,13 @@ export class SelectCellEditing extends BaseCellRenderer<
     `;
   }
 }
+
+columnRenderer.register({
+  type: selectPureColumnConfig.type,
+  cellRenderer: {
+    view: createFromBaseCellRenderer(SelectCell),
+    edit: createFromBaseCellRenderer(SelectCellEditing),
+  },
+});
+
+export const selectColumnConfig = selectPureColumnConfig;

@@ -2,6 +2,8 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { BaseCellRenderer } from '../base-cell.js';
+import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
+import { numberPureColumnConfig } from './define.js';
 
 @customElement('affine-database-number-cell')
 export class NumberCell extends BaseCellRenderer<number> {
@@ -125,3 +127,13 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     />`;
   }
 }
+
+columnRenderer.register({
+  type: numberPureColumnConfig.type,
+  cellRenderer: {
+    view: createFromBaseCellRenderer(NumberCell),
+    edit: createFromBaseCellRenderer(NumberCellEditing),
+  },
+});
+
+export const numberColumnConfig = numberPureColumnConfig;

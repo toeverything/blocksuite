@@ -18,7 +18,7 @@ import { ContentParser } from '../../__internal__/content-parser/index.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
 import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
-import { richTextColumnTypeName } from '../../database-block/common/columns/rich-text/type.js';
+import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
@@ -181,7 +181,7 @@ export async function importNotion(workspace: Workspace, file: File) {
 
             const columns: Column[] = titles.slice(1).map((value, index) => {
               return columnManager
-                .getColumn(richTextColumnTypeName)
+                .getColumn(richTextPureColumnConfig.type)
                 .createWithId('' + id++, value);
             });
             if (rows.length > 0) {
@@ -193,7 +193,7 @@ export async function importNotion(workspace: Workspace, file: File) {
               for (let i = 0; i < addNum; i++) {
                 columns.push(
                   columnManager
-                    .getColumn(richTextColumnTypeName)
+                    .getColumn(richTextPureColumnConfig.type)
                     .createWithId('' + id++, '')
                 );
               }

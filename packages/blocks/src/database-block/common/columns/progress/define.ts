@@ -3,17 +3,16 @@ import { Text } from '@blocksuite/store';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tNumber } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
-import { richTextColumnTypeName } from '../rich-text/type.js';
-import { ProgressCell, ProgressCellEditing } from './cell-renderer.js';
-import { progressColumnTypeName } from './type.js';
+import { richTextColumnTypeName } from '../rich-text/define.js';
+
+export const progressColumnTypeName = 'progress';
 
 declare global {
   interface ColumnConfigMap {
-    [progressColumnTypeName]: typeof progressColumnConfig;
+    [progressColumnTypeName]: typeof progressPureColumnConfig;
   }
 }
-export const progressColumnConfig = columnManager.register<number>(
+export const progressPureColumnConfig = columnManager.register<number>(
   progressColumnTypeName,
   {
     name: 'Progress',
@@ -24,14 +23,7 @@ export const progressColumnConfig = columnManager.register<number>(
     cellToJson: data => data ?? null,
   }
 );
-columnRenderer.register({
-  type: progressColumnTypeName,
-  cellRenderer: {
-    view: createFromBaseCellRenderer(ProgressCell),
-    edit: createFromBaseCellRenderer(ProgressCellEditing),
-  },
-});
-progressColumnConfig.registerConvert(
+progressPureColumnConfig.registerConvert(
   richTextColumnTypeName,
   (column, cells) => ({
     column: {},

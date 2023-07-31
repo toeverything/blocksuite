@@ -4,19 +4,18 @@ import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tTag } from '../../../logical/data-type.js';
 import { tArray } from '../../../logical/typesystem.js';
 import { columnManager } from '../manager.js';
-import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
-import { richTextColumnTypeName } from '../rich-text/type.js';
-import { selectColumnTypeName } from '../select/type.js';
+import { richTextColumnTypeName } from '../rich-text/define.js';
+import { selectColumnTypeName } from '../select/define.js';
 import type { SelectColumnData } from '../types.js';
-import { MultiSelectCell, MultiSelectCellEditing } from './cell-renderer.js';
-import { multiSelectColumnTypeName } from './type.js';
+
+export const multiSelectColumnTypeName = 'multiSelect';
 
 declare global {
   interface ColumnConfigMap {
-    [multiSelectColumnTypeName]: typeof multiSelectColumnConfig;
+    multiSelect: typeof multiSelectPureColumnConfig;
   }
 }
-export const multiSelectColumnConfig = columnManager.register<
+export const multiSelectPureColumnConfig = columnManager.register<
   string[],
   SelectColumnData
 >(multiSelectColumnTypeName, {
@@ -36,21 +35,14 @@ export const multiSelectColumnConfig = columnManager.register<
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
   cellToJson: data => data ?? null,
 });
-columnRenderer.register({
-  type: multiSelectColumnTypeName,
-  cellRenderer: {
-    view: createFromBaseCellRenderer(MultiSelectCell),
-    edit: createFromBaseCellRenderer(MultiSelectCellEditing),
-  },
-});
-multiSelectColumnConfig.registerConvert(
+multiSelectPureColumnConfig.registerConvert(
   selectColumnTypeName,
   (column, cells) => ({
     column,
     cells: cells.map(v => v?.[0]),
   })
 );
-multiSelectColumnConfig.registerConvert(
+multiSelectPureColumnConfig.registerConvert(
   richTextColumnTypeName,
   (column, cells) => {
     const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));

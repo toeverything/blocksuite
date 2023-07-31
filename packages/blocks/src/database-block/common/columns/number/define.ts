@@ -3,17 +3,16 @@ import { Text } from '@blocksuite/store';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tNumber } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
-import { richTextColumnTypeName } from '../rich-text/type.js';
-import { NumberCell, NumberCellEditing } from './cell-renderer.js';
-import { numberColumnTypeName } from './type.js';
+import { richTextColumnTypeName } from '../rich-text/define.js';
+
+export const numberColumnTypeName = 'number';
 
 declare global {
   interface ColumnConfigMap {
-    [numberColumnTypeName]: typeof numberColumnConfig;
+    [numberColumnTypeName]: typeof numberPureColumnConfig;
   }
 }
-export const numberColumnConfig = columnManager.register<
+export const numberPureColumnConfig = columnManager.register<
   number,
   {
     decimal: number;
@@ -26,14 +25,10 @@ export const numberColumnConfig = columnManager.register<
   cellToString: data => data?.toString() ?? '',
   cellToJson: data => data ?? null,
 });
-columnRenderer.register({
-  type: numberColumnTypeName,
-  cellRenderer: {
-    view: createFromBaseCellRenderer(NumberCell),
-    edit: createFromBaseCellRenderer(NumberCellEditing),
-  },
-});
-numberColumnConfig.registerConvert(richTextColumnTypeName, (column, cells) => ({
-  column: {},
-  cells: cells.map(v => new Text(v?.toString()).yText),
-}));
+numberPureColumnConfig.registerConvert(
+  richTextColumnTypeName,
+  (column, cells) => ({
+    column: {},
+    cells: cells.map(v => new Text(v?.toString()).yText),
+  })
+);

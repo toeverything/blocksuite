@@ -3,19 +3,18 @@ import { Text } from '@blocksuite/store';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tTag } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-import { multiSelectColumnTypeName } from '../multi-select/type.js';
-import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
-import { richTextColumnTypeName } from '../rich-text/type.js';
+import { multiSelectColumnTypeName } from '../multi-select/define.js';
+import { richTextColumnTypeName } from '../rich-text/define.js';
 import type { SelectColumnData } from '../types.js';
-import { SelectCell, SelectCellEditing } from './cell-renderer.js';
-import { selectColumnTypeName } from './type.js';
+
+export const selectColumnTypeName = 'select';
 
 declare global {
   interface ColumnConfigMap {
-    [selectColumnTypeName]: typeof selectColumnConfig;
+    [selectColumnTypeName]: typeof selectPureColumnConfig;
   }
 }
-export const selectColumnConfig = columnManager.register<
+export const selectPureColumnConfig = columnManager.register<
   string,
   SelectColumnData
 >(selectColumnTypeName, {
@@ -30,14 +29,7 @@ export const selectColumnConfig = columnManager.register<
   cellToJson: data => data ?? null,
 });
 
-columnRenderer.register({
-  type: selectColumnTypeName,
-  cellRenderer: {
-    view: createFromBaseCellRenderer(SelectCell),
-    edit: createFromBaseCellRenderer(SelectCellEditing),
-  },
-});
-selectColumnConfig.registerConvert(
+selectPureColumnConfig.registerConvert(
   multiSelectColumnTypeName,
   (column, cells) => ({
     column,
@@ -45,10 +37,13 @@ selectColumnConfig.registerConvert(
   })
 );
 
-selectColumnConfig.registerConvert(richTextColumnTypeName, (column, cells) => {
-  const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
-  return {
-    column: {},
-    cells: cells.map(v => new Text(v ? optionMap[v]?.value : '').yText),
-  };
-});
+selectPureColumnConfig.registerConvert(
+  richTextColumnTypeName,
+  (column, cells) => {
+    const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
+    return {
+      column: {},
+      cells: cells.map(v => new Text(v ? optionMap[v]?.value : '').yText),
+    };
+  }
+);

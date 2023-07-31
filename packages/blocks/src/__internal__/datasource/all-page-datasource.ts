@@ -3,9 +3,9 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store';
 
 import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
-import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
-import { numberColumnTypeName } from '../../database-block/common/columns/number/type.js';
-import { textColumnTypeName } from '../../database-block/common/columns/text/type.js';
+import { multiSelectPureColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
+import { numberPureColumnConfig } from '../../database-block/common/columns/number/define.js';
+import { textPureColumnConfig } from '../../database-block/common/columns/text/define.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import type { AllPageDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
@@ -28,14 +28,14 @@ export class AllPageDatasource extends BaseDataSource {
     }
   > = {
     title: {
-      type: textColumnTypeName,
+      type: textPureColumnConfig.type,
       getValue: page => page.meta.title,
       setValue: (page, value) => {
         page.meta.title = `${value ?? ''}`;
       },
     },
     tags: {
-      type: multiSelectColumnTypeName,
+      type: multiSelectPureColumnConfig.type,
       getValue: page => page.meta.tags,
       setValue: (page, value) => {
         page.meta.tags = value as string[];
@@ -49,7 +49,7 @@ export class AllPageDatasource extends BaseDataSource {
       },
     },
     createDate: {
-      type: numberColumnTypeName,
+      type: numberPureColumnConfig.type,
       getValue: page => page.meta.createDate,
     },
   };

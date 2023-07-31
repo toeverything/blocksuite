@@ -3,6 +3,8 @@ import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { BaseCellRenderer } from '../base-cell.js';
+import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
+import { datePureColumnConfig } from './define.js';
 
 @customElement('affine-database-date-cell')
 export class DateCell extends BaseCellRenderer<number> {
@@ -103,3 +105,13 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     />`;
   }
 }
+
+columnRenderer.register({
+  type: datePureColumnConfig.type,
+  cellRenderer: {
+    view: createFromBaseCellRenderer(DateCell),
+    edit: createFromBaseCellRenderer(DateCellEditing),
+  },
+});
+
+export const dateColumnConfig = datePureColumnConfig;

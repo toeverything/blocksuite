@@ -1,30 +1,17 @@
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { tDate } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
-import { DateCell, DateCellEditing } from './cell-renderer.js';
-import { dateColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [dateColumnTypeName]: typeof dateColumnConfig;
+    date: typeof datePureColumnConfig;
   }
 }
-export const dateColumnConfig = columnManager.register<number>(
-  dateColumnTypeName,
-  {
-    name: 'Date',
-    icon: createIcon('DateTime'),
-    type: () => tDate.create(),
-    defaultData: () => ({}),
-    cellToString: data => data?.toString() ?? '',
-    cellToJson: data => data ?? null,
-  }
-);
-columnRenderer.register({
-  type: dateColumnTypeName,
-  cellRenderer: {
-    view: createFromBaseCellRenderer(DateCell),
-    edit: createFromBaseCellRenderer(DateCellEditing),
-  },
+export const datePureColumnConfig = columnManager.register<number>('date', {
+  name: 'Date',
+  icon: createIcon('DateTime'),
+  type: () => tDate.create(),
+  defaultData: () => ({}),
+  cellToString: data => data?.toString() ?? '',
+  cellToJson: data => data ?? null,
 });
