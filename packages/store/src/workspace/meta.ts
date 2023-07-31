@@ -181,7 +181,7 @@ export class WorkspaceMeta {
       console.error(`Page version already set.`);
     }
 
-    if (blockVersions) {
+    if (!blockVersions) {
       const _versions: Record<string, number> = {};
       workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
         _versions[flavour] = schema.version;
