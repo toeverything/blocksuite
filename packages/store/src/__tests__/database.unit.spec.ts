@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { numberColumnConfig } from '@blocksuite/blocks/dist/database-block/common/columns/number/define';
-import { richTextColumnConfig } from '@blocksuite/blocks/dist/database-block/common/columns/rich-text/define';
-import { selectColumnConfig } from '@blocksuite/blocks/dist/database-block/common/columns/select/define';
 import { beforeEach, describe, expect, test } from 'vitest';
 
+import { numberColumnConfig } from '../../../blocks/src/database-block/common/columns/number/define';
+import { richTextColumnConfig } from '../../../blocks/src/database-block/common/columns/rich-text/define';
+import { selectColumnConfig } from '../../../blocks/src/database-block/common/columns/select/define';
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
 import type { Cell, Column } from '../../../blocks/src/database-block/types.js';
