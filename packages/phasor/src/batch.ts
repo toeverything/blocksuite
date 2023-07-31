@@ -1,5 +1,5 @@
 export class Batch<T extends { index: string }> {
-  private elements = new Set<T>();
+  private _elements = new Set<T>();
   private _min = 'a0';
   private _max = 'a0';
 
@@ -21,17 +21,17 @@ export class Batch<T extends { index: string }> {
     this._min = min;
   }
 
-  addElement(ele: T) {
-    const index = ele.index;
+  addElement(element: T) {
+    const index = element.index;
     if (index > this.max) {
       this.max = index;
     } else if (index < this.min) {
       this.min = index;
     }
-    this.elements.add(ele);
+    this._elements.add(element);
   }
 
-  deleteElement(ele: T) {
-    this.elements.delete(ele);
+  deleteElement(element: T) {
+    this._elements.delete(element);
   }
 }
