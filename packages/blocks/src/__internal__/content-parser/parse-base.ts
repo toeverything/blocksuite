@@ -598,29 +598,27 @@ const getIsLink = (htmlElement: HTMLElement) => {
 
 const getTextStyle = (htmlElement: HTMLElement) => {
   const tagName = htmlElement.tagName;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const textStyle: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   } = {};
 
-  const style = (htmlElement.getAttribute('style') || '')
-    .split(';')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .reduce(
-      (
-        style: {
-          [key: string]: any;
-        },
-        styleString
-      ) => {
-        const [key, value] = styleString.split(':');
-        if (key && value) {
-          style[key] = value;
-        }
-        return style;
+  const style = (htmlElement.getAttribute('style') || '').split(';').reduce(
+    (
+      style: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [key: string]: any;
       },
-      {}
-    );
+      styleString
+    ) => {
+      const [key, value] = styleString.split(':');
+      if (key && value) {
+        style[key] = value;
+      }
+      return style;
+    },
+    {}
+  );
 
   if (
     style['font-weight'] === 'bold' ||
