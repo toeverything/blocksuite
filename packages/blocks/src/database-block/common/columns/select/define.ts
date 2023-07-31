@@ -25,12 +25,12 @@ export const selectPureColumnConfig = columnManager.register<
   cellToJson: data => data ?? null,
 });
 
-selectPureColumnConfig.registerConvert('multiSelect', (column, cells) => ({
+selectPureColumnConfig.registerConvert('multi-select', (column, cells) => ({
   column,
   cells: cells.map(v => (v ? [v] : undefined)),
 }));
 
-selectPureColumnConfig.registerConvert('richText', (column, cells) => {
+selectPureColumnConfig.registerConvert('rich-text', (column, cells) => {
   const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
   return {
     column: {},

@@ -5,18 +5,18 @@ import { tArray } from '../../../logical/typesystem.js';
 import { columnManager } from '../manager.js';
 import type { SelectColumnData } from '../types.js';
 
-export const multiSelectColumnTypeName = 'multiSelect';
+export const multiSelectColumnTypeName = 'multi-select';
 
 declare global {
   interface ColumnConfigMap {
-    multiSelect: typeof multiSelectPureColumnConfig;
+    'multi-select': typeof multiSelectPureColumnConfig;
   }
 }
 export const multiSelectPureColumnConfig = columnManager.register<
   string[],
   SelectColumnData
 >(multiSelectColumnTypeName, {
-  name: 'Multi-Select',
+  name: 'Multi-select',
   type: data => tArray(tTag.create({ tags: data.options })),
   defaultData: () => ({
     options: [],
@@ -35,7 +35,7 @@ multiSelectPureColumnConfig.registerConvert('select', (column, cells) => ({
   column,
   cells: cells.map(v => v?.[0]),
 }));
-multiSelectPureColumnConfig.registerConvert('richText', (column, cells) => {
+multiSelectPureColumnConfig.registerConvert('rich-text', (column, cells) => {
   const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
   return {
     column: {},

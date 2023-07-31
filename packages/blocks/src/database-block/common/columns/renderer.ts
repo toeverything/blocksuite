@@ -26,7 +26,7 @@ export class ColumnRendererHelper {
   get(type: Renderer['type']): Renderer {
     const renderer = this._columns.get(type);
     if (!renderer) {
-      throw new Error('cannot find renderer');
+      throw new Error(`cannot find renderer of ${type}`);
     }
     return renderer;
   }

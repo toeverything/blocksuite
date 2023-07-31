@@ -447,6 +447,7 @@ export abstract class BaseDataViewColumnManager
   }
 
   public get icon(): UniComponent | undefined {
+    if (!this.type) return undefined;
     return this.viewManager.getIcon(this.type);
   }
 }

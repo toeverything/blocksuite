@@ -8,7 +8,7 @@ import { columnManager } from '../manager.js';
 import { multiSelectColumnTypeName } from '../multi-select/define.js';
 import { selectColumnTypeName } from '../select/define.js';
 
-export const richTextColumnTypeName = 'richText';
+export const richTextColumnTypeName = 'rich-text';
 
 declare global {
   interface ColumnConfigMap {

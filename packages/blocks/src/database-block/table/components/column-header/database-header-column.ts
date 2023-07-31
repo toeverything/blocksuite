@@ -244,18 +244,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
               input: {
                 search: true,
               },
-              items: this.tableViewManager.allColumnConfig.map(config => {
-                return {
-                  type: 'action',
-                  name: config.name,
-                  icon: html`<uni-lit
-                    .uni="${this.tableViewManager.getIcon(config.type)}"
-                  ></uni-lit>`,
-                  select: () => {
-                    this.column.updateType?.(config.type);
-                  },
-                };
-              }),
+              items: this.tableViewManager.allColumnConfig
+                .filter(v => v.type !== this.column.type)
+                .map(config => {
+                  return {
+                    type: 'action',
+                    name: config.name,
+                    icon: html`<uni-lit
+                      .uni="${this.tableViewManager.getIcon(config.type)}"
+                    ></uni-lit>`,
+                    select: () => {
+                      this.column.updateType?.(config.type);
+                    },
+                  };
+                }),
             },
           },
           {
@@ -375,18 +377,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           search: true,
           placeholder: 'Search',
         },
-        items: this.tableViewManager.allColumnConfig.map(config => {
-          return {
-            type: 'action',
-            name: config.name,
-            icon: html`<uni-lit
-              .uni="${this.tableViewManager.getIcon(config.type)}"
-            ></uni-lit>`,
-            select: () => {
-              this.column.updateType?.(config.type);
-            },
-          };
-        }),
+        items: this.tableViewManager.allColumnConfig
+          .filter(v => v.type !== this.column.type)
+          .map(config => {
+            return {
+              type: 'action',
+              name: config.name,
+              icon: html`<uni-lit
+                .uni="${this.tableViewManager.getIcon(config.type)}"
+              ></uni-lit>`,
+              select: () => {
+                this.column.updateType?.(config.type);
+              },
+            };
+          }),
       },
     });
   };
