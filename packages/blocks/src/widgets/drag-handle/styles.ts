@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-export const DRAG_HANDLE_HEIGHT = 20; // px
+export const DRAG_HANDLE_HEIGHT = 24; // px
 export const DRAG_HANDLE_WIDTH = 16; // px
 
 export const styles = css`
@@ -121,13 +121,5 @@ export const styles = css`
   }
   .affine-drag-handle-container:hover > .affine-drag-handle-line {
     opacity: 1;
-  }
-  .affine-drag-handle-container:hover .affine-drag-handle-normal,
-  .affine-drag-handle-container[data-selected] .affine-drag-handle-normal {
-    display: none !important;
-  }
-  .affine-drag-handle-container:hover .affine-drag-handle-hover,
-  .affine-drag-handle-container[data-selected] .affine-drag-handle-hover {
-    display: flex !important;
   }
 `;
