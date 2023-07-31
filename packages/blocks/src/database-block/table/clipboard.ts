@@ -170,41 +170,30 @@ export class TableViewClipboard implements BaseViewClipboard {
       if (!clipboardData) return true;
 
       const copyedSelection = JSON.parse(clipboardData) as TableViewSelection;
-      const srcColumns = getSrcValuesFromSelection(
-        copyedSelection,
-        model,
-        view
-      );
-      const srcRowLength = srcColumns.length;
-      const srcColumnLength = srcColumns[0].length;
+      let targetRange = getTargetRangeFromSelection(tableSelection, model);
+      let rowStartIndex = targetRange.row.start;
+      let columnStartIndex = targetRange.column.start;
+      let rowLength = targetRange.row.length;
+      let columnLength = targetRange.column.length;
 
-      const targetRange = getTargetRangeFromSelection(tableSelection, model);
-      model.page.captureSync();
-      for (let i = 0; i < targetRange.row.length; i++) {
-        for (let j = 0; j < targetRange.column.length; j++) {
-          const rowIndex = targetRange.row.start + i;
-          const columnIndex = targetRange.column.start + j;
-          const targetColumn = this._model.columns[columnIndex];
-
-          const srcRowIndex = i % srcRowLength;
-          const srcColumnIndex = j % srcColumnLength;
-          const srcColumn = srcColumns[srcRowIndex][srcColumnIndex];
-
-          // Can only be pasted when the column type is the same.
-          if (targetColumn.type !== srcColumn.type) continue;
-
-          const targetContainer = view.selection.getCellContainer(
-            rowIndex,
-            columnIndex
-          );
-          const rowId = targetContainer?.dataset.rowId;
-          const columnId = targetContainer?.dataset.columnId;
-          assertExists(rowId);
-          assertExists(columnId);
-
-          data.cellUpdateValue(rowId, columnId, srcColumn.value);
-        }
+      if (targetRange.anchor) {
+        targetRange = getTargetRangeFromSelection(copyedSelection, model);
+        rowStartIndex = tableSelection.focus.rowIndex;
+        columnStartIndex = tableSelection.focus.columnIndex;
+        rowLength = targetRange.row.length;
+        columnLength = targetRange.column.length;
       }
+
+      pasteToCells(
+        model,
+        data,
+        view,
+        copyedSelection,
+        rowStartIndex,
+        columnStartIndex,
+        rowLength,
+        columnLength
+      );
     }
 
     return true;
@@ -348,6 +337,7 @@ function getTargetRangeFromSelection(
   let range: {
     row: { start: number; end: number; length: number };
     column: { start: number; end: number; length: number };
+    anchor?: boolean;
   } = {
     row: {
       start: 0,
@@ -392,6 +382,7 @@ function getTargetRangeFromSelection(
   } else if (!rowsSelection && !columnsSelection && focus) {
     // single cell
     range = {
+      anchor: true,
       row: {
         start: focus.rowIndex,
         end: focus.rowIndex,
@@ -444,6 +435,47 @@ function pasteToRichText(
       index: index + data.length,
       length: 0,
     });
+  }
+}
+
+function pasteToCells(
+  model: DatabaseBlockModel,
+  data: DataViewTableManager,
+  view: DatabaseTable,
+  copyedSelection: TableViewSelection,
+  rowStartIndex: number,
+  columnStartIndex: number,
+  rowLength: number,
+  columnLength: number
+) {
+  const srcColumns = getSrcValuesFromSelection(copyedSelection, model, view);
+  const srcRowLength = srcColumns.length;
+  const srcColumnLength = srcColumns[0].length;
+
+  model.page.captureSync();
+  for (let i = 0; i < rowLength; i++) {
+    for (let j = 0; j < columnLength; j++) {
+      const rowIndex = rowStartIndex + i;
+      const columnIndex = columnStartIndex + j;
+      const targetColumn = model.columns[columnIndex];
+
+      const srcRowIndex = i % srcRowLength;
+      const srcColumnIndex = j % srcColumnLength;
+      const srcColumn = srcColumns[srcRowIndex][srcColumnIndex];
+
+      // Can only be pasted when the column type is the same.
+      if (targetColumn.type !== srcColumn.type) continue;
+
+      const targetContainer = view.selection.getCellContainer(
+        rowIndex,
+        columnIndex
+      );
+      const rowId = targetContainer?.dataset.rowId;
+      const columnId = targetContainer?.dataset.columnId;
+      if (rowId && columnId) {
+        data.cellUpdateValue(rowId, columnId, srcColumn.value);
+      }
+    }
   }
 }
 
