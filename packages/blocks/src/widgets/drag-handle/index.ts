@@ -28,8 +28,8 @@ export class DragHandleWidget extends WidgetElement {
   @query('.affine-drag-handle-container')
   private _dragHandleContainer!: HTMLDivElement;
 
-  @query('.affine-drag-handle')
-  private _dragHandle!: HTMLDivElement;
+  // @query('.affine-drag-handle')
+  // private _dragHandle!: HTMLDivElement;
 
   @query('.affine-drag-preview')
   private _dragPreview!: HTMLDivElement;
@@ -90,7 +90,7 @@ export class DragHandleWidget extends WidgetElement {
    * @param state PointerEventState
    */
   private _show(blockElement: BlockElement, state: PointerEventState) {
-    const { height, left, top, width } = blockElement.getBoundingClientRect();
+    const { height, left, top } = blockElement.getBoundingClientRect();
     this._dragHandleContainer.style.display = 'block';
     this._dragHandleContainer.style.height = `${height / this._scale}px`;
     this._dragHandleContainer.style.width = `${DRAG_HANDLE_WIDTH}px`;
