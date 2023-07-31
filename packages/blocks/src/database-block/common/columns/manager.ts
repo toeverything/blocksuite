@@ -98,11 +98,11 @@ export class ColumnConfigManager {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GetColumnDataFromConfig<T extends ColumnConfig> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends ColumnConfig<infer R, any> ? R : never;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GetCellDataFromConfig<T extends ColumnConfig> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends ColumnConfig<any, infer R> ? R : never;
 
 export class ColumnConfig<

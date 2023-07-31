@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import { numberColumnConfig } from '@blocksuite/blocks/dist/database-block/common/columns/number/define';
+import { richTextColumnConfig } from '@blocksuite/blocks/dist/database-block/common/columns/rich-text/define';
+import { selectColumnConfig } from '@blocksuite/blocks/dist/database-block/common/columns/select/define';
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { columnManager } from '../../../blocks/src/database-block/common/columns/manager';
-import { numberColumnTypeName } from '../../../blocks/src/database-block/common/columns/number/type';
-import { richTextColumnTypeName } from '../../../blocks/src/database-block/common/columns/rich-text/type';
-import { selectColumnTypeName } from '../../../blocks/src/database-block/common/columns/select/type';
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
 import type { Cell, Column } from '../../../blocks/src/database-block/types.js';
@@ -78,20 +77,12 @@ describe('DatabaseManager', () => {
     ) as DatabaseBlockModel;
     db = databaseModel;
 
-    col1 = db.addColumn(
-      'end',
-      columnManager.getColumn(numberColumnTypeName).create('Number')
-    );
+    col1 = db.addColumn('end', numberColumnConfig.create('Number'));
     col2 = db.addColumn(
       'end',
-      columnManager
-        .create(selectColumnTypeName)
-        .create('Single Select', { options: selection })
+      selectColumnConfig.create('Single Select', { options: selection })
     );
-    col3 = db.addColumn(
-      'end',
-      columnManager.getColumn(richTextColumnTypeName).create('Rich Text')
-    );
+    col3 = db.addColumn('end', richTextColumnConfig.create('Rich Text'));
 
     page.updateBlock(databaseModel, {
       columns: [col1, col2, col3],
@@ -124,7 +115,7 @@ describe('DatabaseManager', () => {
 
   test('getColumn', () => {
     const column = {
-      ...columnManager.getColumn(numberColumnTypeName).create('testColumnId'),
+      ...numberColumnConfig.create('testColumnId'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -134,9 +125,7 @@ describe('DatabaseManager', () => {
   });
 
   test('addColumn', () => {
-    const column = columnManager
-      .getColumn(numberColumnTypeName)
-      .create('Test Column');
+    const column = numberColumnConfig.create('Test Column');
     const id = db.addColumn('end', column);
     const result = db.getColumn(id);
 
@@ -146,7 +135,7 @@ describe('DatabaseManager', () => {
 
   test('deleteColumn', () => {
     const column = {
-      ...columnManager.getColumn(numberColumnTypeName).create('Test Column'),
+      ...numberColumnConfig.create('Test Column'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -165,7 +154,7 @@ describe('DatabaseManager', () => {
       noteBlockId
     );
     const column = {
-      ...columnManager.getColumn(numberColumnTypeName).create('Test Column'),
+      ...numberColumnConfig.create('Test Column'),
       id: 'testColumnId',
     };
     const cell: Cell = {
@@ -209,9 +198,7 @@ describe('DatabaseManager', () => {
   test('copyCellsByColumn', () => {
     const newColId = db.addColumn(
       'end',
-      columnManager
-        .getColumn(selectColumnTypeName)
-        .create('Copied Select', { options: selection })
+      selectColumnConfig.create('Copied Select', { options: selection })
     );
 
     db.copyCellsByColumn(col2, newColId);
