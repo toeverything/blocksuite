@@ -12,23 +12,23 @@ import { selectColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [selectColumnTypeName]: typeof selectHelper;
+    [selectColumnTypeName]: typeof selectColumnConfig;
   }
 }
-const selectHelper = columnManager.register<string, SelectColumnData>(
-  selectColumnTypeName,
-  {
-    name: 'Select',
-    icon: createIcon('DatabaseSelect'),
-    type: data => tTag.create({ tags: data.options }),
-    defaultData: () => ({
-      options: [],
-    }),
-    cellToString: (data, colData) =>
-      colData.options.find(v => v.id === data)?.value ?? '',
-    cellToJson: data => data ?? null,
-  }
-);
+export const selectColumnConfig = columnManager.register<
+  string,
+  SelectColumnData
+>(selectColumnTypeName, {
+  name: 'Select',
+  icon: createIcon('DatabaseSelect'),
+  type: data => tTag.create({ tags: data.options }),
+  defaultData: () => ({
+    options: [],
+  }),
+  cellToString: (data, colData) =>
+    colData.options.find(v => v.id === data)?.value ?? '',
+  cellToJson: data => data ?? null,
+});
 
 columnRenderer.register({
   type: selectColumnTypeName,
@@ -37,12 +37,15 @@ columnRenderer.register({
     edit: createFromBaseCellRenderer(SelectCellEditing),
   },
 });
-selectHelper.registerConvert(multiSelectColumnTypeName, (column, cells) => ({
-  column,
-  cells: cells.map(v => (v ? [v] : undefined)),
-}));
+selectColumnConfig.registerConvert(
+  multiSelectColumnTypeName,
+  (column, cells) => ({
+    column,
+    cells: cells.map(v => (v ? [v] : undefined)),
+  })
+);
 
-selectHelper.registerConvert(richTextColumnTypeName, (column, cells) => {
+selectColumnConfig.registerConvert(richTextColumnTypeName, (column, cells) => {
   const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
   return {
     column: {},

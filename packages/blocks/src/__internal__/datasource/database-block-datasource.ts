@@ -1,19 +1,18 @@
-import '../../database-block/common/columns/title/define.js';
-import '../../database-block/common/columns/number/define.js';
-import '../../database-block/common/columns/link/define.js';
-import '../../database-block/common/columns/select/define.js';
-import '../../database-block/common/columns/multi-select/define.js';
-import '../../database-block/common/columns/progress/define.js';
-import '../../database-block/common/columns/rich-text/define.js';
-import '../../database-block/common/columns/date/define.js';
-import '../../database-block/common/columns/checkbox/define.js';
-
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { undefined } from 'zod';
 
+import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/define.js';
+import { dateColumnConfig } from '../../database-block/common/columns/date/define.js';
+import { linkColumnConfig } from '../../database-block/common/columns/link/define.js';
+import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
+import { multiSelectColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
 import { multiSelectColumnTypeName } from '../../database-block/common/columns/multi-select/type.js';
+import { numberColumnConfig } from '../../database-block/common/columns/number/define.js';
+import { progressColumnConfig } from '../../database-block/common/columns/progress/define.js';
+import { richTextColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
+import { selectColumnConfig } from '../../database-block/common/columns/select/define.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/index.js';
@@ -217,7 +216,17 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return super.propertyGetDefaultWidth(propertyId);
   }
 
-  public get allPropertyConfig() {
-    return [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public get allPropertyConfig(): ColumnConfig<any, any>[] {
+    return [
+      dateColumnConfig,
+      numberColumnConfig,
+      progressColumnConfig,
+      selectColumnConfig,
+      multiSelectColumnConfig,
+      richTextColumnConfig,
+      linkColumnConfig,
+      checkboxColumnConfig,
+    ];
   }
 }

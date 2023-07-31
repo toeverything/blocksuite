@@ -8,16 +8,19 @@ import { titleColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [titleColumnTypeName]: typeof titleHelper;
+    [titleColumnTypeName]: typeof titleColumnConfig;
   }
 }
-const titleHelper = columnManager.register<Text['yText']>(titleColumnTypeName, {
-  name: 'Title',
-  type: () => tString.create(),
-  defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data?.toString() ?? null,
-});
+export const titleColumnConfig = columnManager.register<Text['yText']>(
+  titleColumnTypeName,
+  {
+    name: 'Title',
+    type: () => tString.create(),
+    defaultData: () => ({}),
+    cellToString: data => data?.toString() ?? '',
+    cellToJson: data => data?.toString() ?? null,
+  }
+);
 
 columnRenderer.register({
   type: titleColumnTypeName,

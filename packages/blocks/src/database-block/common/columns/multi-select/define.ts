@@ -13,29 +13,29 @@ import { multiSelectColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [multiSelectColumnTypeName]: typeof multiSelectHelper;
+    [multiSelectColumnTypeName]: typeof multiSelectColumnConfig;
   }
 }
-const multiSelectHelper = columnManager.register<string[], SelectColumnData>(
-  multiSelectColumnTypeName,
-  {
-    name: 'Multi-Select',
-    icon: createIcon('DatabaseMultiSelect'),
-    type: data => tArray(tTag.create({ tags: data.options })),
-    defaultData: () => ({
-      options: [],
-    }),
-    formatValue: v => {
-      if (Array.isArray(v)) {
-        return v.filter(v => v != null);
-      }
-      return [];
-    },
-    cellToString: (data, colData) =>
-      data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
-    cellToJson: data => data ?? null,
-  }
-);
+export const multiSelectColumnConfig = columnManager.register<
+  string[],
+  SelectColumnData
+>(multiSelectColumnTypeName, {
+  name: 'Multi-Select',
+  icon: createIcon('DatabaseMultiSelect'),
+  type: data => tArray(tTag.create({ tags: data.options })),
+  defaultData: () => ({
+    options: [],
+  }),
+  formatValue: v => {
+    if (Array.isArray(v)) {
+      return v.filter(v => v != null);
+    }
+    return [];
+  },
+  cellToString: (data, colData) =>
+    data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
+  cellToJson: data => data ?? null,
+});
 columnRenderer.register({
   type: multiSelectColumnTypeName,
   cellRenderer: {
@@ -43,16 +43,23 @@ columnRenderer.register({
     edit: createFromBaseCellRenderer(MultiSelectCellEditing),
   },
 });
-multiSelectHelper.registerConvert(selectColumnTypeName, (column, cells) => ({
-  column,
-  cells: cells.map(v => v?.[0]),
-}));
-multiSelectHelper.registerConvert(richTextColumnTypeName, (column, cells) => {
-  const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
-  return {
-    column: {},
-    cells: cells.map(
-      arr => new Text(arr?.map(v => optionMap[v]?.value ?? '').join(',')).yText
-    ),
-  };
-});
+multiSelectColumnConfig.registerConvert(
+  selectColumnTypeName,
+  (column, cells) => ({
+    column,
+    cells: cells.map(v => v?.[0]),
+  })
+);
+multiSelectColumnConfig.registerConvert(
+  richTextColumnTypeName,
+  (column, cells) => {
+    const optionMap = Object.fromEntries(column.options.map(v => [v.id, v]));
+    return {
+      column: {},
+      cells: cells.map(
+        arr =>
+          new Text(arr?.map(v => optionMap[v]?.value ?? '').join(',')).yText
+      ),
+    };
+  }
+);

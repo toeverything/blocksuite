@@ -10,10 +10,10 @@ import { numberColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [numberColumnTypeName]: typeof numberHelper;
+    [numberColumnTypeName]: typeof numberColumnConfig;
   }
 }
-const numberHelper = columnManager.register<
+export const numberColumnConfig = columnManager.register<
   number,
   {
     decimal: number;
@@ -33,7 +33,7 @@ columnRenderer.register({
     edit: createFromBaseCellRenderer(NumberCellEditing),
   },
 });
-numberHelper.registerConvert(richTextColumnTypeName, (column, cells) => ({
+numberColumnConfig.registerConvert(richTextColumnTypeName, (column, cells) => ({
   column: {},
   cells: cells.map(v => new Text(v?.toString()).yText),
 }));

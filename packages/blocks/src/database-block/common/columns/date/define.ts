@@ -7,17 +7,20 @@ import { dateColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [dateColumnTypeName]: typeof dateHelper;
+    [dateColumnTypeName]: typeof dateColumnConfig;
   }
 }
-const dateHelper = columnManager.register<number>(dateColumnTypeName, {
-  name: 'Date',
-  icon: createIcon('DateTime'),
-  type: () => tDate.create(),
-  defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data ?? null,
-});
+export const dateColumnConfig = columnManager.register<number>(
+  dateColumnTypeName,
+  {
+    name: 'Date',
+    icon: createIcon('DateTime'),
+    type: () => tDate.create(),
+    defaultData: () => ({}),
+    cellToString: data => data?.toString() ?? '',
+    cellToJson: data => data ?? null,
+  }
+);
 columnRenderer.register({
   type: dateColumnTypeName,
   cellRenderer: {

@@ -7,11 +7,11 @@ import { checkboxColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [checkboxColumnTypeName]: typeof checkboxColumnHelper;
+    [checkboxColumnTypeName]: typeof checkboxColumnConfig;
   }
 }
 
-const checkboxColumnHelper = columnManager.register<boolean>(
+export const checkboxColumnConfig = columnManager.register<boolean>(
   checkboxColumnTypeName,
   {
     name: 'Checkbox',

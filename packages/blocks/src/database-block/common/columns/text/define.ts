@@ -7,17 +7,20 @@ import { textColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [textColumnTypeName]: typeof textHelper;
+    [textColumnTypeName]: typeof textColumnConfig;
   }
 }
-const textHelper = columnManager.register<string>(textColumnTypeName, {
-  name: 'Plain-Text',
-  icon: createIcon('TextIcon'),
-  type: () => tString.create(),
-  defaultData: () => ({}),
-  cellToString: data => data ?? '',
-  cellToJson: data => data ?? null,
-});
+export const textColumnConfig = columnManager.register<string>(
+  textColumnTypeName,
+  {
+    name: 'Plain-Text',
+    icon: createIcon('TextIcon'),
+    type: () => tString.create(),
+    defaultData: () => ({}),
+    cellToString: data => data ?? '',
+    cellToJson: data => data ?? null,
+  }
+);
 columnRenderer.register({
   type: textColumnTypeName,
   cellRenderer: {

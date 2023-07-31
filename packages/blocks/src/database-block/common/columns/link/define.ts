@@ -7,17 +7,20 @@ import { linkColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [linkColumnTypeName]: typeof linkHelper;
+    [linkColumnTypeName]: typeof linkColumnConfig;
   }
 }
-const linkHelper = columnManager.register<string>(linkColumnTypeName, {
-  name: 'Link',
-  icon: createIcon('LinkIcon'),
-  type: () => tString.create(),
-  defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data ?? null,
-});
+export const linkColumnConfig = columnManager.register<string>(
+  linkColumnTypeName,
+  {
+    name: 'Link',
+    icon: createIcon('LinkIcon'),
+    type: () => tString.create(),
+    defaultData: () => ({}),
+    cellToString: data => data?.toString() ?? '',
+    cellToJson: data => data ?? null,
+  }
+);
 columnRenderer.register({
   type: linkColumnTypeName,
   cellRenderer: {

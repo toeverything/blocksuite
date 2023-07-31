@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { columnManager } from '@blocksuite/blocks/dist/database-block/common/columns/manager';
-import { numberColumnTypeName } from '@blocksuite/blocks/dist/database-block/common/columns/number/type';
-import { richTextColumnTypeName } from '@blocksuite/blocks/dist/database-block/common/columns/rich-text/type';
-import { selectColumnTypeName } from '@blocksuite/blocks/dist/database-block/common/columns/select/type';
 import { beforeEach, describe, expect, test } from 'vitest';
 
+import { columnManager } from '../../../blocks/src/database-block/common/columns/manager';
+import { numberColumnTypeName } from '../../../blocks/src/database-block/common/columns/number/type';
+import { richTextColumnTypeName } from '../../../blocks/src/database-block/common/columns/rich-text/type';
+import { selectColumnTypeName } from '../../../blocks/src/database-block/common/columns/select/type';
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
 import type { Cell, Column } from '../../../blocks/src/database-block/types.js';

@@ -10,17 +10,20 @@ import { progressColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [progressColumnTypeName]: typeof progressHelper;
+    [progressColumnTypeName]: typeof progressColumnConfig;
   }
 }
-const progressHelper = columnManager.register<number>(progressColumnTypeName, {
-  name: 'Progress',
-  icon: createIcon('DatabaseProgress'),
-  type: () => tNumber.create(),
-  defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data ?? null,
-});
+export const progressColumnConfig = columnManager.register<number>(
+  progressColumnTypeName,
+  {
+    name: 'Progress',
+    icon: createIcon('DatabaseProgress'),
+    type: () => tNumber.create(),
+    defaultData: () => ({}),
+    cellToString: data => data?.toString() ?? '',
+    cellToJson: data => data ?? null,
+  }
+);
 columnRenderer.register({
   type: progressColumnTypeName,
   cellRenderer: {
@@ -28,7 +31,10 @@ columnRenderer.register({
     edit: createFromBaseCellRenderer(ProgressCellEditing),
   },
 });
-progressHelper.registerConvert(richTextColumnTypeName, (column, cells) => ({
-  column: {},
-  cells: cells.map(v => new Text(v?.toString()).yText),
-}));
+progressColumnConfig.registerConvert(
+  richTextColumnTypeName,
+  (column, cells) => ({
+    column: {},
+    cells: cells.map(v => new Text(v?.toString()).yText),
+  })
+);

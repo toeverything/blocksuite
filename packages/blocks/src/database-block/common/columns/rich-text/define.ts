@@ -14,10 +14,10 @@ import { richTextColumnTypeName } from './type.js';
 
 declare global {
   interface ColumnConfigMap {
-    [richTextColumnTypeName]: typeof richTextHelper;
+    [richTextColumnTypeName]: typeof richTextColumnConfig;
   }
 }
-const richTextHelper = columnManager.register<Text['yText']>(
+export const richTextColumnConfig = columnManager.register<Text['yText']>(
   richTextColumnTypeName,
   {
     name: 'Text',
@@ -35,7 +35,7 @@ columnRenderer.register({
     edit: createFromBaseCellRenderer(RichTextCellEditing),
   },
 });
-richTextHelper.registerConvert(selectColumnTypeName, (column, cells) => {
+richTextColumnConfig.registerConvert(selectColumnTypeName, (column, cells) => {
   const options: Record<string, SelectTag> = {};
   const getTag = (name: string) => {
     if (options[name]) return options[name];
@@ -58,32 +58,35 @@ richTextHelper.registerConvert(selectColumnTypeName, (column, cells) => {
   };
 });
 
-richTextHelper.registerConvert(multiSelectColumnTypeName, (column, cells) => {
-  const options: Record<string, SelectTag> = {};
-  const getTag = (name: string) => {
-    if (options[name]) return options[name];
-    const tag: SelectTag = {
-      id: nanoid(),
-      value: name,
-      color: getTagColor(),
+richTextColumnConfig.registerConvert(
+  multiSelectColumnTypeName,
+  (column, cells) => {
+    const options: Record<string, SelectTag> = {};
+    const getTag = (name: string) => {
+      if (options[name]) return options[name];
+      const tag: SelectTag = {
+        id: nanoid(),
+        value: name,
+        color: getTagColor(),
+      };
+      options[name] = tag;
+      return tag;
     };
-    options[name] = tag;
-    return tag;
-  };
-  return {
-    cells: cells.map(v => {
-      const result: string[] = [];
-      const values = v?.toString().split(',');
-      values?.forEach(value => {
-        value = value.trim();
-        if (value) {
-          result.push(getTag(value).id);
-        }
-      });
-      return result;
-    }),
-    column: {
-      options: Object.values(options),
-    },
-  };
-});
+    return {
+      cells: cells.map(v => {
+        const result: string[] = [];
+        const values = v?.toString().split(',');
+        values?.forEach(value => {
+          value = value.trim();
+          if (value) {
+            result.push(getTag(value).id);
+          }
+        });
+        return result;
+      }),
+      column: {
+        options: Object.values(options),
+      },
+    };
+  }
+);
