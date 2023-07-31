@@ -140,7 +140,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   const blobStorages: ((id: string) => BlobStorage)[] = [
     createIndexeddbStorage,
   ];
-  const idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
+  const idGenerator: Generator = Generator.NanoID;
 
   return {
     id: 'quickEdgeless',
