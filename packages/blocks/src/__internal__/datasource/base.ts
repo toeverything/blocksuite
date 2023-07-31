@@ -13,7 +13,12 @@ export interface DataSource {
     propertyId: string,
     value: unknown
   ) => unknown;
-  cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
+  cellChangeValue: (
+    rowId: string,
+    propertyId: string,
+    value: unknown,
+    captureSync?: boolean
+  ) => void;
   rowAdd: (insertPosition: InsertPosition) => string;
   rowDelete: (ids: string[]) => void;
   propertyGetName: (propertyId: string) => string;
@@ -44,7 +49,8 @@ export abstract class BaseDataSource implements DataSource {
   public abstract cellChangeValue(
     rowId: string,
     propertyId: string,
-    value: unknown
+    value: unknown,
+    captureSync?: boolean
   ): void;
 
   public cellChangeRenderValue(

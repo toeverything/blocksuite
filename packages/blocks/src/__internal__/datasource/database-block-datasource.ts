@@ -45,9 +45,13 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   public cellChangeValue(
     rowId: string,
     propertyId: string,
-    value: unknown
+    value: unknown,
+    captureSync = true
   ): void {
-    this.page.captureSync();
+    if (captureSync) {
+      this.page.captureSync();
+    }
+
     if (
       this.propertyGetType(propertyId) === 'title' &&
       typeof value === 'string'

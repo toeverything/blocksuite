@@ -1,4 +1,4 @@
-import type { UIEventStateContext } from '@blocksuite/block-std';
+import type { TextSelection, UIEventStateContext } from '@blocksuite/block-std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { assertExists, DisposableGroup } from '@blocksuite/store';
 import format from 'date-fns/format';
@@ -12,16 +12,18 @@ import {
 import type { TableViewSelection } from '../../__internal__/utils/types.js';
 import type { BaseDataView } from '../common/base-data-view.js';
 import type { BaseViewClipboard } from '../common/clipboard.js';
+import type { DataViewManager } from '../common/data-view-manager.js';
 import type { DatabaseSelection } from '../common/selection.js';
-import type { DatabaseBlockComponent } from '../database-block.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { DatabaseCellContainer } from '../table/components/cell-container.js';
 import type { DatabaseTable } from '../table/table-view.js';
+import type { DataViewTableManager } from './table-view-manager.js';
 
 type TableViewClipboardConfig = {
   path: string[];
   model: DatabaseBlockModel;
   view: Ref<BaseDataView | undefined>;
+  data: DataViewManager;
 };
 
 export class TableViewClipboard implements BaseViewClipboard {
@@ -29,11 +31,13 @@ export class TableViewClipboard implements BaseViewClipboard {
   private _path: string[];
   private _model: DatabaseBlockModel;
   private _view: Ref<BaseDataView | undefined>;
+  private _data: DataViewTableManager;
 
   constructor(private _root: BlockSuiteRoot, config: TableViewClipboardConfig) {
     this._path = config.path;
     this._model = config.model;
     this._view = config.view;
+    this._data = config.data as DataViewTableManager;
   }
 
   init(): void {
@@ -48,22 +52,16 @@ export class TableViewClipboard implements BaseViewClipboard {
   }
 
   private _onCopy = (context: UIEventStateContext) => {
-    const block = this._root.viewStore.blockViewMap.get(this._path) as
-      | DatabaseBlockComponent
-      | undefined;
-    assertExists(block);
-
     const selection = getDatabaseSelection(this._root);
-    if (!selection) return;
-
-    const tableSelection = selection.getSelection('table');
+    const tableSelection = selection?.getSelection('table');
     if (!tableSelection) return;
-    const { rowsSelection, columnsSelection, isEditing, focus } =
-      tableSelection;
-    const view = this._view.value as DatabaseTable;
 
-    // copy cell's content
-    const column = this._model.columns[focus.columnIndex];
+    const view = this._view.value as DatabaseTable;
+    const model = this._model;
+
+    // copy cells' content
+    const { isEditing, focus } = tableSelection;
+    const column = model.columns[focus.columnIndex];
     if (isEditing) {
       const container = view.selection.getCellContainer(
         focus.rowIndex,
@@ -84,39 +82,7 @@ export class TableViewClipboard implements BaseViewClipboard {
       }
     }
 
-    // copy cell
-    const values: string[] = [];
-    if (rowsSelection && !columnsSelection) {
-      // rows
-      const { start, end } = rowsSelection;
-      const titleIndex = this._model.columns.findIndex(
-        column => column.type === 'title'
-      );
-      for (let i = start; i <= end; i++) {
-        const container = view.selection.getCellContainer(i, titleIndex);
-        const value = selectionValueMap['title']?.(container) ?? '';
-        values.push(value);
-      }
-    } else if (rowsSelection && columnsSelection) {
-      // multiple cells
-      for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
-        for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
-          const column = this._model.columns[j];
-          const container = view.selection.getCellContainer(i, j);
-          const value = selectionValueMap[column.type]?.(container) ?? '';
-          values.push(value);
-        }
-      }
-    } else if (!rowsSelection && !columnsSelection && focus) {
-      // single cell
-      const container = view.selection.getCellContainer(
-        focus.rowIndex,
-        focus.columnIndex
-      );
-      const value = selectionValueMap[column.type]?.(container) ?? '';
-      values.push(value);
-    }
-
+    // copy cells
     const stringifiesData = JSON.stringify(tableSelection);
     const htmlSelection = setHTMLStringForSelection(
       stringifiesData,
@@ -127,70 +93,81 @@ export class TableViewClipboard implements BaseViewClipboard {
       htmlSelection
     );
 
+    const cellsValue = copyCellsValue(tableSelection, model, view);
     const textClipboardItem = new ClipboardItem(
       CLIPBOARD_MIMETYPE.TEXT,
-      values.join('')
+      cellsValue.join('')
     );
     performNativeCopy([textClipboardItem, htmlClipboardItem]);
+
     return true;
   };
 
   private _onPaste = (context: UIEventStateContext) => {
     const event = context.get('clipboardState').raw;
-    const view = this._view as DatabaseTable;
+    const view = this._view.value as DatabaseTable;
+    const model = this._model;
+    const data = this._data;
 
     const selection = getDatabaseSelection(this._root);
-    if (!selection) return true;
-    const tableSelection = selection.getSelection('table');
-    if (!tableSelection) return true;
+    const tableSelection = selection?.getSelection('table');
+    // When the title column is edited, it is the `TextSelection`.
+    const titleSelection = getTextSelection(this._root, this._path);
+    if (titleSelection) {
+      // todo
+    } else if (tableSelection) {
+      const { isEditing } = tableSelection;
 
-    const { rowsSelection, columnsSelection, focus, isEditing } =
-      tableSelection;
+      // paste cells' content
+      if (isEditing) {
+        return true;
+      }
 
-    if (isEditing) {
-      const textClipboardData = event.clipboardData?.getData(
-        CLIPBOARD_MIMETYPE.TEXT
+      // paste cells
+      const htmlClipboardData = event.clipboardData?.getData(
+        CLIPBOARD_MIMETYPE.HTML
       );
-      if (!textClipboardData) return true;
-
-      return true;
-    }
-
-    const htmlClipboardData = event.clipboardData?.getData(
-      CLIPBOARD_MIMETYPE.HTML
-    );
-
-    if (htmlClipboardData) {
+      if (!htmlClipboardData) return true;
       const clipboardData = getSelectionFromHTMLString(
         CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE,
         htmlClipboardData
       );
+      if (!clipboardData) return true;
 
-      if (clipboardData) {
-        const copyedSelection = JSON.parse(clipboardData) as TableViewSelection;
+      const copyedSelection = JSON.parse(clipboardData) as TableViewSelection;
+      const srcColumns = getSrcValuesFromSelection(
+        copyedSelection,
+        model,
+        view
+      );
+      const srcRowLength = srcColumns.length;
+      const srcColumnLength = srcColumns[0].length;
 
-        if (rowsSelection && !columnsSelection) {
-          // rows
-          console.log('rows');
-        } else if (rowsSelection && columnsSelection) {
-          // multiple cells
-          console.log('multiple cells');
-        } else if (!rowsSelection && !columnsSelection && focus) {
-          // single cell
-          console.log('single cell');
-          const targetColumn = this._model.columns[focus.columnIndex];
-          const srcColumn =
-            this._model.columns[copyedSelection.focus.columnIndex];
+      const targetRange = getTargetRangeFromSelection(tableSelection, model);
+      model.page.captureSync();
+      for (let i = 0; i < targetRange.row.length; i++) {
+        for (let j = 0; j < targetRange.column.length; j++) {
+          const rowIndex = targetRange.row.start + i;
+          const columnIndex = targetRange.column.start + j;
+          const targetColumn = this._model.columns[columnIndex];
 
-          if (targetColumn.type === srcColumn.type) {
-            const container = view.selection.getCellContainer(
-              copyedSelection.focus.rowIndex,
-              copyedSelection.focus.columnIndex
-            );
-            const value =
-              selectionValueMap[targetColumn.type]?.(container) ?? '';
-            console.log(value);
-          }
+          const srcRowIndex = i % srcRowLength;
+          const srcColumnIndex = j % srcColumnLength;
+          const srcColumn = srcColumns[srcRowIndex][srcColumnIndex];
+
+          // Can only be pasted when the column type is the same.
+          if (targetColumn.type !== srcColumn.type) continue;
+
+          const targetContainer = view.selection.getCellContainer(
+            rowIndex,
+            columnIndex
+          );
+          const rowId = targetContainer?.dataset.rowId;
+          const columnId = targetContainer?.dataset.columnId;
+          assertExists(rowId);
+          assertExists(columnId);
+
+          data.cellUpdateValue(rowId, columnId, srcColumn.value, false);
         }
       }
     }
@@ -204,6 +181,15 @@ function getDatabaseSelection(root: BlockSuiteRoot) {
     (selection): selection is DatabaseSelection => selection.is('database')
   );
   return selection;
+}
+
+function getTextSelection(root: BlockSuiteRoot, path: string[]) {
+  const selection = root.selectionManager.value.find(
+    (selection): selection is TextSelection => selection.is('text')
+  );
+
+  const isDatabaseTitle = selection?.path.join('|').startsWith(path.join('|'));
+  return isDatabaseTitle ? selection : undefined;
 }
 
 function getColumnValue(container: DatabaseCellContainer | undefined) {
@@ -224,6 +210,162 @@ function getSelectionFromHTMLString(type: CLIPBOARD_MIMETYPE, html: string) {
   const dom = new DOMParser().parseFromString(html, 'text/html');
   const ele = dom.querySelector(`database[data-type="${type}"]`);
   return ele?.getAttribute('data-clipboard');
+}
+
+function copyCellsValue(
+  selection: TableViewSelection,
+  model: DatabaseBlockModel,
+  view: DatabaseTable
+) {
+  const { rowsSelection, columnsSelection, focus } = selection;
+  const values: string[] = [];
+  if (rowsSelection && !columnsSelection) {
+    // rows
+    const { start, end } = rowsSelection;
+    const titleIndex = model.columns.findIndex(
+      column => column.type === 'title'
+    );
+    for (let i = start; i <= end; i++) {
+      const container = view.selection.getCellContainer(i, titleIndex);
+      const value = selectionValueMap['title']?.(container) ?? '';
+      values.push(value);
+    }
+  } else if (rowsSelection && columnsSelection) {
+    // multiple cells
+    for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
+      for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
+        const column = model.columns[j];
+        const container = view.selection.getCellContainer(i, j);
+        const value = selectionValueMap[column.type]?.(container) ?? '';
+        values.push(value);
+      }
+    }
+  } else if (!rowsSelection && !columnsSelection && focus) {
+    // single cell
+    const column = model.columns[focus.columnIndex];
+    const container = view.selection.getCellContainer(
+      focus.rowIndex,
+      focus.columnIndex
+    );
+    const value = selectionValueMap[column.type]?.(container) ?? '';
+    values.push(value);
+  }
+
+  return values;
+}
+
+function getSrcValuesFromSelection(
+  selection: TableViewSelection,
+  model: DatabaseBlockModel,
+  view: DatabaseTable
+) {
+  type Column = { type: string; value: string };
+  const { rowsSelection, columnsSelection, focus } = selection;
+  const values: Column[][] = [];
+  if (rowsSelection && !columnsSelection) {
+    // rows
+    const { start, end } = rowsSelection;
+    for (let i = start; i <= end; i++) {
+      const cellValues: Column[] = [];
+      for (let j = 0; j < model.columns.length; j++) {
+        const column = model.columns[j];
+        const container = view.selection.getCellContainer(i, j);
+        const value = selectionValueMap['title']?.(container) ?? '';
+        cellValues.push({ type: column.type, value });
+      }
+      values.push(cellValues);
+    }
+  } else if (rowsSelection && columnsSelection) {
+    // multiple cells
+    for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
+      const cellValues: Column[] = [];
+      for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
+        const column = model.columns[j];
+        const container = view.selection.getCellContainer(i, j);
+        const value = selectionValueMap[column.type]?.(container) ?? '';
+        cellValues.push({ type: column.type, value });
+      }
+      values.push(cellValues);
+    }
+  } else if (!rowsSelection && !columnsSelection && focus) {
+    // single cell
+    const container = view.selection.getCellContainer(
+      focus.rowIndex,
+      focus.columnIndex
+    );
+    const column = model.columns[focus.columnIndex];
+    const value = selectionValueMap[column.type]?.(container) ?? '';
+    values.push([{ type: column.type, value }]);
+  }
+
+  return values;
+}
+
+function getTargetRangeFromSelection(
+  selection: TableViewSelection,
+  model: DatabaseBlockModel
+) {
+  const { rowsSelection, columnsSelection, focus } = selection;
+  let range: {
+    row: { start: number; end: number; length: number };
+    column: { start: number; end: number; length: number };
+  } = {
+    row: {
+      start: 0,
+      end: 0,
+      length: 0,
+    },
+    column: {
+      start: 0,
+      end: 0,
+      length: 0,
+    },
+  };
+
+  if (rowsSelection && !columnsSelection) {
+    // rows
+    range = {
+      row: {
+        start: rowsSelection.start,
+        end: rowsSelection.end,
+        length: rowsSelection.end - rowsSelection.start + 1,
+      },
+      column: {
+        start: 0,
+        end: model.columns.length - 1,
+        length: model.columns.length,
+      },
+    };
+  } else if (rowsSelection && columnsSelection) {
+    // multiple cells
+    range = {
+      row: {
+        start: rowsSelection.start,
+        end: rowsSelection.end,
+        length: rowsSelection.end - rowsSelection.start + 1,
+      },
+      column: {
+        start: columnsSelection.start,
+        end: columnsSelection.end,
+        length: columnsSelection.end - columnsSelection.start + 1,
+      },
+    };
+  } else if (!rowsSelection && !columnsSelection && focus) {
+    // single cell
+    range = {
+      row: {
+        start: focus.rowIndex,
+        end: focus.rowIndex,
+        length: 1,
+      },
+      column: {
+        start: focus.columnIndex,
+        end: focus.columnIndex,
+        length: 1,
+      },
+    };
+  }
+  return range;
 }
 
 const selectionValueMap: Record<

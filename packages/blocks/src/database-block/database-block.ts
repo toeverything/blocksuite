@@ -172,6 +172,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         path: this.path,
         model: this.model,
         view: this._view,
+        data: view,
       });
       clipboard.init();
     }
