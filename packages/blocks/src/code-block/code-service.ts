@@ -72,6 +72,18 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     return preElement.outerHTML;
   }
 
+  override block2Json(
+    block: CodeBlockModel,
+    selectedModels?: Map<string, number>,
+    begin?: number,
+    end?: number
+  ) {
+    return {
+      ...super.block2Json(block, selectedModels, begin, end),
+      language: block.language,
+    };
+  }
+
   override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[],

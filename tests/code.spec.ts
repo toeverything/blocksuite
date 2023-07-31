@@ -331,11 +331,11 @@ test.fixme(
   }
 );
 
-test.skip('use code block copy menu of code block copy whole code block', async ({
+test('use code block copy menu of code block copy whole code block', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyCodeBlockState(page);
+  await initEmptyCodeBlockState(page, { language: 'javascript' });
   await focusRichText(page);
 
   await page.keyboard.type('use');
@@ -350,8 +350,6 @@ test.skip('use code block copy menu of code block copy whole code block', async 
     '.affine-codeblock-option > icon-button:nth-child(1)'
   );
 
-  await page.mouse.move(position.x, position.y);
-  await waitNextFrame(page);
   await page.mouse.click(position.x, position.y);
 
   await focusRichText(page, 1);
@@ -366,12 +364,11 @@ test.skip('use code block copy menu of code block copy whole code block', async 
     prop:index="a0"
   >
     <affine:code
-      prop:language="Plain Text"
-      prop:text="use
-"
+      prop:language="javascript"
+      prop:text="use"
     />
     <affine:code
-      prop:language="Plain Text"
+      prop:language="javascript"
       prop:text="use"
     />
   </affine:note>
