@@ -600,10 +600,12 @@ export class EdgelessPageBlockComponent
               this.requestUpdate();
             };
 
-            // assume it to be resized if width and height both change,
-            // it's supposed to transact the update of the block
-            // see https://github.com/toeverything/blocksuite/issues/3671
-            if (prevDomRect && !almostEqual(domRect.width, prevDomRect.width)) {
+            // Assume it's user-triggered resizing if both width and height change,
+            // otherwise we don't add the size updating into history.
+            // See https://github.com/toeverything/blocksuite/issues/3671
+            const isResize =
+              prevDomRect && !almostEqual(domRect.width, prevDomRect.width);
+            if (isResize) {
               updateBlock();
             } else {
               page.withoutTransact(updateBlock);
