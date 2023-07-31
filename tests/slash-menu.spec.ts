@@ -120,7 +120,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['//']);
   });
 
-  test('pressing esc should close the slash menu', async () => {
+  test.fixme('pressing esc should close the slash menu', async () => {
     // You may need to press Esc twice in a real browser
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');

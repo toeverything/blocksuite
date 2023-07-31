@@ -8,10 +8,7 @@ import type { Page } from '@blocksuite/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  getCurrentBlockRange,
-  getDefaultPage,
-} from '../../__internal__/index.js';
+import { getCurrentBlockRange } from '../../__internal__/index.js';
 import { multiSelectHelper } from '../../database-block/common/columns/define.js';
 import type { DatabaseBlockModel } from '../../database-block/index.js';
 import { styles } from './styles.js';
@@ -87,15 +84,6 @@ export class DatabaseModal extends LitElement {
     databaseModel.applyColumnUpdate();
 
     this.page.moveBlocks(models, databaseModel);
-
-    // Try clean block selection
-    const defaultPageBlock = getDefaultPage(this.page);
-    assertExists(defaultPageBlock);
-    if (!defaultPageBlock.selection) {
-      // In the edgeless mode
-      return;
-    }
-    defaultPageBlock.selection.clear();
   }
 
   private _hide() {

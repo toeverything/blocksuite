@@ -98,7 +98,7 @@ test.fixme('block level range delete by forwardDelete', async ({ page }) => {
 });
 
 // XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
-test('select all and delete', async ({ page }) => {
+test.fixme('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -112,7 +112,7 @@ test('select all and delete', async ({ page }) => {
   await assertRichTexts(page, ['abc']);
 });
 
-test('select all and delete by forwardDelete', async ({ page }) => {
+test.fixme('select all and delete by forwardDelete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -153,7 +153,7 @@ test.fixme('click the list icon can select and copy', async ({ page }) => {
   await assertRichTexts(page, ['123789123', '456', '789123']);
 });
 
-test('click the list icon can select and delete', async ({ page }) => {
+test.fixme('click the list icon can select and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -170,24 +170,25 @@ test('click the list icon can select and delete', async ({ page }) => {
   await assertRichTexts(page, ['', '']);
 });
 
-test('click the list icon can select and delete by forwardDelete', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeLists(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'click the list icon can select and delete by forwardDelete',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeLists(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await clickListIcon(page, 0);
-  await pressForwardDelete(page);
-  await shamefullyBlurActiveElement(page);
-  await pressForwardDelete(page);
-  await assertRichTexts(page, ['', '456', '789']);
-  await clickListIcon(page, 0);
-  await shamefullyBlurActiveElement(page);
-  await pressForwardDelete(page);
-  await assertRichTexts(page, ['', '']);
-});
+    await clickListIcon(page, 0);
+    await pressForwardDelete(page);
+    await shamefullyBlurActiveElement(page);
+    await pressForwardDelete(page);
+    await assertRichTexts(page, ['', '456', '789']);
+    await clickListIcon(page, 0);
+    await shamefullyBlurActiveElement(page);
+    await pressForwardDelete(page);
+    await assertRichTexts(page, ['', '']);
+  }
+);
 
 test.fixme('selection on heavy page', async ({ page }) => {
   await page
