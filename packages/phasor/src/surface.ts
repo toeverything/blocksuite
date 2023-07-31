@@ -1,6 +1,7 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
+import { Batch } from './batch.js';
 import type { IBound } from './consts.js';
 import {
   ElementCtors,
@@ -40,8 +41,9 @@ export class SurfaceManager {
   >();
 
   private _computedValue: ComputedValue;
+  private _defaultBatch = 'a1';
+  private _batches = new Map<string, Batch<SurfaceElement>>();
 
-  indexes = { min: 'a0', max: 'a0' };
   slots = {
     elementUpdated: new Slot<{
       id: id;
@@ -73,6 +75,28 @@ export class SurfaceManager {
     return this._renderer;
   }
 
+  get defaultBatch() {
+    return this._defaultBatch;
+  }
+
+  getBatch(id: string) {
+    const batch = this._batches.get(id);
+    if (batch) return batch;
+    const newBatch = new Batch<SurfaceElement>(id);
+    this._batches.set(id, newBatch);
+    return newBatch;
+  }
+
+  private _addToBatch(element: SurfaceElement) {
+    const batch = element.batch ?? this._defaultBatch;
+    this.getBatch(batch).addElement(element);
+  }
+
+  private _removeFromBatch(element: SurfaceElement) {
+    const batch = element.batch ?? this._defaultBatch;
+    this.getBatch(batch).deleteElement(element);
+  }
+
   private _syncFromExistingContainer() {
     this._transact(() => {
       this._yContainer.forEach(yElement => {
@@ -83,14 +107,8 @@ export class SurfaceManager {
         const element = new ElementCtor(yElement, this);
         element.computedValue = this._computedValue;
         element.mount(this._renderer);
-
         this._elements.set(element.id, element);
-
-        if (element.index > this.indexes.max) {
-          this.indexes.max = element.index;
-        } else if (element.index < this.indexes.min) {
-          this.indexes.min = element.index;
-        }
+        this._addToBatch(element);
         this.slots.elementAdded.emit(id);
       });
     });
@@ -115,12 +133,9 @@ export class SurfaceManager {
         const element = new ElementCtor(yElement, this);
         element.computedValue = this._computedValue;
         element.mount(this._renderer);
-
         this._elements.set(element.id, element);
 
-        if (element.index > this.indexes.max) {
-          this.indexes.max = element.index;
-        }
+        this._addToBatch(element);
         this.slots.elementAdded.emit(id);
       } else if (type.action === 'update') {
         console.error('update event on yElements is not supported', event);
@@ -131,10 +146,7 @@ export class SurfaceManager {
         element.unmount();
         this._elements.delete(id);
         this.deleteElementLocalRecord(id);
-
-        if (element.index === this.indexes.min) {
-          this.indexes.min = generateKeyBetween(element.index, null);
-        }
+        this._removeFromBatch(element);
         this.slots.elementRemoved.emit(id);
       }
     });
@@ -191,11 +203,12 @@ export class SurfaceManager {
     const yMap = new Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
+    const batch = this.getBatch(properties.batch ?? this._defaultBatch);
     const props: IElementCreateProps<T> = {
       ...defaultProps,
       ...properties,
       id,
-      index: generateKeyBetween(this.indexes.max, null),
+      index: generateKeyBetween(batch.max, null),
       seed: randomSeed(),
     };
 
@@ -228,6 +241,10 @@ export class SurfaceManager {
     this.updateElement(id, {
       xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
     });
+  }
+
+  setDefaultBatch(batch: string) {
+    this._defaultBatch = batch;
   }
 
   removeElement(id: string) {

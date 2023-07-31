@@ -1,5 +1,9 @@
 import { DEFAULT_SHAPE_STROKE_COLOR } from '@blocksuite/blocks';
-import { serializeXYWH, StrokeStyle } from '@blocksuite/phasor';
+import {
+  DEFAULT_ROUGHNESS,
+  serializeXYWH,
+  StrokeStyle,
+} from '@blocksuite/phasor';
 import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
@@ -49,7 +53,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           strokeWidth: 4,
           strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
           strokeStyle: StrokeStyle.Solid,
-          roughness: 2,
+          roughness: DEFAULT_ROUGHNESS,
         },
         1: {
           id: '1',
@@ -66,7 +70,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           strokeWidth: 4,
           strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
           strokeStyle: StrokeStyle.Solid,
-          roughness: 2,
+          roughness: DEFAULT_ROUGHNESS,
         },
       },
     },
