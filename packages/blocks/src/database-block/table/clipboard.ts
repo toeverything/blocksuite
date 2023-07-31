@@ -1,7 +1,6 @@
 import type { TextSelection, UIEventStateContext } from '@blocksuite/block-std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { assertExists, DisposableGroup } from '@blocksuite/store';
-import format from 'date-fns/format';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';
@@ -72,7 +71,8 @@ export class TableViewClipboard implements BaseViewClipboard {
         // Execute browser default behavior
         return true;
       } else {
-        const data = selectionValueMap[column.type]?.(container) ?? '';
+        const data = (selectionValueMap[column.type]?.(container) ??
+          '') as string;
         const textClipboardItem = new ClipboardItem(
           CLIPBOARD_MIMETYPE.TEXT,
           data
@@ -167,7 +167,7 @@ export class TableViewClipboard implements BaseViewClipboard {
           assertExists(rowId);
           assertExists(columnId);
 
-          data.cellUpdateValue(rowId, columnId, srcColumn.value, false);
+          data.cellUpdateValue(rowId, columnId, srcColumn.value);
         }
       }
     }
@@ -195,8 +195,12 @@ function getTextSelection(root: BlockSuiteRoot, path: string[]) {
 function getColumnValue(container: DatabaseCellContainer | undefined) {
   const rowId = container?.dataset.rowId;
   assertExists(rowId);
-  const value = container?.column.getStringValue(rowId) ?? '';
-  return value;
+  const rawValue = container?.column.getJsonValue(rowId);
+  const stringValue = container?.column.getStringValue(rowId);
+  return {
+    rawValue,
+    stringValue,
+  };
 }
 
 function setHTMLStringForSelection(data: string, type: CLIPBOARD_MIMETYPE) {
@@ -227,7 +231,7 @@ function copyCellsValue(
     );
     for (let i = start; i <= end; i++) {
       const container = view.selection.getCellContainer(i, titleIndex);
-      const value = selectionValueMap['title']?.(container) ?? '';
+      const value = (selectionValueMap['title']?.(container) ?? '') as string;
       values.push(value);
     }
   } else if (rowsSelection && columnsSelection) {
@@ -236,7 +240,8 @@ function copyCellsValue(
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = model.columns[j];
         const container = view.selection.getCellContainer(i, j);
-        const value = selectionValueMap[column.type]?.(container) ?? '';
+        const value = (selectionValueMap[column.type]?.(container) ??
+          '') as string;
         values.push(value);
       }
     }
@@ -247,7 +252,7 @@ function copyCellsValue(
       focus.rowIndex,
       focus.columnIndex
     );
-    const value = selectionValueMap[column.type]?.(container) ?? '';
+    const value = (selectionValueMap[column.type]?.(container) ?? '') as string;
     values.push(value);
   }
 
@@ -259,7 +264,7 @@ function getSrcValuesFromSelection(
   model: DatabaseBlockModel,
   view: DatabaseTable
 ) {
-  type Column = { type: string; value: string };
+  type Column = { type: string; value: unknown };
   const { rowsSelection, columnsSelection, focus } = selection;
   const values: Column[][] = [];
   if (rowsSelection && !columnsSelection) {
@@ -270,7 +275,7 @@ function getSrcValuesFromSelection(
       for (let j = 0; j < model.columns.length; j++) {
         const column = model.columns[j];
         const container = view.selection.getCellContainer(i, j);
-        const value = selectionValueMap['title']?.(container) ?? '';
+        const value = selectionValueMap[column.type]?.(container, true);
         cellValues.push({ type: column.type, value });
       }
       values.push(cellValues);
@@ -282,7 +287,7 @@ function getSrcValuesFromSelection(
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = model.columns[j];
         const container = view.selection.getCellContainer(i, j);
-        const value = selectionValueMap[column.type]?.(container) ?? '';
+        const value = selectionValueMap[column.type]?.(container, true);
         cellValues.push({ type: column.type, value });
       }
       values.push(cellValues);
@@ -294,10 +299,9 @@ function getSrcValuesFromSelection(
       focus.columnIndex
     );
     const column = model.columns[focus.columnIndex];
-    const value = selectionValueMap[column.type]?.(container) ?? '';
+    const value = selectionValueMap[column.type]?.(container, true);
     values.push([{ type: column.type, value }]);
   }
-
   return values;
 }
 
@@ -370,13 +374,16 @@ function getTargetRangeFromSelection(
 
 const selectionValueMap: Record<
   string,
-  (container: DatabaseCellContainer | undefined) => string
+  (
+    container: DatabaseCellContainer | undefined,
+    needRawValue?: boolean
+  ) => unknown
 > = {
-  'rich-text': container => {
+  'rich-text': (container, needRawValue = false) => {
     const cell = container?.querySelector(
       'affine-database-rich-text-cell-editing'
     );
-    const value = getColumnValue(container);
+    const value = getColumnValue(container).stringValue;
     const range = cell?.vEditor?.getVRange();
     if (range) {
       const start = range.index;
@@ -386,9 +393,9 @@ const selectionValueMap: Record<
     }
     return value;
   },
-  title: container => {
+  title: (container, needRawValue = false) => {
     const cell = container?.querySelector('rich-text');
-    const value = getColumnValue(container);
+    const value = getColumnValue(container).stringValue;
     const range = cell?.vEditor?.getVRange();
     if (range) {
       const start = range.index;
@@ -399,10 +406,30 @@ const selectionValueMap: Record<
     return value;
   },
   // TODO: change date format
-  date: container => format(Number(getColumnValue(container)), 'yyyy-MM-dd'),
-  number: container => getColumnValue(container),
-  select: container => getColumnValue(container),
-  'multi-select': container => getColumnValue(container),
-  progress: container => getColumnValue(container),
-  link: container => getColumnValue(container),
+  date: (container, needRawValue = false) => {
+    const value = getColumnValue(container);
+    return needRawValue ? value.rawValue : value.stringValue;
+  },
+  number: (container, needRawValue = false) => {
+    const value = getColumnValue(container);
+    return needRawValue ? value.rawValue : value.stringValue;
+  },
+  select: (container, needRawValue = false) => {
+    const value = getColumnValue(container);
+    return needRawValue ? value.rawValue : value.stringValue;
+  },
+  'multi-select': (container, needRawValue = false) => {
+    const value = getColumnValue(container);
+    return needRawValue ? value.rawValue : value.stringValue;
+  },
+  progress: (container, needRawValue = false) => {
+    const value = getColumnValue(container);
+    return needRawValue ? value.rawValue : value.stringValue;
+  },
+  link: (container, needRawValue = false) =>
+    getColumnValue(container).stringValue,
+  checkbox: (container, needRawValue = false) => {
+    const value = getColumnValue(container);
+    return needRawValue ? value.rawValue : value.stringValue;
+  },
 };

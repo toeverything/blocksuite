@@ -1,5 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { Text, type Y } from '@blocksuite/store';
 
 import { multiSelectHelper } from '../../database-block/common/columns/define.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
@@ -12,6 +13,7 @@ import { BaseDataSource } from './base.js';
 export class DatabaseBlockDatasource extends BaseDataSource {
   private _model: DatabaseBlockModel;
   private _path: string[];
+  private _batch = 0;
 
   get page() {
     return this._model.page;
@@ -42,26 +44,40 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     update: new Slot(),
   };
 
+  private _runCapture() {
+    if (this._batch) {
+      return;
+    }
+
+    this._batch = requestAnimationFrame(() => {
+      this.page.captureSync();
+      this._batch = 0;
+    });
+  }
+
   public cellChangeValue(
     rowId: string,
     propertyId: string,
-    value: unknown,
-    captureSync = true
+    value: unknown
   ): void {
-    if (captureSync) {
-      this.page.captureSync();
-    }
+    this._runCapture();
 
-    if (
-      this.propertyGetType(propertyId) === 'title' &&
-      typeof value === 'string'
-    ) {
+    const type = this.propertyGetType(propertyId);
+    if (type === 'title' && typeof value === 'string') {
       const text =
         this._model.children[this._model.childMap.get(rowId) ?? 0].text;
       if (text) {
         text.replace(0, text.length, value);
       }
       this.slots.update.emit();
+      return;
+    } else if (type === 'rich-text' && typeof value === 'string') {
+      const cell = this._model.getCell(rowId, propertyId);
+      const yText = cell?.value as Y.Text | undefined;
+      if (yText) {
+        const text = new Text(yText);
+        text.replace(0, text.length, value);
+      }
       return;
     }
     this._model.updateCell(rowId, { columnId: propertyId, value });

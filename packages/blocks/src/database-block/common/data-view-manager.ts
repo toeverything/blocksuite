@@ -221,10 +221,9 @@ export abstract class BaseDataViewManager implements DataViewManager {
   public cellUpdateValue(
     rowId: string,
     columnId: string,
-    value: unknown,
-    captureSync = true
+    value: unknown
   ): void {
-    this.dataSource.cellChangeValue(rowId, columnId, value, captureSync);
+    this.dataSource.cellChangeValue(rowId, columnId, value);
   }
 
   public columnAdd(toAfterOfColumn: InsertPosition): void {

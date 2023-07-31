@@ -1,4 +1,5 @@
 import type { Text } from '@blocksuite/store';
+import format from 'date-fns/format';
 
 import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
 import {
@@ -15,7 +16,7 @@ export const titleHelper = columnManager.register<Text['yText']>('title', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data?.toString() ?? null,
+  cellToJson: data => data?.toString(),
 });
 export const richTextHelper = columnManager.register<Text['yText']>(
   'rich-text',
@@ -23,7 +24,7 @@ export const richTextHelper = columnManager.register<Text['yText']>(
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
-    cellToJson: data => data?.toString() ?? null,
+    cellToJson: data => data?.toString(),
   }
 );
 export type SelectColumnData = {
@@ -38,7 +39,7 @@ export const selectHelper = columnManager.register<string, SelectColumnData>(
     }),
     cellToString: (data, colData) =>
       colData.options.find(v => v.id === data)?.value ?? '',
-    cellToJson: data => data ?? null,
+    cellToJson: data => data,
   }
 );
 export const multiSelectHelper = columnManager.register<
@@ -57,7 +58,7 @@ export const multiSelectHelper = columnManager.register<
   },
   cellToString: (data, colData) =>
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
-  cellToJson: data => data ?? null,
+  cellToJson: data => data,
 });
 export const numberHelper = columnManager.register<
   number,
@@ -68,35 +69,35 @@ export const numberHelper = columnManager.register<
   type: () => tNumber.create(),
   defaultData: () => ({ decimal: 0 }),
   cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data ?? null,
+  cellToJson: data => data,
 });
 export const checkboxHelper = columnManager.register<boolean>('checkbox', {
   type: () => tBoolean.create(),
   defaultData: () => ({}),
-  cellToString: data => '',
-  cellToJson: data => data ?? null,
+  cellToString: data => data?.toString() ?? 'false',
+  cellToJson: data => data,
 });
 export const progressHelper = columnManager.register<number>('progress', {
   type: () => tNumber.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data ?? null,
+  cellToJson: data => data,
 });
 export const linkHelper = columnManager.register<string>('link', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data ?? null,
+  cellToJson: data => data,
 });
 export const textHelper = columnManager.register<string>('text', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data ?? '',
-  cellToJson: data => data ?? null,
+  cellToJson: data => data,
 });
 export const dateHelper = columnManager.register<number>('date', {
   type: () => tDate.create(),
   defaultData: () => ({}),
-  cellToString: data => data?.toString() ?? '',
-  cellToJson: data => data ?? null,
+  cellToString: data => format(data, 'yyyy-MM-dd'),
+  cellToJson: data => data,
 });
