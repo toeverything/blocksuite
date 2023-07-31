@@ -423,13 +423,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
     updateLocalSelectionRange(this.page);
   };
 
-  refreshRemoteSelection() {
-    const element = document.querySelector('remote-selection');
-    if (element) {
-      element.requestUpdate();
-    }
-  }
-
   getHoverState(): EdgelessHoverState | null {
     if (!this.currentController.enableHover) {
       return null;

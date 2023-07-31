@@ -122,6 +122,10 @@ export class EdgelessSelectionManager {
     this._selection.set([instance]);
   }
 
+  refreshRemoteSelection() {
+    document.querySelector('remote-selection')?.requestUpdate();
+  }
+
   setSelectedBlock(blocks: BlockComponentElement[]) {
     this.selectedBlocks = blocks;
     this.slots.blocksUpdated.emit(blocks);
