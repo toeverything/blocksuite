@@ -51,12 +51,6 @@ export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
     }
   > = {};
 
-  private _enableRemoteCursor = false;
-
-  get enableRemoteCursor() {
-    return this._enableRemoteCursor;
-  }
-
   get selection() {
     return this.edgeless.selection;
   }
@@ -123,11 +117,6 @@ export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-
-    this._enableRemoteCursor =
-      this.edgeless.page.awarenessStore.getFlag(
-        'enable_edgeless_remote_cursor'
-      ) ?? false;
 
     const { _disposables, surface, page } = this;
 
