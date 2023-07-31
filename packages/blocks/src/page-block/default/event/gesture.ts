@@ -21,7 +21,7 @@ export class Gesture {
     return this.host.root.selectionManager;
   }
 
-  private get rangeController() {
+  private get _rangeController() {
     return this.host.rangeController;
   }
 
@@ -61,7 +61,7 @@ export class Gesture {
       return;
     }
 
-    this.rangeController.render(range);
+    this._rangeController.render(range);
   };
 
   private _nativeDragStartHandler: UIEventHandler = ctx => {
@@ -142,7 +142,7 @@ export class Gesture {
     const range = document.createRange();
     range.setStart(first, 0);
     range.setEnd(last, Number(last.textContent?.length));
-    this.rangeController.render(range);
+    this._rangeController.render(range);
   };
 
   private _clickHandler: UIEventHandler = ctx => {
@@ -205,7 +205,7 @@ export class Gesture {
     range.setStart(node, left);
     range.setEnd(node, right);
 
-    this.rangeController.render(range);
+    this._rangeController.render(range);
   };
 
   private _clearRaf() {
@@ -229,7 +229,7 @@ export class Gesture {
 
     const range = rangeFromCaret(caret);
 
-    this.rangeController.render(this._startRange, range);
+    this._rangeController.render(this._startRange, range);
   };
 
   private _autoScroll = (y: number): boolean => {

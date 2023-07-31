@@ -16,14 +16,14 @@ export class Keyboard {
     this.host.bindHotKey({
       'Mod-z': ctx => {
         ctx.get('defaultState').event.preventDefault();
-        if (this.page.canUndo) {
-          this.page.undo();
+        if (this._page.canUndo) {
+          this._page.undo();
         }
       },
       'Mod-Z': ctx => {
         ctx.get('defaultState').event.preventDefault();
-        if (this.page.canRedo) {
-          this.page.redo();
+        if (this._page.canRedo) {
+          this._page.redo();
         }
       },
       ArrowUp: ctx => {
@@ -138,7 +138,7 @@ export class Keyboard {
     });
   }
 
-  private get page() {
+  private get _page() {
     return this.host.page;
   }
 
@@ -158,7 +158,7 @@ export class Keyboard {
       return;
     }
 
-    this.page.transact(() => {
+    this._page.transact(() => {
       const { blockId, path } = this._replaceBlocksBySelection(
         blockSelections,
         'affine:paragraph',
@@ -181,9 +181,9 @@ export class Keyboard {
 
   private _deleteBlocksBySelection(selections: BlockSelection[]) {
     selections.forEach(selection => {
-      const block = this.page.getBlockById(selection.blockId);
+      const block = this._page.getBlockById(selection.blockId);
       if (block) {
-        this.page.deleteBlock(block);
+        this._page.deleteBlock(block);
       }
     });
   }
@@ -194,7 +194,7 @@ export class Keyboard {
     props: Record<string, unknown>
   ) {
     const current = selections[0];
-    const first = this.page.getBlockById(current.blockId);
+    const first = this._page.getBlockById(current.blockId);
     const firstElement = this.host.root.blockViewMap.get(current.path);
 
     assertExists(first, `Cannot find block ${current.blockId}`);
@@ -205,11 +205,11 @@ export class Keyboard {
 
     const parentPath = firstElement.parentPath;
 
-    const parent = this.page.getParent(first);
+    const parent = this._page.getParent(first);
     const index = parent?.children.indexOf(first);
 
     this._deleteBlocksBySelection(selections);
-    const blockId = this.page.addBlock(flavour, props, parent, index);
+    const blockId = this._page.addBlock(flavour, props, parent, index);
 
     return {
       blockId,

@@ -43,11 +43,11 @@ export class BlockNavigation {
     }
 
     const parentPath = view.parentPath;
-    const block = this.page.getBlockById(selection.blockId);
+    const block = this._page.getBlockById(selection.blockId);
     assertExists(block);
-    const parent = this.page.getParent(block);
+    const parent = this._page.getParent(block);
     const index = parent?.children.indexOf(block);
-    const blockId = this.page.addBlock(
+    const blockId = this._page.addBlock(
       'affine:paragraph',
       {},
       parent,
@@ -71,9 +71,9 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const model = this.page.getBlockById(selection.blockId);
+    const model = this._page.getBlockById(selection.blockId);
     if (!model) return;
-    const previousSibling = this.page.getPreviousSibling(model);
+    const previousSibling = this._page.getPreviousSibling(model);
     if (!previousSibling) return;
     this._focusBlockById(previousSibling.id, selection.path.slice(0, -1));
   };
@@ -83,9 +83,9 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const model = this.page.getBlockById(selection.blockId);
+    const model = this._page.getBlockById(selection.blockId);
     if (!model) return;
-    const nextSibling = this.page.getNextSibling(model);
+    const nextSibling = this._page.getNextSibling(model);
     if (!nextSibling) return;
     this._focusBlockById(nextSibling.id, selection.path.slice(0, -1));
     return;
@@ -102,11 +102,11 @@ export class BlockNavigation {
       this._anchorBlock = anchor;
     }
 
-    const model = this.page.getBlockById(
+    const model = this._page.getBlockById(
       this._focusBlock?.blockId || selection.blockId
     );
     if (!model) return;
-    const previousSibling = this.page.getPreviousSibling(model);
+    const previousSibling = this._page.getPreviousSibling(model);
     if (!previousSibling) return;
     this._focusBlock = this._modeToSelection(
       previousSibling.id,
@@ -127,11 +127,11 @@ export class BlockNavigation {
       this._anchorBlock = anchor;
     }
 
-    const model = this.page.getBlockById(
+    const model = this._page.getBlockById(
       this._focusBlock?.blockId || selection.blockId
     );
     if (!model) return;
-    const nextSibling = this.page.getNextSibling(model);
+    const nextSibling = this._page.getNextSibling(model);
     if (!nextSibling) return;
     this._focusBlock = this._modeToSelection(
       nextSibling.id,
@@ -188,7 +188,7 @@ export class BlockNavigation {
     });
   }
 
-  private get page() {
+  private get _page() {
     return this.host.page;
   }
 
@@ -201,7 +201,7 @@ export class BlockNavigation {
   }
 
   private _focusBlockById(id: string, parentPath: string[]) {
-    const block = this.page.getBlockById(id);
+    const block = this._page.getBlockById(id);
     if (!block) return;
     const blockId = block.id;
     const path = parentPath.concat(blockId);
