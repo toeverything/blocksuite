@@ -93,8 +93,8 @@ export class IconButton extends LitElement {
   @property()
   text: string | null = null;
 
-  @property()
-  disabled: false | '' = false;
+  @property({ attribute: false })
+  disabled = false;
 
   constructor() {
     super();
@@ -111,7 +111,7 @@ export class IconButton extends LitElement {
     this.addEventListener(
       'click',
       event => {
-        if (this.disabled === '') {
+        if (this.disabled) {
           event.preventDefault();
           event.stopPropagation();
         }

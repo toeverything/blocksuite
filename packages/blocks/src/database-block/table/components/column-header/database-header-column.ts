@@ -19,6 +19,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -34,7 +35,7 @@ import type {
   DataViewTableColumnManager,
   DataViewTableManager,
 } from '../../table-view-manager.js';
-import type { ColumnHeader, ColumnTypeIcon } from '../../types.js';
+import type { ColumnTypeIcon } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 
 @customElement('affine-database-header-column')
@@ -244,16 +245,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
               input: {
                 search: true,
               },
-              items: columnTypes.map(type => {
-                return {
-                  type: 'action',
-                  name: type.text,
-                  icon: type.icon,
-                  select: () => {
-                    this.column.updateType?.(type.type);
-                  },
-                };
-              }),
+              items: this.tableViewManager.allColumnConfig
+                .filter(v => v.type !== this.column.type)
+                .map(config => {
+                  return {
+                    type: 'action',
+                    name: config.name,
+                    icon: html`<uni-lit
+                      .uni="${this.tableViewManager.getIcon(config.type)}"
+                    ></uni-lit>`,
+                    select: () => {
+                      this.column.updateType?.(config.type);
+                    },
+                  };
+                }),
             },
           },
           {
@@ -373,16 +378,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           search: true,
           placeholder: 'Search',
         },
-        items: columnTypes.map(type => {
-          return {
-            type: 'action',
-            name: type.text,
-            icon: type.icon,
-            select: () => {
-              this.column.updateType?.(type.type);
-            },
-          };
-        }),
+        items: this.tableViewManager.allColumnConfig
+          .filter(v => v.type !== this.column.type)
+          .map(config => {
+            return {
+              type: 'action',
+              name: config.name,
+              icon: html`<uni-lit
+                .uni="${this.tableViewManager.getIcon(config.type)}"
+              ></uni-lit>`,
+              select: () => {
+                this.column.updateType?.(config.type);
+              },
+            };
+          }),
       },
     });
   };
@@ -403,7 +412,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             class="affine-database-column-type-icon"
             @click="${this._clickTypeIcon}"
           >
-            ${columnTypeIconMap[column.type]}
+            ${keyed(
+              column.type,
+              html`<uni-lit .uni="${column.icon}"></uni-lit>`
+            )}
           </div>
           <div class="affine-database-column-text-content">
             <div class="affine-database-column-text-input">${column.name}</div>
@@ -497,45 +509,3 @@ declare global {
     'affine-database-header-column': DatabaseHeaderColumn;
   }
 }
-const columnTypes: ColumnHeader[] = [
-  {
-    type: 'rich-text',
-    text: 'Text',
-    icon: TextIcon,
-  },
-  {
-    type: 'select',
-    text: 'Select',
-    icon: DatabaseSelect,
-  },
-  {
-    type: 'multi-select',
-    text: 'Multi-select',
-    icon: DatabaseMultiSelect,
-  },
-  {
-    type: 'number',
-    text: 'Number',
-    icon: DatabaseNumber,
-  },
-  {
-    type: 'checkbox',
-    text: 'Checkbox',
-    icon: TodoIcon,
-  },
-  {
-    type: 'progress',
-    text: 'Progress',
-    icon: DatabaseProgress,
-  },
-  {
-    type: 'link',
-    text: 'Link',
-    icon: LinkIcon,
-  },
-  {
-    type: 'date',
-    text: 'Date',
-    icon: DateTime,
-  },
-];

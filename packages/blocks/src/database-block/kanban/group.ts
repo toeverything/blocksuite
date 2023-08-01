@@ -8,7 +8,7 @@ import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupRenderProps } from '../common/columns/group.js';
+import type { GroupRenderProps } from '../common/groupBy/matcher.js';
 import type {
   DataViewKanbanManager,
   KanbanGroupData,
