@@ -447,6 +447,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     if (this.state.selected.length > 1) {
       this._updateSelectedRect();
+    }
+
+    if (
+      this.state.selected.length > 1 ||
+      (this.state.selected.length === 1 &&
+        this.state.selected[0] instanceof TextElement)
+    ) {
       this._resizeManager.updateState(
         this.resizeMode,
         this._rotate,
