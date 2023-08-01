@@ -193,8 +193,7 @@ export class DragHandleWidget extends WidgetElement {
 
     const viewportElement = this._viewportElement;
 
-    const { left, top, width, height } =
-      hoverBlockElement.getBoundingClientRect();
+    const { left, top, width } = hoverBlockElement.getBoundingClientRect();
     this._dragPreviewOffsetY = this._calculatePreviewOffsetY(
       blockElements,
       hoverBlockElement
