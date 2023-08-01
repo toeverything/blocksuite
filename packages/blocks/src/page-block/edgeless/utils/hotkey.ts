@@ -10,7 +10,6 @@ import type { EdgelessTool } from '../../../__internal__/utils/types.js';
 import { BrushSize } from '../../../__internal__/utils/types.js';
 import { DEFAULT_NOTE_COLOR } from '../../../note-block/note-model.js';
 import {
-  bindCommonHotkey,
   deleteModelsByRange,
   handleDown,
   handleUp,
@@ -228,7 +227,7 @@ export function bindEdgelessHotkeys(edgeless: EdgelessPageBlockComponent) {
     bindSpace(edgeless);
     bindDelete(edgeless);
     bindShift(edgeless);
-    bindCommonHotkey(edgeless.page);
+    // bindCommonHotkey(edgeless.page);
   });
   return () => {
     hotkey.deleteScope(scope);

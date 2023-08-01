@@ -29,14 +29,7 @@ import {
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import {
-  showFormatQuickBar,
-  showFormatQuickBarByClicks,
-} from '../../../components/format-quick-bar/index.js';
-import {
-  calcCurrentSelectionPosition,
-  getNativeSelectionMouseDragInfo,
-} from '../../utils/position.js';
+import { getNativeSelectionMouseDragInfo } from '../../utils/position.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import {
   getXYWH,
@@ -344,13 +337,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._isDoubleClickedOnMask = true;
       return;
     }
-
-    showFormatQuickBarByClicks('double', e, this._page);
   }
 
   onContainerTripleClick(e: PointerEventState) {
     if (this._isDoubleClickedOnMask) return;
-    showFormatQuickBarByClicks('triple', e, this._page);
   }
 
   private _determineDragType(e: PointerEventState): DefaultModeDragType {
@@ -522,20 +512,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     if (this.isActive) {
-      const { direction, selectedType } = getNativeSelectionMouseDragInfo(e);
+      const { selectedType } = getNativeSelectionMouseDragInfo(e);
       if (selectedType === 'Caret') {
         // If nothing is selected, then we should not show the format bar
         return;
       }
-      showFormatQuickBar({
-        page: this._page,
-        direction,
-        anchorEl: {
-          getBoundingClientRect: () => {
-            return calcCurrentSelectionPosition(direction);
-          },
-        },
-      });
     }
 
     this._forceUpdateSelection(this.dragType);

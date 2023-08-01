@@ -7,15 +7,20 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { createLink } from '../../components/link-popover/create-link.js';
-import type { ActionProps } from './const.js';
 import {
   getCurrentCombinedFormat,
   handleFormat,
 } from './container-operations.js';
+
+interface ActionProps {
+  page: Page;
+  abortController: AbortController;
+  format: AffineTextAttributes;
+}
 
 export const formatConfig = [
   {

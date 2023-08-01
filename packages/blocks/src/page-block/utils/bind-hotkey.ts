@@ -1,4 +1,3 @@
-import { HOTKEYS, paragraphConfig } from '@blocksuite/global/config';
 import {
   assertEquals,
   assertExists,
@@ -6,13 +5,7 @@ import {
 } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
-import {
-  blockRangeToNativeRange,
-  hotkey,
-  isMultiBlockRange,
-  isPageMode,
-  isPrintableKeyEvent,
-} from '../../__internal__/index.js';
+import { isPageMode } from '../../__internal__/index.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
@@ -24,98 +17,6 @@ import {
   getRichTextByModel,
   Point,
 } from '../../__internal__/utils/index.js';
-// import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
-import { legacyActionConfig } from './const.js';
-import {
-  deleteModelsByRange,
-  updateBlockType,
-} from './container-operations.js';
-import { formatConfig } from './format-config.js';
-
-export function bindCommonHotkey(page: Page) {
-  if (page.readonly) return;
-
-  formatConfig.forEach(({ hotkey: hotkeyStr, action }) => {
-    hotkey.addListener(hotkeyStr, e => {
-      // Prevent default behavior
-      e.preventDefault();
-
-      if (page.awarenessStore.isReadonly(page)) return;
-
-      action({ page });
-    });
-  });
-
-  legacyActionConfig.forEach(({ hotkey: hotkeyStr, action, enabledWhen }) => {
-    // if (!isPrintableKeyEvent(e) || page.readonly) return;
-    if (!hotkeyStr) return;
-
-    hotkey.addListener(hotkeyStr, e => {
-      // Prevent default behavior
-      e.preventDefault();
-
-      if (!enabledWhen(page)) return;
-      if (page.awarenessStore.isReadonly(page)) return;
-
-      action({ page });
-    });
-  });
-
-  paragraphConfig.forEach(({ flavour, type, hotkey: hotkeyStr }) => {
-    if (!hotkeyStr) return;
-
-    hotkey.addListener(hotkeyStr, () => {
-      const blockRange = getCurrentBlockRange(page);
-      if (!blockRange) return;
-
-      updateBlockType(blockRange.models, flavour, type);
-    });
-  });
-
-  hotkey.addListener(HOTKEYS.UNDO, e => {
-    e.preventDefault();
-    if (page.canUndo) {
-      page.undo();
-    }
-  });
-
-  hotkey.addListener(HOTKEYS.REDO, e => {
-    e.preventDefault();
-    if (page.canRedo) {
-      page.redo();
-    }
-  });
-
-  // Fixes: https://github.com/toeverything/blocksuite/issues/200
-  // We shouldn't prevent user input, because there could have CN/JP/KR... input,
-  // that have pop-up for selecting local characters.
-  // So we could just hook on the keydown event and detect whether user input a new character.
-  hotkey.addListener(HOTKEYS.ANY_KEY, e => {
-    if (!isPrintableKeyEvent(e) || page.readonly) return;
-
-    const blockRange = getCurrentBlockRange(page);
-    if (!blockRange) return;
-
-    const range = blockRangeToNativeRange(blockRange);
-    if (!range || !isMultiBlockRange(range)) return;
-    deleteModelsByRange(page, blockRange);
-  });
-
-  // !!!
-  // Don't forget to remove hotkeys at `removeCommonHotKey`
-}
-
-export function removeCommonHotKey() {
-  hotkey.removeListener([
-    ...formatConfig.map(({ hotkey: hotkeyStr }) => hotkeyStr),
-    ...paragraphConfig
-      .map(({ hotkey: hotkeyStr }) => hotkeyStr)
-      .filter((i): i is string => !!i),
-    HOTKEYS.UNDO,
-    HOTKEYS.REDO,
-    HOTKEYS.ANY_KEY,
-  ]);
-}
 
 export function handleUp(
   e: KeyboardEvent,
