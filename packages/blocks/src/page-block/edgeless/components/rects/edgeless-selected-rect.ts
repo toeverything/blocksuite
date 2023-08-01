@@ -382,7 +382,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _onDragStart = () => {
     this._toolbarVisible = false;
-    this._updateResizeManagerState();
+    this._updateResizeManagerState(false);
   };
 
   private _onDragMove = (
@@ -579,7 +579,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     };
   }
 
-  private _updateResizeManagerState = () => {
+  /**
+   * @param refresh indicate whether to completely refresh the state of resize manager, otherwise only update the position
+   */
+  private _updateResizeManagerState = (refresh: boolean) => {
     const {
       _resizeManager,
       _selectedRect,
@@ -588,11 +591,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       selection: { elements },
     } = this;
 
+    const rect = getSelectedRect(elements);
+
     _resizeManager.updateState(
       resizeMode,
       _selectedRect.rotate,
       zoom,
-      getSelectedRect(elements)
+      refresh ? undefined : rect,
+      refresh ? rect : undefined
     );
     _resizeManager.updateBounds(getSelectableBounds(elements));
   };
@@ -603,6 +609,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _updateOnSelectionChange = () => {
     this._updateSelectedRect();
+    this._updateResizeManagerState(true);
 
     if (this.selection.editing) {
       this._toolbarVisible = false;

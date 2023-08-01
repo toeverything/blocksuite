@@ -94,11 +94,19 @@ export class HandleResizeManager {
     resizeMode: ResizeMode,
     rotate: number,
     zoom: number,
+    position?: { x: number; y: number },
     originalRect?: DOMRect
   ) {
     this._resizeMode = resizeMode;
     this._rotate = rotate;
     this._zoom = zoom;
+
+    if (position) {
+      this._currentRect.x = position.x;
+      this._currentRect.y = position.y;
+      this._originalRect.x = this._currentRect.x;
+      this._originalRect.y = this._currentRect.y;
+    }
 
     if (originalRect) {
       this._originalRect = originalRect;
