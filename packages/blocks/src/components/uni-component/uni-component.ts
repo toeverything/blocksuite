@@ -3,7 +3,7 @@ import type { PropertyValues } from 'lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-type UniComponentReturn<
+export type UniComponentReturn<
   Props = NonNullable<unknown>,
   Expose extends NonNullable<unknown> = NonNullable<unknown>
 > = {
@@ -21,7 +21,7 @@ export class UniLit<
   Expose extends NonNullable<unknown>
 > extends ShadowlessElement {
   @property()
-  uni!: UniComponent<unknown, Expose>;
+  uni?: UniComponent<unknown, Expose>;
 
   @property()
   props!: NonNullable<unknown>;
@@ -34,7 +34,7 @@ export class UniLit<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.uniReturn = this.uni(this, this.props);
+    this.uniReturn = this.uni?.(this, this.props);
   }
 
   override disconnectedCallback() {
@@ -56,7 +56,7 @@ export class UniLit<
 
 export const createUniComponentFromWebComponent = <
   T,
-  Expose extends Record<string, unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>
 >(
   component: typeof HTMLElement
 ): UniComponent<T, Expose> => {

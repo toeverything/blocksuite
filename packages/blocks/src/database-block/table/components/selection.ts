@@ -329,6 +329,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
                 rowsSelection: undefined,
                 columnsSelection: undefined,
               };
+              return true;
             } else {
               this.selection = {
                 ...selection,
@@ -338,9 +339,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
                 },
                 columnsSelection: undefined,
               };
+              return true;
             }
           }
-          return false;
         },
         Enter: () => {
           const selection = this.selection;

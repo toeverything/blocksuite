@@ -17,7 +17,8 @@ import { customElement, state } from 'lit/decorators.js';
 import { ContentParser } from '../../__internal__/content-parser/index.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
 import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
-import { richTextHelper } from '../../database-block/common/columns/define.js';
+import { columnManager } from '../../database-block/common/columns/manager.js';
+import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
@@ -179,7 +180,9 @@ export async function importNotion(workspace: Workspace, file: File) {
             });
 
             const columns: Column[] = titles.slice(1).map((value, index) => {
-              return richTextHelper.createWithId('' + id++, value);
+              return columnManager
+                .getColumn(richTextPureColumnConfig.type)
+                .createWithId('' + id++, value);
             });
             if (rows.length > 0) {
               let maxLen = rows[0].length;
@@ -188,7 +191,11 @@ export async function importNotion(workspace: Workspace, file: File) {
               }
               const addNum = maxLen - columns.length;
               for (let i = 0; i < addNum; i++) {
-                columns.push(richTextHelper.createWithId('' + id++, ''));
+                columns.push(
+                  columnManager
+                    .getColumn(richTextPureColumnConfig.type)
+                    .createWithId('' + id++, '')
+                );
               }
             }
             const databasePropsId = id++;
