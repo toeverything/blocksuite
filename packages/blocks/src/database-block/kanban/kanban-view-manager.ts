@@ -1,11 +1,11 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
-import { groupByMatcher } from '../common/columns/group.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
 import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
+import { groupByMatcher } from '../common/groupBy/matcher.js';
 import type { GroupBy, KanbanViewData } from '../common/view-manager.js';
 import { defaultGroupBy } from '../common/view-manager.js';
 import type { ViewSource } from '../common/view-source.js';

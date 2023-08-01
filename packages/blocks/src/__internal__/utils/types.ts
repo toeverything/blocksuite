@@ -48,30 +48,6 @@ export interface EditingState {
   rect: DOMRect;
 }
 
-export type DatabaseTableViewRowSelect = {
-  type: 'select';
-  databaseId: string;
-  rowIds: string[];
-};
-type DatabaseTableViewRowClick = {
-  type: 'click';
-  databaseId: string;
-  rowIds: string[];
-};
-type DatabaseTableViewRowDelete = {
-  type: 'delete';
-  databaseId: string;
-  rowIds: string[];
-};
-type DatabaseTableViewRowClear = {
-  type: 'clear';
-};
-export type DatabaseTableViewRowState =
-  | DatabaseTableViewRowSelect
-  | DatabaseTableViewRowClick
-  | DatabaseTableViewRowDelete
-  | DatabaseTableViewRowClear;
-
 export type CellFocus = {
   rowIndex: number;
   columnIndex: number;
