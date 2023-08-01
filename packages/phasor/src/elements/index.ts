@@ -34,7 +34,12 @@ export { FrameElement } from './frame/frame-element.js';
 
 export { normalizeShapeBound } from './shape/utils.js';
 export { SHAPE_TEXT_PADDING } from './shape/constants.js';
-export { normalizeTextBound } from './text/utils.js';
+export {
+  normalizeTextBound,
+  getFontString,
+  getLineHeight,
+  getLineWidth,
+} from './text/utils.js';
 export type { HitTestOptions } from './surface-element.js';
 
 export type PhasorElement =
