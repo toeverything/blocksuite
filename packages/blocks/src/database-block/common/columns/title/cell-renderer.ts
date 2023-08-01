@@ -80,6 +80,16 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
       },
       true
     );
+    this._disposables.addFromEvent(
+      this,
+      'pointerdown',
+      e => {
+        if (this.realEditing) {
+          e.stopPropagation();
+        }
+      },
+      true
+    );
     requestAnimationFrame(() => {
       const editor = this.querySelector('rich-text')?.vEditor;
       if (editor) {
