@@ -338,7 +338,7 @@ export class EdgelessPageBlockComponent
 
   private _clearSelection() {
     requestAnimationFrame(() => {
-      if (!this.selection.editing) {
+      if (this.isConnected && !this.selection.editing) {
         resetNativeSelection(null);
       }
     });
