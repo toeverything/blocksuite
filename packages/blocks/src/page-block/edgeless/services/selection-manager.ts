@@ -91,16 +91,16 @@ export class EdgelessSelectionManager {
           s => s.type === 'surface'
         ) as SurfaceSelection;
 
-        if (selection || (!selection && !this.state.isEmpty())) {
-          this._setState(
-            selection ??
-              SurfaceSelection.fromJSON({
-                elements: [],
-                editing: false,
-              })
-          );
-          this.slots.updated.emit(this.state);
-        }
+        if (this.state.isEmpty() && (!selection || selection.isEmpty())) return;
+
+        this._setState(
+          selection ??
+            SurfaceSelection.fromJSON({
+              elements: [],
+              editing: false,
+            })
+        );
+        this.slots.updated.emit(this.state);
       })
     );
 
