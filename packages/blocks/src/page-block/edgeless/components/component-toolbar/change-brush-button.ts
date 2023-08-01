@@ -13,7 +13,6 @@ import type { CssVariableName } from '../../../../__internal__/theme/css-variabl
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../services/tools-manager.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
@@ -90,9 +89,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   elements: BrushElement[] = [];
-
-  @property({ type: Object })
-  selectionState!: EdgelessSelectionState;
 
   @property({ attribute: false })
   page!: Page;

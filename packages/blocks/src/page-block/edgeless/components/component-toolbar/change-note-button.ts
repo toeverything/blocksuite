@@ -16,7 +16,6 @@ import {
   type NoteBlockModel,
 } from '../../../../note-block/note-model.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../services/tools-manager.js';
 import type { ColorEvent } from '../panel/color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -141,9 +140,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   page!: Page;
-
-  @property({ attribute: false })
-  selectionState!: EdgelessSelectionState;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;

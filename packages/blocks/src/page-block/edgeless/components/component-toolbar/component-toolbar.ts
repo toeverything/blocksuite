@@ -6,7 +6,6 @@ import './change-note-button.js';
 import './change-text-button.js';
 import './more-button.js';
 
-import type { SurfaceSelection } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';
 import type {
   BrushElement,
@@ -15,12 +14,13 @@ import type {
   TextElement,
 } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import {
   atLeastNMatches,
   groupBy,
+  pickValues,
 } from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
@@ -57,9 +57,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       height: 24px;
     }
   `;
-
-  @state()
-  selectionState!: SurfaceSelection;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -110,7 +107,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
-          .selectionState=${this.selectionState}
         >
         </edgeless-change-brush-button>`
       : nothing;
@@ -123,7 +119,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
-          .selectionState=${this.selectionState}
         >
         </edgeless-change-connector-button>`
       : nothing;
@@ -136,7 +131,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
-          .selectionState=${this.selectionState}
         >
         </edgeless-change-note-button>`
       : nothing;
@@ -149,21 +143,37 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
-          .selectionState=${this.selectionState}
         >
         </edgeless-change-text-button>`
       : nothing;
   }
+
+  private _updateOnSelectedChange = (element: string | { id: string }) => {
+    const id = typeof element === 'string' ? element : element.id;
+
+    if (this.selection.has(id)) {
+      this.requestUpdate();
+    }
+  };
 
   override connectedCallback(): void {
     super.connectedCallback();
 
     this._disposables.add(
       this.edgeless.selection.slots.updated.on(() => {
-        this.selectionState = this.edgeless.selection.state;
+        this.requestUpdate();
       })
     );
-    this.selectionState = this.edgeless.selection.state;
+    this._disposables.add(
+      this.edgeless.page.slots.blockUpdated.on(this._updateOnSelectedChange)
+    );
+    pickValues(this.edgeless.surface.slots, [
+      'elementAdded',
+      'elementRemoved',
+      'elementUpdated',
+    ]).forEach(slot =>
+      this._disposables.add(slot.on(this._updateOnSelectedChange))
+    );
   }
 
   override render() {

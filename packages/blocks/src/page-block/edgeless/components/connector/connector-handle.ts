@@ -76,7 +76,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
         clientY - viewportRect.top
       );
       edgeless.connector.updateConnection(connector, modelXY, connection);
-      this?.refresh();
+      this.refresh?.();
     });
 
     _disposables.addFromEvent(document, 'pointerup', () => {
