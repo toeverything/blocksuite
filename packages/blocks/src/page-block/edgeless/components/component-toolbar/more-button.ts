@@ -134,12 +134,14 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   private _splitElements() {
-    return groupBy(this.selection.elements, element => {
+    const { notes, shapes } = groupBy(this.selection.elements, element => {
       return isTopLevelBlock(element) ? 'notes' : 'shapes';
     }) as {
       notes: TopLevelBlockModel[];
       shapes: PhasorElement[];
     };
+
+    return { notes: notes ?? [], shapes: shapes ?? [] };
   }
 
   private _delete() {
