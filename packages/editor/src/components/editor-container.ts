@@ -60,15 +60,21 @@ export class EditorContainer
   @property({ attribute: false })
   override autofocus = false;
 
+  /**
+   * @deprecated This property is unreliable since pagePreset can be overridden.
+   */
   @query('affine-default-page')
   private _defaultPageBlock?: DefaultPageBlockComponent;
 
+  /**
+   * @deprecated This property is unreliable since edgelessPreset can be overridden.
+   */
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   readonly themeObserver = new ThemeObserver();
 
-  fileDropManager = new FileDropManager(this._getPageInfo.bind(this));
+  fileDropManager = new FileDropManager(this);
 
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
@@ -79,16 +85,6 @@ export class EditorContainer
     pageModeSwitched: new Slot(),
     tagClicked: new Slot<{ tagId: string }>(),
   };
-
-  private _getPageInfo() {
-    const { page, mode } = this;
-    return {
-      page,
-      mode,
-      pageBlock:
-        mode === 'page' ? this._defaultPageBlock : this._edgelessPageBlock,
-    };
-  }
 
   override connectedCallback() {
     super.connectedCallback();

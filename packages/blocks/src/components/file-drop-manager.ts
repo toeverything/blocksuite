@@ -1,25 +1,24 @@
 import {
   assertExists,
   type BaseBlockModel,
+  matchFlavours,
   type Page,
 } from '@blocksuite/store';
 
 import {
   asyncFocusRichText,
-  type BlockComponentElement,
   calcDropTarget,
   type DropResult,
+  getBlockElementByModel,
   getClosestBlockElementByPoint,
-  getClosestNoteBlockElementById,
-  getLastNoteBlockElement,
   getModelByBlockElement,
   Point,
 } from '../__internal__/index.js';
 import type {
+  AbstractEditor,
   DefaultPageBlockComponent,
   EdgelessPageBlockComponent,
   ImageBlockModel,
-  NoteBlockComponent,
 } from '../index.js';
 import type { DragIndicator } from './index.js';
 
@@ -32,14 +31,15 @@ export type GetPageInfo = () => {
 type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;
 
 export class FileDropManager {
-  private _getPageInfo: GetPageInfo;
+  private _editor: AbstractEditor;
+
   private _indicator!: DragIndicator;
   private _point: Point | null = null;
   private _result: DropResult | null = null;
   private _handlers: Map<string, ImportHandler> = new Map();
 
-  constructor(getPageInfo: GetPageInfo) {
-    this._getPageInfo = getPageInfo;
+  constructor(_editor: AbstractEditor) {
+    this._editor = _editor;
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
@@ -107,7 +107,7 @@ export class FileDropManager {
       if (block) blocks.push(block);
     }
 
-    await this._onDropEnd(this._point, blocks, this._result);
+    this._onDropEnd(this._point, blocks, this._result);
 
     this._point = null;
     this._result = null;
@@ -122,7 +122,8 @@ export class FileDropManager {
     const len = models.length;
     if (!len) return;
 
-    const { page, mode, pageBlock } = this._getPageInfo();
+    const { page, mode } = this._editor;
+    const pageBlock = page.root;
     assertExists(pageBlock);
 
     page.captureSync();
@@ -134,9 +135,10 @@ export class FileDropManager {
     if (type === 'none' && isPageMode) {
       type = 'after';
       if (!model) {
-        const note = getLastNoteBlockElement(pageBlock) as NoteBlockComponent;
-        assertExists(note);
-        model = note.model.lastItem();
+        const lastNote = pageBlock.children[pageBlock.children.length - 1];
+        if (!matchFlavours(lastNote, ['affine:note']))
+          throw new Error('The last block is not a note block.');
+        model = lastNote.lastItem();
       }
     }
 
@@ -152,39 +154,31 @@ export class FileDropManager {
       assertExists(parent);
       const ids = page.addSiblingBlocks(model, models, type);
       focusId = ids[ids.length - 1];
-
-      if (isPageMode) {
-        asyncFocusRichText(page, focusId);
-        return;
-      }
-
-      const note = getClosestNoteBlockElementById(
-        parent.id,
-        pageBlock
-      ) as BlockComponentElement;
-      assertExists(note);
-      noteId = note.model.id;
+      if (isPageMode) asyncFocusRichText(page, focusId);
+      return;
     }
-
     if (isPageMode) return;
 
+    const edgelessBlockEle = getBlockElementByModel(
+      pageBlock
+    ) as EdgelessPageBlockComponent | null;
+    assertExists(edgelessBlockEle);
     // In edgeless mode
     // Creates new notes on blank area.
     let i = 0;
     for (; i < len; i++) {
       const model = models[i];
       if (model.flavour === 'affine:image') {
-        const note = (pageBlock as EdgelessPageBlockComponent).addImage(
+        const note = (edgelessBlockEle as EdgelessPageBlockComponent).addImage(
           model as ImageBlockModel,
           point
         );
         noteId = note.noteId;
       }
     }
-
     if (!noteId || !focusId) return;
 
-    (pageBlock as EdgelessPageBlockComponent).setSelection(
+    (edgelessBlockEle as EdgelessPageBlockComponent).setSelection(
       noteId,
       true,
       focusId,
