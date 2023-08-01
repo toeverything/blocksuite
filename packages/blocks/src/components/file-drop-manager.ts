@@ -30,13 +30,19 @@ export type GetPageInfo = () => {
 
 type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;
 
+type FileDropRule = {
+  name: string;
+  matcher: (file: File) => boolean;
+  handler: ImportHandler;
+};
+
 export class FileDropManager {
   private _editor: AbstractEditor;
 
   private _indicator!: DragIndicator;
   private _point: Point | null = null;
   private _result: DropResult | null = null;
-  private _handlers: Map<string, ImportHandler> = new Map();
+  private _handlers: FileDropRule[] = [];
 
   constructor(_editor: AbstractEditor) {
     this._editor = _editor;
@@ -96,7 +102,7 @@ export class FileDropManager {
 
     for (; i < len; i++) {
       const file = files[i];
-      const handler = this.get(file.type);
+      const handler = this.findFileHandler(file);
 
       if (!handler) {
         console.warn(`This ${file.type} is not currently supported.`);
@@ -126,8 +132,6 @@ export class FileDropManager {
     const pageBlock = page.root;
     assertExists(pageBlock);
 
-    page.captureSync();
-
     const isPageMode = mode === 'page';
     let type = result?.type || 'none';
     let model = result?.modelState.model || null;
@@ -148,6 +152,8 @@ export class FileDropManager {
 
     let noteId: string | undefined;
     let focusId: string | undefined;
+
+    page.captureSync();
 
     if (type !== 'none' && model) {
       const parent = page.getParent(model);
@@ -186,26 +192,17 @@ export class FileDropManager {
     );
   }
 
-  get(type: string): ImportHandler | undefined {
-    const handler = this._handlers.get(type);
-
-    // `*`
-    if (handler || type === '*') return handler;
-
-    // `image/*`
-    if (type.endsWith('/*')) return this.get('*');
-
-    // `image/png`
-    return this.get(type.substring(0, type.indexOf('/')) + '/*');
+  findFileHandler(file: File): ImportHandler | undefined {
+    const ruler = this._handlers.find(handler => handler.matcher(file));
+    return ruler?.handler;
   }
 
   /**
    * Registers a processing function to handle the specified type.
-   *
-   * @param type - MIME type
-   * @parram handler - A processing handler
    */
-  register(type: string, handler: ImportHandler) {
-    this._handlers.set(type, handler);
+  register(rule: FileDropRule) {
+    // Remove duplicated rule
+    this._handlers = this._handlers.filter(({ name }) => name !== rule.name);
+    this._handlers.push(rule);
   }
 }

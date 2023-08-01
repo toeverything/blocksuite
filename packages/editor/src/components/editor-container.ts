@@ -1,11 +1,13 @@
 import {
   type AbstractEditor,
   activeEditorManager,
+  type AttachmentProps,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
   FileDropManager,
   getServiceOrRegister,
+  type ImageProps,
   noop,
   type PageBlockModel,
   pagePreset,
@@ -18,7 +20,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
+import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -183,16 +185,38 @@ export class EditorContainer
     }
 
     // adds files from outside by dragging and dropping
-    this.fileDropManager.register('image/*', async (file: File) => {
-      const storage = this.page.blobs;
-      assertExists(storage);
-      const sourceId = await storage.set(file);
-      const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
-      return {
-        flavour: 'affine:image',
-        sourceId,
-        ...size,
-      };
+    this.fileDropManager.register({
+      name: 'Image',
+      matcher: file => file.type.startsWith('image'),
+      handler: async (
+        file: File
+      ): Promise<ImageProps & { flavour: 'affine:image' }> => {
+        const storage = this.page.blobs;
+        const sourceId = await storage.set(file);
+        const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
+        return {
+          flavour: 'affine:image',
+          sourceId,
+          ...size,
+        };
+      },
+    });
+
+    this.fileDropManager.register({
+      name: 'Attachment',
+      matcher: () => true,
+      handler: async (
+        file: File
+      ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
+        const storage = this.page.blobs;
+        const sourceId = await storage.set(file);
+        return {
+          flavour: 'affine:attachment',
+          name: file.name,
+          size: file.size,
+          sourceId,
+        };
+      },
     });
   }
 
