@@ -1,10 +1,15 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { IModelCoord, ShapeElement } from '@blocksuite/phasor';
+import type {
+  FrameElement,
+  IModelCoord,
+  ShapeElement,
+} from '@blocksuite/phasor';
 import { Bound, TextElement } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
+import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -49,6 +54,21 @@ export function mountShapeEditor(
   shapeEditor.vEditor?.focusEnd();
   edgeless.selection.switchToDefaultMode({
     selected: [shapeElement],
+    active: true,
+  });
+}
+
+export function mountFrameEditor(
+  frame: FrameElement,
+  edgeless: EdgelessPageBlockComponent
+) {
+  const frameEditor = new EdgelessFrameTitleEditor();
+
+  edgeless.pageBlockContainer.appendChild(frameEditor);
+  frameEditor.mount(frame, edgeless);
+  frameEditor.vEditor?.focusEnd();
+  edgeless.selection.switchToDefaultMode({
+    selected: [frame],
     active: true,
   });
 }

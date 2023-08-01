@@ -47,14 +47,10 @@ export class SurfaceManager {
   slots = {
     elementUpdated: new Slot<{
       id: id;
-      props:
-        | IElementUpdateProps<'shape'>
-        | IElementUpdateProps<'connector'>
-        | IElementUpdateProps<'brush'>
-        | IElementUpdateProps<'shape'>;
+      props: { [index: string]: { old: unknown; new: unknown } };
     }>(),
     elementAdded: new Slot<id>(),
-    elementRemoved: new Slot<id>(),
+    elementRemoved: new Slot<{ id: id; element: SurfaceElement }>(),
   };
 
   constructor(
@@ -142,7 +138,7 @@ export class SurfaceManager {
       } else if (type.action === 'delete') {
         const element = this._elements.get(id);
         assertExists(element);
-        element.xywh;
+
         element.unmount();
         this._elements.delete(id);
         this.deleteElementLocalRecord(id);
@@ -214,7 +210,7 @@ export class SurfaceManager {
 
     this._transact(() => {
       for (const [key, value] of Object.entries(props)) {
-        if (key === 'text' && !(value instanceof Y.Text)) {
+        if ((key === 'text' || key === 'title') && !(value instanceof Y.Text)) {
           yMap.set(key, new Y.Text(value));
         } else {
           yMap.set(key, value);
@@ -362,10 +358,10 @@ export class SurfaceManager {
     this.refresh();
   }
 
-  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
-    id: id
-  ): IPhasorElementLocalRecord[T] | undefined {
-    return this._elementLocalRecords.get(id);
+  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(id: id) {
+    return this._elementLocalRecords.get(id) as
+      | IPhasorElementLocalRecord[T]
+      | undefined;
   }
 
   deleteElementLocalRecord(id: id) {

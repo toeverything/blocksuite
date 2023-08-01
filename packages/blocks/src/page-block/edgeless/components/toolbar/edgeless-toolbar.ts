@@ -10,11 +10,15 @@ import {
   EdgelessImageIcon,
   EdgelessTextIcon,
   HandIcon,
+  PrensentNextIcon,
+  PresentationIcon,
+  PresentPreviousIcon,
   SelectIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { Bound, clamp } from '@blocksuite/phasor/';
+import { css, html, LitElement, type PropertyValues } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
@@ -98,9 +102,46 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .transform-button:hover svg {
       transform: scale(1.15);
     }
+
+    .edgeless-present-frame {
+      width: 145px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .edgeless-prensent-frame-title {
+      display: inline-block;
+      cursor: pointer;
+      color: #424149;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      margin-right: 4px;
+    }
+
+    .edgeless-present-frame-count {
+      color: #8e8d91;
+    }
+    .edgeless-presnet-stop {
+      background: #eb4335;
+      color: #ffffff;
+      box-shadow: 0px 1px 2px 0px #ffffff40 inset;
+      padding: 4px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
   `;
 
   edgeless: EdgelessPageBlockComponent;
+
+  @state({
+    hasChanged() {
+      return true;
+    },
+  })
+  private _currentFrameIndex = 0;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
@@ -159,9 +200,156 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   };
 
+  protected override updated(changedProperties: PropertyValues) {
+    const { type } = this.edgelessTool;
+    if (changedProperties.has('_currentFrameIndex') && type === 'present') {
+      const frames = this.edgeless.surface.getElementsByType('frame');
+      const current = this._currentFrameIndex;
+      const viewport = this.edgeless.surface.viewport;
+      const frame = frames[current];
+      if (frame) {
+        const bound = Bound.deserialize(frame.xywh);
+        viewport.setViewportByBound(bound, [40, 60], true);
+      }
+    }
+  }
+
+  private get prensentContent() {
+    const frames = this.edgeless.surface.getElementsByType('frame');
+    const current = this._currentFrameIndex;
+    const frame = frames[current];
+    const min = 0;
+    const max = frames.length - 1;
+    return html`
+      <edgeless-tool-icon-button
+        .tooltip=${'Previous'}
+        .disabled=${current === min}
+        @click=${() =>
+          (this._currentFrameIndex = clamp(
+            this._currentFrameIndex - 1,
+            min,
+            max
+          ))}
+      >
+        ${PresentPreviousIcon}
+      </edgeless-tool-icon-button>
+      <div class="edgeless-present-frame">
+        <span
+          class="edgeless-prensent-frame-title"
+          @click=${() =>
+            (this._currentFrameIndex = this._currentFrameIndex + 1 - 1)}
+          >${frame?.title ?? 'no frame'}</span
+        >
+        <span class="edgeless-present-frame-count"
+          >${current + 1}/${frames.length}</span
+        >
+      </div>
+      <edgeless-tool-icon-button
+        .tooltip=${'Next'}
+        .disabled=${current === max}
+        @click=${() =>
+          (this._currentFrameIndex = clamp(
+            this._currentFrameIndex + 1,
+            min,
+            max
+          ))}
+      >
+        ${PrensentNextIcon}
+      </edgeless-tool-icon-button>
+      <div class="short-divider"></div>
+      <div
+        class="edgeless-presnet-stop"
+        @click=${() => this.setEdgelessTool({ type: 'default' })}
+      >
+        Stop
+      </div>
+    `;
+  }
+
+  private get defaultContent() {
+    const { type } = this.edgelessTool;
+    return html`<edgeless-tool-icon-button
+        .tooltip=${getTooltipWithShortcut('Select', 'V')}
+        .active=${type === 'default'}
+        @click=${() => this.setEdgelessTool({ type: 'default' })}
+      >
+        ${SelectIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .tooltip=${getTooltipWithShortcut('Hand', 'H')}
+        .active=${type === 'pan'}
+        @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
+      >
+        ${HandIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .tooltip=${'Present'}
+        @click=${() => {
+          this.setEdgelessTool({ type: 'present' });
+          this._currentFrameIndex = 0;
+        }}
+      >
+        ${PresentationIcon}
+      </edgeless-tool-icon-button>
+      <div class="short-divider"></div>
+      <edgeless-note-tool-button
+        .edgelessTool=${this.edgelessTool}
+        .edgeless=${this.edgeless}
+        .setEdgelessTool=${this.setEdgelessTool}
+      ></edgeless-note-tool-button>
+      <div class="full-divider"></div>
+      <div class="brush-and-eraser">
+        <edgeless-brush-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-brush-tool-button>
+        <edgeless-toolbar-button
+          .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
+          .active=${type === 'eraser'}
+          .activeMode=${'background'}
+          @click=${() => this.setEdgelessTool({ type: 'eraser' })}
+        >
+          <div class="eraser-button">${EdgelessEraserIcon}</div>
+        </edgeless-toolbar-button>
+      </div>
+      <div class="edgeless-right-part">
+        <edgeless-toolbar-button
+          class="transform-button"
+          .tooltip=${getTooltipWithShortcut('Text', 'T')}
+          .active=${type === 'text'}
+          .activeMode=${'background'}
+          @click=${() => this.setEdgelessTool({ type: 'text' })}
+        >
+          ${EdgelessTextIcon}
+        </edgeless-toolbar-button>
+        <edgeless-shape-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-shape-tool-button>
+        <edgeless-toolbar-button
+          class="transform-button"
+          .disabled=${this._imageLoading}
+          .activeMode=${'background'}
+          .tooltip=${'Image'}
+          @click=${() => this._addImages()}
+        >
+          ${EdgelessImageIcon}
+        </edgeless-toolbar-button>
+        <edgeless-connector-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-connector-tool-button>
+      </div>`;
+  }
+
   override render() {
     const { type } = this.edgelessTool;
 
+    const Content =
+      type === 'present' ? this.prensentContent : this.defaultContent;
     return html`
       <div
         class="edgeless-toolbar-container"
@@ -170,72 +358,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         @mouseup=${stopPropagation}
         @pointerdown=${stopPropagation}
       >
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Select', 'V')}
-          .active=${type === 'default'}
-          @click=${() => this.setEdgelessTool({ type: 'default' })}
-        >
-          ${SelectIcon}
-        </edgeless-tool-icon-button>
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
-          .active=${type === 'pan'}
-          @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
-        >
-          ${HandIcon}
-        </edgeless-tool-icon-button>
-        <div class="short-divider"></div>
-        <edgeless-note-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-note-tool-button>
-        <div class="full-divider"></div>
-        <div class="brush-and-eraser">
-          <edgeless-brush-tool-button
-            .edgelessTool=${this.edgelessTool}
-            .edgeless=${this.edgeless}
-            .setEdgelessTool=${this.setEdgelessTool}
-          ></edgeless-brush-tool-button>
-          <edgeless-toolbar-button
-            .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
-            .active=${type === 'eraser'}
-            .activeMode=${'background'}
-            @click=${() => this.setEdgelessTool({ type: 'eraser' })}
-          >
-            <div class="eraser-button">${EdgelessEraserIcon}</div>
-          </edgeless-toolbar-button>
-        </div>
-        <div class="edgeless-right-part">
-          <edgeless-toolbar-button
-            class="transform-button"
-            .tooltip=${getTooltipWithShortcut('Text', 'T')}
-            .active=${type === 'text'}
-            .activeMode=${'background'}
-            @click=${() => this.setEdgelessTool({ type: 'text' })}
-          >
-            ${EdgelessTextIcon}
-          </edgeless-toolbar-button>
-          <edgeless-shape-tool-button
-            .edgelessTool=${this.edgelessTool}
-            .edgeless=${this.edgeless}
-            .setEdgelessTool=${this.setEdgelessTool}
-          ></edgeless-shape-tool-button>
-          <edgeless-toolbar-button
-            class="transform-button"
-            .disabled=${this._imageLoading}
-            .activeMode=${'background'}
-            .tooltip=${'Image'}
-            @click=${() => this._addImages()}
-          >
-            ${EdgelessImageIcon}
-          </edgeless-toolbar-button>
-          <edgeless-connector-tool-button
-            .edgelessTool=${this.edgelessTool}
-            .edgeless=${this.edgeless}
-            .setEdgelessTool=${this.setEdgelessTool}
-          ></edgeless-connector-tool-button>
-        </div>
+        ${Content}
       </div>
     `;
   }

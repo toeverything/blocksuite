@@ -29,7 +29,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       fill: currentColor;
       align-items: center;
       justify-content: center;
-      padding: 6px 0 6px 6px;
       gap: 10px;
     }
 

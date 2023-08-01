@@ -13,6 +13,11 @@ export type { Controller } from './elements/connector/types.js';
 export { type Connection, ConnectorMode } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';
 export * from './elements/index.js';
+// export {
+//   getFontString,
+//   getLineHeight,
+//   getLineWidth,
+// } from './elements/text/utils.js';
 export { compare } from './grid.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export type { SurfaceViewport } from './renderer.js';

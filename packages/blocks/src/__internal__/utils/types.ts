@@ -135,9 +135,11 @@ export type ExtendedModel = BaseBlockModel & Record<string, any>;
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel = NoteBlockModel;
 
-export type Alignable = NoteBlockModel | PhasorElement;
+export type EdgelessElement = TopLevelBlockModel | PhasorElement;
 
-export type Erasable = NoteBlockModel | PhasorElement;
+export type Alignable = EdgelessElement;
+
+export type Erasable = EdgelessElement;
 
 export type Connectable =
   | NoteBlockModel
@@ -179,6 +181,10 @@ export type EraserTool = {
   type: 'eraser';
 };
 
+export type PresentTool = {
+  type: 'present';
+};
+
 export type PanTool = {
   type: 'pan';
   panning: boolean;
@@ -208,7 +214,8 @@ export type EdgelessTool =
   | PanTool
   | NoteTool
   | ConnectorTool
-  | EraserTool;
+  | EraserTool
+  | PresentTool;
 
 export type SerializedBlock = {
   flavour: string;
