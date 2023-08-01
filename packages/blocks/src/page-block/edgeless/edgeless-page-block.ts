@@ -522,7 +522,7 @@ export class EdgelessPageBlockComponent
         }
         this.components.dragHandle?.hide();
         if (this.selection.selectedBlocks.length) {
-          this.selection.setSelectedBlock(
+          this.selection.setSelectedBlocks(
             this.selection.selectedBlocks.slice()
           );
         }
@@ -1036,7 +1036,7 @@ export class EdgelessPageBlockComponent
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
-      this.selection.setSelectedBlock([]);
+      this.selection.setSelectedBlocks([]);
       this.selection.setSelection({
         elements: [noteBlock.id],
         editing: false,
@@ -1052,15 +1052,6 @@ export class EdgelessPageBlockComponent
         }
       });
     });
-  }
-
-  /**
-   * Clear selected blocks.
-   */
-  clearSelectedBlocks() {
-    if (this.selection.selectedBlocks.length) {
-      this.selection.setSelectedBlock([]);
-    }
   }
 
   getElementsBound(): IBound | null {
@@ -1095,7 +1086,7 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.selection.setSelectedBlock(this.selection.selectedBlocks.slice());
+      this.selection.setSelectedBlocks(this.selection.selectedBlocks.slice());
       this.selection.setSelection(this.selection.state);
     });
     resizeObserver.observe(this.pageBlockContainer);

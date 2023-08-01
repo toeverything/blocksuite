@@ -1,7 +1,7 @@
+import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   type EventName,
   PointerEventState,
-  SurfaceSelection,
   type UIEventDispatcher,
   type UIEventHandler,
   type UIEventState,
@@ -95,12 +95,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
 
   // pressed shift key
   private _shiftKey = false;
-
-  // Holds the state of the current selected elements.
-  state: SurfaceSelection = SurfaceSelection.fromJSON({
-    editing: false,
-    elements: [],
-  });
 
   get selection() {
     return this.container.selection;
@@ -425,7 +419,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
     ) as TopLevelBlockModel[];
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
-
     const hovered: Selectable | null =
       surface.pickTop(modelX, modelY) || pickTopBlock(notes, modelX, modelY);
 
@@ -436,14 +429,14 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
       // if in other mouse mode
       this.edgelessTool.type !== 'default' ||
       // if current selection is not active
-      !this.state?.editing ||
+      !this.selection.editing ||
       // if current selected block is not the hovered block
-      this.state.elements[0] !== hovered.id
+      this.selection.state.elements[0] !== hovered.id
     ) {
       this.container.components.dragHandle?.hide();
     }
 
-    if (!hovered || this.state?.editing) {
+    if (!hovered || this.selection?.editing) {
       return null;
     }
 
@@ -485,9 +478,8 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
     this.setEdgelessTool({ type: 'default' }, state);
   }
 
-  clear() {
-    this.state = SurfaceSelection.fromJSON({ elements: [], editing: false });
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  clear() {}
 
   dispose() {
     this._disposables.dispose();

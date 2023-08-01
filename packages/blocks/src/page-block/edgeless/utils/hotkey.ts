@@ -103,7 +103,7 @@ function bindDelete(edgeless: EdgelessPageBlockComponent) {
       }
     });
 
-    edgeless.tools.clear();
+    edgeless.selection.clear();
     edgeless.selection.setSelection(edgeless.selection.state);
   }
   hotkey.addListener(HOTKEYS.BACKSPACE, backspace);

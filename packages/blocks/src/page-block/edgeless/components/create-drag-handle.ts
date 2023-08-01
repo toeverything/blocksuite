@@ -83,7 +83,7 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       if (modelState) {
         selectedBlocks.push(modelState.element);
       }
-      selection.setSelectedBlock(selectedBlocks);
+      selection.setSelectedBlocks(selectedBlocks);
     },
     getSelectedBlocks() {
       return pageBlock.selection.selectedBlocks;

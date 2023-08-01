@@ -268,7 +268,7 @@ export class NoteCut extends WithDisposable(LitElement) {
       page.getBlockById(newNoteId) as NoteBlockModel
     );
 
-    this.edgelessPage.clearSelectedBlocks();
+    this.selection.setSelectedBlocks([]);
     this._hide();
   }
 

@@ -136,7 +136,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
     const { elements, editing } = this.state;
-    this._edgeless.clearSelectedBlocks();
+    this.selection.setSelectedBlocks([]);
     // click the inner area of active text and note element
     if (editing && elements.length === 1 && elements[0] === element.id) {
       handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
@@ -154,7 +154,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         // then the currently clicked noteBlock should also be in an active state when selected.
         this._setSelectionState([element.id], true);
         handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
-        this.selection.setSelectedBlock([]);
+        this.selection.setSelectedBlocks([]);
         return;
       }
     }
@@ -210,7 +210,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     // TODO: refactor
     if (this.selectedBlocks.length) {
-      this.selection.setSelectedBlock(this.selectedBlocks);
+      this.selection.setSelectedBlocks(this.selectedBlocks);
     }
   }
 
