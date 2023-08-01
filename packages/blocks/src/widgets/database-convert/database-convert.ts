@@ -9,7 +9,8 @@ import { assertExists } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { multiSelectHelper } from '../../database-block/common/columns/define.js';
+import { columnManager } from '../../database-block/common/columns/manager.js';
+import { multiSelectPureColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import { styles } from './styles.js';
 
@@ -78,7 +79,9 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
     // default column
     databaseModel.addColumn(
       'end',
-      multiSelectHelper.create('Tag', { options: [] })
+      columnManager
+        .getColumn(multiSelectPureColumnConfig.type)
+        .create('Tag', { options: [] })
     );
     databaseModel.applyColumnUpdate();
 
