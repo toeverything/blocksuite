@@ -473,14 +473,22 @@ export abstract class BaseParser {
     const firstChild = element.children[0];
     const languageTag = firstChild?.getAttribute('class')?.split('-');
     const isNormalMarkdown =
-      firstChild.tagName === 'Code' && languageTag?.[0] === 'language';
+      element.tagName === 'PRE' && firstChild?.tagName === 'CODE';
+    const isLanguageSpecifiedMarkdown =
+      isNormalMarkdown && languageTag?.[0] === 'language';
     let content = '';
     let language = FALLBACK_LANG;
-    if (isNormalMarkdown) {
-      content = element.firstChild?.textContent || '';
+    if (isLanguageSpecifiedMarkdown) {
+      // Remove the last new line character.
+      // https://spec.commonmark.org/0.30/#example-119
+      content = firstChild.textContent?.replace(/\n$/, '') ?? '';
       language = getStandardLanguage(languageTag?.[1])?.id || FALLBACK_LANG;
+    } else if (isNormalMarkdown) {
+      // Remove the last new line character.
+      // https://spec.commonmark.org/0.30/#example-119
+      content = firstChild.textContent?.replace(/\n$/, '') ?? '';
     } else {
-      content = element.textContent || '';
+      content = element.textContent ?? '';
     }
     return [
       {
