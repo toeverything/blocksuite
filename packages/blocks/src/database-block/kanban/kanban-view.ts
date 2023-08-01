@@ -1,6 +1,7 @@
 import './group.js';
 import './header.js';
 import './drag.js';
+import '../common/groupBy/define.js';
 
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
