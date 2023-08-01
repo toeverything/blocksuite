@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/store';
 
 import { GRID_SIZE, type IBound } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import { Bound } from './index.js';
+import { Bound } from './utils/bound.js';
 import {
   getBoundsWithRotation,
   intersects,

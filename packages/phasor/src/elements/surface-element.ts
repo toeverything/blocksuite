@@ -1,17 +1,18 @@
 import type * as Y from 'yjs';
 
-import { Bound, type PointLocation } from '../index.js';
+import type { IPhasorElementType } from '../elements/index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
+import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation, isPointIn } from '../utils/math-utils.js';
+import { type PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
 import {
   deserializeXYWH,
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
-import type { IPhasorElementType } from './index.js';
 
 export interface ISurfaceElement {
   id: string;

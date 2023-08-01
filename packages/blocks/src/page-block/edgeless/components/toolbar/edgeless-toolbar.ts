@@ -16,7 +16,7 @@ import {
   SelectIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound, clamp } from '@blocksuite/phasor/';
+import { Bound, clamp } from '@blocksuite/phasor';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 

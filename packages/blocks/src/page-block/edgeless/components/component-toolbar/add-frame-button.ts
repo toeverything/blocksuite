@@ -2,7 +2,7 @@ import '../buttons/tool-icon-button.js';
 
 import { AddFrameButtonIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store/';
+import { assertExists } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import * as Y from 'yjs';
