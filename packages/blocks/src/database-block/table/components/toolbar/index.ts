@@ -51,7 +51,7 @@ class NewRecordPreview extends ShadowlessElement {
   }
 }
 
-export type ColumnConfig = {
+type ColumnConfig = {
   position?: InsertPosition;
   rows: HTMLElement[];
 };

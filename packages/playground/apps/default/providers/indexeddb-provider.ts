@@ -12,8 +12,8 @@ export class IndexedDBProviderWrapper implements PassiveDocProvider {
   public readonly passive = true as const;
   private _connected = false;
   private _provider: IndexedDBProvider;
-  constructor(id: string, doc: Y.Doc) {
-    this._provider = createIndexedDBProvider(id, doc, INDEXED_DB_NAME);
+  constructor(doc: Y.Doc) {
+    this._provider = createIndexedDBProvider(doc, INDEXED_DB_NAME);
   }
   connect() {
     this._provider.connect();

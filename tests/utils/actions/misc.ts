@@ -437,6 +437,7 @@ export async function initDatabaseDynamicRowWithData(
   const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
+  await waitNextFrame(page);
   await type(page, data);
   await pressEnter(page);
 }
@@ -456,18 +457,21 @@ export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
   );
 }
 
-export async function initEmptyCodeBlockState(page: Page) {
-  const ids = await page.evaluate(async () => {
+export async function initEmptyCodeBlockState(
+  page: Page,
+  codeBlockProps = {} as { language?: string }
+) {
+  const ids = await page.evaluate(async codeBlockProps => {
     const { page } = window;
     await page.waitForLoaded();
 
     page.captureSync();
     const pageId = page.addBlock('affine:page');
     const noteId = page.addBlock('affine:note', {}, pageId);
-    const codeBlockId = page.addBlock('affine:code', {}, noteId);
+    const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
     page.captureSync();
     return { pageId, noteId, codeBlockId };
-  });
+  }, codeBlockProps);
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
 }
