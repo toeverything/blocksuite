@@ -593,6 +593,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const rect = getSelectedRect(elements);
 
+    // if there are more than one element, we need to refresh the state of resize manager
+    if (elements.length > 1) refresh = true;
+
     _resizeManager.updateState(
       resizeMode,
       _selectedRect.rotate,
