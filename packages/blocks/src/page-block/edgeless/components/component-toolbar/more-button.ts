@@ -146,8 +146,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _delete() {
     this.page.captureSync();
-    this.elements.forEach(id => {
-      const element = this.edgeless.getElementModel(id);
+    this.selection.elements.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = this.page.root?.children ?? [];
         if (children.length > 1) {
