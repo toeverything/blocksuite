@@ -204,7 +204,15 @@ export class EditorContainer
 
     this.fileDropManager.register({
       name: 'Attachment',
-      matcher: () => true,
+      matcher: (file: File) => {
+        // TODO limit size in blob
+        const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+        if (file.size > MAX_ATTACHMENT_SIZE) {
+          console.warn('You can only upload files less than 10M.');
+          return false;
+        }
+        return true;
+      },
       handler: async (
         file: File
       ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
