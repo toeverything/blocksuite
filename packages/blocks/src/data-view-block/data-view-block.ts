@@ -10,7 +10,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
+import { legacyCopyBlocks } from '../__internal__/clipboard/index.js';
 import type { DatabaseBlockDatasourceConfig } from '../__internal__/datasource/base.js';
 import {
   createDatasource,
@@ -123,7 +123,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       : '';
     const blockOperation: BlockOperation = {
       copy: () => {
-        copyBlocks({
+        legacyCopyBlocks({
           type: 'Block',
           models: [this.model],
           startOffset: 0,

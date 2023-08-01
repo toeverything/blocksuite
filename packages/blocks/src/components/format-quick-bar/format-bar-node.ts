@@ -25,7 +25,7 @@ import {
   getRichTextByModel,
   stopPropagation,
 } from '../../__internal__/utils/index.js';
-import { actionConfig } from '../../page-block/utils/const.js';
+import { legacyActionConfig } from '../../page-block/utils/const.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
   getCurrentCombinedFormat,
@@ -304,7 +304,7 @@ export class FormatQuickBar extends WithDisposable(LitElement) {
       top: this.top,
     });
 
-    const actionItems = actionConfig
+    const actionItems = legacyActionConfig
       .filter(({ showWhen = () => true }) => showWhen(page, this.models))
       .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
         const enabled = enabledWhen(page);

@@ -25,7 +25,7 @@ import {
   Point,
 } from '../../__internal__/utils/index.js';
 // import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
-import { actionConfig } from './const.js';
+import { legacyActionConfig } from './const.js';
 import {
   deleteModelsByRange,
   updateBlockType,
@@ -46,7 +46,7 @@ export function bindCommonHotkey(page: Page) {
     });
   });
 
-  actionConfig.forEach(({ hotkey: hotkeyStr, action, enabledWhen }) => {
+  legacyActionConfig.forEach(({ hotkey: hotkeyStr, action, enabledWhen }) => {
     // if (!isPrintableKeyEvent(e) || page.readonly) return;
     if (!hotkeyStr) return;
 

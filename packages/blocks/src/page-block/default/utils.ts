@@ -1,6 +1,6 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { copyBlocks } from '../../__internal__/clipboard/index.js';
+import { legacyCopyBlocks } from '../../__internal__/clipboard/index.js';
 import { type SerializedBlock } from '../../__internal__/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { toast } from '../../components/toast.js';
@@ -69,7 +69,7 @@ function performNativeCopy(items: ClipboardItem[]): boolean {
 }
 
 export function copyCode(codeBlockModel: CodeBlockModel) {
-  copyBlocks({
+  legacyCopyBlocks({
     type: 'Block',
     models: [codeBlockModel],
     startOffset: 0,

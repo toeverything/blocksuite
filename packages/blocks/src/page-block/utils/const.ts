@@ -6,7 +6,7 @@ import {
 import { type BaseBlockModel, matchFlavours } from '@blocksuite/store';
 import { assertExists, type Page } from '@blocksuite/store';
 
-import { copyBlocks } from '../../__internal__/clipboard/utils/commons.js';
+import { legacyCopyBlocks } from '../../__internal__/clipboard/utils/commons.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { showDatabaseModal } from '../../components/database-modal/index.js';
@@ -23,7 +23,7 @@ export type ActionProps = {
 
 const DATABASE_WHITE_LIST = ['affine:list', 'affine:paragraph'];
 
-export const actionConfig = [
+export const legacyActionConfig = [
   {
     id: 'copy',
     name: 'Copy',
@@ -35,7 +35,7 @@ export const actionConfig = [
     action: ({ page }: ActionProps) => {
       const range = getCurrentBlockRange(page);
       assertExists(range);
-      copyBlocks(range);
+      legacyCopyBlocks(range);
       toast('Copied to clipboard');
     },
   },

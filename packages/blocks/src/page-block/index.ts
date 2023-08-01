@@ -1,4 +1,6 @@
 import './default/meta-data/backlink/backlink-popover.js';
+
+import type { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
 export * from './default/default-page-block.js';
 export { getAllowSelectedBlocks } from './default/utils.js';
 export {
@@ -15,5 +17,5 @@ export type DocPageBlockWidgetName =
   | 'slashMenu'
   | 'linkedPage'
   | 'draggingArea'
-  | 'formatBar';
+  | typeof AFFINE_FORMAT_BAR_WIDGET_TAG;
 export type EdgelessPageBlockWidgetName = 'slashMenu' | 'linkedPage';

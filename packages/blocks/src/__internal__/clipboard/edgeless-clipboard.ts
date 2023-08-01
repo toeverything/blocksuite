@@ -33,9 +33,9 @@ import { groupBy } from '../utils/common.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
-  copyBlocks,
   copyOnPhasorElementWithText,
   getBlockClipboardInfo,
+  legacyCopyBlocks,
 } from './utils/commons.js';
 import {
   CLIPBOARD_MIMETYPE,
@@ -154,7 +154,7 @@ export class EdgelessClipboard implements Clipboard {
       } else {
         const range = getCurrentBlockRange(this._page);
         assertExists(range);
-        copyBlocks(range);
+        legacyCopyBlocks(range);
       }
       return;
     }

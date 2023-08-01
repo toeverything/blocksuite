@@ -143,7 +143,7 @@ export class RangeController {
     return Array.from(blocks);
   };
 
-  getSelectedBlocks(range: Range): BaseBlockModel['id'][] {
+  getSelectedBlocksId(range: Range): BaseBlockModel['id'][] {
     const blocksId = Array.from(
       range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
     ).map(block => {

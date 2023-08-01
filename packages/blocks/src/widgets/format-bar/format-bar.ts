@@ -13,8 +13,8 @@ import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getBlockElementByModel } from '../../__internal__/utils/query.js';
-import { DefaultPageService } from '../../page-block/default/default-page-service.js';
-import type { RangeController } from '../../page-block/default/selection-manager/range-controller.js';
+import { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { RangeController } from '../../page-block/default/event/range-controller.js';
 import { getCurrentCombinedFormat } from '../../page-block/utils/container-operations.js';
 import { ActionItems } from './components/action-items.js';
 import { InlineItems } from './components/inline-items.js';
@@ -83,15 +83,16 @@ export class AffineFormatBarWidget extends WidgetElement {
     const widgets = host.widgets;
 
     // check if the host use the format bar widget
-    if (!Object.hasOwn(widgets, 'formatBar')) {
+    if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET_TAG)) {
       return;
     }
 
     // check if format bar widget support the host (page and edgeless)
     //TODO: adapt to edgeless
-    const service = this.root.blockStore.specStore.getService(host.flavour);
-    if (!(service instanceof DefaultPageService)) {
-      return;
+    if (!(host instanceof DefaultPageBlockComponent)) {
+      throw new Error(
+        `format bar not support host: ${host.constructor.name} but its widgets has format bar`
+      );
     }
 
     this._disposables.add(
@@ -154,11 +155,14 @@ export class AffineFormatBarWidget extends WidgetElement {
         if (textSelection) {
           if (!textSelection.isCollapsed()) {
             this._displayType = 'text';
-
-            this._rangeController = service.rangeController;
-            this._selectedModels = this._rangeController.getSelectedBlocks(
-              this._rangeController.value
-            );
+            this._rangeController = host.rangeController;
+            this._selectedModels = this._rangeController
+              .getSelectedBlocksId(this._rangeController.value)
+              .map(id => {
+                const block = this.page.getBlockById(id);
+                assertExists(block);
+                return block;
+              });
           } else {
             this._reset();
           }
@@ -276,6 +280,8 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   override render() {
+    const host = this.hostElement;
+    assertExists(host);
     const selectedModels = this._selectedModels;
     const page = this.page;
     const abortController = this._abortController;
@@ -288,9 +294,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       selectedModels,
       page,
     });
-    const actionItems = ActionItems({
-      page,
-    });
+    const actionItems = ActionItems(host);
     const inlineItems = InlineItems({
       page,
       format,
@@ -316,6 +320,6 @@ export class AffineFormatBarWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-format-bar-widget': AffineFormatBarWidget;
+    [AFFINE_FORMAT_BAR_WIDGET_TAG]: AffineFormatBarWidget;
   }
 }

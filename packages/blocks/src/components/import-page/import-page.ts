@@ -501,9 +501,6 @@ export class ImportPage extends WithDisposable(LitElement) {
           ${NewIcon}
         </icon-button>
       </div>
-      <!-- <div class="footer">
-        <div>Migrate from other versions of AFFiNE?</div>
-      </div> -->
     `;
   }
 }

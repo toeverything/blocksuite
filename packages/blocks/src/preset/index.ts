@@ -19,6 +19,7 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
 
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -28,7 +29,7 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
-      formatBar: literal`affine-format-bar-widget`,
+      [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`affine-format-bar-widget`,
     },
   },
 };

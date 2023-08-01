@@ -8,7 +8,7 @@ import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
-  copyBlocks,
+  legacyCopyBlocks,
   textedClipboardData2Blocks,
 } from './utils/commons.js';
 
@@ -81,7 +81,7 @@ export class PageClipboard implements Clipboard {
     e.preventDefault();
     this._page.captureSync();
 
-    copyBlocks(range);
+    legacyCopyBlocks(range);
 
     this._page.captureSync();
 

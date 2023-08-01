@@ -6,7 +6,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../..//components/toast.js';
-import { copyBlocks } from '../../__internal__/clipboard/index.js';
+import { legacyCopyBlocks } from '../../__internal__/clipboard/index.js';
 import { getBlockElementByModel } from '../../__internal__/index.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
@@ -76,7 +76,7 @@ const operations: Operation[] = [
     icon: CopyIcon,
     label: 'Copy',
     action: (model, callback) => {
-      copyBlocks({
+      legacyCopyBlocks({
         type: 'Block',
         models: [model],
         startOffset: 0,

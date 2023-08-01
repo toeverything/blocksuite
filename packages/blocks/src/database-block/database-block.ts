@@ -9,7 +9,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { html, literal } from 'lit/static-html.js';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
+import { legacyCopyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelectionState } from '../__internal__/index.js';
@@ -178,7 +178,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     const viewData = this.getView(current.id);
     const blockOperation: BlockOperation = {
       copy: () => {
-        copyBlocks({
+        legacyCopyBlocks({
           type: 'Block',
           models: [this.model],
           startOffset: 0,
