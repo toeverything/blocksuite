@@ -644,12 +644,12 @@ export async function pasteContent(
       });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       Object.keys(clipData).forEach(key => {
         e.clipboardData?.setData(key, clipData[key] as string);
       });
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
