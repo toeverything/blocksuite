@@ -17,7 +17,6 @@ export type NodeViewTree<T> = NodeViewLeaf<T> & {
 export interface BlockSuiteViewSpec<T = unknown> {
   fromDOM: (node: Node) => null | NodeView<T>;
   toDOM: (nodeView: NodeView<T>) => Element;
-  equals: (nodeView1: NodeView<T>, nodeView2: NodeView<T>) => boolean;
   getChildren: (node: Element) => Element[];
 }
 
@@ -127,11 +126,16 @@ export class ViewStore<NodeViewType = unknown> {
 
   getViewByPath = (path: string[]) => {
     const tree = this.getNodeViewTree();
-    return path.reduce((curr: NodeViewTree<NodeViewType>, id) => {
+    return path.reduce((curr: NodeViewTree<NodeViewType> | null, id) => {
+      if (!curr) {
+        return null;
+      }
       const child = curr.children.find(x => x.id === id);
-      assertExists(child);
+      if (!child) {
+        return null;
+      }
       return child;
-    }, tree) as NodeViewLeaf<NodeViewType>;
+    }, tree) as NodeViewLeaf<NodeViewType> | null;
   };
 
   mount() {

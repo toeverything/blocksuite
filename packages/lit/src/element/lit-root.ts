@@ -75,84 +75,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
         page: this.page,
       }
     );
-
-    this.blockStore.viewStore.register('block', {
-      fromDOM: node => {
-        const element =
-          node && node instanceof HTMLElement ? node : node.parentElement;
-        if (!element) return null;
-
-        const selector = `[${this.blockIdAttr}]`;
-        const view = element.closest(selector) as BlockElement | null;
-        if (!view) {
-          return null;
-        }
-        const widget = element.closest('[data-widget-id]');
-        if (view.contains(widget)) {
-          return null;
-        }
-
-        const id = view.getAttribute(this.blockIdAttr);
-        assertExists(id);
-
-        return {
-          id,
-          path: view.path,
-          view,
-        };
-      },
-      toDOM: ({ view }) => {
-        return view;
-      },
-      equals: (a, b) => {
-        return a.view === b.view;
-      },
-      getChildren: view => {
-        return Array.from(
-          view.querySelectorAll<BlockElement>(
-            '[data-block-id], [data-widget-id]'
-          )
-        ).filter(x => {
-          return x.parentElement?.closest('[data-block-id]') === view;
-        });
-      },
-    });
-
-    this.blockStore.viewStore.register('widget', {
-      fromDOM: node => {
-        const element =
-          node && node instanceof HTMLElement ? node : node.parentElement;
-        if (!element) return null;
-
-        const selector = `[${this.widgetIdAttr}]`;
-        const view = element.closest(selector) as WidgetElement | null;
-        if (!view) {
-          return null;
-        }
-        const block = element.closest('[data-block-id]');
-        if (view.contains(block)) {
-          return null;
-        }
-
-        const id = view.getAttribute(this.widgetIdAttr);
-        assertExists(id);
-
-        return {
-          id,
-          view,
-          path: view.path,
-        };
-      },
-      toDOM: ({ view }) => {
-        return view;
-      },
-      equals: (a, b) => {
-        return a.view === b.view;
-      },
-      getChildren: () => {
-        return [];
-      },
-    });
+    this._registerView();
 
     this.blockStore.mount();
     this.blockStore.specStore.applySpecs(this.blocks);
@@ -217,7 +140,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
     ></${tag}>`;
   };
 
-  _onLoadModel = (model: BaseBlockModel) => {
+  private _onLoadModel = (model: BaseBlockModel) => {
     const { id } = model;
     if (!this.modelSubscribed.has(id)) {
       model.propsUpdated.on(() => {
@@ -228,6 +151,75 @@ export class BlockSuiteRoot extends ShadowlessElement {
       });
       this.modelSubscribed.add(id);
     }
+  };
+
+  private _registerView = () => {
+    const blockSelector = `[${this.blockIdAttr}]`;
+    const widgetSelector = `[${this.widgetIdAttr}]`;
+
+    const fromDOM = <T extends Element & { path: string[] }>(
+      node: Node,
+      target: string,
+      notInside: string
+    ) => {
+      const selector = `[${target}]`;
+      const notInSelector = `[${notInside}]`;
+      const element =
+        node && node instanceof HTMLElement ? node : node.parentElement;
+      if (!element) return null;
+
+      const view = element.closest<T>(selector);
+      if (!view) {
+        return null;
+      }
+      const not = element.closest(notInSelector);
+      if (view.contains(not)) {
+        return null;
+      }
+
+      const id = view.getAttribute(target);
+      assertExists(id);
+
+      return {
+        id,
+        path: view.path,
+        view,
+      };
+    };
+
+    this.blockStore.viewStore.register('block', {
+      fromDOM: node => {
+        return fromDOM<BlockElement>(node, this.blockIdAttr, this.widgetIdAttr);
+      },
+      toDOM: ({ view }) => {
+        return view;
+      },
+      getChildren: view => {
+        return Array.from(
+          view.querySelectorAll<BlockElement>(
+            `${blockSelector},${widgetSelector}`
+          )
+        ).filter(x => {
+          return x.parentElement?.closest(blockSelector) === view;
+        });
+      },
+    });
+
+    this.blockStore.viewStore.register('widget', {
+      fromDOM: node => {
+        return fromDOM<WidgetElement>(
+          node,
+          this.widgetIdAttr,
+          this.blockIdAttr
+        );
+      },
+      toDOM: ({ view }) => {
+        return view;
+      },
+      getChildren: () => {
+        return [];
+      },
+    });
   };
 }
 
