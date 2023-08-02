@@ -168,7 +168,6 @@ export class EdgelessSelectionManager {
   }
 
   clear() {
-    this.lastState = this.state;
     this.setSelection({
       blockId: '',
       elements: [],
