@@ -8,6 +8,7 @@
   "repository": "toeverything/blocksuite",
   "license": "MPL-2.0",
   "devDependencies": {
+    "vite-plugin-wasm": "^3.2.2",
     "vitepress": "1.0.0-alpha.74"
   },
   "scripts": {
