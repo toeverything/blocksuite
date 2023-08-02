@@ -16,7 +16,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
     block: ImageBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ): string {
-    return block.caption;
+    return block.caption ?? '';
   }
 
   override block2Json(

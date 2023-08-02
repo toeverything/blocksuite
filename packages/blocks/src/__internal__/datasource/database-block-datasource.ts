@@ -22,7 +22,6 @@ import { BaseDataSource } from './base.js';
 
 export class DatabaseBlockDatasource extends BaseDataSource {
   private _model: DatabaseBlockModel;
-  private _path: string[];
   private _batch = 0;
 
   get page() {
@@ -39,7 +38,6 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
     this._model.propsUpdated.pipe(this.slots.update);
-    this._path = config.path;
   }
 
   public get rows(): string[] {
@@ -113,7 +111,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     if (type === 'title') {
       const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
       if (model) {
-        return this.root.renderModel(model, this._path);
+        return this.root.renderModel(model);
       }
       return;
     }

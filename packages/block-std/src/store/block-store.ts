@@ -9,47 +9,41 @@ export interface BlockStoreConfig<BlockViewType = unknown> {
   getBlockViewByNode: (node: Node) => BlockViewType | null;
 }
 
-export interface BlockStoreOptions<BlockViewType = unknown> {
+export interface BlockStoreOptions {
   root: HTMLElement;
   workspace: Workspace;
   page: Page;
-  config: BlockStoreConfig<BlockViewType>;
 }
 
-export class BlockStore<
-  ComponentType = unknown,
-  BlockViewType = unknown,
-  WidgetViewType = unknown
-> {
+export class BlockStore<ComponentType = unknown, NodeView = unknown> {
   page: Page;
   readonly workspace: Workspace;
   readonly uiEventDispatcher: UIEventDispatcher;
   readonly selectionManager: SelectionManager;
   readonly root: HTMLElement;
   readonly specStore: SpecStore<ComponentType>;
-  readonly viewStore: ViewStore<BlockViewType, WidgetViewType>;
-  readonly config: BlockStoreConfig<BlockViewType>;
+  readonly viewStore: ViewStore<NodeView>;
 
-  constructor(options: BlockStoreOptions<BlockViewType>) {
+  constructor(options: BlockStoreOptions) {
     this.root = options.root;
     this.workspace = options.workspace;
     this.page = options.page;
-    this.config = options.config;
     this.uiEventDispatcher = new UIEventDispatcher(this);
     this.selectionManager = new SelectionManager(this);
     this.specStore = new SpecStore<ComponentType>(this);
-    this.viewStore = new ViewStore<BlockViewType, WidgetViewType>();
+    this.viewStore = new ViewStore<NodeView>(this);
   }
 
   mount() {
     this.selectionManager.mount();
     this.uiEventDispatcher.mount();
+    this.viewStore.mount();
   }
 
   unmount() {
     this.uiEventDispatcher.unmount();
     this.selectionManager.unmount();
-    this.viewStore.clear();
+    this.viewStore.unmount();
     this.specStore.dispose();
   }
 }

@@ -15,11 +15,11 @@
   "peerDependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
-    "@blocksuite/store": "workspace:*"
+    "@blocksuite/store": "workspace:*",
+    "@toeverything/theme": "^0.7.9"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@toeverything/theme": "0.7.7",
     "lit": "^2.7.6",
     "marked": "^4.3.0",
     "turndown": "^7.1.2"
@@ -28,6 +28,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@toeverything/theme": "^0.7.9",
     "@types/marked": "^4.3.1",
     "@types/turndown": "^5.0.1"
   },

@@ -171,7 +171,7 @@ export class UIEventDispatcher {
   createEventState(event: Event, scope: EventScope) {
     const targetMap = new PathMap();
     scope.paths.forEach(path => {
-      const instance = this.blockStore.viewStore.blockViewMap.get(path);
+      const instance = this.blockStore.viewStore.getViewByPath(path);
       if (instance) {
         targetMap.set(path, instance);
       }
@@ -216,8 +216,7 @@ export class UIEventDispatcher {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    const blockView = this.blockStore.config.getBlockViewByNode(target);
-    const path = this.blockStore.viewStore.blockViewMap.getPath(blockView);
+    const path = this.blockStore.viewStore.getNodeView(target)?.path;
     if (!path) return;
 
     const flavours = path

@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import type * as Y from 'yjs';
 
 interface IBlockMigration {
@@ -42,6 +43,39 @@ const blockMigrations: IBlockMigration[] = [
               }
             }
           }
+        }
+      }
+    },
+  },
+  {
+    desc: 'move database block title data to view',
+    condition: (
+      pageDoc: Y.Doc,
+      currentBlockVersions: { [k: string]: number }
+    ) => {
+      const databaseVersion = currentBlockVersions['affine:database'];
+      return databaseVersion < 3;
+    },
+    migrate: (pageDoc: Y.Doc) => {
+      const blocks = pageDoc.getMap('blocks');
+      for (const block of blocks.values()) {
+        const flavour = block.get('sys:flavour') as string;
+        if (flavour === 'affine:database') {
+          const id = nanoid();
+          const title = block.get('prop:titleColumnName') as string;
+          const width = block.get('prop:titleColumnWidth') as number;
+          block.delete('prop:titleColumnName');
+          block.delete('prop:titleColumnWidth');
+          const columns = block.get('prop:columns') as Y.Array<unknown>;
+          columns.unshift([{ id: id, type: 'title', name: title, data: {} }]);
+          const views = block.get('prop:views') as Y.Array<Y.Map<unknown>>;
+          views.forEach(view => {
+            if (view.get('mode') === 'table') {
+              (view.get('columns') as Y.Array<unknown>).unshift([
+                { id, width },
+              ]);
+            }
+          });
         }
       }
     },

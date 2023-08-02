@@ -10,8 +10,7 @@
     "test:unit": "vitest --run",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:ui": "vitest --ui",
-    "test:e2e": "playwright test",
-    "test": "pnpm test:unit && pnpm test:e2e"
+    "test": "pnpm test:unit"
   },
   "keywords": [],
   "author": "toeverything",
