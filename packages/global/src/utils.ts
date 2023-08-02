@@ -156,15 +156,3 @@ export function diffArray<T>(
 
   return { changed: add.length || remove.length, add, remove, unchanged };
 }
-
-export function polyfillIntlSegmenter() {
-  if (Intl.Segmenter === undefined) {
-    import('intl-segmenter-polyfill-rs').then(({ Segmenter }) => {
-      Object.defineProperty(Intl, 'Segmenter', {
-        value: Segmenter,
-        configurable: true,
-        writable: true,
-      });
-    });
-  }
-}
