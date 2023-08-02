@@ -56,6 +56,11 @@
         "import": "./dist/index.js"
       },
       "./shim.d.ts": "./shim.d.ts",
+      "./workspace/migration/*": {
+        "types": "./dist/workspace/migration/*.d.ts",
+        "module": "./dist/workspace/migration/*.js",
+        "import": "./dist/workspace/migration/*.js"
+      },
       "./providers/*": {
         "types": "./dist/providers/*.d.ts",
         "module": "./dist/providers/*.js",
