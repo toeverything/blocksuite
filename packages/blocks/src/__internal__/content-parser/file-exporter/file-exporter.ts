@@ -66,7 +66,7 @@ export const FileExporter = {
       blob && zipFile.file(value, blob);
     }
     zipFile.file(
-      `${pageTitle}_${pageId}.html`,
+      `${pageTitle}|${pageId}.html`,
       wrapHtmlWithHtmlDocumentText(pageTitle, htmlContent)
     );
 
