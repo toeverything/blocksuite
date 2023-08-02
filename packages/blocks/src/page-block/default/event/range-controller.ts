@@ -64,8 +64,11 @@ export class RangeController {
 
   writeRange(range: Range | null) {
     const selectionManager = this.root.selectionManager;
-    const hasTextSelection =
-      selectionManager.value.filter(sel => sel.is('text')).length > 0;
+    let hasTextSelection = false;
+    const noneTextSelection = selectionManager.value.filter(sel => {
+      if (sel.is('text')) hasTextSelection = true;
+      return !sel.is('text');
+    });
     this._reusedRange = range;
 
     const { startContainer, endContainer } = this._range;
@@ -74,7 +77,7 @@ export class RangeController {
 
     if (!from) {
       if (hasTextSelection) {
-        selectionManager.clear();
+        selectionManager.clear(['text']);
       }
       return null;
     }
@@ -84,7 +87,7 @@ export class RangeController {
       to,
     });
 
-    selectionManager.set([selection]);
+    selectionManager.set([...noneTextSelection, selection]);
     return selection;
   }
 

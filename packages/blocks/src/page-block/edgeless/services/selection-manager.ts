@@ -151,7 +151,11 @@ export class EdgelessSelectionManager {
       selection.by
     );
 
-    this._selection.set([instance]);
+    const values = this._selection.value.filter(
+      selection => selection.type !== 'surface'
+    );
+
+    this._selection.set([...values, instance]);
   }
 
   refreshRemoteSelection() {

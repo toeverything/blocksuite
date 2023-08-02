@@ -80,8 +80,15 @@ export class SelectionManager {
     this.set(selections);
   }
 
-  clear() {
-    this.set([]);
+  clear(types?: string[]) {
+    if (types) {
+      const values = this.value.filter(
+        selection => !types.includes(selection.type)
+      );
+      this.set(values);
+    } else {
+      this.set([]);
+    }
   }
 
   get remoteSelections() {

@@ -68,6 +68,9 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
+import type { Gesture } from '../default/event/gesture.js';
+import { RangeController } from '../default/event/range-controller.js';
+import { Synchronizer } from '../default/event/synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
@@ -292,9 +295,19 @@ export class EdgelessPageBlockComponent
 
   surface!: SurfaceManager;
 
+  gesture: Gesture | null = null;
+
+  rangeController!: RangeController;
+
+  synchronizer: Synchronizer | null = null;
+
   indexes: { max: string; min: string } = { max: 'a0', min: 'a0' };
 
   getService = getService;
+
+  get disposables() {
+    return this._disposables;
+  }
 
   get selection() {
     const selection = this.service?.selection;
@@ -335,14 +348,6 @@ export class EdgelessPageBlockComponent
   private _resizeObserver: ResizeObserver | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
-
-  private _clearSelection() {
-    requestAnimationFrame(() => {
-      if (this.isConnected && !this.selection.editing) {
-        resetNativeSelection(null);
-      }
-    });
-  }
 
   // just init surface, attach to dom later
   private _initSurface() {
@@ -544,7 +549,6 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       selection.slots.updated.on(() => {
-        this._clearSelection();
         this.requestUpdate();
       })
     );
@@ -560,7 +564,6 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(
       this.page.slots.historyUpdated.on(() => {
-        this._clearSelection();
         this.requestUpdate();
       })
     );
@@ -1135,9 +1138,6 @@ export class EdgelessPageBlockComponent
       this._handleToolbarFlag();
       this.requestUpdate();
     });
-
-    // XXX: should be called after rich text components are mounted
-    this._clearSelection();
   }
 
   private _tryLoadViewportLocalRecord() {
@@ -1204,6 +1204,8 @@ export class EdgelessPageBlockComponent
     registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
+    this.rangeController = new RangeController(this.root);
+    this.synchronizer = new Synchronizer(this);
   }
 
   override disconnectedCallback() {
