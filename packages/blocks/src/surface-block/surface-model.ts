@@ -10,7 +10,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
     elements: {},
   }),
   metadata: {
-    version: 3,
+    version: 4,
     role: 'hub',
     parent: ['affine:page'],
     children: [],
