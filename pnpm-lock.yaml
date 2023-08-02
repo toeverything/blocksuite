@@ -237,7 +237,7 @@ importers:
         version: 3.2.2(vite@4.4.7)
       vitepress:
         specifier: 1.0.0-alpha.74
-        version: 1.0.0-alpha.74(search-insights@2.7.0)
+        version: 1.0.0-alpha.74(@types/node@18.17.1)(@types/react@18.2.17)(search-insights@2.7.0)
 
   packages/editor:
     dependencies:
@@ -278,9 +278,6 @@ importers:
       ansi-colors:
         specifier: ^4.1.3
         version: 4.1.3
-      intl-segmenter-polyfill-rs:
-        specifier: ^0.1.4
-        version: 0.1.4
       zod:
         specifier: ^3.21.4
         version: 3.21.4
@@ -365,6 +362,9 @@ importers:
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
+      intl-segmenter-polyfill-rs:
+        specifier: ^0.1.4
+        version: 0.1.4
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -1075,10 +1075,10 @@ packages:
     resolution: {integrity: sha512-2Pu9HDg/uP/IT10rbQ+4OrTQuxIWdKVUEdcw9/w7kZJv9NeHS6skJx1xuRiFyoGKwAzcHXnLp7csE99sj+O1YA==}
     dev: true
 
-  /@docsearch/js@3.5.1(search-insights@2.7.0):
+  /@docsearch/js@3.5.1(@types/react@18.2.17)(search-insights@2.7.0):
     resolution: {integrity: sha512-EXi8de5njxgP6TV3N9ytnGRLG9zmBNTEZjR4VzwPcpPLbZxxTLG2gaFyJyKiFVQxHW/DPlMrDJA3qoRRGEkgZw==}
     dependencies:
-      '@docsearch/react': 3.5.1(search-insights@2.7.0)
+      '@docsearch/react': 3.5.1(@types/react@18.2.17)(search-insights@2.7.0)
       preact: 10.16.0
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -1088,7 +1088,7 @@ packages:
       - search-insights
     dev: true
 
-  /@docsearch/react@3.5.1(search-insights@2.7.0):
+  /@docsearch/react@3.5.1(@types/react@18.2.17)(search-insights@2.7.0):
     resolution: {integrity: sha512-t5mEODdLzZq4PTFAm/dvqcvZFdPDMdfPE5rJS5SC8OUq9mPzxEy6b+9THIqNM9P0ocCb4UC5jqBrxKclnuIbzQ==}
     peerDependencies:
       '@types/react': '>= 16.8.0 < 19.0.0'
@@ -1105,6 +1105,7 @@ packages:
       '@algolia/autocomplete-core': 1.9.3(algoliasearch@4.19.1)(search-insights@2.7.0)
       '@algolia/autocomplete-preset-algolia': 1.9.3(algoliasearch@4.19.1)
       '@docsearch/css': 3.5.1
+      '@types/react': 18.2.17
       algoliasearch: 4.19.1
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -2066,7 +2067,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.4.7
+      vite: 4.4.7(@types/node@18.17.1)
       vue: 3.3.4
     dev: true
 
@@ -7650,7 +7651,7 @@ packages:
     peerDependencies:
       vite: ^2 || ^3 || ^4
     dependencies:
-      vite: 4.4.7
+      vite: 4.4.7(@types/node@18.17.1)
     dev: true
 
   /vite-plugin-web-components-hmr@0.1.3(vite@4.4.7):
@@ -7666,41 +7667,6 @@ packages:
       vite: 4.4.7(@types/node@18.17.1)
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /vite@4.4.7:
-    resolution: {integrity: sha512-6pYf9QJ1mHylfVh39HpuSfMPojPSKVxZvnclX1K1FyZ1PXDOcLBibdq5t1qxJSnL63ca8Wf4zts6mD8u8oc9Fw==}
-    engines: {node: ^14.18.0 || >=16.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      esbuild: 0.18.17
-      postcss: 8.4.27
-      rollup: 3.27.0
-    optionalDependencies:
-      fsevents: 2.3.2
     dev: true
 
   /vite@4.4.7(@types/node@18.17.1):
@@ -7739,12 +7705,12 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vitepress@1.0.0-alpha.74(search-insights@2.7.0):
+  /vitepress@1.0.0-alpha.74(@types/node@18.17.1)(@types/react@18.2.17)(search-insights@2.7.0):
     resolution: {integrity: sha512-n5UHqsLJKaJ3V6BSiofS5ZVhtxzarNIn3/kyOzUp/vePmVbQyX/pZ6/MhZgNr0g5t4E55j7XM3AHf/Fo0hnrpw==}
     hasBin: true
     dependencies:
       '@docsearch/css': 3.5.1
-      '@docsearch/js': 3.5.1(search-insights@2.7.0)
+      '@docsearch/js': 3.5.1(@types/react@18.2.17)(search-insights@2.7.0)
       '@vitejs/plugin-vue': 4.2.3(vite@4.4.7)(vue@3.3.4)
       '@vue/devtools-api': 6.5.0
       '@vueuse/core': 10.2.1(vue@3.3.4)
@@ -7752,7 +7718,7 @@ packages:
       mark.js: 8.11.1
       minisearch: 6.1.0
       shiki: 0.14.3
-      vite: 4.4.7
+      vite: 4.4.7(@types/node@18.17.1)
       vue: 3.3.4
     transitivePeerDependencies:
       - '@algolia/client-search'
