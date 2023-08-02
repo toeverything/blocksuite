@@ -97,7 +97,7 @@ export class ContentParser {
     if (!root) return;
 
     const blobMap = new Map<string, string>();
-    const htmlContent = await this._block2Html(
+    const htmlContent = await this.block2Html(
       [this.getSelectedBlock(root)],
       blobMap
     );
@@ -116,7 +116,7 @@ export class ContentParser {
     if (!root) return;
 
     const blobMap = new Map<string, string>();
-    const htmlContent = await this._block2Html(
+    const htmlContent = await this.block2Html(
       [this.getSelectedBlock(root)],
       blobMap
     );
@@ -366,7 +366,7 @@ export class ContentParser {
     );
   }
 
-  private async _block2Html(
+  private async block2Html(
     blocks: SelectedBlock[],
     blobMap: Map<string, string>
   ): Promise<string> {
