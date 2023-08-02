@@ -4,6 +4,7 @@ import './shape/shape-tool-button.js';
 import './brush/brush-tool-button.js';
 import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
+import './frame/frame-order-button.js';
 
 import {
   EdgelessEraserIcon,
@@ -16,7 +17,7 @@ import {
   SelectIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound, clamp } from '@blocksuite/phasor';
+import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
@@ -136,6 +137,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   edgeless: EdgelessPageBlockComponent;
 
+  @state()
+  private _frames: FrameElement[] = [];
+
   @state({
     hasChanged() {
       return true;
@@ -146,6 +150,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
+    this._frames = edgeless.frame.frames.sort(compare);
   }
 
   get edgelessTool() {
@@ -173,15 +178,42 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this._imageLoading = false;
   }
 
+  private _updateFrames() {
+    this._frames = this.edgeless.frame.frames.sort(compare);
+  }
+
   override firstUpdated() {
     const {
       _disposables,
-      edgeless: { slots },
+      edgeless: { slots, surface },
     } = this;
     _disposables.add(
       slots.edgelessToolUpdated.on(() => {
         this._trySaveBrushStateLocalRecord();
         this.requestUpdate();
+      })
+    );
+    _disposables.add(
+      surface.slots.elementAdded.on(id => {
+        const element = surface.pickById(id);
+        if (element instanceof FrameElement) {
+          this._updateFrames();
+        }
+      })
+    );
+    _disposables.add(
+      surface.slots.elementRemoved.on(({ element }) => {
+        if (element instanceof FrameElement) {
+          this._updateFrames();
+        }
+      })
+    );
+    _disposables.add(
+      surface.slots.elementUpdated.on(({ id, props }) => {
+        const element = surface.pickById(id);
+        if (element instanceof FrameElement && 'index' in props) {
+          this._updateFrames();
+        }
       })
     );
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
@@ -206,10 +238,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       changedProperties.has('_currentFrameIndex') &&
       type === 'frameNavigator'
     ) {
-      const frames = this.edgeless.surface.getElementsByType('frame');
       const current = this._currentFrameIndex;
       const viewport = this.edgeless.surface.viewport;
-      const frame = frames[current];
+      const frame = this._frames[current];
       if (frame) {
         const bound = Bound.deserialize(frame.xywh);
         viewport.setViewportByBound(bound, [40, 60], true);
@@ -218,8 +249,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private get frameNavigatorContent() {
-    const frames = this.edgeless.surface.getElementsByType('frame');
     const current = this._currentFrameIndex;
+    const frames = this._frames;
     const frame = frames[current];
     const min = 0;
     const max = frames.length - 1;
@@ -259,6 +290,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       >
         ${FrameNavigatorNextIcon}
       </edgeless-tool-icon-button>
+      <div class="short-divider"></div>
+      <edgeless-frame-order-button
+        .frames=${this._frames}
+        .updateFrames=${this._updateFrames.bind(this)}
+        .edgeless=${this.edgeless}
+      >
+      </edgeless-frame-order-button>
       <div class="short-divider"></div>
       <div
         class="edgeless-frame-navigator-stop"

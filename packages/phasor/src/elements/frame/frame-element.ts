@@ -94,9 +94,7 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
     ctx.beginPath();
     ctx.roundRect(0, 0, w, h, 8);
     ctx.stroke();
-    if (!this.getLocalRecord()?.titleHide) {
-      this._renderTitle(ctx);
-    }
+    this._renderTitle(ctx);
   }
 
   private _renderTitle(ctx: CanvasRenderingContext2D) {
@@ -128,6 +126,7 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
     this._padding = padding;
     this._radius = radius;
 
+    if (this.getLocalRecord()?.titleHide) return;
     ctx.beginPath();
     ctx.roundRect(
       0,

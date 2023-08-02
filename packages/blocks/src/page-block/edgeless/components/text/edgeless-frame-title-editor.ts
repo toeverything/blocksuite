@@ -35,12 +35,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
     this._vEditor = new VEditor(this._frame.title);
 
-    this._disposables.add(
-      edgeless.slots.viewportUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
     this.requestUpdate();
     requestAnimationFrame(() => {
       assertExists(this._vEditor);
@@ -52,7 +46,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       const dispatcher = this._edgeless?.dispatcher;
       assertExists(dispatcher);
       this._disposables.addFromEvent(this._virgoContainer, 'blur', () => {
-        this._unmount();
+        // this._unmount();
       });
       this._disposables.add(
         dispatcher.add('click', () => {
@@ -75,6 +69,11 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
             this.requestUpdate();
           });
           return false;
+        })
+      );
+      this._disposables.add(
+        edgeless.slots.viewportUpdated.on(() => {
+          this.requestUpdate();
         })
       );
     });
@@ -127,7 +126,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
         fontSize: '16px',
         fontFamily: 'sans-serif',
         color: 'white',
-        background: '#7D91FF',
+        background: this._frame.color,
         outline: 'none',
         padding: `${padding[1] * zoom}px ${padding[0] * zoom}px`,
         lineHeight: 'initial',

@@ -160,7 +160,7 @@ export class SurfaceManager {
   updateIndexes(
     keys: string[],
     elements: PhasorElement[],
-    callback: (keys: string[]) => void
+    callback?: (keys: string[]) => void
   ) {
     this._transact(() => {
       let newIndex;
@@ -174,7 +174,7 @@ export class SurfaceManager {
         yElement.set('index', newIndex);
       }
 
-      callback(keys);
+      callback && callback(keys);
     });
   }
 
