@@ -3,8 +3,8 @@ import { fileURLToPath } from 'url';
 import { assert, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
+import { migratePageBlock } from '../migrate-block.js';
 import { migrateWorkspace } from '../migrate-workspace.js';
-import { migratePageBlock } from '../mirgrate-block.js';
 
 async function loadBinary(name: string) {
   const url = new URL(`./ydocs/${name}.ydoc`, import.meta.url);
