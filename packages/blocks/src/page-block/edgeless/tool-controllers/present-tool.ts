@@ -1,9 +1,9 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { noop, type PresentTool } from '../../../__internal__/index.js';
+import { type FrameNavigatorTool,noop } from '../../../__internal__/index.js';
 import { EdgelessToolController } from './index.js';
 
-export class PresentToolController extends EdgelessToolController<PresentTool> {
+export class PresentToolController extends EdgelessToolController<FrameNavigatorTool> {
   override onContainerPointerDown(e: PointerEventState): void {
     noop();
   }
@@ -37,13 +37,13 @@ export class PresentToolController extends EdgelessToolController<PresentTool> {
   override onPressShiftKey(pressed: boolean): void {
     noop();
   }
-  override beforeModeSwitch(prevMode: PresentTool): void {
+  override beforeModeSwitch(prevMode: FrameNavigatorTool): void {
     noop();
   }
-  override afterModeSwitch(newMode: PresentTool): void {
+  override afterModeSwitch(newMode: FrameNavigatorTool): void {
     noop();
   }
-  readonly tool = <PresentTool>{
+  readonly tool = <FrameNavigatorTool>{
     type: 'present',
   };
 }

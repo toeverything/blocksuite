@@ -35,7 +35,7 @@ export const AddFrameButtonIcon = html`
   </svg>
 `;
 
-export const PresentationIcon = html`<svg
+export const FrameNavigatorIcon = html`<svg
   width="24"
   height="24"
   viewBox="0 0 24 24"
@@ -48,7 +48,7 @@ export const PresentationIcon = html`<svg
   />
 </svg> `;
 
-export const PresentPreviousIcon = html`
+export const FrameNavigatorPrevIcon = html`
   <svg
     width="24"
     height="24"
@@ -63,7 +63,7 @@ export const PresentPreviousIcon = html`
   </svg>
 `;
 
-export const PrensentNextIcon = html`
+export const FrameNavigatorNextIcon = html`
   <svg
     width="24"
     height="24"

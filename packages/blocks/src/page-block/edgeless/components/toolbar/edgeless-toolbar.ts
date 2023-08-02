@@ -9,10 +9,10 @@ import {
   EdgelessEraserIcon,
   EdgelessImageIcon,
   EdgelessTextIcon,
+  FrameNavigatorIcon,
+  FrameNavigatorNextIcon,
+  FrameNavigatorPrevIcon,
   HandIcon,
-  PrensentNextIcon,
-  PresentationIcon,
-  PresentPreviousIcon,
   SelectIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
@@ -103,7 +103,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       transform: scale(1.15);
     }
 
-    .edgeless-present-frame {
+    .edgeless-frame-navigator {
       width: 145px;
       text-align: center;
       display: flex;
@@ -111,7 +111,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       justify-content: center;
     }
 
-    .edgeless-prensent-frame-title {
+    .edgeless-frame-nativator-title {
       display: inline-block;
       cursor: pointer;
       color: #424149;
@@ -121,10 +121,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       margin-right: 4px;
     }
 
-    .edgeless-present-frame-count {
+    .edgeless-frame-navigator-count {
       color: #8e8d91;
     }
-    .edgeless-presnet-stop {
+    .edgeless-frame-navigator-stop {
       background: #eb4335;
       color: #ffffff;
       box-shadow: 0px 1px 2px 0px #ffffff40 inset;
@@ -202,7 +202,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   protected override updated(changedProperties: PropertyValues) {
     const { type } = this.edgelessTool;
-    if (changedProperties.has('_currentFrameIndex') && type === 'present') {
+    if (
+      changedProperties.has('_currentFrameIndex') &&
+      type === 'frame-navigator'
+    ) {
       const frames = this.edgeless.surface.getElementsByType('frame');
       const current = this._currentFrameIndex;
       const viewport = this.edgeless.surface.viewport;
@@ -214,7 +217,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   }
 
-  private get prensentContent() {
+  private get frameNavigatorContent() {
     const frames = this.edgeless.surface.getElementsByType('frame');
     const current = this._currentFrameIndex;
     const frame = frames[current];
@@ -231,16 +234,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             max
           ))}
       >
-        ${PresentPreviousIcon}
+        ${FrameNavigatorPrevIcon}
       </edgeless-tool-icon-button>
-      <div class="edgeless-present-frame">
+      <div class="edgeless-frame-navigator">
         <span
-          class="edgeless-prensent-frame-title"
+          class="edgeless-frame-nativator-title"
           @click=${() =>
             (this._currentFrameIndex = this._currentFrameIndex + 1 - 1)}
           >${frame?.title ?? 'no frame'}</span
         >
-        <span class="edgeless-present-frame-count"
+        <span class="edgeless-frame-navigator-count"
           >${current + 1}/${frames.length}</span
         >
       </div>
@@ -254,11 +257,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
             max
           ))}
       >
-        ${PrensentNextIcon}
+        ${FrameNavigatorNextIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div
-        class="edgeless-presnet-stop"
+        class="edgeless-frame-navigator-stop"
         @click=${() => this.setEdgelessTool({ type: 'default' })}
       >
         Stop
@@ -283,13 +286,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         ${HandIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
-        .tooltip=${'Present'}
+        .tooltip=${'Frame Navigator'}
         @click=${() => {
-          this.setEdgelessTool({ type: 'present' });
+          this.setEdgelessTool({ type: 'frame-navigator' });
           this._currentFrameIndex = 0;
         }}
       >
-        ${PresentationIcon}
+        ${FrameNavigatorIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <edgeless-note-tool-button
@@ -349,7 +352,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { type } = this.edgelessTool;
 
     const Content =
-      type === 'present' ? this.prensentContent : this.defaultContent;
+      type === 'frame-navigator'
+        ? this.frameNavigatorContent
+        : this.defaultContent;
     return html`
       <div
         class="edgeless-toolbar-container"

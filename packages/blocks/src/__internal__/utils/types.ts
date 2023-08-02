@@ -181,8 +181,8 @@ export type EraserTool = {
   type: 'eraser';
 };
 
-export type PresentTool = {
-  type: 'present';
+export type FrameNavigatorTool = {
+  type: 'frame-navigator';
 };
 
 export type PanTool = {
@@ -215,7 +215,7 @@ export type EdgelessTool =
   | NoteTool
   | ConnectorTool
   | EraserTool
-  | PresentTool;
+  | FrameNavigatorTool;
 
 export type SerializedBlock = {
   flavour: string;
