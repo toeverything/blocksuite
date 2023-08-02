@@ -44,7 +44,6 @@ import {
   type ReorderingAction,
   type ReorderingRange,
   reorderTo,
-  resetNativeSelection,
   sendBackward,
   throttle,
   type TopLevelBlockModel,
