@@ -98,9 +98,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _containBlock(selections: BaseSelection[], blockId: string) {
-    return selections.some(selection => {
-      return selection.blockId === blockId;
-    });
+    return selections.some(selection => selection.blockId === blockId);
   }
 
   // To check if the block is a child block of the selected blocks
@@ -258,7 +256,7 @@ export class DragHandleWidget extends WidgetElement {
     this._dropBlockId = blockId;
 
     let rect = null;
-    let tragetElement = null;
+    let targetElement = null;
     const model = getModelByBlockElement(closestBlockElement);
     const result = calcDropTarget(
       point,
@@ -270,12 +268,12 @@ export class DragHandleWidget extends WidgetElement {
 
     if (result) {
       rect = result.rect;
-      tragetElement = result.modelState.element;
+      targetElement = result.modelState.element;
       this._dropBefore = result.type === 'before' ? true : false;
     }
 
-    if (tragetElement) {
-      const targetBlockId = tragetElement.getAttribute(this.root.blockIdAttr);
+    if (targetElement) {
+      const targetBlockId = targetElement.getAttribute(this.root.blockIdAttr);
       if (targetBlockId) this._dropBlockId = targetBlockId;
     }
 
