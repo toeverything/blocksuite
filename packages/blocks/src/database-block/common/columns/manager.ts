@@ -1,5 +1,3 @@
-import { assertExists } from '@blocksuite/store';
-
 import type { UniComponent } from '../../../components/uni-component/uni-component.js';
 import type { TType } from '../../logical/typesystem.js';
 import type { DataViewColumnManager } from '../data-view-manager.js';
@@ -14,7 +12,7 @@ type JSON =
       [k: string]: JSON;
     };
 
-interface CellRenderProps<
+export interface CellRenderProps<
   Data extends Record<string, unknown> = Record<string, never>,
   Value = unknown
 > {
@@ -52,6 +50,7 @@ type ColumnOps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown
 > = {
+  name: string;
   defaultData: () => Data;
   type: (data: Data) => TType;
   formatValue?: (value: unknown, colData: Data) => Value;
@@ -59,34 +58,28 @@ type ColumnOps<
   cellToJson: (data: Value, colData: Data) => JSON;
 };
 
-type ConvertFunction<
-  FromColumn extends Record<string, unknown>,
-  FromCell,
-  ToColumn extends Record<string, unknown>,
-  ToCell
-> = (
-  column: FromColumn,
-  cells: (FromCell | undefined)[]
+type ConvertFunction<From extends ColumnConfig, To extends ColumnConfig> = (
+  column: GetColumnDataFromConfig<From>,
+  cells: (GetCellDataFromConfig<From> | undefined)[]
 ) => {
-  column: ToColumn;
-  cells: (ToCell | undefined)[];
+  column: GetColumnDataFromConfig<To>;
+  cells: (GetCellDataFromConfig<To> | undefined)[];
 };
 
-class ColumnHelperContainer {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private map = new Map<string, ColumnHelper<any, any>>();
-  private convert = new Map<
-    string,
-    (
-      column: Record<string, unknown>,
-      cells: unknown[]
-    ) => {
-      column: Record<string, unknown>;
-      cells: unknown[];
-    }
-  >();
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface ColumnConfigMap {}
+}
 
-  getColumn(type: string) {
+export class ColumnConfigManager {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private map = new Map<string, ColumnConfig<any, any>>();
+
+  getColumn<Type extends keyof ColumnConfigMap>(
+    type: Type
+  ): ColumnConfigMap[Type];
+  getColumn(type: string): ColumnConfig;
+  getColumn(type: string): ColumnConfig {
     const column = this.map.get(type);
     if (!column) {
       throw new Error(`${type} is not exist`);
@@ -98,56 +91,25 @@ class ColumnHelperContainer {
     type: string,
     ops: ColumnOps<T, CellData>
   ) {
-    const helper = new ColumnHelper(type, ops);
-    this.map.set(type, helper);
-    return helper;
-  }
-
-  toString(type: string, cellData: unknown, colData: unknown) {
-    return this.map.get(type)?.toString(cellData, colData);
-  }
-
-  registerConvert<
-    FromCell,
-    ToCell,
-    FromColumn extends Record<string, unknown>,
-    ToColumn extends Record<string, unknown>
-  >(
-    from: ColumnHelper<FromColumn, FromCell>,
-    to: ColumnHelper<ToColumn, ToCell>,
-    convert: ConvertFunction<FromColumn, FromCell, ToColumn, ToCell>
-  ) {
-    this.convert.set(`${from.type}|${to.type}`, convert as never);
-  }
-
-  convertCell(
-    from: string,
-    to: string,
-    column: Record<string, unknown>,
-    cells: unknown[]
-  ) {
-    return this.convert.get(`${from}|${to}`)?.(column, cells);
-  }
-
-  create(targetType: string, name: string, data?: unknown) {
-    return this.getColumn(targetType)?.create(name, data);
-  }
-
-  defaultData(type: string): Record<string, unknown> {
-    return this.getColumn(type)?.defaultData();
-  }
-
-  typeOf(type: string, data: unknown): TType {
-    const dataType = this.map.get(type)?.dataType(data);
-    assertExists(dataType);
-    return dataType;
+    const config = new ColumnConfig(type, ops);
+    this.map.set(type, config);
+    return config;
   }
 }
 
-class ColumnHelper<
-  T extends Record<string, unknown> = Record<string, never>,
+export type GetColumnDataFromConfig<T extends ColumnConfig> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends ColumnConfig<infer R, any> ? R : never;
+export type GetCellDataFromConfig<T extends ColumnConfig> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  T extends ColumnConfig<any, infer R> ? R : never;
+
+export class ColumnConfig<
+  T extends NonNullable<unknown> = NonNullable<unknown>,
   CellData = unknown
 > {
+  convertMap = new Map();
+
   constructor(
     public readonly type: string,
     public ops: ColumnOps<T, CellData>
@@ -207,6 +169,22 @@ class ColumnHelper<
       ? undefined
       : this.ops.formatValue?.(cellData, colData) ?? cellData;
   }
+
+  convertCell(to: string, column: Record<string, unknown>, cells: unknown[]) {
+    return this.convertMap.get(to)?.(column, cells);
+  }
+
+  registerConvert<ToCellName extends keyof ColumnConfigMap>(
+    to: ToCellName,
+    // @ts-expect-error
+    convert: ConvertFunction<this, ColumnConfigMap[ToCellName]>
+  ) {
+    this.convertMap.set(to, convert);
+  }
+
+  get name() {
+    return this.ops.name;
+  }
 }
 
-export const columnManager = new ColumnHelperContainer();
+export const columnManager = new ColumnConfigManager();

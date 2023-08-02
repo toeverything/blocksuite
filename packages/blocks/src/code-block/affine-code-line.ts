@@ -3,7 +3,6 @@ import { assertExists } from '@blocksuite/store';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
@@ -37,7 +36,14 @@ export class AffineCodeLine extends ShadowlessElement {
     const { lang, highlighter } = this.highlightOptionsGetter();
 
     if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
-      return html`<span><v-text .str=${this.delta.insert}></v-text></span>`;
+      return html`<span
+        ><v-text
+          .str=${this.delta.insert}
+          .styles=${{
+            'word-wrap': 'break-word',
+          }}
+        ></v-text
+      ></span>`;
     }
 
     const mode = queryCurrentMode();
@@ -63,9 +69,10 @@ export class AffineCodeLine extends ShadowlessElement {
     const vTexts = tokens.map(token => {
       return html`<v-text
         .str=${token.content}
-        style=${styleMap({
+        .styles=${{
+          'word-wrap': 'break-word',
           color: token.color,
-        })}
+        }}
       ></v-text>`;
     });
 

@@ -48,7 +48,7 @@ export class RangeController {
     }
 
     const { from, to } = selection;
-    const fromBlock = this.root.blockViewMap.get(from.path);
+    const fromBlock = this.root.viewStore.getViewByPath(from.path);
     if (!fromBlock) {
       return;
     }
@@ -104,7 +104,9 @@ export class RangeController {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
-    const getBlockView = this.root.blockStore.config.getBlockViewByNode;
+    const getBlockView = (node: Node) =>
+      this.root.viewStore.getNodeView(node)?.view as BlockElement;
+
     if (ancestor.nodeType === Node.TEXT_NODE) {
       const block = getBlockView(ancestor);
       if (!block) return [];
@@ -168,10 +170,10 @@ export class RangeController {
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {
-    const fromBlock = this.root.blockViewMap.get(point.path);
+    const fromBlock = this.root.viewStore.getViewByPath(point.path);
     assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);
     const startVirgoElement =
-      fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');
+      fromBlock.view.querySelector<VirgoRootElement>('[data-virgo-root]');
     assertExists(
       startVirgoElement,
       `Cannot find virgo element in block ${point.path.join(' > ')}}`

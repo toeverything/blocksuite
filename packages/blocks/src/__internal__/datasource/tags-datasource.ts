@@ -8,10 +8,9 @@ import {
   selectOptionColors,
 } from '../../components/tags/colors.js';
 import type { SelectTag } from '../../components/tags/multi-tag-select.js';
-import {
-  selectHelper,
-  textHelper,
-} from '../../database-block/common/columns/define.js';
+import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
+import { selectPureColumnConfig } from '../../database-block/common/columns/select/define.js';
+import { textPureColumnConfig } from '../../database-block/common/columns/text/define.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
@@ -34,7 +33,7 @@ export class TagsDatasource extends BaseDataSource {
     }
   > = {
     value: {
-      type: textHelper.type,
+      type: textPureColumnConfig.type,
       getValue: tag => tag.value,
       setValue: (tag, value) => {
         this.changeTag({
@@ -44,7 +43,7 @@ export class TagsDatasource extends BaseDataSource {
       },
     },
     color: {
-      type: selectHelper.type,
+      type: selectPureColumnConfig.type,
       getValue: tag => tag.color,
       setValue: (tag, value) => {
         this.changeTag({
@@ -61,7 +60,7 @@ export class TagsDatasource extends BaseDataSource {
       }),
     },
     parent: {
-      type: selectHelper.type,
+      type: selectPureColumnConfig.type,
       getData: () => ({ options: this.meta.properties.tags.options }),
       getValue: tag => tag.parentId,
       setValue: (tag, value) => {
@@ -180,4 +179,5 @@ export class TagsDatasource extends BaseDataSource {
   private changeTag = (tag: SelectTag) => {
     this.changeTags(this.tags.map(v => (v.id === tag.id ? tag : v)));
   };
+  public allPropertyConfig: ColumnConfig[] = [];
 }

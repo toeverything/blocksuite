@@ -5,8 +5,8 @@ import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
 import type { Column, InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { FilterGroup } from './ast.js';
-import { groupByMatcher } from './columns/group.js';
 import { columnManager } from './columns/manager.js';
+import { groupByMatcher } from './groupBy/matcher.js';
 
 export type TableViewColumn = {
   id: string;
