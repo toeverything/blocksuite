@@ -13,50 +13,10 @@ import type { BlockSuiteRoot } from './lit-root.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
-// TODO: remove this
-export type FocusContext<
-  Model extends BaseBlockModel = BaseBlockModel,
-  Service extends BlockService = BlockService
-> = (
-  | {
-      multi?: false;
-    }
-  | {
-      /**
-       * Please note that this parameter only suggests that the operation is a multi-select operation,
-       * and does not mean that multiple blocks will be selected every time.
-       *
-       * For example, select all blocks by pressing `Ctrl+A` or clicking the drag handler.
-       */
-      multi: true;
-      /**
-       * Please check the length of the array before using it.
-       */
-      blocks: BlockElement<BaseBlockModel>;
-    }
-) &
-  (
-    | {
-        type: 'pointer';
-        event: PointerEvent;
-      }
-    | {
-        type: 'keyboard';
-        event: KeyboardEvent;
-      }
-    | {
-        // Please update the type name
-        // for example, 'api' or 'others'
-        type: 'UNKNOWN';
-        // TODO: add more information
-      }
-  );
-
 export class BlockElement<
   Model extends BaseBlockModel = BaseBlockModel,
   Service extends BlockService = BlockService,
-  WidgetName extends string = string,
-  FocusCtx extends FocusContext<Model, Service> = FocusContext<Model, Service>
+  WidgetName extends string = string
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   root!: BlockSuiteRoot;
@@ -146,18 +106,6 @@ export class BlockElement<
     return this.root.blockStore.specStore.getService(this.model.flavour) as
       | Service
       | undefined;
-  }
-
-  // TODO: remove this
-  focusBlock(focusContext: FocusCtx): boolean {
-    // Return false to prevent default focus behavior
-    return true;
-  }
-
-  // TODO: remove this
-  blurBlock(focusContext: FocusCtx): boolean {
-    // Return false to prevent default focus behavior
-    return true;
   }
 
   override connectedCallback() {
