@@ -32,10 +32,10 @@ export const actionConfig = [
     hotkey: undefined,
     showWhen: () => true,
     enabledWhen: () => true,
-    action: ({ page }: ActionProps) => {
+    action: async ({ page }: ActionProps) => {
       const range = getCurrentBlockRange(page);
       assertExists(range);
-      copyBlocks(range);
+      await copyBlocks(range);
       toast('Copied to clipboard');
     },
   },

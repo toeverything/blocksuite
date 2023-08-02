@@ -64,21 +64,22 @@ function prepareConnnectorClipboardData(
   return serialized;
 }
 
-function prepareClipboardData(
+async function prepareClipboardData(
   selectedAll: Selectable[],
   surface: SurfaceManager
 ) {
-  return selectedAll
-    .map(selected => {
+  const selected = await Promise.all(
+    selectedAll.map(async selected => {
       if (isTopLevelBlock(selected)) {
-        return getBlockClipboardInfo(selected).json;
+        return await getBlockClipboardInfo(selected).json;
       } else if (selected instanceof ConnectorElement) {
         return prepareConnnectorClipboardData(selected, selectedAll, surface);
       } else {
         return selected.serialize();
       }
     })
-    .filter(d => !!d);
+  );
+  return selected.filter(d => !!d);
 }
 
 export class EdgelessClipboard implements Clipboard {
@@ -141,7 +142,7 @@ export class EdgelessClipboard implements Clipboard {
     this.slots.selectionUpdated.emit({ active: false, selected: [] });
   };
 
-  private _onCopy = (e: ClipboardEvent) => {
+  private _onCopy = async (e: ClipboardEvent) => {
     if (!activeEditorManager.isActive(this._edgeless)) {
       return;
     }
@@ -154,11 +155,11 @@ export class EdgelessClipboard implements Clipboard {
       } else {
         const range = getCurrentBlockRange(this._page);
         assertExists(range);
-        copyBlocks(range);
+        await copyBlocks(range);
       }
       return;
     }
-    const data = prepareClipboardData(state.selected, this.surface);
+    const data = await prepareClipboardData(state.selected, this.surface);
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
