@@ -5,7 +5,7 @@ import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
-import { groupByMatcher } from '../common/groupBy/matcher.js';
+import { groupByMatcher } from '../common/group-by/matcher.js';
 import type { GroupBy, KanbanViewData } from '../common/view-manager.js';
 import { defaultGroupBy } from '../common/view-manager.js';
 import type { ViewSource } from '../common/view-source.js';

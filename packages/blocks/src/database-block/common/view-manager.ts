@@ -6,7 +6,7 @@ import type { Column, InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { FilterGroup } from './ast.js';
 import { columnManager } from './columns/manager.js';
-import { groupByMatcher } from './groupBy/matcher.js';
+import { groupByMatcher } from './group-by/matcher.js';
 
 export type TableViewColumn = {
   id: string;
