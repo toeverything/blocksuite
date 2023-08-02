@@ -533,8 +533,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         });
         const frame = this._edgeless.frame.selectFrame(this._toBeMoved);
         frame
-          ? this._edgeless.frame.highlight(frame)
-          : this._edgeless.frame.unhighlight();
+          ? this._edgeless.frame.setHighlight(frame)
+          : this._edgeless.frame.clearHighlight();
 
         this._forceUpdateSelection(this.dragType, true, {
           x: delta.x - this._lastMoveDelta.x,
@@ -583,7 +583,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._selectedBounds = [];
     this._lastMoveDelta = { x: 0, y: 0 };
     this._edgeless.snap.cleanupAlignables();
-    this._edgeless.frame.unhighlight();
+    this._edgeless.frame.clearHighlight();
     this._addFrames();
     this._frames.forEach(frame => {
       this._edgeless.frame.calculateFrameColor(frame);

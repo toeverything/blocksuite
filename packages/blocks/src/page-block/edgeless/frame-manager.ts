@@ -24,6 +24,7 @@ class FrameOverlay extends Overlay {
     ctx.fill();
   }
 }
+
 export class EdgelessFrameManager {
   private _frameOverlay = new FrameOverlay();
   constructor(private _edgeless: EdgelessPageBlockComponent) {
@@ -50,13 +51,13 @@ export class EdgelessFrameManager {
     return null;
   }
 
-  highlight(frame: FrameElement) {
+  setHighlight(frame: FrameElement) {
     const bound = Bound.deserialize(frame.xywh);
     this._frameOverlay.bound = bound;
     this._edgeless.surface.refresh();
   }
 
-  unhighlight() {
+  clearHighlight() {
     this._frameOverlay.bound = null;
   }
 
