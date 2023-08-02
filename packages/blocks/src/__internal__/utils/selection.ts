@@ -1,6 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR, SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import { polyfillIntlSegmenter } from '@blocksuite/global/utils';
 import {
   assertExists,
   caretRangeFromPoint,
@@ -25,8 +24,6 @@ import {
 } from './query.js';
 import { Rect } from './rect.js';
 import type { IPoint, SelectionPosition } from './types.js';
-
-polyfillIntlSegmenter();
 
 // /[\p{Alphabetic}\p{Mark}\p{Decimal_Number}\p{Connector_Punctuation}\p{Join_Control}]/u
 const notStrictCharacterReg = /[^\p{Alpha}\p{M}\p{Nd}\p{Pc}\p{Join_C}]/u;

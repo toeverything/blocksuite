@@ -1,10 +1,6 @@
-import { polyfillIntlSegmenter } from '@blocksuite/global/utils';
-
 import type { VRange } from '../types.js';
 import type { VEditor } from '../virgo.js';
 import type { BaseTextAttributes } from './base-attributes.js';
-
-polyfillIntlSegmenter();
 
 function handleInsertText<TextAttributes extends BaseTextAttributes>(
   vRange: VRange,

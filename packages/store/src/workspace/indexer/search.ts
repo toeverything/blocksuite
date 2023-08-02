@@ -1,4 +1,3 @@
-import { polyfillIntlSegmenter } from '@blocksuite/global/utils';
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
@@ -6,8 +5,6 @@ import { Map as YMap, Text as YText } from 'yjs';
 
 import type { BlockSuiteDoc } from '../../yjs/index.js';
 import type { YBlock } from '../page.js';
-
-polyfillIntlSegmenter();
 
 const DocumentIndexer = FlexSearch.Document;
 const Index = FlexSearch.Index;
