@@ -57,8 +57,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         });
       })
     );
-    this.handleEvent('selectionChange', () => {
-      return true;
+    this.handleEvent('selectionChange', ctx => {
+      const selection = this.service?.selectionManager.value.find(selection =>
+        PathMap.equals(selection.path, this.path)
+      );
+      return !!selection;
     });
   }
 
