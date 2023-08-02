@@ -872,6 +872,31 @@ export function findClosestBlock(
   return lastChild;
 }
 
+export function findClosestNoteBlock(
+  container: BlockComponentElement,
+  point: Point
+) {
+  const children = Array.from(
+    container.querySelectorAll('affine-note > [data-block-id]')
+  );
+  let lastDistance = Number.POSITIVE_INFINITY;
+  let lastChild = null;
+
+  if (!children.length) return null;
+
+  for (const child of children) {
+    const rect = child.getBoundingClientRect();
+    const distance = Math.abs(point.y - (rect.y + rect.height));
+
+    if (distance <= lastDistance) {
+      lastDistance = distance;
+      lastChild = child;
+    }
+  }
+
+  return lastChild;
+}
+
 /**
  * Returns the closest block element by element that does not contain the page element and note element.
  */

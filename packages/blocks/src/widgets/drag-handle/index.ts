@@ -15,6 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   calcDropTarget,
   findClosestBlock,
+  findClosestNoteBlock,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
@@ -137,10 +138,6 @@ export class DragHandleWidget extends WidgetElement {
     return this._pageBlockElement.rangeController;
   }
 
-  private get _noteBlock() {
-    return this._pageBlockElement.querySelector('affine-note');
-  }
-
   private _getClosestBlockElementByPoint(point: Point) {
     const blockElement = getClosestBlockElementByPoint(point);
     const closestBlockElement = (
@@ -215,7 +212,8 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _outOfNoteBlock = (point: Point) => {
-    const rect = this._noteBlock?.getBoundingClientRect();
+    const closeNoteBlock = findClosestNoteBlock(this._pageBlockElement, point);
+    const rect = closeNoteBlock?.getBoundingClientRect();
     return rect
       ? point.x < rect.left + DRAG_HANDLE_WORKING_OFFSET.left ||
           point.x > rect.right + DRAG_HANDLE_WORKING_OFFSET.right ||
@@ -339,7 +337,6 @@ export class DragHandleWidget extends WidgetElement {
     const state = ctx.get('pointerState');
     const { target } = state.raw;
     const element = this._captureEventTarget(target);
-
     if (
       !element ||
       !element.closest('.affine-drag-handle-container') ||
@@ -541,32 +538,12 @@ export class DragHandleWidget extends WidgetElement {
 
     return html`
       <div class="affine-drag-handle-container">
-        <div class="affine-drag-handle-line"></div>
         <div class="affine-drag-handle">
-          <svg
-            class="affine-drag-handle-normal"
-            width="4"
-            height="12"
-            viewBox="0 0 4 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="4" height="12" rx="1" fill="#C0BFC1" />
-          </svg>
-          <svg
-            class="affine-drag-handle-hover"
-            xmlns="http://www.w3.org/2000/svg"
-            width="3"
-            height="16"
-            viewBox="0 0 3 16"
-            fill="none"
-          >
-            <rect width="3" height="16" rx="1" fill="#C0BFC1" />
-          </svg>
+          <div class="affine-drag-handle-icon"></div>
         </div>
+        <div class="affine-drag-preview"></div>
+        <div class="affine-drag-indicator" style=${indicatorStyle}></div>
       </div>
-      <div class="affine-drag-preview"></div>
-      <div class="affine-drag-indicator" style=${indicatorStyle}></div>
     `;
   }
 }
