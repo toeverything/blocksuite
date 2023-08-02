@@ -93,7 +93,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
             type: 'database-block',
             pageId: page.id,
             blockId: model.id,
-            path: this.path,
           });
         }
         model.children.forEach(findDatabase);

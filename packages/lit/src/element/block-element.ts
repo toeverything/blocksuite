@@ -1,9 +1,10 @@
-import type { BlockService } from '@blocksuite/block-std';
+import type { BlockService, BlockSuiteViewSpec } from '@blocksuite/block-std';
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathMap } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { property, state } from 'lit/decorators.js';
 
@@ -72,18 +73,21 @@ export class BlockElement<
   @property({ attribute: false })
   page!: Page;
 
-  @property({ attribute: false })
-  path!: string[];
-
   @state()
   selected: BaseSelection | null = null;
+
+  path!: string[];
 
   get parentPath(): string[] {
     return this.path.slice(0, -1);
   }
 
   get parentBlockElement() {
-    return this.root.blockViewMap.get(this.parentPath);
+    const parentElement = this.parentElement;
+    assertExists(parentElement);
+    const nodeView = this.root.viewStore.getNodeView(parentElement);
+    assertExists(nodeView);
+    return nodeView.view as BlockElement;
   }
 
   get flavour(): string {
@@ -129,13 +133,13 @@ export class BlockElement<
     return Object.keys(this.widgets).reduce((mapping, key) => {
       return {
         ...mapping,
-        [key]: this.root.widgetViewMap.get([...this.path, key]),
+        [key]: this.root.viewStore.getViewByPath([...this.path, key])?.view,
       };
     }, {}) as Partial<Record<WidgetName, WidgetElement>>;
   }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {
-    return this.root.renderModel(model, this.path);
+    return this.root.renderModel(model);
   };
 
   get service(): Service | undefined {
@@ -158,7 +162,6 @@ export class BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.blockViewMap.set(this.path, this);
 
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
@@ -178,14 +181,21 @@ export class BlockElement<
         this.selected = selection;
       })
     );
+
+    this.path = this.root.viewStore.calculatePath(this);
   }
 
   override disconnectedCallback() {
-    this.root.blockViewMap.delete(this.path);
     super.disconnectedCallback();
   }
 
   override render(): unknown {
     return null;
+  }
+}
+
+declare global {
+  interface BlockSuiteView {
+    block: BlockSuiteViewSpec<BlockElement>;
   }
 }

@@ -176,7 +176,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   override focusBlock(ctx: FocusContext) {
-    super.focusBlock(ctx);
     if (ctx.multi) {
       return true;
     }

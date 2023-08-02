@@ -1249,13 +1249,6 @@ export function hasDatabase(elements: Element[]) {
   return elements.some(isDatabase);
 }
 
-/**
- * Returns the last note element.
- */
-export function getLastNoteBlockElement(parent: Element) {
-  return parent.querySelector('affine-note:last-of-type');
-}
-
 export function getEdgelessCanvasTextEditor(element: Element | Document) {
   return element.querySelector(
     'edgeless-text-editor,edgeless-shape-text-editor'
