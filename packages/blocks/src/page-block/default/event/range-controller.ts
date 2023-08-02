@@ -1,7 +1,7 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -79,6 +79,15 @@ export class RangeController {
       if (hasTextSelection) {
         selectionManager.clear(['text']);
       }
+      return null;
+    }
+
+    if (
+      matchFlavours(
+        this.root.page.getBlockById(from.blockId) as BaseBlockModel,
+        ['affine:page']
+      )
+    ) {
       return null;
     }
 
