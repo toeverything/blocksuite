@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { type FrameElement,generateKeyBetween } from '@blocksuite/phasor';
+import { type FrameElement, generateKeyBetween } from '@blocksuite/phasor';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -69,13 +69,13 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     }
   `;
 
-  @property()
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property()
+  @property({ attribute: false })
   frames!: FrameElement[];
 
-  @property()
+  @property({ attribute: false })
   updateFrames!: () => void;
 
   @query('.edgeelss-frame-order-items-container')

@@ -13,13 +13,13 @@ import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 
 @customElement('edgeless-frame-order-button')
 export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
-  @property()
+  @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property()
+  @property({ attribute: false })
   frames!: FrameElement[];
 
-  @property()
+  @property({ attribute: false })
   updateFrames!: () => void;
 
   @query('edgeless-frame-order-menu')
