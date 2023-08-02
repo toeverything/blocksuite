@@ -15,6 +15,11 @@ export const textPureColumnConfig = columnManager.register<string>(
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data ?? '',
+    cellFromString: data => {
+      return {
+        value: data,
+      };
+    },
     cellToJson: data => data ?? null,
   }
 );

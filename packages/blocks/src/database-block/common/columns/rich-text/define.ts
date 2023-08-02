@@ -22,6 +22,11 @@ export const richTextPureColumnConfig = columnManager.register<Text['yText']>(
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
+    cellFromString: data => {
+      return {
+        value: data,
+      };
+    },
     cellToJson: data => data?.toString() ?? null,
   }
 );

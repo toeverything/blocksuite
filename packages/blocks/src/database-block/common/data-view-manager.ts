@@ -33,6 +33,11 @@ export interface DataViewManager {
 
   cellGetStringValue(rowId: string, columnId: string): string;
 
+  cellSetValueFromString(
+    columnId: string,
+    value: string
+  ): { value: unknown; data?: Record<string, unknown> };
+
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void;
 
   cellUpdateValue(rowId: string, columnId: string, value: unknown): void;
@@ -221,6 +226,14 @@ export abstract class BaseDataViewManager implements DataViewManager {
           this.dataSource.cellGetValue(rowId, columnId),
           this.columnGetData(columnId)
         ) ?? ''
+    );
+  }
+
+  public cellSetValueFromString(columnId: string, cellData: string) {
+    return (
+      columnManager
+        .getColumn(this.columnGetType(columnId))
+        .fromString(cellData, this.columnGetData(columnId)) ?? ''
     );
   }
 
@@ -444,6 +457,15 @@ export abstract class BaseDataViewColumnManager
 
   getStringValue(rowId: string): string {
     return this.viewManager.cellGetStringValue(rowId, this.id);
+  }
+
+  setValueFromString(value: string) {
+    const result = this.viewManager.cellSetValueFromString(this.id, value);
+
+    if (result.data) {
+      this.viewManager.columnUpdateData(this.id, result.data);
+    }
+    return result.value;
   }
 
   public get icon(): UniComponent | undefined {

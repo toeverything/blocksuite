@@ -58,17 +58,19 @@ export class TableViewClipboard implements BaseViewClipboard {
     const view = this._view.value as DatabaseTable;
     const model = this._model;
 
+    const { isEditing, focus, rowsSelection, columnsSelection } =
+      tableSelection;
+
     // copy cells' content
-    const { isEditing, focus } = tableSelection;
-    const column = model.columns[focus.columnIndex];
     if (isEditing) {
+      const column = model.columns[focus.columnIndex];
       const container = view.selection.getCellContainer(
         focus.rowIndex,
         focus.columnIndex
       );
 
       if (column.type !== 'number') {
-        const data = (selectionValueMap[column.type]?.(container) ??
+        const data = (cellToStringMap[column.type]?.(container) ??
           '') as string;
         const textClipboardItem = new ClipboardItem(
           CLIPBOARD_MIMETYPE.TEXT,
@@ -82,8 +84,21 @@ export class TableViewClipboard implements BaseViewClipboard {
       return true;
     }
 
-    // copy cells
-    const stringifiesData = JSON.stringify(tableSelection);
+    if (rowsSelection && !columnsSelection) {
+      // rows
+      // When copying row to outside the database, it can be pasted as a `block`.
+      // The pasteboard data is the same as the external clipboard data.
+      // CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE
+    }
+
+    // cells
+    // For database paste inside.
+    const copyedValues = getCopyedValuesFromSelection(
+      tableSelection,
+      model,
+      view
+    );
+    const stringifiesData = JSON.stringify(copyedValues);
     const htmlSelection = setHTMLStringForSelection(
       stringifiesData,
       CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE
@@ -93,10 +108,12 @@ export class TableViewClipboard implements BaseViewClipboard {
       htmlSelection
     );
 
+    // For database paste outside(raw text).
     const cellsValue = copyCellsValue(tableSelection, model, view);
+    const formatValue = cellsValue.map(value => value.join('\t')).join('\n');
     const textClipboardItem = new ClipboardItem(
       CLIPBOARD_MIMETYPE.TEXT,
-      cellsValue.join('')
+      formatValue
     );
     performNativeCopy([textClipboardItem, htmlClipboardItem]);
 
@@ -169,26 +186,27 @@ export class TableViewClipboard implements BaseViewClipboard {
       );
       if (!clipboardData) return true;
 
-      const copyedSelection = JSON.parse(clipboardData) as TableViewSelection;
-      let targetRange = getTargetRangeFromSelection(tableSelection, model);
+      const copyedSelectionData = JSON.parse(
+        clipboardData
+      ) as CopyedSelectionData;
+      const targetRange = getTargetRangeFromSelection(tableSelection, model);
       let rowStartIndex = targetRange.row.start;
       let columnStartIndex = targetRange.column.start;
       let rowLength = targetRange.row.length;
       let columnLength = targetRange.column.length;
 
       if (targetRange.anchor) {
-        targetRange = getTargetRangeFromSelection(copyedSelection, model);
         rowStartIndex = tableSelection.focus.rowIndex;
         columnStartIndex = tableSelection.focus.columnIndex;
-        rowLength = targetRange.row.length;
-        columnLength = targetRange.column.length;
+        rowLength = copyedSelectionData.length;
+        columnLength = copyedSelectionData[0].length;
       }
 
       pasteToCells(
         model,
         data,
         view,
-        copyedSelection,
+        copyedSelectionData,
         rowStartIndex,
         columnStartIndex,
         rowLength,
@@ -219,12 +237,7 @@ function getTextSelection(root: BlockSuiteRoot, path: string[]) {
 function getColumnValue(container: DatabaseCellContainer | undefined) {
   const rowId = container?.dataset.rowId;
   assertExists(rowId);
-  const rawValue = container?.column.getJsonValue(rowId);
-  const stringValue = container?.column.getStringValue(rowId);
-  return {
-    rawValue,
-    stringValue,
-  };
+  return container?.column.getStringValue(rowId) ?? '';
 }
 
 function setHTMLStringForSelection(data: string, type: CLIPBOARD_MIMETYPE) {
@@ -246,7 +259,7 @@ function copyCellsValue(
   view: DatabaseTable
 ) {
   const { rowsSelection, columnsSelection, focus } = selection;
-  const values: string[] = [];
+  const values: string[][] = [];
   if (rowsSelection && !columnsSelection) {
     // rows
     const { start, end } = rowsSelection;
@@ -255,19 +268,21 @@ function copyCellsValue(
     );
     for (let i = start; i <= end; i++) {
       const container = view.selection.getCellContainer(i, titleIndex);
-      const value = (selectionValueMap['title']?.(container) ?? '') as string;
-      values.push(value);
+      const data = (cellToStringMap['title']?.(container) ?? '') as string;
+      values.push([data]);
     }
   } else if (rowsSelection && columnsSelection) {
     // multiple cells
     for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
+      const value: string[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = model.columns[j];
         const container = view.selection.getCellContainer(i, j);
-        const value = (selectionValueMap[column.type]?.(container) ??
+        const data = (cellToStringMap[column.type]?.(container) ??
           '') as string;
-        values.push(value);
+        value.push(data);
       }
+      values.push(value);
     }
   } else if (!rowsSelection && !columnsSelection && focus) {
     // single cell
@@ -276,30 +291,31 @@ function copyCellsValue(
       focus.rowIndex,
       focus.columnIndex
     );
-    const value = (selectionValueMap[column.type]?.(container) ?? '') as string;
-    values.push(value);
+    const data = (cellToStringMap[column.type]?.(container) ?? '') as string;
+    values.push([data]);
   }
 
   return values;
 }
 
-function getSrcValuesFromSelection(
+type CopyedColumn = { type: string; value: string };
+type CopyedSelectionData = CopyedColumn[][];
+function getCopyedValuesFromSelection(
   selection: TableViewSelection,
   model: DatabaseBlockModel,
   view: DatabaseTable
-) {
-  type Column = { type: string; value: unknown };
+): CopyedSelectionData {
   const { rowsSelection, columnsSelection, focus } = selection;
-  const values: Column[][] = [];
+  const values: CopyedColumn[][] = [];
   if (rowsSelection && !columnsSelection) {
     // rows
     const { start, end } = rowsSelection;
     for (let i = start; i <= end; i++) {
-      const cellValues: Column[] = [];
+      const cellValues: CopyedColumn[] = [];
       for (let j = 0; j < model.columns.length; j++) {
         const column = model.columns[j];
         const container = view.selection.getCellContainer(i, j);
-        const value = selectionValueMap[column.type]?.(container, true);
+        const value = cellToStringMap[column.type]?.(container);
         cellValues.push({ type: column.type, value });
       }
       values.push(cellValues);
@@ -307,11 +323,11 @@ function getSrcValuesFromSelection(
   } else if (rowsSelection && columnsSelection) {
     // multiple cells
     for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
-      const cellValues: Column[] = [];
+      const cellValues: CopyedColumn[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = model.columns[j];
         const container = view.selection.getCellContainer(i, j);
-        const value = selectionValueMap[column.type]?.(container, true);
+        const value = cellToStringMap[column.type]?.(container);
         cellValues.push({ type: column.type, value });
       }
       values.push(cellValues);
@@ -323,7 +339,7 @@ function getSrcValuesFromSelection(
       focus.columnIndex
     );
     const column = model.columns[focus.columnIndex];
-    const value = selectionValueMap[column.type]?.(container, true);
+    const value = cellToStringMap[column.type]?.(container);
     values.push([{ type: column.type, value }]);
   }
   return values;
@@ -442,13 +458,13 @@ function pasteToCells(
   model: DatabaseBlockModel,
   data: DataViewTableManager,
   view: DatabaseTable,
-  copyedSelection: TableViewSelection,
+  copyedSelectionData: CopyedSelectionData,
   rowStartIndex: number,
   columnStartIndex: number,
   rowLength: number,
   columnLength: number
 ) {
-  const srcColumns = getSrcValuesFromSelection(copyedSelection, model, view);
+  const srcColumns = copyedSelectionData;
   const srcRowLength = srcColumns.length;
   const srcColumnLength = srcColumns[0].length;
 
@@ -457,14 +473,10 @@ function pasteToCells(
     for (let j = 0; j < columnLength; j++) {
       const rowIndex = rowStartIndex + i;
       const columnIndex = columnStartIndex + j;
-      const targetColumn = model.columns[columnIndex];
 
       const srcRowIndex = i % srcRowLength;
       const srcColumnIndex = j % srcColumnLength;
       const srcColumn = srcColumns[srcRowIndex][srcColumnIndex];
-
-      // Can only be pasted when the column type is the same.
-      if (targetColumn.type !== srcColumn.type) continue;
 
       const targetContainer = view.selection.getCellContainer(
         rowIndex,
@@ -472,71 +484,64 @@ function pasteToCells(
       );
       const rowId = targetContainer?.dataset.rowId;
       const columnId = targetContainer?.dataset.columnId;
+
       if (rowId && columnId) {
-        data.cellUpdateValue(rowId, columnId, srcColumn.value);
+        const value = targetContainer?.column.setValueFromString(
+          srcColumn.value
+        );
+        data.cellUpdateValue(rowId, columnId, value);
       }
     }
   }
 }
 
-const selectionValueMap: Record<
+const cellToStringMap: Record<
   string,
-  (
-    container: DatabaseCellContainer | undefined,
-    needRawValue?: boolean
-  ) => unknown
+  (container: DatabaseCellContainer | undefined) => string
 > = {
-  'rich-text': (container, needRawValue = false) => {
+  'rich-text': container => {
     const cell = container?.querySelector(
       'affine-database-rich-text-cell-editing'
     );
-    const value = getColumnValue(container).stringValue;
+    const value = getColumnValue(container);
     const range = cell?.vEditor?.getVRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;
-      const data = value?.slice(start, end);
+      const data = value?.slice(start, end) ?? '';
       return data;
     }
-    return value;
+    return value ?? '';
   },
-  title: (container, needRawValue = false) => {
+  title: container => {
     const cell = container?.querySelector('rich-text');
-    const value = getColumnValue(container).stringValue;
+    const value = getColumnValue(container);
     const range = cell?.vEditor?.getVRange();
     if (range) {
       const start = range.index;
       const end = range.index + range.length;
-      const data = value?.slice(start, end);
+      const data = value?.slice(start, end) ?? '';
       return data;
     }
-    return value;
+    return value ?? '';
   },
-  // TODO: change date format
-  date: (container, needRawValue = false) => {
-    const value = getColumnValue(container);
-    return needRawValue ? value.rawValue : value.stringValue;
+  date: container => {
+    return getColumnValue(container);
   },
-  number: (container, needRawValue = false) => {
-    const value = getColumnValue(container);
-    return needRawValue ? value.rawValue : value.stringValue;
+  number: container => {
+    return getColumnValue(container);
   },
-  select: (container, needRawValue = false) => {
-    const value = getColumnValue(container);
-    return needRawValue ? value.rawValue : value.stringValue;
+  select: container => {
+    return getColumnValue(container);
   },
-  'multi-select': (container, needRawValue = false) => {
-    const value = getColumnValue(container);
-    return needRawValue ? value.rawValue : value.stringValue;
+  'multi-select': container => {
+    return getColumnValue(container);
   },
-  progress: (container, needRawValue = false) => {
-    const value = getColumnValue(container);
-    return needRawValue ? value.rawValue : value.stringValue;
+  progress: container => {
+    return getColumnValue(container);
   },
-  link: (container, needRawValue = false) =>
-    getColumnValue(container).stringValue,
-  checkbox: (container, needRawValue = false) => {
-    const value = getColumnValue(container);
-    return needRawValue ? value.rawValue : value.stringValue;
+  link: container => getColumnValue(container),
+  checkbox: container => {
+    return getColumnValue(container);
   },
 };

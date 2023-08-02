@@ -18,6 +18,12 @@ export const progressPureColumnConfig = columnManager.register<number>(
     type: () => tNumber.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
+    cellFromString: data => {
+      const num = data ? Number(data) : NaN;
+      return {
+        value: isNaN(num) ? null : num,
+      };
+    },
     cellToJson: data => data ?? null,
   }
 );
