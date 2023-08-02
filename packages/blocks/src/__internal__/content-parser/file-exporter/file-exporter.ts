@@ -72,7 +72,7 @@ export const FileExporter = {
 
     const blob = await zipFile.generateAsync({ type: 'blob' });
     const fileURL = URL.createObjectURL(blob);
-    FileExporter.exportFile(pageTitle + '|HTML.zip', fileURL);
+    FileExporter.exportFile(`${pageTitle}|HTML.zip`, fileURL);
   },
   async exportHtmlAsMarkdown(
     title: string | undefined,
@@ -273,7 +273,7 @@ export const FileExporter = {
 
     const blob = await zipFile.generateAsync({ type: 'blob' });
     const fileURL = URL.createObjectURL(blob);
-    FileExporter.exportFile(pageTitle + '|MarkDown.zip', fileURL);
+    FileExporter.exportFile(`${pageTitle}|MarkDown.zip`, fileURL);
   },
   exportPng(pageTitle: string | undefined, dataURL: string) {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
