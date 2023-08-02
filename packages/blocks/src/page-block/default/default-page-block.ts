@@ -25,13 +25,11 @@ import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageBlockService } from '../index.js';
+import { Keyboard } from '../keyboard/keyboard.js';
 import type { PageBlockModel } from '../page-model.js';
-import {
-  Gesture,
-  Keyboard,
-  RangeController,
-  Synchronizer,
-} from './event/index.js';
+import { RangeController } from '../text-selection/range-controller.js';
+import { Synchronizer } from '../text-selection/synchronizer.js';
+import { Gesture } from './event/gesture.js';
 
 export interface PageViewport {
   left: number;

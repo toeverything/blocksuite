@@ -14,7 +14,7 @@ import { customElement, query } from 'lit/decorators.js';
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getBlockElementByModel } from '../../__internal__/utils/query.js';
 import { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
-import type { RangeController } from '../../page-block/default/event/range-controller.js';
+import type { RangeController } from '../../page-block/text-selection/range-controller.js';
 import { getCurrentCombinedFormat } from '../../page-block/utils/container-operations.js';
 import { ActionItems } from './components/action-items.js';
 import { InlineItems } from './components/inline-items.js';

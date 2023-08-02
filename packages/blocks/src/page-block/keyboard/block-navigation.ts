@@ -3,7 +3,7 @@ import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
-import type { DefaultPageBlockComponent } from '../../default-page-block.js';
+import type { DefaultPageBlockComponent } from '../default/default-page-block.js';
 
 export class BlockNavigation {
   private _anchorBlock: BlockSelection | null = null;

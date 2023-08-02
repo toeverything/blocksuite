@@ -1,7 +1,7 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { DefaultPageBlockComponent } from '../../default-page-block.js';
+import type { DefaultPageBlockComponent } from '../default/default-page-block.js';
 import { BlockNavigation } from './block-navigation.js';
 import { TextNavigation } from './text-navigation.js';
 

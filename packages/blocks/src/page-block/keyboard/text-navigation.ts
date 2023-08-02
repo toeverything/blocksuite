@@ -1,11 +1,11 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 
-import type { DefaultPageBlockComponent } from '../../default-page-block.js';
+import type { DefaultPageBlockComponent } from '../default/default-page-block.js';
 import {
   horizontalGetNextCaret,
   horizontalMoveCursorToNextText,
-} from '../utils.js';
+} from '../default/event/utils.js';
 
 export class TextNavigation {
   private _anchorRange: Range | null = null;

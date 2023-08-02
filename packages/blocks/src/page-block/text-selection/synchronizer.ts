@@ -5,7 +5,7 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import type { DefaultPageBlockComponent } from '../default-page-block.js';
+import type { DefaultPageBlockComponent } from '../default/default-page-block.js';
 
 export class Synchronizer {
   private _prevSelection: BaseSelection | null = null;
@@ -21,6 +21,7 @@ export class Synchronizer {
     return this._selection.value;
   }
 
+  //TODO: add EdgelessPageBlockComponent
   constructor(public host: DefaultPageBlockComponent) {
     this.host.disposables.add(
       this._selection.slots.changed.on(selections => {
