@@ -46,15 +46,15 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     });
   }
 
-  override block2html(
+  override async block2html(
     block: CodeBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
-  ): string {
+  ): Promise<string> {
     const richTextElement = document.querySelector(
       `[${BLOCK_ID_ATTR}="${block.id}"] rich-text`
     );
     if (!richTextElement) {
-      return super.block2html(block, {
+      return await super.block2html(block, {
         childText,
         begin,
         end,

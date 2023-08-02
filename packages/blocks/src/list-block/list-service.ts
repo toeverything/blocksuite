@@ -6,11 +6,11 @@ import { BaseService } from '../__internal__/service/index.js';
 import { json2block } from '../__internal__/service/json2block.js';
 import type { ListBlockModel } from './list-model.js';
 export class ListBlockService extends BaseService<ListBlockModel> {
-  override block2html(
+  override async block2html(
     block: ListBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    let text = super.block2html(block, {
+    let text = await super.block2html(block, {
       childText,
       begin,
       end,

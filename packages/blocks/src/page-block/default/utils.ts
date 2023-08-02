@@ -68,8 +68,8 @@ function performNativeCopy(items: ClipboardItem[]): boolean {
   return success;
 }
 
-export function copyCode(codeBlockModel: CodeBlockModel) {
-  copyBlocks({
+export async function copyCode(codeBlockModel: CodeBlockModel) {
+  await copyBlocks({
     type: 'Block',
     models: [codeBlockModel],
     startOffset: 0,
