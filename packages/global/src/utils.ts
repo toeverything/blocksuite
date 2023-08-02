@@ -1,4 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import SegmenterPolyfillInit, * as SegmenterPolyfill from 'intl-segmenter-polyfill-rs';
 
 import type { BlockModels } from './types.js';
 
@@ -6,6 +7,7 @@ export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup } from './utils/disposable.js';
 export { Slot } from './utils/slot.js';
 export { caretRangeFromPoint, isFirefox, isWeb } from './utils/web.js';
+
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object
@@ -154,4 +156,16 @@ export function diffArray<T>(
   }
 
   return { changed: add.length || remove.length, add, remove, unchanged };
+}
+
+export function polyfillIntlSegmenter() {
+  if (Intl.Segmenter === undefined) {
+    SegmenterPolyfillInit().then(() => {
+      Object.defineProperty(Intl, 'Segmenter', {
+        value: SegmenterPolyfill.Segmenter,
+        configurable: true,
+        writable: true,
+      });
+    });
+  }
 }

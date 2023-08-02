@@ -1,3 +1,4 @@
+import { polyfillIntlSegmenter } from '@blocksuite/global/utils';
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
@@ -5,6 +6,8 @@ import { Map as YMap, Text as YText } from 'yjs';
 
 import type { BlockSuiteDoc } from '../../yjs/index.js';
 import type { YBlock } from '../page.js';
+
+polyfillIntlSegmenter();
 
 const DocumentIndexer = FlexSearch.Document;
 const Index = FlexSearch.Index;
@@ -15,7 +18,7 @@ type SearchResult = { id: string; doc: { space: string } };
 type SearchResults = { field: string; result: SearchResult[] };
 
 function tokenize(locale: string) {
-  const tokenizer = Intl?.Segmenter;
+  const tokenizer = Intl.Segmenter;
   if (tokenizer) {
     // extract the latin encoder inside flexsearch
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

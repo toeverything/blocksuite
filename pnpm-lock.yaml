@@ -275,6 +275,9 @@ importers:
       ansi-colors:
         specifier: ^4.1.3
         version: 4.1.3
+      intl-segmenter-polyfill-rs:
+        specifier: 0.1.0
+        version: 0.1.0
       zod:
         specifier: ^3.21.4
         version: 3.21.4
@@ -4562,6 +4565,10 @@ packages:
       has: 1.0.3
       side-channel: 1.0.4
     dev: true
+
+  /intl-segmenter-polyfill-rs@0.1.0:
+    resolution: {integrity: sha512-XfkWomy6pLjE1gV13WSl59Kt/tOoFHtfBMy3AOTObjyPmSH8wQcStxCT0ePCmYHRTXL1G1O7QddnxN9hO9cOwg==}
+    dev: false
 
   /is-accessor-descriptor@0.1.6:
     resolution: {integrity: sha512-e1BM1qnDbMRG3ll2U9dSK0UMHuWOs3pY3AtcFsmvwPtKL3MML/Q86i+GilLfvqEs4GW+ExB91tQ3Ig9noDIZ+A==}

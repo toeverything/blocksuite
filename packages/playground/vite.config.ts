@@ -72,4 +72,7 @@ export default defineConfig({
       ),
     },
   },
+  optimizeDeps: {
+    exclude: ['intl-segmenter-polyfill-rs'],
+  },
 });
