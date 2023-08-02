@@ -1,5 +1,4 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import SegmenterPolyfillInit, * as SegmenterPolyfill from 'intl-segmenter-polyfill-rs';
 
 import type { BlockModels } from './types.js';
 
@@ -160,7 +159,7 @@ export function diffArray<T>(
 
 export function polyfillIntlSegmenter() {
   if (Intl.Segmenter === undefined) {
-    SegmenterPolyfillInit().then(() => {
+    import('intl-segmenter-polyfill-rs').then(SegmenterPolyfill => {
       Object.defineProperty(Intl, 'Segmenter', {
         value: SegmenterPolyfill.Segmenter,
         configurable: true,
