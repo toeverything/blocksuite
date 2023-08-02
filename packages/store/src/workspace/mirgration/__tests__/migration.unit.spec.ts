@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
-import { assert, describe, test } from 'vitest';
+import { assert, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import { migrateWorkspace } from '../migrate-workspace.js';
@@ -68,5 +68,41 @@ describe('block migration', () => {
     assert.isUndefined(shape.get('isItalic'));
     assert.equal(shape.get('bold'), true);
     assert.equal(shape.get('italic'), true);
+  });
+  test('update database block title data', async () => {
+    const doc = await loadBinary('page-database-v2-v3');
+
+    let databaseBlock = (
+      doc.getMap('blocks').get('Y76JkP9XRn') as Y.Map<unknown>
+    ).toJSON();
+    expect(databaseBlock['prop:titleColumnName']).toBe('Title');
+    expect(databaseBlock['prop:titleColumnWidth']).toBe(200);
+    expect(
+      databaseBlock['prop:columns'].find(
+        (v: Record<string, unknown>) => v.type === 'title'
+      )
+    ).toBeUndefined();
+    expect(databaseBlock['prop:views'].length).toBe(2);
+    migratePageBlock(doc, {
+      'affine:database': 2,
+    });
+    databaseBlock = (
+      doc.getMap('blocks').get('Y76JkP9XRn') as Y.Map<unknown>
+    ).toJSON();
+    expect(databaseBlock['prop:titleColumnName']).toBeUndefined();
+    expect(databaseBlock['prop:titleColumnWidth']).toBeUndefined();
+    const titleColumn = databaseBlock['prop:columns'].find(
+      (v: Record<string, unknown>) => v.type === 'title'
+    );
+    expect(titleColumn.type).toBe('title');
+    for (const view of databaseBlock['prop:views']) {
+      if (view['mode'] === 'table') {
+        expect(
+          view['columns'].find(
+            (v: Record<string, unknown>) => v.id === titleColumn.id
+          ).width
+        ).toBe(200);
+      }
+    }
   });
 });
