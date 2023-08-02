@@ -1,3 +1,9 @@
-import { polyfillIntlSegmenter } from '@blocksuite/global/utils';
-
-polyfillIntlSegmenter();
+if (Intl.Segmenter === undefined) {
+  import('intl-segmenter-polyfill-rs').then(({ Segmenter }) => {
+    Object.defineProperty(Intl, 'Segmenter', {
+      value: Segmenter,
+      configurable: true,
+      writable: true,
+    });
+  });
+}
