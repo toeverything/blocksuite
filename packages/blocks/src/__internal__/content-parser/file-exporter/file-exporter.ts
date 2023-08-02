@@ -1,8 +1,6 @@
 /* eslint-disable no-control-regex */
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import type { BlobManager } from '@blocksuite/store';
-import JSZip from 'jszip';
-import TurndownService from 'turndown';
 
 import { globalCSS } from './exporter-style.js';
 
@@ -59,6 +57,8 @@ export const FileExporter = {
     blobMap: Map<string, string>,
     blobs: BlobManager
   ) {
+    const JSZip = (await import('jszip')).default;
+
     const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
     const zipFile = new JSZip();
     for (const [key, value] of blobMap) {
@@ -72,7 +72,7 @@ export const FileExporter = {
 
     const blob = await zipFile.generateAsync({ type: 'blob' });
     const fileURL = URL.createObjectURL(blob);
-    FileExporter.exportFile(pageTitle + '.zip', fileURL);
+    FileExporter.exportFile(pageTitle + '|HTML.zip', fileURL);
   },
   async exportHtmlAsMarkdown(
     title: string | undefined,
@@ -81,6 +81,8 @@ export const FileExporter = {
     blobMap: Map<string, string>,
     blobs: BlobManager
   ) {
+    const JSZip = (await import('jszip')).default;
+    const TurndownService = (await import('turndown')).default;
     const turndownService = new TurndownService();
     turndownService.addRule('input', {
       //@ts-ignore
@@ -271,7 +273,7 @@ export const FileExporter = {
 
     const blob = await zipFile.generateAsync({ type: 'blob' });
     const fileURL = URL.createObjectURL(blob);
-    FileExporter.exportFile(pageTitle + '.zip', fileURL);
+    FileExporter.exportFile(pageTitle + '|MarkDown.zip', fileURL);
   },
   exportPng(pageTitle: string | undefined, dataURL: string) {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
