@@ -1,6 +1,6 @@
 /* eslint-disable no-control-regex */
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import type { BlobManager } from '@blocksuite/store/index.js';
+import type { BlobManager } from '@blocksuite/store';
 import JSZip from 'jszip';
 import TurndownService from 'turndown';
 
