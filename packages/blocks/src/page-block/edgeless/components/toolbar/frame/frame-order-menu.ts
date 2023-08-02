@@ -1,7 +1,6 @@
 import { WithDisposable } from '@blocksuite/lit';
-import type { FrameElement } from '@blocksuite/phasor';
-import { generateKeyBetween } from '@blocksuite/phasor';
-import { DisposableGroup } from '@blocksuite/store/index.js';
+import { type FrameElement,generateKeyBetween } from '@blocksuite/phasor';
+import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

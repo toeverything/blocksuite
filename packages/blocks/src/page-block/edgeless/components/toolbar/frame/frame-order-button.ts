@@ -3,7 +3,7 @@ import '../../buttons/tool-icon-button.js';
 
 import { FrameOrderAdjustmentIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { FrameElement } from '@blocksuite/phasor/index.js';
+import type { FrameElement } from '@blocksuite/phasor';
 import { computePosition, offset } from '@floating-ui/dom';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
