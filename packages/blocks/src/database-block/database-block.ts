@@ -81,7 +81,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         type: 'database-block',
         pageId: this.root.page.id,
         blockId: this.model.id,
-        path: this.path,
       });
     }
     return this._dataSource;

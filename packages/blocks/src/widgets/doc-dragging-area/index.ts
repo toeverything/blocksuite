@@ -1,4 +1,6 @@
+import type { NodeViewLeaf, NodeViewTree } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -39,7 +41,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   private _rafID = 0;
 
-  static excludeFlavours: string[] = ['affine:note'];
+  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
 
   private _dragging = false;
 
@@ -53,15 +55,31 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   private get _allBlocksRect() {
     const viewportElement = this._viewportElement;
-    return [...this.root.blockViewMap.entries()]
-      .filter(([_, element]) => {
+    const tree = this.root.viewStore.getNodeViewTree();
+
+    const getAllNodeFromTree = (
+      node: NodeViewTree<BlockElement>
+    ): NodeViewLeaf<BlockElement>[] => {
+      if (node.children.length === 0) {
+        return [node];
+      }
+      return node.children
+        .filter(node => node.type === 'block')
+        .flatMap(child => getAllNodeFromTree(child));
+    };
+
+    const elements = getAllNodeFromTree(tree as NodeViewTree<BlockElement>);
+
+    return elements
+      .map(x => x.view as BlockElement)
+      .filter(element => {
         const model = element.model;
         return (
           model.role !== 'root' &&
           !DocDraggingAreaWidget.excludeFlavours.includes(model.flavour)
         );
       })
-      .map(([_, element]) => {
+      .map(element => {
         const bounding = element.getBoundingClientRect();
         return {
           id: element.model.id,
