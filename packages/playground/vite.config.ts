@@ -4,7 +4,6 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
-import topLevelAwait from 'vite-plugin-top-level-await';
 import wasm from 'vite-plugin-wasm';
 
 import { hmrPlugin } from './scripts/hmr-plugin';
@@ -28,9 +27,9 @@ export default defineConfig({
         forceBuildInstrument: true,
       }),
     wasm(),
-    topLevelAwait(),
   ],
   build: {
+    target: 'ES2022',
     sourcemap: true,
     rollupOptions: {
       input: {

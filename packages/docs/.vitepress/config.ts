@@ -1,11 +1,13 @@
 import { defineConfig } from 'vitepress';
-import topLevelAwait from 'vite-plugin-top-level-await';
 import wasm from 'vite-plugin-wasm';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   vite: {
-    plugins: [wasm(), topLevelAwait()],
+    build: {
+      target: 'ES2022',
+    },
+    plugins: [wasm()],
   },
   lang: 'en-US',
   title: 'BlockSuite',
