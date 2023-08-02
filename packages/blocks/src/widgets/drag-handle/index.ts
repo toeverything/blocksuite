@@ -19,6 +19,7 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
+  Rect,
 } from '../../__internal__/index.js';
 import type { DefaultPageBlockComponent } from '../../page-block/index.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
@@ -139,11 +140,17 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _getClosestBlockElementByPoint(point: Point) {
-    const blockElement = getClosestBlockElementByPoint(point);
+    const closeNoteBlock = findClosestNoteBlock(this._pageBlockElement, point);
+    if (!closeNoteBlock) return null;
+    const noteRect = Rect.fromDOM(closeNoteBlock);
+    const blockElement = getClosestBlockElementByPoint(point, {
+      container: closeNoteBlock,
+      rect: noteRect,
+    });
     const closestBlockElement = (
       blockElement
         ? blockElement
-        : findClosestBlock(this._pageBlockElement, point.clone())
+        : findClosestBlock(closeNoteBlock, point.clone())
     ) as BlockElement;
     return closestBlockElement;
   }
@@ -351,6 +358,7 @@ export class DragHandleWidget extends WidgetElement {
     // Should clear selection if current block is the first selected block
     if (
       this.selectedBlocks.length > 0 &&
+      this.selectedBlocks[0].type !== 'text' &&
       this.selectedBlocks[0].blockId === this._hoveredBlockId
     ) {
       selectionManager.clear();
@@ -396,12 +404,14 @@ export class DragHandleWidget extends WidgetElement {
         const range = nativeSelection.getRangeAt(0);
         const blockElements =
           this._rangeController.findBlockElementsByRange(range);
-        const blockSelections = blockElements.map(element => {
-          return this.root.selectionManager.getInstance('block', {
-            blockId: element.path[element.path.length - 1],
-            path: element.path,
+        const blockSelections = blockElements
+          .filter(element => element.flavour !== 'affine:note')
+          .map(element => {
+            return this.root.selectionManager.getInstance('block', {
+              blockId: element.path[element.path.length - 1],
+              path: element.path,
+            });
           });
-        });
         this.root.selectionManager.set(blockSelections);
         selections = this.selectedBlocks;
       }
@@ -542,9 +552,9 @@ export class DragHandleWidget extends WidgetElement {
         <div class="affine-drag-handle">
           <div class="affine-drag-handle-icon"></div>
         </div>
-        <div class="affine-drag-preview"></div>
-        <div class="affine-drag-indicator" style=${indicatorStyle}></div>
       </div>
+      <div class="affine-drag-preview"></div>
+      <div class="affine-drag-indicator" style=${indicatorStyle}></div>
     `;
   }
 }
