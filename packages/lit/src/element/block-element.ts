@@ -133,7 +133,7 @@ export class BlockElement<
     return Object.keys(this.widgets).reduce((mapping, key) => {
       return {
         ...mapping,
-        [key]: this.root.viewStore.getViewByPath([...this.path, key]),
+        [key]: this.root.viewStore.getViewByPath([...this.path, key])?.view,
       };
     }, {}) as Partial<Record<WidgetName, WidgetElement>>;
   }
