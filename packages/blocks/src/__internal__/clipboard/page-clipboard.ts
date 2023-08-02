@@ -26,8 +26,12 @@ export class PageClipboard implements Clipboard {
   init(page: Page) {
     this._page = page;
 
-    this._ele.handleEvent('cut', this._onCut);
-    this._ele.handleEvent('copy', this._onCopy);
+    this._ele.handleEvent('cut', ctx => {
+      this._onCut(ctx);
+    });
+    this._ele.handleEvent('copy', ctx => {
+      this._onCopy(ctx);
+    });
     this._ele.handleEvent('paste', ctx => {
       this._onPaste(ctx);
     });
@@ -74,7 +78,7 @@ export class PageClipboard implements Clipboard {
     this._page.slots.pasted.emit(blocks);
   };
 
-  private _onCopy = (
+  private _onCopy = async (
     ctx: UIEventStateContext,
     range = getCurrentBlockRange(this._page)
   ) => {
@@ -89,14 +93,14 @@ export class PageClipboard implements Clipboard {
     e.preventDefault();
     this._page.captureSync();
 
-    copyBlocks(range);
+    await copyBlocks(range);
 
     this._page.captureSync();
 
     this._page.slots.copied.emit();
   };
 
-  private _onCut = (ctx: UIEventStateContext) => {
+  private _onCut = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
 
     if (!activeEditorManager.isActive(this._ele)) {
@@ -107,7 +111,7 @@ export class PageClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    this._onCopy(ctx, range);
+    await this._onCopy(ctx, range);
     deleteModelsByRange(this._page, range);
   };
 }
