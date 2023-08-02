@@ -56,10 +56,10 @@
         "import": "./dist/index.js"
       },
       "./shim.d.ts": "./shim.d.ts",
-      "./workspace/mirgration/*": {
-        "types": "./dist/workspace/mirgration/*.d.ts",
-        "module": "./dist/workspace/mirgration/*.js",
-        "import": "./dist/workspace/mirgration/*.js"
+      "./workspace/migration/*": {
+        "types": "./dist/workspace/migration/*.d.ts",
+        "module": "./dist/workspace/migration/*.js",
+        "import": "./dist/workspace/migration/*.js"
       },
       "./providers/*": {
         "types": "./dist/providers/*.d.ts",
