@@ -269,7 +269,7 @@ export const FileExporter = {
       const blob = await blobs.get(key);
       blob && zipFile.file(value, blob);
     }
-    zipFile.file(`${pageTitle}_${pageId}.md`, markdown);
+    zipFile.file(`${pageTitle}|${pageId}.md`, markdown);
 
     const blob = await zipFile.generateAsync({ type: 'blob' });
     const fileURL = URL.createObjectURL(blob);
