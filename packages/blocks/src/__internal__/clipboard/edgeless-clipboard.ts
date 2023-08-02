@@ -71,7 +71,7 @@ async function prepareClipboardData(
   const selected = await Promise.all(
     selectedAll.map(async selected => {
       if (isTopLevelBlock(selected)) {
-        return await getBlockClipboardInfo(selected).json;
+        return (await getBlockClipboardInfo(selected)).json;
       } else if (selected instanceof ConnectorElement) {
         return prepareConnnectorClipboardData(selected, selectedAll, surface);
       } else {
