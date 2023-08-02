@@ -1,12 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type { ImageBlockService } from '@blocksuite/blocks/index.js';
 import { assertExists } from '@blocksuite/global/utils';
 import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
-import type { ImageBlockModel, PageBlockModel } from '../../models.js';
+import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
