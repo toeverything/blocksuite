@@ -379,9 +379,9 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     // Get current hover block eleemnt by path
-    const hoverBlockElement = this.root.blockViewMap.get(
+    const hoverBlockElement = this.root.viewStore.getViewByPath(
       this._hoveredBlockPath
-    );
+    )?.view as BlockElement;
     if (!hoverBlockElement) {
       return;
     }
@@ -419,7 +419,8 @@ export class DragHandleWidget extends WidgetElement {
 
     const blockElements = this.selectedBlocks
       .map(selection => {
-        return this.root.blockViewMap.get(selection.path as string[]);
+        return this.root.viewStore.getViewByPath(selection.path as string[])
+          ?.view;
       })
       .filter((element): element is BlockElement<BaseBlockModel> => !!element);
 
