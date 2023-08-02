@@ -8,6 +8,7 @@ import type {
 } from '@blocksuite/block-std';
 import { BlockStore } from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -35,9 +36,12 @@ export class BlockSuiteRoot extends ShadowlessElement {
   @property({ attribute: false })
   blockIdAttr = 'data-block-id';
 
+  @property({ attribute: false })
+  widgetIdAttr = 'data-widget-id';
+
   modelSubscribed = new Set<string>();
 
-  blockStore!: BlockStore<StaticValue, BlockElement, WidgetElement>;
+  blockStore!: BlockStore<StaticValue, BlockElement | WidgetElement>;
 
   get uiEventDispatcher(): UIEventDispatcher {
     return this.blockStore.uiEventDispatcher;
@@ -47,16 +51,8 @@ export class BlockSuiteRoot extends ShadowlessElement {
     return this.blockStore.selectionManager;
   }
 
-  get viewStore(): ViewStore<BlockElement, WidgetElement> {
+  get viewStore(): ViewStore<BlockElement | WidgetElement> {
     return this.blockStore.viewStore;
-  }
-
-  get blockViewMap() {
-    return this.viewStore.blockViewMap;
-  }
-
-  get widgetViewMap() {
-    return this.viewStore.widgetViewMap;
   }
 
   override willUpdate(changedProperties: PropertyValues) {
@@ -72,18 +68,89 @@ export class BlockSuiteRoot extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.blockStore = new BlockStore<StaticValue, BlockElement, WidgetElement>({
-      root: this,
-      workspace: this.page.workspace,
-      page: this.page,
-      config: {
-        getBlockViewByNode: node => {
-          const element =
-            node && node instanceof HTMLElement ? node : node.parentElement;
-          if (!element) return null;
+    this.blockStore = new BlockStore<StaticValue, BlockElement | WidgetElement>(
+      {
+        root: this,
+        workspace: this.page.workspace,
+        page: this.page,
+      }
+    );
 
-          return element.closest(`[${this.blockIdAttr}]`);
-        },
+    this.blockStore.viewStore.register('block', {
+      fromDOM: node => {
+        const element =
+          node && node instanceof HTMLElement ? node : node.parentElement;
+        if (!element) return null;
+
+        const selector = `[${this.blockIdAttr}]`;
+        const view = element.closest(selector) as BlockElement | null;
+        if (!view) {
+          return null;
+        }
+        const widget = element.closest('[data-widget-id]');
+        if (view.contains(widget)) {
+          return null;
+        }
+
+        const id = view.getAttribute(this.blockIdAttr);
+        assertExists(id);
+
+        return {
+          id,
+          path: view.path,
+          view,
+        };
+      },
+      toDOM: ({ view }) => {
+        return view;
+      },
+      equals: (a, b) => {
+        return a.view === b.view;
+      },
+      getChildren: view => {
+        return Array.from(
+          view.querySelectorAll<BlockElement>(
+            '[data-block-id], [data-widget-id]'
+          )
+        ).filter(x => {
+          return x.parentElement?.closest('[data-block-id]') === view;
+        });
+      },
+    });
+
+    this.blockStore.viewStore.register('widget', {
+      fromDOM: node => {
+        const element =
+          node && node instanceof HTMLElement ? node : node.parentElement;
+        if (!element) return null;
+
+        const selector = `[${this.widgetIdAttr}]`;
+        const view = element.closest(selector) as WidgetElement | null;
+        if (!view) {
+          return null;
+        }
+        const block = element.closest('[data-block-id]');
+        if (view.contains(block)) {
+          return null;
+        }
+
+        const id = view.getAttribute(this.widgetIdAttr);
+        assertExists(id);
+
+        return {
+          id,
+          view,
+          path: view.path,
+        };
+      },
+      toDOM: ({ view }) => {
+        return view;
+      },
+      equals: (a, b) => {
+        return a.view === b.view;
+      },
+      getChildren: () => {
+        return [];
       },
     });
 
@@ -103,10 +170,10 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return null;
     }
 
-    return this.renderModel(root, []);
+    return this.renderModel(root);
   }
 
-  renderModel = (model: BaseBlockModel, path: string[]): TemplateResult => {
+  renderModel = (model: BaseBlockModel): TemplateResult => {
     const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
@@ -120,16 +187,16 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
-    const currentPath = path.concat(model.id);
-
     const tag = view.component;
     const widgets: Record<string, TemplateResult> = view.widgets
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
-          const path = currentPath.concat(key);
+          const template = html`<${tag} ${unsafeStatic(
+            this.widgetIdAttr
+          )}=${key} .root=${this} .page=${this.page}></${tag}>`;
 
           return {
             ...mapping,
-            [key]: html`<${tag} .path=${path} .root=${this} .page=${this.page}></${tag}>`,
+            [key]: template,
           };
         }, {})
       : {};
@@ -142,11 +209,10 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
-      .path=${currentPath}
       .content=${html`${repeat(
         children,
         child => child.id,
-        child => this.renderModel(child, currentPath)
+        child => this.renderModel(child)
       )}`}
     ></${tag}>`;
   };

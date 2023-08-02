@@ -1,6 +1,7 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/lit';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
 import type { DefaultPageBlockComponent } from '../../default-page-block.js';
@@ -21,7 +22,8 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const view = this.host.root.blockViewMap.get(selection.path);
+    const view = this.host.root.viewStore.getViewByPath(selection.path)
+      ?.view as BlockElement;
     if (!view) return;
 
     if (view.model.text) {
@@ -183,7 +185,7 @@ export class BlockNavigation {
 
     const path = _focusBlock.path;
     requestAnimationFrame(() => {
-      const view = this.host.root.blockViewMap.get(path);
+      const view = this.host.root.viewStore.getViewByPath(path)?.view;
       view?.scrollIntoView({ block: 'nearest' });
     });
   }
@@ -212,7 +214,7 @@ export class BlockNavigation {
       }),
     ]);
     requestAnimationFrame(() => {
-      const view = this.host.root.blockViewMap.get(path);
+      const view = this.host.root.viewStore.getViewByPath(path)?.view;
       view?.scrollIntoView({ block: 'nearest' });
     });
   }
