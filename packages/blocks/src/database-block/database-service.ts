@@ -1,33 +1,23 @@
+import { BlockService } from '@blocksuite/block-std';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
   type BaseBlockModel,
   type Page,
-  Slot,
 } from '@blocksuite/store';
 
 import { getService } from '../__internal__/service.js';
 import { BaseService } from '../__internal__/service/index.js';
 import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
-import type {
-  DatabaseSelection,
-  DatabaseSelectionState,
-  SerializedBlock,
-} from '../__internal__/utils/types.js';
-import { multiSelectHelper } from './common/column-manager.js';
+import type { SerializedBlock } from '../__internal__/utils/types.js';
+import { columnManager } from './common/columns/manager.js';
+import { multiSelectColumnTypeName } from './common/columns/multi-select/define.js';
+import { DatabaseSelection } from './common/selection.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import type { Cell, Column } from './table/types.js';
+import type { Column } from './table/types.js';
+import type { Cell } from './types.js';
 
-export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
-  private _databaseSelection?: DatabaseSelection;
-
-  slots = {
-    databaseSelectionUpdated: new Slot<{
-      selection: DatabaseSelectionState;
-      old: DatabaseSelectionState;
-    }>(),
-  };
-
+export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> {
   initDatabaseBlock(
     page: Page,
     model: BaseBlockModel,
@@ -57,7 +47,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     // default column
     blockModel.addColumn(
       'end',
-      multiSelectHelper.create('Tag', {
+      columnManager.getColumn(multiSelectColumnTypeName).create('Tag', {
         options: [],
       })
     );
@@ -66,6 +56,7 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
 
   override block2Json(
     block: BlockModels['affine:database'],
+    selectedModels?: Map<string, number>,
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -77,18 +68,23 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       databaseProps: {
         id: block.id,
         title: block.title.toString(),
-        titleColumnName: block.titleColumnName,
-        titleColumnWidth: block.titleColumnWidth,
         rowIds,
         cells: block.cells,
         columns,
       },
-      children: block.children?.map((child, index) => {
-        if (index === block.children.length - 1) {
-          return getService(child.flavour).block2Json(child, 0, end);
-        }
-        return getService(child.flavour).block2Json(child);
-      }),
+      children: block.children
+        ?.filter(child => selectedModels?.has(child.id) ?? true)
+        .map((child, index, array) => {
+          if (index === array.length - 1) {
+            return getService(child.flavour).block2Json(
+              child,
+              selectedModels,
+              0,
+              end
+            );
+          }
+          return getService(child.flavour).block2Json(child, selectedModels);
+        }),
     };
   }
 
@@ -101,9 +97,8 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
     }
   ) {
     const { rowIds, columns, cells } = props;
-
     const columnIds = columns.map(column => column.id);
-
+    model.deleteColumn(model.id);
     const newColumnIds = columns.map(schema => {
       const { id, ...nonIdProps } = schema;
       return model.addColumn('end', nonIdProps);
@@ -124,41 +119,13 @@ export class DatabaseBlockService extends BaseService<DatabaseBlockModel> {
       });
     });
   }
+}
 
-  selectionEqual(a: DatabaseSelectionState, b: DatabaseSelectionState) {
-    if (a === undefined || b === undefined) return a === b;
-    if (a.databaseId !== b.databaseId) return false;
-    if (
-      a.rowsSelection?.start !== b.rowsSelection?.start ||
-      a.rowsSelection?.end !== b.rowsSelection?.end
-    )
-      return false;
-    if (
-      a.columnsSelection?.start !== b.columnsSelection?.start ||
-      a.columnsSelection?.end !== b.columnsSelection?.end
-    )
-      return false;
-    if (
-      a.focus.rowIndex !== b.focus.rowIndex ||
-      a.focus.columnIndex !== b.focus.columnIndex
-    )
-      return false;
-    return a.isEditing === b.isEditing;
-  }
+export class DatabaseService extends BlockService<DatabaseBlockModel> {
+  override mounted(): void {
+    super.mounted();
+    this.selectionManager.register(DatabaseSelection);
 
-  select(state: DatabaseSelectionState) {
-    const old = this._databaseSelection;
-    if (this.selectionEqual(state, old)) {
-      return;
-    }
-    this._databaseSelection = state;
-    this.slots.databaseSelectionUpdated.emit({
-      selection: state,
-      old,
-    });
-  }
-
-  getSelection() {
-    return this._databaseSelection;
+    this.handleEvent('selectionChange', () => true);
   }
 }

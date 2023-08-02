@@ -58,7 +58,7 @@ export function LineSizeButton({
 
   return html`<edgeless-tool-icon-button
     class=${className ?? ''}
-    .active=${active}
+    .active=${active ?? true}
     .activeMode=${'background'}
     .tooltip=${tooltip}
     @click=${onClick}

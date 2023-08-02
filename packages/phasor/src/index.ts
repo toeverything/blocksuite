@@ -1,12 +1,14 @@
 /// <reference types="@blocksuite/global" />
 export {
   type IBound,
+  type IModelCoord,
+  ShapeStyle,
   StrokeStyle,
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,
 } from './consts.js';
-export { GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
+export { DEFAULT_ROUGHNESS, GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export type { Controller } from './elements/connector/types.js';
 export { type Connection, ConnectorMode } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';
@@ -38,6 +40,7 @@ export {
   polygonNearestPoint,
   polygonPointDistance,
   polyLineNearestPoint,
+  rotatePoints,
   sign,
   toRadian,
 } from './utils/math-utils.js';

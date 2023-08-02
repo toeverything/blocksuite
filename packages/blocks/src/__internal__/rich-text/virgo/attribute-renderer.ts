@@ -1,11 +1,9 @@
 import { html } from 'lit';
-import { repeat } from 'lit/directives/repeat.js';
 
-import { REFERENCE_NODE } from '../reference-node.js';
 import type { AffineTextSchema } from './types.js';
 
 export const attributeRenderer: AffineTextSchema['textRenderer'] =
-  () => delta => {
+  () => (delta, selected) => {
     const defaultTemplate = html`<affine-text .delta=${delta}></affine-text>`;
     if (!delta.attributes) {
       return defaultTemplate;
@@ -22,18 +20,10 @@ export const attributeRenderer: AffineTextSchema['textRenderer'] =
       return html`<affine-link .delta=${delta}></affine-link>`;
     }
     if (attributes.reference) {
-      // https://github.com/toeverything/blocksuite/issues/2136
-      return html`${repeat(
-        Array.from(delta.insert).map((_, index) => ({
-          delta: {
-            insert: REFERENCE_NODE,
-            attributes,
-          },
-          index,
-        })),
-        item => item.index,
-        item => html`<affine-reference .delta=${item.delta}></affine-reference>`
-      )}`;
+      return html`<affine-reference
+        .delta=${delta}
+        .selected=${selected}
+      ></affine-reference>`;
     }
 
     return defaultTemplate;

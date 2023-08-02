@@ -27,7 +27,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     }
     .affine-embed-wrapper {
       text-align: center;
-      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+      margin-bottom: 18px;
     }
     .affine-embed-wrapper-caption {
       width: 100%;
@@ -57,7 +57,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
+      margin-top: 18px;
     }
 
     .affine-image-wrapper img {
@@ -69,6 +69,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     .resizable-img {
       position: relative;
       border: 1px solid var(--affine-white-90);
+      border-radius: 8px;
+      overflow: hidden;
     }
 
     .resizable-img img {
@@ -170,10 +172,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       ) {
         document.activeElement.blur();
       }
-    });
-
-    this._input.addEventListener('pointerup', (e: Event) => {
-      e.stopPropagation();
     });
   }
 
@@ -412,14 +410,18 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     }[this._imageState];
 
     return html`
-      <div>
+      <div style="position: relative;">
         <div class="affine-image-wrapper">
           <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
             ${img} ${this._imageOptionsTemplate()}
             ${this._imageResizeBoardTemplate()}
           </div>
         </div>
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : null}
       </div>
+
       <div class="affine-embed-block-container">
         <div class="affine-embed-wrapper">
           <input
@@ -430,6 +432,11 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
             @input=${this._onInputChange}
             @blur=${this._onInputBlur}
             @click=${stopPropagation}
+            @keyup=${stopPropagation}
+            @pointerup=${stopPropagation}
+            @paste=${stopPropagation}
+            @cut=${stopPropagation}
+            @copy=${stopPropagation}
           />
         </div>
       </div>

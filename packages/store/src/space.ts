@@ -1,11 +1,11 @@
 import { Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { AwarenessStore, UserRange } from './awareness.js';
+import type { AwarenessStore } from './awareness.js';
 import type { BlockSuiteDoc } from './yjs/index.js';
 
 export interface StackItem {
-  meta: Map<'cursor-location', UserRange | undefined>;
+  meta: Map<'cursor-location' | 'selection-state', unknown>;
   type: 'undo' | 'redo';
 }
 

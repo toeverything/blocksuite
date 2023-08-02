@@ -12,6 +12,9 @@ import { CloseIcon } from '../images/icons.js';
 
 export const bookmarkModalStyles = html`
   <style>
+    .bookmark-modal {
+      font-family: var(--affine-font-family);
+    }
     .bookmark-modal-container {
       position: fixed;
       width: 100vw;
@@ -56,6 +59,7 @@ export const bookmarkModalStyles = html`
       font-size: var(--affine-font-base);
       margin-top: 20px;
       caret-color: var(--affine-primary-color);
+      margin-bottom: 15px;
     }
     .bookmark-input-wrapper {
       margin-top: 20px;

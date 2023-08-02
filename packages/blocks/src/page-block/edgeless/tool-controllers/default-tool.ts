@@ -322,7 +322,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return;
     } else {
       if (selected instanceof TextElement) {
-        mountTextEditor(selected, this._edgeless);
+        const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
+          e.x,
+          e.y
+        );
+        mountTextEditor(selected, this._edgeless, { x: modelX, y: modelY });
         return;
       }
       if (selected instanceof ShapeElement) {
@@ -341,12 +345,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return;
     }
 
-    showFormatQuickBarByClicks('double', e, this._page, this._edgeless);
+    showFormatQuickBarByClicks('double', e, this._page);
   }
 
   onContainerTripleClick(e: PointerEventState) {
     if (this._isDoubleClickedOnMask) return;
-    showFormatQuickBarByClicks('triple', e, this._page, this._edgeless);
+    showFormatQuickBarByClicks('triple', e, this._page);
   }
 
   private _determineDragType(e: PointerEventState): DefaultModeDragType {

@@ -1,16 +1,16 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { PropertyValues } from 'lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { DatabaseCellElement } from '../register.js';
-import type { ColumnManager } from '../table-view-manager.js';
-
-/** affine-database-cell-container padding */
-const CELL_PADDING = 8;
+import type { UniLit } from '../../../components/uni-component/uni-component.js';
+import type { DataViewCellLifeCycle } from '../../common/columns/manager.js';
+import type { DataViewTableColumnManager } from '../table-view-manager.js';
 
 @customElement('affine-database-cell-container')
 export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
@@ -22,11 +22,14 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       height: 100%;
       border: none;
       outline: none;
-      border-right: 1px solid var(--affine-border-color) !important;
     }
 
     affine-database-cell-container * {
       box-sizing: border-box;
+    }
+
+    affine-database-cell-container uni-lit > *:first-child {
+      padding: 0 8px;
     }
 
     affine-database-multi-select-cell,
@@ -50,7 +53,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   public readonly columnIndex!: number;
 
   @property({ attribute: false })
-  column!: ColumnManager;
+  column!: DataViewTableColumnManager;
   private _selectCurrentCell = (editing: boolean) => {
     const selection = this.closest('affine-database-table')?.selection;
     if (selection) {
@@ -74,33 +77,44 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return table;
   }
 
-  private _cell = createRef<DatabaseCellElement<unknown>>();
+  private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
 
-  public get cell(): DatabaseCellElement<unknown> | undefined {
-    return this._cell.value;
+  public get cell(): DataViewCellLifeCycle | undefined {
+    return this._cell.value?.expose;
+  }
+
+  protected override firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    this._disposables.addFromEvent(this, 'click', e => {
+      this._selectCurrentCell(true);
+    });
   }
 
   /* eslint-disable lit/binding-positions, lit/no-invalid-html */
   override render() {
-    const renderer = this.column.renderer;
-    const tag =
-      !this.readonly &&
-      this.isEditing &&
-      renderer.components.CellEditing !== null
-        ? renderer.components.CellEditing.tag
-        : renderer.components.Cell.tag;
+    const { edit, view } = this.column.renderer;
+
+    const uni = !this.readonly && this.isEditing && edit != null ? edit : view;
     const style = styleMap({
-      padding: `0 ${CELL_PADDING}px`,
+      display: 'contents',
     });
-    return html`
-      <${tag}
+    const props = {
+      column: this.column,
+      rowId: this.rowId,
+      isEditing: this.isEditing,
+      selectCurrentCell: this._selectCurrentCell,
+    };
+    const isEditView = view === uni;
+
+    return html`${keyed(
+      `${isEditView} ${this.column.type}`,
+      html`<uni-lit
         ${ref(this._cell)}
         style=${style}
-        .column='${this.column}'
-        .rowId='${this.rowId}'
-        .isEditing='${this.isEditing}'
-        .selectCurrentCell='${this._selectCurrentCell}'
-      ></${tag}>`;
+        .uni="${uni}"
+        .props="${props}"
+      ></uni-lit>`
+    )}`;
   }
 }
 

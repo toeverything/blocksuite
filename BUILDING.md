@@ -19,7 +19,7 @@ pnpm install
 pnpm dev
 ```
 
-The playground page should work at [http://localhost:5173/?init](http://localhost:5173/?init)
+The playground page should work at [http://localhost:5173/starter/?init](http://localhost:5173/starter/?init)
 
 ## Build Packages
 

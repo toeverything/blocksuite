@@ -1,48 +1,82 @@
+import { PathMap } from '../../store/path-map.js';
 import { BaseSelection } from '../base.js';
 
+export type TextRangePoint = {
+  blockId: string;
+  path: string[];
+  index: number;
+  length: number;
+};
+
+export type TextSelectionProps = {
+  from: TextRangePoint;
+  to: TextRangePoint | null;
+};
+
 export class TextSelection extends BaseSelection {
-  static override readonly type = 'text';
+  static override type = 'text';
 
-  from: number;
+  from: TextRangePoint;
 
-  to: number;
+  to: TextRangePoint | null;
 
-  constructor(blockId: string, from: number, to: number) {
-    super(blockId);
+  constructor({ from, to }: TextSelectionProps) {
+    super({
+      blockId: from.blockId,
+      path: from.path,
+    });
     this.from = from;
     this.to = to;
   }
 
   empty(): boolean {
-    return this.from === this.to;
+    return !!this.to;
+  }
+
+  private _equalPoint(
+    a: TextRangePoint | null,
+    b: TextRangePoint | null
+  ): boolean {
+    if (a && b) {
+      return (
+        a.blockId === b.blockId && a.index === b.index && a.length === b.length
+      );
+    }
+
+    return a === b;
   }
 
   override equals(other: BaseSelection): boolean {
     if (other instanceof TextSelection) {
       return (
         other.blockId === this.blockId &&
-        other.from === this.from &&
-        other.to === this.to
+        this._equalPoint(other.from, this.from) &&
+        this._equalPoint(other.to, this.to)
       );
     }
     return false;
   }
-
   override toJSON(): Record<string, unknown> {
     return {
       type: 'text',
-      blockId: this.blockId,
       from: this.from,
       to: this.to,
     };
   }
 
   static override fromJSON(json: Record<string, unknown>): TextSelection {
-    return new TextSelection(
-      json.blockId as string,
-      json.from as number,
-      json.to as number
-    );
+    return new TextSelection({
+      from: json.from as TextRangePoint,
+      to: json.to as TextRangePoint | null,
+    });
+  }
+
+  isCollapsed(): boolean {
+    return this.to === null;
+  }
+
+  isInSameBlock(): boolean {
+    return this.to === null || PathMap.equals(this.from.path, this.to.path);
   }
 }
 

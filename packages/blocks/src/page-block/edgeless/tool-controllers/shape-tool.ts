@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { Bound, StrokeStyle } from '@blocksuite/phasor';
+import { Bound, ShapeStyle, StrokeStyle } from '@blocksuite/phasor';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { hasClassNameInList, noop } from '../../../__internal__/index.js';
@@ -57,6 +57,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       radius: shape === 'roundedRect' ? 0.1 : 0,
       strokeWidth: 4,
       strokeStyle: StrokeStyle.Solid,
+      shapeStyle: ShapeStyle.Scribbled,
     });
 
     return id;

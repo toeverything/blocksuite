@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
@@ -392,7 +392,6 @@ export async function initEmptyDatabaseWithParagraphState(
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumnName: 'Title',
       },
       noteId
     );
@@ -434,9 +433,11 @@ export async function initDatabaseDynamicRowWithData(
   if (addRow) {
     await initDatabaseRow(page);
   }
+  await focusDatabaseTitle(page);
   const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
+  await waitNextFrame(page);
   await type(page, data);
   await pressEnter(page);
 }
@@ -456,18 +457,21 @@ export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
   );
 }
 
-export async function initEmptyCodeBlockState(page: Page) {
-  const ids = await page.evaluate(async () => {
+export async function initEmptyCodeBlockState(
+  page: Page,
+  codeBlockProps = {} as { language?: string }
+) {
+  const ids = await page.evaluate(async codeBlockProps => {
     const { page } = window;
     await page.waitForLoaded();
 
     page.captureSync();
     const pageId = page.addBlock('affine:page');
     const noteId = page.addBlock('affine:note', {}, pageId);
-    const codeBlockId = page.addBlock('affine:code', {}, noteId);
+    const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
     page.captureSync();
     return { pageId, noteId, codeBlockId };
-  });
+  }, codeBlockProps);
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
 }
@@ -575,8 +579,10 @@ export async function getSelectedTextByVirgo(page: Page) {
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { index, length } = component!.vEditor!.getVRange()!;
+    const vRange = component?.vEditor?.getVRange();
+    if (!vRange) return '';
+
+    const { index, length } = vRange;
     return component?.vEditor?.yText.toString().slice(index, length) || '';
   });
 }
@@ -595,8 +601,9 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { index, length } = component!.vEditor!.getVRange()!;
+      const vRange = component.vEditor?.getVRange();
+      if (!vRange) return;
+      const { index, length } = vRange;
       content +=
         component?.vEditor?.yText.toString().slice(index, index + length) || '';
     });
@@ -886,7 +893,15 @@ export async function shamefullyBlurActiveElement(page: Page) {
  *
  */
 export async function waitForVirgoStateUpdated(page: Page) {
-  await page.waitForTimeout(50);
+  return await page.evaluate(async () => {
+    const selection = window.getSelection() as Selection;
+
+    if (selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const component = range.startContainer.parentElement?.closest('rich-text');
+    await component?.vEditor?.waitForUpdate();
+  });
 }
 
 export async function initImageState(page: Page) {
@@ -966,7 +981,7 @@ export async function transformHtml(page: Page, data: string) {
   const promiseResult = await page.evaluate(
     ({ data }) => {
       const contentParser = new window.ContentParser(window.page);
-      return contentParser.htmlText2Block(data);
+      return contentParser.htmlText2Block(data, 'NotionHtml');
     },
     { data }
   );

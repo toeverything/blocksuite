@@ -67,14 +67,18 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return this.computedValue(this.fillColor);
   }
 
+  get shapeStyle() {
+    const shapeStyle = this.yMap.get('shapeStyle') as IShape['shapeStyle'];
+    return shapeStyle;
+  }
+
   get text() {
     const text = this.yMap.get('text') as IShape['text'];
     return text;
   }
 
   get color() {
-    const color =
-      (this.yMap.get('color') as IShape['color']) ?? this.strokeColor;
+    const color = (this.yMap.get('color') as IShape['color']) ?? '#000000';
     return color;
   }
 
@@ -110,6 +114,16 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       (this.yMap.get('textVerticalAlign') as IShape['textVerticalAlign']) ??
       'center';
     return textVerticalAlign;
+  }
+
+  get bold() {
+    const isTextBold = (this.yMap.get('bold') as IShape['bold']) ?? false;
+    return isTextBold;
+  }
+
+  get italic() {
+    const isTextItalic = (this.yMap.get('italic') as IShape['italic']) ?? false;
+    return isTextItalic;
   }
 
   override hitTest(x: number, y: number, options: HitTestOptions) {
@@ -164,15 +178,18 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
       fontFamily,
       textVerticalAlign,
       textAlign,
-      textHorizontalAlign,
+      bold,
+      italic,
     } = this;
     if (!text) return;
 
-    const lineHeight = getLineHeight(fontFamily, fontSize.toString());
+    const lineHeight = getLineHeight(fontFamily, fontSize);
     const font = getFontString({
       fontSize: fontSize,
       lineHeight: `${lineHeight}px`,
       fontFamily: fontFamily,
+      bold,
+      italic,
     });
 
     const yText = text;
@@ -185,9 +202,9 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     const lines = deltaInsertsToChunks(deltas);
 
     const horizontalOffset =
-      textHorizontalAlign === 'center'
+      textAlign === 'center'
         ? w / 2
-        : textHorizontalAlign === 'right'
+        : textAlign === 'right'
         ? w - SHAPE_TEXT_PADDING
         : SHAPE_TEXT_PADDING;
     const verticalOffset =
@@ -219,7 +236,9 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
         ctx.fillText(
           str,
           horizontalOffset - 2,
-          (lineIndex + 1) * lineHeight + verticalOffset
+          // 1.5 is a "magic number" used to align the text rendered on the canvas with the text in the DOM.
+          // This approach is employed until a better or proper handling method is discovered.
+          (lineIndex + 1) * lineHeight + verticalOffset - 1.5
         );
 
         if (shouldTemporarilyAttach) {

@@ -53,8 +53,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       padding: 32px 0px 12px 0px;
       background: var(--affine-background-code-block);
       border-radius: 10px;
-      margin-top: calc(var(--affine-paragraph-space) + 8px);
-      margin-bottom: calc(var(--affine-paragraph-space) + 8px);
+      margin-top: 24px;
+      margin-bottom: 24px;
     }
 
     /* hover area */
@@ -385,7 +385,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       </icon-button>
       ${this._showLangList
         ? html`<lang-list
-            .currentLanguageId=${this._curLanguage.id}
+            .currentLanguageId=${this._curLanguage.id as Lang}
             @selected-language-changed=${(e: CustomEvent) => {
               getService('affine:code').setLang(this.model, e.detail.language);
               this._showLangList = false;
@@ -433,6 +433,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           </rich-text>
         </div>
         ${this.content}
+        ${this.selected?.is('block')
+          ? html`<affine-block-selection></affine-block-selection>`
+          : null}
       </div>
       ${this._codeOptionTemplate()}`;
   }

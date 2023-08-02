@@ -20,7 +20,6 @@ import {
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
-import { updateLocalSelectionRange } from '../../default/selection-manager/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
@@ -150,9 +149,9 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
   constructor(
     container: EdgelessPageBlockComponent,
-    dispacher: UIEventDispatcher
+    dispatcher: UIEventDispatcher
   ) {
-    super(container, dispacher);
+    super(container, dispatcher);
 
     this._controllers = {
       default: new DefaultToolController(this.container),
@@ -265,9 +264,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       const event = ctx.get('pointerState');
       this._onContainerContextMenu(event);
     });
-    this._add('selectionChange', () => {
-      this._onSelectionChangeWithoutDebounce();
-    });
     this._add('wheel', ctx => {
       const state = ctx.get('defaultState');
       const e = state.event;
@@ -282,7 +278,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
         const dx = e.deltaX / viewport.zoom;
         const dy = e.deltaY / viewport.zoom;
         viewport.applyDeltaCenter(dx, dy);
-        container.slots.viewportUpdated.emit();
       }
       // zoom
       else {
@@ -295,7 +290,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
         const zoom = normalizeWheelDeltaY(e.deltaY, viewport.zoom);
         viewport.setZoom(zoom, new Point(baseX, baseY));
-        container.slots.viewportUpdated.emit();
       }
     });
   }
@@ -410,10 +404,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       }
       this._rightClickTimer = null;
     }
-  };
-
-  private _onSelectionChangeWithoutDebounce = () => {
-    updateLocalSelectionRange(this.page);
   };
 
   refreshRemoteSelection() {

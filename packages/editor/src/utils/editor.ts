@@ -60,21 +60,25 @@ export const createBlockHub: (
       } else {
         models.push(data);
       }
-      const last = page.root?.lastItem();
+
+      const defaultNoteBlock =
+        page.root?.children.findLast(
+          block => block.flavour === 'affine:note'
+        ) ?? page.addBlock('affine:note', {}, page.root?.id);
 
       if (range) {
         const lastModel = range.models[range.models.length - 1];
         const arr = page.addSiblingBlocks(lastModel, models, 'after');
         const lastId = arr[arr.length - 1];
         asyncFocusRichText(page, lastId);
-      } else if (last) {
+      } else {
         // add to end
-        let lastId = page.root?.lastItem()?.id;
+        let lastId;
         models.forEach(model => {
           lastId = page.addBlock(
             model.flavour ?? 'affine:paragraph',
             model,
-            page.root?.lastItem()
+            defaultNoteBlock
           );
         });
         lastId && asyncFocusRichText(page, lastId);
@@ -182,7 +186,8 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         const defaultPageBlock = editor.querySelector('affine-default-page');
         assertExists(defaultPageBlock);
-        defaultPageBlock.selection?.clear();
+        // FIXME:
+        // defaultPageBlock.selection?.clear();
       }
     },
     getAllowedBlocks: () => {

@@ -30,6 +30,7 @@ export { TextElement } from './text/text-element.js';
 
 export { normalizeShapeBound } from './shape/utils.js';
 export { SHAPE_TEXT_PADDING } from './shape/constants.js';
+export { normalizeTextBound } from './text/utils.js';
 export type { HitTestOptions } from './surface-element.js';
 
 export type PhasorElement =
@@ -102,8 +103,9 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
         | 'absolutePath'
         | 'controllers'
         | 'rotate'
+        | 'batch'
       >
-    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>;
+    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;
 
 export type PhasorElementWithText = ShapeElement | TextElement;
 

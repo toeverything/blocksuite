@@ -1,21 +1,21 @@
-import { BaseBlockModel, defineBlockSchema, Text } from '@blocksuite/store';
+import type { Text } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import type { SelectTag } from '../components/tags/multi-tag-select.js';
 import type {
   DatabaseViewData,
   DatabaseViewDataMap,
 } from './common/view-manager.js';
 import { ViewOperationMap } from './common/view-manager.js';
 import { DEFAULT_TITLE } from './table/consts.js';
-import type { Cell, Column } from './table/types.js';
+import type { Column } from './table/types.js';
+import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
+import { insertPositionToIndex } from './utils/insert.js';
 
-export type Props = {
+type Props = {
   views: DatabaseViewData[];
   title: Text;
   cells: SerializedCells;
   columns: Array<Column>;
-  titleColumnName: string;
-  titleColumnWidth: number;
 };
 
 type SerializedCells = {
@@ -24,27 +24,6 @@ type SerializedCells = {
     // column
     [key: string]: Cell;
   };
-};
-export type ColumnUpdater<T extends Column = Column> = (data: T) => Partial<T>;
-export type ColumnDataUpdater<
-  Data extends Record<string, unknown> = Record<string, unknown>
-> = (data: Data) => Partial<Data>;
-export type InsertPosition = 'end' | 'start' | { id: string; before: boolean };
-export const insertPositionToIndex = <T extends { id: string }>(
-  position: InsertPosition,
-  arr: T[]
-): number => {
-  if (typeof position === 'object') {
-    const index = arr.findIndex(v => v.id === position.id);
-    return index + (position.before ? 0 : 1);
-  }
-  if (position == null || position === 'start') {
-    return 0;
-  }
-  if (position === 'end') {
-    return arr.length;
-  }
-  return arr.findIndex(v => v.id === position) + 1;
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
@@ -60,7 +39,14 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         this.propsUpdated.emit();
       }
     });
-
+    if (!this.columns.find(v => v.id === this.id)) {
+      this.columns.unshift({
+        type: 'title',
+        id: this.id,
+        name: 'Title',
+        data: {},
+      });
+    }
     if (!this.views.length) {
       this.addView('table');
     }
@@ -87,15 +73,19 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  updateView(id: string, update: (data: DatabaseViewData) => void) {
+  updateView(
+    id: string,
+    update: (data: DatabaseViewData) => Partial<DatabaseViewData>
+  ) {
     this.page.transact(() => {
-      this.views.map(v => {
+      this.views = this.views.map(v => {
         if (v.id !== id) {
           return v;
         }
-        return update(v);
+        return { ...v, ...update(v) } as DatabaseViewData;
       });
     });
+    this.applyViewsUpdate();
   }
 
   applyViewsUpdate() {
@@ -110,29 +100,24 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  applyCellsUpdate() {
-    this.page.updateBlock(this, {
-      cells: this.cells,
-    });
-  }
-
   findColumnIndex(id: Column['id']) {
     return this.columns.findIndex(v => v.id === id);
   }
 
-  getColumn(id: Column['id']): Column | null {
-    const index = this.findColumnIndex(id);
-    if (index < 0) {
-      return null;
-    }
-    return this.columns[index];
+  getColumn(id: Column['id']): Column | undefined {
+    return this.columns.find(v => v.id === id);
   }
 
   addColumn(
     position: InsertPosition,
-    column: Omit<Column, 'id'> & { id?: string }
+    column: Omit<Column, 'id'> & {
+      id?: string;
+    }
   ): string {
     const id = column.id ?? this.page.generateId();
+    if (this.columns.find(v => v.id === id)) {
+      return id;
+    }
     this.page.transact(() => {
       const col = { ...column, id };
       this.columns.splice(
@@ -140,14 +125,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         0,
         col
       );
-      this.views.forEach(view => {
-        ViewOperationMap[view.mode].addColumn(
-          this,
-          view as never,
-          col,
-          position
-        );
-      });
     });
     return id;
   }
@@ -164,26 +141,12 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return id;
   }
 
-  updateColumnData(id: string, update: ColumnDataUpdater) {
-    this.page.transact(() => {
-      const i = this.findColumnIndex(id);
-      const data = this.columns[i].data;
-      this.columns[i].data = {
-        ...data,
-        ...update(data),
-      };
-    });
-  }
-
   deleteColumn(columnId: Column['id']) {
     const index = this.findColumnIndex(columnId);
     if (index < 0) return;
 
     this.page.transact(() => {
       this.columns.splice(index, 1);
-      this.views.forEach(view => {
-        ViewOperationMap[view.mode].deleteColumn(this, view as never, columnId);
-      });
     });
   }
 
@@ -228,73 +191,10 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
   }
 
-  deleteCellsByColumn(columnId: Column['id']) {
+  updateCells(columnId: string, cells: Record<string, unknown>) {
     this.page.transact(() => {
-      Object.keys(this.cells).forEach(rowId => {
-        delete this.cells[rowId][columnId];
-      });
-    });
-  }
-
-  convertCellsByColumn(columnId: Column['id'], newType: string) {
-    this.page.transact(() => {
-      Object.keys(this.cells).forEach(rowId => {
-        const cell = this.cells[rowId][columnId];
-        if (!cell) return;
-
-        const value = cell.value;
-        if (!value) return;
-
-        if (newType === 'select') {
-          this.cells[rowId][columnId] = {
-            columnId,
-            value: [(value as string[])[0]],
-          };
-          return;
-        }
-
-        if (newType === 'rich-text') {
-          const text = new Text((value as number) + '');
-          this.cells[rowId][columnId] = {
-            columnId,
-            value: text.yText,
-          };
-          return;
-        }
-      });
-    });
-  }
-
-  updateCellByColumn(columnId: string, update: (value: unknown) => unknown) {
-    this.page.transact(() => {
-      Object.keys(this.cells).forEach(rowId => {
-        const cell = this.cells[rowId][columnId];
-        if (!cell) {
-          return;
-        }
-        this.cells[rowId][columnId] = {
-          columnId,
-          value: update(cell.value),
-        };
-      });
-    });
-  }
-
-  deleteSelectedCellTag(columnId: Column['id'], target: SelectTag) {
-    this.page.transact(() => {
-      Object.keys(this.cells).forEach(rowId => {
-        const cell = this.cells[rowId][columnId];
-        if (!cell) return;
-
-        const selected = cell.value as SelectTag[];
-        const newSelected = [...selected].filter(
-          item => item.value !== target.value
-        );
-
-        this.cells[rowId][columnId] = {
-          columnId,
-          value: newSelected,
-        };
+      Object.entries(cells).forEach(([rowId, value]) => {
+        this.cells[rowId][columnId] = { columnId, value };
       });
     });
   }
@@ -307,8 +207,6 @@ export const DatabaseBlockSchema = defineBlockSchema({
     title: internal.Text(DEFAULT_TITLE),
     cells: {},
     columns: [],
-    titleColumnName: 'Title',
-    titleColumnWidth: 432,
   }),
   metadata: {
     role: 'hub',

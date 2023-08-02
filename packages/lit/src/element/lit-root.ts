@@ -1,7 +1,12 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type { BlockSpec } from '@blocksuite/block-std';
-import { BlockStore, UIEventDispatcher } from '@blocksuite/block-std';
+import type {
+  BlockSpec,
+  SelectionManager,
+  UIEventDispatcher,
+  ViewStore,
+} from '@blocksuite/block-std';
+import { BlockStore } from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
@@ -10,9 +15,14 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
+import type { WidgetElement } from './widget-element.js';
 
-export type LitBlockSpec = BlockSpec<StaticValue>;
+export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
+  StaticValue,
+  WidgetNames
+>;
 
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
@@ -27,30 +37,64 @@ export class BlockSuiteRoot extends ShadowlessElement {
 
   modelSubscribed = new Set<string>();
 
-  uiEventDispatcher = new UIEventDispatcher(this);
+  blockStore!: BlockStore<StaticValue, BlockElement, WidgetElement>;
 
-  blockStore!: BlockStore<StaticValue>;
+  get uiEventDispatcher(): UIEventDispatcher {
+    return this.blockStore.uiEventDispatcher;
+  }
+
+  get selectionManager(): SelectionManager {
+    return this.blockStore.selectionManager;
+  }
+
+  get viewStore(): ViewStore<BlockElement, WidgetElement> {
+    return this.blockStore.viewStore;
+  }
+
+  get blockViewMap() {
+    return this.viewStore.blockViewMap;
+  }
+
+  get widgetViewMap() {
+    return this.viewStore.widgetViewMap;
+  }
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
-      this.blockStore.applySpecs(this.blocks);
+      this.blockStore.specStore.applySpecs(this.blocks);
+    }
+    if (changedProperties.has('page')) {
+      this.blockStore.page = this.page;
     }
     super.willUpdate(changedProperties);
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.blockStore = new BlockStore<StaticValue>({
-      uiEventDispatcher: this.uiEventDispatcher,
+
+    this.blockStore = new BlockStore<StaticValue, BlockElement, WidgetElement>({
+      root: this,
+      workspace: this.page.workspace,
+      page: this.page,
+      config: {
+        getBlockViewByNode: node => {
+          const element =
+            node && node instanceof HTMLElement ? node : node.parentElement;
+          if (!element) return null;
+
+          return element.closest(`[${this.blockIdAttr}]`);
+        },
+      },
     });
-    this.uiEventDispatcher.mount();
-    this.blockStore.applySpecs(this.blocks);
+
+    this.blockStore.mount();
+    this.blockStore.specStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.blockStore.dispose();
-    this.uiEventDispatcher.unmount();
+
+    this.blockStore.unmount();
   }
 
   override render() {
@@ -59,10 +103,10 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return null;
     }
 
-    return this.renderModel(root);
+    return this.renderModel(root, []);
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BaseBlockModel, path: string[]): TemplateResult => {
     const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
@@ -70,18 +114,25 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
-    const view = this.blockStore.getView(flavour);
+    const view = this.blockStore.specStore.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);
       return html`${nothing}`;
     }
 
+    const currentPath = path.concat(model.id);
+
     const tag = view.component;
-    const widgets = view.widgets
-      ? html`${repeat(view.widgets, widget => {
-          return html`<${widget} .root=${this} .model=${model}></${widget}>`;
-        })}`
-      : html`${nothing}`;
+    const widgets: Record<string, TemplateResult> = view.widgets
+      ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
+          const path = currentPath.concat(key);
+
+          return {
+            ...mapping,
+            [key]: html`<${tag} .path=${path} .root=${this} .page=${this.page}></${tag}>`,
+          };
+        }, {})
+      : {};
 
     this._onLoadModel(model);
 
@@ -91,10 +142,11 @@ export class BlockSuiteRoot extends ShadowlessElement {
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
+      .path=${currentPath}
       .content=${html`${repeat(
         children,
         child => child.id,
-        child => this.renderModel(child)
+        child => this.renderModel(child, currentPath)
       )}`}
     ></${tag}>`;
   };

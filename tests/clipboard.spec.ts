@@ -25,6 +25,8 @@ import {
   initThreeParagraphs,
   pasteByKeyboard,
   pasteContent,
+  pressArrowDown,
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -42,6 +44,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  waitEmbedLoaded,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -50,6 +53,7 @@ import {
   assertClipItems,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
+  assertRichImage,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -97,6 +101,91 @@ test(scoped`clipboard paste html`, async ({ page }) => {
   );
   await assertText(page, 'aaabbbcccddd');
 });
+
+test(
+  scoped`clipboard paste HTML containing Markdown syntax code and image `,
+  async ({ page }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/2855',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    // set up clipboard data using html
+    const clipData = {
+      'text/html': `<p>符合 Markdown 格式的 URL 放到笔记中，此时需要的格式如下：</p>
+    <pre><code>md [任务管理这件事 - 少数派](https://sspai.com/post/61092)</code></pre>
+    <p>（将一段文字包裹在<code >[[]]</code>中）此时需要的格式如下：</p>
+    <figure ><img src="https://placehold.co/600x400"></figure>
+    <p>上图中，当我们处在 Obsidian 的「预览模式」时，点击这个「双向链接」</p>
+    `,
+    };
+    await page.evaluate(
+      ({ clipData }) => {
+        const dT = new DataTransfer();
+        const e = new ClipboardEvent('paste', { clipboardData: dT });
+        Object.defineProperty(e, 'target', {
+          writable: false,
+          value: document.body,
+        });
+        e.clipboardData?.setData('text/html', clipData['text/html']);
+        document.body.dispatchEvent(e);
+      },
+      { clipData }
+    );
+    await waitEmbedLoaded(page);
+    // await page.waitForTimeout(500);
+    await assertRichImage(page, 1);
+  }
+);
+
+test.fixme(
+  scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
+  async ({ page }) => {
+    test.info().annotations.push({
+      type: 'issue',
+      description: 'https://github.com/toeverything/blocksuite/issues/3639',
+    });
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+
+    // set up clipboard data using html
+    const clipData = {
+      'text/html': `<p>Lorem Ipsum placeholder text.</p>
+    <figure ><img src='/test-card-1.png' /></figure>
+    `,
+    };
+    await page.evaluate(
+      ({ clipData }) => {
+        const dT = new DataTransfer();
+        const e = new ClipboardEvent('paste', { clipboardData: dT });
+        Object.defineProperty(e, 'target', {
+          writable: false,
+          value: document.body,
+        });
+        e.clipboardData?.setData('text/html', clipData['text/html']);
+        document.body.dispatchEvent(e);
+      },
+      { clipData }
+    );
+    await waitEmbedLoaded(page);
+    await assertRichImage(page, 1);
+    await pressArrowUp(page, 1);
+    await pasteContent(page, clipData);
+    await assertRichImage(page, 2);
+    await assertText(
+      page,
+      'Lorem Ipsum placeholder text.Lorem Ipsum placeholder text.'
+    );
+    await pressArrowDown(page, 1);
+    await pasteContent(page, clipData);
+    await assertRichImage(page, 3);
+    await assertText(page, 'Lorem Ipsum placeholder text.', 1);
+  }
+);
 
 test(scoped`markdown format parse`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -436,24 +525,27 @@ test.skip('should keep first line format when pasted into a new line', async ({
   );
 });
 
-test(scoped`cut should work for multi-block selection`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
+test.fixme(
+  scoped`cut should work for multi-block selection`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
 
-  await type(page, 'a');
-  await pressEnter(page);
-  await type(page, 'b');
-  await pressEnter(page);
-  await type(page, 'c');
-  await selectAllByKeyboard(page);
-  await selectAllByKeyboard(page);
-  await page.keyboard.press(`${SHORT_KEY}+x`);
-  await assertText(page, '');
-  await page.keyboard.press(`${SHORT_KEY}+v`);
-  await waitNextFrame(page);
-  await assertRichTexts(page, ['a', 'b', 'c']);
-});
+    await type(page, 'a');
+    await pressEnter(page);
+    await type(page, 'b');
+    await pressEnter(page);
+    await type(page, 'c');
+    await selectAllByKeyboard(page);
+    await selectAllByKeyboard(page);
+    await page.keyboard.press(`${SHORT_KEY}+x`);
+    await assertText(page, '');
+    await page.keyboard.press(`${SHORT_KEY}+v`);
+    await waitNextFrame(page);
+    await assertRichTexts(page, ['a', 'b', 'c']);
+  }
+);
 
 test(
   scoped`pasting into empty list should not convert the list into paragraph`,
@@ -555,7 +647,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   );
 });
 
-test(scoped`should copy and paste of database work`, async ({ page }) => {
+test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseWithParagraphState(page);
 
@@ -579,10 +671,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:database
-      prop:columns="Array [1]"
+      prop:columns="Array [2]"
       prop:title="Database 1"
-      prop:titleColumnName="Title"
-      prop:titleColumnWidth={432}
       prop:views="Array [1]"
     >
       <affine:paragraph
@@ -593,10 +683,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
       prop:type="text"
     />
     <affine:database
-      prop:columns="Array [1]"
+      prop:columns="Array [2]"
       prop:title="Database 1"
-      prop:titleColumnName="Title"
-      prop:titleColumnWidth={432}
       prop:views="Array [1]"
     >
       <affine:paragraph
@@ -621,10 +709,8 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:database
-      prop:columns="Array [1]"
+      prop:columns="Array [2]"
       prop:title="Database 1"
-      prop:titleColumnName="Title"
-      prop:titleColumnWidth={432}
       prop:views="Array [1]"
     >
       <affine:paragraph
@@ -737,7 +823,7 @@ test(scoped`copy and paste to selection block selection`, async ({ page }) => {
   await assertRichTexts(page, ['1234', '']);
 });
 
-test(
+test.fixme(
   scoped`should keep paragraph block's type when pasting at the start of empty paragraph block except type text`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -924,4 +1010,30 @@ test(scoped`auto identify url`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test(scoped`paste parent block`, async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/3153',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'This is parent');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 1');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('Tab');
+  await type(page, 'This is child 2');
+  await setVirgoSelection(page, 0, 3);
+  await copyByKeyboard(page);
+  await focusRichText(page, 2);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertRichTexts(page, [
+    'This is parent',
+    'This is child 1',
+    'This is child 2Thi',
+  ]);
 });

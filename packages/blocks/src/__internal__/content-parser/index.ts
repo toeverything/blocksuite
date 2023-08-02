@@ -22,14 +22,22 @@ import type {
   TableParseHandler,
   TableTitleColumnHandler,
   TextStyleHandler,
-} from './parse-html.js';
-import { HtmlParser } from './parse-html.js';
+} from './parse-base.js';
+import { MarkdownParser } from './parse-markdown.js';
+import { NotionHtmlParser } from './parse-notion-html.js';
 import type { SelectedBlock } from './types.js';
 
-type ParseHtml2BlockHandler = (
+type ParseContext = 'Markdown' | 'NotionHtml';
+
+export type ParseHtml2BlockHandler = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...args: any[]
 ) => Promise<SerializedBlock[] | null>;
+
+export type ContextedContentParser = {
+  context: string;
+  getParserHtmlText2Block: (name: string) => ParseHtml2BlockHandler;
+};
 
 export class ContentParser {
   private _page: Page;
@@ -37,8 +45,9 @@ export class ContentParser {
     beforeHtml2Block: new Slot<Element>(),
   };
   private _parsers: Record<string, ParseHtml2BlockHandler> = {};
-  private _htmlParser: HtmlParser;
   private _imageProxyEndpoint?: string;
+  private _markdownParser: MarkdownParser;
+  private _notionHtmlParser: NotionHtmlParser;
   private urlPattern =
     /(?<=\s|^)https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)(?=\s|$)/g;
   constructor(
@@ -63,7 +72,7 @@ export class ContentParser {
       this._imageProxyEndpoint =
         'https://workers.toeverything.workers.dev/proxy/image';
     }
-    this._htmlParser = new HtmlParser(
+    this._markdownParser = new MarkdownParser(
       this,
       page,
       options.fetchFileHandler,
@@ -71,7 +80,16 @@ export class ContentParser {
       options.tableParseHandler,
       options.tableTitleColumnHandler
     );
-    this._htmlParser.registerParsers();
+    this._notionHtmlParser = new NotionHtmlParser(
+      this,
+      page,
+      options.fetchFileHandler,
+      options.textStyleHandler,
+      options.tableParseHandler,
+      options.tableTitleColumnHandler
+    );
+    this._markdownParser.registerParsers();
+    this._notionHtmlParser.registerParsers();
   }
 
   public async exportHtml() {
@@ -95,9 +113,18 @@ export class ContentParser {
   }
 
   private async _checkReady() {
-    const promise = new Promise(resolve => {
+    const pathname = location.pathname;
+    const pageMode = isPageMode(this._page);
+
+    const promise = new Promise((resolve, reject) => {
       let count = 0;
       const checkReactRender = setInterval(async () => {
+        try {
+          this._checkCanContinueToCanvas(pathname, pageMode);
+        } catch (e) {
+          clearInterval(checkReactRender);
+          reject(e);
+        }
         const root = this._page.root;
         const pageBlock = root ? getPageBlock(root) : null;
         const imageLoadingComponent = document.querySelector(
@@ -128,6 +155,9 @@ export class ContentParser {
 
     const html2canvas = (await import('html2canvas')).default;
     if (!(html2canvas instanceof Function)) return;
+
+    const pathname = location.pathname;
+    const pageMode = isPageMode(this._page);
 
     const editorContainer = getEditorContainer(this._page);
     const container = document.querySelector(
@@ -165,6 +195,15 @@ export class ContentParser {
         if (layer && layer instanceof HTMLElement) {
           layer.style.setProperty('transform', 'none');
         }
+
+        const childNodes = documentClone.querySelectorAll(
+          '.affine-edgeless-child-note'
+        );
+        childNodes.forEach(childNode => {
+          if (childNode instanceof HTMLElement) {
+            childNode.style.setProperty('box-shadow', 'none');
+          }
+        });
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
@@ -186,6 +225,7 @@ export class ContentParser {
         blockBound.w,
         blockBound.h
       );
+      this._checkCanContinueToCanvas(pathname, pageMode);
     }
 
     const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
@@ -198,14 +238,17 @@ export class ContentParser {
   }
 
   private async _docToCanvas(): Promise<HTMLCanvasElement | void> {
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    const pathname = location.pathname;
+    const pageMode = isPageMode(this._page);
+
     const editorContainer = getEditorContainer(this._page);
     const pageContainer = editorContainer.querySelector(
       '.affine-default-page-block-container'
     );
     if (!pageContainer) return;
-
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
 
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
@@ -238,7 +281,14 @@ export class ContentParser {
       pageContainer as HTMLElement,
       html2canvasOption
     );
+    this._checkCanContinueToCanvas(pathname, pageMode);
     return data;
+  }
+
+  private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
+    if (location.pathname !== pathName || isPageMode(this._page) !== pageMode) {
+      throw new Error('Unable to export content to canvas');
+    }
   }
 
   private async _toCanvas(): Promise<HTMLCanvasElement | void> {
@@ -278,25 +328,23 @@ export class ContentParser {
     if (!canvasImage) {
       return;
     }
-    const jspdf = await import('jspdf');
-    const pdf = new jspdf.jsPDF(
-      canvasImage.width < canvasImage.height ? 'p' : 'l',
-      'pt',
-      [canvasImage.width, canvasImage.height]
-    );
-    pdf.addImage(
-      canvasImage.toDataURL('PNG'),
-      'PNG',
-      0,
-      0,
-      canvasImage.width,
-      canvasImage.height,
-      '',
-      'FAST'
-    );
+
+    const PDFLib = await import('pdf-lib');
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const page = pdfDoc.addPage([canvasImage.width, canvasImage.height]);
+    const imageEmbed = await pdfDoc.embedPng(canvasImage.toDataURL('PNG'));
+    const { width, height } = imageEmbed.scale(1);
+    page.drawImage(imageEmbed, {
+      x: 0,
+      y: 0,
+      width,
+      height,
+    });
+    const pdfBase64 = await pdfDoc.saveAsBase64({ dataUri: true });
+
     FileExporter.exportFile(
       (root as PageBlockModel).title.toString() + '.pdf',
-      pdf.output('dataurlstring')
+      pdfBase64
     );
   }
 
@@ -318,12 +366,16 @@ export class ContentParser {
     ).reduce((text, block) => text + block, '');
   }
 
-  public async htmlText2Block(html: string): Promise<SerializedBlock[]> {
+  public async htmlText2Block(
+    html: string,
+    // TODO: for now, we will use notion html as default context
+    context: ParseContext = 'NotionHtml'
+  ): Promise<SerializedBlock[]> {
     const htmlEl = document.createElement('html');
     htmlEl.innerHTML = html;
     htmlEl.querySelector('head')?.remove();
     this.slots.beforeHtml2Block.emit(htmlEl);
-    return this._convertHtml2Blocks(htmlEl);
+    return this._convertHtml2Blocks(htmlEl, context);
   }
 
   async file2Blocks(clipboardData: DataTransfer): Promise<SerializedBlock[]> {
@@ -334,7 +386,10 @@ export class ContentParser {
         // XXX: should use blob storage here?
         const storage = this._page.blobs;
         assertExists(storage);
-        const id = await storage.set(file);
+        // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
+        const id = await storage.set(
+          new File([file], file.name, { type: file.type })
+        );
         return [
           {
             flavour: 'affine:image',
@@ -434,7 +489,7 @@ export class ContentParser {
     };
     marked.use({ extensions: [underline, inlineCode], walkTokens });
     const md2html = marked.parse(text);
-    return this.htmlText2Block(md2html);
+    return this.htmlText2Block(md2html, 'Markdown');
   }
 
   public async importMarkdown(text: string, insertPositionId: string) {
@@ -449,7 +504,7 @@ export class ContentParser {
   }
 
   public async importHtml(text: string, insertPositionId: string) {
-    const blocks = await this.htmlText2Block(text);
+    const blocks = await this.htmlText2Block(text, 'NotionHtml');
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
@@ -464,6 +519,17 @@ export class ContentParser {
     handler: ParseHtml2BlockHandler
   ) {
     this._parsers[name] = handler;
+  }
+
+  public withContext(context: ParseContext): ContextedContentParser {
+    return {
+      get context() {
+        return context;
+      },
+      getParserHtmlText2Block: (name: string): ParseHtml2BlockHandler => {
+        return this._parsers[context + name] || null;
+      },
+    };
   }
 
   public getParserHtmlText2Block(name: string): ParseHtml2BlockHandler {
@@ -566,13 +632,15 @@ export class ContentParser {
   }
 
   private async _convertHtml2Blocks(
-    element: Element
+    element: Element,
+    context: ParseContext
   ): Promise<SerializedBlock[]> {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
         return (
-          (await this.getParserHtmlText2Block('nodeParser')?.(childElement)) ||
-          []
+          (await this.withContext(context).getParserHtmlText2Block(
+            'NodeParser'
+          )?.(childElement)) || []
         );
       }
     );

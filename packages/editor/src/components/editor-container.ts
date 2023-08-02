@@ -1,12 +1,13 @@
 import {
   type AbstractEditor,
   activeEditorManager,
+  type AttachmentProps,
   type DefaultPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
   FileDropManager,
-  getPageBlock,
   getServiceOrRegister,
+  type ImageProps,
   noop,
   type PageBlockModel,
   pagePreset,
@@ -19,7 +20,7 @@ import {
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { assertExists, isFirefox, type Page, Slot } from '@blocksuite/store';
+import { isFirefox, type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -61,15 +62,21 @@ export class EditorContainer
   @property({ attribute: false })
   override autofocus = false;
 
+  /**
+   * @deprecated This property is unreliable since pagePreset can be overridden.
+   */
   @query('affine-default-page')
   private _defaultPageBlock?: DefaultPageBlockComponent;
 
+  /**
+   * @deprecated This property is unreliable since edgelessPreset can be overridden.
+   */
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   readonly themeObserver = new ThemeObserver();
 
-  fileDropManager = new FileDropManager(this._getPageInfo.bind(this));
+  fileDropManager = new FileDropManager(this);
 
   get model(): PageBlockModel | null {
     return this.page.root as PageBlockModel | null;
@@ -80,16 +87,6 @@ export class EditorContainer
     pageModeSwitched: new Slot(),
     tagClicked: new Slot<{ tagId: string }>(),
   };
-
-  private _getPageInfo() {
-    const { page, mode } = this;
-    return {
-      page,
-      mode,
-      pageBlock:
-        mode === 'page' ? this._defaultPageBlock : this._edgelessPageBlock,
-    };
-  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -108,7 +105,8 @@ export class EditorContainer
       if (!pageModel) return;
 
       if (this.mode === 'page') {
-        getPageBlock(pageModel)?.selection?.clear();
+        // FIXME(mirone)
+        // getPageBlock(pageModel)?.selection?.clear();
       }
 
       const selection = getSelection();
@@ -173,7 +171,6 @@ export class EditorContainer
   override disconnectedCallback() {
     super.disconnectedCallback();
     activeEditorManager.clearActive();
-    this.page.awarenessStore.setLocalRange(this.page, null);
   }
 
   override firstUpdated() {
@@ -188,16 +185,46 @@ export class EditorContainer
     }
 
     // adds files from outside by dragging and dropping
-    this.fileDropManager.register('image/*', async (file: File) => {
-      const storage = this.page.blobs;
-      assertExists(storage);
-      const sourceId = await storage.set(file);
-      const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
-      return {
-        flavour: 'affine:image',
-        sourceId,
-        ...size,
-      };
+    this.fileDropManager.register({
+      name: 'Image',
+      matcher: file => file.type.startsWith('image'),
+      handler: async (
+        file: File
+      ): Promise<ImageProps & { flavour: 'affine:image' }> => {
+        const storage = this.page.blobs;
+        const sourceId = await storage.set(file);
+        const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
+        return {
+          flavour: 'affine:image',
+          sourceId,
+          ...size,
+        };
+      },
+    });
+
+    this.fileDropManager.register({
+      name: 'Attachment',
+      matcher: (file: File) => {
+        // TODO limit size in blob
+        const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+        if (file.size > MAX_ATTACHMENT_SIZE) {
+          console.warn('You can only upload files less than 10M.');
+          return false;
+        }
+        return true;
+      },
+      handler: async (
+        file: File
+      ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
+        const storage = this.page.blobs;
+        const sourceId = await storage.set(file);
+        return {
+          flavour: 'affine:attachment',
+          name: file.name,
+          size: file.size,
+          sourceId,
+        };
+      },
     });
   }
 

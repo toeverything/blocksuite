@@ -10,10 +10,6 @@ import {
   asyncSetVRange,
   type BlockComponentElement,
   blockRangeToNativeRange,
-  focusBlockByModel,
-  focusRichText,
-  getBlockElementByModel,
-  getDefaultPage,
   hotkey,
   isMultiBlockRange,
   isPageMode,
@@ -28,23 +24,15 @@ import { getService } from '../../__internal__/service.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { isAtLineEdge } from '../../__internal__/utils/check-line.js';
 import {
-  asyncFocusRichText,
-  clearSelection,
   focusNextBlock,
   focusPreviousBlock,
   focusTitle,
   getCurrentNativeRange,
-  getModelByElement,
   getPreviousBlock,
   getRichTextByModel,
-  getVirgoByModel,
   Point,
 } from '../../__internal__/utils/index.js';
-import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
-import {
-  handleKeydownAfterSelectBlocks,
-  handleSelectAll,
-} from '../utils/index.js';
+// import type { DefaultSelectionManager } from '../default/selection-manager/index.js';
 import { actionConfig } from './const.js';
 import {
   deleteModelsByRange,
@@ -94,14 +82,16 @@ export function bindCommonHotkey(page: Page) {
 
   hotkey.addListener(HOTKEYS.UNDO, e => {
     e.preventDefault();
-    if (page.canUndo) clearSelection(page);
-    page.undo();
+    if (page.canUndo) {
+      page.undo();
+    }
   });
 
   hotkey.addListener(HOTKEYS.REDO, e => {
     e.preventDefault();
-    if (page.canRedo) clearSelection(page);
-    page.redo();
+    if (page.canRedo) {
+      page.redo();
+    }
   });
 
   // Fixes: https://github.com/toeverything/blocksuite/issues/200
@@ -113,15 +103,6 @@ export function bindCommonHotkey(page: Page) {
 
     const blockRange = getCurrentBlockRange(page);
     if (!blockRange) return;
-
-    if (blockRange.type === 'Block') {
-      handleKeydownAfterSelectBlocks({
-        page,
-        keyboardEvent: e,
-        selectedBlocks: blockRange.models,
-      });
-      return;
-    }
 
     const range = blockRangeToNativeRange(blockRange);
     if (!range || !isMultiBlockRange(range)) return;
@@ -147,37 +128,13 @@ export function removeCommonHotKey() {
 export function handleUp(
   e: KeyboardEvent,
   page: Page,
-  {
-    selection,
-    zoom,
-  }: { selection?: DefaultSelectionManager; zoom?: number } = {
+  { zoom }: { zoom?: number } = {
     zoom: 1,
   }
 ) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) return;
 
-  if (blockRange.type === 'Block') {
-    if (!selection) {
-      console.error(
-        'Failed to handle up: selection is not provided',
-        blockRange
-      );
-      return;
-    }
-    const selectedModel = getModelByElement(selection.state.selectedBlocks[0]);
-    selection.clear();
-    const pageBlock = getDefaultPage(page);
-    assertExists(pageBlock);
-    focusPreviousBlock(
-      selectedModel,
-      pageBlock.lastSelectionPosition instanceof Point
-        ? pageBlock.lastSelectionPosition
-        : 'end'
-    );
-    e.preventDefault();
-    return;
-  }
   // Assume the native selection is collapsed
   if (blockRange.type === 'Native') {
     assertEquals(
@@ -230,42 +187,13 @@ export function handleUp(
 export function handleDown(
   e: KeyboardEvent,
   page: Page,
-  {
-    selection,
-    zoom,
-  }: { selection?: DefaultSelectionManager; zoom?: number } = {
+  { zoom }: { zoom?: number } = {
     zoom: 1,
   }
 ) {
   const blockRange = getCurrentBlockRange(page);
   if (!blockRange) return;
 
-  if (blockRange.type === 'Block') {
-    if (!selection) {
-      console.error(
-        'Failed to handle down: selection is not provided',
-        blockRange
-      );
-      return;
-    }
-    const lastEle = selection.state.selectedBlocks.at(-1);
-    if (!lastEle) {
-      throw new Error(
-        "Failed to handleDown! Can't find last selected element!"
-      );
-    }
-    const selectedModel = getModelByElement(lastEle);
-    selection.clear();
-    const pageBlock = getDefaultPage(page);
-    assertExists(pageBlock);
-    focusNextBlock(
-      selectedModel,
-      pageBlock.lastSelectionPosition instanceof Point
-        ? pageBlock.lastSelectionPosition
-        : 'start'
-    );
-    e.preventDefault();
-  }
   // Assume the native selection is collapsed
   if (blockRange.type === 'Native') {
     assertEquals(

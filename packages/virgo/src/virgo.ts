@@ -1,5 +1,6 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import { html, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
@@ -129,7 +130,7 @@ export class VEditor<
     yText: VEditor['yText'],
     ops?: {
       active?: VEditor['isActive'];
-      embed?: VEditor['isEmbed'];
+      embed?: (delta: DeltaInsert<TextAttributes>) => boolean;
     }
   ) {
     if (!yText.doc) {
@@ -192,6 +193,11 @@ export class VEditor<
 
       this._deltaService.render(syncVRange);
     });
+  }
+
+  async waitForUpdate() {
+    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
+    await Promise.all(vLines.map(line => line.updateComplete));
   }
 
   getNativeSelection(): Selection | null {
@@ -266,6 +272,13 @@ export class VEditor<
   focusEnd(): void {
     this.rangeService.setVRange({
       index: this.yText.length,
+      length: 0,
+    });
+  }
+
+  focusByIndex(index: number): void {
+    this.rangeService.setVRange({
+      index: index,
       length: 0,
     });
   }
@@ -383,6 +396,11 @@ export class VEditor<
       this.deltaService.render();
     });
   };
+
+  rerenderWholeEditor() {
+    render(html`<div></div>`, this.rootElement);
+    this._deltaService.render();
+  }
 
   private _transact(fn: () => void): void {
     const doc = this.yText.doc;

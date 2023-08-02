@@ -22,12 +22,16 @@ function rangeFromBound(a: IBound): number[] {
 }
 
 // Dont compare by id, '398303718:2' > '398303718:14' is true
-export function compare<T extends { id: string; index: string }>(
-  a: T,
-  b: T
-): number {
+export function compare<
+  T extends { id: string; index: string; batch?: string | null }
+>(a: T, b: T): number {
+  if (a.batch && b.batch) {
+    if (a.batch < b.batch) return -1;
+    else if (a.batch > b.batch) return 1;
+  }
+
   if (a.index < b.index) return -1;
-  if (a.index > b.index) return 1;
+  else if (a.index > b.index) return 1;
   return 0;
 }
 

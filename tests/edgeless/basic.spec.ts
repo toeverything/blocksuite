@@ -44,7 +44,7 @@ import {
 import { test } from '../utils/playwright.js';
 
 const CENTER_X = 450;
-const CENTER_Y = 300;
+const CENTER_Y = 450;
 
 test('switch to edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -71,10 +71,10 @@ test('can zoom viewport', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
 
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 260, EDITOR_WIDTH, 80];
+  const original = [50, 404.5, EDITOR_WIDTH, 91];
   await assertEdgelessHoverRect(page, original);
   let box = await getEdgelessHoverRect(page);
 
@@ -97,16 +97,16 @@ test('zoom by mouse', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 80]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 260, EDITOR_WIDTH, 80];
+  const original = [50, 404.5, EDITOR_WIDTH, 91];
   await assertEdgelessHoverRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const zoomed = [150, 270, original[2] * 0.75, original[3] * 0.75];
+  const zoomed = [150, 415.875, original[2] * 0.75, original[3] * 0.75];
   await assertEdgelessHoverRect(page, zoomed);
 });
 

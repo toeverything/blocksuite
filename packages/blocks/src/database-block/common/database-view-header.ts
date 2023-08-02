@@ -80,9 +80,9 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
         input: {
           initValue: view.name,
           onComplete: text => {
-            this.model.updateView(view.id, data => {
-              data.name = text;
-            });
+            this.model.updateView(view.id, data => ({
+              name: text,
+            }));
             this.model.applyViewsUpdate();
           },
         },
@@ -108,8 +108,7 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const views = this.model.getViewList();
-
+    const views = this.model.views;
     return html`
       <div class="database-view-header">
         ${repeat(

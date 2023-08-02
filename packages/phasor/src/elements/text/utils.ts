@@ -1,5 +1,7 @@
 // something comes from https://github.com/excalidraw/excalidraw/blob/b1311a407a636c87ee0ca326fd20599d0ce4ba9b/src/utils.ts
 
+import type { Bound } from '../../utils/bound.js';
+import type { TextElement } from './text-element.js';
 import type { ITextDelta } from './types.js';
 
 const RS_LTR_CHARS =
@@ -15,7 +17,7 @@ export const isChrome =
 export const isSafari =
   !isChrome && globalThis.navigator?.userAgent.indexOf('Safari') !== -1;
 
-export function getLineHeight(fontFamily: string, fontSize: string) {
+export function getLineHeight(fontFamily: string, fontSize: number) {
   const span = document.createElement('span');
   span.style.fontFamily = fontFamily;
   span.style.fontSize = fontSize + 'px';
@@ -31,17 +33,17 @@ export function getFontString({
   fontSize,
   fontFamily,
   lineHeight,
-  isBold = false,
-  isItalic = false,
+  bold = false,
+  italic = false,
 }: {
-  isBold?: boolean;
-  isItalic?: boolean;
+  bold?: boolean;
+  italic?: boolean;
   fontSize: number;
   lineHeight: string;
   fontFamily: string;
 }): string {
-  return `${isItalic ? 'italic' : ''} ${
-    isBold ? 'bold' : ''
+  return `${italic ? 'italic' : ''} ${
+    bold ? 'bold' : ''
   } ${fontSize}px/${lineHeight} ${fontFamily}`.trim();
 }
 
@@ -309,4 +311,33 @@ export function deltaInsertsToChunks(delta: ITextDelta[]): ITextDelta[][] {
   }
 
   return [...chunksGenerator(transformedDelta)];
+}
+
+export function normalizeTextBound(text: TextElement, bound: Bound): Bound {
+  if (!text.text) return bound;
+
+  const yText = text.text;
+  const { fontFamily, fontSize } = text;
+  const lineHeightPx = getLineHeight(fontFamily, fontSize);
+  const font = getFontString({
+    fontSize: fontSize,
+    lineHeight: `${lineHeightPx}px`,
+    fontFamily: fontFamily,
+    bold: text.bold,
+    italic: text.italic,
+  });
+
+  const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
+  const lines = deltaInsertsToChunks(deltas);
+  const widestLineWidth = Math.max(
+    ...yText
+      .toString()
+      .split('\n')
+      .map(text => getTextWidth(text, font))
+  );
+
+  bound.w = widestLineWidth;
+  bound.h = lineHeightPx * lines.length;
+
+  return bound;
 }
