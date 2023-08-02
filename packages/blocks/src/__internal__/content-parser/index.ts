@@ -1,10 +1,13 @@
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { ImageBlockService } from '@blocksuite/blocks/index.js';
 import { assertExists } from '@blocksuite/global/utils';
 import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
+import JSZip from 'jszip';
 import { marked } from 'marked';
 
-import type { PageBlockModel } from '../../models.js';
+import type { ImageBlockModel, PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import { getFileFromClipboard } from '../clipboard/utils/pure.js';
@@ -95,20 +98,38 @@ export class ContentParser {
   public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
+
+    const blobMap = new Map<string, string>();
+    const htmlContent = await this.block2Html(
+      [this.getSelectedBlock(root)],
+      blobMap
+    );
+
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
-      htmlContent
+      root.id,
+      htmlContent,
+      blobMap,
+      this._page.blobs
     );
   }
 
   public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
+
+    const blobMap = new Map<string, string>();
+    const htmlContent = await this.block2Html(
+      [this.getSelectedBlock(root)],
+      blobMap
+    );
+
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
-      htmlContent
+      root.id,
+      htmlContent,
+      blobMap,
+      this._page.blobs
     );
   }
 
@@ -348,14 +369,43 @@ export class ContentParser {
     );
   }
 
-  public async block2Html(blocks: SelectedBlock[]): Promise<string> {
+  public async block2Html(
+    blocks: SelectedBlock[],
+    blobMap: Map<string, string>
+  ): Promise<string> {
     let htmlText = '';
     for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
       htmlText =
         htmlText +
-        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex]));
+        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex], blobMap));
     }
     return htmlText;
+  }
+
+  public async exportBlock2Html() {
+    const root = this._page.root;
+    if (!root) return;
+    const blocks = [this.getSelectedBlock(root)];
+
+    const zip = new JSZip();
+    const blobMap = new Map<string, string>();
+    let htmlText = '';
+    for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
+      htmlText =
+        htmlText +
+        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex], blobMap));
+    }
+    for (const [key, value] of blobMap) {
+      const blob = await this._page.blobs.get(key);
+      blob && zip.file(value, blob);
+    }
+    zip.file('index.html', htmlText);
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const fileUrl = URL.createObjectURL(blob);
+    FileExporter.exportFile(
+      (root as PageBlockModel).title.toString() + '.zip',
+      fileUrl
+    );
   }
 
   public async block2Text(blocks: SelectedBlock[]): Promise<string> {
@@ -579,7 +629,8 @@ export class ContentParser {
   }
 
   private async _getHtmlInfoBySelectionInfo(
-    block: SelectedBlock
+    block: SelectedBlock,
+    blobMap: Map<string, string>
   ): Promise<string> {
     const model = this._page.getBlockById(block.id);
     if (!model) {
@@ -593,18 +644,35 @@ export class ContentParser {
       currentIndex++
     ) {
       const childText = await this._getHtmlInfoBySelectionInfo(
-        block.children[currentIndex]
+        block.children[currentIndex],
+        blobMap
       );
       childText && children.push(childText);
     }
     const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
-    return service.block2html(model, {
-      childText: children.join(''),
-      begin: block.startPos,
-      end: block.endPos,
-    });
+    if (model.flavour === 'affine:image') {
+      return await (service as ImageBlockService).block22html(
+        model as ImageBlockModel,
+        {
+          childText: children.join(''),
+          begin: block.startPos,
+          end: block.endPos,
+        },
+        blobMap
+      );
+    }
+
+    return service.block2html(
+      model,
+      {
+        childText: children.join(''),
+        begin: block.startPos,
+        end: block.endPos,
+      },
+      blobMap
+    );
   }
 
   private async _getTextInfoBySelectionInfo(

@@ -7,9 +7,31 @@ import type { ImageBlockModel } from './image-model.js';
 export class ImageBlockService extends BaseService<ImageBlockModel> {
   override block2html(
     block: ImageBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
+    { childText = '', begin, end }: BlockTransformContext = {},
+    blobMap?: Map<string, string>
   ) {
     return `<figure><img src="${block.sourceId}" alt="${block.caption}"><figcaption>${block.caption}</figcaption></figure>`;
+  }
+
+  async block22html(
+    block: ImageBlockModel,
+    { childText = '', begin, end }: BlockTransformContext = {},
+    blobMap?: Map<string, string>
+  ) {
+    const blobId = block.sourceId;
+    let imageSrc = blobId;
+    if (blobMap) {
+      if (blobMap.has(blobId)) {
+        imageSrc = blobMap.get(blobId) ?? '';
+      } else {
+        const blob = await block.page.blobs.get(blobId);
+        if (blob) {
+          imageSrc = `images/${blobId}.${blob.type.split('/')[1]}`;
+          blobMap.set(blobId, imageSrc);
+        }
+      }
+    }
+    return `<figure><img src="${imageSrc}" alt="${block.caption}"><figcaption>${block.caption}</figcaption></figure>`;
   }
 
   override block2Text(

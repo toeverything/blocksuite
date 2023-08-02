@@ -33,7 +33,8 @@ import {
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   block2html(
     block: BlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
+    { childText = '', begin, end }: BlockTransformContext = {},
+    blobMap?: Map<string, string>
   ): string {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {

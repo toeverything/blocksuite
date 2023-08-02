@@ -1,12 +1,14 @@
 /* eslint-disable no-control-regex */
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
+import type { BlobManager } from '@blocksuite/store/index.js';
+import JSZip from 'jszip';
 import TurndownService from 'turndown';
 
 import { globalCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
-const UNTITLED_PAGE_NAME = 'Untitled';
+export const UNTITLED_PAGE_NAME = 'Untitled';
 
 /** Tools for exporting files to device. For example, via browser download. */
 export const FileExporter = {
@@ -50,15 +52,35 @@ export const FileExporter = {
       'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
     );
   },
-  exportHtml(pageTitle: string | undefined, htmlContent: string) {
-    const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
-    FileExporter.exportTextFile(
-      title + '.html',
-      wrapHtmlWithHtmlDocumentText(title, htmlContent),
-      'text/html'
+  async exportHtml(
+    title: string | undefined,
+    pageId: string,
+    htmlContent: string,
+    blobMap: Map<string, string>,
+    blobs: BlobManager
+  ) {
+    const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
+    const zipFile = new JSZip();
+    for (const [key, value] of blobMap) {
+      const blob = await blobs.get(key);
+      blob && zipFile.file(value, blob);
+    }
+    zipFile.file(
+      `${pageTitle}_${pageId}.html`,
+      wrapHtmlWithHtmlDocumentText(pageTitle, htmlContent)
     );
+
+    const blob = await zipFile.generateAsync({ type: 'blob' });
+    const fileURL = URL.createObjectURL(blob);
+    FileExporter.exportFile(pageTitle + '.zip', fileURL);
   },
-  exportHtmlAsMarkdown(pageTitle: string | undefined, htmlContent: string) {
+  async exportHtmlAsMarkdown(
+    title: string | undefined,
+    pageId: string,
+    htmlContent: string,
+    blobMap: Map<string, string>,
+    blobs: BlobManager
+  ) {
     const turndownService = new TurndownService();
     turndownService.addRule('input', {
       //@ts-ignore
@@ -238,8 +260,18 @@ export const FileExporter = {
     });
     turndownService.keep(['del', 'u']);
     const markdown = turndownService.turndown(htmlContent);
-    const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
-    FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
+
+    const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
+    const zipFile = new JSZip();
+    for (const [key, value] of blobMap) {
+      const blob = await blobs.get(key);
+      blob && zipFile.file(value, blob);
+    }
+    zipFile.file(`${pageTitle}_${pageId}.md`, markdown);
+
+    const blob = await zipFile.generateAsync({ type: 'blob' });
+    const fileURL = URL.createObjectURL(blob);
+    FileExporter.exportFile(pageTitle + '.zip', fileURL);
   },
   exportPng(pageTitle: string | undefined, dataURL: string) {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
@@ -248,7 +280,10 @@ export const FileExporter = {
 };
 
 /** @internal surround plain html content in a document with head and basic styles */
-function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
+export function wrapHtmlWithHtmlDocumentText(
+  pageTitle: string,
+  htmlContent: string
+) {
   // Question: Why not embed css directly into html?
   const htmlCss = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
 <style>
