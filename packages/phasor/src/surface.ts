@@ -329,7 +329,7 @@ export class SurfaceManager {
         const dy = e.deltaY / _renderer.zoom;
         _renderer.setCenter(_renderer.centerX + dx, _renderer.centerY + dy);
       }
-      // zoom
+      // zoom1
       else {
         const zoom = normalizeWheelDeltaY(e.deltaY);
         _renderer.setZoom(zoom);
