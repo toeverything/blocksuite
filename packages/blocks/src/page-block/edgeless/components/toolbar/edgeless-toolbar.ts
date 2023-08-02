@@ -204,7 +204,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { type } = this.edgelessTool;
     if (
       changedProperties.has('_currentFrameIndex') &&
-      type === 'frame-navigator'
+      type === 'frameNavigator'
     ) {
       const frames = this.edgeless.surface.getElementsByType('frame');
       const current = this._currentFrameIndex;
@@ -288,7 +288,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${'Frame Navigator'}
         @click=${() => {
-          this.setEdgelessTool({ type: 'frame-navigator' });
+          this.setEdgelessTool({ type: 'frameNavigator' });
           this._currentFrameIndex = 0;
         }}
       >
@@ -352,7 +352,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const { type } = this.edgelessTool;
 
     const Content =
-      type === 'frame-navigator'
+      type === 'frameNavigator'
         ? this.frameNavigatorContent
         : this.defaultContent;
     return html`

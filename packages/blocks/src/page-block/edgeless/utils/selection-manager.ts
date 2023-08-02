@@ -31,10 +31,10 @@ import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
 import { DefaultToolController } from '../tool-controllers/default-tool.js';
 import { EraserToolController } from '../tool-controllers/eraser-tool.js';
+import { PresentToolController } from '../tool-controllers/frame-navigator-tool.js';
 import type { EdgelessToolController } from '../tool-controllers/index.js';
 import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
-import { PresentToolController } from '../tool-controllers/present-tool.js';
 import { ShapeToolController } from '../tool-controllers/shape-tool.js';
 import { TextToolController } from '../tool-controllers/text-tool.js';
 import {
@@ -174,7 +174,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       note: new NoteToolController(this.container),
       connector: new ConnectorToolController(this.container),
       eraser: new EraserToolController(this.container),
-      present: new PresentToolController(this.container),
+      frameNavigator: new PresentToolController(this.container),
     };
 
     this._initMouseAndWheelEvents();

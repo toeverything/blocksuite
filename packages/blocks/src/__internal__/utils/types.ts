@@ -182,7 +182,7 @@ export type EraserTool = {
 };
 
 export type FrameNavigatorTool = {
-  type: 'frame-navigator';
+  type: 'frameNavigator';
 };
 
 export type PanTool = {

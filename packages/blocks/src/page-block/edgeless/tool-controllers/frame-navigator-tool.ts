@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
-import { type FrameNavigatorTool,noop } from '../../../__internal__/index.js';
+import { type FrameNavigatorTool, noop } from '../../../__internal__/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class PresentToolController extends EdgelessToolController<FrameNavigatorTool> {
@@ -44,6 +44,6 @@ export class PresentToolController extends EdgelessToolController<FrameNavigator
     noop();
   }
   readonly tool = <FrameNavigatorTool>{
-    type: 'present',
+    type: 'frameNavigator',
   };
 }
