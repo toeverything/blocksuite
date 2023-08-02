@@ -3,7 +3,6 @@ import { assertExists } from '@blocksuite/store';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import type { Highlighter, IThemedToken, Lang } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
@@ -63,9 +62,10 @@ export class AffineCodeLine extends ShadowlessElement {
     const vTexts = tokens.map(token => {
       return html`<v-text
         .str=${token.content}
-        style=${styleMap({
+        .styles=${{
+          'word-wrap': 'break-word',
           color: token.color,
-        })}
+        }}
       ></v-text>`;
     });
 
