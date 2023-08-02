@@ -130,7 +130,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this.selection.setSelection({
       elements,
       editing,
-      by: by ? 'selecting' : undefined,
     });
   }
 

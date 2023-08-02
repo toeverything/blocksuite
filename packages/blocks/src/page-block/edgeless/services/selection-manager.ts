@@ -9,7 +9,7 @@ export interface EdgelessSelectionState {
   /**
    * Block id
    *
-   * Should be the surface block id.
+   * Should be the surface block id or just levea it empty.
    */
   blockId?: string;
 
@@ -22,11 +22,6 @@ export interface EdgelessSelectionState {
    * Indicate whether the selected element is in editing mode
    */
   editing: boolean;
-
-  /**
-   * legacy property
-   */
-  by?: 'selecting';
 }
 
 export class EdgelessSelectionManager {
@@ -147,8 +142,7 @@ export class EdgelessSelectionManager {
       'surface',
       selection.blockId ?? '',
       selection.elements,
-      selection.editing,
-      selection.by
+      selection.editing
     );
 
     const values = this._selection.value.filter(

@@ -37,6 +37,7 @@ import {
   isTopLevelBlock,
   pickTopBlock,
 } from '../utils/query.js';
+import type { EdgelessSelectionState } from './selection-manager.js';
 
 export type Selectable = TopLevelBlockModel | PhasorElement;
 
@@ -60,16 +61,6 @@ function shouldFilterMouseEvent(event: Event): boolean {
 export interface EdgelessHoverState {
   rect: DOMRect;
   content: Selectable;
-}
-
-export interface EdgelessSelectionState {
-  blockId?: string;
-  /* The selected note or phasor element */
-  elements: string[];
-  /* True if the selected content is active (like after double click) */
-  editing: boolean;
-  // wait for explain
-  by?: 'selecting';
 }
 
 export interface SelectionArea {

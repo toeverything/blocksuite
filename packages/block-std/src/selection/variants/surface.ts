@@ -5,18 +5,11 @@ export class SurfaceSelection extends BaseSelection {
 
   readonly elements: string[];
   readonly editing: boolean;
-  readonly by: string | undefined;
 
-  constructor(
-    blockId: string,
-    elements: string[],
-    editing: boolean,
-    by?: string
-  ) {
+  constructor(blockId: string, elements: string[], editing: boolean) {
     super({ blockId, path: [] });
     this.elements = elements;
     this.editing = editing;
-    this.by = by;
   }
 
   isEmpty() {
@@ -28,8 +21,7 @@ export class SurfaceSelection extends BaseSelection {
       return (
         this.blockId === other.blockId &&
         this.elements.length === other.elements.length &&
-        this.elements.every((id, idx) => id === other.elements[idx]) &&
-        this.by === other.by
+        this.elements.every((id, idx) => id === other.elements[idx])
       );
     }
 
@@ -42,7 +34,6 @@ export class SurfaceSelection extends BaseSelection {
       elements: this.elements,
       blockId: this.blockId,
       editing: this.editing,
-      by: this.by,
     };
   }
 
@@ -54,8 +45,7 @@ export class SurfaceSelection extends BaseSelection {
     return new SurfaceSelection(
       (json.blockId ?? '') as string,
       json.elements as string[],
-      json.editing as boolean,
-      json.by as string
+      json.editing as boolean
     );
   }
 }
