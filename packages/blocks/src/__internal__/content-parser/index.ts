@@ -4,7 +4,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Slot } from '@blocksuite/store';
-import JSZip from 'jszip';
 import { marked } from 'marked';
 
 import type { ImageBlockModel, PageBlockModel } from '../../models.js';
@@ -380,32 +379,6 @@ export class ContentParser {
         (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex], blobMap));
     }
     return htmlText;
-  }
-
-  public async exportBlock2Html() {
-    const root = this._page.root;
-    if (!root) return;
-    const blocks = [this.getSelectedBlock(root)];
-
-    const zip = new JSZip();
-    const blobMap = new Map<string, string>();
-    let htmlText = '';
-    for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
-      htmlText =
-        htmlText +
-        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex], blobMap));
-    }
-    for (const [key, value] of blobMap) {
-      const blob = await this._page.blobs.get(key);
-      blob && zip.file(value, blob);
-    }
-    zip.file('index.html', htmlText);
-    const blob = await zip.generateAsync({ type: 'blob' });
-    const fileUrl = URL.createObjectURL(blob);
-    FileExporter.exportFile(
-      (root as PageBlockModel).title.toString() + '.zip',
-      fileUrl
-    );
   }
 
   public async block2Text(blocks: SelectedBlock[]): Promise<string> {

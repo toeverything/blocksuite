@@ -8,7 +8,7 @@ import { globalCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
 // easier to track content we may need to localize in the future. (i18n)
-export const UNTITLED_PAGE_NAME = 'Untitled';
+const UNTITLED_PAGE_NAME = 'Untitled';
 
 /** Tools for exporting files to device. For example, via browser download. */
 export const FileExporter = {
@@ -280,10 +280,7 @@ export const FileExporter = {
 };
 
 /** @internal surround plain html content in a document with head and basic styles */
-export function wrapHtmlWithHtmlDocumentText(
-  pageTitle: string,
-  htmlContent: string
-) {
+function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
   // Question: Why not embed css directly into html?
   const htmlCss = `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
 <style>
