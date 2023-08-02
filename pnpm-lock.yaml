@@ -276,8 +276,8 @@ importers:
         specifier: ^4.1.3
         version: 4.1.3
       intl-segmenter-polyfill-rs:
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: ^0.1.3
+        version: 0.1.3
       zod:
         specifier: ^3.21.4
         version: 3.21.4
@@ -4566,8 +4566,8 @@ packages:
       side-channel: 1.0.4
     dev: true
 
-  /intl-segmenter-polyfill-rs@0.1.0:
-    resolution: {integrity: sha512-XfkWomy6pLjE1gV13WSl59Kt/tOoFHtfBMy3AOTObjyPmSH8wQcStxCT0ePCmYHRTXL1G1O7QddnxN9hO9cOwg==}
+  /intl-segmenter-polyfill-rs@0.1.3:
+    resolution: {integrity: sha512-eVxBEMqucO2bVy4mT8pJh7JcOVHn1CTiOTLFO1mM4L6hW6hrvNGlZyHAGCn679oQts4aDvd/pwRsDUHyUuoOtQ==}
     dev: false
 
   /is-accessor-descriptor@0.1.6:
