@@ -99,7 +99,7 @@ export class ContentParser {
     if (!root) return;
 
     const blobMap = new Map<string, string>();
-    const htmlContent = await this.block2Html(
+    const htmlContent = await this._block2Html(
       [this.getSelectedBlock(root)],
       blobMap
     );
@@ -118,7 +118,7 @@ export class ContentParser {
     if (!root) return;
 
     const blobMap = new Map<string, string>();
-    const htmlContent = await this.block2Html(
+    const htmlContent = await this._block2Html(
       [this.getSelectedBlock(root)],
       blobMap
     );
@@ -368,7 +368,7 @@ export class ContentParser {
     );
   }
 
-  public async block2Html(
+  private async _block2Html(
     blocks: SelectedBlock[],
     blobMap: Map<string, string>
   ): Promise<string> {
@@ -625,19 +625,7 @@ export class ContentParser {
     const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
-    if (model.flavour === 'affine:image') {
-      return await (service as ImageBlockService).block22html(
-        model as ImageBlockModel,
-        {
-          childText: children.join(''),
-          begin: block.startPos,
-          end: block.endPos,
-        },
-        blobMap
-      );
-    }
-
-    return service.block2html(
+    const text = await service.block2html(
       model,
       {
         childText: children.join(''),
@@ -646,6 +634,7 @@ export class ContentParser {
       },
       blobMap
     );
+    return text;
   }
 
   private async _getTextInfoBySelectionInfo(

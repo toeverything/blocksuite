@@ -10,7 +10,7 @@ import type {
 import type { PageBlockModel } from './page-model.js';
 
 export class PageBlockService extends BaseService<PageBlockModel> {
-  override block2html(
+  override async block2html(
     block: PageBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {

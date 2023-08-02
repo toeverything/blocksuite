@@ -25,14 +25,14 @@ import {
   performNativeCopy,
 } from './pure.js';
 
-export function getBlockClipboardInfo(
+export async function getBlockClipboardInfo(
   model: BaseBlockModel,
   selectedModels?: Map<string, number>,
   begin?: number,
   end?: number
 ) {
   const service = getService(model.flavour);
-  const html = service.block2html(model, { begin, end });
+  const html = await service.block2html(model, { begin, end });
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered
   // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated

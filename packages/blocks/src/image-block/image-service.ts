@@ -5,15 +5,7 @@ import type {
 } from '../__internal__/utils/index.js';
 import type { ImageBlockModel } from './image-model.js';
 export class ImageBlockService extends BaseService<ImageBlockModel> {
-  override block2html(
-    block: ImageBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {},
-    blobMap?: Map<string, string>
-  ) {
-    return `<figure><img src="${block.sourceId}" alt="${block.caption}"><figcaption>${block.caption}</figcaption></figure>`;
-  }
-
-  async block22html(
+  override async block2html(
     block: ImageBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {},
     blobMap?: Map<string, string>

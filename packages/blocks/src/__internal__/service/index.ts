@@ -31,11 +31,11 @@ import {
 } from './keymap.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
-  block2html(
+  async block2html(
     block: BlockModel,
     { childText = '', begin, end }: BlockTransformContext = {},
     blobMap?: Map<string, string>
-  ): string {
+  ): Promise<string> {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
       return html + BaseService.deltaLeaf2Html(block, item);
