@@ -200,7 +200,6 @@ export class EdgelessPageBlockComponent
       top: 0;
       left: 0;
       contain: layout style size;
-      content-visibility: hidden;
       transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
         scale(var(--affine-zoom));
     }
