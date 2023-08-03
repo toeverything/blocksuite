@@ -1,9 +1,11 @@
+import { PathFinder } from '@blocksuite/block-std';
 import type { TemplateResult } from 'lit';
 import { css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { html } from 'lit/static-html.js';
 
+import type { ParagraphBlockComponent } from '../../../../paragraph-block/index.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { titleColumnTypeName, titlePureColumnConfig } from './define.js';
@@ -57,15 +59,43 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
 
   @state()
   realEditing = false;
+  @query('affine-paragraph')
+  paragraph?: ParagraphBlockComponent;
 
+  jumpOut() {
+    this.paragraph?.root.selectionManager?.clear();
+    getSelection()?.removeAllRanges();
+    this.querySelector('rich-text')?.vEditor?.syncVRange();
+    this.selectCurrentCell(false);
+  }
   protected override firstUpdated() {
     this._disposables.addFromEvent(
       this,
       'keydown',
       e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        const block = this.paragraph;
+        if (!block) {
+          return;
+        }
+        const selectionManager = block.root.selectionManager;
+        const selection = selectionManager?.value.find(v =>
+          PathFinder.equals(v.path, block.path)
+        );
+        if (e.key === 'Escape') {
+          if (!selection) {
+            return;
+          }
           e.stopPropagation();
           e.preventDefault();
+          this.jumpOut();
+        }
+        if (e.key === 'Enter' && !e.shiftKey) {
+          if (selection) {
+            e.stopPropagation();
+            e.preventDefault();
+            this.jumpOut();
+            return;
+          }
         }
       },
       true
@@ -80,6 +110,16 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
       },
       true
     );
+    // if (this.paragraph) {
+    //   this.paragraph.bindHotKey({
+    //     'Escape': () => {
+    //       const selected = this.paragraph?.selected;
+    //       if (selected) {
+    //         return true;
+    //       }
+    //     },
+    //   }, { flavour: true });
+    // }
     this._disposables.addFromEvent(
       this,
       'pointerdown',
