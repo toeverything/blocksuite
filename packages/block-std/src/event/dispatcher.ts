@@ -15,8 +15,6 @@ import { toLowerCase } from './utils.js';
 const bypassEventNames = [
   'beforeInput',
 
-  // 'paste',
-  // 'copy',
   'blur',
   'focus',
   'drop',
