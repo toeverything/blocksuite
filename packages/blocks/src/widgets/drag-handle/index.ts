@@ -37,9 +37,6 @@ export class DragHandleWidget extends WidgetElement {
   @query('.affine-drag-handle-container')
   private _dragHandleContainer!: HTMLDivElement;
 
-  // @query('.affine-drag-handle')
-  // private _dragHandle!: HTMLDivElement;
-
   @query('.affine-drag-preview')
   private _dragPreview!: HTMLDivElement;
 
