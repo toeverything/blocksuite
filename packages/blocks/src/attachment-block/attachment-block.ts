@@ -4,15 +4,15 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
-import { downloadBlob } from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { focusBlockByModel } from '../__internal__/utils/selection.js';
-import { toast } from '../components/toast.js';
+import { createLitPortal } from '../components/portal.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
+import { AttachmentOptionsTemplate } from './components/options.js';
 import { AttachmentBanner, LoadingIcon, styles } from './styles.js';
-import { getAttachment, isAttachmentLoading } from './utils.js';
+import { downloadAttachment, isAttachmentLoading } from './utils.js';
 
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
@@ -27,20 +27,23 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     focusBlockByModel(this.model);
   }
 
+  private _optionsPortal: HTMLDivElement | null = null;
+
+  private _onHover = () => {
+    if (this._optionsPortal?.isConnected) return;
+    const abortController = new AbortController();
+    this._optionsPortal = createLitPortal({
+      template: AttachmentOptionsTemplate({
+        anchor: this,
+        model: this.model,
+        abortController,
+      }),
+      abortController,
+    });
+  };
+
   private async _downloadAttachment() {
-    const attachmentModel = this.model;
-    const attachment = await getAttachment(attachmentModel);
-    if (!attachment) {
-      toast('Failed to download attachment!');
-      console.error(
-        'attachment load failed! sourceId:',
-        this.model.sourceId,
-        'BlobManager:',
-        this.model.page.blobs
-      );
-      return;
-    }
-    downloadBlob(attachment, attachmentModel.name);
+    downloadAttachment(this.model);
   }
 
   override render() {
@@ -60,6 +63,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
     return html`<div
       class="attachment-container"
+      @mouseover=${this._onHover}
       @click=${this._focusAttachment}
       @dblclick=${this._downloadAttachment}
     >

@@ -108,7 +108,7 @@ export function focusCaption(model: BaseBlockModel) {
 
 async function getBlobByModel(model: BaseBlockModel) {
   assertExists(model.sourceId);
-  const store = await model.page.blobs;
-  const blob = await store?.get(model.sourceId);
+  const store = model.page.blobs;
+  const blob = await store.get(model.sourceId);
   return blob;
 }
