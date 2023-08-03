@@ -38,7 +38,7 @@ export const BlockSchema = z.object({
   }),
   onUpgrade: z
     .function()
-    .args(z.record(z.any()), z.number(), z.number())
+    .args(z.any(), z.number(), z.number())
     .returns(z.void())
     .optional(),
 });
