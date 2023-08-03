@@ -36,7 +36,7 @@ export class RangeSynchronizer {
           return;
         }
         // wait for lit updated
-        requestAnimationFrame(() => {
+        const rafId = requestAnimationFrame(() => {
           const text =
             selections.find((selection): selection is TextSelection =>
               selection.is('text')
@@ -51,6 +51,9 @@ export class RangeSynchronizer {
 
           this._prevSelection = text;
           this._rangeManager.syncTextSelectionToRange(text);
+        });
+        this.host.disposables.add(() => {
+          cancelAnimationFrame(rafId);
         });
       })
     );
