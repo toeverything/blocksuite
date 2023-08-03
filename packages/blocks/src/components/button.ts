@@ -94,8 +94,8 @@ export class IconButton extends LitElement {
   text: string | null = null;
 
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
-  @property()
-  disabled: boolean | '' = false;
+  @property({ attribute: true })
+  disabled?: '' = undefined;
 
   constructor() {
     super();
