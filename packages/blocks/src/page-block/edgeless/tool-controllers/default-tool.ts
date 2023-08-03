@@ -4,6 +4,7 @@ import {
   Bound,
   ConnectorElement,
   deserializeXYWH,
+  FrameElement,
   getCommonBound,
   type HitTestOptions,
   isPointIn,
@@ -46,7 +47,12 @@ import {
   pickBlocksByBound,
   pickTopBlock,
 } from '../utils/query.js';
-import { addText, mountShapeEditor, mountTextEditor } from '../utils/text.js';
+import {
+  addText,
+  mountFrameEditor,
+  mountShapeEditor,
+  mountTextEditor,
+} from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
@@ -80,6 +86,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDoubleClickedOnMask = false;
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
+  private _toBeMoved: Selectable[] = [];
+  private _frames = new Set<FrameElement>();
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
@@ -241,7 +249,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _isDraggable(element: Selectable) {
     return !(
       element instanceof ConnectorElement &&
-      !isConnectorAndBindingsAllSelected(element, this.selection.elements)
+      !isConnectorAndBindingsAllSelected(element, this._toBeMoved)
     );
   }
 
@@ -332,6 +340,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         mountShapeEditor(selected, this._edgeless);
         return;
       }
+      if (selected instanceof FrameElement) {
+        mountFrameEditor(selected, this._edgeless);
+        return;
+      }
     }
 
     if (
@@ -373,7 +385,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._lock = true;
     const { surface } = this._edgeless;
     const elements = (await Promise.all(
-      this.selection.elements.map(async selected => {
+      this._toBeMoved.map(async selected => {
         return await this._cloneSelected(selected, surface);
       })
     )) as Selectable[];
@@ -409,6 +421,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
+  private _addFrames() {
+    this.selection.elements.forEach(ele => {
+      if (ele instanceof FrameElement) {
+        this._frames.add(ele);
+      } else {
+        const frame = this._edgeless.frame.selectFrame([ele]);
+        if (frame) {
+          this._frames.add(frame);
+        }
+      }
+    });
+  }
+
   async onContainerDragStart(e: PointerEventState) {
     // Determine the drag type based on the current state and event
     let dragType = this._determineDragType(e);
@@ -419,6 +444,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       await this._cloneContent(e);
     }
 
+    this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
   }
@@ -430,11 +456,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = { x, y };
     this._dragLastPos = { x, y };
 
-    const { elements } = this.selection;
+    const toBeMoved = new Set(this.selection.elements);
+    this.selection.elements.forEach(element => {
+      if (element instanceof FrameElement) {
+        this._edgeless.frame
+          .getElementsInFrame(element)
+          .forEach(ele => toBeMoved.add(ele));
+      }
+    });
 
-    this._alignBound = this._edgeless.snap.setupAlignables(elements);
+    this._toBeMoved = Array.from(toBeMoved);
+    this._alignBound = this._edgeless.snap.setupAlignables(this._toBeMoved);
 
-    this._selectedBounds = elements.map(element =>
+    this._selectedBounds = this._toBeMoved.map(element =>
       Bound.deserialize(element.xywh)
     );
   }
@@ -470,10 +504,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       case DefaultModeDragType.AltCloning:
       case DefaultModeDragType.ContentMoving: {
-        const selectedElements = this.selection.elements;
-
         if (
-          selectedElements.every(ele => {
+          this._toBeMoved.every(ele => {
             return !this._isDraggable(ele);
           })
         ) {
@@ -492,7 +524,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           y: dy + alignRst.dy,
         };
 
-        selectedElements.forEach((element, index) => {
+        this._toBeMoved.forEach((element, index) => {
           if (isPhasorElement(element)) {
             if (!this._isDraggable(element)) return;
             this._handleSurfaceDragMove(
@@ -508,6 +540,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           }
         });
+        const frame = this._edgeless.frame.selectFrame(this._toBeMoved);
+        frame
+          ? this._edgeless.frame.setHighlight(frame)
+          : this._edgeless.frame.clearHighlight();
 
         this._forceUpdateSelection(this.dragType, true, {
           x: delta.x - this._lastMoveDelta.x,
@@ -551,13 +587,19 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       });
     }
 
-    this._forceUpdateSelection(this.dragType);
-    this.dragType = DefaultModeDragType.None;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
     this._lastMoveDelta = { x: 0, y: 0 };
     this._edgeless.snap.cleanupAlignables();
+    this._edgeless.frame.clearHighlight();
+    this._addFrames();
+    this._frames.forEach(frame => {
+      this._edgeless.frame.calculateFrameColor(frame);
+    });
+    this._frames.clear();
+    this._forceUpdateSelection(this.dragType);
+    this.dragType = DefaultModeDragType.None;
   }
 
   onContainerMouseMove(e: PointerEventState) {

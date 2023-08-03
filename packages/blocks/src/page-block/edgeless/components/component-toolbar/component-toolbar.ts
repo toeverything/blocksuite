@@ -4,6 +4,7 @@ import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
 import './change-text-button.js';
+import './add-frame-button.js';
 import './more-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
@@ -44,13 +45,18 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       user-select: none;
     }
 
-    .container {
+    :host([data-show]) {
+      display: block;
+    }
+
+    .edgeless-component-toolbar-container {
       display: flex;
       align-items: center;
       height: 48px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
+      padding: 0 8px;
     }
 
     menu-divider {
@@ -176,12 +182,17 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     );
   }
 
+  private _getFrameButton() {
+    return html`<edgeless-add-frame-button
+      .edgeless=${this.edgeless}
+    ></edgeless-add-frame-button>`;
+  }
+
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless } = this;
     const { shape, brush, connector, note, text } = groupedSelected;
 
-    // when selected types more than two, only show `more` button
     const selectedAtLeastTwoTypes = atLeastNMatches(
       Object.values(groupedSelected),
       e => !!e.length,
@@ -198,11 +209,18 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._getTextButton(text),
         ].filter(b => !!b);
 
+    if (this.selection.state.elements.length > 1) {
+      buttons.unshift(this._getFrameButton());
+    }
+
     const divider = buttons.length
       ? html`<menu-divider .vertical=${true}></menu-divider>`
       : nothing;
 
-    return html`<div class="container" @pointerdown=${stopPropagation}>
+    return html`<div
+      class="edgeless-component-toolbar-container"
+      @pointerdown=${stopPropagation}
+    >
       ${join(buttons, () => '')} ${divider}
       <edgeless-more-button .edgeless=${edgeless}></edgeless-more-button>
     </div>`;

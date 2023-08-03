@@ -45,3 +45,7 @@ export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
 
 export const SCIBBLED_CANVAS_FONT_FANILY = "'Kalam', cursive";
 export const GENERAL_CANVAS_FONT_FAMILY = 'sans-serif';
+
+export const SurfaceColor = '#6046FE';
+export const NoteColor = '#1E96EB';
+export const BlendColor = '#7D91FF';

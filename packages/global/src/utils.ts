@@ -6,6 +6,7 @@ export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup } from './utils/disposable.js';
 export { Slot } from './utils/slot.js';
 export { caretRangeFromPoint, isFirefox, isWeb } from './utils/web.js';
+
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 // https://stackoverflow.com/questions/31538010/test-if-a-variable-is-a-primitive-rather-than-an-object

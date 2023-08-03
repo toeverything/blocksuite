@@ -1,7 +1,14 @@
 import { defineConfig } from 'vitepress';
+import wasm from 'vite-plugin-wasm';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  vite: {
+    build: {
+      target: 'ES2022',
+    },
+    plugins: [wasm()],
+  },
   lang: 'en-US',
   title: 'BlockSuite',
   description: 'The Block-Based Collaborative Framework',

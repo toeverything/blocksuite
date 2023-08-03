@@ -33,7 +33,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
-      padding: 8px 8px;
       box-sizing: border-box;
       background: var(--affine-popover-background);
     }

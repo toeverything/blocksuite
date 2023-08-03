@@ -1,21 +1,19 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { BlockStore } from '../store/index.js';
-import { PathMap } from '../store/index.js';
+import { PathFinder } from '../store/index.js';
 import type { UIEventHandler } from './base.js';
 import { UIEventState, UIEventStateContext } from './base.js';
+import { ClipboardControl } from './control/clipboard.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
 import { bindKeymap } from './keymap.js';
-import { BlockEventState } from './state/index.js';
 import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
   'beforeInput',
 
-  'paste',
-  'copy',
   'blur',
   'focus',
   'drop',
@@ -44,6 +42,10 @@ const eventNames = [
   'compositionStart',
   'compositionUpdate',
   'compositionEnd',
+
+  'cut',
+  'copy',
+  'paste',
 
   ...bypassEventNames,
 ] as const;
@@ -75,11 +77,13 @@ export class UIEventDispatcher {
   private _pointerControl: PointerControl;
   private _keyboardControl: KeyboardControl;
   private _rangeControl: RangeControl;
+  private _clipboardControl: ClipboardControl;
 
   constructor(public blockStore: BlockStore) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
+    this._clipboardControl = new ClipboardControl(this);
   }
 
   mount() {
@@ -98,17 +102,12 @@ export class UIEventDispatcher {
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
-    const event = context.get('defaultState').event;
+    const { event } = context.get('defaultState');
     if (!scope) {
       scope = this._getEventScope(name, event);
       if (!scope) {
         return;
       }
-    }
-
-    if (!context.has('blockState')) {
-      const blockState = this.createEventState(event, scope);
-      context.add(blockState);
     }
 
     for (const runner of scope.runners) {
@@ -161,21 +160,6 @@ export class UIEventDispatcher {
     return output;
   }
 
-  createEventState(event: Event, scope: EventScope) {
-    const targetMap = new PathMap();
-    scope.paths.forEach(path => {
-      const instance = this.blockStore.viewStore.getViewByPath(path);
-      if (instance) {
-        targetMap.set(path, instance);
-      }
-    });
-
-    return new BlockEventState({
-      event,
-      target: targetMap,
-    });
-  }
-
   buildEventScope(
     name: EventName,
     flavours: string[],
@@ -191,7 +175,7 @@ export class UIEventDispatcher {
     const pathEvents = handlers.filter(handler => {
       const _path = handler.path;
       if (_path === undefined) return false;
-      return paths.some(path => PathMap.includes(path, _path));
+      return paths.some(path => PathFinder.includes(path, _path));
     });
 
     const flavourEvents = handlers.filter(
@@ -268,5 +252,6 @@ export class UIEventDispatcher {
     this._pointerControl.listen();
     this._keyboardControl.listen();
     this._rangeControl.listen();
+    this._clipboardControl.listen();
   }
 }

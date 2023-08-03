@@ -18,7 +18,6 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
 
     .change-text-container {
       display: flex;
-      padding-left: 8px;
     }
   `;
 

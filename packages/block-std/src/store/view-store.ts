@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockStore } from './block-store.js';
+import { PathFinder } from './path-finder.js';
 
 export type NodeView<T = unknown> = {
   id: string;
@@ -13,6 +14,8 @@ export type NodeViewLeaf<T> = NodeView<T> & {
 export type NodeViewTree<T> = NodeViewLeaf<T> & {
   children: NodeViewTree<T>[];
 };
+
+type SpecToNodeView<T> = T extends BlockSuiteViewSpec<infer U> ? U : unknown;
 
 export interface BlockSuiteViewSpec<T = unknown> {
   fromDOM: (node: Node) => null | NodeView<T>;
@@ -124,7 +127,7 @@ export class ViewStore<NodeViewType = unknown> {
     return tree;
   };
 
-  getViewByPath = (path: string[]) => {
+  fromPath = (path: string[]) => {
     const tree = this.getNodeViewTree();
     return path.reduce((curr: NodeViewTree<NodeViewType> | null, id) => {
       if (!curr) {
@@ -135,7 +138,165 @@ export class ViewStore<NodeViewType = unknown> {
         return null;
       }
       return child;
-    }, tree) as NodeViewLeaf<NodeViewType> | null;
+    }, tree);
+  };
+
+  viewFromPath = <T extends BlockSuiteViewType>(
+    type: T,
+    path: string[]
+  ): null | SpecToNodeView<BlockSuiteView[T]> => {
+    const tree = this.fromPath(path);
+    if (!tree || tree.type !== type) {
+      return null;
+    }
+    return tree.view as SpecToNodeView<BlockSuiteView[T]>;
+  };
+
+  walkThrough = (
+    fn: (
+      nodeView: NodeViewTree<NodeViewType>,
+      index: number,
+      parent: NodeViewTree<NodeViewType>
+    ) => undefined | null | true,
+    path: string[] = []
+  ) => {
+    const tree = this.fromPath(path);
+    assertExists(tree, `Invalid path to get node in view: ${path}`);
+
+    const iterate = (node: NodeViewTree<NodeViewType>, index: number) => {
+      const result = fn(node, index, tree);
+      if (result === true) {
+        return;
+      }
+      node.children.forEach(iterate);
+    };
+
+    tree.children.forEach(iterate);
+  };
+
+  getParent = (path: string[]) => {
+    if (path.length === 0) {
+      return null;
+    }
+    return this.fromPath(PathFinder.parent(path));
+  };
+
+  findPrev = (
+    path: string[],
+    fn: (
+      nodeView: NodeViewTree<NodeViewType>,
+      index: number,
+      parent: NodeViewTree<NodeViewType>
+    ) => undefined | null | true
+  ) => {
+    const getPrev = (path: string[]) => {
+      const parent = this.getParent(path);
+      if (!parent) {
+        return null;
+      }
+      const index = this._indexOf(path, parent);
+      if (index === -1) {
+        return null;
+      }
+      if (index === 0) {
+        const grandParent = this.getParent(PathFinder.parent(path));
+        if (!grandParent) return null;
+        return {
+          nodeView: parent,
+          parent: grandParent,
+          index: this._indexOf(PathFinder.parent(path), grandParent),
+        };
+      }
+      return {
+        nodeView: parent.children[index - 1],
+        parent,
+        index: index - 1,
+      };
+    };
+
+    let output: null | NodeViewTree<NodeViewType> = null;
+    const iterate = (path: string[]) => {
+      const state = getPrev(path);
+      if (!state) {
+        return;
+      }
+      const { nodeView, parent, index } = state;
+      const result = fn(nodeView, index, parent);
+      if (result) {
+        output = nodeView;
+
+        return;
+      }
+
+      iterate(nodeView.path);
+    };
+
+    iterate(path);
+
+    return output;
+  };
+
+  findNext = (
+    path: string[],
+    fn: (
+      nodeView: NodeViewTree<NodeViewType>,
+      index: number,
+      parent: NodeViewTree<NodeViewType>
+    ) => undefined | null | true
+  ) => {
+    const getNext = (path: string[]) => {
+      const parent = this.getParent(path);
+      if (!parent) {
+        return null;
+      }
+      const index = this._indexOf(path, parent);
+      if (index === -1) {
+        return null;
+      }
+      if (index === parent.children.length - 1) {
+        const grandParent = this.getParent(PathFinder.parent(path));
+        if (!grandParent) return null;
+        return {
+          nodeView: parent,
+          parent: grandParent,
+          index: this._indexOf(PathFinder.parent(path), grandParent),
+        };
+      }
+      return {
+        nodeView: parent.children[index + 1],
+        parent,
+        index: index + 1,
+      };
+    };
+
+    let output: null | NodeViewTree<NodeViewType> = null;
+    const iterate = (path: string[]) => {
+      const state = getNext(path);
+      if (!state) {
+        return;
+      }
+      const { nodeView, parent, index } = state;
+      const result = fn(nodeView, index, parent);
+      if (result) {
+        output = nodeView;
+
+        return;
+      }
+
+      iterate(nodeView.path);
+    };
+
+    iterate(path);
+
+    return output;
+  };
+
+  indexOf = (path: string[]) => {
+    const parent = this.getParent(path);
+    if (!parent) {
+      return -1;
+    }
+    return this._indexOf(path, parent);
   };
 
   mount() {
@@ -147,6 +308,10 @@ export class ViewStore<NodeViewType = unknown> {
     this._observer.disconnect();
     this.viewSpec.clear();
   }
+
+  private _indexOf = (path: string[], parent: NodeViewTree<unknown>) => {
+    return parent.children.findIndex(x => x.id === path[path.length - 1]);
+  };
 }
 
 declare global {

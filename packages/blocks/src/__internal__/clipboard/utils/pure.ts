@@ -8,6 +8,7 @@ export enum CLIPBOARD_MIMETYPE {
   TEXT = 'text/plain',
   BLOCKSUITE_PAGE = 'blocksuite/page',
   BLOCKSUITE_SURFACE = 'blocksuite/surface',
+  BLOCKSUITE_DATABASE = 'blocksuite/database',
   // IMAGE_BMP = 'image/bmp',
   // IMAGE_GIF = 'image/gif',
   // IMAGE_JPEG = 'image/jpeg',

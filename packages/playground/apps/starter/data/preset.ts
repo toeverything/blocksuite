@@ -5,6 +5,7 @@ import {
   StrokeStyle,
 } from '@blocksuite/phasor';
 import { Text, type Workspace } from '@blocksuite/store';
+import * as Y from 'yjs';
 
 import { type InitFn } from './utils';
 
@@ -70,6 +71,14 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
           strokeStyle: StrokeStyle.Solid,
           roughness: DEFAULT_ROUGHNESS,
+        },
+        2: {
+          id: '2',
+          index: 'a2',
+          type: 'frame',
+          xywh: '[1000,0,800,640]',
+          batch: 'a0',
+          title: new Y.Text('Frame 1'),
         },
       },
     },

@@ -15,6 +15,7 @@ import { asyncFocusRichText } from './common-operations.js';
 import {
   getBlockElementByModel,
   getDefaultPage,
+  getDefaultPageByElement,
   getElementFromEventTarget,
   getModelByBlockElement,
   getModelsByRange,
@@ -117,11 +118,16 @@ export async function focusRichText(
   position: SelectionPosition = 'end',
   zoom = 1
 ) {
+  const isDefaultPage = !!getDefaultPageByElement(editableContainer);
+  if (isDefaultPage) {
+    editableContainer
+      .querySelector<VirgoLine>('v-line')
+      ?.scrollIntoView({ block: 'nearest' });
+  }
+
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDOM(editableContainer);
-  editableContainer
-    .querySelector<VirgoLine>('v-line')
-    ?.scrollIntoView({ block: 'nearest' });
+
   let range: Range | null = null;
   switch (position) {
     case 'start':

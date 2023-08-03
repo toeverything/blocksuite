@@ -85,6 +85,10 @@ export class Page extends Space<FlatBlockMap> {
           props: Partial<BlockProps>;
         }
     >(),
+    yBlockUpdated: new Slot<{
+      id: string;
+      props: { [key: string]: { old: unknown; new: unknown } };
+    }>(),
     copied: new Slot(),
     pasted: new Slot<SerializedBlock[]>(),
   };
@@ -816,6 +820,7 @@ export class Page extends Space<FlatBlockMap> {
     if (!model) return;
 
     const props: Partial<BlockProps> = {};
+    const yProps: { [key: string]: { old: unknown; new: unknown } } = {};
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
@@ -840,6 +845,7 @@ export class Page extends Space<FlatBlockMap> {
         continue;
       }
       const value = event.target.get(key);
+      yProps[key] = { old: event.changes.keys.get(key)?.oldValue, new: value };
       hasPropsUpdate = true;
       if (value instanceof Y.Map || value instanceof Y.Array) {
         props[key.replace('prop:', '')] = this.doc.proxy.createYProxy(value, {
@@ -853,6 +859,7 @@ export class Page extends Space<FlatBlockMap> {
     if (hasPropsUpdate) {
       Object.assign(model, props);
       model.propsUpdated.emit();
+      this.slots.yBlockUpdated.emit({ id: model.id, props: yProps });
     }
     hasChildrenUpdate && model.childrenUpdated.emit();
   }

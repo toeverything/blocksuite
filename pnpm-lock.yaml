@@ -232,6 +232,9 @@ importers:
         specifier: workspace:*
         version: link:../store
     devDependencies:
+      vite-plugin-wasm:
+        specifier: ^3.2.2
+        version: 3.2.2(vite@4.4.7)
       vitepress:
         specifier: 1.0.0-alpha.74
         version: 1.0.0-alpha.74(@types/node@18.17.1)(@types/react@18.2.17)(search-insights@2.7.0)
@@ -359,6 +362,9 @@ importers:
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
+      intl-segmenter-polyfill-rs:
+        specifier: ^0.1.4
+        version: 0.1.4
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -399,6 +405,9 @@ importers:
       magic-string:
         specifier: ^0.29.0
         version: 0.29.0
+      vite-plugin-wasm:
+        specifier: ^3.2.2
+        version: 3.2.2(vite@4.4.7)
 
   packages/store:
     dependencies:
@@ -4563,6 +4572,10 @@ packages:
       side-channel: 1.0.4
     dev: true
 
+  /intl-segmenter-polyfill-rs@0.1.4:
+    resolution: {integrity: sha512-hASM/m5PoSCqq4vofQxkop6JUajLOuvGmGi05h7S6M9APbqc02ZNO55wvwLc+OAxlXgK6pAsdHV21Tj0y/P2Og==}
+    dev: false
+
   /is-accessor-descriptor@0.1.6:
     resolution: {integrity: sha512-e1BM1qnDbMRG3ll2U9dSK0UMHuWOs3pY3AtcFsmvwPtKL3MML/Q86i+GilLfvqEs4GW+ExB91tQ3Ig9noDIZ+A==}
     engines: {node: '>=0.10.0'}
@@ -7631,6 +7644,14 @@ packages:
       vite: 4.4.7(@types/node@18.17.1)
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /vite-plugin-wasm@3.2.2(vite@4.4.7):
+    resolution: {integrity: sha512-cdbBUNR850AEoMd5nvLmnyeq63CSfoP1ctD/L2vLk/5+wsgAPlAVAzUK5nGKWO/jtehNlrSSHLteN+gFQw7VOA==}
+    peerDependencies:
+      vite: ^2 || ^3 || ^4
+    dependencies:
+      vite: 4.4.7(@types/node@18.17.1)
     dev: true
 
   /vite-plugin-web-components-hmr@0.1.3(vite@4.4.7):
