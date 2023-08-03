@@ -1,20 +1,23 @@
+import { PathFinder } from '../store/index.js';
+
 type SelectionConstructor<T = unknown> = {
   new (...args: unknown[]): T;
   type: string;
 };
 
 export type BaseSelectionOptions = {
-  blockId: string;
   path: string[];
 };
 
 export abstract class BaseSelection {
   static readonly type: string;
-  readonly blockId: string;
   readonly path: string[];
-  constructor({ blockId, path }: BaseSelectionOptions) {
-    this.blockId = blockId;
+  constructor({ path }: BaseSelectionOptions) {
     this.path = path;
+  }
+
+  get blockId(): string {
+    return PathFinder.id(this.path);
   }
 
   is<T extends BlockSuiteSelectionType>(
