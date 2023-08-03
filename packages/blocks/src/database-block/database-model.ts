@@ -200,27 +200,8 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 }
 
-export const DatabaseBlockSchema = defineBlockSchema({
-  flavour: 'affine:database',
-  props: (internal): Props => ({
-    views: [],
-    title: internal.Text(DEFAULT_TITLE),
-    cells: {},
-    columns: [],
-  }),
-  metadata: {
-    role: 'hub',
-    version: 3,
-    parent: ['affine:note'],
-    children: ['affine:paragraph', 'affine:list'],
-  },
-  toModel: () => {
-    return new DatabaseBlockModel();
-  },
-  onUpgrade: (data, previousVersion, latestVersion) => {
-    if (previousVersion >= 3 || latestVersion < 3) {
-      return;
-    }
+const migration = {
+  toV3: (data, previousVersion, latestVersion) => {
     const id = nanoid();
     // @ts-expect-error
     const title = data['titleColumnName'];
@@ -241,5 +222,29 @@ export const DatabaseBlockSchema = defineBlockSchema({
         view.columns.unshift({ id, width });
       }
     });
+  },
+} satisfies Record<string, (typeof DatabaseBlockSchema)['onUpgrade']>;
+
+export const DatabaseBlockSchema = defineBlockSchema({
+  flavour: 'affine:database',
+  props: (internal): Props => ({
+    views: [],
+    title: internal.Text(DEFAULT_TITLE),
+    cells: {},
+    columns: [],
+  }),
+  metadata: {
+    role: 'hub',
+    version: 3,
+    parent: ['affine:note'],
+    children: ['affine:paragraph', 'affine:list'],
+  },
+  toModel: () => {
+    return new DatabaseBlockModel();
+  },
+  onUpgrade: (data, previousVersion, latestVersion) => {
+    if (previousVersion < 3 && latestVersion >= 3) {
+      migration.toV3(data, previousVersion, latestVersion);
+    }
   },
 });

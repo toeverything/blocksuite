@@ -4,21 +4,8 @@ type SurfaceBlockProps = {
   elements: Record<string, unknown>;
 };
 
-export const SurfaceBlockSchema = defineBlockSchema({
-  flavour: 'affine:surface',
-  props: (): SurfaceBlockProps => ({
-    elements: {},
-  }),
-  metadata: {
-    version: 4,
-    role: 'hub',
-    parent: ['affine:page'],
-    children: [],
-  },
-  onUpgrade: (data, previousVersion, version) => {
-    if (previousVersion >= 4 || version !== 4) {
-      return;
-    }
+const migration = {
+  toV4: (data, previousVersion, latestVersion) => {
     const { elements } = data;
     Object.keys(elements).forEach(key => {
       const element = elements[key] as Record<string, unknown>;
@@ -36,6 +23,24 @@ export const SurfaceBlockSchema = defineBlockSchema({
         }
       }
     });
+  },
+} satisfies Record<string, (typeof SurfaceBlockSchema)['onUpgrade']>;
+
+export const SurfaceBlockSchema = defineBlockSchema({
+  flavour: 'affine:surface',
+  props: (): SurfaceBlockProps => ({
+    elements: {},
+  }),
+  metadata: {
+    version: 4,
+    role: 'hub',
+    parent: ['affine:page'],
+    children: [],
+  },
+  onUpgrade: (data, previousVersion, version) => {
+    if (previousVersion < 4 && version >= 4) {
+      migration.toV4(data, previousVersion, version);
+    }
   },
 });
 

@@ -94,6 +94,11 @@ export function defineBlockSchema<
     props: PropsGetter<Props>;
     flavour: Flavour;
   } & Metadata;
+  onUpgrade?: (
+    data: Props,
+    previousVersion: number,
+    latestVersion: number
+  ) => void;
 };
 
 export function defineBlockSchema({
