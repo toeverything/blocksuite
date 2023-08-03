@@ -7,6 +7,7 @@ import { PathMap } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { html, literal } from 'lit/static-html.js';
 
 import { copyBlocks } from '../__internal__/clipboard/index.js';
@@ -20,7 +21,9 @@ import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { LegacyDatabaseBlockService } from './database-service.js';
+import { KanbanViewClipboard } from './kanban/clipboard.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
+import { TableViewClipboard } from './table/clipboard.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
 import type { BlockOperation } from './types.js';
 
@@ -71,9 +74,12 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   @state()
   currentView?: string;
 
+  private _view = createRef<BaseDataView>();
+
   _setViewId = (viewId: string) => {
     this.currentView = viewId;
   };
+
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
     if (!this._dataSource) {
@@ -159,6 +165,18 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           };
         },
       };
+
+      // init clipboard
+      const clipboard = new {
+        table: TableViewClipboard,
+        kanban: KanbanViewClipboard,
+      }[this.getViewDataById(id)?.mode ?? 'table'](this.root, {
+        path: this.path,
+        model: this.model,
+        view: this._view,
+        data: view,
+      });
+      clipboard.init();
     }
     return this.viewMap[id];
   }
@@ -197,6 +215,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       <div class='toolbar-hover-container data-view-root'>
         ${view}
         <${databaseTag}
+          ${ref(this._view)}
           .titleText='${this.model.title}'
           .selectionUpdated='${viewData.selectionUpdated}'
           .setSelection='${viewData.setSelection}'

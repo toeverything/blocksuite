@@ -324,6 +324,12 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   }
 }
 
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-database-rich-text-cell-editing': RichTextCellEditing;
+  }
+}
+
 columnRenderer.register({
   type: richTextColumnTypeName,
   icon: createIcon('TextIcon'),

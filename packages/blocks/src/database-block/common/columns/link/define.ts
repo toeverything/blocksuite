@@ -11,5 +11,10 @@ export const linkPureColumnConfig = columnManager.register<string>('link', {
   type: () => tString.create(),
   defaultData: () => ({}),
   cellToString: data => data?.toString() ?? '',
+  cellFromString: data => {
+    return {
+      value: data,
+    };
+  },
   cellToJson: data => data ?? null,
 });

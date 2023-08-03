@@ -321,7 +321,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
               ...selection,
               isEditing: false,
             };
-            return true;
           } else {
             if (rowsSelection && !selection.columnsSelection) {
               this.selection = {
@@ -329,7 +328,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
                 rowsSelection: undefined,
                 columnsSelection: undefined,
               };
-              return true;
             } else {
               this.selection = {
                 ...selection,
@@ -339,9 +337,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
                 },
                 columnsSelection: undefined,
               };
-              return true;
             }
           }
+          return true;
         },
         Enter: () => {
           const selection = this.selection;

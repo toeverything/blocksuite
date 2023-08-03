@@ -29,9 +29,14 @@ export interface DataViewManager {
 
   cellGetRenderValue(rowId: string, columnId: string): unknown;
 
-  cellGetFilterValue(rowId: string, columnId: string): unknown;
+  cellGetJsonValue(rowId: string, columnId: string): unknown;
 
   cellGetStringValue(rowId: string, columnId: string): string;
+
+  cellSetValueFromString(
+    columnId: string,
+    value: string
+  ): { value: unknown; data?: Record<string, unknown> };
 
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void;
 
@@ -117,7 +122,7 @@ export interface DataViewColumnManager<
 
   getStringValue(rowId: string): string;
 
-  getFilterValue(rowId: string): unknown;
+  getJsonValue(rowId: string): unknown;
 
   getValue(rowId: string): Value | undefined;
 
@@ -200,7 +205,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
       );
   }
 
-  public cellGetFilterValue(rowId: string, columnId: string): unknown {
+  public cellGetJsonValue(rowId: string, columnId: string): unknown {
     return columnManager
       .getColumn(this.columnGetType(columnId))
       .toJson(
@@ -221,6 +226,14 @@ export abstract class BaseDataViewManager implements DataViewManager {
           this.dataSource.cellGetValue(rowId, columnId),
           this.columnGetData(columnId)
         ) ?? ''
+    );
+  }
+
+  public cellSetValueFromString(columnId: string, cellData: string) {
+    return (
+      columnManager
+        .getColumn(this.columnGetType(columnId))
+        .fromString(cellData, this.columnGetData(columnId)) ?? ''
     );
   }
 
@@ -438,12 +451,21 @@ export abstract class BaseDataViewColumnManager
     this.viewManager.captureSync();
   }
 
-  getFilterValue(rowId: string): unknown {
-    return this.viewManager.cellGetFilterValue(rowId, this.id);
+  getJsonValue(rowId: string): unknown {
+    return this.viewManager.cellGetJsonValue(rowId, this.id);
   }
 
   getStringValue(rowId: string): string {
     return this.viewManager.cellGetStringValue(rowId, this.id);
+  }
+
+  setValueFromString(value: string) {
+    const result = this.viewManager.cellSetValueFromString(this.id, value);
+
+    if (result.data) {
+      this.viewManager.columnUpdateData(this.id, result.data);
+    }
+    return result.value;
   }
 
   public get icon(): UniComponent | undefined {

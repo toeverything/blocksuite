@@ -21,6 +21,12 @@ export const numberPureColumnConfig = columnManager.register<
   type: () => tNumber.create(),
   defaultData: () => ({ decimal: 0 }),
   cellToString: data => data?.toString() ?? '',
+  cellFromString: data => {
+    const num = data ? Number(data) : NaN;
+    return {
+      value: isNaN(num) ? null : num,
+    };
+  },
   cellToJson: data => data ?? null,
 });
 numberPureColumnConfig.registerConvert(
