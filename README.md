@@ -16,6 +16,7 @@
 [![Open in StackBlitz](https://img.shields.io/badge/open%20in-StackBlitz-black)](https://stackblitz.com/github/toeverything/blocksuite)
 [![Open in CodeSandbox](https://img.shields.io/badge/open%20in-CodeSandbox-black)](https://codesandbox.io/p/github/toeverything/blocksuite/master)
 [![Join Discord](https://img.shields.io/discord/959027316334407691)](https://discord.gg/9vwSWmYYcZ)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftoeverything%2Fblocksuite.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftoeverything%2Fblocksuite?ref=badge_shield)
 
 ---
 
@@ -75,3 +76,6 @@ BlockSuite accepts pull requests on GitHub. **Before you start contributing, ple
 ## License
 
 [MPL 2.0](./LICENSE)
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftoeverything%2Fblocksuite.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftoeverything%2Fblocksuite?ref=badge_large)
