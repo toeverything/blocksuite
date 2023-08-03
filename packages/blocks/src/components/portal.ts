@@ -1,8 +1,12 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, render, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
  * Renders a template into a portal. Defaults to `document.body`.
+ *
+ * Note that every time the parent component re-renders, the portal will be re-called.
+ *
+ * See https://lit.dev/docs/components/rendering/#writing-a-good-render()-method
  *
  * @example
  * ```ts
@@ -40,6 +44,34 @@ export class Portal extends LitElement {
     return this.template;
   }
 }
+
+/**
+ * Similar to `<affine-portal>`, but only renders once when called.
+ *
+ * The template should be a **static** template since it will not be re-rendered.
+ *
+ * See {@link Portal} for more details.
+ */
+export const createLitPortal = ({
+  template,
+  container = document.body,
+  abortController = new AbortController(),
+}: {
+  template: TemplateResult<1>;
+  container?: HTMLElement;
+  abortController?: AbortController;
+}) => {
+  const portalRoot = document.createElement('div');
+  portalRoot.classList.add('affine-portal');
+
+  abortController.signal.addEventListener('abort', () => {
+    portalRoot.remove();
+  });
+
+  render(template, portalRoot);
+  container.append(portalRoot);
+  return portalRoot;
+};
 
 declare global {
   interface HTMLElementTagNameMap {
