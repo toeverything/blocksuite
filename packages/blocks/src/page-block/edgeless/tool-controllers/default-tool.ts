@@ -134,7 +134,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     resetNativeSelection(null);
   }
 
-  private _setSelectionState(elements: string[], editing: boolean, by = false) {
+  private _setSelectionState(elements: string[], editing: boolean) {
     this.selection.setSelection({
       elements,
       editing,
@@ -456,8 +456,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = { x, y };
     this._dragLastPos = { x, y };
 
-    const toBeMoved = new Set(this.selection.elements);
-    this.selection.elements.forEach(element => {
+    const { elements } = this.selection;
+    const toBeMoved = new Set(elements);
+    elements.forEach(element => {
       if (element instanceof FrameElement) {
         this._edgeless.frame
           .getElementsInFrame(element)

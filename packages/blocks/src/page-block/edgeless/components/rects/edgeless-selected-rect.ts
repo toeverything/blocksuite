@@ -536,6 +536,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       await this.updateComplete;
     }
 
+    if (this._componentToolbar.isUpdatePending)
+      await this._componentToolbar.updateComplete;
+
     const componentToolbar = this._componentToolbar;
     const elements = this.selection.elements;
     const bound = elements.reduce((prev, element) => {
