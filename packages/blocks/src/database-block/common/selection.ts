@@ -12,15 +12,12 @@ export class DatabaseSelection extends BaseSelection {
 
   constructor({
     path,
-    blockId,
     viewSelection,
   }: {
-    blockId: string;
     path: string[];
     viewSelection: DataViewSelection;
   }) {
     super({
-      blockId,
       path,
     });
 
@@ -50,7 +47,6 @@ export class DatabaseSelection extends BaseSelection {
     return {
       type: 'database',
       path: this.path,
-      blockId: this.blockId,
       viewSelection: this.viewSelection,
     };
   }
@@ -58,7 +54,6 @@ export class DatabaseSelection extends BaseSelection {
   static override fromJSON(json: Record<string, unknown>): DatabaseSelection {
     return new DatabaseSelection({
       path: json.path as string[],
-      blockId: json.blockId as string,
       viewSelection: json.viewSelection as DataViewSelection,
     });
   }

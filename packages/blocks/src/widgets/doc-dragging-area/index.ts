@@ -106,7 +106,6 @@ export class DocDraggingAreaWidget extends WidgetElement {
       )
       .map(rectWithId => {
         return this.root.selectionManager.getInstance('block', {
-          blockId: rectWithId.id,
           path: rectWithId.path,
         });
       });

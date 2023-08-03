@@ -28,7 +28,6 @@ export class TextNavigation {
       blocks.map(block => {
         return manager.getInstance('block', {
           path: block.path,
-          blockId: block.model.id,
         });
       })
     );
@@ -115,7 +114,6 @@ export class TextNavigation {
         from: {
           index: 0,
           length: 0,
-          blockId: blockElement.model.id,
           path: blockElement.path,
         },
         to: null,
@@ -153,7 +151,6 @@ export class TextNavigation {
         from: {
           index: blockElement.model.text?.length ?? 0,
           length: 0,
-          blockId: blockElement.model.id,
           path: blockElement.path,
         },
         to: null,
