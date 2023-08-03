@@ -181,12 +181,127 @@ export class ViewStore<NodeViewType = unknown> {
     return this.fromPath(PathFinder.parent(path));
   };
 
-  indexOf = (path: string[]) => {
-    const parent = this.getParent(path);
+  private _indexOf = (
+    path: string[],
+    parent?: NodeViewTree<NodeViewType> | null
+  ) => {
+    if (!parent) {
+      parent = this.getParent(path);
+    }
     if (!parent) {
       return -1;
     }
     return parent.children.findIndex(x => x.id === path[path.length - 1]);
+  };
+
+  findPrev = (
+    path: string[],
+    fn: (
+      nodeView: NodeViewTree<NodeViewType>,
+      index: number,
+      parent: NodeViewTree<NodeViewType>
+    ) => undefined | null | true
+  ) => {
+    const getPrev = (path: string[]) => {
+      const parent = this.getParent(path);
+      if (!parent) {
+        return null;
+      }
+      const index = this._indexOf(path, parent);
+      if (index === -1) {
+        return null;
+      }
+      if (index === 0) {
+        const grandParent = this.getParent(PathFinder.parent(path));
+        if (!grandParent) return null;
+        return {
+          nodeView: parent,
+          parent: grandParent,
+          index: this._indexOf(PathFinder.parent(path), grandParent),
+        };
+      }
+      return {
+        nodeView: parent.children[index - 1],
+        parent,
+        index: index - 1,
+      };
+    };
+
+    let output: null | NodeViewTree<NodeViewType> = null;
+    const iterate = (path: string[]) => {
+      const state = getPrev(path);
+      if (!state) {
+        return;
+      }
+      const { nodeView, parent, index } = state;
+      const result = fn(nodeView, index, parent);
+      if (result) {
+        output = nodeView;
+
+        return;
+      }
+
+      iterate(nodeView.path);
+    };
+
+    iterate(path);
+
+    return output;
+  };
+
+  findNext = (
+    path: string[],
+    fn: (
+      nodeView: NodeViewTree<NodeViewType>,
+      index: number,
+      parent: NodeViewTree<NodeViewType>
+    ) => undefined | null | true
+  ) => {
+    const getNext = (path: string[]) => {
+      const parent = this.getParent(path);
+      if (!parent) {
+        return null;
+      }
+      const index = this._indexOf(path, parent);
+      if (index === -1) {
+        return null;
+      }
+      if (index === parent.children.length - 1) {
+        const grandParent = this.getParent(PathFinder.parent(path));
+        if (!grandParent) return null;
+        return {
+          nodeView: parent,
+          parent: grandParent,
+          index: this._indexOf(PathFinder.parent(path), grandParent),
+        };
+      }
+      return {
+        nodeView: parent.children[index + 1],
+        parent,
+        index: index + 1,
+      };
+    };
+
+    let output: null | NodeViewTree<NodeViewType> = null;
+    const iterate = (path: string[]) => {
+      const state = getNext(path);
+      if (!state) {
+        return;
+      }
+      const { nodeView, parent, index } = state;
+      const result = fn(nodeView, index, parent);
+      if (result) {
+        output = nodeView;
+
+        return;
+      }
+
+      iterate(nodeView.path);
+    };
+
+    iterate(path);
+
+    return output;
   };
 
   mount() {
