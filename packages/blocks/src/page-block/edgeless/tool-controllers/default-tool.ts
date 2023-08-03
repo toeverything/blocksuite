@@ -496,8 +496,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             ...blocks.map(block => block.id),
             ...elements.map(element => element.id),
           ],
-          false,
-          true
+          false
         );
 
         this._forceUpdateSelection(this.dragType, true);
