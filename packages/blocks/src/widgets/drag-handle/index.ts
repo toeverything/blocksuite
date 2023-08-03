@@ -472,6 +472,7 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragEndHandler: UIEventHandler = () => {
     if (!this._dragging || this._draggingElements.length === 0) {
+      this._hide(true);
       return;
     }
 

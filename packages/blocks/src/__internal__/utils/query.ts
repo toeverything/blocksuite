@@ -890,6 +890,8 @@ export function findClosestNoteBlock(
     if (distance <= lastDistance) {
       lastDistance = distance;
       lastChild = child;
+    } else {
+      return lastChild;
     }
   }
 

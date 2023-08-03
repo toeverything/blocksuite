@@ -78,15 +78,11 @@ export const styles = css`
 
   .affine-drag-preview > .affine-block-element {
     pointer-events: none;
+    background-color: transparent;
   }
 
   .affine-drag-preview > .affine-block-element:first-child > *:first-child {
     margin-top: 0;
-  }
-
-  .affine-drag-preview .affine-rich-text {
-    user-modify: read-only;
-    -webkit-user-modify: read-only;
   }
 
   .affine-drag-preview.grabbing {
