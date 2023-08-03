@@ -1,6 +1,5 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
 
 import type { DefaultPageBlockComponent } from '../../default-page-block.js';
 import { BlockNavigation } from './block-navigation.js';
@@ -196,8 +195,10 @@ export class Keyboard {
   ) {
     const current = selections[0];
     const first = this._page.getBlockById(current.blockId);
-    const firstElement = this.host.root.viewStore.viewFromPath(current.path)
-      ?.view as BlockElement;
+    const firstElement = this.host.root.viewStore.viewFromPath(
+      'block',
+      current.path
+    );
 
     assertExists(first, `Cannot find block ${current.blockId}`);
     assertExists(

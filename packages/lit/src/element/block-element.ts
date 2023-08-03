@@ -93,9 +93,9 @@ export class BlockElement<
     return Object.keys(this.widgets).reduce((mapping, key) => {
       return {
         ...mapping,
-        [key]: this.root.viewStore.viewFromPath([...this.path, key])?.view,
+        [key]: this.root.viewStore.viewFromPath('widget', [...this.path, key]),
       };
-    }, {}) as Partial<Record<WidgetName, WidgetElement>>;
+    }, {});
   }
 
   renderModel = (model: BaseBlockModel): TemplateResult => {

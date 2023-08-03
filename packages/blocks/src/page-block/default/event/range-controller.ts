@@ -48,7 +48,7 @@ export class RangeController {
     }
 
     const { from, to } = selection;
-    const fromBlock = this.root.viewStore.viewFromPath(from.path);
+    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
     if (!fromBlock) {
       return;
     }
@@ -158,10 +158,10 @@ export class RangeController {
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {
-    const fromBlock = this.root.viewStore.viewFromPath(point.path);
+    const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
     assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);
     const startVirgoElement =
-      fromBlock.view.querySelector<VirgoRootElement>('[data-virgo-root]');
+      fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');
     assertExists(
       startVirgoElement,
       `Cannot find virgo element in block ${point.path.join(' > ')}}`

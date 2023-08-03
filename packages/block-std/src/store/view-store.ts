@@ -15,6 +15,8 @@ export type NodeViewTree<T> = NodeViewLeaf<T> & {
   children: NodeViewTree<T>[];
 };
 
+type SpecToNodeView<T> = T extends BlockSuiteViewSpec<infer U> ? U : unknown;
+
 export interface BlockSuiteViewSpec<T = unknown> {
   fromDOM: (node: Node) => null | NodeView<T>;
   toDOM: (nodeView: NodeView<T>) => Element;
@@ -125,7 +127,7 @@ export class ViewStore<NodeViewType = unknown> {
     return tree;
   };
 
-  viewFromPath = (path: string[]) => {
+  fromPath = (path: string[]) => {
     const tree = this.getNodeViewTree();
     return path.reduce((curr: NodeViewTree<NodeViewType> | null, id) => {
       if (!curr) {
@@ -139,6 +141,17 @@ export class ViewStore<NodeViewType = unknown> {
     }, tree);
   };
 
+  viewFromPath = <T extends BlockSuiteViewType>(
+    type: T,
+    path: string[]
+  ): null | SpecToNodeView<BlockSuiteView[T]> => {
+    const tree = this.fromPath(path);
+    if (!tree || tree.type !== type) {
+      return null;
+    }
+    return tree.view as SpecToNodeView<BlockSuiteView[T]>;
+  };
+
   walkThrough = (
     fn: (
       nodeView: NodeViewTree<NodeViewType>,
@@ -147,7 +160,7 @@ export class ViewStore<NodeViewType = unknown> {
     ) => undefined | null | true,
     path: string[] = []
   ) => {
-    const tree = this.viewFromPath(path);
+    const tree = this.fromPath(path);
     assertExists(tree, `Invalid path to get node in view: ${path}`);
 
     const iterate = (node: NodeViewTree<NodeViewType>, index: number) => {
@@ -165,7 +178,7 @@ export class ViewStore<NodeViewType = unknown> {
     if (path.length === 0) {
       return null;
     }
-    return this.viewFromPath(PathFinder.parent(path));
+    return this.fromPath(PathFinder.parent(path));
   };
 
   indexOf = (path: string[]) => {
