@@ -1,10 +1,7 @@
-import { expect } from '@playwright/test';
-
 import { click } from '../utils/actions/click.js';
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
   addBasicRectShapeElement,
-  countBlock,
   deleteAll,
   getNoteBoundBoxInEdgeless,
   setEdgelessTool,

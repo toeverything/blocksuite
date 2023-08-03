@@ -29,7 +29,11 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
-import { getConnectorPath, getZoomLevel } from './actions/edgeless.js';
+import {
+  getConnectorPath,
+  getSelectedBound,
+  getZoomLevel,
+} from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -110,6 +114,8 @@ export const defaultStore: SerializedStore = {
   },
 };
 
+type Bound = [x: number, y: number, w: number, h: number];
+
 export async function assertEmpty(page: Page) {
   await assertRichTexts(page, ['']);
 }
@@ -148,7 +154,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
     const editor = document.querySelector(
-      'edgeless-text-editor,edgeless-shape-text-editor'
+      'edgeless-text-editor,edgeless-shape-text-editor,edgeless-frame-title-editor'
     );
     if (!editor) {
       throw new Error('editor not found');
@@ -805,4 +811,20 @@ export function assertRectExist(
   rect: { x: number; y: number; width: number; height: number } | null
 ): asserts rect is { x: number; y: number; width: number; height: number } {
   expect(rect).not.toBe(null);
+}
+
+export async function assertSelectedBound(
+  page: Page,
+  expected: Bound,
+  index = 0
+) {
+  const bound = await getSelectedBound(page, index);
+  assertBound(bound, expected);
+}
+
+export function assertBound(received: Bound, expected: Bound) {
+  expect(received[0]).toBeCloseTo(expected[0], 0);
+  expect(received[1]).toBeCloseTo(expected[1], 0);
+  expect(received[2]).toBeCloseTo(expected[2], 0);
+  expect(received[3]).toBeCloseTo(expected[3], 0);
 }
