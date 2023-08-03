@@ -181,19 +181,6 @@ export class ViewStore<NodeViewType = unknown> {
     return this.fromPath(PathFinder.parent(path));
   };
 
-  private _indexOf = (
-    path: string[],
-    parent?: NodeViewTree<NodeViewType> | null
-  ) => {
-    if (!parent) {
-      parent = this.getParent(path);
-    }
-    if (!parent) {
-      return -1;
-    }
-    return parent.children.findIndex(x => x.id === path[path.length - 1]);
-  };
-
   findPrev = (
     path: string[],
     fn: (
@@ -304,6 +291,14 @@ export class ViewStore<NodeViewType = unknown> {
     return output;
   };
 
+  indexOf = (path: string[]) => {
+    const parent = this.getParent(path);
+    if (!parent) {
+      return -1;
+    }
+    return this._indexOf(path, parent);
+  };
+
   mount() {
     this._observer.observe(this.blockStore.root, observeOptions);
   }
@@ -313,6 +308,10 @@ export class ViewStore<NodeViewType = unknown> {
     this._observer.disconnect();
     this.viewSpec.clear();
   }
+
+  private _indexOf = (path: string[], parent: NodeViewTree<unknown>) => {
+    return parent.children.findIndex(x => x.id === path[path.length - 1]);
+  };
 }
 
 declare global {
