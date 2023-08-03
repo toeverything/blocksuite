@@ -16,7 +16,7 @@ import {
 } from '../__internal__/index.js';
 import type {
   AbstractEditor,
-  DefaultPageBlockComponent,
+  DocPageBlockComponent,
   EdgelessPageBlockComponent,
   ImageBlockModel,
 } from '../index.js';
@@ -25,7 +25,7 @@ import type { DragIndicator } from './index.js';
 export type GetPageInfo = () => {
   page: Page;
   mode: 'page' | 'edgeless';
-  pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent | undefined;
+  pageBlock: DocPageBlockComponent | EdgelessPageBlockComponent | undefined;
 };
 
 type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;

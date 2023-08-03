@@ -3,7 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import { getService } from '../../__internal__/service.js';
-import type { DefaultPageBlockComponent } from '../../page-block/index.js';
+import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { getCurrentBlockRange } from '../utils/index.js';
@@ -18,8 +18,8 @@ import {
 
 export class PageClipboard implements Clipboard {
   _page!: Page;
-  _ele: DefaultPageBlockComponent;
-  constructor(pageEle: DefaultPageBlockComponent) {
+  _ele: DocPageBlockComponent;
+  constructor(pageEle: DocPageBlockComponent) {
     this._ele = pageEle;
   }
 

@@ -3,7 +3,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 
 import {
-  getDefaultPage,
+  getDocPage,
   getModelByElement,
   noop,
 } from '../../__internal__/utils/index.js';
@@ -79,7 +79,7 @@ function bindHoverState(
   popover.addEventListener('mouseout', handleMouseLeave);
 
   const model = getModelByElement(target);
-  const pageBlock = getDefaultPage(model.page);
+  const pageBlock = getDocPage(model.page);
   const viewport = pageBlock?.viewportElement;
   viewport?.addEventListener('scroll', abortHandler);
   return () => {

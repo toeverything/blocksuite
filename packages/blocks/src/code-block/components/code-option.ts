@@ -10,7 +10,7 @@ import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import { copyCode } from '../../page-block/default/utils.js';
+import { copyCode } from '../../page-block/doc/utils.js';
 import type { CodeBlockModel } from '../code-model.js';
 
 export function CodeOptionTemplate({

@@ -2,12 +2,15 @@ import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
-import type { Text } from '@blocksuite/store';
+import { assertExists, type Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import type { DefaultPageBlockComponent } from '../default-page-block.js';
+import type { PageBlockComponent } from '../types.js';
 
-export class Synchronizer {
+/**
+ * Two-way binding between native range and text selection
+ */
+export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
   private get _selection() {
     return this.host.root.selectionManager;
@@ -21,7 +24,12 @@ export class Synchronizer {
     return this._selection.value;
   }
 
-  constructor(public host: DefaultPageBlockComponent) {
+  private get _rangeManager() {
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
+  }
+
+  constructor(public host: PageBlockComponent) {
     this.host.disposables.add(
       this._selection.slots.changed.on(selections => {
         if (this._isNativeSelection) {
@@ -42,7 +50,7 @@ export class Synchronizer {
           }
 
           this._prevSelection = text;
-          this.host.rangeController.syncRange(text);
+          this._rangeManager.syncTextSelectionToRange(text);
         });
       })
     );
@@ -53,7 +61,8 @@ export class Synchronizer {
         return;
       }
       const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-      this._prevSelection = this.host.rangeController.writeRange(range) ?? null;
+      this._prevSelection =
+        this._rangeManager.writeRangeByTextSelection(range) ?? null;
     });
 
     this.host.handleEvent('beforeInput', ctx => {
@@ -74,10 +83,10 @@ export class Synchronizer {
     const { from, to } = selection;
     if (!to || PathFinder.equals(from.path, to.path)) return;
 
-    const range = this.host.rangeController.value;
+    const range = this._rangeManager.value;
     if (!range) return;
 
-    const blocks = this.host.rangeController.findBlockElementsByRange(range);
+    const blocks = this._rangeManager.findBlockElementsByRange(range);
     const start = blocks.at(0);
     const end = blocks.at(-1);
     if (!start || !end) return;

@@ -3,29 +3,44 @@ import type {
   TextSelection,
   UIEventHandler,
 } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import type { DefaultPageBlockComponent } from '../default-page-block.js';
-import { caretFromPoint, pointIsNotText, rangeFromCaret } from './utils.js';
+import { DocPageBlockComponent } from '../doc/doc-page-block.js';
+import type { PageBlockComponent } from '../types.js';
+import {
+  autoScroll,
+  caretFromPoint,
+  pointIsNotText,
+  rangeFromCaret,
+} from './utils.js';
 
+/**
+ * Used to support native range between multiple contenteditable elements
+ */
 export class Gesture {
   isNativeSelection = false;
 
   private _startRange: Range | null = null;
   private _rafID = 0;
-  private get _viewport() {
-    return this.host.viewport;
-  }
 
-  private get _selection() {
+  private get _selectionManager() {
     return this.host.root.selectionManager;
   }
 
-  private get _rangeController() {
-    return this.host.rangeController;
+  private get _viewportElement() {
+    if (this.host instanceof DocPageBlockComponent) {
+      return this.host.viewportElement;
+    }
+    return null;
   }
 
-  constructor(public host: DefaultPageBlockComponent) {
+  private get _rangeManager() {
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
+  }
+
+  constructor(public host: PageBlockComponent) {
     this.host.handleEvent('dragStart', this._dragStartHandler);
     this.host.handleEvent('dragMove', this._dragMoveHandler);
     this.host.handleEvent('dragEnd', this._dragEndHandler);
@@ -61,7 +76,7 @@ export class Gesture {
       return;
     }
 
-    this._rangeController.render(range);
+    this._rangeManager.renderRange(range);
   };
 
   private _nativeDragStartHandler: UIEventHandler = ctx => {
@@ -84,7 +99,9 @@ export class Gesture {
 
       this._updateRange(state);
 
-      const result = this._autoScroll(state.y);
+      const result = this._viewportElement
+        ? autoScroll(this._viewportElement, state.y)
+        : false;
       if (result) {
         this._rafID = requestAnimationFrame(runner);
         return;
@@ -142,7 +159,7 @@ export class Gesture {
     const range = document.createRange();
     range.setStart(first, 0);
     range.setEnd(last, Number(last.textContent?.length));
-    this._rangeController.render(range);
+    this._rangeManager.renderRange(range);
   };
 
   private _clickHandler: UIEventHandler = ctx => {
@@ -152,8 +169,8 @@ export class Gesture {
     }
 
     const text =
-      this._selection.value.find((selection): selection is TextSelection =>
-        selection.is('text')
+      this._selectionManager.value.find(
+        (selection): selection is TextSelection => selection.is('text')
       ) ?? null;
 
     if (state.keys.shift) {
@@ -205,7 +222,7 @@ export class Gesture {
     range.setStart(node, left);
     range.setEnd(node, right);
 
-    this._rangeController.render(range);
+    this._rangeManager.renderRange(range);
   };
 
   private _clearRaf() {
@@ -229,34 +246,6 @@ export class Gesture {
 
     const range = rangeFromCaret(caret);
 
-    this._rangeController.render(this._startRange, range);
-  };
-
-  private _autoScroll = (y: number): boolean => {
-    const { scrollHeight, clientHeight, scrollTop } = this._viewport;
-    let _scrollTop = scrollTop;
-    const threshold = 50;
-    const max = scrollHeight - clientHeight;
-
-    let d = 0;
-    let flag = false;
-
-    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
-      // ↓
-      d = threshold - (clientHeight - y);
-      flag = Math.ceil(_scrollTop) < max;
-    } else if (scrollTop > 0 && y < threshold) {
-      // ↑
-      d = y - threshold;
-      flag = _scrollTop > 0;
-    }
-
-    _scrollTop += d * 0.25;
-
-    if (this.host.viewportElement && flag && scrollTop !== _scrollTop) {
-      this.host.viewportElement.scrollTop = _scrollTop;
-      return true;
-    }
-    return false;
+    this._rangeManager.renderRange(this._startRange, range);
   };
 }

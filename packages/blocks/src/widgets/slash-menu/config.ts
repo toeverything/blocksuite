@@ -40,7 +40,7 @@ import {
 } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
-import { copyBlock } from '../../page-block/default/utils.js';
+import { copyBlock } from '../../page-block/doc/utils.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
   onModelTextUpdated,

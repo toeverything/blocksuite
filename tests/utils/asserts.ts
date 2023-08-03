@@ -195,7 +195,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('.affine-default-page-block-title').nth(0);
+  const locator = page.locator('.affine-doc-page-block-title').nth(0);
   await expect(locator).toBeFocused();
 }
 

@@ -156,7 +156,7 @@ export async function assertSelectedStyle(
 }
 
 export async function clickDatabaseOutside(page: Page) {
-  const pageTitle = page.locator('.affine-default-page-block-title');
+  const pageTitle = page.locator('.affine-doc-page-block-title');
   await pageTitle.click();
 }
 

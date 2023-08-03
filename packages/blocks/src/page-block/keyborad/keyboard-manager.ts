@@ -1,12 +1,12 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { DefaultPageBlockComponent } from '../../default-page-block.js';
+import type { PageBlockComponent } from '../types.js';
 import { BlockNavigation } from './block-navigation.js';
 import { TextNavigation } from './text-navigation.js';
 
-export class Keyboard {
-  constructor(public host: DefaultPageBlockComponent) {
+export class PageKeyboardManager {
+  constructor(public host: PageBlockComponent) {
     const textNavigation = new TextNavigation(host);
     const blockNavigation = new BlockNavigation(host);
     this.host.handleEvent('keyDown', ctx => {

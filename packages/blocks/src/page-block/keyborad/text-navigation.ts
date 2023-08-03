@@ -1,19 +1,36 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/store';
 
-import type { DefaultPageBlockComponent } from '../../default-page-block.js';
+import { DocPageBlockComponent } from '../index.js';
+import { autoScroll } from '../text-selection/utils.js';
+import type { PageBlockComponent } from '../types.js';
 import {
   horizontalGetNextCaret,
   horizontalMoveCursorToNextText,
-} from '../utils.js';
+} from './utils.js';
 
 export class TextNavigation {
   private _anchorRange: Range | null = null;
   private _focusRange: Range | null = null;
 
-  private get _viewport() {
-    return this.host.viewport;
+  private get _viewportElement() {
+    if (this.host instanceof DocPageBlockComponent) {
+      return this.host.viewportElement;
+    }
+    return null;
   }
+
+  private get _rangeManager() {
+    assertExists(this.host.rangeManager);
+    return this.host.rangeManager;
+  }
+
+  private get _selection() {
+    return this.host.root.selectionManager;
+  }
+
+  constructor(public host: PageBlockComponent) {}
 
   Escape: UIEventHandler = () => {
     const selection = document.getSelection();
@@ -21,7 +38,7 @@ export class TextNavigation {
       return;
     }
     const range = selection.getRangeAt(0);
-    const blocks = this.host.rangeController.findBlockElementsByRange(range);
+    const blocks = this._rangeManager.findBlockElementsByRange(range);
 
     const manager = this.host.root.selectionManager;
     manager.set(
@@ -54,7 +71,9 @@ export class TextNavigation {
     const nextRect = result?.caret.node.parentElement?.getBoundingClientRect();
     if (nextRect) {
       ctx.get('keyboardState').raw.preventDefault();
-      this._autoScroll(nextRect.top);
+      if (this._viewportElement) {
+        autoScroll(this._viewportElement, nextRect.top);
+      }
     }
     return;
   };
@@ -79,7 +98,9 @@ export class TextNavigation {
     const nextRect = result?.caret.node.parentElement?.getBoundingClientRect();
     if (nextRect) {
       ctx.get('keyboardState').raw.preventDefault();
-      this._autoScroll(nextRect.bottom);
+      if (this._viewportElement) {
+        autoScroll(this._viewportElement, nextRect.bottom);
+      }
     }
     return;
   };
@@ -184,11 +205,16 @@ export class TextNavigation {
     }
     const _range = document.createRange();
     _range.setStart(caret.node, caret.offset);
-    this.host.rangeController.render(_range, this._anchorRange);
+    this._rangeManager.renderRange(_range, this._anchorRange);
     this._focusRange = _range.cloneRange();
-    this._autoScroll(
-      this.host.rangeController.value.getBoundingClientRect().top
-    );
+
+    if (this._viewportElement) {
+      autoScroll(
+        this._viewportElement,
+        this._rangeManager.value.getBoundingClientRect().top
+      );
+    }
+
     return true;
   };
 
@@ -220,12 +246,16 @@ export class TextNavigation {
     }
     const _range = document.createRange();
     _range.setStart(caret.node, caret.offset);
-    this.host.rangeController.render(_range, this._anchorRange);
+    this._rangeManager.renderRange(_range, this._anchorRange);
     this._focusRange = _range.cloneRange();
 
-    this._autoScroll(
-      this.host.rangeController.value.getBoundingClientRect().bottom
-    );
+    if (this._viewportElement) {
+      autoScroll(
+        this._viewportElement,
+        this._rangeManager.value.getBoundingClientRect().bottom
+      );
+    }
+
     return true;
   };
 
@@ -233,38 +263,4 @@ export class TextNavigation {
     this._anchorRange = null;
     this._focusRange = null;
   };
-
-  constructor(public host: DefaultPageBlockComponent) {}
-
-  private _autoScroll = (y: number): boolean => {
-    const { scrollHeight, clientHeight, scrollTop } = this._viewport;
-    let _scrollTop = scrollTop;
-    const threshold = 100;
-    const max = scrollHeight - clientHeight;
-
-    let d = 0;
-    let flag = false;
-
-    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
-      // ↓
-      d = threshold - (clientHeight - y);
-      flag = Math.ceil(_scrollTop) < max;
-    } else if (scrollTop > 0 && y < threshold) {
-      // ↑
-      d = y - threshold;
-      flag = _scrollTop > 0;
-    }
-
-    _scrollTop += d * 0.5;
-
-    if (this.host.viewportElement && flag && scrollTop !== _scrollTop) {
-      this.host.viewportElement.scrollTop = _scrollTop;
-      return true;
-    }
-    return false;
-  };
-
-  private get _selection() {
-    return this.host.root.selectionManager;
-  }
 }

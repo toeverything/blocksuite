@@ -6,7 +6,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isBlankArea } from '../../__internal__/index.js';
-import type { DefaultPageBlockComponent } from '../../page-block/index.js';
+import type { DocPageBlockComponent } from '../../page-block/index.js';
 
 type Rect = {
   left: number;
@@ -91,7 +91,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
   }
 
   private get _viewportElement() {
-    const pageBlock = this.hostElement as DefaultPageBlockComponent;
+    const pageBlock = this.hostElement as DocPageBlockComponent;
 
     assertExists(pageBlock);
 
