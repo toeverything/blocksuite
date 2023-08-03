@@ -15,6 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   calcDropTarget,
   findClosestBlockElement,
+  getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
@@ -22,13 +23,6 @@ import {
 } from '../../__internal__/index.js';
 import type { DefaultPageBlockComponent } from '../../page-block/index.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
-
-const DRAG_HANDLE_WORKING_OFFSET = {
-  left: -120,
-  top: 0,
-  right: 0,
-  bottom: 0,
-};
 
 @customElement('affine-drag-handle-widget')
 export class DragHandleWidget extends WidgetElement {
@@ -81,8 +75,8 @@ export class DragHandleWidget extends WidgetElement {
     this._dragPreviewOffsetY = 0;
   }
 
-  private _show(blockElement: BlockElement) {
-    const { height, left, top } = blockElement.getBoundingClientRect();
+  private _show(point: Point, blockElement: BlockElement) {
+    const { height, left, top, width } = blockElement.getBoundingClientRect();
     this._dragHandleContainer.style.display = 'block';
     this._dragHandleContainer.style.height = `${height / this._scale}px`;
     this._dragHandleContainer.style.width = `${DRAG_HANDLE_WIDTH}px`;
@@ -93,6 +87,10 @@ export class DragHandleWidget extends WidgetElement {
     const posTop = top;
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
+    this._dragHandleContainer.style.opacity = `${(
+      1 -
+      (point.x - left) / width
+    ).toFixed(2)}`;
   }
 
   private _containBlock(selections: BaseSelection[], blockId: string) {
@@ -230,18 +228,13 @@ export class DragHandleWidget extends WidgetElement {
 
   private _outOfNoteBlock = (point: Point) => {
     const noteSelector = 'affine-note';
-    const closeNoteBlock = findClosestBlockElement(
+    const closestNoteBlock = findClosestBlockElement(
       this._pageBlockElement,
       point,
       noteSelector
     );
-    const rect = closeNoteBlock?.getBoundingClientRect();
-    return rect
-      ? point.x < rect.left + DRAG_HANDLE_WORKING_OFFSET.left ||
-          point.x > rect.right + DRAG_HANDLE_WORKING_OFFSET.right ||
-          point.y < rect.top + DRAG_HANDLE_WORKING_OFFSET.top ||
-          point.y > rect.bottom + DRAG_HANDLE_WORKING_OFFSET.bottom
-      : false;
+    const rect = closestNoteBlock?.getBoundingClientRect();
+    return rect ? point.y < rect.top || point.y > rect.bottom : true;
   };
 
   /**
@@ -321,7 +314,7 @@ export class DragHandleWidget extends WidgetElement {
 
     this._hoveredBlockId = blockId;
     this._hoveredBlockPath = blockPath;
-    this._show(closestBlockElement);
+    this._show(point, closestBlockElement);
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
@@ -418,15 +411,17 @@ export class DragHandleWidget extends WidgetElement {
       const nativeSelection = document.getSelection();
       if (nativeSelection && nativeSelection.rangeCount > 0) {
         const range = nativeSelection.getRangeAt(0);
-        const blockElements =
-          this._rangeController.findBlockElementsByRange(range);
-        const blockSelections = blockElements
-          .filter(element => element.flavour !== 'affine:note')
-          .map(element => {
-            return this.root.selectionManager.getInstance('block', {
-              path: element.path,
-            });
+        const blockElements = this._rangeController
+          .findBlockElementsByRange(range)
+          .filter(element => element.flavour !== 'affine:note');
+        const blockElementsExcludingChildren = getBlockElementsExcludeSubtrees(
+          blockElements
+        ) as BlockElement[];
+        const blockSelections = blockElementsExcludingChildren.map(element => {
+          return this.root.selectionManager.getInstance('block', {
+            path: element.path,
           });
+        });
         this.root.selectionManager.set(blockSelections);
         selections = this.selectedBlocks;
       }
@@ -451,8 +446,14 @@ export class DragHandleWidget extends WidgetElement {
       })
       .filter((element): element is BlockElement<BaseBlockModel> => !!element);
 
-    this._createDragPreview(blockElements, hoverBlockElement);
-    this._draggingElements = blockElements;
+    // This could be skip if we can ensure that all selected blocks are on the same level
+    // Which means not selecting parent block and child block at the same time
+    const blockElementsExcludingChildren = getBlockElementsExcludeSubtrees(
+      blockElements
+    ) as BlockElement[];
+
+    this._createDragPreview(blockElementsExcludingChildren, hoverBlockElement);
+    this._draggingElements = blockElementsExcludingChildren;
     this._dragging = true;
     this._hide();
 
@@ -505,7 +506,7 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
-    const selectedBlocks = draggingElements
+    const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
       .map(element => getModelByBlockElement(element))
       .filter((x): x is BaseBlockModel => !!x);
     const targetBlock = this.page.getBlockById(targetBlockId);
@@ -518,6 +519,22 @@ export class DragHandleWidget extends WidgetElement {
         shouldInsertBefore
       );
     }
+
+    // TODO:
+    // Need to update selection when moving blocks successfully
+    // Because the block path may be changed after moving
+    // assertExists(parent);
+    // const parentElement = getBlockElementByModel(parent);
+    // console.log('parent path: ', parentElement?.path);
+    // if (parentElement) {
+    //   const newSelections = selectedBlocks
+    //     .map(block => parentElement.path.concat(block.id))
+    //     .map(path => this.root.selectionManager.getInstance('block', { path }));
+
+    //   console.log('new selections: ', newSelections);
+    //   this.root.selectionManager.set(newSelections);
+    //   console.log('new selected blocks: ', this.selectedBlocks);
+    // }
 
     return true;
   };
@@ -534,7 +551,7 @@ export class DragHandleWidget extends WidgetElement {
   };
 
   override firstUpdated() {
-    this._hide();
+    this._hide(true);
   }
 
   override connectedCallback() {

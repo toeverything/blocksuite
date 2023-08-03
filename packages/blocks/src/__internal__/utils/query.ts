@@ -856,9 +856,9 @@ export function findClosestBlockElement(
 
   for (const child of children) {
     const rect = child.getBoundingClientRect();
-    if (rect.height === 0) continue;
+    if (rect.height === 0 || point.y > rect.bottom) continue;
     const distance =
-      Math.pow(point.y - (rect.y + rect.height), 2) +
+      Math.pow(point.y - (rect.y + rect.height / 2), 2) +
       Math.pow(point.x - rect.x, 2);
 
     if (distance <= lastDistance) {
