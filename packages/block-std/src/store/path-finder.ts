@@ -3,6 +3,10 @@ export class PathFinder {
     // this is a static class
   }
 
+  static id = (path: readonly string[]) => {
+    return path[path.length - 1];
+  };
+
   static parent = (path: readonly string[]) => {
     return path.slice(0, path.length - 1);
   };

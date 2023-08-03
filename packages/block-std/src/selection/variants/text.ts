@@ -2,7 +2,6 @@ import { PathFinder } from '../../store/path-finder.js';
 import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
-  blockId: string;
   path: string[];
   index: number;
   length: number;
@@ -22,11 +21,11 @@ export class TextSelection extends BaseSelection {
 
   constructor({ from, to }: TextSelectionProps) {
     super({
-      blockId: from.blockId,
       path: from.path,
     });
     this.from = from;
-    this.to = to;
+
+    this.to = this._equalPoint(from, to) ? null : to;
   }
 
   empty(): boolean {
@@ -39,7 +38,9 @@ export class TextSelection extends BaseSelection {
   ): boolean {
     if (a && b) {
       return (
-        a.blockId === b.blockId && a.index === b.index && a.length === b.length
+        PathFinder.equals(a.path, b.path) &&
+        a.index === b.index &&
+        a.length === b.length
       );
     }
 
@@ -49,7 +50,7 @@ export class TextSelection extends BaseSelection {
   override equals(other: BaseSelection): boolean {
     if (other instanceof TextSelection) {
       return (
-        other.blockId === this.blockId &&
+        PathFinder.equals(this.path, other.path) &&
         this._equalPoint(other.from, this.from) &&
         this._equalPoint(other.to, this.to)
       );
