@@ -1034,7 +1034,6 @@ export class EdgelessPageBlockComponent
     assertExists(note);
 
     this.tools.switchToDefaultMode({
-      blockId: '',
       elements: [note.id],
       editing: false,
     });

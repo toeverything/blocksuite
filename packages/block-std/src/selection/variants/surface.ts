@@ -6,8 +6,8 @@ export class SurfaceSelection extends BaseSelection {
   readonly elements: string[];
   readonly editing: boolean;
 
-  constructor(blockId: string, elements: string[], editing: boolean) {
-    super({ blockId, path: [] });
+  constructor(elements: string[], editing: boolean) {
+    super({ path: [] });
     this.elements = elements;
     this.editing = editing;
   }
@@ -38,12 +38,9 @@ export class SurfaceSelection extends BaseSelection {
   }
 
   static override fromJSON(
-    json:
-      | Record<string, unknown>
-      | { elements: string[]; editing: boolean; blockId?: string; by?: string }
+    json: Record<string, unknown> | { elements: string[]; editing: boolean }
   ): SurfaceSelection {
     return new SurfaceSelection(
-      (json.blockId ?? '') as string,
       json.elements as string[],
       json.editing as boolean
     );

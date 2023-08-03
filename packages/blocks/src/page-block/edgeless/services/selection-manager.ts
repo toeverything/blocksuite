@@ -7,13 +7,6 @@ import type { Selectable } from './tools-manager.js';
 
 export interface EdgelessSelectionState {
   /**
-   * Block id
-   *
-   * Should be the surface block id or just levea it empty.
-   */
-  blockId?: string;
-
-  /**
    * The selected elements. Could be note or phasor element
    */
   elements: string[];
@@ -140,7 +133,6 @@ export class EdgelessSelectionManager {
   setSelection(selection: SurfaceSelection | EdgelessSelectionState) {
     const instance = this._selection.getInstance(
       'surface',
-      selection.blockId ?? '',
       selection.elements,
       selection.editing
     );
