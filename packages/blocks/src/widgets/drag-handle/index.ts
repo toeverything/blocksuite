@@ -190,6 +190,7 @@ export class DragHandleWidget extends WidgetElement {
       const container = document.createElement('div');
       container.classList.add('affine-block-element');
       render(element.render(), container);
+      container.querySelector('.selected')?.classList.remove('selected');
       fragment.appendChild(container);
     });
 
@@ -387,9 +388,10 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     // Get current hover block eleemnt by path
-    const hoverBlockElement = this.root.viewStore.getViewByPath(
+    const hoverBlockElement = this.root.viewStore.viewFromPath(
+      'block',
       this._hoveredBlockPath
-    )?.view as BlockElement;
+    );
     if (!hoverBlockElement) {
       return;
     }
@@ -429,8 +431,10 @@ export class DragHandleWidget extends WidgetElement {
 
     const blockElements = this.selectedBlocks
       .map(selection => {
-        return this.root.viewStore.getViewByPath(selection.path as string[])
-          ?.view;
+        return this.root.viewStore.viewFromPath(
+          'block',
+          selection.path as string[]
+        );
       })
       .filter((element): element is BlockElement<BaseBlockModel> => !!element);
 
