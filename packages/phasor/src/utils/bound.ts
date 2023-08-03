@@ -211,7 +211,7 @@ export class Bound implements IBound {
     left: number,
     top: number = left,
     right: number = left,
-    bottom: number = left
+    bottom: number = top
   ) {
     return new Bound(
       this.x - left,

@@ -450,7 +450,10 @@ export async function countBlock(page: Page, flavour: string) {
 
 export async function activeNoteInEdgeless(page: Page, noteId: string) {
   const bound = await getNoteBoundBoxInEdgeless(page, noteId);
-  await page.mouse.dblclick(bound.x + 8, bound.y + 8);
+  await page.mouse.dblclick(
+    bound.x + bound.width / 2,
+    bound.y + bound.height / 2
+  );
 }
 
 export async function selectNoteInEdgeless(page: Page, noteId: string) {

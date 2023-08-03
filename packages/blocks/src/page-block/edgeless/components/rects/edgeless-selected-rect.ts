@@ -2,10 +2,11 @@ import '../component-toolbar/component-toolbar.js';
 import '../connector/connector-handle.js';
 
 import { WithDisposable } from '@blocksuite/lit';
+import type { Bound } from '@blocksuite/phasor';
 import {
-  type Bound,
   ConnectorElement,
   deserializeXYWH,
+  FrameElement,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
@@ -15,7 +16,7 @@ import {
   TextElement,
 } from '@blocksuite/phasor';
 import { matchFlavours } from '@blocksuite/store';
-import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
+import { autoUpdate } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -42,6 +43,7 @@ import {
   calcAngleEdgeWithRotation,
   calcAngleWithRotation,
   generateCursorUrl,
+  getGridBound,
   getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
@@ -302,6 +304,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
+    this._disposables.add(
+      this._resizeManager.slots.resizeEnd.on(() => {
+        this.state.selected.forEach(ele => {
+          ele instanceof FrameElement &&
+            this.edgeless.frame.calculateFrameColor(ele);
+        });
+      })
+    );
   }
 
   get page() {
@@ -517,20 +527,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _computeComponentToolbarPosition() {
     const componentToolbar = this._componentToolbar;
     if (!componentToolbar) return;
+    const selected = this.state.selected;
+    const bound = selected.reduce((prev, element) => {
+      return prev.unite(getGridBound(element));
+    }, getGridBound(selected[0]));
 
-    computePosition(this._selectedRect, componentToolbar, {
-      placement: 'top-start',
-      middleware: [
-        offset({
-          mainAxis: 8,
-        }),
-        flip(),
-      ],
-    }).then(({ x, y }) => {
-      Object.assign(componentToolbar.style, {
-        left: `${x}px`,
-        top: `${y}px`,
-      });
+    const { viewport } = this.edgeless.surface;
+    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    const rect = componentToolbar.getBoundingClientRect();
+    const offset = 8;
+    let top = y - rect.height - offset;
+    top < 0 && (top = y + bound.h * viewport.zoom + offset);
+    Object.assign(componentToolbar.style, {
+      left: `${x}px`,
+      top: `${top}px`,
     });
   }
 
@@ -702,6 +712,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     super.updated(changedProperties);
   }
 
+  private _canRotate() {
+    return !this.state.selected.some(ele => ele instanceof FrameElement);
+  }
+
   override render() {
     const { state } = this;
     const { active, selected } = state;
@@ -719,9 +733,26 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
           resizeMode,
-          (e: PointerEvent, direction: HandleDirection) =>
-            _resizeManager.onPointerDown(e, direction),
-          _updateCursor
+          (e: PointerEvent, direction: HandleDirection) => {
+            if (
+              (<HTMLElement>e.target).classList.contains('rotate') &&
+              !this._canRotate()
+            )
+              return;
+            _resizeManager.onPointerDown(e, direction);
+          },
+          (
+            dragging: boolean,
+            options?: {
+              type: 'resize' | 'rotate';
+              angle?: number;
+              target?: HTMLElement;
+              point?: IVec;
+            }
+          ) => {
+            if (options?.type === 'rotate' && !this._canRotate()) return;
+            _updateCursor(dragging, options);
+          }
         )
       : nothing;
 

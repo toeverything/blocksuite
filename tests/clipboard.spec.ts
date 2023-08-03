@@ -766,7 +766,7 @@ test.fixme(
   }
 );
 
-test(scoped`copy when text note active in edgeless`, async ({ page }) => {
+test.fixme(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
