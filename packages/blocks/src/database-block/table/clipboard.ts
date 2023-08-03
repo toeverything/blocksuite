@@ -419,7 +419,7 @@ function pasteToTitleColumn(
   titleSelection: TextSelection,
   data: string
 ) {
-  const view = root.viewStore.getViewByPath(titleSelection.path)
+  const view = root.viewStore.viewFromPath(titleSelection.path)
     ?.view as BlockElement;
   if (!view) return;
 
