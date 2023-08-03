@@ -189,8 +189,10 @@ test('edgeless arrow up/down', async ({ page }) => {
   // 0 for page, 1 for surface, 2 for note, 3 for paragraph
   expect(ids.paragraphId).toBe('3');
   await clickBlockById(page, ids.paragraphId);
+  await assertSelection(page, 0, 5, 0);
 
   await pressArrowDown(page);
+  await waitNextFrame(page);
   await assertSelection(page, 1, 4, 0);
 
   await pressArrowUp(page);
