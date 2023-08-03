@@ -221,8 +221,8 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   @property({ attribute: false })
   readonly = false;
 
-  @query('#block-type-dropdown')
-  blockTypeDropdown!: SlDropdown;
+  @query('#test-operations-dropdown')
+  testOperationsDropdown!: SlDropdown;
 
   private _styleMenu!: GUI;
   private _showStyleDebugMenu = false;
@@ -529,8 +529,8 @@ export class QuickEdgelessMenu extends ShadowlessElement {
             </sl-button>
             <sl-menu>
               <sl-menu-item
-                @mouseenter=${() => this.blockTypeDropdown.show()}
-                @mouseleave=${() => this.blockTypeDropdown.hide()}
+                @mouseenter=${() => this.testOperationsDropdown.show()}
+                @mouseleave=${() => this.testOperationsDropdown.hide()}
               >
                 <sl-icon
                   slot="prefix"
@@ -538,9 +538,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   label="Test operations"
                 ></sl-icon>
                 <sl-dropdown
-                  id="block-type-dropdown"
+                  id="test-operations-dropdown"
                   placement="right-start"
-                  .distance=${55}
+                  .distance=${54}
                   hoist
                 >
                   <span slot="trigger">Test operations</span>

@@ -601,7 +601,7 @@ export class DebugMenu extends ShadowlessElement {
           </sl-dropdown>
 
           <!-- test operations -->
-          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
+          <sl-dropdown id="test-operations-dropdown" placement="bottom" hoist>
             <sl-button size="small" slot="trigger" caret>
               Test Operations
             </sl-button>
