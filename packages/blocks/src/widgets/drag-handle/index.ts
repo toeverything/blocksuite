@@ -14,8 +14,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   calcDropTarget,
-  findClosestBlock,
-  findClosestNoteBlock,
+  findClosestBlockElement,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   Point,
@@ -124,6 +123,7 @@ export class DragHandleWidget extends WidgetElement {
     ]);
   }
 
+  // TODO: need to find a better way, should not assumpt the host element is page block
   private get _pageBlockElement() {
     const pageBlock = this.hostElement as DefaultPageBlockComponent;
     assertExists(pageBlock);
@@ -131,26 +131,39 @@ export class DragHandleWidget extends WidgetElement {
     return pageBlock;
   }
 
+  // TODO: need to find a better way to get viewport element
   private get _viewportElement() {
     return this._pageBlockElement.viewportElement;
   }
 
+  // TODO: need to find a better way to get range controller
   private get _rangeController() {
     return this._pageBlockElement.rangeController;
   }
 
   private _getClosestBlockElementByPoint(point: Point) {
-    const closeNoteBlock = findClosestNoteBlock(this._pageBlockElement, point);
+    const noteSelector = 'affine-note';
+    const closeNoteBlock = findClosestBlockElement(
+      this._pageBlockElement,
+      point,
+      noteSelector
+    );
     if (!closeNoteBlock) return null;
     const noteRect = Rect.fromDOM(closeNoteBlock);
     const blockElement = getClosestBlockElementByPoint(point, {
       container: closeNoteBlock,
       rect: noteRect,
     });
+    const blockSelector =
+      '.affine-note-block-container > .affine-block-children-container > [data-block-id]';
     const closestBlockElement = (
       blockElement
         ? blockElement
-        : findClosestBlock(closeNoteBlock, point.clone())
+        : findClosestBlockElement(
+            closeNoteBlock as BlockElement,
+            point.clone(),
+            blockSelector
+          )
     ) as BlockElement;
     return closestBlockElement;
   }
@@ -220,7 +233,12 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _outOfNoteBlock = (point: Point) => {
-    const closeNoteBlock = findClosestNoteBlock(this._pageBlockElement, point);
+    const noteSelector = 'affine-note';
+    const closeNoteBlock = findClosestBlockElement(
+      this._pageBlockElement,
+      point,
+      noteSelector
+    );
     const rect = closeNoteBlock?.getBoundingClientRect();
     return rect
       ? point.x < rect.left + DRAG_HANDLE_WORKING_OFFSET.left ||

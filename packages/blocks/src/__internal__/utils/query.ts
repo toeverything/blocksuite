@@ -843,40 +843,12 @@ export function getClosestBlockElementByPoint(
  * @param container container which the blocks can be found inside
  * @param point position
  */
-export function findClosestBlock(
+export function findClosestBlockElement(
   container: BlockComponentElement,
-  point: Point
+  point: Point,
+  selector: string
 ) {
-  const children = Array.from(
-    container.querySelectorAll(
-      '.affine-note-block-container > .affine-block-children-container > [data-block-id]'
-    )
-  );
-  let lastDistance = Number.POSITIVE_INFINITY;
-  let lastChild = null;
-
-  if (!children.length) return null;
-
-  for (const child of children) {
-    const rect = child.getBoundingClientRect();
-    const distance =
-      Math.pow(point.y - (rect.y + rect.height), 2) +
-      Math.pow(point.x - rect.x, 2);
-
-    if (distance <= lastDistance) {
-      lastDistance = distance;
-      lastChild = child;
-    }
-  }
-
-  return lastChild;
-}
-
-export function findClosestNoteBlock(
-  container: BlockComponentElement,
-  point: Point
-) {
-  const children = Array.from(container.querySelectorAll('affine-note'));
+  const children = Array.from(container.querySelectorAll(selector));
   let lastDistance = Number.POSITIVE_INFINITY;
   let lastChild = null;
 
@@ -885,7 +857,9 @@ export function findClosestNoteBlock(
   for (const child of children) {
     const rect = child.getBoundingClientRect();
     if (rect.height === 0) continue;
-    const distance = Math.abs(point.y - (rect.y + rect.height));
+    const distance =
+      Math.pow(point.y - (rect.y + rect.height), 2) +
+      Math.pow(point.x - rect.x, 2);
 
     if (distance <= lastDistance) {
       lastDistance = distance;
@@ -1213,10 +1187,9 @@ function getCellRect(element: Element, bounds?: DOMRect) {
   const row = col.parentElement;
   assertExists(row);
   const colRect = col.getBoundingClientRect();
-  const rowRect = row.getBoundingClientRect();
   return new DOMRect(
     bounds.left,
-    rowRect.top,
+    colRect.top,
     colRect.right - bounds.left,
     colRect.height
   );
