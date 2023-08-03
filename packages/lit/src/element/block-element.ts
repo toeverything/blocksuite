@@ -1,7 +1,7 @@
 import type { BlockService, BlockSuiteViewSpec } from '@blocksuite/block-std';
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
-import { PathMap } from '@blocksuite/block-std';
+import { PathFinder } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
@@ -114,7 +114,7 @@ export class BlockElement<
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
         const selection = selections.find(selection =>
-          PathMap.equals(selection.path, this.path)
+          PathFinder.equals(selection.path, this.path)
         );
 
         if (!selection) {

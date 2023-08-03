@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BlockStore } from './block-store.js';
+import { PathFinder } from './path-finder.js';
 
 export type NodeView<T = unknown> = {
   id: string;
@@ -135,7 +136,44 @@ export class ViewStore<NodeViewType = unknown> {
         return null;
       }
       return child;
-    }, tree) as NodeViewLeaf<NodeViewType> | null;
+    }, tree);
+  };
+
+  walkThrough = (
+    fn: (
+      nodeView: NodeViewTree<NodeViewType>,
+      index: number,
+      parent: NodeViewTree<NodeViewType>
+    ) => undefined | null | true,
+    path: string[] = []
+  ) => {
+    const tree = this.getViewByPath(path);
+    assertExists(tree, `Invalid path to get node in view: ${path}`);
+
+    const iterate = (node: NodeViewTree<NodeViewType>, index: number) => {
+      const result = fn(node, index, tree);
+      if (result === true) {
+        return;
+      }
+      node.children.forEach(iterate);
+    };
+
+    tree.children.forEach(iterate);
+  };
+
+  getParent = (path: string[]) => {
+    if (path.length === 0) {
+      return null;
+    }
+    return this.getViewByPath(PathFinder.parent(path));
+  };
+
+  indexOf = (path: string[]) => {
+    const parent = this.getParent(path);
+    if (!parent) {
+      return -1;
+    }
+    return parent.children.findIndex(x => x.id === path[path.length - 1]);
   };
 
   mount() {
