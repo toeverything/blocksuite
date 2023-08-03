@@ -2,7 +2,7 @@ import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
 
 import { Slot } from '@blocksuite/global/utils';
-import { BlockElement, type FocusContext } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -173,21 +173,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         document.activeElement.blur();
       }
     });
-  }
-
-  override focusBlock(ctx: FocusContext) {
-    if (ctx.multi) {
-      return true;
-    }
-    this._focused = true;
-    // show selection rect
-    return false;
-  }
-
-  override blurBlock(ctx: FocusContext) {
-    this._focused = false;
-    super.blurBlock(ctx);
-    return true;
   }
 
   private _onInputChange() {

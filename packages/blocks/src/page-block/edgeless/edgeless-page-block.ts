@@ -12,6 +12,7 @@ import {
   compare,
   ConnectorElement,
   deserializeXYWH,
+  FrameElement,
   generateKeyBetween,
   generateNKeysBetween,
   getCommonBound,
@@ -85,6 +86,7 @@ import {
 } from './components/zoom/zoom-tool-bar.js';
 import { EdgelessConnectorManager } from './connector-manager.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
+import { EdgelessFrameManager } from './frame-manager.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -95,7 +97,11 @@ import {
 import { xywhArrayToObject } from './utils/convert.js';
 import { bindEdgelessHotkeys } from './utils/hotkey.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
-import { getBackgroundGrid, getCursorMode } from './utils/query.js';
+import {
+  getBackgroundGrid,
+  getCursorMode,
+  getEdgelessElement,
+} from './utils/query.js';
 import {
   type EdgelessSelectionState,
   type Selectable,
@@ -312,8 +318,8 @@ export class EdgelessPageBlockComponent
   }
 
   snap!: EdgelessSnapManager;
-
   connector!: EdgelessConnectorManager;
+  frame!: EdgelessFrameManager;
 
   // Gets the top level notes.
   get notes() {
@@ -375,21 +381,28 @@ export class EdgelessPageBlockComponent
       }
       return value;
     });
+    const { surface } = this;
     this._disposables.add(
-      this.surface.slots.elementAdded.on(id => {
+      surface.slots.elementAdded.on(id => {
         const element = this.surface.pickById(id);
-        if (element && element instanceof ConnectorElement) {
+        assertExists(element);
+        if (element instanceof ConnectorElement) {
           this.connector.updatePath(element);
+        } else if (element instanceof FrameElement) {
+          this.frame.calculateFrameColor(element);
         }
       })
     );
 
     this._disposables.add(
-      this.surface.slots.elementUpdated.on(({ id, props }) => {
+      surface.slots.elementUpdated.on(({ id, props }) => {
         if ('xywh' in props || 'rotate' in props) {
           this.slots.elementSizeUpdated.emit(id);
         }
-        const element = this.surface.pickById(id);
+
+        const element = surface.pickById(id);
+        assertExists(element);
+
         if (element instanceof ConnectorElement) {
           if ('target' in props || 'source' in props || 'mode' in props) {
             this.connector.updatePath(element as ConnectorElement);
@@ -488,11 +501,11 @@ export class EdgelessPageBlockComponent
     // });
     const { _disposables, slots, page, surface } = this;
     _disposables.add(
-      page.slots.blockUpdated.on(e => {
-        if (e.type === 'update') {
-          const block = page.getBlockById(e.id);
-          if (block && block.flavour === 'affine:note' && 'xywh' in e.props) {
-            this.slots.elementSizeUpdated.emit(e.id);
+      page.slots.yBlockUpdated.on(({ id, props }) => {
+        const block = page.getBlockById(id);
+        if (block && block.flavour === 'affine:note') {
+          if ('prop:xywh' in props) {
+            this.slots.elementSizeUpdated.emit(id);
           }
         }
       })
@@ -500,9 +513,7 @@ export class EdgelessPageBlockComponent
 
     _disposables.add(
       slots.elementSizeUpdated.on(id => {
-        const element =
-          this.surface.pickById(id) ??
-          <TopLevelBlockModel>page.getBlockById(id);
+        const element = getEdgelessElement(this, id);
         if (element) {
           this.connector.syncConnectorPos([element]);
         }
@@ -1079,6 +1090,7 @@ export class EdgelessPageBlockComponent
     if (changedProperties.has('page')) {
       this._initSurface();
       this.connector = new EdgelessConnectorManager(this);
+      this.frame = new EdgelessFrameManager(this);
       this.service?.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
       this.surface.init();

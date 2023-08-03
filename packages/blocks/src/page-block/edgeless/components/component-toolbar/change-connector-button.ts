@@ -123,10 +123,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         background-color: var(--affine-hover-color);
       }
 
-      .straight-line-button {
-        margin-left: 8px;
-      }
-
       .line-style-panel {
         display: none;
       }

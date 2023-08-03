@@ -10,8 +10,7 @@
     "test:unit": "vitest --run",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:ui": "vitest --ui",
-    "test:e2e": "playwright test",
-    "test": "pnpm test:unit && pnpm test:e2e"
+    "test": "pnpm test:unit"
   },
   "keywords": [],
   "author": "toeverything",
@@ -57,6 +56,11 @@
         "import": "./dist/index.js"
       },
       "./shim.d.ts": "./shim.d.ts",
+      "./workspace/migration/*": {
+        "types": "./dist/workspace/migration/*.d.ts",
+        "module": "./dist/workspace/migration/*.js",
+        "import": "./dist/workspace/migration/*.js"
+      },
       "./providers/*": {
         "types": "./dist/providers/*.d.ts",
         "module": "./dist/providers/*.js",

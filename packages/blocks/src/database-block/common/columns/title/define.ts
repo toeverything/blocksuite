@@ -2,7 +2,6 @@ import type { Text } from '@blocksuite/store';
 
 import { tString } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
-
 export const titleColumnTypeName = 'title';
 
 declare global {
@@ -17,6 +16,11 @@ export const titlePureColumnConfig = columnManager.register<Text['yText']>(
     type: () => tString.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
+    cellFromString: data => {
+      return {
+        value: data,
+      };
+    },
     cellToJson: data => data?.toString() ?? null,
   }
 );

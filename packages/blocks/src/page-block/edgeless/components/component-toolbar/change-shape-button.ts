@@ -179,7 +179,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       .change-shape-button {
         fill: none;
         stroke: currentColor;
-        margin-left: 8px;
       }
 
       .shape-style-button svg {

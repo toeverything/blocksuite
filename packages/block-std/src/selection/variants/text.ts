@@ -1,4 +1,4 @@
-import { PathMap } from '../../store/path-map.js';
+import { PathFinder } from '../../store/path-finder.js';
 import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
@@ -76,7 +76,7 @@ export class TextSelection extends BaseSelection {
   }
 
   isInSameBlock(): boolean {
-    return this.to === null || PathMap.equals(this.from.path, this.to.path);
+    return this.to === null || PathFinder.equals(this.from.path, this.to.path);
   }
 }
 

@@ -33,13 +33,15 @@
     "ses": "^0.18.5",
     "y-protocols": "^1.0.5",
     "yjs": "^13.6.7",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "intl-segmenter-polyfill-rs": "^0.1.4"
   },
   "license": "MPL-2.0",
   "devDependencies": {
     "@types/dat.gui": "^0.7.10",
     "@types/micromatch": "^4.0.2",
     "dat.gui": "^0.7.9",
-    "magic-string": "^0.29.0"
+    "magic-string": "^0.29.0",
+    "vite-plugin-wasm": "^3.2.2"
   }
 }

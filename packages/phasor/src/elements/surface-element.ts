@@ -1,17 +1,18 @@
 import type * as Y from 'yjs';
 
-import type { Bound, PointLocation } from '../index.js';
+import type { IPhasorElementType } from '../elements/index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
-import { isPointIn } from '../utils/math-utils.js';
+import { Bound } from '../utils/bound.js';
+import { getBoundsWithRotation, isPointIn } from '../utils/math-utils.js';
+import { type PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
 import {
   deserializeXYWH,
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
-import type { IElementUpdateProps, IPhasorElementType } from './index.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -111,6 +112,13 @@ export abstract class SurfaceElement<
     return (this.yMap.get('batch') as T['batch']) ?? null;
   }
 
+  get gridBound() {
+    if (this.rotate) {
+      return Bound.from(getBoundsWithRotation(this));
+    }
+    return Bound.deserialize(this.xywh);
+  }
+
   get x() {
     const [x] = this.deserializeXYWH();
     return x;
@@ -167,11 +175,9 @@ export abstract class SurfaceElement<
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
     const e = events[0] as Y.YMapEvent<Y.Map<unknown>>;
-    const props: IElementUpdateProps<T> = {};
-    e.keysChanged.forEach(key => {
-      props[key as keyof IElementUpdateProps<T>] = this.yMap.get(
-        key
-      ) as IPhasorElementType[T][keyof IElementUpdateProps<T>];
+    const props: { [index: string]: { old: unknown; new: unknown } } = {};
+    e.changes.keys.forEach((change, key) => {
+      props[key] = { old: change.oldValue, new: this.yMap.get(key) };
     });
     this.surface.slots.elementUpdated.emit({
       id: this.id,

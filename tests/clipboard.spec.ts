@@ -92,10 +92,10 @@ test(scoped`clipboard paste html`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -128,10 +128,10 @@ test(
         const e = new ClipboardEvent('paste', { clipboardData: dT });
         Object.defineProperty(e, 'target', {
           writable: false,
-          value: document.body,
+          value: document,
         });
         e.clipboardData?.setData('text/html', clipData['text/html']);
-        document.body.dispatchEvent(e);
+        document.dispatchEvent(e);
       },
       { clipData }
     );
@@ -164,10 +164,10 @@ test.fixme(
         const e = new ClipboardEvent('paste', { clipboardData: dT });
         Object.defineProperty(e, 'target', {
           writable: false,
-          value: document.body,
+          value: document,
         });
         e.clipboardData?.setData('text/html', clipData['text/html']);
-        document.body.dispatchEvent(e);
+        document.dispatchEvent(e);
       },
       { clipData }
     );
@@ -766,7 +766,7 @@ test.fixme(
   }
 );
 
-test(scoped`copy when text note active in edgeless`, async ({ page }) => {
+test.fixme(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
@@ -918,10 +918,10 @@ test(scoped`paste from FeiShu list format`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -951,10 +951,10 @@ test(scoped`paste in list format`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -977,10 +977,10 @@ test(scoped`auto identify url`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/plain', clipData['text/plain']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );

@@ -54,22 +54,22 @@ export class LangList extends ShadowlessElement {
       }
 
       .input-wrapper {
-        position: relative;
         display: flex;
         margin-top: 8px;
         margin-left: 4px;
+        border: 1px solid var(--affine-border-color);
+        border-radius: 8px;
+        padding: 4px 10px;
       }
 
       #filter-input {
-        display: flex;
+        flex: 1;
         align-items: center;
-        height: 32px;
-        width: 192px;
-        border: 1px solid var(--affine-border-color);
+        height: 20px;
+        width: 140px;
         border-radius: 8px;
-        padding-left: 44px;
-        padding-top: 4px;
-
+        padding-top: 2px;
+        border: none;
         font-family: var(--affine-font-family);
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
@@ -87,10 +87,9 @@ export class LangList extends ShadowlessElement {
       }
 
       .search-icon {
-        position: absolute;
-        left: 8px;
         height: 100%;
         display: flex;
+        padding-right: 4px;
         align-items: center;
         fill: var(--affine-icon-color);
       }

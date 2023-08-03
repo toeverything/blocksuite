@@ -55,6 +55,10 @@ type ColumnOps<
   type: (data: Data) => TType;
   formatValue?: (value: unknown, colData: Data) => Value;
   cellToString: (data: Value, colData: Data) => string;
+  cellFromString: (
+    data: string,
+    colData: Data
+  ) => { value: unknown; data?: Record<string, unknown> };
   cellToJson: (data: Value, colData: Data) => JSON;
 };
 
@@ -168,6 +172,10 @@ export class ColumnConfig<
     return cellData === undefined
       ? undefined
       : this.ops.formatValue?.(cellData, colData) ?? cellData;
+  }
+
+  fromString(cellData: string, colData: T) {
+    return this.ops.cellFromString(cellData, colData);
   }
 
   convertCell(to: string, column: Record<string, unknown>, cells: unknown[]) {

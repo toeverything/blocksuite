@@ -66,7 +66,7 @@ export const defaultStore: SerializedStore = {
     blockVersions: {
       'affine:paragraph': 1,
       'affine:page': 2,
-      'affine:database': 2,
+      'affine:database': 3,
       'affine:data-view': 1,
       'affine:list': 1,
       'affine:note': 1,

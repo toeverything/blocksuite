@@ -58,7 +58,6 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       display: block;
       color: var(--affine-text-primary-color);
       fill: currentColor;
-      padding-right: 6px;
     }
 
     .more-actions-container {

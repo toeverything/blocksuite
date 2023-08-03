@@ -7,7 +7,7 @@ import type { AttachmentBlockModel } from './attachment-model.js';
 import { cloneAttachmentProperties } from './utils.js';
 
 export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {
-  override block2html(
+  override async block2html(
     block: AttachmentBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
