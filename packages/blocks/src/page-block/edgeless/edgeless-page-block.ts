@@ -200,6 +200,7 @@ export class EdgelessPageBlockComponent
       top: 0;
       left: 0;
       contain: layout style size;
+      visibility: auto;
       transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
         scale(var(--affine-zoom));
     }
@@ -262,6 +263,9 @@ export class EdgelessPageBlockComponent
   edgelessTool: EdgelessTool = {
     type: 'default',
   };
+
+  @state()
+  private _edgelessLayerWillChange = false;
 
   @state()
   private _rectsOfSelectedBlocks: DOMRect[] = [];
@@ -523,6 +527,19 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(({ zoom, center }) => {
         this.slots.viewportUpdated.emit({ zoom, center });
+      })
+    );
+
+    let resetWillChange: ReturnType<typeof setTimeout> | null = null;
+    _disposables.add(
+      slots.viewportUpdated.on(() => {
+        this._edgelessLayerWillChange = true;
+
+        if (resetWillChange) clearTimeout(resetWillChange);
+        resetWillChange = setTimeout(() => {
+          this._edgelessLayerWillChange = false;
+          resetWillChange = null;
+        }, 150);
       })
     );
 
@@ -1287,7 +1304,14 @@ export class EdgelessPageBlockComponent
         style=${styleMap(blockContainerStyle)}
       >
         <div class="affine-block-children-container edgeless">
-          <div class="affine-edgeless-layer">
+          <div
+            class="affine-edgeless-layer"
+            style=${styleMap({
+              willChange: this._edgelessLayerWillChange
+                ? 'transform'
+                : undefined,
+            })}
+          >
             ${this.enableNoteCut
               ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
               : nothing}
