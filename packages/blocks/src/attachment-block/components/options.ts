@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { createRef, type Ref,ref } from 'lit/directives/ref.js';
+import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
