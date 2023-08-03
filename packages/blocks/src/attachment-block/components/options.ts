@@ -62,8 +62,10 @@ export function AttachmentOptionsTemplate({
       abortController.abort();
     }, HOVER_TIMEOUT);
   };
+  anchor.addEventListener('mouseover', onHover);
   anchor.addEventListener('mouseleave', onHoverLeave);
   abortController.signal.addEventListener('abort', () => {
+    anchor.removeEventListener('mouseover', onHover);
     anchor.removeEventListener('mouseleave', onHoverLeave);
   });
 
@@ -98,7 +100,7 @@ export function AttachmentOptionsTemplate({
       class="affine-attachment-options"
       @pointerdown=${stopPropagation}
       @mouseover=${onHover}
-      @mouseout=${onHoverLeave}
+      @mouseleave=${onHoverLeave}
     >
       <icon-button
         class="has-tool-tip"
