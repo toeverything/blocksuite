@@ -51,6 +51,8 @@ noop(EdgelessRemoteSelection);
 
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
+  // disable change-in-update warning
+  static override enabledWarnings = [];
   static override styles = css`
     :host {
       display: block;
