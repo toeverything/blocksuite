@@ -1,5 +1,6 @@
 import type { RoughCanvas } from '../../rough/canvas.js';
 import { Bound } from '../../utils/bound.js';
+import { linePolygonIntersects } from '../../utils/math-utils.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import { type IVec } from '../../utils/vec.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
@@ -16,7 +17,11 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
     return bound.contains(Bound.deserialize(this.xywh));
   }
   override intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-    return null;
+    return linePolygonIntersects(
+      start,
+      end,
+      Bound.deserialize(this.xywh).points
+    );
   }
   override getRelativePointLocation(point: IVec): PointLocation {
     throw new Error('Method not implemented.');
