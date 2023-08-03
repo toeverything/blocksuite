@@ -46,7 +46,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       const dispatcher = this._edgeless?.dispatcher;
       assertExists(dispatcher);
       this._disposables.addFromEvent(this._virgoContainer, 'blur', () => {
-        // this._unmount();
+        this._unmount();
       });
       this._disposables.add(
         dispatcher.add('click', () => {
