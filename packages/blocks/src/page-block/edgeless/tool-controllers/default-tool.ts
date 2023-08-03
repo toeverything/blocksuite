@@ -448,7 +448,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
     });
     this._toBeMoved = Array.from(toBeMoved);
-
     // If alt key is pressed and content is moving, clone the content
     if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
       dragType = DefaultModeDragType.AltCloning;

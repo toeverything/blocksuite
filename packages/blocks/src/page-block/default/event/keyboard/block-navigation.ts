@@ -31,7 +31,6 @@ export class BlockNavigation {
       assertExists(virgoRoot);
       const sel = this._selection.getInstance('text', {
         from: {
-          blockId: selection.blockId,
           path: selection.path,
           index: virgoRoot.virgoEditor.yText.length,
           length: 0,
@@ -55,7 +54,6 @@ export class BlockNavigation {
     );
     const sel = this._selection.getInstance('text', {
       from: {
-        blockId,
         path: parentPath.concat(blockId),
         index: 0,
         length: 0,
@@ -145,7 +143,6 @@ export class BlockNavigation {
     const blockId = id;
     const path = parentPath.concat(blockId);
     return this._selection.getInstance('block', {
-      blockId,
       path,
     });
   }
@@ -207,7 +204,6 @@ export class BlockNavigation {
     const path = parentPath.concat(blockId);
     this._selection.set([
       this._selection.getInstance('block', {
-        blockId,
         path,
       }),
     ]);

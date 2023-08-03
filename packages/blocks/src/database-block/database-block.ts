@@ -128,7 +128,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         selectionUpdated: new Slot<DataViewSelectionState>(),
         setSelection: selection => {
           const data = this.root.selectionManager.getInstance('database', {
-            blockId: this.model.id,
             path: this.path,
             viewSelection: selection as never,
           });
