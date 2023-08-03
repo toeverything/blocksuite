@@ -4,6 +4,7 @@ import type { BlockStore } from '../store/index.js';
 import { PathFinder } from '../store/index.js';
 import type { UIEventHandler } from './base.js';
 import { UIEventState, UIEventStateContext } from './base.js';
+import { ClipboardControl } from './control/clipboard.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
@@ -13,8 +14,6 @@ import { toLowerCase } from './utils.js';
 const bypassEventNames = [
   'beforeInput',
 
-  'paste',
-  'copy',
   'blur',
   'focus',
   'drop',
@@ -43,6 +42,10 @@ const eventNames = [
   'compositionStart',
   'compositionUpdate',
   'compositionEnd',
+
+  'cut',
+  'copy',
+  'paste',
 
   ...bypassEventNames,
 ] as const;
@@ -74,11 +77,13 @@ export class UIEventDispatcher {
   private _pointerControl: PointerControl;
   private _keyboardControl: KeyboardControl;
   private _rangeControl: RangeControl;
+  private _clipboardControl: ClipboardControl;
 
   constructor(public blockStore: BlockStore) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
+    this._clipboardControl = new ClipboardControl(this);
   }
 
   mount() {
@@ -247,5 +252,6 @@ export class UIEventDispatcher {
     this._pointerControl.listen();
     this._keyboardControl.listen();
     this._rangeControl.listen();
+    this._clipboardControl.listen();
   }
 }

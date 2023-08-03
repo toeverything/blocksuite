@@ -123,6 +123,23 @@ export const charWidth = (() => {
   };
 })();
 
+export const truncateTextByWidth = (
+  text: string,
+  font: string,
+  width: number
+) => {
+  let totalWidth = 0;
+  let i = 0;
+  for (; i < text.length; i++) {
+    const char = text[i];
+    totalWidth += charWidth.calculate(char, font);
+    if (totalWidth > width) {
+      break;
+    }
+  }
+  return text.slice(0, i);
+};
+
 export function wrapText(text: string, font: string, maxWidth: number): string {
   // if maxWidth is not finite or NaN which can happen in case of bugs in
   // computation, we need to make sure we don't continue as we'll end up

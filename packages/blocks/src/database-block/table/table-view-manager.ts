@@ -133,7 +133,7 @@ export class DataViewTableManager extends BaseDataViewManager {
       const rowMap = Object.fromEntries(
         this.columnManagerList.map(column => [
           column.id,
-          column.getFilterValue(rowId),
+          column.getJsonValue(rowId),
         ])
       );
       return evalFilter(this.filter, rowMap);

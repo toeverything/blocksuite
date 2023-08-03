@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/store';
 
 import { GRID_SIZE, type IBound } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
+import { Bound } from './utils/bound.js';
 import {
   getBoundsWithRotation,
   intersects,
@@ -18,6 +19,15 @@ function rangeFromBound(a: IBound): number[] {
   const maxRow = getGridIndex(a.x + a.w);
   const minCol = getGridIndex(a.y);
   const maxCol = getGridIndex(a.y + a.h);
+  return [minRow, maxRow, minCol, maxCol];
+}
+
+function rangeFromElement(ele: SurfaceElement): number[] {
+  const bound = ele.gridBound;
+  const minRow = getGridIndex(bound.x);
+  const maxRow = getGridIndex(bound.maxX);
+  const minCol = getGridIndex(bound.y);
+  const maxCol = getGridIndex(bound.maxY);
   return [minRow, maxRow, minCol, maxCol];
 }
 
@@ -57,7 +67,7 @@ export class GridManager {
   }
 
   add(element: SurfaceElement) {
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
+    const [minRow, maxRow, minCol, maxCol] = rangeFromElement(element);
     const grids = new Set<Set<SurfaceElement>>();
     this._elementToGrids.set(element, grids);
 
@@ -93,16 +103,20 @@ export class GridManager {
     );
   }
 
-  search(bound: IBound): SurfaceElement[] {
+  search(bound: IBound, strict = false): SurfaceElement[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const results: Set<SurfaceElement> = new Set();
+    const b = Bound.from(bound);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         const gridElements = this._getGrid(i, j);
         if (!gridElements) continue;
-
         for (const element of gridElements) {
-          if (intersects(getBoundsWithRotation(element), bound)) {
+          if (
+            strict
+              ? b.contains(element.gridBound)
+              : intersects(element.gridBound, bound)
+          ) {
             results.add(element);
           }
         }

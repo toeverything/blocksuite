@@ -22,9 +22,11 @@ import { GRID_GAP_MAX, GRID_GAP_MIN } from '@blocksuite/phasor';
 import { type Page } from '@blocksuite/store';
 
 import {
+  type EdgelessElement,
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { Selectable } from './selection-manager.js';
 
 export function isTopLevelBlock(
@@ -233,4 +235,15 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     });
   }
   return bounds;
+}
+
+export function getEdgelessElement(
+  edgeless: EdgelessPageBlockComponent,
+  id: string
+): EdgelessElement | null {
+  return (
+    edgeless.surface.pickById(id) ??
+    <TopLevelBlockModel>edgeless.page.getBlockById(id) ??
+    null
+  );
 }
