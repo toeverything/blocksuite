@@ -438,6 +438,17 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     // Determine the drag type based on the current state and event
     let dragType = this._determineDragType(e);
 
+    const elements = this.selection.elements;
+    const toBeMoved = new Set(elements);
+    elements.forEach(element => {
+      if (element instanceof FrameElement) {
+        this._edgeless.frame
+          .getElementsInFrame(element)
+          .forEach(ele => toBeMoved.add(ele));
+      }
+    });
+    this._toBeMoved = Array.from(toBeMoved);
+
     // If alt key is pressed and content is moving, clone the content
     if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
       dragType = DefaultModeDragType.AltCloning;
@@ -456,17 +467,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = { x, y };
     this._dragLastPos = { x, y };
 
-    const { elements } = this.selection;
-    const toBeMoved = new Set(elements);
-    elements.forEach(element => {
-      if (element instanceof FrameElement) {
-        this._edgeless.frame
-          .getElementsInFrame(element)
-          .forEach(ele => toBeMoved.add(ele));
-      }
-    });
-
-    this._toBeMoved = Array.from(toBeMoved);
     this._alignBound = this._edgeless.snap.setupAlignables(this._toBeMoved);
 
     this._selectedBounds = this._toBeMoved.map(element =>
@@ -598,6 +598,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       this._edgeless.frame.calculateFrameColor(frame);
     });
     this._frames.clear();
+    this._toBeMoved = [];
     this._forceUpdateSelection(this.dragType);
     this.dragType = DefaultModeDragType.None;
   }
