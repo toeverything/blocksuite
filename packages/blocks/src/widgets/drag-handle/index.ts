@@ -114,7 +114,6 @@ export class DragHandleWidget extends WidgetElement {
     const { selectionManager } = this.root;
     selectionManager.set([
       selectionManager.getInstance('block', {
-        blockId,
         path,
       }),
     ]);
@@ -425,7 +424,6 @@ export class DragHandleWidget extends WidgetElement {
           .filter(element => element.flavour !== 'affine:note')
           .map(element => {
             return this.root.selectionManager.getInstance('block', {
-              blockId: element.path[element.path.length - 1],
               path: element.path,
             });
           });
