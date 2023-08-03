@@ -1,5 +1,5 @@
 import type { TextSelection, UIEventStateContext } from '@blocksuite/block-std';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { assertExists, DisposableGroup, Text } from '@blocksuite/store';
 import type { Ref } from 'lit/directives/ref.js';
 
@@ -419,8 +419,7 @@ function pasteToTitleColumn(
   titleSelection: TextSelection,
   data: string
 ) {
-  const view = root.viewStore.getViewByPath(titleSelection.path)
-    ?.view as BlockElement;
+  const view = root.viewStore.viewFromPath('block', titleSelection.path);
   if (!view) return;
 
   const text = view.model.text;

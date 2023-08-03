@@ -3,7 +3,7 @@ import './table/table-view.js';
 import './kanban/kanban-view.js';
 import './common/database-view-header.js';
 
-import { PathMap } from '@blocksuite/block-std';
+import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -45,7 +45,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       this.root.selectionManager.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
-            if (!PathMap.equals(selection.path, this.path)) {
+            if (!PathFinder.equals(selection.path, this.path)) {
               return false;
             }
             return selection instanceof DatabaseSelection;
@@ -62,7 +62,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     );
     this.handleEvent('selectionChange', ctx => {
       const selection = this.service?.selectionManager.value.find(selection =>
-        PathMap.equals(selection.path, this.path)
+        PathFinder.equals(selection.path, this.path)
       );
       return !!selection;
     });
