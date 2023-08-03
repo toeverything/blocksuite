@@ -1,6 +1,5 @@
-import type { NodeViewLeaf, NodeViewTree } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -55,43 +54,40 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   private get _allBlocksRect() {
     const viewportElement = this._viewportElement;
-    const tree = this.root.viewStore.getNodeViewTree();
 
-    const getAllNodeFromTree = (
-      node: NodeViewTree<BlockElement>
-    ): NodeViewLeaf<BlockElement>[] => {
-      if (node.children.length === 0) {
-        return [node];
-      }
-      return node.children
-        .filter(node => node.type === 'block')
-        .flatMap(child => getAllNodeFromTree(child));
+    const getAllNodeFromTree = (): BlockElement[] => {
+      const blockElement: BlockElement[] = [];
+      this.root.viewStore.walkThrough(node => {
+        const view = node.view;
+        if (!(view instanceof BlockElement)) {
+          return true;
+        }
+        if (
+          view.model.role !== 'root' &&
+          !DocDraggingAreaWidget.excludeFlavours.includes(view.model.flavour)
+        ) {
+          blockElement.push(view);
+        }
+        return;
+      });
+      return blockElement;
     };
 
-    const elements = getAllNodeFromTree(tree as NodeViewTree<BlockElement>);
+    const elements = getAllNodeFromTree();
 
-    return elements
-      .map(x => x.view as BlockElement)
-      .filter(element => {
-        const model = element.model;
-        return (
-          model.role !== 'root' &&
-          !DocDraggingAreaWidget.excludeFlavours.includes(model.flavour)
-        );
-      })
-      .map(element => {
-        const bounding = element.getBoundingClientRect();
-        return {
-          id: element.model.id,
-          path: element.path,
-          rect: {
-            left: bounding.left + viewportElement.scrollLeft,
-            top: bounding.top + viewportElement.scrollTop,
-            width: bounding.width,
-            height: bounding.height,
-          },
-        };
-      });
+    return elements.map(element => {
+      const bounding = element.getBoundingClientRect();
+      return {
+        id: element.model.id,
+        path: element.path,
+        rect: {
+          left: bounding.left + viewportElement.scrollLeft,
+          top: bounding.top + viewportElement.scrollTop,
+          width: bounding.width,
+          height: bounding.height,
+        },
+      };
+    });
   }
 
   private get _viewportElement() {

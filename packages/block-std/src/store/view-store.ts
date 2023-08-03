@@ -125,7 +125,7 @@ export class ViewStore<NodeViewType = unknown> {
     return tree;
   };
 
-  getViewByPath = (path: string[]) => {
+  viewFromPath = (path: string[]) => {
     const tree = this.getNodeViewTree();
     return path.reduce((curr: NodeViewTree<NodeViewType> | null, id) => {
       if (!curr) {
@@ -147,7 +147,7 @@ export class ViewStore<NodeViewType = unknown> {
     ) => undefined | null | true,
     path: string[] = []
   ) => {
-    const tree = this.getViewByPath(path);
+    const tree = this.viewFromPath(path);
     assertExists(tree, `Invalid path to get node in view: ${path}`);
 
     const iterate = (node: NodeViewTree<NodeViewType>, index: number) => {
@@ -165,7 +165,7 @@ export class ViewStore<NodeViewType = unknown> {
     if (path.length === 0) {
       return null;
     }
-    return this.getViewByPath(PathFinder.parent(path));
+    return this.viewFromPath(PathFinder.parent(path));
   };
 
   indexOf = (path: string[]) => {

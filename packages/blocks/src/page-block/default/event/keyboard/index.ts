@@ -196,7 +196,7 @@ export class Keyboard {
   ) {
     const current = selections[0];
     const first = this._page.getBlockById(current.blockId);
-    const firstElement = this.host.root.viewStore.getViewByPath(current.path)
+    const firstElement = this.host.root.viewStore.viewFromPath(current.path)
       ?.view as BlockElement;
 
     assertExists(first, `Cannot find block ${current.blockId}`);

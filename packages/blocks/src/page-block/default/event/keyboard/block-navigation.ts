@@ -22,7 +22,7 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const view = this.host.root.viewStore.getViewByPath(selection.path)
+    const view = this.host.root.viewStore.viewFromPath(selection.path)
       ?.view as BlockElement;
     if (!view) return;
 
@@ -185,7 +185,7 @@ export class BlockNavigation {
 
     const path = _focusBlock.path;
     requestAnimationFrame(() => {
-      const view = this.host.root.viewStore.getViewByPath(path)?.view;
+      const view = this.host.root.viewStore.viewFromPath(path)?.view;
       view?.scrollIntoView({ block: 'nearest' });
     });
   }
@@ -214,7 +214,7 @@ export class BlockNavigation {
       }),
     ]);
     requestAnimationFrame(() => {
-      const view = this.host.root.viewStore.getViewByPath(path)?.view;
+      const view = this.host.root.viewStore.viewFromPath(path)?.view;
       view?.scrollIntoView({ block: 'nearest' });
     });
   }
