@@ -22,6 +22,7 @@ import {
   createMemoryStorage,
   createSimpleServerStorage,
   Generator,
+  Schema,
   Utils,
   Workspace,
   type WorkspaceOptions,
@@ -125,11 +126,13 @@ if (isE2E) {
         extensions: ['.ydoc'],
       });
       const buffer = await file.arrayBuffer();
+      const schema = new Schema();
+      schema.register(AffineSchemas).register(__unstableSchemas);
+
       const workspace = new Workspace({
+        schema,
         id: 'temporary',
-      })
-        .register(AffineSchemas)
-        .register(__unstableSchemas);
+      });
       Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
       globalThis.debugWorkspace = workspace;
     },
@@ -190,6 +193,9 @@ export async function tryInitExternalContent(
 export function createWorkspaceOptions(): WorkspaceOptions {
   const providerCreators: DocProviderCreator[] = [];
   const blobStorages: ((id: string) => BlobStorage)[] = [];
+  const schema = new Schema();
+  schema.register(AffineSchemas).register(__unstableSchemas);
+
   let idGenerator: Generator = Generator.AutoIncrement; // works only in single user mode
 
   if (providerArgs.includes('idb')) {
@@ -223,6 +229,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
 
   return {
     id: room,
+    schema,
     providerCreators,
     idGenerator,
     blobStorages,

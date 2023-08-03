@@ -11,6 +11,7 @@ import {
   assertExists,
   createIndexeddbStorage,
   Generator,
+  Schema,
   Utils,
   Workspace,
   type WorkspaceOptions,
@@ -78,11 +79,12 @@ Object.defineProperty(globalThis, 'debugFromFile', {
       extensions: ['.ydoc'],
     });
     const buffer = await file.arrayBuffer();
+    const schema = new Schema();
+    schema.register(AffineSchemas).register(__unstableSchemas);
     const workspace = new Workspace({
+      schema,
       id: 'temporary',
-    })
-      .register(AffineSchemas)
-      .register(__unstableSchemas);
+    });
     Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
     globalThis.debugWorkspace = workspace;
   },
@@ -141,9 +143,12 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     createIndexeddbStorage,
   ];
   const idGenerator: Generator = Generator.NanoID;
+  const schema = new Schema();
+  schema.register(AffineSchemas).register(__unstableSchemas);
 
   return {
     id: 'quickEdgeless',
+    schema,
     providerCreators: [],
     idGenerator,
     blobStorages,

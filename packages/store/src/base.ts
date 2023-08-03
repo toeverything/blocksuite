@@ -36,6 +36,11 @@ export const BlockSchema = z.object({
       .optional(),
     toModel: z.function().args().returns(z.custom<BaseBlockModel>()).optional(),
   }),
+  onUpgrade: z
+    .function()
+    .args(z.record(z.any()), z.number(), z.number())
+    .returns(z.void())
+    .optional(),
 });
 
 export type BlockSchemaType = z.infer<typeof BlockSchema>;
@@ -76,6 +81,11 @@ export function defineBlockSchema<
   flavour: Flavour;
   metadata: Metadata;
   props?: (internalPrimitives: InternalPrimitives) => Props;
+  onUpgrade?: (
+    data: Props,
+    previousVersion: number,
+    latestVersion: number
+  ) => void;
   toModel?: () => Model;
 }): {
   version: number;
@@ -91,6 +101,7 @@ export function defineBlockSchema({
   props,
   metadata,
   toModel,
+  onUpgrade,
 }: {
   flavour: string;
   metadata: {
@@ -101,6 +112,11 @@ export function defineBlockSchema({
   };
   props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
   toModel?: () => BaseBlockModel;
+  onUpgrade?: (
+    data: Record<string, unknown>,
+    previousVersion: number,
+    latestVersion: number
+  ) => void;
 }): BlockSchemaType {
   const schema = {
     version: metadata.version,
@@ -112,6 +128,7 @@ export function defineBlockSchema({
       props,
       toModel,
     },
+    onUpgrade,
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
   return schema;
