@@ -68,21 +68,22 @@ export function createDragHandle(pageBlock: EdgelessPageBlockComponent) {
       page.captureSync();
     },
     setDragType(dragging: boolean) {
-      const { selection } = pageBlock;
-      if (selection.edgelessTool.type === 'default') {
+      const { tools } = pageBlock;
+      if (tools.edgelessTool.type === 'default') {
         const currentController =
-          selection.currentController as DefaultToolController;
+          tools.currentController as DefaultToolController;
         currentController.dragType = dragging
           ? DefaultModeDragType.PreviewDragging
           : DefaultModeDragType.None;
       }
     },
     setSelectedBlock(modelState: EditingState | null) {
+      const { selection } = pageBlock;
       const selectedBlocks = [];
       if (modelState) {
         selectedBlocks.push(modelState.element);
       }
-      pageBlock.slots.selectedBlocksUpdated.emit(selectedBlocks);
+      selection.setSelectedBlocks(selectedBlocks);
     },
     getSelectedBlocks() {
       return pageBlock.selection.selectedBlocks;

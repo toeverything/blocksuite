@@ -156,8 +156,8 @@ class ToolOverlay extends Overlay {
       this.edgeless.slots.viewportUpdated.on(() => {
         // when viewport is updated, we should keep the overlay in the same position
         // to get last mouse position and convert it to model coordinates
-        const lastX = this.edgeless.selection.lastMousePos.x;
-        const lastY = this.edgeless.selection.lastMousePos.y;
+        const lastX = this.edgeless.tools.lastMousePos.x;
+        const lastY = this.edgeless.tools.lastMousePos.y;
         const [x, y] = this.edgeless.surface.toModelCoord(lastX, lastY);
         this.x = x;
         this.y = y;

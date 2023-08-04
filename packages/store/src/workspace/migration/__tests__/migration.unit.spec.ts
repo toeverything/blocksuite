@@ -1,9 +1,18 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { assert, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { migratePageBlock } from '../migrate-block.js';
+// Use manual per-module import/export to support vitest environment on Node.js
+import { DatabaseBlockSchema } from '../../../../../blocks/src/database-block/database-model.js';
+import { NoteBlockSchema } from '../../../../../blocks/src/note-block/note-model.js';
+import { PageBlockSchema } from '../../../../../blocks/src/page-block/page-model.js';
+import { ParagraphBlockSchema } from '../../../../../blocks/src/paragraph-block/paragraph-model.js';
+import { SurfaceBlockSchema } from '../../../../../blocks/src/surface-block/surface-model.js';
+// normal import
+import { Schema } from '../../schema.js';
 import { migrateWorkspace } from '../migrate-workspace.js';
 
 async function loadBinary(name: string) {
@@ -15,6 +24,15 @@ async function loadBinary(name: string) {
   Y.applyUpdate(doc, update);
   return doc;
 }
+
+const schema = new Schema();
+schema.register([
+  PageBlockSchema,
+  SurfaceBlockSchema,
+  NoteBlockSchema,
+  ParagraphBlockSchema,
+  DatabaseBlockSchema,
+]);
 
 describe('workspace migration', () => {
   test('add pageVersion in workspace meta', async () => {
@@ -55,9 +73,15 @@ describe('block migration', () => {
     assert.isUndefined(shape.get('bold'));
     assert.isUndefined(shape.get('italic'));
 
-    migratePageBlock(doc, {
-      surface: 3,
-    });
+    schema.upgradePage(
+      {
+        'affine:page': 1,
+        'affine:note': 1,
+        'affine:paragraph': 1,
+        'affine:surface': 3,
+      },
+      doc
+    );
 
     assert.isUndefined(text.get('isBold'));
     assert.isUndefined(text.get('isItalic'));
@@ -69,6 +93,7 @@ describe('block migration', () => {
     assert.equal(shape.get('bold'), true);
     assert.equal(shape.get('italic'), true);
   });
+
   test('update database block title data', async () => {
     const doc = await loadBinary('page-database-v2-v3');
 
@@ -83,9 +108,19 @@ describe('block migration', () => {
       )
     ).toBeUndefined();
     expect(databaseBlock['prop:views'].length).toBe(2);
-    migratePageBlock(doc, {
-      'affine:database': 2,
-    });
+    // migratePageBlock(doc, {
+    //   'affine:database': 2,
+    // });
+    schema.upgradePage(
+      {
+        'affine:page': 1,
+        'affine:surface': 4,
+        'affine:note': 1,
+        'affine:paragraph': 1,
+        'affine:database': 2,
+      },
+      doc
+    );
     databaseBlock = (
       doc.getMap('blocks').get('Y76JkP9XRn') as Y.Map<unknown>
     ).toJSON();

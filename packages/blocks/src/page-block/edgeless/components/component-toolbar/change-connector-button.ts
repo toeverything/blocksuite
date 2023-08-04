@@ -18,7 +18,6 @@ import type { CssVariableName } from '../../../../__internal__/theme/css-variabl
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
@@ -135,9 +134,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
   @property({ attribute: false })
   elements: ConnectorElement[] = [];
 
-  @property({ type: Object })
-  selectionState!: EdgelessSelectionState;
-
   @property({ attribute: false })
   page!: Page;
 
@@ -165,11 +161,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
 
   private _popperShow = false;
 
-  private _forceUpdateSelection() {
-    // FIXME: force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
-  }
-
   private _setConnectorMode(mode: ConnectorMode) {
     this.page.captureSync();
     this.elements.forEach(element => {
@@ -179,7 +170,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         });
       }
     });
-    this._forceUpdateSelection();
   }
 
   private _setConnectorColor(stroke: CssVariableName) {
@@ -201,7 +191,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         strokeWidth,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
@@ -210,7 +199,6 @@ export class EdgelessChangeConnectorButton extends LitElement {
         strokeStyle,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {

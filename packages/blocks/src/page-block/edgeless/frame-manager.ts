@@ -9,9 +9,9 @@ import type { EdgelessElement } from '../../__internal__/utils/types.js';
 import type { NoteBlockModel } from '../../models.js';
 import { getGridBound } from './components/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
+import type { Selectable } from './services/tools-manager.js';
 import { BlendColor, NoteColor, SurfaceColor } from './utils/consts.js';
 import { isTopLevelBlock } from './utils/query.js';
-import type { Selectable } from './utils/selection-manager.js';
 
 class FrameOverlay extends Overlay {
   bound: Bound | null = null;
