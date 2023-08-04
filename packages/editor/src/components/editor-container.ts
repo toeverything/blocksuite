@@ -222,6 +222,7 @@ export class EditorContainer
           flavour: 'affine:attachment',
           name: file.name,
           size: file.size,
+          type: file.type,
           sourceId,
         };
       },

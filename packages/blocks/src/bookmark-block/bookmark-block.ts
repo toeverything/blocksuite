@@ -2,7 +2,6 @@ import './components/bookmark-toolbar.js';
 import './components/bookmark-edit-modal.js';
 import './components/bookmark-create-modal.js';
 import './components/loader.js';
-import '../components/portal.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { Slot } from '@blocksuite/store';
