@@ -1,5 +1,5 @@
 import { AttachmentIcon16 } from '@blocksuite/global/config';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, createLitPortal } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -7,7 +7,6 @@ import { registerService } from '../__internal__/service.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { focusBlockByModel } from '../__internal__/utils/selection.js';
-import { createLitPortal } from '../components/portal.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
 import { AttachmentOptionsTemplate } from './components/options.js';

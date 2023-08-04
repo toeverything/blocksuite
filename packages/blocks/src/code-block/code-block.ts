@@ -1,5 +1,4 @@
 import '../__internal__/rich-text/rich-text.js';
-import '../components/portal.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 

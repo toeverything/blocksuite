@@ -1,4 +1,10 @@
-import { html, LitElement, render, type TemplateResult } from 'lit';
+import {
+  html,
+  LitElement,
+  render,
+  type RenderOptions,
+  type TemplateResult,
+} from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
@@ -56,10 +62,12 @@ export const createLitPortal = ({
   template,
   container = document.body,
   abortController = new AbortController(),
+  renderOptions,
 }: {
   template: TemplateResult<1>;
   container?: HTMLElement;
   abortController?: AbortController;
+  renderOptions?: RenderOptions;
 }) => {
   const portalRoot = document.createElement('div');
   portalRoot.classList.add('affine-portal');
@@ -68,7 +76,7 @@ export const createLitPortal = ({
     portalRoot.remove();
   });
 
-  render(template, portalRoot);
+  render(template, portalRoot, renderOptions);
   container.append(portalRoot);
   return portalRoot;
 };
