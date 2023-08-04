@@ -240,6 +240,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:code', CodeBlockService);
+    // set highlight options getter used by "exportToHtml"
+    getService('affine:code').setHighlightOptionsGetter(() => {
+      return {
+        lang: this._curLanguage.id as Lang,
+        highlighter: this._highlighter,
+      };
+    });
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );

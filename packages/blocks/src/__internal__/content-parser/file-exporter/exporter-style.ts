@@ -1,5 +1,31 @@
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
+
+export const quoteCSSContent = `
+  .quote {
+    line-height: 26px;
+    padding-left: 17px;
+    margin-top: var(--affine-paragraph-space);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    position: relative;
+  }
+`;
+
+export const quotePseudoElementContent = `
+  .quote::after {
+    content: '';
+    width: 2px;
+    height: calc(100% - 20px);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: var(--affine-quote-color);
+    border-radius: 18px;
+  }
+`;
 
 export const globalCSS = css`
   :root {
@@ -234,5 +260,30 @@ export const globalCSS = css`
   }
   .affine-bookmark-block-container .affine-bookmark-caption.caption-show {
     display: inline-block;
+  }
+
+  blockquote {
+    margin-inline-start: 0;
+  }
+
+  ${unsafeCSS(quoteCSSContent)}
+  ${unsafeCSS(quotePseudoElementContent)}
+
+  ul {
+    padding-inline-start: 1rem;
+  }
+  li {
+    padding-inline-start: 1rem;
+  }
+
+  .shiki {
+    font-size: var(--affine-font-sm);
+    line-height: var(--affine-line-height);
+    position: relative;
+    padding: 32px 0px 12px 60px;
+    background: var(--affine-background-code-block);
+    border-radius: 10px;
+    margin-top: 24px;
+    margin-bottom: 24px;
   }
 `;
