@@ -188,7 +188,7 @@ export class ViewStore<NodeViewType = unknown> {
       index: number,
       parent: NodeViewTree<NodeViewType>
     ) => undefined | null | true
-  ) => {
+  ): NodeViewTree<NodeViewType> | null => {
     const getPrev = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {
@@ -243,7 +243,7 @@ export class ViewStore<NodeViewType = unknown> {
       index: number,
       parent: NodeViewTree<NodeViewType>
     ) => undefined | null | true
-  ) => {
+  ): NodeViewTree<NodeViewType> | null => {
     const getNext = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {

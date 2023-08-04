@@ -1,26 +1,45 @@
-import { caretFromPoint, getNearestText } from '../text-selection/utils.js';
+import type { BlockElement } from '@blocksuite/lit';
+
+import {
+  caretFromPoint,
+  getNearestText,
+} from '../../page-block/text-selection/utils.js';
 
 export function horizontalGetNextCaret(
   point: { x: number; y: number },
-  root: HTMLElement,
+  element: BlockElement,
   forward = false,
-  span = 10
+  span = 5
 ) {
   const selection = document.getSelection();
   if (!selection) {
     return;
   }
   let _point = { ...point };
-  let move = caretFromPoint(point.x, point.y);
   const anchor = caretFromPoint(point.x, point.y);
+  if (!anchor) {
+    return;
+  }
+  const { viewStore } = element.root;
+  const view = viewStore.getNodeView(anchor.node);
+  if (!view) {
+    return;
+  }
+
+  const next = forward
+    ? viewStore.findPrev(view.path, () => true)
+    : viewStore.findNext(view.path, () => true);
+  const el = next?.view;
+  if (!el || el === element) {
+    return;
+  }
+  const rect = el.getBoundingClientRect();
+  let move = caretFromPoint(point.x, forward ? rect.bottom : rect.top);
   const needContinue = () => {
     if (!move) {
       return false;
     }
-    if (!anchor) {
-      return false;
-    }
-    if (!root.contains(move.node)) {
+    if (!element.contains(move.node)) {
       return false;
     }
     if (move.node.nodeType !== Node.TEXT_NODE) {
@@ -58,7 +77,7 @@ export function horizontalGetNextCaret(
 
 export function horizontalMoveCursorToNextText(
   point: { x: number; y: number },
-  root: HTMLElement,
+  root: BlockElement,
   forward = false
 ) {
   const selection = document.getSelection();

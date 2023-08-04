@@ -4,6 +4,7 @@ import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
+import { NoteKeyboardManager } from './keyboard/keyboard-manager.js';
 import type { NoteBlockModel } from './note-model.js';
 import { NoteBlockService } from './note-service.js';
 
@@ -18,9 +19,17 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
     }
   `;
 
+  keyboardManager: NoteKeyboardManager | null = null;
+
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:note', NoteBlockService);
+    this.keyboardManager = new NoteKeyboardManager(this);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.keyboardManager = null;
   }
 
   override firstUpdated() {

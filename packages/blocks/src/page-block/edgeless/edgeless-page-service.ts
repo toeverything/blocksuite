@@ -26,6 +26,7 @@ export class EdgelessPageService extends BlockService<PageBlockModel> {
     }
 
     if (this.selection) {
+      this.selectionManager.set([]);
       this.selection.dispose();
       this.selection = null;
     }

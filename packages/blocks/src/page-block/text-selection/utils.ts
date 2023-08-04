@@ -72,10 +72,13 @@ export function getNearestText(
   return undefined;
 }
 
-export function autoScroll(viewportElement: HTMLElement, y: number): boolean {
+export function autoScroll(
+  viewportElement: HTMLElement,
+  y: number,
+  threshold = 50
+): boolean {
   const { scrollHeight, clientHeight, scrollTop } = viewportElement;
   let _scrollTop = scrollTop;
-  const threshold = 50;
   const max = scrollHeight - clientHeight;
 
   let d = 0;

@@ -1,15 +1,28 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import type { UIEventHandler } from '@blocksuite/block-std';
+import type { BaseSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
-import type { PageBlockComponent } from '../types.js';
+import type { NoteBlockComponent } from '../note-block.js';
 
 export class BlockNavigation {
   private _anchorBlock: BlockSelection | null = null;
   private _focusBlock: BlockSelection | null = null;
 
-  constructor(public host: PageBlockComponent) {}
+  private _setSelections = (selection: BaseSelection[]) => {
+    const otherSelections = this._currentSelection.filter(
+      sel => !sel.is('text') && !sel.is('block')
+    );
+
+    this._selection.set([...otherSelections, ...selection]);
+  };
+
+  private get _blockSelections() {
+    return this._currentSelection.filter(sel => sel.is('block'));
+  }
+
+  constructor(public host: NoteBlockComponent) {}
 
   keyDown: UIEventHandler = () => {
     this._anchorBlock = null;
@@ -17,7 +30,7 @@ export class BlockNavigation {
   };
 
   Enter: UIEventHandler = () => {
-    const selection = this._currentSelection.at(0);
+    const selection = this._blockSelections.at(0);
     if (!selection) {
       return;
     }
@@ -37,8 +50,8 @@ export class BlockNavigation {
         },
         to: null,
       });
-      this._selection.set([sel]);
-      return;
+      this._setSelections([sel]);
+      return true;
     }
 
     const parentPath = view.parentPath;
@@ -61,11 +74,11 @@ export class BlockNavigation {
       to: null,
     });
     this._selection.set([sel]);
-    return;
+    return true;
   };
 
   ArrowUp: UIEventHandler = () => {
-    const selection = this._currentSelection.at(0);
+    const selection = this._blockSelections.at(0);
     if (!selection) {
       return;
     }
@@ -77,7 +90,7 @@ export class BlockNavigation {
   };
 
   ArrowDown: UIEventHandler = () => {
-    const selection = this._currentSelection.at(-1);
+    const selection = this._blockSelections.at(-1);
     if (!selection) {
       return;
     }
@@ -90,12 +103,12 @@ export class BlockNavigation {
   };
 
   ShiftArrowUp: UIEventHandler = () => {
-    const selection = this._currentSelection.at(0);
+    const selection = this._blockSelections.at(0);
     if (!selection) {
       return;
     }
     if (!this._anchorBlock) {
-      const anchor = this._currentSelection.at(-1);
+      const anchor = this._blockSelections.at(-1);
       if (!anchor) return;
       this._anchorBlock = anchor;
     }
@@ -115,12 +128,12 @@ export class BlockNavigation {
   };
 
   ShiftArrowDown: UIEventHandler = () => {
-    const selection = this._currentSelection.at(-1);
+    const selection = this._blockSelections.at(-1);
     if (!selection) {
       return;
     }
     if (!this._anchorBlock) {
-      const anchor = this._currentSelection.at(0);
+      const anchor = this._blockSelections.at(0);
       if (!anchor) return;
       this._anchorBlock = anchor;
     }
@@ -154,7 +167,7 @@ export class BlockNavigation {
       this._selection.set([_focusBlock]);
       return;
     }
-    const selections = [...this._selection.value];
+    const selections = [...this._blockSelections];
     if (
       this._selection.value.every(sel => sel.blockId !== _focusBlock.blockId)
     ) {
@@ -176,7 +189,7 @@ export class BlockNavigation {
       return start;
     });
 
-    this._selection.set(sel);
+    this._setSelections(sel);
 
     const path = _focusBlock.path;
     requestAnimationFrame(() => {
@@ -202,7 +215,7 @@ export class BlockNavigation {
     if (!block) return;
     const blockId = block.id;
     const path = parentPath.concat(blockId);
-    this._selection.set([
+    this._setSelections([
       this._selection.getInstance('block', {
         path,
       }),

@@ -1,10 +1,12 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
+import type { BaseSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 
-import { DocPageBlockComponent } from '../index.js';
-import { autoScroll } from '../text-selection/utils.js';
-import type { PageBlockComponent } from '../types.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import { autoScroll } from '../../page-block/text-selection/utils.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
+import type { NoteBlockComponent } from '../note-block.js';
 import {
   horizontalGetNextCaret,
   horizontalMoveCursorToNextText,
@@ -14,23 +16,45 @@ export class TextNavigation {
   private _anchorRange: Range | null = null;
   private _focusRange: Range | null = null;
 
-  private get _viewportElement() {
-    if (this.host instanceof DocPageBlockComponent) {
-      return this.host.viewportElement;
-    }
-    return null;
+  private get _pageBlock() {
+    const page = this.host.closest<PageBlockComponent>(
+      'affine-doc-page,affine-edgeless-page'
+    );
+    assertExists(page);
+    return page;
   }
 
   private get _rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
+    const { rangeManager } = this._pageBlock;
+    assertExists(rangeManager);
+
+    return rangeManager;
   }
 
   private get _selection() {
     return this.host.root.selectionManager;
   }
 
-  constructor(public host: PageBlockComponent) {}
+  private get _viewportElement() {
+    if (this._pageBlock.tagName === 'AFFINE-DOC-PAGE') {
+      return (this._pageBlock as DocPageBlockComponent).viewportElement;
+    }
+    return null;
+  }
+
+  private get _currentSelection() {
+    return this._selection.value;
+  }
+
+  private _setSelections = (selection: BaseSelection[]) => {
+    const otherSelections = this._currentSelection.filter(
+      sel => !sel.is('text') && !sel.is('block')
+    );
+
+    this._selection.set([...otherSelections, ...selection]);
+  };
+
+  constructor(public host: NoteBlockComponent) {}
 
   Escape: UIEventHandler = () => {
     const selection = document.getSelection();
@@ -41,13 +65,14 @@ export class TextNavigation {
     const blocks = this._rangeManager.findBlockElementsByRange(range);
 
     const manager = this.host.root.selectionManager;
-    manager.set(
-      blocks.map(block => {
-        return manager.getInstance('block', {
-          path: block.path,
-        });
-      })
-    );
+
+    const blockSelections = blocks.map(block => {
+      return manager.getInstance('block', {
+        path: block.path,
+      });
+    });
+
+    this._setSelections(blockSelections);
   };
 
   ArrowUp: UIEventHandler = ctx => {
@@ -72,7 +97,7 @@ export class TextNavigation {
     if (nextRect) {
       ctx.get('keyboardState').raw.preventDefault();
       if (this._viewportElement) {
-        autoScroll(this._viewportElement, nextRect.top);
+        autoScroll(this._viewportElement, nextRect.top, 200);
       }
     }
     return;
@@ -99,7 +124,7 @@ export class TextNavigation {
     if (nextRect) {
       ctx.get('keyboardState').raw.preventDefault();
       if (this._viewportElement) {
-        autoScroll(this._viewportElement, nextRect.bottom);
+        autoScroll(this._viewportElement, nextRect.bottom, 200);
       }
     }
     return;
@@ -130,7 +155,7 @@ export class TextNavigation {
     ) as BlockElement;
     if (!blockElement) return;
 
-    this._selection.set([
+    this._setSelections([
       this._selection.getInstance('text', {
         from: {
           index: 0,
@@ -167,7 +192,7 @@ export class TextNavigation {
     ) as BlockElement;
     if (!blockElement) return;
 
-    this._selection.set([
+    this._setSelections([
       this._selection.getInstance('text', {
         from: {
           index: blockElement.model.text?.length ?? 0,
