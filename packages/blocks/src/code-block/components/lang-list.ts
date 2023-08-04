@@ -1,5 +1,6 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
@@ -8,7 +9,6 @@ import {
   type Lang,
 } from 'shiki';
 
-import { createEvent } from '../../__internal__/index.js';
 import { scrollbarStyle } from '../../components/utils.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
@@ -111,6 +111,10 @@ export class LangList extends ShadowlessElement {
   @property({ attribute: false })
   delay = 150;
 
+  slots = {
+    selectedLanguageChanged: new Slot<{ language: string | null }>(),
+    dispose: new Slot(),
+  };
   override async connectedCallback() {
     super.connectedCallback();
     // Avoid triggering click away listener on initial render
@@ -130,16 +134,11 @@ export class LangList extends ShadowlessElement {
     if (this.renderRoot.parentElement?.contains(e.target as Node)) {
       return;
     }
-    this.dispatchEvent(createEvent('dispose', null));
+    this.slots.dispose.emit();
   };
 
   private _onLanguageClicked(language: ILanguageRegistration | null) {
-    // TODO use slot instead
-    this.dispatchEvent(
-      createEvent('selected-language-changed', {
-        language: language?.id ?? null,
-      })
-    );
+    this.slots.selectedLanguageChanged.emit({ language: language?.id ?? null });
   }
 
   override render() {
@@ -223,13 +222,5 @@ export class LangList extends ShadowlessElement {
 declare global {
   interface HTMLElementTagNameMap {
     'lang-list': LangList;
-  }
-
-  interface HTMLElementEventMap {
-    /**
-     * @deprecated Use slot instead
-     */
-    'selected-language-changed': CustomEvent<{ language: string | null }>;
-    dispose: CustomEvent<null>;
   }
 }
