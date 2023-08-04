@@ -2,6 +2,7 @@
 import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
 
+import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   BLOCK_ID_ATTR,
   EDGELESS_BLOCK_CHILD_PADDING,
@@ -1230,6 +1231,19 @@ export class EdgelessPageBlockComponent
     this.mouseRoot = this.parentElement!;
     this.rangeController = new RangeController(this.root);
     this.synchronizer = new Synchronizer(this);
+    this.handleEvent('selectionChange', () => {
+      const surface = this.root.selectionManager.value.find(
+        (sel): sel is SurfaceSelection => sel.is('surface')
+      );
+      if (!surface) return;
+
+      const el = this.surface.pickById(surface.elements[0]);
+      if (el?.type === 'shape') {
+        return true;
+      }
+
+      return;
+    });
   }
 
   override disconnectedCallback() {
