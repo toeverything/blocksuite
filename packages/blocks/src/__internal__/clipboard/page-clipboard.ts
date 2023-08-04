@@ -10,7 +10,7 @@ import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
-  copyBlocks,
+  copyBlocksInPage,
   textedClipboardData2Blocks,
 } from './utils/commons.js';
 
@@ -78,22 +78,17 @@ export class PageClipboard implements Clipboard {
     this._page.slots.pasted.emit(blocks);
   };
 
-  private _onCopy = async (
-    ctx: UIEventStateContext,
-    range = getCurrentBlockRange(this._page)
-  ) => {
+  private _onCopy = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
 
     if (!activeEditorManager.isActive(this._ele)) {
       return;
     }
-    if (!range) {
-      return;
-    }
+
     e.preventDefault();
     this._page.captureSync();
 
-    await copyBlocks(range);
+    await copyBlocksInPage(this._ele);
 
     this._page.captureSync();
 
@@ -111,7 +106,7 @@ export class PageClipboard implements Clipboard {
       return;
     }
     e.preventDefault();
-    await this._onCopy(ctx, range);
+    await this._onCopy(ctx);
     deleteModelsByRange(this._page, range);
   };
 }

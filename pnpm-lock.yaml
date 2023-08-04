@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  hotkeys-js@3.11.2:
-    hash: 3mgwcccs6bhgogrpuyqhyqyhea
-    path: patches/hotkeys-js@3.11.2.patch
-
 importers:
 
   .:
@@ -170,9 +165,6 @@ importers:
       file-type:
         specifier: ^16.5.4
         version: 16.5.4
-      hotkeys-js:
-        specifier: ^3.11.2
-        version: 3.11.2(patch_hash=3mgwcccs6bhgogrpuyqhyqyhea)
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
@@ -4428,11 +4420,6 @@ packages:
     dependencies:
       lru-cache: 6.0.0
     dev: true
-
-  /hotkeys-js@3.11.2(patch_hash=3mgwcccs6bhgogrpuyqhyqyhea):
-    resolution: {integrity: sha512-hLuR+wtvrVrVFHku5cud44cPXQf5ke+96TonRaGzlNSt22rh2LH65avLYFNsc+QpzMuOEQG/IxJT5mEop99rvg==}
-    dev: false
-    patched: true
 
   /html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}

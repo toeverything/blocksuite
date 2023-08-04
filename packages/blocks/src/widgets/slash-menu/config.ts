@@ -40,8 +40,8 @@ import {
 } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
+import { inlineFormatConfig } from '../../page-block/const/inline-format-config.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
-import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
   onModelTextUpdated,
   updateBlockType,
@@ -96,7 +96,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
   },
   {
     name: 'Style',
-    items: formatConfig
+    items: inlineFormatConfig
       .filter(i => !['Link', 'Code'].includes(i.name))
       .map(({ name, icon, id }) => ({
         name,

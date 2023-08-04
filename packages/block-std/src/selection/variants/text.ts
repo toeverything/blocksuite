@@ -73,7 +73,7 @@ export class TextSelection extends BaseSelection {
   }
 
   isCollapsed(): boolean {
-    return this.to === null;
+    return this.to === null && this.from.length === 0;
   }
 
   isInSameBlock(): boolean {

@@ -37,7 +37,7 @@ import { groupBy } from '../utils/common.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
-  copyBlocks,
+  copyBlocksInPage,
   copyOnPhasorElementWithText,
   getBlockClipboardInfo,
 } from './utils/commons.js';
@@ -170,9 +170,7 @@ export class EdgelessClipboard implements Clipboard {
       if (isPhasorElementWithText(elements[0])) {
         copyOnPhasorElementWithText(this._edgeless);
       } else {
-        const range = getCurrentBlockRange(this._page);
-        assertExists(range);
-        await copyBlocks(range);
+        await copyBlocksInPage(this._edgeless);
       }
       return;
     }

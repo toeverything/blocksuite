@@ -68,11 +68,13 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
+import { SELF_CONTROL_PAGE_WIDGETS } from '../const/widget.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
+import { WidgetManager } from '../widget-manager/widget-manager.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { NoteCut } from './components/note-cut/index.js';
@@ -98,7 +100,6 @@ import {
   FIT_TO_SCREEN_PADDING,
 } from './utils/consts.js';
 import { xywhArrayToObject } from './utils/convert.js';
-import { bindEdgelessHotkeys } from './utils/hotkey.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import {
   getBackgroundGrid,
@@ -257,6 +258,8 @@ export class EdgelessPageBlockComponent
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
+
+  widgetManager: WidgetManager | null = null;
 
   mouseRoot!: HTMLElement;
 
@@ -596,7 +599,6 @@ export class EdgelessPageBlockComponent
     _disposables.add(this.tools);
     _disposables.add(this.selection);
     _disposables.add(this.surface);
-    _disposables.add(bindEdgelessHotkeys(this));
 
     _disposables.add(this._noteResizeObserver);
     _disposables.add(
@@ -1232,6 +1234,7 @@ export class EdgelessPageBlockComponent
     this.gesture = new Gesture(this);
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
+    this.widgetManager = new WidgetManager(this);
 
     this.handleEvent('selectionChange', () => {
       const surface = this.root.selectionManager.value.find(
@@ -1266,6 +1269,7 @@ export class EdgelessPageBlockComponent
     this.gesture = null;
     this.rangeSynchronizer = null;
     this.keyboardManager = null;
+    this.widgetManager = null;
   }
 
   override render() {
@@ -1313,6 +1317,10 @@ export class EdgelessPageBlockComponent
       '--affine-edgeless-y': `${translateY}px`,
     };
 
+    const widgets = this.widgetManager?.render(
+      name => !SELF_CONTROL_PAGE_WIDGETS.includes(name)
+    );
+
     return html`
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
@@ -1349,8 +1357,7 @@ export class EdgelessPageBlockComponent
         ></affine-selected-blocks>
         ${hoverRectTpl} ${draggingAreaTpl}
         <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
-        ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets.slashMenu}
-        ${this.widgets.linkedPage}
+        ${EdgelessNotesStatus(this, this.sortedNotes)} ${widgets}
       </div>
     `;
   }

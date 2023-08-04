@@ -151,15 +151,13 @@ export class RangeManager {
   };
 
   getSelectedBlocksIdByRange(range: Range): BaseBlockModel['id'][] {
-    const blocksId = Array.from(
-      range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
-    ).map(block => {
-      const id = block.getAttribute(BLOCK_ID_ATTR);
-      assertExists(id, 'Cannot find block id');
-      return id;
-    });
+    const selectedBlocksId = Array.from<BlockElement>(
+      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
+    )
+      .filter(el => range.intersectsNode(el))
+      .map(el => el.model.id);
 
-    return blocksId;
+    return selectedBlocksId;
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {
