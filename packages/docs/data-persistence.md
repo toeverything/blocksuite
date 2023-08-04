@@ -19,12 +19,14 @@ Different providers can handle the asynchronous IO over different network protoc
 Code example:
 
 ```ts
-import { Workspace } from '@blocksuite/store';
+import { Workspace, Schema } from '@blocksuite/store';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
-const workspace = new Workspace();
-workspace.register(AffineSchemas);
+const schema = new Schema();
+schema.register(AffineSchemas);
+
+const workspace = new Workspace({ schema });
 
 // `workspace.doc` is the underlying Yjs data structure
 const { doc } = workspace;

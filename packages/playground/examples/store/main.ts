@@ -1,4 +1,4 @@
-import { type Page, Workspace } from '@blocksuite/store';
+import { type Page, Schema, Workspace } from '@blocksuite/store';
 
 import {
   type TodoContainerBlockModel,
@@ -7,8 +7,9 @@ import {
 } from './schema';
 
 function initPage() {
-  const workspace = new Workspace({ id: 'todo' });
-  workspace.register(TodoSchema);
+  const schema = new Schema();
+  schema.register(TodoSchema);
+  const workspace = new Workspace({ id: 'todo', schema });
   const page = workspace.createPage({ id: 'page0' });
   page.addBlock('todo:container');
   return page;

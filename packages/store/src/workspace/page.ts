@@ -765,7 +765,7 @@ export class Page extends Space<FlatBlockMap> {
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
 
-    const props = toBlockProps(yBlock, this.doc);
+    const props = toBlockProps(yBlock, this.doc.proxy);
     const model = this._createBlockModel({ ...props, id }, yBlock);
     this._blockMap.set(id, model);
 

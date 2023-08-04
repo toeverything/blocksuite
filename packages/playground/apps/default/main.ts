@@ -133,9 +133,7 @@ async function main() {
     return;
   }
 
-  const workspace = new Workspace(options)
-    .register(AffineSchemas)
-    .register(__unstableSchemas);
+  const workspace = new Workspace(options);
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;

@@ -9,12 +9,14 @@ BlockSuite is centered around the concept of blocks. However, to handle a large 
 A `Workspace` in BlockSuite acts as a top-level container for organizing pages. By creating workspaces, users can group and categorize different sets of pages, each representing a specific project or a collection of related content. Here is how we create a new workspace:
 
 ```ts
-import { Workspace } from '@blocksuite/store';
+import { Workspace, Schema } from '@blocksuite/store';
 
-const workspace = new Workspace({ id: 'foo' });
+const schema = new Schema();
 
 // We can register a batch of blocks to the workspace
-workspace.register(AffineSchemas);
+schema.register(AffineSchemas);
+
+const workspace = new Workspace({ id: 'foo', schema });
 ```
 
 ## Pages
