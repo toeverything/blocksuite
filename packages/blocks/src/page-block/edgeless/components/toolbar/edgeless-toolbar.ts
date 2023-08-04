@@ -158,7 +158,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.selection.setEdgelessTool(edgelessTool);
+    this.edgeless.tools.setEdgelessTool(edgelessTool);
   };
 
   private _imageLoading = false;
@@ -220,7 +220,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _trySaveBrushStateLocalRecord = () => {
-    const edgelessTool = this.edgeless.selection.edgelessTool;
+    const edgelessTool = this.edgeless.tools.edgelessTool;
     if (edgelessTool.type === 'brush') {
       sessionStorage.setItem(
         'blocksuite:' + this.edgeless.page.id + ':edgelessBrush',

@@ -88,9 +88,9 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     });
     this.remove();
     assertExists(this._edgeless);
-    this._edgeless.slots.selectionUpdated.emit({
-      selected: [],
-      active: false,
+    this._edgeless.selection.setSelection({
+      elements: [],
+      editing: false,
     });
     this._frame = null;
   }

@@ -93,15 +93,15 @@ export class NoteCut extends WithDisposable(LitElement) {
   private get _notHovering() {
     return (
       this.edgelessPage.edgelessTool.type !== 'default' ||
-      (
-        this.edgelessPage.service?.selection
-          ?.currentController as DefaultToolController
-      ).dragType !== DefaultModeDragType.None
+      (this.edgelessPage.tools.currentController as DefaultToolController)
+        .dragType !== DefaultModeDragType.None
     );
   }
 
   private _updateVisiblity(e: PointerEventState) {
-    const block = this.selection.state.selected[0];
+    const block = this.edgelessPage.getElementModel(
+      this.selection.state.elements[0]
+    );
     if (this._notHovering || !block || !isTopLevelBlock(block)) {
       this._hide();
       return;
@@ -268,7 +268,7 @@ export class NoteCut extends WithDisposable(LitElement) {
       page.getBlockById(newNoteId) as NoteBlockModel
     );
 
-    this.edgelessPage.slots.selectedBlocksUpdated.emit([]);
+    this.selection.setSelectedBlocks([]);
     this._hide();
   }
 

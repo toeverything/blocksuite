@@ -8,7 +8,7 @@ import { customElement, property } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getSelectedBound } from '../../utils/selection-manager.js';
+import { getSelectedBound } from '../../services/tools-manager.js';
 
 const MIN_FRAME_WIDTH = 800;
 const MIN_FRAME_HEIGHT = 640;
@@ -24,7 +24,7 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
     const { surface } = this.edgeless;
     return html`<edgeless-tool-icon-button
       @click=${() => {
-        let bound = getSelectedBound(this.edgeless.selection.state.selected);
+        let bound = getSelectedBound(this.edgeless.selection.elements);
         bound = bound.expand(FRAME_PADDING);
         if (bound.w < MIN_FRAME_WIDTH) {
           const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
@@ -42,9 +42,9 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
         this.edgeless.page.captureSync();
         const frame = surface.pickById(id);
         assertExists(frame);
-        this.edgeless.slots.selectionUpdated.emit({
-          selected: [frame],
-          active: false,
+        this.edgeless.selection.setSelection({
+          elements: [frame.id],
+          editing: false,
         });
       }}
     >

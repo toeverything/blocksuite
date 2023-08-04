@@ -374,3 +374,23 @@ export function uncapitalize(s: string) {
   }
   return s[0].toLowerCase() + s.slice(1);
 }
+
+export function pick<T, K extends Partial<keyof T>>(
+  target: T,
+  keys: K[]
+): { [key in K]: T[K] } {
+  return keys.reduce((pre, key) => {
+    pre[key] = target[key];
+    return pre;
+  }, {} as { [key in K]: T[K] });
+}
+
+export function pickValues<T, K extends Partial<keyof T>>(
+  target: T,
+  keys: K[]
+): Array<T[K]> {
+  return keys.reduce((pre, key) => {
+    pre.push(target[key]);
+    return pre;
+  }, [] as Array<T[K]>);
+}
