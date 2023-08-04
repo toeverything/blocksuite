@@ -1,6 +1,7 @@
 import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
 
+import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   BLOCK_ID_ATTR,
   EDGELESS_BLOCK_CHILD_PADDING,
@@ -1231,6 +1232,20 @@ export class EdgelessPageBlockComponent
     this.gesture = new Gesture(this);
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
+
+    this.handleEvent('selectionChange', () => {
+      const surface = this.root.selectionManager.value.find(
+        (sel): sel is SurfaceSelection => sel.is('surface')
+      );
+      if (!surface) return;
+
+      const el = this.surface.pickById(surface.elements[0]);
+      if (el?.type === 'shape') {
+        return true;
+      }
+
+      return;
+    });
 
     registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

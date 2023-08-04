@@ -4,8 +4,12 @@ import type { EdgelessPageBlockComponent } from './edgeless/edgeless-page-block.
 export type DocPageBlockWidgetName =
   | 'slashMenu'
   | 'linkedPage'
-  | 'draggingArea';
-export type EdgelessPageBlockWidgetName = 'slashMenu' | 'linkedPage';
+  | 'draggingArea'
+  | 'dragHandle';
+export type EdgelessPageBlockWidgetName =
+  | 'slashMenu'
+  | 'linkedPage'
+  | 'dragHandle';
 
 export type PageBlockComponent =
   | DocPageBlockComponent

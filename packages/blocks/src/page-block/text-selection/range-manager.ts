@@ -1,7 +1,7 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -68,29 +68,19 @@ export class RangeManager {
   writeRangeByTextSelection(range: Range | null) {
     const selectionManager = this.root.selectionManager;
     let hasTextSelection = false;
-    const noneTextSelection = selectionManager.value.filter(sel => {
+    const noneTextAndBlockSelection = selectionManager.value.filter(sel => {
       if (sel.is('text')) hasTextSelection = true;
-      return !sel.is('text');
+      return !sel.is('text') && !sel.is('block');
     });
     this._reusedRange = range;
 
     const { startContainer, endContainer } = this._range;
     const from = this._nodeToPoint(startContainer);
     const to = range?.collapsed ? null : this._nodeToPoint(endContainer);
-
     if (!from) {
       if (hasTextSelection) {
         selectionManager.clear(['text']);
       }
-      return null;
-    }
-
-    if (
-      matchFlavours(
-        this.root.page.getBlockById(from.blockId) as BaseBlockModel,
-        ['affine:page']
-      )
-    ) {
       return null;
     }
 
@@ -99,7 +89,7 @@ export class RangeManager {
       to,
     });
 
-    selectionManager.set([...noneTextSelection, selection]);
+    selectionManager.set([...noneTextAndBlockSelection, selection]);
     return selection;
   }
 

@@ -28,6 +28,7 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
+      dragHandle: literal`affine-drag-handle-widget`,
     },
   },
 };
@@ -40,6 +41,7 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
     widgets: {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
+      dragHandle: literal`affine-drag-handle-widget`,
     },
   },
 };
