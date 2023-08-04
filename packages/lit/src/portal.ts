@@ -63,14 +63,22 @@ export const createLitPortal = ({
   container = document.body,
   abortController = new AbortController(),
   renderOptions,
+  identifyWrapper = true,
 }: {
   template: TemplateResult<1>;
   container?: HTMLElement;
   abortController?: AbortController;
   renderOptions?: RenderOptions;
+  /**
+   * Defaults to `true`.
+   * If true, the portalRoot will be added a class `affine-portal`. It's useful for finding the portalRoot.
+   */
+  identifyWrapper?: boolean;
 }) => {
   const portalRoot = document.createElement('div');
-  portalRoot.classList.add('affine-portal');
+  if (identifyWrapper) {
+    portalRoot.classList.add('affine-portal');
+  }
 
   abortController.signal.addEventListener('abort', () => {
     portalRoot.remove();
