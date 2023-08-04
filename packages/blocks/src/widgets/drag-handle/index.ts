@@ -22,7 +22,7 @@ import {
   Point,
   Rect,
 } from '../../__internal__/index.js';
-import type { DefaultPageBlockComponent } from '../../page-block/index.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 
 @customElement('affine-drag-handle-widget')
@@ -120,7 +120,7 @@ export class DragHandleWidget extends WidgetElement {
 
   // TODO: need to find a better way, should not assumpt the host element is page block
   private get _pageBlockElement() {
-    const pageBlock = this.hostElement as DefaultPageBlockComponent;
+    const pageBlock = this.hostElement as DocPageBlockComponent;
     assertExists(pageBlock);
 
     return pageBlock;
@@ -132,8 +132,9 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   // TODO: need to find a better way to get range controller
-  private get _rangeController() {
-    return this._pageBlockElement.rangeController;
+  private get _rangeManager() {
+    assertExists(this._pageBlockElement.rangeManager);
+    return this._pageBlockElement.rangeManager;
   }
 
   private _getClosestBlockElementByPoint(point: Point) {
@@ -412,7 +413,7 @@ export class DragHandleWidget extends WidgetElement {
       const nativeSelection = document.getSelection();
       if (nativeSelection && nativeSelection.rangeCount > 0) {
         const range = nativeSelection.getRangeAt(0);
-        const blockElements = this._rangeController
+        const blockElements = this._rangeManager
           .findBlockElementsByRange(range)
           .filter(element => element.flavour !== 'affine:note');
         const blockElementsExcludingChildren = getBlockElementsExcludeSubtrees(
