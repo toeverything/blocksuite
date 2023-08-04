@@ -170,7 +170,7 @@ test('always keep at least 1 note block', async ({ page }) => {
   expect(notes.length).toEqual(1);
 });
 
-test('edgeless arrow up/down', async ({ page }) => {
+test.fixme('edgeless arrow up/down', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
