@@ -2,7 +2,7 @@ import {
   type AbstractEditor,
   activeEditorManager,
   type AttachmentProps,
-  type DefaultPageBlockComponent,
+  type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
   FileDropManager,
@@ -65,8 +65,8 @@ export class EditorContainer
   /**
    * @deprecated This property is unreliable since pagePreset can be overridden.
    */
-  @query('affine-default-page')
-  private _defaultPageBlock?: DefaultPageBlockComponent;
+  @query('affine-doc-page')
+  private _defaultPageBlock?: DocPageBlockComponent;
 
   /**
    * @deprecated This property is unreliable since edgelessPreset can be overridden.

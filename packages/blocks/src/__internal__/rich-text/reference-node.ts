@@ -11,7 +11,7 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { getBlockElementById, getModelByElement } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
@@ -123,7 +123,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const targetPageId = refMeta.id;
     const root = model.page.root;
     assertExists(root);
-    const element = getBlockElementById(root?.id) as DefaultPageBlockComponent;
+    const element = getBlockElementById(root?.id) as DocPageBlockComponent;
     assertExists(element);
     element.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }

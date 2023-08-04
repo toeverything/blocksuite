@@ -56,7 +56,7 @@ export async function dragBetweenIndices(
 export async function dragOverTitle(page: Page) {
   const { from, to } = await page.evaluate(() => {
     const titleInput = document.querySelector(
-      '.affine-default-page-block-title'
+      '.affine-doc-page-block-title'
     ) as HTMLTextAreaElement;
     const titleBound = titleInput.getBoundingClientRect();
 

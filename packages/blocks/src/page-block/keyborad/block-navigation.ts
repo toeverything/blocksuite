@@ -3,13 +3,13 @@ import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
-import type { DefaultPageBlockComponent } from '../../default-page-block.js';
+import type { PageBlockComponent } from '../types.js';
 
 export class BlockNavigation {
   private _anchorBlock: BlockSelection | null = null;
   private _focusBlock: BlockSelection | null = null;
 
-  constructor(public host: DefaultPageBlockComponent) {}
+  constructor(public host: PageBlockComponent) {}
 
   keyDown: UIEventHandler = () => {
     this._anchorBlock = null;

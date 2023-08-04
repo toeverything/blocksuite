@@ -264,7 +264,7 @@ export class ContentParser {
 
     const editorContainer = getEditorContainer(this._page);
     const pageContainer = editorContainer.querySelector(
-      '.affine-default-page-block-container'
+      '.affine-doc-page-block-container'
     );
     if (!pageContainer) return;
 

@@ -14,7 +14,10 @@ type RangeSnapshot = {
   endOffset: number;
 };
 
-export class RangeController {
+/**
+ * CRUD for Range and TextSelection
+ */
+export class RangeManager {
   private _reusedRange: Range | null = null;
 
   constructor(public root: BlockSuiteRoot) {}
@@ -30,7 +33,7 @@ export class RangeController {
     return this._reusedRange;
   }
 
-  render(start: Range, end?: Range | null) {
+  renderRange(start: Range, end?: Range | null) {
     const ranges = [start];
     if (end) {
       ranges.push(end);
@@ -40,7 +43,7 @@ export class RangeController {
     this._renderRange();
   }
 
-  syncRange(selection: TextSelection | null) {
+  syncTextSelectionToRange(selection: TextSelection | null) {
     if (!selection) {
       this._reusedRange = null;
       window.getSelection()?.removeAllRanges();
@@ -59,10 +62,10 @@ export class RangeController {
     if (!startRange) {
       return;
     }
-    this.render(startRange, endRange);
+    this.renderRange(startRange, endRange);
   }
 
-  writeRange(range: Range | null) {
+  writeRangeByTextSelection(range: Range | null) {
     const selectionManager = this.root.selectionManager;
     let hasTextSelection = false;
     const noneTextAndBlockSelection = selectionManager.value.filter(sel => {
@@ -147,7 +150,7 @@ export class RangeController {
     return Array.from(blocks);
   };
 
-  getSelectedBlocks(range: Range): BaseBlockModel['id'][] {
+  getSelectedBlocksIdByRange(range: Range): BaseBlockModel['id'][] {
     const blocksId = Array.from(
       range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
     ).map(block => {

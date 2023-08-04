@@ -184,17 +184,17 @@ export const createBlockHub: (
     },
     onDragStart: () => {
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
         // FIXME:
         // defaultPageBlock.selection?.clear();
       }
     },
     getAllowedBlocks: () => {
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
-        return getAllowSelectedBlocks(defaultPageBlock.model);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
+        return getAllowSelectedBlocks(docPageBlock.model);
       } else {
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
@@ -207,10 +207,10 @@ export const createBlockHub: (
       } as { container?: Element; rect?: Rect; scale: number };
 
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
         const rect = Rect.fromDOMRect(
-          defaultPageBlock.pageBlockContainer.getBoundingClientRect()
+          docPageBlock.pageBlockContainer.getBoundingClientRect()
         );
         rect.height -= PAGE_BLOCK_PADDING_BOTTOM;
         state.rect = rect;

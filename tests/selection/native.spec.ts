@@ -1249,7 +1249,7 @@ test('should keep native range selection when scrolling backward with the scroll
   await assertRichTexts(page, data);
 
   const blockHeight = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1321,7 +1321,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await assertRichTexts(page, data);
 
   const blockHeight = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1346,7 +1346,7 @@ test('should keep native range selection when scrolling forward with the scroll 
   await page.waitForTimeout(250);
 
   await page.evaluate(() => {
-    document.querySelector('.affine-default-viewport')?.scrollTo(0, 0);
+    document.querySelector('.affine-doc-viewport')?.scrollTo(0, 0);
   });
   await page.mouse.move(0, 0);
 

@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
 
@@ -69,9 +68,10 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
-import type { Gesture } from '../default/event/gesture.js';
-import { RangeController } from '../default/event/range-controller.js';
-import { Synchronizer } from '../default/event/synchronizer.js';
+import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
+import { Gesture } from '../text-selection/gesture.js';
+import { RangeManager } from '../text-selection/range-manager.js';
+import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
@@ -251,6 +251,13 @@ export class EdgelessPageBlockComponent
     zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
+  rangeManager: RangeManager | null = null;
+  rangeSynchronizer: RangeSynchronizer | null = null;
+
+  keyboardManager: PageKeyboardManager | null = null;
+
+  gesture: Gesture | null = null;
+
   mouseRoot!: HTMLElement;
 
   showGrid = true;
@@ -304,19 +311,9 @@ export class EdgelessPageBlockComponent
 
   surface!: SurfaceManager;
 
-  gesture: Gesture | null = null;
-
-  rangeController!: RangeController;
-
-  synchronizer: Synchronizer | null = null;
-
   indexes: { max: string; min: string } = { max: 'a0', min: 'a0' };
 
   getService = getService;
-
-  get disposables() {
-    return this._disposables;
-  }
 
   get selection() {
     const selection = this.service?.selection;
@@ -352,6 +349,10 @@ export class EdgelessPageBlockComponent
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
+  }
+
+  get disposables() {
+    return this._disposables;
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -1226,11 +1227,12 @@ export class EdgelessPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:page', PageBlockService);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.mouseRoot = this.parentElement!;
-    this.rangeController = new RangeController(this.root);
-    this.synchronizer = new Synchronizer(this);
+
+    this.rangeManager = new RangeManager(this.root);
+    this.gesture = new Gesture(this);
+    this.rangeSynchronizer = new RangeSynchronizer(this);
+    this.keyboardManager = new PageKeyboardManager(this);
+
     this.handleEvent('selectionChange', () => {
       const surface = this.root.selectionManager.value.find(
         (sel): sel is SurfaceSelection => sel.is('surface')
@@ -1244,6 +1246,10 @@ export class EdgelessPageBlockComponent
 
       return;
     });
+
+    registerService('affine:page', PageBlockService);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.mouseRoot = this.parentElement!;
   }
 
   override disconnectedCallback() {
@@ -1255,6 +1261,11 @@ export class EdgelessPageBlockComponent
       this._resizeObserver = null;
     }
     this.service?.unmountSelectionManager();
+
+    this.rangeManager = null;
+    this.gesture = null;
+    this.rangeSynchronizer = null;
+    this.keyboardManager = null;
   }
 
   override render() {

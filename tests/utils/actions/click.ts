@@ -122,7 +122,7 @@ export async function addCodeBlock(page: Page) {
 export async function switchReadonly(page: Page) {
   page.evaluate(() => {
     const defaultPage = document.querySelector(
-      'affine-default-page'
+      'affine-doc-page'
     ) as HTMLElement & {
       page: {
         awarenessStore: { setFlag: (key: string, value: unknown) => void };

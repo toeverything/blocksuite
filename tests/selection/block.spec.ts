@@ -390,7 +390,7 @@ test.fixme(
     await assertRichTexts(page, data);
 
     const [viewport, container, distance] = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -432,7 +432,7 @@ test.fixme(
     );
 
     const scrollTop = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -470,7 +470,7 @@ test.fixme(
     await assertRichTexts(page, data);
 
     const [viewport, container, distance] = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -510,7 +510,7 @@ test.fixme(
     );
 
     const scrollTop = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -549,7 +549,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await assertRichTexts(page, data);
 
   const [last, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -594,7 +594,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -604,7 +604,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   await page.mouse.move(0, 0);
 
   await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -628,7 +628,7 @@ test('should keep selection state when scrolling backward with the scroll wheel'
   // get count with moving mouse
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -665,7 +665,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await assertRichTexts(page, data);
 
   const [first, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -708,7 +708,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -718,7 +718,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   await page.mouse.move(0, 0);
 
   await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -741,7 +741,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
   // get count with moving mouse
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -772,7 +772,7 @@ test.fixme(
     await type(page, '321');
 
     const [viewport, first, distance] = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -812,7 +812,7 @@ test.fixme(
     const rects = page.locator('affine-selected-blocks > *');
     const count0 = await rects.count();
     const scrollTop0 = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -823,7 +823,7 @@ test.fixme(
 
     const count1 = await rects.count();
     const scrollTop1 = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -856,7 +856,7 @@ test.fixme(
     await type(page, '321');
 
     const [viewport, first, distance] = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -908,7 +908,7 @@ test.fixme(
     await waitNextFrame(page);
 
     const count2 = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -940,7 +940,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   await type(page, '321');
 
   const [viewport, first, distance] = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -980,7 +980,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
   const rects = page.locator('affine-selected-blocks > *');
   const count0 = await rects.count();
   const scrollTop0 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1003,7 +1003,7 @@ test('should refresh selected rects when resizing the window/viewport', async ({
 
   const count1 = await rects.count();
   const scrollTop1 = await page.evaluate(() => {
-    const viewport = document.querySelector('.affine-default-viewport');
+    const viewport = document.querySelector('.affine-doc-viewport');
     if (!viewport) {
       throw new Error();
     }
@@ -1079,7 +1079,7 @@ test.fixme(
 
     // `123`, `789`
     const [first, last] = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -1341,7 +1341,7 @@ test.fixme(
     await initImageState(page);
 
     await page.evaluate(async () => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -1349,7 +1349,7 @@ test.fixme(
     });
 
     const pageRect = await page.evaluate(() => {
-      const pageBlock = document.querySelector('affine-default-page');
+      const pageBlock = document.querySelector('affine-doc-page');
       return pageBlock?.getBoundingClientRect() || null;
     });
 
@@ -1469,7 +1469,7 @@ test.fixme(
     await type(page, 'new block');
 
     const lastBlockId = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport')!;
+      const viewport = document.querySelector('.affine-doc-viewport')!;
       const container = viewport.querySelector(
         'affine-note .affine-block-children-container'
       );
@@ -1485,7 +1485,7 @@ test.fixme(
 
     async function getViewportScrollTop() {
       return await page.evaluate(() => {
-        const viewport = document.querySelector('.affine-default-viewport');
+        const viewport = document.querySelector('.affine-doc-viewport');
         if (!viewport) {
           throw new Error();
         }
@@ -1500,7 +1500,7 @@ test.fixme(
 
     // scroll to end by wheel
     const distanceToEnd = await page.evaluate(() => {
-      const viewport = document.querySelector('.affine-default-viewport')!;
+      const viewport = document.querySelector('.affine-doc-viewport')!;
       return viewport.scrollHeight - viewport.clientHeight;
     });
     await page.mouse.wheel(0, distanceToEnd * 2);

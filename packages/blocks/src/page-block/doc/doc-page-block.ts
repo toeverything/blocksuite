@@ -1,4 +1,3 @@
-/// <reference types="vite/client" />
 import './meta-data/meta-data.js';
 
 import type { BlockService } from '@blocksuite/block-std';
@@ -25,13 +24,11 @@ import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageBlockService } from '../index.js';
+import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
-import {
-  Gesture,
-  Keyboard,
-  RangeController,
-  Synchronizer,
-} from './event/index.js';
+import { Gesture } from '../text-selection/gesture.js';
+import { RangeManager } from '../text-selection/range-manager.js';
+import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 
 export interface PageViewport {
   left: number;
@@ -43,20 +40,20 @@ export interface PageViewport {
   clientWidth: number;
 }
 
-@customElement('affine-default-page')
-export class DefaultPageBlockComponent
+@customElement('affine-doc-page')
+export class DocPageBlockComponent
   extends BlockElement<PageBlockModel, BlockService, DocPageBlockWidgetName>
   implements BlockHost
 {
   static override styles = css`
-    .affine-default-viewport {
+    .affine-doc-viewport {
       position: relative;
       overflow-x: hidden;
       overflow-y: auto;
       height: 100%;
     }
 
-    .affine-default-page-block-container {
+    .affine-doc-page-block-container {
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -79,7 +76,7 @@ export class DefaultPageBlockComponent
       padding-right: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
     }
 
-    .affine-default-page-block-title {
+    .affine-doc-page-block-title {
       width: 100%;
       font-size: 40px;
       line-height: 50px;
@@ -93,19 +90,19 @@ export class DefaultPageBlockComponent
       padding: 38px 0;
     }
 
-    .affine-default-page-block-title-empty::before {
+    .affine-doc-page-block-title-empty::before {
       content: 'Title';
       color: var(--affine-placeholder-color);
       position: absolute;
       opacity: 0.5;
     }
 
-    .affine-default-page-block-title:disabled {
+    .affine-doc-page-block-title:disabled {
       background-color: transparent;
     }
 
     /*
-    .affine-default-page-block-title-container {
+    .affine-doc-page-block-title-container {
     }
     */
 
@@ -120,7 +117,12 @@ export class DefaultPageBlockComponent
     }
   `;
 
-  rangeController!: RangeController;
+  rangeManager: RangeManager | null = null;
+  rangeSynchronizer: RangeSynchronizer | null = null;
+
+  keyboardManager: PageKeyboardManager | null = null;
+
+  gesture: Gesture | null = null;
 
   clipboard = new PageClipboard(this);
 
@@ -128,19 +130,13 @@ export class DefaultPageBlockComponent
 
   lastSelectionPosition: SelectionPosition = 'start';
 
-  gesture: Gesture | null = null;
-
-  synchronizer: Synchronizer | null = null;
-
-  keyboard: Keyboard | null = null;
-
   @state()
   private _isComposing = false;
 
-  @query('.affine-default-viewport')
+  @query('.affine-doc-viewport')
   viewportElement!: HTMLDivElement;
 
-  @query('.affine-default-page-block-container')
+  @query('.affine-doc-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
   slots = {
@@ -157,7 +153,7 @@ export class DefaultPageBlockComponent
     }>(),
   };
 
-  @query('.affine-default-page-block-title')
+  @query('.affine-doc-page-block-title')
   private _titleContainer!: HTMLElement;
   private _titleVEditor: VEditor | null = null;
 
@@ -330,20 +326,21 @@ export class DefaultPageBlockComponent
     super.connectedCallback();
 
     registerService('affine:page', PageBlockService);
-    this.rangeController = new RangeController(this.root);
-    this.clipboard.init(this.page);
+    this.rangeManager = new RangeManager(this.root);
     this.gesture = new Gesture(this);
-    this.synchronizer = new Synchronizer(this);
-    this.keyboard = new Keyboard(this);
+    this.rangeSynchronizer = new RangeSynchronizer(this);
+    this.keyboardManager = new PageKeyboardManager(this);
+    this.clipboard.init(this.page);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.clipboard.dispose();
     this._disposables.dispose();
+    this.rangeManager = null;
     this.gesture = null;
-    this.synchronizer = null;
-    this.keyboard = null;
+    this.rangeSynchronizer = null;
+    this.keyboardManager = null;
   }
 
   override render() {
@@ -352,8 +349,8 @@ export class DefaultPageBlockComponent
     const title = html`
       <div
         data-block-is-title="true"
-        class="affine-default-page-block-title ${isEmpty
-          ? 'affine-default-page-block-title-empty'
+        class="affine-doc-page-block-title ${isEmpty
+          ? 'affine-doc-page-block-title-empty'
           : ''}"
       ></div>
     `;
@@ -380,9 +377,9 @@ export class DefaultPageBlockComponent
     `;
 
     return html`
-      <div class="affine-default-viewport">
-        <div class="affine-default-page-block-container">
-          <div class="affine-default-page-block-title-container">
+      <div class="affine-doc-viewport">
+        <div class="affine-doc-page-block-container">
+          <div class="affine-doc-page-block-title-container">
             ${title} ${meta}
           </div>
           ${content} ${widgets}
@@ -394,6 +391,6 @@ export class DefaultPageBlockComponent
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-default-page': DefaultPageBlockComponent;
+    'affine-doc-page': DocPageBlockComponent;
   }
 }
