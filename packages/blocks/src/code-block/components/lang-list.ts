@@ -10,6 +10,7 @@ import {
 } from 'shiki';
 
 import { scrollbarStyle } from '../../components/utils.js';
+import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -112,10 +113,13 @@ export class LangList extends ShadowlessElement {
 
   slots = {
     selectedLanguageChanged: new Slot<{ language: string | null }>(),
+    dispose: new Slot(),
   };
-
   override async connectedCallback() {
     super.connectedCallback();
+    // Avoid triggering click away listener on initial render
+    document.addEventListener('click', this._clickAwayListener);
+
     setTimeout(() => {
       this.filterInput?.focus();
     }, 0);
@@ -123,28 +127,38 @@ export class LangList extends ShadowlessElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.slots.selectedLanguageChanged.dispose();
+    document.removeEventListener('click', this._clickAwayListener);
   }
+
+  private _clickAwayListener = (e: Event) => {
+    if (this.renderRoot.parentElement?.contains(e.target as Node)) {
+      return;
+    }
+    this.slots.dispose.emit();
+  };
 
   private _onLanguageClicked(language: ILanguageRegistration | null) {
     this.slots.selectedLanguageChanged.emit({ language: language?.id ?? null });
   }
 
   override render() {
-    const filteredLanguages = [
-      PLAIN_TEXT_REGISTRATION,
-      ...BUNDLED_LANGUAGES,
-    ].filter(language => {
-      if (!this._filterText) {
-        return true;
-      }
-      return (
-        language.id.startsWith(this._filterText.toLowerCase()) ||
-        language.aliases?.some(alias =>
-          alias.startsWith(this._filterText.toLowerCase())
-        )
+    const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
+      .filter(language => {
+        if (!this._filterText) {
+          return true;
+        }
+        return (
+          language.id.startsWith(this._filterText.toLowerCase()) ||
+          language.aliases?.some(alias =>
+            alias.startsWith(this._filterText.toLowerCase())
+          )
+        );
+      })
+      .sort(
+        (a, b) =>
+          getLanguagePriority(a.id as Lang, this.currentLanguageId === a.id) -
+          getLanguagePriority(b.id as Lang, this.currentLanguageId === b.id)
       );
-    });
 
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
@@ -187,13 +201,13 @@ export class LangList extends ShadowlessElement {
         </div>
         <div class="lang-list-button-container">
           ${filteredLanguages.map(
-            language => html`
+            (language, index) => html`
               <icon-button
                 width="100%"
                 height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
                 class="lang-item"
-                ?hover=${language.id === this.currentLanguageId}
+                ?hover=${index === this._currentSelectedIndex}
               >
                 ${language.displayName ?? language.id}
               </icon-button>

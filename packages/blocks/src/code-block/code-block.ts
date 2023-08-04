@@ -185,6 +185,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @state()
   private _wrap = false;
 
+  private _langListSlots = {
+    selectedLanguageChanged: new Slot<{ language: string | null }>(),
+    dispose: new Slot(),
+  };
+
   readonly textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
     textRenderer: () =>
@@ -255,6 +260,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
+    this._langListSlots.selectedLanguageChanged.on(({ language }) => {
+      getService('affine:code').setLang(this.model, language);
+      this._showLangList = false;
+    });
+    this._langListSlots.dispose.on(() => {
+      this._showLangList = false;
+    });
+
     this._observePosition();
   }
 
@@ -265,15 +278,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override updated() {
-    const langList = this.querySelector('lang-list');
-
-    if (langList) {
-      langList.slots.selectedLanguageChanged.on(({ language }) => {
-        getService('affine:code').setLang(this.model, language);
-        this._showLangList = false;
-      });
-    }
-
     if (this.model.language !== this._curLanguage.id) {
       const lang = getStandardLanguage(this.model.language);
       this._curLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
@@ -394,13 +398,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       ${this._showLangList
         ? html`<lang-list
             .currentLanguageId=${this._curLanguage.id as Lang}
-            @selected-language-changed=${(e: CustomEvent) => {
-              getService('affine:code').setLang(this.model, e.detail.language);
-              this._showLangList = false;
-            }}
-            @dispose=${() => {
-              this._showLangList = false;
-            }}
+            .slots=${this._langListSlots}
           ></lang-list>`
         : nothing}
     </div>`;
