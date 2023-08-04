@@ -1,45 +1,51 @@
 import {
   assertExists,
   type BaseBlockModel,
+  matchFlavours,
   type Page,
 } from '@blocksuite/store';
 
 import {
   asyncFocusRichText,
-  type BlockComponentElement,
   calcDropTarget,
   type DropResult,
+  getBlockElementByModel,
   getClosestBlockElementByPoint,
-  getClosestNoteBlockElementById,
-  getLastNoteBlockElement,
   getModelByBlockElement,
   Point,
 } from '../__internal__/index.js';
 import type {
-  DefaultPageBlockComponent,
+  AbstractEditor,
+  DocPageBlockComponent,
   EdgelessPageBlockComponent,
   ImageBlockModel,
-  NoteBlockComponent,
 } from '../index.js';
 import type { DragIndicator } from './index.js';
 
 export type GetPageInfo = () => {
   page: Page;
   mode: 'page' | 'edgeless';
-  pageBlock: DefaultPageBlockComponent | EdgelessPageBlockComponent | undefined;
+  pageBlock: DocPageBlockComponent | EdgelessPageBlockComponent | undefined;
 };
 
 type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;
 
+type FileDropRule = {
+  name: string;
+  matcher: (file: File) => boolean;
+  handler: ImportHandler;
+};
+
 export class FileDropManager {
-  private _getPageInfo: GetPageInfo;
+  private _editor: AbstractEditor;
+
   private _indicator!: DragIndicator;
   private _point: Point | null = null;
   private _result: DropResult | null = null;
-  private _handlers: Map<string, ImportHandler> = new Map();
+  private _handlers: FileDropRule[] = [];
 
-  constructor(getPageInfo: GetPageInfo) {
-    this._getPageInfo = getPageInfo;
+  constructor(_editor: AbstractEditor) {
+    this._editor = _editor;
     this._indicator = <DragIndicator>(
       document.querySelector('affine-drag-indicator')
     );
@@ -96,7 +102,7 @@ export class FileDropManager {
 
     for (; i < len; i++) {
       const file = files[i];
-      const handler = this.get(file.type);
+      const handler = this.findFileHandler(file);
 
       if (!handler) {
         console.warn(`This ${file.type} is not currently supported.`);
@@ -107,7 +113,7 @@ export class FileDropManager {
       if (block) blocks.push(block);
     }
 
-    await this._onDropEnd(this._point, blocks, this._result);
+    this._onDropEnd(this._point, blocks, this._result);
 
     this._point = null;
     this._result = null;
@@ -122,10 +128,9 @@ export class FileDropManager {
     const len = models.length;
     if (!len) return;
 
-    const { page, mode, pageBlock } = this._getPageInfo();
+    const { page, mode } = this._editor;
+    const pageBlock = page.root;
     assertExists(pageBlock);
-
-    page.captureSync();
 
     const isPageMode = mode === 'page';
     let type = result?.type || 'none';
@@ -134,9 +139,10 @@ export class FileDropManager {
     if (type === 'none' && isPageMode) {
       type = 'after';
       if (!model) {
-        const note = getLastNoteBlockElement(pageBlock) as NoteBlockComponent;
-        assertExists(note);
-        model = note.model.lastItem();
+        const lastNote = pageBlock.children[pageBlock.children.length - 1];
+        if (!matchFlavours(lastNote, ['affine:note']))
+          throw new Error('The last block is not a note block.');
+        model = lastNote.lastItem();
       }
     }
 
@@ -147,44 +153,38 @@ export class FileDropManager {
     let noteId: string | undefined;
     let focusId: string | undefined;
 
+    page.captureSync();
+
     if (type !== 'none' && model) {
       const parent = page.getParent(model);
       assertExists(parent);
       const ids = page.addSiblingBlocks(model, models, type);
       focusId = ids[ids.length - 1];
-
-      if (isPageMode) {
-        asyncFocusRichText(page, focusId);
-        return;
-      }
-
-      const note = getClosestNoteBlockElementById(
-        parent.id,
-        pageBlock
-      ) as BlockComponentElement;
-      assertExists(note);
-      noteId = note.model.id;
+      if (isPageMode) asyncFocusRichText(page, focusId);
+      return;
     }
-
     if (isPageMode) return;
 
+    const edgelessBlockEle = getBlockElementByModel(
+      pageBlock
+    ) as EdgelessPageBlockComponent | null;
+    assertExists(edgelessBlockEle);
     // In edgeless mode
     // Creates new notes on blank area.
     let i = 0;
     for (; i < len; i++) {
       const model = models[i];
       if (model.flavour === 'affine:image') {
-        const note = (pageBlock as EdgelessPageBlockComponent).addImage(
+        const note = (edgelessBlockEle as EdgelessPageBlockComponent).addImage(
           model as ImageBlockModel,
           point
         );
         noteId = note.noteId;
       }
     }
-
     if (!noteId || !focusId) return;
 
-    (pageBlock as EdgelessPageBlockComponent).setSelection(
+    (edgelessBlockEle as EdgelessPageBlockComponent).setSelection(
       noteId,
       true,
       focusId,
@@ -192,26 +192,17 @@ export class FileDropManager {
     );
   }
 
-  get(type: string): ImportHandler | undefined {
-    const handler = this._handlers.get(type);
-
-    // `*`
-    if (handler || type === '*') return handler;
-
-    // `image/*`
-    if (type.endsWith('/*')) return this.get('*');
-
-    // `image/png`
-    return this.get(type.replace(/\/(.*)$/, '/*'));
+  findFileHandler(file: File): ImportHandler | undefined {
+    const ruler = this._handlers.find(handler => handler.matcher(file));
+    return ruler?.handler;
   }
 
   /**
    * Registers a processing function to handle the specified type.
-   *
-   * @param type - MIME type
-   * @parram handler - A processing handler
    */
-  register(type: string, handler: ImportHandler) {
-    this._handlers.set(type, handler);
+  register(rule: FileDropRule) {
+    // Remove duplicated rule
+    this._handlers = this._handlers.filter(({ name }) => name !== rule.name);
+    this._handlers.push(rule);
   }
 }

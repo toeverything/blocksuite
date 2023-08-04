@@ -60,21 +60,25 @@ export const createBlockHub: (
       } else {
         models.push(data);
       }
-      const last = page.root?.lastItem();
+
+      const defaultNoteBlock =
+        page.root?.children.findLast(
+          block => block.flavour === 'affine:note'
+        ) ?? page.addBlock('affine:note', {}, page.root?.id);
 
       if (range) {
         const lastModel = range.models[range.models.length - 1];
         const arr = page.addSiblingBlocks(lastModel, models, 'after');
         const lastId = arr[arr.length - 1];
         asyncFocusRichText(page, lastId);
-      } else if (last) {
+      } else {
         // add to end
-        let lastId = page.root?.lastItem()?.id;
+        let lastId;
         models.forEach(model => {
           lastId = page.addBlock(
             model.flavour ?? 'affine:paragraph',
             model,
-            page.root?.lastItem()
+            defaultNoteBlock
           );
         });
         lastId && asyncFocusRichText(page, lastId);
@@ -180,16 +184,17 @@ export const createBlockHub: (
     },
     onDragStart: () => {
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
-        defaultPageBlock.selection?.clear();
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
+        // FIXME:
+        // defaultPageBlock.selection?.clear();
       }
     },
     getAllowedBlocks: () => {
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
-        return getAllowSelectedBlocks(defaultPageBlock.model);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
+        return getAllowSelectedBlocks(docPageBlock.model);
       } else {
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
@@ -202,10 +207,10 @@ export const createBlockHub: (
       } as { container?: Element; rect?: Rect; scale: number };
 
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
         const rect = Rect.fromDOMRect(
-          defaultPageBlock.pageBlockContainer.getBoundingClientRect()
+          docPageBlock.pageBlockContainer.getBoundingClientRect()
         );
         rect.height -= PAGE_BLOCK_PADDING_BOTTOM;
         state.rect = rect;

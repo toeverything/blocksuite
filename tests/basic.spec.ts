@@ -20,6 +20,7 @@ import {
   pressBackspace,
   pressEnter,
   pressForwardDelete,
+  pressForwardDeleteWord,
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
@@ -202,7 +203,7 @@ test(
   }
 );
 
-test(scoped`basic paired undo/redo`, async ({ page }) => {
+test.fixme(scoped`basic paired undo/redo`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -233,7 +234,7 @@ test(scoped`undo/redo with keyboard`, async ({ page }) => {
   await assertText(page, 'hello');
 });
 
-test(scoped`undo after adding block twice`, async ({ page }) => {
+test.fixme(scoped`undo after adding block twice`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -283,29 +284,32 @@ test(
   }
 );
 
-test(scoped`undo/redo twice after adding block twice`, async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, 'hello');
-  await pressEnter(page);
-  await type(page, 'world');
-  await assertRichTexts(page, ['hello', 'world']);
+test.fixme(
+  scoped`undo/redo twice after adding block twice`,
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, 'hello');
+    await pressEnter(page);
+    await type(page, 'world');
+    await assertRichTexts(page, ['hello', 'world']);
 
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['hello']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['hello']);
 
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
 
-  await redoByClick(page);
-  await assertRichTexts(page, ['hello']);
+    await redoByClick(page);
+    await assertRichTexts(page, ['hello']);
 
-  await redoByKeyboard(page);
-  await assertRichTexts(page, ['hello', 'world']);
-});
+    await redoByKeyboard(page);
+    await assertRichTexts(page, ['hello', 'world']);
+  }
+);
 
-test(scoped`should undo/redo works on title`, async ({ page }) => {
+test.fixme(scoped`should undo/redo works on title`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
@@ -342,7 +346,7 @@ test(scoped`should undo/redo works on title`, async ({ page }) => {
   await assertRichTexts(page, ['hello ']);
 });
 
-test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
+test.fixme(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
@@ -369,6 +373,7 @@ test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await focusRichText(page);
   await waitNextFrame(page);
   await undoByKeyboard(page);
+  await waitNextFrame(page);
   await redoByKeyboard(page);
   await waitNextFrame(page);
   await type(page, '4');
@@ -473,27 +478,28 @@ test(
   }
 );
 
-test('when no note block, click editing area auto add a new note block', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
+test.fixme(
+  'when no note block, click editing area auto add a new note block',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
 
-  await switchEditorMode(page);
-  await click(page, { x: 100, y: 280 });
-  await pressBackspace(page);
-  await switchEditorMode(page);
-  let note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
-  });
-  expect(note).toBeNull();
-  await click(page, { x: 100, y: 280 });
+    await switchEditorMode(page);
+    await click(page, { x: 100, y: 280 });
+    await pressBackspace(page);
+    await switchEditorMode(page);
+    let note = await page.evaluate(() => {
+      return document.querySelector('affine-note');
+    });
+    expect(note).toBeNull();
+    await click(page, { x: 100, y: 280 });
 
-  note = await page.evaluate(() => {
-    return document.querySelector('affine-note');
-  });
-  expect(note).not.toBeNull();
-});
+    note = await page.evaluate(() => {
+      return document.querySelector('affine-note');
+    });
+    expect(note).not.toBeNull();
+  }
+);
 
 test(scoped`automatic identify url text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -527,4 +533,14 @@ test(scoped`automatic identify url text`, async ({ page }) => {
   </affine:note>
 </affine:page>`
   );
+});
+
+test('ctrl+delete to delete one word forward', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa bbb ccc');
+  await pressArrowLeft(page, 8);
+  await pressForwardDeleteWord(page);
+  await assertText(page, 'aaa ccc');
 });

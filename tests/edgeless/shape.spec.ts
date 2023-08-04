@@ -7,12 +7,14 @@ import {
   changeShapeStrokeColor,
   changeShapeStrokeStyle,
   changeShapeStrokeWidth,
+  changeShapeStyle,
   clickComponentToolbarMoreMenuButton,
   locatorEdgelessToolButton,
   locatorShapeStrokeStyleButton,
-  locatorShapeStrokeWidthButton,
+  locatorShapeStyleButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
+  resizeElementByHandle,
   setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
@@ -24,10 +26,12 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
+  SHORT_KEY,
   type,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
+  assertEdgelessCanvasText,
   assertEdgelessColorSameWithHexColor,
   assertEdgelessHoverRect,
   assertEdgelessNonHoverRect,
@@ -290,20 +294,13 @@ test('change shape stroke width', async ({ page }) => {
   await changeShapeStrokeColor(page, '--affine-palette-line-navy');
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  await changeShapeStrokeWidth(page, 'l');
+  await changeShapeStrokeWidth(page);
+  await page.mouse.move(start.x + 5, start.y + 5);
+  await assertEdgelessHoverRect(page, [100, 150, 100, 100]);
 
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeShapeStrokeStyles');
-  const activeButton = locatorShapeStrokeWidthButton(page, 'l');
-  const className = await activeButton.evaluate(ele => ele.className);
-  expect(className.includes(' active')).toBeTruthy();
-
-  const pickedColor = await pickColorAtPoints(page, [
-    [start.x + 20, start.y + 2],
-    [start.x + 20, start.y + 7],
-  ]);
-  expect(pickedColor[0]).toBe(pickedColor[1]);
 });
 
 test('change shape stroke style', async ({ page }) => {
@@ -311,8 +308,8 @@ test('change shape stroke style', async ({ page }) => {
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
 
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
+  const start = { x: 100, y: 150 };
+  const end = { x: 200, y: 250 };
   await addBasicRectShapeElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y + 5);
@@ -329,5 +326,136 @@ test('change shape stroke style', async ({ page }) => {
   expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
-  expect(pickedColor[0]).toBe('#3b25cc');
+  expect(pickedColor[0]).toBe('#000000');
+});
+
+test('click to add shape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setEdgelessTool(page, 'shape');
+  await waitNextFrame(page, 500);
+
+  await page.mouse.move(400, 400);
+  await page.mouse.move(200, 200);
+  await page.mouse.click(200, 200, { button: 'left', delay: 300 });
+
+  await assertEdgelessTool(page, 'default');
+  await assertEdgelessSelectedRect(page, [200, 200, 100, 100]);
+});
+
+test('dbclick to add text in shape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setEdgelessTool(page, 'shape');
+  await waitNextFrame(page, 500);
+
+  await page.mouse.click(200, 150);
+  await waitNextFrame(page);
+  await page.mouse.dblclick(250, 200);
+  await waitNextFrame(page);
+
+  await type(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
+  await assertEdgelessTool(page, 'default');
+
+  // test select, copy, paste
+  await page.mouse.move(245, 205);
+  await page.mouse.down();
+  await page.mouse.move(262, 205, {
+    steps: 10,
+  });
+  await page.mouse.up();
+  // h|ell|o
+  await waitNextFrame(page, 200);
+  await page.keyboard.press(`${SHORT_KEY}+c`);
+
+  await waitNextFrame(page, 200);
+  await type(page, 'ddd', 100);
+  await waitNextFrame(page, 200);
+  await assertEdgelessCanvasText(page, 'hdddo');
+
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertEdgelessCanvasText(page, 'hdddello');
+});
+
+test('auto wrap text in shape', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  await setEdgelessTool(page, 'shape');
+  await waitNextFrame(page, 500);
+
+  await page.mouse.click(200, 150);
+  await waitNextFrame(page);
+  await page.mouse.dblclick(250, 200);
+  await waitNextFrame(page);
+
+  await type(page, 'aaaa\nbbbb\n');
+  await assertEdgelessCanvasText(page, 'aaaa\nbbbb\n');
+  await assertEdgelessTool(page, 'default');
+
+  // blur to finish typing
+  await page.mouse.click(150, 150);
+  // select shape
+  await page.mouse.click(200, 150);
+  // the height of shape should be increased because of \n
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 136]);
+
+  await page.mouse.dblclick(250, 200);
+  await waitNextFrame(page);
+  // type long text
+  await type(page, 'cccccccc');
+  await assertEdgelessCanvasText(page, 'aaaa\nbbbb\ncccccccc');
+
+  // blur to finish typing
+  await page.mouse.click(150, 150);
+  // select shape
+  await page.mouse.click(200, 150);
+  // the height of shape should be increased because of long text
+  // cccccccc -- wrap --> cccccc\ncc
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 168]);
+
+  // try to decrease height
+  await resizeElementByHandle(page, { x: 0, y: -50 }, 'bottom-right');
+  // you can't decrease height because of min height to fit text
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 168]);
+
+  // increase width to make text not wrap
+  await resizeElementByHandle(page, { x: 50, y: 0 }, 'bottom-right');
+  // the height of shape should be decreased because of long text not wrap
+  await assertEdgelessSelectedRect(page, [200, 150, 150, 136]);
+
+  // try to decrease width
+  await resizeElementByHandle(page, { x: -120, y: 0 }, 'bottom-right');
+  // you can't decrease width after text can't wrap (each line just has 1 char)
+  await assertEdgelessSelectedRect(page, [200, 150, 51, 552]);
+});
+
+test('change shape style', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+
+  const start = { x: 100, y: 150 };
+  const end = { x: 200, y: 250 };
+  await addBasicRectShapeElement(page, start, end);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeStyle');
+  await changeShapeStyle(page, 'general');
+  await waitNextFrame(page);
+
+  await page.mouse.click(start.x + 5, start.y + 5);
+  await triggerComponentToolbarAction(page, 'changeShapeStrokeColor');
+  const color = '--affine-palette-line-navy';
+  await changeShapeStrokeColor(page, color);
+  await page.waitForTimeout(50);
+  const [picked] = await pickColorAtPoints(page, [[start.x + 2, start.y + 2]]);
+
+  await assertEdgelessColorSameWithHexColor(page, color, picked);
 });

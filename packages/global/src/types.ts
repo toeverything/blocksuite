@@ -1,7 +1,11 @@
 import type {
+  AttachmentBlockModel,
+  AttachmentBlockSchema,
   BookmarkBlockModel,
+  BookmarkBlockSchema,
   CodeBlockSchema,
   DatabaseBlockSchema,
+  DataViewBlockModel,
   DividerBlockSchema,
   ImageBlockSchema,
   ListBlockSchema,
@@ -10,9 +14,8 @@ import type {
   ParagraphBlockSchema,
   SurfaceBlockSchema,
 } from '@blocksuite/blocks';
-import type { BookmarkBlockSchema } from '@blocksuite/blocks';
+import type { DataViewBlockSchema } from '@blocksuite/blocks';
 import type {
-  // Model
   CodeBlockModel,
   DatabaseBlockModel,
   DividerBlockModel,
@@ -34,7 +37,9 @@ export type BlockSchemas = {
   'affine:image': typeof ImageBlockSchema;
   'affine:surface': typeof SurfaceBlockSchema;
   'affine:database': typeof DatabaseBlockSchema;
+  'affine:data-view': typeof DataViewBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;
+  'affine:attachment': typeof AttachmentBlockSchema;
 };
 
 export type BlockModels = {
@@ -47,7 +52,9 @@ export type BlockModels = {
   'affine:image': ImageBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
+  'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
+  'affine:attachment': AttachmentBlockModel;
 };
 
 export type BlockModelProps = {

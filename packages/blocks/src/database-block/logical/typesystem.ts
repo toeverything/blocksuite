@@ -10,7 +10,7 @@ export const tUnion = (list: TType[]): TUnion => ({
   list,
 });
 
-//TODO treat as data type
+// TODO treat as data type
 export interface TArray<Ele extends TType = TType> {
   type: 'array';
   ele: TType;
@@ -23,6 +23,9 @@ export const tArray = <const T extends TType>(ele: T): TArray<T> => {
     title: 'array',
     ele,
   };
+};
+export const isTArray = (type: TType): type is TArray => {
+  return type.type === 'array';
 };
 export type TTypeVar = {
   type: 'typeVar';

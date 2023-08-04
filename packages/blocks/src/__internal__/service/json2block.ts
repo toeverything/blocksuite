@@ -9,6 +9,7 @@ import { getServiceOrRegister } from '../service.js';
 import {
   asyncGetVirgoByModel,
   type BlockRange,
+  focusBlockByModel,
   type SerializedBlock,
 } from '../utils/index.js';
 
@@ -81,8 +82,6 @@ export async function json2block(
           index: textLength,
           length: 0,
         });
-      } else {
-        // TODO: set embed block selection
       }
     }
 
@@ -119,9 +118,9 @@ export async function json2block(
   isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
 
   const lastModel = page.getBlockById(ids[ids.length - 1]);
+  assertExists(lastModel);
 
   if (shouldMergeLastBlock) {
-    assertExists(lastModel);
     const rangeOffset = lastModel.text?.length || 0;
     const nextSiblingModel = page.getNextSibling(lastModel);
     lastModel.text?.join(nextSiblingModel?.text as Text);
@@ -141,7 +140,10 @@ export async function json2block(
         length: 0,
       });
     } else {
-      // TODO: set embed block selection
+      requestAnimationFrame(() => {
+        // TODO: wait block ready
+        focusBlockByModel(lastModel);
+      });
     }
   }
 }
@@ -177,8 +179,6 @@ export async function addSerializedBlocks(
       height: json.height,
       language: json.language,
       title: json.databaseProps?.title || json.title,
-      titleColumnName: json.databaseProps?.titleColumnName,
-      titleColumnWidth: json.databaseProps?.titleColumnWidth,
       // bookmark
       url: json.url,
       description: json.description,
@@ -186,7 +186,20 @@ export async function addSerializedBlocks(
       image: json.image,
       crawled: json.crawled,
     };
-    const id = page.addBlock(flavour, blockProps, parent, index + i);
+
+    let id: string;
+    try {
+      page.schema.validate(flavour, parent.flavour);
+      id = page.addBlock(flavour, blockProps, parent, index + i);
+    } catch {
+      id = page.addBlock(
+        'affine:paragraph',
+        { type: 'text' },
+        parent,
+        index + i
+      );
+    }
+
     addedBlockIds.push(id);
     const model = page.getBlockById(id);
     assertExists(model);

@@ -1,13 +1,17 @@
-import './button.js';
-
+import type { PointerEventState } from '@blocksuite/block-std';
 import type { Page } from '@blocksuite/store';
 import { matchFlavours, Slot } from '@blocksuite/store';
 
+import {
+  handleNativeRangeDblClick,
+  handleNativeRangeTripleClick,
+} from '../../__internal__/index.js';
 import { getCurrentBlockRange } from '../../__internal__/utils/block-range.js';
 import { throttle } from '../../__internal__/utils/common.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
 import { onModelElementUpdated } from '../../page-block/index.js';
 import {
+  calcCurrentSelectionPosition,
   calcPositionPointByRange,
   calcSafeCoordinate,
   type DragDirection,
@@ -153,3 +157,29 @@ export const showFormatQuickBar = ({
   });
   return formatQuickBar;
 };
+
+// Show format quick bar when double/triple clicking on text
+export function showFormatQuickBarByClicks(
+  type: 'double' | 'triple',
+  e: PointerEventState,
+  page: Page
+) {
+  const range =
+    type === 'double'
+      ? handleNativeRangeDblClick()
+      : handleNativeRangeTripleClick(e);
+  if (e.raw.target instanceof HTMLTextAreaElement) return;
+  if (!range || range.collapsed) return;
+  if (page.readonly) return;
+
+  const direction = 'center-bottom';
+  showFormatQuickBar({
+    page,
+    direction,
+    anchorEl: {
+      getBoundingClientRect: () => {
+        return calcCurrentSelectionPosition(direction);
+      },
+    },
+  });
+}

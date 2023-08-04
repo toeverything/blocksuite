@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
@@ -16,24 +16,27 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "peerDependencies": {
+    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "yjs": "^13"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "@floating-ui/dom": "^1.2.9",
-    "hotkeys-js": "^3.10.1",
+    "@floating-ui/dom": "^1.5.1",
+    "buffer": "^6.0.3",
+    "date-fns": "^2.30.0",
+    "file-type": "^16.5.4",
+    "hotkeys-js": "^3.11.2",
     "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
-    "lit": "^2.7.3",
-    "marked": "^4.2.12",
+    "lit": "^2.7.6",
+    "marked": "^4.3.0",
+    "pdf-lib": "^1.17.1",
     "shiki": "^0.14.3",
-    "turndown": "^7.1.1",
+    "turndown": "^7.1.2",
     "zod": "^3.21.4"
   },
   "exports": {
@@ -69,12 +72,12 @@
     }
   },
   "devDependencies": {
+    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@types/autosize": "^4.0.1",
-    "@types/marked": "^4.0.8",
+    "@types/marked": "^4.3.1",
     "@types/turndown": "^5.0.1",
-    "yjs": "^13.6.5"
+    "yjs": "^13.6.7"
   }
 }

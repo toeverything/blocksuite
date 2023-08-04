@@ -11,7 +11,7 @@ import { filterMatcher } from '../../logical/filter-matcher.js';
 import { typesystem } from '../../logical/typesystem.js';
 import type { SingleFilter, Variable, VariableOrProperty } from '../ast.js';
 import { firstFilterByRef, getRefType } from '../ast.js';
-import { renderLiteral } from '../literal/index.js';
+import { renderLiteral } from '../literal/matcher.js';
 
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {

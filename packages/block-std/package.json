@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/block-std",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Std for blocksuite blocks",
   "main": "src/index.ts",
   "type": "module",
@@ -16,7 +16,8 @@
     "@blocksuite/store": "workspace:*"
   },
   "dependencies": {
-    "@blocksuite/global": "workspace:*"
+    "@blocksuite/global": "workspace:*",
+    "w3c-keyname": "^2.2.8"
   },
   "devDependencies": {
     "@blocksuite/store": "workspace:*"

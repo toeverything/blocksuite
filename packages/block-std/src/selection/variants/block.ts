@@ -1,11 +1,12 @@
+import { PathFinder } from '../../store/index.js';
 import { BaseSelection } from '../base.js';
 
 export class BlockSelection extends BaseSelection {
-  static override readonly type = 'block';
+  static override type = 'block';
 
   override equals(other: BaseSelection): boolean {
     if (other instanceof BlockSelection) {
-      return other.blockId === this.blockId;
+      return PathFinder.equals(this.path, other.path);
     }
     return false;
   }
@@ -13,12 +14,14 @@ export class BlockSelection extends BaseSelection {
   override toJSON(): Record<string, unknown> {
     return {
       type: 'block',
-      blockId: this.blockId,
+      path: this.path,
     };
   }
 
   static override fromJSON(json: Record<string, unknown>): BlockSelection {
-    return new BlockSelection(json.blockId as string);
+    return new BlockSelection({
+      path: json.path as string[],
+    });
   }
 }
 

@@ -46,15 +46,15 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     });
   }
 
-  override block2html(
+  override async block2html(
     block: CodeBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
-  ): string {
+  ): Promise<string> {
     const richTextElement = document.querySelector(
       `[${BLOCK_ID_ATTR}="${block.id}"] rich-text`
     );
     if (!richTextElement) {
-      return super.block2html(block, {
+      return await super.block2html(block, {
         childText,
         begin,
         end,
@@ -70,6 +70,18 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
       .join('');
     preElement.append(codeElement);
     return preElement.outerHTML;
+  }
+
+  override block2Json(
+    block: CodeBlockModel,
+    selectedModels?: Map<string, number>,
+    begin?: number,
+    end?: number
+  ) {
+    return {
+      ...super.block2Json(block, selectedModels, begin, end),
+      language: block.language,
+    };
   }
 
   override async json2Block(

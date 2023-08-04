@@ -132,7 +132,9 @@ export class RemoteSelection extends LitElement {
     this.page.history.on(
       'stack-item-popped',
       (event: { stackItem: StackItem }) => {
-        const userRange = event.stackItem.meta.get('cursor-location');
+        const userRange = event.stackItem.meta.get(
+          'cursor-location'
+        ) as UserRange;
         if (!userRange) {
           return;
         }
@@ -170,7 +172,7 @@ export class RemoteSelection extends LitElement {
 
     this._resizeObserver.observe(document.body);
 
-    const viewportElement = document.querySelector('.affine-default-viewport');
+    const viewportElement = document.querySelector('.affine-doc-viewport');
     viewportElement?.addEventListener('scroll', () => this.requestUpdate(), {
       signal: this._abortController.signal,
     });

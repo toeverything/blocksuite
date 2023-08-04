@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type {
-  CssVariableName,
-  ListType,
-  PageBlockModel,
-  ThemeObserver,
+import {
+  type CssVariableName,
+  type ListType,
+  type PageBlockModel,
+  type ThemeObserver,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
-import { type BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-export const defaultPlaygroundURL = new URL(`http://localhost:5173/`);
+export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
@@ -78,12 +78,17 @@ export const getSelectionRect = async (page: Page): Promise<DOMRect> => {
  * await initEmptyEditor(page, { enable_some_flag: true });
  * ```
  */
-async function initEmptyEditor(
-  page: Page,
-  flags: Partial<BlockSuiteFlags> = {},
+async function initEmptyEditor({
+  page,
+  flags = {},
   noInit = false,
-  multiEditor = false
-) {
+  multiEditor = false,
+}: {
+  page: Page;
+  flags?: Partial<BlockSuiteFlags>;
+  noInit?: boolean;
+  multiEditor?: boolean;
+}) {
   await page.evaluate(
     ([flags, noInit, multiEditor]) => {
       const { workspace } = window;
@@ -208,7 +213,12 @@ export async function enterPlaygroundRoom(
     throw new Error(`Uncaught exception: "${exception}"\n${exception.stack}`);
   });
 
-  await initEmptyEditor(page, ops?.flags, ops?.noInit, multiEditor);
+  await initEmptyEditor({
+    page,
+    flags: ops?.flags,
+    noInit: ops?.noInit,
+    multiEditor,
+  });
 
   await readyPromise;
 
@@ -221,7 +231,7 @@ export async function enterPlaygroundRoom(
 }
 
 export async function waitDefaultPageLoaded(page: Page) {
-  await page.waitForSelector('affine-default-page[data-block-id="0"]');
+  await page.waitForSelector('affine-doc-page[data-block-id="0"]');
 }
 
 export async function waitEmbedLoaded(page: Page) {
@@ -271,7 +281,7 @@ export async function enterPlaygroundWithList(
 ) {
   const room = generateRandomRoomId();
   await page.goto(`${DEFAULT_PLAYGROUND}?room=${room}`);
-  await initEmptyEditor(page);
+  await initEmptyEditor({ page });
 
   await page.evaluate(
     async ({ contents, type }: { contents: string[]; type: ListType }) => {
@@ -382,7 +392,6 @@ export async function initEmptyDatabaseWithParagraphState(
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumnName: 'Title',
       },
       noteId
     );
@@ -410,7 +419,7 @@ export async function initDatabaseRowWithData(page: Page, data: string) {
 
   const lastRow = page.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('affine-paragraph');
-  await cell.click();
+  await cell.click({ force: true });
   await type(page, data);
 }
 
@@ -424,9 +433,11 @@ export async function initDatabaseDynamicRowWithData(
   if (addRow) {
     await initDatabaseRow(page);
   }
+  await focusDatabaseTitle(page);
   const lastRow = editor.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('.database-cell').nth(index + 1);
   await cell.click();
+  await waitNextFrame(page);
   await type(page, data);
   await pressEnter(page);
 }
@@ -446,18 +457,21 @@ export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
   );
 }
 
-export async function initEmptyCodeBlockState(page: Page) {
-  const ids = await page.evaluate(async () => {
+export async function initEmptyCodeBlockState(
+  page: Page,
+  codeBlockProps = {} as { language?: string }
+) {
+  const ids = await page.evaluate(async codeBlockProps => {
     const { page } = window;
     await page.waitForLoaded();
 
     page.captureSync();
     const pageId = page.addBlock('affine:page');
     const noteId = page.addBlock('affine:note', {}, pageId);
-    const codeBlockId = page.addBlock('affine:code', {}, noteId);
+    const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
     page.captureSync();
     return { pageId, noteId, codeBlockId };
-  });
+  }, codeBlockProps);
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);
   return ids;
 }
@@ -565,8 +579,10 @@ export async function getSelectedTextByVirgo(page: Page) {
     const range = selection.getRangeAt(0);
     const component = range.startContainer.parentElement?.closest('rich-text');
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { index, length } = component!.vEditor!.getVRange()!;
+    const vRange = component?.vEditor?.getVRange();
+    if (!vRange) return '';
+
+    const { index, length } = vRange;
     return component?.vEditor?.yText.toString().slice(index, length) || '';
   });
 }
@@ -585,8 +601,9 @@ export async function getSelectedText(page: Page) {
       ) || [];
 
     components.forEach(component => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { index, length } = component!.vEditor!.getVRange()!;
+      const vRange = component.vEditor?.getVRange();
+      if (!vRange) return;
+      const { index, length } = vRange;
       content +=
         component?.vEditor?.yText.toString().slice(index, index + length) || '';
     });
@@ -627,12 +644,12 @@ export async function pasteContent(
       });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       Object.keys(clipData).forEach(key => {
         e.clipboardData?.setData(key, clipData[key] as string);
       });
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -821,15 +838,14 @@ export async function focusTitle(page: Page) {
   // click to ensure editor is active
   await page.mouse.move(0, 0);
   const editor = getEditorLocator(page);
-  const locator = editor.locator('affine-default-page').first();
+  const locator = editor.locator('affine-doc-page').first();
   // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
   // avoid trigger double click
   await page.waitForTimeout(500);
   await page.evaluate(i => {
-    const defaultPageComponent = document.querySelectorAll(
-      'affine-default-page'
-    )[i];
+    const defaultPageComponent =
+      document.querySelectorAll('affine-doc-page')[i];
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }
@@ -876,7 +892,15 @@ export async function shamefullyBlurActiveElement(page: Page) {
  *
  */
 export async function waitForVirgoStateUpdated(page: Page) {
-  await page.waitForTimeout(50);
+  return await page.evaluate(async () => {
+    const selection = window.getSelection() as Selection;
+
+    if (selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const component = range.startContainer.parentElement?.closest('rich-text');
+    await component?.vEditor?.waitForUpdate();
+  });
 }
 
 export async function initImageState(page: Page) {
@@ -956,7 +980,7 @@ export async function transformHtml(page: Page, data: string) {
   const promiseResult = await page.evaluate(
     ({ data }) => {
       const contentParser = new window.ContentParser(window.page);
-      return contentParser.htmlText2Block(data);
+      return contentParser.htmlText2Block(data, 'NotionHtml');
     },
     { data }
   );

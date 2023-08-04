@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import {
-  numberHelper,
-  richTextHelper,
-  selectHelper,
-} from '../../../blocks/src/database-block/common/column-manager';
+import { numberPureColumnConfig } from '../../../blocks/src/database-block/common/columns/number/define';
+import { richTextPureColumnConfig } from '../../../blocks/src/database-block/common/columns/rich-text/define';
+import { selectPureColumnConfig } from '../../../blocks/src/database-block/common/columns/select/define';
 import type { DatabaseBlockModel } from '../../../blocks/src/database-block/database-model.js';
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
 import type { Cell, Column } from '../../../blocks/src/database-block/types.js';
@@ -13,12 +11,7 @@ import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { BaseBlockModel, Page } from '../index.js';
-import { Generator, Workspace } from '../index.js';
-
-function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
-  return { id: 'test-workspace', idGenerator, isSSR: true };
-}
+import { Generator, Schema, Workspace } from '../index.js';
 
 const AffineSchemas = [
   ParagraphBlockSchema,
@@ -27,9 +20,16 @@ const AffineSchemas = [
   DatabaseBlockSchema,
 ];
 
+function createTestOptions() {
+  const idGenerator = Generator.AutoIncrement;
+  const schema = new Schema();
+  schema.register(AffineSchemas);
+  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+}
+
 async function createTestPage(pageId = 'page0') {
   const options = createTestOptions();
-  const workspace = new Workspace(options).register(AffineSchemas);
+  const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
   await page.waitForLoaded();
   return page;
@@ -79,12 +79,12 @@ describe('DatabaseManager', () => {
     ) as DatabaseBlockModel;
     db = databaseModel;
 
-    col1 = db.addColumn('end', numberHelper.create('Number'));
+    col1 = db.addColumn('end', numberPureColumnConfig.create('Number'));
     col2 = db.addColumn(
       'end',
-      selectHelper.create('Single Select', { options: selection })
+      selectPureColumnConfig.create('Single Select', { options: selection })
     );
-    col3 = db.addColumn('end', richTextHelper.create('Rich Text'));
+    col3 = db.addColumn('end', richTextPureColumnConfig.create('Rich Text'));
 
     page.updateBlock(databaseModel, {
       columns: [col1, col2, col3],
@@ -117,7 +117,7 @@ describe('DatabaseManager', () => {
 
   test('getColumn', () => {
     const column = {
-      ...numberHelper.create('testColumnId'),
+      ...numberPureColumnConfig.create('testColumnId'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
@@ -127,7 +127,7 @@ describe('DatabaseManager', () => {
   });
 
   test('addColumn', () => {
-    const column = numberHelper.create('Test Column');
+    const column = numberPureColumnConfig.create('Test Column');
     const id = db.addColumn('end', column);
     const result = db.getColumn(id);
 
@@ -137,14 +137,14 @@ describe('DatabaseManager', () => {
 
   test('deleteColumn', () => {
     const column = {
-      ...numberHelper.create('Test Column'),
+      ...numberPureColumnConfig.create('Test Column'),
       id: 'testColumnId',
     };
     db.addColumn('end', column);
     expect(db.getColumn(column.id)).toEqual(column);
 
     db.deleteColumn(column.id);
-    expect(db.getColumn(column.id)).toBeNull();
+    expect(db.getColumn(column.id)).toBeUndefined();
   });
 
   test('getCell', () => {
@@ -156,7 +156,7 @@ describe('DatabaseManager', () => {
       noteBlockId
     );
     const column = {
-      ...numberHelper.create('Test Column'),
+      ...numberPureColumnConfig.create('Test Column'),
       id: 'testColumnId',
     };
     const cell: Cell = {
@@ -200,7 +200,7 @@ describe('DatabaseManager', () => {
   test('copyCellsByColumn', () => {
     const newColId = db.addColumn(
       'end',
-      selectHelper.create('Copied Select', { options: selection })
+      selectPureColumnConfig.create('Copied Select', { options: selection })
     );
 
     db.copyCellsByColumn(col2, newColId);
@@ -209,37 +209,6 @@ describe('DatabaseManager', () => {
     expect(cell).toEqual({
       columnId: newColId,
       value: [selection[1]],
-    });
-  });
-
-  test('deleteCellsByColumn', () => {
-    db.deleteCellsByColumn(col2);
-
-    const cell = db.getCell(p2, col2);
-    expect(cell).toBeNull();
-  });
-
-  // FIXME: https://github.com/toeverything/blocksuite/issues/1949
-  test.skip('convertCellsByColumn', () => {
-    db.convertCellsByColumn(col1, 'select');
-    const cell = db.getCell(p1, col1);
-    expect(cell).toEqual({
-      columnId: col1,
-      value: ['0.1'],
-    });
-
-    db.convertCellsByColumn(col1, 'rich-text');
-    const richTextCell = db.getCell(p1, col1);
-    expect(richTextCell?.value?.toString()).toEqual('0.1');
-  });
-
-  test('deleteSelectedCellTag', () => {
-    db.deleteSelectedCellTag(col2, selection[1]);
-
-    const cell = db.getCell(p2, col2);
-    expect(cell).toEqual({
-      columnId: col2,
-      value: [],
     });
   });
 });

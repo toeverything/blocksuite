@@ -1,4 +1,10 @@
-import { Bound } from '@blocksuite/phasor';
+import {
+  Bound,
+  clamp,
+  type PhasorElementWithText,
+  ShapeElement,
+  TextElement,
+} from '@blocksuite/phasor';
 import {
   type PhasorElement,
   type SurfaceManager,
@@ -12,16 +18,20 @@ import {
   isPointIn as isPointInFromPhasor,
   serializeXYWH,
 } from '@blocksuite/phasor';
+import { GRID_GAP_MAX, GRID_GAP_MIN } from '@blocksuite/phasor';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { type Page } from '@blocksuite/store';
 
 import {
+  type EdgelessElement,
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { Selectable } from './selection-manager.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type { Selectable } from '../services/tools-manager.js';
 
 export function isTopLevelBlock(
-  selectable: Selectable | null
+  selectable: Selectable | BaseBlockModel | null
 ): selectable is TopLevelBlockModel {
   return !!selectable && 'flavour' in selectable;
 }
@@ -30,6 +40,12 @@ export function isPhasorElement(
   selectable: Selectable | null
 ): selectable is PhasorElement {
   return !isTopLevelBlock(selectable);
+}
+
+export function isPhasorElementWithText(
+  element: Selectable
+): element is PhasorElementWithText {
+  return element instanceof TextElement || element instanceof ShapeElement;
 }
 
 function isPointIn(
@@ -138,7 +154,7 @@ export function getBackgroundGrid(
   showGrid: boolean
 ) {
   const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
-  const gap = 20 * step * zoom;
+  const gap = clamp(20 * step * zoom, GRID_GAP_MIN, GRID_GAP_MAX);
   const translateX = -viewportX * zoom;
   const translateY = -viewportY * zoom;
 
@@ -204,13 +220,10 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     }
   >();
   for (const s of selected) {
-    let bound: Bound;
+    const bound = Bound.deserialize(s.xywh);
     let rotate = 0;
 
-    if (isTopLevelBlock(s)) {
-      bound = Bound.deserialize(s.xywh);
-    } else {
-      bound = new Bound(s.x, s.y, s.w, s.h);
+    if (!isTopLevelBlock(s)) {
       rotate = s.rotate ?? 0;
     }
 
@@ -220,4 +233,15 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     });
   }
   return bounds;
+}
+
+export function getEdgelessElement(
+  edgeless: EdgelessPageBlockComponent,
+  id: string
+): EdgelessElement | null {
+  return (
+    edgeless.surface.pickById(id) ??
+    <TopLevelBlockModel>edgeless.page.getBlockById(id) ??
+    null
+  );
 }

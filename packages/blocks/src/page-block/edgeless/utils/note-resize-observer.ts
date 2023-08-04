@@ -1,6 +1,6 @@
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
-import { Slot } from '@blocksuite/store';
+import { matchFlavours, Slot } from '@blocksuite/store';
 
 import { almostEqual, throttle } from '../../../__internal__/utils/common.js';
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
@@ -17,7 +17,7 @@ export class NoteResizeObserver {
   private _lastRects = new Map<string, DOMRectReadOnly>();
 
   slots = {
-    resize: new Slot<Map<string, DOMRectReadOnly>>(),
+    resize: new Slot<Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>>(),
   };
 
   constructor() {
@@ -30,25 +30,23 @@ export class NoteResizeObserver {
   }
 
   private _onResize = (entries: ResizeObserverEntry[]) => {
-    const resizedNotes = new Map<string, DOMRect>();
+    const resizedNotes = new Map<string, [DOMRectReadOnly, DOMRectReadOnly?]>();
     entries.forEach(entry => {
       const blockElement = entry.target.closest(`[${BLOCK_ID_ATTR}]`);
       const id = blockElement?.getAttribute(BLOCK_ID_ATTR);
       if (!id) return;
-      if (this._lastRects.has(id)) {
-        const rect = this._lastRects.get(id);
-        if (
-          rect &&
-          almostEqual(rect.x, entry.contentRect.x) &&
-          almostEqual(rect.y, entry.contentRect.y) &&
-          almostEqual(rect.width, entry.contentRect.width) &&
-          almostEqual(rect.height, entry.contentRect.height)
-        ) {
-          return;
-        }
+      const lastRect = this._lastRects.get(id);
+      if (
+        lastRect &&
+        almostEqual(lastRect.x, entry.contentRect.x) &&
+        almostEqual(lastRect.y, entry.contentRect.y) &&
+        almostEqual(lastRect.width, entry.contentRect.width) &&
+        almostEqual(lastRect.height, entry.contentRect.height)
+      ) {
+        return;
       }
+      resizedNotes.set(id, [entry.contentRect, lastRect]);
       this._lastRects.set(id, entry.contentRect);
-      resizedNotes.set(id, entry.contentRect);
     });
 
     if (resizedNotes.size) {
@@ -59,6 +57,7 @@ export class NoteResizeObserver {
   resetListener(page: Page) {
     const unCachedKeys = new Set(this._cachedElements.keys());
     page.root?.children.forEach(model => {
+      if (!matchFlavours(model, ['affine:note'])) return;
       const blockId = model.id;
       unCachedKeys.delete(blockId);
       const blockElement = getBlockElementByModel(model);
@@ -76,6 +75,7 @@ export class NoteResizeObserver {
       }
 
       if (!container) return;
+      this._lastRects.set(blockId, container.getBoundingClientRect());
       this._observer.observe(container);
       this._cachedElements.set(blockId, container);
     });

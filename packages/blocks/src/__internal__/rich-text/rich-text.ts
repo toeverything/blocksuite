@@ -6,20 +6,17 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { activeEditorManager } from '../utils/active-editor-manager.js';
+import { isValidUrl } from '../utils/url.js';
 import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { REFERENCE_NODE } from './reference-node.js';
-import { type AffineTextSchema, type AffineVEditor } from './virgo/types.js';
-
-const IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
-const isValidUrl = (url: string) => {
-  try {
-    new URL(url);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
+import {
+  type AffineTextAttributes,
+  type AffineTextSchema,
+  type AffineVEditor,
+} from './virgo/types.js';
+const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
+const GLOBAL_IGNORED_ATTRIBUTES = ['reference'] as const;
 
 const autoIdentifyLink = (
   editor: AffineVEditor,
@@ -177,8 +174,9 @@ export class RichText extends ShadowlessElement {
 
   override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
-    this._vEditor = new VEditor(this.model.text.yText, {
+    this._vEditor = new VEditor<AffineTextAttributes>(this.model.text.yText, {
       active: () => activeEditorManager.isActive(this),
+      embed: delta => !!delta.attributes?.reference,
     });
     setupVirgoScroll(this, this._vEditor);
     const textSchema = this.textSchema;
@@ -225,15 +223,26 @@ export class RichText extends ShadowlessElement {
 
         if (data && data.length > 0 && data !== '\n') {
           if (
-            deltas.length > 1 ||
-            (deltas.length === 1 && vRange.index !== 0)
+            deltas.length > 1 || // cursor is in the between of two deltas
+            (deltas.length === 1 && vRange.index !== 0) // cursor is in the end of line or in the middle of a delta
           ) {
+            // each new text inserted by virgo will not contain any attributes,
+            // but we want to keep the attributes of previous text or current text where the cursor is in
+            // here are two cases:
+            // 1. aaa**b|bb**ccc --input 'd'--> aaa**bdbb**ccc, d should extend the bold attribute
+            // 2. aaa**bbb|**ccc --input 'd'--> aaa**bbbd**ccc, d should extend the bold attribute
             const { attributes } = deltas[0][0];
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-              IGNORED_ATTRIBUTES.forEach(attr => {
+              // `EDGE_IGNORED_ATTRIBUTES` is which attributes should be ignored in case 2
+              EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
                 delete attributes?.[attr];
               });
             }
+
+            // `GLOBAL_IGNORED_ATTRIBUTES` is which attributes should be ignored in case 1, 2
+            GLOBAL_IGNORED_ATTRIBUTES.forEach(attr => {
+              delete attributes?.[attr];
+            });
 
             ctx.attributes = attributes ?? null;
           }
@@ -259,10 +268,14 @@ export class RichText extends ShadowlessElement {
           ) {
             const attributes = deltas[0][0].attributes;
             if (deltas.length !== 1 || vRange.index === vEditor.yText.length) {
-              IGNORED_ATTRIBUTES.forEach(attr => {
+              EDGE_IGNORED_ATTRIBUTES.forEach(attr => {
                 delete attributes?.[attr];
               });
             }
+
+            GLOBAL_IGNORED_ATTRIBUTES.forEach(attr => {
+              delete attributes?.[attr];
+            });
 
             ctx.attributes = attributes ?? null;
           }

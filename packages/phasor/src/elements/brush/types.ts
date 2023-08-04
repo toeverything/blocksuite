@@ -1,13 +1,7 @@
-import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { ISurfaceElement } from '../surface-element.js';
 
-export interface IBrush {
-  id: string;
+export interface IBrush extends ISurfaceElement {
   type: 'brush';
-  xywh: SerializedXYWH;
-  index: string;
-  seed: number;
-
-  rotate: number;
 
   // [[x0,y0],[x1,y1]...]
   points: number[][];

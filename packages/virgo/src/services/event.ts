@@ -5,15 +5,10 @@ import type { NativePoint, VRange } from '../types.js';
 import {
   type BaseTextAttributes,
   findDocumentOrShadowRoot,
+  isInEmbedElement,
 } from '../utils/index.js';
 import { transformInput } from '../utils/transform-input.js';
-import {
-  intersectVRange,
-  isPoint,
-  isVRangeContain,
-  isVRangeEdge,
-  isVRangeEqual,
-} from '../utils/v-range.js';
+import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export interface VHandlerContext<
@@ -75,10 +70,11 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   mount = () => {
     const rootElement = this._editor.rootElement;
     this._mountAbortController = new AbortController();
-
-    document.addEventListener('selectionchange', this._onSelectionChange);
-
     const signal = this._mountAbortController.signal;
+
+    document.addEventListener('selectionchange', this._onSelectionChange, {
+      signal,
+    });
 
     rootElement.addEventListener('beforeinput', this._onBeforeInput, {
       signal,
@@ -86,9 +82,15 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     rootElement
       .querySelectorAll('[data-virgo-text="true"]')
       .forEach(textNode => {
-        textNode.addEventListener('dragstart', event => {
-          event.preventDefault();
-        });
+        textNode.addEventListener(
+          'dragstart',
+          event => {
+            event.preventDefault();
+          },
+          {
+            signal,
+          }
+        );
       });
 
     rootElement.addEventListener('compositionstart', this._onCompositionStart, {
@@ -97,13 +99,20 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     rootElement.addEventListener('compositionend', this._onCompositionEnd, {
       signal,
     });
-    rootElement.addEventListener('scroll', this._onScroll);
+    rootElement.addEventListener('scroll', this._onScroll, {
+      signal,
+    });
+    rootElement.addEventListener('keydown', this._onKeyDown, {
+      signal,
+    });
+    rootElement.addEventListener('click', this._onClick, {
+      signal,
+    });
 
     this.bindHandlers();
   };
 
   unmount = () => {
-    document.removeEventListener('selectionchange', this._onSelectionChange);
     if (this._mountAbortController) {
       this._mountAbortController.abort();
       this._mountAbortController = null;
@@ -148,6 +157,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onSelectionChange = () => {
     const rootElement = this._editor.rootElement;
+    const previousVRange = this._editor.getVRange();
     if (this._isComposing) {
       return;
     }
@@ -155,9 +165,16 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     const selectionRoot = findDocumentOrShadowRoot(this._editor);
     const selection = selectionRoot.getSelection();
     if (!selection) return;
-    if (selection.rangeCount === 0) return;
+    if (selection.rangeCount === 0) {
+      if (previousVRange !== null) {
+        this._editor.slots.vRangeUpdated.emit([null, 'native']);
+      }
+
+      return;
+    }
 
     const range = selection.getRangeAt(0);
+
     if (
       range.startContainer === range.endContainer &&
       range.startContainer.textContent === ZERO_WIDTH_SPACE &&
@@ -170,9 +187,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       return;
     }
 
-    if (!range) return;
     if (!range.intersectsNode(rootElement)) {
-      if (
+      const isContainerSelected =
         range.endContainer.contains(rootElement) &&
         Array.from(range.endContainer.childNodes).filter(
           node => node instanceof HTMLElement
@@ -180,10 +196,14 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         range.startContainer.contains(rootElement) &&
         Array.from(range.startContainer.childNodes).filter(
           node => node instanceof HTMLElement
-        ).length === 1
-      ) {
+        ).length === 1;
+      if (isContainerSelected) {
         this._editor.focusEnd();
+        return;
       } else {
+        if (previousVRange !== null) {
+          this._editor.slots.vRangeUpdated.emit([null, 'native']);
+        }
         return;
       }
     }
@@ -191,11 +211,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this._previousAnchor = [range.startContainer, range.startOffset];
     this._previousFocus = [range.endContainer, range.endOffset];
 
-    if (this._handleEmbedRange(selection)) {
-      return;
-    }
-    const vRange = this._editor.toVRange(selection);
-    if (vRange) {
+    const vRange = this._editor.toVRange(selection.getRangeAt(0));
+    if (!isMaybeVRangeEqual(previousVRange, vRange)) {
       this._editor.slots.vRangeUpdated.emit([vRange, 'native']);
     }
 
@@ -216,10 +233,19 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   private _onCompositionStart = () => {
     this._isComposing = true;
+    // embeds is not editable and it will break IME
+    const embeds = this._editor.rootElement.querySelectorAll(
+      '[data-virgo-embed="true"]'
+    );
+    embeds.forEach(embed => {
+      embed.removeAttribute('contenteditable');
+    });
   };
 
-  private _onCompositionEnd = (event: CompositionEvent) => {
+  private _onCompositionEnd = async (event: CompositionEvent) => {
     this._isComposing = false;
+    this._editor.rerenderWholeEditor();
+    await this._editor.waitForUpdate();
 
     if (this._editor.isReadonly) return;
 
@@ -331,7 +357,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (ctx.skipDefault) return;
 
     const { event: newEvent, data, vRange: newVRange } = ctx;
-
     transformInput<TextAttributes>(
       newEvent.inputType,
       data,
@@ -341,55 +366,67 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     );
   };
 
-  private _onScroll = (event: Event) => {
+  private _onScroll = () => {
     this._editor.slots.scrollUpdated.emit(this._editor.rootElement.scrollLeft);
   };
 
-  private _handleEmbedRange = (selection: Selection) => {
-    const vRange = this._editor.toVRange(selection);
-    if (!vRange) return false;
-    let newVRange: VRange | null = null;
-    const deltaEntrys = this._editor.deltaService.getDeltasByVRange(vRange);
-    for (const [delta, deltaVRange] of deltaEntrys) {
-      if (this._editor.isEmbed(delta)) {
-        if (isVRangeContain(deltaVRange, vRange)) {
-          if (isPoint(vRange) && isVRangeEdge(vRange.index, deltaVRange)) {
-            continue;
-          }
-          newVRange = deltaVRange;
-        } else if (!isVRangeContain(vRange, deltaVRange)) {
-          const iVRange = intersectVRange(deltaVRange, vRange);
-          if (!iVRange || isPoint(iVRange)) return false;
-          // aaa[bb|b]cc|c -> aaa[bbb]|cc|c
-          if (deltaVRange.index < vRange.index) {
-            newVRange = {
-              index: deltaVRange.index + deltaVRange.length,
-              length:
-                vRange.index +
-                vRange.length -
-                deltaVRange.index -
-                deltaVRange.length,
-            };
+  private _onKeyDown = (event: KeyboardEvent) => {
+    if (!event.shiftKey) {
+      const vRange = this._editor.getVRange();
+      if (!vRange || vRange.length !== 0) return;
 
-            // a|aa[b|bb]ccc -> a|aa|[bbb]ccc
-          } else if (deltaVRange.index > vRange.index) {
-            newVRange = {
+      const deltas = this._editor.getDeltasByVRange(vRange);
+      if (deltas.length === 2) {
+        if (event.key === 'ArrowLeft' && this._editor.isEmbed(deltas[0][0])) {
+          this._editor.setVRange({
+            index: vRange.index - 1,
+            length: 1,
+          });
+        } else if (
+          event.key === 'ArrowRight' &&
+          this._editor.isEmbed(deltas[1][0])
+        ) {
+          this._editor.setVRange({
+            index: vRange.index,
+            length: 1,
+          });
+        }
+      } else if (deltas.length === 1) {
+        const delta = deltas[0][0];
+        if (this._editor.isEmbed(delta)) {
+          if (event.key === 'ArrowLeft') {
+            this._editor.setVRange({
+              index: vRange.index - 1,
+              length: 1,
+            });
+          } else if (event.key === 'ArrowRight') {
+            this._editor.setVRange({
               index: vRange.index,
-              length: deltaVRange.index - vRange.index,
-            };
+              length: 1,
+            });
           }
         }
       }
     }
+  };
 
-    if (newVRange && !isVRangeEqual(newVRange, vRange)) {
-      const newRange = this._editor.toDomRange(newVRange);
-      if (!newRange) return false;
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-      return true;
-    } else {
-      return false;
+  private _onClick = (event: MouseEvent) => {
+    // select embed element when click on it
+    if (event.target instanceof Node && isInEmbedElement(event.target)) {
+      const selectionRoot = findDocumentOrShadowRoot(this._editor);
+      const selection = selectionRoot.getSelection();
+      if (!selection) return;
+      if (event.target instanceof HTMLElement) {
+        const vElement = event.target.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      } else {
+        const vElement = event.target.parentElement?.closest('v-element');
+        if (vElement) {
+          selection.selectAllChildren(vElement);
+        }
+      }
     }
   };
 }

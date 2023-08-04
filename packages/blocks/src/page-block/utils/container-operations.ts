@@ -1,4 +1,3 @@
-import type { PointerEventState } from '@blocksuite/block-std';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
@@ -15,18 +14,11 @@ import {
   asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
   type BlockComponentElement,
-  type ExtendedModel,
-  focusBlockByModel,
   getBlockElementByModel,
-  getClosestBlockElementByElement,
-  getDefaultPage,
   getVirgoByModel,
-  handleNativeRangeDblClick,
-  handleNativeRangeTripleClick,
   hasNativeSelection,
   isCollapsedNativeSelection,
   isMultiBlockRange,
-  resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
@@ -39,41 +31,7 @@ import {
 } from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import { showFormatQuickBar } from '../../components/format-quick-bar/index.js';
 import type { BlockSchemas } from '../../models.js';
-import type {
-  DefaultSelectionManager,
-  PageSelectionState,
-} from '../default/selection-manager/index.js';
-import { calcCurrentSelectionPosition } from './position.js';
-
-export function handleBlockSelectionBatchDelete(
-  page: Page,
-  models: ExtendedModel[]
-) {
-  const parentModel = page.getParent(models[0]);
-  assertExists(parentModel);
-  const index = parentModel.children.indexOf(models[0]);
-  page.captureSync();
-  models.forEach(model => page.deleteBlock(model));
-  const id = page.addBlock(
-    'affine:paragraph',
-    { type: 'text' },
-    parentModel,
-    index
-  );
-  const newBlock = page.getBlockById(id);
-
-  // Try clean block selection
-  const defaultPageBlock = getDefaultPage(models[0].page);
-  if (!defaultPageBlock) {
-    // In the edgeless mode
-    return null;
-  }
-  defaultPageBlock.selection?.clear();
-  asyncFocusRichText(page, id);
-  return newBlock;
-}
 
 export function deleteModelsByRange(
   page: Page,
@@ -81,10 +39,6 @@ export function deleteModelsByRange(
 ) {
   if (!blockRange) return null;
 
-  if (blockRange.type === 'Block') {
-    const newBlock = handleBlockSelectionBatchDelete(page, blockRange.models);
-    return newBlock;
-  }
   const startModel = blockRange.models[0];
   const endModel = blockRange.models[blockRange.models.length - 1];
   // TODO handle database
@@ -225,6 +179,27 @@ export function updateBlockType(
 
   // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
+  const resolvedFlags: boolean[] = [];
+  savedBlockRange?.models.forEach(model => {
+    if (model.flavour !== flavour) {
+      resolvedFlags.push(false);
+    } else {
+      switch (flavour) {
+        case 'affine:paragraph':
+          resolvedFlags.push(true);
+          break;
+        case 'affine:list':
+          if (model.type === type) {
+            resolvedFlags.push(true);
+          } else {
+            resolvedFlags.push(false);
+          }
+          break;
+        default:
+          resolvedFlags.push(false);
+      }
+    }
+  });
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
@@ -241,9 +216,12 @@ export function updateBlockType(
     newModels.push(newModel);
   });
 
-  const allTextUpdated = savedBlockRange?.models.map(
-    model => new Promise(resolve => onModelTextUpdated(model, resolve))
-  );
+  const allTextUpdated = savedBlockRange?.models.map((model, index) => {
+    return new Promise(resolve =>
+      onModelTextUpdated(model, resolve, resolvedFlags[index])
+    );
+  });
+
   if (allTextUpdated && savedBlockRange) {
     Promise.all(allTextUpdated).then(() => {
       restoreSelection(savedBlockRange);
@@ -488,61 +466,16 @@ export function handleFormat(
   formatBlockRange(blockRange, key);
 }
 
-export function handleSelectAll(selection: DefaultSelectionManager) {
-  const currentSelection = window.getSelection();
-  if (
-    selection.state.selectedBlocks.length === 0 &&
-    currentSelection?.focusNode?.nodeName === '#text'
-  ) {
-    selection.selectOneBlock(
-      getClosestBlockElementByElement(currentSelection.focusNode.parentElement)
-    );
-  } else {
-    selection.selectAllBlocks();
-  }
-
-  resetNativeSelection(null);
-}
-export function handleKeydownAfterSelectBlocks({
-  page,
-  keyboardEvent,
-  selectedBlocks,
-}: {
-  page: Page;
-  keyboardEvent: KeyboardEvent;
-  selectedBlocks: BaseBlockModel[];
-}) {
-  const { key } = keyboardEvent;
-
-  const parent = page.getParent(selectedBlocks[0]);
-  const index = parent?.children.indexOf(selectedBlocks[0]);
-  selectedBlocks.forEach(block => {
-    page.deleteBlock(block);
-  });
-  // TODO:
-  //  1. should add block which has same flavour as the parent?
-  //  2. If use Chinese input method, the input method state cannot be retained
-  const id = page.addBlock(
-    'affine:paragraph',
-    {
-      text: new page.Text(key),
-    },
-    parent,
-    index
-  );
-  // Wait block inserted to dom
-  requestAnimationFrame(() => {
-    const defaultPage = getDefaultPage(page);
-    const newBlock = page.getBlockById(id) as BaseBlockModel;
-    defaultPage?.selection?.clear();
-    focusBlockByModel(newBlock, 'end');
-  });
-}
 export async function onModelTextUpdated(
   model: BaseBlockModel,
-  callback: (text: RichText) => void
+  callback: (text: RichText) => void,
+  resolved = false
 ) {
   const richText = await asyncGetRichTextByModel(model);
+  if (richText && resolved) {
+    callback(richText);
+    return;
+  }
   richText?.vEditor?.slots.updated.once(() => {
     callback(richText);
   });
@@ -586,34 +519,5 @@ export function tryUpdateNoteSize(page: Page, zoom: number) {
         });
       }
     });
-  });
-}
-
-// Show format quick bar when double/triple clicking on text
-export function showFormatQuickBarByClicks(
-  type: 'double' | 'triple',
-  e: PointerEventState,
-  page: Page,
-  container?: HTMLElement,
-  state?: PageSelectionState
-) {
-  const range =
-    type === 'double'
-      ? handleNativeRangeDblClick()
-      : handleNativeRangeTripleClick(e);
-  if (e.raw.target instanceof HTMLTextAreaElement) return;
-  if (!range || range.collapsed) return;
-  if (page.readonly) return;
-
-  const direction = 'center-bottom';
-  showFormatQuickBar({
-    page,
-    container,
-    direction,
-    anchorEl: {
-      getBoundingClientRect: () => {
-        return calcCurrentSelectionPosition(direction, state);
-      },
-    },
   });
 }

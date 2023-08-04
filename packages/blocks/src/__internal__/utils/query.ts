@@ -9,8 +9,9 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
-import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
-import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { clamp } from './common.js';
 import { type Point, Rect } from './rect.js';
@@ -167,9 +168,7 @@ export function getPreviousBlock(
  * Returns `DefaultPageBlockComponent` | `EdgelessPageBlockComponent` if it exists
  * otherwise return `null`.
  */
-export function getPageBlock(
-  model: BaseBlockModel
-): DefaultPageBlockComponent | EdgelessPageBlockComponent | null {
+export function getPageBlock(model: BaseBlockModel): PageBlockComponent | null {
   assertExists(model.page.root);
   return document.querySelector(`[${ATTR}="${model.page.root.id}"]`);
 }
@@ -177,10 +176,20 @@ export function getPageBlock(
 /**
  * If it's not in the page mode, it will return `null` directly.
  */
-export function getDefaultPage(page: Page) {
+export function getDocPage(page: Page) {
   const editor = getEditorContainer(page);
   if (editor.mode !== 'page') return null;
-  const pageComponent = editor.querySelector('affine-default-page');
+  const pageComponent = editor.querySelector('affine-doc-page');
+  return pageComponent;
+}
+
+/**
+ * If it's not in the page mode, it will return `null` directly.
+ */
+export function getDocPageByElement(ele: Element) {
+  const editor = getClosestEditorContainer(ele);
+  if (editor.mode !== 'page') return null;
+  const pageComponent = editor.querySelector('affine-doc-page');
   return pageComponent;
 }
 
@@ -210,6 +219,12 @@ export function getEditorContainer(page: Page): AbstractEditor {
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
 }
+
+export const getClosestEditorContainer = (ele: Element) => {
+  const editorContainer = ele.closest('editor-container');
+  assertExists(editorContainer);
+  return editorContainer as AbstractEditor;
+};
 
 export function getEditorContainerByElement(ele: Element) {
   // EditorContainer
@@ -256,11 +271,11 @@ export function getViewportElement(page: Page) {
 
   if (
     !defaultPageBlock ||
-    defaultPageBlock.closest('affine-default-page') !== defaultPageBlock
+    defaultPageBlock.closest('affine-doc-page') !== defaultPageBlock
   ) {
     throw new Error('Failed to get viewport element!');
   }
-  return (defaultPageBlock as DefaultPageBlockComponent).viewportElement;
+  return (defaultPageBlock as DocPageBlockComponent).viewportElement;
 }
 
 export function getBlockElementByModel(
@@ -268,9 +283,9 @@ export function getBlockElementByModel(
 ): BlockComponentElement | null {
   assertExists(model.page.root);
   const editor = activeEditorManager.getActiveEditor();
-  const page = (editor ?? document).querySelector<
-    DefaultPageBlockComponent | EdgelessPageBlockComponent
-  >(`[${ATTR}="${model.page.root.id}"]`);
+  const page = (editor ?? document).querySelector<PageBlockComponent>(
+    `[${ATTR}="${model.page.root.id}"]`
+  );
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
@@ -285,9 +300,9 @@ export function asyncGetBlockElementByModel(
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
   const editor = activeEditorManager.getActiveEditor();
-  const page = (editor ?? document).querySelector<
-    DefaultPageBlockComponent | EdgelessPageBlockComponent
-  >(`[${ATTR}="${model.page.root.id}"]`);
+  const page = (editor ?? document).querySelector<PageBlockComponent>(
+    `[${ATTR}="${model.page.root.id}"]`
+  );
   if (!page) return Promise.resolve(null);
 
   if (model.id === model.page.root.id) {
@@ -442,7 +457,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (!block.model) return;
 
       const mainElement = matchFlavours(block.model, ['affine:page'])
-        ? element?.querySelector('.affine-default-page-block-title-container')
+        ? element?.querySelector('.affine-doc-page-block-title-container')
         : element?.querySelector('rich-text') || element?.querySelector('img');
       if (
         mainElement &&
@@ -520,7 +535,7 @@ export function isInsidePageTitle(element: unknown): boolean {
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
   const editor = activeEditorManager.getActiveEditor();
-  const textElement = (editor ?? document).querySelector('surface-text-editor');
+  const textElement = getEdgelessCanvasTextEditor(editor ?? document);
   if (!textElement) return false;
 
   return textElement.contains(element as Node);
@@ -720,7 +735,12 @@ export function getClosestBlockElementByPoint(
   let n = 1;
 
   if (state) {
-    const { snapToEdge = { x: true, y: false } } = state;
+    const {
+      snapToEdge = {
+        x: true,
+        y: false,
+      },
+    } = state;
     container = state.container;
     const rect = state.rect || container?.getBoundingClientRect();
     if (rect) {
@@ -752,16 +772,17 @@ export function getClosestBlockElementByPoint(
     if (isDatabase(element)) {
       bounds = element.getBoundingClientRect();
       const rows = getDatabaseBlockRowsElement(element);
-      assertExists(rows);
-      childBounds = rows.getBoundingClientRect();
+      if (rows) {
+        childBounds = rows.getBoundingClientRect();
 
-      if (childBounds.height) {
-        if (point.y < childBounds.top || point.y > childBounds.bottom) {
+        if (childBounds.height) {
+          if (point.y < childBounds.top || point.y > childBounds.bottom) {
+            return element;
+          }
+          childBounds = null;
+        } else {
           return element;
         }
-        childBounds = null;
-      } else {
-        return element;
       }
     } else {
       // Indented paragraphs or list
@@ -813,6 +834,40 @@ export function getClosestBlockElementByPoint(
   } while (n <= STEPS);
 
   return element;
+}
+
+/**
+ * Find the most close block on the given position
+ * @param container container which the blocks can be found inside
+ * @param point position
+ */
+export function findClosestBlockElement(
+  container: BlockComponentElement,
+  point: Point,
+  selector: string
+) {
+  const children = Array.from(container.querySelectorAll(selector));
+  let lastDistance = Number.POSITIVE_INFINITY;
+  let lastChild = null;
+
+  if (!children.length) return null;
+
+  for (const child of children) {
+    const rect = child.getBoundingClientRect();
+    if (rect.height === 0 || point.y > rect.bottom) continue;
+    const distance =
+      Math.pow(point.y - (rect.y + rect.height / 2), 2) +
+      Math.pow(point.x - rect.x, 2);
+
+    if (distance <= lastDistance) {
+      lastDistance = distance;
+      lastChild = child;
+    } else {
+      return lastChild;
+    }
+  }
+
+  return lastChild;
 }
 
 /**
@@ -1130,10 +1185,9 @@ function getCellRect(element: Element, bounds?: DOMRect) {
   const row = col.parentElement;
   assertExists(row);
   const colRect = col.getBoundingClientRect();
-  const rowRect = row.getBoundingClientRect();
   return new DOMRect(
     bounds.left,
-    rowRect.top,
+    colRect.top,
     colRect.right - bounds.left,
     colRect.height
   );
@@ -1167,9 +1221,15 @@ export function hasDatabase(elements: Element[]) {
   return elements.some(isDatabase);
 }
 
+export function getEdgelessCanvasTextEditor(element: Element | Document) {
+  return element.querySelector(
+    'edgeless-text-editor,edgeless-shape-text-editor'
+  ) as EdgelessCanvasTextEditor | null;
+}
+
 /**
- * Returns the last note element.
+ * Return `true` if the element has class name in the class list.
  */
-export function getLastNoteBlockElement(parent: Element) {
-  return parent.querySelector('affine-note:last-of-type');
+export function hasClassNameInList(element: Element, classList: string[]) {
+  return classList.some(className => element.classList.contains(className));
 }

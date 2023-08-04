@@ -1,6 +1,6 @@
-import { AffineSchemas } from '@blocksuite/blocks/models';
+import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import type { Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Schema, Workspace } from '@blocksuite/store';
 import { LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -20,13 +20,16 @@ export class SimpleAffineEditor extends LitElement {
 
   constructor() {
     super();
+    const schema = new Schema();
 
-    this.workspace = new Workspace({ id: 'test' }).register(AffineSchemas);
+    schema.register(AffineSchemas).register(__unstableSchemas);
+    this.workspace = new Workspace({ id: 'test', schema });
     this.page = this.workspace.createPage({ id: 'page0' });
-
-    const pageBlockId = this.page.addBlock('affine:page');
-    const noteId = this.page.addBlock('affine:note', {}, pageBlockId);
-    this.page.addBlock('affine:paragraph', {}, noteId);
+    this.page.waitForLoaded().then(() => {
+      const pageBlockId = this.page.addBlock('affine:page');
+      const noteId = this.page.addBlock('affine:note', {}, pageBlockId);
+      this.page.addBlock('affine:paragraph', {}, noteId);
+    });
   }
 
   override connectedCallback() {

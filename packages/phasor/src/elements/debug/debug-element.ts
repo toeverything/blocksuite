@@ -1,17 +1,11 @@
 import type { Bound } from '../../utils/bound.js';
+import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
-import { type SerializedXYWH } from '../../utils/xywh.js';
 import type { IElementDefaultProps } from '../index.js';
-import { SurfaceElement } from '../surface-element.js';
+import { type ISurfaceElement, SurfaceElement } from '../surface-element.js';
 
-export interface IDebug {
-  id: string;
+export interface IDebug extends ISurfaceElement {
   type: 'debug';
-  xywh: SerializedXYWH;
-  index: string;
-  seed: number;
-
-  rotate: number;
 
   color: string;
 }
@@ -39,7 +33,11 @@ export class DebugElement extends SurfaceElement<IDebug> {
     throw new Error('Method not implemented.');
   }
 
-  override intersectWithLine(start: IVec, end: IVec): IVec[] | null {
+  override intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
+    throw new Error('Method not implemented.');
+  }
+
+  getRelativePointLocation(point: IVec): PointLocation {
     throw new Error('Method not implemented.');
   }
 

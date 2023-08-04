@@ -2,11 +2,10 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
-import type { BlockSchemaType } from '../base.js';
-import { BlockSchema } from '../base.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
+import type { DocProviderCreator } from '../providers/type.js';
 import { Store, type StoreOptions } from '../store.js';
 import { Text } from '../text-adapter.js';
 import { serializeYDoc } from '../utils/jsx.js';
@@ -16,9 +15,11 @@ import type { QueryContent } from './indexer/search.js';
 import { SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
-import { Schema } from './schema.js';
+import type { Schema } from './schema.js';
 
-export type WorkspaceOptions = StoreOptions;
+export type WorkspaceOptions = StoreOptions & {
+  schema: Schema;
+};
 
 export class Workspace {
   static Y = Y;
@@ -46,7 +47,7 @@ export class Workspace {
   };
 
   constructor(storeOptions: WorkspaceOptions) {
-    this._schema = new Schema(this);
+    this._schema = storeOptions.schema;
 
     this._store = new Store(storeOptions);
 
@@ -120,7 +121,8 @@ export class Workspace {
     let flag = false;
     if (this.doc.store.clients.size === 1) {
       const items = [...this.doc.store.clients.values()][0];
-      if (items.length <= 1) {
+      // workspaceVersion and pageVersion were set when we init the workspace
+      if (items.length <= 2) {
         flag = true;
       }
     }
@@ -160,12 +162,8 @@ export class Workspace {
     return this._schema;
   }
 
-  register(blockSchema: BlockSchemaType[]) {
-    blockSchema.forEach(schema => {
-      BlockSchema.parse(schema);
-      this.schema.flavourSchemaMap.set(schema.model.flavour, schema);
-    });
-    return this;
+  registerProvider(providerCreator: DocProviderCreator, id?: string) {
+    return this._store.registerProvider(providerCreator, id);
   }
 
   private _hasPage(pageId: string) {
@@ -282,7 +280,7 @@ export class Workspace {
     const sanitize = async (props: Record<string, unknown>) => {
       const result: Record<string, unknown> = {};
 
-      //TODO: https://github.com/toeverything/blocksuite/issues/2939
+      // TODO: https://github.com/toeverything/blocksuite/issues/2939
       if (props['sys:flavour'] === 'affine:surface' && props['prop:elements']) {
         Object.values(props['prop:elements']).forEach(element => {
           const _element = element as Record<string, unknown>;
@@ -380,6 +378,45 @@ export class Workspace {
 
   exportSnapshot() {
     return serializeYDoc(this.doc);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  exportWorkspaceYDoc() {
+    const binary = Y.encodeStateAsUpdate(this.doc);
+    const file = new Blob([binary], { type: 'application/octet-stream' });
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'workspace.ydoc';
+    link.click();
+
+    URL.revokeObjectURL(fileUrl);
+  }
+
+  /**
+   * @internal Only for testing
+   */
+  exportPageYDoc(pageId: string) {
+    const pages = this.doc.getMap('spaces');
+    const pageDoc = pages.get(`space:${pageId}`);
+
+    if (!(pageDoc instanceof Y.Doc)) {
+      throw new Error(`Page ${pageId} not found or not a Y.Doc`);
+    }
+
+    const binary = Y.encodeStateAsUpdate(pageDoc);
+    const file = new Blob([binary], { type: 'application/octet-stream' });
+    const fileUrl = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = 'workspace.ydoc';
+    link.click();
+
+    URL.revokeObjectURL(fileUrl);
   }
 
   /** @internal Only for testing */

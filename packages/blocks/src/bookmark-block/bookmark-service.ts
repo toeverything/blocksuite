@@ -7,7 +7,7 @@ import type { BookmarkBlockModel } from './bookmark-model.js';
 import { cloneBookmarkProperties } from './utils.js';
 
 export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
-  override block2html(
+  override async block2html(
     block: BookmarkBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
@@ -24,6 +24,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
 
   override block2Json(
     block: BookmarkBlockModel,
+    selectedModels?: Map<string, number>,
     begin?: number,
     end?: number
   ): SerializedBlock {

@@ -37,27 +37,32 @@ const PARAMS: { [key: string]: number } = {
 };
 
 function tokenize(d: string): PathToken[] {
-  // eslint-disable-next-line @typescript-eslint/no-array-constructor
-  const tokens: PathToken[] = new Array();
+  const tokens: PathToken[] = [];
+  let match: RegExpMatchArray | null;
+
   while (d !== '') {
-    if (d.match(/^([ \t\r\n,]+)/)) {
-      d = d.substr(RegExp.$1.length);
-    } else if (d.match(/^([aAcChHlLmMqQsStTvVzZ])/)) {
-      tokens[tokens.length] = { type: COMMAND, text: RegExp.$1 };
-      d = d.substr(RegExp.$1.length);
-    } else if (
-      d.match(/^(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)/)
-    ) {
-      tokens[tokens.length] = {
-        type: NUMBER,
-        text: `${parseFloat(RegExp.$1)}`,
-      };
-      d = d.substr(RegExp.$1.length);
+    match = d.match(/^([ \t\r\n,]+)/);
+    if (match) {
+      d = d.slice(match[0].length);
+      continue;
+    }
+    match = d.match(/^([aAcChHlLmMqQsStTvVzZ])/);
+    if (match) {
+      tokens.push({ type: COMMAND, text: match[0] });
+      d = d.slice(match[0].length);
+      continue;
+    }
+    match = d.match(
+      /^(([-+]?[0-9]+(\.[0-9]*)?|[-+]?\.[0-9]+)([eE][-+]?[0-9]+)?)/
+    );
+    if (match) {
+      tokens.push({ type: NUMBER, text: `${parseFloat(match[0])}` });
+      d = d.slice(match[0].length);
     } else {
       return [];
     }
   }
-  tokens[tokens.length] = { type: EOD, text: '' };
+  tokens.push({ type: EOD, text: '' });
   return tokens;
 }
 

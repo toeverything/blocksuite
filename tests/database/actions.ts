@@ -15,6 +15,7 @@ import {
   getEditorLocator,
   waitNextFrame,
 } from '../utils/actions/misc.js';
+
 export async function initDatabaseColumn(page: Page, title = '') {
   await focusDatabaseHeader(page);
   const editor = getEditorLocator(page);
@@ -155,7 +156,7 @@ export async function assertSelectedStyle(
 }
 
 export async function clickDatabaseOutside(page: Page) {
-  const pageTitle = page.locator('.affine-default-page-block-title');
+  const pageTitle = page.locator('.affine-doc-page-block-title');
   await pageTitle.click();
 }
 
@@ -177,23 +178,14 @@ export async function assertDatabaseCellRichTexts(
     text: string;
   }
 ) {
-  const actualTexts = await page.evaluate(
-    ({ rowIndex, columnIndex }) => {
-      const rows = document.querySelector('.affine-database-block-rows');
-      const row = rows?.querySelector(
-        `.database-row:nth-child(${rowIndex + 1})`
-      );
-      const cell = row?.querySelector(
-        `.database-cell:nth-child(${columnIndex + 1})`
-      );
-      const richText =
-        cell?.querySelector<RichText>('affine-database-rich-text-cell') ??
-        cell?.querySelector<RichText>('affine-database-rich-text-cell-editing');
-      if (!richText) throw new Error('Missing database rich text cell');
-      return richText.vEditor.yText.toString();
-    },
-    { rowIndex, columnIndex }
-  );
+  const actualTexts = await page
+    .locator(
+      `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
+    )
+    .locator('affine-database-rich-text-cell')
+    .evaluate(ele => {
+      return (ele as RichText).vEditor?.yText.toString();
+    });
   expect(actualTexts).toEqual(text);
 }
 
@@ -272,16 +264,14 @@ export async function assertDatabaseSearching(
 
 export async function focusDatabaseSearch(page: Page) {
   (await getDatabaseMouse(page)).mouseOver();
-  const searchContainer = page.locator('.search-container');
-  const searchExpand = searchContainer.locator('.search-container-expand');
+
+  const searchExpand = page.locator('.search-container-expand');
   const count = await searchExpand.count();
   if (count === 1) {
-    const input = searchContainer.locator('.affine-database-search-input');
+    const input = page.locator('.affine-database-search-input');
     await input.click();
   } else {
-    const searchIcon = searchContainer.locator(
-      '.affine-database-search-input-icon'
-    );
+    const searchIcon = page.locator('.affine-database-search-input-icon');
     await searchIcon.click();
     await waitSearchTransitionEnd(page);
   }

@@ -14,6 +14,12 @@ export const styles = css`
     font-size: var(--affine-font-sm);
   }
 
+  @media print {
+    .affine-select-cell-select {
+      display: none;
+    }
+  }
+
   .select-input-container {
     display: flex;
     align-items: center;

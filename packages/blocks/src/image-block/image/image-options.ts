@@ -45,6 +45,11 @@ export function ImageOptionsTemplate({
         background-color: var(--affine-background-overlay-panel-color);
         margin: 0;
       }
+      .has-tool-tip.delete-image-button:hover {
+        background: var(--affine-background-error-color);
+        fill: var(--affine-error-color);
+        color: var(--affine-error-color);
+      }
       ${tooltipStyle}
     </style>
 
@@ -55,42 +60,46 @@ export function ImageOptionsTemplate({
       @mouseout=${() => hoverState.emit(false)}
     >
       <div style=${styleMap(style)} class="embed-editing-state">
-        <format-bar-button
+        <icon-button
           class="has-tool-tip"
           width="100%"
+          height="32px"
           @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
           <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
-        </format-bar-button>
-        <format-bar-button
+        </icon-button>
+        <icon-button
           class="has-tool-tip"
           width="100%"
+          height="32px"
           @click=${() => downloadImage(model)}
         >
           ${DownloadIcon}
           <tool-tip inert tip-position="right" role="tooltip"
             >Download</tool-tip
           >
-        </format-bar-button>
-        <format-bar-button
+        </icon-button>
+        <icon-button
           class="has-tool-tip"
           width="100%"
+          height="32px"
           @click=${() => copyImage(model)}
         >
           ${CopyIcon}
           <tool-tip inert tip-position="right" role="tooltip"
             >Copy to clipboard</tool-tip
           >
-        </format-bar-button>
-        <format-bar-button
-          class="has-tool-tip"
+        </icon-button>
+        <icon-button
+          class="has-tool-tip delete-image-button"
           width="100%"
+          height="32px"
           @click="${() => model.page.deleteBlock(model)}"
         >
           ${DeleteIcon}
           <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>
-        </format-bar-button>
+        </icon-button>
       </div>
     </div>
   `;

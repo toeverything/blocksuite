@@ -11,7 +11,10 @@ export type DeltaInsert<
 
 export type AttributeRenderer<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes
-> = (delta: DeltaInsert<TextAttributes>) => TemplateResult<1>;
+> = (
+  delta: DeltaInsert<TextAttributes>,
+  selected: boolean
+) => TemplateResult<1>;
 
 export interface VRange {
   index: number;
@@ -19,8 +22,8 @@ export interface VRange {
 }
 
 export type VRangeUpdatedProp = [
-  range: VRange,
-  type: 'native' | 'input' | 'other'
+  range: VRange | null,
+  type: 'native' | 'input' | 'other' | 'silent'
 ];
 
 export type DeltaEntry<

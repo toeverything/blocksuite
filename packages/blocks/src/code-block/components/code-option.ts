@@ -6,11 +6,11 @@ import {
 } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import { copyCode } from '../../page-block/default/utils.js';
+import { copyCode } from '../../page-block/doc/utils.js';
 import type { CodeBlockModel } from '../code-model.js';
 
 export function CodeOptionTemplate({
@@ -44,7 +44,11 @@ export function CodeOptionTemplate({
         z-index: var(--affine-z-index-popover);
         background: var(--affine-background-overlay-panel-color);
       }
-
+      .has-tool-tip.delete-code-button:hover {
+        background: var(--affine-background-error-color);
+        fill: var(--affine-error-color);
+        color: var(--affine-error-color);
+      }
       ${tooltipStyle}
     </style>
 
@@ -54,7 +58,8 @@ export function CodeOptionTemplate({
       @mouseover=${() => hoverState.emit(true)}
       @mouseout=${() => hoverState.emit(false)}
     >
-      <format-bar-button
+      <icon-button
+        size="32px"
         class="has-tool-tip"
         data-testid="copy-button"
         @click=${() => copyCode(model as CodeBlockModel)}
@@ -63,8 +68,9 @@ export function CodeOptionTemplate({
         <tool-tip inert tip-position="right" role="tooltip"
           >Copy to Clipboard</tool-tip
         >
-      </format-bar-button>
-      <format-bar-button
+      </icon-button>
+      <icon-button
+        size="32px"
         class="has-tool-tip"
         data-testid="wrap-button"
         ?active=${wrap}
@@ -72,12 +78,13 @@ export function CodeOptionTemplate({
       >
         ${wrap ? CancelWrapIcon : WrapIcon}
         <tool-tip inert tip-position="right" role="tooltip">Wrap code</tool-tip>
-      </format-bar-button>
+      </icon-button>
       ${readonly
-        ? ''
-        : html`<format-bar-button
+        ? nothing
+        : html`<icon-button
+            size="32px"
             data-testid="delete-button"
-            class="has-tool-tip"
+            class="has-tool-tip delete-code-button"
             @click=${() => {
               if (readonly) return;
               model.page.deleteBlock(model);
@@ -87,7 +94,7 @@ export function CodeOptionTemplate({
             <tool-tip inert tip-position="right" role="tooltip"
               >Delete</tool-tip
             >
-          </format-bar-button>`}
+          </icon-button>`}
     </div>
   `;
 }

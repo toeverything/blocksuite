@@ -9,7 +9,8 @@ import {
 } from 'shiki';
 
 import { createEvent } from '../../__internal__/index.js';
-import { POPULAR_LANGUAGES_MAP } from '../utils/code-languages.js';
+import { scrollbarStyle } from '../../components/utils.js';
+import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -24,7 +25,7 @@ export class LangList extends ShadowlessElement {
         background: var(--affine-background-overlay-panel-color);
         border-radius: 12px;
         top: 24px;
-        z-index: 1;
+        z-index: var(--affine-z-index-popover);
       }
 
       .lang-list-container {
@@ -41,14 +42,9 @@ export class LangList extends ShadowlessElement {
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
-        /*scrollbar-color: #fff0 #fff0;*/
       }
 
-      /*
-      .lang-list-button-container::-webkit-scrollbar {
-        background: none;
-      }
-      */
+      ${scrollbarStyle}
 
       .lang-item {
         display: flex;
@@ -58,22 +54,22 @@ export class LangList extends ShadowlessElement {
       }
 
       .input-wrapper {
-        position: relative;
         display: flex;
         margin-top: 8px;
         margin-left: 4px;
+        border: 1px solid var(--affine-border-color);
+        border-radius: 8px;
+        padding: 4px 10px;
       }
 
       #filter-input {
-        display: flex;
+        flex: 1;
         align-items: center;
-        height: 32px;
-        width: 192px;
-        border: 1px solid var(--affine-border-color);
+        height: 20px;
+        width: 140px;
         border-radius: 8px;
-        padding-left: 44px;
-        padding-top: 4px;
-
+        padding-top: 2px;
+        border: none;
         font-family: var(--affine-font-family);
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
@@ -91,10 +87,9 @@ export class LangList extends ShadowlessElement {
       }
 
       .search-icon {
-        position: absolute;
-        left: 8px;
         height: 100%;
         display: flex;
+        padding-right: 4px;
         align-items: center;
         fill: var(--affine-icon-color);
       }
@@ -109,6 +104,9 @@ export class LangList extends ShadowlessElement {
 
   @query('#filter-input')
   filterInput!: HTMLInputElement;
+
+  @property({ attribute: false })
+  currentLanguageId!: Lang;
 
   @property({ attribute: false })
   delay = 150;
@@ -159,8 +157,8 @@ export class LangList extends ShadowlessElement {
       })
       .sort(
         (a, b) =>
-          (POPULAR_LANGUAGES_MAP[a.id as Lang] ?? Infinity) -
-          (POPULAR_LANGUAGES_MAP[b.id as Lang] ?? Infinity)
+          getLanguagePriority(a.id as Lang, this.currentLanguageId === a.id) -
+          getLanguagePriority(b.id as Lang, this.currentLanguageId === b.id)
       );
 
     const onLanguageSelect = (e: KeyboardEvent) => {

@@ -29,10 +29,12 @@ export * from './__internal__/utils/filesys.js';
 export * from './__internal__/utils/query.js';
 export * as SelectionUtils from './__internal__/utils/selection.js';
 export * from './__internal__/utils/types.js';
+export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
 export * from './components/index.js';
 export * from './counter-block/index.js';
+export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './image-block/index.js';
@@ -42,6 +44,7 @@ export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export * from './preset/index.js';
 export * from './surface-block/index.js';
+export * from './widgets/index.js';
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis

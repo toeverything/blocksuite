@@ -105,7 +105,8 @@ test.describe('rotation', () => {
     await assertEdgelessSelectedRect(page, [100, 100, 200, 100]);
 
     await rotateElementByHandle(page, 90, 'bottom-right');
-    await assertEdgelessSelectedRectRotation(page, 90);
+    await assertEdgelessSelectedRectRotation(page, 0);
+    await assertEdgelessSelectedRect(page, [150, 50, 100, 200]);
   });
 
   test('combination with resizing', async ({ page }) => {
@@ -129,5 +130,39 @@ test.describe('rotation', () => {
 
     await resizeElementByHandle(page, { x: 10, y: 10 }, 'bottom-right');
     await assertEdgelessSelectedRect(page, [110, 100, 100, 100]);
+  });
+
+  test('combination with resizing for multiple shapes', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    await addBasicRectShapeElement(
+      page,
+      { x: 100, y: 100 },
+      { x: 200, y: 200 }
+    );
+    await addBasicRectShapeElement(
+      page,
+      { x: 200, y: 100 },
+      { x: 300, y: 200 }
+    );
+
+    await dragBetweenCoords(page, { x: 90, y: 90 }, { x: 310, y: 110 });
+    await assertEdgelessSelectedRect(page, [100, 100, 200, 100]);
+
+    await rotateElementByHandle(page, 90, 'bottom-left');
+    await assertEdgelessSelectedRectRotation(page, 0);
+    await assertEdgelessSelectedRect(page, [150, 50, 100, 200]);
+
+    await resizeElementByHandle(page, { x: -10, y: -20 }, 'bottom-right');
+    await assertEdgelessSelectedRect(page, [150, 50, 90, 180]);
+
+    await rotateElementByHandle(page, -90, 'bottom-right');
+    await assertEdgelessSelectedRectRotation(page, 0);
+    await assertEdgelessSelectedRect(page, [105, 95, 180, 90]);
+
+    await resizeElementByHandle(page, { x: 20, y: 10 }, 'bottom-right');
+    await assertEdgelessSelectedRect(page, [105, 95, 200, 100]);
   });
 });

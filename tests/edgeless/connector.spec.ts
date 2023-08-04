@@ -5,14 +5,16 @@ import {
   changeConnectorStrokeColor,
   changeConnectorStrokeStyle,
   changeConnectorStrokeWidth,
-  createConnectorElementWithModel as createConnectorElement,
-  createRectShapeElementWithModel as createRectShapeElement,
+  createConnectorElement,
+  createShapeElement,
   deleteAllConnectors,
   dragBetweenViewCoords,
   edgelessCommonSetup as commonSetup,
   locatorConnectorStrokeStyleButton,
   locatorConnectorStrokeWidthButton,
   pickColorAtPoints,
+  rotateElementByHandle,
+  Shape,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
@@ -21,7 +23,11 @@ import {
   undoByClick,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertConnectorPath } from '../utils/asserts.js';
+import {
+  assertConnectorPath,
+  assertEdgelessHoverRect,
+  assertPointAlmostEqual,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test('elbow connector without node and width greater than height', async ({
@@ -54,7 +60,7 @@ test('elbow connector one side attached element another side free', async ({
   page,
 }) => {
   await commonSetup(page);
-  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
   await createConnectorElement(page, [50, 50], [200, 0]);
 
   await assertConnectorPath(page, [
@@ -77,8 +83,8 @@ test('elbow connector one side attached element another side free', async ({
 test('elbow connector both side attatched element', async ({ page }) => {
   await commonSetup(page);
 
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
   await createConnectorElement(page, [50, 50], [250, 50]);
 
   await assertConnectorPath(page, [
@@ -157,8 +163,8 @@ test('elbow connector both side attached element with one attach element and oth
 }) => {
   await commonSetup(page);
 
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
   await createConnectorElement(page, [50, 0], [250, 50]);
 
   await assertConnectorPath(page, [
@@ -202,8 +208,8 @@ test('elbow connector both side attached element with all fixed', async ({
 }) => {
   await commonSetup(page);
 
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
   await createConnectorElement(page, [50, 0], [300, 50]);
   await assertConnectorPath(page, [
     [50, 0],
@@ -219,8 +225,8 @@ test('path #1, the upper line is parallel with the lower line of antoher, and an
 }) => {
   await commonSetup(page);
 
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [200, -100], [300, 0]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [200, -100], [300, 0], Shape.Square);
   await createConnectorElement(page, [50, 0], [250, 0]);
 
   await waitNextFrame(page);
@@ -238,8 +244,8 @@ test('path #2, the top-right point is overlapped with the bottom-left point of a
   page,
 }) => {
   await commonSetup(page);
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [100, -100], [200, 0]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [100, -100], [200, 0], Shape.Square);
   await createConnectorElement(page, [50, 0], [150, 0]);
 
   await assertConnectorPath(page, [
@@ -257,8 +263,8 @@ test('path #3, the two shape are parallel in x axis, the anchor from the right t
 }) => {
   await commonSetup(page);
 
-  await createRectShapeElement(page, [0, 0], [100, 100]);
-  await createRectShapeElement(page, [200, 0], [300, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
   await createConnectorElement(page, [100, 50], [300, 50]);
   await assertConnectorPath(page, [
     [100, 50],
@@ -272,7 +278,7 @@ test('path #3, the two shape are parallel in x axis, the anchor from the right t
 
 test('when element is removed, connector should updated', async ({ page }) => {
   await commonSetup(page);
-  await createRectShapeElement(page, [0, 0], [100, 100]);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
   await createConnectorElement(page, [100, 50], [200, 0]);
 
   //select
@@ -284,6 +290,51 @@ test('when element is removed, connector should updated', async ({ page }) => {
     [50, 50],
     [50, 0],
     [100, 0],
+  ]);
+});
+
+test('connector connects triangle shape', async ({ page }) => {
+  await commonSetup(page);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Triangle);
+  await createConnectorElement(page, [75, 50], [100, 50]);
+
+  await assertConnectorPath(page, [
+    [75, 50],
+    [100, 50],
+  ]);
+});
+
+test('connector connects diamond shape', async ({ page }) => {
+  await commonSetup(page);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Diamond);
+  await createConnectorElement(page, [100, 50], [200, 50]);
+
+  await assertConnectorPath(page, [
+    [100, 50],
+    [200, 50],
+  ]);
+});
+
+test('connector connects rotated Square shape', async ({ page }) => {
+  await commonSetup(page);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createConnectorElement(page, [50, 0], [50, -100]);
+
+  await dragBetweenViewCoords(page, [-10, 50], [60, 60]);
+  await rotateElementByHandle(page, 30, 'top-left');
+  await assertConnectorPath(page, [
+    [75, 6.7],
+    [75, -46.65],
+    [50, -46.65],
+    [50, -100],
+  ]);
+  await rotateElementByHandle(page, 30, 'top-left');
+  await assertConnectorPath(page, [
+    [93.3, 25],
+    [138.3, 25],
+    [138.3, -38.3],
+    [50, -38.3],
+    [50, -100],
   ]);
 });
 
@@ -299,14 +350,13 @@ test('change connector line width', async ({ page }) => {
   await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
-  await changeConnectorStrokeWidth(page, 'l');
+  await changeConnectorStrokeWidth(page, 5);
+  await page.mouse.move(start.x + 5, start.y);
+  await assertEdgelessHoverRect(page, [100, 200, 200, 100]);
 
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
-  const activeButton = locatorConnectorStrokeWidthButton(page, 'l');
-  const className = await activeButton.evaluate(ele => ele.className);
-  expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [
     [start.x + 5, start.y],

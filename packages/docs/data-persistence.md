@@ -5,7 +5,7 @@ In the `SimpleAffineEditor` example, we did not actually use the data persistenc
 BlockSuite uses CRDT data model that is very similar to Git. This means that when you call methods like `page.addBlock`, this is equivalent to synchronously committing to Git (all block operation APIs in BlockSuite are synchronous, which brings a very convenient and reliable development experience). And thanks to the capability of CRDT, it can efficiently serialize the entire block state sequence into binary.
 
 ::: tip
-The BlockSuite workspace is encoded using the [y-protocols](https://github.com/yjs/y-protocols) protocol, which can be thought of as a binary JSON format for collaborative applications. You can enter `Y.encodeStateAsUpdate(workspace.doc)` in the console of the [BlockSuite Playground](https://blocksuite-toeverything.vercel.app/?init) to view the encoded workspace.
+The BlockSuite workspace is encoded using the [y-protocols](https://github.com/yjs/y-protocols) protocol, which can be thought of as a binary JSON format for collaborative applications. You can enter `Y.encodeStateAsUpdate(workspace.doc)` in the console of the [BlockSuite Playground](https://blocksuite-toeverything.vercel.app/starter/?init) to view the encoded workspace.
 :::
 
 However, the more powerful aspect of the Git model is that you only need to connect via SSH or HTTP to sync a Git repository, without worrying about handling asynchronous network IO details. This is why BlockSuite provides a provider-based persistence solution.
@@ -19,12 +19,14 @@ Different providers can handle the asynchronous IO over different network protoc
 Code example:
 
 ```ts
-import { Workspace } from '@blocksuite/store';
+import { Workspace, Schema } from '@blocksuite/store';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
-const workspace = new Workspace();
-workspace.register(AffineSchemas);
+const schema = new Schema();
+schema.register(AffineSchemas);
+
+const workspace = new Workspace({ schema });
 
 // `workspace.doc` is the underlying Yjs data structure
 const { doc } = workspace;
@@ -51,7 +53,7 @@ The document data will be automatically synchronized to IndexedDB. After the nex
 - Multiple providers can be reliably connected at the same time, just as it is easy to add multiple remote upstreams for a git repository.
   :::
 
-You can view more provider usage instructions in the [BlockSuite Playground](https://blocksuite-toeverything.vercel.app/?init).
+You can view more provider usage instructions in the [BlockSuite Playground](https://blocksuite-toeverything.vercel.app/starter/?init).
 
 ## Reusing Binary Data
 

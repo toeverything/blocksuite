@@ -49,7 +49,7 @@ page.updateBlock(block, props);
 Similarly, you can use the `page.deleteBlock` method to remove a block from the block tree.
 
 ::: tip
-In [BlockSuite playground](https://blocksuite-toeverything.vercel.app/?init), you can run `workspace.doc.toJSON()` in the console to see the basic block structure in BlockSuite.
+In [BlockSuite playground](https://blocksuite-toeverything.vercel.app/starter/?init), you can run `workspace.doc.toJSON()` in the console to see the basic block structure in BlockSuite.
 :::
 
 ## Block Flavours
@@ -123,6 +123,7 @@ In this example, `props` defines the fields on each block instance, while `metad
 workspace.register([ListBlockSchema]);
 const page = workspace.createPage();
 
+await page.waitForLoaded();
 const id = page.addBlock('affine:list');
 const listBlock = page.getBlockById(id);
 

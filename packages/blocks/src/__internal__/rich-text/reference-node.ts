@@ -11,7 +11,7 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { getBlockElementById, getModelByElement } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
@@ -42,8 +42,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     .affine-reference:hover {
       background: var(--affine-hover-color);
     }
-    .affine-reference:hover .affine-reference-title::after {
-      border-color: var(--affine-divider-color);
+
+    .affine-reference[data-selected='true'] {
+      background: var(--affine-hover-color);
     }
 
     .affine-reference > svg {
@@ -53,29 +54,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     .affine-reference > span {
       white-space: break-spaces;
     }
-
-    .affine-reference-title {
-      color: var(--affine-text-primary-color);
-      position: relative;
-    }
-    .affine-reference-unavailable {
-      color: var(--affine-text-disable-color);
-      text-decoration: line-through;
-      text-decoration-color: var(--affine-text-disable-color);
-    }
-    .affine-reference-title::after {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 0;
-      left: 0;
-      bottom: 1px;
-      border-top: 1px solid var(--affine-hover-color);
-    }
-
-    .affine-reference-title::before {
-      content: attr(data-title);
-    }
   `;
 
   @property({ type: Object })
@@ -83,6 +61,9 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     insert: ZERO_WIDTH_SPACE,
     attributes: {},
   };
+
+  @property({ type: Boolean })
+  selected = false;
 
   // Since the linked page may be deleted, the `_refMeta` could be undefined.
   @state()
@@ -142,7 +123,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const targetPageId = refMeta.id;
     const root = model.page.root;
     assertExists(root);
-    const element = getBlockElementById(root?.id) as DefaultPageBlockComponent;
+    const element = getBlockElementById(root?.id) as DocPageBlockComponent;
     assertExists(element);
     element.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
@@ -169,34 +150,19 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         : {}
     );
 
-    // Sine reference title should not be edit by user,
-    // we set it into the `::before` pseudo element.
-    //
-    // There are some issues if you try to turn off the `contenteditable` attribute in the title node:
-    //   - the cursor may invisible when trying to move across the reference node using the keyboard
-    //
-    // see also [HTML contenteditable with non-editable islands](https://stackoverflow.com/questions/14615551/html-contenteditable-with-non-editable-islands)
-    //
-    // The virgo will skip the zero-width space when calculating the cursor position,
-    // so we use a other zero-width symbol to make the cursor work correctly.
-
-    // This node is under contenteditable="true",
-    // so we should not add any extra white space between HTML tags
-
+    // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
+    // embed element to make sure virgo range calculation is correct
     return html`<span
+      data-selected=${this.selected}
       class="affine-reference"
       style=${style}
       @click=${this._onClick}
       >${type === 'LinkedPage' ? FontLinkedPageIcon : FontPageIcon}<span
-        class="affine-reference-title ${unavailable
-          ? 'affine-reference-unavailable'
-          : ''}"
         data-title=${title || DEFAULT_PAGE_NAME}
-        data-virgo-text="true"
-        data-virgo-text-value=${ZERO_WIDTH_NON_JOINER}
-        >${ZERO_WIDTH_NON_JOINER}</span
-      ></span
-    >`;
+        class="affine-reference-title"
+        >${title || DEFAULT_PAGE_NAME}</span
+      ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+    ></span>`;
   }
 }
 

@@ -1,3 +1,5 @@
+import { DEFAULT_ROUGHNESS } from '@blocksuite/phasor';
+
 export const NOTE_MIN_WIDTH = 200;
 export const NOTE_MIN_HEIGHT = 20;
 
@@ -20,8 +22,8 @@ export const SHAPE_OVERLAY_HEIGHT = 100;
 export const SHAPE_OVERLAY_OFFSET_X = 6;
 export const SHAPE_OVERLAY_OFFSET_Y = 6;
 export const SHAPE_OVERLAY_OPTIONS = {
-  seed: 0,
-  roughness: 0.1,
+  seed: 666,
+  roughness: DEFAULT_ROUGHNESS,
   strokeLineDash: [0, 0],
   stroke: 'black',
   strokeWidth: 4,
@@ -34,3 +36,16 @@ export const DEFAULT_NOTE_TIP = 'Text';
 export const FIT_TO_SCREEN_PADDING = 100;
 
 export const ATTACHED_DISTANCE = 20;
+
+export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
+  'affine-note-mask',
+  'affine-edgeless-child-note',
+  'affine-block-children-container',
+];
+
+export const SCIBBLED_CANVAS_FONT_FANILY = "'Kalam', cursive";
+export const GENERAL_CANVAS_FONT_FAMILY = 'sans-serif';
+
+export const SurfaceColor = '#6046FE';
+export const NoteColor = '#1E96EB';
+export const BlendColor = '#7D91FF';

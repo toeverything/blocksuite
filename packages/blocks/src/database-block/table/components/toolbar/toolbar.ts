@@ -8,28 +8,23 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '@blocksuite/global/config';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 
-import { copyBlocks } from '../../../../__internal__/clipboard/index.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { popFilterableSimpleMenu } from '../../../../components/menu/menu.js';
 import { toast } from '../../../../components/toast.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
-import { columnManager } from '../../../common/column-manager.js';
+import { columnManager } from '../../../common/columns/manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
-import type {
-  DatabaseBlockModel,
-  InsertPosition,
-} from '../../../database-model.js';
-import { onClickOutside } from '../../../utils/utils.js';
-import type { TableViewManager } from '../../table-view-manager.js';
-import { SearchState } from '../../types.js';
+import type { InsertPosition } from '../../../types.js';
+import type { DatabaseTable } from '../../table-view.js';
+import type { DataViewTableManager } from '../../table-view-manager.js';
 import { initAddNewRecordHandlers } from './index.js';
 
 const styles = css`
@@ -37,6 +32,10 @@ const styles = css`
     display: none;
     align-items: center;
     gap: 26px;
+  }
+
+  .toolbar-hover-container:hover .affine-database-toolbar {
+    display: flex;
   }
 
   .affine-database-toolbar-search svg,
@@ -69,14 +68,15 @@ const styles = css`
   }
 
   .affine-database-search-container {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
     width: 16px;
     height: 32px;
-    padding: 8px 0;
     border-radius: 8px;
     transition: all 0.3s ease;
+    overflow: hidden;
   }
 
   .affine-database-search-container > svg {
@@ -85,8 +85,8 @@ const styles = css`
   }
 
   .search-container-expand {
+    overflow: visible;
     width: 138px;
-    padding: 8px 12px;
     background-color: var(--affine-hover-color);
   }
 
@@ -95,9 +95,12 @@ const styles = css`
     align-items: center;
   }
 
-  .search-input-container > .close-icon {
+  .close-icon {
     display: flex;
     align-items: center;
+    padding-right: 8px;
+    height: 100%;
+    cursor: pointer;
   }
 
   .close-icon .code {
@@ -109,22 +112,31 @@ const styles = css`
   }
 
   .affine-database-search-input-icon {
-    display: inline-flex;
+    position: absolute;
+    left: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .search-container-expand .affine-database-search-input-icon {
+    left: 8px;
+    pointer-events: none;
   }
 
   .affine-database-search-input {
     flex: 1;
-    height: 16px;
-    width: 80px;
+    width: 100%;
+    padding: 0 2px 0 30px;
     border: none;
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     color: inherit;
     background: transparent;
-  }
-
-  .affine-database-search-input:focus {
     outline: none;
   }
 
@@ -163,6 +175,12 @@ const styles = css`
   .show-toolbar {
     display: flex;
   }
+
+  @media print {
+    affine-database-toolbar {
+      display: none;
+    }
+  }
 `;
 
 @customElement('affine-database-toolbar')
@@ -170,33 +188,19 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  root!: BlockSuiteRoot;
+  tableView!: DatabaseTable;
 
   @property({ attribute: false })
-  targetModel!: DatabaseBlockModel;
+  copyBlock!: () => void;
 
   @property({ attribute: false })
-  hoverState!: boolean;
+  deleteSelf!: () => void;
 
   @property({ attribute: false })
-  searchState!: SearchState;
-
-  @property({ attribute: false })
-  view!: TableViewManager;
+  view!: DataViewTableManager;
 
   @property({ attribute: false })
   addRow!: (position: InsertPosition) => void;
-
-  @property({ attribute: false })
-  modalMode?: boolean;
-
-  @property({ attribute: false })
-  setSearchState!: (state: SearchState) => void;
-
-  @property({ attribute: false })
-  setSearchString!: (search: string) => void;
-  @property({ attribute: false })
-  setFilteredRowIds!: (rowIds: string[]) => void;
 
   @query('.affine-database-search-input')
   private _searchInput!: HTMLInputElement;
@@ -204,16 +208,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   @query('.more-action')
   private _moreActionContainer!: HTMLDivElement;
 
-  @query('.search-container')
-  private _searchContainer!: HTMLDivElement;
-
   @query('.new-record')
   private _newRecord!: HTMLDivElement;
 
   private _recordAddDisposables = new DisposableGroup();
 
+  @state()
+  private showSearch = false;
+
   private get readonly() {
-    return this.targetModel.page.readonly;
+    return this.view.readonly;
   }
 
   override firstUpdated() {
@@ -248,64 +252,42 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   private _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;
     const inputValue = el.value.trim();
-    this.setSearchState(SearchState.Searching);
-    if (inputValue === '') {
-      this.setSearchState(SearchState.SearchInput);
+    this.view.setSearch(inputValue);
+  };
+  preventBlur = false;
+  private _onSearchBlur = (e: Event) => {
+    if (this._searchInput.value || this.preventBlur) {
+      return;
     }
-
-    this.setSearchString(inputValue);
-
-    // When deleting the search content, the rich-text in the database row will automatically get the focus,
-    // causing the search box to blur. So, here we manually make it focus.
-    requestAnimationFrame(() => el.focus());
+    this.showSearch = false;
   };
 
   private _onSearchKeydown = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       if (this._searchInput.value) {
         this._searchInput.value = '';
-        this.setSearchState(SearchState.SearchInput);
-        this.setSearchString('');
+        this.view.setSearch('');
       } else {
-        this._resetSearchStatus();
-        this._searchContainer.classList.add('hidden');
+        this.showSearch = false;
       }
     }
   };
 
-  private _clearSearch = (event: MouseEvent) => {
-    event.stopPropagation();
+  private _clearSearch = () => {
     this._searchInput.value = '';
-    this.setSearchState(SearchState.SearchInput);
-    this.setSearchString('');
+    this.view.setSearch('');
+    this.preventBlur = true;
+    setTimeout(() => {
+      this.preventBlur = false;
+    });
   };
 
-  private _onShowSearch = () => {
-    this.setSearchState(SearchState.SearchInput);
-    const removeListener = onClickOutside(
-      this._searchContainer,
-      () => {
-        if (this.searchState !== SearchState.Searching) {
-          this._searchContainer.classList.add('hidden');
-          this.setSearchState(SearchState.SearchIcon);
-          removeListener();
-        }
-      },
-      'click',
-      true
-    );
+  private _clickSearch = (e: MouseEvent) => {
+    e.stopPropagation();
+    this.showSearch = true;
   };
 
-  private _onFocusSearchInput = () => {
-    if (this.searchState === SearchState.SearchInput) {
-      this._searchInput.focus();
-      this._searchContainer.classList.remove('hidden');
-    } else {
-      this._searchInput.blur();
-    }
-  };
-
-  private _onShowAction = () => {
+  private _clickMoreAction = () => {
     if (this.readonly) return;
     popFilterableSimpleMenu(this._moreActionContainer, [
       {
@@ -313,12 +295,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
         name: 'Copy',
         icon: CopyIcon,
         select: () => {
-          copyBlocks({
-            type: 'Block',
-            models: [this.targetModel],
-            startOffset: 0,
-            endOffset: 0,
-          });
+          this.copyBlock();
           toast('Copied Database to clipboard');
         },
       },
@@ -327,17 +304,11 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
         name: 'Delete database',
         icon: DeleteIcon,
         select: () => {
-          const models = [this.targetModel, ...this.targetModel.children];
-          models.forEach(model => this.targetModel.page.deleteBlock(model));
+          this.deleteSelf();
         },
+        class: 'delete-item',
       },
     ]);
-  };
-
-  private _resetSearchStatus = () => {
-    this._searchInput.value = '';
-    this.setSearchString('');
-    this.setSearchState(SearchState.SearchIcon);
   };
 
   private _onAddNewRecord = () => {
@@ -354,10 +325,10 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   }
 
   private get _vars() {
-    return this.targetModel.columns.map(v => ({
+    return this.view.columnManagerList.map(v => ({
       id: v.id,
       name: v.name,
-      type: columnManager.typeOf(v.type, v.data),
+      type: columnManager.getColumn(v.type).dataType(v.data),
     }));
   }
 
@@ -389,32 +360,8 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     popAdvance();
   }
 
-  // private _onShowModalView = () => {
-  //   if (!this.modalMode) {
-  //     showDatabaseTableViewModal({
-  //       root: this.root,
-  //       model: this.targetModel,
-  //       page: this.targetModel.page,
-  //     });
-  //   }
-  // };
-
   override render() {
-    const expandSearch =
-      this.searchState === SearchState.SearchInput ||
-      this.searchState === SearchState.Searching;
-    const isActiveMoreAction = this.searchState === SearchState.Action;
-
-    const onSearchIconClick = expandSearch ? undefined : this._onShowSearch;
-
-    const closeIcon = this._searchInput
-      ? this._searchInput.value === ''
-        ? null
-        : DatabaseSearchClose
-      : null;
-    const filter = this.targetModel.page.awarenessStore.getFlag(
-      'enable_database_filter'
-    )
+    const filter = this.tableView.getFlag('enable_database_filter')
       ? html` <div
           @click="${this._showFilter}"
           class="affine-database-filter-button"
@@ -422,34 +369,31 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
           Filter
         </div>`
       : '';
+    const searchToolClassMap = classMap({
+      'affine-database-search-container': true,
+      'search-container-expand': this.showSearch,
+    });
     const searchTool = html`
-      <div
-        class="affine-database-search-container ${expandSearch
-          ? 'search-container-expand'
-          : ''}"
-        @click="${onSearchIconClick}"
-        @transitionend="${this._onFocusSearchInput}"
-      >
+      <label class="${searchToolClassMap}" @click="${this._clickSearch}">
         <div class="affine-database-search-input-icon">
           ${DatabaseSearchIcon}
         </div>
-        <div class="search-input-container">
-          <input
-            placeholder="Search..."
-            class="affine-database-search-input"
-            @input="${this._onSearch}"
-            @click="${(event: MouseEvent) => event.stopPropagation()}"
-            @keydown="${this._onSearchKeydown}"
-            @pointerdown=${stopPropagation}
-          />
-          <div class="has-tool-tip close-icon" @click="${this._clearSearch}">
-            ${closeIcon}
-            <tool-tip inert arrow tip-position="top" role="tooltip">
-              <span class="code">Esc</span> to clear all
-            </tool-tip>
-          </div>
+        <input
+          placeholder="Search..."
+          class="affine-database-search-input"
+          @input="${this._onSearch}"
+          @click="${(event: MouseEvent) => event.stopPropagation()}"
+          @keydown="${this._onSearchKeydown}"
+          @pointerdown="${stopPropagation}"
+          @blur="${this._onSearchBlur}"
+        />
+        <div class="has-tool-tip close-icon" @mousedown="${this._clearSearch}">
+          ${DatabaseSearchClose}
+          <tool-tip inert arrow tip-position="top" role="tooltip">
+            <span class="code">Esc</span> to clear all
+          </tool-tip>
         </div>
-      </div>
+      </label>
     `;
 
     const expandIcon = null;
@@ -461,22 +405,17 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     //     >
     //       ${DatabaseExpandWide}
     //     </div>`;
-
-    return html` <div
-      class="affine-database-toolbar ${this.hoverState ? 'show-toolbar' : ''}"
-    >
-      ${filter}
-      <div class="affine-database-toolbar-item search-container hidden">
-        ${searchTool}
-      </div>
-      ${expandIcon}
+    const classList = classMap({
+      'show-toolbar': this.showSearch,
+      'affine-database-toolbar': true,
+    });
+    return html` <div class="${classList}">
+      ${filter} ${searchTool} ${expandIcon}
       ${this.readonly
         ? null
         : html` <div
-              class="affine-database-toolbar-item more-action ${isActiveMoreAction
-                ? 'active'
-                : ''}"
-              @click="${this._onShowAction}"
+              class="affine-database-toolbar-item more-action"
+              @click="${this._clickMoreAction}"
             >
               ${MoreHorizontalIcon}
             </div>

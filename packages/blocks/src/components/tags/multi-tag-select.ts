@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nanoid } from '@blocksuite/store';
-import { offset } from '@floating-ui/dom';
+import { autoPlacement, offset } from '@floating-ui/dom';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -265,6 +265,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
           },
         ],
       },
+      middleware: [autoPlacement()],
     });
   };
 
@@ -480,6 +481,7 @@ export const popTagSelect = (
     remove();
   };
   const remove = createPopup(target, component, {
+    onClose: ops.onComplete,
     middleware: [
       offset(state => {
         return {

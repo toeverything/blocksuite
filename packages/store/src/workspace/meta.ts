@@ -1,4 +1,4 @@
-import { WORKSPACE_VERSION } from '@blocksuite/global/config';
+import { PAGE_VERSION, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 
@@ -27,6 +27,7 @@ type WorkspaceMetaState = {
   pages?: unknown[];
   properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
+  pageVersion?: number;
   blockVersions?: Record<string, number>;
   name?: string;
   avatar?: string;
@@ -53,7 +54,6 @@ export class WorkspaceMeta {
       deep: true,
     });
     this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
-    this._proxy.workspaceVersion = WORKSPACE_VERSION;
   }
 
   get yPages() {
@@ -80,16 +80,20 @@ export class WorkspaceMeta {
     return this._proxy.workspaceVersion;
   }
 
+  get pageVersion() {
+    return this._proxy.pageVersion;
+  }
+
   setName(name: string) {
     this.doc.transact(() => {
       this._proxy.name = name;
-    });
+    }, this.doc.clientID);
   }
 
   setAvatar(avatar: string) {
     this.doc.transact(() => {
       this._proxy.avatar = avatar;
-    });
+    }, this.doc.clientID);
   }
 
   get pageMetas() {
@@ -114,7 +118,7 @@ export class WorkspaceMeta {
       } else {
         pages.splice(index, 0, page);
       }
-    });
+    }, this.doc.clientID);
   }
 
   /**
@@ -135,7 +139,7 @@ export class WorkspaceMeta {
       Object.entries(props).forEach(([key, value]) => {
         page[key] = value;
       });
-    });
+    }, this.doc.clientID);
   }
 
   removePageMeta(id: string) {
@@ -149,11 +153,11 @@ export class WorkspaceMeta {
     this.doc.transact(() => {
       assertExists(this.pages);
       this.pages.splice(index, 1);
-    });
+    }, this.doc.clientID);
   }
 
   get hasVersion() {
-    if (!this.blockVersions) {
+    if (!this.blockVersions || !this.pageVersion || !this.workspaceVersion) {
       return false;
     }
     return Object.keys(this.blockVersions).length > 0;
@@ -163,16 +167,28 @@ export class WorkspaceMeta {
    * @internal Only for page initialization
    */
   writeVersion(workspace: Workspace) {
-    const versions = this._proxy.blockVersions;
-    if (!versions) {
+    const { blockVersions, pageVersion, workspaceVersion } = this._proxy;
+
+    if (!workspaceVersion) {
+      this._proxy.workspaceVersion = WORKSPACE_VERSION;
+    } else {
+      console.error(`Workspace version already set.`);
+    }
+
+    if (!pageVersion) {
+      this._proxy.pageVersion = PAGE_VERSION;
+    } else {
+      console.error(`Page version already set.`);
+    }
+
+    if (!blockVersions) {
       const _versions: Record<string, number> = {};
       workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
         _versions[flavour] = schema.version;
       });
       this._proxy.blockVersions = _versions;
-      return;
     } else {
-      console.error(`Workspace versions already set.`);
+      console.error(`Block versions already set.`);
     }
   }
 
@@ -275,5 +291,6 @@ export class WorkspaceMeta {
 
   setProperties(meta: PagesPropertiesMeta) {
     this._proxy.properties = meta;
+    this.pageMetasUpdated.emit();
   }
 }

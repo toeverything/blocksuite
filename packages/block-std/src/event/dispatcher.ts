@@ -1,28 +1,25 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
+import type { BlockStore } from '../store/index.js';
+import { PathFinder } from '../store/index.js';
 import type { UIEventHandler } from './base.js';
-import { UIEventStateContext } from './base.js';
-import { UIEventState } from './base.js';
-import { KeyboardControl } from './keyboard.js';
-import { PointerControl } from './pointer.js';
+import { UIEventState, UIEventStateContext } from './base.js';
+import { ClipboardControl } from './control/clipboard.js';
+import { KeyboardControl } from './control/keyboard.js';
+import { PointerControl } from './control/pointer.js';
+import { RangeControl } from './control/range.js';
+import { bindKeymap } from './keymap.js';
 import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
   'beforeInput',
-  'compositionStart',
-  'compositionUpdate',
-  'compositionEnd',
 
-  'paste',
-  'copy',
   'blur',
   'focus',
   'drop',
   'contextMenu',
   'wheel',
 ] as const;
-
-const globalEventNames = ['selectionChange', 'virgo-vrange-updated'] as const;
 
 const eventNames = [
   'click',
@@ -41,25 +38,52 @@ const eventNames = [
   'keyDown',
   'keyUp',
 
+  'selectionChange',
+  'compositionStart',
+  'compositionUpdate',
+  'compositionEnd',
+
+  'cut',
+  'copy',
+  'paste',
+
   ...bypassEventNames,
-  ...globalEventNames,
 ] as const;
 
 export type EventName = (typeof eventNames)[number];
+export type EventOptions = {
+  flavour?: string;
+  path?: string[];
+};
+export type EventHandlerRunner = {
+  fn: UIEventHandler;
+  flavour?: string;
+  path?: string[];
+};
+
+export type EventScope = {
+  runners: EventHandlerRunner[];
+  flavours: string[];
+  paths: string[][];
+};
 
 export class UIEventDispatcher {
   disposables = new DisposableGroup();
 
   private _handlersMap = Object.fromEntries(
-    eventNames.map((name): [EventName, Array<UIEventHandler>] => [name, []])
-  ) as Record<EventName, Array<UIEventHandler>>;
+    eventNames.map((name): [EventName, Array<EventHandlerRunner>] => [name, []])
+  ) as Record<EventName, Array<EventHandlerRunner>>;
 
   private _pointerControl: PointerControl;
   private _keyboardControl: KeyboardControl;
+  private _rangeControl: RangeControl;
+  private _clipboardControl: ClipboardControl;
 
-  constructor(public root: HTMLElement) {
+  constructor(public blockStore: BlockStore) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
+    this._rangeControl = new RangeControl(this);
+    this._clipboardControl = new ClipboardControl(this);
   }
 
   mount() {
@@ -73,41 +97,161 @@ export class UIEventDispatcher {
     this.disposables.dispose();
   }
 
-  run(name: EventName, context: UIEventStateContext) {
-    const handlers = this._handlersMap[name];
-    if (!handlers) return;
+  get root() {
+    return this.blockStore.root;
+  }
 
-    for (const handler of handlers) {
-      const result = handler(context);
+  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+    const { event } = context.get('defaultState');
+    if (!scope) {
+      scope = this._getEventScope(name, event);
+      if (!scope) {
+        return;
+      }
+    }
+
+    for (const runner of scope.runners) {
+      const { fn } = runner;
+      const result = fn(context);
       if (result) {
         return;
       }
     }
   }
 
-  add(name: EventName, handler: UIEventHandler) {
-    this._handlersMap[name].unshift(handler);
+  add(name: EventName, handler: UIEventHandler, options?: EventOptions) {
+    const runner: EventHandlerRunner = {
+      fn: handler,
+      flavour: options?.flavour,
+      path: options?.path,
+    };
+    this._handlersMap[name].unshift(runner);
     return () => {
-      if (this._handlersMap[name].includes(handler)) {
+      if (this._handlersMap[name].includes(runner)) {
         this._handlersMap[name] = this._handlersMap[name].filter(
-          f => f !== handler
+          x => x !== runner
         );
       }
     };
   }
 
+  bindHotkey(keymap: Record<string, UIEventHandler>, options?: EventOptions) {
+    return this.add('keyDown', bindKeymap(keymap), options);
+  }
+
+  private get _currentSelections() {
+    return this.blockStore.selectionManager.value;
+  }
+
+  private _getEventScope(name: EventName, event: Event) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    let output: EventScope | undefined;
+
+    if (event.target && event.target instanceof Node) {
+      output = this._buildEventScopeByTarget(name, event.target);
+    }
+
+    if (!output) {
+      output = this._buildEventScopeBySelection(name);
+    }
+
+    return output;
+  }
+
+  buildEventScope(
+    name: EventName,
+    flavours: string[],
+    paths: string[][]
+  ): EventScope | undefined {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    const globalEvents = handlers.filter(
+      handler => handler.flavour === undefined && handler.path === undefined
+    );
+
+    const pathEvents = handlers.filter(handler => {
+      const _path = handler.path;
+      if (_path === undefined) return false;
+      return paths.some(path => PathFinder.includes(path, _path));
+    });
+
+    const flavourEvents = handlers.filter(
+      handler => handler.flavour && flavours.includes(handler.flavour)
+    );
+
+    return {
+      runners: pathEvents.concat(flavourEvents).concat(globalEvents),
+      flavours,
+      paths,
+    };
+  }
+
+  private _buildEventScopeByTarget(name: EventName, target: Node) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    const path = this.blockStore.viewStore.getNodeView(target)?.path;
+    if (!path) return;
+
+    const flavours = path
+      .map(blockId => {
+        return this.blockStore.page.getBlockById(blockId)?.flavour;
+      })
+      .filter((flavour): flavour is string => {
+        return !!flavour;
+      })
+      .reverse();
+
+    return this.buildEventScope(name, flavours, [path]);
+  }
+
+  private _buildEventScopeBySelection(name: EventName) {
+    const handlers = this._handlersMap[name];
+    if (!handlers) return;
+
+    const selections = this._currentSelections;
+    const seen: Record<string, boolean> = {};
+
+    const flavours = selections
+      .map(selection => selection.path)
+      .flatMap(path => {
+        return path.map(blockId => {
+          return this.blockStore.page.getBlockById(blockId)?.flavour;
+        });
+      })
+      .filter((flavour): flavour is string => {
+        if (!flavour) return false;
+        if (seen[flavour]) return false;
+        seen[flavour] = true;
+        return true;
+      })
+      .reverse();
+
+    const paths = selections.map(selection => selection.path);
+
+    return this.buildEventScope(name, flavours, paths);
+  }
+
   private _bindEvents() {
     bypassEventNames.forEach(eventName => {
-      this.disposables.addFromEvent(this.root, toLowerCase(eventName), e => {
-        this.run(eventName, UIEventStateContext.from(new UIEventState(e)));
-      });
+      this.disposables.addFromEvent(
+        this.root,
+        toLowerCase(eventName),
+        event => {
+          this.run(
+            eventName,
+            UIEventStateContext.from(new UIEventState(event))
+          );
+        }
+      );
     });
-    globalEventNames.forEach(eventName => {
-      this.disposables.addFromEvent(document, toLowerCase(eventName), e => {
-        this.run(eventName, UIEventStateContext.from(new UIEventState(e)));
-      });
-    });
+
     this._pointerControl.listen();
     this._keyboardControl.listen();
+    this._rangeControl.listen();
+    this._clipboardControl.listen();
   }
 }

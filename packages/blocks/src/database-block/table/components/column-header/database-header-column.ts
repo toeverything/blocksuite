@@ -9,6 +9,7 @@ import {
   DatabaseNumber,
   DatabaseProgress,
   DatabaseSelect,
+  DateTime,
   DeleteIcon,
   LinkIcon,
   TextIcon,
@@ -18,22 +19,24 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../../components/menu/menu.js';
-import type { InsertPosition } from '../../../database-model.js';
-import { insertPositionToIndex } from '../../../database-model.js';
+import type { InsertPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';
+import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
+import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import { getTableContainer } from '../../table-view.js';
 import type {
-  ColumnManager,
-  TableViewManager,
+  DataViewTableColumnManager,
+  DataViewTableManager,
 } from '../../table-view-manager.js';
 import type { ColumnTypeIcon } from '../../types.js';
-import type { ColumnHeader } from '../../types.js';
+import { DataViewColumnPreview } from './column-renderer.js';
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
@@ -43,10 +46,18 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  tableViewManager!: TableViewManager;
+  tableViewManager!: DataViewTableManager;
 
   @property({ attribute: false })
-  column!: ColumnManager;
+  column!: DataViewTableColumnManager;
+
+  override firstUpdated() {
+    this._disposables.add(
+      this.tableViewManager.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   private _columnsOffset = (header: Element, scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
@@ -120,7 +131,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     };
   };
-  private _drag = (evt: MouseEvent) => {
+  private _drag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const scrollContainer = tableContainer?.parentElement;
     assertExists(tableContainer);
@@ -138,12 +149,16 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     const max = (headerContainerRect.width - columnHeaderRect.width) / scale;
 
     const { computeInsertInfo } = this._columnsOffset(tableContainer, scale);
-
+    const column = new DataViewColumnPreview();
+    column.tableViewManager = this.tableViewManager;
+    column.column = this.column;
+    column.table = tableContainer;
     const dragPreview = createDragPreview(
       tableContainer,
       columnHeaderRect.width / scale,
       headerContainerRect.height / scale,
-      startOffset
+      startOffset,
+      column
     );
     const dropPreview = createDropPreview(
       tableContainer,
@@ -193,7 +208,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
       onDrop: ({ insertPosition }) => {
         if (insertPosition) {
-          this.tableViewManager.moveColumn(this.column.id, insertPosition);
+          this.tableViewManager.columnMove(this.column.id, insertPosition);
         }
         cancelScroll();
         html?.classList.toggle('affine-database-header-column-grabbing', false);
@@ -225,28 +240,32 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'sub-menu',
             name: 'Column type',
             icon: TextIcon,
-            hide: () => !this.column.updateType,
+            hide: () => !this.column.updateType || this.column.type === 'title',
             options: {
               input: {
                 search: true,
               },
-              items: columnTypes.map(type => {
-                return {
-                  type: 'action',
-                  name: type.text,
-                  icon: type.icon,
-                  select: () => {
-                    this.column.updateType?.(type.type);
-                  },
-                };
-              }),
+              items: this.tableViewManager.allColumnConfig
+                .filter(v => v.type !== this.column.type)
+                .map(config => {
+                  return {
+                    type: 'action',
+                    name: config.name,
+                    icon: html`<uni-lit
+                      .uni="${this.tableViewManager.getIcon(config.type)}"
+                    ></uni-lit>`,
+                    select: () => {
+                      this.column.updateType?.(config.type);
+                    },
+                  };
+                }),
             },
           },
           {
             type: 'action',
             name: 'Duplicate column',
             icon: DatabaseDuplicate,
-            hide: () => !this.column.duplicate,
+            hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
               this.column.duplicate?.();
               Promise.resolve().then(() => {
@@ -263,7 +282,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             name: 'Insert left column',
             icon: DatabaseInsertLeft,
             select: () => {
-              this.tableViewManager.newColumn({
+              this.tableViewManager.columnAdd({
                 id: this.column.id,
                 before: true,
               });
@@ -281,7 +300,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             name: 'Insert right column',
             icon: DatabaseInsertRight,
             select: () => {
-              this.tableViewManager.newColumn({
+              this.tableViewManager.columnAdd({
                 id: this.column.id,
                 before: false,
               });
@@ -298,13 +317,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Move left',
             icon: DatabaseMoveLeft,
-            hide: () => this.column.isFirst || this.column.index === 1,
+            hide: () => this.column.isFirst,
             select: () => {
-              const preId = this.tableViewManager.preColumn(this.column.id)?.id;
+              const preId = this.tableViewManager.columnGetPreColumn(
+                this.column.id
+              )?.id;
               if (!preId) {
                 return;
               }
-              this.tableViewManager.moveColumn(this.column.id, {
+              this.tableViewManager.columnMove(this.column.id, {
                 id: preId,
                 before: true,
               });
@@ -314,15 +335,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             type: 'action',
             name: 'Move Right',
             icon: DatabaseMoveRight,
-            hide: () => this.column.isLast || this.column.type === 'title',
+            hide: () => this.column.isLast,
             select: () => {
-              const nextId = this.tableViewManager.nextColumn(
+              const nextId = this.tableViewManager.columnGetNextColumn(
                 this.column.id
               )?.id;
               if (!nextId) {
                 return;
               }
-              this.tableViewManager.moveColumn(this.column.id, {
+              this.tableViewManager.columnMove(this.column.id, {
                 id: nextId,
                 before: false,
               });
@@ -336,10 +357,11 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                 type: 'action',
                 name: 'Delete column',
                 icon: DeleteIcon,
-                hide: () => !this.column.delete,
+                hide: () => !this.column.delete || this.column.type === 'title',
                 select: () => {
                   this.column.delete?.();
                 },
+                class: 'delete-item',
               },
             ],
           },
@@ -356,16 +378,20 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           search: true,
           placeholder: 'Search',
         },
-        items: columnTypes.map(type => {
-          return {
-            type: 'action',
-            name: type.text,
-            icon: type.icon,
-            select: () => {
-              this.column.updateType?.(type.type);
-            },
-          };
-        }),
+        items: this.tableViewManager.allColumnConfig
+          .filter(v => v.type !== this.column.type)
+          .map(config => {
+            return {
+              type: 'action',
+              name: config.name,
+              icon: html`<uni-lit
+                .uni="${this.tableViewManager.getIcon(config.type)}"
+              ></uni-lit>`,
+              select: () => {
+                this.column.updateType?.(config.type);
+              },
+            };
+          }),
       },
     });
   };
@@ -373,7 +399,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   override render() {
     const column = this.column;
     const style = styleMap({
-      width: `${column.width}px`,
+      height: DEFAULT_COLUMN_TITLE_HEIGHT + 'px',
     });
     return html`
       <div
@@ -386,7 +412,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             class="affine-database-column-type-icon"
             @click="${this._clickTypeIcon}"
           >
-            ${columnTypeIconMap[column.type]}
+            ${keyed(
+              column.type,
+              html`<uni-lit .uni="${column.icon}"></uni-lit>`
+            )}
           </div>
           <div class="affine-database-column-text-content">
             <div class="affine-database-column-text-input">${column.name}</div>
@@ -414,9 +443,11 @@ const createDragPreview = (
   container: Element,
   width: number,
   height: number,
-  startLeft: number
+  startLeft: number,
+  content: HTMLElement
 ) => {
   const div = document.createElement('div');
+  div.append(content);
   // div.style.pointerEvents='none';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
@@ -424,7 +455,6 @@ const createDragPreview = (
   div.style.left = `${startLeft}px`;
   div.style.top = `0px`;
   div.style.zIndex = '9';
-  div.style.backgroundColor = 'rgba(0,0,0,0.3)';
   container.append(div);
   return {
     display(offset: number) {
@@ -463,7 +493,7 @@ const createDropPreview = (container: Element, height: number) => {
   };
 };
 
-const columnTypeIconMap: ColumnTypeIcon = {
+export const columnTypeIconMap: ColumnTypeIcon = {
   select: DatabaseSelect,
   number: DatabaseNumber,
   checkbox: TodoIcon,
@@ -471,6 +501,7 @@ const columnTypeIconMap: ColumnTypeIcon = {
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,
   link: LinkIcon,
+  date: DateTime,
 };
 
 declare global {
@@ -478,40 +509,3 @@ declare global {
     'affine-database-header-column': DatabaseHeaderColumn;
   }
 }
-const columnTypes: ColumnHeader[] = [
-  {
-    type: 'rich-text',
-    text: 'Text',
-    icon: TextIcon,
-  },
-  {
-    type: 'select',
-    text: 'Select',
-    icon: DatabaseSelect,
-  },
-  {
-    type: 'multi-select',
-    text: 'Multi-select',
-    icon: DatabaseMultiSelect,
-  },
-  {
-    type: 'number',
-    text: 'Number',
-    icon: DatabaseNumber,
-  },
-  {
-    type: 'checkbox',
-    text: 'Checkbox',
-    icon: TodoIcon,
-  },
-  {
-    type: 'progress',
-    text: 'Progress',
-    icon: DatabaseProgress,
-  },
-  {
-    type: 'link',
-    text: 'Link',
-    icon: LinkIcon,
-  },
-];

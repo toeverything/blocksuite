@@ -1,10 +1,11 @@
-import { normalizeDegAngle, Vec } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
+import { type IVec } from '@blocksuite/phasor';
 import { html, nothing } from 'lit';
 
 export enum HandleDirection {
   Left = 'left',
+  Top = 'top',
   Right = 'right',
+  Bottom = 'bottom',
   TopLeft = 'top-left',
   BottomLeft = 'bottom-left',
   TopRight = 'top-right',
@@ -15,10 +16,14 @@ function ResizeHandle(
   handleDirection: HandleDirection,
   onPointerDown?: (e: PointerEvent, direction: HandleDirection) => void,
   updateCursor?: (
-    angle: number,
     dragging: boolean,
-    type?: 'resize' | 'rotate'
-  ) => void
+    options?: {
+      type: 'resize' | 'rotate';
+      target?: HTMLElement;
+      point?: IVec;
+    }
+  ) => void,
+  hideEdgeHandle?: boolean
 ) {
   const handlerPointerDown = (e: PointerEvent) => {
     e.stopPropagation();
@@ -27,33 +32,32 @@ function ResizeHandle(
 
   const pointerEnter = (type: 'resize' | 'rotate') => (e: PointerEvent) => {
     e.stopPropagation();
-    if (type === 'rotate' && e.buttons === 1) return;
+    if (e.buttons === 1 || !updateCursor) return;
 
-    if (updateCursor) {
-      const { clientX, clientY } = e;
-      const target = e.target as HTMLElement;
-      const point = [clientX, clientY];
-      const angle = calcAngle(target, point, type === 'rotate' ? 45 : 0);
+    const { clientX, clientY } = e;
+    const target = e.target as HTMLElement;
+    const point = [clientX, clientY];
 
-      updateCursor(angle, true, type);
-    }
+    updateCursor(true, { type, point, target });
   };
 
   const pointerLeave = (e: PointerEvent) => {
     e.stopPropagation();
-    if (e.buttons === 1) return;
+    if (e.buttons === 1 || !updateCursor) return;
 
-    updateCursor && updateCursor(0, false);
+    updateCursor(false);
   };
 
   const rotationTpl =
+    handleDirection === HandleDirection.Top ||
+    handleDirection === HandleDirection.Bottom ||
     handleDirection === HandleDirection.Left ||
     handleDirection === HandleDirection.Right
       ? nothing
       : html`<div
           class="rotate"
-          @pointerenter=${pointerEnter('rotate')}
-          @pointerleave=${pointerLeave}
+          @pointerover=${pointerEnter('rotate')}
+          @pointerout=${pointerLeave}
         ></div>`;
 
   return html`<div
@@ -63,45 +67,101 @@ function ResizeHandle(
   >
     ${rotationTpl}
     <div
-      class="resize"
-      @pointerenter=${pointerEnter('resize')}
-      @pointerleave=${pointerLeave}
+      class="resize${hideEdgeHandle && ' transparent-handle'}"
+      @pointerover=${pointerEnter('resize')}
+      @pointerout=${pointerLeave}
     ></div>
   </div>`;
 }
 
-export type ResizeMode = 'corner' | 'edge' | 'none';
+/**
+ * Indicate how selected elements can be resized.
+ *
+ * - edge: The selected elements can only be resized dragging edge, usually when note element is selected
+ * - all: The selected elements can be resize both dragging edge or corner, usually when all elements are `shape`
+ * - none: The selected elements can't be resized, usually when all elements are `connector`
+ * - corner: The selected elements can only be resize dragging corner, this is by default mode
+ */
+export type ResizeMode = 'edge' | 'all' | 'none' | 'corner';
+
 export function ResizeHandles(
   resizeMode: ResizeMode,
   onPointerDown: (e: PointerEvent, direction: HandleDirection) => void,
-  updateCursor: (
-    angle: number,
+  updateCursor?: (
     dragging: boolean,
-    type?: 'resize' | 'rotate'
+    options?: {
+      type: 'resize' | 'rotate';
+      target?: HTMLElement;
+      point?: IVec;
+    }
   ) => void
 ) {
+  const getCornerHandles = () => {
+    const handleTopLeft = ResizeHandle(
+      HandleDirection.TopLeft,
+      onPointerDown,
+      updateCursor
+    );
+    const handleTopRight = ResizeHandle(
+      HandleDirection.TopRight,
+      onPointerDown,
+      updateCursor
+    );
+    const handleBottomLeft = ResizeHandle(
+      HandleDirection.BottomLeft,
+      onPointerDown,
+      updateCursor
+    );
+    const handleBottomRight = ResizeHandle(
+      HandleDirection.BottomRight,
+      onPointerDown,
+      updateCursor
+    );
+    return {
+      handleTopLeft,
+      handleTopRight,
+      handleBottomLeft,
+      handleBottomRight,
+    };
+  };
+  const getEdgeHandles = (hideEdgeHandle?: boolean) => {
+    const handleLeft = ResizeHandle(
+      HandleDirection.Left,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    const handleRight = ResizeHandle(
+      HandleDirection.Right,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    return { handleLeft, handleRight };
+  };
+  const getEdgeVerticalHandles = (hideEdgeHandle?: boolean) => {
+    const handleTop = ResizeHandle(
+      HandleDirection.Top,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    const handleBottom = ResizeHandle(
+      HandleDirection.Bottom,
+      onPointerDown,
+      updateCursor,
+      hideEdgeHandle
+    );
+    return { handleTop, handleBottom };
+  };
   switch (resizeMode) {
     case 'corner': {
-      const handleTopLeft = ResizeHandle(
-        HandleDirection.TopLeft,
-        onPointerDown,
-        updateCursor
-      );
-      const handleTopRight = ResizeHandle(
-        HandleDirection.TopRight,
-        onPointerDown,
-        updateCursor
-      );
-      const handleBottomLeft = ResizeHandle(
-        HandleDirection.BottomLeft,
-        onPointerDown,
-        updateCursor
-      );
-      const handleBottomRight = ResizeHandle(
-        HandleDirection.BottomRight,
-        onPointerDown,
-        updateCursor
-      );
+      const {
+        handleTopLeft,
+        handleTopRight,
+        handleBottomLeft,
+        handleBottomRight,
+      } = getCornerHandles();
 
       // prettier-ignore
       return html`
@@ -112,33 +172,33 @@ export function ResizeHandles(
       `;
     }
     case 'edge': {
-      const handleLeft = ResizeHandle(
-        HandleDirection.Left,
-        onPointerDown,
-        updateCursor
-      );
-      const handleRight = ResizeHandle(
-        HandleDirection.Right,
-        onPointerDown,
-        updateCursor
-      );
-
+      const { handleLeft, handleRight } = getEdgeHandles();
       return html`${handleLeft} ${handleRight}`;
+    }
+    case 'all': {
+      const {
+        handleTopLeft,
+        handleTopRight,
+        handleBottomLeft,
+        handleBottomRight,
+      } = getCornerHandles();
+      const { handleLeft, handleRight } = getEdgeHandles(true);
+      const { handleTop, handleBottom } = getEdgeVerticalHandles(true);
+
+      // prettier-ignore
+      return html`
+        ${handleTopLeft}
+        ${handleTop}
+        ${handleTopRight}
+        ${handleRight}
+        ${handleBottomRight}
+        ${handleBottom}
+        ${handleBottomLeft}
+        ${handleLeft}
+      `;
     }
     case 'none': {
       return nothing;
     }
   }
-}
-
-function calcAngle(target: HTMLElement, point: number[], offset = 0) {
-  const rect = target
-    .closest('.affine-edgeless-selected-rect')
-    ?.getBoundingClientRect();
-  assertExists(rect);
-  const { left, top, right, bottom } = rect;
-  const center = Vec.med([left, top], [right, bottom]);
-  return normalizeDegAngle(
-    ((Vec.angle(center, point) + offset) * 180) / Math.PI
-  );
 }

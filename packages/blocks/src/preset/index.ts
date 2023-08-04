@@ -1,16 +1,50 @@
 import type { LitBlockSpec } from '@blocksuite/lit';
 import { literal } from 'lit/static-html.js';
 
+import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
+import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
+import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
-import { edgelessBlockSpec, pageBlockSpec } from '../page-block/index.js';
+import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
+import {
+  type DocPageBlockWidgetName,
+  type EdgelessPageBlockWidgetName,
+} from '../page-block/index.js';
+import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+
+const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
+  schema: PageBlockSchema,
+  view: {
+    component: literal`affine-doc-page`,
+    widgets: {
+      slashMenu: literal`affine-slash-menu-widget`,
+      linkedPage: literal`affine-linked-page-widget`,
+      draggingArea: literal`affine-doc-dragging-area-widget`,
+      dragHandle: literal`affine-drag-handle-widget`,
+    },
+  },
+};
+
+const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
+  schema: PageBlockSchema,
+  service: EdgelessPageService,
+  view: {
+    component: literal`affine-edgeless-page`,
+    widgets: {
+      slashMenu: literal`affine-slash-menu-widget`,
+      linkedPage: literal`affine-linked-page-widget`,
+      dragHandle: literal`affine-drag-handle-widget`,
+    },
+  },
+};
 
 export const pagePreset: LitBlockSpec[] = [
   pageBlockSpec,
@@ -34,8 +68,15 @@ export const pagePreset: LitBlockSpec[] = [
   },
   {
     schema: DatabaseBlockSchema,
+    service: DatabaseService,
     view: {
       component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
     },
   },
   {
@@ -66,6 +107,12 @@ export const pagePreset: LitBlockSpec[] = [
     schema: BookmarkBlockSchema,
     view: {
       component: literal`affine-bookmark`,
+    },
+  },
+  {
+    schema: AttachmentBlockSchema,
+    view: {
+      component: literal`affine-attachment`,
     },
   },
 ];
@@ -97,6 +144,12 @@ export const edgelessPreset: LitBlockSpec[] = [
     },
   },
   {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
+    },
+  },
+  {
     schema: DividerBlockSchema,
     view: {
       component: literal`affine-divider`,
@@ -124,6 +177,12 @@ export const edgelessPreset: LitBlockSpec[] = [
     schema: BookmarkBlockSchema,
     view: {
       component: literal`affine-bookmark`,
+    },
+  },
+  {
+    schema: AttachmentBlockSchema,
+    view: {
+      component: literal`affine-attachment`,
     },
   },
 ];

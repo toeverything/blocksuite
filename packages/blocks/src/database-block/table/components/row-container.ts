@@ -5,9 +5,9 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
-import type { TableViewManager } from '../table-view-manager.js';
+import type { DataViewTableManager } from '../table-view-manager.js';
 
-export function DataBaseRowContainer(view: TableViewManager) {
+export function DataBaseRowContainer(view: DataViewTableManager) {
   return html`
     <style>
       .affine-database-block-rows {
@@ -29,10 +29,6 @@ export function DataBaseRowContainer(view: TableViewManager) {
         background: transparent;
       }
 
-      .affine-database-block-row > .affine-database-block-row-cell:first-child {
-        background: var(--affine-hover-color);
-      }
-
       .affine-database-block-row > .database-cell {
         background: var(--affine-white);
       }
@@ -40,10 +36,9 @@ export function DataBaseRowContainer(view: TableViewManager) {
       .database-cell {
         min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
       }
-
-      .database-cell:last-child affine-database-cell-container {
-        border-right: none;
-      }
+      /*.database-cell:last-child affine-database-cell-container {*/
+      /*  border-right: none;*/
+      /*}*/
     </style>
     <div class="affine-database-block-rows">
       ${repeat(
@@ -57,17 +52,16 @@ export function DataBaseRowContainer(view: TableViewManager) {
               data-row-id="${id}"
             >
               ${repeat(
-                view.columns,
+                view.columnManagerList,
                 v => v.id,
                 (column, i) => {
                   return html`
-                    <div
-                      class="database-cell"
-                      style=${styleMap({
-                        width: `${column.width}px`,
-                      })}
-                    >
+                    <div>
                       <affine-database-cell-container
+                        class="database-cell"
+                        style=${styleMap({
+                          width: `${column.width}px`,
+                        })}
                         .column="${column}"
                         .rowId="${id}"
                         data-row-id=${id}
@@ -77,7 +71,6 @@ export function DataBaseRowContainer(view: TableViewManager) {
                         data-column-id=${column.id}
                         .columnIndex="${i}"
                         data-column-index=${i}
-                        tabindex="0"
                       >
                       </affine-database-cell-container>
                     </div>

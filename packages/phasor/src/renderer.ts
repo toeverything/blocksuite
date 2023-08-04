@@ -1,4 +1,4 @@
-import { assertNotExists } from '@blocksuite/global/utils';
+import { assertNotExists, Slot } from '@blocksuite/global/utils';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
@@ -8,7 +8,7 @@ import { Bound } from './utils/bound.js';
 import { intersects } from './utils/math-utils.js';
 import { clamp, getBoundsWithRotation } from './utils/math-utils.js';
 import { type IPoint } from './utils/point.js';
-import { Vec } from './utils/vec.js';
+import { type IVec, Vec } from './utils/vec.js';
 
 export interface SurfaceViewport {
   readonly left: number;
@@ -37,7 +37,16 @@ export interface SurfaceViewport {
   addOverlay(overlay: Overlay): void;
   removeOverlay(overlay: Overlay): void;
 
-  getCanvasByBound(bound: IBound): HTMLCanvasElement;
+  getCanvasByBound(
+    bound: IBound,
+    surfaceElements?: SurfaceElement[]
+  ): HTMLCanvasElement;
+}
+
+function cutoff(value: number, ref: number, sign: number) {
+  if (sign > 0 && value > ref) return ref;
+  if (sign < 0 && value < ref) return ref;
+  return value;
 }
 
 /**
@@ -54,8 +63,11 @@ export class Renderer implements SurfaceViewport {
   rc: RoughCanvas;
   gridManager = new GridManager();
 
-  private _overlays: Set<Overlay> = new Set();
+  slots = {
+    viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
+  };
 
+  private _overlays: Set<Overlay> = new Set();
   private _container!: HTMLElement;
   private _left = 0;
   private _top = 0;
@@ -65,12 +77,20 @@ export class Renderer implements SurfaceViewport {
   private _zoom = 1.0;
   private _center = { x: 0, y: 0 };
   private _shouldUpdate = false;
+  private _rafId: number | null = null;
 
   constructor() {
     const canvas = document.createElement('canvas');
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.rc = new RoughCanvas(canvas);
+  }
+
+  private _emitViewportUpdatedSlot() {
+    this.slots.viewportUpdated.emit({
+      zoom: this._zoom,
+      center: Vec.toVec(this._center),
+    });
   }
 
   get left() {
@@ -166,6 +186,7 @@ export class Renderer implements SurfaceViewport {
     this._center.x = centerX;
     this._center.y = centerY;
     this._shouldUpdate = true;
+    this._emitViewportUpdatedSlot();
   }
 
   /**
@@ -186,10 +207,87 @@ export class Renderer implements SurfaceViewport {
     );
     this.setCenter(newCenter[0], newCenter[1]);
     this._shouldUpdate = true;
+    this._emitViewportUpdatedSlot();
+  }
+
+  setViewport(
+    newZoom: number,
+    newCenter = Vec.toVec(this.center),
+    smooth = false
+  ) {
+    const preZoom = this._zoom;
+    if (smooth) {
+      const cofficient = preZoom / newZoom;
+      if (cofficient === 1) {
+        this.smoothTranslate(newCenter[0], newCenter[1]);
+      } else {
+        const center = [this.centerX, this.centerY];
+        const focusPoint = Vec.mul(
+          Vec.sub(newCenter, Vec.mul(center, cofficient)),
+          1 / (1 - cofficient)
+        );
+        this.smoothZoom(newZoom, Vec.toPoint(focusPoint));
+      }
+    } else {
+      this._center.x = newCenter[0];
+      this._center.y = newCenter[1];
+      this.setZoom(newZoom);
+    }
+  }
+
+  setViewportByBound(bound: Bound, padding = [0, 0], smooth = false) {
+    const zoom = Math.min(
+      (this.width - padding[0]) / bound.w,
+      (this.height - padding[1]) / bound.h
+    );
+    const center = bound.center;
+    this.setViewport(zoom, center, smooth);
+  }
+
+  smoothZoom(zoom: number, focusPoint?: IPoint) {
+    const delta = zoom - this.zoom;
+
+    const innerSmoothZoom = () => {
+      if (this._rafId) cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => {
+        const sign = delta > 0 ? 1 : -1;
+        const total = 10;
+        const step = delta / total;
+        const nextZoom = cutoff(this.zoom + step, zoom, sign);
+
+        this.setZoom(nextZoom, focusPoint);
+        if (nextZoom != zoom) innerSmoothZoom();
+      });
+    };
+    innerSmoothZoom();
+  }
+
+  smoothTranslate(x: number, y: number) {
+    const { center } = this;
+    const delta = { x: x - center.x, y: y - center.y };
+    const innerSmoothTranslate = () => {
+      if (this._rafId) cancelAnimationFrame(this._rafId);
+      this._rafId = requestAnimationFrame(() => {
+        const rate = 10;
+        const step = { x: delta.x / rate, y: delta.y / rate };
+        const nextCenter = {
+          x: this.centerX + step.x,
+          y: this.centerY + step.y,
+        };
+        const signX = delta.x > 0 ? 1 : -1;
+        const signY = delta.y > 0 ? 1 : -1;
+        nextCenter.x = cutoff(nextCenter.x, x, signX);
+        nextCenter.y = cutoff(nextCenter.y, y, signY);
+        this.setCenter(nextCenter.x, nextCenter.y);
+        if (nextCenter.x != x || nextCenter.y != y) innerSmoothTranslate();
+      });
+    };
+    innerSmoothTranslate();
   }
 
   applyDeltaCenter = (deltaX: number, deltaY: number) => {
     this.setCenter(this.centerX + deltaX, this.centerY + deltaY);
+    this._emitViewportUpdatedSlot();
   };
 
   addElement(element: SurfaceElement) {
@@ -291,21 +389,21 @@ export class Renderer implements SurfaceViewport {
     ctx: CanvasRenderingContext2D | null,
     matrix: DOMMatrix,
     rc: RoughCanvas,
-    bound: IBound
+    bound: IBound,
+    surfaceElements?: SurfaceElement[]
   ) {
     if (!ctx) return;
 
     const { gridManager } = this;
-    const elements = gridManager.search(bound);
+    const elements = surfaceElements ?? gridManager.search(bound);
     for (const element of elements) {
       ctx.save();
 
       const localRecord = element.localRecord;
-      if (
-        intersects(getBoundsWithRotation(element), bound) &&
-        localRecord.display
-      ) {
-        ctx.globalAlpha = localRecord.opacity;
+      const display = localRecord?.display ?? true;
+      const opacity = localRecord?.opacity ?? 1;
+      if (intersects(getBoundsWithRotation(element), bound) && display) {
+        ctx.globalAlpha = opacity;
         const dx = element.x - bound.x;
         const dy = element.y - bound.y;
         element.render(ctx, matrix.translate(dx, dy), rc);
@@ -324,7 +422,10 @@ export class Renderer implements SurfaceViewport {
     ctx.restore();
   }
 
-  public getCanvasByBound(bound: IBound): HTMLCanvasElement {
+  public getCanvasByBound(
+    bound: IBound,
+    surfaceElements?: SurfaceElement[]
+  ): HTMLCanvasElement {
     const dpr = window.devicePixelRatio || 1;
     const canvas = document.createElement('canvas');
     canvas.width = bound.w * dpr;
@@ -336,7 +437,7 @@ export class Renderer implements SurfaceViewport {
 
     ctx.setTransform(matrix);
 
-    this._renderByBound(ctx, matrix, rc, bound);
+    this._renderByBound(ctx, matrix, rc, bound, surfaceElements);
 
     return canvas;
   }

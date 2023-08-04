@@ -1,8 +1,14 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 
-import type { BlockSpec } from '@blocksuite/block-std';
-import { BlockStore, UIEventDispatcher } from '@blocksuite/block-std';
+import type {
+  BlockSpec,
+  SelectionManager,
+  UIEventDispatcher,
+  ViewStore,
+} from '@blocksuite/block-std';
+import { BlockStore } from '@blocksuite/block-std';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -10,9 +16,14 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
+import type { WidgetElement } from './widget-element.js';
 
-export type LitBlockSpec = BlockSpec<StaticValue>;
+export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
+  StaticValue,
+  WidgetNames
+>;
 
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends ShadowlessElement {
@@ -25,32 +36,55 @@ export class BlockSuiteRoot extends ShadowlessElement {
   @property({ attribute: false })
   blockIdAttr = 'data-block-id';
 
+  @property({ attribute: false })
+  widgetIdAttr = 'data-widget-id';
+
   modelSubscribed = new Set<string>();
 
-  uiEventDispatcher = new UIEventDispatcher(this);
+  blockStore!: BlockStore<StaticValue, BlockElement | WidgetElement>;
 
-  blockStore!: BlockStore<StaticValue>;
+  get uiEventDispatcher(): UIEventDispatcher {
+    return this.blockStore.uiEventDispatcher;
+  }
+
+  get selectionManager(): SelectionManager {
+    return this.blockStore.selectionManager;
+  }
+
+  get viewStore(): ViewStore<BlockElement | WidgetElement> {
+    return this.blockStore.viewStore;
+  }
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
-      this.blockStore.applySpecs(this.blocks);
+      this.blockStore.specStore.applySpecs(this.blocks);
+    }
+    if (changedProperties.has('page')) {
+      this.blockStore.page = this.page;
     }
     super.willUpdate(changedProperties);
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.blockStore = new BlockStore<StaticValue>({
-      uiEventDispatcher: this.uiEventDispatcher,
-    });
-    this.uiEventDispatcher.mount();
-    this.blockStore.applySpecs(this.blocks);
+
+    this.blockStore = new BlockStore<StaticValue, BlockElement | WidgetElement>(
+      {
+        root: this,
+        workspace: this.page.workspace,
+        page: this.page,
+      }
+    );
+    this._registerView();
+
+    this.blockStore.mount();
+    this.blockStore.specStore.applySpecs(this.blocks);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.blockStore.dispose();
-    this.uiEventDispatcher.unmount();
+
+    this.blockStore.unmount();
   }
 
   override render() {
@@ -70,18 +104,25 @@ export class BlockSuiteRoot extends ShadowlessElement {
       return html`${nothing}`;
     }
 
-    const view = this.blockStore.getView(flavour);
+    const view = this.blockStore.specStore.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);
       return html`${nothing}`;
     }
 
     const tag = view.component;
-    const widgets = view.widgets
-      ? html`${repeat(view.widgets, widget => {
-          return html`<${widget} .root=${this} .model=${model}></${widget}>`;
-        })}`
-      : html`${nothing}`;
+    const widgets: Record<string, TemplateResult> = view.widgets
+      ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
+          const template = html`<${tag} ${unsafeStatic(
+            this.widgetIdAttr
+          )}=${key} .root=${this} .page=${this.page}></${tag}>`;
+
+          return {
+            ...mapping,
+            [key]: template,
+          };
+        }, {})
+      : {};
 
     this._onLoadModel(model);
 
@@ -99,7 +140,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
     ></${tag}>`;
   };
 
-  _onLoadModel = (model: BaseBlockModel) => {
+  private _onLoadModel = (model: BaseBlockModel) => {
     const { id } = model;
     if (!this.modelSubscribed.has(id)) {
       model.propsUpdated.on(() => {
@@ -110,6 +151,75 @@ export class BlockSuiteRoot extends ShadowlessElement {
       });
       this.modelSubscribed.add(id);
     }
+  };
+
+  private _registerView = () => {
+    const blockSelector = `[${this.blockIdAttr}]`;
+    const widgetSelector = `[${this.widgetIdAttr}]`;
+
+    const fromDOM = <T extends Element & { path: string[] }>(
+      node: Node,
+      target: string,
+      notInside: string
+    ) => {
+      const selector = `[${target}]`;
+      const notInSelector = `[${notInside}]`;
+      const element =
+        node && node instanceof HTMLElement ? node : node.parentElement;
+      if (!element) return null;
+
+      const view = element.closest<T>(selector);
+      if (!view) {
+        return null;
+      }
+      const not = element.closest(notInSelector);
+      if (view.contains(not)) {
+        return null;
+      }
+
+      const id = view.getAttribute(target);
+      assertExists(id);
+
+      return {
+        id,
+        path: view.path,
+        view,
+      };
+    };
+
+    this.blockStore.viewStore.register('block', {
+      fromDOM: node => {
+        return fromDOM<BlockElement>(node, this.blockIdAttr, this.widgetIdAttr);
+      },
+      toDOM: ({ view }) => {
+        return view;
+      },
+      getChildren: view => {
+        return Array.from(
+          view.querySelectorAll<BlockElement>(
+            `${blockSelector},${widgetSelector}`
+          )
+        ).filter(x => {
+          return x.parentElement?.closest(blockSelector) === view;
+        });
+      },
+    });
+
+    this.blockStore.viewStore.register('widget', {
+      fromDOM: node => {
+        return fromDOM<WidgetElement>(
+          node,
+          this.widgetIdAttr,
+          this.blockIdAttr
+        );
+      },
+      toDOM: ({ view }) => {
+        return view;
+      },
+      getChildren: () => {
+        return [];
+      },
+    });
   };
 }
 

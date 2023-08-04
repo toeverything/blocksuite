@@ -1,10 +1,12 @@
 import { nextItemIcon } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type {
-  EdgelessTool,
-  NoteChildrenFlavour,
+import {
+  type EdgelessTool,
+  type NoteChildrenFlavour,
+  throttle,
 } from '../../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
@@ -12,20 +14,22 @@ import {
   NOTE_MENU_ITEM_LENGTH,
   NOTE_MENU_ITEMS,
 } from './note-memu-config.js';
+
 @customElement('edgeless-note-menu')
-export class EdgelessNoteMenu extends LitElement {
+export class EdgelessNoteMenu extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       position: absolute;
       height: 76px;
-      display: flex;
       box-shadow: var(--affine-shadow-2);
+      border-radius: 8px 8px 0 0;
+      display: flex;
       z-index: -1;
     }
     .note-menu-container {
       display: flex;
       flex-direction: column;
-      background: var(--affine-background-overlay-panel-color);
+      background: transparent;
       fill: currentcolor;
       position: relative;
     }
@@ -120,8 +124,6 @@ export class EdgelessNoteMenu extends LitElement {
   @property({ attribute: false })
   _activeIndex!: number;
 
-  _wheelTimer: ReturnType<typeof setTimeout> | null = null;
-
   private _updateNoteTool(
     childFlavour: NoteChildrenFlavour,
     childType: string | null,
@@ -164,18 +166,15 @@ export class EdgelessNoteMenu extends LitElement {
     this._updateNoteTool(childFlavour, childType, tip);
   }
 
-  private _handleWheel(e: WheelEvent) {
-    e.preventDefault();
-    // prevent edgeless page block from scrolling
-    e.stopPropagation();
+  private _handleWheel = throttle((e: WheelEvent) => {
     // prevent scrolling when the menu is at the end (right edge)
-    if (this._activeIndex >= NOTE_MENU_ITEM_LENGTH - 1 && e.deltaY > 0) return;
+    if (this._activeIndex >= NOTE_MENU_ITEM_LENGTH - 1 && e.deltaY < 0) return;
     // prevent scrolling when the menu is at the start (left edge)
-    if (this._activeIndex <= 0 && e.deltaY < 0) return;
+    if (this._activeIndex <= 0 && e.deltaY > 0) return;
     // when scrolling down, increase the active index
-    if (e.deltaY > 0) {
+    if (e.deltaY < 0) {
       this._activeIndex++;
-    } else if (e.deltaY < 0) {
+    } else if (e.deltaY > 0) {
       // when scrolling up, decrease the active index
       this._activeIndex--;
     }
@@ -193,15 +192,12 @@ export class EdgelessNoteMenu extends LitElement {
 
     if (this._activeIndex < 0 || this._activeIndex >= NOTE_MENU_ITEM_LENGTH)
       return;
+
     const childFlavour = NOTE_MENU_ITEMS[this._activeIndex].childFlavour;
     const childType = NOTE_MENU_ITEMS[this._activeIndex].childType;
     const tip = NOTE_MENU_ITEMS[this._activeIndex].tooltip;
-    // debounce the update of the note tool
-    this._wheelTimer && clearTimeout(this._wheelTimer);
-    this._wheelTimer = setTimeout(() => {
-      this._updateNoteTool(childFlavour, childType, tip);
-    }, 500);
-  }
+    this._updateNoteTool(childFlavour, childType, tip);
+  }, 100);
 
   // get currnet visible button group
   private _getMenuButtons(start: number, end: number) {
@@ -235,17 +231,21 @@ export class EdgelessNoteMenu extends LitElement {
     this._activeIndex = 0;
     this._startIndex = 0;
     this._endIndex = BUTTON_GROUP_LENGTH;
-    this._wheelTimer = null;
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.addEventListener('wheel', this._handleWheel.bind(this));
+    this._disposables.addFromEvent(this, 'wheel', e => {
+      e.preventDefault();
+      // prevent edgeless page block from scrolling
+      e.stopPropagation();
+      this._handleWheel(e);
+    });
   }
 
   override disconnectedCallback() {
     super.connectedCallback();
-    this.removeEventListener('wheel', this._handleWheel.bind(this));
+    this._disposables.dispose();
   }
 
   override render() {

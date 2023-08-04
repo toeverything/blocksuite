@@ -1,4 +1,4 @@
-import type { SurfaceManager } from '@blocksuite/phasor';
+import type { IBound, SurfaceManager } from '@blocksuite/phasor';
 import {
   Bound,
   compare,
@@ -8,28 +8,24 @@ import {
   getCommonBound,
   type PhasorElement,
   type PhasorElementType,
-  Renderer,
   serializeXYWH,
-  TextElement,
 } from '@blocksuite/phasor';
 import { assertExists, type Page } from '@blocksuite/store';
-import { render } from 'lit';
 
-import type { NoteBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
 } from '../../page-block/edgeless/utils/consts.js';
 import {
-  getSelectedRect,
+  isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
-import type { Selectable } from '../../page-block/edgeless/utils/selection-manager.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
+import { ContentParser } from '../content-parser/index.js';
 import {
-  type BlockComponentElement,
-  getBlockElementById,
+  type Connectable,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
@@ -42,13 +38,14 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocks,
-  copySurfaceText,
+  copyOnPhasorElementWithText,
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
   CLIPBOARD_MIMETYPE,
   createSurfaceClipboardItems,
   getSurfaceClipboardData,
+  isPureFileInClipboard,
   performNativeCopy,
 } from './utils/index.js';
 
@@ -71,21 +68,22 @@ function prepareConnnectorClipboardData(
   return serialized;
 }
 
-function prepareClipboardData(
+async function prepareClipboardData(
   selectedAll: Selectable[],
   surface: SurfaceManager
 ) {
-  return selectedAll
-    .map(selected => {
+  const selected = await Promise.all(
+    selectedAll.map(async selected => {
       if (isTopLevelBlock(selected)) {
-        return getBlockClipboardInfo(selected).json;
+        return (await getBlockClipboardInfo(selected)).json;
       } else if (selected instanceof ConnectorElement) {
         return prepareConnnectorClipboardData(selected, selectedAll, surface);
       } else {
         return selected.serialize();
       }
     })
-    .filter(d => !!d);
+  );
+  return selected.filter(d => !!d);
 }
 
 export class EdgelessClipboard implements Clipboard {
@@ -102,6 +100,10 @@ export class EdgelessClipboard implements Clipboard {
     document.body.addEventListener('cut', this._onCut);
     document.body.addEventListener('copy', this._onCopy);
     document.body.addEventListener('paste', this._onPaste);
+  }
+
+  get toolMgr() {
+    return this._edgeless.tools;
   }
 
   get selection() {
@@ -130,42 +132,51 @@ export class EdgelessClipboard implements Clipboard {
     this._onCopy(e);
 
     const { state } = this.selection;
-    if (state.active) {
+    if (state.editing) {
       deleteModelsByRange(this._page);
       return;
     }
 
     this._page.transact(() => {
-      state.selected.forEach(selected => {
-        if (isTopLevelBlock(selected)) {
-          this._page.deleteBlock(selected);
+      state.elements.forEach(id => {
+        const selectedModel = this._edgeless.getElementModel(id);
+        if (!selectedModel) return;
+
+        if (isTopLevelBlock(selectedModel)) {
+          this._page.deleteBlock(selectedModel);
         } else {
-          this._edgeless.connector.detachConnectors([selected]);
-          this.surface.removeElement(selected.id);
+          this._edgeless.connector.detachConnectors([
+            selectedModel as Connectable,
+          ]);
+          this.surface.removeElement(id);
         }
       });
     });
-    this.slots.selectionUpdated.emit({ active: false, selected: [] });
+
+    this.selection.setSelection({
+      editing: false,
+      elements: [],
+    });
   };
 
-  private _onCopy = (e: ClipboardEvent) => {
+  private _onCopy = async (e: ClipboardEvent) => {
     if (!activeEditorManager.isActive(this._edgeless)) {
       return;
     }
     e.preventDefault();
-    const { state } = this.selection;
+    const { state, elements } = this.selection;
     // when note active, handle copy like page mode
-    if (state.active) {
-      if (state.selected[0] instanceof TextElement) {
-        copySurfaceText(this._edgeless);
+    if (state.editing) {
+      if (isPhasorElementWithText(elements[0])) {
+        copyOnPhasorElementWithText(this._edgeless);
       } else {
         const range = getCurrentBlockRange(this._page);
         assertExists(range);
-        copyBlocks(range);
+        await copyBlocks(range);
       }
       return;
     }
-    const data = prepareClipboardData(state.selected, this.surface);
+    const data = await prepareClipboardData(elements, this.surface);
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
@@ -175,13 +186,37 @@ export class EdgelessClipboard implements Clipboard {
     if (!activeEditorManager.isActive(this._edgeless)) {
       return;
     }
+
+    if (
+      document.activeElement instanceof HTMLInputElement ||
+      document.activeElement instanceof HTMLTextAreaElement
+    ) {
+      return;
+    }
     e.preventDefault();
-    const { state } = this.selection;
-    if (state.active) {
-      if (!(state.selected[0] instanceof TextElement)) {
+    const { state, elements } = this.selection;
+    if (state.editing) {
+      if (!isPhasorElementWithText(elements[0])) {
         this._pasteInTextNote(e);
       }
       // use build-in paste handler in virgo when paste in surface text element
+      return;
+    }
+
+    if (e.clipboardData && isPureFileInClipboard(e.clipboardData)) {
+      const files = e.clipboardData.files;
+      if (files.length === 0) {
+        return;
+      }
+      const res: { file: File; sourceId: string }[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image')) {
+          const sourceId = await this._edgeless.page.blobs.set(file);
+          res.push({ file, sourceId });
+        }
+      }
+      await this._edgeless.addImages(res);
       return;
     }
 
@@ -322,19 +357,15 @@ export class EdgelessClipboard implements Clipboard {
     noteIds: string[]
   ) {
     const newSelected = [
-      ...(phasorElementIds
-        .map(id => this.surface.pickById(id))
-        .filter(e => !!e) as PhasorElement[]),
-      ...(noteIds
-        .map(id => this._page.getBlockById(id))
-        .filter(
-          f => !!f && f.flavour === 'affine:note'
-        ) as TopLevelBlockModel[]),
+      ...phasorElementIds,
+      ...noteIds.filter(id => {
+        return this._page.getBlockById(id)?.flavour === 'affine:note';
+      }),
     ];
 
-    this.slots.selectionUpdated.emit({
-      active: false,
-      selected: newSelected,
+    this.selection.setSelection({
+      editing: false,
+      elements: newSelected,
     });
   }
 
@@ -355,7 +386,7 @@ export class EdgelessClipboard implements Clipboard {
       groupedByType.notes || []
     );
 
-    const { lastMousePos } = this.selection;
+    const { lastMousePos } = this.toolMgr;
     const [modelX, modelY] = this.surface.toModelCoord(
       lastMousePos.x,
       lastMousePos.y
@@ -393,116 +424,55 @@ export class EdgelessClipboard implements Clipboard {
     );
   }
 
-  async copyAsPng(notes: NoteBlockModel[], shapes: PhasorElement[]) {
+  async copyAsPng(notes: TopLevelBlockModel[], shapes: PhasorElement[]) {
     const notesLen = notes.length;
     const shapesLen = shapes.length;
 
     if (notesLen + shapesLen === 0) return;
 
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
-
     // sort by `index`
     notes.sort(compare);
     shapes.sort(compare);
 
-    const { _edgeless } = this;
-    const { surface } = _edgeless;
-    const { zoom } = surface.viewport;
-    const rect = getSelectedRect([...notes, ...shapes]);
-    const cx = (rect.left + rect.right) / 2;
-    const cy = (rect.top + rect.bottom) / 2;
-    const vx = cx - rect.width / 2;
-    const vy = cy - rect.height / 2;
-    const width = rect.width * zoom;
-    const height = rect.height * zoom;
-
-    const container = document.createElement('div');
-    container.style.position = 'relative';
-    container.style.width = `${width}px`;
-    container.style.height = `${height}px`;
-    _edgeless.appendChild(container);
-
-    if (notesLen) {
-      const fragment = document.createDocumentFragment();
-      const layer = document.createElement('div');
-      layer.style.position = 'absolute';
-      layer.style.zIndex = '-1';
-      layer.style.transform = `scale(${zoom})`;
-      for (let i = 0; i < notesLen; i++) {
-        const element = notes[i];
-        const note = getBlockElementById(element.id) as BlockComponentElement;
-        assertExists(note);
-        const parent = note.parentElement;
-        assertExists(parent);
-
-        const [x, y] = deserializeXYWH(element.xywh);
-        const div = document.createElement('div');
-        div.className = parent.className;
-        div.setAttribute('style', parent.getAttribute('style') || '');
-        div.style.transform = `translate(${x - vx}px, ${y - vy}px)`;
-        render(note.render(), div);
-        layer.appendChild(div);
-      }
-      fragment.appendChild(layer);
-      container.appendChild(fragment);
+    const bounds: IBound[] = [];
+    notes.forEach(note => {
+      bounds.push(Bound.deserialize(note.xywh));
+    });
+    shapes.forEach(shape => {
+      bounds.push(Bound.deserialize(shape.xywh));
+    });
+    const bound = getCommonBound(bounds);
+    if (!bound) {
+      return;
     }
 
-    if (shapesLen) {
-      const renderer = new Renderer();
-      renderer.load(shapes);
-      renderer.setCenter(cx, cy);
-      renderer.setZoom(zoom);
-      renderer.attach(container);
-    }
+    const parser = new ContentParser(this._page);
+    const canvas = await parser.edgelessToCanvas(
+      this._edgeless,
+      bound,
+      notes,
+      shapes
+    );
 
-    try {
-      // waiting for canvas to render
-      await new Promise(requestAnimationFrame);
+    assertExists(canvas);
 
-      const canvas: HTMLCanvasElement = await html2canvas(container, {
-        ignoreElements: function (element: Element) {
-          if (
-            element.tagName === 'AFFINE-BLOCK-HUB' ||
-            element.tagName === 'EDGELESS-TOOLBAR' ||
-            element.classList.contains('dg')
-          ) {
-            return true;
-          } else {
-            return false;
-          }
-        },
-        onclone: function (documentClone: Document, element: HTMLElement) {
-          // html2canvas can't support transform feature
-          element.style.setProperty('transform', 'none');
-        },
-        backgroundColor: window.getComputedStyle(document.body).backgroundColor,
-      });
-      assertExists(canvas);
-
+    // @ts-ignore
+    if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore
-      if (window.apis?.clipboard?.copyAsImageFromString) {
-        // @ts-ignore
-        await window.apis.clipboard?.copyAsImageFromString(
-          canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
-        );
-      } else {
-        const blob: Blob = await new Promise((resolve, reject) =>
-          canvas.toBlob(
-            blob =>
-              blob ? resolve(blob) : reject('Canvas can not export blob'),
-            CLIPBOARD_MIMETYPE.IMAGE_PNG
-          )
-        );
-        assertExists(blob);
-        await navigator.clipboard.write([
-          new ClipboardItem({ [blob.type]: blob }),
-        ]);
-      }
-    } catch (error) {
-      console.error(error);
+      await window.apis.clipboard?.copyAsImageFromString(
+        canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
+      );
+    } else {
+      const blob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob(
+          blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
+          CLIPBOARD_MIMETYPE.IMAGE_PNG
+        )
+      );
+      assertExists(blob);
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob }),
+      ]);
     }
-
-    container.remove();
   }
 }

@@ -1,7 +1,11 @@
 import { assertExists, sleep } from '@blocksuite/global/utils';
+import { BaseBlockModel } from '@blocksuite/store';
+import { css } from 'lit';
 
 import type { RichText } from '../__internal__/rich-text/rich-text.js';
+import type { AffineVEditor } from '../__internal__/rich-text/virgo/types.js';
 import { isControlledKeyboardEvent } from '../__internal__/utils/common.js';
+import { getVirgoByModel } from '../__internal__/utils/query.js';
 import { getCurrentNativeRange } from '../__internal__/utils/selection.js';
 
 export const createKeydownObserver = ({
@@ -194,3 +198,48 @@ export const createKeydownObserver = ({
     });
   }
 };
+
+/**
+ * Remove specified text from the current range.
+ */
+export function cleanSpecifiedTail(
+  vEditorOrModel: AffineVEditor | BaseBlockModel,
+  str: string
+) {
+  if (!str) {
+    console.warn('Failed to clean text! Unexpected empty string');
+    return;
+  }
+  const vEditor =
+    vEditorOrModel instanceof BaseBlockModel
+      ? getVirgoByModel(vEditorOrModel)
+      : vEditorOrModel;
+  assertExists(vEditor, 'Editor not found');
+
+  const vRange = vEditor.getVRange();
+  assertExists(vRange);
+  const idx = vRange.index - str.length;
+  const textStr = vEditor.yText.toString().slice(idx, idx + str.length);
+  if (textStr !== str) {
+    console.warn(
+      `Failed to clean text! Text mismatch expected: ${str} but actual: ${textStr}`
+    );
+    return;
+  }
+  vEditor.deleteText({ index: idx, length: str.length });
+  vEditor.setVRange({
+    index: idx,
+    length: 0,
+  });
+}
+
+export const scrollbarStyle = css`
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: #b1b1b1;
+  }
+`;

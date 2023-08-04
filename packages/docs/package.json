@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/docs",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "BlockSuite documentation",
   "private": true,
   "keywords": [],
@@ -8,6 +8,7 @@
   "repository": "toeverything/blocksuite",
   "license": "MPL-2.0",
   "devDependencies": {
+    "vite-plugin-wasm": "^3.2.2",
     "vitepress": "1.0.0-alpha.74"
   },
   "scripts": {

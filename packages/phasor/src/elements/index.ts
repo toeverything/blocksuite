@@ -9,26 +9,45 @@ import {
   DebugElementDefaultProps,
   type IDebug,
 } from './debug/debug-element.js';
+import { FrameElementDefaultProps } from './frame/constants.js';
+import { FrameElement } from './frame/frame-element.js';
+import type { IFrame, IFrameLocalRecord } from './frame/types.js';
 import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
-import type { IShape } from './shape/types.js';
-import type { SurfaceElement } from './surface-element.js';
+import type { IShape, IShapeLocalRecord } from './shape/types.js';
+import type {
+  ISurfaceElementLocalRecord,
+  SurfaceElement,
+} from './surface-element.js';
 import { TextElementDefaultProps } from './text/constants.js';
 import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
 
+// eslint-disable-next-line simple-import-sort/exports
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
 export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
 export { TextElement } from './text/text-element.js';
+export { FrameElement } from './frame/frame-element.js';
+
+export { normalizeShapeBound } from './shape/utils.js';
+export { SHAPE_TEXT_PADDING } from './shape/constants.js';
+export {
+  normalizeTextBound,
+  getFontString,
+  getLineHeight,
+  getLineWidth,
+} from './text/utils.js';
+export type { HitTestOptions } from './surface-element.js';
 
 export type PhasorElement =
   | ShapeElement
   | DebugElement
   | BrushElement
   | ConnectorElement
+  | FrameElement
   | SurfaceElement;
 
 export type PhasorElementType = {
@@ -37,6 +56,7 @@ export type PhasorElementType = {
   brush: BrushElement;
   connector: ConnectorElement;
   text: TextElement;
+  frame: FrameElement;
 };
 
 export type IPhasorElementType = {
@@ -45,6 +65,16 @@ export type IPhasorElementType = {
   brush: IBrush;
   connector: IConnector;
   text: IText;
+  frame: IFrame;
+};
+
+export type IPhasorElementLocalRecord = {
+  shape: IShapeLocalRecord;
+  debug: ISurfaceElementLocalRecord;
+  brush: ISurfaceElementLocalRecord;
+  connector: ISurfaceElementLocalRecord;
+  text: ISurfaceElementLocalRecord;
+  frame: IFrameLocalRecord;
 };
 
 export const ElementCtors = {
@@ -53,6 +83,7 @@ export const ElementCtors = {
   shape: ShapeElement,
   connector: ConnectorElement,
   text: TextElement,
+  frame: FrameElement,
 } as const;
 
 export const ElementDefaultProps: Record<
@@ -64,6 +95,7 @@ export const ElementDefaultProps: Record<
   shape: ShapeElementDefaultProps,
   connector: ConnectorElementDefaultProps,
   text: TextElementDefaultProps,
+  frame: FrameElementDefaultProps,
 } as const;
 
 export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
@@ -86,7 +118,12 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
         | 'absolutePath'
         | 'controllers'
         | 'rotate'
+        | 'batch'
       >
-    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed'>;
+    : T extends 'frame'
+    ? Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'rotate' | 'batch'>
+    : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;
+
+export type PhasorElementWithText = ShapeElement | TextElement;
 
 export type { IBrush, IConnector, IDebug, IShape, IText };

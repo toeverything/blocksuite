@@ -1,20 +1,27 @@
-import type { DatabaseBlockModel, InsertPosition } from '../database-model.js';
-import { insertPositionToIndex } from '../database-model.js';
+import type { DatabaseBlockModel } from '../database-model.js';
+import { tTag } from '../logical/data-type.js';
+import { isTArray } from '../logical/typesystem.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
-import type { Column } from '../types.js';
+import type { Column, InsertPosition } from '../types.js';
+import { insertPositionToIndex } from '../utils/insert.js';
 import type { FilterGroup } from './ast.js';
+import { columnManager } from './columns/manager.js';
+import { groupByMatcher } from './groupBy/matcher.js';
 
 export type TableViewColumn = {
   id: string;
   width: number;
   hide?: boolean;
 };
-export type TableMixColumn<
-  Data extends Record<string, unknown> = Record<string, unknown>
-> = TableViewColumn & Column<Data>;
+
 export type KanbanViewColumn = {
   id: string;
   hide?: boolean;
+};
+export type GroupBy = {
+  type: 'groupBy';
+  columnId: string;
+  name: string;
 };
 export type DatabaseModeMap = {
   table: {
@@ -24,6 +31,7 @@ export type DatabaseModeMap = {
   kanban: {
     columns: KanbanViewColumn[];
     filter: FilterGroup;
+    groupBy?: GroupBy;
   };
 };
 export type DatabaseViewDataMap = {
@@ -33,8 +41,9 @@ export type DatabaseViewDataMap = {
     mode: K;
   };
 };
-
-export type TableViewData = DatabaseViewDataMap['table'];
+type Pretty<T> = { [K in keyof T]: T[K] };
+export type TableViewData = Pretty<DatabaseViewDataMap['table']>;
+export type KanbanViewData = Pretty<DatabaseViewDataMap['kanban']>;
 
 export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
@@ -48,17 +57,49 @@ type ViewOperation<Data> = {
   ): void;
   deleteColumn(model: DatabaseBlockModel, view: Data, id: string): void;
 };
+
+export const defaultGroupBy = (
+  columnId: string,
+  type: string,
+  data: NonNullable<unknown>
+): GroupBy | undefined => {
+  const name = groupByMatcher.match(
+    columnManager.getColumn(type).dataType(data)
+  )?.name;
+  return name != null
+    ? {
+        type: 'groupBy',
+        columnId: columnId,
+        name: name,
+      }
+    : undefined;
+};
 export const ViewOperationMap: {
   [K in keyof DatabaseViewDataMap]: ViewOperation<DatabaseViewDataMap[K]>;
 } = {
   kanban: {
     init(model, id, name) {
+      const column = model.columns.find(column => {
+        const type = columnManager.getColumn(column.type).dataType(column.data);
+        return !!(tTag.is(type) || (isTArray(type) && tTag.is(type.ele)));
+      });
+      if (!column) {
+        throw new Error('not implement yet');
+      }
       return {
         id,
         name,
         mode: 'kanban',
-        columns: model.columns.map(v => ({ id: v.id, hide: false })),
-        filter: { type: 'group', op: 'and', conditions: [] },
+        columns: model.columns.map(v => ({
+          id: v.id,
+          hide: false,
+        })),
+        filter: {
+          type: 'group',
+          op: 'and',
+          conditions: [],
+        },
+        groupBy: defaultGroupBy(column.id, column.type, column.data),
       };
     },
     addColumn(model, view, newColumn) {
@@ -74,11 +115,7 @@ export const ViewOperationMap: {
         id,
         name,
         mode: 'table',
-        columns: model.columns.map(v => ({
-          id: v.id,
-          hide: false,
-          width: DEFAULT_COLUMN_WIDTH,
-        })),
+        columns: [],
         filter: {
           type: 'group',
           op: 'and',

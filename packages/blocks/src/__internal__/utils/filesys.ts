@@ -73,24 +73,52 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
       ],
     },
   },
+  {
+    description: 'Markdown',
+    accept: {
+      'text/markdown': ['.md', '.markdwon'],
+    },
+  },
+  {
+    description: 'Html',
+    accept: {
+      'text/html': ['.html', '.htm'],
+    },
+  },
+  {
+    description: 'Zip',
+    accept: {
+      'application/zip': ['.zip'],
+    },
+  },
 ];
 
 /**
  * See https://web.dev/patterns/files/open-one-or-multiple-files/
  */
-type AcceptTypes = 'Any' | 'Images' | 'Videos' | 'Audios';
-function openFileOrFiles(options: {
-  accept?: AcceptTypes;
+type AcceptTypes =
+  | 'Any'
+  | 'Images'
+  | 'Videos'
+  | 'Audios'
+  | 'Markdown'
+  | 'Html'
+  | 'Zip';
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
 }): Promise<File | null>;
-function openFileOrFiles(options: {
-  accept?: AcceptTypes;
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
   multiple: false;
 }): Promise<File | null>;
-function openFileOrFiles(options: {
-  accept?: AcceptTypes;
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
   multiple: true;
 }): Promise<File[] | null>;
-async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
+export async function openFileOrFiles({
+  acceptType = 'Any',
+  multiple = false,
+} = {}) {
   // Feature detection. The API needs to be supported
   // and the app not run in an iframe.
   const supportsFileSystemAccess =
@@ -105,7 +133,9 @@ async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
   // If the File System Access API is supported…
   if (supportsFileSystemAccess && window.showOpenFilePicker) {
     try {
-      const fileType = FileTypes.find(i => i.description === accept);
+      const fileType = FileTypes.find(i => i.description === acceptType);
+      if (acceptType !== 'Any' && !fileType)
+        throw new Error(`Unexpected acceptType "${acceptType}"`);
       const pickerOpts = {
         types: fileType ? [fileType] : undefined,
         multiple,
@@ -146,10 +176,10 @@ async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
     if (multiple) {
       input.multiple = true;
     }
-    if (accept !== 'Any') {
+    if (acceptType !== 'Any') {
       // For example, `accept="image/*"` or `accept="video/*,audio/*"`.
       input.accept = Object.keys(
-        FileTypes.find(i => i.description === accept)?.accept ?? ''
+        FileTypes.find(i => i.description === acceptType)?.accept ?? ''
       ).join(',');
     }
     document.body.append(input);
@@ -180,7 +210,7 @@ async function openFileOrFiles({ accept = 'Any', multiple = false } = {}) {
 
 export const uploadImageFromLocal = async (storage: BlobManager) => {
   const imageFiles = await openFileOrFiles({
-    accept: 'Images',
+    acceptType: 'Images',
     multiple: true,
   });
   if (!imageFiles) return [];
@@ -192,3 +222,42 @@ export const uploadImageFromLocal = async (storage: BlobManager) => {
   }
   return res;
 };
+
+/**
+ * See https://gist.github.com/davalapar/d0a5ba7cce4bc599f54800da22926da2
+ */
+export const uploadFileFromLocal = async (
+  storage: BlobManager,
+  beforeUpload?: (file: File) => boolean | Promise<boolean>
+) => {
+  const file = await openFileOrFiles({
+    acceptType: 'Any',
+  });
+  if (!file) return;
+  const allowUpload = beforeUpload ? await beforeUpload(file) : true;
+  if (!allowUpload) return;
+
+  // The original file name can not be modified after the file is uploaded to the storage,
+  // so we create a new file with a fixed name to prevent privacy leaks.
+  const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
+    type: file.type,
+  });
+  const sourceId = await storage.set(anonymousFile);
+  return {
+    // Notice: we return the original file here, not the anonymous file.
+    file,
+    sourceId,
+  };
+};
+
+export function downloadBlob(blob: Blob, name: string) {
+  const dataURL = URL.createObjectURL(blob);
+  const tmpLink = document.createElement('a');
+  const event = new MouseEvent('click');
+  tmpLink.download = name;
+  tmpLink.href = dataURL;
+  tmpLink.dispatchEvent(event);
+
+  tmpLink.remove();
+  URL.revokeObjectURL(dataURL);
+}

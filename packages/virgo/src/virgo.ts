@@ -1,5 +1,6 @@
 import type { NullablePartial } from '@blocksuite/global/types';
 import { assertExists, Slot } from '@blocksuite/global/utils';
+import { html, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
@@ -53,6 +54,8 @@ export class VEditor<
   private _deltaService: VirgoDeltaService<TextAttributes> =
     new VirgoDeltaService<TextAttributes>(this);
 
+  private _mounted = false;
+
   shouldLineScrollIntoView = true;
   shouldCursorScrollIntoView = true;
 
@@ -92,6 +95,10 @@ export class VEditor<
     return this._deltaService;
   }
 
+  get mounted() {
+    return this._mounted;
+  }
+
   // Expose attribute service API
   get marks() {
     return this._attributeService.marks;
@@ -117,11 +124,13 @@ export class VEditor<
   getDeltasByVRange = this.deltaService.getDeltasByVRange;
   getDeltaByRangeIndex = this.deltaService.getDeltaByRangeIndex;
   mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
+  isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
+
   constructor(
     yText: VEditor['yText'],
     ops?: {
       active?: VEditor['isActive'];
-      embed?: VEditor['isEmbed'];
+      embed?: (delta: DeltaInsert<TextAttributes>) => boolean;
     }
   ) {
     if (!yText.doc) {
@@ -163,6 +172,7 @@ export class VEditor<
 
     this._eventService.mount();
 
+    this._mounted = true;
     this.slots.mounted.emit();
   }
 
@@ -173,15 +183,21 @@ export class VEditor<
     this._rootElement?.replaceChildren();
     this._rootElement = null;
 
+    this._mounted = false;
     this.slots.unmounted.emit();
   }
 
-  requestUpdate(): void {
+  requestUpdate(syncVRange = true): void {
     Promise.resolve().then(() => {
       assertExists(this._rootElement);
 
-      this._deltaService.render();
+      this._deltaService.render(syncVRange);
     });
+  }
+
+  async waitForUpdate() {
+    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
+    await Promise.all(vLines.map(line => line.updateComplete));
   }
 
   getNativeSelection(): Selection | null {
@@ -256,6 +272,13 @@ export class VEditor<
   focusEnd(): void {
     this.rangeService.setVRange({
       index: this.yText.length,
+      length: 0,
+    });
+  }
+
+  focusByIndex(index: number): void {
+    this.rangeService.setVRange({
+      index: index,
       length: 0,
     });
   }
@@ -373,6 +396,11 @@ export class VEditor<
       this.deltaService.render();
     });
   };
+
+  rerenderWholeEditor() {
+    render(html`<div></div>`, this.rootElement);
+    this._deltaService.render();
+  }
 
   private _transact(fn: () => void): void {
     const doc = this.yText.doc;

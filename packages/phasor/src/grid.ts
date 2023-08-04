@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/store';
 
 import { GRID_SIZE, type IBound } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
+import { Bound } from './utils/bound.js';
 import {
   getBoundsWithRotation,
   intersects,
@@ -21,13 +22,26 @@ function rangeFromBound(a: IBound): number[] {
   return [minRow, maxRow, minCol, maxCol];
 }
 
+function rangeFromElement(ele: SurfaceElement): number[] {
+  const bound = ele.gridBound;
+  const minRow = getGridIndex(bound.x);
+  const maxRow = getGridIndex(bound.maxX);
+  const minCol = getGridIndex(bound.y);
+  const maxCol = getGridIndex(bound.maxY);
+  return [minRow, maxRow, minCol, maxCol];
+}
+
 // Dont compare by id, '398303718:2' > '398303718:14' is true
-export function compare<T extends { id: string; index: string }>(
-  a: T,
-  b: T
-): number {
+export function compare<
+  T extends { id: string; index: string; batch?: string | null }
+>(a: T, b: T): number {
+  if (a.batch && b.batch) {
+    if (a.batch < b.batch) return -1;
+    else if (a.batch > b.batch) return 1;
+  }
+
   if (a.index < b.index) return -1;
-  if (a.index > b.index) return 1;
+  else if (a.index > b.index) return 1;
   return 0;
 }
 
@@ -53,7 +67,7 @@ export class GridManager {
   }
 
   add(element: SurfaceElement) {
-    const [minRow, maxRow, minCol, maxCol] = rangeFromBound(element);
+    const [minRow, maxRow, minCol, maxCol] = rangeFromElement(element);
     const grids = new Set<Set<SurfaceElement>>();
     this._elementToGrids.set(element, grids);
 
@@ -89,16 +103,20 @@ export class GridManager {
     );
   }
 
-  search(bound: IBound): SurfaceElement[] {
+  search(bound: IBound, strict = false): SurfaceElement[] {
     const [minRow, maxRow, minCol, maxCol] = rangeFromBound(bound);
     const results: Set<SurfaceElement> = new Set();
+    const b = Bound.from(bound);
     for (let i = minRow; i <= maxRow; i++) {
       for (let j = minCol; j <= maxCol; j++) {
         const gridElements = this._getGrid(i, j);
         if (!gridElements) continue;
-
         for (const element of gridElements) {
-          if (intersects(getBoundsWithRotation(element), bound)) {
+          if (
+            strict
+              ? b.contains(element.gridBound)
+              : intersects(element.gridBound, bound)
+          ) {
             results.add(element);
           }
         }

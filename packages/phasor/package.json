@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/phasor",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Hybrid canvas renderer.",
   "main": "src/index.ts",
   "type": "module",
@@ -16,8 +16,8 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "nanoid": "^4.0.1",
-    "yjs": "^13.6.5"
+    "nanoid": "^4.0.2",
+    "yjs": "^13.6.7"
   },
   "peerDependencies": {
     "nanoid": "^4",

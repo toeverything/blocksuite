@@ -1,4 +1,4 @@
-import { StrokeStyle } from '../../../consts.js';
+import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -6,10 +6,21 @@ import {
   lineEllipseIntersects,
   pointInEllipse,
 } from '../../../utils/math-utils.js';
+import { PointLocation } from '../../../utils/point-location.js';
 import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
+import { drawGeneralShpae } from '../utils.js';
+
+function ellipsePoints({ x, y, w, h }: IBound): IVec[] {
+  return [
+    [x, y + h / 2],
+    [x + w / 2, y],
+    [x + w, y + h / 2],
+    [x + w / 2, y + h],
+  ];
+}
 
 export const EllipseMethods: ShapeMethods = {
   render(
@@ -27,6 +38,7 @@ export const EllipseMethods: ShapeMethods = {
       strokeStyle,
       roughness,
       rotate,
+      shapeStyle,
     } = element;
     const [, , w, h] = element.deserializeXYWH();
     const renderOffset = Math.max(strokeWidth, 0) / 2;
@@ -45,16 +57,31 @@ export const EllipseMethods: ShapeMethods = {
 
     rc.ellipse(cx, cy, renderWidth, renderHeight, {
       seed,
-      roughness,
+      roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
       strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-      stroke: realStrokeColor,
+      stroke:
+        strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
+          ? 'none'
+          : realStrokeColor,
       strokeWidth,
       fill: filled ? realFillColor : undefined,
       curveFitting: 1,
     });
+
+    if (shapeStyle === ShapeStyle.General) {
+      drawGeneralShpae(ctx, 'ellipse', {
+        x: 0,
+        y: 0,
+        width: renderWidth,
+        height: renderHeight,
+        strokeWidth,
+        strokeColor: realStrokeColor,
+        strokeStyle: strokeStyle,
+      });
+    }
   },
 
-  hitTest(this: ShapeElement, x: number, y: number, options?: HitTestOptions) {
+  hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
     const point = [x, y];
     const expand = (options?.expand ?? 1) / (this.renderer?.zoom ?? 1);
     const rx = this.w / 2;
@@ -66,7 +93,7 @@ export const EllipseMethods: ShapeMethods = {
       pointInEllipse(point, center, rx + expand, ry + expand, rad) &&
       !pointInEllipse(point, center, rx - expand, ry - expand, rad);
 
-    if (this.filled && !hited) {
+    if ((!options.ignoreTransparent || this.filled) && !hited) {
       hited = pointInEllipse(point, center, rx, ry, rad);
     }
 
@@ -74,19 +101,12 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {
-    const points = getPointsFromBoundsWithRotation(
-      element,
-      ({ x, y, w, h }) => [
-        [x, y + h / 2],
-        [x + w / 2, y],
-        [x + w, y + h / 2],
-        [x + w / 2, y + h],
-      ]
-    );
+    const points = getPointsFromBoundsWithRotation(element, ellipsePoints);
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
+    // TODO: get real nearest point on ellipse
     return point;
   },
 
@@ -101,5 +121,12 @@ export const EllipseMethods: ShapeMethods = {
       bound.h / 2,
       rad
     );
+  },
+
+  getRelativePointLocation(position, element) {
+    const bound = Bound.deserialize(element.xywh);
+    const point = bound.getRelativePoint(position);
+    // TODO: calculate the tangent of point on ellipse
+    return new PointLocation(point);
   },
 };

@@ -139,7 +139,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
         position: absolute;
         left: 0;
         top: 0;
-        z-index: 1;
+        z-index: calc(var(--affine-z-index-popover, 0) + 2);
         transform-origin: top left;
       }
     `,

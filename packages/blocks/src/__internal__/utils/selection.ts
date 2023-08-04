@@ -10,12 +10,12 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { getTextNodesFromElement, type VirgoLine } from '@blocksuite/virgo';
 
 import type { NoteBlockComponent } from '../../note-block/index.js';
-import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { asyncFocusRichText } from './common-operations.js';
 import {
-  type BlockComponentElement,
   getBlockElementByModel,
-  getDefaultPage,
+  getDocPage,
+  getDocPageByElement,
   getElementFromEventTarget,
   getModelByBlockElement,
   getModelsByRange,
@@ -58,7 +58,7 @@ function setEndRange(editableContainer: Element) {
 }
 
 async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
-  const scrollContainer = editableContainer.closest('.affine-default-viewport');
+  const scrollContainer = editableContainer.closest('.affine-doc-viewport');
   const { top, bottom } = Rect.fromDOM(editableContainer);
   const { clientHeight } = document.documentElement;
   const lineHeight =
@@ -100,7 +100,7 @@ async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
  */
 export function focusTitle(page: Page, index = Infinity, len = 0) {
   // TODO support SelectionPosition
-  const pageComponent = getDefaultPage(page);
+  const pageComponent = getDocPage(page);
   if (!pageComponent) {
     throw new Error("Can't find page component!");
   }
@@ -118,11 +118,16 @@ export async function focusRichText(
   position: SelectionPosition = 'end',
   zoom = 1
 ) {
+  const isDocPage = !!getDocPageByElement(editableContainer);
+  if (isDocPage) {
+    editableContainer
+      .querySelector<VirgoLine>('v-line')
+      ?.scrollIntoView({ block: 'nearest' });
+  }
+
   // TODO optimize how get scroll container
   const { left, right } = Rect.fromDOM(editableContainer);
-  editableContainer
-    .querySelector<VirgoLine>('v-line')
-    ?.scrollIntoView({ block: 'nearest' });
+
   let range: Range | null = null;
   switch (position) {
     case 'start':
@@ -157,50 +162,13 @@ export function focusBlockByModel(
     throw new Error("Can't focus note or page!");
   }
 
-  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
+  const pageBlock = getPageBlock(model) as DocPageBlockComponent;
   assertExists(pageBlock);
-  const isPageMode = pageBlock.tagName === 'AFFINE-DEFAULT-PAGE';
 
-  // If focus on a follow block, we should select the block
-  if (
-    isPageMode &&
-    matchFlavours(model, [
-      'affine:image',
-      'affine:divider',
-      'affine:code',
-      'affine:database',
-      'affine:bookmark',
-    ])
-  ) {
-    assertExists(pageBlock.selection);
-    pageBlock.selection.state.clearSelection();
-    const rect = getBlockElementByModel(model)?.getBoundingClientRect();
-    rect && pageBlock.slots.selectedRectsUpdated.emit([rect]);
-    const element = getBlockElementByModel(model);
-    assertExists(element);
-    pageBlock.selection.state.selectedBlocks.push(element);
-    if (matchFlavours(model, ['affine:database'])) {
-      const elements = model.children
-        .map(child => getBlockElementByModel(child))
-        .filter(
-          (element): element is BlockComponentElement => element !== null
-        );
-      pageBlock.selection.state.selectedBlocks.push(...elements);
-    }
-    pageBlock.selection.state.type = 'block';
-    resetNativeSelection(null);
-    (document.activeElement as HTMLTextAreaElement).blur();
-    return;
-  }
   const element = getBlockElementByModel(model);
   assertExists(element);
   const editableContainer = element?.querySelector('[contenteditable]');
   if (editableContainer) {
-    if (isPageMode) {
-      assertExists(pageBlock.selection);
-      pageBlock.selection.state.clearSelection();
-      pageBlock.selection.setFocusedBlock(element, { type: 'UNKNOWN' });
-    }
     focusRichText(editableContainer, position, zoom);
   }
 }
@@ -210,7 +178,7 @@ export function focusPreviousBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
+  const pageBlock = getPageBlock(model) as DocPageBlockComponent;
   assertExists(pageBlock);
 
   let nextPosition = position;
@@ -233,7 +201,7 @@ export function focusNextBlock(
   position: SelectionPosition = 'start',
   zoom = 1
 ) {
-  const pageBlock = getPageBlock(model) as DefaultPageBlockComponent;
+  const pageBlock = getPageBlock(model) as DocPageBlockComponent;
   assertExists(pageBlock);
 
   let nextPosition = position;
@@ -258,9 +226,9 @@ export function resetNativeSelection(range: Range | null) {
   range && selection.addRange(range);
 }
 
+// FIXME(mirone): remove this
 export function clearSelection(page: Page) {
-  if (!page.root) return;
-  getPageBlock(page.root)?.selection?.clear();
+  return;
 }
 
 /**

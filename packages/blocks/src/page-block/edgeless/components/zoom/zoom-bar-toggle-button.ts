@@ -27,7 +27,7 @@ function createNoteMenuPopper(
   }).then(({ x, y }) => {
     Object.assign(zoomBar.style, {
       left: `${x}px`,
-      top: `${y}px`,
+      top: `${y - 10}px`,
     });
   });
 
@@ -54,7 +54,7 @@ export class ZoomBarToggleButton extends LitElement {
     }
     edgeless-zoom-toolbar {
       position: absolute;
-      bottom: 48px;
+      bottom: initial;
     }
   `;
 
@@ -99,6 +99,7 @@ export class ZoomBarToggleButton extends LitElement {
           .tooltip=${'Toggle Zoom Tool Bar'}
           .tipPosition=${'right'}
           .active=${this._popperShow}
+          .arrow=${false}
           .activeMode=${'background'}
           @click=${() => this._toggleNoteMenu()}
         >

@@ -10,6 +10,7 @@ import { getService } from '../../service.js';
 import {
   type BlockRange,
   getCurrentNativeRange,
+  getEdgelessCanvasTextEditor,
   hasNativeSelection,
   resetNativeSelection,
   type SerializedBlock,
@@ -24,17 +25,18 @@ import {
   performNativeCopy,
 } from './pure.js';
 
-export function getBlockClipboardInfo(
+export async function getBlockClipboardInfo(
   model: BaseBlockModel,
+  selectedModels?: Map<string, number>,
   begin?: number,
   end?: number
 ) {
   const service = getService(model.flavour);
-  const html = service.block2html(model, { begin, end });
+  const html = await service.block2html(model, { begin, end });
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered
   // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
-  const json = service.block2Json(model, begin, end);
+  const json = service.block2Json(model, selectedModels, begin, end);
 
   return {
     html,
@@ -44,34 +46,52 @@ export function getBlockClipboardInfo(
   };
 }
 
-function createPageClipboardItems(range: BlockRange) {
-  const clipGroups = range.models.map((model, index) => {
-    if (index === 0) {
-      return getBlockClipboardInfo(
-        model,
-        range.startOffset,
-        index === range.models.length - 1 ? range.endOffset : undefined
-      );
-    }
-    if (index === range.models.length - 1) {
-      return getBlockClipboardInfo(model, undefined, range.endOffset);
-    }
-    return getBlockClipboardInfo(model);
+async function createPageClipboardItems(range: BlockRange) {
+  const uniqueModelsFilter = new Map();
+  const addToFilter = (model: BaseBlockModel, index: number) => {
+    uniqueModelsFilter.set(model.id, index);
+    model.children?.forEach(child => addToFilter(child, index));
+  };
+
+  const selectedModels = new Map();
+
+  range.models.forEach((model, index) => {
+    selectedModels.set(model.id, index);
   });
 
+  const clipModels = range.models.filter((model, index) => {
+    if (uniqueModelsFilter.has(model.id)) {
+      uniqueModelsFilter.set(model.id, index);
+      return false;
+    }
+    addToFilter(model, index);
+    return true;
+  });
+
+  const clipGroups = await Promise.all(
+    clipModels.map(async (model, index, array) => {
+      if (index === 0) {
+        return await getBlockClipboardInfo(
+          model,
+          selectedModels,
+          range.startOffset,
+          index === array.length - 1 ? range.endOffset : undefined
+        );
+      }
+      if (index === array.length - 1) {
+        return await getBlockClipboardInfo(
+          model,
+          selectedModels,
+          undefined,
+          range.endOffset
+        );
+      }
+      return await getBlockClipboardInfo(model, selectedModels);
+    })
+  );
+
   const stringifiesData = JSON.stringify(
-    clipGroups
-      .filter(group => {
-        if (!group.json) {
-          return false;
-        }
-        // XXX: should handle this issue here?
-        // Children json info is collected by its parent,
-        // but getCurrentBlockRange.models return parent and children at same time,
-        // children should be deleted from group
-        return !isChildBlock(range.models, group.model);
-      })
-      .map(group => group.json)
+    clipGroups.filter(group => group.json).map(group => group.json)
   );
 
   // Compatibility handling: In some environments, browsers do not support clipboard mime type other than `text/html` and `text/plain`, so need to store the copied json information in html
@@ -101,8 +121,8 @@ function createPageClipboardItems(range: BlockRange) {
   return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
 }
 
-export function copyBlocks(range: BlockRange) {
-  const clipboardItems = createPageClipboardItems(range);
+export async function copyBlocks(range: BlockRange) {
+  const clipboardItems = await createPageClipboardItems(range);
 
   const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
 
@@ -113,23 +133,31 @@ export function copyBlocks(range: BlockRange) {
   }
 }
 
-function isChildBlock(blocks: BaseBlockModel[], block: BaseBlockModel) {
-  for (let i = 0; i < blocks.length; i++) {
-    const parentBlock = blocks[i];
-    if (parentBlock.children) {
-      if (
-        parentBlock.children.findIndex(
-          childBlock => childBlock.id === block.id
-        ) > -1
-      ) {
-        return true;
-      }
-      if (isChildBlock(parentBlock.children, block)) {
-        return true;
-      }
+export async function textedClipboardData2Blocks(
+  page: Page,
+  clipboardData: ClipboardEvent['clipboardData']
+) {
+  if (!clipboardData) {
+    return [];
+  }
+
+  const contentParser = new ContentParser(page);
+  const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+
+  if (HTMLClipboardData) {
+    const blockSuiteClipboardData = extractCustomDataFromHTMLString(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
+      HTMLClipboardData
+    );
+
+    if (blockSuiteClipboardData) {
+      return JSON.parse(blockSuiteClipboardData) as SerializedBlock[];
     }
   }
-  return false;
+
+  const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+
+  return contentParser.text2blocks(textClipData);
 }
 
 export async function clipboardData2Blocks(
@@ -146,10 +174,11 @@ export async function clipboardData2Blocks(
   }
 
   const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
+
   if (HTMLClipboardData) {
     const blockSuiteClipboardData = extractCustomDataFromHTMLString(
       CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
-      clipboardData.getData(CLIPBOARD_MIMETYPE.HTML)
+      HTMLClipboardData
     );
 
     if (blockSuiteClipboardData) {
@@ -158,10 +187,18 @@ export async function clipboardData2Blocks(
   }
 
   const textClipData = clipboardData.getData(CLIPBOARD_MIMETYPE.TEXT);
+
+  const isHTMLContainCode = /<code/.test(HTMLClipboardData);
   const shouldConvertMarkdown =
-    markdownUtils.checkIfTextContainsMd(textClipData);
+    !isHTMLContainCode && markdownUtils.checkIfTextContainsMd(textClipData);
+
   if (HTMLClipboardData && !shouldConvertMarkdown) {
-    return await contentParser.htmlText2Block(HTMLClipboardData);
+    const htmlSerializedBlocks = await contentParser.htmlText2Block(
+      removeFragmentFromHtmlClipboardString(HTMLClipboardData)
+    );
+    if (htmlSerializedBlocks.length) {
+      return htmlSerializedBlocks;
+    }
   }
 
   if (shouldConvertMarkdown) {
@@ -171,10 +208,17 @@ export async function clipboardData2Blocks(
   return contentParser.text2blocks(textClipData);
 }
 
-export function copySurfaceText(edgeless: EdgelessPageBlockComponent) {
-  const surfaceTextEditor = edgeless.querySelector('surface-text-editor');
-  if (surfaceTextEditor) {
-    const vEditor = surfaceTextEditor.vEditor;
+// https://learn.microsoft.com/en-us/windows/win32/dataxchg/html-clipboard-format
+export function removeFragmentFromHtmlClipboardString(html: string) {
+  return html.replace(/<!--StartFragment-->([^]*)<!--EndFragment-->/g, '$1');
+}
+
+export function copyOnPhasorElementWithText(
+  edgeless: EdgelessPageBlockComponent
+) {
+  const edgelessTextEditor = getEdgelessCanvasTextEditor(edgeless);
+  if (edgelessTextEditor) {
+    const vEditor = edgelessTextEditor.vEditor;
     assertExists(vEditor);
     const vRange = vEditor.getVRange();
     if (vRange) {
@@ -183,10 +227,10 @@ export function copySurfaceText(edgeless: EdgelessPageBlockComponent) {
         .slice(vRange.index, vRange.index + vRange.length);
       const clipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, text);
 
-      surfaceTextEditor.setKeeping(true);
+      edgelessTextEditor.setKeeping(true);
       // this function will make virgo editor lose focus
       performNativeCopy([clipboardItem]);
-      surfaceTextEditor.setKeeping(false);
+      edgelessTextEditor.setKeeping(false);
 
       // restore focus and selection
       vEditor.rootElement.focus();

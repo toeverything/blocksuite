@@ -9,8 +9,8 @@ import {
 } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { createLink } from '../../__internal__/rich-text/link-node/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+import { createLink } from '../../components/link-popover/create-link.js';
 import type { ActionProps } from './const.js';
 import {
   getCurrentCombinedFormat,

@@ -1,21 +1,17 @@
 import type * as Y from 'yjs';
 
-import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { ISurfaceElement } from '../surface-element.js';
 
-export interface IText {
-  id: string;
-  index: string;
+export interface IText extends ISurfaceElement {
   type: 'text';
-  xywh: SerializedXYWH;
-  seed: number;
-
-  rotate: number;
 
   text: Y.Text;
   color: string;
   fontSize: number;
   fontFamily: string;
   textAlign: 'left' | 'center' | 'right';
+  bold: boolean;
+  italic: boolean;
 }
 
 export interface ITextDelta {

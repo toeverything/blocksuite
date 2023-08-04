@@ -25,12 +25,12 @@
         box-sizing: border-box;
       }
 
-      .affine-default-page-block-title-container {
+      .affine-doc-page-block-title-container {
         margin-top: 78px;
       }
 
       @media print {
-        .affine-default-page-block-title-container {
+        .affine-doc-page-block-title-container {
           margin-top: 0px;
         }
       }
@@ -38,8 +38,13 @@
   </head>
 
   <body>
-    <script type="module" src="./src/main.ts"></script>
-    <div id="app">
+    <script type="module" src="./polyfill/intl-segmenter.ts"></script>
+    <script type="module" src="./polyfill/ses.ts"></script>
+    <script type="module" src="./apps/default/main.ts"></script>
+    <div
+      id="app"
+      style="margin: 0; overflow: initial; height: 100%; box-shadow: initial"
+    >
       <div id="inspector"></div>
     </div>
   </body>

@@ -1,10 +1,10 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
 import { DATABASE_TITLE_LENGTH, DEFAULT_TITLE } from '../consts.js';
 
 @customElement('affine-database-title')
@@ -59,7 +59,10 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  targetModel!: DatabaseBlockModel;
+  titleText!: Text;
+
+  @property({ attribute: false })
+  readonly!: boolean;
 
   @property({ attribute: false })
   addRow!: (rowIndex?: number) => void;
@@ -84,16 +87,16 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   private _initTitleVEditor() {
     this._titleVInput = new VirgoInput({
-      yText: this.targetModel.title.yText,
+      yText: this.titleText.yText,
       rootElement: this._titleContainer,
       maxLength: DATABASE_TITLE_LENGTH,
     });
     setupVirgoScroll(this, this._titleVInput.vEditor);
-    this._titleVInput.vEditor.setReadonly(this.targetModel.page.readonly);
+    this._titleVInput.vEditor.setReadonly(this.readonly);
     this._titleContainer.addEventListener('keydown', this._handleKeyDown);
 
     // for title placeholder
-    this.targetModel.title.yText.observe(() => {
+    this.titleText.yText.observe(() => {
       this.requestUpdate();
     });
   }
@@ -127,12 +130,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    const isEmpty = !this.targetModel.title || !this.targetModel.title.length;
+    const isEmpty = !this.titleText || !this.titleText.length;
     return html`<div class="affine-database-title">
       <div
         class="database-title ${isEmpty ? 'database-title-empty' : ''}"
         data-block-is-database-title="true"
-        title=${this.targetModel.title.toString()}
+        title=${this.titleText.toString()}
       ></div>
     </div>`;
   }

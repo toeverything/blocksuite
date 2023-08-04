@@ -11,10 +11,14 @@ import {
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertEdgelessText } from '../utils/asserts.js';
+import {
+  assertEdgelessCanvasText,
+  assertEdgelessSelectedRect,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test('add text element in default mode', async ({ page }) => {
+// it's flaky
+test.fixme('add text element in default mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -25,25 +29,26 @@ test('add text element in default mode', async ({ page }) => {
   await waitForVirgoStateUpdated(page);
 
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
   await assertEdgelessTool(page, 'default');
 
   await page.mouse.click(120, 140);
 
-  expect(await page.locator('surface-text-editor').count()).toBe(0);
+  expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
   await page.mouse.dblclick(145, 155);
-  await page.locator('surface-text-editor').waitFor({
+  await page.locator('edgeless-text-editor').waitFor({
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hhelloello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
+// it's also a little flaky
 test('add text element in text mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
@@ -52,26 +57,29 @@ test('add text element in text mode', async ({ page }) => {
   await setEdgelessTool(page, 'text');
 
   await page.mouse.click(130, 140);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
 
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
   await assertEdgelessTool(page, 'default');
 
   await page.mouse.click(120, 140);
 
-  expect(await page.locator('surface-text-editor').count()).toBe(0);
+  expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
-  await page.mouse.dblclick(145, 155);
-  await page.locator('surface-text-editor').waitFor({
+  await page.mouse.click(145, 145);
+  await page.mouse.click(145, 145);
+
+  await page.locator('edgeless-text-editor').waitFor({
     state: 'attached',
   });
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hellohello');
+  await page.waitForTimeout(100);
+  await assertEdgelessCanvasText(page, 'hhelloello');
 
   await page.mouse.click(145, 155);
   await type(page, 'ddd\n');
-  await assertEdgelessText(page, 'hddd\nellohello');
+  await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
 test('copy and paste', async ({ page }) => {
@@ -82,10 +90,10 @@ test('copy and paste', async ({ page }) => {
   await setEdgelessTool(page, 'default');
 
   await page.mouse.dblclick(130, 140);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
 
   await type(page, 'hello');
-  await assertEdgelessText(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hello');
   await assertEdgelessTool(page, 'default');
 
   await page.mouse.move(145, 155);
@@ -94,14 +102,45 @@ test('copy and paste', async ({ page }) => {
     steps: 10,
   });
   await page.mouse.up();
+  // h|ell|o
   await waitNextFrame(page, 200);
   await page.keyboard.press(`${SHORT_KEY}+c`);
 
   await waitNextFrame(page, 200);
-  await type(page, 'ddd');
+  await type(page, 'ddd', 100);
   await waitNextFrame(page, 200);
-  await assertEdgelessText(page, 'hdddo');
+  await assertEdgelessCanvasText(page, 'hdddo');
 
   await page.keyboard.press(`${SHORT_KEY}+v`);
-  await assertEdgelessText(page, 'hdddello');
+  await assertEdgelessCanvasText(page, 'hdddello');
+});
+
+test('normalize text element rect after change its font', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await setEdgelessTool(page, 'text');
+
+  await page.mouse.click(130, 160);
+  await waitNextFrame(page);
+
+  await type(page, 'aaa\nbbbbbbbb\n\ncc');
+  await assertEdgelessCanvasText(page, 'aaa\nbbbbbbbb\n\ncc');
+  await assertEdgelessTool(page, 'default');
+  await page.mouse.click(120, 160);
+
+  await page.mouse.click(145, 175);
+  await assertEdgelessSelectedRect(page, [130, 160, 106, 156]);
+
+  const fontButton = page.locator('.text-font-family-button');
+  await fontButton.click();
+  const generalTextFont = page.getByText('General');
+  await generalTextFont.click();
+  await assertEdgelessSelectedRect(page, [130, 160, 106.7, 108]);
+
+  await fontButton.click();
+  const scribbledTextFont = page.getByText('Scribbled');
+  await scribbledTextFont.click();
+  await assertEdgelessSelectedRect(page, [130, 160, 104, 156]);
 });

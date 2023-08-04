@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "type": "module",
@@ -10,8 +10,7 @@
     "test:unit": "vitest --run",
     "test:unit:coverage": "vitest run --coverage",
     "test:unit:ui": "vitest --ui",
-    "test:e2e": "playwright test",
-    "test": "pnpm test:unit && pnpm test:e2e"
+    "test": "pnpm test:unit"
   },
   "keywords": [],
   "author": "toeverything",
@@ -22,19 +21,19 @@
     "@types/flexsearch": "^0.7.3",
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
-    "idb-keyval": "^6.2.0",
+    "idb-keyval": "^6.2.1",
     "ky": "^0.33.3",
-    "lib0": "^0.2.74",
+    "lib0": "^0.2.78",
     "merge": "^2.1.1",
-    "minimatch": "^9.0.0",
-    "nanoid": "^4.0.1",
+    "minimatch": "^9.0.3",
+    "nanoid": "^4.0.2",
     "y-protocols": "^1.0.5",
     "zod": "^3.21.4"
   },
   "devDependencies": {
     "async-call-rpc": "^6.3.1",
-    "lit": "^2.7.3",
-    "yjs": "^13.6.5"
+    "lit": "^2.7.6",
+    "yjs": "^13.6.7"
   },
   "peerDependencies": {
     "async-call-rpc": "^6",
@@ -57,6 +56,11 @@
         "import": "./dist/index.js"
       },
       "./shim.d.ts": "./shim.d.ts",
+      "./workspace/migration/*": {
+        "types": "./dist/workspace/migration/*.d.ts",
+        "module": "./dist/workspace/migration/*.js",
+        "import": "./dist/workspace/migration/*.js"
+      },
       "./providers/*": {
         "types": "./dist/providers/*.d.ts",
         "module": "./dist/providers/*.js",

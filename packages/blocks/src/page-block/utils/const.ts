@@ -1,6 +1,6 @@
 import {
   CopyIcon,
-  DatabaseTableViewIcon,
+  DatabaseTableViewIcon20,
   SHORT_KEY,
 } from '@blocksuite/global/config';
 import { type BaseBlockModel, matchFlavours } from '@blocksuite/store';
@@ -32,10 +32,10 @@ export const actionConfig = [
     hotkey: undefined,
     showWhen: () => true,
     enabledWhen: () => true,
-    action: ({ page }: ActionProps) => {
+    action: async ({ page }: ActionProps) => {
       const range = getCurrentBlockRange(page);
       assertExists(range);
-      copyBlocks(range);
+      await copyBlocks(range);
       toast('Copied to clipboard');
     },
   },
@@ -44,7 +44,7 @@ export const actionConfig = [
     name: 'Group as Database',
     disabledToolTip:
       'Contains Block types that cannot be converted to Database',
-    icon: DatabaseTableViewIcon,
+    icon: DatabaseTableViewIcon20,
     hotkey: `${SHORT_KEY}+g`,
     showWhen: (page: Page, models: BaseBlockModel[]) => {
       if (
@@ -53,9 +53,9 @@ export const actionConfig = [
       ) {
         return false;
       }
-      const range = getCurrentBlockRange(page);
-      const isShow = range?.type === 'Block';
-      return isShow;
+      // const range = getCurrentBlockRange(page);
+      // const isShow = range?.type === 'Block';
+      return false;
     },
     enabledWhen: (page: Page) => {
       const range = getCurrentBlockRange(page);

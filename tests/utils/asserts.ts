@@ -9,7 +9,11 @@ import type {
   NoteBlockModel,
   PageBlockModel,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH, WORKSPACE_VERSION } from '@blocksuite/global/config';
+import {
+  EDITOR_WIDTH,
+  PAGE_VERSION,
+  WORKSPACE_VERSION,
+} from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -25,7 +29,11 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
-import { getConnectorPath, getZoomLevel } from './actions/edgeless.js';
+import {
+  getConnectorPath,
+  getSelectedBound,
+  getZoomLevel,
+} from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -62,16 +70,19 @@ export const defaultStore: SerializedStore = {
     blockVersions: {
       'affine:paragraph': 1,
       'affine:page': 2,
-      'affine:database': 2,
+      'affine:database': 3,
+      'affine:data-view': 1,
       'affine:list': 1,
       'affine:note': 1,
       'affine:divider': 1,
       'affine:image': 1,
       'affine:code': 1,
-      'affine:surface': 3,
+      'affine:surface': 4,
       'affine:bookmark': 1,
+      'affine:attachment': 1,
     },
     workspaceVersion: WORKSPACE_VERSION,
+    pageVersion: PAGE_VERSION,
   },
   spaces: {
     'space:page0': {
@@ -86,7 +97,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
-          'prop:xywh': `[0,0,${EDITOR_WIDTH},80]`,
+          'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
@@ -102,6 +113,8 @@ export const defaultStore: SerializedStore = {
     },
   },
 };
+
+type Bound = [x: number, y: number, w: number, h: number];
 
 export async function assertEmpty(page: Page) {
   await assertRichTexts(page, ['']);
@@ -138,12 +151,15 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   expect(actualTexts).toEqual(texts);
 }
 
-export async function assertEdgelessText(page: Page, text: string) {
+export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
-    const editor = document.querySelector('surface-text-editor');
+    const editor = document.querySelector(
+      'edgeless-text-editor,edgeless-shape-text-editor,edgeless-frame-title-editor'
+    );
     if (!editor) {
       throw new Error('editor not found');
     }
+    // @ts-ignore
     const vEditor = editor.vEditor;
     return vEditor?.yText.toString();
   });
@@ -151,7 +167,8 @@ export async function assertEdgelessText(page: Page, text: string) {
 }
 
 export async function assertRichImage(page: Page, count: number) {
-  const actual = await page.locator('.resizable-img').count();
+  const editor = getEditorLocator(page);
+  const actual = await editor.locator('.resizable-img').count();
   expect(actual).toEqual(count);
 }
 
@@ -184,7 +201,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('.affine-default-page-block-title').nth(0);
+  const locator = page.locator('.affine-doc-page-block-title').nth(0);
   await expect(locator).toBeFocused();
 }
 
@@ -193,7 +210,7 @@ export async function assertListPrefix(
   predict: (string | RegExp)[],
   range?: [number, number]
 ) {
-  const prefixs = await page.locator('.affine-list-block__prefix');
+  const prefixs = page.locator('.affine-list-block__prefix');
 
   let start = 0;
   let end = await prefixs.count();
@@ -567,6 +584,15 @@ export function assertAlmostEqual(
   ).toBeLessThan(precision);
 }
 
+export function assertPointAlmostEqual(
+  actual: number[],
+  expected: number[],
+  precision = 0.001
+) {
+  assertAlmostEqual(actual[0], expected[0], precision);
+  assertAlmostEqual(actual[1], expected[1], precision);
+}
+
 /**
  * Assert the locator is visible in the viewport.
  * It will check the bounding box of the locator is within the viewport.
@@ -778,5 +804,27 @@ export async function assertConnectorPath(
   index = 0
 ) {
   const actualPath = await getConnectorPath(page, index);
-  expect(actualPath).toMatchObject(path);
+  actualPath.every((p, i) => assertPointAlmostEqual(p, path[i]));
+}
+
+export function assertRectExist(
+  rect: { x: number; y: number; width: number; height: number } | null
+): asserts rect is { x: number; y: number; width: number; height: number } {
+  expect(rect).not.toBe(null);
+}
+
+export async function assertSelectedBound(
+  page: Page,
+  expected: Bound,
+  index = 0
+) {
+  const bound = await getSelectedBound(page, index);
+  assertBound(bound, expected);
+}
+
+export function assertBound(received: Bound, expected: Bound) {
+  expect(received[0]).toBeCloseTo(expected[0], 0);
+  expect(received[1]).toBeCloseTo(expected[1], 0);
+  expect(received[2]).toBeCloseTo(expected[2], 0);
+  expect(received[3]).toBeCloseTo(expected[3], 0);
 }

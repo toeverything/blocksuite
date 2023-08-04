@@ -9,7 +9,7 @@ import { startDrag } from '../../../utils/drag.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../consts.js';
 import { getTableContainer } from '../../table-view.js';
-import type { ColumnManager } from '../../table-view-manager.js';
+import type { DataViewTableColumnManager } from '../../table-view-manager.js';
 
 const dragBarWidth = 16;
 
@@ -40,12 +40,12 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   left!: number;
   @property({ attribute: false })
-  column!: ColumnManager;
+  column!: DataViewTableColumnManager;
   @state()
   dragLeft = 0;
 
   private _bar = createRef<HTMLElement>();
-  private _startDrag = (evt: MouseEvent) => {
+  private _startDrag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
     const database = this.closest('affine-database-table');
     const offsetParent = database?.offsetParent;
@@ -77,6 +77,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
             Infinity
           )
         );
+        this.dragLeft = width - this.column.width;
         preview.display(width);
         return {
           width,
@@ -84,6 +85,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
       },
       onDrop: ({ width }) => {
         tableContainer.style.pointerEvents = 'auto';
+        this.dragLeft = 0;
         this.column.updateWidth(width);
         preview.remove();
       },
