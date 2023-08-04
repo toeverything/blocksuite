@@ -55,8 +55,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     this._draggingElementId = id;
     this._draggingPathPoints = points;
-
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -81,15 +79,12 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       points,
       lineWidth,
     });
-
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragEnd(e: PointerEventState) {
     this._draggingElementId = null;
     this._draggingPathPoints = null;
     this._page.captureSync();
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerMouseMove(e: PointerEventState) {

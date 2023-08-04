@@ -14,5 +14,9 @@ export * from './utils/index.js';
 export type DocPageBlockWidgetName =
   | 'slashMenu'
   | 'linkedPage'
-  | 'draggingArea';
-export type EdgelessPageBlockWidgetName = 'slashMenu' | 'linkedPage';
+  | 'draggingArea'
+  | 'dragHandle';
+export type EdgelessPageBlockWidgetName =
+  | 'slashMenu'
+  | 'linkedPage'
+  | 'dragHandle';

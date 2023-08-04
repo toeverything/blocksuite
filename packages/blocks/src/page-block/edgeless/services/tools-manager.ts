@@ -1,14 +1,20 @@
-import type {
-  EventName,
+import type { SurfaceSelection } from '@blocksuite/block-std';
+import {
+  type EventName,
   PointerEventState,
-  UIEventDispatcher,
-  UIEventHandler,
+  type UIEventDispatcher,
+  type UIEventHandler,
+  type UIEventState,
 } from '@blocksuite/block-std';
-import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
+import type { Bound } from '@blocksuite/phasor';
+import {
+  getCommonBound,
+  normalizeWheelDeltaY,
+  type PhasorElement,
+} from '@blocksuite/phasor';
 
 import {
   AbstractSelectionManager,
-  type BlockComponentElement,
   type EdgelessTool,
   getEditorContainerByElement,
   isDatabaseInput,
@@ -20,11 +26,13 @@ import {
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
+import { getGridBound } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
 import { DefaultToolController } from '../tool-controllers/default-tool.js';
 import { EraserToolController } from '../tool-controllers/eraser-tool.js';
+import { PresentToolController } from '../tool-controllers/frame-navigator-tool.js';
 import type { EdgelessToolController } from '../tool-controllers/index.js';
 import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
@@ -35,9 +43,15 @@ import {
   getXYWH,
   isTopLevelBlock,
   pickTopBlock,
-} from './query.js';
+} from '../utils/query.js';
+import type { EdgelessSelectionState } from './selection-manager.js';
 
 export type Selectable = TopLevelBlockModel | PhasorElement;
+
+export function getSelectedBound(selected: Selectable[]) {
+  const bounds = selected.map(s => getGridBound(s));
+  return getCommonBound(bounds) as Bound;
+}
 
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;
@@ -61,20 +75,12 @@ export interface EdgelessHoverState {
   content: Selectable;
 }
 
-export interface EdgelessSelectionState {
-  /* The selected note or phasor element */
-  selected: Selectable[];
-  /* True if the selected content is active (like after double click) */
-  active: boolean;
-  by?: 'selecting';
-}
-
 export interface SelectionArea {
   start: DOMPoint;
   end: DOMPoint;
 }
 
-export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
+export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
   private _edgelessTool: EdgelessTool = {
     type: 'default',
   };
@@ -93,20 +99,12 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
   // pressed shift key
   private _shiftKey = false;
 
-  // selected blocks
-  selectedBlocks: BlockComponentElement[] = [];
+  get selection() {
+    return this.container.selection;
+  }
 
-  // Cache the last edited elements.
-  lastState: EdgelessSelectionState | null = null;
-
-  // Holds the state of the current selected elements.
-  state: EdgelessSelectionState = {
-    selected: [],
-    active: false,
-  };
-
-  get isActive() {
-    return this.state.active;
+  get surface() {
+    return this.container.surface;
   }
 
   get lastMousePos() {
@@ -162,6 +160,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       note: new NoteToolController(this.container),
       connector: new ConnectorToolController(this.container),
       eraser: new EraserToolController(this.container),
+      frameNavigator: new PresentToolController(this.container),
     };
 
     this._initMouseAndWheelEvents();
@@ -261,7 +260,7 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       this._onContainerPointerOut(event);
     });
     this._add('contextMenu', ctx => {
-      const event = ctx.get('pointerState');
+      const event = ctx.get('defaultState');
       this._onContainerContextMenu(event);
     });
     this._add('wheel', ctx => {
@@ -346,15 +345,23 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     return this._controllers[this.edgelessTool.type].onContainerMouseOut(e);
   };
 
-  private _onContainerContextMenu = (e: PointerEventState) => {
-    e.raw.preventDefault();
+  private _onContainerContextMenu = (e: UIEventState) => {
+    e.event.preventDefault();
+    const pointerEventState = new PointerEventState({
+      event: e.event as PointerEvent,
+      rect: this._dispatcher.root.getBoundingClientRect(),
+      startX: 0,
+      startY: 0,
+      last: null,
+    });
+
     const edgelessTool = this.edgelessTool;
     if (edgelessTool.type !== 'pan' && !this._rightClickTimer) {
       this._rightClickTimer = {
         edgelessTool: edgelessTool,
-        timeStamp: e.raw.timeStamp,
+        timeStamp: e.event.timeStamp,
         timer: window.setTimeout(() => {
-          this._controllers['pan'].onContainerDragStart(e);
+          this._controllers['pan'].onContainerDragStart(pointerEventState);
         }, 233),
       };
     }
@@ -406,13 +413,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     }
   };
 
-  refreshRemoteSelection() {
-    const element = document.querySelector('remote-selection');
-    if (element) {
-      element.requestUpdate();
-    }
-  }
-
   getHoverState(): EdgelessHoverState | null {
     if (!this.currentController.enableHover) {
       return null;
@@ -423,7 +423,6 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     ) as TopLevelBlockModel[];
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
-
     const hovered: Selectable | null =
       surface.pickTop(modelX, modelY) || pickTopBlock(notes, modelX, modelY);
 
@@ -434,14 +433,14 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
       // if in other mouse mode
       this.edgelessTool.type !== 'default' ||
       // if current selection is not active
-      !this.state.active ||
+      !this.selection.editing ||
       // if current selected block is not the hovered block
-      this.state.selected[0].id !== hovered.id
+      this.selection.state.elements[0] !== hovered.id
     ) {
       this.container.components.dragHandle?.hide();
     }
 
-    if (!hovered || this.state.active) {
+    if (!hovered || this.selection?.editing) {
       return null;
     }
 
@@ -454,28 +453,27 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
 
   setEdgelessTool = (
     edgelessTool: EdgelessTool,
-    state: EdgelessSelectionState = {
-      selected: [],
-      active: false,
+    state: EdgelessSelectionState | SurfaceSelection = {
+      blockId: '',
+      elements: [],
+      editing: false,
     }
   ) => {
     if (this.edgelessTool === edgelessTool) return;
     const lastType = this.edgelessTool.type;
     this._controllers[lastType].beforeModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].beforeModeSwitch(edgelessTool);
-    if (edgelessTool.type === 'default') {
-      if (!state.selected.length && this.lastState) {
-        state = this.lastState;
-        this.lastState = null;
-      } else {
-        this.lastState = state;
-      }
-    } else if (this.state.selected.length) {
-      this.lastState = this.state;
+
+    if (
+      edgelessTool.type === 'default' &&
+      !state['elements'].length &&
+      this.selection.lastState
+    ) {
+      state = this.selection.lastState;
     }
 
     this.container.slots.edgelessToolUpdated.emit(edgelessTool);
-    this.container.slots.selectionUpdated.emit(state);
+    this.selection.setSelection(state);
     this._controllers[lastType].afterModeSwitch(edgelessTool);
     this._controllers[edgelessTool.type].afterModeSwitch(edgelessTool);
   };
@@ -484,14 +482,8 @@ export class EdgelessSelectionManager extends AbstractSelectionManager<EdgelessP
     this.setEdgelessTool({ type: 'default' }, state);
   }
 
-  clear() {
-    this.selectedBlocks = [];
-    this.lastState = null;
-    this.state = {
-      selected: [],
-      active: false,
-    };
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  clear() {}
 
   dispose() {
     this._disposables.dispose();

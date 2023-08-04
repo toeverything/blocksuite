@@ -16,7 +16,6 @@ import {
   type NoteBlockModel,
 } from '../../../../note-block/note-model.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import type { ColorEvent } from '../panel/color-panel.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -29,7 +28,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       fill: currentColor;
       align-items: center;
       justify-content: center;
-      padding: 6px 0 6px 6px;
       gap: 10px;
     }
 
@@ -143,9 +141,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  selectionState!: EdgelessSelectionState;
-
-  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()
@@ -171,8 +166,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.notes.forEach(note => {
       this.page.updateBlock(note, { background: color });
     });
-    // force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
@@ -191,8 +184,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
     }
     this.requestUpdate();
-    // force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   override updated(changedProperties: Map<string, unknown>) {

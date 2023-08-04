@@ -24,7 +24,6 @@ import type { CssVariableName } from '../../../../__internal__/theme/css-variabl
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
 import {
   type ColorEvent,
@@ -114,9 +113,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceManager;
-
-  @property({ attribute: false })
-  selectionState!: EdgelessSelectionState;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
@@ -226,7 +222,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         color,
       });
     });
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
   private _setTextAlign = (align: EdgelessCanvasTextElement['textAlign']) => {
@@ -236,7 +231,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         textAlign: align,
       });
     });
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
   private _setFontFamily = (
@@ -259,7 +253,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         });
       }
     });
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
   private _setFontSize = (fontSize: EdgelessCanvasTextElement['fontSize']) => {
@@ -269,7 +262,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         fontSize: fontSize,
       });
     });
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
   private _setTextBold = (bold: boolean) => {
@@ -279,7 +271,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         bold,
       });
     });
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
   private _setTextItalic = (italic: boolean) => {
@@ -289,7 +280,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         italic,
       });
     });
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   };
 
   private _getFontSizeLabel = (fontSize: number) => {

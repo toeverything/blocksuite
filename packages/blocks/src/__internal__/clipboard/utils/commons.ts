@@ -25,14 +25,14 @@ import {
   performNativeCopy,
 } from './pure.js';
 
-export function getBlockClipboardInfo(
+export async function getBlockClipboardInfo(
   model: BaseBlockModel,
   selectedModels?: Map<string, number>,
   begin?: number,
   end?: number
 ) {
   const service = getService(model.flavour);
-  const html = service.block2html(model, { begin, end });
+  const html = await service.block2html(model, { begin, end });
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered
   // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
@@ -46,7 +46,7 @@ export function getBlockClipboardInfo(
   };
 }
 
-function createPageClipboardItems(range: BlockRange) {
+async function createPageClipboardItems(range: BlockRange) {
   const uniqueModelsFilter = new Map();
   const addToFilter = (model: BaseBlockModel, index: number) => {
     uniqueModelsFilter.set(model.id, index);
@@ -59,18 +59,19 @@ function createPageClipboardItems(range: BlockRange) {
     selectedModels.set(model.id, index);
   });
 
-  const clipGroups = range.models
-    .filter((model, index) => {
-      if (uniqueModelsFilter.has(model.id)) {
-        uniqueModelsFilter.set(model.id, index);
-        return false;
-      }
-      addToFilter(model, index);
-      return true;
-    })
-    .map((model, index, array) => {
+  const clipModels = range.models.filter((model, index) => {
+    if (uniqueModelsFilter.has(model.id)) {
+      uniqueModelsFilter.set(model.id, index);
+      return false;
+    }
+    addToFilter(model, index);
+    return true;
+  });
+
+  const clipGroups = await Promise.all(
+    clipModels.map(async (model, index, array) => {
       if (index === 0) {
-        return getBlockClipboardInfo(
+        return await getBlockClipboardInfo(
           model,
           selectedModels,
           range.startOffset,
@@ -78,15 +79,16 @@ function createPageClipboardItems(range: BlockRange) {
         );
       }
       if (index === array.length - 1) {
-        return getBlockClipboardInfo(
+        return await getBlockClipboardInfo(
           model,
           selectedModels,
           undefined,
           range.endOffset
         );
       }
-      return getBlockClipboardInfo(model, selectedModels);
-    });
+      return await getBlockClipboardInfo(model, selectedModels);
+    })
+  );
 
   const stringifiesData = JSON.stringify(
     clipGroups.filter(group => group.json).map(group => group.json)
@@ -119,8 +121,8 @@ function createPageClipboardItems(range: BlockRange) {
   return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
 }
 
-export function copyBlocks(range: BlockRange) {
-  const clipboardItems = createPageClipboardItems(range);
+export async function copyBlocks(range: BlockRange) {
+  const clipboardItems = await createPageClipboardItems(range);
 
   const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
 

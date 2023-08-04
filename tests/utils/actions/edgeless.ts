@@ -450,7 +450,10 @@ export async function countBlock(page: Page, flavour: string) {
 
 export async function activeNoteInEdgeless(page: Page, noteId: string) {
   const bound = await getNoteBoundBoxInEdgeless(page, noteId);
-  await page.mouse.dblclick(bound.x + 8, bound.y + 8);
+  await page.mouse.dblclick(
+    bound.x + bound.width / 2,
+    bound.y + bound.height / 2
+  );
 }
 
 export async function selectNoteInEdgeless(page: Page, noteId: string) {
@@ -596,7 +599,8 @@ type Action =
   | 'changeShapeStrokeColor'
   | 'changeShapeStrokeStyles'
   | 'changeConnectorStrokeColor'
-  | 'changeConnectorStrokeStyles';
+  | 'changeConnectorStrokeStyles'
+  | 'addFrame';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -709,6 +713,13 @@ export async function triggerComponentToolbarAction(
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-connector-button')
         .locator('.line-styles-button');
+      await button.click();
+      break;
+    }
+    case 'addFrame': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-add-frame-button'
+      );
       await button.click();
       break;
     }
@@ -945,6 +956,18 @@ export async function getConnectorPath(page: Page, index = 0) {
       if (!container) throw new Error('container not found');
       const connectors = container.surface.getElementsByType('connector');
       return connectors[index].absolutePath;
+    },
+    [index]
+  );
+}
+
+export async function getSelectedBound(page: Page, index = 0) {
+  return await page.evaluate(
+    ([index]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      const selected = container.selection.elements[index];
+      return JSON.parse(selected.xywh);
     },
     [index]
   );

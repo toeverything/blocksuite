@@ -21,7 +21,7 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const view = this.host.root.blockViewMap.get(selection.path);
+    const view = this.host.root.viewStore.viewFromPath('block', selection.path);
     if (!view) return;
 
     if (view.model.text) {
@@ -31,7 +31,6 @@ export class BlockNavigation {
       assertExists(virgoRoot);
       const sel = this._selection.getInstance('text', {
         from: {
-          blockId: selection.blockId,
           path: selection.path,
           index: virgoRoot.virgoEditor.yText.length,
           length: 0,
@@ -55,7 +54,6 @@ export class BlockNavigation {
     );
     const sel = this._selection.getInstance('text', {
       from: {
-        blockId,
         path: parentPath.concat(blockId),
         index: 0,
         length: 0,
@@ -145,7 +143,6 @@ export class BlockNavigation {
     const blockId = id;
     const path = parentPath.concat(blockId);
     return this._selection.getInstance('block', {
-      blockId,
       path,
     });
   }
@@ -183,7 +180,7 @@ export class BlockNavigation {
 
     const path = _focusBlock.path;
     requestAnimationFrame(() => {
-      const view = this.host.root.blockViewMap.get(path);
+      const view = this.host.root.viewStore.viewFromPath('block', path);
       view?.scrollIntoView({ block: 'nearest' });
     });
   }
@@ -207,12 +204,11 @@ export class BlockNavigation {
     const path = parentPath.concat(blockId);
     this._selection.set([
       this._selection.getInstance('block', {
-        blockId,
         path,
       }),
     ]);
     requestAnimationFrame(() => {
-      const view = this.host.root.blockViewMap.get(path);
+      const view = this.host.root.viewStore.viewFromPath('block', path);
       view?.scrollIntoView({ block: 'nearest' });
     });
   }

@@ -317,6 +317,7 @@ test.describe('switch column type', () => {
     const checkbox = getFirstColumnCell(page, 'checkbox');
     await expect(checkbox).not.toHaveClass('checked');
 
+    await waitNextFrame(page, 500);
     await checkbox.click();
     await expect(checkbox).toHaveClass(/checked/);
 

@@ -419,7 +419,7 @@ export async function initDatabaseRowWithData(page: Page, data: string) {
 
   const lastRow = page.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('affine-paragraph');
-  await cell.click();
+  await cell.click({ force: true });
   await type(page, data);
 }
 
@@ -644,12 +644,12 @@ export async function pasteContent(
       });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       Object.keys(clipData).forEach(key => {
         e.clipboardData?.setData(key, clipData[key] as string);
       });
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );

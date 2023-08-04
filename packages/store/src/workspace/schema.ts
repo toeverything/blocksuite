@@ -1,21 +1,19 @@
 import { SchemaValidateError } from '@blocksuite/global/error';
 import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
+import * as Y from 'yjs';
 
 import type { BlockSchemaType } from '../base.js';
-import type { Workspace } from './workspace.js';
+import { BlockSchema } from '../base.js';
+import { toBlockMigrationData } from '../utils/utils.js';
+import { ProxyManager } from '../yjs/index.js';
 
 const SCHEMA_NOT_FOUND_MESSAGE =
   'Schema not found. The block flavour may not be registered.';
 
 export class Schema {
-  workspace: Workspace;
-
-  flavourSchemaMap = new Map<string, BlockSchemaType>();
-
-  constructor(workspace: Workspace) {
-    this.workspace = workspace;
-  }
+  readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
+  readonly proxy = new ProxyManager();
 
   toJSON() {
     return Object.fromEntries(
@@ -30,6 +28,14 @@ export class Schema {
         ]
       )
     );
+  }
+
+  register(blockSchema: BlockSchemaType[]) {
+    blockSchema.forEach(schema => {
+      BlockSchema.parse(schema);
+      this.flavourSchemaMap.set(schema.model.flavour, schema);
+    });
+    return this;
   }
 
   validate = (
@@ -95,6 +101,37 @@ export class Schema {
       );
     }
   }
+
+  upgradePage = (oldVersions: Record<string, number>, pageData: Y.Doc) => {
+    const blocks = pageData.get('blocks') as Y.Map<unknown>;
+    assertExists(blocks instanceof Y.Map, 'blocks must be a Y.Map');
+    Array.from(blocks.values()).forEach(block => {
+      const flavour = block.get('sys:flavour') as string;
+      const currentVersion = oldVersions[flavour];
+      assertExists(
+        currentVersion,
+        `previous version for flavour ${flavour} not found`
+      );
+      this.upgradeBlock(flavour, currentVersion, block);
+    });
+  };
+
+  upgradeBlock = (
+    flavour: string,
+    oldVersion: number,
+    blockData: Y.Map<unknown>
+  ) => {
+    const currentSchema = this.flavourSchemaMap.get(flavour);
+    assertExists(currentSchema);
+    const { onUpgrade, version } = currentSchema;
+    if (!onUpgrade) {
+      return;
+    }
+
+    const data = toBlockMigrationData(blockData, this.proxy);
+
+    return onUpgrade(data, oldVersion, version);
+  };
 
   private _validateRole(child: BlockSchemaType, parent: BlockSchemaType) {
     const childRole = child.model.role;

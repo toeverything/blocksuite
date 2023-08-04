@@ -52,9 +52,9 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         });
         this._virgoContainer.style.minHeight = `${containerHeight}px`;
       }
-      edgeless.slots.selectionUpdated.emit({
-        selected: [element],
-        active: true,
+      edgeless.selection.setSelection({
+        elements: [element.id],
+        editing: true,
       });
     }
   }
@@ -139,9 +139,9 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.remove();
     assertExists(this._edgeless);
-    this._edgeless.slots.selectionUpdated.emit({
-      selected: [],
-      active: false,
+    this._edgeless.selection.setSelection({
+      elements: [],
+      editing: false,
     });
   }
 

@@ -13,7 +13,6 @@ import type { CssVariableName } from '../../../../__internal__/theme/css-variabl
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import { BrushSize } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
@@ -91,9 +90,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   elements: BrushElement[] = [];
 
-  @property({ type: Object })
-  selectionState!: EdgelessSelectionState;
-
   @property({ attribute: false })
   page!: Page;
 
@@ -125,8 +121,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
         this.surface.updateElement<'brush'>(element.id, { lineWidth: size });
       }
     });
-    // FIXME: force update selection, because brush size changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setBrushColor(color: CssVariableName) {

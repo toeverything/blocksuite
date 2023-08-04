@@ -159,7 +159,7 @@ export class Keyboard {
     }
 
     this._page.transact(() => {
-      const { blockId, path } = this._replaceBlocksBySelection(
+      const { path } = this._replaceBlocksBySelection(
         blockSelections,
         'affine:paragraph',
         {}
@@ -170,7 +170,6 @@ export class Keyboard {
           from: {
             index: 0,
             length: 0,
-            blockId,
             path,
           },
           to: null,
@@ -195,7 +194,10 @@ export class Keyboard {
   ) {
     const current = selections[0];
     const first = this._page.getBlockById(current.blockId);
-    const firstElement = this.host.root.blockViewMap.get(current.path);
+    const firstElement = this.host.root.viewStore.viewFromPath(
+      'block',
+      current.path
+    );
 
     assertExists(first, `Cannot find block ${current.blockId}`);
     assertExists(

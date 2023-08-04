@@ -232,6 +232,9 @@ importers:
         specifier: workspace:*
         version: link:../store
     devDependencies:
+      vite-plugin-wasm:
+        specifier: ^3.2.2
+        version: 3.2.2(vite@4.4.7)
       vitepress:
         specifier: 1.0.0-alpha.74
         version: 1.0.0-alpha.74(@types/node@18.17.1)(@types/react@18.2.17)(search-insights@2.7.0)
@@ -241,9 +244,6 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
-      '@toeverything/theme':
-        specifier: 0.7.7
-        version: 0.7.7
       lit:
         specifier: ^2.7.6
         version: 2.7.6
@@ -263,6 +263,9 @@ importers:
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
+      '@toeverything/theme':
+        specifier: ^0.7.9
+        version: 0.7.9
       '@types/marked':
         specifier: ^4.3.1
         version: 4.3.1
@@ -359,6 +362,9 @@ importers:
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
+      intl-segmenter-polyfill-rs:
+        specifier: ^0.1.4
+        version: 0.1.4
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -377,6 +383,9 @@ importers:
       ses:
         specifier: ^0.18.5
         version: 0.18.5
+      tweakpane:
+        specifier: ^3.1.10
+        version: 3.1.10
       y-protocols:
         specifier: ^1.0.5
         version: 1.0.5
@@ -387,18 +396,18 @@ importers:
         specifier: ^3.21.4
         version: 3.21.4
     devDependencies:
-      '@types/dat.gui':
-        specifier: ^0.7.10
-        version: 0.7.10
+      '@tweakpane/core':
+        specifier: ^1.1.9
+        version: 1.1.9
       '@types/micromatch':
         specifier: ^4.0.2
         version: 4.0.2
-      dat.gui:
-        specifier: ^0.7.9
-        version: 0.7.9
       magic-string:
         specifier: ^0.29.0
         version: 0.29.0
+      vite-plugin-wasm:
+        specifier: ^3.2.2
+        version: 3.2.2(vite@4.4.7)
 
   packages/store:
     dependencies:
@@ -1602,9 +1611,9 @@ packages:
     resolution: {integrity: sha512-tvtmkI4ALjKThVVORh++sB9JnkFY7eGInKxNy+Df7WVQiF7T85tlvGADzlgX4Ic+CK5MIUzZ0jhOlQ/RRlgXpg==}
     dev: false
 
-  /@toeverything/theme@0.7.7:
-    resolution: {integrity: sha512-yGk1GiPnaDmm0uUqg/zzEVKahl1GusRZb+wy+wnVu+yjOmiD/3NlvdoSNdJC64iHYL1wH6dqxuw23oIGEmE6RQ==}
-    dev: false
+  /@toeverything/theme@0.7.9:
+    resolution: {integrity: sha512-CrgP/c2OrVIAWrAaASChUy8YBcr/u6fOt07sZUL72MsLGQ9IbfistfBZtcvPA2HyXUhAkktgM28WOx7Ga7ZHWA==}
+    dev: true
 
   /@toeverything/y-indexeddb@0.8.0-canary.4(yjs@13.6.7):
     resolution: {integrity: sha512-PQhuZhGYfydQy8+AZghdu/mtQ2vf1hQIZz4YW+7HE9X10RN0f4Sc3u2vlhvM3Y+exdK0E12iqhTvQ2kaskQ4hg==}
@@ -1633,6 +1642,10 @@ packages:
 
   /@tsconfig/node16@1.0.4:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+    dev: true
+
+  /@tweakpane/core@1.1.9:
+    resolution: {integrity: sha512-9tq+KAhaqPiOgsFyLPAz1IMXkVfhRqxGzAgy1ps3As6o3W7XjnU7sev6OlD/Z+Pzw8uZVMukkSHf2e0uCU6u0A==}
     dev: true
 
   /@types/accepts@1.3.5:
@@ -1683,10 +1696,6 @@ packages:
       '@types/express': 4.17.17
       '@types/keygrip': 1.0.2
       '@types/node': 18.17.1
-    dev: true
-
-  /@types/dat.gui@0.7.10:
-    resolution: {integrity: sha512-sLifoNrvs4lgJkAUZcTB28dbWy0AM05Yc0BzTqHheK0tRYRVsJHoFLocB5heDbb5amaFLEXna41GOM6IG06oqA==}
     dev: true
 
   /@types/express-serve-static-core@4.17.35:
@@ -3105,10 +3114,6 @@ packages:
   /dargs@7.0.0:
     resolution: {integrity: sha512-2iy1EkLdlBzQGvbweYRFxmFath8+K7+AKB0TlhHWkNuH+TmovaMH/Wp7V7R4u7f4SnX3OgLsU9t1NI9ioDnUpg==}
     engines: {node: '>=8'}
-    dev: true
-
-  /dat.gui@0.7.9:
-    resolution: {integrity: sha512-sCNc1OHobc+Erc1HqiswYgHdVNpSJUlk/Hz8vzOCsER7rl+oF/4+v8GXFUyCgtXpoCX6+bnmg07DedLvBLwYKQ==}
     dev: true
 
   /date-fns@2.30.0:
@@ -4562,6 +4567,10 @@ packages:
       has: 1.0.3
       side-channel: 1.0.4
     dev: true
+
+  /intl-segmenter-polyfill-rs@0.1.4:
+    resolution: {integrity: sha512-hASM/m5PoSCqq4vofQxkop6JUajLOuvGmGi05h7S6M9APbqc02ZNO55wvwLc+OAxlXgK6pAsdHV21Tj0y/P2Og==}
+    dev: false
 
   /is-accessor-descriptor@0.1.6:
     resolution: {integrity: sha512-e1BM1qnDbMRG3ll2U9dSK0UMHuWOs3pY3AtcFsmvwPtKL3MML/Q86i+GilLfvqEs4GW+ExB91tQ3Ig9noDIZ+A==}
@@ -7385,6 +7394,10 @@ packages:
       domino: 2.1.6
     dev: false
 
+  /tweakpane@3.1.10:
+    resolution: {integrity: sha512-rqwnl/pUa7+inhI2E9ayGTqqP0EPOOn/wVvSWjZsRbZUItzNShny7pzwL3hVlaN4m9t/aZhsP0aFQ9U5VVR2VQ==}
+    dev: false
+
   /type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
@@ -7631,6 +7644,14 @@ packages:
       vite: 4.4.7(@types/node@18.17.1)
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /vite-plugin-wasm@3.2.2(vite@4.4.7):
+    resolution: {integrity: sha512-cdbBUNR850AEoMd5nvLmnyeq63CSfoP1ctD/L2vLk/5+wsgAPlAVAzUK5nGKWO/jtehNlrSSHLteN+gFQw7VOA==}
+    peerDependencies:
+      vite: ^2 || ^3 || ^4
+    dependencies:
+      vite: 4.4.7(@types/node@18.17.1)
     dev: true
 
   /vite-plugin-web-components-hmr@0.1.3(vite@4.4.7):

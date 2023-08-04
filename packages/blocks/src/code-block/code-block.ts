@@ -385,7 +385,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       </icon-button>
       ${this._showLangList
         ? html`<lang-list
-            .currentLanguageId=${this._curLanguage.id}
+            .currentLanguageId=${this._curLanguage.id as Lang}
             @selected-language-changed=${(e: CustomEvent) => {
               getService('affine:code').setLang(this.model, e.detail.language);
               this._showLangList = false;

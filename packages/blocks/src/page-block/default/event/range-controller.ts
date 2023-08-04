@@ -48,7 +48,7 @@ export class RangeController {
     }
 
     const { from, to } = selection;
-    const fromBlock = this.root.blockViewMap.get(from.path);
+    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
     if (!fromBlock) {
       return;
     }
@@ -64,17 +64,19 @@ export class RangeController {
 
   writeRange(range: Range | null) {
     const selectionManager = this.root.selectionManager;
-    const hasTextSelection =
-      selectionManager.value.filter(sel => sel.is('text')).length > 0;
+    let hasTextSelection = false;
+    const noneTextAndBlockSelection = selectionManager.value.filter(sel => {
+      if (sel.is('text')) hasTextSelection = true;
+      return !sel.is('text') && !sel.is('block');
+    });
     this._reusedRange = range;
 
     const { startContainer, endContainer } = this._range;
     const from = this._nodeToPoint(startContainer);
     const to = range?.collapsed ? null : this._nodeToPoint(endContainer);
-
     if (!from) {
       if (hasTextSelection) {
-        selectionManager.clear();
+        selectionManager.clear(['text']);
       }
       return null;
     }
@@ -84,7 +86,7 @@ export class RangeController {
       to,
     });
 
-    selectionManager.set([selection]);
+    selectionManager.set([...noneTextAndBlockSelection, selection]);
     return selection;
   }
 
@@ -92,7 +94,9 @@ export class RangeController {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
-    const getBlockView = this.root.blockStore.config.getBlockViewByNode;
+    const getBlockView = (node: Node) =>
+      this.root.viewStore.getNodeView(node)?.view as BlockElement;
+
     if (ancestor.nodeType === Node.TEXT_NODE) {
       const block = getBlockView(ancestor);
       if (!block) return [];
@@ -156,7 +160,7 @@ export class RangeController {
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {
-    const fromBlock = this.root.blockViewMap.get(point.path);
+    const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
     assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);
     const startVirgoElement =
       fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');

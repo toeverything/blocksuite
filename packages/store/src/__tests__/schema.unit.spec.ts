@@ -12,11 +12,13 @@ import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragr
 import { SchemaValidateError } from '../../../global/src/error/index.js';
 import { defineBlockSchema } from '../base';
 import { Generator } from '../store';
-import { Workspace } from '../workspace';
+import { Schema, Workspace } from '../workspace';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;
-  return { id: 'test-workspace', idGenerator, isSSR: true };
+  const schema = new Schema();
+  schema.register(BlockSchemas);
+  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
 }
 
 const TestCustomNoteBlockSchema = defineBlockSchema({
@@ -58,7 +60,7 @@ const BlockSchemas = [
 const defaultPageId = 'page0';
 async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
-  const workspace = new Workspace(options).register(BlockSchemas);
+  const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
   await page.waitForLoaded();
   return page;

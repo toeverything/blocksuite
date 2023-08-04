@@ -110,7 +110,6 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
         block?.querySelector('rich-text')?.vEditor?.yText.length ?? 0;
       const selection = selectionManager.getInstance('text', {
         from: {
-          blockId: block.model.id,
           path: block.path,
           index: length,
           length: 0,

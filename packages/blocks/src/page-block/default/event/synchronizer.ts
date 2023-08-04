@@ -1,10 +1,11 @@
 import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
-import { PathMap } from '@blocksuite/block-std';
+import { PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
+import type { EdgelessPageBlockComponent } from '../../index.js';
 import type { DefaultPageBlockComponent } from '../default-page-block.js';
 
 export class Synchronizer {
@@ -21,7 +22,9 @@ export class Synchronizer {
     return this._selection.value;
   }
 
-  constructor(public host: DefaultPageBlockComponent) {
+  constructor(
+    public host: DefaultPageBlockComponent | EdgelessPageBlockComponent
+  ) {
     this.host.disposables.add(
       this._selection.slots.changed.on(selections => {
         if (this._isNativeSelection) {
@@ -72,7 +75,7 @@ export class Synchronizer {
 
   private _beforeTextInput(selection: TextSelection, composing: boolean) {
     const { from, to } = selection;
-    if (!to || PathMap.equals(from.path, to.path)) return;
+    if (!to || PathFinder.equals(from.path, to.path)) return;
 
     const range = this.host.rangeController.value;
     if (!range) return;
