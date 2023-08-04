@@ -181,6 +181,14 @@ export class ViewStore<NodeViewType = unknown> {
     return this.fromPath(PathFinder.parent(path));
   };
 
+  getChildren = (path: string[]): NodeViewTree<NodeViewType>[] => {
+    const node = this.fromPath(path);
+    if (!node) {
+      return [];
+    }
+    return node.children;
+  };
+
   findPrev = (
     path: string[],
     fn: (

@@ -26,15 +26,7 @@ export function horizontalGetNextCaret(
     return;
   }
 
-  const next = forward
-    ? viewStore.findPrev(view.path, () => true)
-    : viewStore.findNext(view.path, () => true);
-  const el = next?.view;
-  if (!el || el === element) {
-    return;
-  }
-  const rect = el.getBoundingClientRect();
-  let move = caretFromPoint(point.x, forward ? rect.bottom : rect.top);
+  let move = caretFromPoint(point.x, point.y);
   const needContinue = () => {
     if (!move) {
       return false;
