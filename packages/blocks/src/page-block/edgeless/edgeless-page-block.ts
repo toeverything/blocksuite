@@ -537,9 +537,7 @@ export class EdgelessPageBlockComponent
         }
         this.components.dragHandle?.hide();
         if (this.selection.selectedBlocks.length) {
-          this.selection.setSelectedBlocks(
-            this.selection.selectedBlocks.slice()
-          );
+          this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
         }
         this.requestUpdate();
       })
@@ -1099,7 +1097,7 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.selection.setSelectedBlocks(this.selection.selectedBlocks.slice());
+      this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
       this.selection.setSelection(this.selection.state);
     });
     resizeObserver.observe(this.pageBlockContainer);
