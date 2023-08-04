@@ -36,7 +36,7 @@ import {
   getModelByBlockElement,
   Point,
 } from '../__internal__/index.js';
-import { type DragIndicator } from './drag-handle.js';
+import { type DragIndicator } from './drag-indicator.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
 const styles = css`
