@@ -61,12 +61,12 @@ export class DragHandleWidget extends WidgetElement {
     return this.root.selectionManager.value;
   }
 
-  private _hide(force = false) {
+  public hide(force = false) {
     this._dragHandleContainer.style.display = 'none';
-    if (force) this._reset();
+    if (force) this.reset();
   }
 
-  private _reset() {
+  public reset() {
     this._dragging = false;
     this._indicatorRect = null;
     this._dragPreview.textContent = '';
@@ -343,7 +343,7 @@ export class DragHandleWidget extends WidgetElement {
     this._hoveredBlockPath = blockPath;
 
     if (this._insideDatabaseTable(closestBlockElement)) {
-      this._hide();
+      this.hide();
       return;
     }
     this._show(point, closestBlockElement);
@@ -367,7 +367,7 @@ export class DragHandleWidget extends WidgetElement {
     // When pointer out of note block hover area or inside database, should hide drag handle
     const point = new Point(state.point.x, state.point.y);
     if (this._outOfNoteBlock(point)) {
-      this._hide();
+      this.hide();
       return;
     }
 
@@ -487,7 +487,7 @@ export class DragHandleWidget extends WidgetElement {
     this._createDragPreview(blockElementsExcludingChildren, hoverBlockElement);
     this._draggingElements = blockElementsExcludingChildren;
     this._dragging = true;
-    this._hide();
+    this.hide();
 
     return true;
   };
@@ -522,7 +522,7 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragEndHandler: UIEventHandler = () => {
     if (!this._dragging || this._draggingElements.length === 0) {
-      this._hide(true);
+      this.hide(true);
       return;
     }
 
@@ -530,7 +530,7 @@ export class DragHandleWidget extends WidgetElement {
     const shouldInsertBefore = this._dropBefore;
     const draggingElements = this._draggingElements;
 
-    this._hide(true);
+    this.hide(true);
     if (!targetBlockId) return;
 
     // Should make sure drop block id is not in selected blocks
@@ -577,14 +577,14 @@ export class DragHandleWidget extends WidgetElement {
    * Should update drag preview position when wheel if dragging
    */
   private _wheelHandler: UIEventHandler = ctx => {
-    this._hide();
+    this.hide();
     if (!this._dragging) {
       return;
     }
   };
 
   override firstUpdated() {
-    this._hide(true);
+    this.hide(true);
   }
 
   override connectedCallback() {
@@ -598,7 +598,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   override disconnectedCallback() {
-    this._hide(true);
+    this.hide(true);
     super.disconnectedCallback();
   }
 

@@ -437,7 +437,8 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
       // if current selected block is not the hovered block
       this.selection.state.elements[0] !== hovered.id
     ) {
-      this.container.components.dragHandle?.hide();
+      // TODO: find a way to hide drag handle when not hovering on a block and not in editing mode
+      // this.container.components.dragHandle?.hide();
     }
 
     if (!hovered || this.selection?.editing) {
