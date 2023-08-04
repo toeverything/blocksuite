@@ -58,7 +58,7 @@ export class Portal extends LitElement {
  *
  * See {@link Portal} for more details.
  */
-export const createLitPortal = ({
+export function createLitPortal({
   template,
   container = document.body,
   abortController = new AbortController(),
@@ -74,7 +74,7 @@ export const createLitPortal = ({
    * If true, the portalRoot will be added a class `affine-portal`. It's useful for finding the portalRoot.
    */
   identifyWrapper?: boolean;
-}) => {
+}) {
   const portalRoot = document.createElement('div');
   if (identifyWrapper) {
     portalRoot.classList.add('affine-portal');
@@ -87,7 +87,7 @@ export const createLitPortal = ({
   render(template, portalRoot, renderOptions);
   container.append(portalRoot);
   return portalRoot;
-};
+}
 
 declare global {
   interface HTMLElementTagNameMap {
