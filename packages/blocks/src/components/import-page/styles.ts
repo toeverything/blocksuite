@@ -11,8 +11,8 @@ export const styles = css`
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
-    padding: 20px 40px 24px 40px;
-    gap: 19px;
+    padding: 12px 40px 36px;
+    gap: 20px;
     display: flex;
     flex-direction: column;
     background: var(--affine-background-primary-color);
@@ -43,6 +43,8 @@ export const styles = css`
 
   header icon-button {
     margin-left: auto;
+    position: relative;
+    left: 24px;
   }
 
   .button-container {
@@ -51,7 +53,7 @@ export const styles = css`
   }
 
   .button-container icon-button {
-    padding: 8px;
+    padding: 8px 12px;
     justify-content: flex-start;
     gap: 8px;
     width: 190px;
