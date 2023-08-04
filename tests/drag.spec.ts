@@ -670,45 +670,44 @@ test('should drag and drop blocks under block-level selection', async ({
   await expect(blockSelections).toHaveCount(2);
 });
 
-test.fixme(
-  'should trigger click event on editor container when clicking on blocks under block-level selection',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await assertRichTexts(page, ['123', '456', '789']);
+test('should trigger click event on editor container when clicking on blocks under block-level selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
-    await dragBetweenIndices(
-      page,
-      [0, 0],
-      [1, 3],
-      { x: -60, y: 0 },
-      { x: 80, y: 0 },
-      {
-        steps: 50,
-      }
-    );
-
-    const blockSelections = page.locator('.selected');
-    await expect(blockSelections).toHaveCount(2);
-    await expect(page.locator('*:focus')).toHaveCount(0);
-
-    const editors = page.locator('rich-text');
-    const editorRect0 = await editors.nth(0).boundingBox();
-    if (!editorRect0) {
-      throw new Error();
+  await dragBetweenIndices(
+    page,
+    [0, 0],
+    [1, 3],
+    { x: -60, y: 0 },
+    { x: 80, y: 0 },
+    {
+      steps: 50,
     }
+  );
 
-    await page.mouse.move(
-      editorRect0.x + 10,
-      editorRect0.y + editorRect0.height / 2
-    );
-    await page.mouse.down();
-    await page.mouse.up();
-    await expect(blockSelections).toHaveCount(0);
-    await expect(page.locator('*:focus')).toHaveCount(1);
+  const blockSelections = page.locator('.selected');
+  await expect(blockSelections).toHaveCount(2);
+  await expect(page.locator('*:focus')).toHaveCount(0);
+
+  const editors = page.locator('rich-text');
+  const editorRect0 = await editors.nth(0).boundingBox();
+  if (!editorRect0) {
+    throw new Error();
   }
-);
+
+  await page.mouse.move(
+    editorRect0.x + 10,
+    editorRect0.y + editorRect0.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.up();
+  await expect(blockSelections).toHaveCount(0);
+  await expect(page.locator('*:focus')).toHaveCount(1);
+});
 
 test('should get to selected block when dragging unselected block', async ({
   page,
