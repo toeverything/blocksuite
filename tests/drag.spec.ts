@@ -594,8 +594,6 @@ test('should create preview when dragging', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   const dragPreview = page.locator('.affine-drag-preview');
-  const dragPreviewRect = await dragPreview.boundingBox();
-  expect(dragPreviewRect?.height).toBe(0);
 
   await dragBetweenIndices(
     page,

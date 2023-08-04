@@ -15,6 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   calcDropTarget,
   findClosestBlockElement,
+  getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
@@ -520,21 +521,22 @@ export class DragHandleWidget extends WidgetElement {
       );
     }
 
-    // TODO:
-    // Need to update selection when moving blocks successfully
-    // Because the block path may be changed after moving
-    // assertExists(parent);
-    // const parentElement = getBlockElementByModel(parent);
-    // console.log('parent path: ', parentElement?.path);
-    // if (parentElement) {
-    //   const newSelections = selectedBlocks
-    //     .map(block => parentElement.path.concat(block.id))
-    //     .map(path => this.root.selectionManager.getInstance('block', { path }));
+    // TODO: need a better way to update selection
+    setTimeout(() => {
+      assertExists(parent);
+      // Need to update selection when moving blocks successfully
+      // Because the block path may be changed after moving
+      const parentElement = getBlockElementByModel(parent);
+      if (parentElement) {
+        const newSelections = selectedBlocks
+          .map(block => parentElement.path.concat(block.id))
+          .map(path =>
+            this.root.selectionManager.getInstance('block', { path })
+          );
 
-    //   console.log('new selections: ', newSelections);
-    //   this.root.selectionManager.set(newSelections);
-    //   console.log('new selected blocks: ', this.selectedBlocks);
-    // }
+        this.root.selectionManager.set(newSelections);
+      }
+    }, 0);
 
     return true;
   };
