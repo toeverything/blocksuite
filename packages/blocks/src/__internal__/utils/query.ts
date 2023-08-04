@@ -839,6 +839,40 @@ export function getClosestBlockElementByPoint(
 }
 
 /**
+ * Find the most close block on the given position
+ * @param container container which the blocks can be found inside
+ * @param point position
+ */
+export function findClosestBlockElement(
+  container: BlockComponentElement,
+  point: Point,
+  selector: string
+) {
+  const children = Array.from(container.querySelectorAll(selector));
+  let lastDistance = Number.POSITIVE_INFINITY;
+  let lastChild = null;
+
+  if (!children.length) return null;
+
+  for (const child of children) {
+    const rect = child.getBoundingClientRect();
+    if (rect.height === 0 || point.y > rect.bottom) continue;
+    const distance =
+      Math.pow(point.y - (rect.y + rect.height / 2), 2) +
+      Math.pow(point.x - rect.x, 2);
+
+    if (distance <= lastDistance) {
+      lastDistance = distance;
+      lastChild = child;
+    } else {
+      return lastChild;
+    }
+  }
+
+  return lastChild;
+}
+
+/**
  * Returns the closest block element by element that does not contain the page element and note element.
  */
 export function getClosestBlockElementByElement(
@@ -1153,10 +1187,9 @@ function getCellRect(element: Element, bounds?: DOMRect) {
   const row = col.parentElement;
   assertExists(row);
   const colRect = col.getBoundingClientRect();
-  const rowRect = row.getBoundingClientRect();
   return new DOMRect(
     bounds.left,
-    rowRect.top,
+    colRect.top,
     colRect.right - bounds.left,
     colRect.height
   );
