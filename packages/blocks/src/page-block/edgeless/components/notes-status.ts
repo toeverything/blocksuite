@@ -17,8 +17,8 @@ export function EdgelessNotesStatus(
     return nothing;
 
   const state = edgeless.selection.state;
-  const isSelectOne = state.selected.length === 1;
-  const singleSelected = state.selected[0];
+  const isSelectOne = state.elements.length === 1;
+  const singleSelected = edgeless.getElementModel(state.elements[0]);
 
   if (
     !isSelectOne ||

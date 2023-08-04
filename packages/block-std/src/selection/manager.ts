@@ -3,7 +3,11 @@ import { DisposableGroup, Slot } from '@blocksuite/store';
 
 import type { BlockStore } from '../store/index.js';
 import type { BaseSelection } from './base.js';
-import { BlockSelection, TextSelection } from './variants/index.js';
+import {
+  BlockSelection,
+  SurfaceSelection,
+  TextSelection,
+} from './variants/index.js';
 
 interface SelectionConstructor {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,7 +42,7 @@ export class SelectionManager {
   }
 
   private _setupDefaultSelections() {
-    this.register([TextSelection, BlockSelection]);
+    this.register([TextSelection, BlockSelection, SurfaceSelection]);
   }
 
   private _jsonToSelection = (json: Record<string, unknown>) => {
@@ -76,8 +80,15 @@ export class SelectionManager {
     this.set(selections);
   }
 
-  clear() {
-    this.set([]);
+  clear(types?: string[]) {
+    if (types) {
+      const values = this.value.filter(
+        selection => !types.includes(selection.type)
+      );
+      this.set(values);
+    } else {
+      this.set([]);
+    }
   }
 
   get remoteSelections() {

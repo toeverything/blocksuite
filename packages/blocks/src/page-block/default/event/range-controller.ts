@@ -1,7 +1,7 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -64,8 +64,11 @@ export class RangeController {
 
   writeRange(range: Range | null) {
     const selectionManager = this.root.selectionManager;
-    const hasTextSelection =
-      selectionManager.value.filter(sel => sel.is('text')).length > 0;
+    let hasTextSelection = false;
+    const noneTextSelection = selectionManager.value.filter(sel => {
+      if (sel.is('text')) hasTextSelection = true;
+      return !sel.is('text');
+    });
     this._reusedRange = range;
 
     const { startContainer, endContainer } = this._range;
@@ -74,8 +77,17 @@ export class RangeController {
 
     if (!from) {
       if (hasTextSelection) {
-        selectionManager.clear();
+        selectionManager.clear(['text']);
       }
+      return null;
+    }
+
+    if (
+      matchFlavours(
+        this.root.page.getBlockById(from.blockId) as BaseBlockModel,
+        ['affine:page']
+      )
+    ) {
       return null;
     }
 
@@ -84,7 +96,7 @@ export class RangeController {
       to,
     });
 
-    selectionManager.set([selection]);
+    selectionManager.set([...noneTextSelection, selection]);
     return selection;
   }
 

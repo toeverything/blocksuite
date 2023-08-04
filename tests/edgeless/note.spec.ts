@@ -141,7 +141,6 @@ test('add empty Note', async ({ page }) => {
   // add note at 300,300
   await page.mouse.click(300, 300);
   await waitForVirgoStateUpdated(page);
-  await pressEnter(page);
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
 

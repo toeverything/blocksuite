@@ -54,7 +54,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       target: { position: this._startPoint },
     });
     this._connector = _surface.pickById(id) as unknown as ConnectorElement;
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -69,16 +68,15 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       this._connector.source.id ? [this._connector.source.id] : []
     ) as Connection;
     this._surface.updateElement<'connector'>(this._connector.id, { target });
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragEnd(e: PointerEventState) {
     assertExists(this._connector);
     this._edgeless.connector.clear();
     this._page.captureSync();
-    this._edgeless.selection.switchToDefaultMode({
-      selected: [this._connector],
-      active: false,
+    this._edgeless.tools.switchToDefaultMode({
+      elements: [this._connector.id],
+      editing: false,
     });
     this._connector = null;
   }

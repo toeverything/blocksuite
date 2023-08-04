@@ -41,9 +41,9 @@ export function addNote(
       ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === noteId);
     if (element) {
-      edgeless.slots.selectionUpdated.emit({
-        selected: [element],
-        active: true,
+      edgeless.selection.setSelection({
+        elements: [element.id],
+        editing: true,
       });
 
       // Waiting dom updated, `note mask` is removed
@@ -54,10 +54,10 @@ export function addNote(
 
         // Waiting dom updated, remove note if it is empty
         requestAnimationFrame(() => {
-          edgeless.slots.selectionUpdated.once(({ active }) => {
+          edgeless.selection.slots.updated.once(({ editing }) => {
             const block = page.getBlockById(noteId);
             assertExists(block);
-            if (!active && isEmpty(block)) {
+            if (!editing && isEmpty(block)) {
               page.deleteBlock(element);
             }
           });

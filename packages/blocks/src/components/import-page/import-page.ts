@@ -504,11 +504,7 @@ export class ImportPage extends WithDisposable(LitElement) {
             </tool-tip>
           </div>
         </icon-button>
-        <icon-button
-          class="button-item"
-          text="Coming soon..."
-          ?disabled=${true}
-        >
+        <icon-button class="button-item" text="Coming soon..." disabled>
           ${NewIcon}
         </icon-button>
       </div>

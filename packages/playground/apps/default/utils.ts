@@ -175,31 +175,18 @@ export function isValidUrl(urlLike: string) {
 }
 
 export async function testIDBExistence() {
-  let databaseExists = false;
-  try {
-    databaseExists =
-      (await indexedDB.databases()).find(db => db.name === INDEXED_DB_NAME) !==
-      undefined;
-  } catch (e) {
+  return new Promise<boolean>(resolve => {
     const request = indexedDB.open(INDEXED_DB_NAME);
-    databaseExists = await new Promise(resolve => {
-      const unlisten = () => {
-        request.removeEventListener('success', success);
-        request.removeEventListener('error', error);
-      };
-      const success = () => {
-        resolve(true);
-        unlisten();
-      };
-      const error = () => {
-        resolve(false);
-        unlisten();
-      };
-      request.addEventListener('success', success);
-      request.addEventListener('error', error);
-    });
-  }
-  return databaseExists;
+    request.onupgradeneeded = function (e) {
+      request.transaction?.abort();
+      request.result.close();
+      resolve(false);
+    };
+    request.onsuccess = function (e) {
+      request.result.close();
+      resolve(true);
+    };
+  });
 }
 
 export const createEditor = (page: Page, element: HTMLElement) => {
