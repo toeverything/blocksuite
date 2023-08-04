@@ -594,6 +594,7 @@ const getCorrespondingTableColumnType = (htmlElement?: SVGSVGElement) => {
     typesNumber: 'number',
     typesCheckbox: 'checkbox',
     typesText: 'rich-text',
+    typesTitle: 'title',
   };
 
   const className = htmlElement?.classList[0] ?? 'typesText';
@@ -700,21 +701,18 @@ const getTableCellsAndChildren = (
     });
     const rowId = '' + idCounter.next();
     cells[rowId] = {};
-    row.slice(1).forEach((value, index) => {
-      if (
-        columnMeta[index + 1]?.type === 'multi-select' &&
-        Array.isArray(value)
-      ) {
+    row.forEach((value, index) => {
+      if (columnMeta[index]?.type === 'multi-select' && Array.isArray(value)) {
         cells[rowId][columns[index].id] = {
           columnId: columns[index].id,
-          value: value.map(v => columnMeta[index + 1]?.optionsMap.get(v) || ''),
+          value: value.map(v => columnMeta[index]?.optionsMap.get(v) || ''),
         };
         return;
       }
-      if (columnMeta[index + 1]?.type === 'select' && !Array.isArray(value)) {
+      if (columnMeta[index]?.type === 'select' && !Array.isArray(value)) {
         cells[rowId][columns[index].id] = {
           columnId: columns[index].id,
-          value: columnMeta[index + 1]?.optionsMap.get(value) || '',
+          value: columnMeta[index]?.optionsMap.get(value) || '',
         };
         return;
       }
@@ -734,10 +732,10 @@ const getTableColumns = (
     next: () => number;
   }
 ): Column<Record<string, unknown>>[] => {
-  const columns: Column[] = columnMeta.slice(1).map((value, index) => {
+  const columns: Column[] = columnMeta.map((value, index) => {
     if (['select', 'multi-select'].includes(value.type)) {
       const options = rows
-        .map(row => row[index + 1])
+        .map(row => row[index])
         .flat()
         .filter((value, index, array) => array.indexOf(value) === index)
         .map(uniqueValue => {
@@ -748,7 +746,7 @@ const getTableColumns = (
           };
         });
       options.map(option =>
-        columnMeta[index + 1].optionsMap.set(option.value, option.id)
+        columnMeta[index].optionsMap.set(option.value, option.id)
       );
       return columnManager
         .getColumn(value.type)
