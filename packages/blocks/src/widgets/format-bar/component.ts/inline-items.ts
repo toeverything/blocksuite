@@ -12,7 +12,7 @@ interface InlineItemsProps {
 
 export const InlineItems = ({ host, abortController }: InlineItemsProps) => {
   const textSelection = getTextSelection(host);
-  if (!textSelection) {
+  if (!textSelection || textSelection.isCollapsed()) {
     return [];
   }
   const format = getCurrentCombinedFormat(host, textSelection);
