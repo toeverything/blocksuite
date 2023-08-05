@@ -3,10 +3,12 @@
   "version": "0.7.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
+    "packages/block-std",
     "packages/blocks",
     "packages/docs",
     "packages/editor",
     "packages/global",
+    "packages/lit",
     "packages/phasor",
     "packages/playground",
     "packages/store",
