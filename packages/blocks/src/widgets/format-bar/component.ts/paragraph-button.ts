@@ -1,9 +1,5 @@
 import { TextSelection } from '@blocksuite/block-std';
-import {
-  ArrowDownIcon,
-  type BlockConfig,
-  paragraphConfig,
-} from '@blocksuite/global/config';
+import { ArrowDownIcon } from '@blocksuite/global/config';
 import {
   assertExists,
   type BaseBlockModel,
@@ -13,26 +9,33 @@ import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
+import type { BlockSchemas } from '../../../models.js';
+import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
+import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
   onModelElementUpdated,
   updateBlockType,
 } from '../../../page-block/utils/container-operations.js';
+import { isPageComponent } from '../../../page-block/utils/guard.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
+  host: PageBlockComponent;
   page: Page;
   selectedModels: BaseBlockModel[];
 }
 
 interface ParagraphButtonProps {
+  host: PageBlockComponent;
   formatBar: AffineFormatBarWidget;
   page: Page;
   selectedModels: BaseBlockModel[];
 }
 
 const updateParagraphType = (
+  host: PageBlockComponent,
   models: BaseBlockModel[],
-  flavour: BlockConfig['flavour'],
+  flavour: keyof BlockSchemas,
   type?: string
 ) => {
   if (models.length === 0) {
@@ -46,7 +49,7 @@ const updateParagraphType = (
   const targetType = models.every(model => model.type === type)
     ? defaultType
     : type;
-  const newModels = updateBlockType(models, targetFlavour, targetType);
+  const newModels = updateBlockType(host, models, targetFlavour, targetType);
 
   // Reset selection if the target is code block
   if (targetFlavour === 'affine:code') {
@@ -74,7 +77,11 @@ const updateParagraphType = (
   }
 };
 
-const ParagraphPanel = ({ page, selectedModels }: ParagraphPanelProps) => {
+const ParagraphPanel = ({
+  page,
+  selectedModels,
+  host,
+}: ParagraphPanelProps) => {
   return html`<div class="paragraph-panel">
     ${paragraphConfig
       .filter(({ flavour }) => flavour !== 'affine:divider')
@@ -86,7 +93,8 @@ const ParagraphPanel = ({ page, selectedModels }: ParagraphPanelProps) => {
           style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
           text="${name}"
           data-testid="${flavour}/${type}"
-          @click="${() => updateParagraphType(selectedModels, flavour, type)}"
+          @click="${() =>
+            updateParagraphType(host, selectedModels, flavour, type)}"
         >
           ${icon}
         </icon-button>`
@@ -107,7 +115,14 @@ export const ParagraphButton = ({
             selectedModels[0].flavour === flavour &&
             selectedModels[0].type === type
         )?.icon ?? paragraphConfig[0].icon;
+
+  const host = formatBar.hostElement;
+  if (!isPageComponent(host)) {
+    throw new Error('paragraph button host is not a page component');
+  }
+
   const paragraphPanel = ParagraphPanel({
+    host,
     selectedModels,
     page,
   });

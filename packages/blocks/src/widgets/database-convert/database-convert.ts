@@ -49,6 +49,10 @@ export const DATABASE_CONVERT_WHITE_LIST = ['affine:list', 'affine:paragraph'];
 export class AffineDatabaseConvertWidget extends WidgetElement {
   static override styles = styles;
 
+  override firstUpdated() {
+    this.style.display = 'none';
+  }
+
   private _convertToDatabase(viewType: DatabaseViewName) {
     const host = this.hostElement;
     if (!isPageComponent(host)) {
@@ -57,7 +61,6 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
       );
     }
     const selectedModels = getSelectedContentModels(host);
-    console.log(selectedModels);
     //TODO: kanban view
     if (viewType !== 'table' || selectedModels.length === 0) return;
 
@@ -90,7 +93,7 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
 
     this.page.moveBlocks(selectedModels, databaseModel);
 
-    this.remove();
+    this.style.display = 'none';
   }
 
   override render() {
@@ -115,7 +118,7 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
                     : ''}"
                   @click=${() => this._convertToDatabase(view.type)}
                 >
-                  <div class="modal-view-item-content}">
+                  <div class="modal-view-item-content">
                     <div class="modal-view-item-icon">${view.icon}</div>
                     <div class="modal-view-item-text">${view.text}</div>
                   </div>

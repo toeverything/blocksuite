@@ -23,6 +23,10 @@ import {
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
+import {
+  getSelectedContentModels,
+  getTextSelection,
+} from '../../page-block/utils/selection.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
   type Connectable,
@@ -32,7 +36,6 @@ import {
 import { getService } from '../service.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
-import { getCurrentBlockRange } from '../utils/block-range.js';
 import { groupBy } from '../utils/common.js';
 import type { Clipboard } from './type.js';
 import {
@@ -110,6 +113,10 @@ export class EdgelessClipboard implements Clipboard {
     return this._edgeless.selection;
   }
 
+  get textSelection() {
+    return getTextSelection(this._edgeless);
+  }
+
   get slots() {
     return this._edgeless.slots;
   }
@@ -133,7 +140,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const { state } = this.selection;
     if (state.editing) {
-      deleteModelsByRange(this._page);
+      deleteModelsByRange(this._edgeless);
       return;
     }
 
@@ -233,15 +240,16 @@ export class EdgelessClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    deleteModelsByRange(this._page);
+    deleteModelsByRange(this._edgeless);
 
-    const range = getCurrentBlockRange(this._page);
+    const textSelection = getTextSelection(this._edgeless);
+    assertExists(textSelection);
+    const selectedModels = getSelectedContentModels(this._edgeless);
 
-    const focusedBlockModel = range?.models[0];
+    const focusedBlockModel = selectedModels[0];
     assertExists(focusedBlockModel);
     const service = getService(focusedBlockModel.flavour);
-    assertExists(range);
-    await service.json2Block(focusedBlockModel, blocks, range);
+    await service.json2Block(focusedBlockModel, blocks, textSelection.from);
   }
 
   private _createPhasorElement(clipboardData: Record<string, unknown>) {

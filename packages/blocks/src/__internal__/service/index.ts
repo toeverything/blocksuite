@@ -1,3 +1,4 @@
+import type { TextRangePoint } from '@blocksuite/block-std';
 import { PREVENT_DEFAULT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
@@ -12,11 +13,7 @@ import {
 import type { AffineVEditor } from '../rich-text/virgo/types.js';
 import { getService } from '../service.js';
 import { supportsChildren } from '../utils/common.js';
-import type {
-  BlockRange,
-  BlockTransformContext,
-  SerializedBlock,
-} from '../utils/index.js';
+import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
 import { json2block } from './json2block.js';
 import {
   enterMarkdownMatch,
@@ -93,9 +90,9 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   async json2Block(
     focusedBlockModel: BlockModel,
     pastedBlocks: SerializedBlock[],
-    range?: BlockRange
+    textRangePoint?: TextRangePoint
   ) {
-    return json2block(focusedBlockModel, pastedBlocks, { range });
+    return json2block(focusedBlockModel, pastedBlocks, { textRangePoint });
   }
 
   async onBlockPasted(

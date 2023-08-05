@@ -22,7 +22,6 @@ import type {
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import { getService, registerService } from '../../__internal__/service.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
-import { SELF_CONTROL_PAGE_WIDGETS } from '../const/widget.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageBlockService } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
@@ -30,7 +29,6 @@ import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
-import { WidgetManager } from '../widget-manager/widget-manager.js';
 
 export interface PageViewport {
   left: number;
@@ -127,8 +125,6 @@ export class DocPageBlockComponent
   gesture: Gesture | null = null;
 
   clipboard = new PageClipboard(this);
-
-  widgetManager: WidgetManager | null = null;
 
   getService = getService;
 
@@ -335,7 +331,6 @@ export class DocPageBlockComponent
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
     this.clipboard.init(this.page);
-    this.widgetManager = new WidgetManager(this);
   }
 
   override disconnectedCallback() {
@@ -346,7 +341,6 @@ export class DocPageBlockComponent
     this.gesture = null;
     this.rangeSynchronizer = null;
     this.keyboardManager = null;
-    this.widgetManager = null;
   }
 
   override render() {
@@ -369,9 +363,11 @@ export class DocPageBlockComponent
       child => this.renderModel(child)
     )}`;
 
-    const widgets = this.widgetManager?.render(
-      name => !SELF_CONTROL_PAGE_WIDGETS.includes(name)
-    );
+    const widgets = html`${repeat(
+      Object.entries(this.widgets),
+      ([id]) => id,
+      ([_, widget]) => widget
+    )}`;
 
     const meta = html`
       <affine-page-meta-data

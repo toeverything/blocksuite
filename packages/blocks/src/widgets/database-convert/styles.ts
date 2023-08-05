@@ -1,10 +1,6 @@
 import { css } from 'lit';
 
 export const styles = css`
-  .affine-database-convert-widget {
-    display: none;
-  }
-
   .overlay-mask {
     position: fixed;
     top: 0;

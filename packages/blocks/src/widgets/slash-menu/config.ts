@@ -10,7 +10,6 @@ import {
   ImageIcon20,
   NewPageIcon,
   NowIcon,
-  paragraphConfig,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -42,6 +41,7 @@ import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
 import type { ImageProps } from '../../image-block/image-model.js';
 import { inlineFormatConfig } from '../../page-block/const/inline-format-config.js';
+import { paragraphConfig } from '../../page-block/const/paragraph-config.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
 import {
   onModelTextUpdated,
@@ -75,8 +75,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
             return true;
           },
-          action: ({ model }) => {
-            const newModels = updateBlockType([model], flavour, type);
+          action: ({ model, host }) => {
+            const newModels = updateBlockType(host, [model], flavour, type);
             // Reset selection if the target is code block
             if (flavour === 'affine:code') {
               if (newModels.length !== 1) {
@@ -135,7 +135,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: ({ model }) => updateBlockType([model], flavour, type),
+        action: ({ model, host }) =>
+          updateBlockType(host, [model], flavour, type),
       })),
   },
 
@@ -147,8 +148,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: NewPageIcon,
         showWhen: model =>
           !!model.page.awarenessStore.getFlag('enable_linked_page'),
-        action: async ({ page, model }) => {
-          const newPage = await createPage(page.workspace);
+        action: async ({ host, model }) => {
+          const newPage = await createPage(host.page.workspace);
           insertContent(model, REFERENCE_NODE, {
             reference: { type: 'LinkedPage', pageId: newPage.id },
           });
@@ -204,18 +205,18 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        async action({ page, model }) {
-          const parent = page.getParent(model);
+        async action({ host, model }) {
+          const parent = host.page.getParent(model);
           if (!parent) {
             return;
           }
-          const props = (await uploadImageFromLocal(page.blobs)).map(
+          const props = (await uploadImageFromLocal(host.page.blobs)).map(
             ({ sourceId }): ImageProps & { flavour: 'affine:image' } => ({
               flavour: 'affine:image',
               sourceId,
             })
           );
-          page.addSiblingBlocks(model, props);
+          host.page.addSiblingBlocks(model, props);
         },
       },
       {
@@ -227,8 +228,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return !insideDatabase(model);
         },
-        async action({ page, model }) {
-          const parent = page.getParent(model);
+        async action({ host, model }) {
+          const parent = host.page.getParent(model);
           if (!parent) {
             return;
           }
@@ -238,7 +239,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             flavour: 'affine:bookmark',
             url,
           } as const;
-          page.addSiblingBlocks(model, [props]);
+          host.page.addSiblingBlocks(model, [props]);
         },
       },
       {
@@ -252,13 +253,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             return false;
           return !insideDatabase(model);
         },
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
+        action: async ({ host, model }) => {
+          const parent = host.page.getParent(model);
           if (!parent) {
             return;
           }
           let attachmentModel: AttachmentBlockModel | null = null;
-          const fileInfo = await uploadFileFromLocal(page.blobs, file => {
+          const fileInfo = await uploadFileFromLocal(host.page.blobs, file => {
             if (file.size > MAX_ATTACHMENT_SIZE) {
               toast(
                 `You can only upload files less than ${humanFileSize(
@@ -270,7 +271,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
               return false;
             }
 
-            const loadingKey = page.generateId();
+            const loadingKey = host.page.generateId();
             setAttachmentLoading(loadingKey, true);
             const props: AttachmentProps & { flavour: 'affine:attachment' } = {
               flavour: 'affine:attachment',
@@ -279,9 +280,9 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
               type: file.type,
               loadingKey,
             };
-            const [newBlockId] = page.addSiblingBlocks(model, [props]);
+            const [newBlockId] = host.page.addSiblingBlocks(model, [props]);
             assertExists(newBlockId);
-            attachmentModel = page.getBlockById(
+            attachmentModel = host.page.getBlockById(
               newBlockId
             ) as AttachmentBlockModel;
 
@@ -293,7 +294,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const realAttachmentModel: AttachmentBlockModel = attachmentModel;
           // await new Promise(resolve => setTimeout(resolve, 1000));
           setAttachmentLoading(realAttachmentModel.loadingKey ?? '', false);
-          page.updateBlock(realAttachmentModel, {
+          host.page.updateBlock(realAttachmentModel, {
             sourceId,
             loadingKey: null,
           });
@@ -369,19 +370,19 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
+        action: async ({ host, model }) => {
+          const parent = host.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const id = page.addBlock(
+          const id = host.page.addBlock(
             'affine:database',
             {},
-            page.getParent(model),
+            host.page.getParent(model),
             index + 1
           );
           const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(page, model, id, false);
+          service.initDatabaseBlock(host.page, model, id, false);
         },
       },
       {
@@ -426,15 +427,15 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
+        action: async ({ host, model }) => {
+          const parent = host.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          page.addBlock(
+          host.page.addBlock(
             'affine:data-view',
             {},
-            page.getParent(model),
+            host.page.getParent(model),
             index + 1
           );
         },
@@ -466,26 +467,26 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Duplicate',
         icon: DuplicateIcon,
-        action: ({ page, model }) => {
+        action: ({ host, model }) => {
           if (!model.text || !(model.text instanceof Text)) {
             throw new Error("Can't duplicate a block without text");
           }
-          const parent = page.getParent(model);
+          const parent = host.page.getParent(model);
           if (!parent) {
             throw new Error('Failed to duplicate block! Parent not found');
           }
           const index = parent.children.indexOf(model);
 
           // TODO add clone model util
-          page.addBlock(
+          host.page.addBlock(
             model.flavour,
             {
               type: model.type,
-              text: page.Text.fromDelta(model.text.toDelta()),
+              text: host.page.Text.fromDelta(model.text.toDelta()),
               // @ts-expect-error
               checked: model.checked,
             },
-            page.getParent(model),
+            host.page.getParent(model),
             index
           );
         },
@@ -493,8 +494,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Delete',
         icon: DeleteIcon,
-        action: ({ page, model }) => {
-          page.deleteBlock(model);
+        action: ({ host, model }) => {
+          host.page.deleteBlock(model);
         },
       },
     ],

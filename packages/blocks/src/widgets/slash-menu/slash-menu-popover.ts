@@ -13,6 +13,7 @@ import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../components/utils.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
 import { styles } from './styles.js';
 import {
   collectGroupNames,
@@ -24,6 +25,9 @@ import {
 @customElement('affine-slash-menu')
 export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
+
+  @property({ attribute: false })
+  host!: PageBlockComponent;
 
   @property({ attribute: false })
   model!: BaseBlockModel;
@@ -247,7 +251,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
 
     const { action } = this._filterItems[index];
-    action({ page: this.model.page, model: this.model });
+    action({ host: this.host, model: this.model });
   }
 
   private _handleClickCategory(groupName: string) {

@@ -1,21 +1,23 @@
 import { html } from 'lit';
 
-import type { AffineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
 import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
+import { getCurrentCombinedFormat } from '../../../page-block/utils/container-operations.js';
+import { getTextSelection } from '../../../page-block/utils/selection.js';
 
 interface InlineItemsProps {
   host: PageBlockComponent;
   abortController: AbortController;
-  format: AffineTextAttributes;
 }
 
-export const InlineItems = ({
-  host,
-  format,
-  abortController,
-}: InlineItemsProps) =>
-  inlineFormatConfig.map(
+export const InlineItems = ({ host, abortController }: InlineItemsProps) => {
+  const textSelection = getTextSelection(host);
+  if (!textSelection) {
+    return [];
+  }
+  const format = getCurrentCombinedFormat(host, textSelection);
+
+  return inlineFormatConfig.map(
     ({ id, name, icon, action, activeWhen }) => html`<icon-button
       size="32px"
       class="has-tool-tip"
@@ -33,3 +35,4 @@ export const InlineItems = ({
       <tool-tip inert role="tooltip">${name}</tool-tip>
     </icon-button>`
   );
+};

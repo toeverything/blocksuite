@@ -31,6 +31,7 @@ import {
 } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
@@ -68,13 +69,11 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
-import { SELF_CONTROL_PAGE_WIDGETS } from '../const/widget.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
-import { WidgetManager } from '../widget-manager/widget-manager.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { NoteCut } from './components/note-cut/index.js';
@@ -258,8 +257,6 @@ export class EdgelessPageBlockComponent
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
-
-  widgetManager: WidgetManager | null = null;
 
   mouseRoot!: HTMLElement;
 
@@ -1234,7 +1231,6 @@ export class EdgelessPageBlockComponent
     this.gesture = new Gesture(this);
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
-    this.widgetManager = new WidgetManager(this);
 
     this.handleEvent('selectionChange', () => {
       const surface = this.root.selectionManager.value.find(
@@ -1269,7 +1265,6 @@ export class EdgelessPageBlockComponent
     this.gesture = null;
     this.rangeSynchronizer = null;
     this.keyboardManager = null;
-    this.widgetManager = null;
   }
 
   override render() {
@@ -1317,9 +1312,11 @@ export class EdgelessPageBlockComponent
       '--affine-edgeless-y': `${translateY}px`,
     };
 
-    const widgets = this.widgetManager?.render(
-      name => !SELF_CONTROL_PAGE_WIDGETS.includes(name)
-    );
+    const widgets = html`${repeat(
+      Object.entries(this.widgets),
+      ([id]) => id,
+      ([_, widget]) => widget
+    )}`;
 
     return html`
       <div class="affine-edgeless-surface-block-container">

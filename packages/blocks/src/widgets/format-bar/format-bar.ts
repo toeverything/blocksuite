@@ -14,7 +14,6 @@ import { customElement, query } from 'lit/decorators.js';
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getBlockElementByModel } from '../../__internal__/utils/query.js';
 import type { RangeManager } from '../../page-block/text-selection/range-manager.js';
-import { getCurrentCombinedFormat } from '../../page-block/utils/container-operations.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import {
   getSelectedContentModels,
@@ -276,11 +275,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     const selectedModels = this._selectedModels;
     const page = this.page;
     const abortController = this._abortController;
-    const format = getCurrentCombinedFormat(this.page);
 
     //TODO: format bar in database
 
     const paragraphButton = ParagraphButton({
+      host,
       formatBar: this,
       selectedModels,
       page,
@@ -288,7 +287,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     const actionItems = ActionItems(host);
     const inlineItems = InlineItems({
       host,
-      format,
       abortController,
     });
 

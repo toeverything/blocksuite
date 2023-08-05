@@ -7,12 +7,19 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import type { PageBlockComponent } from '../types.js';
-import { getCurrentCombinedFormat } from '../utils/container-operations.js';
-import { getSelectedContentModels } from '../utils/selection.js';
+import {
+  getCurrentCombinedFormat,
+  handleFormat,
+} from '../utils/container-operations.js';
+import {
+  getSelectedContentModels,
+  getTextSelection,
+} from '../utils/selection.js';
 
 function noneCodeBlockSelected(host: PageBlockComponent) {
   const selectedModels = getSelectedContentModels(host);
@@ -44,8 +51,10 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: `${SHORT_KEY}+b`,
     activeWhen: (format: AffineTextAttributes) => 'bold' in format,
     showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: () => {
-      // handleFormat(page, 'bold');
+    action: ({ host }) => {
+      const textSelection = getTextSelection(host);
+      assertExists(textSelection);
+      handleFormat(host, textSelection, 'bold');
     },
   },
   {
@@ -55,8 +64,10 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: `${SHORT_KEY}+i`,
     activeWhen: (format: AffineTextAttributes) => 'italic' in format,
     showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: () => {
-      // handleFormat(page, 'italic');
+    action: ({ host }) => {
+      const textSelection = getTextSelection(host);
+      assertExists(textSelection);
+      handleFormat(host, textSelection, 'italic');
     },
   },
   {
@@ -66,8 +77,10 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: `${SHORT_KEY}+u`,
     activeWhen: (format: AffineTextAttributes) => 'underline' in format,
     showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: () => {
-      // handleFormat(page, 'underline');
+    action: ({ host }) => {
+      const textSelection = getTextSelection(host);
+      assertExists(textSelection);
+      handleFormat(host, textSelection, 'underline');
     },
   },
   {
@@ -77,8 +90,10 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: `${SHORT_KEY}+shift+s`,
     activeWhen: (format: AffineTextAttributes) => 'strike' in format,
     showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: () => {
-      // handleFormat(page, 'strike');
+    action: ({ host }) => {
+      const textSelection = getTextSelection(host);
+      assertExists(textSelection);
+      handleFormat(host, textSelection, 'strike');
     },
   },
   {
@@ -88,8 +103,10 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: `${SHORT_KEY}+e`,
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
     showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: () => {
-      // handleFormat(page, 'code');
+    action: ({ host }) => {
+      const textSelection = getTextSelection(host);
+      assertExists(textSelection);
+      handleFormat(host, textSelection, 'code');
     },
   },
   {
@@ -100,13 +117,15 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     activeWhen: (format: AffineTextAttributes) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (host: PageBlockComponent) => {
+      const textSelection = getTextSelection(host);
+      assertExists(textSelection);
       const selectedModels = getSelectedContentModels(host);
       return (
         selectedModels.length === 1 &&
         noneCodeBlockSelected(host) &&
         // can't create link when selection includes reference node
         // XXX get loose format at here is not a good practice
-        !getCurrentCombinedFormat(selectedModels[0].page, true).reference
+        !getCurrentCombinedFormat(host, textSelection, true).reference
       );
     },
     action: () => {

@@ -1,3 +1,4 @@
+import type { TextSelection } from '@blocksuite/block-std';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import {
@@ -23,24 +24,30 @@ import {
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import {
-  type BlockRange,
-  getCurrentBlockRange,
-  restoreSelection,
-  updateBlockRange,
-} from '../../__internal__/utils/block-range.js';
 import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import type { BlockSchemas } from '../../models.js';
+import type { PageBlockComponent } from '../types.js';
+import { getSelectedContentModels, getTextSelection } from './selection.js';
 
 export function deleteModelsByRange(
-  page: Page,
-  blockRange = getCurrentBlockRange(page)
+  host: PageBlockComponent,
+  textSelection?: TextSelection
 ) {
-  if (!blockRange) return null;
+  if (!textSelection) {
+    textSelection = getTextSelection(host) ?? undefined;
+  }
+  assertExists(textSelection);
 
-  const startModel = blockRange.models[0];
-  const endModel = blockRange.models[blockRange.models.length - 1];
+  const page = host.page;
+  const selectedModels = getSelectedContentModels(host);
+
+  if (selectedModels.length === 0) {
+    return null;
+  }
+
+  const startModel = selectedModels[0];
+  const endModel = selectedModels[selectedModels.length - 1];
   // TODO handle database
   if (!startModel.text || !endModel.text) {
     throw new Error('startModel or endModel does not have text');
@@ -52,10 +59,7 @@ export function deleteModelsByRange(
   // Only select one block
   if (startModel === endModel) {
     page.captureSync();
-    if (
-      blockRange.startOffset === blockRange.endOffset &&
-      blockRange.startOffset > 0
-    ) {
+    if (textSelection.from.index > 0 && textSelection.isCollapsed()) {
       // startModel.text.delete(blockRange.startOffset - 1, 1);
       // vEditor.setVRange({
       //   index: blockRange.startOffset - 1,
@@ -63,29 +67,26 @@ export function deleteModelsByRange(
       // });
       return startModel;
     }
-    startModel.text.delete(
-      blockRange.startOffset,
-      blockRange.endOffset - blockRange.startOffset
-    );
+    startModel.text.delete(textSelection.from.index, textSelection.from.length);
     vEditor.setVRange({
-      index: blockRange.startOffset,
+      index: textSelection.from.index,
       length: 0,
     });
     return startModel;
   }
   page.captureSync();
-  startModel.text.delete(
-    blockRange.startOffset,
-    startModel.text.length - blockRange.startOffset
+  startModel.text.delete(textSelection.from.index, textSelection.from.length);
+  endModel.text.delete(
+    textSelection.to?.index ?? 0,
+    textSelection.to?.length ?? 0
   );
-  endModel.text.delete(0, blockRange.endOffset);
   startModel.text.join(endModel.text);
-  blockRange.models.slice(1).forEach(model => {
+  selectedModels.slice(1).forEach(model => {
     page.deleteBlock(model);
   });
 
   vEditor.setVRange({
-    index: blockRange.startOffset,
+    index: textSelection.from.index,
     length: 0,
   });
   return startModel;
@@ -94,12 +95,15 @@ export function deleteModelsByRange(
 /**
  * Do nothing when selection is collapsed or not multi block selected
  */
-export function handleMultiBlockBackspace(page: Page, e: KeyboardEvent) {
+export function handleMultiBlockBackspace(
+  host: PageBlockComponent,
+  e: KeyboardEvent
+) {
   if (!hasNativeSelection()) return;
   if (isCollapsedNativeSelection()) return;
   if (!isMultiBlockRange()) return;
   e.preventDefault();
-  deleteModelsByRange(page);
+  deleteModelsByRange(host);
 }
 
 function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
@@ -127,6 +131,7 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
 }
 
 export function updateBlockType(
+  host: PageBlockComponent,
   models: BaseBlockModel[],
   flavour: keyof BlockSchemas,
   type?: string
@@ -144,7 +149,8 @@ export function updateBlockType(
     );
   }
   page.captureSync();
-  const savedBlockRange = getCurrentBlockRange(page);
+  const selectionManager = host.root.selectionManager;
+  const savedSelection = selectionManager.value;
   if (flavour === 'affine:code') {
     const id = mergeToCodeBlocks(page, models);
     const model = page.getBlockById(id);
@@ -177,29 +183,7 @@ export function updateBlockType(
     return [newModel];
   }
 
-  // The lastNewId will not be null since we have checked models.length > 0
   const newModels: BaseBlockModel[] = [];
-  const resolvedFlags: boolean[] = [];
-  savedBlockRange?.models.forEach(model => {
-    if (model.flavour !== flavour) {
-      resolvedFlags.push(false);
-    } else {
-      switch (flavour) {
-        case 'affine:paragraph':
-          resolvedFlags.push(true);
-          break;
-        case 'affine:list':
-          if (model.type === type) {
-            resolvedFlags.push(true);
-          } else {
-            resolvedFlags.push(false);
-          }
-          break;
-        default:
-          resolvedFlags.push(false);
-      }
-    }
-  });
   models.forEach(model => {
     assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
     if (model.flavour === flavour) {
@@ -212,21 +196,14 @@ export function updateBlockType(
     if (!newModel) {
       throw new Error('Failed to get new model after transform block!');
     }
-    savedBlockRange && updateBlockRange(savedBlockRange, model, newModel);
     newModels.push(newModel);
   });
 
-  const allTextUpdated = savedBlockRange?.models.map((model, index) => {
-    return new Promise(resolve =>
-      onModelTextUpdated(model, resolve, resolvedFlags[index])
-    );
-  });
+  const allTextUpdated = newModels.map(model => onModelTextUpdated(model));
 
-  if (allTextUpdated && savedBlockRange) {
-    Promise.all(allTextUpdated).then(() => {
-      restoreSelection(savedBlockRange);
-    });
-  }
+  Promise.all(allTextUpdated).then(() => {
+    selectionManager.set(savedSelection);
+  });
 
   return newModels;
 }
@@ -290,16 +267,22 @@ function mergeFormat(
  * formats with different values will only return the last one.
  */
 export function getCombinedFormat(
-  blockRange: BlockRange,
+  host: PageBlockComponent,
+  textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  if (blockRange.models.length === 1) {
-    const vEditor = getVirgoByModel(blockRange.models[0]);
+  const selectedModel = getSelectedContentModels(host);
+  if (selectedModel.length === 0) {
+    return {};
+  }
+
+  if (selectedModel.length === 1) {
+    const vEditor = getVirgoByModel(selectedModel[0]);
     assertExists(vEditor);
     const format = vEditor.getFormat(
       {
-        index: blockRange.startOffset,
-        length: blockRange.endOffset - blockRange.startOffset,
+        index: textSelection.from.index,
+        length: textSelection.from.length,
       },
       loose
     );
@@ -308,7 +291,7 @@ export function getCombinedFormat(
   const formatArr = [];
   // Start block
   // Skip code block or empty block
-  const startModel = blockRange.models[0];
+  const startModel = selectedModel[0];
   if (
     !matchFlavours(startModel, ['affine:code']) &&
     startModel.text &&
@@ -318,15 +301,15 @@ export function getCombinedFormat(
     assertExists(vEditor);
     const startFormat = vEditor.getFormat(
       {
-        index: blockRange.startOffset,
-        length: vEditor.yText.length - blockRange.startOffset,
+        index: textSelection.from.index,
+        length: textSelection.from.length,
       },
       loose
     );
     formatArr.push(startFormat);
   }
   // End block
-  const endModel = blockRange.models[blockRange.models.length - 1];
+  const endModel = selectedModel[selectedModel.length - 1];
   if (
     !matchFlavours(endModel, ['affine:code']) &&
     endModel.text &&
@@ -337,14 +320,14 @@ export function getCombinedFormat(
     const endFormat = vEditor.getFormat(
       {
         index: 0,
-        length: blockRange.endOffset,
+        length: textSelection.to?.length ?? 0,
       },
       loose
     );
     formatArr.push(endFormat);
   }
   // Between blocks
-  blockRange.models
+  selectedModel
     .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .filter(model => model.text && model.text.length)
@@ -362,29 +345,34 @@ export function getCombinedFormat(
 }
 
 export function getCurrentCombinedFormat(
-  page: Page,
+  host: PageBlockComponent,
+  textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  const blockRange = getCurrentBlockRange(page);
-  if (!blockRange || blockRange.models.every(model => !model.text)) {
-    return {};
-  }
-  return getCombinedFormat(blockRange, loose);
+  return getCombinedFormat(host, textSelection, loose);
 }
 
-function formatBlockRange(
-  blockRange: BlockRange,
+function formatTextSelection(
+  host: PageBlockComponent,
+  textSelection: TextSelection,
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
 ) {
-  const { startOffset, endOffset } = blockRange;
-  const startModel = blockRange.models[0];
-  const endModel = blockRange.models[blockRange.models.length - 1];
+  const selectedModels = getSelectedContentModels(host);
+
+  if (selectedModels.length === 0) {
+    throw new Error('No selected models');
+  }
+
+  const selectionManager = host.root.selectionManager;
+  const { from, to } = textSelection;
+  const startModel = selectedModels[0];
+  const endModel = selectedModels[selectedModels.length - 1];
   // edge case 1: collapsed range
-  if (blockRange.models.length === 1 && startOffset === endOffset) {
+  if (textSelection.isCollapsed()) {
     // Collapsed range
 
     const vEditor = getVirgoByModel(startModel);
-    const delta = vEditor?.getDeltaByRangeIndex(startOffset);
+    const delta = vEditor?.getDeltaByRangeIndex(from.index);
     if (!vEditor || !delta) return;
     vEditor.setMarks({
       ...vEditor.marks,
@@ -398,16 +386,16 @@ function formatBlockRange(
 
     return;
   }
-  const format = getCombinedFormat(blockRange);
+  const format = getCombinedFormat(host, textSelection);
 
   // edge case 2: same model
-  if (blockRange.models.length === 1) {
+  if (textSelection.isInSameBlock()) {
     if (matchFlavours(startModel, ['affine:code'])) return;
     const vEditor = getVirgoByModel(startModel);
     vEditor?.slots.updated.once(() => {
-      restoreSelection(blockRange);
+      selectionManager.set([textSelection]);
     });
-    startModel.text?.format(startOffset, endOffset - startOffset, {
+    startModel.text?.format(from.index, from.length, {
       [key]: format[key] ? null : true,
     });
     return;
@@ -415,16 +403,18 @@ function formatBlockRange(
   // common case
   // format start model
   if (!matchFlavours(startModel, ['affine:code'])) {
-    startModel.text?.format(startOffset, startModel.text.length - startOffset, {
+    startModel.text?.format(from.index, from.length, {
       [key]: format[key] ? null : true,
     });
   }
   // format end model
   if (!matchFlavours(endModel, ['affine:code'])) {
-    endModel.text?.format(0, endOffset, { [key]: format[key] ? null : true });
+    endModel.text?.format(to?.index ?? 0, to?.length ?? 0, {
+      [key]: format[key] ? null : true,
+    });
   }
   // format between models
-  blockRange.models
+  selectedModels
     .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
@@ -435,49 +425,43 @@ function formatBlockRange(
 
   // Native selection maybe shifted after format
   // We need to restore it manually
-  if (blockRange.type === 'Native') {
-    const allTextUpdated = blockRange.models
-      .filter(model => !matchFlavours(model, ['affine:code']))
-      .map(
-        model =>
-          // We can not use `onModelTextUpdated` here because it is asynchronous, which
-          // will make updated event emit before we observe it.
-          new Promise(resolve => {
-            const vEditor = getVirgoByModel(model);
-            vEditor?.slots.updated.once(() => {
-              resolve(vEditor);
-            });
-          })
-      );
+  const allTextUpdated = selectedModels
+    .filter(model => !matchFlavours(model, ['affine:code']))
+    .map(
+      model =>
+        // We can not use `onModelTextUpdated` here because it is asynchronous, which
+        // will make updated event emit before we observe it.
+        new Promise(resolve => {
+          const vEditor = getVirgoByModel(model);
+          vEditor?.slots.updated.once(() => {
+            resolve(vEditor);
+          });
+        })
+    );
 
-    Promise.all(allTextUpdated).then(() => {
-      restoreSelection(blockRange);
-    });
-  }
+  Promise.all(allTextUpdated).then(() => {
+    selectionManager.set([textSelection]);
+  });
 }
 
 export function handleFormat(
-  page: Page,
+  host: PageBlockComponent,
+  textSelection: TextSelection,
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
 ) {
-  const blockRange = getCurrentBlockRange(page);
-  if (!blockRange) return;
-  page.captureSync();
-  formatBlockRange(blockRange, key);
+  host.page.captureSync();
+  formatTextSelection(host, textSelection, key);
 }
 
 export async function onModelTextUpdated(
   model: BaseBlockModel,
-  callback: (text: RichText) => void,
-  resolved = false
+  callback?: (text: RichText) => void
 ) {
   const richText = await asyncGetRichTextByModel(model);
-  if (richText && resolved) {
-    callback(richText);
-    return;
-  }
   richText?.vEditor?.slots.updated.once(() => {
-    callback(richText);
+    if (callback) {
+      callback(richText);
+    }
   });
 }
 

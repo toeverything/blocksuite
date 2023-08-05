@@ -5,8 +5,7 @@ import {
   SHORT_KEY,
 } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/store';
-import { html, render, type TemplateResult } from 'lit';
-import { unsafeStatic } from 'lit/static-html.js';
+import { type TemplateResult } from 'lit';
 
 import { copyBlocksInPage } from '../../__internal__/clipboard/utils/commons.js';
 import { toast } from '../../components/toast.js';
@@ -86,22 +85,11 @@ export const actionConfig: ActionConfig[] = [
       );
     },
     action: (host: PageBlockComponent) => {
-      const widgetManager = host.widgetManager;
-      assertExists(widgetManager);
-      const databaseConvertTag = widgetManager.get(
+      const databaseConvertWidget = host.querySelector(
         AFFINE_DATABASE_CONVERT_WIDGET_TAG
       );
-      2;
-      assertExists(databaseConvertTag);
-      /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-      render(
-        html`<${databaseConvertTag} ${unsafeStatic(
-          host.root.widgetIdAttr
-        )}=${AFFINE_DATABASE_CONVERT_WIDGET_TAG} .root=${host.root} .page=${
-          host.page
-        }></${databaseConvertTag}>`,
-        document.body
-      );
+      assertExists(databaseConvertWidget);
+      databaseConvertWidget.style.display = 'block';
     },
   },
 ];

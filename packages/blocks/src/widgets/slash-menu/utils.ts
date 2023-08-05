@@ -1,9 +1,10 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
 
 export type SlashMenuOptions = {
   isTriggerKey: (e: KeyboardEvent) => boolean;
@@ -26,7 +27,13 @@ export type SlashItem = {
   suffix?: TemplateResult<1>;
   showWhen?: (model: BaseBlockModel) => boolean;
   disabled?: boolean;
-  action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
+  action: ({
+    host,
+    model,
+  }: {
+    host: PageBlockComponent;
+    model: BaseBlockModel;
+  }) => void;
 };
 
 export type InternSlashItem = SlashItem & { groupName: string };
