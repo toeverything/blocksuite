@@ -20,20 +20,20 @@ import { isPageComponent } from '../../../page-block/utils/guard.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
-  host: PageBlockComponent;
+  pageElement: PageBlockComponent;
   page: Page;
   selectedModels: BaseBlockModel[];
 }
 
 interface ParagraphButtonProps {
-  host: PageBlockComponent;
+  pageElement: PageBlockComponent;
   formatBar: AffineFormatBarWidget;
   page: Page;
   selectedModels: BaseBlockModel[];
 }
 
 const updateParagraphType = (
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   models: BaseBlockModel[],
   flavour: keyof BlockSchemas,
   type?: string
@@ -49,7 +49,12 @@ const updateParagraphType = (
   const targetType = models.every(model => model.type === type)
     ? defaultType
     : type;
-  const newModels = updateBlockType(host, models, targetFlavour, targetType);
+  const newModels = updateBlockType(
+    pageElement,
+    models,
+    targetFlavour,
+    targetType
+  );
 
   // Reset selection if the target is code block
   if (targetFlavour === 'affine:code') {
@@ -80,7 +85,7 @@ const updateParagraphType = (
 const ParagraphPanel = ({
   page,
   selectedModels,
-  host,
+  pageElement,
 }: ParagraphPanelProps) => {
   return html`<div class="paragraph-panel">
     ${paragraphConfig
@@ -94,7 +99,7 @@ const ParagraphPanel = ({
           text="${name}"
           data-testid="${flavour}/${type}"
           @click="${() =>
-            updateParagraphType(host, selectedModels, flavour, type)}"
+            updateParagraphType(pageElement, selectedModels, flavour, type)}"
         >
           ${icon}
         </icon-button>`
@@ -116,13 +121,13 @@ export const ParagraphButton = ({
             selectedModels[0].type === type
         )?.icon ?? paragraphConfig[0].icon;
 
-  const host = formatBar.hostElement;
-  if (!isPageComponent(host)) {
+  const pageElement = formatBar.pageElement;
+  if (!isPageComponent(pageElement)) {
     throw new Error('paragraph button host is not a page component');
   }
 
   const paragraphPanel = ParagraphPanel({
-    host,
+    pageElement,
     selectedModels,
     page,
   });

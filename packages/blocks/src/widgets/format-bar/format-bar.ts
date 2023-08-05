@@ -81,9 +81,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     super.connectedCallback();
     this._abortController = new AbortController();
 
-    const host = this.hostElement;
-    assertExists(host);
-    const widgets = host.widgets;
+    const pageElement = this.pageElement;
+    assertExists(pageElement);
+    const widgets = pageElement.widgets;
 
     // check if the host use the format bar widget
     if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET_TAG)) {
@@ -91,9 +91,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     // check if format bar widget support the host
-    if (!isPageComponent(host)) {
+    if (!isPageComponent(pageElement)) {
       throw new Error(
-        `format bar not support host: ${host.constructor.name} but its widgets has format bar`
+        `format bar not support pageElement: ${pageElement.constructor.name} but its widgets has format bar`
       );
     }
 
@@ -141,7 +141,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     this._disposables.add(
       this._selectionManager.slots.changed.on(selections => {
-        const textSelection = getTextSelection(host);
+        const textSelection = getTextSelection(pageElement);
         const blockSelections = selections.filter(
           selection => selection instanceof BlockSelection
         );
@@ -149,15 +149,15 @@ export class AffineFormatBarWidget extends WidgetElement {
         if (textSelection) {
           if (!textSelection.isCollapsed()) {
             this._displayType = 'text';
-            assertExists(host.rangeManager);
-            this._rangeManager = host.rangeManager;
-            this._selectedModels = getSelectedContentModels(host);
+            assertExists(pageElement.rangeManager);
+            this._rangeManager = pageElement.rangeManager;
+            this._selectedModels = getSelectedContentModels(pageElement);
           } else {
             this._reset();
           }
         } else if (blockSelections.length > 0) {
           this._displayType = 'block';
-          this._selectedModels = getSelectedContentModels(host);
+          this._selectedModels = getSelectedContentModels(pageElement);
         }
 
         this.requestUpdate();
@@ -265,10 +265,10 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   override render() {
-    const host = this.hostElement;
-    assertExists(host);
+    const pageElement = this.pageElement;
+    assertExists(pageElement);
 
-    if (!isPageComponent(host)) {
+    if (!isPageComponent(pageElement)) {
       throw new Error('format bar should be hosted by page component');
     }
 
@@ -279,14 +279,14 @@ export class AffineFormatBarWidget extends WidgetElement {
     //TODO: format bar in database
 
     const paragraphButton = ParagraphButton({
-      host,
+      pageElement: pageElement,
       formatBar: this,
       selectedModels,
       page,
     });
-    const actionItems = ActionItems(host);
+    const actionItems = ActionItems(pageElement);
     const inlineItems = InlineItems({
-      host,
+      pageElement: pageElement,
       abortController,
     });
 

@@ -6,16 +6,19 @@ import { getCurrentCombinedFormat } from '../../../page-block/utils/container-op
 import { getTextSelection } from '../../../page-block/utils/selection.js';
 
 interface InlineItemsProps {
-  host: PageBlockComponent;
+  pageElement: PageBlockComponent;
   abortController: AbortController;
 }
 
-export const InlineItems = ({ host, abortController }: InlineItemsProps) => {
-  const textSelection = getTextSelection(host);
+export const InlineItems = ({
+  pageElement,
+  abortController,
+}: InlineItemsProps) => {
+  const textSelection = getTextSelection(pageElement);
   if (!textSelection || textSelection.isCollapsed()) {
     return [];
   }
-  const format = getCurrentCombinedFormat(host, textSelection);
+  const format = getCurrentCombinedFormat(pageElement, textSelection);
 
   return inlineFormatConfig.map(
     ({ id, name, icon, action, activeWhen }) => html`<icon-button
@@ -25,7 +28,7 @@ export const InlineItems = ({ host, abortController }: InlineItemsProps) => {
       ?active=${activeWhen(format)}
       @click=${() => {
         action({
-          host,
+          pageElement,
           abortController,
           format,
         });

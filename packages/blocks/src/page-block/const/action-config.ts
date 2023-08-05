@@ -22,9 +22,9 @@ export interface ActionConfig {
   disabledToolTip?: string;
   icon: TemplateResult<1>;
   hotkey?: string;
-  showWhen: (host: PageBlockComponent) => boolean;
-  enabledWhen: (host: PageBlockComponent) => boolean;
-  action: (host: PageBlockComponent) => void;
+  showWhen: (pageElement: PageBlockComponent) => boolean;
+  enabledWhen: (pageElement: PageBlockComponent) => boolean;
+  action: (pageElement: PageBlockComponent) => void;
 }
 
 export const actionConfig: ActionConfig[] = [
@@ -36,8 +36,8 @@ export const actionConfig: ActionConfig[] = [
     hotkey: undefined,
     showWhen: () => true,
     enabledWhen: () => true,
-    action: (host: PageBlockComponent) => {
-      copyBlocksInPage(host);
+    action: (pageElement: PageBlockComponent) => {
+      copyBlocksInPage(pageElement);
       toast('Copied to clipboard');
     },
   },
@@ -48,8 +48,8 @@ export const actionConfig: ActionConfig[] = [
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
     hotkey: `${SHORT_KEY}+g`,
-    showWhen: (host: PageBlockComponent) => {
-      const selectedModels = getSelectedContentModels(host);
+    showWhen: (pageElement: PageBlockComponent) => {
+      const selectedModels = getSelectedContentModels(pageElement);
 
       if (selectedModels.length === 0) {
         return false;
@@ -62,15 +62,15 @@ export const actionConfig: ActionConfig[] = [
 
       return true;
     },
-    enabledWhen: (host: PageBlockComponent) => {
-      const root = host.root;
+    enabledWhen: (pageElement: PageBlockComponent) => {
+      const root = pageElement.root;
       const selectionManager = root.selectionManager;
       const selections = selectionManager.value;
 
       const selectedBlocks = selections
         .filter(selection => selection instanceof BlockSelection)
         .map(selection => {
-          const page = host.page;
+          const page = pageElement.page;
           const block = page.getBlockById(selection.blockId);
           assertExists(block);
           return block;
@@ -84,8 +84,8 @@ export const actionConfig: ActionConfig[] = [
         DATABASE_CONVERT_WHITE_LIST.includes(block.flavour)
       );
     },
-    action: (host: PageBlockComponent) => {
-      const databaseConvertWidget = host.querySelector(
+    action: (pageElement: PageBlockComponent) => {
+      const databaseConvertWidget = pageElement.querySelector(
         AFFINE_DATABASE_CONVERT_WIDGET_TAG
       );
       assertExists(databaseConvertWidget);

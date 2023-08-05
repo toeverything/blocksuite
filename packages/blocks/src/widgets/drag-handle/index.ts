@@ -120,7 +120,7 @@ export class DragHandleWidget extends WidgetElement {
 
   // TODO: need to find a better way, should not assumpt the host element is page block
   private get _pageBlockElement() {
-    const pageBlock = this.hostElement as DocPageBlockComponent;
+    const pageBlock = this.pageElement as DocPageBlockComponent;
     assertExists(pageBlock);
 
     return pageBlock;

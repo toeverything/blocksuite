@@ -24,14 +24,14 @@ import type { SlashMenuOptions } from './utils.js';
 let globalAbortController = new AbortController();
 
 function showSlashMenu({
-  host,
+  pageElement,
   model,
   range,
   container = document.body,
   abortController = new AbortController(),
   options,
 }: {
-  host: PageBlockComponent;
+  pageElement: PageBlockComponent;
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
@@ -49,7 +49,7 @@ function showSlashMenu({
   slashMenu.model = model;
   slashMenu.abortController = abortController;
   slashMenu.options = options;
-  slashMenu.host = host;
+  slashMenu.pageElement = pageElement;
 
   // Handle position
   const updatePosition = throttle(() => {
@@ -128,8 +128,8 @@ export class SlashMenuWidget extends WidgetElement {
     const vEditor = getVirgoByModel(model);
     if (!vEditor) return;
     vEditor.slots.rangeUpdated.once(() => {
-      const host = this.hostElement;
-      if (!isPageComponent(host)) {
+      const pageElement = this.pageElement;
+      if (!isPageComponent(pageElement)) {
         throw new Error('SlashMenuWidget should be used in PageBlock');
       }
 
@@ -137,7 +137,7 @@ export class SlashMenuWidget extends WidgetElement {
       requestAnimationFrame(() => {
         const curRange = getCurrentNativeRange();
         showSlashMenu({
-          host,
+          pageElement,
           model,
           range: curRange,
           options: this.options,

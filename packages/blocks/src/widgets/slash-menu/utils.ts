@@ -28,10 +28,10 @@ export type SlashItem = {
   showWhen?: (model: BaseBlockModel) => boolean;
   disabled?: boolean;
   action: ({
-    host,
+    pageElement,
     model,
   }: {
-    host: PageBlockComponent;
+    pageElement: PageBlockComponent;
     model: BaseBlockModel;
   }) => void;
 };

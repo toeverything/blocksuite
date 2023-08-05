@@ -371,7 +371,7 @@ export class DocPageBlockComponent
 
     const meta = html`
       <affine-page-meta-data
-        .host="${this}"
+        .pageElement="${this}"
         .page="${this.page}"
       ></affine-page-meta-data>
     `;

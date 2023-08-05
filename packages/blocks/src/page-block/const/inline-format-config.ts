@@ -21,13 +21,13 @@ import {
   getTextSelection,
 } from '../utils/selection.js';
 
-function noneCodeBlockSelected(host: PageBlockComponent) {
-  const selectedModels = getSelectedContentModels(host);
+function noneCodeBlockSelected(pageElement: PageBlockComponent) {
+  const selectedModels = getSelectedContentModels(pageElement);
   return !selectedModels.every(model => model.flavour === 'affine:code');
 }
 
 interface InlineFormatConfigAction {
-  host: PageBlockComponent;
+  pageElement: PageBlockComponent;
   abortController: AbortController;
   format: AffineTextAttributes;
 }
@@ -39,7 +39,7 @@ export interface InlineFormatConfig {
   icon: TemplateResult<1>;
   hotkey?: string;
   activeWhen: (format: AffineTextAttributes) => boolean;
-  showWhen: (host: PageBlockComponent) => boolean;
+  showWhen: (pageElement: PageBlockComponent) => boolean;
   action: (props: InlineFormatConfigAction) => void;
 }
 
@@ -50,11 +50,12 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     icon: BoldIcon,
     hotkey: `${SHORT_KEY}+b`,
     activeWhen: (format: AffineTextAttributes) => 'bold' in format,
-    showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: ({ host }) => {
-      const textSelection = getTextSelection(host);
+    showWhen: (pageElement: PageBlockComponent) =>
+      noneCodeBlockSelected(pageElement),
+    action: ({ pageElement }) => {
+      const textSelection = getTextSelection(pageElement);
       assertExists(textSelection);
-      handleFormat(host, textSelection, 'bold');
+      handleFormat(pageElement, textSelection, 'bold');
     },
   },
   {
@@ -63,11 +64,12 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     icon: ItalicIcon,
     hotkey: `${SHORT_KEY}+i`,
     activeWhen: (format: AffineTextAttributes) => 'italic' in format,
-    showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: ({ host }) => {
-      const textSelection = getTextSelection(host);
+    showWhen: (pageElement: PageBlockComponent) =>
+      noneCodeBlockSelected(pageElement),
+    action: ({ pageElement }) => {
+      const textSelection = getTextSelection(pageElement);
       assertExists(textSelection);
-      handleFormat(host, textSelection, 'italic');
+      handleFormat(pageElement, textSelection, 'italic');
     },
   },
   {
@@ -76,11 +78,12 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     icon: UnderlineIcon,
     hotkey: `${SHORT_KEY}+u`,
     activeWhen: (format: AffineTextAttributes) => 'underline' in format,
-    showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: ({ host }) => {
-      const textSelection = getTextSelection(host);
+    showWhen: (pageElement: PageBlockComponent) =>
+      noneCodeBlockSelected(pageElement),
+    action: ({ pageElement }) => {
+      const textSelection = getTextSelection(pageElement);
       assertExists(textSelection);
-      handleFormat(host, textSelection, 'underline');
+      handleFormat(pageElement, textSelection, 'underline');
     },
   },
   {
@@ -89,11 +92,12 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     icon: StrikethroughIcon,
     hotkey: `${SHORT_KEY}+shift+s`,
     activeWhen: (format: AffineTextAttributes) => 'strike' in format,
-    showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: ({ host }) => {
-      const textSelection = getTextSelection(host);
+    showWhen: (pageElement: PageBlockComponent) =>
+      noneCodeBlockSelected(pageElement),
+    action: ({ pageElement }) => {
+      const textSelection = getTextSelection(pageElement);
       assertExists(textSelection);
-      handleFormat(host, textSelection, 'strike');
+      handleFormat(pageElement, textSelection, 'strike');
     },
   },
   {
@@ -102,11 +106,12 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     icon: InlineCodeIcon,
     hotkey: `${SHORT_KEY}+e`,
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
-    showWhen: (host: PageBlockComponent) => noneCodeBlockSelected(host),
-    action: ({ host }) => {
-      const textSelection = getTextSelection(host);
+    showWhen: (pageElement: PageBlockComponent) =>
+      noneCodeBlockSelected(pageElement),
+    action: ({ pageElement }) => {
+      const textSelection = getTextSelection(pageElement);
       assertExists(textSelection);
-      handleFormat(host, textSelection, 'code');
+      handleFormat(pageElement, textSelection, 'code');
     },
   },
   {
@@ -116,16 +121,16 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: `${SHORT_KEY}+k`,
     activeWhen: (format: AffineTextAttributes) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
-    showWhen: (host: PageBlockComponent) => {
-      const textSelection = getTextSelection(host);
+    showWhen: (pageElement: PageBlockComponent) => {
+      const textSelection = getTextSelection(pageElement);
       assertExists(textSelection);
-      const selectedModels = getSelectedContentModels(host);
+      const selectedModels = getSelectedContentModels(pageElement);
       return (
         selectedModels.length === 1 &&
-        noneCodeBlockSelected(host) &&
+        noneCodeBlockSelected(pageElement) &&
         // can't create link when selection includes reference node
         // XXX get loose format at here is not a good practice
-        !getCurrentCombinedFormat(host, textSelection, true).reference
+        !getCurrentCombinedFormat(pageElement, textSelection, true).reference
       );
     },
     action: () => {

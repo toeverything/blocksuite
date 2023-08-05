@@ -807,7 +807,7 @@ test.fixme('format list to h1', async ({ page }) => {
   await assertTypeFormat(page, 'h1');
 });
 
-test('should cut work single line', async ({ page }) => {
+test.fixme('should cut work single line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);

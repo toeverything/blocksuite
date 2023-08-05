@@ -54,13 +54,13 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
   }
 
   private _convertToDatabase(viewType: DatabaseViewName) {
-    const host = this.hostElement;
-    if (!isPageComponent(host)) {
+    const pageElement = this.pageElement;
+    if (!isPageComponent(pageElement)) {
       throw new Error(
         'database convert widget must be hosted in page component'
       );
     }
-    const selectedModels = getSelectedContentModels(host);
+    const selectedModels = getSelectedContentModels(pageElement);
     //TODO: kanban view
     if (viewType !== 'table' || selectedModels.length === 0) return;
 

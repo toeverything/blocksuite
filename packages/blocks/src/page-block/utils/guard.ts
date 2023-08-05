@@ -5,10 +5,10 @@ import { EdgelessPageBlockComponent } from '../edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../types.js';
 
 export function isPageComponent(
-  host: BlockElement
-): host is PageBlockComponent {
+  blockElement: BlockElement
+): blockElement is PageBlockComponent {
   return (
-    host instanceof DocPageBlockComponent ||
-    host instanceof EdgelessPageBlockComponent
+    blockElement instanceof DocPageBlockComponent ||
+    blockElement instanceof EdgelessPageBlockComponent
   );
 }

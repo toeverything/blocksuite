@@ -31,16 +31,16 @@ import type { PageBlockComponent } from '../types.js';
 import { getSelectedContentModels, getTextSelection } from './selection.js';
 
 export function deleteModelsByRange(
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   textSelection?: TextSelection
 ) {
   if (!textSelection) {
-    textSelection = getTextSelection(host) ?? undefined;
+    textSelection = getTextSelection(pageElement) ?? undefined;
   }
   assertExists(textSelection);
 
-  const page = host.page;
-  const selectedModels = getSelectedContentModels(host);
+  const page = pageElement.page;
+  const selectedModels = getSelectedContentModels(pageElement);
 
   if (selectedModels.length === 0) {
     return null;
@@ -96,14 +96,14 @@ export function deleteModelsByRange(
  * Do nothing when selection is collapsed or not multi block selected
  */
 export function handleMultiBlockBackspace(
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   e: KeyboardEvent
 ) {
   if (!hasNativeSelection()) return;
   if (isCollapsedNativeSelection()) return;
   if (!isMultiBlockRange()) return;
   e.preventDefault();
-  deleteModelsByRange(host);
+  deleteModelsByRange(pageElement);
 }
 
 function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
@@ -131,7 +131,7 @@ function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
 }
 
 export function updateBlockType(
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   models: BaseBlockModel[],
   flavour: keyof BlockSchemas,
   type?: string
@@ -149,7 +149,7 @@ export function updateBlockType(
     );
   }
   page.captureSync();
-  const selectionManager = host.root.selectionManager;
+  const selectionManager = pageElement.root.selectionManager;
   const savedSelection = selectionManager.value;
   if (flavour === 'affine:code') {
     const id = mergeToCodeBlocks(page, models);
@@ -267,11 +267,11 @@ function mergeFormat(
  * formats with different values will only return the last one.
  */
 export function getCombinedFormat(
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  const selectedModel = getSelectedContentModels(host);
+  const selectedModel = getSelectedContentModels(pageElement);
   if (selectedModel.length === 0) {
     return {};
   }
@@ -345,25 +345,25 @@ export function getCombinedFormat(
 }
 
 export function getCurrentCombinedFormat(
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  return getCombinedFormat(host, textSelection, loose);
+  return getCombinedFormat(pageElement, textSelection, loose);
 }
 
 function formatTextSelection(
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   textSelection: TextSelection,
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
 ) {
-  const selectedModels = getSelectedContentModels(host);
+  const selectedModels = getSelectedContentModels(pageElement);
 
   if (selectedModels.length === 0) {
     throw new Error('No selected models');
   }
 
-  const selectionManager = host.root.selectionManager;
+  const selectionManager = pageElement.root.selectionManager;
   const { from, to } = textSelection;
   const startModel = selectedModels[0];
   const endModel = selectedModels[selectedModels.length - 1];
@@ -386,7 +386,7 @@ function formatTextSelection(
 
     return;
   }
-  const format = getCombinedFormat(host, textSelection);
+  const format = getCombinedFormat(pageElement, textSelection);
 
   // edge case 2: same model
   if (textSelection.isInSameBlock()) {
@@ -445,12 +445,12 @@ function formatTextSelection(
 }
 
 export function handleFormat(
-  host: PageBlockComponent,
+  pageElement: PageBlockComponent,
   textSelection: TextSelection,
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
 ) {
-  host.page.captureSync();
-  formatTextSelection(host, textSelection, key);
+  pageElement.page.captureSync();
+  formatTextSelection(pageElement, textSelection, key);
 }
 
 export async function onModelTextUpdated(

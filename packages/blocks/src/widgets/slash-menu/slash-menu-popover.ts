@@ -27,7 +27,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  host!: PageBlockComponent;
+  pageElement!: PageBlockComponent;
 
   @property({ attribute: false })
   model!: BaseBlockModel;
@@ -251,7 +251,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     this.abortController.abort();
 
     const { action } = this._filterItems[index];
-    action({ host: this.host, model: this.model });
+    action({ pageElement: this.pageElement, model: this.model });
   }
 
   private _handleClickCategory(groupName: string) {

@@ -75,8 +75,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
             return true;
           },
-          action: ({ model, host }) => {
-            const newModels = updateBlockType(host, [model], flavour, type);
+          action: ({ model, pageElement }) => {
+            const newModels = updateBlockType(
+              pageElement,
+              [model],
+              flavour,
+              type
+            );
             // Reset selection if the target is code block
             if (flavour === 'affine:code') {
               if (newModels.length !== 1) {
@@ -135,8 +140,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: ({ model, host }) =>
-          updateBlockType(host, [model], flavour, type),
+        action: ({ model, pageElement }) =>
+          updateBlockType(pageElement, [model], flavour, type),
       })),
   },
 
@@ -148,8 +153,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: NewPageIcon,
         showWhen: model =>
           !!model.page.awarenessStore.getFlag('enable_linked_page'),
-        action: async ({ host, model }) => {
-          const newPage = await createPage(host.page.workspace);
+        action: async ({ pageElement, model }) => {
+          const newPage = await createPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
             reference: { type: 'LinkedPage', pageId: newPage.id },
           });
@@ -205,18 +210,18 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        async action({ host, model }) {
-          const parent = host.page.getParent(model);
+        async action({ pageElement, model }) {
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
           }
-          const props = (await uploadImageFromLocal(host.page.blobs)).map(
-            ({ sourceId }): ImageProps & { flavour: 'affine:image' } => ({
-              flavour: 'affine:image',
-              sourceId,
-            })
-          );
-          host.page.addSiblingBlocks(model, props);
+          const props = (
+            await uploadImageFromLocal(pageElement.page.blobs)
+          ).map(({ sourceId }): ImageProps & { flavour: 'affine:image' } => ({
+            flavour: 'affine:image',
+            sourceId,
+          }));
+          pageElement.page.addSiblingBlocks(model, props);
         },
       },
       {
@@ -228,8 +233,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return !insideDatabase(model);
         },
-        async action({ host, model }) {
-          const parent = host.page.getParent(model);
+        async action({ pageElement, model }) {
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
           }
@@ -239,7 +244,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             flavour: 'affine:bookmark',
             url,
           } as const;
-          host.page.addSiblingBlocks(model, [props]);
+          pageElement.page.addSiblingBlocks(model, [props]);
         },
       },
       {
@@ -253,48 +258,54 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             return false;
           return !insideDatabase(model);
         },
-        action: async ({ host, model }) => {
-          const parent = host.page.getParent(model);
+        action: async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
           }
           let attachmentModel: AttachmentBlockModel | null = null;
-          const fileInfo = await uploadFileFromLocal(host.page.blobs, file => {
-            if (file.size > MAX_ATTACHMENT_SIZE) {
-              toast(
-                `You can only upload files less than ${humanFileSize(
-                  MAX_ATTACHMENT_SIZE,
-                  true,
-                  0
-                )}`
-              );
-              return false;
+          const fileInfo = await uploadFileFromLocal(
+            pageElement.page.blobs,
+            file => {
+              if (file.size > MAX_ATTACHMENT_SIZE) {
+                toast(
+                  `You can only upload files less than ${humanFileSize(
+                    MAX_ATTACHMENT_SIZE,
+                    true,
+                    0
+                  )}`
+                );
+                return false;
+              }
+
+              const loadingKey = pageElement.page.generateId();
+              setAttachmentLoading(loadingKey, true);
+              const props: AttachmentProps & { flavour: 'affine:attachment' } =
+                {
+                  flavour: 'affine:attachment',
+                  name: file.name,
+                  size: file.size,
+                  type: file.type,
+                  loadingKey,
+                };
+              const [newBlockId] = pageElement.page.addSiblingBlocks(model, [
+                props,
+              ]);
+              assertExists(newBlockId);
+              attachmentModel = pageElement.page.getBlockById(
+                newBlockId
+              ) as AttachmentBlockModel;
+
+              return true;
             }
-
-            const loadingKey = host.page.generateId();
-            setAttachmentLoading(loadingKey, true);
-            const props: AttachmentProps & { flavour: 'affine:attachment' } = {
-              flavour: 'affine:attachment',
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              loadingKey,
-            };
-            const [newBlockId] = host.page.addSiblingBlocks(model, [props]);
-            assertExists(newBlockId);
-            attachmentModel = host.page.getBlockById(
-              newBlockId
-            ) as AttachmentBlockModel;
-
-            return true;
-          });
+          );
           if (!fileInfo || !attachmentModel) return;
           const { sourceId } = fileInfo;
           // FIXME: I think it is a bug of TypeScript
           const realAttachmentModel: AttachmentBlockModel = attachmentModel;
           // await new Promise(resolve => setTimeout(resolve, 1000));
           setAttachmentLoading(realAttachmentModel.loadingKey ?? '', false);
-          host.page.updateBlock(realAttachmentModel, {
+          pageElement.page.updateBlock(realAttachmentModel, {
             sourceId,
             loadingKey: null,
           });
@@ -370,19 +381,19 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: async ({ host, model }) => {
-          const parent = host.page.getParent(model);
+        action: async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const id = host.page.addBlock(
+          const id = pageElement.page.addBlock(
             'affine:database',
             {},
-            host.page.getParent(model),
+            pageElement.page.getParent(model),
             index + 1
           );
           const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(host.page, model, id, false);
+          service.initDatabaseBlock(pageElement.page, model, id, false);
         },
       },
       {
@@ -427,15 +438,15 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: async ({ host, model }) => {
-          const parent = host.page.getParent(model);
+        action: async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          host.page.addBlock(
+          pageElement.page.addBlock(
             'affine:data-view',
             {},
-            host.page.getParent(model),
+            pageElement.page.getParent(model),
             index + 1
           );
         },
@@ -467,26 +478,26 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Duplicate',
         icon: DuplicateIcon,
-        action: ({ host, model }) => {
+        action: ({ pageElement, model }) => {
           if (!model.text || !(model.text instanceof Text)) {
             throw new Error("Can't duplicate a block without text");
           }
-          const parent = host.page.getParent(model);
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             throw new Error('Failed to duplicate block! Parent not found');
           }
           const index = parent.children.indexOf(model);
 
           // TODO add clone model util
-          host.page.addBlock(
+          pageElement.page.addBlock(
             model.flavour,
             {
               type: model.type,
-              text: host.page.Text.fromDelta(model.text.toDelta()),
+              text: pageElement.page.Text.fromDelta(model.text.toDelta()),
               // @ts-expect-error
               checked: model.checked,
             },
-            host.page.getParent(model),
+            pageElement.page.getParent(model),
             index
           );
         },
@@ -494,8 +505,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Delete',
         icon: DeleteIcon,
-        action: ({ host, model }) => {
-          host.page.deleteBlock(model);
+        action: ({ pageElement, model }) => {
+          pageElement.page.deleteBlock(model);
         },
       },
     ],
