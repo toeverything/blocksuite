@@ -1,5 +1,4 @@
 import '../../components/button.js';
-import '../../components/portal.js';
 import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
