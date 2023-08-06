@@ -42,6 +42,7 @@
   "exports": {
     "./src/*": "./src/*.ts",
     ".": "./src/index.ts",
+    "./workspace/migration/*": "./src/workspace/migration/*.ts",
     "./providers/*": "./src/providers/*.ts"
   },
   "publishConfig": {
