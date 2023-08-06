@@ -121,9 +121,118 @@ export const globalCSS = css`
     --affine-palette-shape-black: #000;
     --affine-palette-shape-grey: #c2c2c2;
     --affine-tooltip: #424149;
+    --affine-shadow-1: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
+    --affine-card-background-blue: linear-gradient(
+      180deg,
+      #f0f3fd 0%,
+      #fcfcfd 100%
+    );
+    --affine-background-secondary-color: rgba(244, 244, 245, 1);
   }
   body {
     font-family: var(--affine-font-family);
     color: var(--affine-text-primary-color);
+  }
+
+  .affine-bookmark-block-container {
+    width: 100%;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    position: relative;
+    .affine-bookmark-link {
+      height: 74px;
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-card-background-blue);
+      border: 3px solid var(--affine-background-secondary-color);
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: flex;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--affine-text-primary-color);
+      overflow: hidden;
+      line-height: calc(1em + 4px);
+      position: relative;
+    }
+    .affine-bookmark-banner {
+      width: 140px;
+      height: 93px;
+      margin-left: 20px;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .affine-bookmark-banner img,
+    .affine-bookmark-banner svg {
+      width: 140px;
+      height: 93px;
+      object-fit: cover;
+    }
+    .affine-bookmark-content-wrapper {
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    .affine-bookmark-title {
+      height: 18px;
+      display: flex;
+      align-items: center;
+      font-size: var(--affine-font-sm);
+      font-weight: 600;
+    }
+    .affine-bookmark-title-content {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+    .affine-bookmark-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--affine-text-secondary-color);
+      flex-shrink: 0;
+    }
+    .affine-bookmark-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .affine-bookmark-description {
+      height: 32px;
+      line-height: 16px;
+      margin-top: 4px;
+      font-size: var(--affine-font-xs);
+
+      display: -webkit-box;
+      word-break: break-all;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .affine-bookmark-url {
+      font-size: var(--affine-font-xs);
+      color: var(--affine-text-secondary-color);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+    .affine-bookmark-caption {
+      width: 100%;
+      font-size: var(--affine-font-sm);
+      outline: none;
+      border: 0;
+      font-family: inherit;
+      text-align: center;
+      color: var(--affine-icon-color);
+      background: var(--affine-background-primary-color);
+    }
+    .affine-bookmark-caption::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+    .affine-bookmark-caption.caption-show {
+      display: inline-block;
+    }
   }
 `;

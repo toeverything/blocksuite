@@ -261,6 +261,23 @@ export const FileExporter = {
       },
     });
     turndownService.keep(['del', 'u']);
+    turndownService.addRule('bookMark', {
+      filter: function (node) {
+        return (
+          node.nodeName === 'DIV' &&
+          node.classList.contains('affine-bookmark-block-container')
+        );
+      },
+      //@ts-ignore
+      replacement: function (content, node: Node) {
+        const element = node as Element;
+        const titleElement = element.querySelector(
+          '.affine-bookmark-title-content'
+        );
+        const urlElement = element.querySelector('.affine-bookmark-url');
+        return `[${titleElement?.textContent}](${urlElement?.textContent})\n`;
+      },
+    });
     const markdown = turndownService.turndown(htmlContent);
 
     const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
