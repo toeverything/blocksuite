@@ -55,14 +55,23 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
     .edgeless-brush-button {
       position: relative;
       height: 66px;
-      width: 36px;
+      width: 40px;
       overflow-y: hidden;
     }
     #edgeless-pen-icon {
       position: absolute;
       top: 10px;
-      left: 0;
+      left: 3px;
       transition: top 0.3s ease-in-out;
+    }
+    .active-mode {
+      height: 66px;
+      width: 40px;
+      top: 10px;
+      position: absolute;
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
+      background: var(--affine-hover-color);
     }
     #edgeless-pen-icon:hover {
       top: 2px;
@@ -72,7 +81,7 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       position: absolute;
-      right: 0px;
+      right: 2px;
       top: 12px;
       width: 14px;
       height: 14px;
@@ -173,7 +182,6 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       <edgeless-toolbar-button
         .tooltip=${getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
-        .activeMode=${'background'}
         @click=${() => {
           this.setEdgelessTool({
             type: 'brush',
@@ -184,6 +192,7 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
         }}
       >
         <div class="edgeless-brush-button">
+          <div class=${type === 'brush' ? 'active-mode' : ''}></div>
           ${EdgelessPenIcon}
           <div class="arrow-up-icon">${ArrowUpIcon}</div>
         </div>
