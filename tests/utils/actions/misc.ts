@@ -869,28 +869,52 @@ export async function shamefullyBlurActiveElement(page: Page) {
   });
 }
 
-/**
- * FIXME:
- * Sometimes virgo state is not updated in time. Bad case like below:
- *
- * ```
- * await focusRichText(page);
- * await type(page, 'hello');
- * await assertRichTexts(page, ['hello']);
- * ```
- *
- * output(failed or flaky):
- *
- * ```
- * - Expected  - 1
- * + Received  + 1
- *   Array [
- * -   "hello",
- * +   "ello",
- *   ]
- * ```
- *
- */
+export async function waitForRange(page: Page, containerSelector?: string) {
+  return page.evaluate(async (containerSelector?: string) => {
+    const getRange = () => {
+      const selection = window.getSelection() as Selection;
+      return selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    };
+
+    await new Promise(resolve => {
+      const tryResolveRange = () => {
+        const range = getRange();
+        if (!range) return false;
+
+        let resolved = true;
+        if (containerSelector) {
+          const container = document.querySelector(containerSelector);
+          resolved =
+            !!container &&
+            (range.startContainer.compareDocumentPosition(container) &
+              Node.DOCUMENT_POSITION_CONTAINS) !==
+              0;
+        }
+
+        if (resolved) {
+          resolve(range);
+        }
+
+        return resolved;
+      };
+
+      const resolved = tryResolveRange();
+      if (resolved) return;
+
+      const handleSelectionChange = () => {
+        const resolved = tryResolveRange();
+        if (resolved) {
+          document.removeEventListener(
+            'selectionchange',
+            handleSelectionChange
+          );
+        }
+      };
+      document.addEventListener('selectionchange', handleSelectionChange);
+    });
+  }, containerSelector);
+}
+
 export async function waitForVirgoStateUpdated(page: Page) {
   return await page.evaluate(async () => {
     const selection = window.getSelection() as Selection;

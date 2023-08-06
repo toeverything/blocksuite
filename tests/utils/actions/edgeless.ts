@@ -22,6 +22,7 @@ import {
   enterPlaygroundRoom,
   getEditorLocator,
   initEmptyEdgelessState,
+  waitForRange,
   waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
@@ -316,6 +317,11 @@ export async function addBasicConnectorElement(
 export async function addNote(page: Page, text: string, x: number, y: number) {
   await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
+  const newNoteId = await page.evaluate(() => {
+    const allNotes = document.querySelectorAll('affine-note');
+    return allNotes[allNotes.length - 1].model.id;
+  });
+  await waitForRange(page, `affine-note[data-block-id="${newNoteId}"]`);
   await waitForVirgoStateUpdated(page);
   await type(page, text);
 }
