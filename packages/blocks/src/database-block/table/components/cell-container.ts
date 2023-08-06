@@ -85,7 +85,9 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', e => {
-      this._selectCurrentCell(true);
+      if (!this.isEditing) {
+        this._selectCurrentCell(true);
+      }
     });
   }
 
@@ -107,7 +109,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
     return html`${keyed(
       `${isEditView} ${this.column.type}`,
-      html`<uni-lit
+      html` <uni-lit
         ${ref(this._cell)}
         style=${style}
         .uni="${uni}"
