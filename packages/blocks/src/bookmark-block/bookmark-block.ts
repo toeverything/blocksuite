@@ -367,7 +367,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         @mouseover="${this._onHover}"
         @mouseout="${this._onHoverOut}"
       >
-        <affine-portal .template=${toolbar}></affine-portal>
+        <blocksuite-portal .template=${toolbar}></blocksuite-portal>
         ${this._isLoading ? loading : linkCard}
         <input
           .disabled=${this.model.page.readonly}

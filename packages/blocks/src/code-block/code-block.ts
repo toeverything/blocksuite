@@ -406,7 +406,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   private _codeOptionTemplate() {
     if (!this._optionPosition) return '';
-    return html`<affine-portal
+    return html`<blocksuite-portal
       .template=${CodeOptionTemplate({
         model: this.model,
         position: this._optionPosition,
@@ -414,7 +414,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         wrap: this._wrap,
         onClickWrap: () => this._onClickWrapBtn(),
       })}
-    ></affine-portal>`;
+    ></blocksuite-portal>`;
   }
 
   private _updateLineNumbers() {
