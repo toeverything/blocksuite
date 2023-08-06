@@ -25,6 +25,8 @@ type TableViewClipboardConfig = {
   data: DataViewManager;
 };
 
+const columnsContainInput = ['number', 'date', 'link', 'select'];
+
 export class TableViewClipboard implements BaseViewClipboard {
   private _disposables = new DisposableGroup();
   private _path: string[];
@@ -69,7 +71,7 @@ export class TableViewClipboard implements BaseViewClipboard {
         focus.columnIndex
       );
 
-      if (column.type !== 'number') {
+      if (!columnsContainInput.includes(column.type)) {
         const data = (cellToStringMap[column.type]?.(container) ??
           '') as string;
         const textClipboardItem = new ClipboardItem(
