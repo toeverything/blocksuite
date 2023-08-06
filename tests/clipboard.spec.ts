@@ -14,7 +14,7 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  getAllNotes,
+  getAllNoteIds,
   getEditorLocator,
   getRichTextBoundingBox,
   importMarkdown,
@@ -801,10 +801,10 @@ test(scoped`paste note block with background`, async ({ page }) => {
 
   await page.mouse.move(0, 0);
   await pasteByKeyboard(page, false);
-  const notes = await getAllNotes(page);
-  await Array.from(notes).map(async note => {
-    await assertEdgelessNoteBackground(page, note.id, color);
-  });
+  const noteIds = await getAllNoteIds(page);
+  for (const noteId of noteIds) {
+    await assertEdgelessNoteBackground(page, noteId, color);
+  }
 });
 
 test(scoped`copy and paste to selection block selection`, async ({ page }) => {
