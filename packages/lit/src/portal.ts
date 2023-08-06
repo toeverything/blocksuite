@@ -18,12 +18,12 @@ import { customElement, property } from 'lit/decorators.js';
  * ```ts
  * render() {
  *   return html`${showPortal
- *     ? html`<affine-portal .template=${portalTemplate}></affine-portal>`
+ *     ? html`<blocksuite-portal .template=${portalTemplate}></blocksuite-portal>`
  *     : null}`;
  * };
  * ```
  */
-@customElement('affine-portal')
+@customElement('blocksuite-portal')
 export class Portal extends LitElement {
   @property({ attribute: false })
   public container = document.body;
@@ -40,7 +40,7 @@ export class Portal extends LitElement {
 
   override createRenderRoot() {
     const portalRoot = document.createElement('div');
-    portalRoot.classList.add('affine-portal');
+    portalRoot.classList.add('blocksuite-portal');
     this.container.append(portalRoot);
     this._portalRoot = portalRoot;
     return portalRoot;
@@ -52,7 +52,7 @@ export class Portal extends LitElement {
 }
 
 /**
- * Similar to `<affine-portal>`, but only renders once when called.
+ * Similar to `<blocksuite-portal>`, but only renders once when called.
  *
  * The template should be a **static** template since it will not be re-rendered.
  *
@@ -71,13 +71,13 @@ export function createLitPortal({
   renderOptions?: RenderOptions;
   /**
    * Defaults to `true`.
-   * If true, the portalRoot will be added a class `affine-portal`. It's useful for finding the portalRoot.
+   * If true, the portalRoot will be added a class `blocksuite-portal`. It's useful for finding the portalRoot.
    */
   identifyWrapper?: boolean;
 }) {
   const portalRoot = document.createElement('div');
   if (identifyWrapper) {
-    portalRoot.classList.add('affine-portal');
+    portalRoot.classList.add('blocksuite-portal');
   }
 
   abortController.signal.addEventListener('abort', () => {
@@ -91,6 +91,6 @@ export function createLitPortal({
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-portal': Portal;
+    'blocksuite-portal': Portal;
   }
 }
