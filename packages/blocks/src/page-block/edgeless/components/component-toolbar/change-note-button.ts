@@ -95,6 +95,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       color: var(--affine-text-secondary-color);
       width: 74px;
       height: 24px;
+      padding: 4px 8px;
     }
 
     .note-status-button.hidden {
