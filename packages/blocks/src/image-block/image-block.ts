@@ -356,13 +356,13 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   private _imageOptionsTemplate() {
     if (!this._optionPosition) return null;
-    return html`<affine-portal
+    return html`<blocksuite-portal
       .template=${ImageOptionsTemplate({
         model: this.model,
         position: this._optionPosition,
         hoverState: this.hoverState,
       })}
-    ></affine-portal>`;
+    ></blocksuite-portal>`;
   }
 
   private _imageResizeBoardTemplate() {
