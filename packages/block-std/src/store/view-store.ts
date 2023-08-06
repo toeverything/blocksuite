@@ -41,6 +41,14 @@ export class ViewStore<NodeViewType = unknown> {
     });
   }
 
+  getChildren = (path: string[]): NodeViewTree<NodeViewType>[] => {
+    const node = this.fromPath(path);
+    if (!node) {
+      return [];
+    }
+    return node.children;
+  };
+
   register<T extends BlockSuiteViewType>(type: T, spec: BlockSuiteView[T]) {
     this.viewSpec.set(type, spec);
   }
@@ -188,7 +196,7 @@ export class ViewStore<NodeViewType = unknown> {
       index: number,
       parent: NodeViewTree<NodeViewType>
     ) => undefined | null | true
-  ) => {
+  ): NodeViewTree<NodeViewType> | null => {
     const getPrev = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {
@@ -243,7 +251,7 @@ export class ViewStore<NodeViewType = unknown> {
       index: number,
       parent: NodeViewTree<NodeViewType>
     ) => undefined | null | true
-  ) => {
+  ): NodeViewTree<NodeViewType> | null => {
     const getNext = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {

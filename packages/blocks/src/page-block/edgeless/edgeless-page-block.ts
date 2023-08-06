@@ -87,7 +87,11 @@ import {
 import { EdgelessConnectorManager } from './connector-manager.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessFrameManager } from './frame-manager.js';
-import { type Selectable } from './services/tools-manager.js';
+import { EdgelessSelectionManager } from './services/selection-manager.js';
+import {
+  EdgelessToolsManager,
+  type Selectable,
+} from './services/tools-manager.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -312,17 +316,8 @@ export class EdgelessPageBlockComponent
 
   getService = getService;
 
-  get selection() {
-    const selection = this.service?.selection;
-    assertExists(selection, 'Selection should be initialized before used');
-    return selection;
-  }
-
-  get tools() {
-    const toolsMgr = this.service?.tools;
-    assertExists(toolsMgr, 'ToolsManager should be initialized before used');
-    return toolsMgr;
-  }
+  selection!: EdgelessSelectionManager;
+  tools!: EdgelessToolsManager;
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
@@ -1065,7 +1060,6 @@ export class EdgelessPageBlockComponent
       this._initSurface();
       this.connector = new EdgelessConnectorManager(this);
       this.frame = new EdgelessFrameManager(this);
-      this.service?.mountSelectionManager(this);
       this.snap = new EdgelessSnapManager(this);
       this.surface.init();
     }
@@ -1212,6 +1206,8 @@ export class EdgelessPageBlockComponent
     registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
+    this.selection = new EdgelessSelectionManager(this);
+    this.tools = new EdgelessToolsManager(this, this.root.uiEventDispatcher);
   }
 
   override disconnectedCallback() {
@@ -1221,17 +1217,21 @@ export class EdgelessPageBlockComponent
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }
-    this.service?.unmountSelectionManager();
 
     this.rangeManager = null;
     this.gesture = null;
     this.rangeSynchronizer = null;
     this.keyboardManager = null;
+
+    this.tools.clear();
+    this.tools.dispose();
+
+    this.selection.dispose();
   }
 
   override render() {
     requestAnimationFrame(() => {
-      this.selection.refreshRemoteSelection();
+      this.selection?.refreshRemoteSelection();
     });
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
