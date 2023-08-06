@@ -1,5 +1,6 @@
 import {
   CaptionIcon,
+  ConfirmIcon,
   DeleteIcon,
   DownloadIcon,
   DuplicateIcon,
@@ -10,39 +11,15 @@ import {
   ViewIcon,
 } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { html } from 'lit';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { ImageProps } from '../../image-block/image-model.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { cloneAttachmentProperties, downloadAttachment } from '../utils.js';
-
-const styles = css`
-  .affine-attachment-options {
-    position: fixed;
-    left: 0;
-    top: 0;
-
-    display: flex;
-    align-items: center;
-    padding: 8px;
-    gap: 8px;
-    border-radius: 8px;
-    background: var(--affine-background-overlay-panel-color);
-    box-shadow: var(--affine-shadow-2);
-  }
-
-  .affine-attachment-options .divider {
-    width: 1px;
-    height: 24px;
-    background-color: var(--affine-border-color);
-  }
-
-  ${tooltipStyle}
-`;
+import { styles } from './styles.js';
 
 export function AttachmentOptionsTemplate({
   anchor,
@@ -90,6 +67,7 @@ export function AttachmentOptionsTemplate({
   });
 
   const moreMenuRef = createRef<HTMLDivElement>();
+  const renameRef = createRef<HTMLDivElement>();
 
   return html`<style>
       ${styles}
@@ -150,7 +128,10 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        @click="${() => console.log('TODO rename', model)}"
+        @click="${() => {
+          containerRef.value?.toggleAttribute('hidden');
+          renameRef.value?.toggleAttribute('hidden');
+        }}"
       >
         ${EditIcon}
         <tool-tip inert tip-position="top" role="tooltip">Rename</tool-tip>
@@ -175,8 +156,58 @@ export function AttachmentOptionsTemplate({
         <tool-tip inert role="tooltip">More</tool-tip>
       </icon-button>
       ${MoreMenu({ model, abortController, ref: moreMenuRef })}
+      ${RenameModal({ model, abortController, ref: renameRef })}
     </div>`;
 }
+
+const RenameModal = ({
+  ref: renamePopoverRef,
+  model,
+  abortController,
+}: {
+  ref: Ref<HTMLDivElement>;
+  model: AttachmentBlockModel;
+  abortController: AbortController;
+}) => {
+  let name = model.name;
+  // TODO suffix
+
+  const onConfirm = () => {
+    model.page.updateBlock(model, {
+      name,
+    });
+    abortController.abort();
+  };
+  const onInput = (e: InputEvent) => {
+    name = (e.target as HTMLInputElement).value;
+  };
+  const onKeydown = (e: KeyboardEvent) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && !e.isComposing) {
+      e.preventDefault();
+      onConfirm();
+    }
+    return;
+  };
+
+  return html`<div
+    ${ref(renamePopoverRef)}
+    class="attachment-rename-container"
+    hidden
+  >
+    <div class="attachment-rename-input-wrapper">
+      <input
+        .value=${name}
+        type="text"
+        @input=${onInput}
+        @keydown=${onKeydown}
+      />
+    </div>
+    <icon-button class="affine-confirm-button" @click=${onConfirm}
+      >${ConfirmIcon}</icon-button
+    >
+  </div>`;
+};
 
 const MoreMenu = ({
   ref: moreMenuRef,
@@ -187,78 +218,40 @@ const MoreMenu = ({
   model: AttachmentBlockModel;
   abortController: AbortController;
 }) => {
-  const styles = css`
-    .attachment-options-more {
-      position: absolute;
-      right: 0;
-      top: 0;
-      transform: translateY(calc(-100% - 4px));
-
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: var(--affine-text-primary-color);
-
-      border-radius: 8px;
-      padding: 8px;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-    }
-
-    .attachment-options-more[hidden] {
-      display: none;
-    }
-
-    .attachment-options-more icon-button {
-      display: flex;
-      align-items: center;
-      padding: 8px;
-      gap: 8px;
-    }
-
-    .attachment-options-more icon-button:hover.danger {
-      background: var(--affine-background-error-color);
-      fill: var(--affine-error-color);
-      color: var(--affine-error-color);
-    }
-  `;
-  return html`<style>
-      ${styles}
-    </style>
-    <div ${ref(moreMenuRef)} class="attachment-options-more" hidden>
-      <icon-button
-        width="120px"
-        height="32px"
-        text="Download"
-        @click="${() => downloadAttachment(model)}"
-      >
-        ${DownloadIcon}
-      </icon-button>
-      <icon-button
-        width="120px"
-        height="32px"
-        text="Duplicate"
-        @click="${() => {
-          const prop = {
-            flavour: 'affine:attachment',
-            ...cloneAttachmentProperties(model),
-          };
-          model.page.addSiblingBlocks(model, [prop]);
-        }}"
-      >
-        ${DuplicateIcon}
-      </icon-button>
-      <icon-button
-        width="120px"
-        height="32px"
-        text="Delete"
-        class="danger"
-        @click="${() => {
-          model.page.deleteBlock(model);
-          abortController.abort();
-        }}"
-      >
-        ${DeleteIcon}
-      </icon-button>
-    </div>`;
+  return html`<div ${ref(moreMenuRef)} class="attachment-options-more" hidden>
+    <icon-button
+      width="120px"
+      height="32px"
+      text="Download"
+      @click="${() => downloadAttachment(model)}"
+    >
+      ${DownloadIcon}
+    </icon-button>
+    <icon-button
+      width="120px"
+      height="32px"
+      text="Duplicate"
+      @click="${() => {
+        const prop = {
+          flavour: 'affine:attachment',
+          ...cloneAttachmentProperties(model),
+        };
+        model.page.addSiblingBlocks(model, [prop]);
+      }}"
+    >
+      ${DuplicateIcon}
+    </icon-button>
+    <icon-button
+      width="120px"
+      height="32px"
+      text="Delete"
+      class="danger"
+      @click="${() => {
+        model.page.deleteBlock(model);
+        abortController.abort();
+      }}"
+    >
+      ${DeleteIcon}
+    </icon-button>
+  </div>`;
 };
