@@ -433,9 +433,11 @@ export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
   return bound;
 }
 
-export async function getAllNotes(page: Page) {
+export async function getAllNoteIds(page: Page) {
   return await page.evaluate(() => {
-    return document.querySelectorAll('affine-note');
+    return Array.from(document.querySelectorAll('affine-note')).map(
+      note => note.model.id
+    );
   });
 }
 
