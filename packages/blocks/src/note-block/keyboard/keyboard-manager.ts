@@ -4,14 +4,11 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import type { NoteBlockComponent } from '../note-block.js';
 import { BlockNavigation } from './block-navigation.js';
-import { TextNavigation } from './text-navigation.js';
 
 export class NoteKeyboardManager {
   constructor(public host: NoteBlockComponent) {
-    const textNavigation = new TextNavigation(host);
     const blockNavigation = new BlockNavigation(host);
     this.host.handleEvent('keyDown', ctx => {
-      textNavigation.keyDown(ctx);
       blockNavigation.keyDown(ctx);
     });
     this.host.bindHotKey({
@@ -19,9 +16,6 @@ export class NoteKeyboardManager {
         const current = this._matchedSelections.at(0);
         if (!current) {
           return;
-        }
-        if (current.is('text')) {
-          return textNavigation.ArrowUp(ctx);
         }
 
         if (current.is('block')) {
@@ -33,31 +27,8 @@ export class NoteKeyboardManager {
         if (!current) {
           return;
         }
-        if (current.is('text')) {
-          return textNavigation.ArrowDown(ctx);
-        }
         if (current.is('block')) {
           return blockNavigation.ArrowDown(ctx);
-        }
-      },
-      ArrowLeft: ctx => {
-        const current = this._matchedSelections.at(0);
-        if (!current) {
-          return;
-        }
-        if (current.is('text')) {
-          ctx.get('keyboardState').raw.preventDefault();
-          return textNavigation.ArrowLeft(ctx);
-        }
-      },
-      ArrowRight: ctx => {
-        const current = this._matchedSelections.at(-1);
-        if (!current) {
-          return;
-        }
-        if (current.is('text')) {
-          ctx.get('keyboardState').raw.preventDefault();
-          return textNavigation.ArrowRight(ctx);
         }
       },
       'Shift-ArrowUp': ctx => {
@@ -65,12 +36,6 @@ export class NoteKeyboardManager {
         if (!current) {
           return;
         }
-        // still need to polish
-        // if (current.is('text')) {
-        //   event.preventDefault();
-        //   textNavigation.ShiftArrowUp(ctx);
-        //   return true;
-        // }
         if (current.is('block')) {
           return blockNavigation.ShiftArrowUp(ctx);
         }
@@ -81,12 +46,6 @@ export class NoteKeyboardManager {
         if (!current) {
           return;
         }
-        // still need to polish
-        // if (current.is('text')) {
-        //   event.preventDefault();
-        //   textNavigation.ShiftArrowDown(ctx);
-        //   return true;
-        // }
         if (current.is('block')) {
           return blockNavigation.ShiftArrowDown(ctx);
         }
@@ -94,22 +53,6 @@ export class NoteKeyboardManager {
       },
       Backspace: this._handleDelete,
       Delete: this._handleDelete,
-      Escape: ctx => {
-        const current = this._matchedSelections.at(0);
-        if (!current) {
-          return;
-        }
-
-        if (current.is('text')) {
-          return textNavigation.Escape(ctx);
-        }
-
-        if (current.is('block')) {
-          this._setSelections([]);
-          return true;
-        }
-        return;
-      },
       Enter: ctx => {
         const current = this._matchedSelections.at(0);
         if (!current) {

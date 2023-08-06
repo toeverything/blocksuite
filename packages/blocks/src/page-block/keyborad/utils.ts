@@ -1,9 +1,6 @@
 import type { BlockElement } from '@blocksuite/lit';
 
-import {
-  caretFromPoint,
-  getNearestText,
-} from '../../page-block/text-selection/utils.js';
+import { caretFromPoint, getNearestText } from '../text-selection/utils.js';
 
 export function horizontalGetNextCaret(
   point: { x: number; y: number },
