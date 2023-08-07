@@ -51,6 +51,7 @@ export class TableViewClipboard implements BaseViewClipboard {
   }
 
   private _onCopy = (context: UIEventStateContext) => {
+    const event = context.get('clipboardState').raw;
     const selection = getDatabaseSelection(this._root);
     const tableSelection = selection?.getSelection('table');
     if (!tableSelection) return;
@@ -69,7 +70,7 @@ export class TableViewClipboard implements BaseViewClipboard {
         focus.columnIndex
       );
 
-      if (column.type !== 'number') {
+      if (!(event.target instanceof HTMLInputElement)) {
         const data = (cellToStringMap[column.type]?.(container) ??
           '') as string;
         const textClipboardItem = new ClipboardItem(

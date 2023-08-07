@@ -1,4 +1,5 @@
 import type { Text } from '@blocksuite/store';
+import type { MigrationRunner } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
 import type {
@@ -223,7 +224,7 @@ const migration = {
       }
     });
   },
-} satisfies Record<string, (typeof DatabaseBlockSchema)['onUpgrade']>;
+} satisfies Record<string, MigrationRunner<typeof DatabaseBlockSchema>>;
 
 export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
