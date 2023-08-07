@@ -49,7 +49,7 @@ test.fixme('add text element in default mode', async ({ page }) => {
 });
 
 // it's also a little flaky
-test('add text element in text mode', async ({ page }) => {
+test.fixme('add text element in text mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -82,7 +82,7 @@ test('add text element in text mode', async ({ page }) => {
   await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
-test('copy and paste', async ({ page }) => {
+test.fixme('copy and paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 

@@ -65,7 +65,7 @@ export class RangeManager {
     this.renderRange(startRange, endRange);
   }
 
-  writeRangeByTextSelection(range: Range | null) {
+  syncRangeToTextSelection(range: Range) {
     const selectionManager = this.root.selectionManager;
     let hasTextSelection = false;
     const noneTextAndBlockSelection = selectionManager.value.filter(sel => {
@@ -76,7 +76,7 @@ export class RangeManager {
 
     const { startContainer, endContainer } = this._range;
     const from = this._nodeToPoint(startContainer);
-    const to = range?.collapsed ? null : this._nodeToPoint(endContainer);
+    const to = range.collapsed ? null : this._nodeToPoint(endContainer);
     if (!from) {
       if (hasTextSelection) {
         selectionManager.clear(['text']);
@@ -151,15 +151,21 @@ export class RangeManager {
   };
 
   getSelectedBlocksIdByRange(range: Range): BaseBlockModel['id'][] {
-    const blocksId = Array.from(
-      range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
-    ).map(block => {
-      const id = block.getAttribute(BLOCK_ID_ATTR);
-      assertExists(id, 'Cannot find block id');
-      return id;
-    });
+    const selectedBlocksId = Array.from<BlockElement>(
+      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
+    )
+      .filter(el => range.intersectsNode(el))
+      .map(el => el.model.id);
 
-    return blocksId;
+    return selectedBlocksId;
+  }
+
+  getSelectedBlockElementsByRange(range: Range): BlockElement[] {
+    const selectedBlockElements = Array.from<BlockElement>(
+      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
+    ).filter(el => range.intersectsNode(el));
+
+    return selectedBlockElements;
   }
 
   private _pointToRange(point: TextRangePoint): Range | null {

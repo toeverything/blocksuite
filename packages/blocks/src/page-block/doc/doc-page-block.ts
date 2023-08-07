@@ -1,6 +1,6 @@
 import './meta-data/meta-data.js';
 
-import type { BlockService } from '@blocksuite/block-std';
+import { type BlockService } from '@blocksuite/block-std';
 import {
   PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
@@ -29,6 +29,7 @@ import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
+import { UtilManager } from '../utils/util-manager.js';
 
 export interface PageViewport {
   left: number;
@@ -123,6 +124,12 @@ export class DocPageBlockComponent
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
+
+  /**
+   * @internal
+   * just used for test
+   */
+  utilManager = new UtilManager(this);
 
   clipboard = new PageClipboard(this);
 
@@ -371,7 +378,7 @@ export class DocPageBlockComponent
 
     const meta = html`
       <affine-page-meta-data
-        .host="${this}"
+        .pageElement="${this}"
         .page="${this.page}"
       ></affine-page-meta-data>
     `;

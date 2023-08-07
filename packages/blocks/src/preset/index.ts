@@ -1,5 +1,5 @@
 import type { LitBlockSpec } from '@blocksuite/lit';
-import { literal } from 'lit/static-html.js';
+import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
@@ -19,6 +19,8 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { AFFINE_DATABASE_CONVERT_WIDGET_TAG } from '../widgets/database-convert/database-convert.js';
+import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
 
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -29,6 +31,12 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
+      [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_FORMAT_BAR_WIDGET_TAG
+      )}`,
+      [AFFINE_DATABASE_CONVERT_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_DATABASE_CONVERT_WIDGET_TAG
+      )}`,
     },
   },
 };
@@ -42,6 +50,12 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
+      [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_FORMAT_BAR_WIDGET_TAG
+      )}`,
+      [AFFINE_DATABASE_CONVERT_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_DATABASE_CONVERT_WIDGET_TAG
+      )}`,
     },
   },
 };

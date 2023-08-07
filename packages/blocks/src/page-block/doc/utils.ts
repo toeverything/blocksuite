@@ -69,12 +69,7 @@ function performNativeCopy(items: ClipboardItem[]): boolean {
 }
 
 export async function copyCode(codeBlockModel: CodeBlockModel) {
-  await copyBlocks({
-    type: 'Block',
-    models: [codeBlockModel],
-    startOffset: 0,
-    endOffset: Infinity,
-  });
+  await copyBlocks([codeBlockModel]);
 
   toast('Copied to clipboard');
 }

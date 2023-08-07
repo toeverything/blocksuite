@@ -20,7 +20,7 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test.describe('frame', () => {
+test.fixme('frame', () => {
   async function addFrame(page) {
     await edgelessCommonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);

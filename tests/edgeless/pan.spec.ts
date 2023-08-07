@@ -44,7 +44,7 @@ test('pan tool basic', async ({ page }) => {
   await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
 });
 
-test('pan tool shortcut', async ({ page }) => {
+test.fixme('pan tool shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);

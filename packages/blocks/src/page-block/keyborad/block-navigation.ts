@@ -9,7 +9,7 @@ export class BlockNavigation {
   private _anchorBlock: BlockSelection | null = null;
   private _focusBlock: BlockSelection | null = null;
 
-  constructor(public host: PageBlockComponent) {}
+  constructor(public pageElement: PageBlockComponent) {}
 
   keyDown: UIEventHandler = () => {
     this._anchorBlock = null;
@@ -21,7 +21,10 @@ export class BlockNavigation {
     if (!selection) {
       return;
     }
-    const view = this.host.root.viewStore.viewFromPath('block', selection.path);
+    const view = this.pageElement.root.viewStore.viewFromPath(
+      'block',
+      selection.path
+    );
     if (!view) return;
 
     if (view.model.text) {
@@ -180,17 +183,17 @@ export class BlockNavigation {
 
     const path = _focusBlock.path;
     requestAnimationFrame(() => {
-      const view = this.host.root.viewStore.viewFromPath('block', path);
+      const view = this.pageElement.root.viewStore.viewFromPath('block', path);
       view?.scrollIntoView({ block: 'nearest' });
     });
   }
 
   private get _page() {
-    return this.host.page;
+    return this.pageElement.page;
   }
 
   private get _selection() {
-    return this.host.root.selectionManager;
+    return this.pageElement.root.selectionManager;
   }
 
   private get _currentSelection() {
@@ -208,7 +211,7 @@ export class BlockNavigation {
       }),
     ]);
     requestAnimationFrame(() => {
-      const view = this.host.root.viewStore.viewFromPath('block', path);
+      const view = this.pageElement.root.viewStore.viewFromPath('block', path);
       view?.scrollIntoView({ block: 'nearest' });
     });
   }

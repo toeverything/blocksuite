@@ -15,22 +15,22 @@ export class TextNavigation {
   private _focusRange: Range | null = null;
 
   private get _viewportElement() {
-    if (this.host instanceof DocPageBlockComponent) {
-      return this.host.viewportElement;
+    if (this.pageElement instanceof DocPageBlockComponent) {
+      return this.pageElement.viewportElement;
     }
     return null;
   }
 
   private get _rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
+    assertExists(this.pageElement.rangeManager);
+    return this.pageElement.rangeManager;
   }
 
   private get _selection() {
-    return this.host.root.selectionManager;
+    return this.pageElement.root.selectionManager;
   }
 
-  constructor(public host: PageBlockComponent) {}
+  constructor(public pageElement: PageBlockComponent) {}
 
   Escape: UIEventHandler = () => {
     const selection = document.getSelection();
@@ -40,7 +40,7 @@ export class TextNavigation {
     const range = selection.getRangeAt(0);
     const blocks = this._rangeManager.findBlockElementsByRange(range);
 
-    const manager = this.host.root.selectionManager;
+    const manager = this.pageElement.root.selectionManager;
     manager.set(
       blocks.map(block => {
         return manager.getInstance('block', {
@@ -65,7 +65,7 @@ export class TextNavigation {
         x: rect.left,
         y: rect.top,
       },
-      this.host,
+      this.pageElement,
       true
     );
     const nextRect = result?.caret.node.parentElement?.getBoundingClientRect();
@@ -93,7 +93,7 @@ export class TextNavigation {
         x: rect.right,
         y: rect.top,
       },
-      this.host
+      this.pageElement
     );
     const nextRect = result?.caret.node.parentElement?.getBoundingClientRect();
     if (nextRect) {
@@ -120,7 +120,7 @@ export class TextNavigation {
         x: rect.right,
         y: rect.top,
       },
-      this.host,
+      this.pageElement,
       false
     );
     if (!caret) return;
@@ -157,7 +157,7 @@ export class TextNavigation {
         x: rect.right,
         y: rect.top,
       },
-      this.host,
+      this.pageElement,
       true
     );
     if (!caret) return;
@@ -197,7 +197,7 @@ export class TextNavigation {
         x: rect.left,
         y: rect.top,
       },
-      this.host,
+      this.pageElement,
       true
     );
     if (!caret) {
@@ -238,7 +238,7 @@ export class TextNavigation {
         x: rect.right,
         y: rect.top,
       },
-      this.host,
+      this.pageElement,
       false
     );
     if (!caret) {

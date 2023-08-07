@@ -14,9 +14,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { BlockHost } from '../../../__internal__/index.js';
 import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../components/tags/multi-tag-select.js';
+import type { PageBlockComponent } from '../../types.js';
 import type { BacklinkData } from './backlink/backlink.js';
 import { DEFAULT_PAGE_NAME, listenBacklinkList } from './backlink/backlink.js';
 
@@ -223,7 +223,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  host!: BlockHost;
+  pageElement!: PageBlockComponent;
 
   get meta() {
     return this.page.workspace.meta;
@@ -258,7 +258,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      listenBacklinkList(this.host, list => {
+      listenBacklinkList(this.pageElement, list => {
         this.backlinkList = list;
       })
     );
@@ -362,7 +362,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
                 backgroundColor: tag.color,
               });
               const click = () => {
-                this.host.slots.tagClicked.emit({ tagId: tag.id });
+                this.pageElement.slots.tagClicked.emit({ tagId: tag.id });
               };
               return html` <div class="tag" @click=${click} style=${style}>
                 ${tag.value}

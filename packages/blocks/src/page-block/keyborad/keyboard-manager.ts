@@ -6,14 +6,14 @@ import { BlockNavigation } from './block-navigation.js';
 import { TextNavigation } from './text-navigation.js';
 
 export class PageKeyboardManager {
-  constructor(public host: PageBlockComponent) {
-    const textNavigation = new TextNavigation(host);
-    const blockNavigation = new BlockNavigation(host);
-    this.host.handleEvent('keyDown', ctx => {
+  constructor(public pageElement: PageBlockComponent) {
+    const textNavigation = new TextNavigation(pageElement);
+    const blockNavigation = new BlockNavigation(pageElement);
+    this.pageElement.handleEvent('keyDown', ctx => {
       textNavigation.keyDown(ctx);
       blockNavigation.keyDown(ctx);
     });
-    this.host.bindHotKey({
+    this.pageElement.bindHotKey({
       'Mod-z': ctx => {
         ctx.get('defaultState').event.preventDefault();
         if (this._page.canUndo) {
@@ -139,11 +139,11 @@ export class PageKeyboardManager {
   }
 
   private get _page() {
-    return this.host.page;
+    return this.pageElement.page;
   }
 
   private get _selection() {
-    return this.host.root.selectionManager;
+    return this.pageElement.root.selectionManager;
   }
 
   private get _currentSelection() {
@@ -194,7 +194,7 @@ export class PageKeyboardManager {
   ) {
     const current = selections[0];
     const first = this._page.getBlockById(current.blockId);
-    const firstElement = this.host.root.viewStore.viewFromPath(
+    const firstElement = this.pageElement.root.viewStore.viewFromPath(
       'block',
       current.path
     );
