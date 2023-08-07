@@ -1,5 +1,4 @@
 import type {
-  PointerEventState,
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
