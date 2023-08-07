@@ -69,7 +69,6 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { PageBlockService } from '../../index.js';
-import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
@@ -89,6 +88,7 @@ import {
   type ZoomAction,
 } from './components/zoom/zoom-tool-bar.js';
 import { EdgelessConnectorManager } from './connector-manager.js';
+import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessFrameManager } from './frame-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -259,7 +259,7 @@ export class EdgelessPageBlockComponent
   rangeManager: RangeManager | null = null;
   rangeSynchronizer: RangeSynchronizer | null = null;
 
-  keyboardManager: PageKeyboardManager | null = null;
+  keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
 
@@ -1231,7 +1231,7 @@ export class EdgelessPageBlockComponent
     this.rangeManager = new RangeManager(this.root);
     this.gesture = new Gesture(this);
     this.rangeSynchronizer = new RangeSynchronizer(this);
-    this.keyboardManager = new PageKeyboardManager(this);
+    this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
       const surface = this.root.selectionManager.value.find(
