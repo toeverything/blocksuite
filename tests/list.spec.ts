@@ -557,8 +557,7 @@ test('add number prefix to a todo item should not forcefully change it into numb
   await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
   await type(page, '[] ');
   await assertListPrefix(page, ['1']);
-  await initEmptyParagraphState(page);
-  await focusRichText(page, 0);
+  await pressBackspace(page, 14);
   await type(page, '[] todoList');
   await assertListPrefix(page, ['']);
   await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
