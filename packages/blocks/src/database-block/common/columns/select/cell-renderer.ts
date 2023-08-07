@@ -24,6 +24,7 @@ export class SelectCell extends BaseCellRenderer<string[], SelectColumnData> {
     `;
   }
 }
+
 @customElement('affine-database-select-cell-editing')
 export class SelectCellEditing extends BaseCellRenderer<
   string,
@@ -59,14 +60,16 @@ export class SelectCellEditing extends BaseCellRenderer<
   }
 
   private popTagSelect = () => {
-    popTagSelect(this, {
-      mode: 'single',
-      options: this._options,
-      onOptionsChange: this._onOptionsChange,
-      value: this._value,
-      onChange: this._onChange,
-      onComplete: this._editComplete,
-      minWidth: 400,
+    this._disposables.add({
+      dispose: popTagSelect(this, {
+        mode: 'single',
+        options: this._options,
+        onOptionsChange: this._onOptionsChange,
+        value: this._value,
+        onChange: this._onChange,
+        onComplete: this._editComplete,
+        minWidth: 400,
+      }),
     });
   };
 

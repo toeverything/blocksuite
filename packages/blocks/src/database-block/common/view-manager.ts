@@ -1,3 +1,5 @@
+import { createIcon } from '../../components/icon/uni-icon.js';
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import { tTag } from '../logical/data-type.js';
 import { isTArray } from '../logical/typesystem.js';
@@ -48,6 +50,8 @@ export type KanbanViewData = Pretty<DatabaseViewDataMap['kanban']>;
 export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
 type ViewOperation<Data> = {
+  icon: UniComponent;
+  defaultName: string;
   init(model: DatabaseBlockModel, id: string, name: string): Data;
   addColumn(
     model: DatabaseBlockModel,
@@ -78,6 +82,8 @@ export const ViewOperationMap: {
   [K in keyof DatabaseViewDataMap]: ViewOperation<DatabaseViewDataMap[K]>;
 } = {
   kanban: {
+    defaultName: 'Kanban View',
+    icon: createIcon('DatabaseKanbanViewIcon'),
     init(model, id, name) {
       const column = model.columns.find(column => {
         const type = columnManager.getColumn(column.type).dataType(column.data);
@@ -110,6 +116,8 @@ export const ViewOperationMap: {
     },
   },
   table: {
+    defaultName: 'Table View',
+    icon: createIcon('DatabaseTableViewIcon'),
     init(model, id, name) {
       return {
         id,

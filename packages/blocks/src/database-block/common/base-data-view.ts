@@ -5,7 +5,7 @@ import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
-import type { BlockOperation } from '../types.js';
+import type { InsertPosition } from '../types.js';
 import type { DataViewManager } from './data-view-manager.js';
 
 export class BaseDataView<
@@ -14,9 +14,6 @@ export class BaseDataView<
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   view!: T;
-
-  @property({ attribute: false })
-  blockOperation!: BlockOperation;
 
   @property({ attribute: false })
   titleText!: Text;
@@ -38,4 +35,6 @@ export class BaseDataView<
 
   @property({ attribute: false })
   getFlag!: Page['awarenessStore']['getFlag'];
+
+  addRow?(position: InsertPosition): void;
 }

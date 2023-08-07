@@ -3,27 +3,27 @@ import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { setupVirgoScroll } from '../../../__internal__/utils/virgo.js';
 import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
-import { DATABASE_TITLE_LENGTH, DEFAULT_TITLE } from '../consts.js';
+
+export const DEFAULT_TITLE = 'Database';
+
+export const DATABASE_TITLE_LENGTH = 50;
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-database-title {
       flex: 1;
-      max-width: 300px;
-      min-width: 300px;
-      height: 30px;
+      height: 28px;
+      min-width: 100px;
+      width: max-content;
     }
 
     .database-title {
-      position: sticky;
-      width: 300px;
       height: 30px;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
-      line-height: 24px;
+      line-height: 28px;
       color: var(--affine-text-primary-color);
       font-family: inherit;
       /* overflow-x: scroll; */
@@ -52,8 +52,9 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     .database-title-empty::before {
       content: 'Database';
-      color: var(--affine-placeholder-color);
       position: absolute;
+      pointer-events: none;
+      color: var(--affine-placeholder-color);
       opacity: 0.5;
     }
   `;
@@ -65,7 +66,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   readonly!: boolean;
 
   @property({ attribute: false })
-  addRow!: (rowIndex?: number) => void;
+  onPressEnterKey?: () => void;
 
   @query('.database-title')
   private _titleContainer!: HTMLDivElement;
@@ -91,7 +92,6 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       rootElement: this._titleContainer,
       maxLength: DATABASE_TITLE_LENGTH,
     });
-    setupVirgoScroll(this, this._titleVInput.vEditor);
     this._titleVInput.vEditor.setReadonly(this.readonly);
     this._titleContainer.addEventListener('keydown', this._handleKeyDown);
 
@@ -106,7 +106,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       // prevent insert v-line
       event.preventDefault();
       // insert new row
-      this.addRow(0);
+      this.onPressEnterKey?.();
       return;
     }
   };
@@ -131,11 +131,11 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const isEmpty = !this.titleText || !this.titleText.length;
-    return html`<div class="affine-database-title">
+    return html` <div class="affine-database-title">
       <div
         class="database-title ${isEmpty ? 'database-title-empty' : ''}"
         data-block-is-database-title="true"
-        title=${this.titleText.toString()}
+        title="${this.titleText.toString()}"
       ></div>
     </div>`;
   }

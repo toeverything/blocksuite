@@ -1,12 +1,16 @@
 // related component
 import './table/table-view.js';
 import './kanban/kanban-view.js';
-import './common/database-view-header.js';
+import './common/groupBy/define.js';
+import './common/header/views.js';
+import './common/header/title.js';
+import './common/header/tools/tools.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html, literal } from 'lit/static-html.js';
 
@@ -66,6 +70,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       );
       return !!selection;
     });
+    requestAnimationFrame(() => {
+      this.requestUpdate();
+    });
   }
 
   @property({ attribute: false })
@@ -77,7 +84,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private _view = createRef<BaseDataView>();
 
   _setViewId = (viewId: string) => {
-    this.currentView = viewId;
+    if (this.currentView !== viewId) {
+      this.service?.selectionManager.set([]);
+      this.currentView = viewId;
+      requestAnimationFrame(() => {
+        this.requestUpdate();
+      });
+    }
   };
 
   private _dataSource?: DataSource;
@@ -180,21 +193,24 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return this.viewMap[id];
   }
 
-  override render() {
-    const views = this.model.views;
-    const current = views.find(v => v.id === this.currentView) ?? views[0];
-    const databaseTag = {
-      table: literal`affine-database-table`,
-      kanban: literal`affine-data-view-kanban`,
-    }[current.mode];
-    const view = this.root.page.awarenessStore.getFlag('enable_database_filter')
-      ? html` <database-view-header
-          .currentView="${current.id}"
-          .setViewId="${this._setViewId}"
-          .model="${this.model}"
-        ></database-view-header>`
-      : '';
-    const viewData = this.getView(current.id);
+  private renderViews = () => {
+    return html` <data-view-header-views
+      .currentView="${this.currentView}"
+      .setViewId="${this._setViewId}"
+      .model="${this.model}"
+    ></data-view-header-views>`;
+  };
+  private renderTitle = () => {
+    return html` <affine-database-title
+      .titleText="${this.model.title}"
+      .readonly="${this.model.page.readonly}"
+    ></affine-database-title>`;
+  };
+  private renderReference = () => {
+    return html` <div></div>`;
+  };
+
+  private renderTools = (view: DataViewManager) => {
     const blockOperation: BlockOperation = {
       copy: () => {
         copyBlocks({
@@ -209,25 +225,55 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         models.forEach(model => this.page.deleteBlock(model));
       },
     };
+
+    return html` <data-view-header-tools
+      .viewEle="${this._view.value}"
+      .copyBlock="${blockOperation.copy}"
+      .deleteSelf="${blockOperation.delete}"
+      .view="${view}"
+    ></data-view-header-tools>`;
+  };
+
+  override render() {
+    const views = this.model.views;
+    const current = views.find(v => v.id === this.currentView) ?? views[0];
+    const databaseTag = {
+      table: literal`affine-database-table`,
+      kanban: literal`affine-data-view-kanban`,
+    }[current.mode];
+    const viewData = this.getView(current.id);
     /* eslint-disable lit/binding-positions, lit/no-invalid-html */
     return html`
-      <div class='toolbar-hover-container data-view-root'>
-        ${view}
-        <${databaseTag}
+      <div class="toolbar-hover-container data-view-root">
+        <div
+          style="margin-bottom: 16px;display:flex;flex-direction: column;gap: 8px"
+        >
+          <div style="display:flex;align-items:center;gap:12px;padding: 0 6px;">
+            ${this.renderTitle()} ${this.renderReference()}
+          </div>
+          <div
+            style="display:flex;align-items:center;justify-content: space-between"
+          >
+            ${this.renderViews()} ${this.renderTools(viewData.view)}
+          </div>
+        </div>
+        ${keyed(
+          current.id,
+          html`<${databaseTag}
           ${ref(this._view)}
           .titleText='${this.model.title}'
           .selectionUpdated='${viewData.selectionUpdated}'
           .setSelection='${viewData.setSelection}'
           .bindHotkey='${viewData.bindHotkey}'
           .handleEvent='${viewData.handleEvent}'
-          .blockOperation='${blockOperation}'
           .view='${viewData.view}'
           .modalMode='${this.modalMode}'
           .getFlag='${this.page.awarenessStore.getFlag.bind(
             this.page.awarenessStore
           )}'
           class='affine-block-element'
-        ></${databaseTag}>
+        ></${databaseTag}>`
+        )}
       </div>
     `;
   }

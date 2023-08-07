@@ -1,5 +1,4 @@
-import type { Text } from '@blocksuite/store';
-import type { MigrationRunner } from '@blocksuite/store';
+import type { MigrationRunner, Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
 import type {
@@ -60,7 +59,11 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   addView(type: keyof DatabaseViewDataMap) {
     this.page.captureSync();
     const id = this.page.generateId();
-    const view = ViewOperationMap[type].init(this, id, type);
+    const view = ViewOperationMap[type].init(
+      this,
+      id,
+      ViewOperationMap[type].defaultName
+    );
     this.page.transact(() => {
       this.views.push(view);
     });

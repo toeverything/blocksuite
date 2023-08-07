@@ -32,20 +32,32 @@ export class UniLit<
     return this.uniReturn?.expose;
   }
 
+  private mount() {
+    this.uniReturn = this.uni?.(this, this.props);
+  }
+
+  private unmount() {
+    this.uniReturn?.unmount();
+  }
+
   override connectedCallback() {
     super.connectedCallback();
-    this.uniReturn = this.uni?.(this, this.props);
+    this.mount();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.uniReturn?.unmount();
+    this.unmount();
   }
 
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
     if (_changedProperties.has('props')) {
       this.uniReturn?.update(this.props);
+    }
+    if (_changedProperties.has('uni')) {
+      this.unmount();
+      this.mount();
     }
   }
 

@@ -1,43 +1,54 @@
+import { AddCursorIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
   popFilterableSimpleMenu,
   popMenu,
-} from '../../components/menu/menu.js';
-import { ViewOperationMap } from '../common/view-manager.js';
-import type { DatabaseBlockModel } from '../database-model.js';
+} from '../../../components/menu/index.js';
+import type { DatabaseBlockModel } from '../../database-model.js';
+import { ViewOperationMap } from '../view-manager.js';
 
-@customElement('database-view-header')
-export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
+@customElement('data-view-header-views')
+export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .database-view-header {
+    data-view-header-views {
       display: flex;
       user-select: none;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .database-view-button-wrapper {
-      padding: 0 0 4px 0;
-      margin-right: 4px;
-    }
-
-    .database-view-button-wrapper.active {
-      border-bottom: 2px solid;
-      font-weight: 600;
     }
 
     .database-view-button {
       cursor: pointer;
-      padding: 3px 6px;
+      padding: 4px 8px;
       border-radius: 4px;
       font-size: 14px;
+      display: flex;
+      align-items: center;
     }
 
-    .database-view-button:hover {
-      background-color: #e0e0e0;
+    .database-view-button .name {
+      height: 22px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .database-view-button .icon {
+      margin-right: 6px;
+    }
+
+    .database-view-button .icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .database-view-button.active {
+      font-weight: 600;
+      background-color: var(--affine-hover-color);
     }
   `;
   @property({ attribute: false })
@@ -55,6 +66,9 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
       Object.keys(ViewOperationMap).map(type => ({
         type: 'action',
         name: type,
+        hide: () =>
+          type === 'kanban' &&
+          !this.model.page.awarenessStore.getFlag('enable_database_filter'),
         select: () => {
           const view = this.model.addView(
             type as keyof typeof ViewOperationMap
@@ -110,31 +124,28 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
   override render() {
     const views = this.model.views;
     return html`
-      <div class="database-view-header">
-        ${repeat(
-          views,
-          v => v.id,
-          view => {
-            return html` <div
-              class="database-view-button-wrapper ${this.currentView === view.id
-                ? 'active'
-                : ''}"
-            >
-              <div
-                @click="${(event: MouseEvent) =>
-                  this._clickView(event, view.id)}"
-                class="database-view-button"
-              >
-                ${view.name}
-              </div>
-            </div>`;
-          }
-        )}
-        <div class="database-view-button-wrapper">
-          <div class="database-view-button" @click="${this._addViewMenu}">
-            Add
-          </div>
-        </div>
+      ${repeat(
+        views,
+        v => v.id,
+        view => {
+          const classList = classMap({
+            'database-view-button': true,
+            active: this.currentView === view.id,
+          });
+          return html` <div
+            class="${classList}"
+            @click="${(event: MouseEvent) => this._clickView(event, view.id)}"
+          >
+            <uni-lit
+              class="icon"
+              .uni="${ViewOperationMap[view.mode].icon}"
+            ></uni-lit>
+            <div class="name">${view.name}</div>
+          </div>`;
+        }
+      )}
+      <div class="database-view-button" @click="${this._addViewMenu}">
+        ${AddCursorIcon}
       </div>
     `;
   }
@@ -142,6 +153,6 @@ export class DatabaseViewHeader extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'database-view-header': DatabaseViewHeader;
+    'data-view-header-views': DataViewHeaderViews;
   }
 }
