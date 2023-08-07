@@ -1,34 +1,12 @@
-import { PREVENT_DEFAULT } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 
-import type { KeyboardBindings } from '../rich-text/keyboard.js';
-import {
-  handleIndent,
-  handleKeyDown,
-  handleKeyUp,
-  handleUnindent,
-} from '../rich-text/rich-text-operations.js';
-import type { AffineVEditor } from '../rich-text/virgo/types.js';
 import { getService } from '../service.js';
-import { supportsChildren } from '../utils/common.js';
 import type {
   BlockRange,
   BlockTransformContext,
   SerializedBlock,
 } from '../utils/index.js';
 import { json2block } from './json2block.js';
-import {
-  enterMarkdownMatch,
-  hardEnter,
-  onBackspace,
-  onForwardDelete,
-  onKeyLeft,
-  onKeyRight,
-  onSoftEnter,
-  onSpace,
-  spaceMarkdownMatch,
-} from './keymap.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   async block2html(
@@ -152,140 +130,5 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       text = `<a href="${referenceLink}">${referenceTitle}</a>`;
     }
     return text;
-  }
-
-  /**
-   * side effect when update block
-   */
-  async updateEffect(block: BlockModel) {
-    const handleUnindent = (
-      await import('../rich-text/rich-text-operations.js')
-    ).handleUnindent;
-    // we need to unindent the first child of the block if it not
-    // supports children
-    if (supportsChildren(block)) {
-      return;
-    }
-
-    if (!block.children.length) {
-      return;
-    }
-
-    handleUnindent(block.page, block.children[0], 0, false);
-  }
-
-  defineKeymap(block: BlockModel, virgo: AffineVEditor): KeyboardBindings {
-    return {
-      enterMarkdownMatch: {
-        key: 'Enter',
-        handler: (range, context) => {
-          assertExists(virgo);
-          return enterMarkdownMatch(block, virgo, range, context);
-        },
-      },
-      spaceMarkdownMatch: {
-        key: ' ',
-        handler(range, context) {
-          assertExists(virgo);
-          return spaceMarkdownMatch(block, virgo, range, context);
-        },
-      },
-      hardEnter: {
-        key: 'Enter',
-        handler(range, context) {
-          assertExists(virgo);
-          return hardEnter(block, range, virgo, context.event);
-        },
-      },
-      softEnter: {
-        key: 'Enter',
-        shiftKey: true,
-        handler(range, context) {
-          assertExists(virgo);
-          return onSoftEnter(block, range, virgo);
-        },
-      },
-      // shortKey+enter
-      insertLineAfter: {
-        key: 'Enter',
-        shortKey: true,
-        handler(range, context) {
-          assertExists(virgo);
-          return hardEnter(block, range, virgo, context.event, true);
-        },
-      },
-      tab: {
-        key: 'Tab',
-        handler(range, context) {
-          const index = range.index;
-          handleIndent(block.page, block, index);
-          context.event.stopPropagation();
-          return PREVENT_DEFAULT;
-        },
-      },
-      shiftTab: {
-        key: 'Tab',
-        shiftKey: true,
-        handler(range, context) {
-          const index = range.index;
-          handleUnindent(block.page, block, index);
-          context.event.stopPropagation();
-          return PREVENT_DEFAULT;
-        },
-      },
-      backspace: {
-        key: 'Backspace',
-        handler(range, context) {
-          return onBackspace(block, context.event, this.vEditor);
-        },
-      },
-      delete: {
-        key: 'Delete',
-        handler(range, context) {
-          return onForwardDelete(block, context.event, this.vEditor);
-        },
-      },
-      up: {
-        key: 'ArrowUp',
-        shiftKey: false,
-        handler(range, context) {
-          return handleKeyUp(context.event, this.vEditor.rootElement);
-        },
-      },
-      down: {
-        key: 'ArrowDown',
-        shiftKey: false,
-        handler(range, context) {
-          return handleKeyDown(block, context.event, this.vEditor.rootElement);
-        },
-      },
-      left: {
-        key: 'ArrowLeft',
-        shiftKey: false,
-        handler(range, context) {
-          return onKeyLeft(
-            block,
-            context.event,
-            range,
-            this.vEditor.rootElement
-          );
-        },
-      },
-      right: {
-        key: 'ArrowRight',
-        shiftKey: false,
-        handler(range, context) {
-          return onKeyRight(block, context.event, range);
-        },
-      },
-      inputRule: {
-        key: ' ',
-        shiftKey: null,
-        prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
-        handler(range, context) {
-          return onSpace(block, virgo, range, context);
-        },
-      },
-    };
   }
 }
