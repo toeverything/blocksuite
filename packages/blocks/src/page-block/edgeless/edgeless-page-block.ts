@@ -1312,8 +1312,9 @@ export class EdgelessPageBlockComponent
       '--affine-edgeless-y': `${translateY}px`,
     };
 
+    //TODO: enable dragHandle
     const widgets = html`${repeat(
-      Object.entries(this.widgets),
+      Object.entries(this.widgets).filter(([name]) => name !== 'dragHandle'),
       ([id]) => id,
       ([_, widget]) => widget
     )}`;
