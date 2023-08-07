@@ -69,6 +69,10 @@ export const RenameModal = ({
     <style>
       ${renameStyles}
     </style>
+    <div
+      class="attachment-rename-overlay-mask"
+      @click="${() => abortController.abort()}"
+    ></div>
     <div ${ref(containerRef)} class="attachment-rename-container">
       <div class="attachment-rename-input-wrapper">
         <input
