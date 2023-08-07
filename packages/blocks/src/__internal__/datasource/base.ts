@@ -117,7 +117,6 @@ export type DatabaseBlockDatasourceConfig = {
   type: 'database-block';
   pageId: string;
   blockId: string;
-  path: string[];
 };
 export type AllPageDatasourceConfig = {
   type: 'all-pages';

@@ -23,11 +23,12 @@ import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
   view: {
-    component: literal`affine-default-page`,
+    component: literal`affine-doc-page`,
     widgets: {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
+      dragHandle: literal`affine-drag-handle-widget`,
     },
   },
 };
@@ -40,6 +41,7 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
     widgets: {
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
+      dragHandle: literal`affine-drag-handle-widget`,
     },
   },
 };

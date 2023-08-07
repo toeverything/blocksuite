@@ -1,5 +1,7 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { downloadBlob } from '../__internal__/utils/filesys.js';
+import { toast } from '../components/toast.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,
@@ -21,7 +23,7 @@ export function cloneAttachmentProperties(
   return clonedProps;
 }
 
-export async function getAttachment(model: AttachmentBlockModel) {
+async function getAttachment(model: AttachmentBlockModel) {
   const blobManager = model.page.blobs;
   const sourceId = model.sourceId;
   if (!sourceId) return null;
@@ -29,6 +31,23 @@ export async function getAttachment(model: AttachmentBlockModel) {
   const blob = await blobManager.get(sourceId);
   if (!blob) return null;
   return blob;
+}
+
+export async function downloadAttachment(
+  attachmentModel: AttachmentBlockModel
+) {
+  const attachment = await getAttachment(attachmentModel);
+  if (!attachment) {
+    toast('Failed to download attachment!');
+    console.error(
+      'attachment load failed! sourceId:',
+      attachmentModel.sourceId,
+      'BlobManager:',
+      attachmentModel.page.blobs
+    );
+    return;
+  }
+  downloadBlob(attachment, attachmentModel.name);
 }
 
 const attachmentLoadingMap = new Set<string>();

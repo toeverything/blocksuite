@@ -2,7 +2,6 @@ import './components/bookmark-toolbar.js';
 import './components/bookmark-edit-modal.js';
 import './components/bookmark-create-modal.js';
 import './components/loader.js';
-import '../components/portal.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { Slot } from '@blocksuite/store';
@@ -368,7 +367,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         @mouseover="${this._onHover}"
         @mouseout="${this._onHoverOut}"
       >
-        <affine-portal .template=${toolbar}></affine-portal>
+        <blocksuite-portal .template=${toolbar}></blocksuite-portal>
         ${this._isLoading ? loading : linkCard}
         <input
           .disabled=${this.model.page.readonly}

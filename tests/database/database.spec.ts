@@ -455,7 +455,7 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
       steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
-        await expect(page.locator('.affine-drag-indicator')).toBeHidden();
+        await expect(page.locator('affine-drag-indicator div')).toBeHidden();
       },
     }
   );
@@ -468,7 +468,7 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
       steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
-        await expect(page.locator('.affine-drag-indicator')).toBeVisible();
+        await expect(page.locator('affine-drag-indicator div')).toBeVisible();
       },
     }
   );
@@ -520,7 +520,7 @@ test('should the indicator display correctly when resize the window', async ({
       beforeMouseUp: async () => {
         await waitNextFrame(page);
         const { x: indicatorX } = await getBoundingBox(
-          page.locator('.affine-drag-indicator')
+          page.locator('affine-drag-indicator div')
         );
         const { x: databaseX } = await getBoundingBox(
           page.locator('affine-database')

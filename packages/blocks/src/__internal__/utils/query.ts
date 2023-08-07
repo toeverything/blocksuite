@@ -9,9 +9,9 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
-import type { DefaultPageBlockComponent } from '../../page-block/default/default-page-block.js';
+import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
-import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { clamp } from './common.js';
 import { type Point, Rect } from './rect.js';
@@ -168,9 +168,7 @@ export function getPreviousBlock(
  * Returns `DefaultPageBlockComponent` | `EdgelessPageBlockComponent` if it exists
  * otherwise return `null`.
  */
-export function getPageBlock(
-  model: BaseBlockModel
-): DefaultPageBlockComponent | EdgelessPageBlockComponent | null {
+export function getPageBlock(model: BaseBlockModel): PageBlockComponent | null {
   assertExists(model.page.root);
   return document.querySelector(`[${ATTR}="${model.page.root.id}"]`);
 }
@@ -178,20 +176,20 @@ export function getPageBlock(
 /**
  * If it's not in the page mode, it will return `null` directly.
  */
-export function getDefaultPage(page: Page) {
+export function getDocPage(page: Page) {
   const editor = getEditorContainer(page);
   if (editor.mode !== 'page') return null;
-  const pageComponent = editor.querySelector('affine-default-page');
+  const pageComponent = editor.querySelector('affine-doc-page');
   return pageComponent;
 }
 
 /**
  * If it's not in the page mode, it will return `null` directly.
  */
-export function getDefaultPageByElement(ele: Element) {
+export function getDocPageByElement(ele: Element) {
   const editor = getClosestEditorContainer(ele);
   if (editor.mode !== 'page') return null;
-  const pageComponent = editor.querySelector('affine-default-page');
+  const pageComponent = editor.querySelector('affine-doc-page');
   return pageComponent;
 }
 
@@ -273,11 +271,11 @@ export function getViewportElement(page: Page) {
 
   if (
     !defaultPageBlock ||
-    defaultPageBlock.closest('affine-default-page') !== defaultPageBlock
+    defaultPageBlock.closest('affine-doc-page') !== defaultPageBlock
   ) {
     throw new Error('Failed to get viewport element!');
   }
-  return (defaultPageBlock as DefaultPageBlockComponent).viewportElement;
+  return (defaultPageBlock as DocPageBlockComponent).viewportElement;
 }
 
 export function getBlockElementByModel(
@@ -285,9 +283,9 @@ export function getBlockElementByModel(
 ): BlockComponentElement | null {
   assertExists(model.page.root);
   const editor = activeEditorManager.getActiveEditor();
-  const page = (editor ?? document).querySelector<
-    DefaultPageBlockComponent | EdgelessPageBlockComponent
-  >(`[${ATTR}="${model.page.root.id}"]`);
+  const page = (editor ?? document).querySelector<PageBlockComponent>(
+    `[${ATTR}="${model.page.root.id}"]`
+  );
   if (!page) return null;
 
   if (model.id === model.page.root.id) {
@@ -302,9 +300,9 @@ export function asyncGetBlockElementByModel(
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
   const editor = activeEditorManager.getActiveEditor();
-  const page = (editor ?? document).querySelector<
-    DefaultPageBlockComponent | EdgelessPageBlockComponent
-  >(`[${ATTR}="${model.page.root.id}"]`);
+  const page = (editor ?? document).querySelector<PageBlockComponent>(
+    `[${ATTR}="${model.page.root.id}"]`
+  );
   if (!page) return Promise.resolve(null);
 
   if (model.id === model.page.root.id) {
@@ -459,7 +457,7 @@ export function getModelsByRange(range: Range): BaseBlockModel[] {
       if (!block.model) return;
 
       const mainElement = matchFlavours(block.model, ['affine:page'])
-        ? element?.querySelector('.affine-default-page-block-title-container')
+        ? element?.querySelector('.affine-doc-page-block-title-container')
         : element?.querySelector('rich-text') || element?.querySelector('img');
       if (
         mainElement &&
@@ -839,6 +837,40 @@ export function getClosestBlockElementByPoint(
 }
 
 /**
+ * Find the most close block on the given position
+ * @param container container which the blocks can be found inside
+ * @param point position
+ */
+export function findClosestBlockElement(
+  container: BlockComponentElement,
+  point: Point,
+  selector: string
+) {
+  const children = Array.from(container.querySelectorAll(selector));
+  let lastDistance = Number.POSITIVE_INFINITY;
+  let lastChild = null;
+
+  if (!children.length) return null;
+
+  for (const child of children) {
+    const rect = child.getBoundingClientRect();
+    if (rect.height === 0 || point.y > rect.bottom) continue;
+    const distance =
+      Math.pow(point.y - (rect.y + rect.height / 2), 2) +
+      Math.pow(point.x - rect.x, 2);
+
+    if (distance <= lastDistance) {
+      lastDistance = distance;
+      lastChild = child;
+    } else {
+      return lastChild;
+    }
+  }
+
+  return lastChild;
+}
+
+/**
  * Returns the closest block element by element that does not contain the page element and note element.
  */
 export function getClosestBlockElementByElement(
@@ -1153,10 +1185,9 @@ function getCellRect(element: Element, bounds?: DOMRect) {
   const row = col.parentElement;
   assertExists(row);
   const colRect = col.getBoundingClientRect();
-  const rowRect = row.getBoundingClientRect();
   return new DOMRect(
     bounds.left,
-    rowRect.top,
+    colRect.top,
     colRect.right - bounds.left,
     colRect.height
   );

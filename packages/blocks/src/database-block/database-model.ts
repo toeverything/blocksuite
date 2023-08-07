@@ -1,5 +1,5 @@
 import type { Text } from '@blocksuite/store';
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
 import type {
   DatabaseViewData,
@@ -200,6 +200,31 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 }
 
+const migration = {
+  toV3: (data, previousVersion, latestVersion) => {
+    const id = nanoid();
+    // @ts-expect-error
+    const title = data['titleColumnName'];
+    // @ts-expect-error
+    const width = data['titleColumnWidth'];
+    // @ts-expect-error
+    delete data['titleColumnName'];
+    // @ts-expect-error
+    delete data['titleColumnWidth'];
+    data.columns.unshift({
+      id,
+      type: 'title',
+      name: title,
+      data: {},
+    });
+    data.views.forEach(view => {
+      if (view.mode === 'table') {
+        view.columns.unshift({ id, width });
+      }
+    });
+  },
+} satisfies Record<string, (typeof DatabaseBlockSchema)['onUpgrade']>;
+
 export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
@@ -210,11 +235,16 @@ export const DatabaseBlockSchema = defineBlockSchema({
   }),
   metadata: {
     role: 'hub',
-    version: 2,
+    version: 3,
     parent: ['affine:note'],
     children: ['affine:paragraph', 'affine:list'],
   },
   toModel: () => {
     return new DatabaseBlockModel();
+  },
+  onUpgrade: (data, previousVersion, latestVersion) => {
+    if (previousVersion < 3 && latestVersion >= 3) {
+      migration.toV3(data, previousVersion, latestVersion);
+    }
   },
 });

@@ -178,7 +178,7 @@ export class NotionHtmlParser extends BaseParser {
         this._contextedContentParser
       );
       texts.push(...(captionText || []));
-      if (captionText) {
+      if (captionText && captionText.length > 0) {
         caption = captionText[0].insert || '';
       }
       const bookmarkUrlElement = element.querySelector('.bookmark.source');

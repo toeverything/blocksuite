@@ -123,7 +123,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       const rowMap = Object.fromEntries(
         this.columnManagerList.map(column => [
           column.id,
-          column.getFilterValue(rowId),
+          column.getJsonValue(rowId),
         ])
       );
       return evalFilter(this.filter, rowMap);
@@ -177,7 +177,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       ])
     );
     this.rows.forEach(id => {
-      const value = this.cellGetFilterValue(id, groupBy.columnId);
+      const value = this.cellGetJsonValue(id, groupBy.columnId);
       const keys = groupByConfig.valuesGroup(value, type);
       keys.forEach(({ key, value }) => {
         if (!groupMap[key]) {
@@ -249,7 +249,7 @@ class GroupHelper {
     const addTo = this.groupData()?.addToGroup ?? (value => value);
     const newValue = addTo(
       value,
-      this.viewManager.cellGetFilterValue(rowId, columnId)
+      this.viewManager.cellGetJsonValue(rowId, columnId)
     );
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }

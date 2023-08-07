@@ -2,8 +2,8 @@ import { matchFlavours } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessHoverState } from '../../services/tools-manager.js';
 import { isTopLevelBlock } from '../../utils/query.js';
-import type { EdgelessHoverState } from '../../utils/selection-manager.js';
 
 export function EdgelessHoverRect(hoverState: EdgelessHoverState | null) {
   if (!hoverState) return null;

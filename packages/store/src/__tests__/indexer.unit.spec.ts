@@ -7,12 +7,7 @@ import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { Page } from '../index.js';
-import { Generator, Workspace } from '../index.js';
-
-function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
-  return { id: 'test-workspace', idGenerator, isSSR: true };
-}
+import { Generator, Schema, Workspace } from '../index.js';
 
 export const BlockSchemas = [
   ParagraphBlockSchema,
@@ -20,9 +15,16 @@ export const BlockSchemas = [
   NoteBlockSchema,
 ];
 
+function createTestOptions() {
+  const idGenerator = Generator.AutoIncrement;
+  const schema = new Schema();
+  schema.register(BlockSchemas);
+  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+}
+
 async function createTestPage(pageId = 'page0', workspace?: Workspace) {
   const options = createTestOptions();
-  const _workspace = workspace || new Workspace(options).register(BlockSchemas);
+  const _workspace = workspace || new Workspace(options);
   const page = _workspace.createPage({ id: pageId });
   await page.waitForLoaded();
   return page;

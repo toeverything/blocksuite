@@ -9,6 +9,9 @@ import {
   DebugElementDefaultProps,
   type IDebug,
 } from './debug/debug-element.js';
+import { FrameElementDefaultProps } from './frame/constants.js';
+import { FrameElement } from './frame/frame-element.js';
+import type { IFrame, IFrameLocalRecord } from './frame/types.js';
 import { ShapeElementDefaultProps } from './shape/constants.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape, IShapeLocalRecord } from './shape/types.js';
@@ -27,10 +30,16 @@ export { DebugElement } from './debug/debug-element.js';
 export { ShapeElement } from './shape/shape-element.js';
 export type { ShapeType } from './shape/types.js';
 export { TextElement } from './text/text-element.js';
+export { FrameElement } from './frame/frame-element.js';
 
 export { normalizeShapeBound } from './shape/utils.js';
 export { SHAPE_TEXT_PADDING } from './shape/constants.js';
-export { normalizeTextBound } from './text/utils.js';
+export {
+  normalizeTextBound,
+  getFontString,
+  getLineHeight,
+  getLineWidth,
+} from './text/utils.js';
 export type { HitTestOptions } from './surface-element.js';
 
 export type PhasorElement =
@@ -38,6 +47,7 @@ export type PhasorElement =
   | DebugElement
   | BrushElement
   | ConnectorElement
+  | FrameElement
   | SurfaceElement;
 
 export type PhasorElementType = {
@@ -46,6 +56,7 @@ export type PhasorElementType = {
   brush: BrushElement;
   connector: ConnectorElement;
   text: TextElement;
+  frame: FrameElement;
 };
 
 export type IPhasorElementType = {
@@ -54,6 +65,7 @@ export type IPhasorElementType = {
   brush: IBrush;
   connector: IConnector;
   text: IText;
+  frame: IFrame;
 };
 
 export type IPhasorElementLocalRecord = {
@@ -62,6 +74,7 @@ export type IPhasorElementLocalRecord = {
   brush: ISurfaceElementLocalRecord;
   connector: ISurfaceElementLocalRecord;
   text: ISurfaceElementLocalRecord;
+  frame: IFrameLocalRecord;
 };
 
 export const ElementCtors = {
@@ -70,6 +83,7 @@ export const ElementCtors = {
   shape: ShapeElement,
   connector: ConnectorElement,
   text: TextElement,
+  frame: FrameElement,
 } as const;
 
 export const ElementDefaultProps: Record<
@@ -81,6 +95,7 @@ export const ElementDefaultProps: Record<
   shape: ShapeElementDefaultProps,
   connector: ConnectorElementDefaultProps,
   text: TextElementDefaultProps,
+  frame: FrameElementDefaultProps,
 } as const;
 
 export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
@@ -105,6 +120,8 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
         | 'rotate'
         | 'batch'
       >
+    : T extends 'frame'
+    ? Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'rotate' | 'batch'>
     : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;
 
 export type PhasorElementWithText = ShapeElement | TextElement;

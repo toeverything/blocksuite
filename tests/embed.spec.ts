@@ -148,7 +148,7 @@ test.fixme(
     await insertThreeLevelLists(page, 6);
 
     await page.evaluate(async () => {
-      const viewport = document.querySelector('.affine-default-viewport');
+      const viewport = document.querySelector('.affine-doc-viewport');
       if (!viewport) {
         throw new Error();
       }
@@ -178,7 +178,7 @@ test.fixme(
 
     await page.evaluate(
       async ([rect]) => {
-        const viewport = document.querySelector('.affine-default-viewport');
+        const viewport = document.querySelector('.affine-doc-viewport');
         if (!viewport) {
           throw new Error();
         }

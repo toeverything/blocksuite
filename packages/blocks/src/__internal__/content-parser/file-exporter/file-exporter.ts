@@ -1,6 +1,6 @@
 /* eslint-disable no-control-regex */
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import TurndownService from 'turndown';
+import type { BlobManager } from '@blocksuite/store';
 
 import { globalCSS } from './exporter-style.js';
 
@@ -50,15 +50,39 @@ export const FileExporter = {
       'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(text)
     );
   },
-  exportHtml(pageTitle: string | undefined, htmlContent: string) {
-    const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
-    FileExporter.exportTextFile(
-      title + '.html',
-      wrapHtmlWithHtmlDocumentText(title, htmlContent),
-      'text/html'
+  async exportHtml(
+    title: string | undefined,
+    pageId: string,
+    htmlContent: string,
+    blobMap: Map<string, string>,
+    blobs: BlobManager
+  ) {
+    const JSZip = (await import('jszip')).default;
+
+    const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
+    const zipFile = new JSZip();
+    for (const [key, value] of blobMap) {
+      const blob = await blobs.get(key);
+      blob && zipFile.file(value, blob);
+    }
+    zipFile.file(
+      `${pageTitle}|${pageId}.html`,
+      wrapHtmlWithHtmlDocumentText(pageTitle, htmlContent)
     );
+
+    const blob = await zipFile.generateAsync({ type: 'blob' });
+    const fileURL = URL.createObjectURL(blob);
+    FileExporter.exportFile(`${pageTitle}|HTML.zip`, fileURL);
   },
-  exportHtmlAsMarkdown(pageTitle: string | undefined, htmlContent: string) {
+  async exportHtmlAsMarkdown(
+    title: string | undefined,
+    pageId: string,
+    htmlContent: string,
+    blobMap: Map<string, string>,
+    blobs: BlobManager
+  ) {
+    const JSZip = (await import('jszip')).default;
+    const TurndownService = (await import('turndown')).default;
     const turndownService = new TurndownService();
     turndownService.addRule('input', {
       //@ts-ignore
@@ -237,9 +261,36 @@ export const FileExporter = {
       },
     });
     turndownService.keep(['del', 'u']);
+    turndownService.addRule('bookMark', {
+      filter: function (node) {
+        return (
+          node.nodeName === 'DIV' &&
+          node.classList.contains('affine-bookmark-block-container')
+        );
+      },
+      //@ts-ignore
+      replacement: function (content, node: Node) {
+        const element = node as Element;
+        const titleElement = element.querySelector(
+          '.affine-bookmark-title-content'
+        );
+        const urlElement = element.querySelector('.affine-bookmark-url');
+        return `[${titleElement?.textContent}](${urlElement?.textContent})\n`;
+      },
+    });
     const markdown = turndownService.turndown(htmlContent);
-    const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;
-    FileExporter.exportTextFile(title + '.md', markdown, 'text/plain');
+
+    const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
+    const zipFile = new JSZip();
+    for (const [key, value] of blobMap) {
+      const blob = await blobs.get(key);
+      blob && zipFile.file(value, blob);
+    }
+    zipFile.file(`${pageTitle}|${pageId}.md`, markdown);
+
+    const blob = await zipFile.generateAsync({ type: 'blob' });
+    const fileURL = URL.createObjectURL(blob);
+    FileExporter.exportFile(`${pageTitle}|MarkDown.zip`, fileURL);
   },
   exportPng(pageTitle: string | undefined, dataURL: string) {
     const title = pageTitle?.trim() || UNTITLED_PAGE_NAME;

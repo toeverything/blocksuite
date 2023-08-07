@@ -65,7 +65,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       line-height: 22px;
       padding: 5px;
       border-radius: 5px;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 500;
       text-align: center;
       cursor: pointer;
@@ -115,7 +115,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.selection.setEdgelessTool(edgelessTool);
+    this.edgeless.tools.setEdgelessTool(edgelessTool);
   };
 
   setZoomByAction(action: ZoomAction) {

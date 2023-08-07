@@ -95,20 +95,38 @@ export class ContentParser {
   public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
+
+    const blobMap = new Map<string, string>();
+    const htmlContent = await this.block2Html(
+      [this.getSelectedBlock(root)],
+      blobMap
+    );
+
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
-      htmlContent
+      root.id,
+      htmlContent,
+      blobMap,
+      this._page.blobs
     );
   }
 
   public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
+
+    const blobMap = new Map<string, string>();
+    const htmlContent = await this.block2Html(
+      [this.getSelectedBlock(root)],
+      blobMap
+    );
+
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
-      htmlContent
+      root.id,
+      htmlContent,
+      blobMap,
+      this._page.blobs
     );
   }
 
@@ -246,7 +264,7 @@ export class ContentParser {
 
     const editorContainer = getEditorContainer(this._page);
     const pageContainer = editorContainer.querySelector(
-      '.affine-default-page-block-container'
+      '.affine-doc-page-block-container'
     );
     if (!pageContainer) return;
 
@@ -348,12 +366,15 @@ export class ContentParser {
     );
   }
 
-  public async block2Html(blocks: SelectedBlock[]): Promise<string> {
+  private async block2Html(
+    blocks: SelectedBlock[],
+    blobMap: Map<string, string>
+  ): Promise<string> {
     let htmlText = '';
     for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
       htmlText =
         htmlText +
-        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex]));
+        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex], blobMap));
     }
     return htmlText;
   }
@@ -579,7 +600,8 @@ export class ContentParser {
   }
 
   private async _getHtmlInfoBySelectionInfo(
-    block: SelectedBlock
+    block: SelectedBlock,
+    blobMap: Map<string, string>
   ): Promise<string> {
     const model = this._page.getBlockById(block.id);
     if (!model) {
@@ -593,18 +615,24 @@ export class ContentParser {
       currentIndex++
     ) {
       const childText = await this._getHtmlInfoBySelectionInfo(
-        block.children[currentIndex]
+        block.children[currentIndex],
+        blobMap
       );
       childText && children.push(childText);
     }
     const { getServiceOrRegister } = await import('../service.js');
     const service = await getServiceOrRegister(model.flavour);
 
-    return service.block2html(model, {
-      childText: children.join(''),
-      begin: block.startPos,
-      end: block.endPos,
-    });
+    const text = await service.block2html(
+      model,
+      {
+        childText: children.join(''),
+        begin: block.startPos,
+        end: block.endPos,
+      },
+      blobMap
+    );
+    return text;
   }
 
   private async _getTextInfoBySelectionInfo(

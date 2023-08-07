@@ -1,11 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isBlankArea } from '../../__internal__/index.js';
-import type { DefaultPageBlockComponent } from '../../page-block/index.js';
+import type { DocPageBlockComponent } from '../../page-block/index.js';
 
 type Rect = {
   left: number;
@@ -39,7 +40,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   private _rafID = 0;
 
-  static excludeFlavours: string[] = ['affine:note'];
+  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
 
   private _dragging = false;
 
@@ -53,31 +54,44 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   private get _allBlocksRect() {
     const viewportElement = this._viewportElement;
-    return [...this.root.blockViewMap.entries()]
-      .filter(([_, element]) => {
-        const model = element.model;
-        return (
-          model.role !== 'root' &&
-          !DocDraggingAreaWidget.excludeFlavours.includes(model.flavour)
-        );
-      })
-      .map(([_, element]) => {
-        const bounding = element.getBoundingClientRect();
-        return {
-          id: element.model.id,
-          path: element.path,
-          rect: {
-            left: bounding.left + viewportElement.scrollLeft,
-            top: bounding.top + viewportElement.scrollTop,
-            width: bounding.width,
-            height: bounding.height,
-          },
-        };
+
+    const getAllNodeFromTree = (): BlockElement[] => {
+      const blockElement: BlockElement[] = [];
+      this.root.viewStore.walkThrough(node => {
+        const view = node.view;
+        if (!(view instanceof BlockElement)) {
+          return true;
+        }
+        if (
+          view.model.role !== 'root' &&
+          !DocDraggingAreaWidget.excludeFlavours.includes(view.model.flavour)
+        ) {
+          blockElement.push(view);
+        }
+        return;
       });
+      return blockElement;
+    };
+
+    const elements = getAllNodeFromTree();
+
+    return elements.map(element => {
+      const bounding = element.getBoundingClientRect();
+      return {
+        id: element.model.id,
+        path: element.path,
+        rect: {
+          left: bounding.left + viewportElement.scrollLeft,
+          top: bounding.top + viewportElement.scrollTop,
+          width: bounding.width,
+          height: bounding.height,
+        },
+      };
+    });
   }
 
   private get _viewportElement() {
-    const pageBlock = this.hostElement as DefaultPageBlockComponent;
+    const pageBlock = this.hostElement as DocPageBlockComponent;
 
     assertExists(pageBlock);
 
@@ -92,7 +106,6 @@ export class DocDraggingAreaWidget extends WidgetElement {
       )
       .map(rectWithId => {
         return this.root.selectionManager.getInstance('block', {
-          blockId: rectWithId.id,
           path: rectWithId.path,
         });
       });

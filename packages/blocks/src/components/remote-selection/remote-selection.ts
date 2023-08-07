@@ -172,7 +172,7 @@ export class RemoteSelection extends LitElement {
 
     this._resizeObserver.observe(document.body);
 
-    const viewportElement = document.querySelector('.affine-default-viewport');
+    const viewportElement = document.querySelector('.affine-doc-viewport');
     viewportElement?.addEventListener('scroll', () => this.requestUpdate(), {
       signal: this._abortController.signal,
     });

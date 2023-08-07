@@ -9,13 +9,13 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../components/component-toolbar/change-shape-button.js';
 import { isTransparent } from '../components/panel/color-panel.js';
+import type { SelectionArea } from '../services/tools-manager.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_OPTIONS,
   SHAPE_OVERLAY_WIDTH,
 } from '../utils/consts.js';
-import type { SelectionArea } from '../utils/selection-manager.js';
 import { ShapeOverlay } from '../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
@@ -77,11 +77,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const element = this._surface.pickById(id);
     assertExists(element);
-    this._edgeless.slots.surfaceUpdated.emit();
 
-    this._edgeless.selection.switchToDefaultMode({
-      selected: [element],
-      active: false,
+    this._edgeless.tools.switchToDefaultMode({
+      elements: [element.id],
+      editing: false,
     });
   }
 
@@ -115,7 +114,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       start: new DOMPoint(e.x, e.y),
       end: new DOMPoint(e.x, e.y),
     };
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -126,7 +124,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     this._draggingArea.end = new DOMPoint(e.x, e.y);
 
-    this._resize(e.keys.shift || this._edgeless.selection.shiftKey);
+    this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
   }
 
   onContainerDragEnd(e: PointerEventState) {
@@ -140,9 +138,9 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const element = this._surface.pickById(id);
     assertExists(element);
-    this._edgeless.selection.switchToDefaultMode({
-      selected: [element],
-      active: false,
+    this._edgeless.tools.switchToDefaultMode({
+      elements: [element.id],
+      editing: false,
     });
   }
 
@@ -158,7 +156,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     assertExists(id);
     assertExists(_draggingArea);
 
-    const { slots, surface } = _edgeless;
+    const { surface } = _edgeless;
     const { viewport } = surface;
     const { zoom } = viewport;
     const {
@@ -184,7 +182,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const bound = new Bound(x, y, w, h);
     surface.setElementBound(id, bound);
-    slots.surfaceUpdated.emit();
   }
 
   private _updateOverlayPosition(x: number, y: number) {

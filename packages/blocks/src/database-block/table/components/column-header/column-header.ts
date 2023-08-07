@@ -8,7 +8,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getDefaultPageByElement } from '../../../../__internal__/index.js';
+import { getDocPageByElement } from '../../../../__internal__/index.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
@@ -52,7 +52,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
 
   private _initResizeEffect(element: Element) {
-    const pageBlock = getDefaultPageByElement(this);
+    const pageBlock = getDocPageByElement(this);
     const viewportElement = pageBlock?.viewportElement;
     if (viewportElement) {
       const resizeObserver = new ResizeObserver(

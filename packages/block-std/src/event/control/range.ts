@@ -1,3 +1,5 @@
+import type { BlockElement } from '@blocksuite/lit';
+
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type {
   EventName,
@@ -80,12 +82,10 @@ export class RangeControl {
   };
 
   private _buildEventScopeByNativeRange(name: EventName, range: Range) {
-    const blocks = this._findBlockElement(range);
+    const blocks = this._findBlockElement(range) as BlockElement[];
     const paths = blocks
       .map(blockView => {
-        return this._dispatcher.blockStore.viewStore.blockViewMap.getPath(
-          blockView
-        );
+        return blockView.path;
       })
       .filter((path): path is string[] => !!path);
     const flavours = Array.from(
@@ -110,9 +110,12 @@ export class RangeControl {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
-    const getBlockView = this._dispatcher.blockStore.config.getBlockViewByNode;
+    const getBlockView = this._dispatcher.blockStore.viewStore.getNodeView;
     if (ancestor.nodeType === Node.TEXT_NODE) {
-      return [getBlockView(ancestor)];
+      const view = getBlockView(ancestor)?.view;
+      if (view) {
+        return [view];
+      }
     }
     const nodes = new Set<Node>();
 
@@ -147,7 +150,7 @@ export class RangeControl {
 
     const blocks = new Set<unknown>();
     nodes.forEach(node => {
-      const blockView = getBlockView(node);
+      const blockView = getBlockView(node)?.view;
       if (!blockView) {
         return;
       }

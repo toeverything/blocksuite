@@ -9,12 +9,12 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  groupBy,
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
-import type { Selectable } from '../../utils/selection-manager.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action = {
@@ -58,7 +58,6 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       display: block;
       color: var(--affine-text-primary-color);
       fill: currentColor;
-      padding-right: 6px;
     }
 
     .more-actions-container {
@@ -103,7 +102,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  elements: Selectable[] = [];
+  elements: string[] = [];
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -121,6 +120,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return this.edgeless.page;
   }
 
+  get selection() {
+    return this.edgeless.selection;
+  }
+
   get slots() {
     return this.edgeless.slots;
   }
@@ -129,39 +132,34 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return this.edgeless.surface;
   }
 
-  private _splitElements(): {
-    notes: TopLevelBlockModel[];
-    shapes: PhasorElement[];
-  } {
-    const notes: TopLevelBlockModel[] = [];
-    const shapes: PhasorElement[] = [];
-    this.elements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        notes.push(element);
-      } else {
-        shapes.push(element);
-      }
-    });
-    return {
-      notes: notes,
-      shapes,
+  private _splitElements() {
+    const { notes, shapes } = groupBy(this.selection.elements, element => {
+      return isTopLevelBlock(element) ? 'notes' : 'shapes';
+    }) as {
+      notes: TopLevelBlockModel[];
+      shapes: PhasorElement[];
     };
+
+    return { notes: notes ?? [], shapes: shapes ?? [] };
   }
 
   private _delete() {
     this.page.captureSync();
-    this.elements.forEach(element => {
+    this.selection.elements.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = this.page.root?.children ?? [];
         if (children.length > 1) {
           this.page.deleteBlock(element);
         }
-      } else {
-        this.edgeless.connector.detachConnectors([element]);
+      } else if (element) {
+        this.edgeless.connector.detachConnectors([element as PhasorElement]);
         this.surface.removeElement(element.id);
       }
     });
-    this.slots.selectionUpdated.emit({ selected: [], active: false });
+    this.selection.setSelection({
+      elements: [],
+      editing: false,
+    });
   }
 
   private _runAction = ({ type }: Action) => {

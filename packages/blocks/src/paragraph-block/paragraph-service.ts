@@ -7,11 +7,11 @@ import { json2block } from '../__internal__/service/json2block.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
-  override block2html(
+  override async block2html(
     model: ParagraphBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    const text = super.block2html(model, {
+    const text = await super.block2html(model, {
       childText,
       begin,
       end,

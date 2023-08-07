@@ -659,7 +659,7 @@ async function scrollToTop(page: Page) {
   await page.mouse.wheel(0, -1000);
 
   await page.waitForFunction(() => {
-    const scrollContainer = document.querySelector('.affine-default-viewport');
+    const scrollContainer = document.querySelector('.affine-doc-viewport');
     if (!scrollContainer) {
       throw new Error("Can't find scroll container");
     }
@@ -671,14 +671,14 @@ async function scrollToBottom(page: Page) {
   // await page.mouse.wheel(0, 1000);
 
   await page
-    .locator('.affine-default-viewport')
+    .locator('.affine-doc-viewport')
     .evaluate(node =>
       node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
     );
   // TODO switch to `scrollend`
   // See https://developer.chrome.com/en/blog/scrollend-a-new-javascript-event/
   await page.waitForFunction(() => {
-    const scrollContainer = document.querySelector('.affine-default-viewport');
+    const scrollContainer = document.querySelector('.affine-doc-viewport');
     if (!scrollContainer) {
       throw new Error("Can't find scroll container");
     }

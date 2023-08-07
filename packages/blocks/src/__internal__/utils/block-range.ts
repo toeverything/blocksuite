@@ -5,7 +5,7 @@ import {
 } from '@blocksuite/store';
 import type { VEditor, VRange } from '@blocksuite/virgo';
 
-import { getDefaultPage, getModelsByRange, getVirgoByModel } from './query.js';
+import { getDocPage, getModelsByRange, getVirgoByModel } from './query.js';
 import {
   focusTitle,
   getCurrentNativeRange,
@@ -68,7 +68,7 @@ export function blockRangeToNativeRange(
   // special case for title
   if (blockRange.type === 'Title') {
     const page = blockRange.models[0].page;
-    const pageElement = getDefaultPage(page);
+    const pageElement = getDocPage(page);
     if (!pageElement) {
       // Maybe in edgeless mode
       return null;
@@ -157,7 +157,7 @@ export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
   }
 
   const page = blockRange.models[0].page;
-  const defaultPageBlock = getDefaultPage(page);
+  const docPageBlock = getDocPage(page);
 
   if (blockRange.type === 'Native') {
     const range = blockRangeToNativeRange(blockRange);
@@ -174,7 +174,7 @@ export function restoreSelection(blockRange: BlockRange | ExtendBlockRange) {
   }
 
   // In the default mode
-  if (defaultPageBlock && blockRange.type === 'Title') {
+  if (docPageBlock && blockRange.type === 'Title') {
     focusTitle(
       page,
       blockRange.startOffset,

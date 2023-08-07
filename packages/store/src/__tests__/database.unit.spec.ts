@@ -11,12 +11,7 @@ import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { BaseBlockModel, Page } from '../index.js';
-import { Generator, Workspace } from '../index.js';
-
-function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
-  return { id: 'test-workspace', idGenerator, isSSR: true };
-}
+import { Generator, Schema, Workspace } from '../index.js';
 
 const AffineSchemas = [
   ParagraphBlockSchema,
@@ -25,9 +20,16 @@ const AffineSchemas = [
   DatabaseBlockSchema,
 ];
 
+function createTestOptions() {
+  const idGenerator = Generator.AutoIncrement;
+  const schema = new Schema();
+  schema.register(AffineSchemas);
+  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+}
+
 async function createTestPage(pageId = 'page0') {
   const options = createTestOptions();
-  const workspace = new Workspace(options).register(AffineSchemas);
+  const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
   await page.waitForLoaded();
   return page;

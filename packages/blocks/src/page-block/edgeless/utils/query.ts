@@ -19,16 +19,19 @@ import {
   serializeXYWH,
 } from '@blocksuite/phasor';
 import { GRID_GAP_MAX, GRID_GAP_MIN } from '@blocksuite/phasor';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { type Page } from '@blocksuite/store';
 
 import {
+  type EdgelessElement,
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { Selectable } from './selection-manager.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import type { Selectable } from '../services/tools-manager.js';
 
 export function isTopLevelBlock(
-  selectable: Selectable | null
+  selectable: Selectable | BaseBlockModel | null
 ): selectable is TopLevelBlockModel {
   return !!selectable && 'flavour' in selectable;
 }
@@ -217,13 +220,10 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     }
   >();
   for (const s of selected) {
-    let bound: Bound;
+    const bound = Bound.deserialize(s.xywh);
     let rotate = 0;
 
-    if (isTopLevelBlock(s)) {
-      bound = Bound.deserialize(s.xywh);
-    } else {
-      bound = new Bound(s.x, s.y, s.w, s.h);
+    if (!isTopLevelBlock(s)) {
       rotate = s.rotate ?? 0;
     }
 
@@ -233,4 +233,15 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     });
   }
   return bounds;
+}
+
+export function getEdgelessElement(
+  edgeless: EdgelessPageBlockComponent,
+  id: string
+): EdgelessElement | null {
+  return (
+    edgeless.surface.pickById(id) ??
+    <TopLevelBlockModel>edgeless.page.getBlockById(id) ??
+    null
+  );
 }

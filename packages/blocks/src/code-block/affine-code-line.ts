@@ -36,7 +36,14 @@ export class AffineCodeLine extends ShadowlessElement {
     const { lang, highlighter } = this.highlightOptionsGetter();
 
     if (!highlighter || !highlighter.getLoadedLanguages().includes(lang)) {
-      return html`<span><v-text .str=${this.delta.insert}></v-text></span>`;
+      return html`<span
+        ><v-text
+          .str=${this.delta.insert}
+          .styles=${{
+            'word-wrap': 'break-word',
+          }}
+        ></v-text
+      ></span>`;
     }
 
     const mode = queryCurrentMode();

@@ -2,8 +2,6 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
 import type { AwarenessStore } from '../awareness.js';
-import type { BlockSchemaType } from '../base.js';
-import { BlockSchema } from '../base.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
@@ -17,9 +15,11 @@ import type { QueryContent } from './indexer/search.js';
 import { SearchIndexer } from './indexer/search.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
-import { Schema } from './schema.js';
+import type { Schema } from './schema.js';
 
-export type WorkspaceOptions = StoreOptions;
+export type WorkspaceOptions = StoreOptions & {
+  schema: Schema;
+};
 
 export class Workspace {
   static Y = Y;
@@ -47,7 +47,7 @@ export class Workspace {
   };
 
   constructor(storeOptions: WorkspaceOptions) {
-    this._schema = new Schema(this);
+    this._schema = storeOptions.schema;
 
     this._store = new Store(storeOptions);
 
@@ -164,14 +164,6 @@ export class Workspace {
 
   registerProvider(providerCreator: DocProviderCreator, id?: string) {
     return this._store.registerProvider(providerCreator, id);
-  }
-
-  register(blockSchema: BlockSchemaType[]) {
-    blockSchema.forEach(schema => {
-      BlockSchema.parse(schema);
-      this.schema.flavourSchemaMap.set(schema.model.flavour, schema);
-    });
-    return this;
   }
 
   private _hasPage(pageId: string) {

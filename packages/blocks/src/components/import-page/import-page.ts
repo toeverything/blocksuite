@@ -461,13 +461,13 @@ export class ImportPage extends WithDisposable(LitElement) {
     }
     return html`
       <header @mousedown=${this._onMouseDown} @mouseup=${this._onMouseUp}>
-        <icon-button height="16px" @click=${this._onCloseClick}>
+        <icon-button height="24px" @click=${this._onCloseClick}>
           ${CloseIcon}
         </icon-button>
         <div>Import</div>
       </header>
       <div>
-        AFFiNE will gradually support more and more file types for import.
+        AFFiNE will gradually support more file formats for import.
         <a
           href="https://community.affine.pro/c/feature-requests/import-export"
           target="_blank"
@@ -504,11 +504,7 @@ export class ImportPage extends WithDisposable(LitElement) {
             </tool-tip>
           </div>
         </icon-button>
-        <icon-button
-          class="button-item"
-          text="Coming soon..."
-          ?disabled=${true}
-        >
+        <icon-button class="button-item" text="Coming soon..." disabled>
           ${NewIcon}
         </icon-button>
       </div>

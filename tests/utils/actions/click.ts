@@ -1,6 +1,7 @@
 import type { IPoint } from '@blocksuite/blocks';
 import type { Page } from '@playwright/test';
 
+import { toViewCoord } from './edgeless.js';
 import { waitNextFrame } from './misc.js';
 
 function getDebugMenu(page: Page) {
@@ -21,6 +22,16 @@ function getDebugMenu(page: Page) {
 
 export async function click(page: Page, point: IPoint) {
   await page.mouse.click(point.x, point.y);
+}
+
+export async function clickView(page: Page, point: [number, number]) {
+  const [x, y] = await toViewCoord(page, point);
+  await page.mouse.click(x, y);
+}
+
+export async function dblclickView(page: Page, point: [number, number]) {
+  const [x, y] = await toViewCoord(page, point);
+  await page.mouse.dblclick(x, y);
 }
 
 export async function undoByClick(page: Page) {
@@ -111,7 +122,7 @@ export async function addCodeBlock(page: Page) {
 export async function switchReadonly(page: Page) {
   page.evaluate(() => {
     const defaultPage = document.querySelector(
-      'affine-default-page'
+      'affine-doc-page'
     ) as HTMLElement & {
       page: {
         awarenessStore: { setFlag: (key: string, value: unknown) => void };

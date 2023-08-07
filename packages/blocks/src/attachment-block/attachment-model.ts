@@ -3,6 +3,10 @@ import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 export type AttachmentProps = {
   name: string;
   size: number;
+  /**
+   * MIME type
+   */
+  type: string;
   caption?: string;
 
   // `loadingKey` is used to indicate whether the attachment is loading
@@ -17,6 +21,7 @@ export type AttachmentProps = {
 export const defaultAttachmentProps: AttachmentProps = {
   name: '',
   size: 0,
+  type: 'application/octet-stream',
   sourceId: undefined,
   loadingKey: undefined,
   caption: undefined,

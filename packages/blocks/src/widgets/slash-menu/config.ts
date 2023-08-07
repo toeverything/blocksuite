@@ -40,7 +40,8 @@ import {
 } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
-import { copyBlock } from '../../page-block/default/utils.js';
+import type { ImageProps } from '../../image-block/image-model.js';
+import { copyBlock } from '../../page-block/doc/utils.js';
 import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
   onModelTextUpdated,
@@ -208,9 +209,11 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           if (!parent) {
             return;
           }
-          parent.children.indexOf(model);
           const props = (await uploadImageFromLocal(page.blobs)).map(
-            ({ sourceId }) => ({ flavour: 'affine:image', sourceId })
+            ({ sourceId }): ImageProps & { flavour: 'affine:image' } => ({
+              flavour: 'affine:image',
+              sourceId,
+            })
           );
           page.addSiblingBlocks(model, props);
         },
@@ -273,6 +276,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
               flavour: 'affine:attachment',
               name: file.name,
               size: file.size,
+              type: file.type,
               loadingKey,
             };
             const [newBlockId] = page.addSiblingBlocks(model, [props]);

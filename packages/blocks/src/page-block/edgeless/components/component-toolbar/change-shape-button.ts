@@ -27,7 +27,6 @@ import {
   type ShapeTool,
 } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
@@ -179,7 +178,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       .change-shape-button {
         fill: none;
         stroke: currentColor;
-        margin-left: 8px;
       }
 
       .shape-style-button svg {
@@ -238,9 +236,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   surface!: SurfaceManager;
 
   @property({ attribute: false })
-  selectionState!: EdgelessSelectionState;
-
-  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   @state()
@@ -280,11 +275,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _forceUpdateSelection() {
-    // FIXME: force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
-  }
-
   private _setShapeFillColor(color: CssVariableName) {
     const filled = !isTransparent(color);
     this.elements.forEach(ele => {
@@ -293,7 +283,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         fillColor: color,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStrokeColor(color: CssVariableName) {
@@ -302,7 +291,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         strokeColor: color,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStrokeWidth(strokeWidth: number) {
@@ -311,7 +299,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         strokeWidth,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
@@ -320,7 +307,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         strokeStyle,
       });
     });
-    this._forceUpdateSelection();
   }
 
   private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
@@ -351,7 +337,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         shapeStyle: shapeStyle,
       });
     });
-    this._forceUpdateSelection();
   }
 
   override firstUpdated(changedProperties: Map<string, unknown>) {
@@ -376,7 +361,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         this.elements.forEach(element => {
           this.surface.updateElement<'shape'>(element.id, updatedProps);
         });
-        this._forceUpdateSelection();
       })
     );
 
@@ -534,7 +518,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
               .elements=${this.elements}
               .elementType=${'shape'}
               .surface=${this.surface}
-              .selectionState=${this.selectionState}
               .slots=${this.slots}
             ></edgeless-change-text-menu>`
         : nothing}

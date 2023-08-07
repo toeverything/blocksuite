@@ -1,5 +1,7 @@
-import { Text } from '@blocksuite/store';
+import { nanoid, Text } from '@blocksuite/store';
 
+import { getTagColor } from '../../../../components/tags/colors.js';
+import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { tTag } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import type { SelectColumnData } from '../types.js';
@@ -22,6 +24,38 @@ export const selectPureColumnConfig = columnManager.register<
   }),
   cellToString: (data, colData) =>
     colData.options.find(v => v.id === data)?.value ?? '',
+  cellFromString: (data, colData) => {
+    const optionMap = Object.fromEntries(
+      colData.options.map(v => [v.value, v])
+    );
+    const optionNames = data
+      .split(',')
+      .map(v => v.trim())
+      .filter(v => v);
+
+    let value = '';
+    optionNames.forEach((name, index) => {
+      if (!optionMap[name]) {
+        const newOption: SelectTag = {
+          id: nanoid(),
+          value: name,
+          color: getTagColor(),
+        };
+        colData.options.push(newOption);
+
+        if (index === 0) {
+          value = newOption.id;
+        }
+      } else {
+        value = optionMap[name].id;
+      }
+    });
+
+    return {
+      value,
+      data: colData,
+    };
+  },
   cellToJson: data => data ?? null,
 });
 

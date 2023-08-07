@@ -1,5 +1,4 @@
 import '../__internal__/rich-text/rich-text.js';
-import '../components/portal.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
@@ -186,6 +185,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @state()
   private _wrap = false;
 
+  private _langListSlots = {
+    selectedLanguageChanged: new Slot<{ language: string | null }>(),
+    dispose: new Slot(),
+  };
+
   readonly textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
     textRenderer: () =>
@@ -255,6 +259,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         });
       })
     );
+
+    this._langListSlots.selectedLanguageChanged.on(({ language }) => {
+      getService('affine:code').setLang(this.model, language);
+      this._showLangList = false;
+    });
+    this._langListSlots.dispose.on(() => {
+      this._showLangList = false;
+    });
 
     this._observePosition();
   }
@@ -386,13 +398,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       ${this._showLangList
         ? html`<lang-list
             .currentLanguageId=${this._curLanguage.id as Lang}
-            @selected-language-changed=${(e: CustomEvent) => {
-              getService('affine:code').setLang(this.model, e.detail.language);
-              this._showLangList = false;
-            }}
-            @dispose=${() => {
-              this._showLangList = false;
-            }}
+            .slots=${this._langListSlots}
           ></lang-list>`
         : nothing}
     </div>`;
@@ -400,7 +406,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   private _codeOptionTemplate() {
     if (!this._optionPosition) return '';
-    return html`<affine-portal
+    return html`<blocksuite-portal
       .template=${CodeOptionTemplate({
         model: this.model,
         position: this._optionPosition,
@@ -408,7 +414,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         wrap: this._wrap,
         onClickWrap: () => this._onClickWrapBtn(),
       })}
-    ></affine-portal>`;
+    ></blocksuite-portal>`;
   }
 
   private _updateLineNumbers() {

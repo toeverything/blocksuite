@@ -75,8 +75,8 @@ const operations: Operation[] = [
     type: 'copy',
     icon: CopyIcon,
     label: 'Copy',
-    action: (model, callback) => {
-      copyBlocks({
+    action: async (model, callback) => {
+      await copyBlocks({
         type: 'Block',
         models: [model],
         startOffset: 0,

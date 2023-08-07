@@ -1,5 +1,4 @@
 import '../../components/button.js';
-import '../../components/portal.js';
 import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
@@ -227,7 +226,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           </div>
         </div>
       </div>`;
-    return html`<affine-portal .template=${modal}></affine-portal>`;
+    return html`<blocksuite-portal .template=${modal}></blocksuite-portal>`;
   }
 }
 

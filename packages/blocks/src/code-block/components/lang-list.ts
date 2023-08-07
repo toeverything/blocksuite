@@ -1,5 +1,6 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
@@ -8,7 +9,6 @@ import {
   type Lang,
 } from 'shiki';
 
-import { createEvent } from '../../__internal__/index.js';
 import { scrollbarStyle } from '../../components/utils.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
@@ -54,22 +54,22 @@ export class LangList extends ShadowlessElement {
       }
 
       .input-wrapper {
-        position: relative;
         display: flex;
         margin-top: 8px;
         margin-left: 4px;
+        border: 1px solid var(--affine-border-color);
+        border-radius: 8px;
+        padding: 4px 10px;
       }
 
       #filter-input {
-        display: flex;
+        flex: 1;
         align-items: center;
-        height: 32px;
-        width: 192px;
-        border: 1px solid var(--affine-border-color);
+        height: 20px;
+        width: 140px;
         border-radius: 8px;
-        padding-left: 44px;
-        padding-top: 4px;
-
+        padding-top: 2px;
+        border: none;
         font-family: var(--affine-font-family);
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
@@ -87,10 +87,9 @@ export class LangList extends ShadowlessElement {
       }
 
       .search-icon {
-        position: absolute;
-        left: 8px;
         height: 100%;
         display: flex;
+        padding-right: 4px;
         align-items: center;
         fill: var(--affine-icon-color);
       }
@@ -112,6 +111,10 @@ export class LangList extends ShadowlessElement {
   @property({ attribute: false })
   delay = 150;
 
+  slots = {
+    selectedLanguageChanged: new Slot<{ language: string | null }>(),
+    dispose: new Slot(),
+  };
   override async connectedCallback() {
     super.connectedCallback();
     // Avoid triggering click away listener on initial render
@@ -131,16 +134,11 @@ export class LangList extends ShadowlessElement {
     if (this.renderRoot.parentElement?.contains(e.target as Node)) {
       return;
     }
-    this.dispatchEvent(createEvent('dispose', null));
+    this.slots.dispose.emit();
   };
 
   private _onLanguageClicked(language: ILanguageRegistration | null) {
-    // TODO use slot instead
-    this.dispatchEvent(
-      createEvent('selected-language-changed', {
-        language: language?.id ?? null,
-      })
-    );
+    this.slots.selectedLanguageChanged.emit({ language: language?.id ?? null });
   }
 
   override render() {
@@ -224,13 +222,5 @@ export class LangList extends ShadowlessElement {
 declare global {
   interface HTMLElementTagNameMap {
     'lang-list': LangList;
-  }
-
-  interface HTMLElementEventMap {
-    /**
-     * @deprecated Use slot instead
-     */
-    'selected-language-changed': CustomEvent<{ language: string | null }>;
-    dispose: CustomEvent<null>;
   }
 }

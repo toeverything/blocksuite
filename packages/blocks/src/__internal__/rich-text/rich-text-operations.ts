@@ -14,7 +14,7 @@ import {
   asyncSetVRange,
 } from '../utils/common-operations.js';
 import {
-  getDefaultPage,
+  getDocPage,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
@@ -550,7 +550,7 @@ function handleEmbedDividerCodeSibling(
 function handleNoPreviousSibling(page: Page, model: ExtendedModel) {
   const text = model.text;
   const titleElement = document.querySelector(
-    '.affine-default-page-block-title'
+    '.affine-doc-page-block-title'
   ) as HTMLTextAreaElement | null;
   // Probably no title, e.g. in edgeless mode
   if (!titleElement) return false;
@@ -798,7 +798,7 @@ export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
 
 export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:paragraph'])) return;
-  const pageElement = getDefaultPage(page);
+  const pageElement = getDocPage(page);
   if (!pageElement) {
     // Maybe in edgeless mode
     return;

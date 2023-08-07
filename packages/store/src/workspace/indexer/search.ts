@@ -15,7 +15,7 @@ type SearchResult = { id: string; doc: { space: string } };
 type SearchResults = { field: string; result: SearchResult[] };
 
 function tokenize(locale: string) {
-  const tokenizer = Intl?.Segmenter;
+  const tokenizer = Intl.Segmenter;
   if (tokenizer) {
     // extract the latin encoder inside flexsearch
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

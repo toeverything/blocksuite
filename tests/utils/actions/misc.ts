@@ -231,7 +231,7 @@ export async function enterPlaygroundRoom(
 }
 
 export async function waitDefaultPageLoaded(page: Page) {
-  await page.waitForSelector('affine-default-page[data-block-id="0"]');
+  await page.waitForSelector('affine-doc-page[data-block-id="0"]');
 }
 
 export async function waitEmbedLoaded(page: Page) {
@@ -419,7 +419,7 @@ export async function initDatabaseRowWithData(page: Page, data: string) {
 
   const lastRow = page.locator('.affine-database-block-row').last();
   const cell = lastRow.locator('affine-paragraph');
-  await cell.click();
+  await cell.click({ force: true });
   await type(page, data);
 }
 
@@ -644,12 +644,12 @@ export async function pasteContent(
       });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       Object.keys(clipData).forEach(key => {
         e.clipboardData?.setData(key, clipData[key] as string);
       });
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -838,15 +838,14 @@ export async function focusTitle(page: Page) {
   // click to ensure editor is active
   await page.mouse.move(0, 0);
   const editor = getEditorLocator(page);
-  const locator = editor.locator('affine-default-page').first();
+  const locator = editor.locator('affine-doc-page').first();
   // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
   // avoid trigger double click
   await page.waitForTimeout(500);
   await page.evaluate(i => {
-    const defaultPageComponent = document.querySelectorAll(
-      'affine-default-page'
-    )[i];
+    const defaultPageComponent =
+      document.querySelectorAll('affine-doc-page')[i];
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }

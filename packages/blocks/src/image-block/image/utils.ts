@@ -15,7 +15,7 @@ async function getImageBlob(model: BaseBlockModel) {
   if (!blob.type) {
     // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
     // @ts-ignore
-    const FileType = await import('file-type/browser');
+    const FileType = await import('file-type/browser.js');
     if (window.Buffer === undefined) {
       window.Buffer = Buffer;
     }
@@ -108,7 +108,7 @@ export function focusCaption(model: BaseBlockModel) {
 
 async function getBlobByModel(model: BaseBlockModel) {
   assertExists(model.sourceId);
-  const store = await model.page.blobs;
-  const blob = await store?.get(model.sourceId);
+  const store = model.page.blobs;
+  const blob = await store.get(model.sourceId);
   return blob;
 }
