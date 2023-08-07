@@ -146,6 +146,14 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         return false;
       })
     );
+
+    this._disposables.add(
+      this.tableView.handleEvent('dragMove', context => {
+        const event = context.get('pointerState').raw;
+        event.preventDefault();
+        return true;
+      })
+    );
   }
 
   isValidSelection(selection?: TableViewSelection): boolean {
