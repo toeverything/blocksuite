@@ -67,4 +67,8 @@ export abstract class BaseCellRenderer<
       }
     });
   }
+
+  forceUpdate(): void {
+    this.requestUpdate();
+  }
 }

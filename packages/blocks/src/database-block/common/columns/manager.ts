@@ -32,6 +32,8 @@ export interface DataViewCellLifeCycle {
   focusCell(): boolean;
 
   blurCell(): boolean;
+
+  forceUpdate(): void;
 }
 
 export type DataViewCellComponent<

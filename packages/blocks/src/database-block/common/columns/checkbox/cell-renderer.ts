@@ -92,7 +92,6 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
 
   override render() {
     const checked = this.value ?? false;
-
     const icon = checked ? checkboxChecked() : checkboxUnchecked();
     return html` <div class="affine-database-checkbox-container">
       <div class="affine-database-checkbox checkbox ${checked && 'checked'}">

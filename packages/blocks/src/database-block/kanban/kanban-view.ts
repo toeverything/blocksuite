@@ -18,6 +18,7 @@ const styles = css`
   affine-data-view-kanban {
     user-select: none;
   }
+
   .affine-data-view-kanban-groups {
     display: flex;
     padding: 20px 0;
@@ -40,9 +41,10 @@ export class DataViewKanban extends BaseDataView<
     this._disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
-        this.querySelectorAll('affine-data-view-kanban-cell').forEach(v =>
-          v.requestUpdate()
-        );
+        this.querySelectorAll('affine-data-view-kanban-cell').forEach(v => {
+          v.cell?.forceUpdate();
+          v.requestUpdate();
+        });
       })
     );
     this._disposables.add(this.selection.run());

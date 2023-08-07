@@ -42,7 +42,7 @@ export class KanbanSelection {
       viewId: this.viewEle.view.id,
       type: 'kanban',
     };
-    if (selection.focus) {
+    if (selection.focus && selection.focus.isEditing) {
       const focus = selection.focus;
       const container = this.getFocusCellContainer(selection);
       const cell = container?.cell;
