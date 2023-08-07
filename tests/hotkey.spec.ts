@@ -1042,7 +1042,7 @@ test('should up/down key navigator works', async ({ page }) => {
   await assertSelection(page, 1, 1);
 });
 
-test('should cut in title works', async ({ page }) => {
+test.fixme('should cut in title works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 

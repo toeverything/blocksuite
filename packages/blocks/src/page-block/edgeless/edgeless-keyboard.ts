@@ -19,42 +19,42 @@ import {
 } from './utils/consts.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
-  constructor(edgelessElement: EdgelessPageBlockComponent) {
-    super(edgelessElement);
+  constructor(override pageElement: EdgelessPageBlockComponent) {
+    super(pageElement);
     this.pageElement.bindHotKey(
       {
         v: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'default',
           });
         },
         t: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'text',
           });
         },
         l: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'connector',
             mode: ConnectorMode.Straight,
             color: GET_DEFAULT_LINE_COLOR(),
           });
         },
         x: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'connector',
             mode: ConnectorMode.Orthogonal,
             color: GET_DEFAULT_LINE_COLOR(),
           });
         },
         h: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'pan',
             panning: false,
           });
         },
         n: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'note',
             background: DEFAULT_NOTE_COLOR,
             childFlavour: DEFAULT_NOTE_CHILD_FLAVOUR,
@@ -63,24 +63,54 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         p: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'brush',
             color: GET_DEFAULT_LINE_COLOR(),
             lineWidth: BrushSize.Thin,
           });
         },
         e: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'eraser',
           });
         },
         s: () => {
-          this._setEdgelessTool(edgelessElement, {
+          this._setEdgelessTool(pageElement, {
             type: 'shape',
             shape: 'rect',
             fillColor: DEFAULT_SHAPE_FILL_COLOR,
             strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
           });
+        },
+        'Mod-a': ctx => {
+          if (this.pageElement.selection.editing) {
+            return;
+          }
+
+          ctx.get('defaultState').event.preventDefault();
+          this.pageElement.selection.setSelection({
+            elements: [
+              ...this.pageElement.notes.map(note => note.id),
+              ...this.pageElement.surface.getElements().map(el => el.id),
+            ],
+            editing: false,
+          });
+        },
+        'Mod-1': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          this.pageElement.slots.zoomUpdated.emit('fit');
+        },
+        'Mod--': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          this.pageElement.slots.zoomUpdated.emit('out');
+        },
+        'Mod-0': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          this.pageElement.slots.zoomUpdated.emit('reset');
+        },
+        'Mod-=': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          this.pageElement.slots.zoomUpdated.emit('in');
         },
       },
       {
