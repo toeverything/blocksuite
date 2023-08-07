@@ -10,7 +10,7 @@ import {
   popMenu,
 } from '../../../components/menu/index.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { ViewOperationMap } from '../view-manager.js';
+import { viewManager } from '../data-view.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
@@ -63,20 +63,20 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   _addViewMenu(event: MouseEvent) {
     popFilterableSimpleMenu(
       event.target as HTMLElement,
-      Object.keys(ViewOperationMap).map(type => ({
-        type: 'action',
-        name: type,
-        hide: () =>
-          type === 'kanban' &&
-          !this.model.page.awarenessStore.getFlag('enable_database_filter'),
-        select: () => {
-          const view = this.model.addView(
-            type as keyof typeof ViewOperationMap
-          );
-          this.setViewId(view.id);
-          this.model.applyViewsUpdate();
-        },
-      }))
+      viewManager.all.map(v => {
+        return {
+          type: 'action',
+          name: v.type,
+          hide: () =>
+            v.type === 'kanban' &&
+            !this.model.page.awarenessStore.getFlag('enable_database_filter'),
+          select: () => {
+            const view = this.model.addView(v.type);
+            this.setViewId(view.id);
+            this.model.applyViewsUpdate();
+          },
+        };
+      })
     );
   }
 
@@ -138,7 +138,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           >
             <uni-lit
               class="icon"
-              .uni="${ViewOperationMap[view.mode].icon}"
+              .uni="${viewManager.getView(view.mode).icon}"
             ></uni-lit>
             <div class="name">${view.name}</div>
           </div>`;

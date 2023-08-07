@@ -1,18 +1,17 @@
 // related component
-import './table/table-view.js';
-import './kanban/kanban-view.js';
 import './common/groupBy/define.js';
 import './common/header/views.js';
 import './common/header/title.js';
 import './common/header/tools/tools.js';
+import './table/define.js';
+import './kanban/define.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
-import { createRef, ref } from 'lit/directives/ref.js';
-import { html, literal } from 'lit/static-html.js';
+import { createRef } from 'lit/directives/ref.js';
+import { html } from 'lit/static-html.js';
 
 import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
@@ -20,6 +19,7 @@ import { DatabaseBlockDatasource } from '../__internal__/datasource/database-blo
 import type { DataViewSelectionState } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { BaseDataView } from './common/base-data-view.js';
+import { viewManager } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
@@ -82,6 +82,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   currentView?: string;
 
   private _view = createRef<BaseDataView>();
+
+  get viewEle() {
+    return this._view.value;
+  }
 
   _setViewId = (viewId: string) => {
     if (this.currentView !== viewId) {
@@ -201,9 +205,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     ></data-view-header-views>`;
   };
   private renderTitle = () => {
+    const addRow = () => this._view.value?.addRow?.('start');
     return html` <affine-database-title
       .titleText="${this.model.title}"
       .readonly="${this.model.page.readonly}"
+      .onPressEnterKey="${addRow}"
     ></affine-database-title>`;
   };
   private renderReference = () => {
@@ -237,12 +243,17 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override render() {
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
-    const databaseTag = {
-      table: literal`affine-database-table`,
-      kanban: literal`affine-data-view-kanban`,
-    }[current.mode];
     const viewData = this.getView(current.id);
-    /* eslint-disable lit/binding-positions, lit/no-invalid-html */
+    const props = {
+      titleText: this.model.title,
+      selectionUpdated: viewData.selectionUpdated,
+      setSelection: viewData.setSelection,
+      bindHotkey: viewData.bindHotkey,
+      handleEvent: viewData.handleEvent,
+      view: viewData.view,
+      modalMode: this.modalMode,
+      getFlag: this.page.awarenessStore.getFlag.bind(this.page.awarenessStore),
+    };
     return html`
       <div class="toolbar-hover-container data-view-root">
         <div
@@ -257,23 +268,12 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             ${this.renderViews()} ${this.renderTools(viewData.view)}
           </div>
         </div>
-        ${keyed(
-          current.id,
-          html`<${databaseTag}
-          ${ref(this._view)}
-          .titleText='${this.model.title}'
-          .selectionUpdated='${viewData.selectionUpdated}'
-          .setSelection='${viewData.setSelection}'
-          .bindHotkey='${viewData.bindHotkey}'
-          .handleEvent='${viewData.handleEvent}'
-          .view='${viewData.view}'
-          .modalMode='${this.modalMode}'
-          .getFlag='${this.page.awarenessStore.getFlag.bind(
-            this.page.awarenessStore
-          )}'
-          class='affine-block-element'
-        ></${databaseTag}>`
-        )}
+        <uni-lit
+          .ref=${this._view}
+          .uni="${viewManager.getView(current.mode).view}"
+          .props="${props}"
+          class="affine-block-element"
+        ></uni-lit>
       </div>
     `;
   }

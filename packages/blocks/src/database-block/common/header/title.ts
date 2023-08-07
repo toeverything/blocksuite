@@ -4,10 +4,7 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
-
-export const DEFAULT_TITLE = 'Database';
-
-export const DATABASE_TITLE_LENGTH = 50;
+import { DATABASE_TITLE_LENGTH, DEFAULT_TITLE } from './consts.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {

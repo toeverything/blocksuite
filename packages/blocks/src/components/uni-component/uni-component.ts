@@ -2,6 +2,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import type { PropertyValues } from 'lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import type { Ref } from 'lit/directives/ref.js';
 
 export type UniComponentReturn<
   Props = NonNullable<unknown>,
@@ -25,6 +26,8 @@ export class UniLit<
 
   @property()
   props!: NonNullable<unknown>;
+  @property()
+  ref?: Ref<Expose>;
 
   uniReturn?: UniComponentReturn<unknown, Expose>;
 
@@ -34,6 +37,10 @@ export class UniLit<
 
   private mount() {
     this.uniReturn = this.uni?.(this, this.props);
+    if (this.ref) {
+      // @ts-expect-error
+      this.ref.value = this.uniReturn?.expose;
+    }
   }
 
   private unmount() {

@@ -6,12 +6,16 @@ import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
 import type { InsertPosition } from '../types.js';
+import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';
 
 export class BaseDataView<
-  T extends DataViewManager = DataViewManager,
-  Selection extends DataViewSelection = DataViewSelection
-> extends WithDisposable(ShadowlessElement) {
+    T extends DataViewManager = DataViewManager,
+    Selection extends DataViewSelection = DataViewSelection
+  >
+  extends WithDisposable(ShadowlessElement)
+  implements DataViewProps<T, Selection>, DataViewExpose
+{
   @property({ attribute: false })
   view!: T;
 
