@@ -21,12 +21,12 @@ export type UniComponent<
 export class UniLit<
   Expose extends NonNullable<unknown>
 > extends ShadowlessElement {
-  @property()
+  @property({ attribute: false })
   uni?: UniComponent<unknown, Expose>;
 
-  @property()
+  @property({ attribute: false })
   props!: NonNullable<unknown>;
-  @property()
+  @property({ attribute: false })
   ref?: Ref<Expose>;
 
   uniReturn?: UniComponentReturn<unknown, Expose>;
