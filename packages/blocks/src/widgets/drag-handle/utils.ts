@@ -1,4 +1,5 @@
 import type { BaseSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT } from './config.js';
@@ -59,4 +60,13 @@ export const captureEventTarget = (target: EventTarget | null) => {
       ? target
       : target.parentElement
     : null;
+};
+
+export const getNoteId = (blockElement: BlockElement) => {
+  let element = blockElement;
+  while (element && element.flavour !== 'affine:note') {
+    element = element.parentBlockElement;
+  }
+
+  return element.model.id;
 };
