@@ -1,5 +1,3 @@
-import { createIcon } from '../../components/icon/uni-icon.js';
-import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
 import type { FilterGroup } from '../common/ast.js';
 import { columnManager } from '../common/columns/manager.js';
 import { viewManager } from '../common/data-view.js';
@@ -7,7 +5,6 @@ import { defaultGroupBy } from '../common/groupBy/util.js';
 import type { GroupBy } from '../common/types.js';
 import { tTag } from '../logical/data-type.js';
 import { isTArray } from '../logical/typesystem.js';
-import { DataViewKanban } from './kanban-view.js';
 
 declare global {
   interface DataViewDataTypeMap {
@@ -26,8 +23,6 @@ export type KanbanViewData = {
 };
 
 viewManager.register('kanban', {
-  icon: createIcon('DatabaseKanbanViewIcon'),
-  view: createUniComponentFromWebComponent(DataViewKanban),
   defaultName: 'Kanban View',
   init(model, id, name) {
     const column = model.columns.find(column => {

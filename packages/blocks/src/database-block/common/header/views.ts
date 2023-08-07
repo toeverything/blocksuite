@@ -10,7 +10,7 @@ import {
   popMenu,
 } from '../../../components/menu/index.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
-import { viewManager } from '../data-view.js';
+import { viewManager, viewRendererManager } from '../data-view.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
@@ -138,7 +138,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           >
             <uni-lit
               class="icon"
-              .uni="${viewManager.getView(view.mode).icon}"
+              .uni="${viewRendererManager.getView(view.mode).icon}"
             ></uni-lit>
             <div class="name">${view.name}</div>
           </div>`;

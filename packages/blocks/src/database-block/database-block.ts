@@ -4,7 +4,9 @@ import './common/header/views.js';
 import './common/header/title.js';
 import './common/header/tools/tools.js';
 import './table/define.js';
+import './table/renderer.js';
 import './kanban/define.js';
+import './kanban/renderer.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
@@ -19,7 +21,7 @@ import { DatabaseBlockDatasource } from '../__internal__/datasource/database-blo
 import type { DataViewSelectionState } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service.js';
 import type { BaseDataView } from './common/base-data-view.js';
-import { viewManager } from './common/data-view.js';
+import { viewRendererManager } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
@@ -270,7 +272,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         </div>
         <uni-lit
           .ref=${this._view}
-          .uni="${viewManager.getView(current.mode).view}"
+          .uni="${viewRendererManager.getView(current.mode).view}"
           .props="${props}"
           class="affine-block-element"
         ></uni-lit>

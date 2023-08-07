@@ -61,11 +61,16 @@ export interface DataViewConfig<
   Data extends DataViewDataType = DataViewDataType
 > {
   type: DataViewTypes;
-  view: UniComponent<DataViewProps, DataViewExpose>;
-  icon: UniComponent;
   defaultName: string;
 
   init(model: DatabaseBlockModel, id: string, name: string): Data;
+}
+export interface DataViewRendererConfig<
+  Data extends DataViewDataType = DataViewDataType
+> {
+  type: DataViewTypes;
+  view: UniComponent<DataViewProps, DataViewExpose>;
+  icon: UniComponent;
 }
 
 export class ViewManager {
@@ -96,3 +101,32 @@ export class ViewManager {
 }
 
 export const viewManager = new ViewManager();
+
+export class ViewRendererManager {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private map = new Map<string, DataViewRendererConfig>();
+
+  getView(type: string): DataViewRendererConfig {
+    const view = this.map.get(type);
+    if (!view) {
+      throw new Error(`${type} is not exist`);
+    }
+    return view;
+  }
+
+  register<Type extends keyof RealDataViewDataTypeMap>(
+    type: Type,
+    config: Omit<DataViewRendererConfig<RealDataViewDataTypeMap[Type]>, 'type'>
+  ) {
+    this.map.set(type, {
+      ...config,
+      type,
+    });
+  }
+
+  get all() {
+    return [...this.map.values()];
+  }
+}
+
+export const viewRendererManager = new ViewRendererManager();
