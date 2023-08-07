@@ -27,12 +27,14 @@ function showSlashMenu({
   container = document.body,
   abortController = new AbortController(),
   options,
+  triggerKey,
 }: {
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
   options: SlashMenuOptions;
+  triggerKey: string;
 }) {
   // Abort previous format quick bar
   globalAbortController.abort();
@@ -45,6 +47,7 @@ function showSlashMenu({
   slashMenu.model = model;
   slashMenu.abortController = abortController;
   slashMenu.options = options;
+  slashMenu.triggerKey = triggerKey;
 
   // Handle position
   const updatePosition = throttle(() => {
@@ -69,7 +72,7 @@ function showSlashMenu({
 @customElement('affine-slash-menu-widget')
 export class SlashMenuWidget extends WidgetElement {
   static DEFAULT_OPTIONS: SlashMenuOptions = {
-    isTriggerKey: (event: KeyboardEvent) => {
+    isTriggerKey: (event: KeyboardEvent): false | string => {
       const triggerKeys = [
         '/',
         // Compatible with CJK IME
@@ -83,13 +86,13 @@ export class SlashMenuWidget extends WidgetElement {
         // Description: The `Process` key. Instructs the IME to process the conversion.
         // See also https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values#common_ime_keys
         // https://stackoverflow.com/questions/71961563/keyboard-event-has-key-process-on-chromebook
-        return true;
+        return '/';
       }
-      return (
-        !isControlledKeyboardEvent(event) &&
-        event.key.length === 1 &&
-        triggerKeys.includes(event.key)
-      );
+      if (isControlledKeyboardEvent(event) || event.key.length !== 1)
+        return false;
+      const triggerKey = triggerKeys.find(key => key === event.key);
+      if (!triggerKey) return false;
+      return triggerKey;
     },
     menus: menuGroups,
   };
@@ -107,7 +110,8 @@ export class SlashMenuWidget extends WidgetElement {
 
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
-    if (!this.options.isTriggerKey(event)) return;
+    const triggerKey = this.options.isTriggerKey(event);
+    if (triggerKey === false) return;
     const text = this.root.selectionManager.value.find(selection =>
       selection.is('text')
     );
@@ -129,6 +133,7 @@ export class SlashMenuWidget extends WidgetElement {
         showSlashMenu({
           model,
           range: curRange,
+          triggerKey,
           options: this.options,
         });
       });
