@@ -143,7 +143,7 @@ export class AffineFormatBarWidget extends WidgetElement {
         const textSelection = getTextSelection(pageElement);
         const blockSelections = selections.filter(
           selection => selection instanceof BlockSelection
-        );
+        ) as BlockSelection[];
 
         if (textSelection) {
           if (!textSelection.isCollapsed()) {
@@ -157,8 +157,15 @@ export class AffineFormatBarWidget extends WidgetElement {
           }
         } else if (blockSelections.length > 0) {
           this._displayType = 'block';
-          this._selectedBlockElements =
-            getSelectedContentBlockElements(pageElement);
+          this._selectedBlockElements = blockSelections.map(selection => {
+            const path = selection.path;
+            const blockElement = this.pageElement.root.viewStore.viewFromPath(
+              'block',
+              path
+            );
+            assertExists(blockElement);
+            return blockElement;
+          });
         }
 
         this.requestUpdate();

@@ -696,7 +696,7 @@ test('should keep selection state when scrolling forward with the scroll wheel',
       y: first.top + 1,
     },
     {
-      // dont release mouse
+      // don't release mouse
       beforeMouseUp: async () => {
         await page.mouse.wheel(0, distance * 2);
         await page.waitForTimeout(250);
