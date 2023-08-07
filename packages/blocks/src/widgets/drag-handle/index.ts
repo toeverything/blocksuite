@@ -28,6 +28,7 @@ import { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-p
 import {
   DRAG_HANDLE_GRABBER_HEIGHT,
   DRAG_HANDLE_GRABBER_WIDTH,
+  NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
@@ -231,10 +232,10 @@ export class DragHandleWidget extends WidgetElement {
     this._dragPreview.appendChild(fragment);
   }
 
-  private _updateDragPreviewPosition(state: PointerEventState) {
+  private _updateDragPreviewPosition(point: Point) {
     const previewOffset = this._getDragPreviewOffset();
-    const posX = state.x + previewOffset.left;
-    const posY = state.y + previewOffset.top - this._dragPreviewOffsetY;
+    const posX = point.x + previewOffset.left;
+    const posY = point.y + previewOffset.top - this._dragPreviewOffsetY;
 
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
   }
@@ -257,8 +258,7 @@ export class DragHandleWidget extends WidgetElement {
   private _outOfNoteBlock = (noteBlock: Element, point: Point) => {
     // TODO: need to find a better way to check if the point is out of note block
     const rect = noteBlock.getBoundingClientRect();
-    const noteContainerPadding = 24;
-    const padding = noteContainerPadding * this._scale;
+    const padding = NOTE_CONTAINER_PADDING * this._scale;
     return rect
       ? isPageMode(this.page)
         ? point.y < rect.top || point.y > rect.bottom
@@ -532,7 +532,7 @@ export class DragHandleWidget extends WidgetElement {
       this._updateIndicator(ctx);
     }
 
-    this._updateDragPreviewPosition(state);
+    this._updateDragPreviewPosition(point);
     return true;
   };
 
@@ -573,6 +573,9 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     // TODO: need a better way to update selection
+    // Should update selection after moving blocks
+    // In doc page mode, update selected blocks
+    // In edgeless mode, focus on the first block
     setTimeout(() => {
       assertExists(parent);
       // Need to update selection when moving blocks successfully
@@ -598,9 +601,16 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _wheelHandler: UIEventHandler = ctx => {
     this.hide();
-    if (!this._dragging) {
+    if (!this._dragging || this._draggingElements.length === 0) {
       return;
     }
+
+    const state = ctx.get('defaultState');
+    const event = state.event as WheelEvent;
+    const point = new Point(event.x, event.y);
+
+    this._updateDragPreviewPosition(point);
+    return true;
   };
 
   private _pointerOutHandler: UIEventHandler = ctx => {
