@@ -12,6 +12,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isPageMode } from '../__internal__/index.js';
+import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
@@ -208,13 +210,14 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   private _placeholderDisposables = new DisposableGroup();
 
   @query('rich-text')
-  private _richTextElement?: HTMLElement;
+  private _richTextElement?: RichText;
 
   override connectedCallback() {
     super.connectedCallback();
     // Initial placeholder state
     this._updatePlaceholder();
     registerService('affine:paragraph', paragraphService);
+    bindContainerHotkey(this);
   }
 
   override firstUpdated() {

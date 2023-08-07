@@ -16,6 +16,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import { WithDisposable } from '../with-disposable.js';
 import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
@@ -26,7 +27,7 @@ export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
 >;
 
 @customElement('block-suite-root')
-export class BlockSuiteRoot extends ShadowlessElement {
+export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   blocks!: LitBlockSpec[];
 
@@ -85,6 +86,7 @@ export class BlockSuiteRoot extends ShadowlessElement {
     super.disconnectedCallback();
 
     this.blockStore.unmount();
+    this.modelSubscribed.clear();
   }
 
   override render() {
@@ -143,12 +145,16 @@ export class BlockSuiteRoot extends ShadowlessElement {
   private _onLoadModel = (model: BaseBlockModel) => {
     const { id } = model;
     if (!this.modelSubscribed.has(id)) {
-      model.propsUpdated.on(() => {
-        this.requestUpdate();
-      });
-      model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      });
+      this._disposables.add(
+        model.propsUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
+      this._disposables.add(
+        model.childrenUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
       this.modelSubscribed.add(id);
     }
   };
