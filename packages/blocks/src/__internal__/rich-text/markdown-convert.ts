@@ -501,9 +501,11 @@ export function tryMatchSpaceHotkey(
   if (offset > prefix.length) {
     return ALLOW_DEFAULT;
   }
-  const isParagraphQuoteBlock = isEqual(model.type, 'quote');
+  const isParagraph = matchFlavours(model, ['affine:paragraph']);
+  const isHeading = isParagraph && model.type.startsWith('h');
+  const isParagraphQuoteBlock = isParagraph && isEqual(model.type, 'quote');
   const isCodeBlock = matchFlavours(model, ['affine:code']);
-  if (isParagraphQuoteBlock || isCodeBlock) {
+  if (isHeading || isParagraphQuoteBlock || isCodeBlock) {
     return ALLOW_DEFAULT;
   }
   let isConverted = false;

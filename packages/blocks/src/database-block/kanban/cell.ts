@@ -4,7 +4,6 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { PropertyValues } from 'lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
@@ -115,15 +114,12 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
       : '';
     return html` <div class="icon">${columnTypeIconMap[this.column.type]}</div>
-      ${keyed(
-        `${this.editing} ${this.column.type}`,
-        html` <uni-lit
-          ${ref(this._cell)}
-          class="kanban-cell"
-          .uni="${this.editing && edit ? edit : view}"
-          .props="${props}"
-        ></uni-lit>`
-      )}`;
+      <uni-lit
+        ${ref(this._cell)}
+        class="kanban-cell"
+        .uni="${this.editing && edit ? edit : view}"
+        .props="${props}"
+      ></uni-lit>`;
   }
 }
 

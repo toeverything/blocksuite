@@ -13,6 +13,7 @@ const renameStyles = css`
     gap: 12px;
     width: 340px;
 
+    font-family: var(--affine-font-family);
     color: var(--affine-text-primary-color);
     border-radius: 8px;
     padding: 12px;
@@ -37,6 +38,11 @@ const renameStyles = css`
     border: none;
     outline: none;
     background: transparent;
+  }
+
+  .attachment-rename-extension {
+    font-size: var(--affine-font-xs);
+    color: var(--affine-text-secondary-color);
   }
 `;
 
