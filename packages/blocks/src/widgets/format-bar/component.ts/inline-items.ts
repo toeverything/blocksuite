@@ -2,7 +2,7 @@ import { html } from 'lit';
 
 import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import { getCurrentCombinedFormat } from '../../../page-block/utils/container-operations.js';
+import { getCurrentCombinedFormat } from '../../../page-block/utils/operations/inline.js';
 import { getTextSelection } from '../../../page-block/utils/selection.js';
 
 interface InlineItemsProps {

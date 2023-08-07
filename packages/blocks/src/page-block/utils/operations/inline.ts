@@ -1,102 +1,11 @@
 import type { TextSelection } from '@blocksuite/block-std';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
-import { deserializeXYWH } from '@blocksuite/phasor';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { assertExists, matchFlavours } from '@blocksuite/store';
 
-import {
-  almostEqual,
-  asyncGetBlockElementByModel,
-  asyncGetRichTextByModel,
-  type BlockComponentElement,
-  getBlockElementByModel,
-  getVirgoByModel,
-  hasNativeSelection,
-  isCollapsedNativeSelection,
-  isMultiBlockRange,
-  type TopLevelBlockModel,
-} from '../../__internal__/index.js';
-import type { RichText } from '../../__internal__/rich-text/rich-text.js';
-import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import type { PageBlockComponent } from '../types.js';
-import { getSelectedContentModels, getTextSelection } from './selection.js';
-
-export function deleteModelsByRange(
-  pageElement: PageBlockComponent,
-  textSelection?: TextSelection
-) {
-  if (!textSelection) {
-    textSelection = getTextSelection(pageElement) ?? undefined;
-  }
-  assertExists(textSelection);
-
-  const page = pageElement.page;
-  const selectedModels = getSelectedContentModels(pageElement);
-
-  if (selectedModels.length === 0) {
-    return null;
-  }
-
-  const startModel = selectedModels[0];
-  const endModel = selectedModels[selectedModels.length - 1];
-  // TODO handle database
-  if (!startModel.text || !endModel.text) {
-    throw new Error('startModel or endModel does not have text');
-  }
-
-  const vEditor = getVirgoByModel(startModel);
-  assertExists(vEditor);
-
-  // Only select one block
-  if (startModel === endModel) {
-    page.captureSync();
-    if (textSelection.from.index > 0 && textSelection.isCollapsed()) {
-      // startModel.text.delete(blockRange.startOffset - 1, 1);
-      // vEditor.setVRange({
-      //   index: blockRange.startOffset - 1,
-      //   length: 0,
-      // });
-      return startModel;
-    }
-    startModel.text.delete(textSelection.from.index, textSelection.from.length);
-    vEditor.setVRange({
-      index: textSelection.from.index,
-      length: 0,
-    });
-    return startModel;
-  }
-  page.captureSync();
-  startModel.text.delete(textSelection.from.index, textSelection.from.length);
-  endModel.text.delete(
-    textSelection.to?.index ?? 0,
-    textSelection.to?.length ?? 0
-  );
-  startModel.text.join(endModel.text);
-  selectedModels.slice(1).forEach(model => {
-    page.deleteBlock(model);
-  });
-
-  vEditor.setVRange({
-    index: textSelection.from.index,
-    length: 0,
-  });
-  return startModel;
-}
-
-/**
- * Do nothing when selection is collapsed or not multi block selected
- */
-export function handleMultiBlockBackspace(
-  pageElement: PageBlockComponent,
-  e: KeyboardEvent
-) {
-  if (!hasNativeSelection()) return;
-  if (isCollapsedNativeSelection()) return;
-  if (!isMultiBlockRange()) return;
-  e.preventDefault();
-  deleteModelsByRange(pageElement);
-}
+import type { AffineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
+import { getVirgoByModel } from '../../../__internal__/utils/query.js';
+import { clearMarksOnDiscontinuousInput } from '../../../__internal__/utils/virgo.js';
+import type { PageBlockComponent } from '../../types.js';
+import { getSelectedContentModels } from '../selection.js';
 
 /**
  * Merge format of multiple blocks. Format will be active only when all blocks have the same format.
@@ -231,7 +140,8 @@ function formatTextSelection(
     throw new Error('No selected models');
   }
 
-  const selectionManager = pageElement.root.selectionManager;
+  const rangeManager = pageElement.rangeManager;
+  assertExists(rangeManager);
   const { from, to } = textSelection;
   const startModel = selectedModels[0];
   const endModel = selectedModels[selectedModels.length - 1];
@@ -261,7 +171,7 @@ function formatTextSelection(
     if (matchFlavours(startModel, ['affine:code'])) return;
     const vEditor = getVirgoByModel(startModel);
     vEditor?.slots.updated.once(() => {
-      selectionManager.set([textSelection]);
+      rangeManager.syncTextSelectionToRange(textSelection);
     });
     startModel.text?.format(from.index, from.length, {
       [key]: format[key] ? null : true,
@@ -308,7 +218,7 @@ function formatTextSelection(
     );
 
   Promise.all(allTextUpdated).then(() => {
-    selectionManager.set([textSelection]);
+    rangeManager.syncTextSelectionToRange(textSelection);
   });
 }
 
@@ -319,57 +229,4 @@ export function handleFormat(
 ) {
   pageElement.page.captureSync();
   formatTextSelection(pageElement, textSelection, key);
-}
-
-export async function onModelTextUpdated(
-  model: BaseBlockModel,
-  callback?: (text: RichText) => void
-) {
-  const richText = await asyncGetRichTextByModel(model);
-  richText?.vEditor?.slots.updated.once(() => {
-    if (callback) {
-      callback(richText);
-    }
-  });
-}
-
-// Run the callback until a model's element updated.
-// Please notice that the callback will be called **once the element itself is ready**.
-// The children may be not updated.
-// If you want to wait for the text elements,
-// please use `onModelTextUpdated`.
-export async function onModelElementUpdated(
-  model: BaseBlockModel,
-  callback: (blockElement: BlockComponentElement) => void
-) {
-  const element = await asyncGetBlockElementByModel(model);
-  if (element) {
-    callback(element);
-  }
-}
-
-export function tryUpdateNoteSize(page: Page, zoom: number) {
-  requestAnimationFrame(() => {
-    if (!page.root) return;
-    const notes = page.root.children.filter(
-      child => child.flavour === 'affine:note'
-    ) as TopLevelBlockModel[];
-    notes.forEach(model => {
-      // DO NOT resize shape block
-      // FIXME: we don't have shape block for now.
-      // if (matchFlavours(model, ['affine:shape'])) return;
-      const blockElement = getBlockElementByModel(model);
-      if (!blockElement) return;
-      const bound = blockElement.getBoundingClientRect();
-
-      const [x, y, w, h] = deserializeXYWH(model.xywh);
-      const newModelHeight =
-        bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
-      if (!almostEqual(newModelHeight, h)) {
-        page.updateBlock(model, {
-          xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
-        });
-      }
-    });
-  });
 }

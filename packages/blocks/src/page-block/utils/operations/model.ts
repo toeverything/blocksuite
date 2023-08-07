@@ -1,3 +1,5 @@
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
+import { deserializeXYWH } from '@blocksuite/phasor';
 import {
   assertExists,
   type BaseBlockModel,
@@ -5,6 +7,9 @@ import {
   Text,
 } from '@blocksuite/store';
 
+import { almostEqual } from '../../../__internal__/utils/common.js';
+import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
+import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
 import type { Flavour } from '../../../models.js';
 
 /**
@@ -57,4 +62,30 @@ export function transformBlock(
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
   return page.addBlock(flavour, blockProps, parent, index);
+}
+
+export function tryUpdateNoteSize(page: Page, zoom: number) {
+  requestAnimationFrame(() => {
+    if (!page.root) return;
+    const notes = page.root.children.filter(
+      child => child.flavour === 'affine:note'
+    ) as TopLevelBlockModel[];
+    notes.forEach(model => {
+      // DO NOT resize shape block
+      // FIXME: we don't have shape block for now.
+      // if (matchFlavours(model, ['affine:shape'])) return;
+      const blockElement = getBlockElementByModel(model);
+      if (!blockElement) return;
+      const bound = blockElement.getBoundingClientRect();
+
+      const [x, y, w, h] = deserializeXYWH(model.xywh);
+      const newModelHeight =
+        bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
+      if (!almostEqual(newModelHeight, h)) {
+        page.updateBlock(model, {
+          xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+        });
+      }
+    });
+  });
 }

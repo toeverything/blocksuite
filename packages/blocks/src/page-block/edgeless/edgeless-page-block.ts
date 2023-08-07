@@ -72,7 +72,7 @@ import { PageBlockService } from '../../index.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
-import { tryUpdateNoteSize } from '../utils/index.js';
+import { tryUpdateNoteSize } from '../utils/operations/model.js';
 import { UtilManager } from '../utils/util-manager.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';

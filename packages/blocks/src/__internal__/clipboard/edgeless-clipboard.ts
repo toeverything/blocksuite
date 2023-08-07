@@ -22,7 +22,7 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
-import { deleteModelsByRange } from '../../page-block/utils/container-operations.js';
+import { deleteModelsByRange } from '../../page-block/utils/operations/block-element.js';
 import {
   getSelectedContentModels,
   getTextSelection,

@@ -15,7 +15,7 @@ import type { PageBlockComponent } from '../types.js';
 import {
   getCurrentCombinedFormat,
   handleFormat,
-} from '../utils/container-operations.js';
+} from '../utils/operations/inline.js';
 import {
   getSelectedContentModels,
   getTextSelection,
