@@ -11,6 +11,7 @@ import {
   initThreeParagraphs,
   pressArrowDown,
   pressArrowLeft,
+  pressArrowRight,
   pressArrowUp,
   pressBackspace,
   pressEnter,
@@ -727,7 +728,8 @@ test('handling keyup when cursor located in first paragraph', async ({
   await pressEnter(page);
   await type(page, 'world');
   await assertRichTexts(page, ['world', '']);
-  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await pressArrowUp(page);
+  await pressArrowUp(page);
   await assertPageTitleFocus(page);
 });
 
@@ -817,6 +819,7 @@ test('press arrow down should move caret to the start of line', async ({
   await pressArrowLeft(page);
   await pressArrowUp(page);
   await pressArrowDown(page);
+  await pressArrowLeft(page);
   await type(page, '2');
   await assertRichTexts(page, ['0'.repeat(100), '21']);
 });
@@ -843,22 +846,23 @@ test('press arrow up in the second line should move caret to the first line', as
 
   // Focus the empty paragraph
   await focusRichText(page, 1);
-  await page.keyboard.press('ArrowUp');
-  // Now the caret is at the start of the second line of the first paragraph
-
   await pressArrowUp(page);
+  await pressArrowUp(page);
+  await pressArrowLeft(page);
   await type(page, '0');
+  await pressArrowUp(page);
   await pressArrowUp(page);
   // At title
   await type(page, '1');
   await assertTitle(page, '1');
 
   // At the first line of the first paragraph
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowDown(page);
   // At the second line of the first paragraph
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowDown(page);
   // At the second paragraph
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowDown(page);
+  await pressArrowRight(page);
   await type(page, '2');
 
   await assertRichTexts(page, ['0' + 'ib'.repeat(60), '2']);
@@ -869,6 +873,7 @@ test('press arrow up in the second line should move caret to the first line', as
   await page.keyboard.press('ArrowDown', { delay: 50 });
   // Should be inserted at the start of the second paragraph
   await type(page, '3');
+  await page.waitForTimeout(9000);
   await assertRichTexts(page, ['0' + 'ib'.repeat(60), '32']);
 });
 
