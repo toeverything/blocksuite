@@ -7,6 +7,10 @@ import type { BlockSchemaType } from '../base.js';
 import { BlockSchema } from '../base.js';
 import { toBlockMigrationData } from '../utils/utils.js';
 import { ProxyManager } from '../yjs/index.js';
+import { workspaceMigrations } from './migration/migrate-workspace.js';
+
+export type MigrationRunner<BlockSchema extends BlockSchemaType> =
+  BlockSchema['onUpgrade'];
 
 const SCHEMA_NOT_FOUND_MESSAGE =
   'Schema not found. The block flavour may not be registered.';
@@ -101,6 +105,18 @@ export class Schema {
       );
     }
   }
+
+  upgradeWorkspace = (rootData: Y.Doc) => {
+    workspaceMigrations.forEach(migration => {
+      try {
+        if (migration.condition(rootData)) {
+          migration.migrate(rootData);
+        }
+      } catch (err) {
+        throw new Error(`migrate workspace failed: ${migration.desc}`);
+      }
+    });
+  };
 
   upgradePage = (oldVersions: Record<string, number>, pageData: Y.Doc) => {
     const blocks = pageData.get('blocks') as Y.Map<unknown>;

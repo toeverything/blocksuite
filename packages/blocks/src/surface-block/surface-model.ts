@@ -1,3 +1,4 @@
+import type { MigrationRunner } from '@blocksuite/store';
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
 type SurfaceBlockProps = {
@@ -24,7 +25,7 @@ const migration = {
       }
     });
   },
-} satisfies Record<string, (typeof SurfaceBlockSchema)['onUpgrade']>;
+} satisfies Record<string, MigrationRunner<typeof SurfaceBlockSchema>>;
 
 export const SurfaceBlockSchema = defineBlockSchema({
   flavour: 'affine:surface',
