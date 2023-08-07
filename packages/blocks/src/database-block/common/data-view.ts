@@ -60,7 +60,7 @@ export type DataViewTypes = DataViewDataType['mode'];
 export interface DataViewConfig<
   Data extends DataViewDataType = DataViewDataType
 > {
-  type: string;
+  type: DataViewTypes;
   view: UniComponent<DataViewProps, DataViewExpose>;
   icon: UniComponent;
   defaultName: string;
