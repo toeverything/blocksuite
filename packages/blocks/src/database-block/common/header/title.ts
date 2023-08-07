@@ -127,7 +127,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     });
     return html` <div class="affine-database-title">
       <div
-        class="database-title ${isEmpty ? 'database-title-empty' : ''}"
+        class="${classList}"
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
       ></div>
