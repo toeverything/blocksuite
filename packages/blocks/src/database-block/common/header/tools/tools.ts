@@ -22,10 +22,10 @@ import { firstFilterByRef } from '../../../common/ast.js';
 import { columnManager } from '../../../common/columns/manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
+import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { InsertPosition } from '../../../types.js';
-import type { DatabaseTable } from '../../table-view.js';
-import type { DataViewTableManager } from '../../table-view-manager.js';
-import { initAddNewRecordHandlers } from './index.js';
+import type { BaseDataView } from '../../base-data-view.js';
+import { initAddNewRecordHandlers } from './new-record-preview.js';
 
 const styles = css`
   .affine-database-toolbar {
@@ -183,12 +183,12 @@ const styles = css`
   }
 `;
 
-@customElement('affine-database-toolbar')
-export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
+@customElement('data-view-header-tools')
+export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  tableView!: DatabaseTable;
+  viewEle!: BaseDataView;
 
   @property({ attribute: false })
   copyBlock!: () => void;
@@ -198,9 +198,6 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   view!: DataViewTableManager;
-
-  @property({ attribute: false })
-  addRow!: (position: InsertPosition) => void;
 
   @query('.affine-database-search-input')
   private _searchInput!: HTMLInputElement;
@@ -234,10 +231,16 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
     }
   }
 
+  addRow = (position: InsertPosition) => {
+    this.viewEle.addRow?.(position);
+  };
+
   private _initAddRecordHandlers() {
     // remove previous handlers
     this._recordAddDisposables.dispose();
-
+    if (!this._newRecord) {
+      return;
+    }
     const disposables = initAddNewRecordHandlers(
       this._newRecord,
       this,
@@ -361,7 +364,7 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const filter = this.tableView.getFlag('enable_database_filter')
+    const filter = this.viewEle?.getFlag('enable_database_filter')
       ? html` <div
           @click="${this._showFilter}"
           class="affine-database-filter-button"
@@ -419,23 +422,25 @@ export class DatabaseToolbar extends WithDisposable(ShadowlessElement) {
             >
               ${MoreHorizontalIcon}
             </div>
-            <div
-              class="has-tool-tip affine-database-toolbar-item new-record"
-              draggable="true"
-              @click="${this._onAddNewRecord}"
-            >
-              ${PlusIcon}<span>New Record</span>
-              <tool-tip inert arrow tip-position="top" role="tooltip"
-                >You can drag this button to the desired location and add a
-                record
-              </tool-tip>
-            </div>`}
+            ${this.viewEle?.addRow
+              ? html` <div
+                  class="has-tool-tip affine-database-toolbar-item new-record"
+                  draggable="true"
+                  @click="${this._onAddNewRecord}"
+                >
+                  ${PlusIcon}<span>New Record</span>
+                  <tool-tip inert arrow tip-position="top" role="tooltip"
+                    >You can drag this button to the desired location and add a
+                    record
+                  </tool-tip>
+                </div>`
+              : ''}`}
     </div>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-toolbar': DatabaseToolbar;
+    'data-view-header-tools': DataViewHeaderTools;
   }
 }

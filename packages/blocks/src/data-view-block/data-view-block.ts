@@ -1,6 +1,5 @@
 // related component
 import '../database-block/table/table-view.js';
-import '../database-block/common/database-view-header.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
