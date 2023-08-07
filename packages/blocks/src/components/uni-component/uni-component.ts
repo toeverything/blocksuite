@@ -59,12 +59,11 @@ export class UniLit<
 
   protected override updated(_changedProperties: PropertyValues) {
     super.updated(_changedProperties);
-    if (_changedProperties.has('props')) {
-      this.uniReturn?.update(this.props);
-    }
     if (_changedProperties.has('uni')) {
       this.unmount();
       this.mount();
+    } else if (_changedProperties.has('props')) {
+      this.uniReturn?.update(this.props);
     }
   }
 
