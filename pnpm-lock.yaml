@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:packages/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:packages/blocks

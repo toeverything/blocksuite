@@ -74,6 +74,7 @@ import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/index.js';
+import { UtilManager } from '../utils/util-manager.js';
 import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { NoteCut } from './components/note-cut/index.js';
@@ -261,6 +262,12 @@ export class EdgelessPageBlockComponent
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
+
+  /**
+   * @internal
+   * just used for test
+   */
+  utilManager = new UtilManager(this);
 
   mouseRoot!: HTMLElement;
 

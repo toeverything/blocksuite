@@ -23,6 +23,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  updateBlockType,
   waitDefaultPageLoaded,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -586,13 +587,13 @@ test('switch between paragraph types', async ({ page }) => {
 
   const selector = '.affine-paragraph-block-container';
 
-  await clickBlockTypeMenuItem(page, 'H1');
+  await updateBlockType(page, 'affine:paragraph', 'h1');
   await assertClassName(page, selector, /h1/);
 
-  await clickBlockTypeMenuItem(page, 'H2');
+  await updateBlockType(page, 'affine:paragraph', 'h2');
   await assertClassName(page, selector, /h2/);
 
-  await clickBlockTypeMenuItem(page, 'H3');
+  await updateBlockType(page, 'affine:paragraph', 'h3');
   await assertClassName(page, selector, /h3/);
 
   await undoByClick(page);
