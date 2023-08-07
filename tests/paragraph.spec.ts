@@ -858,22 +858,20 @@ test('press arrow up in the second line should move caret to the first line', as
 
   // At the first line of the first paragraph
   await pressArrowDown(page);
-  // At the second line of the first paragraph
-  await pressArrowDown(page);
   // At the second paragraph
-  await pressArrowDown(page);
+  await pressArrowDown(page, 3);
   await pressArrowRight(page);
   await type(page, '2');
 
   await assertRichTexts(page, ['0' + 'ib'.repeat(60), '2']);
 
   // Go to the start of the second paragraph
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowUp', { delay: 50 });
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowLeft(page);
+  await pressArrowUp(page);
+  await pressArrowDown(page);
+  await pressArrowLeft(page);
   // Should be inserted at the start of the second paragraph
   await type(page, '3');
-  await page.waitForTimeout(9000);
   await assertRichTexts(page, ['0' + 'ib'.repeat(60), '32']);
 });
 
