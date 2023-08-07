@@ -226,7 +226,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           </div>
         </div>
       </div>`;
-    return html`<affine-portal .template=${modal}></affine-portal>`;
+    return html`<blocksuite-portal .template=${modal}></blocksuite-portal>`;
   }
 }
 
