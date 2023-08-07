@@ -3,8 +3,8 @@ import type { Disposable } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import type { BlockHost } from '../../../../__internal__/index.js';
 import type { AffineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
+import type { PageBlockComponent } from '../../../../page-block/types.js';
 
 export type BackLink = {
   pageId: string;
@@ -13,13 +13,13 @@ export type BackLink = {
 };
 
 export const listenBacklinkList = (
-  host: BlockHost,
+  pageElement: PageBlockComponent,
   cb: (list: BacklinkData[]) => void
 ): Disposable => {
   const metaMap = Object.fromEntries(
-    host.page.workspace.meta.pageMetas.map(v => [v.id, v])
+    pageElement.page.workspace.meta.pageMetas.map(v => [v.id, v])
   );
-  const page = host.page;
+  const page = pageElement.page;
   const toData = (backlink: BackLink): BacklinkData => {
     const pageMeta = metaMap[backlink.pageId];
     if (!pageMeta) {
@@ -35,7 +35,7 @@ export const listenBacklinkList = (
           // TODO jump to block
           return;
         }
-        host.slots.pageLinkClicked.emit({
+        pageElement.slots.pageLinkClicked.emit({
           pageId: backlink.pageId,
           blockId: backlink.blockId,
         });

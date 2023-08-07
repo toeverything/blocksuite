@@ -23,6 +23,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  updateBlockType,
   waitDefaultPageLoaded,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -586,13 +587,13 @@ test('switch between paragraph types', async ({ page }) => {
 
   const selector = '.affine-paragraph-block-container';
 
-  await clickBlockTypeMenuItem(page, 'H1');
+  await updateBlockType(page, 'affine:paragraph', 'h1');
   await assertClassName(page, selector, /h1/);
 
-  await clickBlockTypeMenuItem(page, 'H2');
+  await updateBlockType(page, 'affine:paragraph', 'h2');
   await assertClassName(page, selector, /h2/);
 
-  await clickBlockTypeMenuItem(page, 'H3');
+  await updateBlockType(page, 'affine:paragraph', 'h3');
   await assertClassName(page, selector, /h3/);
 
   await undoByClick(page);
@@ -611,7 +612,7 @@ test('delete at start of paragraph block', async ({ page }) => {
   await pressEnter(page);
   await type(page, 'a');
 
-  await clickBlockTypeMenuItem(page, 'H1');
+  await updateBlockType(page, 'affine:paragraph', 'h1');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '3', 'h1');
@@ -931,11 +932,11 @@ test('should placeholder works', async ({ page }) => {
   await pressBackspace(page);
 
   await expect(placeholder).toBeVisible();
-  await clickBlockTypeMenuItem(page, 'H1');
+  await updateBlockType(page, 'affine:paragraph', 'h1');
 
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveText('Heading 1');
-  await clickBlockTypeMenuItem(page, 'Text');
+  await updateBlockType(page, 'affine:paragraph', 'text');
   await focusRichText(page, 0);
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toContainText('type');

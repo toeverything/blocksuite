@@ -25,29 +25,29 @@ export class Gesture {
   private _rafID = 0;
 
   private get _selectionManager() {
-    return this.host.root.selectionManager;
+    return this.pageElement.root.selectionManager;
   }
 
   private get _viewportElement() {
-    if (this.host instanceof DocPageBlockComponent) {
-      return this.host.viewportElement;
+    if (this.pageElement instanceof DocPageBlockComponent) {
+      return this.pageElement.viewportElement;
     }
     return null;
   }
 
   private get _rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
+    assertExists(this.pageElement.rangeManager);
+    return this.pageElement.rangeManager;
   }
 
-  constructor(public host: PageBlockComponent) {
-    this.host.handleEvent('dragStart', this._dragStartHandler);
-    this.host.handleEvent('dragMove', this._dragMoveHandler);
-    this.host.handleEvent('dragEnd', this._dragEndHandler);
-    this.host.handleEvent('pointerMove', this._pointerMoveHandler);
-    this.host.handleEvent('click', this._clickHandler);
-    this.host.handleEvent('doubleClick', this._doubleClickHandler);
-    this.host.handleEvent('tripleClick', this._tripleClickHandler);
+  constructor(public pageElement: PageBlockComponent) {
+    this.pageElement.handleEvent('dragStart', this._dragStartHandler);
+    this.pageElement.handleEvent('dragMove', this._dragMoveHandler);
+    this.pageElement.handleEvent('dragEnd', this._dragEndHandler);
+    this.pageElement.handleEvent('pointerMove', this._pointerMoveHandler);
+    this.pageElement.handleEvent('click', this._clickHandler);
+    this.pageElement.handleEvent('doubleClick', this._doubleClickHandler);
+    this.pageElement.handleEvent('tripleClick', this._tripleClickHandler);
   }
 
   private _dragStartHandler: UIEventHandler = ctx => {

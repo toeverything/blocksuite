@@ -14,6 +14,8 @@ import {
   isControlledKeyboardEvent,
   throttle,
 } from '../../__internal__/utils/index.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
+import { isPageComponent } from '../../page-block/utils/guard.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
 import { menuGroups } from './config.js';
 import { SlashMenu } from './slash-menu-popover.js';
@@ -22,6 +24,7 @@ import type { SlashMenuOptions } from './utils.js';
 let globalAbortController = new AbortController();
 
 function showSlashMenu({
+  pageElement,
   model,
   range,
   container = document.body,
@@ -29,6 +32,7 @@ function showSlashMenu({
   options,
   triggerKey,
 }: {
+  pageElement: PageBlockComponent;
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
@@ -47,6 +51,7 @@ function showSlashMenu({
   slashMenu.model = model;
   slashMenu.abortController = abortController;
   slashMenu.options = options;
+  slashMenu.pageElement = pageElement;
   slashMenu.triggerKey = triggerKey;
 
   // Handle position
@@ -127,10 +132,16 @@ export class SlashMenuWidget extends WidgetElement {
     const vEditor = getVirgoByModel(model);
     if (!vEditor) return;
     vEditor.slots.rangeUpdated.once(() => {
+      const pageElement = this.pageElement;
+      if (!isPageComponent(pageElement)) {
+        throw new Error('SlashMenuWidget should be used in PageBlock');
+      }
+
       // Wait for dom update, see this case https://github.com/toeverything/blocksuite/issues/2611
       requestAnimationFrame(() => {
         const curRange = getCurrentNativeRange();
         showSlashMenu({
+          pageElement,
           model,
           range: curRange,
           triggerKey,

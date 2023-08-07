@@ -135,10 +135,10 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private get _pageBlockElement() {
-    const hostElement = this.hostElement;
+    const pageElement = this.pageElement;
     const pageBlock = isPageMode(this.page)
-      ? (hostElement as DocPageBlockComponent)
-      : (hostElement as EdgelessPageBlockComponent);
+      ? (pageElement as DocPageBlockComponent)
+      : (pageElement as EdgelessPageBlockComponent);
     assertExists(pageBlock);
 
     return pageBlock;

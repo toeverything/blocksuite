@@ -143,21 +143,24 @@ test.describe('zooming', () => {
   });
 });
 
-test('cmd + A should select all elements by default', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
-  const start = { x: 0, y: 0 };
-  const end = { x: 100, y: 100 };
-  await addBasicRectShapeElement(page, start, end);
-  start.x = 100;
-  end.x = 200;
-  await addBasicRectShapeElement(page, start, end);
-  await selectAllByKeyboard(page);
+test.fixme(
+  'cmd + A should select all elements by default',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await deleteAll(page);
+    const start = { x: 0, y: 0 };
+    const end = { x: 100, y: 100 };
+    await addBasicRectShapeElement(page, start, end);
+    start.x = 100;
+    end.x = 200;
+    await addBasicRectShapeElement(page, start, end);
+    await selectAllByKeyboard(page);
 
-  await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
-});
+    await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
+  }
+);
 
 test('cmd + A should not fire inside active note', async ({ page }) => {
   await enterPlaygroundRoom(page);

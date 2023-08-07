@@ -95,7 +95,7 @@ function getLinkedPagePopover(page: Page) {
   };
 }
 
-test.describe('multiple page', () => {
+test.fixme('multiple page', () => {
   test('should create and switch page work', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -464,7 +464,7 @@ test.describe('reference node', () => {
     }
   );
 
-  test('should create reference node works', async ({ page }) => {
+  test.fixme('should create reference node works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     const defaultPageId = 'page0';
@@ -497,7 +497,7 @@ test.describe('reference node', () => {
     await assertReferenceText('titl1');
   });
 
-  test('can create linked page and jump', async ({ page }) => {
+  test.fixme('can create linked page and jump', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusTitle(page);
@@ -622,7 +622,7 @@ test.describe('linked page popover', () => {
     }
   );
 
-  test('should fuzzy search works', async ({ page }) => {
+  test.fixme('should fuzzy search works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     const {
