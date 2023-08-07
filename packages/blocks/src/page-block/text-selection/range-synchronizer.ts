@@ -12,7 +12,7 @@ import type { PageBlockComponent } from '../types.js';
  */
 export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
-  private get _selection() {
+  private get _selectionManager() {
     return this.pageElement.root.selectionManager;
   }
 
@@ -21,7 +21,7 @@ export class RangeSynchronizer {
   }
 
   private get _currentSelection() {
-    return this._selection.value;
+    return this._selectionManager.value;
   }
 
   private get _rangeManager() {
@@ -31,7 +31,7 @@ export class RangeSynchronizer {
 
   constructor(public pageElement: PageBlockComponent) {
     this.pageElement.disposables.add(
-      this._selection.slots.changed.on(selections => {
+      this._selectionManager.slots.changed.on(selections => {
         if (this._isNativeSelection) {
           return;
         }
@@ -58,15 +58,27 @@ export class RangeSynchronizer {
       })
     );
 
-    this.pageElement.handleEvent('selectionChange', () => {
-      const selection = window.getSelection();
-      if (!selection) {
-        return;
+    this.pageElement.handleEvent(
+      'selectionChange',
+      () => {
+        const selection = window.getSelection();
+        if (!selection) {
+          this._selectionManager.clear();
+          return;
+        }
+        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        if (range && range.intersectsNode(this.pageElement)) {
+          this._prevSelection =
+            this._rangeManager.syncRangeToTextSelection(range);
+        } else {
+          this._prevSelection = null;
+          this._selectionManager.clear(['text']);
+        }
+      },
+      {
+        global: true,
       }
-      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-      this._prevSelection =
-        this._rangeManager.writeRangeByTextSelection(range) ?? null;
-    });
+    );
 
     this.pageElement.handleEvent('beforeInput', ctx => {
       const event = ctx.get('defaultState').event as InputEvent;

@@ -1,14 +1,8 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
-import type { BlockModels } from '@blocksuite/global/types';
-import {
-  assertExists,
-  assertFlavours,
-  matchFlavours,
-} from '@blocksuite/global/utils';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
 
 import {
   almostEqual,
@@ -24,9 +18,7 @@ import {
 } from '../../__internal__/index.js';
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
-import { asyncFocusRichText } from '../../__internal__/utils/common-operations.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import type { BlockSchemas } from '../../models.js';
 import type { PageBlockComponent } from '../types.js';
 import { getSelectedContentModels, getTextSelection } from './selection.js';
 
@@ -104,130 +96,6 @@ export function handleMultiBlockBackspace(
   if (!isMultiBlockRange()) return;
   e.preventDefault();
   deleteModelsByRange(pageElement);
-}
-
-function mergeToCodeBlocks(page: Page, models: BaseBlockModel[]) {
-  const parent = page.getParent(models[0]);
-  assertExists(parent);
-  const index = parent.children.indexOf(models[0]);
-  const text = models
-    .map(model => {
-      if (model.text instanceof Text) {
-        return model.text.toString();
-      }
-      return null;
-    })
-    .filter(Boolean)
-    .join('\n');
-  models.map(model => page.deleteBlock(model));
-
-  const id = page.addBlock(
-    'affine:code',
-    { text: new Text(text) },
-    parent,
-    index
-  );
-  return id;
-}
-
-export function updateBlockType(
-  pageElement: PageBlockComponent,
-  models: BaseBlockModel[],
-  flavour: keyof BlockSchemas,
-  type?: string
-) {
-  if (!models.length) {
-    return [];
-  }
-  const page = models[0].page;
-  const hasSamePage = models.every(model => model.page === page);
-  if (!hasSamePage) {
-    // page check
-    console.error(
-      'Not all models have the same page instanceof, the result for update text type may not be correct',
-      models
-    );
-  }
-  page.captureSync();
-  const selectionManager = pageElement.root.selectionManager;
-  const savedSelection = selectionManager.value;
-  if (flavour === 'affine:code') {
-    const id = mergeToCodeBlocks(page, models);
-    const model = page.getBlockById(id);
-    if (!model) {
-      throw new Error('Failed to get model after merge code block!');
-    }
-    return [model];
-  }
-  if (flavour === 'affine:divider') {
-    const model = models.at(-1);
-    if (!model) {
-      return [];
-    }
-    const parent = page.getParent(model);
-    if (!parent) {
-      return [];
-    }
-    const index = parent.children.indexOf(model);
-    const nextSibling = page.getNextSibling(model);
-    let nextSiblingId = nextSibling?.id as string;
-    const id = page.addBlock('affine:divider', {}, parent, index + 1);
-    if (!nextSibling) {
-      nextSiblingId = page.addBlock('affine:paragraph', {}, parent);
-    }
-    asyncFocusRichText(page, nextSiblingId);
-    const newModel = page.getBlockById(id);
-    if (!newModel) {
-      throw new Error('Failed to get model after add divider block!');
-    }
-    return [newModel];
-  }
-
-  const newModels: BaseBlockModel[] = [];
-  models.forEach(model => {
-    assertFlavours(model, ['affine:paragraph', 'affine:list', 'affine:code']);
-    if (model.flavour === flavour) {
-      page.updateBlock(model, { type });
-      newModels.push(model);
-      return;
-    }
-    const newId = transformBlock(model, flavour, type);
-    const newModel = page.getBlockById(newId);
-    if (!newModel) {
-      throw new Error('Failed to get new model after transform block!');
-    }
-    newModels.push(newModel);
-  });
-
-  const allTextUpdated = newModels.map(model => onModelTextUpdated(model));
-
-  Promise.all(allTextUpdated).then(() => {
-    selectionManager.set(savedSelection);
-  });
-
-  return newModels;
-}
-
-function transformBlock(
-  model: BaseBlockModel,
-  flavour: keyof BlockModels,
-  type?: string
-) {
-  const page = model.page;
-  const parent = page.getParent(model);
-  assertExists(parent);
-  const blockProps: {
-    type?: string;
-    text?: Text;
-    children?: BaseBlockModel[];
-  } = {
-    type,
-    text: model?.text?.clone(), // should clone before `deleteBlock`
-    children: model.children,
-  };
-  const index = parent.children.indexOf(model);
-  page.deleteBlock(model);
-  return page.addBlock(flavour, blockProps, parent, index);
 }
 
 /**

@@ -30,9 +30,15 @@ export class PageClipboard implements Clipboard {
     this._ele.handleEvent('copy', ctx => {
       this._onCopy(ctx);
     });
-    this._ele.handleEvent('paste', ctx => {
-      this._onPaste(ctx);
-    });
+    this._ele.handleEvent(
+      'paste',
+      ctx => {
+        this._onPaste(ctx);
+      },
+      {
+        global: true,
+      }
+    );
   }
 
   dispose() {

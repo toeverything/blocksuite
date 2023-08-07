@@ -46,7 +46,6 @@ import { copyBlock } from '../../page-block/doc/utils.js';
 import {
   getSelectedContentBlockElements,
   onModelTextUpdated,
-  updateBlockType,
 } from '../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../page-block/utils/operations/block-element.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
@@ -77,7 +76,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
             return true;
           },
-          action: ({ model, pageElement }) => {
+          action: ({ pageElement }) => {
             const selectedBlockElements =
               getSelectedContentBlockElements(pageElement);
             const newModels = updateBlockElementType(
@@ -144,8 +143,16 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: ({ model, pageElement }) =>
-          updateBlockType(pageElement, [model], flavour, type),
+        action: ({ pageElement }) => {
+          const selectedBlockElements =
+            getSelectedContentBlockElements(pageElement);
+          updateBlockElementType(
+            pageElement,
+            selectedBlockElements,
+            flavour,
+            type
+          );
+        },
       })),
   },
 
