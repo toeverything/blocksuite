@@ -27,10 +27,10 @@ export function getSelectedContentModels(
     const range = rangeManager.value;
     const selectedBlocks = rangeManager
       .getSelectedBlocksIdByRange(range)
-      .map(id => {
+      .flatMap(id => {
         const model = pageElement.page.getBlockById(id);
-        assertExists(model);
-        return model;
+        // model can be null if the block is deleted
+        return model ?? [];
       });
     selectedContentBlocks.push(
       ...selectedBlocks.filter(model => model.role === 'content')
