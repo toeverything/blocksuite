@@ -1,57 +1,54 @@
 import { TextSelection } from '@blocksuite/block-std';
 import { ArrowDownIcon } from '@blocksuite/global/config';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type Page,
-} from '@blocksuite/store';
+import type { BlockElement } from '@blocksuite/lit';
+import { assertExists, type Page } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
-import type { BlockSchemas } from '../../../models.js';
+import type { Flavour } from '../../../models.js';
 import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import {
-  onModelElementUpdated,
-  updateBlockType,
-} from '../../../page-block/utils/container-operations.js';
+import { onModelElementUpdated } from '../../../page-block/utils/container-operations.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
+import { updateBlockElementType } from '../../../page-block/utils/operations/block-element.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
   pageElement: PageBlockComponent;
   page: Page;
-  selectedModels: BaseBlockModel[];
+  selectedBlockElements: BlockElement[];
 }
 
 interface ParagraphButtonProps {
   pageElement: PageBlockComponent;
   formatBar: AffineFormatBarWidget;
   page: Page;
-  selectedModels: BaseBlockModel[];
+  selectedBlockElements: BlockElement[];
 }
 
 const updateParagraphType = (
   pageElement: PageBlockComponent,
-  models: BaseBlockModel[],
-  flavour: keyof BlockSchemas,
+  selectedBlockElements: BlockElement[],
+  flavour: Flavour,
   type?: string
 ) => {
-  if (models.length === 0) {
+  if (selectedBlockElements.length === 0) {
     throw new Error('No models to update!');
   }
 
   const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
-  const targetFlavour = models.every(model => model.flavour === flavour)
+  const targetFlavour = selectedBlockElements.every(
+    el => el.flavour === flavour
+  )
     ? defaultFlavour
     : flavour;
-  const targetType = models.every(model => model.type === type)
+  const targetType = selectedBlockElements.every(el => el.model.type === type)
     ? defaultType
     : type;
-  const newModels = updateBlockType(
+  const newModels = updateBlockElementType(
     pageElement,
-    models,
+    selectedBlockElements,
     targetFlavour,
     targetType
   );
@@ -84,7 +81,7 @@ const updateParagraphType = (
 
 const ParagraphPanel = ({
   page,
-  selectedModels,
+  selectedBlockElements,
   pageElement,
 }: ParagraphPanelProps) => {
   return html`<div class="paragraph-panel">
@@ -99,7 +96,12 @@ const ParagraphPanel = ({
           text="${name}"
           data-testid="${flavour}/${type}"
           @click="${() =>
-            updateParagraphType(pageElement, selectedModels, flavour, type)}"
+            updateParagraphType(
+              pageElement,
+              selectedBlockElements,
+              flavour,
+              type
+            )}"
         >
           ${icon}
         </icon-button>`
@@ -110,15 +112,15 @@ const ParagraphPanel = ({
 export const ParagraphButton = ({
   formatBar,
   page,
-  selectedModels,
+  selectedBlockElements,
 }: ParagraphButtonProps) => {
   const paragraphIcon =
-    selectedModels.length < 1
+    selectedBlockElements.length < 1
       ? paragraphConfig[0].icon
       : paragraphConfig.find(
           ({ flavour, type }) =>
-            selectedModels[0].flavour === flavour &&
-            selectedModels[0].type === type
+            selectedBlockElements[0].flavour === flavour &&
+            selectedBlockElements[0].model.type === type
         )?.icon ?? paragraphConfig[0].icon;
 
   const pageElement = formatBar.pageElement;
@@ -128,7 +130,7 @@ export const ParagraphButton = ({
 
   const paragraphPanel = ParagraphPanel({
     pageElement,
-    selectedModels,
+    selectedBlockElements,
     page,
   });
 

@@ -44,9 +44,11 @@ import { inlineFormatConfig } from '../../page-block/const/inline-format-config.
 import { paragraphConfig } from '../../page-block/const/paragraph-config.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
 import {
+  getSelectedContentBlockElements,
   onModelTextUpdated,
   updateBlockType,
 } from '../../page-block/utils/index.js';
+import { updateBlockElementType } from '../../page-block/utils/operations/block-element.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -76,9 +78,11 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             return true;
           },
           action: ({ model, pageElement }) => {
-            const newModels = updateBlockType(
+            const selectedBlockElements =
+              getSelectedContentBlockElements(pageElement);
+            const newModels = updateBlockElementType(
               pageElement,
-              [model],
+              selectedBlockElements,
               flavour,
               type
             );

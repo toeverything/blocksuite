@@ -160,6 +160,14 @@ export class RangeManager {
     return selectedBlocksId;
   }
 
+  getSelectedBlockElementsByRange(range: Range): BlockElement[] {
+    const selectedBlockElements = Array.from<BlockElement>(
+      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
+    ).filter(el => range.intersectsNode(el));
+
+    return selectedBlockElements;
+  }
+
   private _pointToRange(point: TextRangePoint): Range | null {
     const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
     assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);

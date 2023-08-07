@@ -1,13 +1,14 @@
 import { BlockSelection, TextSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 
 import type { PageBlockComponent } from '../types.js';
 
 export function getSelectedContentModels(
-  pageComponent: PageBlockComponent
+  pageElement: PageBlockComponent
 ): BaseBlockModel[] {
-  const { rangeManager } = pageComponent;
-  const selectionManager = pageComponent.root.selectionManager;
+  const { rangeManager } = pageElement;
+  const selectionManager = pageElement.root.selectionManager;
   const selections = selectionManager.value;
   const selectedContentBlocks: BaseBlockModel[] = [];
 
@@ -27,7 +28,7 @@ export function getSelectedContentModels(
     const selectedBlocks = rangeManager
       .getSelectedBlocksIdByRange(range)
       .map(id => {
-        const model = pageComponent.page.getBlockById(id);
+        const model = pageElement.page.getBlockById(id);
         assertExists(model);
         return model;
       });
@@ -38,7 +39,7 @@ export function getSelectedContentModels(
     selectedContentBlocks.push(
       ...blockSelections
         .map(selection => {
-          const model = pageComponent.page.getBlockById(selection.blockId);
+          const model = pageElement.page.getBlockById(selection.blockId);
           assertExists(model);
           return model;
         })
@@ -51,10 +52,21 @@ export function getSelectedContentModels(
   return selectedContentBlocks;
 }
 
+export function getSelectedContentBlockElements(
+  pageElement: PageBlockComponent
+): BlockElement[] {
+  const { rangeManager } = pageElement;
+  assertExists(rangeManager);
+  const range = rangeManager.value;
+  const selectedBlockElements =
+    rangeManager.getSelectedBlockElementsByRange(range);
+  return selectedBlockElements.filter(el => el.model.role === 'content');
+}
+
 export function getTextSelection(
-  pageComponent: PageBlockComponent
+  pageElement: PageBlockComponent
 ): TextSelection | null {
-  const selectionManager = pageComponent.root.selectionManager;
+  const selectionManager = pageElement.root.selectionManager;
   const selections = selectionManager.value;
 
   const textSelection = selections.find(
@@ -62,4 +74,16 @@ export function getTextSelection(
   ) as TextSelection | undefined;
 
   return textSelection ?? null;
+}
+
+export function getBlockSelections(
+  pageElement: PageBlockComponent
+): BlockSelection[] {
+  const selectionManager = pageElement.root.selectionManager;
+  const selections = selectionManager.value;
+
+  const blockSelections = selections.filter(
+    selection => selection instanceof BlockSelection
+  );
+  return blockSelections;
 }
