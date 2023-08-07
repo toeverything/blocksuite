@@ -7,7 +7,7 @@ import {
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
 import { groupByMatcher } from '../common/group-by/matcher.js';
-import { defaultGroupBy } from '../common/groupBy/util.js';
+import { defaultGroupBy } from '../common/group-by/util.js';
 import type { GroupBy } from '../common/types.js';
 import type { ViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';

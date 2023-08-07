@@ -1,7 +1,7 @@
 import type { FilterGroup } from '../common/ast.js';
 import { columnManager } from '../common/columns/manager.js';
 import { viewManager } from '../common/data-view.js';
-import { defaultGroupBy } from '../common/groupBy/util.js';
+import { defaultGroupBy } from '../common/group-by/util.js';
 import type { GroupBy } from '../common/types.js';
 import { tTag } from '../logical/data-type.js';
 import { isTArray } from '../logical/typesystem.js';

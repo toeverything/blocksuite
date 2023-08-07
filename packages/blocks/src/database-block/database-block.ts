@@ -1,5 +1,5 @@
 // related component
-import './common/groupBy/define.js';
+import './common/group-by/define.js';
 import './common/header/views.js';
 import './common/header/title.js';
 import './common/header/tools/tools.js';
