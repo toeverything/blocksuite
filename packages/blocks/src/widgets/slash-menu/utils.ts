@@ -7,7 +7,12 @@ import { getVirgoByModel } from '../../__internal__/utils/query.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
 
 export type SlashMenuOptions = {
-  isTriggerKey: (e: KeyboardEvent) => boolean;
+  /**
+   * If return false, the slash menu will not show
+   *
+   * If return string, the slash menu will show and the string will be clear after the slash menu is activated
+   */
+  isTriggerKey: (e: KeyboardEvent) => false | string;
   menus: {
     name: string;
     items: SlashItem[];

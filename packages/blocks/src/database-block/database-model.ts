@@ -1,19 +1,15 @@
-import type { Text } from '@blocksuite/store';
-import type { MigrationRunner } from '@blocksuite/store';
+import type { MigrationRunner, Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
-import type {
-  DatabaseViewData,
-  DatabaseViewDataMap,
-} from './common/view-manager.js';
-import { ViewOperationMap } from './common/view-manager.js';
-import { DEFAULT_TITLE } from './table/consts.js';
+import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
+import { viewManager } from './common/data-view.js';
+import { DEFAULT_TITLE } from './common/header/consts.js';
 import type { Column } from './table/types.js';
 import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
 import { insertPositionToIndex } from './utils/insert.js';
 
 type Props = {
-  views: DatabaseViewData[];
+  views: DataViewDataType[];
   title: Text;
   cells: SerializedCells;
   columns: Array<Column>;
@@ -57,10 +53,11 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     return this.views;
   }
 
-  addView(type: keyof DatabaseViewDataMap) {
+  addView(type: DataViewTypes) {
     this.page.captureSync();
     const id = this.page.generateId();
-    const view = ViewOperationMap[type].init(this, id, type);
+    const viewConfig = viewManager.getView(type);
+    const view = viewConfig.init(this, id, viewConfig.defaultName);
     this.page.transact(() => {
       this.views.push(view);
     });
@@ -76,14 +73,14 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
   updateView(
     id: string,
-    update: (data: DatabaseViewData) => Partial<DatabaseViewData>
+    update: (data: DataViewDataType) => Partial<DataViewDataType>
   ) {
     this.page.transact(() => {
       this.views = this.views.map(v => {
         if (v.id !== id) {
           return v;
         }
-        return { ...v, ...update(v) } as DatabaseViewData;
+        return { ...v, ...update(v) } as DataViewDataType;
       });
     });
     this.applyViewsUpdate();
@@ -120,7 +117,10 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       return id;
     }
     this.page.transact(() => {
-      const col = { ...column, id };
+      const col = {
+        ...column,
+        id,
+      };
       this.columns.splice(
         insertPositionToIndex(position, this.columns),
         0,
@@ -153,7 +153,10 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
   getCell(rowId: BaseBlockModel['id'], columnId: Column['id']): Cell | null {
     if (columnId === 'title') {
-      return { columnId: 'title', value: rowId };
+      return {
+        columnId: 'title',
+        value: rowId,
+      };
     }
     const yRow = this.cells[rowId];
     const yCell = yRow?.[columnId] ?? null;
@@ -195,7 +198,10 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   updateCells(columnId: string, cells: Record<string, unknown>) {
     this.page.transact(() => {
       Object.entries(cells).forEach(([rowId, value]) => {
-        this.cells[rowId][columnId] = { columnId, value };
+        this.cells[rowId][columnId] = {
+          columnId,
+          value,
+        };
       });
     });
   }
@@ -220,7 +226,10 @@ const migration = {
     });
     data.views.forEach(view => {
       if (view.mode === 'table') {
-        view.columns.unshift({ id, width });
+        view.columns.unshift({
+          id,
+          width,
+        });
       }
     });
   },

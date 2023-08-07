@@ -192,7 +192,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           return true;
         },
         action: ({ model }) => {
-          insertContent(model, '@');
+          const triggerKey = '@';
+          insertContent(model, triggerKey);
           const pageBlock = getPageBlock(model);
           const widgetEle = pageBlock?.widgetElements.linkedPage;
           assertExists(widgetEle);
@@ -200,7 +201,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const linkedPageWidget = widgetEle as LinkedPageWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            linkedPageWidget.showLinkedPage(model);
+            linkedPageWidget.showLinkedPage(model, triggerKey);
           });
         },
       },

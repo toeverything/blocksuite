@@ -11,7 +11,10 @@ import type { InsertPosition } from '../../../types.js';
 @customElement('affine-database-new-record-preview')
 class NewRecordPreview extends ShadowlessElement {
   @property({ attribute: false })
-  offset = { x: 0, y: 0 };
+  offset = {
+    x: 0,
+    y: 0,
+  };
 
   override render() {
     return html`
@@ -70,7 +73,9 @@ export function initAddNewRecordHandlers(
   const rowContainer = database.querySelector<HTMLElement>(
     '.affine-database-block-rows'
   );
-  assertExists(rowContainer);
+  if (!rowContainer) {
+    return;
+  }
 
   const indicator = document.querySelector<DragIndicator>(
     'affine-drag-indicator'
@@ -174,7 +179,10 @@ function getClosestRow(
     if (point.y <= top + 20 && point.y >= top - 20) {
       return {
         element: row,
-        position: { id: row.dataset.rowId ?? '', before: true },
+        position: {
+          id: row.dataset.rowId ?? '',
+          before: true,
+        },
         isLast: false,
       };
     }
@@ -184,7 +192,10 @@ function getClosestRow(
       if (point.y >= bottom - 20 && point.y <= bottom + 20) {
         return {
           element: row,
-          position: { id: row.dataset.rowId ?? '', before: false },
+          position: {
+            id: row.dataset.rowId ?? '',
+            before: false,
+          },
           isLast: true,
         };
       }

@@ -35,6 +35,9 @@ export class SlashMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   options!: SlashMenuOptions;
 
+  @property({ attribute: false })
+  triggerKey!: string;
+
   @query('.slash-menu')
   slashMenuElement?: HTMLElement;
 
@@ -247,7 +250,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Need to remove the search string
     // We must to do clean the slash string before we do the action
     // Otherwise, the action may change the model and cause the slash string to be changed
-    cleanSpecifiedTail(this.model, '/' + this._searchString);
+    cleanSpecifiedTail(this.model, this.triggerKey + this._searchString);
     this.abortController.abort();
 
     const { action } = this._filterItems[index];

@@ -19,7 +19,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -412,10 +411,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             class="affine-database-column-type-icon"
             @click="${this._clickTypeIcon}"
           >
-            ${keyed(
-              column.type,
-              html`<uni-lit .uni="${column.icon}"></uni-lit>`
-            )}
+            <uni-lit .uni="${column.icon}"></uni-lit>
           </div>
           <div class="affine-database-column-text-content">
             <div class="affine-database-column-text-input">${column.name}</div>
