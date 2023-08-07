@@ -14,6 +14,7 @@ const styles = css`
     flex-direction: column;
     gap: 8px;
     border: 1px solid var(--affine-border-color);
+    box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     padding: 4px;
   }

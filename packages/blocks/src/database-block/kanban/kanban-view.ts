@@ -21,7 +21,6 @@ const styles = css`
 
   .affine-data-view-kanban-groups {
     display: flex;
-    padding: 20px 0;
     gap: 20px;
     overflow-x: auto;
   }
@@ -57,9 +56,6 @@ export class DataViewKanban extends BaseDataView<
       return html``;
     }
     return html`
-      <affine-data-view-kanban-header
-        .view="${this.view}"
-      ></affine-data-view-kanban-header>
       <div class="affine-data-view-kanban-groups">
         ${repeat(groups, group => {
           return html` <affine-data-view-kanban-group

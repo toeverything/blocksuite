@@ -12,14 +12,14 @@ groupByMatcher.register(tTag.create(), {
     if (tTag.is(type) && type.data) {
       return [
         ...type.data.tags.map(v => ({ key: v.id, value: v.id })),
-        { key: 'No Tags', value: null },
+        { key: 'Ungroups', value: null },
       ];
     }
     return [];
   },
   valuesGroup: (value, type) => {
     if (value == null) {
-      return [{ key: 'No Tags', value }];
+      return [{ key: 'Ungroups', value }];
     }
     return [{ key: `${value}`, value }];
   },
@@ -31,20 +31,20 @@ groupByMatcher.register(tArray(tTag.create()), {
     if (isTArray(type) && tTag.is(type.ele) && type.ele.data) {
       return [
         ...type.ele.data.tags.map(v => ({ key: v.id, value: v.id })),
-        { key: 'No Tags', value: null },
+        { key: 'Ungroups', value: null },
       ];
     }
     return [];
   },
   valuesGroup: (value, type) => {
     if (value == null) {
-      return [{ key: 'No Tags', value }];
+      return [{ key: 'Ungroups', value }];
     }
     if (Array.isArray(value)) {
       if (value.length) {
         return value.map(id => ({ key: `${id}`, value: id }));
       }
-      return [{ key: 'No Tags', value }];
+      return [{ key: 'Ungroups', value }];
     }
     return [];
   },
