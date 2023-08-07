@@ -98,11 +98,11 @@ export function AttachmentOptionsTemplate({
         class="has-tool-tip"
         size="24px"
         disabled
-        @click=${() => console.log(model)}
+        @click=${() => console.log('Turn into Link view coming soon', model)}
       >
         ${LinkIcon}
         <tool-tip inert tip-position="top" role="tooltip"
-          >Convert to inline(Coming soon)</tool-tip
+          >Turn into Link view(Coming soon)</tool-tip
         >
       </icon-button>
       <icon-button
@@ -122,7 +122,9 @@ export function AttachmentOptionsTemplate({
         }}"
       >
         ${EmbedWebIcon}
-        <tool-tip inert tip-position="top" role="tooltip">Embed</tool-tip>
+        <tool-tip inert tip-position="top" role="tooltip"
+          >Turn into Embed view</tool-tip
+        >
       </icon-button>
       <div class="divider"></div>
 
