@@ -1,11 +1,12 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   getRichTextByModel,
+  getVirgoByModel,
   isControlledKeyboardEvent,
   isFuzzyMatch,
 } from '../../__internal__/utils/index.js';
@@ -243,7 +244,14 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Need to remove the search string
     // We must to do clean the slash string before we do the action
     // Otherwise, the action may change the model and cause the slash string to be changed
-    cleanSpecifiedTail(this.model, '/' + this._searchString);
+    const vEditor = getVirgoByModel(this.model);
+    assertExists(vEditor);
+    const vRange = vEditor.getVRange();
+    assertExists(vRange);
+    const slash =
+      vEditor.yText.toString()[vRange.index - this._searchString.length - 1];
+    cleanSpecifiedTail(this.model, slash + this._searchString);
+
     this.abortController.abort();
 
     const { action } = this._filterItems[index];
