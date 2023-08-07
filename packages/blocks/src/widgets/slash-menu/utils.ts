@@ -6,7 +6,12 @@ import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/ty
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 
 export type SlashMenuOptions = {
-  isTriggerKey: (e: KeyboardEvent) => boolean;
+  /**
+   * If return false, the slash menu will not show
+   *
+   * If return string, the slash menu will show and the string will be clear after the slash menu is activated
+   */
+  isTriggerKey: (e: KeyboardEvent) => false | string;
   menus: {
     name: string;
     items: SlashItem[];
