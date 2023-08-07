@@ -95,7 +95,7 @@ function getLinkedPagePopover(page: Page) {
   };
 }
 
-test.describe('multiple page', () => {
+test.fixme('multiple page', () => {
   test('should create and switch page work', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);

@@ -1,6 +1,8 @@
 import type { Flavour, PageBlockComponent } from '@blocksuite/blocks';
 import type { Page } from '@playwright/test';
 
+import { waitNextFrame } from './misc.js';
+
 export async function updateBlockType(
   page: Page,
   flavour: Flavour,
@@ -23,4 +25,5 @@ export async function updateBlockType(
     },
     [flavour, type] as [Flavour, string?]
   );
+  await waitNextFrame(page);
 }
