@@ -1,13 +1,14 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
+import type { RealDataViewDataTypeMap } from '../common/data-view.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
 import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
 import { groupByMatcher } from '../common/groupBy/matcher.js';
-import type { GroupBy, KanbanViewData } from '../common/view-manager.js';
-import { defaultGroupBy } from '../common/view-manager.js';
+import { defaultGroupBy } from '../common/groupBy/util.js';
+import type { GroupBy } from '../common/types.js';
 import type { ViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { TType } from '../logical/typesystem.js';
@@ -21,6 +22,7 @@ export type KanbanGroupData = {
   value: unknown;
   rows: string[];
 };
+type KanbanViewData = RealDataViewDataTypeMap['kanban'];
 
 export class DataViewKanbanManager extends BaseDataViewManager {
   private readonly updateView: (

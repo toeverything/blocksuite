@@ -51,7 +51,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const values = this.value;
-    const map = new Map<string, SelectTag>(this.options.map(v => [v.id, v]));
+    const map = new Map<string, SelectTag>(this.options?.map(v => [v.id, v]));
     return html`
       <div class="affine-select-cell-container">
         ${repeat(values, id => {
