@@ -620,9 +620,7 @@ export class DragHandleWidget extends WidgetElement {
 
     const { relatedTarget } = state.raw;
     const relatedElement = captureEventTarget(relatedTarget);
-    const outOfPage =
-      element.classList.contains('affine-doc-page-block-container') ||
-      element.classList.contains('affine-edgeless-page-block-container');
+    const outOfPage = element.classList.contains('affine-doc-viewport');
     const inDragHandle = !!relatedElement?.closest('affine-drag-handle-widget');
     if (outOfPage && !inDragHandle) {
       this.hide();
