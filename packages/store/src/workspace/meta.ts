@@ -25,6 +25,7 @@ type PagesPropertiesMeta = {
 };
 type WorkspaceMetaState = {
   pages?: unknown[];
+  favoritesPages?: PageMeta[];
   properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
   pageVersion?: number;
@@ -82,6 +83,16 @@ export class WorkspaceMeta {
 
   get pageVersion() {
     return this._proxy.pageVersion;
+  }
+
+  get favoritePages() {
+    return this._proxy.favoritesPages;
+  }
+
+  setFavoritePages(pages: PageMeta[]) {
+    this.doc.transact(() => {
+      this._proxy.favoritesPages = pages;
+    }, this.doc.clientID);
   }
 
   setName(name: string) {

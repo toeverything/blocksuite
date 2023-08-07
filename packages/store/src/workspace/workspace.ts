@@ -178,6 +178,14 @@ export class Workspace {
     return this._pages.get(prefixedPageId) ?? null;
   }
 
+  getFavoritePages(): PageMeta[] | null {
+    return this.meta.favoritePages ?? null;
+  }
+
+  setFavoritePages(pages: PageMeta[]) {
+    this.meta.setFavoritePages(pages);
+  }
+
   private _bindPageMetaEvents() {
     this.meta.pageMetaAdded.on(pageId => {
       const page = new Page({
