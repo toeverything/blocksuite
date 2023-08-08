@@ -1,5 +1,0 @@
-{
-  "sandboxes": ["playground"],
-  "packages": ["./", "packages/playground"],
-  "node": "18"
-}
