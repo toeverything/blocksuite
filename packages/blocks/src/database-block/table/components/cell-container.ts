@@ -2,7 +2,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -105,17 +104,12 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       isEditing: this.isEditing,
       selectCurrentCell: this._selectCurrentCell,
     };
-    const isEditView = view === uni;
-
-    return html`${keyed(
-      `${isEditView} ${this.column.type}`,
-      html` <uni-lit
-        ${ref(this._cell)}
-        style=${style}
-        .uni="${uni}"
-        .props="${props}"
-      ></uni-lit>`
-    )}`;
+    return html`<uni-lit
+      ${ref(this._cell)}
+      style=${style}
+      .uni="${uni}"
+      .props="${props}"
+    ></uni-lit>`;
   }
 }
 

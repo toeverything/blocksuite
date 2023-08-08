@@ -39,6 +39,7 @@ export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './image-block/index.js';
 export * from './list-block/index.js';
+export * from './models.js';
 export * from './note-block/index.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';

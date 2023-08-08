@@ -92,7 +92,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
   }
 
   private get _viewportElement() {
-    const pageBlock = this.hostElement as DocPageBlockComponent;
+    const pageBlock = this.pageElement as DocPageBlockComponent;
 
     assertExists(pageBlock);
 

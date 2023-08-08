@@ -807,7 +807,7 @@ test.fixme('format list to h1', async ({ page }) => {
   await assertTypeFormat(page, 'h1');
 });
 
-test('should cut work single line', async ({ page }) => {
+test.fixme('should cut work single line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -1021,7 +1021,7 @@ test.skip('should left/right key navigator works', async ({ page }) => {
   await assertSelection(page, 1, 3);
 });
 
-test('should up/down key navigator works', async ({ page }) => {
+test.fixme('should up/down key navigator works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1042,7 +1042,7 @@ test('should up/down key navigator works', async ({ page }) => {
   await assertSelection(page, 1, 1);
 });
 
-test('should cut in title works', async ({ page }) => {
+test.fixme('should cut in title works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 

@@ -102,6 +102,10 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
   await menuItem.waitFor({ state: 'hidden' }); // wait for animation ended
 }
 
+/**
+ * @deprecated
+ * use `updateBlockType`
+ */
 export async function clickBlockTypeMenuItem(page: Page, name: string) {
   const menuButton = getDebugMenu(page).blockTypeButton;
   await menuButton.click();
