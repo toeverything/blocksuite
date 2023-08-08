@@ -16,17 +16,10 @@ import {
 } from '@blocksuite/phasor';
 
 import {
-  type BlockComponentElement,
   type DefaultTool,
-  getBlockElementByModel,
-  getClosestBlockElementByPoint,
-  getModelByBlockElement,
-  getRectByBlockElement,
   handleNativeRangeAtPoint,
   handleNativeRangeDragMove,
   noop,
-  Point,
-  Rect,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
@@ -256,39 +249,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       delta,
       dragging,
     });
-  }
-
-  /** Update drag handle by closest block elements */
-  private _updateDragHandle(e: PointerEventState) {
-    const block = this.selection.elements[0];
-    if (!block || !isTopLevelBlock(block)) return;
-    const noteBlockElement = getBlockElementByModel(block);
-    assertExists(noteBlockElement);
-
-    const {
-      raw: { clientX, clientY },
-    } = e;
-    const point = new Point(clientX, clientY);
-    const element = getClosestBlockElementByPoint(
-      point,
-      {
-        container: noteBlockElement,
-        rect: Rect.fromDOM(noteBlockElement),
-      },
-      this._edgeless.surface.viewport.zoom
-    );
-    let hoverEditingState = null;
-    if (element) {
-      hoverEditingState = {
-        element: element as BlockComponentElement,
-        model: getModelByBlockElement(element),
-        rect: getRectByBlockElement(element),
-      };
-      this._edgeless.components.dragHandle?.onContainerMouseMove(
-        e,
-        hoverEditingState
-      );
-    }
   }
 
   onContainerPointerDown(e: PointerEventState): void {
@@ -584,8 +544,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerMouseMove(e: PointerEventState) {
-    if (this.dragType === DefaultModeDragType.PreviewDragging) return;
-    this._updateDragHandle(e);
+    noop();
   }
 
   onContainerMouseOut(_: PointerEventState) {

@@ -426,20 +426,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
     const hovered: Selectable | null =
       surface.pickTop(modelX, modelY) || pickTopBlock(notes, modelX, modelY);
 
-    // See https://github.com/toeverything/blocksuite/issues/1812
-    if (
-      // if not note block
-      !isTopLevelBlock(hovered) ||
-      // if in other mouse mode
-      this.edgelessTool.type !== 'default' ||
-      // if current selection is not active
-      !this.selection.editing ||
-      // if current selected block is not the hovered block
-      this.selection.state.elements[0] !== hovered.id
-    ) {
-      this.container.components.dragHandle?.hide();
-    }
-
     if (!hovered || this.selection?.editing) {
       return null;
     }
