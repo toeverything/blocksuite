@@ -42,7 +42,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
         }
         const nextBlock = getNextBlock(block, block => !!block.model.text);
         moveCursorToNextBlockElement(blockElement, nextBlock);
-        return;
+        return true;
       }
 
       const blockSelection = getBlockSelectionBySide(blockElement, true);
@@ -76,7 +76,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
         }
         const prevBlock = getPrevBlock(block, block => !!block.model.text);
         moveCursorToPrevBlockElement(blockElement, prevBlock);
-        return;
+        return true;
       }
 
       const blockSelection = getBlockSelectionBySide(blockElement, false);
