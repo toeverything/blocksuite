@@ -988,8 +988,7 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
     // Click at the top-left corner of the 2nd last block to place the cursor at its start
     await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
     // Cursor should have been moved to the start of the last block.
-    await pressArrowDown(page, 2);
-    await pressArrowLeft(page);
+    await pressArrowDown(page);
     await type(page, "I'm here. ");
     await assertRichTexts(page, [
       'This is the 2nd last block.',

@@ -476,7 +476,7 @@ test.describe('indent correctly when deleting list item', () => {
     await pressEnter(page);
     await type(page, 'd');
     await pressArrowUp(page);
-    await pressArrowUp(page);
+    await pressBackspace(page);
     await pressBackspace(page);
     await pressBackspace(page);
 
@@ -509,7 +509,6 @@ test.describe('indent correctly when deleting list item', () => {
     await pressEnter(page);
     await pressTab(page);
     await type(page, 'f');
-    await pressArrowUp(page);
     await pressArrowUp(page);
     await pressArrowUp(page);
     await pressArrowUp(page);

@@ -41,6 +41,9 @@ export const bindHotKey = (blockElement: BlockElement) => {
           return;
         }
         const nextBlock = getNextBlock(block, block => !!block.model.text);
+        if (!nextBlock) {
+          return;
+        }
         moveCursorToNextBlockElement(blockElement, nextBlock);
         return true;
       }
@@ -75,6 +78,9 @@ export const bindHotKey = (blockElement: BlockElement) => {
           return;
         }
         const prevBlock = getPrevBlock(block, block => !!block.model.text);
+        if (!prevBlock) {
+          return;
+        }
         moveCursorToPrevBlockElement(blockElement, prevBlock);
         return true;
       }
