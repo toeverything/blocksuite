@@ -1,6 +1,6 @@
 import { assertExists, sleep } from '@blocksuite/global/utils';
 import { BaseBlockModel } from '@blocksuite/store';
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
 
 import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import type { AffineVEditor } from '../__internal__/rich-text/virgo/types.js';
@@ -233,12 +233,15 @@ export function cleanSpecifiedTail(
   });
 }
 
-export const scrollbarStyle = css`
-  ::-webkit-scrollbar {
+/**
+ * You should add a container before the scrollbar style to prevent the style pollution of the whole page.
+ */
+export const scrollbarStyle = (container: string) => css`
+  ${unsafeCSS(container)}::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 4px;
   }
-  ::-webkit-scrollbar-thumb {
+  ${unsafeCSS(container)}::-webkit-scrollbar-thumb {
     border-radius: 2px;
     background-color: #b1b1b1;
   }

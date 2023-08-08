@@ -27,8 +27,6 @@ const paragraphButtonStyle = css`
     border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
-
-  ${scrollbarStyle}
 `;
 
 export const formatBarStyle = css`
