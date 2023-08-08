@@ -138,9 +138,9 @@ export class PageMetaData extends WithDisposable(LitElement) {
       fill: var(--affine-icon-color);
     }
 
-    .meta-data-expanded-item .type-1 svg {
+    .meta-data-expanded-item .arrow-icon svg {
       fill: var(--affine-icon-color);
-      padding-top:5px;
+       height: 25px;
     }
 
     .meta-data-expanded-item .value {
@@ -340,7 +340,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
       </div>`;
     };
     return html` <div class="meta-data-expanded-item">
-      <div class="type-1">${DualLinkIcon16}</div>
+      <div class="arrow-icon">${DualLinkIcon16}</div>
       <div class="value">
         <div class="backlinks">
           <div class="title">Linked to this page</div>
