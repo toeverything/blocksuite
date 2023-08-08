@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service.js';
+import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { focusBlockByModel } from '../__internal__/utils/selection.js';
@@ -48,27 +49,35 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   override render() {
     const mode = queryCurrentMode();
     if (this.model.loadingKey && isAttachmentLoading(this.model.loadingKey)) {
-      return html`<div class="attachment-container">
-        <div class="attachment-loading">${LoadingIcon}Loading...</div>
-        <div class="attachment-desc">${humanFileSize(this.model.size)}</div>
+      return html`<div class="affine-attachment-container">
+        <div class="affine-attachment-loading">${LoadingIcon}Loading...</div>
+        <div class="affine-attachment-desc">
+          ${humanFileSize(this.model.size)}
+        </div>
       </div>`;
     }
     if (!this.model.sourceId) {
-      return html`<div class="attachment-container">
-        <div class="attachment-name">${AttachmentIcon16}${this.model.name}</div>
-        <div class="attachment-desc">Unable to upload</div>
+      return html`<div class="affine-attachment-container">
+        <div class="affine-attachment-name">
+          ${AttachmentIcon16}${this.model.name}
+        </div>
+        <div class="affine-attachment-desc">Unable to upload</div>
       </div>`;
     }
 
     return html`<div
-      class="attachment-container"
+      class="affine-attachment-container"
       @mouseover=${this._onHover}
       @click=${this._focusAttachment}
       @dblclick=${this._downloadAttachment}
     >
-      <div class="attachment-name">${AttachmentIcon16}${this.model.name}</div>
-      <div class="attachment-desc">${humanFileSize(this.model.size)}</div>
-      <div class="attachment-banner">
+      <div class="affine-attachment-name">
+        ${AttachmentIcon16}${this.model.name}
+      </div>
+      <div class="affine-attachment-desc">
+        ${humanFileSize(this.model.size)}
+      </div>
+      <div class="affine-attachment-banner">
         ${mode === 'light'
           ? AttachmentBanner
           : // TODO dark mode

@@ -19,7 +19,11 @@ export const MoreMenu = ({
   abortController: AbortController;
 }) => {
   const readonly = model.page.readonly;
-  return html`<div ${ref(moreMenuRef)} class="attachment-options-more" hidden>
+  return html`<div
+    ${ref(moreMenuRef)}
+    class="affine-attachment-options-more"
+    hidden
+  >
     <icon-button
       width="120px"
       height="32px"

@@ -70,18 +70,19 @@ export const RenameModal = ({
       ${renameStyles}
     </style>
     <div
-      class="attachment-rename-overlay-mask"
+      class="affine-attachment-rename-overlay-mask"
       @click="${() => abortController.abort()}"
     ></div>
-    <div ${ref(containerRef)} class="attachment-rename-container">
-      <div class="attachment-rename-input-wrapper">
+    <div ${ref(containerRef)} class="affine-attachment-rename-container">
+      <div class="affine-attachment-rename-input-wrapper">
         <input
+          autofocus
           type="text"
           .value=${fileName}
           @input=${onInput}
           @keydown=${onKeydown}
         />
-        <span class="attachment-rename-extension">${extension}</span>
+        <span class="affine-attachment-rename-extension">${extension}</span>
       </div>
       <icon-button class="affine-confirm-button" @click=${onConfirm}
         >${ConfirmIcon}</icon-button

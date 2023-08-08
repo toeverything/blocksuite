@@ -1,7 +1,7 @@
 import { css, html } from 'lit';
 
 export const styles = css`
-  .attachment-container {
+  .affine-attachment-container {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -16,7 +16,7 @@ export const styles = css`
     cursor: pointer;
   }
 
-  .attachment-name {
+  .affine-attachment-name {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -30,20 +30,20 @@ export const styles = css`
     user-select: none;
   }
 
-  .attachment-desc {
+  .affine-attachment-desc {
     color: var(--affine-text-secondary-color);
     font-size: var(--affine-font-xs);
     user-select: none;
   }
 
-  .attachment-banner {
+  .affine-attachment-banner {
     position: absolute;
     display: flex;
     right: 24px;
     bottom: 0;
   }
 
-  .attachment-loading {
+  .affine-attachment-loading {
     display: flex;
     align-items: center;
     gap: 8px;
