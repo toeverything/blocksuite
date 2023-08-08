@@ -1,7 +1,7 @@
 import type {
-  BaseSelection,
   PointerEventState,
   UIEventHandler,
+  UIEventStateContext,
 } from '@blocksuite/block-std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
@@ -19,11 +19,26 @@ import {
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
+  isPageMode,
   Point,
   Rect,
 } from '../../__internal__/index.js';
-import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import {
+  DRAG_HANDLE_GRABBER_HEIGHT,
+  DRAG_HANDLE_GRABBER_WIDTH,
+  NOTE_CONTAINER_PADDING,
+} from './config.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
+import {
+  captureEventTarget,
+  containBlock,
+  containChildBlock,
+  getDragHandleContainerHeight,
+  getNoteId,
+  insideDatabaseTable,
+} from './utils.js';
 
 @customElement('affine-drag-handle-widget')
 export class DragHandleWidget extends WidgetElement {
@@ -31,6 +46,9 @@ export class DragHandleWidget extends WidgetElement {
 
   @query('.affine-drag-handle-container')
   private _dragHandleContainer!: HTMLDivElement;
+
+  @query('.affine-drag-handle-grabber')
+  private _dragHandleGrabber!: HTMLDivElement;
 
   @query('.affine-drag-preview')
   private _dragPreview!: HTMLDivElement;
@@ -58,12 +76,12 @@ export class DragHandleWidget extends WidgetElement {
     return this.root.selectionManager.value;
   }
 
-  private _hide(force = false) {
+  public hide(force = false) {
     this._dragHandleContainer.style.display = 'none';
-    if (force) this._reset();
+    if (force) this.reset();
   }
 
-  private _reset() {
+  public reset() {
     this._dragging = false;
     this._indicatorRect = null;
     this._dragPreview.textContent = '';
@@ -76,11 +94,18 @@ export class DragHandleWidget extends WidgetElement {
     this._dragPreviewOffsetY = 0;
   }
 
+  // drag handle should show on the vertical middle of the first line of element
   private _show(point: Point, blockElement: BlockElement) {
-    const { height, left, top, width } = blockElement.getBoundingClientRect();
-    this._dragHandleContainer.style.display = 'block';
-    this._dragHandleContainer.style.height = `${height / this._scale}px`;
-    this._dragHandleContainer.style.width = `${DRAG_HANDLE_WIDTH}px`;
+    const { left, top, width } = blockElement.getBoundingClientRect();
+
+    const containerHeight = getDragHandleContainerHeight(blockElement.model);
+    this._dragHandleContainer.style.display = 'flex';
+    this._dragHandleContainer.style.height = `${
+      containerHeight * this._scale
+    }px`;
+    this._dragHandleContainer.style.width = `${
+      DRAG_HANDLE_WIDTH * this._scale
+    }px`;
 
     // TODO: optimize drag handle position with different hover block
     const posLeft =
@@ -92,21 +117,13 @@ export class DragHandleWidget extends WidgetElement {
       1 -
       (point.x - left) / width
     ).toFixed(2)}`;
-  }
 
-  private _containBlock(selections: BaseSelection[], blockId: string) {
-    return selections.some(selection => selection.blockId === blockId);
-  }
-
-  // To check if the block is a child block of the selected blocks
-  private _containChildBlock(selections: BaseSelection[], childPath: string[]) {
-    return selections.some(selection => {
-      const { path } = selection;
-      if (path.length > childPath.length) {
-        return false;
-      }
-      return path.join('|') === childPath.slice(0, -1).join('|');
-    });
+    this._dragHandleGrabber.style.height = `${
+      DRAG_HANDLE_GRABBER_HEIGHT * this._scale
+    }px`;
+    this._dragHandleGrabber.style.width = `${
+      DRAG_HANDLE_GRABBER_WIDTH * this._scale
+    }px`;
   }
 
   private _setSelectedBlock(blockId: string, path: string[]) {
@@ -118,23 +135,28 @@ export class DragHandleWidget extends WidgetElement {
     ]);
   }
 
-  // TODO: need to find a better way, should not assumpt the host element is page block
   private get _pageBlockElement() {
-    const pageBlock = this.hostElement as DocPageBlockComponent;
+    const pageElement = this.pageElement;
+    const pageBlock = isPageMode(this.page)
+      ? (pageElement as DocPageBlockComponent)
+      : (pageElement as EdgelessPageBlockComponent);
     assertExists(pageBlock);
 
     return pageBlock;
   }
 
-  // TODO: need to find a better way to get viewport element
-  private get _viewportElement() {
-    return this._pageBlockElement.viewportElement;
-  }
-
-  // TODO: need to find a better way to get range controller
   private get _rangeManager() {
     assertExists(this._pageBlockElement.rangeManager);
     return this._pageBlockElement.rangeManager;
+  }
+
+  private _getDragPreviewOffset() {
+    const offset = { left: 0, top: 0 };
+    if (this._pageBlockElement instanceof DocPageBlockComponent) {
+      offset.left = this._pageBlockElement.viewportElement.scrollLeft;
+      offset.top = this._pageBlockElement.viewportElement.scrollTop;
+    }
+    return offset;
   }
 
   private _getClosestBlockElementByPoint(point: Point) {
@@ -163,15 +185,6 @@ export class DragHandleWidget extends WidgetElement {
     ) as BlockElement;
     return closestBlockElement;
   }
-
-  private _captureEventTarget = (target: EventTarget | null) => {
-    const isElementOrNode = target instanceof Element || target instanceof Node;
-    return isElementOrNode
-      ? target instanceof Element
-        ? target
-        : target.parentElement
-      : null;
-  };
 
   private _calculatePreviewOffsetY(
     blockElements: BlockElement[],
@@ -203,16 +216,16 @@ export class DragHandleWidget extends WidgetElement {
       fragment.appendChild(container);
     });
 
-    const viewportElement = this._viewportElement;
+    const previewOffset = this._getDragPreviewOffset();
 
     const { left, top, width } = hoverBlockElement.getBoundingClientRect();
     this._dragPreviewOffsetY = this._calculatePreviewOffsetY(
       blockElements,
       hoverBlockElement
     );
-    const posX = left + viewportElement.scrollLeft;
-    const posY = top + viewportElement.scrollTop - this._dragPreviewOffsetY;
-    this._dragPreview.style.width = `${width}px`;
+    const posX = left + previewOffset.left;
+    const posY = top + previewOffset.top - this._dragPreviewOffsetY;
+    this._dragPreview.style.width = `${width / this._scale}px`;
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
     this._dragPreview.classList.add('grabbing');
     this._dragPreview.style.display = 'block';
@@ -220,23 +233,47 @@ export class DragHandleWidget extends WidgetElement {
     this._dragPreview.appendChild(fragment);
   }
 
-  private _updateDragPreviewPosition(state: PointerEventState) {
-    const { scrollTop, scrollLeft } = this._viewportElement;
-    const posX = state.x + scrollLeft;
-    const posY = state.y + scrollTop - this._dragPreviewOffsetY;
+  private _updateDragPreviewPosition(point: Point) {
+    const previewOffset = this._getDragPreviewOffset();
+    const posX = point.x + previewOffset.left;
+    const posY = point.y + previewOffset.top - this._dragPreviewOffsetY;
 
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
   }
 
-  private _outOfNoteBlock = (point: Point) => {
-    const noteSelector = 'affine-note';
-    const closestNoteBlock = findClosestBlockElement(
-      this._pageBlockElement,
-      point,
-      noteSelector
+  private _canEditting = (noteBlock: BlockElement) => {
+    if (isPageMode(this.page)) return true;
+    const edgelessPage = this._pageBlockElement as EdgelessPageBlockComponent;
+    const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
+    return (
+      edgelessPage.selection.editing &&
+      edgelessPage.selection.state.elements[0] === noteBlockId
     );
-    const rect = closestNoteBlock?.getBoundingClientRect();
-    return rect ? point.y < rect.top || point.y > rect.bottom : true;
+  };
+
+  private _getClosestNoteBlock = (point: Point) => {
+    const noteSelector = 'affine-note';
+    return findClosestBlockElement(this._pageBlockElement, point, noteSelector);
+  };
+
+  private _getContainerOffsetPoint = (state: PointerEventState) => {
+    const x = state.point.x + state.containerOffset.x;
+    const y = state.point.y + state.containerOffset.y;
+    return new Point(x, y);
+  };
+
+  private _outOfNoteBlock = (noteBlock: Element, point: Point) => {
+    // TODO: need to find a better way to check if the point is out of note block
+    const rect = noteBlock.getBoundingClientRect();
+    const padding = NOTE_CONTAINER_PADDING * this._scale;
+    return rect
+      ? isPageMode(this.page)
+        ? point.y < rect.top || point.y > rect.bottom
+        : point.y < rect.top ||
+          point.y > rect.bottom ||
+          point.x < rect.left - padding ||
+          point.x > rect.right + padding
+      : true;
   };
 
   /**
@@ -244,7 +281,7 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _updateIndicator: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const point = new Point(state.point.x, state.point.y);
+    const point = this._getContainerOffsetPoint(state);
     const closestBlockElement = this._getClosestBlockElementByPoint(point);
     if (!closestBlockElement) {
       this._dropBlockId = '';
@@ -261,8 +298,8 @@ export class DragHandleWidget extends WidgetElement {
     // neither within the selected block
     // nor a child-block of any selected block
     if (
-      this._containBlock(this.selectedBlocks, blockId) ||
-      this._containChildBlock(this.selectedBlocks, blockPath)
+      containBlock(this.selectedBlocks, blockId) ||
+      containChildBlock(this.selectedBlocks, blockPath)
     ) {
       this._dropBlockId = '';
       return;
@@ -299,9 +336,9 @@ export class DragHandleWidget extends WidgetElement {
    * When pointer move on block, should show drag handle
    * And update hover block id and path
    */
-  private _pointerMoveOnBlock: UIEventHandler = ctx => {
+  private _pointerMoveOnBlock = (ctx: UIEventStateContext) => {
     const state = ctx.get('pointerState');
-    const point = new Point(state.point.x, state.point.y);
+    const point = this._getContainerOffsetPoint(state);
     const closestBlockElement = this._getClosestBlockElementByPoint(point);
     if (!closestBlockElement) {
       this._hoveredBlockId = '';
@@ -316,13 +353,18 @@ export class DragHandleWidget extends WidgetElement {
 
     this._hoveredBlockId = blockId;
     this._hoveredBlockPath = blockPath;
+
+    if (insideDatabaseTable(closestBlockElement)) {
+      this.hide();
+      return;
+    }
     this._show(point, closestBlockElement);
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const { target } = state.raw;
-    const element = this._captureEventTarget(target);
+    const element = captureEventTarget(target);
     // WHen pointer not on block or on dragging, should do nothing
     if (!element || this._dragging) {
       return;
@@ -334,10 +376,15 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     // TODO: need to optimize
-    // When pointer out of note block hover area, should hide drag handle
-    const point = new Point(state.point.x, state.point.y);
-    if (this._outOfNoteBlock(point)) {
-      this._hide();
+    // When pointer out of note block hover area or inside database, should hide drag handle
+    const point = this._getContainerOffsetPoint(state);
+    const closestNoteBlock = this._getClosestNoteBlock(point);
+    if (
+      !closestNoteBlock ||
+      !this._canEditting(closestNoteBlock as BlockElement) ||
+      this._outOfNoteBlock(closestNoteBlock, point)
+    ) {
+      this.hide();
       return;
     }
 
@@ -353,7 +400,7 @@ export class DragHandleWidget extends WidgetElement {
   private _clickHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     const { target } = state.raw;
-    const element = this._captureEventTarget(target);
+    const element = captureEventTarget(target);
     if (
       !element ||
       !element.closest('.affine-drag-handle-container') ||
@@ -388,11 +435,18 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragStartHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const { target } = state.raw;
-    const element = this._captureEventTarget(target);
-
+    const event = state.raw;
+    const { target, button } = event;
+    const element = captureEventTarget(target);
     const inside = !!element?.closest('.affine-drag-handle-container');
-    if (!inside || !this._hoveredBlockId || !this._hoveredBlockPath) {
+    // Should only start dragging when pointer down on drag handle
+    // And current mouse button is left button
+    if (
+      button !== 0 ||
+      !inside ||
+      !this._hoveredBlockId ||
+      !this._hoveredBlockPath
+    ) {
       return;
     }
 
@@ -434,7 +488,7 @@ export class DragHandleWidget extends WidgetElement {
     // Set current hover block as selected
     if (
       selections.length === 0 ||
-      !this._containBlock(selections, this._hoveredBlockId)
+      !containBlock(selections, this._hoveredBlockId)
     ) {
       this._setSelectedBlock(this._hoveredBlockId, this._hoveredBlockPath);
     }
@@ -457,7 +511,9 @@ export class DragHandleWidget extends WidgetElement {
     this._createDragPreview(blockElementsExcludingChildren, hoverBlockElement);
     this._draggingElements = blockElementsExcludingChildren;
     this._dragging = true;
-    this._hide();
+    this.hide();
+
+    // TODO: forbiden viewport updating when drag start
 
     return true;
   };
@@ -474,15 +530,17 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     const state = ctx.get('pointerState');
-    const point = new Point(state.point.x, state.point.y);
-    if (this._outOfNoteBlock(point)) {
+    const point = this._getContainerOffsetPoint(state);
+    const closestNoteBlock = this._getClosestNoteBlock(point);
+    if (!closestNoteBlock || this._outOfNoteBlock(closestNoteBlock, point)) {
       this._dropBlockId = '';
       this._indicatorRect = null;
     } else {
       this._updateIndicator(ctx);
     }
 
-    this._updateDragPreviewPosition(state);
+    const previewPos = new Point(state.point.x, state.point.y);
+    this._updateDragPreviewPosition(previewPos);
     return true;
   };
 
@@ -492,7 +550,7 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragEndHandler: UIEventHandler = () => {
     if (!this._dragging || this._draggingElements.length === 0) {
-      this._hide(true);
+      this.hide(true);
       return;
     }
 
@@ -500,11 +558,11 @@ export class DragHandleWidget extends WidgetElement {
     const shouldInsertBefore = this._dropBefore;
     const draggingElements = this._draggingElements;
 
-    this._hide(true);
+    this.hide(true);
     if (!targetBlockId) return;
 
     // Should make sure drop block id is not in selected blocks
-    if (this._containBlock(this.selectedBlocks, targetBlockId)) {
+    if (containBlock(this.selectedBlocks, targetBlockId)) {
       return;
     }
 
@@ -523,6 +581,9 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     // TODO: need a better way to update selection
+    // Should update selection after moving blocks
+    // In doc page mode, update selected blocks
+    // In edgeless mode, focus on the first block
     setTimeout(() => {
       assertExists(parent);
       // Need to update selection when moving blocks successfully
@@ -534,8 +595,13 @@ export class DragHandleWidget extends WidgetElement {
           .map(path =>
             this.root.selectionManager.getInstance('block', { path })
           );
-
         this.root.selectionManager.set(newSelections);
+
+        if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
+          const noteId = getNoteId(parentElement);
+          const blockId = selectedBlocks[0].id;
+          this._pageBlockElement.setSelection(noteId, true, blockId);
+        }
       }
     }, 0);
 
@@ -547,14 +613,38 @@ export class DragHandleWidget extends WidgetElement {
    * Should update drag preview position when wheel if dragging
    */
   private _wheelHandler: UIEventHandler = ctx => {
-    this._hide();
-    if (!this._dragging) {
+    this.hide();
+    if (!this._dragging || this._draggingElements.length === 0) {
       return;
     }
+
+    const state = ctx.get('defaultState');
+    const event = state.event as WheelEvent;
+    const point = new Point(event.x, event.y);
+
+    this._updateDragPreviewPosition(point);
+    return true;
+  };
+
+  private _pointerOutHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+    const { target } = state.raw;
+    const element = captureEventTarget(target);
+    if (!element) return;
+
+    const { relatedTarget } = state.raw;
+    const relatedElement = captureEventTarget(relatedTarget);
+    const outOfPage = element.classList.contains('affine-doc-viewport');
+    const inDragHandle = !!relatedElement?.closest('affine-drag-handle-widget');
+    if (outOfPage && !inDragHandle) {
+      this.hide();
+    }
+
+    return true;
   };
 
   override firstUpdated() {
-    this._hide(true);
+    this.hide(true);
   }
 
   override connectedCallback() {
@@ -565,10 +655,27 @@ export class DragHandleWidget extends WidgetElement {
     this.handleEvent('dragMove', this._dragMoveHandler);
     this.handleEvent('dragEnd', this._dragEndHandler);
     this.handleEvent('wheel', this._wheelHandler);
+    this.handleEvent('pointerOut', this._pointerOutHandler);
+
+    if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
+      const edgelessPage = this._pageBlockElement;
+      this._disposables.add(
+        edgelessPage.slots.edgelessToolUpdated.on(newTool => {
+          if (newTool.type !== 'default') this.hide();
+        })
+      );
+
+      this._disposables.add(
+        edgelessPage.slots.viewportUpdated.on(() => {
+          this.hide();
+          this._scale = edgelessPage.surface.viewport.zoom;
+        })
+      );
+    }
   }
 
   override disconnectedCallback() {
-    this._hide(true);
+    this.hide(true);
     super.disconnectedCallback();
   }
 
@@ -588,7 +695,7 @@ export class DragHandleWidget extends WidgetElement {
     return html`
       <div class="affine-drag-handle-container">
         <div class="affine-drag-handle">
-          <div class="affine-drag-handle-icon"></div>
+          <div class="affine-drag-handle-grabber"></div>
         </div>
       </div>
       <div class="affine-drag-preview"></div>

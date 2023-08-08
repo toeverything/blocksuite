@@ -14,27 +14,27 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
     const icon = block.icon
-      ? `<img alt="icon" src="${block.icon}">`
+      ? `<img class="bookmark-icon" alt="icon" src="${block.icon}">`
       : DefaultIcon.strings.join('');
     const bookmarkCaption = block.caption
-      ? `<div class="affine-bookmark-caption">${block.caption}</div>`
+      ? `<figcaption class="affine-bookmark-caption">${block.caption}</figcaption>`
       : '';
     const banner = block.image
-      ? `<div class="affine-bookmark-banner shadow"><img alt="image" src="${block.image}"></div>`
+      ? `<img class="bookmark-image" alt="image" src="${block.image}">`
       : DefaultBanner.strings.join('');
     return `
-  <div class="affine-bookmark-block-container">
-    <div class="affine-bookmark-link">
+  <figure class="affine-bookmark-block-container">
+    <a href="${block.url}" class="affine-bookmark-link bookmark source">
       <div class="affine-bookmark-content-wrapper">
         <div class="affine-bookmark-title">
           <div class="affine-bookmark-icon">
             ${icon}
           </div>
-          <div class="affine-bookmark-title-content">
-            ${block.bookmarkTitle || 'Bookmark'}
-          </div>
+          <div class="affine-bookmark-title-content bookmark-title">${
+            block.bookmarkTitle || 'Bookmark'
+          }</div>
         </div>
-        <div class="affine-bookmark-description">${
+        <div class="affine-bookmark-description bookmark-description">${
           block.description || block.url
         }</div>
         <div class="affine-bookmark-url">${block.url}</div>
@@ -42,9 +42,9 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
       <div class="affine-bookmark-banner">
         ${banner}
       </div>
-    </div>
+    </a>
     ${bookmarkCaption}
-  </div>
+  </figure>
 `;
   }
   override block2Text(

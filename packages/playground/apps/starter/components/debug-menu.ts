@@ -24,7 +24,6 @@ import {
   getCurrentBlockRange,
   SelectionUtils,
   SIZE_VARIABLES,
-  updateBlockType,
   VARIABLES,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -226,7 +225,7 @@ export class DebugMenu extends ShadowlessElement {
     if (!blockRange) {
       return;
     }
-    updateBlockType(blockRange.models, flavour, type);
+    // updateBlockType(blockRange.models, flavour, type);
   }
 
   private _addCodeBlock(e: PointerEvent) {

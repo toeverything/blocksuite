@@ -5,16 +5,14 @@ import { assertExists } from '@blocksuite/store';
 import { getService } from '../../__internal__/service.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { deleteModelsByRange } from '../../page-block/index.js';
+import { getTextSelection } from '../../page-block/utils/selection.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
-import { getCurrentBlockRange } from '../utils/index.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
-  copyBlocks,
+  copyBlocksInPage,
   textedClipboardData2Blocks,
 } from './utils/commons.js';
-
-// TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
 
 export class PageClipboard implements Clipboard {
   _page!: Page;
@@ -32,9 +30,15 @@ export class PageClipboard implements Clipboard {
     this._ele.handleEvent('copy', ctx => {
       this._onCopy(ctx);
     });
-    this._ele.handleEvent('paste', ctx => {
-      this._onPaste(ctx);
-    });
+    this._ele.handleEvent(
+      'paste',
+      ctx => {
+        this._onPaste(ctx);
+      },
+      {
+        global: true,
+      }
+    );
   }
 
   dispose() {
@@ -47,14 +51,16 @@ export class PageClipboard implements Clipboard {
     if (!activeEditorManager.isActive(this._ele)) {
       return;
     }
-    const range = getCurrentBlockRange(this._page);
-    if (!e.clipboardData || !range) {
+
+    const textSelection = getTextSelection(this._ele);
+
+    if (!e.clipboardData || !textSelection) {
       return;
     }
     e.preventDefault();
 
     let blocks = [];
-    const focusedBlockModel = deleteModelsByRange(this._page, range);
+    const focusedBlockModel = deleteModelsByRange(this._ele, textSelection);
     // This assert is unreliable
     // but it's reasonable to paste nothing when focus block is not found
     assertExists(focusedBlockModel);
@@ -70,30 +76,24 @@ export class PageClipboard implements Clipboard {
     this._page.captureSync();
 
     const service = getService(focusedBlockModel.flavour);
-    assertExists(range);
-    await service.json2Block(focusedBlockModel, blocks, range);
+    await service.json2Block(focusedBlockModel, blocks, textSelection.from);
 
     this._page.captureSync();
 
     this._page.slots.pasted.emit(blocks);
   };
 
-  private _onCopy = async (
-    ctx: UIEventStateContext,
-    range = getCurrentBlockRange(this._page)
-  ) => {
+  private _onCopy = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
 
     if (!activeEditorManager.isActive(this._ele)) {
       return;
     }
-    if (!range) {
-      return;
-    }
+
     e.preventDefault();
     this._page.captureSync();
 
-    await copyBlocks(range);
+    await copyBlocksInPage(this._ele);
 
     this._page.captureSync();
 
@@ -106,12 +106,12 @@ export class PageClipboard implements Clipboard {
     if (!activeEditorManager.isActive(this._ele)) {
       return;
     }
-    const range = getCurrentBlockRange(this._page);
-    if (!range) {
+    const textSelection = getTextSelection(this._ele);
+    if (!textSelection) {
       return;
     }
     e.preventDefault();
-    await this._onCopy(ctx, range);
-    deleteModelsByRange(this._page, range);
+    await this._onCopy(ctx);
+    deleteModelsByRange(this._ele, textSelection);
   };
 }

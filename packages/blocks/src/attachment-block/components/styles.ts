@@ -2,10 +2,9 @@ import { css } from 'lit';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 
-const renameStyles = css`
-  .attachment-rename-container {
-    position: absolute;
-    right: 0;
+export const renameStyles = css`
+  .affine-attachment-rename-container {
+    position: fixed;
     top: 0;
 
     display: flex;
@@ -19,9 +18,10 @@ const renameStyles = css`
     padding: 12px;
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
+    z-index: var(--affine-z-index-popover);
   }
 
-  .attachment-rename-input-wrapper {
+  .affine-attachment-rename-input-wrapper {
     flex: 1;
     display: flex;
     align-items: center;
@@ -32,7 +32,7 @@ const renameStyles = css`
     border: var(--affine-border-color) solid 1px;
   }
 
-  .attachment-rename-input-wrapper input {
+  .affine-attachment-rename-input-wrapper input {
     width: 100%;
     flex: 1;
     border: none;
@@ -40,14 +40,23 @@ const renameStyles = css`
     background: transparent;
   }
 
-  .attachment-rename-extension {
+  .affine-attachment-rename-extension {
     font-size: var(--affine-font-xs);
     color: var(--affine-text-secondary-color);
+  }
+
+  .affine-attachment-rename-overlay-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--affine-z-index-popover);
   }
 `;
 
 const moreMenuStyles = css`
-  .attachment-options-more {
+  .affine-attachment-options-more {
     position: absolute;
     right: 0;
     top: 0;
@@ -64,14 +73,14 @@ const moreMenuStyles = css`
     box-shadow: var(--affine-shadow-2);
   }
 
-  .attachment-options-more icon-button {
+  .affine-attachment-options-more icon-button {
     display: flex;
     align-items: center;
     padding: 8px;
     gap: 8px;
   }
 
-  .attachment-options-more icon-button:hover.danger {
+  .affine-attachment-options-more icon-button:hover.danger {
     background: var(--affine-background-error-color);
     fill: var(--affine-error-color);
     color: var(--affine-error-color);
@@ -104,6 +113,5 @@ export const styles = css`
   }
 
   ${tooltipStyle}
-  ${renameStyles}
   ${moreMenuStyles}
 `;

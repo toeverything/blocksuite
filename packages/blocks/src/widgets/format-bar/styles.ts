@@ -1,17 +1,19 @@
 import { css } from 'lit';
 
-import { tooltipStyle } from '../tooltip/tooltip.js';
-import { scrollbarStyle } from '../utils.js';
+import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 
-const paragraphPanelStyle = css`
-  .paragraph-button > svg:nth-child(2) {
+const paragraphButtonStyle = css`
+  .paragraph-button-icon > svg:nth-child(2) {
     transition-duration: 0.3s;
   }
-  .paragraph-button:is(:hover, :focus-visible, :active) > svg:nth-child(2) {
+  .paragraph-button-icon:is(:hover, :focus-visible, :active)
+    > svg:nth-child(2) {
     transform: rotate(180deg);
   }
 
   .paragraph-panel {
+    display: none;
+
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     position: absolute;
@@ -24,19 +26,18 @@ const paragraphPanelStyle = css`
     border-radius: 8px;
     z-index: var(--affine-z-index-popover);
   }
-
-  ${scrollbarStyle}
 `;
 
-export const formatQuickBarStyle = css`
-  .format-quick-bar {
+export const formatBarStyle = css`
+  .affine-format-bar-widget {
     box-sizing: border-box;
-    position: fixed;
+    position: absolute;
     display: flex;
     align-items: center;
     padding: 4px 8px;
     gap: 4px;
     height: 40px;
+    width: max-content;
 
     border-radius: 8px;
     background: var(--affine-background-overlay-panel-color);
@@ -51,6 +52,6 @@ export const formatQuickBarStyle = css`
     background-color: var(--affine-border-color);
   }
 
-  ${paragraphPanelStyle}
+  ${paragraphButtonStyle}
   ${tooltipStyle}
 `;

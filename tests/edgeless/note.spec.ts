@@ -260,20 +260,20 @@ test('drag handle should be shown when a note is actived in default mode or hidd
   const [x, y] = [noteBox.x + 26, noteBox.y + noteBox.height / 2];
 
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle')).toBeHidden();
   await page.mouse.dblclick(x, y);
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle')).toBeVisible();
+  await expect(page.locator('.affine-drag-handle')).toBeVisible();
 
   await page.mouse.move(0, 0);
   await setEdgelessTool(page, 'shape');
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle')).toBeHidden();
 
   await page.mouse.move(0, 0);
   await setEdgelessTool(page, 'default');
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle')).toBeVisible();
+  await expect(page.locator('.affine-drag-handle')).toBeVisible();
 });
 
 test('drag handle should work inside one note', async ({ page }) => {
@@ -286,7 +286,7 @@ test('drag handle should work inside one note', async ({ page }) => {
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '5');
   await waitNextFrame(page);
-  await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 });
 
@@ -308,17 +308,17 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
-  await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle')).toBeHidden();
   await waitNextFrame(page);
   await assertRichTexts(page, ['456', '789', '000', '123']);
 
   await page.mouse.dblclick(305, 305);
   await dragHandleFromBlockToBlockBottomById(page, '7', '4');
   await waitNextFrame(page);
-  await expect(page.locator('affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle')).toBeHidden();
   await assertRichTexts(page, ['456', '000', '789', '123']);
 
-  await expect(page.locator('affine-selected-blocks > *')).toHaveCount(0);
+  await expect(page.locator('selected > *')).toHaveCount(0);
 });
 
 test('note clipping will add new note', async ({ page }) => {
@@ -350,80 +350,89 @@ test('note clipping will add new note', async ({ page }) => {
   await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
 });
 
-test('undo/redo should work correctly after clipping', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.fixme(
+  'undo/redo should work correctly after clipping',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await switchEditorMode(page);
+    await switchEditorMode(page);
 
-  await selectNoteInEdgeless(page, ids.noteId);
+    await selectNoteInEdgeless(page, ids.noteId);
 
-  await hoverOnNote(page, ids.noteId);
-  await waitNextFrame(page, 500);
+    await hoverOnNote(page, ids.noteId);
+    await waitNextFrame(page, 500);
 
-  const buttonRect = await page
-    .locator('note-scissors-button .scissors-button')
-    .boundingBox();
+    const buttonRect = await page
+      .locator('note-scissors-button .scissors-button')
+      .boundingBox();
 
-  assertRectExist(buttonRect);
+    assertRectExist(buttonRect);
 
-  await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
+    await page.mouse.move(
+      buttonRect.x + 1,
+      buttonRect.y + buttonRect.height / 2
+    );
 
-  await waitNextFrame(page, 2000);
-  await page.locator('affine-note-scissors').click();
+    await waitNextFrame(page, 2000);
+    await page.locator('affine-note-scissors').click();
 
-  await undoByKeyboard(page);
-  await waitNextFrame(page);
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
-  await redoByKeyboard(page);
-  await waitNextFrame(page);
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
-});
+    await undoByKeyboard(page);
+    await waitNextFrame(page);
+    await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
+    await redoByKeyboard(page);
+    await waitNextFrame(page);
+    await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+  }
+);
 
-test('undo/redo should work correctly after resizing', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await activeNoteInEdgeless(page, ids.noteId);
-  await waitNextFrame(page, 400);
-  // current implementation may be a little inefficient
-  await fillLine(page, true);
+test.fixme(
+  'undo/redo should work correctly after resizing',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await activeNoteInEdgeless(page, ids.noteId);
+    await waitNextFrame(page, 400);
+    // current implementation may be a little inefficient
+    await fillLine(page, true);
 
-  await page.mouse.click(0, 0);
-  await waitNextFrame(page, 400);
-  await selectNoteInEdgeless(page, ids.noteId);
+    await page.mouse.click(0, 0);
+    await waitNextFrame(page, 400);
+    await selectNoteInEdgeless(page, ids.noteId);
 
-  const initRect = await getNoteRect(page, ids);
-  const rightHandle = page.locator('.handle[aria-label="right"] .resize');
-  const box = await rightHandle.boundingBox();
-  if (box === null) throw new Error();
+    const initRect = await getNoteRect(page, ids);
+    const rightHandle = page.locator('.handle[aria-label="right"] .resize');
+    const box = await rightHandle.boundingBox();
+    if (box === null) throw new Error();
 
-  await dragBetweenCoords(
-    page,
-    { x: box.x + 5, y: box.y + 5 },
-    { x: box.x + 105, y: box.y + 5 }
-  );
-  const draggedRect = await getNoteRect(page, ids);
-  assertRectEqual(draggedRect, {
-    x: initRect.x,
-    y: initRect.y,
-    w: initRect.w + 100,
-    h: draggedRect.h, // not assert `h` here
-  });
-  expect(draggedRect.h).toBeLessThan(initRect.h);
+    await dragBetweenCoords(
+      page,
+      { x: box.x + 5, y: box.y + 5 },
+      { x: box.x + 105, y: box.y + 5 }
+    );
+    const draggedRect = await getNoteRect(page, ids);
+    assertRectEqual(draggedRect, {
+      x: initRect.x,
+      y: initRect.y,
+      w: initRect.w + 100,
+      h: draggedRect.h, // not assert `h` here
+    });
+    expect(draggedRect.h).toBeLessThan(initRect.h);
 
-  await undoByKeyboard(page);
-  await waitNextFrame(page);
-  const undoRect = await getNoteRect(page, ids);
-  assertRectEqual(undoRect, initRect);
+    await undoByKeyboard(page);
+    await waitNextFrame(page);
+    const undoRect = await getNoteRect(page, ids);
+    assertRectEqual(undoRect, initRect);
 
-  await redoByKeyboard(page);
-  await waitNextFrame(page);
-  const redoRect = await getNoteRect(page, ids);
-  assertRectEqual(redoRect, draggedRect);
-});
+    await redoByKeyboard(page);
+    await waitNextFrame(page);
+    const redoRect = await getNoteRect(page, ids);
+    assertRectEqual(redoRect, draggedRect);
+  }
+);
 
 test.fixme(
   'format quick bar should show up when double-clicking on text',

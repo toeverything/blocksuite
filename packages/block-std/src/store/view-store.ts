@@ -171,15 +171,17 @@ export class ViewStore<NodeViewType = unknown> {
     const tree = this.fromPath(path);
     assertExists(tree, `Invalid path to get node in view: ${path}`);
 
-    const iterate = (node: NodeViewTree<NodeViewType>, index: number) => {
-      const result = fn(node, index, tree);
-      if (result === true) {
-        return;
-      }
-      node.children.forEach(iterate);
-    };
+    const iterate =
+      (parent: NodeViewTree<NodeViewType>) =>
+      (node: NodeViewTree<NodeViewType>, index: number) => {
+        const result = fn(node, index, parent);
+        if (result === true) {
+          return;
+        }
+        node.children.forEach(iterate(node));
+      };
 
-    tree.children.forEach(iterate);
+    tree.children.forEach(iterate(tree));
   };
 
   getParent = (path: string[]) => {

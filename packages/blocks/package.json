@@ -29,7 +29,6 @@
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
     "file-type": "^16.5.4",
-    "hotkeys-js": "^3.11.2",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
     "lit": "^2.7.6",

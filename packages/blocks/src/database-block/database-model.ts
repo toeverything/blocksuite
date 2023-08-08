@@ -3,7 +3,6 @@ import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
 import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
 import { viewManager } from './common/data-view.js';
-import { DEFAULT_TITLE } from './common/header/consts.js';
 import type { Column } from './table/types.js';
 import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
 import { insertPositionToIndex } from './utils/insert.js';
@@ -239,7 +238,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
     views: [],
-    title: internal.Text(DEFAULT_TITLE),
+    title: internal.Text(''),
     cells: {},
     columns: [],
   }),

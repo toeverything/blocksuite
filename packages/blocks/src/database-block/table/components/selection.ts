@@ -510,28 +510,31 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     isRowSelection?: boolean,
     isEditing = false
   ) {
-    const div = this.focusRef.value;
-    assertExists(div);
-    if (focus && !isRowSelection) {
-      const { left, top, width, height, scale } = this.getRect(
-        focus.rowIndex,
-        focus.rowIndex,
-        focus.columnIndex,
-        focus.columnIndex
-      );
-      const tableRect = this.tableContainer.getBoundingClientRect();
-      div.style.left = `${left - tableRect.left / scale}px`;
-      div.style.top = `${top - tableRect.top / scale}px`;
-      div.style.width = `${width}px`;
-      div.style.height = `${height}px`;
-      div.style.borderColor = 'var(--affine-primary-color)';
-      div.style.boxShadow = isEditing
-        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
-        : 'unset';
-      div.style.display = 'block';
-    } else {
-      div.style.display = 'none';
-    }
+    // Calculate styles after dom update.
+    requestAnimationFrame(() => {
+      const div = this.focusRef.value;
+      assertExists(div);
+      if (focus && !isRowSelection) {
+        const { left, top, width, height, scale } = this.getRect(
+          focus.rowIndex,
+          focus.rowIndex,
+          focus.columnIndex,
+          focus.columnIndex
+        );
+        const tableRect = this.tableContainer.getBoundingClientRect();
+        div.style.left = `${left - tableRect.left / scale}px`;
+        div.style.top = `${top - tableRect.top / scale}px`;
+        div.style.width = `${width}px`;
+        div.style.height = `${height}px`;
+        div.style.borderColor = 'var(--affine-primary-color)';
+        div.style.boxShadow = isEditing
+          ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
+          : 'unset';
+        div.style.display = 'block';
+      } else {
+        div.style.display = 'none';
+      }
+    });
   }
 
   getRect(top: number, bottom: number, left: number, right: number) {

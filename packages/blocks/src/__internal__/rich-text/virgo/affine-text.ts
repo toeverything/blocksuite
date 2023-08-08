@@ -26,7 +26,6 @@ export function affineTextStyles(
       color: 'var(--affine-text-primary-color)',
       'border-radius': '4px',
       padding: '3px 6px',
-      'font-size': 'calc(var(--affine-font-base) - 4px)',
       'font-variant-ligatures': 'none',
       'line-height': 'var(--affine-font-base)',
       border: '1px solid var(--affine-border-color)',
@@ -60,6 +59,15 @@ export class AffineText extends ShadowlessElement {
     const style = this.delta.attributes
       ? affineTextStyles(this.delta.attributes)
       : styleMap({});
+
+    // we need to avoid \n appearing before and after the span element, which will
+    // cause the unexpected space
+    if (this.delta.attributes?.code) {
+      return html`<code style=${style}
+        ><v-text .str=${this.delta.insert}></v-text
+      ></code>`;
+    }
+
     // we need to avoid \n appearing before and after the span element, which will
     // cause the unexpected space
     return html`<span style=${style}

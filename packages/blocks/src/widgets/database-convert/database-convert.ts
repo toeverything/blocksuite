@@ -3,26 +3,27 @@ import {
   DatabaseSearchClose,
   DatabaseTableViewIcon,
 } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
-import { html, LitElement, type TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { WidgetElement } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/store';
+import { html, type TemplateResult } from 'lit';
+import { customElement } from 'lit/decorators.js';
 
-import { getCurrentBlockRange } from '../../__internal__/index.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
 import { multiSelectPureColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
-import type { DatabaseBlockModel } from '../../database-block/index.js';
+import type { DatabaseBlockModel } from '../../database-block/database-model.js';
+import { isPageComponent } from '../../page-block/utils/guard.js';
+import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { styles } from './styles.js';
 
 type DatabaseViewName = 'table' | 'kanban';
 
-type DatabaseView = {
+interface DatabaseView {
   type: DatabaseViewName;
   text: string;
   icon: TemplateResult;
   description?: string;
   isComingSoon?: boolean;
-};
+}
 
 const databaseViews: DatabaseView[] = [
   {
@@ -39,29 +40,33 @@ const databaseViews: DatabaseView[] = [
   },
 ];
 
-@customElement('affine-database-modal')
-export class DatabaseModal extends LitElement {
+export const AFFINE_DATABASE_CONVERT_WIDGET_TAG =
+  'affine-database-convert-widget';
+
+export const DATABASE_CONVERT_WHITE_LIST = ['affine:list', 'affine:paragraph'];
+
+@customElement(AFFINE_DATABASE_CONVERT_WIDGET_TAG)
+export class AffineDatabaseConvertWidget extends WidgetElement {
   static override styles = styles;
 
-  @property({ attribute: false })
-  page!: Page;
-
-  @state()
-  private _selectedView: DatabaseViewName = 'table';
-
-  @property({ attribute: false })
-  abortController!: AbortController;
+  override firstUpdated() {
+    this.style.display = 'none';
+  }
 
   private _convertToDatabase(viewType: DatabaseViewName) {
-    if (viewType !== 'table') return;
-    this._hide();
+    const pageElement = this.pageElement;
+    if (!isPageComponent(pageElement)) {
+      throw new Error(
+        'database convert widget must be hosted in page component'
+      );
+    }
+    const selectedModels = getSelectedContentModels(pageElement);
+    //TODO: kanban view
+    if (viewType !== 'table' || selectedModels.length === 0) return;
+
     this.page.captureSync();
 
-    const range = getCurrentBlockRange(this.page);
-    assertExists(range);
-    const models = range.models;
-
-    const parentModel = this.page.getParent(models[0]);
+    const parentModel = this.page.getParent(selectedModels[0]);
     assertExists(parentModel);
 
     const id = this.page.addBlock(
@@ -71,7 +76,7 @@ export class DatabaseModal extends LitElement {
         titleColumnName: 'Title',
       },
       parentModel,
-      parentModel.children.indexOf(models[0])
+      parentModel.children.indexOf(selectedModels[0])
     );
 
     const databaseModel = this.page.getBlockById(id) as DatabaseBlockModel;
@@ -86,22 +91,18 @@ export class DatabaseModal extends LitElement {
     );
     databaseModel.applyColumnUpdate();
 
-    this.page.moveBlocks(models, databaseModel);
-  }
+    this.page.moveBlocks(selectedModels, databaseModel);
 
-  private _hide() {
-    this.abortController.abort();
+    this.style.display = 'none';
   }
 
   override render() {
-    return html` <div class="overlay-root">
-      <div class="overlay-mask" @click="${this._hide}"></div>
+    return html`<div class=${AFFINE_DATABASE_CONVERT_WIDGET_TAG}>
+      <div class="overlay-mask"></div>
       <div class="modal-container">
         <div class="modal-header">
           <div class="modal-header-title">Select Database View</div>
-          <div class="modal-header-close-icon" @click="${this._hide}">
-            ${DatabaseSearchClose}
-          </div>
+          <div class="modal-header-close-icon">${DatabaseSearchClose}</div>
         </div>
         <div class="modal-body">
           <div class="modal-desc">
@@ -110,7 +111,6 @@ export class DatabaseModal extends LitElement {
           </div>
           <div class="modal-view-container">
             ${databaseViews.map(view => {
-              const isSelected = view.type === this._selectedView;
               return html`
                 <div
                   class="modal-view-item ${view.type} ${view.isComingSoon
@@ -118,11 +118,7 @@ export class DatabaseModal extends LitElement {
                     : ''}"
                   @click=${() => this._convertToDatabase(view.type)}
                 >
-                  <div
-                    class="modal-view-item-content ${isSelected
-                      ? 'selected'
-                      : ''}"
-                  >
+                  <div class="modal-view-item-content">
                     <div class="modal-view-item-icon">${view.icon}</div>
                     <div class="modal-view-item-text">${view.text}</div>
                   </div>
@@ -142,6 +138,6 @@ export class DatabaseModal extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-modal': DatabaseModal;
+    [AFFINE_DATABASE_CONVERT_WIDGET_TAG]: AffineDatabaseConvertWidget;
   }
 }

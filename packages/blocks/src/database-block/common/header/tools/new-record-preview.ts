@@ -5,7 +5,7 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { Point, Rect } from '../../../../__internal__/utils/rect.js';
-import type { DragIndicator } from '../../../../components/drag-handle.js';
+import type { DragIndicator } from '../../../../components/drag-indicator.js';
 import type { InsertPosition } from '../../../types.js';
 
 @customElement('affine-database-new-record-preview')

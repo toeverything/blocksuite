@@ -1,12 +1,6 @@
 import { css } from 'lit';
 
 export const styles = css`
-  :host {
-    font-family: var(--affine-font-family);
-  }
-  :host * {
-    box-sizing: border-box;
-  }
   .overlay-mask {
     position: fixed;
     top: 0;

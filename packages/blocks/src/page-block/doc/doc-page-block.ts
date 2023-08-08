@@ -1,6 +1,6 @@
 import './meta-data/meta-data.js';
 
-import type { BlockService } from '@blocksuite/block-std';
+import { type BlockService } from '@blocksuite/block-std';
 import {
   PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
@@ -29,6 +29,7 @@ import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
+import { UtilManager } from '../utils/util-manager.js';
 
 export interface PageViewport {
   left: number;
@@ -123,6 +124,12 @@ export class DocPageBlockComponent
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
+
+  /**
+   * @internal
+   * just used for test
+   */
+  utilManager = new UtilManager(this);
 
   clipboard = new PageClipboard(this);
 
@@ -331,6 +338,116 @@ export class DocPageBlockComponent
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
     this.clipboard.init(this.page);
+
+    this.bindHotKey({
+      ArrowUp: () => {
+        const view = this.root.viewStore;
+        const selection = this.root.selectionManager;
+        const sel = selection.value.find(
+          sel => sel.is('text') || sel.is('block')
+        );
+        if (!sel) return;
+        const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
+          if (nodeView.type === 'block' && parent.view === this) {
+            return true;
+          }
+          return;
+        });
+        if (!focus) return;
+        const notes = this.childBlockElements.filter(
+          el => el.model.flavour === 'affine:note'
+        );
+        const index = notes.indexOf(focus.view as BlockElement);
+        if (index !== 0) {
+          const prev = notes[index - 1];
+          const lastNoteChild = sel.is('text')
+            ? prev.childBlockElements.reverse().find(el => !!el.model.text)
+            : prev.childBlockElements.at(-1);
+          if (!lastNoteChild) return;
+          selection.update(selList =>
+            selList
+              .filter(sel => !sel.is('text') && !sel.is('block'))
+              .concat([
+                sel.is('text')
+                  ? selection.getInstance('text', {
+                      from: {
+                        path: lastNoteChild.path,
+                        index: lastNoteChild.model.text?.length ?? 0,
+                        length: 0,
+                      },
+                      to: null,
+                    })
+                  : selection.getInstance('block', {
+                      path: lastNoteChild.path,
+                    }),
+              ])
+          );
+          return true;
+        }
+
+        selection.update(selList =>
+          selList
+            .filter(sel => !sel.is('text') && !sel.is('block'))
+            .concat([
+              selection.getInstance('text', {
+                from: {
+                  path: this.path,
+                  index: this.model.title.length,
+                  length: 0,
+                },
+                to: null,
+              }),
+            ])
+        );
+        return true;
+      },
+      ArrowDown: () => {
+        const view = this.root.viewStore;
+        const selection = this.root.selectionManager;
+        const sel = selection.value.find(
+          sel => sel.is('text') || sel.is('block')
+        );
+        if (!sel) return;
+        const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
+          if (nodeView.type === 'block' && parent.view === this) {
+            return true;
+          }
+          return;
+        });
+        if (!focus) return;
+        const notes = this.childBlockElements.filter(
+          el => el.model.flavour === 'affine:note'
+        );
+        const index = notes.indexOf(focus.view as BlockElement);
+        if (index < notes.length - 1) {
+          const prev = notes[index + 1];
+          const firstNoteChild = sel.is('text')
+            ? prev.childBlockElements.find(x => !!x.model.text)
+            : prev.childBlockElements.at(0);
+          if (!firstNoteChild) return;
+          selection.update(selList =>
+            selList
+              .filter(sel => !sel.is('text') && !sel.is('block'))
+              .concat([
+                sel.is('text')
+                  ? selection.getInstance('text', {
+                      from: {
+                        path: firstNoteChild.path,
+                        index: 0,
+                        length: 0,
+                      },
+                      to: null,
+                    })
+                  : selection.getInstance('block', {
+                      path: firstNoteChild.path,
+                    }),
+              ])
+          );
+          return true;
+        }
+        return;
+      },
+    });
   }
 
   override disconnectedCallback() {
@@ -371,7 +488,7 @@ export class DocPageBlockComponent
 
     const meta = html`
       <affine-page-meta-data
-        .host="${this}"
+        .pageElement="${this}"
         .page="${this.page}"
       ></affine-page-meta-data>
     `;
