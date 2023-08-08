@@ -2,9 +2,10 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 
 import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
-import { DATABASE_TITLE_LENGTH, DEFAULT_TITLE } from './consts.js';
+import { DATABASE_TITLE_LENGTH } from './consts.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
@@ -48,11 +49,13 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     }
 
     .database-title-empty::before {
-      content: 'Database';
+      content: 'Untitled';
       position: absolute;
       pointer-events: none;
+      color: var(--affine-text-primary-color);
+    }
+    .database-title-empty:focus::before {
       color: var(--affine-placeholder-color);
-      opacity: 0.5;
     }
   `;
 
@@ -109,28 +112,22 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   };
 
   private _onTitleFocus = () => {
-    this._titleContainer.classList.remove('ellipsis');
-
     this._titleVInput?.setActive(true);
-    if (this._titleVInput?.value === 'Database') {
-      this._titleVInput?.setValue('');
-    }
   };
 
   private _onTitleBlur = () => {
-    this._titleContainer.classList.add('ellipsis');
-
     this._titleVInput?.setActive(false);
-    if (this._titleVInput?.value === '') {
-      this._titleVInput?.setValue(DEFAULT_TITLE);
-    }
   };
 
   override render() {
     const isEmpty = !this.titleText || !this.titleText.length;
+    const classList = classMap({
+      'database-title': true,
+      'database-title-empty': isEmpty,
+    });
     return html` <div class="affine-database-title">
       <div
-        class="database-title ${isEmpty ? 'database-title-empty' : ''}"
+        class="${classList}"
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
       ></div>
