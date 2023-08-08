@@ -43,7 +43,7 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test.fixme('block level range delete', async ({ page }) => {
+test('block level range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -70,7 +70,7 @@ test.fixme('block level range delete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test.fixme('block level range delete by forwardDelete', async ({ page }) => {
+test('block level range delete by forwardDelete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);

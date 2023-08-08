@@ -203,7 +203,7 @@ test(
   }
 );
 
-test.fixme(scoped`basic paired undo/redo`, async ({ page }) => {
+test(scoped`basic paired undo/redo`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -234,7 +234,7 @@ test(scoped`undo/redo with keyboard`, async ({ page }) => {
   await assertText(page, 'hello');
 });
 
-test.fixme(scoped`undo after adding block twice`, async ({ page }) => {
+test(scoped`undo after adding block twice`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -284,32 +284,29 @@ test(
   }
 );
 
-test.fixme(
-  scoped`undo/redo twice after adding block twice`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
-    await type(page, 'hello');
-    await pressEnter(page);
-    await type(page, 'world');
-    await assertRichTexts(page, ['hello', 'world']);
+test(scoped`undo/redo twice after adding block twice`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await pressEnter(page);
+  await type(page, 'world');
+  await assertRichTexts(page, ['hello', 'world']);
 
-    await undoByKeyboard(page);
-    await assertRichTexts(page, ['hello']);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['hello']);
 
-    await undoByKeyboard(page);
-    await assertRichTexts(page, ['']);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['']);
 
-    await redoByClick(page);
-    await assertRichTexts(page, ['hello']);
+  await redoByClick(page);
+  await assertRichTexts(page, ['hello']);
 
-    await redoByKeyboard(page);
-    await assertRichTexts(page, ['hello', 'world']);
-  }
-);
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['hello', 'world']);
+});
 
-test.fixme(scoped`should undo/redo works on title`, async ({ page }) => {
+test(scoped`should undo/redo works on title`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);
@@ -346,7 +343,7 @@ test.fixme(scoped`should undo/redo works on title`, async ({ page }) => {
   await assertRichTexts(page, ['hello ']);
 });
 
-test.fixme(scoped`should undo/redo cursor works on title`, async ({ page }) => {
+test(scoped`should undo/redo cursor works on title`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await waitNextFrame(page);

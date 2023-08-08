@@ -21,6 +21,7 @@ export class PageKeyboardManager {
         },
         Backspace: this._handleDelete,
         Delete: this._handleDelete,
+        'Control-d': this._handleDelete,
       },
       {
         global: true,
