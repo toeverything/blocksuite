@@ -116,9 +116,7 @@ test.fixme('copy and paste', async ({ page }) => {
   await assertEdgelessCanvasText(page, 'hdddello');
 });
 
-test.only('normalize text element rect after change its font', async ({
-  page,
-}) => {
+test('normalize text element rect after change its font', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
