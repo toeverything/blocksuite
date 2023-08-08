@@ -782,8 +782,7 @@ test('press left in first paragraph start should not change cursor position', as
   await focusRichText(page);
   await type(page, '1');
 
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 2);
   await type(page, 'l');
   await assertRichTexts(page, ['l1']);
   await assertTitle(page, '');
@@ -900,7 +899,8 @@ test('press arrow down in indent line should not move caret to the start of line
 
   // Focus the empty child paragraph
   await focusRichText(page, 2);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page, 2);
+  await pressArrowRight(page);
   await waitNextFrame(page);
   // Now the caret should be at the end of the last paragraph
   await type(page, '1');
@@ -914,9 +914,8 @@ test('press arrow down in indent line should not move caret to the start of line
 
   await focusRichText(page, 1);
   // Through long text
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page, 3);
+  await pressArrowRight(page);
   await type(page, '2');
   await assertRichTexts(page, ['', '', '0'.repeat(100), '012']);
 });
@@ -989,7 +988,8 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
     // Click at the top-left corner of the 2nd last block to place the cursor at its start
     await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
     // Cursor should have been moved to the start of the last block.
-    await pressArrowDown(page);
+    await pressArrowDown(page, 2);
+    await pressArrowLeft(page);
     await type(page, "I'm here. ");
     await assertRichTexts(page, [
       'This is the 2nd last block.',
@@ -1002,7 +1002,8 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
     // Click at the top-left corner of the last block to place the cursor at its start
     await focusRichText(page, 1, { clickPosition: { x: 0, y: 0 } });
     // Cursor should have been moved to the end of the only line.
-    await pressArrowDown(page);
+    await pressArrowDown(page, 2);
+    await pressArrowRight(page);
     await type(page, " I'm here.");
     await assertRichTexts(page, [
       'This is the 2nd last block.',

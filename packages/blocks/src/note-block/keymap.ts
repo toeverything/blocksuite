@@ -4,9 +4,21 @@ import type { BlockElement } from '@blocksuite/lit';
 
 const getSelection = (blockComponent: BlockElement) =>
   blockComponent.root.selectionManager;
+
 const getView = (blockComponent: BlockElement) => blockComponent.root.viewStore;
 
-const getNextSibling = (blockElement: BlockElement) => {
+const selectionToBlock = (
+  blockElement: BlockElement,
+  selection: BlockSelection
+) => getView(blockElement).viewFromPath('block', selection.path);
+
+const ensureBlockInContainer = (
+  blockElement: BlockElement,
+  containerElement: BlockElement
+) =>
+  containerElement.contains(blockElement) && blockElement !== containerElement;
+
+function getNextSibling(blockElement: BlockElement) {
   const view = getView(blockElement);
   const nextView = view.findNext(blockElement.path, node => {
     if (node.type !== 'block' || node.view.contains(blockElement)) {
@@ -16,9 +28,9 @@ const getNextSibling = (blockElement: BlockElement) => {
   });
   if (!nextView) return null;
   return view.viewFromPath('block', nextView.path);
-};
+}
 
-const getPrevSibling = (blockElement: BlockElement) => {
+function getPrevSibling(blockElement: BlockElement) {
   const view = getView(blockElement);
   const nextView = view.findPrev(blockElement.path, node => {
     if (node.type !== 'block') {
@@ -28,9 +40,9 @@ const getPrevSibling = (blockElement: BlockElement) => {
   });
   if (!nextView) return null;
   return view.viewFromPath('block', nextView.path);
-};
+}
 
-const getLastGrandChild = (blockElement: BlockElement) => {
+function getLastGrandChild(blockElement: BlockElement) {
   const view = getView(blockElement);
   let output = blockElement;
   view.walkThrough((node, index, parent) => {
@@ -44,9 +56,9 @@ const getLastGrandChild = (blockElement: BlockElement) => {
     return;
   }, blockElement.path);
   return output;
-};
+}
 
-const setBlockSelection = (blockElement: BlockElement) => {
+function setBlockSelection(blockElement: BlockElement) {
   const selection = getSelection(blockElement);
   const path = blockElement.path;
   selection.update(selList => {
@@ -54,16 +66,16 @@ const setBlockSelection = (blockElement: BlockElement) => {
       .filter(sel => !sel.is('text') && !sel.is('block'))
       .concat(selection.getInstance('block', { path }));
   });
-};
+}
 
-const getSelectionBySide = (blockElement: BlockElement, tail: boolean) => {
+function getSelectionBySide(blockElement: BlockElement, tail: boolean) {
   const selection = getSelection(blockElement);
   const selections = selection.value.filter(sel => sel.is('block'));
   const sel = selections.at(tail ? -1 : 0) as BlockSelection | undefined;
   return sel ?? null;
-};
+}
 
-const getAnchorSelection = (blockElement: BlockElement) => {
+function getAnchorSelection(blockElement: BlockElement) {
   const selection = getSelection(blockElement);
   const selections = selection.value.filter(sel => sel.is('block'));
   const sel = selections.find(sel =>
@@ -72,9 +84,9 @@ const getAnchorSelection = (blockElement: BlockElement) => {
   if (!sel) return null;
 
   return sel;
-};
+}
 
-const getNextBlock = (blockElement: BlockElement) => {
+function getNextBlock(blockElement: BlockElement) {
   const focus = getAnchorSelection(blockElement);
   if (!focus) return null;
 
@@ -96,9 +108,9 @@ const getNextBlock = (blockElement: BlockElement) => {
   }
 
   return null;
-};
+}
 
-const getPrevBlock = (blockElement: BlockElement) => {
+function getPrevBlock(blockElement: BlockElement) {
   const focus = getAnchorSelection(blockElement);
   if (!focus) return null;
 
@@ -121,21 +133,13 @@ const getPrevBlock = (blockElement: BlockElement) => {
   }
 
   return null;
-};
+}
 
-const selectionToBlock = (
-  blockElement: BlockElement,
-  selection: BlockSelection
-) => {
-  const view = getView(blockElement);
-  return view.viewFromPath('block', selection.path);
-};
-
-const selectBetween = (
+function selectBetween(
   anchorBlock: BlockElement,
   focusBlock: BlockElement,
   tail: boolean
-) => {
+) {
   const selection = getSelection(anchorBlock);
   if (PathFinder.equals(anchorBlock.path, focusBlock.path)) {
     setBlockSelection(focusBlock);
@@ -171,16 +175,7 @@ const selectBetween = (
       .filter(sel => !sel.is('text') && !sel.is('block'))
       .concat(sel);
   });
-};
-
-const ensureBlockInContainer = (
-  blockElement: BlockElement,
-  containerElement: BlockElement
-) => {
-  return (
-    containerElement.contains(blockElement) && blockElement !== containerElement
-  );
-};
+}
 
 export const bindHotKey = (blockElement: BlockElement) => {
   let anchorSel: BlockSelection | null = null;
