@@ -338,6 +338,90 @@ export class DocPageBlockComponent
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
     this.clipboard.init(this.page);
+
+    this.bindHotKey({
+      ArrowUp: () => {
+        const view = this.root.viewStore;
+        const selection = this.root.selectionManager;
+        const sel = selection.value.find(sel => sel.is('block'));
+        if (!sel) return;
+        const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
+          if (nodeView.type === 'block' && parent.view === this) {
+            return true;
+          }
+          return;
+        });
+        if (!focus) return;
+        const notes = this.childBlockElements.filter(
+          el => el.model.flavour === 'affine:note'
+        );
+        const index = notes.indexOf(focus.view as BlockElement);
+        if (index !== 0) {
+          const prev = notes[index - 1];
+          const lastNoteChild = prev.childBlockElements.at(-1);
+          if (!lastNoteChild) return;
+          selection.update(selList =>
+            selList
+              .filter(sel => !sel.is('text') && !sel.is('block'))
+              .concat([
+                selection.getInstance('block', {
+                  path: lastNoteChild.path,
+                }),
+              ])
+          );
+          return true;
+        }
+
+        selection.update(selList =>
+          selList
+            .filter(sel => !sel.is('text') && !sel.is('block'))
+            .concat([
+              selection.getInstance('text', {
+                from: {
+                  path: this.path,
+                  index: this.model.title.length,
+                  length: 0,
+                },
+                to: null,
+              }),
+            ])
+        );
+        return true;
+      },
+      ArrowDown: () => {
+        const view = this.root.viewStore;
+        const selection = this.root.selectionManager;
+        const sel = selection.value.find(sel => sel.is('block'));
+        if (!sel) return;
+        const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
+          if (nodeView.type === 'block' && parent.view === this) {
+            return true;
+          }
+          return;
+        });
+        if (!focus) return;
+        const notes = this.childBlockElements.filter(
+          el => el.model.flavour === 'affine:note'
+        );
+        const index = notes.indexOf(focus.view as BlockElement);
+        if (index < notes.length - 1) {
+          const prev = notes[index + 1];
+          const firstNoteChild = prev.childBlockElements.at(0);
+          if (!firstNoteChild) return;
+          selection.update(selList =>
+            selList
+              .filter(sel => !sel.is('text') && !sel.is('block'))
+              .concat([
+                selection.getInstance('block', {
+                  path: firstNoteChild.path,
+                }),
+              ])
+          );
+          return true;
+        }
+        return;
+      },
+    });
   }
 
   override disconnectedCallback() {

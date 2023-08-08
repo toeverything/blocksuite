@@ -22,6 +22,7 @@ import {
   getViewportElement,
   queryCurrentMode,
 } from '../__internal__/index.js';
+import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService, registerService } from '../__internal__/service.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
@@ -269,6 +270,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
 
     this._observePosition();
+    bindContainerHotkey(this);
   }
 
   override disconnectedCallback() {
