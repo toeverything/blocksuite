@@ -582,18 +582,17 @@ export class DragHandleWidget extends WidgetElement {
       // Because the block path may be changed after moving
       const parentElement = getBlockElementByModel(parent);
       if (parentElement) {
+        const newSelections = selectedBlocks
+          .map(block => parentElement.path.concat(block.id))
+          .map(path =>
+            this.root.selectionManager.getInstance('block', { path })
+          );
+        this.root.selectionManager.set(newSelections);
+
         if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
           const noteId = getNoteId(parentElement);
           const blockId = selectedBlocks[0].id;
           this._pageBlockElement.setSelection(noteId, true, blockId);
-        } else {
-          const newSelections = selectedBlocks
-            .map(block => parentElement.path.concat(block.id))
-            .map(path =>
-              this.root.selectionManager.getInstance('block', { path })
-            );
-
-          this.root.selectionManager.set(newSelections);
         }
       }
     }, 0);
