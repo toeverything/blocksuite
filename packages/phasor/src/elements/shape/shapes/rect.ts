@@ -1,4 +1,4 @@
-import { type IBound,ShapeStyle, StrokeStyle } from '../../../consts.js';
+import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
