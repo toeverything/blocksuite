@@ -83,7 +83,10 @@ export async function pressEscape(page: Page) {
 
 export async function undoByKeyboard(page: Page) {
   await waitNextFrame(page);
-  await page.keyboard.press(`${SHORT_KEY}+z`);
+  await page.keyboard.press(`${SHORT_KEY}+z`, {
+    delay: 50,
+  });
+  await waitNextFrame(page);
 }
 
 export async function formatType(page: Page) {
@@ -94,7 +97,10 @@ export async function formatType(page: Page) {
 
 export async function redoByKeyboard(page: Page) {
   await waitNextFrame(page);
-  await page.keyboard.press(`${SHORT_KEY}+Shift+z`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+z`, {
+    delay: 50,
+  });
+  await waitNextFrame(page);
 }
 
 export async function selectAllByKeyboard(page: Page) {
