@@ -1,5 +1,6 @@
 import '../component-toolbar/component-toolbar.js';
 import '../connector/connector-handle.js';
+import '../auto-complete/edgeless-auto-complete.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { Bound } from '@blocksuite/phasor';
@@ -48,7 +49,15 @@ import {
 import { EdgelessRemoteSelection } from './edgeless-remote-selection.js';
 
 noop(EdgelessRemoteSelection);
-
+export type SelectedRect = {
+  width: number;
+  height: number;
+  borderWidth: number;
+  borderStyle: string;
+  left: number;
+  top: number;
+  rotate: number;
+};
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   // disable change-in-update warning
@@ -286,15 +295,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _selectedRectEl!: HTMLDivElement;
 
   @state()
-  private _selectedRect: {
-    width: number;
-    height: number;
-    borderWidth: number;
-    borderStyle: string;
-    left: number;
-    top: number;
-    rotate: number;
-  } = {
+  private _selectedRect: SelectedRect = {
     width: 0,
     height: 0,
     borderWidth: 0,
@@ -756,6 +757,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       >
         ${resizeHandles} ${connectorHandle}
       </div>
+      <edgeless-auto-complete
+        .edgeless=${edgeless}
+        .selectedRect=${_selectedRect}
+      >
+      </edgeless-auto-complete>
       ${this._toolbarVisible
         ? html`<edgeless-component-toolbar
             style=${styleMap({
