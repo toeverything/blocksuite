@@ -76,14 +76,15 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
     const elements = getAllNodeFromTree();
 
+    const rootRect = this.root.getBoundingClientRect();
     return elements.map(element => {
       const bounding = element.getBoundingClientRect();
       return {
         id: element.model.id,
         path: element.path,
         rect: {
-          left: bounding.left + viewportElement.scrollLeft,
-          top: bounding.top + viewportElement.scrollTop,
+          left: bounding.left + viewportElement.scrollLeft - rootRect.left,
+          top: bounding.top + viewportElement.scrollTop - rootRect.top,
           width: bounding.width,
           height: bounding.height,
         },
