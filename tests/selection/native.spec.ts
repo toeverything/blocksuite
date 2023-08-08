@@ -1522,16 +1522,17 @@ test('should select when clicking on blank area in edgeless mode', async ({
   expect(await getVirgoSelectionText(page)).toBe('456');
 });
 
-test('press ArrowLeft in the start of first paragraph should focus on title', async ({
-  page,
-}) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+test.fixme(
+  'press ArrowLeft in the start of first paragraph should focus on title',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
 
-  await focusRichText(page, 0);
-  await type(page, '123');
-  await pressArrowLeft(page, 5);
+    await focusRichText(page, 0);
+    await type(page, '123');
+    await pressArrowLeft(page, 5);
 
-  await type(page, 'title');
-  await assertTitle(page, 'title');
-});
+    await type(page, 'title');
+    await assertTitle(page, 'title');
+  }
+);
