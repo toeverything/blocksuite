@@ -14,23 +14,23 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
     const icon = block.icon
-      ? `<img alt="icon" src="${block.icon}">`
+      ? `<img class="bookmark-icon" alt="icon" src="${block.icon}">`
       : DefaultIcon.strings.join('');
     const bookmarkCaption = block.caption
       ? `<figcaption class="affine-bookmark-caption">${block.caption}</figcaption>`
       : '';
     const banner = block.image
-      ? `<div class="affine-bookmark-banner shadow"><img alt="image" src="${block.image}"></div>`
+      ? `<img class="bookmark-image" alt="image" src="${block.image}">`
       : DefaultBanner.strings.join('');
     return `
   <figure class="affine-bookmark-block-container">
     <a href="${block.url}" class="affine-bookmark-link bookmark source">
       <div class="affine-bookmark-content-wrapper">
-        <div class="affine-bookmark-title bookmark-title">
-          <div class="affine-bookmark-icon bookmark-icon">
+        <div class="affine-bookmark-title">
+          <div class="affine-bookmark-icon">
             ${icon}
           </div>
-          <div class="affine-bookmark-title-content bookmark-title-content">
+          <div class="affine-bookmark-title-content bookmark-title">
             ${block.bookmarkTitle || 'Bookmark'}
           </div>
         </div>
