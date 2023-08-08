@@ -217,9 +217,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     this._disposables.add(
       this.vEditor.slots.vRangeUpdated.on(([range]) => {
         if (range) {
-          if (!this.isEditing) {
-            this.selectCurrentCell(true);
-          }
+          this.selectCurrentCell(true);
         } else {
           this.selectCurrentCell(false);
         }
