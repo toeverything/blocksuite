@@ -38,12 +38,7 @@ import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
 import { ShapeToolController } from '../tool-controllers/shape-tool.js';
 import { TextToolController } from '../tool-controllers/text-tool.js';
-import {
-  getSelectionBoxBound,
-  getXYWH,
-  isTopLevelBlock,
-  pickTopBlock,
-} from '../utils/query.js';
+import { getSelectionBoxBound, getXYWH, pickTopBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 export type Selectable = TopLevelBlockModel | PhasorElement;
