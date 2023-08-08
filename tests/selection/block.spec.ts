@@ -85,6 +85,7 @@ test('block level range delete by forwardDelete', async ({ page }) => {
 
   await dragBetweenCoords(page, below789, above123);
   await pressForwardDelete(page);
+  await waitNextFrame(page);
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
 

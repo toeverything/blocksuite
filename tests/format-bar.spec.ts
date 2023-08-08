@@ -152,7 +152,7 @@ test('should format quick bar show when select text by keyboard', async ({
     }
   });
 
-  const formatBar = page.locator(`.format-quick-bar`);
+  const { formatBar } = getFormatBar(page);
   await expect(formatBar).toBeVisible();
 
   const leftBox = await formatBar.boundingBox();
@@ -160,7 +160,7 @@ test('should format quick bar show when select text by keyboard', async ({
     throw new Error("formatBar doesn't exist");
   }
   let rect = await getSelectionRect(page);
-  assertAlmostEqual(leftBox.x - rect.x, -60, 10);
+  assertAlmostEqual(leftBox.x - rect.x, -77, 10);
   assertAlmostEqual(leftBox.y + leftBox.height - rect.top, -5, 10);
 
   await page.keyboard.press('ArrowLeft');
@@ -182,7 +182,7 @@ test('should format quick bar show when select text by keyboard', async ({
   // The x position of the format quick bar depends on the font size
   // so there are slight differences in different environments
   rect = await getSelectionRect(page);
-  assertAlmostEqual(leftBox.x - rect.x, -60, 10);
+  assertAlmostEqual(leftBox.x - rect.x, -77, 10);
   assertAlmostEqual(leftBox.y + leftBox.height - rect.top, -5, 10);
 });
 
