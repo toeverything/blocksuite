@@ -18,7 +18,12 @@ export const MoreMenu = ({
   model: AttachmentBlockModel;
   abortController: AbortController;
 }) => {
-  return html`<div ${ref(moreMenuRef)} class="attachment-options-more" hidden>
+  const readonly = model.page.readonly;
+  return html`<div
+    ${ref(moreMenuRef)}
+    class="affine-attachment-options-more"
+    hidden
+  >
     <icon-button
       width="120px"
       height="32px"
@@ -31,6 +36,7 @@ export const MoreMenu = ({
       width="120px"
       height="32px"
       text="Duplicate"
+      ?disabled=${readonly}
       @click="${() => {
         const prop = {
           flavour: 'affine:attachment',
@@ -46,6 +52,7 @@ export const MoreMenu = ({
       height="32px"
       text="Delete"
       class="danger"
+      ?disabled=${readonly}
       @click="${() => {
         model.page.deleteBlock(model);
         abortController.abort();
