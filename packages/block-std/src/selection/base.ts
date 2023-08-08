@@ -12,6 +12,7 @@ export type BaseSelectionOptions = {
 export abstract class BaseSelection {
   static readonly type: string;
   readonly path: string[];
+
   constructor({ path }: BaseSelectionOptions) {
     this.path = path;
   }
