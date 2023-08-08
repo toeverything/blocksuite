@@ -22,10 +22,12 @@ import { styles } from './styles.js';
 export function AttachmentOptionsTemplate({
   anchor,
   model,
+  showCaption,
   abortController,
 }: {
   anchor: HTMLElement;
   model: AttachmentBlockModel;
+  showCaption: () => void;
   abortController: AbortController;
 }) {
   let hoverTimeout = 0;
@@ -149,7 +151,9 @@ export function AttachmentOptionsTemplate({
         class="has-tool-tip"
         size="24px"
         ?disabled=${readonly}
-        @click=${() => console.log('TODO caption', model)}
+        @click=${() => {
+          showCaption();
+        }}
       >
         ${CaptionIcon}
         <tool-tip inert tip-position="top" role="tooltip">Caption</tool-tip>

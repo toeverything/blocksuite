@@ -54,6 +54,20 @@ export const styles = css`
     fill: var(--affine-icon-color);
     user-select: none;
   }
+
+  .affine-attachment-caption {
+    width: 100%;
+    font-size: var(--affine-font-sm);
+    outline: none;
+    border: 0;
+    font-family: inherit;
+    text-align: center;
+    color: var(--affine-icon-color);
+    background: var(--affine-background-primary-color);
+  }
+  .affine-attachment-caption::placeholder {
+    color: var(--affine-placeholder-color);
+  }
 `;
 
 export const LoadingIcon = html`<svg
