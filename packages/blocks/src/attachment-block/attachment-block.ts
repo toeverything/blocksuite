@@ -120,7 +120,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
           : null}
       </div>
       <input
-        autofocus
         ?hidden=${!this._showCaption}
         .disabled=${this.model.page.readonly}
         class="affine-attachment-caption"
@@ -128,7 +127,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         value=${this.model.caption}
         @input=${this._onInput}
         @blur=${this._onBlur}
-        @click=${stopPropagation}
+        @pointerdown=${stopPropagation}
       /> `;
   }
 }
