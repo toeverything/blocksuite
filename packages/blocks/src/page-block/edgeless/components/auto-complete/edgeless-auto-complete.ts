@@ -1,8 +1,7 @@
 import { AutoCompleteArrowIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type {
-  ConnectorElement,
-  RoughCanvas} from '@blocksuite/phasor';
+  ConnectorElement} from '@blocksuite/phasor';
 import {
   Bound,
   type Connection,
@@ -10,10 +9,11 @@ import {
   type IVec,
   Overlay,
   PointLocation,
+  type RoughCanvas,
   ShapeElement,
   Vec,
 } from '@blocksuite/phasor';
-import { assertExists,DisposableGroup } from '@blocksuite/store/index.js';
+import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -301,7 +301,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       return nothing;
     }
     const Arrows = [Direction.Right, Direction.Bottom, Direction.Left].map(
-      (type, index) => {
+      type => {
         let top = 0,
           left = 0,
           transform = '';
