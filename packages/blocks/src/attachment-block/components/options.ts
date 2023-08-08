@@ -7,14 +7,13 @@ import {
   ViewIcon,
 } from '@blocksuite/global/config';
 import { createLitPortal } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
-import type { ImageProps } from '../../image-block/image-model.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
+import { turnIntoEmbedView } from '../utils.js';
 import { MoreMenu } from './more-menu.js';
 import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
@@ -109,14 +108,7 @@ export function AttachmentOptionsTemplate({
         size="24px"
         ?disabled=${readonly || disableEmbed}
         @click="${() => {
-          const sourceId = model.sourceId;
-          assertExists(sourceId);
-          const imageProp: ImageProps & { flavour: 'affine:image' } = {
-            flavour: 'affine:image',
-            sourceId,
-          };
-          model.page.addSiblingBlocks(model, [imageProp]);
-          model.page.deleteBlock(model);
+          turnIntoEmbedView(model);
           abortController.abort();
         }}"
       >
