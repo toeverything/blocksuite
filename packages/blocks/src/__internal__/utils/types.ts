@@ -255,6 +255,7 @@ export type SerializedBlock = {
   url?: string;
   crawled?: boolean;
   background?: string;
+  bookmarkTitle?: string;
 };
 
 export type EmbedBlockDoubleClickData = {

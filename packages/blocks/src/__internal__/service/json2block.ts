@@ -192,6 +192,7 @@ export async function addSerializedBlocks(
       icon: json.icon,
       image: json.image,
       crawled: json.crawled,
+      bookmarkTitle: json.bookmarkTitle,
     };
 
     let id: string;
