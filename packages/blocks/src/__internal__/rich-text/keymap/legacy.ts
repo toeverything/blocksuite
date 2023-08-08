@@ -14,7 +14,6 @@ import {
   handleKeyUp,
   handleLineEndForwardDelete,
   handleLineStartBackspace,
-  handleParagraphBlockLeftKey,
   handleSoftEnter,
   handleUnindent,
 } from '../rich-text-operations.js';
@@ -218,7 +217,6 @@ export function onKeyLeft(
     e.stopPropagation();
     return ALLOW_DEFAULT;
   }
-  handleParagraphBlockLeftKey(model.page, model);
   // Need jump to previous block
   return PREVENT_DEFAULT;
 }
