@@ -1,181 +1,18 @@
 import type { BlockSelection } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 
-const getSelection = (blockComponent: BlockElement) =>
-  blockComponent.root.selectionManager;
-
-const getView = (blockComponent: BlockElement) => blockComponent.root.viewStore;
-
-const selectionToBlock = (
-  blockElement: BlockElement,
-  selection: BlockSelection
-) => getView(blockElement).viewFromPath('block', selection.path);
-
-const ensureBlockInContainer = (
-  blockElement: BlockElement,
-  containerElement: BlockElement
-) =>
-  containerElement.contains(blockElement) && blockElement !== containerElement;
-
-function getNextSibling(blockElement: BlockElement) {
-  const view = getView(blockElement);
-  const nextView = view.findNext(blockElement.path, node => {
-    if (node.type !== 'block' || node.view.contains(blockElement)) {
-      return;
-    }
-    return true;
-  });
-  if (!nextView) return null;
-  return view.viewFromPath('block', nextView.path);
-}
-
-function getPrevSibling(blockElement: BlockElement) {
-  const view = getView(blockElement);
-  const nextView = view.findPrev(blockElement.path, node => {
-    if (node.type !== 'block') {
-      return;
-    }
-    return true;
-  });
-  if (!nextView) return null;
-  return view.viewFromPath('block', nextView.path);
-}
-
-function getLastGrandChild(blockElement: BlockElement) {
-  const view = getView(blockElement);
-  let output = blockElement;
-  view.walkThrough((node, index, parent) => {
-    if (
-      node.children.filter(n => n.type === 'block').length === 0 &&
-      parent.children.filter(n => n.type === 'block').at(-1) === node
-    ) {
-      output = node.view as BlockElement;
-      return true;
-    }
-    return;
-  }, blockElement.path);
-  return output;
-}
-
-function setBlockSelection(blockElement: BlockElement) {
-  const selection = getSelection(blockElement);
-  const path = blockElement.path;
-  selection.update(selList => {
-    return selList
-      .filter(sel => !sel.is('text') && !sel.is('block'))
-      .concat(selection.getInstance('block', { path }));
-  });
-}
-
-function getSelectionBySide(blockElement: BlockElement, tail: boolean) {
-  const selection = getSelection(blockElement);
-  const selections = selection.value.filter(sel => sel.is('block'));
-  const sel = selections.at(tail ? -1 : 0) as BlockSelection | undefined;
-  return sel ?? null;
-}
-
-function getAnchorSelection(blockElement: BlockElement) {
-  const selection = getSelection(blockElement);
-  const selections = selection.value.filter(sel => sel.is('block'));
-  const sel = selections.find(sel =>
-    PathFinder.equals(sel.path, blockElement.path)
-  );
-  if (!sel) return null;
-
-  return sel;
-}
-
-function getNextBlock(blockElement: BlockElement) {
-  const focus = getAnchorSelection(blockElement);
-  if (!focus) return null;
-
-  const view = getView(blockElement);
-  const focusBlock = view.viewFromPath('block', focus.path);
-  if (!focusBlock) return null;
-
-  let next: BlockElement | null = null;
-  if (focusBlock.childBlockElements[0]) {
-    next = focusBlock.childBlockElements[0];
-  }
-
-  if (!next) {
-    next = getNextSibling(focusBlock);
-  }
-
-  if (next && !next.contains(focusBlock)) {
-    return next;
-  }
-
-  return null;
-}
-
-function getPrevBlock(blockElement: BlockElement) {
-  const focus = getAnchorSelection(blockElement);
-  if (!focus) return null;
-
-  const view = getView(blockElement);
-  const focusBlock = view.viewFromPath('block', focus.path);
-  if (!focusBlock) return null;
-
-  let prev: BlockElement | null = getPrevSibling(focusBlock);
-
-  if (!prev) {
-    return null;
-  }
-
-  if (!prev.contains(focusBlock)) {
-    prev = getLastGrandChild(prev);
-  }
-
-  if (prev && prev !== blockElement) {
-    return prev;
-  }
-
-  return null;
-}
-
-function selectBetween(
-  anchorBlock: BlockElement,
-  focusBlock: BlockElement,
-  tail: boolean
-) {
-  const selection = getSelection(anchorBlock);
-  if (PathFinder.equals(anchorBlock.path, focusBlock.path)) {
-    setBlockSelection(focusBlock);
-    return;
-  }
-  const selections = [...selection.value];
-  if (selections.every(sel => !PathFinder.equals(sel.path, focusBlock.path))) {
-    if (tail) {
-      selections.push(
-        selection.getInstance('block', { path: focusBlock.path })
-      );
-    } else {
-      selections.unshift(
-        selection.getInstance('block', { path: focusBlock.path })
-      );
-    }
-  }
-
-  let start = false;
-  const sel = selections.filter(sel => {
-    if (
-      PathFinder.equals(sel.path, anchorBlock.path) ||
-      PathFinder.equals(sel.path, focusBlock.path)
-    ) {
-      start = !start;
-      return true;
-    }
-    return start;
-  });
-
-  selection.update(selList => {
-    return selList
-      .filter(sel => !sel.is('text') && !sel.is('block'))
-      .concat(sel);
-  });
-}
+import {
+  ensureBlockInContainer,
+  getBlockSelectionBySide,
+  getNextBlock,
+  getPrevBlock,
+  getTextSelection,
+  moveCursorToNextBlockElement,
+  moveCursorToPrevBlockElement,
+  pathToBlock,
+  selectBetween,
+  setBlockSelection,
+} from './utils.js';
 
 export const bindHotKey = (blockElement: BlockElement) => {
   let anchorSel: BlockSelection | null = null;
@@ -195,11 +32,24 @@ export const bindHotKey = (blockElement: BlockElement) => {
   blockElement.bindHotKey({
     ArrowDown: () => {
       reset();
-      const sel = getSelectionBySide(blockElement, true);
-      if (!sel) {
+
+      const textSelection = getTextSelection(blockElement);
+      if (textSelection) {
+        const end = textSelection.to ?? textSelection.from;
+        const block = pathToBlock(blockElement, end.path);
+        if (!block) {
+          return;
+        }
+        const nextBlock = getNextBlock(block, block => !!block.model.text);
+        moveCursorToNextBlockElement(blockElement, nextBlock);
         return;
       }
-      const focus = selectionToBlock(blockElement, sel);
+
+      const blockSelection = getBlockSelectionBySide(blockElement, true);
+      if (!blockSelection) {
+        return;
+      }
+      const focus = pathToBlock(blockElement, blockSelection.path);
       if (!focus) {
         return;
       }
@@ -216,11 +66,24 @@ export const bindHotKey = (blockElement: BlockElement) => {
     },
     ArrowUp: () => {
       reset();
-      const sel = getSelectionBySide(blockElement, false);
-      if (!sel) {
+
+      const textSelection = getTextSelection(blockElement);
+      if (textSelection) {
+        const start = textSelection.from;
+        const block = pathToBlock(blockElement, start.path);
+        if (!block) {
+          return;
+        }
+        const prevBlock = getPrevBlock(block, block => !!block.model.text);
+        moveCursorToPrevBlockElement(blockElement, prevBlock);
         return;
       }
-      const focus = selectionToBlock(blockElement, sel);
+
+      const blockSelection = getBlockSelectionBySide(blockElement, false);
+      if (!blockSelection) {
+        return;
+      }
+      const focus = pathToBlock(blockElement, blockSelection.path);
       if (!focus) {
         return;
       }
@@ -237,14 +100,14 @@ export const bindHotKey = (blockElement: BlockElement) => {
     },
     'Shift-ArrowDown': () => {
       if (!anchorSel) {
-        anchorSel = getSelectionBySide(blockElement, true);
+        anchorSel = getBlockSelectionBySide(blockElement, true);
       }
 
       if (!anchorSel) {
         return null;
       }
 
-      const anchorBlock = selectionToBlock(blockElement, anchorSel);
+      const anchorBlock = pathToBlock(blockElement, anchorSel.path);
       if (!anchorBlock) {
         return null;
       }
@@ -265,14 +128,14 @@ export const bindHotKey = (blockElement: BlockElement) => {
     },
     'Shift-ArrowUp': () => {
       if (!anchorSel) {
-        anchorSel = getSelectionBySide(blockElement, false);
+        anchorSel = getBlockSelectionBySide(blockElement, false);
       }
 
       if (!anchorSel) {
         return null;
       }
 
-      const anchorBlock = selectionToBlock(blockElement, anchorSel);
+      const anchorBlock = pathToBlock(blockElement, anchorSel.path);
       if (!anchorBlock) {
         return null;
       }
