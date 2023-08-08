@@ -62,6 +62,12 @@ const styles = css`
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;
+    visibility: hidden;
+    transition: visibility 100ms ease-in-out;
+  }
+
+  affine-data-view-kanban-group:hover .group-header-op {
+    visibility: visible;
   }
 
   .group-header-op:hover {
@@ -71,7 +77,7 @@ const styles = css`
   .group-header-op svg {
     width: 16px;
     height: 16px;
-    color: var(--affine-icon-color);
+    fill: var(--affine-icon-color);
   }
 
   .group-body {
@@ -85,10 +91,18 @@ const styles = css`
   .add-card {
     display: flex;
     align-items: center;
-    justify-content: center;
-    border: 1px solid var(--affine-border-color);
-    border-radius: 8px;
+    height: 28px;
+    padding: 4px;
+    border-radius: 4px;
     cursor: pointer;
+    font-size: 12px;
+    line-height: 20px;
+    visibility: hidden;
+    transition: visibility 100ms ease-in-out;
+  }
+
+  affine-data-view-kanban-group:hover .add-card {
+    visibility: visible;
   }
 
   .add-card:hover {
@@ -105,7 +119,36 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   group!: KanbanGroupData;
   private clickAddCard = () => {
-    this.view.addCard('end', this.group);
+    const id = this.view.addCard('end', this.group);
+    requestAnimationFrame(() => {
+      const kanban = this.closest('affine-data-view-kanban');
+      if (kanban) {
+        kanban.selection.selection = {
+          groupKey: this.group.key,
+          cardId: id,
+          focus: {
+            columnId: this.view.header.titleColumn || this.view.columns[0],
+            isEditing: true,
+          },
+        };
+      }
+    });
+  };
+  private clickAddCardInStart = () => {
+    const id = this.view.addCard('start', this.group);
+    requestAnimationFrame(() => {
+      const kanban = this.closest('affine-data-view-kanban');
+      if (kanban) {
+        kanban.selection.selection = {
+          groupKey: this.group.key,
+          cardId: id,
+          focus: {
+            columnId: this.view.header.titleColumn || this.view.columns[0],
+            isEditing: true,
+          },
+        };
+      }
+    });
   };
   private renderTitle = () => {
     const data = this.group.helper.groupData();
@@ -122,6 +165,14 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     return html` <uni-lit .uni="${data.view}" .props="${props}"></uni-lit>`;
   };
 
+  renderCount() {
+    const cards = this.group.rows;
+    if (!cards.length) {
+      return;
+    }
+    return html` <div class="group-header-count">${cards.length}</div>`;
+  }
+
   override render() {
     const cards = this.group.rows;
 
@@ -129,10 +180,12 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       <div class="group-header">
         <div class="group-header-title">
           <div class="group-header-name">${this.renderTitle()}</div>
-          <div class="group-header-count">${cards.length}</div>
+          ${this.renderCount()}
         </div>
         <div class="group-header-ops">
-          <div class="group-header-op">${PlusIcon}</div>
+          <div @click="${this.clickAddCardInStart}" class="group-header-op">
+            ${PlusIcon}
+          </div>
           <div class="group-header-op">${MoreHorizontalIcon}</div>
         </div>
       </div>
@@ -152,7 +205,12 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
           }
         )}
         <div class="add-card" @click="${this.clickAddCard}">
-          ${AddCursorIcon}
+          <div
+            style="margin-right: 4px;width: 16px;height: 16px;display:flex;align-items:center;"
+          >
+            ${AddCursorIcon}
+          </div>
+          Add
         </div>
       </div>
     `;

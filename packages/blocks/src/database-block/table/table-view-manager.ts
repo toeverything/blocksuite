@@ -117,6 +117,9 @@ export class DataViewTableManager extends BaseDataViewManager {
   }
 
   public get columns(): string[] {
+    return this.columnsWithoutFilter;
+  }
+  public get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
     this.view.columns.forEach(v => {

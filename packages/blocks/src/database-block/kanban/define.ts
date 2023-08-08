@@ -20,6 +20,11 @@ export type KanbanViewData = {
   columns: KanbanViewColumn[];
   filter: FilterGroup;
   groupBy?: GroupBy;
+  header: {
+    titleColumn?: string;
+    iconColumn?: string;
+    coverColumn?: string;
+  };
 };
 
 viewManager.register('kanban', {
@@ -46,6 +51,9 @@ viewManager.register('kanban', {
         conditions: [],
       },
       groupBy: defaultGroupBy(column.id, column.type, column.data),
+      header: {
+        titleColumn: model.columns.find(v => v.type === 'title')?.id,
+      },
     };
   },
 });

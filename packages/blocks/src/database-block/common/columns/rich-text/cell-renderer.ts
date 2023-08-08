@@ -87,6 +87,8 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       width: 100%;
       height: 100%;
       outline: none;
+      font-size: 12px;
+      line-height: 20px;
     }
 
     .affine-database-rich-text v-line {

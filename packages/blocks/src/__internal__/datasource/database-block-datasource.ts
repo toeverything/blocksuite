@@ -28,10 +28,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return this._model.page;
   }
 
-  constructor(
-    private root: BlockSuiteRoot,
-    config: DatabaseBlockDatasourceConfig
-  ) {
+  constructor(root: BlockSuiteRoot, config: DatabaseBlockDatasourceConfig) {
     super();
     this._model = root.page.workspace
       .getPage(config.pageId)
@@ -88,7 +85,10 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       }
       return;
     }
-    this._model.updateCell(rowId, { columnId: propertyId, value });
+    this._model.updateCell(rowId, {
+      columnId: propertyId,
+      value,
+    });
   }
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
@@ -107,15 +107,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     rowId: string,
     propertyId: string
   ): unknown {
-    const type = this.propertyGetType(propertyId);
-    if (type === 'title') {
-      const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
-      if (model) {
-        return this.root.renderModel(model);
-      }
-      return;
-    }
-    return this._model.getCell(rowId, propertyId)?.value;
+    return this.cellGetValue(rowId, propertyId);
   }
 
   private newColumnName() {
@@ -204,7 +196,13 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     assertExists(currentSchema);
     const { id: copyId, ...nonIdProps } = currentSchema;
     const schema = { ...nonIdProps };
-    const id = this._model.addColumn({ before: false, id: columnId }, schema);
+    const id = this._model.addColumn(
+      {
+        before: false,
+        id: columnId,
+      },
+      schema
+    );
     this._model.applyColumnUpdate();
     this._model.copyCellsByColumn(copyId, id);
     return id;
@@ -248,4 +246,5 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     ];
   }
 }
+
 export const hiddenColumn = [titleColumnConfig];

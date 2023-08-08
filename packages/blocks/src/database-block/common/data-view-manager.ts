@@ -23,6 +23,8 @@ export interface DataViewManager {
 
   get columns(): string[];
 
+  get columnsWithoutFilter(): string[];
+
   get rows(): string[];
 
   cellGetValue(rowId: string, columnId: string): unknown;
@@ -333,6 +335,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   public abstract get columns(): string[];
+  public abstract get columnsWithoutFilter(): string[];
 
   public rowAdd(insertPosition: InsertPosition): string {
     return this.dataSource.rowAdd(insertPosition);

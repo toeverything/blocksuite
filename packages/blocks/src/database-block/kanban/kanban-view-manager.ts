@@ -108,6 +108,10 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   }
 
   public get columns(): string[] {
+    return this.columnsWithoutFilter;
+  }
+
+  public get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
     this.view.columns.forEach(v => {
@@ -200,10 +204,58 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   public addCard(position: InsertPosition, group: KanbanGroupData) {
     const id = this.rowAdd(position);
     group.helper.addToGroup(id, group.value);
+    return id;
   }
 
   public get type(): string {
     return this.view.mode;
+  }
+
+  public get header() {
+    return this.view.header;
+  }
+
+  public isInHeader(columnId: string) {
+    const hd = this.view.header;
+
+    return (
+      hd.titleColumn === columnId ||
+      hd.iconColumn === columnId ||
+      hd.coverColumn === columnId
+    );
+  }
+
+  public hasHeader(rowId: string): boolean {
+    const hd = this.view.header;
+    return !!hd.titleColumn || !!hd.iconColumn || !!hd.coverColumn;
+  }
+
+  public getHeaderTitle(
+    rowId: string
+  ): DataViewKanbanColumnManager | undefined {
+    const columnId = this.view.header.titleColumn;
+    if (!columnId) {
+      return;
+    }
+    return this.columnGet(columnId);
+  }
+
+  public getHeaderIcon(rowId: string): DataViewKanbanColumnManager | undefined {
+    const columnId = this.view.header.iconColumn;
+    if (!columnId) {
+      return;
+    }
+    return this.columnGet(columnId);
+  }
+
+  public getHeaderCover(
+    rowId: string
+  ): DataViewKanbanColumnManager | undefined {
+    const columnId = this.view.header.coverColumn;
+    if (!columnId) {
+      return;
+    }
+    return this.columnGet(columnId);
   }
 }
 

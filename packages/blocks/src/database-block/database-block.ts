@@ -201,6 +201,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   private renderViews = () => {
     return html` <data-view-header-views
+      style="flex:1"
       .currentView="${this.currentView}"
       .setViewId="${this._setViewId}"
       .model="${this.model}"
@@ -265,7 +266,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             ${this.renderTitle()} ${this.renderReference()}
           </div>
           <div
-            style="display:flex;align-items:center;justify-content: space-between"
+            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
           >
             ${this.renderViews()} ${this.renderTools(viewData.view)}
           </div>
