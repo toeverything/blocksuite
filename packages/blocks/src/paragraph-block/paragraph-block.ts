@@ -91,6 +91,9 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .affine-paragraph-block-container.selected {
       background-color: var(--affine-hover-color);
     }
+    code {
+      font-size: calc(var(--affine-font-base) - 4px);
+    }
     .h1 {
       font-size: var(--affine-font-h-1);
       line-height: calc(1em + 12px);
