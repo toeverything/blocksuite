@@ -38,12 +38,7 @@ import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
 import { ShapeToolController } from '../tool-controllers/shape-tool.js';
 import { TextToolController } from '../tool-controllers/text-tool.js';
-import {
-  getSelectionBoxBound,
-  getXYWH,
-  isTopLevelBlock,
-  pickTopBlock,
-} from '../utils/query.js';
+import { getSelectionBoxBound, getXYWH, pickTopBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 export type Selectable = TopLevelBlockModel | PhasorElement;
@@ -425,20 +420,6 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
     const [modelX, modelY] = surface.toModelCoord(x, y);
     const hovered: Selectable | null =
       surface.pickTop(modelX, modelY) || pickTopBlock(notes, modelX, modelY);
-
-    // See https://github.com/toeverything/blocksuite/issues/1812
-    if (
-      // if not note block
-      !isTopLevelBlock(hovered) ||
-      // if in other mouse mode
-      this.edgelessTool.type !== 'default' ||
-      // if current selection is not active
-      !this.selection.editing ||
-      // if current selected block is not the hovered block
-      this.selection.state.elements[0] !== hovered.id
-    ) {
-      this.container.components.dragHandle?.hide();
-    }
 
     if (!hovered || this.selection?.editing) {
       return null;
