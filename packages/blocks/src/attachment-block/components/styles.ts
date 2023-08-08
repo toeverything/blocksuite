@@ -2,10 +2,9 @@ import { css } from 'lit';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 
-const renameStyles = css`
+export const renameStyles = css`
   .attachment-rename-container {
-    position: absolute;
-    right: 0;
+    position: fixed;
     top: 0;
 
     display: flex;
@@ -19,6 +18,7 @@ const renameStyles = css`
     padding: 12px;
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
+    z-index: var(--affine-z-index-popover);
   }
 
   .attachment-rename-input-wrapper {
@@ -43,6 +43,15 @@ const renameStyles = css`
   .attachment-rename-extension {
     font-size: var(--affine-font-xs);
     color: var(--affine-text-secondary-color);
+  }
+
+  .attachment-rename-overlay-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--affine-z-index-popover);
   }
 `;
 
@@ -104,6 +113,5 @@ export const styles = css`
   }
 
   ${tooltipStyle}
-  ${renameStyles}
   ${moreMenuStyles}
 `;
