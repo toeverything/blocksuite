@@ -33,7 +33,8 @@ export const AFFINE_FORMAT_BAR_WIDGET_TAG = 'affine-format-bar-widget';
 @customElement(AFFINE_FORMAT_BAR_WIDGET_TAG)
 export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
-  static customElements: CustomElementCreator[] = [];
+  static readonly customElements: Set<CustomElementCreator> =
+    new Set<CustomElementCreator>();
 
   paragraphPanelMaxHeight: string | null = null;
 
@@ -177,10 +178,10 @@ export class AffineFormatBarWidget extends WidgetElement {
     super.update(changedProperties);
     if (
       this._customElements.length === 0 &&
-      AffineFormatBarWidget.customElements.length !== 0
+      AffineFormatBarWidget.customElements.size !== 0
     ) {
-      this._customElements = AffineFormatBarWidget.customElements.map(element =>
-        element(this)
+      this._customElements = [...AffineFormatBarWidget.customElements].map(
+        element => element(this)
       );
       this.customItemsContainer.append(...this._customElements);
       this._disposables.add(() => {
