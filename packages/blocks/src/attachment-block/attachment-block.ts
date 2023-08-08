@@ -124,11 +124,11 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         .disabled=${this.model.page.readonly}
         class="affine-attachment-caption"
         placeholder="Write a caption"
-        value=${this.model.caption}
+        value=${this.model.caption ?? ''}
         @input=${this._onInput}
         @blur=${this._onBlur}
         @pointerdown=${stopPropagation}
-      /> `;
+      />`;
   }
 }
 
