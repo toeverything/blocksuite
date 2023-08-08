@@ -11,6 +11,7 @@ import { initAddNewRecordHandlers } from './new-record-preview.js';
 
 const styles = css`
   .affine-database-toolbar-item.new-record {
+    margin-left: 12px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -27,10 +28,16 @@ const styles = css`
         var(--affine-hover-color)
       ),
       var(--affine-white);
+    cursor: pointer;
   }
 
   .new-record > tool-tip {
     max-width: 280px;
+  }
+  .new-record svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--affine-icon-color);
   }
 
   .edgeless .new-record > tool-tip {

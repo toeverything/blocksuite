@@ -19,16 +19,16 @@ const styles = css`
     display: flex;
     align-items: center;
     gap: 8px;
-    width: 16px;
+    width: 24px;
     height: 32px;
     border-radius: 8px;
     transition: all 0.3s ease;
     overflow: hidden;
   }
-
-  .affine-database-search-container > svg {
-    min-width: 16px;
-    min-height: 16px;
+  .affine-database-search-container svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--affine-icon-color);
   }
 
   .search-container-expand {
@@ -67,10 +67,16 @@ const styles = css`
     justify-content: center;
     flex-shrink: 0;
     cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    height: max-content;
+  }
+  .affine-database-search-input-icon:hover {
+    background: var(--affine-hover-color);
   }
 
   .search-container-expand .affine-database-search-input-icon {
-    left: 8px;
+    left: 4px;
     pointer-events: none;
   }
 

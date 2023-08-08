@@ -10,8 +10,27 @@ import { columnManager } from '../../../common/columns/manager.js';
 import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
+import { viewOpIcons } from './view-options.js';
 
-const styles = css``;
+const styles = css`
+  .affine-database-filter-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 20px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .affine-database-filter-button:hover {
+    background-color: var(--affine-hover-color);
+  }
+  .affine-database-filter-button svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
 
 @customElement('data-view-header-tools-filter')
 export class DataViewHeaderToolsFilter extends WithDisposable(
@@ -81,11 +100,11 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
     if (!showFilter) {
       return;
     }
-    return html` <div
+    return html`<div
       @click="${this._showFilter}"
       class="affine-database-filter-button"
     >
-      Filter
+      ${viewOpIcons.filter} Filter
     </div>`;
   }
 }
