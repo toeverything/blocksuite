@@ -1,4 +1,5 @@
 import type {
+  PointerEventState,
   UIEventHandler,
   UIEventStateContext,
 } from '@blocksuite/block-std';
@@ -255,6 +256,12 @@ export class DragHandleWidget extends WidgetElement {
     return findClosestBlockElement(this._pageBlockElement, point, noteSelector);
   };
 
+  private _getContainerOffsetPoint = (state: PointerEventState) => {
+    const x = state.point.x + state.containerOffset.x;
+    const y = state.point.y + state.containerOffset.y;
+    return new Point(x, y);
+  };
+
   private _outOfNoteBlock = (noteBlock: Element, point: Point) => {
     // TODO: need to find a better way to check if the point is out of note block
     const rect = noteBlock.getBoundingClientRect();
@@ -274,7 +281,7 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _updateIndicator: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const point = new Point(state.point.x, state.point.y);
+    const point = this._getContainerOffsetPoint(state);
     const closestBlockElement = this._getClosestBlockElementByPoint(point);
     if (!closestBlockElement) {
       this._dropBlockId = '';
@@ -331,7 +338,7 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _pointerMoveOnBlock = (ctx: UIEventStateContext) => {
     const state = ctx.get('pointerState');
-    const point = new Point(state.point.x, state.point.y);
+    const point = this._getContainerOffsetPoint(state);
     const closestBlockElement = this._getClosestBlockElementByPoint(point);
     if (!closestBlockElement) {
       this._hoveredBlockId = '';
@@ -370,7 +377,7 @@ export class DragHandleWidget extends WidgetElement {
 
     // TODO: need to optimize
     // When pointer out of note block hover area or inside database, should hide drag handle
-    const point = new Point(state.point.x, state.point.y);
+    const point = this._getContainerOffsetPoint(state);
     const closestNoteBlock = this._getClosestNoteBlock(point);
     if (
       !closestNoteBlock ||
@@ -523,7 +530,7 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     const state = ctx.get('pointerState');
-    const point = new Point(state.point.x, state.point.y);
+    const point = this._getContainerOffsetPoint(state);
     const closestNoteBlock = this._getClosestNoteBlock(point);
     if (!closestNoteBlock || this._outOfNoteBlock(closestNoteBlock, point)) {
       this._dropBlockId = '';
@@ -532,7 +539,8 @@ export class DragHandleWidget extends WidgetElement {
       this._updateIndicator(ctx);
     }
 
-    this._updateDragPreviewPosition(point);
+    const previewPos = new Point(state.point.x, state.point.y);
+    this._updateDragPreviewPosition(previewPos);
     return true;
   };
 
