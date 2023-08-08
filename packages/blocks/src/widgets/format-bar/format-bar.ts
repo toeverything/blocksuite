@@ -167,6 +167,8 @@ export class AffineFormatBarWidget extends WidgetElement {
             assertExists(blockElement);
             return blockElement;
           });
+        } else {
+          this._reset();
         }
 
         this.requestUpdate();

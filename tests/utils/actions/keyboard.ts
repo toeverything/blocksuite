@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test';
 
+import { waitNextFrame } from './misc.js';
+
 const IS_MAC = process.platform === 'darwin';
 // const IS_WINDOWS = process.platform === 'win32';
 // const IS_LINUX = !IS_MAC && !IS_WINDOWS;
@@ -81,6 +83,7 @@ export async function pressEscape(page: Page) {
 
 export async function undoByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+z`);
+  await waitNextFrame(page, 50);
 }
 
 export async function formatType(page: Page) {
@@ -89,6 +92,7 @@ export async function formatType(page: Page) {
 
 export async function redoByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+Shift+z`);
+  await waitNextFrame(page, 50);
 }
 
 export async function selectAllByKeyboard(page: Page) {
