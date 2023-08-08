@@ -15,8 +15,8 @@ import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
 import type { ImageProps } from '../../image-block/image-model.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
-import { MoreMenu } from './moreMenu.js';
-import { RenameModal } from './renameModel.js';
+import { MoreMenu } from './more-menu.js';
+import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
 
 export function AttachmentOptionsTemplate({
