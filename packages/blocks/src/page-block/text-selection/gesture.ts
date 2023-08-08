@@ -64,7 +64,7 @@ export class Gesture {
 
   private _selectByCaret: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const caret = caretFromPoint(state.x, state.y);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }
@@ -96,7 +96,7 @@ export class Gesture {
       this._updateRange(state);
 
       const result = this._viewportElement
-        ? autoScroll(this._viewportElement, state.y)
+        ? autoScroll(this._viewportElement, state.raw.y)
         : false;
       if (result) {
         this._rafID = requestAnimationFrame(runner);
@@ -227,7 +227,7 @@ export class Gesture {
   private _updateRange = (state: PointerEventState) => {
     if (!this._startRange) return;
 
-    const caret = caretFromPoint(state.x, state.y);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }
