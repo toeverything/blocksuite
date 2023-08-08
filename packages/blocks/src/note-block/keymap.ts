@@ -44,7 +44,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
         if (!nextBlock) {
           return;
         }
-        moveCursorToNextBlockElement(blockElement, nextBlock);
+        moveCursorToNextBlockElement(nextBlock);
         return true;
       }
 
@@ -81,7 +81,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
         if (!prevBlock) {
           return;
         }
-        moveCursorToPrevBlockElement(blockElement, prevBlock);
+        moveCursorToPrevBlockElement(prevBlock);
         return true;
       }
 

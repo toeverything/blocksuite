@@ -306,10 +306,7 @@ export function horizontalMoveCursorToNextText(
   };
 }
 
-export function moveCursorToNextBlockElement(
-  blockElement: BlockElement,
-  nextBlock: BlockElement | null
-) {
+export function moveCursorToNextBlockElement(nextBlock: BlockElement) {
   const pos = getCurrentCaretPos(true);
   if (!pos || !nextBlock) {
     return;
@@ -322,31 +319,28 @@ export function moveCursorToNextBlockElement(
     nextBlock
   );
   if (nextRect) {
-    const viewport = blockElement.closest('affine-doc-page')?.viewportElement;
+    const viewport = nextBlock.closest('affine-doc-page')?.viewportElement;
     if (viewport) {
       autoScroll(viewport, nextRect.range.getBoundingClientRect().bottom);
     }
   }
 }
 
-export function moveCursorToPrevBlockElement(
-  blockElement: BlockElement,
-  nextBlock: BlockElement | null
-) {
+export function moveCursorToPrevBlockElement(prevBlock: BlockElement) {
   const pos = getCurrentCaretPos(false);
-  if (!pos || !nextBlock) {
+  if (!pos || !prevBlock) {
     return;
   }
   const nextRect = horizontalMoveCursorToNextText(
     {
       x: pos.left,
-      y: nextBlock.getBoundingClientRect().bottom - 2 ?? 0,
+      y: prevBlock.getBoundingClientRect().bottom - 2 ?? 0,
     },
-    nextBlock,
+    prevBlock,
     true
   );
   if (nextRect) {
-    const viewport = blockElement.closest('affine-doc-page')?.viewportElement;
+    const viewport = prevBlock.closest('affine-doc-page')?.viewportElement;
     if (viewport) {
       autoScroll(viewport, nextRect.range.getBoundingClientRect().top);
     }
