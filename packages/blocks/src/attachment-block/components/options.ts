@@ -66,6 +66,7 @@ export function AttachmentOptionsTemplate({
 
   const moreMenuRef = createRef<HTMLDivElement>();
   const disableEmbed = !model.type?.startsWith('image/');
+  const readonly = model.page.readonly;
   return html`<style>
       ${styles}
     </style>
@@ -93,7 +94,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        disabled
+        ?disabled=${readonly || true}
         @click=${() => console.log('Turn into Link view coming soon', model)}
       >
         ${LinkIcon}
@@ -104,7 +105,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${disableEmbed}
+        ?disabled=${readonly || disableEmbed}
         @click="${() => {
           const sourceId = model.sourceId;
           assertExists(sourceId);
@@ -127,6 +128,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
+        ?disabled=${readonly}
         @click="${() => {
           abortController.abort();
           const renameAbortController = new AbortController();
@@ -146,6 +148,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
+        ?disabled=${readonly}
         @click=${() => console.log('TODO caption', model)}
       >
         ${CaptionIcon}
