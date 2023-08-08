@@ -30,9 +30,9 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
           <div class="affine-bookmark-icon">
             ${icon}
           </div>
-          <div class="affine-bookmark-title-content bookmark-title">
-            ${block.bookmarkTitle || 'Bookmark'}
-          </div>
+          <div class="affine-bookmark-title-content bookmark-title">${
+            block.bookmarkTitle || 'Bookmark'
+          }</div>
         </div>
         <div class="affine-bookmark-description bookmark-description">${
           block.description || block.url
