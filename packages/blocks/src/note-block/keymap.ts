@@ -1,3 +1,5 @@
+import type { BlockSelection } from '@blocksuite/block-std';
+import { PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 
 const getSelection = (blockComponent: BlockElement) =>
@@ -54,15 +56,31 @@ const setBlockSelection = (blockElement: BlockElement) => {
   });
 };
 
-const selectNextBlock = (blockElement: BlockElement) => {
-  const view = getView(blockElement);
+const getSelectionBySide = (blockElement: BlockElement, tail: boolean) => {
   const selection = getSelection(blockElement);
-  const selections = selection.value;
-  const focus = selections.at(-1);
-  if (!focus) return;
+  const selections = selection.value.filter(sel => sel.is('block'));
+  const sel = selections.at(tail ? -1 : 0) as BlockSelection | undefined;
+  return sel ?? null;
+};
 
+const getAnchorSelection = (blockElement: BlockElement) => {
+  const selection = getSelection(blockElement);
+  const selections = selection.value.filter(sel => sel.is('block'));
+  const sel = selections.find(sel =>
+    PathFinder.equals(sel.path, blockElement.path)
+  );
+  if (!sel) return null;
+
+  return sel;
+};
+
+const getNextBlock = (blockElement: BlockElement) => {
+  const focus = getAnchorSelection(blockElement);
+  if (!focus) return null;
+
+  const view = getView(blockElement);
   const focusBlock = view.viewFromPath('block', focus.path);
-  if (!focusBlock) return;
+  if (!focusBlock) return null;
 
   let next: BlockElement | null = null;
   if (focusBlock.childBlockElements[0]) {
@@ -73,29 +91,25 @@ const selectNextBlock = (blockElement: BlockElement) => {
     next = getNextSibling(focusBlock);
   }
 
-  if (next && next.model.flavour !== blockElement.model.flavour) {
-    setBlockSelection(next);
-
-    return true;
+  if (next && !next.contains(focusBlock)) {
+    return next;
   }
 
-  return;
+  return null;
 };
 
-const selectPrevBlock = (blockElement: BlockElement) => {
-  const view = getView(blockElement);
-  const selection = getSelection(blockElement);
-  const selections = selection.value;
-  const focus = selections.at(0);
-  if (!focus) return;
+const getPrevBlock = (blockElement: BlockElement) => {
+  const focus = getAnchorSelection(blockElement);
+  if (!focus) return null;
 
+  const view = getView(blockElement);
   const focusBlock = view.viewFromPath('block', focus.path);
-  if (!focusBlock) return;
+  if (!focusBlock) return null;
 
   let prev: BlockElement | null = getPrevSibling(focusBlock);
 
   if (!prev) {
-    return;
+    return null;
   }
 
   if (!prev.contains(focusBlock)) {
@@ -103,21 +117,168 @@ const selectPrevBlock = (blockElement: BlockElement) => {
   }
 
   if (prev && prev !== blockElement) {
-    setBlockSelection(prev);
-
-    return true;
+    return prev;
   }
 
-  return;
+  return null;
+};
+
+const selectNextBlock = (blockElement: BlockElement) => {
+  const nextBlock = getNextBlock(blockElement);
+
+  if (!nextBlock) {
+    return;
+  }
+
+  setBlockSelection(nextBlock);
+
+  return true;
+};
+
+const selectPrevBlock = (blockElement: BlockElement) => {
+  const prevBlock = getPrevBlock(blockElement);
+
+  if (!prevBlock) {
+    return;
+  }
+
+  setBlockSelection(prevBlock);
+
+  return true;
+};
+
+const selectionToBlock = (
+  blockElement: BlockElement,
+  selection: BlockSelection
+) => {
+  const view = getView(blockElement);
+  return view.viewFromPath('block', selection.path);
+};
+
+const selectBetween = (
+  anchorBlock: BlockElement,
+  focusBlock: BlockElement,
+  tail: boolean
+) => {
+  const selection = getSelection(anchorBlock);
+  if (PathFinder.equals(anchorBlock.path, focusBlock.path)) {
+    setBlockSelection(focusBlock);
+    return;
+  }
+  const selections = [...selection.value];
+  if (selections.every(sel => !PathFinder.equals(sel.path, focusBlock.path))) {
+    if (tail) {
+      selections.push(
+        selection.getInstance('block', { path: focusBlock.path })
+      );
+    } else {
+      selections.unshift(
+        selection.getInstance('block', { path: focusBlock.path })
+      );
+    }
+  }
+
+  let start = false;
+  const sel = selections.filter(sel => {
+    if (
+      PathFinder.equals(sel.path, anchorBlock.path) ||
+      PathFinder.equals(sel.path, focusBlock.path)
+    ) {
+      start = !start;
+      return true;
+    }
+    return start;
+  });
+
+  selection.update(selList => {
+    return selList
+      .filter(sel => !sel.is('text') && !sel.is('block'))
+      .concat(sel);
+  });
 };
 
 export const bindHotKey = (blockElement: BlockElement) => {
+  let anchorSel: BlockSelection | null = null;
+  let focusBlock: BlockElement | null = null;
+
+  blockElement.handleEvent('keyDown', ctx => {
+    const state = ctx.get('keyboardState');
+    if (state.raw.key === 'Shift') {
+      return;
+    }
+    anchorSel = null;
+    focusBlock = null;
+  });
   blockElement.bindHotKey({
     ArrowDown: () => {
-      return selectNextBlock(blockElement);
+      const sel = getSelectionBySide(blockElement, true);
+      if (!sel) {
+        return;
+      }
+      const focus = selectionToBlock(blockElement, sel);
+      if (!focus) {
+        return;
+      }
+      return selectNextBlock(focus);
     },
     ArrowUp: () => {
-      return selectPrevBlock(blockElement);
+      const sel = getSelectionBySide(blockElement, false);
+      if (!sel) {
+        return;
+      }
+      const focus = selectionToBlock(blockElement, sel);
+      if (!focus) {
+        return;
+      }
+      return selectPrevBlock(focus);
+    },
+    'Shift-ArrowDown': () => {
+      if (!anchorSel) {
+        anchorSel = getSelectionBySide(blockElement, true);
+      }
+
+      if (!anchorSel) {
+        return null;
+      }
+
+      const anchorBlock = selectionToBlock(blockElement, anchorSel);
+      if (!anchorBlock) {
+        return null;
+      }
+
+      focusBlock = getNextBlock(focusBlock ?? anchorBlock);
+
+      if (!focusBlock) {
+        return;
+      }
+
+      selectBetween(anchorBlock, focusBlock, true);
+
+      return true;
+    },
+    'Shift-ArrowUp': () => {
+      if (!anchorSel) {
+        anchorSel = getSelectionBySide(blockElement, false);
+      }
+
+      if (!anchorSel) {
+        return null;
+      }
+
+      const anchorBlock = selectionToBlock(blockElement, anchorSel);
+      if (!anchorBlock) {
+        return null;
+      }
+
+      focusBlock = getPrevBlock(focusBlock ?? anchorBlock);
+
+      if (!focusBlock) {
+        return;
+      }
+
+      selectBetween(anchorBlock, focusBlock, false);
+
+      return true;
     },
   });
 };

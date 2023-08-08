@@ -2,14 +2,9 @@ import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { PageBlockComponent } from '../types.js';
-import { BlockNavigation } from './block-navigation.js';
 
 export class PageKeyboardManager {
-  constructor(public host: PageBlockComponent) {
-    const blockNavigation = new BlockNavigation(host);
-    this.pageElement.handleEvent('keyDown', ctx => {
-      blockNavigation.keyDown(ctx);
-    });
+  constructor(public pageElement: PageBlockComponent) {
     this.pageElement.bindHotKey({
       'Mod-z': ctx => {
         ctx.get('defaultState').event.preventDefault();
@@ -22,48 +17,6 @@ export class PageKeyboardManager {
         if (this._page.canRedo) {
           this._page.redo();
         }
-      },
-      ArrowUp: ctx => {
-        const current = this._currentSelection.at(0);
-        if (!current) {
-          return;
-        }
-        if (current.is('block')) {
-          blockNavigation.ArrowUp(ctx);
-          return;
-        }
-      },
-      ArrowDown: ctx => {
-        const current = this._currentSelection.at(-1);
-        if (!current) {
-          return;
-        }
-        if (current.is('block')) {
-          blockNavigation.ArrowDown(ctx);
-          return;
-        }
-      },
-      'Shift-ArrowUp': ctx => {
-        const current = this._currentSelection.at(0);
-        if (!current) {
-          return;
-        }
-        if (current.is('block')) {
-          blockNavigation.ShiftArrowUp(ctx);
-          return true;
-        }
-        return;
-      },
-      'Shift-ArrowDown': ctx => {
-        const current = this._currentSelection.at(-1);
-        if (!current) {
-          return;
-        }
-        if (current.is('block')) {
-          blockNavigation.ShiftArrowDown(ctx);
-          return true;
-        }
-        return;
       },
       Backspace: this._handleDelete,
       Delete: this._handleDelete,
