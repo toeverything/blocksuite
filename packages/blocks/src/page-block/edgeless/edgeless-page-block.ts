@@ -60,7 +60,6 @@ import {
 import { toast } from '../../components/toast.js';
 import type {
   BlockHost,
-  DragHandle,
   EdgelessPageBlockWidgetName,
   EdgelessTool,
   ImageBlockModel,
@@ -74,7 +73,6 @@ import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/operations/model.js';
 import { UtilManager } from '../utils/util-manager.js';
-import { createDragHandle } from './components/create-drag-handle.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
@@ -250,7 +248,6 @@ export class EdgelessPageBlockComponent
    * Shared components
    */
   components = {
-    dragHandle: <DragHandle | null>null,
     toolbar: <EdgelessToolbar | null>null,
     zoomToolbar: <EdgelessZoomToolbar | null>null,
     zoomBarToggleButton: <ZoomBarToggleButton | null>null,
@@ -473,35 +470,6 @@ export class EdgelessPageBlockComponent
     );
   }
 
-  private _initDragHandle = () => {
-    const createHandle = () => {
-      this.components.dragHandle = createDragHandle(this);
-    };
-    if (
-      this.page.awarenessStore.getFlag('enable_drag_handle') &&
-      !this.components.dragHandle
-    ) {
-      createHandle();
-    }
-    this._disposables.add(
-      this.page.awarenessStore.slots.update.subscribe(
-        msg => msg.state?.flags.enable_drag_handle,
-        enable => {
-          if (enable) {
-            if (this.components.dragHandle) return;
-            createHandle();
-            return;
-          }
-          this.components.dragHandle?.remove();
-          this.components.dragHandle = null;
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
-  };
-
   private _initSlotEffects() {
     // TODO: listen to new children
     // this.model.children.forEach(note => {
@@ -553,9 +521,7 @@ export class EdgelessPageBlockComponent
         const newZoom = this.surface.viewport.zoom;
         if (!prevZoom || +prevZoom !== newZoom) {
           this.style.setProperty('--affine-zoom', `${newZoom}`);
-          this.components.dragHandle?.setScale(newZoom);
         }
-        this.components.dragHandle?.hide();
         if (this.selection.selectedBlocks.length) {
           this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
         }
@@ -582,9 +548,6 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
-        if (edgelessTool.type !== 'default') {
-          this.components.dragHandle?.hide();
-        }
         this.edgelessTool = edgelessTool;
 
         slots.cursorUpdated.emit(getCursorMode(edgelessTool));
@@ -1146,7 +1109,6 @@ export class EdgelessPageBlockComponent
 
   override firstUpdated() {
     this._initSlotEffects();
-    this._initDragHandle();
     this._initResizeEffect();
     this._initNoteHeightUpdate();
     this.clipboard.init(this.page);
@@ -1257,7 +1219,6 @@ export class EdgelessPageBlockComponent
   override disconnectedCallback() {
     super.disconnectedCallback();
     this.clipboard.dispose();
-    this.components.dragHandle?.remove();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
@@ -1319,9 +1280,8 @@ export class EdgelessPageBlockComponent
       '--affine-edgeless-y': `${translateY}px`,
     };
 
-    //TODO: enable dragHandle
     const widgets = html`${repeat(
-      Object.entries(this.widgets).filter(([name]) => name !== 'dragHandle'),
+      Object.entries(this.widgets),
       ([id]) => id,
       ([_, widget]) => widget
     )}`;

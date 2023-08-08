@@ -9,20 +9,19 @@ export const styles = css`
     left: 0;
     position: fixed;
     display: flex;
-    justify-items: center;
+    justify-content: center;
+    align-items: center;
     width: ${DRAG_HANDLE_WIDTH + 8}px;
     transform-origin: 0 0;
     pointer-events: none;
     user-select: none;
   }
   .affine-drag-handle {
-    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
     width: ${DRAG_HANDLE_WIDTH}px;
     min-height: ${DRAG_HANDLE_HEIGHT}px;
-    border-radius: 1px;
     pointer-events: auto;
     color: var(--affine-icon-color);
   }
@@ -31,7 +30,7 @@ export const styles = css`
       display: none;
     }
   }
-  .affine-drag-handle-icon {
+  .affine-drag-handle-grabber {
     width: 4px;
     height: 12px;
     border-radius: 1px;
