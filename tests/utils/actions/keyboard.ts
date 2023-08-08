@@ -92,7 +92,7 @@ export async function formatType(page: Page) {
 
 export async function redoByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+Shift+z`);
-  await waitNextFrame(page);
+  await waitNextFrame(page, 400);
 }
 
 export async function selectAllByKeyboard(page: Page) {
