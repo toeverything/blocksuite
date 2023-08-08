@@ -200,17 +200,21 @@ const selectBetween = (
 export const bindHotKey = (blockElement: BlockElement) => {
   let anchorSel: BlockSelection | null = null;
   let focusBlock: BlockElement | null = null;
+  const reset = () => {
+    anchorSel = null;
+    focusBlock = null;
+  };
 
   blockElement.handleEvent('keyDown', ctx => {
     const state = ctx.get('keyboardState');
     if (state.raw.key === 'Shift') {
       return;
     }
-    anchorSel = null;
-    focusBlock = null;
+    reset();
   });
   blockElement.bindHotKey({
     ArrowDown: () => {
+      reset();
       const sel = getSelectionBySide(blockElement, true);
       if (!sel) {
         return;
@@ -222,6 +226,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
       return selectNextBlock(focus);
     },
     ArrowUp: () => {
+      reset();
       const sel = getSelectionBySide(blockElement, false);
       if (!sel) {
         return;
