@@ -2,6 +2,7 @@ import { ConnectorMode } from '@blocksuite/phasor';
 
 import {
   BrushSize,
+  type Connectable,
   type EdgelessTool,
 } from '../../__internal__/utils/types.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
@@ -17,6 +18,7 @@ import {
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
+import { isTopLevelBlock } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -112,11 +114,102 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ctx.get('defaultState').event.preventDefault();
           this.pageElement.slots.zoomUpdated.emit('in');
         },
+        Backspace: () => {
+          this._delete();
+        },
+        Delete: () => {
+          this._delete();
+        },
+        Space: ctx => {
+          const event = ctx.get('defaultState').event;
+          if (event instanceof KeyboardEvent) {
+            this._space(event);
+          }
+        },
       },
       {
         global: true,
       }
     );
+    this.pageElement.handleEvent('keyDown', ctx => {
+      const event = ctx.get('defaultState').event;
+      if (event instanceof KeyboardEvent) {
+        this._shift(event);
+      }
+    });
+    this.pageElement.handleEvent('keyUp', ctx => {
+      const event = ctx.get('defaultState').event;
+      if (event instanceof KeyboardEvent) {
+        this._shift(event);
+      }
+    });
+  }
+
+  private _shouldRevertMode = false;
+  private _lastMode: EdgelessTool | null = null;
+  private _space(event: KeyboardEvent) {
+    const edgeless = this.pageElement;
+    const { edgelessTool: edgelessTool } = edgeless.tools;
+    const { state } = edgeless.selection;
+    if (event.type === 'keydown') {
+      if (edgelessTool.type === 'pan') {
+        return;
+      }
+
+      // when user is editing, shouldn't enter pan mode
+      if (edgelessTool.type === 'default' && state.editing) {
+        return;
+      }
+
+      this._shouldRevertMode = true;
+      this._lastMode = edgelessTool;
+      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+      return;
+    }
+    if (event.type === 'keyup') {
+      if (
+        edgelessTool.type === 'pan' &&
+        this._shouldRevertMode &&
+        this._lastMode
+      ) {
+        this._setEdgelessTool(edgeless, this._lastMode);
+      }
+      this._shouldRevertMode = false;
+    }
+  }
+
+  private _shift(event: KeyboardEvent) {
+    const edgeless = this.pageElement;
+    if (event.key.toLowerCase() === 'shift' && event.shiftKey) {
+      edgeless.slots.pressShiftKeyUpdated.emit(true);
+    } else {
+      edgeless.slots.pressShiftKeyUpdated.emit(false);
+    }
+  }
+
+  private _delete() {
+    const edgeless = this.pageElement;
+
+    if (edgeless.selection.editing) {
+      return;
+    }
+
+    const { elements } = edgeless.selection;
+    elements.forEach(element => {
+      if (isTopLevelBlock(element)) {
+        const children = edgeless.page.root?.children ?? [];
+        // FIXME: should always keep at least 1 note
+        if (children.length > 1) {
+          edgeless.page.deleteBlock(element);
+        }
+      } else {
+        edgeless.connector.detachConnectors([element as Connectable]);
+        edgeless.surface.removeElement(element.id);
+      }
+    });
+
+    edgeless.selection.clear();
+    edgeless.selection.setSelection(edgeless.selection.state);
   }
 
   private _setEdgelessTool(

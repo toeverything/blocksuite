@@ -13,129 +13,134 @@ export class PageKeyboardManager {
       textNavigation.keyDown(ctx);
       blockNavigation.keyDown(ctx);
     });
-    this.pageElement.bindHotKey({
-      'Mod-z': ctx => {
-        ctx.get('defaultState').event.preventDefault();
-        if (this._page.canUndo) {
-          this._page.undo();
-        }
-      },
-      'Mod-Z': ctx => {
-        ctx.get('defaultState').event.preventDefault();
-        if (this._page.canRedo) {
-          this._page.redo();
-        }
-      },
-      ArrowUp: ctx => {
-        const current = this._currentSelection.at(0);
-        if (!current) {
-          return;
-        }
-        if (current.is('text')) {
-          textNavigation.ArrowUp(ctx);
-          return;
-        }
+    this.pageElement.bindHotKey(
+      {
+        'Mod-z': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          if (this._page.canUndo) {
+            this._page.undo();
+          }
+        },
+        'Mod-Z': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          if (this._page.canRedo) {
+            this._page.redo();
+          }
+        },
+        ArrowUp: ctx => {
+          const current = this._currentSelection.at(0);
+          if (!current) {
+            return;
+          }
+          if (current.is('text')) {
+            textNavigation.ArrowUp(ctx);
+            return;
+          }
 
-        if (current.is('block')) {
-          blockNavigation.ArrowUp(ctx);
+          if (current.is('block')) {
+            blockNavigation.ArrowUp(ctx);
+            return;
+          }
+        },
+        ArrowDown: ctx => {
+          const current = this._currentSelection.at(-1);
+          if (!current) {
+            return;
+          }
+          if (current.is('text')) {
+            textNavigation.ArrowDown(ctx);
+            return;
+          }
+          if (current.is('block')) {
+            blockNavigation.ArrowDown(ctx);
+            return;
+          }
+        },
+        ArrowLeft: ctx => {
+          const current = this._currentSelection.at(0);
+          if (!current) {
+            return;
+          }
+          ctx.get('keyboardState').raw.preventDefault();
+          if (current.is('text')) {
+            textNavigation.ArrowLeft(ctx);
+            return;
+          }
+        },
+        ArrowRight: ctx => {
+          const current = this._currentSelection.at(-1);
+          if (!current) {
+            return;
+          }
+          ctx.get('keyboardState').raw.preventDefault();
+          if (current.is('text')) {
+            textNavigation.ArrowRight(ctx);
+            return;
+          }
+        },
+        'Shift-ArrowUp': ctx => {
+          const event = ctx.get('keyboardState').raw;
+          const current = this._currentSelection.at(0);
+          if (!current) {
+            return;
+          }
+          if (current.is('text')) {
+            event.preventDefault();
+            textNavigation.ShiftArrowUp(ctx);
+            return true;
+          }
+          if (current.is('block')) {
+            blockNavigation.ShiftArrowUp(ctx);
+            return true;
+          }
           return;
-        }
-      },
-      ArrowDown: ctx => {
-        const current = this._currentSelection.at(-1);
-        if (!current) {
+        },
+        'Shift-ArrowDown': ctx => {
+          const event = ctx.get('keyboardState').raw;
+          const current = this._currentSelection.at(-1);
+          if (!current) {
+            return;
+          }
+          if (current.is('text')) {
+            event.preventDefault();
+            textNavigation.ShiftArrowDown(ctx);
+            return true;
+          }
+          if (current.is('block')) {
+            blockNavigation.ShiftArrowDown(ctx);
+            return true;
+          }
           return;
-        }
-        if (current.is('text')) {
-          textNavigation.ArrowDown(ctx);
-          return;
-        }
-        if (current.is('block')) {
-          blockNavigation.ArrowDown(ctx);
-          return;
-        }
-      },
-      ArrowLeft: ctx => {
-        const current = this._currentSelection.at(0);
-        if (!current) {
-          return;
-        }
-        ctx.get('keyboardState').raw.preventDefault();
-        if (current.is('text')) {
-          textNavigation.ArrowLeft(ctx);
-          return;
-        }
-      },
-      ArrowRight: ctx => {
-        const current = this._currentSelection.at(-1);
-        if (!current) {
-          return;
-        }
-        ctx.get('keyboardState').raw.preventDefault();
-        if (current.is('text')) {
-          textNavigation.ArrowRight(ctx);
-          return;
-        }
-      },
-      'Shift-ArrowUp': ctx => {
-        const event = ctx.get('keyboardState').raw;
-        const current = this._currentSelection.at(0);
-        if (!current) {
-          return;
-        }
-        if (current.is('text')) {
-          event.preventDefault();
-          textNavigation.ShiftArrowUp(ctx);
-          return true;
-        }
-        if (current.is('block')) {
-          blockNavigation.ShiftArrowUp(ctx);
-          return true;
-        }
-        return;
-      },
-      'Shift-ArrowDown': ctx => {
-        const event = ctx.get('keyboardState').raw;
-        const current = this._currentSelection.at(-1);
-        if (!current) {
-          return;
-        }
-        if (current.is('text')) {
-          event.preventDefault();
-          textNavigation.ShiftArrowDown(ctx);
-          return true;
-        }
-        if (current.is('block')) {
-          blockNavigation.ShiftArrowDown(ctx);
-          return true;
-        }
-        return;
-      },
-      Backspace: this._handleDelete,
-      Delete: this._handleDelete,
-      Escape: ctx => {
-        const current = this._currentSelection.at(0);
-        if (!current) {
-          return;
-        }
-        if (current.is('text')) {
-          textNavigation.Escape(ctx);
-          return;
-        }
+        },
+        Backspace: this._handleDelete,
+        Delete: this._handleDelete,
+        Escape: ctx => {
+          const current = this._currentSelection.at(0);
+          if (!current) {
+            return;
+          }
+          if (current.is('text')) {
+            textNavigation.Escape(ctx);
+            return;
+          }
 
-        this._selection.set([]);
+          this._selection.set([]);
+        },
+        Enter: ctx => {
+          const current = this._currentSelection.at(0);
+          if (!current) {
+            return;
+          }
+          if (current.is('block')) {
+            blockNavigation.Enter(ctx);
+            return;
+          }
+        },
       },
-      Enter: ctx => {
-        const current = this._currentSelection.at(0);
-        if (!current) {
-          return;
-        }
-        if (current.is('block')) {
-          blockNavigation.Enter(ctx);
-          return;
-        }
-      },
-    });
+      {
+        global: true,
+      }
+    );
   }
 
   private get _page() {
