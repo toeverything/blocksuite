@@ -5,22 +5,27 @@ import type { PageBlockComponent } from '../types.js';
 
 export class PageKeyboardManager {
   constructor(public pageElement: PageBlockComponent) {
-    this.pageElement.bindHotKey({
-      'Mod-z': ctx => {
-        ctx.get('defaultState').event.preventDefault();
-        if (this._page.canUndo) {
-          this._page.undo();
-        }
+    this.pageElement.bindHotKey(
+      {
+        'Mod-z': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          if (this._page.canUndo) {
+            this._page.undo();
+          }
+        },
+        'Mod-Z': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          if (this._page.canRedo) {
+            this._page.redo();
+          }
+        },
+        Backspace: this._handleDelete,
+        Delete: this._handleDelete,
       },
-      'Mod-Z': ctx => {
-        ctx.get('defaultState').event.preventDefault();
-        if (this._page.canRedo) {
-          this._page.redo();
-        }
-      },
-      Backspace: this._handleDelete,
-      Delete: this._handleDelete,
-    });
+      {
+        global: true,
+      }
+    );
   }
 
   private get _page() {
