@@ -43,6 +43,7 @@ export {
   polyLineNearestPoint,
   rotatePoints,
   sign,
+  toDegree,
   toRadian,
 } from './utils/math-utils.js';
 export { PointLocation } from './utils/point-location.js';

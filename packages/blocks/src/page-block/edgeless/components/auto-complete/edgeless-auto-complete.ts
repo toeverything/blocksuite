@@ -12,9 +12,9 @@ import {
   type RoughCanvas,
   ShapeElement,
   ShapeMethodsMap,
+  toDegree,
   Vec,
 } from '@blocksuite/phasor';
-import { toDegree } from '@blocksuite/phasor/utils/math-utils.js';
 import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
