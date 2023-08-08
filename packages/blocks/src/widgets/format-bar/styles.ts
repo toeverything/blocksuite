@@ -1,7 +1,6 @@
 import { css } from 'lit';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-import { scrollbarStyle } from '../../components/utils.js';
 
 const paragraphButtonStyle = css`
   .paragraph-button-icon > svg:nth-child(2) {
