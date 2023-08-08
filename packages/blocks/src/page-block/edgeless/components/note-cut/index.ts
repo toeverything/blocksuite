@@ -76,7 +76,7 @@ export class NoteCut extends WithDisposable(LitElement) {
     this._disposables.add(
       this.edgelessPage.service.uiEventDispatcher.add('pointerMove', ctx => {
         const e = ctx.get('pointerState');
-        this._updateVisiblity(e);
+        this._updateVisibility(e);
       })
     );
     this._disposables.add(
@@ -98,7 +98,7 @@ export class NoteCut extends WithDisposable(LitElement) {
     );
   }
 
-  private _updateVisiblity(e: PointerEventState) {
+  private _updateVisibility(e: PointerEventState) {
     const block = this.edgelessPage.getElementModel(
       this.selection.state.elements[0]
     );
