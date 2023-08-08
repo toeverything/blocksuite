@@ -492,4 +492,5 @@ export const popTagSelect = (
       }),
     ],
   });
+  return remove;
 };

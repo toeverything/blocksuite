@@ -50,6 +50,13 @@ export class BlockElement<
     return nodeView.view as BlockElement;
   }
 
+  get childBlockElements() {
+    const children = this.root.viewStore.getChildren(this.path);
+    return children
+      .filter(child => child.type === 'block')
+      .map(child => child.view as BlockElement);
+  }
+
   get flavour(): string {
     return this.model.flavour;
   }
@@ -111,26 +118,34 @@ export class BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.path = this.root.viewStore.calculatePath(this);
+
+    this._disposables.add(
+      this.model.propsUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
-        const selection = selections.find(selection =>
-          PathFinder.equals(selection.path, this.path)
-        );
+        const selection = selections.find(selection => {
+          return PathFinder.equals(selection.path, this.path);
+        });
 
         if (!selection) {
           this.selected = null;
           return;
         }
 
-        if (this.selected && this.selected.equals(selection)) {
-          return;
-        }
-
         this.selected = selection;
       })
     );
-
-    this.path = this.root.viewStore.calculatePath(this);
   }
 
   override disconnectedCallback() {

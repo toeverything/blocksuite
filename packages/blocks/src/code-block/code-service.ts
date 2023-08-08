@@ -1,10 +1,10 @@
+import type { TextRangePoint } from '@blocksuite/block-std';
 import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import { BaseService } from '../__internal__/service/index.js';
 import type {
-  BlockRange,
   BlockTransformContext,
   SerializedBlock,
 } from '../__internal__/utils/index.js';
@@ -63,18 +63,18 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
   override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[],
-    range?: BlockRange
+    textRangePoint?: TextRangePoint
   ) {
-    assertExists(range);
+    assertExists(textRangePoint);
     const texts = pastedBlocks.map(block => block.text);
     const lines = texts.map(line => line?.map(op => op.insert).join(''));
     const text = lines.join('\n');
-    focusedBlockModel.text?.insert(text, range.startOffset);
+    focusedBlockModel.text?.insert(text, textRangePoint.index);
 
     const vEditor = getVirgoByModel(focusedBlockModel);
     assertExists(vEditor);
     vEditor.setVRange({
-      index: range.startOffset + text.length,
+      index: textRangePoint.index + textRangePoint.length,
       length: 0,
     });
   }

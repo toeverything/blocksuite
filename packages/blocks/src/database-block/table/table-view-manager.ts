@@ -1,15 +1,16 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
+import type { RealDataViewDataTypeMap } from '../common/data-view.js';
 import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
-import type { TableViewData } from '../common/view-manager.js';
 import type { ViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 
+type TableViewData = RealDataViewDataTypeMap['table'];
 export class DataViewTableManager extends BaseDataViewManager {
   public override get type(): string {
     return this.view.mode;

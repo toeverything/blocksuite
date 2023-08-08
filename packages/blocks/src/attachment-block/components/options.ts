@@ -1,24 +1,22 @@
 import {
   CaptionIcon,
-  ConfirmIcon,
-  DeleteIcon,
-  DownloadIcon,
-  DuplicateIcon,
   EditIcon,
   EmbedWebIcon,
   LinkIcon,
   MoreIcon,
   ViewIcon,
 } from '@blocksuite/global/config';
+import { createLitPortal } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { html } from 'lit';
-import { createRef, type Ref, ref } from 'lit/directives/ref.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
 import type { ImageProps } from '../../image-block/image-model.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
-import { cloneAttachmentProperties, downloadAttachment } from '../utils.js';
+import { MoreMenu } from './moreMenu.js';
+import { RenameModal } from './renameModel.js';
 import { styles } from './styles.js';
 
 export function AttachmentOptionsTemplate({
@@ -67,8 +65,7 @@ export function AttachmentOptionsTemplate({
   });
 
   const moreMenuRef = createRef<HTMLDivElement>();
-  const renameRef = createRef<HTMLDivElement>();
-
+  const disableEmbed = !model.type?.startsWith('image/');
   return html`<style>
       ${styles}
     </style>
@@ -97,17 +94,17 @@ export function AttachmentOptionsTemplate({
         class="has-tool-tip"
         size="24px"
         disabled
-        @click=${() => console.log(model)}
+        @click=${() => console.log('Turn into Link view coming soon', model)}
       >
         ${LinkIcon}
         <tool-tip inert tip-position="top" role="tooltip"
-          >Convert to inline(Coming soon)</tool-tip
+          >Turn into Link view(Coming soon)</tool-tip
         >
       </icon-button>
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${!model.type?.startsWith('image/')}
+        ?disabled=${disableEmbed}
         @click="${() => {
           const sourceId = model.sourceId;
           assertExists(sourceId);
@@ -121,7 +118,9 @@ export function AttachmentOptionsTemplate({
         }}"
       >
         ${EmbedWebIcon}
-        <tool-tip inert tip-position="top" role="tooltip">Embed</tool-tip>
+        <tool-tip inert tip-position="top" role="tooltip"
+          >Turn into Embed view${disableEmbed ? '(Images only)' : ''}</tool-tip
+        >
       </icon-button>
       <div class="divider"></div>
 
@@ -129,8 +128,16 @@ export function AttachmentOptionsTemplate({
         class="has-tool-tip"
         size="24px"
         @click="${() => {
-          containerRef.value?.toggleAttribute('hidden');
-          renameRef.value?.toggleAttribute('hidden');
+          abortController.abort();
+          const renameAbortController = new AbortController();
+          createLitPortal({
+            template: RenameModal({
+              model,
+              abortController: renameAbortController,
+              anchor,
+            }),
+            abortController: renameAbortController,
+          });
         }}"
       >
         ${EditIcon}
@@ -156,102 +163,5 @@ export function AttachmentOptionsTemplate({
         <tool-tip inert role="tooltip">More</tool-tip>
       </icon-button>
       ${MoreMenu({ model, abortController, ref: moreMenuRef })}
-      ${RenameModal({ model, abortController, ref: renameRef })}
     </div>`;
 }
-
-const RenameModal = ({
-  ref: renamePopoverRef,
-  model,
-  abortController,
-}: {
-  ref: Ref<HTMLDivElement>;
-  model: AttachmentBlockModel;
-  abortController: AbortController;
-}) => {
-  let name = model.name;
-  // TODO suffix
-
-  const onConfirm = () => {
-    model.page.updateBlock(model, {
-      name,
-    });
-    abortController.abort();
-  };
-  const onInput = (e: InputEvent) => {
-    name = (e.target as HTMLInputElement).value;
-  };
-  const onKeydown = (e: KeyboardEvent) => {
-    e.stopPropagation();
-    if (e.key === 'Enter' && !e.isComposing) {
-      e.preventDefault();
-      onConfirm();
-    }
-    return;
-  };
-
-  return html`<div
-    ${ref(renamePopoverRef)}
-    class="attachment-rename-container"
-    hidden
-  >
-    <div class="attachment-rename-input-wrapper">
-      <input
-        .value=${name}
-        type="text"
-        @input=${onInput}
-        @keydown=${onKeydown}
-      />
-    </div>
-    <icon-button class="affine-confirm-button" @click=${onConfirm}
-      >${ConfirmIcon}</icon-button
-    >
-  </div>`;
-};
-
-const MoreMenu = ({
-  ref: moreMenuRef,
-  model,
-  abortController,
-}: {
-  ref: Ref<HTMLDivElement>;
-  model: AttachmentBlockModel;
-  abortController: AbortController;
-}) => {
-  return html`<div ${ref(moreMenuRef)} class="attachment-options-more" hidden>
-    <icon-button
-      width="120px"
-      height="32px"
-      text="Download"
-      @click="${() => downloadAttachment(model)}"
-    >
-      ${DownloadIcon}
-    </icon-button>
-    <icon-button
-      width="120px"
-      height="32px"
-      text="Duplicate"
-      @click="${() => {
-        const prop = {
-          flavour: 'affine:attachment',
-          ...cloneAttachmentProperties(model),
-        };
-        model.page.addSiblingBlocks(model, [prop]);
-      }}"
-    >
-      ${DuplicateIcon}
-    </icon-button>
-    <icon-button
-      width="120px"
-      height="32px"
-      text="Delete"
-      class="danger"
-      @click="${() => {
-        model.page.deleteBlock(model);
-        abortController.abort();
-      }}"
-    >
-      ${DeleteIcon}
-    </icon-button>
-  </div>`;
-};

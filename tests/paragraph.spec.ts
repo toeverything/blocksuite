@@ -11,6 +11,7 @@ import {
   initThreeParagraphs,
   pressArrowDown,
   pressArrowLeft,
+  pressArrowRight,
   pressArrowUp,
   pressBackspace,
   pressEnter,
@@ -23,6 +24,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  updateBlockType,
   waitDefaultPageLoaded,
   waitNextFrame,
 } from './utils/actions/index.js';
@@ -586,13 +588,13 @@ test('switch between paragraph types', async ({ page }) => {
 
   const selector = '.affine-paragraph-block-container';
 
-  await clickBlockTypeMenuItem(page, 'H1');
+  await updateBlockType(page, 'affine:paragraph', 'h1');
   await assertClassName(page, selector, /h1/);
 
-  await clickBlockTypeMenuItem(page, 'H2');
+  await updateBlockType(page, 'affine:paragraph', 'h2');
   await assertClassName(page, selector, /h2/);
 
-  await clickBlockTypeMenuItem(page, 'H3');
+  await updateBlockType(page, 'affine:paragraph', 'h3');
   await assertClassName(page, selector, /h3/);
 
   await undoByClick(page);
@@ -611,7 +613,7 @@ test('delete at start of paragraph block', async ({ page }) => {
   await pressEnter(page);
   await type(page, 'a');
 
-  await clickBlockTypeMenuItem(page, 'H1');
+  await updateBlockType(page, 'affine:paragraph', 'h1');
   await focusRichText(page, 1);
   await assertBlockType(page, '2', 'text');
   await assertBlockType(page, '3', 'h1');
@@ -727,7 +729,8 @@ test('handling keyup when cursor located in first paragraph', async ({
   await pressEnter(page);
   await type(page, 'world');
   await assertRichTexts(page, ['world', '']);
-  await page.keyboard.press('ArrowUp', { delay: 50 });
+  await pressArrowUp(page);
+  await pressArrowUp(page);
   await assertPageTitleFocus(page);
 });
 
@@ -779,8 +782,7 @@ test('press left in first paragraph start should not change cursor position', as
   await focusRichText(page);
   await type(page, '1');
 
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 2);
   await type(page, 'l');
   await assertRichTexts(page, ['l1']);
   await assertTitle(page, '');
@@ -817,6 +819,7 @@ test('press arrow down should move caret to the start of line', async ({
   await pressArrowLeft(page);
   await pressArrowUp(page);
   await pressArrowDown(page);
+  await pressArrowLeft(page);
   await type(page, '2');
   await assertRichTexts(page, ['0'.repeat(100), '21']);
 });
@@ -843,30 +846,30 @@ test('press arrow up in the second line should move caret to the first line', as
 
   // Focus the empty paragraph
   await focusRichText(page, 1);
-  await page.keyboard.press('ArrowUp');
-  // Now the caret is at the start of the second line of the first paragraph
-
   await pressArrowUp(page);
+  await pressArrowUp(page);
+  await pressArrowLeft(page);
   await type(page, '0');
+  await pressArrowUp(page);
   await pressArrowUp(page);
   // At title
   await type(page, '1');
   await assertTitle(page, '1');
 
   // At the first line of the first paragraph
-  await page.keyboard.press('ArrowDown', { delay: 50 });
-  // At the second line of the first paragraph
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowDown(page);
   // At the second paragraph
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowDown(page, 3);
+  await pressArrowRight(page);
   await type(page, '2');
 
   await assertRichTexts(page, ['0' + 'ib'.repeat(60), '2']);
 
   // Go to the start of the second paragraph
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowUp', { delay: 50 });
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowLeft(page);
+  await pressArrowUp(page);
+  await pressArrowDown(page);
+  await pressArrowLeft(page);
   // Should be inserted at the start of the second paragraph
   await type(page, '3');
   await assertRichTexts(page, ['0' + 'ib'.repeat(60), '32']);
@@ -896,7 +899,8 @@ test('press arrow down in indent line should not move caret to the start of line
 
   // Focus the empty child paragraph
   await focusRichText(page, 2);
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page, 2);
+  await pressArrowRight(page);
   await waitNextFrame(page);
   // Now the caret should be at the end of the last paragraph
   await type(page, '1');
@@ -910,9 +914,8 @@ test('press arrow down in indent line should not move caret to the start of line
 
   await focusRichText(page, 1);
   // Through long text
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
+  await pressArrowDown(page, 3);
+  await pressArrowRight(page);
   await type(page, '2');
   await assertRichTexts(page, ['', '', '0'.repeat(100), '012']);
 });
@@ -931,11 +934,11 @@ test('should placeholder works', async ({ page }) => {
   await pressBackspace(page);
 
   await expect(placeholder).toBeVisible();
-  await clickBlockTypeMenuItem(page, 'H1');
+  await updateBlockType(page, 'affine:paragraph', 'h1');
 
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toHaveText('Heading 1');
-  await clickBlockTypeMenuItem(page, 'Text');
+  await updateBlockType(page, 'affine:paragraph', 'text');
   await focusRichText(page, 0);
   await expect(placeholder).toBeVisible();
   await expect(placeholder).toContainText('type');
@@ -985,7 +988,8 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
     // Click at the top-left corner of the 2nd last block to place the cursor at its start
     await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
     // Cursor should have been moved to the start of the last block.
-    await pressArrowDown(page);
+    await pressArrowDown(page, 2);
+    await pressArrowLeft(page);
     await type(page, "I'm here. ");
     await assertRichTexts(page, [
       'This is the 2nd last block.',
@@ -998,7 +1002,8 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
     // Click at the top-left corner of the last block to place the cursor at its start
     await focusRichText(page, 1, { clickPosition: { x: 0, y: 0 } });
     // Cursor should have been moved to the end of the only line.
-    await pressArrowDown(page);
+    await pressArrowDown(page, 2);
+    await pressArrowRight(page);
     await type(page, " I'm here.");
     await assertRichTexts(page, [
       'This is the 2nd last block.',

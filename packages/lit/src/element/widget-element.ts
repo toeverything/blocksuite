@@ -26,7 +26,7 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
     return this.path.slice(0, -1);
   }
 
-  get hostElement() {
+  get pageElement() {
     const parentElement = this.parentElement;
     assertExists(parentElement);
     const nodeView = this.root.viewStore.getNodeView(parentElement);
@@ -35,8 +35,8 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
   }
 
   get flavour(): string {
-    assertExists(this.hostElement);
-    return this.hostElement.model.flavour;
+    assertExists(this.pageElement);
+    return this.pageElement.model.flavour;
   }
 
   handleEvent = (
