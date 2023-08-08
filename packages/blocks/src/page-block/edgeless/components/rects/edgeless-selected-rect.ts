@@ -551,7 +551,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { viewport } = this.edgeless.surface;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const rect = componentToolbar.getBoundingClientRect();
-    const offset = 8;
+    const offset = 18;
     let top = y - rect.height - offset;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 

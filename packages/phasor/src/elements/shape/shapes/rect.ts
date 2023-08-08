@@ -1,4 +1,4 @@
-import { ShapeStyle, StrokeStyle } from '../../../consts.js';
+import { type IBound,ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -21,6 +21,14 @@ import { drawGeneralShpae } from '../utils.js';
 const kRect = 1 - 0.5522847498;
 
 export const RectMethods: ShapeMethods = {
+  points({ x, y, w, h }: IBound) {
+    return [
+      [x, y],
+      [x + w, y],
+      [x + w, y + h],
+      [x, y + h],
+    ];
+  },
   render(
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
@@ -135,11 +143,12 @@ export const RectMethods: ShapeMethods = {
 
   getRelativePointLocation(point, element) {
     const bound = Bound.deserialize(element.xywh);
+    const rotateBound: IBound = { ...bound, rotate: element.rotate };
     const rotatePoint = getPointFromBoundsWithRotation(
-      element,
+      rotateBound,
       bound.getRelativePoint(point)
     );
-    const points = getPointsFromBoundsWithRotation(element);
+    const points = getPointsFromBoundsWithRotation(rotateBound);
     const tangent = polygonGetPointTangent(points, rotatePoint);
     return new PointLocation(rotatePoint, tangent);
   },
