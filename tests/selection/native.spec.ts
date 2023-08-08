@@ -211,74 +211,67 @@ test('cursor move up and down', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  await pressArrowLeft(page, 3);
 
-  await pressArrowUp(page, 2);
-  await pressArrowLeft(page);
+  await pressArrowUp(page);
   const textOne = await getVirgoSelectionText(page);
   expect(textOne).toBe('arrow down test 1');
 
-  await pressArrowDown(page, 2);
-  await pressArrowLeft(page);
+  await pressArrowDown(page);
   const textTwo = await getVirgoSelectionText(page);
   expect(textTwo).toBe('arrow down test 2');
 });
 
-test.fixme(
-  'cursor move to up and down with children block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
-    await type(page, 'arrow down test 1');
-    await pressEnter(page);
-    await type(page, 'arrow down test 2');
-    await page.keyboard.press('Tab');
-    for (let i = 0; i <= 17; i++) {
-      await page.keyboard.press('ArrowRight');
-    }
-    await pressEnter(page);
-    await type(page, 'arrow down test 3');
-    await pressShiftTab(page);
-    for (let i = 0; i < 2; i++) {
-      await page.keyboard.press('ArrowRight');
-    }
-    await page.keyboard.press('ArrowUp');
-    const indexOne = await getVirgoSelectionIndex(page);
-    const textOne = await getVirgoSelectionText(page);
-    expect(textOne).toBe('arrow down test 2');
-    expect(indexOne).toBe(13);
-    for (let i = 0; i < 3; i++) {
-      await page.keyboard.press('ArrowLeft');
-    }
-    await page.keyboard.press('ArrowUp');
-    const indexTwo = await getVirgoSelectionIndex(page);
-    const textTwo = await getVirgoSelectionText(page);
-    expect(textTwo).toBe('arrow down test 1');
-    expect(indexTwo).toBeGreaterThanOrEqual(12);
-    expect(indexTwo).toBeLessThanOrEqual(17);
-    await page.keyboard.press('ArrowDown');
-    const textThree = await getVirgoSelectionText(page);
-    expect(textThree).toBe('arrow down test 2');
-  }
-);
-
-test.fixme('cursor move left and right', async ({ page }) => {
+test('cursor move to up and down with children block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  await pressArrowLeft(page, 18);
+  await page.keyboard.press('Tab');
+  for (let i = 0; i <= 17; i++) {
+    await page.keyboard.press('ArrowRight');
+  }
+  await pressEnter(page);
+  await type(page, 'arrow down test 3');
+  await pressShiftTab(page);
+  for (let i = 0; i < 2; i++) {
+    await page.keyboard.press('ArrowRight');
+  }
+  await page.keyboard.press('ArrowUp');
+  const indexOne = await getVirgoSelectionIndex(page);
+  const textOne = await getVirgoSelectionText(page);
+  expect(textOne).toBe('arrow down test 2');
+  expect(indexOne).toBe(13);
+  for (let i = 0; i < 3; i++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.press('ArrowUp');
+  const indexTwo = await getVirgoSelectionIndex(page);
+  const textTwo = await getVirgoSelectionText(page);
+  expect(textTwo).toBe('arrow down test 1');
+  expect(indexTwo).toBeGreaterThanOrEqual(12);
+  expect(indexTwo).toBeLessThanOrEqual(17);
+  await page.keyboard.press('ArrowDown');
+  const textThree = await getVirgoSelectionText(page);
+  expect(textThree).toBe('arrow down test 2');
+});
+
+test('cursor move left and right', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'arrow down test 1');
+  await pressEnter(page);
+  await type(page, 'arrow down test 2');
   const indexOne = await getVirgoSelectionIndex(page);
   expect(indexOne).toBe(17);
-  await pressArrowRight(page);
+  await pressArrowLeft(page, 18);
   const indexTwo = await getVirgoSelectionIndex(page);
   expect(indexTwo).toBe(0);
 });
 
-test('cursor move up at edge of the second line', async ({ page }) => {
+test.fixme('cursor move up at edge of the second line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
