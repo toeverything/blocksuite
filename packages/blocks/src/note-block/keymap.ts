@@ -123,30 +123,6 @@ const getPrevBlock = (blockElement: BlockElement) => {
   return null;
 };
 
-const selectNextBlock = (blockElement: BlockElement) => {
-  const nextBlock = getNextBlock(blockElement);
-
-  if (!nextBlock) {
-    return;
-  }
-
-  setBlockSelection(nextBlock);
-
-  return true;
-};
-
-const selectPrevBlock = (blockElement: BlockElement) => {
-  const prevBlock = getPrevBlock(blockElement);
-
-  if (!prevBlock) {
-    return;
-  }
-
-  setBlockSelection(prevBlock);
-
-  return true;
-};
-
 const selectionToBlock = (
   blockElement: BlockElement,
   selection: BlockSelection
@@ -197,6 +173,15 @@ const selectBetween = (
   });
 };
 
+const ensureBlockInContainer = (
+  blockElement: BlockElement,
+  containerElement: BlockElement
+) => {
+  return (
+    containerElement.contains(blockElement) && blockElement !== containerElement
+  );
+};
+
 export const bindHotKey = (blockElement: BlockElement) => {
   let anchorSel: BlockSelection | null = null;
   let focusBlock: BlockElement | null = null;
@@ -223,7 +208,16 @@ export const bindHotKey = (blockElement: BlockElement) => {
       if (!focus) {
         return;
       }
-      return selectNextBlock(focus);
+
+      const nextBlock = getNextBlock(focus);
+
+      if (!nextBlock || !ensureBlockInContainer(nextBlock, blockElement)) {
+        return;
+      }
+
+      setBlockSelection(nextBlock);
+
+      return true;
     },
     ArrowUp: () => {
       reset();
@@ -235,7 +229,16 @@ export const bindHotKey = (blockElement: BlockElement) => {
       if (!focus) {
         return;
       }
-      return selectPrevBlock(focus);
+
+      const prevBlock = getPrevBlock(focus);
+
+      if (!prevBlock || !ensureBlockInContainer(prevBlock, blockElement)) {
+        return;
+      }
+
+      setBlockSelection(prevBlock);
+
+      return true;
     },
     'Shift-ArrowDown': () => {
       if (!anchorSel) {
@@ -254,6 +257,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
       focusBlock = getNextBlock(focusBlock ?? anchorBlock);
 
       if (!focusBlock) {
+        return;
+      }
+
+      if (!ensureBlockInContainer(focusBlock, blockElement)) {
         return;
       }
 
@@ -278,6 +285,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
       focusBlock = getPrevBlock(focusBlock ?? anchorBlock);
 
       if (!focusBlock) {
+        return;
+      }
+
+      if (!ensureBlockInContainer(focusBlock, blockElement)) {
         return;
       }
 
