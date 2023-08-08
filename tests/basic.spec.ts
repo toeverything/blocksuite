@@ -210,15 +210,14 @@ test(scoped`basic paired undo/redo`, async ({ page }) => {
   await type(page, 'hello');
 
   await assertText(page, 'hello');
-  await focusRichText(page);
-  await undoByKeyboard(page);
+  await undoByClick(page);
   await assertEmpty(page);
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertText(page, 'hello');
 
-  await undoByKeyboard(page);
+  await undoByClick(page);
   await assertEmpty(page);
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertText(page, 'hello');
 });
 
