@@ -85,16 +85,14 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   private _view = createRef<BaseDataView>();
 
-  get viewEle() {
-    return this._view.value;
-  }
-
   _setViewId = (viewId: string) => {
     if (this.currentView !== viewId) {
       this.service?.selectionManager.set([]);
-      this.currentView = viewId;
       requestAnimationFrame(() => {
-        this.requestUpdate();
+        this.currentView = viewId;
+        requestAnimationFrame(() => {
+          this.requestUpdate();
+        });
       });
     }
   };

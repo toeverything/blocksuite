@@ -74,10 +74,11 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       flex-direction: column;
       user-select: none;
       min-width: 160px;
-      box-shadow: var(--affine-shadow-2);
+      box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
+        0px 0px 0px 0.5px #e3e3e4 inset;
       border-radius: 4px;
       background-color: var(--affine-background-primary-color);
-      padding: 2px 0;
+      padding: 8px;
       position: absolute;
       z-index: 999;
     }
@@ -87,22 +88,33 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-menu-header input {
-      padding: 8px 8px;
+      padding: 2px 8px;
       width: 100%;
       border-radius: 4px;
-      border: 1px solid var(--affine-secondary-color);
+      border: 1px solid var(--affine-primary-color);
       outline: none;
+      font-size: 12px;
+      line-height: 20px;
+    }
+    .affine-menu-header input::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+    .affine-menu-header input:focus {
+      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
     }
 
     .affine-menu-divider {
       height: 0.5px;
       background: var(--affine-divider-color);
-      margin: 2px 0;
+      margin: 7px 0;
     }
 
     .affine-menu-action {
-      padding: 2px 4px;
+      padding: 4px;
       cursor: pointer;
+      display: flex;
+      gap: 8px;
+      border-radius: 4px;
     }
 
     .affine-menu-action svg {
@@ -120,20 +132,22 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-menu-action .content {
-      padding: 8px;
       border-radius: 4px;
       cursor: pointer;
       white-space: nowrap;
       justify-content: space-between;
       display: flex;
       align-items: center;
+      font-size: 14px;
+      line-height: 22px;
+      flex: 1;
     }
 
-    .affine-menu-action.selected .content {
+    .affine-menu-action.selected {
       background-color: var(--affine-hover-color);
     }
 
-    .affine-menu-action.selected.delete-item .content {
+    .affine-menu-action.selected.delete-item {
       background-color: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
@@ -484,7 +498,8 @@ export const popMenu = <T>(
 };
 export const popFilterableSimpleMenu = (
   target: HTMLElement,
-  options: Menu[]
+  options: Menu[],
+  onClose?: () => void
 ) => {
   popMenu(target, {
     options: {
@@ -493,6 +508,7 @@ export const popFilterableSimpleMenu = (
         search: true,
       },
       items: options,
+      onClose,
     },
   });
 };

@@ -65,12 +65,16 @@ export interface DataViewConfig<
 
   init(model: DatabaseBlockModel, id: string, name: string): Data;
 }
+
 export interface DataViewRendererConfig<
   Data extends DataViewDataType = DataViewDataType
 > {
   type: DataViewTypes;
   view: UniComponent<DataViewProps, DataViewExpose>;
   icon: UniComponent;
+  tools?: UniComponent<{
+    view: DataViewManager;
+  }>[];
 }
 
 export class ViewManager {
