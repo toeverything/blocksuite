@@ -1,11 +1,8 @@
+import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 
 import { getService } from '../service.js';
-import type {
-  BlockRange,
-  BlockTransformContext,
-  SerializedBlock,
-} from '../utils/index.js';
+import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
 import { json2block } from './json2block.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
@@ -71,9 +68,9 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   async json2Block(
     focusedBlockModel: BlockModel,
     pastedBlocks: SerializedBlock[],
-    range?: BlockRange
+    textRangePoint?: TextRangePoint
   ) {
-    return json2block(focusedBlockModel, pastedBlocks, { range });
+    return json2block(focusedBlockModel, pastedBlocks, { textRangePoint });
   }
 
   async onBlockPasted(

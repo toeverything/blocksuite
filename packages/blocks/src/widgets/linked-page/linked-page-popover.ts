@@ -20,6 +20,9 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
   @property({ attribute: false })
   options!: LinkedPageOptions;
 
+  @property({ attribute: false })
+  triggerKey!: string;
+
   @state()
   private _position: {
     height: number;
@@ -116,7 +119,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       },
       onConfirm: () => {
         this.abortController.abort();
-        cleanSpecifiedTail(this.model, '@' + this._query);
+        cleanSpecifiedTail(this.model, this.triggerKey + this._query);
         this._flattenActionList[this._activatedItemIndex].action();
       },
       onEsc: () => {
@@ -161,7 +164,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
                   ?hover=${this._activatedItemIndex === curIdx}
                   @click=${() => {
                     this.abortController.abort();
-                    cleanSpecifiedTail(this.model, '@' + this._query);
+                    cleanSpecifiedTail(
+                      this.model,
+                      this.triggerKey + this._query
+                    );
                     action();
                   }}
                   @mousemove=${() => {

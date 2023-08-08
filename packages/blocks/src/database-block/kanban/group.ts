@@ -4,7 +4,6 @@ import { AddCursorIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
@@ -61,10 +60,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       updateValue: value =>
         this.group.helper.updateValue(this.group.rows, value),
     };
-    return html`${keyed(
-      data.name,
-      html` <uni-lit .uni="${data.view}" .props="${props}"></uni-lit>`
-    )}`;
+    return html` <uni-lit .uni="${data.view}" .props="${props}"></uni-lit>`;
   };
 
   override render() {

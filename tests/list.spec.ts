@@ -1,5 +1,4 @@
 import {
-  clickBlockTypeMenuItem,
   enterPlaygroundRoom,
   enterPlaygroundWithList,
   focusRichText,
@@ -14,6 +13,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  updateBlockType,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
@@ -34,7 +34,7 @@ test('add new bulleted list', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
-  await clickBlockTypeMenuItem(page, 'Bulleted List');
+  await updateBlockType(page, 'affine:list', 'bulleted');
   await focusRichText(page, 0);
   await type(page, 'aa');
   await pressEnter(page);
@@ -50,7 +50,7 @@ test('add new toggle list', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
-  await clickBlockTypeMenuItem(page, 'Toggle List');
+  await updateBlockType(page, 'affine:list', 'toggle');
   await focusRichText(page, 0);
   await type(page, 'top');
   await pressTab(page);
@@ -67,8 +67,9 @@ test('convert to numbered list block', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0); // created 0, 1, 2
-  await clickBlockTypeMenuItem(page, 'Bulleted List'); // replaced 2 to 3
-  await clickBlockTypeMenuItem(page, 'Numbered List');
+  await updateBlockType(page, 'affine:list', 'bulleted'); // replaced 2 to 3
+  await waitNextFrame(page);
+  await updateBlockType(page, 'affine:list', 'numbered');
   await focusRichText(page, 0);
 
   const listSelector = '.affine-list-rich-text-wrapper';
@@ -557,8 +558,7 @@ test('add number prefix to a todo item should not forcefully change it into numb
   await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
   await type(page, '[] ');
   await assertListPrefix(page, ['1']);
-  await initEmptyParagraphState(page);
-  await focusRichText(page, 0);
+  await pressBackspace(page, 14);
   await type(page, '[] todoList');
   await assertListPrefix(page, ['']);
   await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });

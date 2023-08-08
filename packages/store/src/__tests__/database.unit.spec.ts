@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
+import '../../../blocks/src/database-block/kanban/define';
+import '../../../blocks/src/database-block/table/define';
+
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { numberPureColumnConfig } from '../../../blocks/src/database-block/common/columns/number/define';

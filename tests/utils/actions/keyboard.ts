@@ -37,8 +37,10 @@ export async function withPressKey(
   await page.keyboard.up(key);
 }
 
-export async function pressBackspace(page: Page) {
-  await page.keyboard.press('Backspace', { delay: 50 });
+export async function pressBackspace(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('Backspace', { delay: 50 });
+  }
 }
 
 export async function pressSpace(page: Page) {

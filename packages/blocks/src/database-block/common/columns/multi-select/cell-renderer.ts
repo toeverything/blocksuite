@@ -26,6 +26,7 @@ export class MultiSelectCell extends BaseCellRenderer<
     `;
   }
 }
+
 @customElement('affine-database-multi-select-cell-editing')
 export class MultiSelectCellEditing extends BaseCellRenderer<
   string[],
@@ -61,13 +62,15 @@ export class MultiSelectCellEditing extends BaseCellRenderer<
   }
 
   private popTagSelect = () => {
-    popTagSelect(this, {
-      options: this._options,
-      onOptionsChange: this._onOptionsChange,
-      value: this._value,
-      onChange: this._onChange,
-      onComplete: this._editComplete,
-      minWidth: 400,
+    this._disposables.add({
+      dispose: popTagSelect(this, {
+        options: this._options,
+        onOptionsChange: this._onOptionsChange,
+        value: this._value,
+        onChange: this._onChange,
+        onComplete: this._editComplete,
+        minWidth: 400,
+      }),
     });
   };
 

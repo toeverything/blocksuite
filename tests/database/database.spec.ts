@@ -14,6 +14,7 @@ import {
   initEmptyDatabaseState,
   initEmptyDatabaseWithParagraphState,
   pasteByKeyboard,
+  pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
   pressBackspace,
@@ -60,6 +61,7 @@ test('edit database block title and create new rows', async ({ page }) => {
     title: dbTitle,
   });
   await focusDatabaseTitle(page);
+  await pressArrowDown(page);
   for (let i = 0; i < dbTitle.length; i++) {
     await pressBackspace(page);
   }

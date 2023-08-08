@@ -27,18 +27,21 @@ export function showLinkedPagePopover({
   container = document.body,
   abortController = new AbortController(),
   options,
+  triggerKey,
 }: {
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
   options: LinkedPageOptions;
+  triggerKey: string;
 }) {
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
   const linkedPage = new LinkedPagePopover(model, abortController);
   linkedPage.options = options;
+  linkedPage.triggerKey = triggerKey;
   // Mount
   container.appendChild(linkedPage);
   disposables.add(() => linkedPage.remove());
@@ -95,9 +98,14 @@ export class LinkedPageWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedPage(model: BaseBlockModel) {
+  public showLinkedPage(model: BaseBlockModel, triggerKey: string) {
     const curRange = getCurrentNativeRange();
-    showLinkedPagePopover({ model, range: curRange, options: this.options });
+    showLinkedPagePopover({
+      model,
+      range: curRange,
+      options: this.options,
+      triggerKey,
+    });
   }
 
   private _onKeyDown = (ctx: UIEventStateContext) => {
@@ -157,11 +165,11 @@ export class LinkedPageWidget extends WidgetElement {
           length: 0,
         });
         vEditor.slots.rangeUpdated.once(() => {
-          this.showLinkedPage(model);
+          this.showLinkedPage(model, primaryTriggerKey);
         });
         return;
       }
-      this.showLinkedPage(model);
+      this.showLinkedPage(model, matchedKey);
     });
   };
 }

@@ -7,7 +7,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { isValidUrl } from '../utils/url.js';
-import { setupVirgoScroll } from '../utils/virgo.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { REFERENCE_NODE } from './reference-node.js';
 import {
@@ -15,6 +14,7 @@ import {
   type AffineTextSchema,
   type AffineVEditor,
 } from './virgo/types.js';
+
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference'] as const;
 const GLOBAL_IGNORED_ATTRIBUTES = ['reference'] as const;
 
@@ -178,7 +178,6 @@ export class RichText extends ShadowlessElement {
       active: () => activeEditorManager.isActive(this),
       embed: delta => !!delta.attributes?.reference,
     });
-    setupVirgoScroll(this, this._vEditor);
     const textSchema = this.textSchema;
     assertExists(
       textSchema,

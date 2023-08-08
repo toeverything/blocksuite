@@ -12,15 +12,15 @@ export class TextNavigation {
   private _focusRange: Range | null = null;
 
   private get _viewportElement() {
-    if (this.host instanceof DocPageBlockComponent) {
-      return this.host.viewportElement;
+    if (this.pageElement instanceof DocPageBlockComponent) {
+      return this.pageElement.viewportElement;
     }
     return null;
   }
 
   private get _rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
+    assertExists(this.pageElement.rangeManager);
+    return this.pageElement.rangeManager;
   }
 
   constructor(public host: PageBlockComponent) {}
@@ -43,7 +43,7 @@ export class TextNavigation {
         x: rect.left,
         y: rect.top,
       },
-      this.host,
+      this.pageElement,
       true
     );
     if (!caret) {
@@ -84,7 +84,7 @@ export class TextNavigation {
         x: rect.right,
         y: rect.top,
       },
-      this.host,
+      this.pageElement,
       false
     );
     if (!caret) {
