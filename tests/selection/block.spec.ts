@@ -26,12 +26,14 @@ import {
   pressShiftTab,
   pressSpace,
   pressTab,
+  redoByClick,
   redoByKeyboard,
   resetHistory,
   shamefullyBlurActiveElement,
   shiftClick,
   SHORT_KEY,
   type,
+  undoByClick,
   undoByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
@@ -62,11 +64,10 @@ test('block level range delete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
-  await undoByKeyboard(page);
-  // FIXME
-  // await assertRichTexts(page, ['123', '456', '789']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertRichTexts(page, ['']);
 });
 
@@ -90,11 +91,10 @@ test('block level range delete by forwardDelete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
-  await undoByKeyboard(page);
-  // FIXME
-  // await assertRichTexts(page, ['123', '456', '789']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertRichTexts(page, ['']);
 });
 
