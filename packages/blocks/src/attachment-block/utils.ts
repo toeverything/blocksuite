@@ -68,9 +68,7 @@ export function turnIntoEmbedView(model: AttachmentBlockModel) {
 
 export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   const sourceId = model.sourceId;
-
   assertExists(sourceId);
-
   const attachmentProp: AttachmentProps & { flavour: 'affine:attachment' } = {
     flavour: 'affine:attachment',
     sourceId,
@@ -114,11 +112,11 @@ export async function appendAttachmentBlock(
 
   // The original file name can not be modified after the file is uploaded to the storage,
   // so we create a new file with a fixed name to prevent privacy leaks.
-  const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
-    type: file.type,
-  });
+  // const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
+  //   type: file.type,
+  // });
   try {
-    const sourceId = await storage.set(anonymousFile);
+    const sourceId = await storage.set(file);
     // await new Promise(resolve => setTimeout(resolve, 1000));
     setAttachmentLoading(attachmentModel.loadingKey ?? '', false);
     page.updateBlock(attachmentModel, {
