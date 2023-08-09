@@ -16,6 +16,12 @@ export type KanbanViewColumn = {
   hide?: boolean;
 };
 
+export type KanbanGroupProperty = {
+  key: string;
+  hide?: boolean;
+  manuallyCardSort: string[];
+};
+
 export type KanbanViewData = {
   columns: KanbanViewColumn[];
   filter: FilterGroup;
@@ -25,6 +31,7 @@ export type KanbanViewData = {
     iconColumn?: string;
     coverColumn?: string;
   };
+  groupProperties: KanbanGroupProperty[];
 };
 
 viewManager.register('kanban', {
@@ -54,6 +61,7 @@ viewManager.register('kanban', {
       header: {
         titleColumn: model.columns.find(v => v.type === 'title')?.id,
       },
+      groupProperties: [],
     };
   },
 });
