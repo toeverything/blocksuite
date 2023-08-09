@@ -513,7 +513,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     // Calculate styles after dom update.
     requestAnimationFrame(() => {
       const div = this.focusRef.value;
-      assertExists(div);
+      if (!div) return;
       if (focus && !isRowSelection) {
         const { left, top, width, height, scale } = this.getRect(
           focus.rowIndex,
