@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { TemplateResult } from 'lit';
 
 export type ColumnType = string;
@@ -13,8 +14,10 @@ export interface Column<
   data: Data;
 }
 
-export type ColumnHeader = {
-  type: ColumnType;
-  text: string;
-  icon: TemplateResult;
+export const getTableContainer = (ele: HTMLElement) => {
+  const element = ele.closest(
+    '.affine-database-table-container'
+  ) as HTMLElement;
+  assertExists(element);
+  return element;
 };

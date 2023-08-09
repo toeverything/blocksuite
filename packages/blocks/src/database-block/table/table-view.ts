@@ -267,11 +267,3 @@ declare global {
     'affine-database-table': DatabaseTable;
   }
 }
-
-export const getTableContainer = (ele: HTMLElement) => {
-  const element = ele.closest(
-    '.affine-database-table-container'
-  ) as HTMLElement;
-  assertExists(element);
-  return element;
-};
