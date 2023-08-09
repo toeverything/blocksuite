@@ -73,6 +73,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       return;
     }
     return html` <div class="card-header-title">
+      ${this.cardId}
       <affine-data-view-kanban-cell
         .contentOnly=${true}
         data-column-id="${title.id}"

@@ -255,7 +255,7 @@ export class GroupHelper {
   constructor(
     private groupBy: GroupBy,
     private properties: KanbanGroupProperty[],
-    private changeProperties: (properties: KanbanGroupProperty[]) => void,
+    private _changeProperties: (properties: KanbanGroupProperty[]) => void,
     config: GroupByConfig,
     type: TType,
     private viewManager: DataViewManager
@@ -289,27 +289,30 @@ export class GroupHelper {
       });
     });
     const keys = new Set(Object.keys(this.groupMap));
-    const newProperties: KanbanGroupProperty[] = [];
+    const groups: string[] = [];
+    const processRowsSort = (key: string) => {
+      const rowIds = new Set(this.groupMap[key].rows);
+      const rowSort =
+        this.properties.find(v => v.key === key)?.manuallyCardSort ?? [];
+      const result: string[] = [];
+      for (const id of rowSort) {
+        if (rowIds.has(id)) {
+          rowIds.delete(id);
+          result.push(id);
+        }
+      }
+      result.push(...rowIds);
+      this.groupMap[key].rows = result;
+    };
     for (const property of this.properties) {
       if (keys.has(property.key)) {
         keys.delete(property.key);
-        newProperties.push(property);
+        groups.push(property.key);
       }
     }
-    keys.forEach(key => {
-      newProperties.push({
-        key,
-        hide: false,
-        manuallyCardSort: [],
-      });
-    });
-    if (
-      newProperties.length !== this.properties.length ||
-      newProperties.some((v, i) => v.key !== this.properties[i].key)
-    ) {
-      this.changeProperties(newProperties);
-    }
-    this.groups = newProperties.map(v => this.groupMap[v.key]);
+    groups.push(...keys);
+    groups.forEach(processRowsSort);
+    this.groups = groups.map(key => this.groupMap[key]);
   }
 
   get dataType() {
@@ -345,6 +348,14 @@ export class GroupHelper {
     return groupByMatcher.findData(v => v.name === this.groupBy.name);
   }
 
+  defaultGroupProperty(key: string): KanbanGroupProperty {
+    return {
+      key,
+      hide: false,
+      manuallyCardSort: [],
+    };
+  }
+
   addToGroup(rowId: string, key: string) {
     const columnId = this.columnId;
     const addTo = this.groupData()?.addToGroup ?? (value => value);
@@ -365,15 +376,49 @@ export class GroupHelper {
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 
+  changeCardSort(groupKey: string, cardIds: string[]) {
+    const map = new Map(this.properties.map(v => [v.key, v]));
+    const group =
+      this.properties.find(v => v.key === groupKey) ??
+      this.defaultGroupProperty(groupKey);
+    this._changeProperties(
+      this.groups.map(v => {
+        if (v.key === groupKey) {
+          return {
+            ...group,
+            manuallyCardSort: cardIds,
+          };
+        }
+        return map.get(v.key) ?? this.defaultGroupProperty(v.key);
+      })
+    );
+  }
+
+  changeGroupSort(keys: string[]) {
+    const map = new Map(this.properties.map(v => [v.key, v]));
+    const newProperties = keys.map(key => {
+      const property = map.get(key);
+      if (property) {
+        return property;
+      }
+      return {
+        key,
+        hide: false,
+        manuallyCardSort: [],
+      };
+    });
+    this._changeProperties(newProperties);
+  }
+
   public moveGroupTo(groupKey: string, position: InsertPosition) {
-    const properties = [...this.properties];
-    const group = properties.splice(
-      properties.findIndex(v => v.key === groupKey),
+    const keys = this.groups.map(v => v.key);
+    keys.splice(
+      keys.findIndex(key => key === groupKey),
       1
-    )[0];
-    const index = insertPositionToIndex(position, properties, data => data.key);
-    properties.splice(index, 0, group);
-    this.changeProperties(properties);
+    );
+    const index = insertPositionToIndex(position, keys, key => key);
+    keys.splice(index, 0, groupKey);
+    this.changeGroupSort(keys);
   }
 
   moveCardTo(
@@ -391,5 +436,9 @@ export class GroupHelper {
     const addTo = this.groupData()?.addToGroup ?? (value => value);
     newValue = addTo(this.groupMap[toGroupKey].value, newValue);
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
+    const rows = this.groupMap[toGroupKey].rows;
+    const index = insertPositionToIndex(position, rows, id => id);
+    rows.splice(index, 0, rowId);
+    this.changeCardSort(toGroupKey, rows);
   }
 }
