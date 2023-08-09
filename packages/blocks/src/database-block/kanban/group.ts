@@ -187,7 +187,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       <div class="group-header">
         <div class="group-header-title">
           <div class="group-header-name">${this.renderTitle()}</div>
-          ${this.renderCount()} ${this.group.key}
+          ${this.renderCount()}
         </div>
         <div class="group-header-ops">
           <div @click="${this.clickAddCardInStart}" class="group-header-op">
