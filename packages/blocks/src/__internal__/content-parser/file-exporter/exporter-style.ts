@@ -235,4 +235,62 @@ export const globalCSS = css`
   .affine-bookmark-block-container .affine-bookmark-caption.caption-show {
     display: inline-block;
   }
+
+  .meta-data-expanded {
+    padding: 10px 12px 24px;
+    margin: 0 -24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: var(--affine-hover-color-filled);
+    border-radius: 8px;
+  }
+
+  .meta-data-expanded .meta-data-expanded-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 12px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--affine-text-secondary-color);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .meta-data-expanded .meta-data-expanded-item {
+    display: flex;
+    gap: 8px;
+  }
+
+  .meta-data-expanded .meta-data-expanded-item .type {
+    display: flex;
+    align-items: center;
+  }
+
+  .meta-data-expanded .meta-data-expanded-item .type svg {
+    fill: var(--affine-icon-color);
+  }
+
+  .meta-data-expanded .meta-data-expanded-item .value {
+    flex: 1;
+  }
+
+  .meta-data-expanded .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .meta-data-expanded .tag {
+    padding: 4px 10px;
+    border-radius: 8px;
+    color: var(--affine-text-primary-color);
+    font-size: 13px;
+    line-height: 13px;
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    cursor: pointer;
+  }
 `;
