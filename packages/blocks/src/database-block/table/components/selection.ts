@@ -517,9 +517,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     requestAnimationFrame(() => {
       const div = this.focusRef.value;
       if (!div) return;
-      const rows = this.rows();
       if (focus && !isRowSelection) {
         // Check if row is removed.
+        const rows = this.rows();
         if (rows.length <= focus.rowIndex) return;
 
         const { left, top, width, height, scale } = this.getRect(
