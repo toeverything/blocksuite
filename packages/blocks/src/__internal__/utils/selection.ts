@@ -153,6 +153,9 @@ export async function focusRichText(
   resetNativeSelection(range);
 }
 
+/**
+ * @deprecated Use `selectionManager.set` instead.
+ */
 export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end',
@@ -173,6 +176,9 @@ export function focusBlockByModel(
   }
 }
 
+/**
+ * @deprecated Use `selectionManager.set` instead.
+ */
 export function focusPreviousBlock(
   model: BaseBlockModel,
   position: SelectionPosition = 'start',
@@ -196,6 +202,9 @@ export function focusPreviousBlock(
   }
 }
 
+/**
+ * @deprecated Use `selectionManager.set` instead.
+ */
 export function focusNextBlock(
   model: BaseBlockModel,
   position: SelectionPosition = 'start',
