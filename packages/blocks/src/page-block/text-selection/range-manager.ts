@@ -56,8 +56,8 @@ export class RangeManager {
       return;
     }
 
-    const startRange = this._pointToRange(from);
-    const endRange = to ? this._pointToRange(to) : null;
+    const startRange = this.pointToRange(from);
+    const endRange = to ? this.pointToRange(to) : null;
 
     if (!startRange) {
       return;
@@ -168,7 +168,31 @@ export class RangeManager {
     return selectedBlockElements;
   }
 
-  private _pointToRange(point: TextRangePoint): Range | null {
+  textSelectionToRange(selection: TextSelection): Range | null {
+    const { from, to } = selection;
+    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
+    if (!fromBlock) {
+      return null;
+    }
+
+    const startRange = this.pointToRange(from);
+    const endRange = to ? this.pointToRange(to) : null;
+
+    if (!startRange) {
+      return null;
+    }
+
+    if (!endRange) {
+      return startRange;
+    } else {
+      const range = document.createRange();
+      range.setStart(startRange.startContainer, startRange.startOffset);
+      range.setEnd(endRange.endContainer, endRange.endOffset);
+      return range;
+    }
+  }
+
+  pointToRange(point: TextRangePoint): Range | null {
     const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
     assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);
     const startVirgoElement =
