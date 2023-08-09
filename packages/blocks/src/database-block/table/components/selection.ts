@@ -71,21 +71,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           return;
         }
 
+        this.updateSelection(tableSelection);
+
         const old = this._databaseSelection;
-
-        this.updateSelectionStyle(
-          tableSelection?.rowsSelection,
-          tableSelection?.columnsSelection
-        );
-
-        const isRowSelection =
-          tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
-        this.updateFocusSelectionStyle(
-          tableSelection?.focus,
-          isRowSelection,
-          tableSelection?.isEditing
-        );
-
         if (old) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
@@ -477,12 +465,27 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return this.tableContainer.querySelectorAll('.affine-database-block-row');
   }
 
+  updateSelection(tableSelection = this.selection) {
+    this.updateSelectionStyle(
+      tableSelection?.rowsSelection,
+      tableSelection?.columnsSelection
+    );
+
+    const isRowSelection =
+      tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
+    this.updateFocusSelectionStyle(
+      tableSelection?.focus,
+      isRowSelection,
+      tableSelection?.isEditing
+    );
+  }
+
   updateSelectionStyle(
     rowSelection?: MultiSelection,
     columnSelection?: MultiSelection
   ) {
     const div = this.selectionRef.value;
-    assertExists(div);
+    if (!div) return;
     if (!rowSelection && !columnSelection) {
       div.style.display = 'none';
       return;
@@ -515,6 +518,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       const div = this.focusRef.value;
       if (!div) return;
       if (focus && !isRowSelection) {
+        // Check if row is removed.
+        const rows = this.rows();
+        if (rows.length <= focus.rowIndex) return;
+
         const { left, top, width, height, scale } = this.getRect(
           focus.rowIndex,
           focus.rowIndex,

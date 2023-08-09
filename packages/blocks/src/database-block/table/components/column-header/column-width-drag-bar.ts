@@ -88,6 +88,8 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
         this.dragLeft = 0;
         this.column.updateWidth(width);
         preview.remove();
+
+        database.selection.updateSelection();
       },
     });
   };
