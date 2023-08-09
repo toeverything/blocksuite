@@ -438,7 +438,7 @@ export class DragHandleWidget extends WidgetElement {
     const event = state.raw;
     const { target, button } = event;
     const element = captureEventTarget(target);
-    const inside = !!element?.closest('.affine-drag-handle-container');
+    const inside = !!element?.closest('affine-drag-handle-widget');
     // Should only start dragging when pointer down on drag handle
     // And current mouse button is left button
     if (
@@ -450,7 +450,7 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
-    // Get current hover block eleemnt by path
+    // Get current hover block element by path
     const hoverBlockElement = this.root.viewStore.viewFromPath(
       'block',
       this._hoveredBlockPath
