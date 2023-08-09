@@ -1,7 +1,7 @@
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
-import type { PropertyValueMap, TemplateResult } from 'lit';
+import type { TemplateResult } from 'lit';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
