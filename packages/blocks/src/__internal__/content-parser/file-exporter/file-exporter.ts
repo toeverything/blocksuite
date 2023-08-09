@@ -239,8 +239,7 @@ export const FileExporter = {
         return [];
       },
       filter: ['input'],
-      //@ts-ignore
-      replacement: function (content, node) {
+      replacement: function (_content: string, node) {
         return (node as HTMLElement).getAttribute('checked') === null
           ? '[ ] '
           : '[x] ';
@@ -248,8 +247,7 @@ export const FileExporter = {
     });
     turndownService.addRule('codeBlock', {
       filter: ['pre'],
-      //@ts-ignore
-      replacement: function (content, node: Node) {
+      replacement: function (_content: string, node: Node) {
         const element = node as Element;
         return (
           '```' +
@@ -262,14 +260,13 @@ export const FileExporter = {
     });
     turndownService.keep(['del', 'u']);
     turndownService.addRule('bookMark', {
-      filter: function (node) {
+      filter: function (node: HTMLElement) {
         return (
           node.nodeName === 'DIV' &&
           node.classList.contains('affine-bookmark-block-container')
         );
       },
-      //@ts-ignore
-      replacement: function (content, node: Node) {
+      replacement: function (_content: string, node: Node) {
         const element = node as Element;
         const titleElement = element.querySelector(
           '.affine-bookmark-title-content'
@@ -279,13 +276,12 @@ export const FileExporter = {
       },
     });
     turndownService.addRule('pageMetaData', {
-      filter: function (node) {
+      filter: function (node: HTMLElement) {
         return (
           node.nodeName === 'DIV' && node.classList.contains('page-meta-data')
         );
       },
-      //@ts-ignore
-      replacement: function (content, node: Node) {
+      replacement: function (_content: string, node: Node) {
         const element = node as Element;
         const tagEles = element.querySelectorAll('.tag');
         return tagEles.length > 0
