@@ -3,7 +3,10 @@ import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { downloadBlob } from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { toast } from '../components/toast.js';
-import type { ImageProps } from '../image-block/image-model.js';
+import type {
+  ImageBlockModel,
+  ImageProps,
+} from '../image-block/image-model.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,
@@ -60,6 +63,22 @@ export function turnIntoEmbedView(model: AttachmentBlockModel) {
     sourceId,
   };
   model.page.addSiblingBlocks(model, [imageProp]);
+  model.page.deleteBlock(model);
+}
+
+export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
+  const sourceId = model.sourceId;
+
+  assertExists(sourceId);
+
+  const attachmentProp: AttachmentProps & { flavour: 'affine:attachment' } = {
+    flavour: 'affine:attachment',
+    sourceId,
+    name: blob.name,
+    size: blob.size,
+    type: blob.type,
+  };
+  model.page.addSiblingBlocks(model, [attachmentProp]);
   model.page.deleteBlock(model);
 }
 
