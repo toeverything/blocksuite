@@ -1,7 +1,7 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
 import type { BlockStore } from '../store/index.js';
-import { PathFinder } from '../store/index.js';
+import { PathFinder } from '../utils/index.js';
 import type { UIEventHandler } from './base.js';
 import { UIEventState, UIEventStateContext } from './base.js';
 import { ClipboardControl } from './control/clipboard.js';
