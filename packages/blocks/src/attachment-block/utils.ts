@@ -61,6 +61,7 @@ export function turnIntoEmbedView(model: AttachmentBlockModel) {
   const imageProp: ImageProps & { flavour: 'affine:image' } = {
     flavour: 'affine:image',
     sourceId,
+    caption: model.caption,
   };
   model.page.addSiblingBlocks(model, [imageProp]);
   model.page.deleteBlock(model);
@@ -75,6 +76,7 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
     name: blob.name,
     size: blob.size,
     type: blob.type,
+    caption: model.caption,
   };
   model.page.addSiblingBlocks(model, [attachmentProp]);
   model.page.deleteBlock(model);

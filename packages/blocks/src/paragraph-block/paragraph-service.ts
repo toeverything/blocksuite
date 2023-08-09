@@ -28,7 +28,7 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
       case 'h6':
         return `<${model.type}>${text}</${model.type}>`;
       case 'quote':
-        return `<blockquote>${text}</blockquote>`;
+        return `<blockquote class="quote">${text}</blockquote>`;
       default:
         return text;
     }

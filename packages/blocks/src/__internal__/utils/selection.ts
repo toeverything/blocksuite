@@ -139,6 +139,9 @@ export async function focusRichText(
   resetNativeSelection(range);
 }
 
+/**
+ * @deprecated Use `selectionManager.set` instead.
+ */
 export function focusBlockByModel(
   model: BaseBlockModel,
   position: SelectionPosition = 'end',

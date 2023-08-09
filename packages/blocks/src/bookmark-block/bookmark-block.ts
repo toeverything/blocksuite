@@ -255,6 +255,14 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   private _onCardClick() {
+    const selectionManager = this.root.selectionManager;
+    const blockSelection = selectionManager.getInstance('block', {
+      path: this.path,
+    });
+    selectionManager.set([blockSelection]);
+  }
+
+  private _onCardDbClick() {
     let link = this.model.url;
 
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
@@ -337,6 +345,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     const linkCard = html`<div
       class="affine-bookmark-link"
       @click=${this._onCardClick}
+      @dblclick=${this._onCardDbClick}
     >
       <div class="affine-bookmark-content-wrapper">
         <div class="affine-bookmark-title">

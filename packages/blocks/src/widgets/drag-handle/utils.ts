@@ -70,3 +70,7 @@ export const getNoteId = (blockElement: BlockElement) => {
 
   return element.model.id;
 };
+
+export const includeTextSelection = (selections: BaseSelection[]) => {
+  return selections.some(selection => selection.type === 'text');
+};
