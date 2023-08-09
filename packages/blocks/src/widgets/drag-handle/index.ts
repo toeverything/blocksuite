@@ -87,8 +87,6 @@ export class DragHandleWidget extends WidgetElement {
   public reset() {
     this._dragging = false;
     this._indicatorRect = null;
-    // this._dragPreview.textContent = '';
-    // this._dragPreview.style.display = 'none';
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
     this._draggingElements = [];
@@ -730,7 +728,6 @@ export class DragHandleWidget extends WidgetElement {
             <div class="affine-drag-handle-grabber"></div>
           </div>
         </div>
-        <!-- <div class="affine-drag-preview"></div> -->
         <div class="affine-drag-indicator" style=${indicatorStyle}></div>
       </div>
     `;
