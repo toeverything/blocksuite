@@ -33,7 +33,7 @@ import {
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
-import { getService } from '../service.js';
+import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { groupBy } from '../utils/common.js';

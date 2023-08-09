@@ -3,7 +3,7 @@ import { BlockElement, createLitPortal } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';

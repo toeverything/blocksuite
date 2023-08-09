@@ -20,7 +20,10 @@ import type {
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
-import { getService, registerService } from '../../__internal__/service.js';
+import {
+  getService,
+  registerService,
+} from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageBlockService } from '../index.js';

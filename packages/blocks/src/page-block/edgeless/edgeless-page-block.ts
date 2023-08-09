@@ -50,7 +50,10 @@ import {
   throttle,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { getService, registerService } from '../../__internal__/service.js';
+import {
+  getService,
+  registerService,
+} from '../../__internal__/service/index.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import {
