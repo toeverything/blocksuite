@@ -1,6 +1,7 @@
 import type { BaseSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { CSSResultGroup } from 'lit';
 
 import { DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT } from './config.js';
 
@@ -70,3 +71,22 @@ export const getNoteId = (blockElement: BlockElement) => {
 
   return element.model.id;
 };
+
+export function renderStyles(styles: CSSResultGroup, container: HTMLElement) {
+  if (Array.isArray(styles)) {
+    styles.forEach(s => {
+      renderStyles(s, container);
+    });
+    return;
+  }
+  const styleEle = document.createElement('style');
+  if (styles instanceof CSSStyleSheet) {
+    const cssText = Array.from(styles.cssRules)
+      .map(rule => rule.cssText)
+      .join('\n');
+    styleEle.textContent = cssText;
+    return;
+  }
+  styleEle.textContent = styles.cssText;
+  container.appendChild(styleEle);
+}

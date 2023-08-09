@@ -38,6 +38,7 @@ import {
   getDragHandleContainerHeight,
   getNoteId,
   insideDatabaseTable,
+  renderStyles,
 } from './utils.js';
 
 @customElement('affine-drag-handle-widget')
@@ -211,6 +212,12 @@ export class DragHandleWidget extends WidgetElement {
     blockElements.forEach(element => {
       const container = document.createElement('div');
       container.classList.add('affine-block-element');
+
+      // XXX workaround for styles not applied to drag preview
+      // It will lost some inline styles such as <a> tag
+      const styles = (element.constructor as typeof BlockElement).styles ?? [];
+      renderStyles(styles, container);
+
       render(element.render(), container);
       container.querySelector('.selected')?.classList.remove('selected');
       fragment.appendChild(container);
