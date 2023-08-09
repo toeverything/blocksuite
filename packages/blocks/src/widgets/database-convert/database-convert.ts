@@ -98,7 +98,12 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
 
   override render() {
     return html`<div class=${AFFINE_DATABASE_CONVERT_WIDGET_TAG}>
-      <div class="overlay-mask"></div>
+      <div
+        @click=${() => {
+          this.style.display = 'none';
+        }}
+        class="overlay-mask"
+      ></div>
       <div class="modal-container">
         <div class="modal-header">
           <div class="modal-header-title">Select Database View</div>
