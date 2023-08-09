@@ -140,7 +140,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
 
     .meta-data-expanded-item .arrow-icon svg {
       fill: var(--affine-icon-color);
-       height: 25px;
+      height: 25px;
     }
 
     .meta-data-expanded-item .value {
