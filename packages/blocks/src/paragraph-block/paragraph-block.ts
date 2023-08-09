@@ -7,14 +7,10 @@ import {
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, unsafeCSS } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  quoteCSSContent,
-  quotePseudoElementContent,
-} from '../__internal__/content-parser/file-exporter/exporter-style.js';
 import { isPageMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { RichText } from '../__internal__/rich-text/rich-text.js';
@@ -152,8 +148,26 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     .h6 code {
       font-size: calc(var(--affine-font-base) - 2px);
     }
-    ${unsafeCSS(quoteCSSContent)}
-    ${unsafeCSS(quotePseudoElementContent)}
+    .quote {
+      line-height: 26px;
+      padding-left: 17px;
+      margin-top: var(--affine-paragraph-space);
+      padding-top: 10px;
+      padding-bottom: 10px;
+      position: relative;
+    }
+    .quote::after {
+      content: '';
+      width: 2px;
+      height: calc(100% - 20px);
+      margin-top: 10px;
+      margin-bottom: 10px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: var(--affine-quote-color);
+      border-radius: 18px;
+    }
     .text {
       margin-top: 10px;
       margin-bottom: 10px;

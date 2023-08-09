@@ -1,7 +1,7 @@
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { css, unsafeCSS } from 'lit';
 
-export const quoteCSSContent = `
+const quoteCSSContent = `
   .quote {
     line-height: 26px;
     padding-left: 17px;
@@ -12,7 +12,7 @@ export const quoteCSSContent = `
   }
 `;
 
-export const quotePseudoElementContent = `
+const quotePseudoElementContent = `
   .quote::after {
     content: '';
     width: 2px;
