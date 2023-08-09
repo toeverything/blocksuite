@@ -31,6 +31,7 @@ import {
   DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
+import { DragPreview } from './drag-preview.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
   captureEventTarget,
@@ -52,9 +53,6 @@ export class DragHandleWidget extends WidgetElement {
   @query('.affine-drag-handle-grabber')
   private _dragHandleGrabber!: HTMLDivElement;
 
-  @query('.affine-drag-preview')
-  private _dragPreview!: HTMLDivElement;
-
   @state()
   private _indicatorRect: {
     width: number;
@@ -73,6 +71,7 @@ export class DragHandleWidget extends WidgetElement {
   private _draggingElements: BlockElement[] = [];
   private _dragging = false;
   private _dragPreviewOffsetY = 0;
+  private _dragPreview: DragPreview | null = null;
 
   private _rafID = 0;
 
@@ -88,8 +87,6 @@ export class DragHandleWidget extends WidgetElement {
   public reset() {
     this._dragging = false;
     this._indicatorRect = null;
-    this._dragPreview.textContent = '';
-    this._dragPreview.style.display = 'none';
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
     this._draggingElements = [];
@@ -162,15 +159,6 @@ export class DragHandleWidget extends WidgetElement {
     return this._pageBlockElement.rangeManager;
   }
 
-  private _getDragPreviewOffset() {
-    const offset = { left: 0, top: 0 };
-    if (this._pageBlockElement instanceof DocPageBlockComponent) {
-      offset.left = this._pageBlockElement.viewportElement.scrollLeft;
-      offset.top = this._pageBlockElement.viewportElement.scrollTop;
-    }
-    return offset;
-  }
-
   private _getClosestBlockElementByPoint(point: Point) {
     const noteSelector = 'affine-note';
     const closeNoteBlock = findClosestBlockElement(
@@ -219,6 +207,8 @@ export class DragHandleWidget extends WidgetElement {
     blockElements: BlockElement[],
     hoverBlockElement: BlockElement
   ) {
+    if (!this._dragPreview) this._dragPreview = new DragPreview();
+
     const fragment = document.createDocumentFragment();
     blockElements.forEach(element => {
       const container = document.createElement('div');
@@ -228,29 +218,34 @@ export class DragHandleWidget extends WidgetElement {
       fragment.appendChild(container);
     });
 
-    const previewOffset = this._getDragPreviewOffset();
-
     const { left, top, width } = hoverBlockElement.getBoundingClientRect();
     this._dragPreviewOffsetY = this._calculatePreviewOffsetY(
       blockElements,
       hoverBlockElement
     );
-    const posX = left + previewOffset.left;
-    const posY = top + previewOffset.top - this._dragPreviewOffsetY;
+    const posX = left;
+    const posY = top - this._dragPreviewOffsetY;
     this._dragPreview.style.width = `${width / this._scale}px`;
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
     this._dragPreview.classList.add('grabbing');
     this._dragPreview.style.display = 'block';
 
     this._dragPreview.appendChild(fragment);
+    this._pageBlockElement.appendChild(this._dragPreview);
   }
 
-  private _updateDragPreviewPosition(point: Point) {
-    const previewOffset = this._getDragPreviewOffset();
-    const posX = point.x + previewOffset.left;
-    const posY = point.y + previewOffset.top - this._dragPreviewOffsetY;
+  private _removeDragPreview() {
+    if (this._dragPreview) {
+      this._dragPreview.remove();
+      this._dragPreview = null;
+    }
+  }
 
-    this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
+  private _updateDragPreviewPosition(dragPreview: DragPreview, point: Point) {
+    const posX = point.x;
+    const posY = point.y - this._dragPreviewOffsetY;
+
+    dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
   }
 
   private _canEditing = (noteBlock: BlockElement) => {
@@ -416,7 +411,7 @@ export class DragHandleWidget extends WidgetElement {
     const element = captureEventTarget(target);
     if (
       !element ||
-      !element.closest('.affine-drag-handle-container') ||
+      !element.closest('affine-drag-handle-widget') ||
       !this._hoveredBlockId ||
       !this._hoveredBlockPath
     ) {
@@ -449,7 +444,7 @@ export class DragHandleWidget extends WidgetElement {
     const event = state.raw;
     const { target, button } = event;
     const element = captureEventTarget(target);
-    const inside = !!element?.closest('.affine-drag-handle-container');
+    const inside = !!element?.closest('affine-drag-handle-widget');
     // Should only start dragging when pointer down on drag handle
     // And current mouse button is left button
     if (
@@ -553,7 +548,8 @@ export class DragHandleWidget extends WidgetElement {
       }
 
       const previewPos = new Point(state.point.x, state.point.y);
-      this._updateDragPreviewPosition(previewPos);
+      if (this._dragPreview)
+        this._updateDragPreviewPosition(this._dragPreview, previewPos);
 
       if (this._pageBlockElement instanceof DocPageBlockComponent) {
         const result = autoScroll(
@@ -581,6 +577,7 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragEndHandler: UIEventHandler = () => {
     this._clearRaf();
+    this._removeDragPreview();
     if (!this._dragging || this._draggingElements.length === 0) {
       this.hide(true);
       return;
@@ -707,6 +704,7 @@ export class DragHandleWidget extends WidgetElement {
 
   override disconnectedCallback() {
     this.hide(true);
+    this._removeDragPreview();
     super.disconnectedCallback();
   }
 
@@ -724,13 +722,14 @@ export class DragHandleWidget extends WidgetElement {
     );
 
     return html`
-      <div class="affine-drag-handle-container">
-        <div class="affine-drag-handle">
-          <div class="affine-drag-handle-grabber"></div>
+      <div class="affine-drag-handle-widget">
+        <div class="affine-drag-handle-container">
+          <div class="affine-drag-handle">
+            <div class="affine-drag-handle-grabber"></div>
+          </div>
         </div>
+        <div class="affine-drag-indicator" style=${indicatorStyle}></div>
       </div>
-      <div class="affine-drag-preview"></div>
-      <div class="affine-drag-indicator" style=${indicatorStyle}></div>
     `;
   }
 }

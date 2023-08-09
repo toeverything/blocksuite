@@ -43,13 +43,13 @@ test('only have one drag handle in screen', async ({ page }) => {
 
   await page.mouse.move(topLeft.x, topLeft.y);
   const length1 = await page.evaluate(() => {
-    const handles = document.querySelectorAll('.affine-drag-handle');
+    const handles = document.querySelectorAll('affine-drag-handle-widget');
     return handles.length;
   }, []);
   expect(length1).toBe(1);
   await page.mouse.move(bottomRight.x, bottomRight.y);
   const length2 = await page.evaluate(() => {
-    const handles = document.querySelectorAll('.affine-drag-handle');
+    const handles = document.querySelectorAll('affine-drag-handle-widget');
     return handles.length;
   }, []);
   expect(length2).toBe(1);
@@ -593,7 +593,7 @@ test('should create preview when dragging', async ({ page }) => {
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const dragPreview = page.locator('.affine-drag-preview');
+  const dragPreview = page.locator('affine-drag-preview');
 
   await dragBetweenIndices(
     page,
