@@ -84,7 +84,9 @@ export async function undoByKeyboard(page: Page) {
 }
 
 export async function formatType(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`, {
+    delay: 50,
+  });
 }
 
 export async function redoByKeyboard(page: Page) {
@@ -92,7 +94,9 @@ export async function redoByKeyboard(page: Page) {
 }
 
 export async function selectAllByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`, {
+    delay: 50,
+  });
 }
 
 export async function pressTab(page: Page) {
