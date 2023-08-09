@@ -10,8 +10,18 @@ import { isTopLevelBlock } from '../../utils/query.js';
 @customElement('edgeless-hover-rect')
 export class EdgelessHoverRect extends WithDisposable(LitElement) {
   static override styles = css`
+    :host {
+      pointer-events: none;
+    }
     .affine-edgeless-hover-rect {
       position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 0;
+      pointer-events: none;
+      box-sizing: border-box;
+      z-index: 1;
+      border: var(--affine-border-width) solid var(--affine-blue);
     }
   `;
 
@@ -25,11 +35,15 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
     this._disposables.add(
       this.edgeless.slots.viewportUpdated.on(() => this.requestUpdate())
     );
+    this._disposables.add(
+      this.edgeless.selection.slots.updated.on(() => this.requestUpdate())
+    );
   }
 
   protected override render() {
-    const hoverState = this.edgeless.tools.getHoverState();
-    if (!hoverState) return nothing;
+    const { edgeless } = this;
+    const hoverState = edgeless.tools.getHoverState();
+    if (!hoverState || edgeless.selection.state.editing) return nothing;
     const rect = hoverState.rect;
     const isNote =
       isTopLevelBlock(hoverState.content) &&
@@ -46,5 +60,11 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
     return html`
       <div class="affine-edgeless-hover-rect" style=${styleMap(style)}></div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edgeless-hover-rect': EdgelessHoverRect;
   }
 }

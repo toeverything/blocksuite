@@ -146,7 +146,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         // If the previously selected element is a noteBlock and is in an active state,
         // then the currently clicked noteBlock should also be in an active state when selected.
         this._setSelectionState([element.id], true);
-        handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+        requestAnimationFrame(() => {
+          handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
+        });
         this.selection.setSelectedBlocks([]);
         return;
       }

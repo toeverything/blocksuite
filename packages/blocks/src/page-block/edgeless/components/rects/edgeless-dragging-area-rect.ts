@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -7,6 +7,15 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-dragging-area-rect')
 export class EdgelessHoverRect extends WithDisposable(LitElement) {
+  static override styles = css`
+    .affine-edgeless-dragging-area {
+      position: absolute;
+      background: var(--affine-hover-color);
+      z-index: 1;
+      pointer-events: none;
+    }
+  `;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -27,15 +36,13 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
       height: rect.height + 'px',
     };
     return html`
-      <style>
-        .affine-edgeless-dragging-area {
-          position: absolute;
-          background: var(--affine-hover-color);
-          z-index: 1;
-          pointer-events: none;
-        }
-      </style>
       <div class="affine-edgeless-dragging-area" style=${styleMap(style)}></div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edgeless-dragging-area-rect': EdgelessHoverRect;
   }
 }

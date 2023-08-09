@@ -2,6 +2,7 @@ import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
 import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
+import './components/edgeless-notes-container.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
@@ -74,7 +75,6 @@ import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/operations/model.js';
 import { UtilManager } from '../utils/util-manager.js';
-import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
@@ -211,17 +211,6 @@ export class EdgelessPageBlockComponent
       border-radius: 8px;
       box-shadow: var(--affine-shadow-3);
       pointer-events: all;
-    }
-
-    .affine-edgeless-hover-rect {
-      position: absolute;
-      top: 0;
-      left: 0;
-      border-radius: 0;
-      pointer-events: none;
-      box-sizing: border-box;
-      z-index: 1;
-      border: var(--affine-border-width) solid var(--affine-blue);
     }
 
     @media screen and (max-width: 1200px) {
@@ -1246,15 +1235,8 @@ export class EdgelessPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const { _rectsOfSelectedBlocks, selection, sortedNotes, surface } = this;
-    const { state } = selection;
+    const { _rectsOfSelectedBlocks, sortedNotes, surface } = this;
     const { viewport } = surface;
-
-    const notesContainer = EdgelessNotesContainer(
-      sortedNotes,
-      state.editing,
-      this.renderModel
-    );
 
     const { left, top } = viewport;
 
@@ -1274,7 +1256,11 @@ export class EdgelessPageBlockComponent
             ${this.enableNoteCut
               ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
               : nothing}
-            ${notesContainer}
+            <edgeless-notes-container
+              .edgeless=${this}
+              .notes=${sortedNotes}
+              .renderer=${this.renderModel.bind(this)}
+            ></edgeless-notes-container>
           </div>
         </div>
         <affine-selected-blocks
