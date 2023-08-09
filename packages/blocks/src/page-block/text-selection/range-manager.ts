@@ -39,8 +39,11 @@ export class RangeManager {
       ranges.push(end);
     }
 
-    this._mergeRanges(ranges);
-    this._renderRange();
+    const range = this._mergeRanges(ranges);
+    if (range) {
+      this._reusedRange = range;
+      this._renderRange();
+    }
   }
 
   syncTextSelectionToRange(selection: TextSelection | null) {
@@ -56,8 +59,8 @@ export class RangeManager {
       return;
     }
 
-    const startRange = this._pointToRange(from);
-    const endRange = to ? this._pointToRange(to) : null;
+    const startRange = this.pointToRange(from);
+    const endRange = to ? this.pointToRange(to) : null;
 
     if (!startRange) {
       return;
@@ -151,26 +154,42 @@ export class RangeManager {
   };
 
   getSelectedBlocksIdByRange(range: Range): BaseBlockModel['id'][] {
-    const selectedBlocksId = Array.from<BlockElement>(
-      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
-    )
-      .filter(el => range.intersectsNode(el))
-      .map(el => el.model.id);
-
-    return selectedBlocksId;
+    return this.getSelectedBlockElementsByRange(range).map(el => el.model.id);
   }
 
   getSelectedBlockElementsByRange(range: Range): BlockElement[] {
-    const selectedBlockElements = Array.from<BlockElement>(
+    return Array.from<BlockElement>(
       this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
     ).filter(el => range.intersectsNode(el));
-
-    return selectedBlockElements;
   }
 
-  private _pointToRange(point: TextRangePoint): Range | null {
+  textSelectionToRange(selection: TextSelection): Range | null {
+    const { from, to } = selection;
+    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
+    if (!fromBlock) {
+      return null;
+    }
+
+    const startRange = this.pointToRange(from);
+    const endRange = to ? this.pointToRange(to) : null;
+
+    if (!startRange) {
+      return null;
+    }
+
+    const ranges = [startRange];
+    if (endRange) {
+      ranges.push(endRange);
+    }
+
+    return this._mergeRanges(ranges);
+  }
+
+  pointToRange(point: TextRangePoint): Range | null {
     const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
-    assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);
+    if (!fromBlock) {
+      return null;
+    }
     const startVirgoElement =
       fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');
     assertExists(
@@ -228,13 +247,14 @@ export class RangeManager {
 
   private _mergeRanges(ranges: RangeSnapshot[]) {
     if (ranges.length === 0) {
-      return;
+      return null;
     }
     if (ranges.length === 1) {
       const [current] = ranges;
-      this._range.setStart(current.startContainer, current.startOffset);
-      this._range.setEnd(current.endContainer, current.endOffset);
-      return;
+      const range = document.createRange();
+      range.setStart(current.startContainer, current.startOffset);
+      range.setEnd(current.endContainer, current.endOffset);
+      return range;
     }
 
     const [leftRangeSnapshot, rightRangeSnapshot] = ranges;
@@ -266,11 +286,14 @@ export class RangeManager {
       }
     }
 
-    this._range.setStart(leftRange.startContainer, leftRange.startOffset);
-    this._range.setEnd(rightRange.endContainer, rightRange.endOffset);
+    const range = document.createRange();
+    range.setStart(leftRange.startContainer, leftRange.startOffset);
+    range.setEnd(rightRange.endContainer, rightRange.endOffset);
 
     leftRange.detach();
     rightRange.detach();
+
+    return range;
   }
 
   private _renderRange() {

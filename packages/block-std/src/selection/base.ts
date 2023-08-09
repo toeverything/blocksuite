@@ -1,4 +1,4 @@
-import { PathFinder } from '../store/index.js';
+import { PathFinder } from '../utils/index.js';
 
 type SelectionConstructor<T = unknown> = {
   new (...args: unknown[]): T;

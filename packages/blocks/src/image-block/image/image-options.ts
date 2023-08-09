@@ -3,6 +3,7 @@ import {
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
+  LinkToCardIcon,
 } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/store';
 import { html } from 'lit';
@@ -10,16 +11,19 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import type { IPoint } from '../../__internal__/utils/types.js';
+import { turnImageIntoCardView } from '../../attachment-block/utils.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import type { ImageBlockModel } from '../image-model.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function ImageOptionsTemplate({
   model,
+  blob,
   position,
   hoverState,
 }: {
   model: ImageBlockModel;
+  blob: Blob;
   position: IPoint;
   hoverState: Slot<boolean>;
 }) {
@@ -60,6 +64,14 @@ export function ImageOptionsTemplate({
       @mouseout=${() => hoverState.emit(false)}
     >
       <div style=${styleMap(style)} class="embed-editing-state">
+        <icon-button
+          class="has-tool-tip"
+          data-testid="unlink"
+          @click=${() => turnImageIntoCardView(model, blob)}
+        >
+          ${LinkToCardIcon}
+          <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+        </icon-button>
         <icon-button
           class="has-tool-tip"
           width="100%"
