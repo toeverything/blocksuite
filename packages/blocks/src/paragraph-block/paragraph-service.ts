@@ -3,8 +3,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { SerializedBlock } from '../__internal__/index.js';
 import type { BlockTransformContext } from '../__internal__/index.js';
-import { BaseService } from '../__internal__/service/index.js';
 import { json2block } from '../__internal__/service/json2block.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type { ParagraphBlockModel } from './paragraph-model.js';
 
 export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {

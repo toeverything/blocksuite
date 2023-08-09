@@ -2,7 +2,7 @@ import type {
   BlockTransformContext,
   SerializedBlock,
 } from '../__internal__/index.js';
-import { BaseService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import { DefaultBanner } from './images/banners.js';
 import { DefaultIcon } from './images/icons.js';

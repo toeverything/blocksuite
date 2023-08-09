@@ -9,13 +9,13 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   almostEqual,
   type BlockComponentElement,
+  getBlockElementByModel,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
 } from '../../../../__internal__/index.js';
 import {
   type EdgelessPageBlockComponent,
-  getBlockElementByModel,
   type NoteBlockModel,
 } from '../../../../index.js';
 import {

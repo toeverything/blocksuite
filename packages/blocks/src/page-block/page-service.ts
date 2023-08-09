@@ -1,8 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
-import { BaseService } from '../__internal__/service/index.js';
 import { getService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type {
   BlockTransformContext,
   SerializedBlock,

@@ -22,7 +22,6 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
-import { deleteModelsByRange } from '../../page-block/utils/operations/block-element.js';
 import {
   getSelectedContentModels,
   getTextSelection,
@@ -51,6 +50,7 @@ import {
   isPureFileInClipboard,
   performNativeCopy,
 } from './utils/index.js';
+import { deleteModelsByRange } from './utils/operation.js';
 
 function prepareConnnectorClipboardData(
   connector: ConnectorElement,

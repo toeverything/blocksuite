@@ -16,8 +16,8 @@ import './surface-block/index.js';
 import './database-block/index.js';
 
 export * from './__internal__/rich-text/rich-text-operations.js';
-export type { BaseService } from './__internal__/service/index.js';
 export { getServiceOrRegister } from './__internal__/service/index.js';
+export type { BaseService } from './__internal__/service/service.js';
 export type { CssVariableName } from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/theme-observer.js';

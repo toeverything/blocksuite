@@ -6,8 +6,8 @@ import {
   type Page,
 } from '@blocksuite/store';
 
-import { BaseService } from '../__internal__/service/index.js';
 import { getService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import type { SerializedBlock } from '../__internal__/utils/types.js';
 import { columnManager } from './common/columns/manager.js';
