@@ -126,7 +126,7 @@ export class DragHandleWidget extends WidgetElement {
     }px`;
   }
 
-  private _setSelectedBlock(blockId: string, path: string[]) {
+  private _setSelectedBlock(path: string[]) {
     const { selectionManager } = this.root;
     selectionManager.set([
       selectionManager.getInstance('block', {
@@ -423,7 +423,7 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     // Should select the block if current block is not selected
-    this._setSelectedBlock(this._hoveredBlockId, this._hoveredBlockPath);
+    this._setSelectedBlock(this._hoveredBlockPath);
 
     // TODO: show slash menu
 
@@ -490,7 +490,7 @@ export class DragHandleWidget extends WidgetElement {
       selections.length === 0 ||
       !containBlock(selections, this._hoveredBlockId)
     ) {
-      this._setSelectedBlock(this._hoveredBlockId, this._hoveredBlockPath);
+      this._setSelectedBlock(this._hoveredBlockPath);
     }
 
     const blockElements = this.selectedBlocks
