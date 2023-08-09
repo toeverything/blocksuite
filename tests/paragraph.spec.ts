@@ -109,12 +109,11 @@ test('backspace and arrow on title', async ({ page }) => {
   await pressBackspace(page);
   await assertTitle(page, 'hell');
 
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
-  await page.keyboard.press('ArrowLeft', { delay: 50 });
+  await pressArrowLeft(page, 2);
   await pressBackspace(page);
   await assertTitle(page, 'hll');
 
-  await page.keyboard.press('ArrowDown', { delay: 50 });
+  await pressArrowDown(page);
   await assertSelection(page, 0, 0, 0);
 
   await undoByKeyboard(page);
