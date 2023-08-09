@@ -15,13 +15,13 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   ) {
     const icon = block.icon
       ? `<img class="bookmark-icon" alt="icon" src="${block.icon}">`
-      : DefaultIcon.strings.join('');
+      : this.templateResult2String(DefaultIcon);
     const bookmarkCaption = block.caption
       ? `<figcaption class="affine-bookmark-caption">${block.caption}</figcaption>`
       : '';
     const banner = block.image
       ? `<img class="bookmark-image" alt="image" src="${block.image}">`
-      : DefaultBanner.strings.join('');
+      : this.templateResult2String(DefaultBanner);
     return `
   <figure class="affine-bookmark-block-container">
     <a href="${block.url}" class="affine-bookmark-link bookmark source">

@@ -1,11 +1,27 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
+import { isTemplateResult } from 'lit/directive-helpers.js';
 
 import { getService } from '../service.js';
 import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
 import { json2block } from './json2block.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
+  templateResult2String(temp: TemplateResult): string {
+    const values = [...temp.values, ''].map(value => {
+      if (isTemplateResult(value)) {
+        return this.templateResult2String(value);
+      } else {
+        return value;
+      }
+    });
+    return temp.strings.reduce(
+      (result, str, i) => result + str + values[i],
+      ''
+    );
+  }
+
   async block2html(
     block: BlockModel,
     { childText = '', begin, end }: BlockTransformContext = {},
