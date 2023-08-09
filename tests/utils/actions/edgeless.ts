@@ -316,7 +316,7 @@ export async function addBasicConnectorElement(
 export async function addNote(page: Page, text: string, x: number, y: number) {
   await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
   await type(page, text);
 }
 

@@ -400,7 +400,7 @@ test.describe('slash menu with code block', () => {
   });
 });
 // Selection is not yet available in edgeless
-test.fixme('slash menu should work in edgeless mode', async ({ page }) => {
+test('slash menu should work in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 

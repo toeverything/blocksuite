@@ -13,7 +13,7 @@ export class PageKeyboardManager {
             this._page.undo();
           }
         },
-        'Mod-Z': ctx => {
+        'Shift-Mod-z': ctx => {
           ctx.get('defaultState').event.preventDefault();
           if (this._page.canRedo) {
             this._page.redo();
@@ -21,6 +21,7 @@ export class PageKeyboardManager {
         },
         Backspace: this._handleDelete,
         Delete: this._handleDelete,
+        'Control-d': this._handleDelete,
       },
       {
         global: true,

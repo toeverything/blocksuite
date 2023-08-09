@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
-  addCodeBlock,
   copyByKeyboard,
   createCodeBlock,
   dragBetweenCoords,
@@ -25,7 +24,7 @@ import {
   switchReadonly,
   type,
   undoByKeyboard,
-  waitNextFrame,
+  updateBlockType,
 } from './utils/actions/index.js';
 import {
   assertKeyboardWorkInInput,
@@ -73,7 +72,7 @@ test('use debug menu can create code block', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await addCodeBlock(page);
+  await updateBlockType(page, 'affine:code');
 
   const locator = page.locator('affine-code');
   await expect(locator).toBeVisible();
@@ -505,7 +504,7 @@ test.fixme(
     await focusRichText(page);
 
     await pressEnter(page);
-    await addCodeBlock(page);
+    await updateBlockType(page, 'affine:code');
     await focusRichText(page);
     await page.keyboard.press('ArrowDown');
 
