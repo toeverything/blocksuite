@@ -4,7 +4,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import type { DividerBlockModel } from './divider-model.js';
 import { DividerBlockService } from './divider-service.js';
 

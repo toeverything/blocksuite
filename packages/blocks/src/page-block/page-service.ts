@@ -2,8 +2,8 @@ import { TagsIcon } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
-import { getService } from '../__internal__/service.js';
-import { BaseService } from '../__internal__/service/index.js';
+import { getService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type {
   BlockTransformContext,
   SerializedBlock,

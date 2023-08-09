@@ -53,7 +53,10 @@ import {
   throttle,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import { getService, registerService } from '../../__internal__/service.js';
+import {
+  getService,
+  registerService,
+} from '../../__internal__/service/index.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import {
@@ -70,7 +73,7 @@ import type {
   PageBlockModel,
   SurfaceBlockModel,
 } from '../../index.js';
-import { PageBlockService } from '../../index.js';
+import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';

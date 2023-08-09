@@ -8,7 +8,7 @@ import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import { clamp } from '../__internal__/utils/common.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { getViewportElement } from '../__internal__/utils/query.js';

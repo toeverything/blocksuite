@@ -24,7 +24,7 @@ import {
 } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { getService, registerService } from '../__internal__/service.js';
+import { getService, registerService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';

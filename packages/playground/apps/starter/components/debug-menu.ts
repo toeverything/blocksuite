@@ -21,15 +21,12 @@ import {
   createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
-  getCurrentBlockRange,
-  SelectionUtils,
   SIZE_VARIABLES,
   VARIABLES,
 } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
 import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
@@ -221,31 +218,28 @@ export class DebugMenu extends ShadowlessElement {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      return;
-    }
-    // updateBlockType(blockRange.models, flavour, type);
+    // FIXME: fix this
   }
 
   private _addCodeBlock(e: PointerEvent) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      throw new Error("Can't add code block without a selection");
-    }
-    const startModel = blockRange.models[0];
-    const parent = this.page.getParent(startModel);
-    const index = parent?.children.indexOf(startModel);
-    const blockProps = {
-      text: startModel.text?.clone(),
-    };
-    assertExists(parent);
-    this.page.captureSync();
-    this.page.deleteBlock(startModel);
-    this.page.addBlock('affine:code', blockProps, parent, index);
+    // FIXME: fix this
+    // const blockRange = getCurrentBlockRange(this.page);
+    // if (!blockRange) {
+    //   throw new Error("Can't add code block without a selection");
+    // }
+    // const startModel = blockRange.models[0];
+    // const parent = this.page.getParent(startModel);
+    // const index = parent?.children.indexOf(startModel);
+    // const blockProps = {
+    //   text: startModel.text?.clone(),
+    // };
+    // assertExists(parent);
+    // this.page.captureSync();
+    // this.page.deleteBlock(startModel);
+    // this.page.addBlock('affine:code', blockProps, parent, index);
   }
 
   private _switchEditorMode() {
@@ -497,7 +491,6 @@ export class DebugMenu extends ShadowlessElement {
                 content="Undo"
                 .disabled=${!this._canUndo}
                 @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
                   this.page.undo();
                 }}
               >
@@ -511,7 +504,6 @@ export class DebugMenu extends ShadowlessElement {
                 content="Redo"
                 .disabled=${!this._canRedo}
                 @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
                   this.page.redo();
                 }}
               >

@@ -3,7 +3,7 @@ import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
-import { BaseService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type {
   BlockTransformContext,
   SerializedBlock,

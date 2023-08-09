@@ -20,7 +20,6 @@ import {
   COLOR_VARIABLES,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
-  SelectionUtils,
   SIZE_VARIABLES,
   VARIABLES,
 } from '@blocksuite/blocks';
@@ -623,7 +622,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 content="Undo"
                 .disabled=${!this._canUndo}
                 @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
                   this.page.undo();
                 }}
               >
@@ -638,7 +636,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 content="Redo"
                 .disabled=${!this._canRedo}
                 @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
                   this.page.redo();
                 }}
               >

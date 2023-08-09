@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists, caretRangeFromPoint } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import {
   Bound,
   ConnectorElement,
@@ -18,12 +18,10 @@ import {
 import {
   type DefaultTool,
   handleNativeRangeAtPoint,
-  handleNativeRangeDragMove,
   noop,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import { getNativeSelectionMouseDragInfo } from '../../utils/position.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
 import {
@@ -63,7 +61,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   override enableHover = true;
   dragType = DefaultModeDragType.None;
 
-  private _startRange: Range | null = null;
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _lastMoveDelta = { x: 0, y: 0 };
@@ -414,7 +411,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   initializeDragState(e: PointerEventState, dragType: DefaultModeDragType) {
     const { x, y } = e;
     this.dragType = dragType;
-    this._startRange = caretRangeFromPoint(x, y);
     this._dragStartPos = { x, y };
     this._dragLastPos = { x, y };
 
@@ -505,7 +501,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       case DefaultModeDragType.NativeEditing: {
         // TODO reset if drag out of note
-        handleNativeRangeDragMove(this._startRange, e);
         break;
       }
     }
@@ -522,11 +517,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     if (this.isActive) {
-      const { selectedType } = getNativeSelectionMouseDragInfo(e);
-      if (selectedType === 'Caret') {
-        // If nothing is selected, then we should not show the format bar
-        return;
-      }
+      return;
     }
 
     this._dragStartPos = { x: 0, y: 0 };

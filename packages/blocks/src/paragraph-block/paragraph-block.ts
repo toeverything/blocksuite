@@ -19,7 +19,7 @@ import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 import paragraphService from './paragraph-service.js';
 

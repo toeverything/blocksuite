@@ -22,7 +22,6 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
-import { deleteModelsByRange } from '../../page-block/utils/operations/block-element.js';
 import {
   getSelectedContentModels,
   getTextSelection,
@@ -33,7 +32,7 @@ import {
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
-import { getService } from '../service.js';
+import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { groupBy } from '../utils/common.js';
@@ -51,6 +50,7 @@ import {
   isPureFileInClipboard,
   performNativeCopy,
 } from './utils/index.js';
+import { deleteModelsByRange } from './utils/operation.js';
 
 function prepareConnnectorClipboardData(
   connector: ConnectorElement,

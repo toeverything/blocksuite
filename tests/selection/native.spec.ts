@@ -5,6 +5,8 @@ import {
   activeEmbed,
   activeNoteInEdgeless,
   addNoteByClick,
+  click,
+  clickView,
   copyByKeyboard,
   dragBetweenCoords,
   dragBetweenIndices,
@@ -1503,16 +1505,10 @@ test('should select when clicking on blank area in edgeless mode', async ({
     throw new Error();
   }
 
-  await focusRichText(page, 2);
+  await click(page, { x: r3.x - 5, y: r3.y + r3.height + 5 });
+  await waitNextFrame(page);
 
-  await dragBetweenCoords(
-    page,
-    { x: r3.x + r3.width / 2, y: r3.y - (r3.y - (r2.y + r2.height)) / 2 },
-    { x: r3.x + r3.width / 2, y: r2.y - (r2.y - (r1.y + r1.height)) / 2 },
-    { steps: 50 }
-  );
-
-  expect(await getVirgoSelectionText(page)).toBe('456');
+  expect(await getVirgoSelectionText(page)).toBe('789');
 });
 
 test.fixme(

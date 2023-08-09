@@ -29,12 +29,12 @@ import { startFrameLoop } from '../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import { getTableContainer } from '../../table-view.js';
 import type {
   DataViewTableColumnManager,
   DataViewTableManager,
 } from '../../table-view-manager.js';
 import type { ColumnTypeIcon } from '../../types.js';
+import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 
 @customElement('affine-database-header-column')
