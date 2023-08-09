@@ -38,6 +38,7 @@ import {
   containChildBlock,
   getDragHandleContainerHeight,
   getNoteId,
+  includeTextSelection,
   insideDatabaseTable,
 } from './utils.js';
 
@@ -252,7 +253,7 @@ export class DragHandleWidget extends WidgetElement {
     this._dragPreview.style.transform = `translate(${posX}px, ${posY}px) scale(${this._scale})`;
   }
 
-  private _canEditting = (noteBlock: BlockElement) => {
+  private _canEditing = (noteBlock: BlockElement) => {
     if (isPageMode(this.page)) return true;
     const edgelessPage = this._pageBlockElement as EdgelessPageBlockComponent;
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
@@ -374,7 +375,6 @@ export class DragHandleWidget extends WidgetElement {
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    state.raw.preventDefault();
 
     const { target } = state.raw;
     const element = captureEventTarget(target);
@@ -394,7 +394,7 @@ export class DragHandleWidget extends WidgetElement {
     const closestNoteBlock = this._getClosestNoteBlock(point);
     if (
       !closestNoteBlock ||
-      !this._canEditting(closestNoteBlock as BlockElement) ||
+      !this._canEditing(closestNoteBlock as BlockElement) ||
       this._outOfNoteBlock(closestNoteBlock, point)
     ) {
       this.hide();
@@ -461,7 +461,7 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
-    // Get current hover block eleemnt by path
+    // Get current hover block element by path
     const hoverBlockElement = this.root.viewStore.viewFromPath(
       'block',
       this._hoveredBlockPath
@@ -474,7 +474,7 @@ export class DragHandleWidget extends WidgetElement {
 
     // When current selection is TextSelection
     // Should set BlockSelection for the blocks in native range
-    if (selections.length > 0 && selections[0].type === 'text') {
+    if (selections.length > 0 && includeTextSelection(selections)) {
       const nativeSelection = document.getSelection();
       if (nativeSelection && nativeSelection.rangeCount > 0) {
         const range = nativeSelection.getRangeAt(0);
@@ -523,8 +523,6 @@ export class DragHandleWidget extends WidgetElement {
     this._draggingElements = blockElementsExcludingChildren;
     this._dragging = true;
     this.hide();
-
-    // TODO: forbiden viewport updating when drag start
 
     return true;
   };
