@@ -34,7 +34,6 @@ import {
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
@@ -276,9 +275,6 @@ export class EdgelessPageBlockComponent
   };
 
   @state()
-  private _edgelessLayerWillChange = false;
-
-  @state()
   private _rectsOfSelectedBlocks: DOMRect[] = [];
 
   @query('.affine-edgeless-surface-block-container')
@@ -502,19 +498,6 @@ export class EdgelessPageBlockComponent
       })
     );
 
-    let resetWillChange: ReturnType<typeof setTimeout> | null = null;
-    _disposables.add(
-      slots.viewportUpdated.on(() => {
-        this._edgelessLayerWillChange = true;
-
-        if (resetWillChange) clearTimeout(resetWillChange);
-        resetWillChange = setTimeout(() => {
-          this._edgelessLayerWillChange = false;
-          resetWillChange = null;
-        }, 150);
-      })
-    );
-
     _disposables.add(
       slots.viewportUpdated.on(() => {
         const prevZoom = this.style.getPropertyValue('--affine-zoom');
@@ -522,10 +505,36 @@ export class EdgelessPageBlockComponent
         if (!prevZoom || +prevZoom !== newZoom) {
           this.style.setProperty('--affine-zoom', `${newZoom}`);
         }
+        const { showGrid } = this;
+        const { zoom, viewportX, viewportY } = this.surface.viewport;
+
+        const { grid, gap, translateX, translateY } = getBackgroundGrid(
+          viewportX,
+          viewportY,
+          zoom,
+          showGrid
+        );
+
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-gap',
+          `${gap}px`
+        );
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-grid',
+          grid
+        );
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-x',
+          `${translateX}px`
+        );
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-y',
+          `${translateY}px`
+        );
+
         if (this.selection.selectedBlocks.length) {
           this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
         }
-        this.requestUpdate();
       })
     );
     _disposables.add(
@@ -541,11 +550,6 @@ export class EdgelessPageBlockComponent
       })
     );
 
-    _disposables.add(
-      selection.slots.updated.on(() => {
-        this.requestUpdate();
-      })
-    );
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         this.edgelessTool = edgelessTool;
@@ -1242,13 +1246,7 @@ export class EdgelessPageBlockComponent
 
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const {
-      _rectsOfSelectedBlocks,
-      selection,
-      showGrid,
-      sortedNotes,
-      surface,
-    } = this;
+    const { _rectsOfSelectedBlocks, selection, sortedNotes, surface } = this;
     const { state } = selection;
     const { viewport } = surface;
 
@@ -1258,21 +1256,7 @@ export class EdgelessPageBlockComponent
       this.renderModel
     );
 
-    const { zoom, viewportX, viewportY, left, top } = viewport;
-
-    const { grid, gap, translateX, translateY } = getBackgroundGrid(
-      viewportX,
-      viewportY,
-      zoom,
-      showGrid
-    );
-
-    const blockContainerStyle = {
-      '--affine-edgeless-gap': `${gap}px`,
-      '--affine-edgeless-grid': grid,
-      '--affine-edgeless-x': `${translateX}px`,
-      '--affine-edgeless-y': `${translateY}px`,
-    };
+    const { left, top } = viewport;
 
     const widgets = html`${repeat(
       Object.entries(this.widgets),
@@ -1284,19 +1268,9 @@ export class EdgelessPageBlockComponent
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
-      <div
-        class="affine-edgeless-page-block-container"
-        style=${styleMap(blockContainerStyle)}
-      >
+      <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
-          <div
-            class="affine-edgeless-layer"
-            style=${styleMap({
-              willChange: this._edgelessLayerWillChange
-                ? 'transform'
-                : undefined,
-            })}
-          >
+          <div class="affine-edgeless-layer">
             ${this.enableNoteCut
               ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
               : nothing}

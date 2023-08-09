@@ -22,6 +22,9 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
     this._disposables.add(
       this.edgeless.slots.hoverUpdated.on(() => this.requestUpdate())
     );
+    this._disposables.add(
+      this.edgeless.slots.viewportUpdated.on(() => this.requestUpdate())
+    );
   }
 
   protected override render() {
