@@ -53,7 +53,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     ) as HTMLElement | null;
   }
 
-  private _display = false;
+  private _dragging = false;
   private _displayType: 'text' | 'block' | 'none' = 'none';
 
   private _selectedBlockElements: BlockElement[] = [];
@@ -74,7 +74,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return (
       this._displayType !== 'none' &&
       this._selectedBlockElements.length > 0 &&
-      this._display
+      !this._dragging
     );
   }
 
@@ -100,14 +100,14 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     this._disposables.add(
       this.root.uiEventDispatcher.add('dragStart', () => {
-        this._display = false;
+        this._dragging = true;
         this.requestUpdate();
       })
     );
 
     this._disposables.add(
       this.root.uiEventDispatcher.add('dragEnd', () => {
-        this._display = true;
+        this._dragging = false;
         this.requestUpdate();
       })
     );
@@ -167,6 +167,8 @@ export class AffineFormatBarWidget extends WidgetElement {
             assertExists(blockElement);
             return blockElement;
           });
+        } else {
+          this._reset();
         }
 
         this.requestUpdate();
@@ -195,11 +197,9 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   override updated() {
-    const formatQuickBarElement = this._formatBarElement;
-    assertExists(formatQuickBarElement, 'format quick bar should exist');
-
     if (this._shouldDisplay()) {
-      formatQuickBarElement.style.display = 'flex';
+      const formatQuickBarElement = this._formatBarElement;
+      assertExists(formatQuickBarElement, 'format quick bar should exist');
       if (this._displayType === 'text') {
         assertExists(this._rangeManager, 'range controller should exist');
         const range = this._rangeManager.value;
@@ -257,8 +257,6 @@ export class AffineFormatBarWidget extends WidgetElement {
           formatQuickBarElement.style.left = `${x}px`;
         });
       }
-    } else {
-      formatQuickBarElement.style.display = 'none';
     }
   }
 
@@ -269,6 +267,10 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   override render() {
+    if (!this._shouldDisplay()) {
+      return nothing;
+    }
+
     const pageElement = this.pageElement;
     assertExists(pageElement);
 

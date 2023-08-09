@@ -1,13 +1,11 @@
 import { expect } from '@playwright/test';
 
 import {
-  clickBlockTypeMenuItem,
   dragBetweenIndices,
   dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
-  formatType,
   initEmptyParagraphState,
   initThreeParagraphs,
   inlineCode,
@@ -29,6 +27,7 @@ import {
   type,
   undoByClick,
   undoByKeyboard,
+  updateBlockType,
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
@@ -791,19 +790,19 @@ test.fixme('should hotkey work in paragraph', async ({ page }) => {
   );
 });
 
-test.fixme('format list to h1', async ({ page }) => {
+test('format list to h1', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
   await focusRichText(page, 0);
-  await clickBlockTypeMenuItem(page, 'Bulleted List');
+  await updateBlockType(page, 'affine:list', 'bulleted');
   await type(page, 'aa');
   await focusRichText(page, 0);
-  await formatType(page);
+  await updateBlockType(page, 'affine:paragraph', 'h1');
   await assertTypeFormat(page, 'h1');
-  await undoByKeyboard(page);
+  await undoByClick(page);
   await assertTypeFormat(page, 'bulleted');
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertTypeFormat(page, 'h1');
 });
 
