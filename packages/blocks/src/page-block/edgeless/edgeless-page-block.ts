@@ -1236,10 +1236,6 @@ export class EdgelessPageBlockComponent
   }
 
   override render() {
-    requestAnimationFrame(() => {
-      this.selection?.refreshRemoteSelection();
-    });
-
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
     const {

@@ -144,10 +144,6 @@ export class EdgelessSelectionManager {
     this._selection.set([...values, instance]);
   }
 
-  refreshRemoteSelection() {
-    document.querySelector('remote-selection')?.requestUpdate();
-  }
-
   setSelectedBlocks(blocks: BlockComponentElement[]) {
     this.selectedBlocks = blocks;
     this.slots.blocksUpdated.emit(blocks);
