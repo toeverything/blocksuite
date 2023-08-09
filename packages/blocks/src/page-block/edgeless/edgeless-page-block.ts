@@ -35,6 +35,7 @@ import {
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
@@ -272,6 +273,8 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
+  private _edgelessLayerWillChange = false;
+
   clipboard = new EdgelessClipboard(this.page, this);
 
   slots = {
@@ -484,6 +487,19 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(({ zoom, center }) => {
         this.slots.viewportUpdated.emit({ zoom, center });
+      })
+    );
+
+    let resetWillChange: ReturnType<typeof setTimeout> | null = null;
+    _disposables.add(
+      slots.viewportUpdated.on(() => {
+        this._edgelessLayerWillChange = true;
+
+        if (resetWillChange) clearTimeout(resetWillChange);
+        resetWillChange = setTimeout(() => {
+          this._edgelessLayerWillChange = false;
+          resetWillChange = null;
+        }, 150);
       })
     );
 
@@ -1252,7 +1268,14 @@ export class EdgelessPageBlockComponent
       </div>
       <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
-          <div class="affine-edgeless-layer">
+          <div
+            class="affine-edgeless-layer"
+            style=${styleMap({
+              willChange: this._edgelessLayerWillChange
+                ? 'transform'
+                : undefined,
+            })}
+          >
             ${this.enableNoteCut
               ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
               : nothing}
