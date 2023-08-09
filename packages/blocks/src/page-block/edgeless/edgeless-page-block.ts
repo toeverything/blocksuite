@@ -1,5 +1,7 @@
 import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
+import './components/rects/edgeless-hover-rect.js';
+import './components/rects/edgeless-dragging-area-rect.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
@@ -76,8 +78,6 @@ import { UtilManager } from '../utils/util-manager.js';
 import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
-import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
-import { EdgelessHoverRect } from './components/rects/hover-rect.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
@@ -540,7 +540,7 @@ export class EdgelessPageBlockComponent
         // this.requestUpdate();
       })
     );
-    _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
+
     _disposables.add(
       selection.slots.updated.on(() => {
         this.requestUpdate();
@@ -1248,9 +1248,7 @@ export class EdgelessPageBlockComponent
       showGrid,
       sortedNotes,
       surface,
-      tools,
     } = this;
-    const { draggingArea } = tools;
     const { state } = selection;
     const { viewport } = surface;
 
@@ -1261,10 +1259,6 @@ export class EdgelessPageBlockComponent
     );
 
     const { zoom, viewportX, viewportY, left, top } = viewport;
-    const draggingAreaTpl = EdgelessDraggingAreaRect(draggingArea);
-
-    const hoverState = tools.getHoverState();
-    const hoverRectTpl = EdgelessHoverRect(hoverState);
 
     const { grid, gap, translateX, translateY } = getBackgroundGrid(
       viewportX,
@@ -1320,7 +1314,10 @@ export class EdgelessPageBlockComponent
             y: -top,
           }}
         ></affine-selected-blocks>
-        ${hoverRectTpl} ${draggingAreaTpl}
+        <edgeless-hover-rect .edgeless=${this}> </edgeless-hover-rect>
+        <edgeless-dragging-area-rect
+          .edgeless=${this}
+        ></edgeless-dragging-area-rect>
         <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
         ${EdgelessNotesStatus(this, this.sortedNotes)} ${widgets}
       </div>
