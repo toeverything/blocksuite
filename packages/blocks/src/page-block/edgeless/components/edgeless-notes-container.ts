@@ -23,9 +23,7 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
     return this;
   }
 
-  protected override firstUpdated(
-    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
-  ): void {
+  protected override firstUpdated() {
     this._disposables.add(
       this.edgeless.selection.slots.updated.on(() => {
         this.requestUpdate();
