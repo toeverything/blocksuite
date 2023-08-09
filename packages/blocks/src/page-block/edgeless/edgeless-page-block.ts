@@ -1,5 +1,8 @@
 import './components/rects/edgeless-selected-rect.js';
 import './components/toolbar/edgeless-toolbar.js';
+import './components/rects/edgeless-hover-rect.js';
+import './components/rects/edgeless-dragging-area-rect.js';
+import './components/edgeless-notes-container.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
@@ -73,11 +76,8 @@ import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { tryUpdateNoteSize } from '../utils/operations/model.js';
 import { UtilManager } from '../utils/util-manager.js';
-import { EdgelessNotesContainer } from './components/edgeless-notes-container.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
-import { EdgelessDraggingAreaRect } from './components/rects/dragging-area-rect.js';
-import { EdgelessHoverRect } from './components/rects/hover-rect.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
@@ -214,17 +214,6 @@ export class EdgelessPageBlockComponent
       pointer-events: all;
     }
 
-    .affine-edgeless-hover-rect {
-      position: absolute;
-      top: 0;
-      left: 0;
-      border-radius: 0;
-      pointer-events: none;
-      box-sizing: border-box;
-      z-index: 1;
-      border: var(--affine-border-width) solid var(--affine-blue);
-    }
-
     @media screen and (max-width: 1200px) {
       edgeless-zoom-toolbar {
         display: none;
@@ -276,9 +265,6 @@ export class EdgelessPageBlockComponent
   };
 
   @state()
-  private _edgelessLayerWillChange = false;
-
-  @state()
   private _rectsOfSelectedBlocks: DOMRect[] = [];
 
   @query('.affine-edgeless-surface-block-container')
@@ -286,6 +272,8 @@ export class EdgelessPageBlockComponent
 
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
+
+  private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
 
@@ -522,10 +510,36 @@ export class EdgelessPageBlockComponent
         if (!prevZoom || +prevZoom !== newZoom) {
           this.style.setProperty('--affine-zoom', `${newZoom}`);
         }
+        const { showGrid } = this;
+        const { zoom, viewportX, viewportY } = this.surface.viewport;
+
+        const { grid, gap, translateX, translateY } = getBackgroundGrid(
+          viewportX,
+          viewportY,
+          zoom,
+          showGrid
+        );
+
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-gap',
+          `${gap}px`
+        );
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-grid',
+          grid
+        );
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-x',
+          `${translateX}px`
+        );
+        this.pageBlockContainer.style.setProperty(
+          '--affine-edgeless-y',
+          `${translateY}px`
+        );
+
         if (this.selection.selectedBlocks.length) {
           this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
         }
-        this.requestUpdate();
       })
     );
     _disposables.add(
@@ -540,12 +554,7 @@ export class EdgelessPageBlockComponent
         // this.requestUpdate();
       })
     );
-    _disposables.add(slots.hoverUpdated.on(() => this.requestUpdate()));
-    _disposables.add(
-      selection.slots.updated.on(() => {
-        this.requestUpdate();
-      })
-    );
+
     _disposables.add(
       slots.edgelessToolUpdated.on(edgelessTool => {
         this.edgelessTool = edgelessTool;
@@ -1238,43 +1247,10 @@ export class EdgelessPageBlockComponent
   override render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const {
-      _rectsOfSelectedBlocks,
-      selection,
-      showGrid,
-      sortedNotes,
-      surface,
-      tools,
-    } = this;
-    const { draggingArea } = tools;
-    const { state } = selection;
+    const { _rectsOfSelectedBlocks, sortedNotes, surface } = this;
     const { viewport } = surface;
 
-    const notesContainer = EdgelessNotesContainer(
-      sortedNotes,
-      state.editing,
-      this.renderModel
-    );
-
-    const { zoom, viewportX, viewportY, left, top } = viewport;
-    const draggingAreaTpl = EdgelessDraggingAreaRect(draggingArea);
-
-    const hoverState = tools.getHoverState();
-    const hoverRectTpl = EdgelessHoverRect(hoverState);
-
-    const { grid, gap, translateX, translateY } = getBackgroundGrid(
-      viewportX,
-      viewportY,
-      zoom,
-      showGrid
-    );
-
-    const blockContainerStyle = {
-      '--affine-edgeless-gap': `${gap}px`,
-      '--affine-edgeless-grid': grid,
-      '--affine-edgeless-x': `${translateX}px`,
-      '--affine-edgeless-y': `${translateY}px`,
-    };
+    const { left, top } = viewport;
 
     const widgets = html`${repeat(
       Object.entries(this.widgets),
@@ -1286,10 +1262,7 @@ export class EdgelessPageBlockComponent
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
-      <div
-        class="affine-edgeless-page-block-container"
-        style=${styleMap(blockContainerStyle)}
-      >
+      <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
           <div
             class="affine-edgeless-layer"
@@ -1302,7 +1275,11 @@ export class EdgelessPageBlockComponent
             ${this.enableNoteCut
               ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
               : nothing}
-            ${notesContainer}
+            <edgeless-notes-container
+              .edgeless=${this}
+              .notes=${sortedNotes}
+              .renderer=${this.renderModel.bind(this)}
+            ></edgeless-notes-container>
           </div>
         </div>
         <affine-selected-blocks
@@ -1316,7 +1293,10 @@ export class EdgelessPageBlockComponent
             y: -top,
           }}
         ></affine-selected-blocks>
-        ${hoverRectTpl} ${draggingAreaTpl}
+        <edgeless-hover-rect .edgeless=${this}> </edgeless-hover-rect>
+        <edgeless-dragging-area-rect
+          .edgeless=${this}
+        ></edgeless-dragging-area-rect>
         <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
         ${EdgelessNotesStatus(this, this.sortedNotes)} ${widgets}
       </div>
