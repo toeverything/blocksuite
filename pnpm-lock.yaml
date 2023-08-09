@@ -186,6 +186,9 @@ importers:
       shiki:
         specifier: ^0.14.3
         version: 0.14.3
+      sortablejs:
+        specifier: ^1.15.0
+        version: 1.15.0
       turndown:
         specifier: ^7.1.2
         version: 7.1.2
@@ -208,6 +211,9 @@ importers:
       '@types/marked':
         specifier: ^4.3.1
         version: 4.3.1
+      '@types/sortablejs':
+        specifier: ^1.15.1
+        version: 1.15.1
       '@types/turndown':
         specifier: ^5.0.1
         version: 5.0.1
@@ -1835,6 +1841,10 @@ packages:
       '@types/http-errors': 2.0.1
       '@types/mime': 3.0.1
       '@types/node': 18.17.1
+    dev: true
+
+  /@types/sortablejs@1.15.1:
+    resolution: {integrity: sha512-g/JwBNToh6oCTAwNS8UGVmjO7NLDKsejVhvE4x1eWiPTC3uCuNsa/TD4ssvX3du+MLiM+SHPNDuijp8y76JzLQ==}
     dev: true
 
   /@types/trusted-types@2.0.3:
@@ -6869,6 +6879,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /sortablejs@1.15.0:
+    resolution: {integrity: sha512-bv9qgVMjUMf89wAvM6AxVvS/4MX3sPeN0+agqShejLU5z5GX4C75ow1O2e5k4L6XItUyAK3gH6AxSbXrOM5e8w==}
+    dev: false
 
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}

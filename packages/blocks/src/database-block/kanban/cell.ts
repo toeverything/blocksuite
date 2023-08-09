@@ -1,7 +1,6 @@
 // related component
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { PropertyValues } from 'lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -74,8 +73,8 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     return this._cell.value?.expose;
   }
 
-  protected override firstUpdated(_changedProperties: PropertyValues) {
-    super.firstUpdated(_changedProperties);
+  override connectedCallback() {
+    super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
       if (!this.editing) {

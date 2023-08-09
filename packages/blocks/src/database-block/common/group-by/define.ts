@@ -11,17 +11,33 @@ groupByMatcher.register(tTag.create(), {
   defaultKeys: type => {
     if (tTag.is(type) && type.data) {
       return [
-        ...type.data.tags.map(v => ({ key: v.id, value: v.id })),
-        { key: 'Ungroups', value: null },
+        {
+          key: 'Ungroups',
+          value: null,
+        },
+        ...type.data.tags.map(v => ({
+          key: v.id,
+          value: v.id,
+        })),
       ];
     }
     return [];
   },
   valuesGroup: (value, type) => {
     if (value == null) {
-      return [{ key: 'Ungroups', value }];
+      return [
+        {
+          key: 'Ungroups',
+          value,
+        },
+      ];
     }
-    return [{ key: `${value}`, value }];
+    return [
+      {
+        key: `${value}`,
+        value,
+      },
+    ];
   },
   view: createUniComponentFromWebComponent(SelectGroupView),
 });
@@ -30,26 +46,51 @@ groupByMatcher.register(tArray(tTag.create()), {
   defaultKeys: type => {
     if (isTArray(type) && tTag.is(type.ele) && type.ele.data) {
       return [
-        ...type.ele.data.tags.map(v => ({ key: v.id, value: v.id })),
-        { key: 'Ungroups', value: null },
+        {
+          key: 'Ungroups',
+          value: null,
+        },
+        ...type.ele.data.tags.map(v => ({
+          key: v.id,
+          value: v.id,
+        })),
       ];
     }
     return [];
   },
   valuesGroup: (value, type) => {
     if (value == null) {
-      return [{ key: 'Ungroups', value }];
+      return [
+        {
+          key: 'Ungroups',
+          value,
+        },
+      ];
     }
     if (Array.isArray(value)) {
       if (value.length) {
-        return value.map(id => ({ key: `${id}`, value: id }));
+        return value.map(id => ({
+          key: `${id}`,
+          value: id,
+        }));
       }
-      return [{ key: 'Ungroups', value }];
+      return [
+        {
+          key: 'Ungroups',
+          value,
+        },
+      ];
     }
     return [];
   },
   addToGroup: (value, old) =>
     Array.isArray(old) ? [...old, value] : value ? [value] : [],
+  removeFromGroup: (value, old) => {
+    if (Array.isArray(old)) {
+      return old.filter(v => v !== value);
+    }
+    return old;
+  },
   view: createUniComponentFromWebComponent(SelectGroupView),
 });
 groupByMatcher.register(tString.create(), {
@@ -59,9 +100,19 @@ groupByMatcher.register(tString.create(), {
   },
   valuesGroup: (value, type) => {
     if (value == null) {
-      return [{ key: '', value }];
+      return [
+        {
+          key: '',
+          value,
+        },
+      ];
     }
-    return [{ key: `${value}`, value }];
+    return [
+      {
+        key: `${value}`,
+        value,
+      },
+    ];
   },
   view: createUniComponentFromWebComponent(StringGroupView),
 });
@@ -72,10 +123,18 @@ groupByMatcher.register(tNumber.create(), {
   },
   valuesGroup: (value, type) => {
     if (typeof value !== 'number') {
-      return [{ key: 'Empty', value }];
+      return [
+        {
+          key: 'Empty',
+          value,
+        },
+      ];
     }
     return [
-      { key: `${Math.floor(value / 10)}`, value: Math.floor(value / 10) },
+      {
+        key: `${Math.floor(value / 10)}`,
+        value: Math.floor(value / 10),
+      },
     ];
   },
   addToGroup: value => (typeof value === 'number' ? value * 10 : undefined),

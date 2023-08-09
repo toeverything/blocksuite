@@ -76,7 +76,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       min-width: 160px;
       box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
         0px 0px 0px 0.5px #e3e3e4 inset;
-      border-radius: 4px;
+      border-radius: 8px;
       background-color: var(--affine-background-primary-color);
       padding: 8px;
       position: absolute;
@@ -392,7 +392,9 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
                   @input="${this._inputText}"
                 />
               </div>
-              <div class="affine-menu-divider"></div>`
+              ${this.items.length
+                ? html`<div class="affine-menu-divider"></div>`
+                : null}`
           : null}
         ${repeat(this.items, (menu, i) => {
           const divider = menu.upDivider || this.items[i - 1]?.downDivider;

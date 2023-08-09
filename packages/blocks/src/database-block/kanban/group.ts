@@ -108,6 +108,13 @@ const styles = css`
   .add-card:hover {
     background-color: var(--affine-hover-color);
   }
+  .sortable-ghost {
+    background-color: var(--affine-hover-color);
+    opacity: 0.5;
+  }
+  .sortable-drag {
+    background-color: var(--affine-background-primary-color);
+  }
 `;
 
 @customElement('affine-data-view-kanban-group')
@@ -180,7 +187,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       <div class="group-header">
         <div class="group-header-title">
           <div class="group-header-name">${this.renderTitle()}</div>
-          ${this.renderCount()}
+          ${this.renderCount()} ${this.group.key}
         </div>
         <div class="group-header-ops">
           <div @click="${this.clickAddCardInStart}" class="group-header-op">

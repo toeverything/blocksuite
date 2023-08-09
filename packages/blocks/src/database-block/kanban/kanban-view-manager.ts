@@ -6,6 +6,7 @@ import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
+import type { GroupByConfig } from '../common/group-by/matcher.js';
 import { groupByMatcher } from '../common/group-by/matcher.js';
 import { defaultGroupBy } from '../common/group-by/util.js';
 import type { GroupBy } from '../common/types.js';
@@ -14,6 +15,7 @@ import { evalFilter } from '../logical/eval-filter.js';
 import type { TType } from '../logical/typesystem.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
+import type { KanbanGroupProperty } from './define.js';
 
 export type KanbanGroupData = {
   key: string;
@@ -154,12 +156,11 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     });
   }
 
-  public get groups(): KanbanGroupData[] | undefined {
+  public get groupHelper(): GroupHelper | undefined {
     const groupBy = this.view.groupBy;
     if (!groupBy) {
       return;
     }
-    const helper = new GroupHelper(groupBy, this);
     const result = groupByMatcher.find(v => v.data.name === groupBy.name);
     if (!result) {
       return;
@@ -168,42 +169,27 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     const type = this.columnGetDataType(groupBy.columnId);
     if (!this.checkGroup(groupBy.columnId, result.type, type)) {
       // reset groupBy config
-      return this.groups;
+      return this.groupHelper;
     }
-    const groupMap: Record<string, KanbanGroupData> = Object.fromEntries(
-      groupByConfig.defaultKeys(type).map(({ key, value }) => [
-        key,
-        {
-          key,
-          helper,
-          type,
-          value,
-          rows: [],
-        },
-      ])
-    );
-    this.rows.forEach(id => {
-      const value = this.cellGetJsonValue(id, groupBy.columnId);
-      const keys = groupByConfig.valuesGroup(value, type);
-      keys.forEach(({ key, value }) => {
-        if (!groupMap[key]) {
-          groupMap[key] = {
-            key,
-            helper,
-            value,
-            rows: [],
-            type,
+    return new GroupHelper(
+      groupBy,
+      this.view.groupProperties,
+      properties => {
+        this.updateView(v => {
+          return {
+            groupProperties: properties,
           };
-        }
-        groupMap[key].rows.push(id);
-      });
-    });
-    return Object.values(groupMap);
+        });
+      },
+      groupByConfig,
+      type,
+      this
+    );
   }
 
   public addCard(position: InsertPosition, group: KanbanGroupData) {
     const id = this.rowAdd(position);
-    group.helper.addToGroup(id, group.value);
+    group.helper.addToGroup(id, group.key);
     return id;
   }
 
@@ -265,7 +251,67 @@ export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {
   }
 }
 
-class GroupHelper {
+export class GroupHelper {
+  constructor(
+    private groupBy: GroupBy,
+    private properties: KanbanGroupProperty[],
+    private changeProperties: (properties: KanbanGroupProperty[]) => void,
+    config: GroupByConfig,
+    type: TType,
+    private viewManager: DataViewManager
+  ) {
+    this.groupMap = Object.fromEntries(
+      config.defaultKeys(type).map(({ key, value }) => [
+        key,
+        {
+          key,
+          helper: this,
+          type,
+          value,
+          rows: [],
+        },
+      ])
+    );
+    this.viewManager.rows.forEach(id => {
+      const value = this.viewManager.cellGetJsonValue(id, groupBy.columnId);
+      const keys = config.valuesGroup(value, type);
+      keys.forEach(({ key, value }) => {
+        if (!this.groupMap[key]) {
+          this.groupMap[key] = {
+            key,
+            helper: this,
+            value,
+            rows: [],
+            type,
+          };
+        }
+        this.groupMap[key].rows.push(id);
+      });
+    });
+    const keys = new Set(Object.keys(this.groupMap));
+    const newProperties: KanbanGroupProperty[] = [];
+    for (const property of this.properties) {
+      if (keys.has(property.key)) {
+        keys.delete(property.key);
+        newProperties.push(property);
+      }
+    }
+    keys.forEach(key => {
+      newProperties.push({
+        key,
+        hide: false,
+        manuallyCardSort: [],
+      });
+    });
+    if (
+      newProperties.length !== this.properties.length ||
+      newProperties.some((v, i) => v.key !== this.properties[i].key)
+    ) {
+      this.changeProperties(newProperties);
+    }
+    this.groups = newProperties.map(v => this.groupMap[v.key]);
+  }
+
   get dataType() {
     return this.viewManager.columnGetDataType(this.groupBy.columnId);
   }
@@ -292,28 +338,58 @@ class GroupHelper {
     });
   }
 
-  constructor(private groupBy: GroupBy, private viewManager: DataViewManager) {}
+  public readonly groups: KanbanGroupData[];
+  public readonly groupMap: Record<string, KanbanGroupData>;
 
   groupData() {
     return groupByMatcher.findData(v => v.name === this.groupBy.name);
   }
 
-  addToGroup(rowId: string, value: unknown) {
+  addToGroup(rowId: string, key: string) {
     const columnId = this.columnId;
     const addTo = this.groupData()?.addToGroup ?? (value => value);
     const newValue = addTo(
-      value,
+      this.groupMap[key].value,
       this.viewManager.cellGetJsonValue(rowId, columnId)
     );
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 
-  removeFromGroup(rowId: string, value: unknown) {
-    //
+  removeFromGroup(rowId: string, key: string) {
+    const columnId = this.columnId;
+    const remove = this.groupData()?.removeFromGroup ?? (() => undefined);
+    const newValue = remove(
+      this.groupMap[key].value,
+      this.viewManager.cellGetJsonValue(rowId, columnId)
+    );
+    this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 
-  moveTo(rowId: string, fromGroupValue: unknown, toGroupValue: unknown) {
-    this.removeFromGroup(rowId, fromGroupValue);
-    this.addToGroup(rowId, toGroupValue);
+  public moveGroupTo(groupKey: string, position: InsertPosition) {
+    const properties = [...this.properties];
+    const group = properties.splice(
+      properties.findIndex(v => v.key === groupKey),
+      1
+    )[0];
+    const index = insertPositionToIndex(position, properties, data => data.key);
+    properties.splice(index, 0, group);
+    this.changeProperties(properties);
+  }
+
+  moveCardTo(
+    rowId: string,
+    fromGroupKey: string,
+    toGroupKey: string,
+    position: InsertPosition
+  ) {
+    const columnId = this.columnId;
+    const remove = this.groupData()?.removeFromGroup ?? (() => undefined);
+    let newValue = remove(
+      this.groupMap[fromGroupKey].value,
+      this.viewManager.cellGetJsonValue(rowId, columnId)
+    );
+    const addTo = this.groupData()?.addToGroup ?? (value => value);
+    newValue = addTo(this.groupMap[toGroupKey].value, newValue);
+    this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 }
