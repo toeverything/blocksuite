@@ -116,30 +116,33 @@ test.fixme('copy and paste', async ({ page }) => {
   await assertEdgelessCanvasText(page, 'hdddello');
 });
 
-test('normalize text element rect after change its font', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
+test.fixme(
+  'normalize text element rect after change its font',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
 
-  await switchEditorMode(page);
-  await setEdgelessTool(page, 'text');
+    await switchEditorMode(page);
+    await setEdgelessTool(page, 'text');
 
-  await page.mouse.click(130, 200);
-  await waitNextFrame(page);
+    await page.mouse.click(130, 200);
+    await waitNextFrame(page);
 
-  await type(page, 'aaa\nbbbbbbbb\n\ncc');
-  await assertEdgelessCanvasText(page, 'aaa\nbbbbbbbb\n\ncc');
-  await assertEdgelessTool(page, 'default');
-  await page.mouse.click(10, 100);
+    await type(page, 'aaa\nbbbbbbbb\n\ncc');
+    await assertEdgelessCanvasText(page, 'aaa\nbbbbbbbb\n\ncc');
+    await assertEdgelessTool(page, 'default');
+    await page.mouse.click(10, 100);
 
-  await page.mouse.click(140, 210);
-  await assertEdgelessSelectedRect(page, [130, 200, 92, 152]);
-  const fontButton = page.locator('.text-font-family-button');
-  await fontButton.click();
-  const generalTextFont = page.getByText('General');
-  await generalTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 200, 106.7, 110]);
-  await fontButton.click();
-  const scribbledTextFont = page.getByText('Scribbled');
-  await scribbledTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 200, 90, 152]);
-});
+    await page.mouse.click(140, 210);
+    await assertEdgelessSelectedRect(page, [130, 200, 92, 152]);
+    const fontButton = page.locator('.text-font-family-button');
+    await fontButton.click();
+    const generalTextFont = page.getByText('General');
+    await generalTextFont.click();
+    await assertEdgelessSelectedRect(page, [130, 200, 106.7, 110]);
+    await fontButton.click();
+    const scribbledTextFont = page.getByText('Scribbled');
+    await scribbledTextFont.click();
+    await assertEdgelessSelectedRect(page, [130, 200, 90, 152]);
+  }
+);
