@@ -187,7 +187,9 @@ export class RangeManager {
 
   pointToRange(point: TextRangePoint): Range | null {
     const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
-    assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);
+    if (!fromBlock) {
+      return null;
+    }
     const startVirgoElement =
       fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');
     assertExists(
