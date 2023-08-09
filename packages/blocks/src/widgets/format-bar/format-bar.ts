@@ -48,7 +48,9 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   private get _formatBarElement() {
-    return this.querySelector(
+    const shadowRoot = this.shadowRoot;
+    assertExists(shadowRoot);
+    return shadowRoot.querySelector(
       `.${AFFINE_FORMAT_BAR_WIDGET_TAG}`
     ) as HTMLElement | null;
   }
@@ -285,7 +287,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     //TODO: format bar in database
 
     const paragraphButton = ParagraphButton({
-      pageElement: pageElement,
+      pageElement,
       formatBar: this,
       selectedBlockElements,
       page,
