@@ -20,17 +20,13 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "lit": "^2.7.6",
-    "marked": "^4.3.0",
-    "turndown": "^7.1.2"
+    "lit": "^2.7.6"
   },
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.9",
-    "@types/marked": "^4.3.1",
-    "@types/turndown": "^5.0.1"
+    "@toeverything/theme": "^0.7.9"
   },
   "exports": {
     ".": "./src/index.ts",

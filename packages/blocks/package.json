@@ -19,7 +19,8 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "yjs": "^13"
+    "yjs": "^13",
+    "@toeverything/theme": "^0.7.9"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
@@ -77,6 +78,7 @@
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.3.1",
     "@types/turndown": "^5.0.1",
-    "yjs": "^13.6.7"
+    "yjs": "^13.6.7",
+    "@toeverything/theme": "^0.7.9"
   }
 }
