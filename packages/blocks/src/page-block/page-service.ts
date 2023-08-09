@@ -21,7 +21,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
       const options = block.page.workspace.meta.properties.tags.options;
       const optionMap = Object.fromEntries(options.map(v => [v.id, v]));
       pageMetaHtml = `
-        <div class="meta-data-expanded">
+        <div class="page-meta-data meta-data-expanded">
           <div class="meta-data-expanded-title">
             <div>Page info</div>
           </div>
@@ -36,9 +36,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
                       if (!tag) {
                         return '';
                       }
-                      return `<div class="tag" style="background-color: ${tag.color}">
-                        ${tag.value}
-                      </div>`;
+                      return `<div class="tag" style="background-color: ${tag.color}">${tag.value}</div>`;
                     })
                     .join('')}
                 </div>

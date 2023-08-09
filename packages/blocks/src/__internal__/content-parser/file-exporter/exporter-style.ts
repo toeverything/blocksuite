@@ -236,7 +236,7 @@ export const globalCSS = css`
     display: inline-block;
   }
 
-  .meta-data-expanded {
+  .page-meta-data {
     padding: 10px 12px 24px;
     margin: 0 -24px;
     display: flex;
@@ -246,7 +246,7 @@ export const globalCSS = css`
     border-radius: 8px;
   }
 
-  .meta-data-expanded .meta-data-expanded-title {
+  .page-meta-data .meta-data-expanded-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -258,31 +258,31 @@ export const globalCSS = css`
     cursor: pointer;
   }
 
-  .meta-data-expanded .meta-data-expanded-item {
+  .page-meta-data .meta-data-expanded-item {
     display: flex;
     gap: 8px;
   }
 
-  .meta-data-expanded .meta-data-expanded-item .type {
+  .page-meta-data .meta-data-expanded-item .type {
     display: flex;
     align-items: center;
   }
 
-  .meta-data-expanded .meta-data-expanded-item .type svg {
+  .page-meta-data .meta-data-expanded-item .type svg {
     fill: var(--affine-icon-color);
   }
 
-  .meta-data-expanded .meta-data-expanded-item .value {
+  .page-meta-data .meta-data-expanded-item .value {
     flex: 1;
   }
 
-  .meta-data-expanded .tags {
+  .page-meta-data .tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
   }
 
-  .meta-data-expanded .tag {
+  .page-meta-data .tag {
     padding: 4px 10px;
     border-radius: 8px;
     color: var(--affine-text-primary-color);

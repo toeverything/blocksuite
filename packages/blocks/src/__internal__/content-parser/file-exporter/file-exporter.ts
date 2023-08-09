@@ -278,6 +278,24 @@ export const FileExporter = {
         return `[${titleElement?.textContent}](${urlElement?.textContent})\n`;
       },
     });
+    turndownService.addRule('pageMetaData', {
+      filter: function (node) {
+        return (
+          node.nodeName === 'DIV' && node.classList.contains('page-meta-data')
+        );
+      },
+      //@ts-ignore
+      replacement: function (content, node: Node) {
+        const element = node as Element;
+        const tagEles = element.querySelectorAll('.tag');
+        return tagEles.length > 0
+          ? `Tags: ${Array.from(tagEles)
+              .map(ele => ele.textContent)
+              .join(', ')}`
+          : '';
+      },
+    });
+
     const markdown = turndownService.turndown(htmlContent);
 
     const pageTitle = title?.trim() ?? UNTITLED_PAGE_NAME;
