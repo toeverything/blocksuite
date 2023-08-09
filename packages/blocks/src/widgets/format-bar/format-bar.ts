@@ -53,7 +53,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     ) as HTMLElement | null;
   }
 
-  private _display = false;
+  private _dragging = false;
   private _displayType: 'text' | 'block' | 'none' = 'none';
 
   private _selectedBlockElements: BlockElement[] = [];
@@ -74,7 +74,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return (
       this._displayType !== 'none' &&
       this._selectedBlockElements.length > 0 &&
-      this._display
+      !this._dragging
     );
   }
 
@@ -100,14 +100,14 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     this._disposables.add(
       this.root.uiEventDispatcher.add('dragStart', () => {
-        this._display = false;
+        this._dragging = true;
         this.requestUpdate();
       })
     );
 
     this._disposables.add(
       this.root.uiEventDispatcher.add('dragEnd', () => {
-        this._display = true;
+        this._dragging = false;
         this.requestUpdate();
       })
     );
@@ -167,6 +167,8 @@ export class AffineFormatBarWidget extends WidgetElement {
             assertExists(blockElement);
             return blockElement;
           });
+        } else {
+          this._reset();
         }
 
         this.requestUpdate();
