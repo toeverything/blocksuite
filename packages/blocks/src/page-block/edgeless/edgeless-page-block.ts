@@ -70,7 +70,7 @@ import type {
   PageBlockModel,
   SurfaceBlockModel,
 } from '../../index.js';
-import { PageBlockService } from '../../index.js';
+import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';

@@ -14,9 +14,9 @@ import {
   getRectByBlockElement,
   Point,
 } from '../../../../__internal__/index.js';
-import {
-  type EdgelessPageBlockComponent,
-  type NoteBlockModel,
+import type {
+  EdgelessPageBlockComponent,
+  NoteBlockModel,
 } from '../../../../index.js';
 import {
   DefaultModeDragType,
