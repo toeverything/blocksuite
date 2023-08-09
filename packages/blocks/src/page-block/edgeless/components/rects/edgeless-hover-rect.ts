@@ -1,6 +1,6 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { matchFlavours } from '@blocksuite/store';
-import { html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -9,6 +9,12 @@ import { isTopLevelBlock } from '../../utils/query.js';
 
 @customElement('edgeless-hover-rect')
 export class EdgelessHoverRect extends WithDisposable(LitElement) {
+  static override styles = css`
+    .affine-edgeless-hover-rect {
+      position: absolute;
+    }
+  `;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
