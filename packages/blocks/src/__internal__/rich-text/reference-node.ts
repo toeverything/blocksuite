@@ -17,7 +17,7 @@ import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
 
 export const REFERENCE_NODE = ' ';
-const DEFAULT_PAGE_NAME = 'Untitled';
+export const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;

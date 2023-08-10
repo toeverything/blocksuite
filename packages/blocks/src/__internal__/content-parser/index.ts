@@ -1,9 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { Slot } from '@blocksuite/store';
+import { nanoid, Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
+import { getTagColor } from '../../components/tags/colors.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
@@ -424,97 +425,13 @@ export class ContentParser {
   }
 
   public async markdown2Block(text: string): Promise<SerializedBlock[]> {
-    const underline = {
-      name: 'underline',
-      level: 'inline',
-      start(src: string) {
-        return src.indexOf('~');
-      },
-      tokenizer(src: string) {
-        const rule = /^~([^~]+)~/;
-        const match = rule.exec(src);
-        if (match) {
-          return {
-            type: 'underline',
-            raw: match[0], // This is the text that you want your token to consume from the source
-            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-          };
-        }
-        return;
-      },
-      renderer(token: marked.Tokens.Generic) {
-        return `<u>${token.text}</u>`;
-      },
-    };
-    const inlineCode = {
-      name: 'inlineCode',
-      level: 'inline',
-      start(src: string) {
-        return src.indexOf('`');
-      },
-      tokenizer(src: string) {
-        const rule = /^(?:`)(`{2,}?|[^`]+)(?:`)$/g;
-        const match = rule.exec(src);
-        if (match) {
-          return {
-            type: 'inlineCode',
-            raw: match[0], // This is the text that you want your token to consume from the source
-            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-          };
-        }
-        return;
-      },
-      renderer(token: marked.Tokens.Generic) {
-        return `<code>${token.text}</code>`;
-      },
-    };
-
-    const walkTokens = (token: marked.Token) => {
-      // fix: https://github.com/toeverything/blocksuite/issues/3304
-      if (
-        token.type === 'list_item' &&
-        token.tokens.length > 0 &&
-        token.tokens[0].type === 'list' &&
-        token.tokens[0].items.length === 1
-      ) {
-        const fistItem = token.tokens[0].items[0];
-        if (
-          fistItem.tokens.length === 0 ||
-          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
-        ) {
-          // transform list_item to text
-          const newToken =
-            fistItem.tokens.length === 1
-              ? (fistItem.tokens[0] as marked.Tokens.Text)
-              : ({
-                  raw: '',
-                  text: '',
-                  type: 'text',
-                  tokens: [],
-                } as marked.Tokens.Text);
-          const preText = fistItem.raw.substring(
-            0,
-            fistItem.raw.length - fistItem.text.length
-          );
-          newToken.raw = preText + newToken.raw;
-          newToken.text = preText + newToken.text;
-          newToken.tokens = newToken.tokens || [];
-          newToken.tokens.unshift({
-            type: 'text',
-            text: preText,
-            raw: preText,
-          });
-          token.tokens[0] = newToken;
-        }
-      }
-    };
-    marked.use({ extensions: [underline, inlineCode], walkTokens });
-    const md2html = marked.parse(text);
+    const md2html = this._markdown2Html(text);
     return this.htmlText2Block(md2html, 'Markdown');
   }
 
   public async importMarkdown(text: string, insertPositionId: string) {
-    const blocks = await this.markdown2Block(text);
+    const md2html = this._markdown2Html(text);
+    const blocks = await this.htmlText2Block(md2html, 'Markdown');
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
@@ -522,6 +439,8 @@ export class ContentParser {
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
+
+    this._importMetaDataFromHtml(md2html);
   }
 
   public async importHtml(text: string, insertPositionId: string) {
@@ -533,6 +452,8 @@ export class ContentParser {
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
+
+    this._importMetaDataFromHtml(text);
   }
 
   public registerParserHtmlText2Block(
@@ -679,5 +600,162 @@ export class ContentParser {
     }
 
     return results.flat().filter(v => v);
+  }
+
+  private _markdown2Html(text: string): string {
+    const underline = {
+      name: 'underline',
+      level: 'inline',
+      start(src: string) {
+        return src.indexOf('~');
+      },
+      tokenizer(src: string) {
+        const rule = /^~([^~]+)~/;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'underline',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      renderer(token: marked.Tokens.Generic) {
+        return `<u>${token.text}</u>`;
+      },
+    };
+    const inlineCode = {
+      name: 'inlineCode',
+      level: 'inline',
+      start(src: string) {
+        return src.indexOf('`');
+      },
+      tokenizer(src: string) {
+        const rule = /^(?:`)(`{2,}?|[^`]+)(?:`)$/g;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'inlineCode',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      renderer(token: marked.Tokens.Generic) {
+        return `<code>${token.text}</code>`;
+      },
+    };
+
+    const pageMetaTags = {
+      name: 'pageMetaTags',
+      level: 'block',
+      start(src: string) {
+        return src.indexOf('Tags: ');
+      },
+      tokenizer(src: string) {
+        const rule = /^Tags: (.*)$/g;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'pageMetaTags',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      renderer(token: marked.Tokens.Generic) {
+        return `<div class="page-meta-data">
+          <div class="value">
+            <div class="tags">
+              ${(token.text as string)
+                .split(',')
+                .map(tag => {
+                  return `<div class="tag">${tag}</div>`;
+                })
+                .join('')}
+            </div>
+          </div>
+        </div>`;
+      },
+    };
+
+    const walkTokens = (token: marked.Token) => {
+      // fix: https://github.com/toeverything/blocksuite/issues/3304
+      if (
+        token.type === 'list_item' &&
+        token.tokens.length > 0 &&
+        token.tokens[0].type === 'list' &&
+        token.tokens[0].items.length === 1
+      ) {
+        const fistItem = token.tokens[0].items[0];
+        if (
+          fistItem.tokens.length === 0 ||
+          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
+        ) {
+          // transform list_item to text
+          const newToken =
+            fistItem.tokens.length === 1
+              ? (fistItem.tokens[0] as marked.Tokens.Text)
+              : ({
+                  raw: '',
+                  text: '',
+                  type: 'text',
+                  tokens: [],
+                } as marked.Tokens.Text);
+          const preText = fistItem.raw.substring(
+            0,
+            fistItem.raw.length - fistItem.text.length
+          );
+          newToken.raw = preText + newToken.raw;
+          newToken.text = preText + newToken.text;
+          newToken.tokens = newToken.tokens || [];
+          newToken.tokens.unshift({
+            type: 'text',
+            text: preText,
+            raw: preText,
+          });
+          token.tokens[0] = newToken;
+        }
+      }
+    };
+    marked.use({
+      extensions: [underline, inlineCode, pageMetaTags],
+      walkTokens,
+    });
+    const md2html = marked.parse(text);
+    return md2html;
+  }
+
+  private _importMetaDataFromHtml(text: string) {
+    const pageMetaData = this._getMetaDataFromhtmlText(text);
+    const tags = pageMetaData.tags.map(tag => {
+      return {
+        id: nanoid(),
+        value: tag.trim(),
+        color: getTagColor(),
+      };
+    });
+    this._page.meta.tags.push(...tags.map(tag => tag.id));
+    this._page.workspace.meta.setProperties({
+      ...this._page.workspace.meta.properties,
+      tags: {
+        ...this._page.workspace.meta.properties.tags,
+        options: tags,
+      },
+    });
+  }
+
+  private _getMetaDataFromhtmlText(html: string) {
+    const htmlEl = document.createElement('html');
+    htmlEl.innerHTML = html;
+    const tags = htmlEl.querySelectorAll('.page-meta-data .tags .tag');
+    return {
+      tags: Array.from(tags)
+        .map(tag => tag.textContent ?? '')
+        .filter(tag => tag !== ''),
+    };
   }
 }
