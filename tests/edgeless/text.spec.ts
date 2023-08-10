@@ -5,6 +5,7 @@ import {
   enterPlaygroundRoom,
   getEdgelessSelectedRect,
   initEmptyEdgelessState,
+  pressArrowLeft,
   setEdgelessTool,
   SHORT_KEY,
   switchEditorMode,
@@ -19,7 +20,7 @@ import {
 import { test } from '../utils/playwright.js';
 
 // it's flaky
-test.fixme('add text element in default mode', async ({ page }) => {
+test('add text element in default mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -28,6 +29,7 @@ test.fixme('add text element in default mode', async ({ page }) => {
 
   await page.mouse.dblclick(130, 140);
   await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
 
   await type(page, 'hello');
   await assertEdgelessCanvasText(page, 'hello');
@@ -38,19 +40,20 @@ test.fixme('add text element in default mode', async ({ page }) => {
   expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
   await page.mouse.dblclick(145, 155);
+  await waitNextFrame(page);
   await page.locator('edgeless-text-editor').waitFor({
     state: 'attached',
   });
   await type(page, 'hello');
   await assertEdgelessCanvasText(page, 'hhelloello');
 
-  await page.mouse.click(145, 155);
+  await pressArrowLeft(page, 5);
   await type(page, 'ddd\n');
   await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
 // it's also a little flaky
-test.fixme('add text element in text mode', async ({ page }) => {
+test('add text element in text mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -83,7 +86,7 @@ test.fixme('add text element in text mode', async ({ page }) => {
   await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
-test.fixme('copy and paste', async ({ page }) => {
+test('copy and paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -116,33 +119,30 @@ test.fixme('copy and paste', async ({ page }) => {
   await assertEdgelessCanvasText(page, 'hdddello');
 });
 
-test.fixme(
-  'normalize text element rect after change its font',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
+test('normalize text element rect after change its font', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
 
-    await switchEditorMode(page);
-    await setEdgelessTool(page, 'text');
+  await switchEditorMode(page);
+  await setEdgelessTool(page, 'text');
 
-    await page.mouse.click(130, 200);
-    await waitNextFrame(page);
+  await page.mouse.click(130, 200);
+  await waitNextFrame(page);
 
-    await type(page, 'aaa\nbbbbbbbb\n\ncc');
-    await assertEdgelessCanvasText(page, 'aaa\nbbbbbbbb\n\ncc');
-    await assertEdgelessTool(page, 'default');
-    await page.mouse.click(10, 100);
+  await type(page, 'aaa\nbbbbbbbb\n\ncc');
+  await assertEdgelessCanvasText(page, 'aaa\nbbbbbbbb\n\ncc');
+  await assertEdgelessTool(page, 'default');
+  await page.mouse.click(10, 100);
 
-    await page.mouse.click(140, 210);
-    await assertEdgelessSelectedRect(page, [130, 200, 92, 152]);
-    const fontButton = page.locator('.text-font-family-button');
-    await fontButton.click();
-    const generalTextFont = page.getByText('General');
-    await generalTextFont.click();
-    await assertEdgelessSelectedRect(page, [130, 200, 106.7, 110]);
-    await fontButton.click();
-    const scribbledTextFont = page.getByText('Scribbled');
-    await scribbledTextFont.click();
-    await assertEdgelessSelectedRect(page, [130, 200, 90, 152]);
-  }
-);
+  await page.mouse.click(140, 210);
+  await assertEdgelessSelectedRect(page, [130, 200, 103, 156]);
+  const fontButton = page.locator('.text-font-family-button');
+  await fontButton.click();
+  const generalTextFont = page.getByText('General');
+  await generalTextFont.click();
+  await assertEdgelessSelectedRect(page, [130, 200, 106.7, 112]);
+  await fontButton.click();
+  const scribbledTextFont = page.getByText('Scribbled');
+  await scribbledTextFont.click();
+  await assertEdgelessSelectedRect(page, [130, 200, 101, 156]);
+});
