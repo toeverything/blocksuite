@@ -18,7 +18,7 @@ declare global {
     ContentParser: typeof ContentParser;
     Y: typeof Workspace.Y;
     std: typeof std;
-    testUtils: TestUtilsq;
+    testUtils: TestUtils;
 
     // TODO: remove this when provider support subdocument
     subdocProviders: Map<string, DocProvider[]>;
