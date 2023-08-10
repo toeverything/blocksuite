@@ -10,12 +10,15 @@ import {
   focusRichText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  pressArrowRight,
   pressEnter,
+  selectAllByKeyboard,
   setVirgoSelection,
   SHORT_KEY,
   switchEditorMode,
   type,
   waitForVirgoStateUpdated,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import { assertStoreMatchJSX } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
@@ -185,28 +188,27 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   );
 });
 
-test.fixme(
-  scoped`copy url to create bookmark in edgeless mode`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const ids = await initEmptyEdgelessState(page);
-    await focusRichText(page);
-    await type(page, 'https://google.com');
+test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await type(page, 'https://google.com');
 
-    await switchEditorMode(page);
+  await switchEditorMode(page);
 
-    await activeNoteInEdgeless(page, ids.noteId);
-    await waitForVirgoStateUpdated(page);
-    await setVirgoSelection(page, 0, 18);
-    await copyByKeyboard(page);
-    await focusRichText(page);
-    await type(page, '/bookmark');
-    await pressEnter(page);
-    await page.keyboard.press(`${SHORT_KEY}+v`);
-    await pressEnter(page);
-    await assertStoreMatchJSX(
-      page,
-      /*xml*/ `<affine:page>
+  await activeNoteInEdgeless(page, ids.noteId);
+  await waitForVirgoStateUpdated(page);
+  await selectAllByKeyboard(page);
+  await copyByKeyboard(page);
+  await pressArrowRight(page);
+  await waitNextFrame(page);
+  await type(page, '/bookmark');
+  await pressEnter(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await pressEnter(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `<affine:page>
   <affine:surface />
   <affine:note
     prop:background="--affine-background-secondary-color"
@@ -235,6 +237,5 @@ test.fixme(
     />
   </affine:note>
 </affine:page>`
-    );
-  }
-);
+  );
+});
