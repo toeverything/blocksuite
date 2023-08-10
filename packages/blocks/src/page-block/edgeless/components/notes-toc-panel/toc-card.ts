@@ -273,6 +273,9 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   pos!: { x: number; y: number };
 
   @property({ attribute: false })
+  width?: number;
+
+  @property({ attribute: false })
   status?: 'dragging' | 'selected' | 'placeholder';
 
   @property({ attribute: false })
@@ -376,7 +379,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     if (this.note.isEmpty()) return nothing;
 
     const mode = queryCurrentMode();
-    const { pos, stackOrder } = this;
+    const { pos, stackOrder, width } = this;
     const { children } = this.note;
     const showEllipsis = children.length > 4;
     const [first, second] = pickArray(children, [0, 1]);
@@ -393,6 +396,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
               transform: `translate(${pos.x - 16}px, ${pos.y - 9}px) rotate(${
                 stackOrder === 0 ? 3 : 1
               }deg)`,
+              width: width ? `${width}px` : undefined,
             })
           : undefined}
       >

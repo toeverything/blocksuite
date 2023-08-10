@@ -316,8 +316,10 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     });
 
     this._noteElementHeight = draggedNotesInfo[0].element.offsetHeight;
+    const width = draggedNotesInfo[0].element.clientWidth;
 
     createDrag(draggedNotesInfo, {
+      width,
       doc: this.ownerDocument,
       page: this.page,
       start: {

@@ -16,6 +16,7 @@ export function createDrag(
     number: number;
   }[],
   options: {
+    width: number;
     onDragEnd?: (insertIndex?: number) => void;
     onDragMove?: (insertIdx?: number) => void;
     tocListContainer: HTMLElement;
@@ -29,7 +30,7 @@ export function createDrag(
 ) {
   const { doc, page, onDragMove, onDragEnd, tocListContainer, start } = options;
   const cardElements = lastN(notes, 2).map((note, idx, arr) => {
-    const el = document.createElement('edgeless-note-toc-card');
+    const el = doc.createElement('edgeless-note-toc-card');
 
     el.page = page;
     el.note = note.note;
@@ -38,16 +39,17 @@ export function createDrag(
     el.status = 'dragging';
     el.stackOrder = arr.length - 1 - idx;
     el.pos = start;
+    el.width = options.width;
 
     return el;
   });
-  const maskElement = createMaskElement();
+  const maskElement = createMaskElement(doc);
   const listContainerRect = tocListContainer.getBoundingClientRect();
   const children = Array.from(tocListContainer.children) as TOCNoteCard[];
   let idx: undefined | number;
 
-  document.body.appendChild(maskElement);
-  document.body.append(...cardElements);
+  doc.body.appendChild(maskElement);
+  doc.body.append(...cardElements);
 
   const insideListContainer = (e: MouseEvent) => {
     return (
@@ -94,16 +96,16 @@ export function createDrag(
   });
 
   once(doc, 'mouseup', () => {
-    cardElements.forEach(child => document.body.removeChild(child));
-    document.body.removeChild(maskElement);
+    cardElements.forEach(child => doc.body.removeChild(child));
+    doc.body.removeChild(maskElement);
 
     disposeMove();
     onDragEnd?.(idx);
   });
 }
 
-function createMaskElement() {
-  const mask = document.createElement('div');
+function createMaskElement(doc: Document) {
+  const mask = doc.createElement('div');
 
   mask.style.height = '100vh';
   mask.style.width = '100vw';
