@@ -26,6 +26,7 @@ import {
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
+  pressArrowRight,
   pressArrowUp,
   pressBackspace,
   pressEnter,
@@ -141,7 +142,7 @@ test(
   }
 );
 
-test.fixme(
+test(
   scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -176,10 +177,7 @@ test.fixme(
     await pressArrowUp(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 2);
-    await assertText(
-      page,
-      'Lorem Ipsum placeholder text.Lorem Ipsum placeholder text.'
-    );
+    await assertText(page, 'Lorem Ipsum placeholder text.');
     await pressArrowDown(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 3);
@@ -731,42 +729,39 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
   );
 });
 
-test.fixme(
-  `copy phasor element and text note in edgeless mode`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
-    await initThreeParagraphs(page);
-    await switchEditorMode(page);
-    await addBasicRectShapeElement(
-      page,
-      {
-        x: 100,
-        y: 100,
-      },
-      {
-        x: 200,
-        y: 200,
-      }
-    );
+test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await switchEditorMode(page);
+  await addBasicRectShapeElement(
+    page,
+    {
+      x: 100,
+      y: 100,
+    },
+    {
+      x: 200,
+      y: 200,
+    }
+  );
 
-    await dragBetweenCoords(
-      page,
-      { x: 50, y: 90 },
-      { x: 400, y: 400 },
-      { steps: 10 }
-    );
-    await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
+  await dragBetweenCoords(
+    page,
+    { x: 50, y: 90 },
+    { x: 400, y: 400 },
+    { steps: 10 }
+  );
+  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 428.5]);
 
-    await copyByKeyboard(page);
-    await page.mouse.move(400, 400);
-    await page.waitForTimeout(300);
-    await pasteByKeyboard(page, false);
-    await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
-  }
-);
+  await copyByKeyboard(page);
+  await page.mouse.move(400, 400);
+  await page.waitForTimeout(300);
+  await pasteByKeyboard(page, false);
+  await assertEdgelessSelectedRect(page, [0, 185.75, EDITOR_WIDTH, 428.5]);
+});
 
-test.fixme(scoped`copy when text note active in edgeless`, async ({ page }) => {
+test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await focusRichText(page);
@@ -778,9 +773,10 @@ test.fixme(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await waitForVirgoStateUpdated(page);
   await setVirgoSelection(page, 0, 4);
   await copyByKeyboard(page);
+  await pressArrowRight(page);
   await type(page, '555');
   await pasteByKeyboard(page, false);
-  await assertText(page, '5551234');
+  await assertText(page, '1234555');
 });
 
 test(scoped`paste note block with background`, async ({ page }) => {
