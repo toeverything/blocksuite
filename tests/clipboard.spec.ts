@@ -26,6 +26,7 @@ import {
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
+  pressArrowRight,
   pressArrowUp,
   pressBackspace,
   pressEnter,
@@ -772,6 +773,7 @@ test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await waitForVirgoStateUpdated(page);
   await setVirgoSelection(page, 0, 4);
   await copyByKeyboard(page);
+  await pressArrowRight(page);
   await type(page, '555');
   await pasteByKeyboard(page, false);
   await assertText(page, '1234555');
