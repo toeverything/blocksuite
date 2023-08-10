@@ -181,7 +181,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _isMoving = false;
 
   private _overlay = new AutoCompleteOverlay();
-  private _timeId: ReturnType<typeof setTimeout> | null = null;
+  private _timer: ReturnType<typeof setTimeout> | null = null;
 
   private get _selected() {
     return this.edgeless.selection.elements;
@@ -195,43 +195,45 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const { surface } = this.edgeless;
     const start = surface.viewport.toModelCoord(e.clientX, e.clientY);
 
-    if (this.edgeless.dispatcher) {
-      let connector: ConnectorElement | null;
-      this._disposables.addFromEvent(document, 'pointermove', e => {
-        const point = surface.viewport.toModelCoord(e.clientX, e.clientY);
-        if (Vec.dist(start, point) > 8 && !this._isMoving) {
-          this._isMoving = true;
-          const { startPoisition } = getPosition(type);
-          const id = surface.addElement('connector', {
-            mode: ConnectorMode.Orthogonal,
-            source: {
-              id: this._current.id,
-              position: startPoisition,
-            },
-            target: {
-              position: point,
-            },
-            strokeWidth: 2,
-          });
-          connector = surface.pickById(id) as ConnectorElement;
-        }
-        if (this._isMoving) {
-          assertExists(connector);
-          this.edgeless.connector.updateConnection(connector, point, 'target');
-        }
-      });
-      this._disposables.addFromEvent(document, 'pointerup', e => {
-        if (!this._isMoving) {
-          this._generateShapeOnClick(type);
-        } else if (connector && !connector.target.id) {
-          this._generateShapeOnDrag(type, connector);
-        }
-        this._isMoving = false;
-        this.edgeless.connector.clear();
-        this._disposables.dispose();
-        this._disposables = new DisposableGroup();
-      });
-    }
+    if (!this.edgeless.dispatcher) return;
+
+    let connector: ConnectorElement | null;
+
+    this._disposables.addFromEvent(document, 'pointermove', e => {
+      const point = surface.viewport.toModelCoord(e.clientX, e.clientY);
+      if (Vec.dist(start, point) > 8 && !this._isMoving) {
+        this._isMoving = true;
+        const { startPoisition } = getPosition(type);
+        const id = surface.addElement('connector', {
+          mode: ConnectorMode.Orthogonal,
+          source: {
+            id: this._current.id,
+            position: startPoisition,
+          },
+          target: {
+            position: point,
+          },
+          strokeWidth: 2,
+        });
+        connector = surface.pickById(id) as ConnectorElement;
+      }
+      if (this._isMoving) {
+        assertExists(connector);
+        this.edgeless.connector.updateConnection(connector, point, 'target');
+      }
+    });
+
+    this._disposables.addFromEvent(document, 'pointerup', e => {
+      if (!this._isMoving) {
+        this._generateShapeOnClick(type);
+      } else if (connector && !connector.target.id) {
+        this._generateShapeOnDrag(type, connector);
+      }
+      this._isMoving = false;
+      this.edgeless.connector.clear();
+      this._disposables.dispose();
+      this._disposables = new DisposableGroup();
+    });
   };
 
   private _generateShapeOnClick(type: Direction) {
@@ -404,10 +406,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           transform,
         })}
         @mouseenter=${() => {
-          this._timeId = setTimeout(() => this._showNextShape(type), 300);
+          this._timer = setTimeout(() => this._showNextShape(type), 300);
         }}
         @mouseleave=${() => {
-          this._timeId && clearTimeout(this._timeId);
+          this._timer && clearTimeout(this._timer);
           this.edgeless.surface.viewport.removeOverlay(this._overlay);
         }}
         @pointerdown=${(e: PointerEvent) => {

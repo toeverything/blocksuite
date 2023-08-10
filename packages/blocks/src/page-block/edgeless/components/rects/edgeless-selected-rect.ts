@@ -49,15 +49,17 @@ import {
 import { EdgelessRemoteSelection } from './edgeless-remote-selection.js';
 
 noop(EdgelessRemoteSelection);
+
 export type SelectedRect = {
+  left: number;
+  top: number;
   width: number;
   height: number;
   borderWidth: number;
   borderStyle: string;
-  left: number;
-  top: number;
   rotate: number;
 };
+
 @customElement('edgeless-selected-rect')
 export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   // disable change-in-update warning
