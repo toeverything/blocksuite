@@ -85,8 +85,9 @@ export const actionConfig: ActionConfig[] = [
       );
     },
     action: (pageElement: PageBlockComponent) => {
-      const databaseConvertWidget = pageElement.querySelector(
-        AFFINE_DATABASE_CONVERT_WIDGET_TAG
+      const databaseConvertWidget = pageElement.root.viewStore.viewFromPath(
+        'widget',
+        pageElement.path.concat(AFFINE_DATABASE_CONVERT_WIDGET_TAG)
       );
       assertExists(databaseConvertWidget);
       databaseConvertWidget.style.display = 'block';

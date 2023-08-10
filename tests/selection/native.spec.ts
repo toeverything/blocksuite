@@ -76,7 +76,7 @@ test('click on blank area', async ({ page }) => {
   await assertSelection(page, 2, 0, 0);
 });
 
-test.fixme('native range delete', async ({ page }) => {
+test('native range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -103,7 +103,7 @@ test.fixme('native range delete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test.fixme('native range delete by forwardDelete', async ({ page }) => {
+test('native range delete by forwardDelete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -123,8 +123,7 @@ test.fixme('native range delete by forwardDelete', async ({ page }) => {
 
   await waitNextFrame(page);
   await undoByKeyboard(page);
-  // FIXME
-  // await assertRichTexts(page, ['123', '456', '789']);
+  await assertRichTexts(page, ['123', '456', '789']);
 
   await redoByKeyboard(page);
   await assertRichTexts(page, ['']);

@@ -17,15 +17,14 @@ import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 import { drawGeneralShpae } from '../utils.js';
 
-function trianglePoints({ x, y, w, h }: IBound) {
-  return [
-    [x, y + h],
-    [x + w / 2, y],
-    [x + w, y + h],
-  ];
-}
-
 export const TriangleMethods: ShapeMethods = {
+  points({ x, y, w, h }: IBound) {
+    return [
+      [x, y + h],
+      [x + w / 2, y],
+      [x + w, y + h],
+    ];
+  },
   render(
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
@@ -92,7 +91,10 @@ export const TriangleMethods: ShapeMethods = {
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
-    const points = getPointsFromBoundsWithRotation(this, trianglePoints);
+    const points = getPointsFromBoundsWithRotation(
+      this,
+      TriangleMethods.points
+    );
 
     let hited = pointOnPolygonStoke(
       [x, y],
@@ -108,24 +110,33 @@ export const TriangleMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {
-    const points = getPointsFromBoundsWithRotation(element, trianglePoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      TriangleMethods.points
+    );
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(element, trianglePoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      TriangleMethods.points
+    );
     return polygonNearestPoint(points, point);
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(element, trianglePoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      TriangleMethods.points
+    );
     return linePolygonIntersects(start, end, points);
   },
 
   getRelativePointLocation(position, element) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(position);
-    let points = trianglePoints(bound);
+    let points = TriangleMethods.points(bound);
     points.push(point);
 
     points = rotatePoints(points, bound.center, element.rotate);
