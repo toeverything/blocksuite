@@ -39,7 +39,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       justify-content: center;
       transform: translateX(-50%);
       user-select: none;
-      font-family: var(--sl-font-sans);
+      font-family: var(--affine-font-family);
     }
     .edgeless-toolbar-container {
       display: flex;
