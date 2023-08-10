@@ -1,6 +1,6 @@
 import { AttachmentIcon16 } from '@blocksuite/global/config';
 import { BlockElement, createLitPortal } from '@blocksuite/lit';
-import { html } from 'lit';
+import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service/index.js';
@@ -14,7 +14,7 @@ import type {
 import { AttachmentBlockService } from './attachment-service.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import { AttachmentBanner, LoadingIcon, styles } from './styles.js';
-import { downloadAttachment, isAttachmentLoading } from './utils.js';
+import { downloadAttachment, hasBlob, isAttachmentLoading } from './utils.js';
 
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
@@ -24,13 +24,35 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   private _showCaption = false;
 
   @query('input.affine-attachment-caption')
-  _captionInput!: HTMLInputElement;
+  private _captionInput!: HTMLInputElement;
+
+  // Sometimes the attachment is unavailable
+  // e.g. paste a attachment block from another workspace
+  private _error = false;
 
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:attachment', AttachmentBlockService);
     if (this.model.caption) {
       this._showCaption = true;
+    }
+    this._checkAttachment();
+  }
+
+  override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('sourceId')) {
+      this._checkAttachment();
+    }
+    super.willUpdate(changedProperties);
+  }
+
+  // Check if the attachment is available
+  private _checkAttachment() {
+    const storage = this.page.blobs;
+    const sourceId = this.model.sourceId;
+    if (!sourceId) return;
+    if (!hasBlob(storage, sourceId)) {
+      this._error = true;
     }
   }
 
@@ -90,7 +112,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         </div>
       </div>`;
     }
-    if (!this.model.sourceId) {
+    if (this._error || !this.model.sourceId) {
       return html`<div class="affine-attachment-container">
         <div class="affine-attachment-name">
           ${AttachmentIcon16}${this.model.name}

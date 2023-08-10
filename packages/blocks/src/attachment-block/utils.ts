@@ -1,4 +1,8 @@
-import { assertExists, type BaseBlockModel } from '@blocksuite/store';
+import {
+  assertExists,
+  type BaseBlockModel,
+  type BlobManager,
+} from '@blocksuite/store';
 
 import { downloadBlob } from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
@@ -151,4 +155,9 @@ export function setAttachmentLoading(loadingKey: string, loading: boolean) {
 
 export function isAttachmentLoading(loadingKey: string) {
   return attachmentLoadingMap.has(loadingKey);
+}
+
+export async function hasBlob(storage: BlobManager, sourceId: string) {
+  const list = await storage.list();
+  return list.some(item => item === sourceId);
 }
