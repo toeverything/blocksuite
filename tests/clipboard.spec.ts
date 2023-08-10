@@ -815,11 +815,12 @@ test(scoped`copy and paste to selection block selection`, async ({ page }) => {
 
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
+  await pressArrowRight(page);
   await pasteByKeyboard(page, false);
-  await assertRichTexts(page, ['1234', '']);
+  await assertRichTexts(page, ['12341234']);
 });
 
-test.fixme(
+test(
   scoped`should keep paragraph block's type when pasting at the start of empty paragraph block except type text`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -867,6 +868,8 @@ test.fixme(
     await copyByKeyboard(page);
     await waitNextFrame(page);
 
+    await pressEnter(page);
+    await pressEnter(page);
     await pressEnter(page);
     await pasteByKeyboard(page);
     await waitNextFrame(page);
