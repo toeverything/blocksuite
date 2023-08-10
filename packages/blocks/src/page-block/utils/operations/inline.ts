@@ -297,7 +297,10 @@ export function toggleLink(
     anchorEl: vEditor.rootElement,
     model,
   }).then(linkState => {
-    if (linkState.type !== 'confirm') return;
+    if (linkState.type !== 'confirm') {
+      clear();
+      return;
+    }
 
     const link = linkState.link;
 
