@@ -136,10 +136,6 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
       const textSelection = getTextSelection(pageElement);
       assertExists(textSelection);
       toggleLink(pageElement, textSelection);
-      // createLink(page);
-      // if (format && abortController && !('link' in format)) {
-      //   abortController.abort();
-      // }
     },
   },
 ];
