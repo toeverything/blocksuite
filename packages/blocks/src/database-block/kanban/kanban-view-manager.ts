@@ -427,16 +427,18 @@ export class GroupHelper {
     toGroupKey: string,
     position: InsertPosition
   ) {
-    const columnId = this.columnId;
-    const remove = this.groupData()?.removeFromGroup ?? (() => undefined);
-    let newValue = remove(
-      this.groupMap[fromGroupKey].value,
-      this.viewManager.cellGetJsonValue(rowId, columnId)
-    );
-    const addTo = this.groupData()?.addToGroup ?? (value => value);
-    newValue = addTo(this.groupMap[toGroupKey].value, newValue);
-    this.viewManager.cellUpdateValue(rowId, columnId, newValue);
-    const rows = this.groupMap[toGroupKey].rows;
+    if (fromGroupKey !== toGroupKey) {
+      const columnId = this.columnId;
+      const remove = this.groupData()?.removeFromGroup ?? (() => undefined);
+      let newValue = remove(
+        this.groupMap[fromGroupKey].value,
+        this.viewManager.cellGetJsonValue(rowId, columnId)
+      );
+      const addTo = this.groupData()?.addToGroup ?? (value => value);
+      newValue = addTo(this.groupMap[toGroupKey].value, newValue);
+      this.viewManager.cellUpdateValue(rowId, columnId, newValue);
+    }
+    const rows = this.groupMap[toGroupKey].rows.filter(id => id !== rowId);
     const index = insertPositionToIndex(position, rows, id => id);
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);

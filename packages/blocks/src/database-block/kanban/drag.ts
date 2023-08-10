@@ -69,24 +69,21 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
       onMove: evt => {
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
         const eles = document.elementsFromPoint(evt.x, evt.y);
-        const target = eles.find(v => v instanceof KanbanGroup);
+        const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
         if (target) {
-          const group = target.closest('affine-data-view-kanban-group');
-          if (group && group !== currentGroup) {
-            const card = getCardByPoint(group, evt.y);
-            dropPreview.display(group, card);
-            return {
-              drop: {
-                key: group.group.key,
-                position: card
-                  ? {
-                      before: true,
-                      id: card.cardId,
-                    }
-                  : 'end',
-              },
-            };
-          }
+          const card = getCardByPoint(target, evt.y);
+          dropPreview.display(target, ele, card);
+          return {
+            drop: {
+              key: target.group.key,
+              position: card
+                ? {
+                    before: true,
+                    id: card.cardId,
+                  }
+                : 'end',
+            },
+          };
         }
         dropPreview.remove();
         return {};
@@ -150,9 +147,13 @@ const createDropPreview = () => {
   div.style.backgroundColor = 'var(--affine-primary-color)';
   div.style.boxShadow = '0px 0px 8px 0px rgba(30, 150, 235, 0.35)';
   return {
-    display(group: KanbanGroup, card?: KanbanCard) {
+    display(group: KanbanGroup, self: KanbanCard, card?: KanbanCard) {
       const target = card ?? group.querySelector('.add-card');
       assertExists(target);
+      if (target.previousElementSibling === self || target === self) {
+        div.remove();
+        return;
+      }
       if (target.previousElementSibling === div) {
         return;
       }
