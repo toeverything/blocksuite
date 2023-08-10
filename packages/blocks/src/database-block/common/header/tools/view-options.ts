@@ -4,7 +4,8 @@ import { css, html, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { popMenu } from '../../../../components/menu/menu.js';
-import type { DataViewTableManager } from '../../../table/table-view-manager.js';
+import { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
+import { popPropertiesSetting } from '../../properties.js';
 
 export const viewOpIcons = {
   properties: svg`<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -54,7 +55,7 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
   static override styles = styles;
 
   @property({ attribute: false })
-  view!: DataViewTableManager;
+  view!: DataViewKanbanManager;
 
   @query('.more-action')
   private _moreActionContainer!: HTMLDivElement;
@@ -77,12 +78,36 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
           },
         },
         items: [
+          // {
+          //   type: 'sub-menu',
+          //   name: 'Layout',
+          //   icon: viewOpIcons.groupBy,
+          //   hide: () => !(this.view instanceof DataViewKanbanManager),
+          //   options: {
+          //     input: {
+          //       search: true,
+          //       placeholder: 'Search',
+          //     },
+          //     items: this.view.columnsWithoutFilter.map(id => {
+          //       const column = this.view.columnGet(id);
+          //       return {
+          //         type: 'action',
+          //         name: column.name,
+          //         select: () => {
+          //           this.view.changeGroup(id);
+          //         },
+          //       };
+          //     }),
+          //   },
+          // },
           {
             type: 'action',
             name: 'Properties',
             icon: viewOpIcons.properties,
             select: () => {
-              //
+              popPropertiesSetting(this._moreActionContainer, {
+                view: this.view,
+              });
             },
           },
           {
@@ -94,11 +119,25 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
             },
           },
           {
-            type: 'action',
+            type: 'sub-menu',
             name: 'Group By',
             icon: viewOpIcons.groupBy,
-            select: () => {
-              //
+            hide: () => !(this.view instanceof DataViewKanbanManager),
+            options: {
+              input: {
+                search: true,
+                placeholder: 'Search',
+              },
+              items: this.view.columnsWithoutFilter.map(id => {
+                const column = this.view.columnGet(id);
+                return {
+                  type: 'action',
+                  name: column.name,
+                  select: () => {
+                    this.view.changeGroup(id);
+                  },
+                };
+              }),
             },
           },
           {

@@ -209,6 +209,8 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         if (insertPosition) {
           this.tableViewManager.columnMove(this.column.id, insertPosition);
         }
+      },
+      onClear: () => {
         cancelScroll();
         html?.classList.toggle('affine-database-header-column-grabbing', false);
         dropPreview.remove();
@@ -250,7 +252,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                   return {
                     type: 'action',
                     name: config.name,
-                    icon: html`<uni-lit
+                    icon: html` <uni-lit
                       .uni="${this.tableViewManager.getIcon(config.type)}"
                     ></uni-lit>`,
                     select: () => {
@@ -383,7 +385,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             return {
               type: 'action',
               name: config.name,
-              icon: html`<uni-lit
+              icon: html` <uni-lit
                 .uni="${this.tableViewManager.getIcon(config.type)}"
               ></uni-lit>`,
               select: () => {
@@ -445,6 +447,10 @@ const createDragPreview = (
   const div = document.createElement('div');
   div.append(content);
   // div.style.pointerEvents='none';
+  div.style.backgroundColor = 'var(--affine-background-primary-color)';
+  div.style.opacity = '0.95';
+  div.style.boxShadow =
+    '0px 0px 12px 0px rgba(66, 65, 73, 0.14), 0px 0px 0px 0.5px #e3e3e4 inset';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
   div.style.height = `${height}px`;

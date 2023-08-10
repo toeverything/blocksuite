@@ -65,6 +65,11 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
         rowId: this.cardId,
       });
     });
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   private renderTitle() {
@@ -74,7 +79,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     }
     return html` <div class="card-header-title">
       <affine-data-view-kanban-cell
-        .contentOnly=${true}
+        .contentOnly="${true}"
         data-column-id="${title.id}"
         .view="${this.view}"
         .groupKey="${this.groupKey}"

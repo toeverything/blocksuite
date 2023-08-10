@@ -88,6 +88,10 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
         dropPreview.remove();
         return {};
       },
+      onClear: () => {
+        preview.remove();
+        dropPreview.remove();
+      },
       onDrop: ({ drop }) => {
         preview.remove();
         dropPreview.remove();

@@ -11,6 +11,7 @@ import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 
 type TableViewData = RealDataViewDataTypeMap['table'];
+
 export class DataViewTableManager extends BaseDataViewManager {
   public override get type(): string {
     return this.view.mode;
@@ -70,11 +71,14 @@ export class DataViewTableManager extends BaseDataViewManager {
     }
     this.viewSource.updateView(view => {
       return {
-        columns: this.columnManagerList.map((column, i) => ({
-          id: column.id,
-          width: column.width,
-          hide: column.hide,
-        })),
+        columns: this.columnsWithoutFilter.map((id, i) => {
+          const column = this.columnGet(id);
+          return {
+            id: column.id,
+            hide: column.hide,
+            width: column.width,
+          };
+        }),
       };
     });
   }
@@ -110,15 +114,21 @@ export class DataViewTableManager extends BaseDataViewManager {
     this.updateView(view => {
       return {
         columns: view.columns.map(v =>
-          v.id === columnId ? { ...v, width: width } : v
+          v.id === columnId
+            ? {
+                ...v,
+                width: width,
+              }
+            : v
         ),
       };
     });
   }
 
   public get columns(): string[] {
-    return this.columnsWithoutFilter;
+    return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
   }
+
   public get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
@@ -143,6 +153,24 @@ export class DataViewTableManager extends BaseDataViewManager {
       return evalFilter(this.filter, rowMap);
     }
     return true;
+  }
+
+  columnUpdateHide(columnId: string, hide: boolean): void {
+    this.updateView(view => {
+      return {
+        columns: view.columns.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                hide,
+              }
+            : v
+        ),
+      };
+    });
+  }
+  columnGetHide(columnId: string): boolean {
+    return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
 }
 

@@ -38,7 +38,10 @@ export interface DataViewManager {
   cellSetValueFromString(
     columnId: string,
     value: string
-  ): { value: unknown; data?: Record<string, unknown> };
+  ): {
+    value: unknown;
+    data?: Record<string, unknown>;
+  };
 
   cellUpdateRenderValue(rowId: string, columnId: string, value: unknown): void;
 
@@ -279,9 +282,8 @@ export abstract class BaseDataViewManager implements DataViewManager {
       .dataType(this.columnGetData(columnId));
   }
 
-  public columnGetHide(columnId: string): boolean {
-    return false;
-  }
+  public abstract columnGetHide(columnId: string): boolean;
+  public abstract columnUpdateHide(columnId: string, hide: boolean): void;
 
   public columnGetIdByIndex(index: number): string {
     return this.columns[index];
@@ -322,10 +324,6 @@ export abstract class BaseDataViewManager implements DataViewManager {
     this.dataSource.propertyChangeData(columnId, data);
   }
 
-  public columnUpdateHide(columnId: string, hide: boolean): void {
-    //TODO
-  }
-
   public columnUpdateName(columnId: string, name: string): void {
     this.dataSource.propertyChangeName(columnId, name);
   }
@@ -335,6 +333,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   public abstract get columns(): string[];
+
   public abstract get columnsWithoutFilter(): string[];
 
   public rowAdd(insertPosition: InsertPosition): string {
@@ -427,7 +426,7 @@ export abstract class BaseDataViewColumnManager
   }
 
   updateHide(hide: boolean): void {
-    // TODO
+    this.viewManager.columnUpdateHide(this.id, hide);
   }
 
   updateName(name: string): void {

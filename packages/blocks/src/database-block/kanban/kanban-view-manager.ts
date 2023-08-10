@@ -81,10 +81,13 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     }
     this.viewSource.updateView(view => {
       return {
-        columns: this.columnManagerList.map((column, i) => ({
-          id: column.id,
-          hide: column.hide,
-        })),
+        columns: this.columnsWithoutFilter.map((id, i) => {
+          const column = this.columnGet(id);
+          return {
+            id: column.id,
+            hide: column.hide,
+          };
+        }),
       };
     });
   }
@@ -110,7 +113,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   }
 
   public get columns(): string[] {
-    return this.columnsWithoutFilter;
+    return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
   }
 
   public get columnsWithoutFilter(): string[] {
@@ -242,6 +245,25 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       return;
     }
     return this.columnGet(columnId);
+  }
+
+  columnUpdateHide(columnId: string, hide: boolean): void {
+    this.updateView(view => {
+      return {
+        columns: view.columns.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                hide,
+              }
+            : v
+        ),
+      };
+    });
+  }
+
+  columnGetHide(columnId: string): boolean {
+    return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
 }
 
