@@ -41,9 +41,6 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
-  refresh!: () => void;
-
   @query('.line-start')
   private _startHandler!: HTMLDivElement;
 
@@ -76,7 +73,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
         clientY - viewportRect.top
       );
       edgeless.connector.updateConnection(connector, modelXY, connection);
-      this.refresh?.();
+      this.requestUpdate();
     });
 
     _disposables.addFromEvent(document, 'pointerup', () => {
