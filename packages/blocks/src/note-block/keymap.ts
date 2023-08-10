@@ -160,6 +160,17 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
       return true;
     },
+    Escape: () => {
+      const blockSelection = getBlockSelectionBySide(blockElement, true);
+      if (!blockSelection) {
+        return;
+      }
+      const selection = blockElement.root.selectionManager;
+      selection.update(selList => {
+        return selList.filter(sel => !sel.is('block'));
+      });
+      return true;
+    },
     Enter: () => {
       const blockSelection = getBlockSelectionBySide(blockElement, true);
       if (!blockSelection) {
@@ -196,6 +207,8 @@ export const bindHotKey = (blockElement: BlockElement) => {
       selection.update(selList => {
         return selList.filter(sel => !sel.is('block')).concat(sel);
       });
+
+      return true;
     },
   });
 };
