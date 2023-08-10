@@ -32,7 +32,6 @@ import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
-import { UtilManager } from '../utils/util-manager.js';
 
 export interface PageViewport {
   left: number;
@@ -127,12 +126,6 @@ export class DocPageBlockComponent
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
-
-  /**
-   * @internal
-   * just used for test
-   */
-  utilManager = new UtilManager(this);
 
   clipboard = new PageClipboard(this);
 
