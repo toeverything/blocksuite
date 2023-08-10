@@ -1,3 +1,4 @@
+import type { TestUtils } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import type {
@@ -17,6 +18,7 @@ declare global {
     ContentParser: typeof ContentParser;
     Y: typeof Workspace.Y;
     std: typeof std;
+    testUtils: TestUtilsq;
 
     // TODO: remove this when provider support subdocument
     subdocProviders: Map<string, DocProvider[]>;
