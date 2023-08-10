@@ -290,7 +290,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     const observer = new MutationObserver(() => this.requestUpdate());
 
-    observer.observe(document.documentElement, {
+    observer.observe(this.ownerDocument.documentElement, {
       subtree: false,
       childList: false,
       attributes: true,
