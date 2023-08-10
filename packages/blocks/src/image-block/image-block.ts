@@ -140,6 +140,21 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       })
     );
 
+    this.bindHotKey({
+      Escape: () => {
+        selection.update(selList => {
+          return selList.map(sel => {
+            const current =
+              sel.is('image') && PathFinder.equals(sel.path, this.path);
+            if (current) {
+              return selection.getInstance('block', { path: this.path });
+            }
+            return sel;
+          });
+        });
+      },
+    });
+
     this.handleEvent('click', () => {
       selection.update(selList => {
         return selList

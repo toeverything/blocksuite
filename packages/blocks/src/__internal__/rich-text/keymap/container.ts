@@ -5,7 +5,14 @@ import type { VirgoRootElement } from '@blocksuite/virgo';
 import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import { getCurrentCombinedFormat } from '../../../page-block/utils/operations/inline.js';
-import { getTextSelection } from '../../../page-block/utils/selection.js';
+import {
+  getSelectedContentModels,
+  getTextSelection,
+} from '../../../page-block/utils/selection.js';
+import {
+  handleMultiBlockIndent,
+  handleMultiBlockUnindent,
+} from '../rich-text-operations.js';
 
 export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.root.selectionManager;
@@ -63,6 +70,40 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     Enter: () => {
       if (blockElement.selected?.is('block')) {
         return _selectText(false);
+      }
+      return;
+    },
+    Tab: () => {
+      if (
+        blockElement.selected?.is('block') ||
+        blockElement.selected?.is('text')
+      ) {
+        const page = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!page) {
+          return;
+        }
+        const models = getSelectedContentModels(page);
+        handleMultiBlockIndent(blockElement.page, models);
+        return true;
+      }
+      return;
+    },
+    'Shift-Tab': () => {
+      if (
+        blockElement.selected?.is('block') ||
+        blockElement.selected?.is('text')
+      ) {
+        const page = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!page) {
+          return;
+        }
+        const models = getSelectedContentModels(page);
+        handleMultiBlockUnindent(blockElement.page, models);
+        return true;
       }
       return;
     },

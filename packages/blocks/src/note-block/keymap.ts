@@ -160,5 +160,42 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
       return true;
     },
+    Enter: () => {
+      const blockSelection = getBlockSelectionBySide(blockElement, true);
+      if (!blockSelection) {
+        return;
+      }
+      const element = blockElement.root.viewStore.viewFromPath(
+        'block',
+        blockSelection.path
+      );
+      if (!element) {
+        return;
+      }
+
+      const page = blockElement.page;
+      const { model } = element;
+      const parent = page.getParent(model);
+      if (!parent) {
+        return;
+      }
+
+      const index = parent.children.indexOf(model) ?? undefined;
+
+      const blockId = page.addBlock('affine:paragraph', {}, parent, index + 1);
+
+      const selection = element.root.selectionManager;
+      const sel = selection.getInstance('text', {
+        from: {
+          path: element.parentPath.concat(blockId),
+          index: 0,
+          length: 0,
+        },
+        to: null,
+      });
+      selection.update(selList => {
+        return selList.filter(sel => !sel.is('block')).concat(sel);
+      });
+    },
   });
 };
