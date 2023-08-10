@@ -23,8 +23,10 @@ export type ReorderEvent = CustomEvent<{
 }>;
 
 export type SelectEvent = CustomEvent<{
+  id: string;
   selected: boolean;
   number: number;
+  multiselect: boolean;
 }>;
 
 export type DragEvent = CustomEvent<{
@@ -166,7 +168,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
       height: 16px;
       gap: 10px;
       padding: 0 10px;
@@ -301,13 +302,15 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     this.dispatchEvent(event);
   }
 
-  private _dispatchSelectEvent() {
+  private _dispatchSelectEvent(e: MouseEvent) {
     const event = new CustomEvent('select', {
       detail: {
+        id: this.note.id,
         selected: this.status !== 'selected',
         number: this.number,
+        multiselect: e.shiftKey,
       },
-    });
+    }) as SelectEvent;
 
     this.dispatchEvent(event);
   }
@@ -316,8 +319,8 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     e.preventDefault();
 
     const dispose = once(this.ownerDocument, 'mousemove', () => {
-      if (!this.status) {
-        this._dispatchSelectEvent();
+      if (this.status !== 'selected') {
+        this._dispatchSelectEvent(e);
       }
 
       const event = new CustomEvent('drag', {
@@ -367,10 +370,9 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     const { children } = this.note;
     const showEllipsis = children.length > 4;
     const [first, second] = pickArray(children, [0, 1]);
-    const [secondToLast, last] = pickArray(children, [
-      children.length - 2,
-      children.length - 1,
-    ]);
+    const [secondToLast, last] = showEllipsis
+      ? pickArray(children, [children.length - 2, children.length - 1])
+      : [children[2], children[3]];
 
     return html`
       <div
@@ -402,7 +404,11 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
               >${ArrowIcon}</span
             >
           </div>
-          <div class="card-preview" @click=${this._dispatchSelectEvent}>
+          <div
+            class="card-preview"
+            @click=${this._dispatchSelectEvent}
+            @dblclick=${this._dispatchFitViewEvent}
+          >
             <div class="card-number">
               ${this.invisible
                 ? HiddenIcon
@@ -420,10 +426,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
                   ></blocksuite-toc-block-preview>`
                 : nothing}
               ${showEllipsis
-                ? html`<div
-                    class="card-ellipsis"
-                    @click=${this._dispatchFitViewEvent}
-                  >
+                ? html`<div class="card-ellipsis">
                     <div class="dash"></div>
                     <div class="dots">
                       <div class="dot"></div>

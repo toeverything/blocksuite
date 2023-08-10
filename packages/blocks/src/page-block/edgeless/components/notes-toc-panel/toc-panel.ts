@@ -12,7 +12,6 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import {
   noop,
-  pickArray,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
@@ -24,6 +23,20 @@ import {
   TOCNoteCard,
 } from './toc-card.js';
 import { createDrag } from './utils/drag.js';
+
+type TOCNoteItem = {
+  note: NoteBlockModel;
+
+  /**
+   * the index of the note inside its parent's children property
+   */
+  index: number;
+
+  /**
+   * the number displayed on the toc panel
+   */
+  number: number;
+};
 
 noop(TOCNoteCard);
 
@@ -87,14 +100,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       align-items: center;
     }
 
-    .panel-info .action .icon {
-      cursor: pointer;
-      height: 12px;
-    }
-
+    .panel-info .action .icon,
     .panel-info .action .icon > svg {
       height: 12px;
-      cursor: pointer;
     }
 
     .panel-info .count {
@@ -123,16 +131,10 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   private _dragging = false;
 
   @state()
-  private _notes: {
-    note: NoteBlockModel;
-    index: number;
-  }[] = [];
+  private _notes: TOCNoteItem[] = [];
 
   @state()
-  private _hiddenNotes: {
-    note: NoteBlockModel;
-    index: number;
-  }[] = [];
+  private _hiddenNotes: TOCNoteItem[] = [];
 
   @property({ attribute: false })
   page!: Page;
@@ -141,10 +143,10 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   insertIndex?: number;
 
   /**
-   * store the index of selected notes
+   * store the id of selected notes
    */
   @state()
-  private _selected: number[] = [];
+  private _selected: string[] = [];
 
   @query('.panel-list')
   panelListElement!: HTMLElement;
@@ -180,27 +182,27 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     const visibleNotes: TOCNotesPanel['_notes'] = [];
     const hiddenNotes: TOCNotesPanel['_notes'] = [];
-    const oldNotes = this._notes;
-    const oldSelectedSet = this._selected.reduce((pre, idx) => {
-      pre.add(oldNotes[idx].note);
+    const oldSelectedSet = this._selected.reduce((pre, id) => {
+      pre.add(id);
       return pre;
-    }, new Set<TopLevelBlockModel>());
-    const newSelected: number[] = [];
+    }, new Set<string>());
+    const newSelected: string[] = [];
 
     root.children.forEach((block, index) => {
       if (!matchFlavours(block, ['affine:note'])) return;
 
-      const blockInfo = {
+      const tocNoteItem = {
         note: block as TopLevelBlockModel,
         index,
+        number: index + 1,
       };
 
       if (block.hidden) {
-        hiddenNotes.push(blockInfo);
+        hiddenNotes.push(tocNoteItem);
       } else {
-        visibleNotes.push(blockInfo);
-        if (oldSelectedSet.has(block)) {
-          newSelected.push(visibleNotes.length - 1);
+        visibleNotes.push(tocNoteItem);
+        if (oldSelectedSet.has(block.id)) {
+          newSelected.push(block.id);
         }
       }
     });
@@ -231,15 +233,20 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     );
   }
 
-  private _moveBlocks(index: number, selected: number[]) {
+  private _moveBlocks(
+    index: number,
+    selected: string[],
+    notesMap: Map<string, TOCNoteItem>,
+    notes: TOCNoteItem[]
+  ) {
     const children = this.page.root?.children.slice() as NoteBlockModel[];
 
     if (!children || !this.page.root) return;
 
-    const blocks = selected.map(idx => this._notes[idx].note);
+    const blocks = selected.map(id => (notesMap.get(id) as TOCNoteItem).note);
     const draggingBlocks = new Set(blocks);
     const targetIndex =
-      index === this._notes.length
+      index === notes.length
         ? this._notes[index - 1].index + 1
         : this._notes[index].index;
 
@@ -257,33 +264,46 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   }
 
   private _selectNote(e: SelectEvent) {
-    const { number, selected } = e.detail;
-    const actualIndex = number - 1;
+    const { selected, id, multiselect } = e.detail;
 
-    if (selected) {
-      this._selected.push(actualIndex);
-    } else {
-      this._selected = this._selected.filter(order => order !== actualIndex);
+    if (!selected) {
+      this._selected = this._selected.filter(noteId => noteId !== id);
+      return;
     }
 
-    this.requestUpdate('_selected');
+    if (multiselect) {
+      this._selected.push(id);
+      this.requestUpdate('_selected');
+    } else {
+      this._selected = [id];
+    }
   }
 
   private _drag(e: DragEvent) {
     this._dragging = true;
 
-    const draggedNotesInfo = pickArray(this._notes, this._selected).map(
-      (note, index) => {
-        return {
-          note: note.note,
-          element: this.renderRoot.querySelector(
-            `[data-note-id="${note.note.id}"]`
-          ) as TOCNoteCard,
-          index: note.index,
-          number: this._selected[index] + 1,
-        };
-      }
-    );
+    // cache the notes in case it is changed by other peers
+    const notes = this._notes;
+    const notesMap = this._notes.reduce((map, note, index) => {
+      map.set(note.note.id, {
+        ...note,
+        number: index + 1,
+      });
+      return map;
+    }, new Map<string, TOCNoteItem>());
+
+    const draggedNotesInfo = this._selected.map(id => {
+      const note = notesMap.get(id) as TOCNoteItem;
+
+      return {
+        note: note.note,
+        element: this.renderRoot.querySelector(
+          `[data-note-id="${note.note.id}"]`
+        ) as TOCNoteCard,
+        index: note.index,
+        number: note.number,
+      };
+    });
 
     this._noteElementHeight = draggedNotesInfo[0].element.offsetHeight;
 
@@ -301,7 +321,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
         if (insertIdx === undefined) return;
 
-        this._moveBlocks(insertIdx, this._selected);
+        this._moveBlocks(insertIdx, this._selected, notesMap, notes);
       },
       onDragMove: idx => {
         this.insertIndex = idx;
@@ -345,7 +365,11 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
               page
             </span>
           </div>
-          <div class="panel-info">
+          <div
+            class="panel-info"
+            style="cursor: pointer;"
+            @click=${this._jumpToHidden}
+          >
             <span class="icon">${HiddenCardIcon}</span>
             <span class="content">
               <span class="count">${this._hiddenNotes.length}</span> cards
@@ -356,7 +380,6 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                 class="icon"
                 role="button"
                 style="position: relative; top: 1px;"
-                @click=${this._jumpToHidden}
               >
                 ${DualLinkIcon}
               </span>
@@ -383,7 +406,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                     .number=${idx + 1}
                     .index=${note.index}
                     .page=${this.page}
-                    .status=${selectedNotesSet.has(idx)
+                    .status=${selectedNotesSet.has(note.note.id)
                       ? this._dragging
                         ? 'placeholder'
                         : 'selected'
