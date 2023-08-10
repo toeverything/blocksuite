@@ -70,10 +70,12 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           this.selection = undefined;
           return;
         }
+        const old = this._databaseSelection;
+        this._databaseSelection = tableSelection;
+        if (!tableSelection) return;
 
         this.updateSelection(tableSelection);
 
-        const old = this._databaseSelection;
         if (old) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
@@ -103,8 +105,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             }
           }
         }
-
-        this._databaseSelection = tableSelection;
       })
     );
   }

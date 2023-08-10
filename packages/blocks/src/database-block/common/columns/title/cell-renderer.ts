@@ -46,13 +46,6 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
       width: 100%;
       margin-top: unset;
     }
-
-    .mock-focus {
-      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
-      border: 2px solid var(--affine-primary-color) !important;
-      pointer-events: none;
-      box-sizing: border-box;
-    }
   `;
 
   @state()
@@ -127,7 +120,6 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
 
   override render() {
     const className = classMap({
-      'mock-focus': this.realEditing,
       mask: true,
     });
     return html`
