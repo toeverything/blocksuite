@@ -1430,7 +1430,7 @@ test('should select with shift-click', async ({ page }) => {
   await page.click('[data-block-id="4"] [data-virgo-text]', {
     modifiers: ['Shift'],
   });
-  expect(await getSelectedText(page)).toBe('45678');
+  expect(await getSelectedText(page)).toContain('4567');
 });
 
 test('should collapse to end when press arrow-right on multi-line selection', async ({

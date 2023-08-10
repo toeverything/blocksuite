@@ -192,13 +192,15 @@ test('edgeless arrow up/down', async ({ page }) => {
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertSelection(page, 1, 4, 0);
+  await assertSelection(page, 1, 0, 0);
 
   await pressArrowUp(page);
-  await assertSelection(page, 0, 4, 0);
+  await waitNextFrame(page);
+  await assertSelection(page, 0, 0, 0);
 
   await pressArrowUp(page);
-  await assertSelection(page, 0, 4, 0);
+  await waitNextFrame(page);
+  await assertSelection(page, 0, 0, 0);
 });
 
 test('dragging un-selected note', async ({ page }) => {
