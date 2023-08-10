@@ -2,6 +2,18 @@ import { PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
+import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
+import type { PageBlockComponent } from '../../../page-block/types.js';
+import { getCurrentCombinedFormat } from '../../../page-block/utils/operations/inline.js';
+import {
+  getSelectedContentModels,
+  getTextSelection,
+} from '../../../page-block/utils/selection.js';
+import {
+  handleMultiBlockIndent,
+  handleMultiBlockUnindent,
+} from '../rich-text-operations.js';
+
 export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.root.selectionManager;
   const _selectBlock = () => {
@@ -61,5 +73,65 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       return;
     },
+    'Mod-a': () => {
+      if (blockElement.selected?.is('text')) {
+        return _selectBlock();
+      }
+      return;
+    },
+    Tab: () => {
+      if (
+        blockElement.selected?.is('block') ||
+        blockElement.selected?.is('text')
+      ) {
+        const page = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!page) {
+          return;
+        }
+        const models = getSelectedContentModels(page);
+        handleMultiBlockIndent(blockElement.page, models);
+        return true;
+      }
+      return;
+    },
+    'Shift-Tab': () => {
+      if (
+        blockElement.selected?.is('block') ||
+        blockElement.selected?.is('text')
+      ) {
+        const page = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!page) {
+          return;
+        }
+        const models = getSelectedContentModels(page);
+        handleMultiBlockUnindent(blockElement.page, models);
+        return true;
+      }
+      return;
+    },
+  });
+
+  inlineFormatConfig.forEach(config => {
+    if (!config.hotkey) return;
+
+    blockElement.bindHotKey({
+      [config.hotkey]: () => {
+        if (blockElement.page.readonly) return;
+
+        const pageElement = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!pageElement) return;
+        const textSelection = getTextSelection(pageElement);
+        if (!textSelection) return;
+
+        const format = getCurrentCombinedFormat(pageElement, textSelection);
+        config.action({ pageElement, format });
+      },
+    });
   });
 };

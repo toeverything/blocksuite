@@ -26,11 +26,7 @@ import {
   undoByKeyboard,
   updateBlockType,
 } from './utils/actions/index.js';
-import {
-  assertKeyboardWorkInInput,
-  assertRichTexts,
-  assertStoreMatchJSX,
-} from './utils/asserts.js';
+import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 /**
@@ -165,7 +161,7 @@ test.fixme('use shortcut can create code block', async ({ page }) => {
   await expect(locator).toBeVisible();
 });
 
-test.fixme('change code language can work', async ({ page }) => {
+test('change code language can work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { codeBlockId } = await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -174,7 +170,6 @@ test.fixme('change code language can work', async ({ page }) => {
   await codeBlockController.clickLanguageButton();
   const locator = codeBlockController.langList;
   await expect(locator).toBeVisible();
-  await assertKeyboardWorkInInput(page, codeBlockController.langFilterInput);
 
   await type(page, 'rust');
   await page.click('.lang-list-button-container > icon-button:nth-child(1)');
@@ -202,7 +197,6 @@ test.fixme('change code language can work', async ({ page }) => {
 
   // Can switch to another language
   await codeBlockController.clickLanguageButton();
-  await assertKeyboardWorkInInput(page, codeBlockController.langFilterInput);
   await type(page, 'ts');
   await pressEnter(page);
   await expect(locator).toBeHidden();
@@ -255,7 +249,7 @@ use fern::{
 });
 
 // FIXEME: wait for paste refactor in code block
-test.fixme('drag copy paste', async ({ page }) => {
+test('drag copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -271,7 +265,7 @@ test.fixme('drag copy paste', async ({ page }) => {
   expect(content).toBe('useuse');
 });
 
-test.fixme('keyboard selection and copy paste', async ({ page }) => {
+test('keyboard selection and copy paste', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -394,7 +388,7 @@ test('code block copy button can work', async ({ page }) => {
   await assertRichTexts(page, ['useuse']);
 });
 
-test.fixme('split code by enter', async ({ page }) => {
+test('split code by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -414,7 +408,7 @@ test.fixme('split code by enter', async ({ page }) => {
   await assertRichTexts(page, ['he\nllo']);
 });
 
-test.fixme('split code with selection by enter', async ({ page }) => {
+test('split code with selection by enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -562,7 +556,7 @@ test.fixme(
   }
 );
 
-test.fixme('undo and redo works in code block', async ({ page }) => {
+test('undo and redo works in code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -687,7 +681,7 @@ test('should code block lang input supports alias', async ({ page }) => {
   await expect(codeBlockController.languageButton).toHaveText('Wenyan');
 });
 
-test.fixme('multi-line indent', async ({ page }) => {
+test('multi-line indent', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);

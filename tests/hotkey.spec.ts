@@ -54,7 +54,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test.fixme('single line rich-text inline code hotkey', async ({ page }) => {
+test('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -123,7 +123,7 @@ test.fixme('type character jump out code node', async ({ page }) => {
   );
 });
 
-test.fixme('multi line rich-text inline code hotkey', async ({ page }) => {
+test('multi line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -265,7 +265,7 @@ test.fixme('multi line rich-text inline code hotkey', async ({ page }) => {
   );
 });
 
-test.fixme('single line rich-text strikethrough hotkey', async ({ page }) => {
+test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -286,7 +286,7 @@ test.fixme('single line rich-text strikethrough hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test.fixme('use formatted cursor with hotkey', async ({ page }) => {
+test('use formatted cursor with hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -481,7 +481,7 @@ test.fixme('use formatted cursor with hotkey', async ({ page }) => {
   );
 });
 
-test.fixme('should single line format hotkey work', async ({ page }) => {
+test('should single line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -1020,7 +1020,7 @@ test.skip('should left/right key navigator works', async ({ page }) => {
   await assertSelection(page, 1, 3);
 });
 
-test.fixme('should up/down key navigator works', async ({ page }) => {
+test('should up/down key navigator works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1112,20 +1112,17 @@ test('should forwardDelete works when delete multi characters', async ({
   await assertRichTexts(page, ['ho']);
 });
 
-test.fixme(
-  'should drag multiple block and input text works',
-  async ({ page }) => {
-    test.info().annotations.push({
-      type: 'issue',
-      description: 'https://github.com/toeverything/blocksuite/issues/2982',
-    });
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await dragBetweenIndices(page, [0, 1], [2, 1]);
-    await type(page, 'ab');
-    await assertRichTexts(page, ['1ab89']);
-    await undoByKeyboard(page);
-    await assertRichTexts(page, ['123', '456', '789']);
-  }
-);
+test('should drag multiple block and input text works', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2982',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await type(page, 'ab');
+  await assertRichTexts(page, ['1ab89']);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+});

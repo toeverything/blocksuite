@@ -214,12 +214,12 @@ export class ContentParser {
           layer.style.setProperty('transform', 'none');
         }
 
-        const childNodes = documentClone.querySelectorAll(
-          '.affine-edgeless-child-note'
+        const boxShadowEles = document.querySelectorAll(
+          "[style*='box-shadow']"
         );
-        childNodes.forEach(childNode => {
-          if (childNode instanceof HTMLElement) {
-            childNode.style.setProperty('box-shadow', 'none');
+        boxShadowEles.forEach(function (element) {
+          if (element instanceof HTMLElement) {
+            element.style.setProperty('box-shadow', 'none');
           }
         });
       },

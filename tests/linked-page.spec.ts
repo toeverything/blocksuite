@@ -5,6 +5,7 @@ import { dragBetweenIndices } from 'utils/actions/drag.js';
 import {
   copyByKeyboard,
   pasteByKeyboard,
+  pressArrowRight,
   pressBackspace,
   pressEnter,
   redoByKeyboard,
@@ -95,7 +96,7 @@ function getLinkedPagePopover(page: Page) {
   };
 }
 
-test.fixme('multiple page', () => {
+test.describe('multiple page', () => {
   test('should create and switch page work', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -156,35 +157,32 @@ test.fixme('multiple page', () => {
 });
 
 test.describe('reference node', () => {
-  test.fixme(
-    'linked page popover can show and hide correctly',
-    async ({ page }) => {
-      await enterPlaygroundRoom(page);
-      const { paragraphId } = await initEmptyParagraphState(page);
-      await focusRichText(page);
-      await type(page, '[[');
+  test('linked page popover can show and hide correctly', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '[[');
 
-      // `[[` should be converted to `@`
-      await assertStoreMatchJSX(
-        page,
-        `
+    // `[[` should be converted to `@`
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text="@"
   prop:type="text"
 />`,
-        paragraphId
-      );
-      const { linkedPagePopover } = getLinkedPagePopover(page);
-      await expect(linkedPagePopover).toBeVisible();
-      await page.mouse.click(0, 0);
-      await expect(linkedPagePopover).toBeHidden();
-      await type(page, '@');
-      await expect(linkedPagePopover).toBeVisible();
-      await assertRichTexts(page, ['@@']);
-      await pressBackspace(page);
-      await expect(linkedPagePopover).toBeHidden();
-    }
-  );
+      paragraphId
+    );
+    const { linkedPagePopover } = getLinkedPagePopover(page);
+    await expect(linkedPagePopover).toBeVisible();
+    await pressArrowRight(page);
+    await expect(linkedPagePopover).toBeHidden();
+    await type(page, '@');
+    await expect(linkedPagePopover).toBeVisible();
+    await assertRichTexts(page, ['@@']);
+    await pressBackspace(page);
+    await expect(linkedPagePopover).toBeHidden();
+  });
 
   test('should reference node attributes correctly', async ({ page }) => {
     await enterPlaygroundRoom(page);
@@ -385,34 +383,34 @@ test.describe('reference node', () => {
     await assertStoreMatchJSX(page, snapshot, paragraphId);
   });
 
-  test.fixme(
-    'should the cursor move correctly around reference node',
-    async ({ page }) => {
-      await enterPlaygroundRoom(page);
-      const { paragraphId } = await initEmptyParagraphState(page);
-      const { id } = await addNewPage(page);
-      await focusRichText(page);
+  test('should the cursor move correctly around reference node', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    const { id } = await addNewPage(page);
+    await focusRichText(page);
 
-      await type(page, '1');
-      await type(page, '[[');
-      await pressEnter(page);
+    await type(page, '1');
+    await type(page, '[[');
+    await pressEnter(page);
 
-      await assertRichTexts(page, ['1 ']);
-      await type(page, '2');
-      await assertRichTexts(page, ['1 2']);
-      await page.keyboard.press('ArrowLeft');
-      await type(page, '3');
-      await assertRichTexts(page, ['1 32']);
-      await page.keyboard.press('ArrowLeft');
-      await waitNextFrame(page);
-      await page.keyboard.press('ArrowLeft');
-      await waitNextFrame(page);
-      await page.keyboard.press('ArrowLeft');
+    await assertRichTexts(page, ['1 ']);
+    await type(page, '2');
+    await assertRichTexts(page, ['1 2']);
+    await page.keyboard.press('ArrowLeft');
+    await type(page, '3');
+    await assertRichTexts(page, ['1 32']);
+    await page.keyboard.press('ArrowLeft');
+    await waitNextFrame(page);
+    await page.keyboard.press('ArrowLeft');
+    await waitNextFrame(page);
+    await page.keyboard.press('ArrowLeft');
 
-      await type(page, '4');
-      await assertRichTexts(page, ['14 32']);
+    await type(page, '4');
+    await assertRichTexts(page, ['14 32']);
 
-      const snapshot = `
+    const snapshot = `
 <affine:paragraph
   prop:text={
     <>
@@ -435,36 +433,35 @@ test.describe('reference node', () => {
   }
   prop:type="text"
 />`;
-      await assertStoreMatchJSX(page, snapshot, paragraphId);
+    await assertStoreMatchJSX(page, snapshot, paragraphId);
 
-      await page.keyboard.press('ArrowRight');
-      await captureHistory(page);
-      await pressBackspace(page);
-      await assertStoreMatchJSX(
-        page,
-        `
+    await page.keyboard.press('ArrowRight');
+    await captureHistory(page);
+    await pressBackspace(page);
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text="1432"
   prop:type="text"
 />`,
-        paragraphId
-      );
-      await undoByKeyboard(page);
-      await assertStoreMatchJSX(page, snapshot, paragraphId);
-      await redoByKeyboard(page);
-      await assertStoreMatchJSX(
-        page,
-        `
+      paragraphId
+    );
+    await undoByKeyboard(page);
+    await assertStoreMatchJSX(page, snapshot, paragraphId);
+    await redoByKeyboard(page);
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text="1432"
   prop:type="text"
 />`,
-        paragraphId
-      );
-    }
-  );
+      paragraphId
+    );
+  });
 
-  test.fixme('should create reference node works', async ({ page }) => {
+  test('should create reference node works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     const defaultPageId = 'page0';
@@ -497,7 +494,7 @@ test.describe('reference node', () => {
     await assertReferenceText('titl1');
   });
 
-  test.fixme('can create linked page and jump', async ({ page }) => {
+  test('can create linked page and jump', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await focusTitle(page);
@@ -587,42 +584,34 @@ test.describe('reference node', () => {
 });
 
 test.describe('linked page popover', () => {
-  test.fixme(
-    'should show linked page popover show and hide',
-    async ({ page }) => {
-      await enterPlaygroundRoom(page);
-      await initEmptyParagraphState(page);
-      await focusRichText(page);
-      const { linkedPagePopover } = getLinkedPagePopover(page);
+  test('should show linked page popover show and hide', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    const { linkedPagePopover } = getLinkedPagePopover(page);
 
-      await type(page, '[[');
-      await expect(linkedPagePopover).toBeVisible();
-      await pressBackspace(page);
-      await expect(linkedPagePopover).toBeHidden();
+    await type(page, '[[');
+    await expect(linkedPagePopover).toBeVisible();
+    await pressBackspace(page);
+    await expect(linkedPagePopover).toBeHidden();
 
-      await type(page, '@');
-      await expect(linkedPagePopover).toBeVisible();
-      await page.keyboard.press('Escape');
-      await expect(linkedPagePopover).toBeHidden();
+    await type(page, '@');
+    await expect(linkedPagePopover).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(linkedPagePopover).toBeHidden();
 
-      await type(page, '@');
-      await expect(linkedPagePopover).toBeVisible();
-      await page.mouse.click(0, 0);
-      await expect(linkedPagePopover).toBeHidden();
+    await type(page, '@');
+    await expect(linkedPagePopover).toBeVisible();
+    await page.keyboard.press('ArrowRight');
+    await expect(linkedPagePopover).toBeHidden();
 
-      await type(page, '@');
-      await expect(linkedPagePopover).toBeVisible();
-      await page.keyboard.press('ArrowRight');
-      await expect(linkedPagePopover).toBeHidden();
+    await type(page, '@');
+    await expect(linkedPagePopover).toBeVisible();
+    await copyByKeyboard(page);
+    await expect(linkedPagePopover).toBeHidden();
+  });
 
-      await type(page, '@');
-      await expect(linkedPagePopover).toBeVisible();
-      await copyByKeyboard(page);
-      await expect(linkedPagePopover).toBeHidden();
-    }
-  );
-
-  test.fixme('should fuzzy search works', async ({ page }) => {
+  test('should fuzzy search works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     const {

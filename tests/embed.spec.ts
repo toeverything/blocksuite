@@ -35,7 +35,7 @@ async function focusCaption(page: Page) {
   await page.click('.embed-editing-state>icon-button:nth-child(1)');
 }
 
-test.fixme('can drag resize image by left menu', async ({ page }) => {
+test('can drag resize image by left menu', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
   await assertRichImage(page, 1);
@@ -57,7 +57,7 @@ test.fixme('can drag resize image by left menu', async ({ page }) => {
   await assertImageSize(page, { width: 340, height: 255 });
 });
 
-test.fixme('can drag resize image by right menu', async ({ page }) => {
+test('can drag resize image by right menu', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
   await assertRichImage(page, 1);
@@ -211,7 +211,7 @@ test.fixme(
   }
 );
 
-test.fixme('select image should not show format bar', async ({ page }) => {
+test('select image should not show format bar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initImageState(page);
   await assertRichImage(page, 1);
@@ -226,7 +226,7 @@ test.fixme('select image should not show format bar', async ({ page }) => {
     { x: rect.x + 20, y: rect.y + 20 },
     { x: rect.x - 20, y: rect.y - 20 }
   );
-  const rects = page.locator('affine-selected-blocks > *');
+  const rects = page.locator('affine-block-selection');
   await expect(rects).toHaveCount(1);
   const formatQuickBar = page.locator(`.format-quick-bar`);
   await expect(formatQuickBar).not.toBeVisible();

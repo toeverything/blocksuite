@@ -930,7 +930,7 @@ export async function initImageState(page: Page) {
     Object.entries(clipData).forEach(([key, value]) => {
       e.clipboardData?.setData(key, value);
     });
-    document.body.dispatchEvent(e);
+    document.dispatchEvent(e);
   });
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.

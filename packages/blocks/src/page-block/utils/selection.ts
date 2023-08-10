@@ -1,4 +1,5 @@
-import { BlockSelection, TextSelection } from '@blocksuite/block-std';
+import type { TextSelection } from '@blocksuite/block-std';
+import type { BlockSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 
@@ -10,18 +11,12 @@ export function getSelectedContentModels(
   const { rangeManager } = pageElement;
   const selectionManager = pageElement.root.selectionManager;
   const selections = selectionManager.value;
-  const selectedContentBlocks: BaseBlockModel[] = [];
 
   if (selections.length === 0) {
     return [];
   }
 
-  const textSelection = selections.find(
-    selection => selection instanceof TextSelection
-  ) as TextSelection | undefined;
-  const blockSelections = selections.filter(
-    selection => selection instanceof BlockSelection
-  ) as BlockSelection[];
+  const textSelection = selectionManager.find('text');
   if (textSelection) {
     assertExists(rangeManager);
     const range = rangeManager.value;
@@ -32,24 +27,22 @@ export function getSelectedContentModels(
         // model can be null if the block is deleted
         return model ?? [];
       });
-    selectedContentBlocks.push(
-      ...selectedBlocks.filter(model => model.role === 'content')
-    );
-  } else if (blockSelections.length > 0) {
-    selectedContentBlocks.push(
-      ...blockSelections
-        .map(selection => {
-          const model = pageElement.page.getBlockById(selection.blockId);
-          assertExists(model);
-          return model;
-        })
-        .filter(model => model.role === 'content')
-    );
-  } else {
-    return [];
+
+    return selectedBlocks.filter(model => model.role === 'content');
   }
 
-  return selectedContentBlocks;
+  const blockSelections = selectionManager.filter('block');
+  if (blockSelections.length > 0) {
+    return blockSelections
+      .map(selection => {
+        const model = pageElement.page.getBlockById(selection.blockId);
+        assertExists(model);
+        return model;
+      })
+      .filter(model => model.role === 'content');
+  }
+
+  return [];
 }
 
 export function getSelectedContentBlockElements(
@@ -64,26 +57,13 @@ export function getSelectedContentBlockElements(
 }
 
 export function getTextSelection(
-  pageElement: PageBlockComponent
+  blockElement: BlockElement
 ): TextSelection | null {
-  const selectionManager = pageElement.root.selectionManager;
-  const selections = selectionManager.value;
-
-  const textSelection = selections.find(
-    selection => selection instanceof TextSelection
-  ) as TextSelection | undefined;
-
-  return textSelection ?? null;
+  return blockElement.root.selectionManager.find('text') ?? null;
 }
 
 export function getBlockSelections(
-  pageElement: PageBlockComponent
+  blockElement: BlockElement
 ): BlockSelection[] {
-  const selectionManager = pageElement.root.selectionManager;
-  const selections = selectionManager.value;
-
-  const blockSelections = selections.filter(
-    selection => selection instanceof BlockSelection
-  );
-  return blockSelections;
+  return blockElement.root.selectionManager.filter('block');
 }

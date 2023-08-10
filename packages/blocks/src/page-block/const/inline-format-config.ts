@@ -3,7 +3,6 @@ import {
   InlineCodeIcon,
   ItalicIcon,
   LinkIcon,
-  SHORT_KEY,
   StrikethroughIcon,
   UnderlineIcon,
 } from '@blocksuite/global/config';
@@ -15,6 +14,7 @@ import type { PageBlockComponent } from '../types.js';
 import {
   getCurrentCombinedFormat,
   handleFormat,
+  toggleLink,
 } from '../utils/operations/inline.js';
 import {
   getSelectedContentModels,
@@ -28,7 +28,6 @@ function noneCodeBlockSelected(pageElement: PageBlockComponent) {
 
 interface InlineFormatConfigAction {
   pageElement: PageBlockComponent;
-  abortController: AbortController;
   format: AffineTextAttributes;
 }
 
@@ -48,7 +47,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     id: 'bold',
     name: 'Bold',
     icon: BoldIcon,
-    hotkey: `${SHORT_KEY}+b`,
+    hotkey: 'Mod-b',
     activeWhen: (format: AffineTextAttributes) => 'bold' in format,
     showWhen: (pageElement: PageBlockComponent) =>
       noneCodeBlockSelected(pageElement),
@@ -62,7 +61,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     id: 'italic',
     name: 'Italic',
     icon: ItalicIcon,
-    hotkey: `${SHORT_KEY}+i`,
+    hotkey: 'Mod-i',
     activeWhen: (format: AffineTextAttributes) => 'italic' in format,
     showWhen: (pageElement: PageBlockComponent) =>
       noneCodeBlockSelected(pageElement),
@@ -76,7 +75,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     id: 'underline',
     name: 'Underline',
     icon: UnderlineIcon,
-    hotkey: `${SHORT_KEY}+u`,
+    hotkey: 'Mod-u',
     activeWhen: (format: AffineTextAttributes) => 'underline' in format,
     showWhen: (pageElement: PageBlockComponent) =>
       noneCodeBlockSelected(pageElement),
@@ -90,7 +89,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     id: 'strike',
     name: 'Strikethrough',
     icon: StrikethroughIcon,
-    hotkey: `${SHORT_KEY}+shift+s`,
+    hotkey: 'Mod-shift-s',
     activeWhen: (format: AffineTextAttributes) => 'strike' in format,
     showWhen: (pageElement: PageBlockComponent) =>
       noneCodeBlockSelected(pageElement),
@@ -104,7 +103,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     id: 'code',
     name: 'Code',
     icon: InlineCodeIcon,
-    hotkey: `${SHORT_KEY}+e`,
+    hotkey: 'Mod-e',
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
     showWhen: (pageElement: PageBlockComponent) =>
       noneCodeBlockSelected(pageElement),
@@ -118,7 +117,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     id: 'link',
     name: 'Link',
     icon: LinkIcon,
-    hotkey: `${SHORT_KEY}+k`,
+    hotkey: 'Mod-k',
     activeWhen: (format: AffineTextAttributes) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: (pageElement: PageBlockComponent) => {
@@ -133,11 +132,10 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
         !getCurrentCombinedFormat(pageElement, textSelection, true).reference
       );
     },
-    action: () => {
-      // createLink(page);
-      // if (format && abortController && !('link' in format)) {
-      //   abortController.abort();
-      // }
+    action: ({ pageElement }) => {
+      const textSelection = getTextSelection(pageElement);
+      assertExists(textSelection);
+      toggleLink(pageElement, textSelection);
     },
   },
 ];
