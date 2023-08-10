@@ -1,11 +1,11 @@
-import { NavigationPanel } from '@blocksuite/blocks';
+import { TOCNotesPanel } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-NavigationPanel;
+TOCNotesPanel;
 
 @customElement('custom-navigation-panel')
 export class CustomNavigationPanel extends WithDisposable(LitElement) {
@@ -24,7 +24,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
     }
   `;
   @state()
-  private _show = true;
+  private _show = false;
 
   @property({ attribute: false })
   page!: Page;
@@ -42,9 +42,9 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
   }
 
   private _renderPanel() {
-    return html`<edgeless-navigation-panel
+    return html`<edgeless-toc-notes-panel
       .page=${this.page}
-    ></edgeless-navigation-panel>`;
+    ></edgeless-toc-notes-panel>`;
   }
 
   public toggleDisplay() {

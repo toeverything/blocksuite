@@ -5,7 +5,7 @@ export {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from './edgeless/components/component-toolbar/change-shape-button.js';
-export { NavigationPanel } from './edgeless/components/navigation-panel/navigation-panel.js';
+export { TOCNotesPanel } from './edgeless/components/notes-toc-panel/toc-panel.js';
 export { readImageSize } from './edgeless/components/utils.js';
 export * from './edgeless/edgeless-page-block.js';
 export { type PageBlockModel, PageBlockSchema } from './page-model.js';

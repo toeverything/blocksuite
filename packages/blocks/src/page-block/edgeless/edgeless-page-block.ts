@@ -1349,7 +1349,7 @@ export class EdgelessPageBlockComponent
         ></affine-selected-blocks>
         ${hoverRectTpl} ${draggingAreaTpl}
         <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
-        ${EdgelessNotesStatus(this, this.sortedNotes)} ${this.widgets.slashMenu}
+        ${EdgelessNotesStatus(this, this.notes)} ${this.widgets.slashMenu}
         ${this.widgets.linkedPage}
       </div>
     `;
