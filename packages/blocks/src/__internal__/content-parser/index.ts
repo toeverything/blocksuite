@@ -433,22 +433,31 @@ export class ContentParser {
       );
       return [];
     }
-
-    const sourceId = await storage.set(
-      new File([file], file.name, { type: file.type })
-    );
-    const attachmentProps: AttachmentProps & {
-      flavour: 'affine:attachment';
-      children: [];
-    } = {
-      flavour: 'affine:attachment',
-      name: file.name,
-      sourceId,
-      size: file.size,
-      type: file.type,
-      children: [],
-    };
-    return [attachmentProps];
+    try {
+      const sourceId = await storage.set(
+        new File([file], file.name, { type: file.type })
+      );
+      const attachmentProps: AttachmentProps & {
+        flavour: 'affine:attachment';
+        children: [];
+      } = {
+        flavour: 'affine:attachment',
+        name: file.name,
+        sourceId,
+        size: file.size,
+        type: file.type,
+        children: [],
+      };
+      return [attachmentProps];
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
+        toast(
+          `Failed to upload attachment! ${error.message || error.toString()}`
+        );
+      }
+    }
+    return [];
   }
 
   public async markdown2Block(text: string): Promise<SerializedBlock[]> {
