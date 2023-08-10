@@ -178,10 +178,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   selectedRect!: SelectedRect;
 
   @state()
-  private _isMove = false;
+  private _isMoving = false;
 
   private _overlay = new AutoCompleteOverlay();
-  private _timeId: NodeJS.Timeout | null = null;
+  private _timeId: ReturnType<typeof setTimeout> | null = null;
 
   private get _selected() {
     return this.edgeless.selection.elements;
@@ -199,8 +199,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       let connector: ConnectorElement | null;
       this._disposables.addFromEvent(document, 'pointermove', e => {
         const point = surface.viewport.toModelCoord(e.clientX, e.clientY);
-        if (Vec.dist(start, point) > 8 && !this._isMove) {
-          this._isMove = true;
+        if (Vec.dist(start, point) > 8 && !this._isMoving) {
+          this._isMoving = true;
           const { startPoisition } = getPosition(type);
           const id = surface.addElement('connector', {
             mode: ConnectorMode.Orthogonal,
@@ -215,18 +215,18 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           });
           connector = surface.pickById(id) as ConnectorElement;
         }
-        if (this._isMove) {
+        if (this._isMoving) {
           assertExists(connector);
           this.edgeless.connector.updateConnection(connector, point, 'target');
         }
       });
       this._disposables.addFromEvent(document, 'pointerup', e => {
-        if (!this._isMove) {
+        if (!this._isMoving) {
           this._generateShapeOnClick(type);
         } else if (connector && !connector.target.id) {
           this._generateShapeOnDrag(type, connector);
         }
-        this._isMove = false;
+        this._isMoving = false;
         this.edgeless.connector.clear();
         this._disposables.dispose();
         this._disposables = new DisposableGroup();
@@ -358,7 +358,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       !(
         this._selected.length === 1 &&
         this._selected[0] instanceof ShapeElement &&
-        !this._isMove
+        !this._isMoving
       )
     ) {
       this.edgeless.surface.viewport.removeOverlay(this._overlay);
