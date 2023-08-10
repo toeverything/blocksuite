@@ -6,7 +6,6 @@ import {
   activeNoteInEdgeless,
   addNoteByClick,
   click,
-  clickView,
   copyByKeyboard,
   dragBetweenCoords,
   dragBetweenIndices,
@@ -716,7 +715,6 @@ test('Delete the second divider between two dividers by forwardDelete', async ({
   await pressEscape(page);
   await pressArrowUp(page);
   await pressForwardDelete(page);
-  await pressForwardDelete(page);
   await assertDivider(page, 1);
   await assertRichTexts(page, ['', '', '']);
 });
@@ -737,7 +735,7 @@ test('should delete line with content after divider not lose content', async ({
   await assertRichTexts(page, ['123']);
 });
 
-test('should forwardDelete driver works properly', async ({ page }) => {
+test('should forwardDelete divider works properly', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -749,7 +747,6 @@ test('should forwardDelete driver works properly', async ({ page }) => {
   await pressEscape(page);
   await pressArrowUp(page);
   await page.keyboard.press(`${SHORT_KEY}+ArrowRight`, { delay: 50 });
-  await pressForwardDelete(page);
   await pressForwardDelete(page);
   await assertDivider(page, 0);
   await assertRichTexts(page, ['123', '', '']);
@@ -1370,7 +1367,7 @@ test('should not show option menu of image on native selection', async ({
     { x: -40, y: 0 }
   );
 
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
 
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '123');
@@ -1385,7 +1382,7 @@ test('should not show option menu of image on native selection', async ({
     { x: -40, y: -100 }
   );
 
-  await page.waitForTimeout(50);
+  await waitNextFrame(page);
 
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '123');

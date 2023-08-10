@@ -152,6 +152,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
             return sel;
           });
         });
+        return true;
       },
     });
 
