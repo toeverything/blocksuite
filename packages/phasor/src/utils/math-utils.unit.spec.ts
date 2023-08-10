@@ -11,6 +11,7 @@ import {
   pointAlmostEqual,
   polygonGetPointTangent,
   rotatePoints,
+  toDegree,
   toRadian,
 } from './math-utils.js';
 
@@ -146,5 +147,12 @@ describe('Line', () => {
     expect(toRadian(90)).toBe(Math.PI / 2);
     expect(toRadian(0)).toBe(0);
     expect(toRadian(360)).toBe(Math.PI * 2);
+  });
+
+  it('toDegree', () => {
+    expect(toDegree(Math.PI)).toBe(180);
+    expect(toDegree(Math.PI / 2)).toBe(90);
+    expect(toDegree(0)).toBe(0);
+    expect(toDegree(Math.PI * 2)).toBe(360);
   });
 });

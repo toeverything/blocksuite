@@ -13,16 +13,15 @@ import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 import { drawGeneralShpae } from '../utils.js';
 
-function ellipsePoints({ x, y, w, h }: IBound): IVec[] {
-  return [
-    [x, y + h / 2],
-    [x + w / 2, y],
-    [x + w, y + h / 2],
-    [x + w / 2, y + h],
-  ];
-}
-
 export const EllipseMethods: ShapeMethods = {
+  points({ x, y, w, h }: IBound) {
+    return [
+      [x, y + h / 2],
+      [x + w / 2, y],
+      [x + w, y + h / 2],
+      [x + w / 2, y + h],
+    ];
+  },
   render(
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
@@ -101,7 +100,10 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {
-    const points = getPointsFromBoundsWithRotation(element, ellipsePoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      EllipseMethods.points
+    );
     return points.some(point => bounds.containsPoint(point));
   },
 
