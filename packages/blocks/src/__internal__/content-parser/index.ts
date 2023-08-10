@@ -367,7 +367,7 @@ export class ContentParser {
     );
   }
 
-  private async block2Html(
+  public async block2Html(
     blocks: SelectedBlock[],
     blobMap: Map<string, string>
   ): Promise<string> {
