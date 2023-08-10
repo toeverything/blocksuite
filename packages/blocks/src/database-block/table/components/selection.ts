@@ -110,8 +110,11 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private handleDragEvent() {
+    let isDragging = false;
     this._disposables.add(
       this.tableView.handleEvent('dragStart', context => {
+        isDragging = true;
+
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
@@ -137,9 +140,18 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
     this._disposables.add(
       this.tableView.handleEvent('dragMove', context => {
-        const event = context.get('pointerState').raw;
-        event.preventDefault();
-        return true;
+        if (isDragging) {
+          const event = context.get('pointerState').raw;
+          event.preventDefault();
+        }
+        return false;
+      })
+    );
+
+    this._disposables.add(
+      this.tableView.handleEvent('dragEnd', context => {
+        isDragging = false;
+        return false;
       })
     );
   }
