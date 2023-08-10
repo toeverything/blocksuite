@@ -26,12 +26,14 @@ import {
   pressShiftTab,
   pressSpace,
   pressTab,
+  redoByClick,
   redoByKeyboard,
   resetHistory,
   shamefullyBlurActiveElement,
   shiftClick,
   SHORT_KEY,
   type,
+  undoByClick,
   undoByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
@@ -43,7 +45,7 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
-test.fixme('block level range delete', async ({ page }) => {
+test('block level range delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -62,15 +64,14 @@ test.fixme('block level range delete', async ({ page }) => {
   await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
-  await undoByKeyboard(page);
-  // FIXME
-  // await assertRichTexts(page, ['123', '456', '789']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertRichTexts(page, ['']);
 });
 
-test.fixme('block level range delete by forwardDelete', async ({ page }) => {
+test('block level range delete by forwardDelete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -85,15 +86,15 @@ test.fixme('block level range delete by forwardDelete', async ({ page }) => {
 
   await dragBetweenCoords(page, below789, above123);
   await pressForwardDelete(page);
+  await waitNextFrame(page);
   await assertBlockCount(page, 'paragraph', 1);
   await assertRichTexts(page, ['']);
 
   await waitNextFrame(page);
-  await undoByKeyboard(page);
-  // FIXME
-  // await assertRichTexts(page, ['123', '456', '789']);
+  await undoByClick(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertRichTexts(page, ['']);
 });
 

@@ -20,12 +20,15 @@ import type {
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
-import { getService, registerService } from '../../__internal__/service.js';
+import {
+  getService,
+  registerService,
+} from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DocPageBlockWidgetName } from '../index.js';
-import { PageBlockService } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
+import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
@@ -343,7 +346,9 @@ export class DocPageBlockComponent
       ArrowUp: () => {
         const view = this.root.viewStore;
         const selection = this.root.selectionManager;
-        const sel = selection.value.find(sel => sel.is('block'));
+        const sel = selection.value.find(
+          sel => sel.is('text') || sel.is('block')
+        );
         if (!sel) return;
         const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
           if (nodeView.type === 'block' && parent.view === this) {
@@ -358,15 +363,26 @@ export class DocPageBlockComponent
         const index = notes.indexOf(focus.view as BlockElement);
         if (index !== 0) {
           const prev = notes[index - 1];
-          const lastNoteChild = prev.childBlockElements.at(-1);
+          const lastNoteChild = sel.is('text')
+            ? prev.childBlockElements.reverse().find(el => !!el.model.text)
+            : prev.childBlockElements.at(-1);
           if (!lastNoteChild) return;
           selection.update(selList =>
             selList
               .filter(sel => !sel.is('text') && !sel.is('block'))
               .concat([
-                selection.getInstance('block', {
-                  path: lastNoteChild.path,
-                }),
+                sel.is('text')
+                  ? selection.getInstance('text', {
+                      from: {
+                        path: lastNoteChild.path,
+                        index: lastNoteChild.model.text?.length ?? 0,
+                        length: 0,
+                      },
+                      to: null,
+                    })
+                  : selection.getInstance('block', {
+                      path: lastNoteChild.path,
+                    }),
               ])
           );
           return true;
@@ -391,7 +407,9 @@ export class DocPageBlockComponent
       ArrowDown: () => {
         const view = this.root.viewStore;
         const selection = this.root.selectionManager;
-        const sel = selection.value.find(sel => sel.is('block'));
+        const sel = selection.value.find(
+          sel => sel.is('text') || sel.is('block')
+        );
         if (!sel) return;
         const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
           if (nodeView.type === 'block' && parent.view === this) {
@@ -406,15 +424,26 @@ export class DocPageBlockComponent
         const index = notes.indexOf(focus.view as BlockElement);
         if (index < notes.length - 1) {
           const prev = notes[index + 1];
-          const firstNoteChild = prev.childBlockElements.at(0);
+          const firstNoteChild = sel.is('text')
+            ? prev.childBlockElements.find(x => !!x.model.text)
+            : prev.childBlockElements.at(0);
           if (!firstNoteChild) return;
           selection.update(selList =>
             selList
               .filter(sel => !sel.is('text') && !sel.is('block'))
               .concat([
-                selection.getInstance('block', {
-                  path: firstNoteChild.path,
-                }),
+                sel.is('text')
+                  ? selection.getInstance('text', {
+                      from: {
+                        path: firstNoteChild.path,
+                        index: 0,
+                        length: 0,
+                      },
+                      to: null,
+                    })
+                  : selection.getInstance('block', {
+                      path: firstNoteChild.path,
+                    }),
               ])
           );
           return true;

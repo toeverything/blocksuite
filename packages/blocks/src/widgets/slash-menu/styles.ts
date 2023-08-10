@@ -100,7 +100,7 @@ export const styles = css`
     width: 200px;
   }
 
-  ${scrollbarStyle}
+  ${scrollbarStyle('.slash-item-container')}
 
   .slash-item-divider {
     border-top: 1px dashed var(--affine-border-color);

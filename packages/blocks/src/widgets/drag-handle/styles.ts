@@ -4,25 +4,27 @@ export const DRAG_HANDLE_HEIGHT = 24; // px
 export const DRAG_HANDLE_WIDTH = 16; // px
 
 export const styles = css`
+  .affine-drag-handle-widget {
+    display: flex;
+  }
   .affine-drag-handle-container {
     top: 0;
     left: 0;
     position: fixed;
     display: flex;
-    justify-items: center;
+    justify-content: center;
+    align-items: center;
     width: ${DRAG_HANDLE_WIDTH + 8}px;
     transform-origin: 0 0;
     pointer-events: none;
     user-select: none;
   }
   .affine-drag-handle {
-    position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
     width: ${DRAG_HANDLE_WIDTH}px;
     min-height: ${DRAG_HANDLE_HEIGHT}px;
-    border-radius: 1px;
     pointer-events: auto;
     color: var(--affine-icon-color);
   }
@@ -31,7 +33,7 @@ export const styles = css`
       display: none;
     }
   }
-  .affine-drag-handle-icon {
+  .affine-drag-handle-grabber {
     width: 4px;
     height: 12px;
     border-radius: 1px;
@@ -52,52 +54,5 @@ export const styles = css`
     transform-origin: 0 0;
     pointer-events: none;
     z-index: 2;
-  }
-  .affine-drag-preview {
-    --x: 0px;
-    --y: 0px;
-    height: auto;
-    display: block;
-    position: absolute;
-    box-sizing: border-box;
-    font-family: var(--affine-font-family);
-    font-size: var(--affine-font-base);
-    line-height: var(--affine-line-height);
-    color: var(--affine-text-primary-color);
-    font-weight: 400;
-    top: 0;
-    left: 0;
-    opacity: 0.843;
-    cursor: none;
-    user-select: none;
-    pointer-events: none;
-    caret-color: transparent;
-    transform-origin: 0 0;
-    z-index: 2;
-  }
-
-  .affine-drag-preview > .affine-block-element {
-    pointer-events: none;
-    background-color: transparent;
-  }
-
-  .affine-drag-preview > .affine-block-element:first-child > *:first-child {
-    margin-top: 0;
-  }
-
-  .affine-drag-preview.grabbing {
-    cursor: grabbing;
-    pointer-events: auto;
-  }
-
-  .affine-drag-preview.grabbing:after {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 24px;
-    height: 24px;
-    transform: translate(var(--x), var(--y));
   }
 `;

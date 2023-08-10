@@ -1,7 +1,9 @@
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
+import { WithDisposable } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { TemplateResult } from 'lit';
-import { html, nothing } from 'lit';
+import { html, LitElement, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -10,67 +12,128 @@ import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,
 } from '../../../note-block/note-model.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
-function NoteMask() {
-  const style = {
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    bottom: '0',
-    right: '0',
-    zIndex: '1',
-  };
-  return html` <div class="affine-note-mask" style=${styleMap(style)}></div> `;
+@customElement('edgeless-note-mask')
+export class EdgelessNoteMask extends WithDisposable(LitElement) {
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
+  protected override createRenderRoot() {
+    return this;
+  }
+
+  protected override firstUpdated() {
+    this._disposables.add(
+      this.edgeless.selection.slots.updated.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
+  override render() {
+    if (this.edgeless.selection.state.editing) return nothing;
+    const style = {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      bottom: '0',
+      right: '0',
+      zIndex: '1',
+      pointerEvents: 'auto',
+    };
+    return html`
+      <div class="affine-note-mask" style=${styleMap(style)}></div>
+    `;
+  }
 }
 
-function EdgelessChildNote(
-  index: number,
-  model: NoteBlockModel,
-  active: boolean,
-  renderer: (model: TopLevelBlockModel) => TemplateResult
-) {
-  const { xywh, background } = model;
-  const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
-  const isHiddenNote = model.hidden;
+@customElement('edgeless-child-note')
+export class EdgelessChildNote extends LitElement {
+  @property({ attribute: false })
+  index!: number;
 
-  const style = {
-    position: 'absolute',
-    zIndex: `${index}`,
-    width: modelW + 'px',
-    height: modelH + 'px',
-    transform: `translate(${modelX}px, ${modelY}px)`,
-    padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-    border: `2px ${isHiddenNote ? 'dashed' : 'solid'} var(--affine-black-10)`,
-    borderRadius: '8px',
-    boxSizing: 'border-box',
-    background: isHiddenNote
-      ? 'transparent'
-      : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-    boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
-    pointerEvents: 'all',
-    overflow: 'hidden',
-    transformOrigin: '0 0',
-  };
+  @property({ attribute: false })
+  model!: NoteBlockModel;
 
-  const mask = active ? nothing : NoteMask();
+  @property({ attribute: false })
+  renderer!: (model: TopLevelBlockModel) => TemplateResult;
 
-  return html`
-    <div class="affine-edgeless-child-note" style=${styleMap(style)}>
-      ${renderer(model)} ${mask}
-    </div>
-  `;
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+  protected override createRenderRoot() {
+    return this;
+  }
+  override render() {
+    const { model, renderer, index } = this;
+    const { xywh, background } = model;
+    const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
+    const isHiddenNote = model.hidden;
+
+    const style = {
+      position: 'absolute',
+      zIndex: `${index}`,
+      width: modelW + 'px',
+      height: modelH + 'px',
+      transform: `translate(${modelX}px, ${modelY}px)`,
+      padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
+      border: `2px ${isHiddenNote ? 'dashed' : 'solid'} var(--affine-black-10)`,
+      borderRadius: '8px',
+      boxSizing: 'border-box',
+      background: isHiddenNote
+        ? 'transparent'
+        : `var(${background ?? DEFAULT_NOTE_COLOR})`,
+      boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
+      pointerEvents: 'all',
+      overflow: 'hidden',
+      transformOrigin: '0 0',
+    };
+
+    return html`
+      <div class="affine-edgeless-child-note" style=${styleMap(style)}>
+        ${renderer(model)}
+        <edgeless-note-mask .edgeless=${this.edgeless}></edgeless-note-mask>
+      </div>
+    `;
+  }
 }
 
-export function EdgelessNotesContainer(
-  notes: TopLevelBlockModel[],
-  active: boolean,
-  renderer: (model: TopLevelBlockModel) => TemplateResult
-) {
-  return html`
-    ${repeat(
-      notes,
-      child => child.id,
-      (child, index) => EdgelessChildNote(index, child, active, renderer)
-    )}
-  `;
+@customElement('edgeless-notes-container')
+export class EdgelessNotesContainer extends WithDisposable(LitElement) {
+  @property({ attribute: false })
+  notes!: TopLevelBlockModel[];
+
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
+  renderer!: (model: TopLevelBlockModel) => TemplateResult;
+
+  protected override createRenderRoot() {
+    return this;
+  }
+
+  override render() {
+    const { notes, renderer } = this;
+    return html`
+      ${repeat(
+        notes,
+        child => child.id,
+        (child, index) => html`<edgeless-child-note
+          .index=${index}
+          .model=${child}
+          .renderer=${renderer}
+          .edgeless=${this.edgeless}
+        ></edgeless-child-note>`
+      )}
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edgeless-notes-container': EdgelessNotesContainer;
+    'edgeless-child-note': EdgelessChildNote;
+    'edgeless-note-mask': EdgelessNoteMask;
+  }
 }

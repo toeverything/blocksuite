@@ -44,7 +44,7 @@ export class LangList extends ShadowlessElement {
         padding-right: 4px;
       }
 
-      ${scrollbarStyle}
+      ${scrollbarStyle('.lang-list-button-container')}
 
       .lang-item {
         display: flex;

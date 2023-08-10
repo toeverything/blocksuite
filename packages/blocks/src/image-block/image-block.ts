@@ -1,13 +1,14 @@
 import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
 
+import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import { clamp } from '../__internal__/utils/common.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
@@ -70,7 +71,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       position: relative;
       border: 1px solid var(--affine-white-90);
       border-radius: 8px;
-      overflow: hidden;
     }
 
     .resizable-img img {
@@ -100,6 +100,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   @state()
   private _source!: string;
+  private _blob!: Blob;
 
   @state()
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
@@ -127,6 +128,45 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._observeDrag();
     // Wait for DOM to be ready
     setTimeout(() => this._observePosition());
+
+    const selection = this.root.selectionManager;
+    this._disposables.add(
+      selection.slots.changed.on(selList => {
+        const curr = selList.find(
+          sel => PathFinder.equals(sel.path, this.path) && sel.is('image')
+        );
+
+        this._focused = !!curr;
+      })
+    );
+
+    this.handleEvent('click', () => {
+      selection.update(selList => {
+        return selList
+          .filter(sel => {
+            return !['text', 'block', 'image'].includes(sel.type);
+          })
+          .concat(selection.getInstance('image', { path: this.path }));
+      });
+      return true;
+    });
+    this.handleEvent(
+      'click',
+      () => {
+        if (!this._focused) return;
+
+        selection.update(selList => {
+          return selList.filter(sel => {
+            const current =
+              sel.is('image') && PathFinder.equals(sel.path, this.path);
+            return !current;
+          });
+        });
+      },
+      {
+        global: true,
+      }
+    );
   }
 
   override disconnectedCallback() {
@@ -212,6 +252,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .get(this.model.sourceId)
       .then(blob => {
         if (blob) {
+          this._blob = blob;
           this._source = URL.createObjectURL(blob);
           this._imageState = 'ready';
         } else {
@@ -359,6 +400,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     return html`<blocksuite-portal
       .template=${ImageOptionsTemplate({
         model: this.model,
+        blob: this._blob,
         position: this._optionPosition,
         hoverState: this.hoverState,
       })}
@@ -417,7 +459,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
             @blur=${this._onInputBlur}
             @click=${stopPropagation}
             @keyup=${stopPropagation}
-            @pointerup=${stopPropagation}
             @paste=${stopPropagation}
             @cut=${stopPropagation}
             @copy=${stopPropagation}

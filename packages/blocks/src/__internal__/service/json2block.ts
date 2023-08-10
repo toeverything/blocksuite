@@ -6,12 +6,12 @@ import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
-import { getServiceOrRegister } from '../service.js';
 import {
   asyncGetVirgoByModel,
   focusBlockByModel,
   type SerializedBlock,
 } from '../utils/index.js';
+import { getServiceOrRegister } from './index.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
@@ -192,6 +192,7 @@ export async function addSerializedBlocks(
       icon: json.icon,
       image: json.image,
       crawled: json.crawled,
+      bookmarkTitle: json.bookmarkTitle,
     };
 
     let id: string;

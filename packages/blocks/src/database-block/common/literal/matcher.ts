@@ -1,17 +1,8 @@
-/* eslint-disable lit/binding-positions,lit/no-invalid-html */
 import type { TemplateResult } from 'lit';
-import type { StaticValue } from 'lit/static-html.js';
-import { html, literal } from 'lit/static-html.js';
 
-import { tNumber, tString, tTag } from '../../logical/data-type.js';
 import { Matcher } from '../../logical/matcher.js';
 import type { TType } from '../../logical/typesystem.js';
-import { tArray, tUnknown } from '../../logical/typesystem.js';
-import { ArrayLiteral } from './renderer/array-literal.js';
 import type { LiteralElement } from './renderer/literal-element.js';
-import { NumberLiteral } from './renderer/number-literal.js';
-import { StringLiteral } from './renderer/string-literal.js';
-import { TagLiteral } from './renderer/tag-literal.js';
 
 export const renderLiteral = (
   type: TType,
@@ -45,36 +36,9 @@ export type LiteralRenderer = (
   onChange: (value: unknown) => void
 ) => TemplateResult;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyLiteralComponent = typeof LiteralElement<any>;
-type LiteralData = {
+export type AnyLiteralComponent = typeof LiteralElement<any>;
+export type LiteralData = {
   render: LiteralRenderer;
   component: AnyLiteralComponent;
 };
 export const literalMatcher = new Matcher<LiteralData>();
-const createRenderFunction = (
-  type: StaticValue,
-  component: AnyLiteralComponent
-): LiteralData => {
-  customElements.define(type._$litStatic$, component as never);
-  return {
-    render: (type, value, onChange) => html`
-      <${type} .type='${type}' .value='${value}' .onChange='${onChange}'></${type}>`,
-    component: component,
-  };
-};
-literalMatcher.register(
-  tString.create(),
-  createRenderFunction(literal`ast-string-literal`, StringLiteral)
-);
-literalMatcher.register(
-  tNumber.create(),
-  createRenderFunction(literal`ast-number-literal`, NumberLiteral)
-);
-literalMatcher.register(
-  tArray(tUnknown.create()),
-  createRenderFunction(literal`ast-array-literal`, ArrayLiteral)
-);
-literalMatcher.register(
-  tTag.create(),
-  createRenderFunction(literal`ast-tag-literal`, TagLiteral)
-);

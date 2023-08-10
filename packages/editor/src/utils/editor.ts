@@ -11,7 +11,6 @@ import {
 import {
   type BlockComponentElement,
   getClosestNoteBlockElementById,
-  getCurrentBlockRange,
   getHoveringNote,
   type Point,
   Rect,
@@ -44,9 +43,6 @@ export const createBlockHub: (
         return;
       }
 
-      // In some cases, like insert bookmark block, range in editor will blur, so we need to get range before insert.
-      const range = getCurrentBlockRange(page);
-
       if (data.flavour === 'affine:image' && data.type === 'image') {
         models.push(
           ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
@@ -66,23 +62,16 @@ export const createBlockHub: (
           block => block.flavour === 'affine:note'
         ) ?? page.addBlock('affine:note', {}, page.root?.id);
 
-      if (range) {
-        const lastModel = range.models[range.models.length - 1];
-        const arr = page.addSiblingBlocks(lastModel, models, 'after');
-        const lastId = arr[arr.length - 1];
-        asyncFocusRichText(page, lastId);
-      } else {
-        // add to end
-        let lastId;
-        models.forEach(model => {
-          lastId = page.addBlock(
-            model.flavour ?? 'affine:paragraph',
-            model,
-            defaultNoteBlock
-          );
-        });
-        lastId && asyncFocusRichText(page, lastId);
-      }
+      // add to end
+      let lastId;
+      models.forEach(model => {
+        lastId = page.addBlock(
+          model.flavour ?? 'affine:paragraph',
+          model,
+          defaultNoteBlock
+        );
+      });
+      lastId && asyncFocusRichText(page, lastId);
     },
     onDrop: async (e, point, end, type) => {
       // To make sure get the current page

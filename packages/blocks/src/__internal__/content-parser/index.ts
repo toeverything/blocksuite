@@ -518,7 +518,7 @@ export class ContentParser {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
-    const { getServiceOrRegister } = await import('../service.js');
+    const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
@@ -529,7 +529,7 @@ export class ContentParser {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
-    const { getServiceOrRegister } = await import('../service.js');
+    const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
     service.json2Block(insertBlockModel, blocks);
@@ -620,7 +620,7 @@ export class ContentParser {
       );
       childText && children.push(childText);
     }
-    const { getServiceOrRegister } = await import('../service.js');
+    const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(model.flavour);
 
     const text = await service.block2html(
@@ -649,7 +649,7 @@ export class ContentParser {
       childText && children.push(childText);
     }
 
-    const { getServiceOrRegister } = await import('../service.js');
+    const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2Text(model, {

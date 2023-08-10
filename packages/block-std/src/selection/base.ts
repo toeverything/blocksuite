@@ -1,4 +1,4 @@
-import { PathFinder } from '../store/index.js';
+import { PathFinder } from '../utils/index.js';
 
 type SelectionConstructor<T = unknown> = {
   new (...args: unknown[]): T;
@@ -12,6 +12,7 @@ export type BaseSelectionOptions = {
 export abstract class BaseSelection {
   static readonly type: string;
   readonly path: string[];
+
   constructor({ path }: BaseSelectionOptions) {
     this.path = path;
   }

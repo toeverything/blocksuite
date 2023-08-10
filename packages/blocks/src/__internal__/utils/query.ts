@@ -14,8 +14,8 @@ import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/compone
 import type { PageBlockComponent } from '../../page-block/types.js';
 import type { RichText } from '../rich-text/rich-text.js';
 import { clamp } from './common.js';
-import { type Point, Rect } from './rect.js';
-import { getCurrentNativeRange } from './selection.js';
+import type { Rect } from './rect.js';
+import { type Point } from './rect.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
@@ -24,40 +24,12 @@ const ATTR_SELECTOR = `[${ATTR}]`;
 const MAX_SPACE = 32;
 const STEPS = MAX_SPACE / 2 / 2;
 
-type ElementTagName = keyof HTMLElementTagNameMap;
-
 // Fix use unknown type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BlockComponentElement = BlockElement<any>;
 
-export type BlockCustomElement =
-  HTMLElementTagNameMap[keyof HTMLElementTagNameMap] extends infer U
-    ? U extends {
-        model: infer M;
-      }
-      ? M extends BaseBlockModel
-        ? U
-        : never
-      : never
-    : never;
-
 interface ContainerBlock {
   model?: BaseBlockModel;
-}
-
-/**
- * @deprecated Use `page.getParent` instead
- */
-export function getParentBlockById<T extends ElementTagName>(
-  id: string,
-  ele: Element = document.body
-) {
-  const currentBlock = getBlockElementById(id, ele);
-  return (
-    (currentBlock?.parentElement?.closest<T>(
-      ATTR_SELECTOR as T
-    ) as BlockComponentElement) || null
-  );
 }
 
 /**
@@ -353,25 +325,6 @@ export function asyncGetBlockElementByModel(
   });
 }
 
-export function getStartModelBySelection(range = getCurrentNativeRange()) {
-  const startContainer =
-    range.startContainer instanceof Text
-      ? (range.startContainer.parentElement as HTMLElement)
-      : (range.startContainer as HTMLElement);
-
-  const startComponent = startContainer.closest(
-    `[${ATTR}]`
-  ) as ContainerBlock | null;
-  if (!startComponent) {
-    return null;
-  }
-  const startModel = startComponent.model as BaseBlockModel;
-  if (matchFlavours(startModel, ['affine:note', 'affine:page'])) {
-    return null;
-  }
-  return startModel;
-}
-
 /**
  * @deprecated In most cases, you not need RichText, you can use {@link getVirgoByModel} instead.
  */
@@ -410,117 +363,10 @@ export async function asyncGetVirgoByModel(model: BaseBlockModel) {
   return richText.vEditor;
 }
 
-// TODO fix find embed model
-export function getModelsByRange(range: Range): BaseBlockModel[] {
-  // filter comment
-  if (
-    range.startContainer.nodeType === Node.COMMENT_NODE ||
-    range.endContainer.nodeType === Node.COMMENT_NODE ||
-    range.commonAncestorContainer.nodeType === Node.COMMENT_NODE
-  ) {
-    return [];
-  }
-
-  let commonAncestor = range.commonAncestorContainer as HTMLElement;
-  if (commonAncestor.nodeType === Node.TEXT_NODE) {
-    const model = getStartModelBySelection(range);
-    if (!model) return [];
-    return [model];
-  }
-
-  if (
-    commonAncestor.attributes &&
-    !commonAncestor.attributes.getNamedItem(ATTR)
-  ) {
-    const parentElement = commonAncestor.closest(ATTR_SELECTOR)
-      ?.parentElement as HTMLElement;
-    if (parentElement != null) {
-      commonAncestor = parentElement;
-    }
-  }
-
-  const intersectedModels: BaseBlockModel[] = [];
-  const blockElements = commonAncestor.querySelectorAll(ATTR_SELECTOR);
-
-  if (!blockElements.length) return [];
-
-  if (blockElements.length === 1) {
-    const model = getStartModelBySelection(range);
-    if (!model) return [];
-    return [model];
-  }
-
-  Array.from(blockElements)
-    .filter(element => 'model' in element)
-    .forEach(element => {
-      const block = element as ContainerBlock;
-      if (!block.model) return;
-
-      const mainElement = matchFlavours(block.model, ['affine:page'])
-        ? element?.querySelector('.affine-doc-page-block-title-container')
-        : element?.querySelector('rich-text') || element?.querySelector('img');
-      if (
-        mainElement &&
-        range.intersectsNode(mainElement) &&
-        !matchFlavours(block.model, ['affine:note', 'affine:page'])
-      ) {
-        intersectedModels.push(block.model);
-      }
-    });
-  return intersectedModels;
-}
-
 export function getModelByElement(element: Element): BaseBlockModel {
   const closestBlock = element.closest(ATTR_SELECTOR);
   assertExists(closestBlock, 'Cannot find block element by element');
   return getModelByBlockElement(closestBlock);
-}
-
-function mergeRect(a: DOMRect, b: DOMRect) {
-  return new DOMRect(
-    Math.min(a.left, b.left),
-    Math.min(a.top, b.top),
-    Math.max(a.right, b.right) - Math.min(a.left, b.left),
-    Math.max(a.bottom, b.bottom) - Math.min(a.top, b.top)
-  );
-}
-
-export function getDOMRectByLine(
-  rectList: DOMRectList,
-  lineType: 'first' | 'last'
-) {
-  const list = Array.from(rectList);
-
-  if (lineType === 'first') {
-    let flag = 0;
-    for (let i = 0; i < list.length; i++) {
-      if (list[i].left < 0 && list[i].right < 0 && list[i].height === 1) break;
-      flag = i;
-    }
-    const subList = list.slice(0, flag + 1);
-    return subList.reduce(mergeRect);
-  } else {
-    let flag = list.length - 1;
-    for (let i = list.length - 1; i >= 0; i--) {
-      if (list[i].height === 0) break;
-      flag = i;
-    }
-    const subList = list.slice(flag);
-    return subList.reduce(mergeRect);
-  }
-}
-
-export function isInsideRichText(element: unknown): element is RichText {
-  // Fool-proofing
-  if (element instanceof Event) {
-    throw new Error('Did you mean "event.target"?');
-  }
-
-  if (!element || !(element instanceof Element)) {
-    return false;
-  }
-  const richText = element.closest('rich-text');
-  return !!richText;
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
@@ -541,57 +387,12 @@ export function isInsideEdgelessTextEditor(element: unknown): boolean {
   return textElement.contains(element as Node);
 }
 
-export function isToggleIcon(element: unknown): element is SVGPathElement {
-  return (
-    element instanceof SVGPathElement &&
-    element.getAttribute('data-is-toggle-icon') === 'true'
-  );
-}
-
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
     element.getAttribute('data-virgo-root') === 'true' &&
     !!element.closest('affine-database')
   );
-}
-
-export function isDatabaseCell(element: unknown): boolean {
-  return (
-    element instanceof HTMLElement &&
-    element.tagName === 'affine-database-cell-container'.toUpperCase()
-  );
-}
-
-export function isRawInput(element: unknown): boolean {
-  return (
-    element instanceof HTMLInputElement && !!element.closest('affine-database')
-  );
-}
-
-export function isInsideDatabaseTitle(element: unknown): boolean {
-  const titleElement = document.querySelector(
-    '[data-block-is-database-title="true"]'
-  );
-  if (!titleElement) return false;
-
-  return titleElement.contains(element as Node);
-}
-
-export function isCaptionElement(node: unknown): node is HTMLInputElement {
-  if (!(node instanceof Element)) {
-    return false;
-  }
-  return node.classList.contains('affine-embed-wrapper-caption');
-}
-
-export function getElementFromEventTarget(
-  target: EventTarget | null
-): Element | null {
-  if (!target) return null;
-  if (target instanceof Element) return target;
-  if (target instanceof Node) target.parentElement;
-  return null;
 }
 
 /**
@@ -602,13 +403,6 @@ export function contains(parent: Element, node: Element) {
   return (
     parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
   );
-}
-
-/**
- * Returns `true` if node is contained in the elements.
- */
-export function isContainedIn(elements: Element[], node: Element) {
-  return elements.some(parent => contains(parent, node));
 }
 
 /**
@@ -854,7 +648,8 @@ export function findClosestBlockElement(
 
   for (const child of children) {
     const rect = child.getBoundingClientRect();
-    if (rect.height === 0 || point.y > rect.bottom) continue;
+    if (rect.height === 0 || point.y > rect.bottom || point.y < rect.top)
+      continue;
     const distance =
       Math.pow(point.y - (rect.y + rect.height / 2), 2) +
       Math.pow(point.x - rect.x, 2);
@@ -956,25 +751,6 @@ export function getRectByBlockElement(
 }
 
 /**
- * Returns selected state rect of the block element.
- */
-export function getSelectedStateRectByBlockElement(
-  element: Element | BlockComponentElement
-) {
-  if (isImage(element)) {
-    const wrapper = element.querySelector('.affine-image-wrapper');
-    const resizable = element.querySelector('.resizable-img');
-    assertExists(wrapper);
-    assertExists(resizable);
-    const w = Rect.fromDOM(wrapper);
-    const r = Rect.fromDOM(resizable);
-    const d = w.intersect(r);
-    return d.toDOMRect();
-  }
-  return getRectByBlockElement(element);
-}
-
-/**
  * Returns block elements excluding their subtrees.
  * Only keep block elements of same level.
  */
@@ -992,20 +768,6 @@ export function getBlockElementsExcludeSubtrees(
       return true;
     }
   });
-}
-
-/**
- * Returns block elements including their subtrees.
- */
-export function getBlockElementsIncludeSubtrees(elements: Element[]) {
-  return elements.reduce<Element[]>((elements, element) => {
-    if (isDatabase(element)) {
-      elements.push(element);
-    } else {
-      elements.push(element, ...getBlockElementsByElement(element));
-    }
-    return elements;
-  }, []);
 }
 
 /**
@@ -1056,13 +818,6 @@ export function getHoveringNote(point: Point) {
     document.elementsFromPoint(point.x, point.y).find(isEdgelessChildNote) ||
     null
   );
-}
-
-/**
- * Returns `true` if the database is empty.
- */
-export function isEmptyDatabase(model: BaseBlockModel) {
-  return matchFlavours(model, ['affine:database']) && model.isEmpty();
 }
 
 /**
@@ -1191,34 +946,6 @@ function getCellRect(element: Element, bounds?: DOMRect) {
     colRect.right - bounds.left,
     colRect.height
   );
-}
-
-/**
- * Returns `true` if the target is `Element`.
- */
-export function isElement(target: EventTarget | null) {
-  return target && target instanceof Element;
-}
-
-/**
- * Returns `true` if the target is `affine-selected-blocks`.
- */
-export function isSelectedBlocks(target: Element) {
-  return target.tagName === 'AFFINE-SELECTED-BLOCKS';
-}
-
-/**
- * Returns `true` if the target is `affine-drag-handle`.
- */
-export function isDragHandle(target: Element) {
-  return target.tagName === 'AFFINE-DRAG-HANDLE';
-}
-
-/**
- * Returns `true` if block elements have database block element.
- */
-export function hasDatabase(elements: Element[]) {
-  return elements.some(isDatabase);
 }
 
 export function getEdgelessCanvasTextEditor(element: Element | Document) {

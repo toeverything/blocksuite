@@ -37,18 +37,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   blockElement.bindHotKey({
-    ArrowUp: () => {
-      if (blockElement.selected?.is('text')) {
-        return _selectBlock();
-      }
-      return;
-    },
-    ArrowDown: () => {
-      if (blockElement.selected?.is('text')) {
-        return _selectBlock();
-      }
-      return;
-    },
     ArrowRight: () => {
       if (blockElement.selected?.is('block')) {
         return _selectText(false);

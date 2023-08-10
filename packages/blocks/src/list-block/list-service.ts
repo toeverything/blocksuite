@@ -3,8 +3,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { BlockTransformContext } from '../__internal__/index.js';
 import type { SerializedBlock } from '../__internal__/index.js';
-import { BaseService } from '../__internal__/service/index.js';
 import { json2block } from '../__internal__/service/json2block.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type { ListBlockModel } from './list-model.js';
 
 export class ListBlockService extends BaseService<ListBlockModel> {

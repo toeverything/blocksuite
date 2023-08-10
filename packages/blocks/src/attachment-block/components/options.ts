@@ -7,25 +7,26 @@ import {
   ViewIcon,
 } from '@blocksuite/global/config';
 import { createLitPortal } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { getViewportElement } from '../../__internal__/utils/query.js';
-import type { ImageProps } from '../../image-block/image-model.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
-import { MoreMenu } from './moreMenu.js';
-import { RenameModal } from './renameModel.js';
+import { turnIntoEmbedView } from '../utils.js';
+import { MoreMenu } from './more-menu.js';
+import { RenameModal } from './rename-model.js';
 import { styles } from './styles.js';
 
 export function AttachmentOptionsTemplate({
   anchor,
   model,
+  showCaption,
   abortController,
 }: {
   anchor: HTMLElement;
   model: AttachmentBlockModel;
+  showCaption: () => void;
   abortController: AbortController;
 }) {
   let hoverTimeout = 0;
@@ -66,6 +67,7 @@ export function AttachmentOptionsTemplate({
 
   const moreMenuRef = createRef<HTMLDivElement>();
   const disableEmbed = !model.type?.startsWith('image/');
+  const readonly = model.page.readonly;
   return html`<style>
       ${styles}
     </style>
@@ -93,7 +95,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        disabled
+        ?disabled=${readonly || true}
         @click=${() => console.log('Turn into Link view coming soon', model)}
       >
         ${LinkIcon}
@@ -104,16 +106,9 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${disableEmbed}
+        ?disabled=${readonly || disableEmbed}
         @click="${() => {
-          const sourceId = model.sourceId;
-          assertExists(sourceId);
-          const imageProp: ImageProps & { flavour: 'affine:image' } = {
-            flavour: 'affine:image',
-            sourceId,
-          };
-          model.page.addSiblingBlocks(model, [imageProp]);
-          model.page.deleteBlock(model);
+          turnIntoEmbedView(model);
           abortController.abort();
         }}"
       >
@@ -127,6 +122,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
+        ?disabled=${readonly}
         @click="${() => {
           abortController.abort();
           const renameAbortController = new AbortController();
@@ -146,7 +142,10 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        @click=${() => console.log('TODO caption', model)}
+        ?disabled=${readonly}
+        @click=${() => {
+          showCaption();
+        }}
       >
         ${CaptionIcon}
         <tool-tip inert tip-position="top" role="tooltip">Caption</tool-tip>

@@ -6,7 +6,7 @@ import type {
 import { assertExists } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import { DocPageBlockComponent } from '../doc/doc-page-block.js';
+import type { DocPageBlockComponent } from '../doc/doc-page-block.js';
 import type { PageBlockComponent } from '../types.js';
 import {
   autoScroll,
@@ -29,8 +29,8 @@ export class Gesture {
   }
 
   private get _viewportElement() {
-    if (this.pageElement instanceof DocPageBlockComponent) {
-      return this.pageElement.viewportElement;
+    if (this.pageElement.tagName === 'AFFINE-DOC-PAGE') {
+      return (this.pageElement as DocPageBlockComponent).viewportElement;
     }
     return null;
   }
@@ -56,12 +56,15 @@ export class Gesture {
       this.isNativeSelection = false;
       return;
     }
-    this._nativeDragStartHandler(ctx);
+
+    this.isNativeSelection = true;
+    this._selectByCaret(ctx);
+    state.raw.preventDefault();
   };
 
   private _selectByCaret: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const caret = caretFromPoint(state.raw.clientX, state.raw.clientY);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }
@@ -79,28 +82,21 @@ export class Gesture {
     this._rangeManager.renderRange(range);
   };
 
-  private _nativeDragStartHandler: UIEventHandler = ctx => {
-    this.isNativeSelection = true;
-    this._selectByCaret(ctx);
-  };
-
   private _dragMoveHandler: UIEventHandler = ctx => {
     this._clearRaf();
     if (!this.isNativeSelection) {
       return;
     }
-    this._nativeDragMoveHandler(ctx);
-  };
 
-  private _nativeDragMoveHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
+    state.raw.preventDefault();
     const runner = () => {
       if (!this._rafID) return;
 
       this._updateRange(state);
 
       const result = this._viewportElement
-        ? autoScroll(this._viewportElement, state.y)
+        ? autoScroll(this._viewportElement, state.raw.y)
         : false;
       if (result) {
         this._rafID = requestAnimationFrame(runner);
@@ -114,12 +110,13 @@ export class Gesture {
     return;
   };
 
-  private _dragEndHandler: UIEventHandler = ctx => {
+  private _dragEndHandler: UIEventHandler = () => {
     this._clearRaf();
     if (!this.isNativeSelection) {
       return;
     }
-    this._nativeDragEndHandler(ctx);
+    this._startRange = null;
+    this.isNativeSelection = false;
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
@@ -128,11 +125,6 @@ export class Gesture {
     }
     const state = ctx.get('defaultState');
     state.event.preventDefault();
-  };
-
-  private _nativeDragEndHandler: UIEventHandler = ctx => {
-    this._startRange = null;
-    this.isNativeSelection = false;
   };
 
   private _tripleClickHandler: UIEventHandler = ctx => {
@@ -235,12 +227,16 @@ export class Gesture {
   private _updateRange = (state: PointerEventState) => {
     if (!this._startRange) return;
 
-    const caret = caretFromPoint(state.x, state.y);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }
 
     if (caret.node.nodeType !== Node.TEXT_NODE) {
+      return;
+    }
+
+    if (!caret.node.parentElement?.closest('[data-virgo-root="true"]')) {
       return;
     }
 

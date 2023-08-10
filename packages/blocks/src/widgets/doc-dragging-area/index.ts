@@ -1,3 +1,4 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
@@ -5,7 +6,6 @@ import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isBlankArea } from '../../__internal__/index.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 
@@ -32,6 +32,11 @@ function rectIncludes(a: Rect, b: Rect) {
     a.top <= b.top &&
     a.top + a.height >= b.top + b.height
   );
+}
+
+function isBlankArea(e: PointerEventState) {
+  const { cursor } = window.getComputedStyle(e.raw.target as Element);
+  return cursor !== 'text';
 }
 
 @customElement('affine-doc-dragging-area-widget')
@@ -76,14 +81,15 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
     const elements = getAllNodeFromTree();
 
+    const rootRect = this.root.getBoundingClientRect();
     return elements.map(element => {
       const bounding = element.getBoundingClientRect();
       return {
         id: element.model.id,
         path: element.path,
         rect: {
-          left: bounding.left + viewportElement.scrollLeft,
-          top: bounding.top + viewportElement.scrollTop,
+          left: bounding.left + viewportElement.scrollLeft - rootRect.left,
+          top: bounding.top + viewportElement.scrollTop - rootRect.top,
           width: bounding.width,
           height: bounding.height,
         },

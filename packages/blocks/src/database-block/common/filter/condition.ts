@@ -1,4 +1,5 @@
 import '../ref/ref.js';
+import '../literal/define.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';

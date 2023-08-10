@@ -9,6 +9,7 @@ import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
+import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
 import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
@@ -21,6 +22,7 @@ import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 import { AFFINE_DATABASE_CONVERT_WIDGET_TAG } from '../widgets/database-convert/database-convert.js';
 import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
+import { AFFINE_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/remote-selection/remote-selection.js';
 
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -36,6 +38,9 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
       )}`,
       [AFFINE_DATABASE_CONVERT_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_DATABASE_CONVERT_WIDGET_TAG
+      )}`,
+      [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_REMOTE_SELECTION_WIDGET_TAG
       )}`,
     },
   },
@@ -55,6 +60,9 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
       )}`,
       [AFFINE_DATABASE_CONVERT_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_DATABASE_CONVERT_WIDGET_TAG
+      )}`,
+      [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_REMOTE_SELECTION_WIDGET_TAG
       )}`,
     },
   },
@@ -107,6 +115,7 @@ export const pagePreset: LitBlockSpec[] = [
   },
   {
     schema: ImageBlockSchema,
+    service: ImageService,
     view: {
       component: literal`affine-image`,
     },
@@ -177,6 +186,7 @@ export const edgelessPreset: LitBlockSpec[] = [
   },
   {
     schema: ImageBlockSchema,
+    service: ImageService,
     view: {
       component: literal`affine-image`,
     },

@@ -334,35 +334,24 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
     <article id="8da888cd-8160-4fd6-929c-628fca9189d8" class="page sans">
       <header><h1 class="page-title">demo</h1></header>
       <div class="page-body">
-        <figure id="5b57744f-875a-4a73-b86b-a0a4c6e4de73">
-          <a
-            href="https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel"
-            class="bookmark source"
-            ><div class="bookmark-info">
+        <figure id="5d65f4af-8da7-4fe2-8d20-cb6ba4d902b3">
+          <a href="https://github.com/toeverything/AFFiNE" class="bookmark source">
+            <div class="bookmark-info">
               <div class="bookmark-text">
-                <div class="bookmark-title">
-                  Beyond Frank Lloyd Wright: A Broader View of Art in Chicago
-                </div>
-                <div class="bookmark-description">
-                  "We had been aware of the Walker exhibit but hadn't quite known how to
-                  connect," said Steve Weaver, executive director of the Chicago Public
-                  Art Group. On April 7 it is hosting a Terra-supported tour of
-                  neighborhood murals by Mr. Walker, as well as by artists including
-                  Mitchell Caton, Calvin Jones and Justine DeVan, with a stop at the
-                  Hyde Park exhibition.
-                </div>
+                <div class="bookmark-title">GitHub - toeverything/AFFiNE: There can be more than Notion and
+                  Miro. AFFiNE is a next-gen knowledge base that brings planning, sorting and creating all
+                  together. Privacy first, open-source, customizable and ready to use.</div>
+                <div class="bookmark-description">There can be more than Notion and Miro. AFFiNE is a
+                  next-gen knowledge base that brings planning, sorting and creating all together. Privacy
+                  first, open-source, customizable and ready to use. - Gi...</div>
               </div>
-              <div class="bookmark-href">
-                <img
-                  src="https://static01.nyt.com/favicon.ico"
-                  class="icon bookmark-icon"
-                />https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel
-              </div>
-            </div>
-            <img
-              src="https://static01.nyt.com/images/2018/03/15/arts/15ARTCHICAGO1/15ARTCHICAGO1-facebookJumbo.jpg"
-              class="bookmark-image"
-          /></a>
+              <div class="bookmark-href"><img src="https://github.com/fluidicon.png"
+                  class="icon bookmark-icon" />https://github.com/toeverything/AFFiNE</div>
+            </div><img
+              src="https://repository-images.githubusercontent.com/519859998/a99cfab6-8d58-4c05-9523-ea31e0cda7f8"
+              class="bookmark-image" />
+          </a>
+          <figcaption>cccxdsdddddd</figcaption>
         </figure>
       </div>
     </article>
@@ -379,7 +368,15 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
     {
       flavour: 'affine:bookmark',
       children: [],
-      url: 'https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel',
+      url: 'https://github.com/toeverything/AFFiNE',
+      bookmarkTitle:
+        'GitHub - toeverything/AFFiNE: There can be more than Notion and\n                  Miro. AFFiNE is a next-gen knowledge base that brings planning, sorting and creating all\n                  together. Privacy first, open-source, customizable and ready to use.',
+      description:
+        'There can be more than Notion and Miro. AFFiNE is a\n                  next-gen knowledge base that brings planning, sorting and creating all together. Privacy\n                  first, open-source, customizable and ready to use. - Gi...',
+      icon: 'https://github.com/fluidicon.png',
+      image:
+        'https://repository-images.githubusercontent.com/519859998/a99cfab6-8d58-4c05-9523-ea31e0cda7f8',
+      caption: '',
     },
   ];
 
