@@ -140,7 +140,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       box-sizing: border-box;
       display: flex;
       width: 20px;
-      height: 24px;
+      height: 20px;
       flex-direction: column;
       justify-content: center;
       align-items: center;
@@ -166,14 +166,16 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 5px 0;
       cursor: pointer;
+      height: 16px;
+      gap: 10px;
     }
 
     .card-ellipsis .dash {
       width: 60px;
       height: 1px;
       background-color: var(--affine-black-30);
+      flex-grow: 1;
     }
 
     .card-ellipsis .dots {

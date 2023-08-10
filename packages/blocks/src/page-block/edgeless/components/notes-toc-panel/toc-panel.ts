@@ -1,6 +1,10 @@
-import { CardIcon, HiddenCardIcon } from '@blocksuite/global/config';
+import {
+  CardIcon,
+  DualLinkIcon,
+  HiddenCardIcon,
+} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound, deserializeXYWH } from '@blocksuite/phasor/index.js';
+import { Bound } from '@blocksuite/phasor/index.js';
 import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -58,9 +62,10 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       color: var(--affine-text-secondary-color);
 
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       gap: 14px;
       align-self: stretch;
+      height: 20px;
     }
 
     .panel-info .content {
@@ -68,7 +73,28 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     }
 
     .panel-info .icon {
+      height: 16px;
       color: var(--affine-icon-color);
+      fill: currentColor;
+    }
+
+    .panel-info .icon > svg {
+      height: 16px;
+    }
+
+    .panel-info .action {
+      display: flex;
+      align-items: center;
+    }
+
+    .panel-info .action .icon {
+      cursor: pointer;
+      height: 12px;
+    }
+
+    .panel-info .action .icon > svg {
+      height: 12px;
+      cursor: pointer;
     }
 
     .panel-info .count {
@@ -294,6 +320,18 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     page.surface.viewport.setViewportByBound(bound, [100, 100, 100, 100], true);
   }
 
+  private _jumpToHidden() {
+    if (!this._hiddenNotes.length) return;
+
+    const id = this._hiddenNotes[0].note.id;
+    const element = this.renderRoot.querySelector(`[data-note-id="${id}"]`);
+
+    element?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
   override render() {
     const selectedNotesSet = new Set(this._selected);
 
@@ -313,7 +351,16 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
               <span class="count">${this._hiddenNotes.length}</span> cards
               hidden
             </span>
-            <span class="action"></span>
+            <span class="action">
+              <span
+                class="icon"
+                role="button"
+                style="position: relative; top: 1px;"
+                @click=${this._jumpToHidden}
+              >
+                ${DualLinkIcon}
+              </span>
+            </span>
           </div>
         </div>
         <div class="panel-list">
