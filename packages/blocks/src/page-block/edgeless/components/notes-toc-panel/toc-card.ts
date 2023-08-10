@@ -169,6 +169,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       cursor: pointer;
       height: 16px;
       gap: 10px;
+      padding: 0 10px;
     }
 
     .card-ellipsis .dash {
