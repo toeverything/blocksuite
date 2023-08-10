@@ -73,6 +73,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
     blockElement.bindHotKey({
       [config.hotkey]: () => {
+        if (blockElement.page.readonly) return;
+
         const pageElement = blockElement.closest<PageBlockComponent>(
           'affine-doc-page,affine-edgeless-page'
         );

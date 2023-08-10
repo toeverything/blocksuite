@@ -292,8 +292,6 @@ export function toggleLink(
     };
   };
 
-  console.log(vEditor.rootElement);
-
   const clear = createMockSelection();
   showLinkPopover({
     anchorEl: vEditor.rootElement,
