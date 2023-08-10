@@ -99,7 +99,7 @@ test('block level range delete by forwardDelete', async ({ page }) => {
 });
 
 // XXX: Doesn't simulate full user operation due to backspace cursor issue in Playwright.
-test.fixme('select all and delete', async ({ page }) => {
+test('select all and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -113,7 +113,7 @@ test.fixme('select all and delete', async ({ page }) => {
   await assertRichTexts(page, ['abc']);
 });
 
-test.fixme('select all and delete by forwardDelete', async ({ page }) => {
+test('select all and delete by forwardDelete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -128,11 +128,16 @@ test.fixme('select all and delete by forwardDelete', async ({ page }) => {
 });
 
 async function clickListIcon(page: Page, i = 0) {
-  const locator = page.locator('.affine-list-block__prefix').nth(i);
+  await page.mouse.click(0, 0);
+  const locator = page
+    .locator('.affine-list-rich-text-wrapper')
+    .nth(i)
+    .locator('div')
+    .first();
   await locator.click();
 }
 
-test.fixme('click the list icon can select and copy', async ({ page }) => {
+test('click the list icon can select and copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -143,7 +148,7 @@ test.fixme('click the list icon can select and copy', async ({ page }) => {
 
   await focusRichText(page, 2);
   await pasteByKeyboard(page);
-  await assertRichTexts(page, ['123', '456', '789123']);
+  await assertRichTexts(page, ['123', '456123', '789']);
 
   // copy 789123
   await clickListIcon(page, 2);
@@ -151,10 +156,10 @@ test.fixme('click the list icon can select and copy', async ({ page }) => {
 
   await focusRichText(page, 0);
   await pasteByKeyboard(page);
-  await assertRichTexts(page, ['123789123', '456', '789123']);
+  await assertRichTexts(page, ['123789', '456123', '789']);
 });
 
-test.fixme('click the list icon can select and delete', async ({ page }) => {
+test('click the list icon can select and delete', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeLists(page);
@@ -171,25 +176,24 @@ test.fixme('click the list icon can select and delete', async ({ page }) => {
   await assertRichTexts(page, ['', '']);
 });
 
-test.fixme(
-  'click the list icon can select and delete by forwardDelete',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeLists(page);
-    await assertRichTexts(page, ['123', '456', '789']);
+test('click the list icon can select and delete by forwardDelete', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
-    await clickListIcon(page, 0);
-    await pressForwardDelete(page);
-    await shamefullyBlurActiveElement(page);
-    await pressForwardDelete(page);
-    await assertRichTexts(page, ['', '456', '789']);
-    await clickListIcon(page, 0);
-    await shamefullyBlurActiveElement(page);
-    await pressForwardDelete(page);
-    await assertRichTexts(page, ['', '']);
-  }
-);
+  await clickListIcon(page, 0);
+  await pressForwardDelete(page);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
+  await assertRichTexts(page, ['', '456', '789']);
+  await clickListIcon(page, 0);
+  await shamefullyBlurActiveElement(page);
+  await pressForwardDelete(page);
+  await assertRichTexts(page, ['', '']);
+});
 
 test('selection on heavy page', async ({ page }) => {
   await page
@@ -1236,39 +1240,34 @@ test('should not show option menu of image on block selection', async ({
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(1);
 });
 
-test.fixme(
-  'should be cleared when dragging block card from BlockHub',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await assertRichTexts(page, ['123', '456', '789']);
+test('should be cleared when dragging block card from BlockHub', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
 
-    await page.keyboard.press(`${SHORT_KEY}+a`);
-    await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`);
 
-    await expect(page.locator('.selected,affine-block-selection')).toHaveCount(
-      3
-    );
+  await expect(page.locator('.selected,affine-block-selection')).toHaveCount(3);
 
-    await page.click('.block-hub-menu-container [role="menuitem"]');
-    await page.waitForTimeout(200);
-    const blankMenu = '.block-hub-icon-container:nth-child(1)';
+  await page.click('.block-hub-menu-container [role="menuitem"]');
+  await page.waitForTimeout(200);
+  const blankMenu = '.block-hub-icon-container:nth-child(1)';
 
-    const blankMenuRect = await getCenterPosition(page, blankMenu);
-    const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
-    await dragBetweenCoords(
-      page,
-      { x: blankMenuRect.x, y: blankMenuRect.y },
-      { x: targetPos.x, y: targetPos.y + 5 },
-      { steps: 50 }
-    );
+  const blankMenuRect = await getCenterPosition(page, blankMenu);
+  const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
+  await dragBetweenCoords(
+    page,
+    { x: blankMenuRect.x, y: blankMenuRect.y },
+    { x: targetPos.x, y: targetPos.y + 5 },
+    { steps: 50 }
+  );
 
-    await expect(page.locator('.selected,affine-block-selection')).toHaveCount(
-      0
-    );
-  }
-);
+  await expect(page.locator('.selected,affine-block-selection')).toHaveCount(0);
+});
 
 test.fixme(
   'click bottom of page and if the last is embed block, editor should insert a new editable block',
@@ -1336,7 +1335,7 @@ test('should select blocks when pressing escape', async ({ page }) => {
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(1);
 });
 
-test.fixme('should un-select blocks when pressing escape', async ({ page }) => {
+test('should un-select blocks when pressing escape', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);

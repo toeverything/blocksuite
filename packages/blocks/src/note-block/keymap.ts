@@ -210,5 +210,23 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
       return true;
     },
+    'Mod-a': () => {
+      const view = blockElement.root.viewStore;
+      const selection = blockElement.root.selectionManager;
+      const blocks: BlockSelection[] = [];
+      view.walkThrough(nodeView => {
+        if (nodeView.type === 'block') {
+          blocks.push(
+            selection.getInstance('block', {
+              path: nodeView.path,
+            })
+          );
+        }
+        return null;
+      }, blockElement.path);
+      selection.update(selList => {
+        return selList.filter(sel => !sel.is('block')).concat(blocks);
+      });
+    },
   });
 };

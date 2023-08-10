@@ -73,6 +73,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       return;
     },
+    'Mod-a': () => {
+      if (blockElement.selected?.is('text')) {
+        return _selectBlock();
+      }
+      return;
+    },
     Tab: () => {
       if (
         blockElement.selected?.is('block') ||
