@@ -24,7 +24,7 @@ import {
 } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { getService, registerService } from '../__internal__/service.js';
+import { getService, registerService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -240,6 +240,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:code', CodeBlockService);
+    // set highlight options getter used by "exportToHtml"
+    getService('affine:code').setHighlightOptionsGetter(() => {
+      return {
+        lang: this._curLanguage.id as Lang,
+        highlighter: this._highlighter,
+      };
+    });
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );

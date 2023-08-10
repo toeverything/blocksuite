@@ -3,11 +3,10 @@ import { BlockElement, createLitPortal } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
-import { focusBlockByModel } from '../__internal__/utils/selection.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,
@@ -36,7 +35,11 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private _focusAttachment() {
-    focusBlockByModel(this.model);
+    const selectionManager = this.root.selectionManager;
+    const blockSelection = selectionManager.getInstance('block', {
+      path: this.path,
+    });
+    selectionManager.set([blockSelection]);
   }
 
   private _optionsPortal: HTMLDivElement | null = null;
@@ -116,7 +119,10 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
               AttachmentBanner}
         </div>
         ${this.selected?.is('block')
-          ? html`<affine-block-selection></affine-block-selection>`
+          ? html`<affine-block-selection
+              .borderRadius=${12}
+              .borderWidth=${3}
+            ></affine-block-selection>`
           : null}
       </div>
       <input

@@ -8,7 +8,7 @@ import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import { clamp } from '../__internal__/utils/common.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
@@ -100,6 +100,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   @state()
   private _source!: string;
+  private _blob!: Blob;
 
   @state()
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
@@ -251,6 +252,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .get(this.model.sourceId)
       .then(blob => {
         if (blob) {
+          this._blob = blob;
           this._source = URL.createObjectURL(blob);
           this._imageState = 'ready';
         } else {
@@ -398,6 +400,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     return html`<blocksuite-portal
       .template=${ImageOptionsTemplate({
         model: this.model,
+        blob: this._blob,
         position: this._optionPosition,
         hoverState: this.hoverState,
       })}

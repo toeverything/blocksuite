@@ -6,7 +6,7 @@ import type {
 import { assertExists } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import { DocPageBlockComponent } from '../doc/doc-page-block.js';
+import type { DocPageBlockComponent } from '../doc/doc-page-block.js';
 import type { PageBlockComponent } from '../types.js';
 import {
   autoScroll,
@@ -29,8 +29,8 @@ export class Gesture {
   }
 
   private get _viewportElement() {
-    if (this.pageElement instanceof DocPageBlockComponent) {
-      return this.pageElement.viewportElement;
+    if (this.pageElement.tagName === 'AFFINE-DOC-PAGE') {
+      return (this.pageElement as DocPageBlockComponent).viewportElement;
     }
     return null;
   }

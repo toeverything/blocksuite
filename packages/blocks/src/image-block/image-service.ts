@@ -1,6 +1,6 @@
 import { BlockService } from '@blocksuite/block-std';
 
-import { BaseService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type {
   BlockTransformContext,
   SerializedBlock,

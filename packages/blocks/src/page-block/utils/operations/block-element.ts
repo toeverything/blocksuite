@@ -1,21 +1,11 @@
-import type { TextSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
-import {
-  assertExists,
-  assertFlavours,
-  type BaseBlockModel,
-} from '@blocksuite/store';
+import { assertFlavours, type BaseBlockModel } from '@blocksuite/store';
 
 import { asyncFocusRichText } from '../../../__internal__/utils/common-operations.js';
-import { getVirgoByModel } from '../../../__internal__/utils/query.js';
 import type { Flavour } from '../../../models.js';
 import type { PageBlockComponent } from '../../types.js';
 import { onModelTextUpdated } from '../callback.js';
-import {
-  getBlockSelections,
-  getSelectedContentModels,
-  getTextSelection,
-} from '../selection.js';
+import { getBlockSelections, getTextSelection } from '../selection.js';
 import { mergeToCodeBlocks, transformBlock } from './model.js';
 
 /**
@@ -143,66 +133,4 @@ export function updateBlockElementType(
   }
 
   return newModels;
-}
-
-export function deleteModelsByRange(
-  pageElement: PageBlockComponent,
-  textSelection?: TextSelection
-) {
-  if (!textSelection) {
-    textSelection = getTextSelection(pageElement) ?? undefined;
-  }
-  assertExists(textSelection);
-
-  const page = pageElement.page;
-  const selectedModels = getSelectedContentModels(pageElement);
-
-  if (selectedModels.length === 0) {
-    return null;
-  }
-
-  const startModel = selectedModels[0];
-  const endModel = selectedModels[selectedModels.length - 1];
-  // TODO handle database
-  if (!startModel.text || !endModel.text) {
-    throw new Error('startModel or endModel does not have text');
-  }
-
-  const vEditor = getVirgoByModel(startModel);
-  assertExists(vEditor);
-
-  // Only select one block
-  if (startModel === endModel) {
-    page.captureSync();
-    if (textSelection.from.index > 0 && textSelection.isCollapsed()) {
-      // startModel.text.delete(blockRange.startOffset - 1, 1);
-      // vEditor.setVRange({
-      //   index: blockRange.startOffset - 1,
-      //   length: 0,
-      // });
-      return startModel;
-    }
-    startModel.text.delete(textSelection.from.index, textSelection.from.length);
-    vEditor.setVRange({
-      index: textSelection.from.index,
-      length: 0,
-    });
-    return startModel;
-  }
-  page.captureSync();
-  startModel.text.delete(textSelection.from.index, textSelection.from.length);
-  endModel.text.delete(
-    textSelection.to?.index ?? 0,
-    textSelection.to?.length ?? 0
-  );
-  startModel.text.join(endModel.text);
-  selectedModels.slice(1).forEach(model => {
-    page.deleteBlock(model);
-  });
-
-  vEditor.setVRange({
-    index: textSelection.from.index,
-    length: 0,
-  });
-  return startModel;
 }

@@ -12,7 +12,7 @@ import {
   getTextSelection,
 } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
-import { getService } from '../../service.js';
+import { getService } from '../../service/index.js';
 import {
   getCurrentNativeRange,
   getEdgelessCanvasTextEditor,

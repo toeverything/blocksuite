@@ -453,8 +453,8 @@ test.fixme(
         delay: 20,
       });
     await page.waitForTimeout(200);
-    const formatQuickBar = page.locator('.format-quick-bar');
-    await expect(formatQuickBar).toBeVisible();
+    const formatBar = page.locator('.affine-format-bar-widget');
+    await expect(formatBar).toBeVisible();
   }
 );
 

@@ -18,7 +18,9 @@ export abstract class BaseCellRenderer<
   @property({ attribute: false })
   isEditing!: boolean;
   @property({ attribute: false })
-  public selectCurrentCell!: (editing: boolean) => void;
+  selectCurrentCell!: (editing: boolean) => void;
+  @property({ attribute: false })
+  rectChanged!: () => void;
 
   get readonly(): boolean {
     return this.column.readonly;

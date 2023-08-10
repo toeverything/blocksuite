@@ -16,7 +16,7 @@ import { selectColumnConfig } from '../../database-block/common/columns/select/c
 import { titleColumnConfig } from '../../database-block/common/columns/title/cell-renderer.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
-import { insertPositionToIndex } from '../../database-block/index.js';
+import { insertPositionToIndex } from '../../database-block/utils/insert.js';
 import type { DatabaseBlockDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 

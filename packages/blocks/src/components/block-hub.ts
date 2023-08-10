@@ -240,20 +240,21 @@ const styles = css`
     background: var(--affine-hover-color);
   }
 
-  .divider {
-    height: 1px;
-    width: 36px;
-    background: var(--affine-border-color);
-    margin: 4px 0;
-  }
-
   [role='menuitem'] tool-tip {
     font-size: var(--affine-font-sm);
   }
 
   .block-hub-icons-container {
+    width: 100%;
     overflow: hidden;
     transition: all 0.2s cubic-bezier(0, 0, 0.55, 1.6);
+  }
+
+  .block-hub-icons-container > .divider {
+    height: 1px;
+    width: 36px;
+    background: var(--affine-border-color);
+    margin: 4px 0;
   }
 
   ${tooltipStyle}

@@ -3,17 +3,26 @@ import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
-import { BaseService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type {
   BlockTransformContext,
   SerializedBlock,
 } from '../__internal__/utils/index.js';
-import { getVirgoByModel } from '../__internal__/utils/index.js';
-import type { CodeBlockModel } from './code-model.js';
+import {
+  getVirgoByModel,
+  queryCurrentMode,
+} from '../__internal__/utils/index.js';
+import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
 import { getStandardLanguage } from './utils/code-languages.js';
-import { FALLBACK_LANG } from './utils/consts.js';
+import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {
+  highlightOptionsGetter: HighlightOptionsGetter = null;
+
+  setHighlightOptionsGetter(fn: HighlightOptionsGetter) {
+    this.highlightOptionsGetter = fn;
+  }
+
   setLang(model: CodeBlockModel, lang: string | null) {
     const standardLang = lang ? getStandardLanguage(lang) : null;
     const langName = standardLang?.id ?? FALLBACK_LANG;
@@ -36,6 +45,11 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
         end,
       });
     }
+    assertExists(
+      this.highlightOptionsGetter,
+      'highlightOptionsGetter is not set'
+    );
+    const { lang, highlighter } = this.highlightOptionsGetter();
     const preElement = document.createElement('pre');
     const codeElement = document.createElement('code');
     preElement.setAttribute('code-lang', block.language);
@@ -45,7 +59,16 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
       .map(line => line.textContent + '\n')
       .join('');
     preElement.append(codeElement);
-    return preElement.outerHTML;
+
+    if (highlighter) {
+      const codeHtml = highlighter.codeToHtml(codeElement.innerHTML, {
+        lang,
+        theme: queryCurrentMode() === 'dark' ? DARK_THEME : LIGHT_THEME,
+      });
+      return codeHtml ?? preElement.outerHTML;
+    } else {
+      return preElement.outerHTML;
+    }
   }
 
   override block2Json(

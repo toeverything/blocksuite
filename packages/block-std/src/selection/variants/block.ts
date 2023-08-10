@@ -1,4 +1,4 @@
-import { PathFinder } from '../../store/index.js';
+import { PathFinder } from '../../utils/index.js';
 import { BaseSelection } from '../base.js';
 
 export class BlockSelection extends BaseSelection {

@@ -1,6 +1,6 @@
 {
   "excludeRegExp": [
-    "^(blocks*)"
+    "(service*)"
   ],
   "detectiveOptions": {
     "ts": {

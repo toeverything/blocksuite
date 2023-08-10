@@ -4,7 +4,6 @@
  *
  * Simply put, `import '@blocksuite/blocks/std.ts'` should work well in the Next.js
  */
-export * from './block-range.js';
 export * from './common-operations.js';
 export * from './drag-and-drop.js';
 export * from './event.js';
