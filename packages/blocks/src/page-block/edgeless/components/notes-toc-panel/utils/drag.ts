@@ -74,7 +74,7 @@ export function createDrag(
 
     idx = 0;
     for (const note of children) {
-      if (note.invisible) break;
+      if (note.invisible || !note.note) break;
 
       const topBoundary =
         listContainerRect.top + note.offsetTop - tocListContainer.scrollTop;

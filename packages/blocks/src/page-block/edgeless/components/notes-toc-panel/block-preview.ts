@@ -48,6 +48,11 @@ const listIconMap: {
 @customElement('blocksuite-toc-block-preview')
 export class TOCBlockPreview extends WithDisposable(LitElement) {
   static override styles = css`
+    :host {
+      display: block;
+      width: 156%;
+    }
+
     .blocksuite-toc-block-preview {
       white-space: nowrap;
       line-height: 15px;
@@ -55,9 +60,6 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       justify-content: start;
       align-items: center;
       gap: 5px;
-
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .icon {
@@ -73,8 +75,13 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     }
 
     .text {
-      font-size: 20px;
-      transform: scale(0.375);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+
+      font-size: 12px;
+      transform: scale(0.625);
       transform-origin: center left;
       color: var(--affine-text-primary-color);
     }
@@ -111,45 +118,64 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
     switch (block.flavour as keyof BlockModels) {
       case 'affine:paragraph':
         assertType<ParagraphBlockModel>(block);
-        return html`${block.type === 'quote'
+        return html`
+          ${block.type === 'quote'
             ? html`<span class="icon">${QuoteIcon}</span>`
-            : nothing}<span class="text subtype ${block.type}"
+            : nothing}
+          <span class="text subtype ${block.type}"
             >${block.text.toString()}</span
-          >`;
+          >
+        `;
       case 'affine:list':
         assertType<ListBlockModel>(block);
-        return html`<span class="icon">${listIconMap[block.type]}</span
-          ><span class="text">${block.text.toString()}</span>`;
+        return html`
+          <span class="icon">${listIconMap[block.type]}</span>
+          <span class="text">${block.text.toString()}</span>
+        `;
       case 'affine:bookmark':
         assertType<BookmarkBlockModel>(block);
-        return html`<span class="icon">${BookmarkIcon}</span
-          ><span class="text"
+        return html`
+          <span class="icon">${BookmarkIcon}</span>
+          <span class="text"
             >${block.bookmarkTitle || block.url || 'Bookmark'}</span
-          >`;
+          >
+        `;
       case 'affine:code':
         assertType<CodeBlockModel>(block);
-        return html`<span class="icon">${CodeBlockIcon}</span
-          ><span class="text">${block.language}</span>`;
+        return html`
+          <span class="icon">${CodeBlockIcon}</span>
+          <span class="text">${block.language}</span>
+        `;
       case 'affine:database':
         assertType<DatabaseBlockModel>(block);
-        return html`<span class="icon">${DatabaseTableViewIcon}</span
-          ><span class="text">${block.title || 'Database'}</span>`;
+        return html`
+          <span class="icon">${DatabaseTableViewIcon}</span>
+          <span class="text">${block.title || 'Database'}</span>
+        `;
       case 'affine:image':
         assertType<ImageBlockModel>(block);
-        return html`<span class="icon">${ImageIcon}</span
-          ><span class="text">${block.caption || ''}</span>`;
+        return html`
+          <span class="icon">${ImageIcon}</span>
+          <span class="text">${block.caption || ''}</span>
+        `;
       case 'affine:attachment':
         assertType<AttachmentBlockModel>(block);
-        return html`<span class="icon">${AttachmentIcon}</span
-          ><span class="text">${block.name}</span>`;
+        return html`
+          <span class="icon">${AttachmentIcon}</span>
+          <span class="text">${block.name}</span>
+        `;
       case 'affine:data-view':
         assertType<DataViewBlockModel>(block);
-        return html`<span class="icon">${DatabaseKanbanViewIcon}</span
-          ><span class="text">Database View</span>`;
+        return html`
+          <span class="icon">${DatabaseKanbanViewIcon}</span>
+          <span class="text">Database View</span>
+        `;
       case 'affine:divider':
         assertType<DividerBlockModel>(block);
-        return html`<span class="icon">${DividerIcon}</span
-          ><span class="text">Divider</span>`;
+        return html`
+          <span class="icon">${DividerIcon}</span>
+          <span class="text">Divider</span>
+        `;
       default:
         return block.type;
     }

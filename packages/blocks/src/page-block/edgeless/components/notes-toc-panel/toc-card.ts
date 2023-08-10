@@ -48,8 +48,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     }
 
     .navigation-card-container {
-      width: 259.147px;
-      height: 135.722px;
+      height: 136px;
     }
 
     .drag-area {
@@ -116,9 +115,9 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     .card-preview {
       cursor: default;
       user-select: none;
-      flex-grow: 1;
+      flex: 1;
+      overflow: hidden;
       box-sizing: border-box;
-      width: 235px;
       height: 120px;
       border-radius: 8px;
       padding: 7px 12px;
@@ -216,7 +215,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     }
 
     .navigation-card-container[data-invisible='true'] .action {
-      visibility: none;
+      visibility: hidden;
     }
 
     .navigation-card-container.dragging .card-preview,
@@ -241,6 +240,17 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
           rgba(255, 255, 255, 0) 100%
         ),
         #000;
+    }
+
+    .navigation-card-container[data-invisible='true'] .card-preview:hover,
+    .navigation-card-container[data-invisible='true'] .card-preview {
+      background: none;
+      outline: none;
+      box-shadow: none;
+      border: 1px dashed var(--affine-border-color);
+    }
+    .navigation-card-container[data-invisible='true'] .drag-area {
+      background: none;
     }
   `;
 

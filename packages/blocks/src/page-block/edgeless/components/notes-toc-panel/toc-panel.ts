@@ -116,6 +116,16 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       position: relative;
     }
 
+    .panel-list .title {
+      font-size: 12px;
+      line-height: 14.5px;
+      font-weight: bolder;
+      color: var(--affine-text-secondary-color);
+      font-family: var(--affine-font-sans-family);
+      padding-left: 16px;
+      margin: 34px 0 24px 0;
+    }
+
     .insert-indicator {
       height: 2px;
       border-radius: 1px;
@@ -423,6 +433,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                 `
               )
             : html`${nothing}`}
+          ${this._hiddenNotes.length > 0
+            ? html`<div class="title">Hidden on Page</div>`
+            : nothing}
           ${this._hiddenNotes.length
             ? repeat(
                 this._hiddenNotes,
@@ -437,9 +450,10 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                   style=${this.insertIndex !== undefined
                     ? 'transform: translateY(20px)'
                     : ''}
+                  @fitview=${this._fitView}
                 ></edgeless-note-toc-card>`
               )
-            : html`${nothing}`}
+            : nothing}
         </div>
       </div>
     `;
