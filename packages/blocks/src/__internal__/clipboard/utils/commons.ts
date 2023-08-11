@@ -12,7 +12,7 @@ import {
   getTextSelection,
 } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
-import { getService } from '../../service/index.js';
+import { getServiceOrRegister } from '../../service/index.js';
 import {
   getCurrentNativeRange,
   getEdgelessCanvasTextEditor,
@@ -36,7 +36,7 @@ export async function getBlockClipboardInfo(
   begin?: number,
   end?: number
 ) {
-  const service = getService(model.flavour);
+  const service = await getServiceOrRegister(model.flavour);
   const html = await service.block2html(model, { begin, end });
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered

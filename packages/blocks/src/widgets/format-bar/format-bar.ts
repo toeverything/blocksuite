@@ -36,8 +36,6 @@ export class AffineFormatBarWidget extends WidgetElement {
   static readonly customElements: Set<CustomElementCreator> =
     new Set<CustomElementCreator>();
 
-  paragraphPanelMaxHeight: string | null = null;
-
   @query('.custom-items')
   customItemsContainer!: HTMLElement;
 
@@ -282,7 +280,6 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     const selectedBlockElements = this._selectedBlockElements;
     const page = this.page;
-    const abortController = this._abortController;
 
     //TODO: format bar in database
 
@@ -293,10 +290,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       page,
     });
     const actionItems = ActionItems(pageElement);
-    const inlineItems = InlineItems({
-      pageElement: pageElement,
-      abortController,
-    });
+    const inlineItems = InlineItems({ pageElement });
 
     return html`<div
       class=${AFFINE_FORMAT_BAR_WIDGET_TAG}

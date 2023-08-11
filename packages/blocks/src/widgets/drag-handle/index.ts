@@ -1,7 +1,7 @@
-import type {
-  PointerEventState,
-  UIEventHandler,
-  UIEventStateContext,
+import {
+  type PointerEventState,
+  type UIEventHandler,
+  type UIEventStateContext,
 } from '@blocksuite/block-std';
 import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
@@ -75,8 +75,10 @@ export class DragHandleWidget extends WidgetElement {
 
   private _rafID = 0;
 
-  protected get selectedBlocks() {
-    return this.root.selectionManager.value;
+  protected get _selectedBlocks() {
+    return this.root.selectionManager.value.filter(
+      selection => selection.type !== 'surface'
+    );
   }
 
   public hide(force = false) {
@@ -135,13 +137,28 @@ export class DragHandleWidget extends WidgetElement {
     }px`;
   }
 
-  private _setSelectedBlock(path: string[]) {
+  private _setSelectedBlocks(blockElements: BlockElement[], noteId?: string) {
     const { selectionManager } = this.root;
-    selectionManager.set([
+    const selections = blockElements.map(blockElement =>
       selectionManager.getInstance('block', {
-        path,
-      }),
-    ]);
+        path: blockElement.path,
+      })
+    );
+
+    // When current page is edgeless page
+    // We need to remain surface selection and set editing as true
+    if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
+      const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
+      const surfaceSelection = selectionManager.getInstance(
+        'surface',
+        [surfaceElementId],
+        true
+      );
+
+      selections.push(surfaceSelection);
+    }
+
+    selectionManager.set(selections);
   }
 
   private get _pageBlockElement() {
@@ -305,8 +322,8 @@ export class DragHandleWidget extends WidgetElement {
     // neither within the selected block
     // nor a child-block of any selected block
     if (
-      containBlock(this.selectedBlocks, blockId) ||
-      containChildBlock(this.selectedBlocks, blockPath)
+      containBlock(this._selectedBlocks, blockId) ||
+      containChildBlock(this._selectedBlocks, blockPath)
     ) {
       this._dropBlockId = '';
       return;
@@ -419,19 +436,27 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     const { selectionManager } = this.root;
+    const selectedBlocks = this._selectedBlocks;
 
     // Should clear selection if current block is the first selected block
     if (
-      this.selectedBlocks.length > 0 &&
-      this.selectedBlocks[0].type !== 'text' &&
-      this.selectedBlocks[0].blockId === this._hoveredBlockId
+      selectedBlocks.length > 0 &&
+      !includeTextSelection(selectedBlocks) &&
+      selectedBlocks[0].blockId === this._hoveredBlockId
     ) {
-      selectionManager.clear();
+      selectionManager.clear(['block']);
       return;
     }
 
     // Should select the block if current block is not selected
-    this._setSelectedBlock(this._hoveredBlockPath);
+    const blockElement = this.root.viewStore.viewFromPath(
+      'block',
+      this._hoveredBlockPath
+    );
+
+    assertExists(blockElement);
+
+    this._setSelectedBlocks([blockElement]);
 
     return true;
   };
@@ -465,7 +490,7 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
-    let selections = this.selectedBlocks;
+    let selections = this._selectedBlocks;
 
     // When current selection is TextSelection
     // Should set BlockSelection for the blocks in native range
@@ -479,13 +504,8 @@ export class DragHandleWidget extends WidgetElement {
         const blockElementsExcludingChildren = getBlockElementsExcludeSubtrees(
           blockElements
         ) as BlockElement[];
-        const blockSelections = blockElementsExcludingChildren.map(element => {
-          return this.root.selectionManager.getInstance('block', {
-            path: element.path,
-          });
-        });
-        this.root.selectionManager.set(blockSelections);
-        selections = this.selectedBlocks;
+        this._setSelectedBlocks(blockElementsExcludingChildren);
+        selections = this._selectedBlocks;
       }
     }
 
@@ -496,10 +516,16 @@ export class DragHandleWidget extends WidgetElement {
       selections.length === 0 ||
       !containBlock(selections, this._hoveredBlockId)
     ) {
-      this._setSelectedBlock(this._hoveredBlockPath);
+      const blockElement = this.root.viewStore.viewFromPath(
+        'block',
+        this._hoveredBlockPath
+      );
+      assertExists(blockElement);
+
+      this._setSelectedBlocks([blockElement]);
     }
 
-    const blockElements = this.selectedBlocks
+    const blockElements = this._selectedBlocks
       .map(selection => {
         return this.root.viewStore.viewFromPath(
           'block',
@@ -591,7 +617,7 @@ export class DragHandleWidget extends WidgetElement {
     if (!targetBlockId) return;
 
     // Should make sure drop block id is not in selected blocks
-    if (containBlock(this.selectedBlocks, targetBlockId)) {
+    if (containBlock(this._selectedBlocks, targetBlockId)) {
       return;
     }
 
@@ -619,18 +645,14 @@ export class DragHandleWidget extends WidgetElement {
       // Because the block path may be changed after moving
       const parentElement = getBlockElementByModel(parent);
       if (parentElement) {
-        const newSelections = selectedBlocks
+        const newSelectedBlocks = selectedBlocks
           .map(block => parentElement.path.concat(block.id))
-          .map(path =>
-            this.root.selectionManager.getInstance('block', { path })
-          );
-        this.root.selectionManager.set(newSelections);
+          .map(path => this.root.viewStore.viewFromPath('block', path));
 
-        if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
-          const noteId = getNoteId(parentElement);
-          const blockId = selectedBlocks[0].id;
-          this._pageBlockElement.setSelection(noteId, true, blockId);
-        }
+        if (!newSelectedBlocks) return;
+
+        const noteId = getNoteId(parentElement);
+        this._setSelectedBlocks(newSelectedBlocks as BlockElement[], noteId);
       }
     }, 0);
 
@@ -685,6 +707,7 @@ export class DragHandleWidget extends WidgetElement {
     this.handleEvent('dragEnd', this._dragEndHandler);
     this.handleEvent('wheel', this._wheelHandler);
     this.handleEvent('pointerOut', this._pointerOutHandler);
+    this.handleEvent('beforeInput', () => this.hide());
 
     if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
       const edgelessPage = this._pageBlockElement;

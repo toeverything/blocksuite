@@ -315,7 +315,7 @@ test('connector connects diamond shape', async ({ page }) => {
   ]);
 });
 
-test.fixme('connector connects rotated Square shape', async ({ page }) => {
+test('connector connects rotated Square shape', async ({ page }) => {
   await commonSetup(page);
   await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
   await createConnectorElement(page, [50, 0], [50, -100]);

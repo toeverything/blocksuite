@@ -124,23 +124,25 @@ export class PageMetaData extends WithDisposable(LitElement) {
       padding: 0 12px;
     }
 
+    .meta-data-expanded-column-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meta-data-expanded-column-item .backlink-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--affine-icon-color);
+    }
+
+    .meta-data-expanded-column-item .backlinks {
+      margin-left: 24px;
+    }
+
     .meta-data-expanded-item {
       display: flex;
       gap: 8px;
-    }
-
-    .meta-data-expanded-item .type {
-      display: flex;
-      align-items: center;
-    }
-
-    .meta-data-expanded-item .type svg {
-      fill: var(--affine-icon-color);
-    }
-
-    .meta-data-expanded-item .link-icon svg {
-      fill: var(--affine-icon-color);
-      height: 25px;
     }
 
     .meta-data-expanded-item .value {
@@ -339,13 +341,13 @@ export class PageMetaData extends WithDisposable(LitElement) {
         <div class="link-title">${link.title || DEFAULT_PAGE_NAME}</div>
       </div>`;
     };
-    return html` <div class="meta-data-expanded-item">
-      <div class="link-icon">${DualLinkIcon16}</div>
-      <div class="value">
-        <div class="backlinks">
-          <div class="title">Linked to this page</div>
-          ${repeat(backlinkList, v => v.pageId, renderLink)}
-        </div>
+    return html`<div class="meta-data-expanded-column-item">
+      <div class="backlink-title">
+        ${DualLinkIcon16}
+        <span class="title">Linked to this page</span>
+      </div>
+      <div class="backlinks">
+        ${repeat(backlinkList, v => v.pageId, renderLink)}
       </div>
     </div>`;
   };
