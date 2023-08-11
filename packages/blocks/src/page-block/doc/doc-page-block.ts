@@ -444,6 +444,39 @@ export class DocPageBlockComponent
         return;
       },
     });
+
+    this.handleEvent('click', () => {
+      let noteId: string;
+      let paragraphId: string;
+      const lastNote = this.model.children
+        .reverse()
+        .find(child => child.flavour === 'affine:note');
+      if (!lastNote) {
+        noteId = this.page.addBlock('affine:note', {}, this.model.id);
+        paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+      } else {
+        noteId = lastNote.id;
+        const last = lastNote.children.at(-1);
+        if (!last || !last.text) {
+          paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+        } else {
+          paragraphId = last.id;
+        }
+      }
+
+      requestAnimationFrame(() => {
+        this.root.selectionManager.set([
+          this.root.selectionManager.getInstance('text', {
+            from: {
+              path: [this.model.id, noteId, paragraphId],
+              index: 0,
+              length: 0,
+            },
+            to: null,
+          }),
+        ]);
+      });
+    });
   }
 
   override disconnectedCallback() {
