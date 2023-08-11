@@ -104,6 +104,21 @@ export function getDatabaseBodyCell(
   {
     rowIndex,
     columnIndex,
+  }: {
+    rowIndex: number;
+    columnIndex: number;
+  }
+) {
+  const row = getDatabaseBodyRow(page, rowIndex);
+  const cell = row.locator('.database-cell').nth(columnIndex);
+  return cell;
+}
+
+export function getDatabaseBodyCellContent(
+  page: Page,
+  {
+    rowIndex,
+    columnIndex,
     cellClass,
   }: {
     rowIndex: number;
@@ -111,14 +126,13 @@ export function getDatabaseBodyCell(
     cellClass: string;
   }
 ) {
-  const row = getDatabaseBodyRow(page, rowIndex);
-  const cell = row.locator('.database-cell').nth(columnIndex);
+  const cell = getDatabaseBodyCell(page, { rowIndex, columnIndex });
   const cellContent = cell.locator(`.${cellClass}`);
   return cellContent;
 }
 
 export function getFirstColumnCell(page: Page, cellClass: string) {
-  const cellContent = getDatabaseBodyCell(page, {
+  const cellContent = getDatabaseBodyCellContent(page, {
     rowIndex: 0,
     columnIndex: 1,
     cellClass,
@@ -178,14 +192,19 @@ export async function assertDatabaseCellRichTexts(
     text: string;
   }
 ) {
-  const actualTexts = await page
-    .locator(
-      `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
-    )
-    .locator('affine-database-rich-text-cell')
-    .evaluate(ele => {
-      return (ele as RichText).vEditor?.yText.toString();
-    });
+  const cellContainer = await page.locator(
+    `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
+  );
+
+  const cellEditing = cellContainer.locator(
+    'affine-database-rich-text-cell-editing'
+  );
+  const cell = cellContainer.locator('affine-database-rich-text-cell');
+
+  const richText = (await cellEditing.count()) === 0 ? cell : cellEditing;
+  const actualTexts = await richText.evaluate(ele => {
+    return (ele as RichText).vEditor?.yText.toString();
+  });
   expect(actualTexts).toEqual(text);
 }
 
@@ -365,4 +384,72 @@ export async function assertRowsSelection(
       height: startRowBox.height + endRowBox.height,
     });
   }
+}
+
+export async function assertCellsSelection(
+  page: Page,
+  cellIndexes: {
+    start: [rowIndex: number, columnIndex: number];
+    end?: [rowIndex: number, columnIndex: number];
+  }
+) {
+  const focus = page.locator('.database-focus');
+  const focusBox = await getBoundingBox(focus);
+  // const selection = page.locator('.database-selection');
+  // const selectionBox = await getBoundingBox(selection);
+
+  const { start, end } = cellIndexes;
+
+  if (!end) {
+    // single cell
+    const [rowIndex, columnIndex] = start;
+    const cell = getDatabaseBodyCell(page, { rowIndex, columnIndex });
+    const cellBox = await getBoundingBox(cell);
+    expect(focusBox).toEqual({
+      x: cellBox.x,
+      y: cellBox.y,
+      height: cellBox.height + 1,
+      width: cellBox.width,
+    });
+  } else {
+    // multi cells
+  }
+
+  // const startIndex = cellIndexes[0];
+  // const endIndex = cellIndexes[1];
+
+  // if (startIndex === endIndex) {
+  //   // single row
+  //   const row = getDatabaseBodyRow(page, startIndex);
+  //   const rowBox = await getBoundingBox(row);
+  //   const lastCell = await row
+  //     .locator('affine-database-cell-container')
+  //     .last()
+  //     .boundingBox();
+  //   assertExists(lastCell);
+  //   expect(selectionBox).toEqual({
+  //     x: rowBox.x,
+  //     y: rowBox.y,
+  //     height: rowBox.height,
+  //     width: lastCell.x + lastCell.width - rowBox.x,
+  //   });
+  // } else {
+  //   // multiple rows
+  //   // Only test at most two lines when testing.
+  //   const startRow = getDatabaseBodyRow(page, startIndex);
+  //   const endRow = getDatabaseBodyRow(page, endIndex);
+  //   const startRowBox = await getBoundingBox(startRow);
+  //   const endRowBox = await getBoundingBox(endRow);
+  //   const lastCell = await startRow
+  //     .locator('affine-database-cell-container')
+  //     .last()
+  //     .boundingBox();
+  //   assertExists(lastCell);
+  //   expect(selectionBox).toEqual({
+  //     x: startRowBox.x,
+  //     y: startRowBox.y,
+  //     width: lastCell.x + lastCell.width - startRowBox.x,
+  //     height: startRowBox.height + endRowBox.height,
+  //   });
+  // }
 }

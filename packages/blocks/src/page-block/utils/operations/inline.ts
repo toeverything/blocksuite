@@ -135,10 +135,24 @@ export function getCurrentCombinedFormat(
   return getCombinedFormat(pageElement, textSelection, loose);
 }
 
+function getDefaultFormatForKey(
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
+  value: boolean | string = true
+) {
+  if (key === 'background') {
+    if (value === 'unset') {
+      return null;
+    }
+    return value;
+  }
+  return null;
+}
+
 function formatTextSelection(
   pageElement: PageBlockComponent,
   textSelection: TextSelection,
-  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
+  value: boolean | string = true
 ) {
   const selectedModels = getSelectedContentModels(pageElement);
 
@@ -163,8 +177,8 @@ function formatTextSelection(
       [key]:
         (vEditor.marks && vEditor.marks[key]) ||
         (delta.attributes && delta.attributes[key])
-          ? null
-          : true,
+          ? getDefaultFormatForKey(key, value)
+          : value,
     });
     clearMarksOnDiscontinuousInput(vEditor);
 
@@ -180,7 +194,7 @@ function formatTextSelection(
       rangeManager.syncTextSelectionToRange(textSelection);
     });
     startModel.text?.format(from.index, from.length, {
-      [key]: format[key] ? null : true,
+      [key]: format[key] ? getDefaultFormatForKey(key, value) : value,
     });
     return;
   }
@@ -188,13 +202,13 @@ function formatTextSelection(
   // format start model
   if (!matchFlavours(startModel, ['affine:code'])) {
     startModel.text?.format(from.index, from.length, {
-      [key]: format[key] ? null : true,
+      [key]: format[key] ? getDefaultFormatForKey(key, value) : value,
     });
   }
   // format end model
   if (!matchFlavours(endModel, ['affine:code'])) {
     endModel.text?.format(to?.index ?? 0, to?.length ?? 0, {
-      [key]: format[key] ? null : true,
+      [key]: format[key] ? getDefaultFormatForKey(key, value) : value,
     });
   }
   // format between models
@@ -203,7 +217,7 @@ function formatTextSelection(
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
       model.text?.format(0, model.text.length, {
-        [key]: format[key] ? null : true,
+        [key]: format[key] ? getDefaultFormatForKey(key, value) : value,
       });
     });
 
@@ -231,10 +245,11 @@ function formatTextSelection(
 export function handleFormat(
   pageElement: PageBlockComponent,
   textSelection: TextSelection,
-  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
+  value: boolean | string = true
 ) {
   pageElement.page.captureSync();
-  formatTextSelection(pageElement, textSelection, key);
+  formatTextSelection(pageElement, textSelection, key, value);
 }
 
 export function toggleLink(
@@ -297,7 +312,10 @@ export function toggleLink(
     anchorEl: vEditor.rootElement,
     model,
   }).then(linkState => {
-    if (linkState.type !== 'confirm') return;
+    if (linkState.type !== 'confirm') {
+      clear();
+      return;
+    }
 
     const link = linkState.link;
 

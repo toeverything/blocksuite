@@ -176,23 +176,20 @@ export async function addSerializedBlocks(
     const json = serializedBlocks[i];
     const flavour = json.flavour as keyof BlockModels;
     // XXX: block props should not be written here !!!
+    const {
+      // Omit block props
+      children,
+      text,
+      rawText,
+      databaseProps,
+      xywh,
+
+      ...blockPropsJson
+    } = json;
+
     const blockProps = {
-      flavour,
-      type: json.type as string,
-      checked: json.checked,
-      sourceId: json.sourceId,
-      caption: json.caption,
-      width: json.width,
-      height: json.height,
-      language: json.language,
+      ...blockPropsJson,
       title: json.databaseProps?.title || json.title,
-      // bookmark
-      url: json.url,
-      description: json.description,
-      icon: json.icon,
-      image: json.image,
-      crawled: json.crawled,
-      bookmarkTitle: json.bookmarkTitle,
     };
 
     let id: string;

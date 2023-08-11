@@ -8,7 +8,7 @@ import type { TOCNoteCard } from '../toc-card.js';
  * start drag notes
  * @param notes notes to drag
  */
-export function createDrag(
+export function startDragging(
   notes: {
     note: NoteBlockModel;
     element: TOCNoteCard;

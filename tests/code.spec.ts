@@ -9,6 +9,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
+  getVirgoSelectionIndex,
   getVirgoSelectionText,
   initEmptyCodeBlockState,
   initEmptyParagraphState,
@@ -150,7 +151,7 @@ test('use more than three backticks can not create code block', async ({
   expect(await inlineCodelocator.count()).toEqual(1);
 });
 
-test.fixme('use shortcut can create code block', async ({ page }) => {
+test('use shortcut can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -282,27 +283,25 @@ test('keyboard selection and copy paste', async ({ page }) => {
   expect(content).toBe('useuse');
 });
 
-test.fixme(
-  'use keyboard copy inside code block copy plain text',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page);
-    await focusRichText(page);
+test('use keyboard copy inside code block copy', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
 
-    await type(page, 'use');
-    await page.keyboard.down('Shift');
-    for (let i = 0; i < 'use'.length; i++) {
-      await page.keyboard.press('ArrowLeft');
-    }
-    await page.keyboard.up('Shift');
-    await copyByKeyboard(page);
-    await page.keyboard.press('ArrowRight');
-    await pressEnter(page);
-    await pressEnter(page);
-    await pasteByKeyboard(page);
-    await assertStoreMatchJSX(
-      page,
-      /*xml*/ `
+  await type(page, 'use');
+  await page.keyboard.down('Shift');
+  for (let i = 0; i < 'use'.length; i++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.up('Shift');
+  await copyByKeyboard(page);
+  await page.keyboard.press('ArrowRight');
+  await pressEnter(page);
+  await pressEnter(page);
+  await pasteByKeyboard(page);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
 <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
@@ -311,18 +310,16 @@ test.fixme(
   >
     <affine:code
       prop:language="Plain Text"
-      prop:text="use
-"
-    />
-    <affine:paragraph
       prop:text="use"
-      prop:type="text"
+    />
+    <affine:code
+      prop:language="Plain Text"
+      prop:text="use"
     />
   </affine:note>
 </affine:page>`
-    );
-  }
-);
+  );
+});
 
 test('use code block copy menu of code block copy whole code block', async ({
   page,
@@ -432,7 +429,7 @@ test('split code with selection by enter', async ({ page }) => {
   await assertRichTexts(page, ['he\no']);
 });
 
-test.fixme('drag select code block can delete it', async ({ page }) => {
+test('drag select code block can delete it', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
@@ -443,12 +440,11 @@ test.fixme('drag select code block can delete it', async ({ page }) => {
     throw new Error("Failed to get code block's bounding box");
   }
   const position = {
-    startX: bbox.x,
-    startY: bbox.y + bbox.height / 2,
+    startX: bbox.x - 10,
+    startY: bbox.y - 10,
     endX: bbox.x + bbox.width,
     endY: bbox.y + bbox.height / 2,
   };
-  await page.mouse.click(position.endX + 150, position.endY + 150);
   await dragBetweenCoords(
     page,
     { x: position.startX, y: position.startY },
@@ -490,71 +486,59 @@ test('press enter twice at end of code block with content can jump out', async (
   await expect(locator).toBeVisible();
 });
 
-test.fixme(
-  'press ArrowDown before code block can select code block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
+test('press backspace inside should select code block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+  const codeBlock = page.locator('affine-code');
+  const selectedRects = page.locator('affine-block-selection');
+  await page.keyboard.press('Backspace');
+  await expect(selectedRects).toHaveCount(1);
+  await expect(codeBlock).toBeVisible();
+  await page.keyboard.press('Backspace');
+  await expect(selectedRects).toHaveCount(0);
+  await expect(codeBlock).toBeHidden();
+});
 
-    await pressEnter(page);
-    await updateBlockType(page, 'affine:code');
-    await focusRichText(page);
-    await page.keyboard.press('ArrowDown');
+test('press backspace after code block can enter code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+  const code = 'const a = 1;';
+  await type(page, code);
 
-    const locator = page.locator('affine-selected-blocks > *');
-    await expect(locator).toHaveCount(1);
-  }
-);
+  await pressEnter(page);
+  await pressEnter(page);
+  await page.keyboard.press('Backspace');
 
-test.fixme(
-  'press backspace inside should select code block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page);
-    await focusRichText(page);
-    const codeBlock = page.locator('affine-code');
-    const selectedRects = page.locator('affine-selected-blocks > *');
-    await page.keyboard.press('Backspace');
-    await expect(selectedRects).toHaveCount(1);
-    await expect(codeBlock).toBeVisible();
-    await page.keyboard.press('Backspace');
-    await expect(selectedRects).toHaveCount(0);
-    await expect(codeBlock).toBeHidden();
-  }
-);
+  const index = await getVirgoSelectionIndex(page);
+  expect(index).toBe(code.length);
 
-test.fixme(
-  'press backspace after code block can select code block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page);
-    await focusRichText(page);
+  const text = await getVirgoSelectionText(page);
+  expect(text).toBe(code);
+});
 
-    await pressEnter(page);
-    await pressEnter(page);
-    await page.keyboard.press('Backspace');
+test('press ArrowUp after code block can enter code block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+  const code = 'const a = 1;';
+  await type(page, code);
 
-    const locator = page.locator('affine-selected-blocks > *');
-    await expect(locator).toHaveCount(1);
-  }
-);
+  await pressEnter(page);
+  await pressEnter(page);
+  await page.keyboard.press('ArrowUp');
 
-test.fixme(
-  'press ArrowUp after code block can select code block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyCodeBlockState(page);
-    await focusRichText(page);
+  const index = await getVirgoSelectionIndex(page);
+  expect(index).toBe(code.length);
 
-    await pressEnter(page);
-    await pressEnter(page);
-    await page.keyboard.press('ArrowUp');
-
-    const locator = page.locator('affine-selected-blocks > *');
-    await expect(locator).toHaveCount(1);
-  }
-);
+  const text = await getVirgoSelectionText(page);
+  expect(text).toBe(code);
+});
 
 test('undo and redo works in code block', async ({ page }) => {
   await enterPlaygroundRoom(page);

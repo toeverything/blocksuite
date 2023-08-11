@@ -14,17 +14,14 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockHost,
-  EditingState,
-  SelectionPosition,
-} from '../../__internal__/index.js';
+import type { BlockHost, EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import {
   getService,
   registerService,
 } from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -130,8 +127,6 @@ export class DocPageBlockComponent
   clipboard = new PageClipboard(this);
 
   getService = getService;
-
-  lastSelectionPosition: SelectionPosition = 'start';
 
   @state()
   private _isComposing = false;
@@ -443,6 +438,52 @@ export class DocPageBlockComponent
         }
         return;
       },
+    });
+
+    this.handleEvent('click', ctx => {
+      const state = ctx.get('pointerState');
+      if (
+        state.raw.target !== this &&
+        state.raw.target !== this.viewportElement &&
+        state.raw.target !== this.pageBlockContainer
+      ) {
+        return;
+      }
+      let noteId: string;
+      let paragraphId: string;
+      let index = 0;
+      const lastNote = this.model.children
+        .reverse()
+        .find(
+          child =>
+            child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
+        );
+      if (!lastNote) {
+        noteId = this.page.addBlock('affine:note', {}, this.model.id);
+        paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+      } else {
+        noteId = lastNote.id;
+        const last = lastNote.children.at(-1);
+        if (!last || !last.text) {
+          paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+        } else {
+          paragraphId = last.id;
+          index = last.text.length ?? 0;
+        }
+      }
+
+      requestAnimationFrame(() => {
+        this.root.selectionManager.set([
+          this.root.selectionManager.getInstance('text', {
+            from: {
+              path: [this.model.id, noteId, paragraphId],
+              index,
+              length: 0,
+            },
+            to: null,
+          }),
+        ]);
+      });
     });
   }
 
