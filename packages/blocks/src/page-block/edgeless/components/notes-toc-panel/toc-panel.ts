@@ -22,7 +22,7 @@ import {
   type SelectEvent,
   TOCNoteCard,
 } from './toc-card.js';
-import { createDrag } from './utils/drag.js';
+import { startDragging } from './utils/drag.js';
 
 type TOCNoteItem = {
   note: NoteBlockModel;
@@ -318,7 +318,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     this._noteElementHeight = draggedNotesInfo[0].element.offsetHeight;
     const width = draggedNotesInfo[0].element.clientWidth;
 
-    createDrag(draggedNotesInfo, {
+    startDragging(draggedNotesInfo, {
       width,
       doc: this.ownerDocument,
       page: this.page,
