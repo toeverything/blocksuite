@@ -25,6 +25,7 @@ import {
   registerService,
 } from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -458,7 +459,10 @@ export class DocPageBlockComponent
       let paragraphId: string;
       const lastNote = this.model.children
         .reverse()
-        .find(child => child.flavour === 'affine:note');
+        .find(
+          child =>
+            child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
+        );
       if (!lastNote) {
         noteId = this.page.addBlock('affine:note', {}, this.model.id);
         paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
