@@ -93,7 +93,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', e => {
       if (!this.isEditing) {
-        this._selectCurrentCell(true);
+        this._selectCurrentCell(!this.column.readonly);
       }
     });
   }

@@ -23,6 +23,9 @@ export class KanbanHotkeys {
       ArrowRight: () => {
         this.viewEle.selection.focusRight();
       },
+      Backspace: () => {
+        this.viewEle.selection.deleteCard();
+      },
     });
   }
 }

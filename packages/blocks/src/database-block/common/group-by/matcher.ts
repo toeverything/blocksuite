@@ -12,7 +12,7 @@ export interface GroupRenderProps<
   updateValue?: (value: Value) => void;
 }
 
-export const groupByMatcher = new Matcher<{
+export type GroupByConfig = {
   name: string;
   defaultKeys: (type: TType) => {
     key: string;
@@ -26,5 +26,7 @@ export const groupByMatcher = new Matcher<{
     value: unknown;
   }[];
   addToGroup?: (value: unknown, oldValue: unknown) => unknown;
+  removeFromGroup?: (value: unknown, oldValue: unknown) => unknown;
   view: UniComponent<GroupRenderProps>;
-}>();
+};
+export const groupByMatcher = new Matcher<GroupByConfig>();

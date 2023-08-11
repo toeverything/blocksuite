@@ -15,18 +15,16 @@ export class SelectGroupView extends BaseGroup<
 > {
   static override styles = css`
     .data-view-group-title-select-view {
-      border-radius: 8px;
-      padding: 4px;
       width: max-content;
       cursor: pointer;
     }
 
-    .data-view-group-title-select-view:hover {
-      background-color: var(--affine-hover-color);
-    }
     .tag {
-      padding: 4px 8px;
+      padding: 0 8px;
       border-radius: 4px;
+      font-size: 12px;
+      line-height: 20px;
+      height: 20px;
     }
   `;
 
@@ -62,7 +60,7 @@ export class SelectGroupView extends BaseGroup<
   protected override render(): unknown {
     const tag = this.tag;
     if (!tag) {
-      return html` <div>No Tags</div>`;
+      return html` <div>Ungroups</div>`;
     }
     const style = styleMap({
       backgroundColor: tag.color,
@@ -71,7 +69,7 @@ export class SelectGroupView extends BaseGroup<
       @click="${this._click}"
       class="data-view-group-title-select-view"
     >
-      <span class="tag" style="${style}">${tag.value}</span>
+      <div class="tag" style="${style}">${tag.value}</div>
     </div>`;
   }
 }

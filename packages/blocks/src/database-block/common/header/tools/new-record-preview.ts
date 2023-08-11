@@ -66,7 +66,6 @@ export function initAddNewRecordHandlers(
 ) {
   let dragConfig: ColumnConfig | null = null;
   let dragPreview: NewRecordPreview | null = null;
-
   const database = container.closest('affine-database');
   if (!database) return;
 

@@ -1,15 +1,23 @@
 import type { InsertPosition } from '../types.js';
 
-export const insertPositionToIndex = <
+export function insertPositionToIndex<
   T extends {
     id: string;
   }
->(
+>(position: InsertPosition, arr: T[]): number;
+export function insertPositionToIndex<T>(
   position: InsertPosition,
-  arr: T[]
-): number => {
+  arr: T[],
+  key: (value: T) => string
+): number;
+export function insertPositionToIndex<T>(
+  position: InsertPosition,
+  arr: T[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  key: (value: T) => string = (value: any) => value.id
+): number {
   if (typeof position === 'object') {
-    const index = arr.findIndex(v => v.id === position.id);
+    const index = arr.findIndex(v => key(v) === position.id);
     return index + (position.before ? 0 : 1);
   }
   if (position == null || position === 'start') {
@@ -18,5 +26,5 @@ export const insertPositionToIndex = <
   if (position === 'end') {
     return arr.length;
   }
-  return arr.findIndex(v => v.id === position) + 1;
-};
+  return arr.findIndex(v => key(v) === position) + 1;
+}

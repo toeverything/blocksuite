@@ -18,6 +18,10 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     data-view-header-views {
       display: flex;
       user-select: none;
+      overflow-x: scroll;
+    }
+    data-view-header-views::-webkit-scrollbar-thumb {
+      width: 1px;
     }
 
     .database-view-button {
@@ -27,6 +31,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
       font-size: 14px;
       display: flex;
       align-items: center;
+      color: var(--affine-text-secondary-color);
     }
 
     .database-view-button .name {
@@ -47,7 +52,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     }
 
     .database-view-button.active {
-      font-weight: 600;
+      color: var(--affine-text-primary-color);
       background-color: var(--affine-hover-color);
     }
   `;
@@ -66,7 +71,10 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
       viewManager.all.map(v => {
         return {
           type: 'action',
-          name: v.type,
+          name: v.defaultName,
+          icon: html`<uni-lit
+            .uni=${viewRendererManager.getView(v.type).icon}
+          ></uni-lit>`,
           hide: () =>
             v.type === 'kanban' &&
             !this.model.page.awarenessStore.getFlag('enable_database_filter'),

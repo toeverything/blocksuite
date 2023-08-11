@@ -21,6 +21,10 @@ export const tURL = typesystem.defineData({
   name: 'URL',
   supers: [tString],
 });
+export const tImage = typesystem.defineData({
+  name: 'Image',
+  supers: [],
+});
 export const tEmail = typesystem.defineData({
   name: 'Email',
   supers: [tString],

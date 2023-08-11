@@ -84,12 +84,13 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
         };
       },
       onDrop: ({ width }) => {
+        this.column.updateWidth(width);
+        database.selection.updateSelection();
+      },
+      onClear: () => {
         tableContainer.style.pointerEvents = 'auto';
         this.dragLeft = 0;
-        this.column.updateWidth(width);
         preview.remove();
-
-        database.selection.updateSelection();
       },
     });
   };
