@@ -15,8 +15,10 @@ export async function updateBlockType(
         '[data-block-id]'
       ) as PageBlockComponent;
       const selectedBlockElements =
-        pageElement.utilManager.getSelectedContentBlockElements(pageElement);
-      pageElement.utilManager.updateBlockElementType(
+        //@ts-ignore
+        window.testUtils.pageBlock.getSelectedContentBlockElements(pageElement);
+      //@ts-ignore
+      window.testUtils.pageBlock.updateBlockElementType(
         pageElement,
         selectedBlockElements,
         flavour,

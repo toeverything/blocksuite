@@ -1,18 +1,14 @@
-import type { PageBlockComponent } from '../types.js';
-import { updateBlockElementType } from './operations/block-element.js';
-import { mergeToCodeBlocks, transformBlock } from './operations/model.js';
+import { updateBlockElementType } from '../page-block/utils/operations/block-element.js';
+import {
+  mergeToCodeBlocks,
+  transformBlock,
+} from '../page-block/utils/operations/model.js';
 import {
   getSelectedContentBlockElements,
   getSelectedContentModels,
-} from './selection.js';
+} from '../page-block/utils/selection.js';
 
-/**
- * Used to wrap utils in PageBlockComponent, which will
- * make us more convenient to write test.
- */
-export class UtilManager {
-  constructor(public pageElement: PageBlockComponent) {}
-
+export class PageTestUtils {
   // block element operations (ui layer)
   updateBlockElementType = updateBlockElementType;
 

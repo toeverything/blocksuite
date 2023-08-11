@@ -93,6 +93,22 @@ export const FrameOrderAdjustmentIcon = html`
   </svg>
 `;
 
+// auto-complete
+export const AutoCompleteArrowIcon = html`
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M11.875 8C11.875 8.09946 11.8355 8.19484 11.7652 8.26517L9.76516 10.2652C9.61872 10.4116 9.38128 10.4116 9.23483 10.2652C9.08839 10.1187 9.08839 9.88128 9.23483 9.73484L10.5947 8.375L4.5 8.375C4.29289 8.375 4.125 8.20711 4.125 8C4.125 7.79289 4.29289 7.625 4.5 7.625L10.5947 7.625L9.23484 6.26516C9.08839 6.11872 9.08839 5.88128 9.23484 5.73483C9.38128 5.58839 9.61872 5.58839 9.76517 5.73483L11.7652 7.73484C11.8355 7.80516 11.875 7.90054 11.875 8Z"
+    />
+  </svg>
+`;
+
 export const ShapeIcon = html`<svg
   width="24"
   height="24"
