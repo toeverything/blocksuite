@@ -114,6 +114,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return this.model.views.find(v => v.id === id);
   };
 
+  public focusFirstCell = () => {
+    this._view.value?.focusFirstCell();
+  };
+
   private viewSource(id: string): ViewSource {
     const getViewDataById = this.getViewDataById;
     return {

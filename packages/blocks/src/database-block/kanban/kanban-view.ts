@@ -119,6 +119,10 @@ export class DataViewKanban extends BaseDataView<
       ></affine-data-view-kanban-drag>
     `;
   }
+
+  focusFirstCell(): void {
+    this.selection.focusFirstCell();
+  }
 }
 
 declare global {

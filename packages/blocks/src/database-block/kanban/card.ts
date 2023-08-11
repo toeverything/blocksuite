@@ -110,7 +110,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       return;
     }
     return html` <div class="card-header-icon">
-      <img src=${icon.getValue(this.cardId)} />
+      <img src=${icon.getValue(this.cardId) as string} />
     </div>`;
   }
 

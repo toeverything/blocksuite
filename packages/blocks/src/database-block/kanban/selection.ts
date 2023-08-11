@@ -248,4 +248,20 @@ export class KanbanSelection {
     this.viewEle.view.rowDelete([selection.cardId]);
     this.selection = undefined;
   }
+
+  focusFirstCell() {
+    const group = this.viewEle.groupHelper?.groups[0];
+    const card = group?.rows[0];
+    const columnId = card && this.viewEle.view.getHeaderTitle(card)?.id;
+    if (group && card && columnId) {
+      this.selection = {
+        groupKey: group.key,
+        cardId: card,
+        focus: {
+          columnId,
+          isEditing: true,
+        },
+      };
+    }
+  }
 }

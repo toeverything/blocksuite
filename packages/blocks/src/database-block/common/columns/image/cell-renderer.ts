@@ -22,7 +22,7 @@ export class TextCell extends BaseCellRenderer<string> {
   `;
 
   override render() {
-    return html`<img src=${this.value}></img>`;
+    return html`<img src=${this.value ?? ''}></img>`;
   }
 }
 

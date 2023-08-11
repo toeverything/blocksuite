@@ -175,9 +175,8 @@ export class TitleCellEditing extends BaseCellRenderer<string> {
         @blur="${this._blur}"
         @focus="${this._focus}"
         @input="${this._input}"
-      >
-${this.value ?? ''}</textarea
-      >
+        .value=${this.value ?? ''}
+      ></textarea>
     </div>`;
   }
 }

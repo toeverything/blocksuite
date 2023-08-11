@@ -636,6 +636,16 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
   }
+
+  focusFirstCell() {
+    this.selection = {
+      focus: {
+        rowIndex: 0,
+        columnIndex: 0,
+      },
+      isEditing: true,
+    };
+  }
 }
 
 declare global {
