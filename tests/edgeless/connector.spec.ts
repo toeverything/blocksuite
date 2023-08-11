@@ -80,7 +80,7 @@ test('elbow connector one side attached element another side free', async ({
   ]);
 });
 
-test.fixme('elbow connector both side attatched element', async ({ page }) => {
+test('elbow connector both side attatched element', async ({ page }) => {
   await commonSetup(page);
 
   await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
@@ -91,9 +91,8 @@ test.fixme('elbow connector both side attatched element', async ({ page }) => {
     [100, 50],
     [200, 50],
   ]);
-
   // select
-  await dragBetweenViewCoords(page, [250, -10], [260, 50]);
+  await dragBetweenViewCoords(page, [250, 50], [350, -10]);
 
   await dragBetweenViewCoords(page, [250, 50], [250, 0]);
   await assertConnectorPath(page, [
