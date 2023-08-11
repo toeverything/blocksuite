@@ -20,16 +20,18 @@ import type {
   SelectionPosition,
 } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
-import { getService, registerService } from '../../__internal__/service.js';
+import {
+  getService,
+  registerService,
+} from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { DocPageBlockWidgetName } from '../index.js';
-import { PageBlockService } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
+import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
-import { UtilManager } from '../utils/util-manager.js';
 
 export interface PageViewport {
   left: number;
@@ -124,12 +126,6 @@ export class DocPageBlockComponent
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
-
-  /**
-   * @internal
-   * just used for test
-   */
-  utilManager = new UtilManager(this);
 
   clipboard = new PageClipboard(this);
 

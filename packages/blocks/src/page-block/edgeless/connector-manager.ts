@@ -31,7 +31,14 @@ import {
 } from '../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import type { Selectable } from './services/tools-manager.js';
-import { isTopLevelBlock } from './utils/query.js';
+import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';
+
+export type OrthogonalConnectorInput = {
+  startBound: Bound | null;
+  endBound: Bound | null;
+  startPoint: PointLocation;
+  endPoint: PointLocation;
+};
 
 function rBound(ele: Connectable, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
@@ -933,7 +940,23 @@ export class EdgelessConnectorManager {
     if (mode === ConnectorMode.Straight) {
       return this._generateStraightConnectorPath(connector);
     } else {
-      return this._generateOrthogonalConnectorPath(connector);
+      const start = this._getConnectorEndElement(connector, 'source');
+      const end = this._getConnectorEndElement(connector, 'target');
+
+      const [startPoint, endPoint] = this._computeStartEndPoint(connector);
+
+      const startBound = start
+        ? Bound.from(getBoundsWithRotation(rBound(start)))
+        : null;
+      const endBound = end
+        ? Bound.from(getBoundsWithRotation(rBound(end)))
+        : null;
+      return this.generateOrthogonalConnectorPath({
+        startPoint,
+        endPoint,
+        startBound,
+        endBound,
+      });
     }
   }
 
@@ -961,7 +984,7 @@ export class EdgelessConnectorManager {
   }
 
   private _prepareOrthogonalConnectorInfo(
-    connector: ConnectorElement
+    connectorInfo: OrthogonalConnectorInput
   ): [
     IVec,
     IVec,
@@ -972,17 +995,8 @@ export class EdgelessConnectorManager {
     Bound | null,
     Bound | null
   ] {
-    const start = this._getConnectorEndElement(connector, 'source');
-    const end = this._getConnectorEndElement(connector, 'target');
+    const { startBound, endBound, startPoint, endPoint } = connectorInfo;
 
-    const [startPoint, endPoint] = this._computeStartEndPoint(connector);
-
-    const startBound = start
-      ? Bound.from(getBoundsWithRotation(rBound(start)))
-      : null;
-    const endBound = end
-      ? Bound.from(getBoundsWithRotation(rBound(end)))
-      : null;
     const [startOffset, endOffset] = computeOffset(startBound, endBound);
     const [nextStartPoint, lastEndPoint] = computeNextStartEndPoint(
       startPoint,
@@ -1049,8 +1063,8 @@ export class EdgelessConnectorManager {
     return [startPoint, endPoint];
   }
 
-  _generateOrthogonalConnectorPath(connector: ConnectorElement) {
-    const info = this._prepareOrthogonalConnectorInfo(connector);
+  generateOrthogonalConnectorPath(input: OrthogonalConnectorInput) {
+    const info = this._prepareOrthogonalConnectorInfo(input);
     let [startPoint, endPoint, nextStartPoint, lastEndPoint] = info;
     const [, , , , startBound, endBound, expandStartBound, expandEndBound] =
       info;
@@ -1181,5 +1195,25 @@ export class EdgelessConnectorManager {
       }
     });
     return result;
+  }
+
+  getConnecttedElements(element: Connectable) {
+    const { surface } = this._edgeless;
+    const connectors = surface
+      .getElements()
+      .filter(e => e.type === 'connector') as ConnectorElement[];
+    const results: Connectable[] = [];
+    connectors.forEach(connector => {
+      if (connector.source.id === element.id && connector.target.id) {
+        results.push(
+          getEdgelessElement(this._edgeless, connector.target.id) as Connectable
+        );
+      } else if (connector.target.id === element.id && connector.source.id) {
+        results.push(
+          getEdgelessElement(this._edgeless, connector.source.id) as Connectable
+        );
+      }
+    });
+    return results;
   }
 }

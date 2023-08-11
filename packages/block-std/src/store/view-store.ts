@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import { PathFinder } from '../utils/index.js';
 import type { BlockStore } from './block-store.js';
-import { PathFinder } from './path-finder.js';
 
 export type NodeView<T = unknown> = {
   id: string;

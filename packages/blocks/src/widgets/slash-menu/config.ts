@@ -17,7 +17,7 @@ import {
 import { assertExists, Text } from '@blocksuite/store';
 
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
-import { getServiceOrRegister } from '../../__internal__/service.js';
+import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
   createPage,
   getCurrentNativeRange,

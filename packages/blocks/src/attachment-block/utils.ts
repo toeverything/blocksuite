@@ -3,7 +3,10 @@ import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 import { downloadBlob } from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { toast } from '../components/toast.js';
-import type { ImageProps } from '../image-block/image-model.js';
+import type {
+  ImageBlockModel,
+  ImageProps,
+} from '../image-block/image-model.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,
@@ -58,8 +61,24 @@ export function turnIntoEmbedView(model: AttachmentBlockModel) {
   const imageProp: ImageProps & { flavour: 'affine:image' } = {
     flavour: 'affine:image',
     sourceId,
+    caption: model.caption,
   };
   model.page.addSiblingBlocks(model, [imageProp]);
+  model.page.deleteBlock(model);
+}
+
+export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
+  const sourceId = model.sourceId;
+  assertExists(sourceId);
+  const attachmentProp: AttachmentProps & { flavour: 'affine:attachment' } = {
+    flavour: 'affine:attachment',
+    sourceId,
+    name: blob.name,
+    size: blob.size,
+    type: blob.type,
+    caption: model.caption,
+  };
+  model.page.addSiblingBlocks(model, [attachmentProp]);
   model.page.deleteBlock(model);
 }
 
@@ -95,11 +114,11 @@ export async function appendAttachmentBlock(
 
   // The original file name can not be modified after the file is uploaded to the storage,
   // so we create a new file with a fixed name to prevent privacy leaks.
-  const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
-    type: file.type,
-  });
+  // const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
+  //   type: file.type,
+  // });
   try {
-    const sourceId = await storage.set(anonymousFile);
+    const sourceId = await storage.set(file);
     // await new Promise(resolve => setTimeout(resolve, 1000));
     setAttachmentLoading(attachmentModel.loadingKey ?? '', false);
     page.updateBlock(attachmentModel, {

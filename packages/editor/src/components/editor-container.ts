@@ -273,10 +273,6 @@ export class EditorContainer
       ></block-suite-root>`
     );
 
-    const remoteSelectionContainer = html`
-      <remote-selection .page=${this.page}></remote-selection>
-    `;
-
     return html`
       <style>
         editor-container * {
@@ -298,7 +294,7 @@ export class EditorContainer
           }
         }
       </style>
-      ${rootContainer} ${remoteSelectionContainer}
+      ${rootContainer}
     `;
   }
 }

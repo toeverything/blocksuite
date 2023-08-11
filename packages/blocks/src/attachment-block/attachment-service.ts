@@ -2,7 +2,7 @@ import type {
   BlockTransformContext,
   SerializedBlock,
 } from '../__internal__/index.js';
-import { BaseService } from '../__internal__/service/index.js';
+import { BaseService } from '../__internal__/service/service.js';
 import type { AttachmentBlockModel } from './attachment-model.js';
 import { cloneAttachmentProperties } from './utils.js';
 

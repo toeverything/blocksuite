@@ -3,7 +3,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import { bindHotKey } from './keymap.js';
 import type { NoteBlockModel } from './note-model.js';
 import { NoteBlockService } from './note-service.js';

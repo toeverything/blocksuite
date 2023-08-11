@@ -7,13 +7,9 @@ import { getTextSelection } from '../../../page-block/utils/selection.js';
 
 interface InlineItemsProps {
   pageElement: PageBlockComponent;
-  abortController: AbortController;
 }
 
-export const InlineItems = ({
-  pageElement,
-  abortController,
-}: InlineItemsProps) => {
+export const InlineItems = ({ pageElement }: InlineItemsProps) => {
   const textSelection = getTextSelection(pageElement);
   if (!textSelection || textSelection.isCollapsed()) {
     return [];
@@ -29,7 +25,6 @@ export const InlineItems = ({
       @click=${() => {
         action({
           pageElement,
-          abortController,
           format,
         });
       }}

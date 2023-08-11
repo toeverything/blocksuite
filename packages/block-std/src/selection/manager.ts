@@ -91,6 +91,18 @@ export class SelectionManager {
     }
   }
 
+  find<T extends BlockSuiteSelectionType>(type: T) {
+    return this.value.find((sel): sel is BlockSuiteSelectionInstance[T] =>
+      sel.is(type)
+    );
+  }
+
+  filter<T extends BlockSuiteSelectionType>(type: T) {
+    return this.value.filter((sel): sel is BlockSuiteSelectionInstance[T] =>
+      sel.is(type)
+    );
+  }
+
   get remoteSelections() {
     return Object.fromEntries(
       Array.from(this._store.getStates().entries())

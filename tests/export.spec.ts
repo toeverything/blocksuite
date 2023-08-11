@@ -54,3 +54,46 @@ test('export html bookmark', async ({ page }) => {
     '<div class="affine-bookmark-description bookmark-description">https://github.com/toeverything/AFFiNE</div>'
   );
 });
+
+test('export html contain <code></code>', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2326',
+  });
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '```ts');
+  await type(page, ' ');
+  await type(page, 'console.log(123);\nconst a = 123;');
+
+  const htmlText = await export2Html(page);
+  // because style from "shiki" may be change in the future, so we just check the structure
+  expect(htmlText).toContain('<span class="line"><span style="');
+  expect(htmlText).toContain('<span class="line"></span>');
+  expect(htmlText).toContain('>console.</span>');
+  expect(htmlText).toContain('><code><span');
+  expect(htmlText).toContain('<span class="line"></span></code></pre>');
+});
+
+test('export html contain <blockquote>', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2326',
+  });
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '>');
+  await type(page, ' ');
+  await type(page, 'page quote is here');
+
+  const htmlText = await export2Html(page);
+  expect(htmlText).toContain(
+    '<header><h1 class="page-title"></h1></header><div><blockquote class="quote">page quote is here</blockquote></div>'
+  );
+});

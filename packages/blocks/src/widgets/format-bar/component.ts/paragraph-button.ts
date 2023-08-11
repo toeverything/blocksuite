@@ -135,17 +135,17 @@ export const ParagraphButton = ({
   });
 
   const onHover = () => {
-    const button = formatBar.querySelector(
+    const button = formatBar.shadowRoot?.querySelector(
       '.paragraph-button'
     ) as HTMLElement | null;
-    const panel = formatBar.querySelector(
+    const panel = formatBar.shadowRoot?.querySelector(
       '.paragraph-panel'
     ) as HTMLElement | null;
     assertExists(button);
     assertExists(panel);
     panel.style.display = 'block';
     computePosition(button, panel, {
-      placement: 'top',
+      placement: 'top-start',
       middleware: [
         flip(),
         shift({
@@ -158,7 +158,7 @@ export const ParagraphButton = ({
     });
   };
   const onHoverEnd = () => {
-    const panel = formatBar.querySelector(
+    const panel = formatBar.shadowRoot?.querySelector(
       '.paragraph-panel'
     ) as HTMLElement | null;
     assertExists(panel);

@@ -71,21 +71,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           return;
         }
 
+        this.updateSelection(tableSelection);
+
         const old = this._databaseSelection;
-
-        this.updateSelectionStyle(
-          tableSelection?.rowsSelection,
-          tableSelection?.columnsSelection
-        );
-
-        const isRowSelection =
-          tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
-        this.updateFocusSelectionStyle(
-          tableSelection?.focus,
-          isRowSelection,
-          tableSelection?.isEditing
-        );
-
         if (old) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
@@ -122,8 +110,11 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private handleDragEvent() {
+    let isDragging = false;
     this._disposables.add(
       this.tableView.handleEvent('dragStart', context => {
+        isDragging = true;
+
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
@@ -149,9 +140,18 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
     this._disposables.add(
       this.tableView.handleEvent('dragMove', context => {
-        const event = context.get('pointerState').raw;
-        event.preventDefault();
-        return true;
+        if (isDragging) {
+          const event = context.get('pointerState').raw;
+          event.preventDefault();
+        }
+        return false;
+      })
+    );
+
+    this._disposables.add(
+      this.tableView.handleEvent('dragEnd', context => {
+        isDragging = false;
+        return false;
       })
     );
   }
@@ -477,12 +477,27 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return this.tableContainer.querySelectorAll('.affine-database-block-row');
   }
 
+  updateSelection(tableSelection = this.selection) {
+    this.updateSelectionStyle(
+      tableSelection?.rowsSelection,
+      tableSelection?.columnsSelection
+    );
+
+    const isRowSelection =
+      tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
+    this.updateFocusSelectionStyle(
+      tableSelection?.focus,
+      isRowSelection,
+      tableSelection?.isEditing
+    );
+  }
+
   updateSelectionStyle(
     rowSelection?: MultiSelection,
     columnSelection?: MultiSelection
   ) {
     const div = this.selectionRef.value;
-    assertExists(div);
+    if (!div) return;
     if (!rowSelection && !columnSelection) {
       div.style.display = 'none';
       return;
@@ -513,8 +528,12 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     // Calculate styles after dom update.
     requestAnimationFrame(() => {
       const div = this.focusRef.value;
-      assertExists(div);
+      if (!div) return;
       if (focus && !isRowSelection) {
+        // Check if row is removed.
+        const rows = this.rows();
+        if (rows.length <= focus.rowIndex) return;
+
         const { left, top, width, height, scale } = this.getRect(
           focus.rowIndex,
           focus.rowIndex,

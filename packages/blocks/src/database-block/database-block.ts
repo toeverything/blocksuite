@@ -19,7 +19,7 @@ import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelectionState } from '../__internal__/index.js';
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import type { BaseDataView } from './common/base-data-view.js';
 import { viewRendererManager } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';

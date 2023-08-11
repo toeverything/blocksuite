@@ -15,7 +15,7 @@ import {
   createDatasource,
   getDatasourceTitle,
 } from '../__internal__/datasource/datasource-manager.js';
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import type { DataViewManager } from '../database-block/common/data-view-manager.js';
 import type { ViewSource } from '../database-block/common/view-source.js';
 import type { BlockOperation } from '../database-block/index.js';

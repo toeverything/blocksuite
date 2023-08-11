@@ -17,7 +17,7 @@ import {
 } from './actions.js';
 
 test.describe('focus', () => {
-  test.fixme('should support move focus by arrow key', async ({ page }) => {
+  test('should support move focus by arrow key', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
@@ -29,7 +29,7 @@ test.describe('focus', () => {
     await assertRowsSelection(page, [0, 0]);
   });
 
-  test.fixme('should support multi row selection', async ({ page }) => {
+  test('should support multi row selection', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
@@ -58,45 +58,41 @@ test.describe('focus', () => {
     await assertRowsSelection(page, [0, 1]);
   });
 
-  test.fixme(
-    'should support row selection with dynamic height',
-    async ({ page }) => {
-      await enterPlaygroundRoom(page);
-      await initEmptyDatabaseState(page);
+  test('should support row selection with dynamic height', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
 
-      await initDatabaseColumn(page);
-      await initDatabaseDynamicRowWithData(page, '123123', true);
-      await type(page, '456456');
-      await pressEnter(page);
-      await type(page, 'abcabc');
-      await pressEnter(page);
-      await type(page, 'defdef');
-      await pressEnter(page);
-      await pressEscape(page);
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123123', true);
+    await type(page, '456456');
+    await pressEnter(page);
+    await type(page, 'abcabc');
+    await pressEnter(page);
+    await type(page, 'defdef');
+    await pressEnter(page);
+    await pressEscape(page);
 
-      await pressEscape(page);
-      await assertRowsSelection(page, [0, 0]);
-    }
-  );
+    await pressEscape(page);
+    await assertRowsSelection(page, [0, 0]);
+  });
 });
 
 test.describe('row-level selection', () => {
-  test.fixme(
-    'should support pressing esc to trigger row selection',
-    async ({ page }) => {
-      await enterPlaygroundRoom(page);
-      await initEmptyDatabaseState(page);
+  test('should support pressing esc to trigger row selection', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
 
-      await initDatabaseColumn(page);
-      await initDatabaseDynamicRowWithData(page, '123', true);
-      await pressEscape(page);
-      await waitNextFrame(page, 100);
-      await pressEscape(page);
-      await assertRowsSelection(page, [0, 0]);
-    }
-  );
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123', true);
+    await pressEscape(page);
+    await waitNextFrame(page, 100);
+    await pressEscape(page);
+    await assertRowsSelection(page, [0, 0]);
+  });
 
-  test.fixme('should support multi row selection', async ({ page }) => {
+  test('should support multi row selection', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
@@ -125,24 +121,21 @@ test.describe('row-level selection', () => {
     await assertRowsSelection(page, [0, 1]);
   });
 
-  test.fixme(
-    'should support row selection with dynamic height',
-    async ({ page }) => {
-      await enterPlaygroundRoom(page);
-      await initEmptyDatabaseState(page);
+  test('should support row selection with dynamic height', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
 
-      await initDatabaseColumn(page);
-      await initDatabaseDynamicRowWithData(page, '123123', true);
-      await type(page, '456456');
-      await pressEnter(page);
-      await type(page, 'abcabc');
-      await pressEnter(page);
-      await type(page, 'defdef');
-      await pressEnter(page);
-      await pressEscape(page);
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '123123', true);
+    await type(page, '456456');
+    await pressEnter(page);
+    await type(page, 'abcabc');
+    await pressEnter(page);
+    await type(page, 'defdef');
+    await pressEnter(page);
+    await pressEscape(page);
 
-      await pressEscape(page);
-      await assertRowsSelection(page, [0, 0]);
-    }
-  );
+    await pressEscape(page);
+    await assertRowsSelection(page, [0, 0]);
+  });
 });
