@@ -1,9 +1,17 @@
+import {
+  DatabaseDuplicate,
+  DatabaseMoveLeft,
+  DatabaseMoveRight,
+  DeleteIcon,
+  TextIcon,
+} from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
+import { popMenu } from '../../../components/menu/index.js';
 import type { UniLit } from '../../../components/uni-component/uni-component.js';
 import type { DataViewCellLifeCycle } from '../columns/manager.js';
 import type {
@@ -27,6 +35,11 @@ const styles = css`
     line-height: 20px;
     color: var(--affine-text-secondary-color);
     width: 102px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .field-left:hover {
+    background-color: var(--affine-hover-color);
   }
 
   affine-data-view-record-field .icon {
@@ -79,6 +92,119 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     return this._cell.value?.expose;
   }
 
+  public changeEditing = (editing: boolean) => {
+    this.editing = editing;
+  };
+
+  public _click = () => {
+    this.changeEditing(true);
+  };
+  public _clickLeft = (e: MouseEvent) => {
+    const ele = e.currentTarget as HTMLElement;
+    popMenu(ele, {
+      options: {
+        input: {
+          initValue: this.column.name,
+          onComplete: text => {
+            this.column.updateName(text);
+          },
+        },
+        items: [
+          {
+            type: 'sub-menu',
+            name: 'Column type',
+            icon: TextIcon,
+            hide: () => !this.column.updateType || this.column.type === 'title',
+            options: {
+              input: {
+                search: true,
+              },
+              items: this.view.allColumnConfig
+                .filter(v => v.type !== this.column.type)
+                .map(config => {
+                  return {
+                    type: 'action',
+                    name: config.name,
+                    icon: html` <uni-lit
+                      .uni="${this.view.getIcon(config.type)}"
+                    ></uni-lit>`,
+                    select: () => {
+                      this.column.updateType?.(config.type);
+                    },
+                  };
+                }),
+            },
+          },
+          {
+            type: 'action',
+            name: 'Duplicate column',
+            icon: DatabaseDuplicate,
+            hide: () => !this.column.duplicate || this.column.type === 'title',
+            select: () => {
+              this.column.duplicate?.();
+            },
+          },
+          {
+            type: 'action',
+            name: 'Move up',
+            icon: html`<div
+              style="transform: rotate(90deg);display:flex;align-items:center;"
+            >
+              ${DatabaseMoveLeft}
+            </div>`,
+            hide: () => this.column.isFirst,
+            select: () => {
+              const preId = this.view.columnGetPreColumn(this.column.id)?.id;
+              if (!preId) {
+                return;
+              }
+              this.view.columnMove(this.column.id, {
+                id: preId,
+                before: true,
+              });
+            },
+          },
+          {
+            type: 'action',
+            name: 'Move down',
+            icon: html`<div
+              style="transform: rotate(90deg);display:flex;align-items:center;"
+            >
+              ${DatabaseMoveRight}
+            </div>`,
+            hide: () => this.column.isLast,
+            select: () => {
+              const nextId = this.view.columnGetNextColumn(this.column.id)?.id;
+              if (!nextId) {
+                return;
+              }
+              this.view.columnMove(this.column.id, {
+                id: nextId,
+                before: false,
+              });
+            },
+          },
+          {
+            type: 'group',
+            name: 'operation',
+            children: () => [
+              {
+                type: 'action',
+                name: 'Delete column',
+                icon: DeleteIcon,
+                hide: () => !this.column.delete || this.column.type === 'title',
+                select: () => {
+                  this.column.delete?.();
+                },
+                class: 'delete-item',
+              },
+            ],
+          },
+        ],
+      },
+    });
+  };
+
   override render() {
     const column = this.column;
 
@@ -86,19 +212,17 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       column: this.column,
       rowId: this.rowId,
       isEditing: this.editing,
-      selectCurrentCell: (editing: boolean) => {
-        this.editing = editing;
-      },
+      selectCurrentCell: this.changeEditing,
     };
-    const { view, edit } = this.column.renderer;
+    const { view, edit } = this.column.detailRenderer;
     return html`
-      <div class="field-left">
+      <div class="field-left" @click="${this._clickLeft}">
         <div class="icon">
           <uni-lit .uni="${this.column.icon}"></uni-lit>
         </div>
         <div class="filed-name">${column.name}</div>
       </div>
-      <div class="field-content">
+      <div @click="${this._click}" class="field-content">
         <uni-lit
           ${ref(this._cell)}
           class="kanban-cell"

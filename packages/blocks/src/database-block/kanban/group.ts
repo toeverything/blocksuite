@@ -11,6 +11,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import { popFilterableSimpleMenu } from '../../components/menu/index.js';
 import type { GroupRenderProps } from '../common/group-by/matcher.js';
 import type {
   DataViewKanbanManager,
@@ -108,10 +109,12 @@ const styles = css`
   .add-card:hover {
     background-color: var(--affine-hover-color);
   }
+
   .sortable-ghost {
     background-color: var(--affine-hover-color);
     opacity: 0.5;
   }
+
   .sortable-drag {
     background-color: var(--affine-background-primary-color);
   }
@@ -157,6 +160,28 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       }
     });
   };
+  private clickGroupOptions = (e: MouseEvent) => {
+    const ele = e.currentTarget as HTMLElement;
+    popFilterableSimpleMenu(ele, [
+      {
+        type: 'action',
+        name: 'Ungroup',
+        hide: () => this.group.value == null,
+        select: () => {
+          this.group.rows.forEach(id => {
+            this.group.helper.removeFromGroup(id, this.group.key);
+          });
+        },
+      },
+      {
+        type: 'action',
+        name: 'Delete Cards',
+        select: () => {
+          this.view.rowDelete(this.group.rows);
+        },
+      },
+    ]);
+  };
   private renderTitle = () => {
     const data = this.group.helper.groupData();
     if (!data) {
@@ -193,7 +218,9 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
           <div @click="${this.clickAddCardInStart}" class="group-header-op">
             ${PlusIcon}
           </div>
-          <div class="group-header-op">${MoreHorizontalIcon}</div>
+          <div @click="${this.clickGroupOptions}" class="group-header-op">
+            ${MoreHorizontalIcon}
+          </div>
         </div>
       </div>
       <div class="group-body">

@@ -334,7 +334,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move Right',
+            name: 'Move right',
             icon: DatabaseMoveRight,
             hide: () => this.column.isLast,
             select: () => {

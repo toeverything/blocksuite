@@ -36,6 +36,22 @@ const styles = css`
     line-height: 20px;
   }
 
+  affine-data-view-kanban-card .card-header-icon {
+    padding: 4px;
+    background-color: var(--affine-background-secondary-color);
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    width: max-content;
+  }
+
+  affine-data-view-kanban-card .card-header-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
+  }
+
   affine-data-view-kanban-card .card-body {
     display: flex;
     flex-direction: column;
@@ -88,13 +104,24 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       ></affine-data-view-kanban-cell>
     </div>`;
   }
+  private renderIcon() {
+    const icon = this.view.getHeaderIcon(this.cardId);
+    if (!icon) {
+      return;
+    }
+    return html` <div class="card-header-icon">
+      <img src=${icon.getValue(this.cardId)} />
+    </div>`;
+  }
 
   private renderHeader() {
     if (!this.view.hasHeader(this.cardId)) {
       return '';
     }
 
-    return html` <div class="card-header">${this.renderTitle()}</div> `;
+    return html`
+      <div class="card-header">${this.renderTitle()} ${this.renderIcon()}</div>
+    `;
   }
 
   override render() {
@@ -112,6 +139,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
               return '';
             }
             return html` <affine-data-view-kanban-cell
+              .contentOnly="${false}"
               data-column-id="${column.id}"
               .view="${this.view}"
               .groupKey="${this.groupKey}"

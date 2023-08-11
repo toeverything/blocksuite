@@ -239,4 +239,13 @@ export class KanbanSelection {
   public focusRight() {
     //
   }
+
+  public deleteCard() {
+    const selection = this.selection;
+    if (!selection || !!selection.focus) {
+      return;
+    }
+    this.viewEle.view.rowDelete([selection.cardId]);
+    this.selection = undefined;
+  }
 }

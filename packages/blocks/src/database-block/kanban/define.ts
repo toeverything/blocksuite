@@ -60,6 +60,7 @@ viewManager.register('kanban', {
       groupBy: defaultGroupBy(column.id, column.type, column.data),
       header: {
         titleColumn: model.columns.find(v => v.type === 'title')?.id,
+        iconColumn: 'type',
       },
       groupProperties: [],
     };

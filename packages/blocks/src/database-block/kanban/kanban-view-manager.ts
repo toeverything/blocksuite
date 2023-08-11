@@ -268,8 +268,11 @@ export class DataViewKanbanManager extends BaseDataViewManager {
 }
 
 export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {
-  constructor(propertyId: string, override viewManager: DataViewKanbanManager) {
-    super(propertyId, viewManager);
+  constructor(
+    propertyId: string,
+    override dataViewManager: DataViewKanbanManager
+  ) {
+    super(propertyId, dataViewManager);
   }
 }
 

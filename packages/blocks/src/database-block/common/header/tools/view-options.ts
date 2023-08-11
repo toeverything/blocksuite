@@ -113,6 +113,10 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
           {
             type: 'action',
             name: 'Filter',
+            hide: () =>
+              !this.closest(
+                'affine-database'
+              )?.root.page.awarenessStore.getFlag('enable_database_filter'),
             icon: viewOpIcons.filter,
             select: () => {
               //

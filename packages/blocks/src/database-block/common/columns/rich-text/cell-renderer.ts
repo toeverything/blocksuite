@@ -222,7 +222,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
           }
-          this.rectChanged();
+          this.rectChanged?.();
         } else {
           this.selectCurrentCell(false);
         }

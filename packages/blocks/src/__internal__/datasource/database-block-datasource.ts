@@ -1,3 +1,4 @@
+import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -66,7 +67,10 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return this._model.page;
   }
 
-  constructor(root: BlockSuiteRoot, config: DatabaseBlockDatasourceConfig) {
+  constructor(
+    private root: BlockSuiteRoot,
+    config: DatabaseBlockDatasourceConfig
+  ) {
     super();
     this._model = root.page.workspace
       .getPage(config.pageId)
@@ -80,7 +84,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public get properties(): string[] {
-    return ['type', ...this._model.columns.map(column => column.id)];
+    return [...this._model.columns.map(column => column.id)];
   }
 
   public slots = {
@@ -107,8 +111,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
     const type = this.propertyGetType(propertyId);
     if (type === 'title' && typeof value === 'string') {
-      const text =
-        this._model.children[this._model.childMap.get(rowId) ?? 0].text;
+      const text = this.getModelById(rowId)?.text;
       if (text) {
         text.replace(0, text.length, value);
       }
@@ -133,18 +136,38 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
     if (propertyId === 'type') {
-      const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
+      const model = this.getModelById(rowId);
+      if (!model) {
+        return;
+      }
       return getIcon(model);
     }
     const type = this.propertyGetType(propertyId);
     if (type === 'title') {
-      const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
+      const model = this.getModelById(rowId);
       if (model) {
         return model.text?.toString();
       }
       return;
     }
     return this._model.getCell(rowId, propertyId)?.value;
+  }
+
+  override cellGetExtra(rowId: string, propertyId: string): unknown {
+    if (this.propertyGetType(propertyId) === 'title') {
+      const model = this.getModelById(rowId);
+      if (model) {
+        return {
+          result: this.root.renderModel(model),
+          model,
+        };
+      }
+    }
+    return super.cellGetExtra(rowId, propertyId);
+  }
+
+  private getModelById(rowId: string): BaseBlockModel | undefined {
+    return this._model.children[this._model.childMap.get(rowId) ?? -1];
   }
 
   public override cellGetRenderValue(
@@ -162,12 +185,12 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return `Column ${i}`;
   }
 
-  public propertyAdd(insertPosition: InsertPosition): string {
+  public propertyAdd(insertPosition: InsertPosition, type?: string): string {
     this.page.captureSync();
     return this._model.addColumn(
       insertPosition,
       columnManager
-        .getColumn(multiSelectPureColumnConfig.type)
+        .getColumn(type ?? multiSelectPureColumnConfig.type)
         .create(this.newColumnName())
     );
   }
@@ -226,6 +249,11 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return this._model.columns.find(v => v.id === propertyId)?.data ?? {};
   }
 
+  public override propertyGetReadonly(propertyId: string): boolean {
+    if (propertyId === 'type') return true;
+    return false;
+  }
+
   public propertyGetName(propertyId: string): string {
     if (propertyId === 'type') {
       return 'Block Type';
@@ -280,6 +308,22 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       return 432;
     }
     return super.propertyGetDefaultWidth(propertyId);
+  }
+
+  override onCellUpdate(
+    rowId: string,
+    propertyId: string,
+    callback: () => void
+  ): Disposable {
+    if (this.propertyGetType(propertyId)) {
+      this.getModelById(rowId)?.text?.yText.observe(callback);
+      return {
+        dispose: () => {
+          this.getModelById(rowId)?.text?.yText.unobserve(callback);
+        },
+      };
+    }
+    return super.onCellUpdate(rowId, propertyId, callback);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

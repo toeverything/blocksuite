@@ -31,6 +31,7 @@ const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: start;
     margin-right: 12px;
     height: 20px;
   }

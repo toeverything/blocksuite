@@ -175,15 +175,18 @@ export class DataViewTableManager extends BaseDataViewManager {
 }
 
 export class DataViewTableColumnManager extends BaseDataViewColumnManager {
-  constructor(propertyId: string, override viewManager: DataViewTableManager) {
-    super(propertyId, viewManager);
+  constructor(
+    propertyId: string,
+    override dataViewManager: DataViewTableManager
+  ) {
+    super(propertyId, dataViewManager);
   }
 
   get width(): number {
-    return this.viewManager.columnGetWidth(this.id);
+    return this.dataViewManager.columnGetWidth(this.id);
   }
 
   updateWidth(width: number): void {
-    this.viewManager.columnUpdateWidth(this.id, width);
+    this.dataViewManager.columnUpdateWidth(this.id, width);
   }
 }
